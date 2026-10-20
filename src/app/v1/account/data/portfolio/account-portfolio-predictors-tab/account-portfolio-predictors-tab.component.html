@@ -13,6 +13,8 @@
   @if (!entries().length) { <app-data-empty-state icon="predictor" title="No predictors" description="Add or upload predictors for a facility to get started."/> }
   @else if (!filteredEntries().length) { <article class="v1-empty-state" role="status"><h2>No predictors match these filters</h2><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></article> }
   @else {
-    <app-portfolio-inventory [tiles]="inventory.visibleTiles()" [printTiles]="tiles()" [detail]="inventory.detail()" [overrides]="inventory.overrides()" [page]="inventory.page()" [pages]="inventory.pages()" [start]="inventory.start()" [end]="inventory.end()" [total]="filteredEntries().length" (detailChanged)="inventory.setTileDetail($event)" (pageSelected)="inventory.selectPage($event)" (layoutReady)="layoutReady.set($event)" (navigationRequested)="navigateRoute($event)"/>
+    <app-inventory-grid [actions]="cardActions.actions()" [actionsByGuid]="cardActions.actionsByGuid()" (actionRequested)="cardActions.request($event)" [tiles]="inventory.visibleTiles()" [printTiles]="tiles()" [detail]="inventory.detail()" [overrides]="inventory.overrides()" [page]="inventory.page()" [pages]="inventory.pages()" [start]="inventory.start()" [end]="inventory.end()" [total]="filteredEntries().length" (detailChanged)="inventory.setTileDetail($event)" (pageSelected)="inventory.selectPage($event)" (layoutReady)="layoutReady.set($event)" (navigationRequested)="navigateRoute($event)"/>
   }
 </section>
+
+<app-account-inventory-actions #cardActions resource="predictors"/>

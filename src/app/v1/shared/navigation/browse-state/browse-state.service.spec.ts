@@ -19,9 +19,18 @@ describe('session browse state', () => {
     store.saveFilters({ accountGuid: 'a', kind: 'facilities' }, { search: 'Plant', status: 'all', sort: 'attention' });
     expect(store.readFilters({ accountGuid: 'a', kind: 'meters' })).toBeUndefined();
     expect(store.readFilters({ accountGuid: 'b', kind: 'facilities' })).toBeUndefined();
-    store.saveFacilityView({ accountGuid: 'a', kind: 'facilityMeters', facilityGuid: 'f1' }, { page: 2, expanded: true, zoom: { start: 20, end: 80 } });
+    store.saveFacilityView({ accountGuid: 'a', kind: 'facilityMeters', facilityGuid: 'f1' }, { page: 2, zoom: { start: 20, end: 80 } });
     expect(store.readFacilityView({ accountGuid: 'a', kind: 'facilityMeters', facilityGuid: 'f2' })).toBeUndefined();
     expect(new BrowseStateService().origin('a')).toBe('facilities');
+  });
+  it('copies facility card detail overrides and zoom without sharing mutable browse state', () => {
+    const store = new BrowseStateService(), key = { accountGuid: 'a', kind: 'facilityMeters' as const, facilityGuid: 'f' };
+    const overrides = { m: 'detailed' as const }, zoom = { start: 10, end: 70 };
+    store.saveFacilityView(key, { page: 2, detail: 'summary', overrides, zoom });
+    zoom.start = 40; delete (overrides as Record<string, string>)['m'];
+    expect(store.readFacilityView(key)).toMatchObject({ page: 2, detail: 'summary', overrides: { m: 'detailed' }, zoom: { start: 10, end: 70 } });
+    const restored = store.readFacilityView(key)!; (restored.zoom as { start: number }).start = 50;
+    expect(store.readFacilityView(key)?.zoom.start).toBe(10);
   });
   it('keeps Predictor controls and previews isolated from Meters, other facilities and other accounts', () => {
     const store = new BrowseStateService(); store.setOrigin('a', 'predictors');

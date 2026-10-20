@@ -1,15 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AccountDataModule } from '../../account-data.module';
-import { portfolioTile } from '../portfolio-inventory.testing';
-import { PortfolioTileComponent } from './portfolio-tile.component';
+import { portfolioTile } from '@app/v1/account/data/portfolio/portfolio-inventory.testing';
+import { InventoryTileComponent } from './inventory-tile.component';
 
 describe('portfolio tile interactions and additive details', () => {
   function setup() {
-    TestBed.configureTestingModule({ imports: [AccountDataModule], providers: [provideRouter([])] });
-    const fixture = TestBed.createComponent(PortfolioTileComponent);
+    TestBed.configureTestingModule({ imports: [InventoryTileComponent], providers: [provideRouter([])] });
+    const fixture = TestBed.createComponent(InventoryTileComponent);
     fixture.componentRef.setInput('tile', portfolioTile('m1', { location: 'Oak Ridge, TN', owner: { label: 'Plant', route: ['/plant'] },
-      chip: 'Electricity', station: 'Station', findings: ['Missing readings'], detailLink: { label: 'View quality report', route: ['/quality'] } }));
+      chip: 'Electricity', station: 'Station', meterSnapshot: {
+        readingCount: 120, rangeLabel: 'Jan 2026', invalidDateCount: 0,
+        readingsLink: { label: 'Open readings', route: ['/readings'] },
+        recentReadings: [{ guid: 'r', dateLabel: 'Jan 1, 2026', dateKey: '2026-01-01', tone: 'neutral', quantityLabel: 'Energy use', valueLabel: '10 kWh', description: 'Energy use: 10 kWh' }],
+        group: { label: 'Meter group', value: 'Not assigned' }, facts: [], remainingFindings: 0,
+        findings: [{ id: 'missing', name: 'Electricity', title: 'Missing readings', description: 'Add readings', severity: 'error', action: { label: 'View quality report', route: ['/quality'] } }]
+      } }));
     fixture.detectChanges(); return fixture;
   }
   it('shows identity, location, facility icon, and status in Simple; facts accumulate at higher levels', () => {
@@ -21,7 +26,7 @@ describe('portfolio tile interactions and additive details', () => {
     expect(root.textContent).toContain('120'); expect(root.textContent).not.toContain('kWh');
     fixture.componentRef.setInput('level', 'detailed'); fixture.detectChanges();
     expect(root.textContent).toContain('120'); expect(root.textContent).toContain('kWh'); expect(root.textContent).toContain('Missing readings');
-    expect(root.querySelector('.portfolio-tile__detail-link')?.getAttribute('href')).toBe('/quality');
+    expect(root.querySelector('.reading-snapshot__attention a')?.getAttribute('href')).toBe('/quality');
   });
   it('emits typed navigation only for unmodified link clicks and leaves native link context menus intact', () => {
     const fixture = setup(), component = fixture.componentInstance;
@@ -66,29 +71,43 @@ describe('portfolio tile interactions and additive details', () => {
     expect(root.textContent?.match(/100 Industrial Drive/g)).toHaveLength(1);
     expect(root.querySelector('app-facility-snapshot')?.textContent).not.toContain('100 Industrial Drive');
   });
-  it('emits GUID-keyed detail choices and inherits again without domain actions', () => {
-    const fixture = setup(), changes = vi.fn(); fixture.componentInstance.detailChanged.subscribe(changes);
-    fixture.componentInstance.choose('detailed'); fixture.componentInstance.choose(null);
-    expect(changes.mock.calls).toEqual([[{ guid: 'm1', level: 'detailed' }], [{ guid: 'm1', level: null }]]);
-    fixture.componentRef.setInput('print', true); fixture.detectChanges(); expect(fixture.nativeElement.querySelector('button')).toBeNull();
+  it('emits independent detail toggles, actions and selection without navigating', () => {
+    const fixture = setup(), component = fixture.componentInstance;
+    const detail = vi.fn(), action = vi.fn(), selection = vi.fn(), navigation = vi.fn();
+    component.detailChanged.subscribe(detail); component.actionRequested.subscribe(action);
+    component.selectionChanged.subscribe(selection); component.navigationRequested.subscribe(navigation);
+    component.choose('detailed'); component.choose('simple');
+    expect(detail.mock.calls).toEqual([[{ guid: 'm1', level: 'detailed' }], [{ guid: 'm1', level: 'simple' }]]);
+    component.chooseAction({ id: 'copy', label: 'Copy meter', icon: 'copy' });
+    component.chooseAction({ id: 'delete', label: 'Delete meter', icon: 'delete', disabled: true });
+    expect(action).toHaveBeenCalledExactlyOnceWith({ guid: 'm1', action: 'copy' });
+    fixture.componentRef.setInput('selecting', true); fixture.detectChanges();
+    const checkbox = fixture.nativeElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    checkbox.click(); expect(selection).toHaveBeenCalledWith({ guid: 'm1', selected: true });
+    expect(navigation).not.toHaveBeenCalled();
+  });
+  it('omits card menus and selection controls when printing', () => {
+    const fixture = setup(); fixture.componentRef.setInput('selecting', true); fixture.componentRef.setInput('print', true); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('button,input')).toBeNull();
   });
   it('places the detailed meter group beside facility ownership and preserves native group links', () => {
     const fixture=setup(),root=fixture.nativeElement as HTMLElement,navigate=vi.fn();
     const meterSnapshot={readingCount:0,rangeLabel:'No readings yet',invalidDateCount:0,
       readingsLink:{label:'Open readings',route:['/meter','readings']},recentReadings:[],facts:[],findings:[],remainingFindings:0,
-      group:{label:'Meter group',value:'Main building',icon:'meterGroupItem' as const,route:['/facility','meter-grouping','g','monthly-table']}};
+      group:{label:'Meter group',value:'Main building',route:['/facility','meter-grouping','g','monthly-table']}};
     fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{label:'Plant',route:['/plant']},meterSnapshot}));
     fixture.componentRef.setInput('level','summary');fixture.detectChanges();
     expect(root.querySelector('.portfolio-tile__group')).toBeNull();
     fixture.componentRef.setInput('level','detailed');fixture.detectChanges();
     const group=root.querySelector<HTMLAnchorElement>('.portfolio-tile__ownership .portfolio-tile__group a')!;
+    expect(root.querySelector('.portfolio-tile__group svg')).not.toBeNull();
     expect(group.textContent).toBe('Main building');expect(group.getAttribute('href')).toBe('/facility/meter-grouping/g/monthly-table');
     expect(root.textContent).not.toContain('Reading units');expect(root.querySelector('.reading-snapshot__facts')).toBeNull();
     fixture.componentInstance.navigationRequested.subscribe(navigate);
     group.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,metaKey:true}));expect(navigate).not.toHaveBeenCalled();
     group.click();expect(navigate).toHaveBeenCalledWith(meterSnapshot.group.route);
     fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{label:'Plant',route:['/plant']},
-      meterSnapshot:{...meterSnapshot,group:{label:'Meter group',value:'Not assigned',icon:'meterGroupItem'}}}));fixture.detectChanges();
+      meterSnapshot:{...meterSnapshot,group:{label:'Meter group',value:'Not assigned'}}}));fixture.detectChanges();
     expect(root.querySelector('.portfolio-tile__group')?.textContent).toContain('Not assigned');
     expect(root.querySelector('.portfolio-tile__group a')).toBeNull();
   });

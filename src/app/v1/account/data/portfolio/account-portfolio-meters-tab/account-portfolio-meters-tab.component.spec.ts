@@ -77,7 +77,7 @@ describe('AccountPortfolioMetersTabComponent', () => {
     (workspace.meters as unknown as { set(value: unknown[]): void }).set([]);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No meters');
-    expect(fixture.nativeElement.querySelector('app-portfolio-inventory')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-inventory-grid')).toBeNull();
   });
 
   it('refreshes the reading snapshot when committed readings change without resetting the chosen detail level', () => {

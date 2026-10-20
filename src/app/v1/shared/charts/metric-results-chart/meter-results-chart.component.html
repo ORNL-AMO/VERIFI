@@ -88,8 +88,8 @@
     } @else if (!hasChartSeries()) {
       <article class="v1-empty-state" role="status">
         <app-ui-icon name="viewHidden"></app-ui-icon>
-        <h2>No visible series</h2>
-        <p>Turn on a chart series to show the chart.</p>
+        <h2>{{ noVisibleSeriesTitle }}</h2>
+        <p>{{ noVisibleSeriesDescription }}</p>
       </article>
     } @else {
       <div

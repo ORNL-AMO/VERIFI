@@ -317,7 +317,7 @@ describe('uniform account inventories in Chromium', () => {
     expect(icon.querySelector('svg')!.getAttribute('width')).toBe('32'); expect(articles()[0].querySelector('.portfolio-tile__owner app-ui-icon')).not.toBeNull();
     const before=root.querySelectorAll('.portfolio-inventory .portfolio-tile__name').length;
     const menuButton=articles()[0].querySelector<HTMLButtonElement>('button')!; menuButton.click(); fixture.detectChanges();
-    await page.getByRole('menuitemradio',{name:'Detailed',exact:true}).click(); fixture.detectChanges(); await settled(root);
+    await page.getByRole('menuitemcheckbox',{name:'Show details',exact:true}).click(); fixture.detectChanges(); await settled(root);
     expect(router.url).toBe('/portfolio/meters'); expect(articles()[0].dataset['detail']).toBe('detailed');
     expect(articles()[0].getBoundingClientRect().width).toBeGreaterThan(articles()[1].getBoundingClientRect().width*1.7);
     expect(root.querySelectorAll('.portfolio-inventory .portfolio-tile__name')).toHaveLength(before); expect(document.activeElement).toBe(menuButton);
@@ -348,7 +348,7 @@ describe('uniform account inventories in Chromium', () => {
     await page.viewport(1400,1000); const {fixture,root,open,router}=setup();await open('meters');
     await page.getByRole('button',{name:'Next',exact:true}).click();fixture.detectChanges();await settled(root);
     const button=root.querySelector<HTMLButtonElement>('.portfolio-inventory > li:nth-child(4) button')!;button.click();fixture.detectChanges();
-    await page.getByRole('menuitemradio',{name:'Summary',exact:true}).click();fixture.detectChanges();await settled(root);
+    await page.getByRole('menuitemcheckbox',{name:'Show details',exact:true}).click();fixture.detectChanges();await settled(root);
     const target=root.querySelector<HTMLAnchorElement>('.portfolio-inventory > li:nth-child(4) .portfolio-tile__name')!;
     const id=target.dataset['browseId'];target.focus();root.scrollTop=400;
     await vi.waitFor(()=>{fixture.detectChanges();expect(getComputedStyle(root.querySelector('.v1-account-portfolio__sticky')!).paddingBottom).toBe('0px');});
@@ -356,7 +356,7 @@ describe('uniform account inventories in Chromium', () => {
     target.click();await fixture.whenStable();fixture.detectChanges();expect(router.url).toContain('/settings');
     await router.navigateByUrl('/portfolio/meters');fixture.detectChanges();await fixture.whenStable();await settled(root);
     await vi.waitFor(()=>{expect(root.textContent).toContain('Page 2 of 11');expect((document.activeElement as HTMLElement).dataset['browseId']).toBe(id);expect(root.scrollTop).toBeCloseTo(position,0);});
-    expect(root.querySelector(`[data-browse-id="${id}"]`)?.closest('article')?.getAttribute('data-detail')).toBe('summary');
+    expect(root.querySelector(`[data-browse-id="${id}"]`)?.closest('article')?.getAttribute('data-detail')).toBe('detailed');
     const browse=TestBed.inject(BrowseStateService);expect(browse.readInventoryView({accountGuid:account().guid,kind:'meters'})?.page).toBe(1);
     const navigate=vi.spyOn(router,'navigate').mockResolvedValueOnce(false);(root.querySelector('.portfolio-inventory .portfolio-tile__name') as HTMLAnchorElement).click();await fixture.whenStable();
     expect(router.url).toBe('/portfolio/meters');expect(root.textContent).toContain('Page 2 of 11');navigate.mockRestore();
@@ -385,7 +385,7 @@ describe('uniform account inventories in Chromium', () => {
     const client=cdp() as {send(command:string,parameters:unknown):Promise<void>};await client.send('Emulation.setEmulatedMedia',{media:'print'});
     expect(getComputedStyle(root.querySelector('.portfolio-inventory')!).display).toBe('none');
     const printed=root.querySelector<HTMLElement>('.portfolio-inventory-print')!;expect(getComputedStyle(printed).display).toBe('grid');
-    expect(printed.querySelectorAll('app-portfolio-tile')).toHaveLength(25);expect(printed.querySelector('button')).toBeNull();
+    expect(printed.querySelectorAll('app-inventory-tile')).toHaveLength(25);expect(printed.querySelector('button')).toBeNull();
     await client.send('Emulation.setEmulatedMedia',{media:''});fixture.destroy();await page.viewport(1500,1000);
   });
 });

@@ -2,7 +2,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
 import { PortfolioFacilityInput } from './portfolio-facility.view';
 import { PortfolioFacilitySnapshot, PortfolioFindingPreview, PortfolioResourceSummary } from './portfolio-inventory.models';
-import { portfolioFindingAction } from './portfolio-finding.view';
+import { inventoryFindingAction } from '@app/v1/shared/inventory/inventory-finding.view';
 
 export type FacilitySnapshotNavigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute'>;
 
@@ -55,7 +55,7 @@ export function buildFacilitySnapshots(input: PortfolioFacilityInput, navigation
       seen.add(key);
       previews.push({ id: finding.id, name: finding.entity.kind === 'facility' ? 'Facility setup' : finding.entity.name,
         title: finding.title, description: finding.description, severity: finding.severity,
-        action: portfolioFindingAction(finding, navigation) });
+        action: inventoryFindingAction(finding, navigation) });
       if (previews.length === 2) break;
     }
     const address = addressPart(facility.address);

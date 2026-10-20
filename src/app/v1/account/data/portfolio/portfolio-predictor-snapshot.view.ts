@@ -5,7 +5,7 @@ import { formatPredictorReadingAmount, predictorMonthKey, validPredictorReadingD
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
 import { PortfolioReadingSnapshot, PortfolioRecentReading, PortfolioTileFact, PortfolioTileLink } from './portfolio-inventory.models';
-import { portfolioFindingAction } from './portfolio-finding.view';
+import { inventoryFindingAction } from '@app/v1/shared/inventory/inventory-finding.view';
 
 type Navigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -69,7 +69,7 @@ function findingAction(entry: PredictorInventoryEntry, finding: StatusItem, navi
       ? { label: 'Review quality', route: navigation.facilityWeatherPredictorQualityRoute(entry.facility.guid, entry.station.routeKey, entry.guid) }
       : { label: destination.tab === 'settings' ? 'Open station setup' : 'Review readings', route: navigation.facilityWeatherPredictorRoute(entry.facility.guid, entry.station.routeKey, destination.tab === 'settings' ? 'setup' : 'readings') };
   }
-  return portfolioFindingAction(finding, navigation);
+  return inventoryFindingAction(finding, navigation);
 }
 
 function readingAnnotations(entry: PredictorInventoryEntry, readings: readonly IdbPredictorData[], active: readonly StatusItem[]): ReadonlyMap<IdbPredictorData, StatusItem[]> {

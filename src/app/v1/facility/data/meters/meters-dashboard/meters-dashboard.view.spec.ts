@@ -1,6 +1,6 @@
-import { account, facility, meter, reading, calendarizedMeter, monthlyData } from '../facility-meters.testing';
+import { facility, meter, reading, calendarizedMeter, monthlyData } from '../facility-meters.testing';
 import { buildMeterCards } from '../models';
-import { buildMeterDirectory, buildMonthlyTrends, buildMeterChartStyles } from './meters-dashboard.view';
+import { buildMeterInventory, buildMonthlyTrends, buildMeterChartStyles } from './meters-dashboard.view';
 
 describe('facility meter dashboard projections', () => {
   const electric = meter({ guid: 'e', name: 'Main' });
@@ -40,7 +40,7 @@ describe('facility meter dashboard projections', () => {
   it('assigns distinct combinations to 64 meters and retains assignments on filtering, reordering, additions and deletions', () => {
     const guids = Array.from({ length: 64 }, (_, index) => `m-${index}`);
     const styles = buildMeterChartStyles(guids);
-    expect(new Set([...styles.values()].map(style => `${style.color}/${style.dashArray}`)).size).toBe(64);
+    expect(new Set([...styles.values()].map(style => `${style.color}/${JSON.stringify(style.lineStyle)}`)).size).toBe(64);
     const next = buildMeterChartStyles(['new', ...guids.slice(1).reverse()], styles);
     for (const guid of guids.slice(1)) expect(next.get(guid)).toEqual(styles.get(guid));
   });
@@ -71,18 +71,17 @@ describe('facility meter dashboard projections', () => {
 
   it.each(['idle', 'evaluating', 'error', 'ready'] as const)('presents %s checks without treating unavailable checks as healthy', state => {
     const cards = buildMeterCards([electric], [reading({ meterId: electric.guid })], []);
-    const entry = buildMeterDirectory(cards, [], [], state)[0];
+    const entry = buildMeterInventory(cards, [], state)[0];
     expect(entry.statusLabel).toBe(state === 'ready' ? 'All data valid' : state === 'error' ? 'Checks unavailable' : 'Checks pending');
     expect(entry.tone).toBe(state === 'ready' ? 'success' : 'neutral');
   });
 
-  it('retains active error and warning labels, search terms, coverage and attention ordering', () => {
+  it('retains active error and warning labels, search terms and attention ordering', () => {
     const cards = buildMeterCards([electric, water], [], []);
     cards[0] = { ...cards[0], statusTone: 'danger' };
     cards[1] = { ...cards[1], statusTone: 'warning' };
-    const entries = buildMeterDirectory(cards, [], [calendarizedMeter(electric, [month(0)])], 'ready');
+    const entries = buildMeterInventory(cards, [], 'ready');
     expect(entries.map(item => item.statusLabel)).toEqual(['Has errors', 'Has warnings']);
-    expect(entries[0].coverage).toBe('Jan 2026');
     expect(entries[0].searchText).toContain('has errors');
     expect(entries[0].attentionRank).toBeLessThan(entries[1].attentionRank);
   });

@@ -1,0 +1,41 @@
+<div class="v1-modal-layer meter-chart-layer">
+  <button type="button" class="v1-modal-backdrop" aria-label="Dismiss chart sheet" (click)="requestClose()"></button>
+  <section id="meter-chart-sheet" class="meter-chart-sheet" [class.meter-chart-sheet--closing]="closing()" (animationend)="finishClose($event)" role="dialog" aria-modal="true" aria-labelledby="meter-chart-title" appModalFocusTrap (escapePressed)="requestClose()">
+    <div class="meter-chart-sheet__handle-bar">
+      <button type="button" class="meter-chart-sheet__handle" aria-label="Close charts" (click)="clickHandle()" (pointerdown)="startPull($event)" (pointerup)="finishPull($event)" (pointercancel)="cancelPull()"><span class="meter-chart-sheet__grip" aria-hidden="true"></span><app-ui-icon name="chevronDown"/><span>Close charts</span></button>
+    </div>
+    <header class="meter-chart-sheet__header">
+      <div class="meter-chart-sheet__identity"><h2 id="meter-chart-title" [title]="facilityName()">{{ facilityName() }} · Monthly data</h2></div>
+    </header>
+    <div class="meter-chart-sheet__body">
+      <div class="meter-chart-sheet__controls">
+        <div class="meter-chart-sheet__metrics" role="group" aria-label="Chart metric">@for (chart of charts(); track chart.id) {
+          <button type="button" class="v1-btn v1-btn--quiet" [class.active]="activeChart()?.id === chart.id" [attr.aria-pressed]="activeChart()?.id === chart.id" (click)="chooseMetric(chart.id)">{{ chart.title }}</button>
+        }</div>
+        <div class="meter-chart-sheet__actions" role="group" aria-label="Chart actions">
+          <button type="button" class="v1-icon-btn" aria-label="Download chart" title="Download chart" [disabled]="!visibleMetrics().length || state() !== 'ready'" (click)="download()"><app-ui-icon name="download"/></button>
+          <button type="button" class="v1-icon-btn" aria-label="Zoom in" (click)="zoom(.6)"><app-ui-icon name="zoomIn"/></button>
+          <button type="button" class="v1-icon-btn" aria-label="Zoom out" (click)="zoom(1.6)"><app-ui-icon name="zoomOut"/></button>
+          <button type="button" class="v1-icon-btn" aria-label="Reset zoom" (click)="zoomChanged.emit({ start: 0, end: 100 })"><app-ui-icon name="refresh"/></button>
+        </div>
+      </div>
+      @if (activeChart(); as chart) {
+        <p class="meter-chart-sheet__coverage">{{ chart.title }} {{ chart.unit }} · {{ state() === 'loading' || state() === 'idle' ? 'Preparing data' : state() === 'error' ? 'Unavailable' : chart.coverage }}</p>
+        <app-meter-results-chart noVisibleSeriesTitle="No meters selected" noVisibleSeriesDescription="Select a meter in the legend to show its data." [chartRows]="chart.rows" [metrics]="visibleMetrics()" [state]="state() === 'idle' ? 'loading' : state()" [showAllMetrics]="true" [showLegend]="false" [showSeriesControls]="false" [showChartActions]="false" [showPointSymbols]="false" [tooltipMaxRows]="8" tooltipOverflowHint="Use the legend to show fewer meters." [allowNegativeValues]="true" [compactAxes]="true" [yAxisTitle]="''" [embedded]="true" [compact]="true" [zoomRange]="zoomRange()" (zoomRangeChanged)="zoomChanged.emit($event)" [ariaLabel]="chart.title + ' monthly data by meter'" [emptyTitle]="chart.metrics.length ? 'No meters selected' : 'No monthly ' + chart.title.toLowerCase() + ' data'" [emptyDescription]="chart.metrics.length ? 'Select a meter in the legend to show its data.' : 'No facility meters have monthly data for this chart.'"/>
+        <div class="meter-chart-sheet__legend" role="group" aria-label="Toggle meter traces">
+          @for (metric of legendEntries(); track metric.id) {
+            <button type="button" class="meter-chart-sheet__chip" [attr.aria-pressed]="metric.visible" [title]="metric.label" (click)="toggleMeter(metric.id)"><svg width="22" height="14" aria-hidden="true"><line x1="1" x2="21" y1="7" y2="7" [attr.stroke]="metric.color" stroke-width="3" [attr.stroke-dasharray]="metric.dash"/></svg><span>{{ metric.label }}</span></button>
+          }
+          @if (legendPages() > 1) {
+            <div class="meter-chart-sheet__legend-pages" role="group" aria-label="Legend pages">
+              <button type="button" class="v1-icon-btn" aria-label="Previous legend page" [disabled]="legendPage() === 0" (click)="updateView({ legendPage: legendPage() - 1 })"><app-ui-icon name="chevronLeft"/></button>
+              <span class="visually-hidden" aria-live="polite">Legend page {{ legendPage() + 1 }} of {{ legendPages() }}</span>
+              <button type="button" class="v1-icon-btn" aria-label="Next legend page" [disabled]="legendPage() + 1 === legendPages()" (click)="updateView({ legendPage: legendPage() + 1 })"><app-ui-icon name="chevronRight"/></button>
+            </div>
+          }
+        </div>
+
+      }
+    </div>
+  </section>
+</div>

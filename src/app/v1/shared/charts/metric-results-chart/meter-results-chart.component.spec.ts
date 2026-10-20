@@ -29,17 +29,16 @@ describe('MeterResultsChartComponent', () => {
     expect(option.dataZoom[1]).toMatchObject({ left: 8, right: 8 });
   });
 
-  it('supports opt-in shared zoom, hidden controls and GUID-based emphasis without echoing controlled inputs', () => {
+  it('supports opt-in shared zoom, hidden controls without echoing controlled inputs', () => {
     const fixture = setup();
     const changed = vi.fn();
     fixture.componentInstance.zoomRangeChanged.subscribe(changed);
-    for (const [key, value] of Object.entries({ showAllMetrics: true, showLegend: false, showChartActions: false, showSeriesControls: false, zoomRange: { start: 20, end: 60 }, emphasizedMetricId: 'utility', allowNegativeValues: true })) fixture.componentRef.setInput(key, value);
+    for (const [key, value] of Object.entries({ showAllMetrics: true, showLegend: false, showChartActions: false, showSeriesControls: false, zoomRange: { start: 20, end: 60 }, allowNegativeValues: true })) fixture.componentRef.setInput(key, value);
     fixture.detectChanges();
     const option = fixture.componentInstance.chartOption() as any;
     expect(option.legend.show).toBe(false);
     expect(option.series[0].id).toBe('utility');
-    expect(option.series[0].lineStyle.width).toBe(4);
-    expect(option.series[1].lineStyle.opacity).toBe(.25);
+    expect(option.series[0].lineStyle.width).toBe(3);
     expect(option.yAxis[0].min).toBeUndefined();
     expect(option.dataZoom[0]).toMatchObject({ start: 20, end: 60 });
     expect(changed).not.toHaveBeenCalled();
@@ -48,14 +47,17 @@ describe('MeterResultsChartComponent', () => {
     expect(fixture.nativeElement.querySelector('.v1-meter-results-chart__controls')).toBeNull();
   });
 
-  it('bounds dense dashboard tooltips and isolates the emphasized meter while retaining default tooltips', () => {
+  it('bounds dense dashboard tooltips while retaining complete default tooltips', () => {
     const fixture = setup();
     fixture.componentRef.setInput('tooltipMaxRows', 1); fixture.detectChanges();
     const params = [{ seriesId: 'utility', seriesName: 'Total Energy', value: 10, axisValueLabel: 'Jan 2026' }, { seriesId: 'cost', seriesName: 'Total Cost', value: 20 }];
     const format = () => (fixture.componentInstance.chartOption() as any).tooltip.formatter(params);
     expect(format()).toContain('+1 more meters');
-    fixture.componentRef.setInput('emphasizedMetricId', 'cost'); fixture.detectChanges();
-    expect(format()).toContain('$20.00'); expect(format()).not.toContain('Total Energy');
+    expect(format()).toContain('Use the legend to show fewer series.');
+    fixture.componentRef.setInput('tooltipOverflowHint', 'Use the legend to show fewer meters.'); fixture.detectChanges();
+    expect(format()).toContain('Use the legend to show fewer meters.');
+    fixture.componentRef.setInput('tooltipMaxRows', undefined); fixture.detectChanges();
+    expect(format()).toContain('$20.00'); expect(format()).toContain('Total Energy');
   });
 
   it('defaults utility and cost to line charts with zoom controls', () => {

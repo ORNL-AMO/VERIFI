@@ -13,6 +13,7 @@
           <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="{ facilityGuid: currentFacility.guid, returnUrl: '/v1/workspace/facility/' + currentFacility.guid + '/data/meters' }"><app-ui-icon name="uploadData"/>Upload data</a>
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()"><app-ui-icon name="add"/>Add meter</button>
           <a class="v1-btn v1-facility-meters__validation" [routerLink]="['/v1/workspace/facility', currentFacility.guid, 'settings', 'data-validation']"><app-ui-icon name="settings"/>Data Validation</a>
+
         </div>
       </header>
     </div>
@@ -22,6 +23,10 @@
       </label>
       <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="missingGroup">Missing group</option><option value="valid">All data valid</option></select></label>
       <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="meterName">Meter name</option><option value="latestReading">Latest reading</option></select></label>
+      <label><span>Detail level</span><select class="v1-select" [formControl]="detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
+      @if (!selecting() && meterCards().length) {
+        <button type="button" class="v1-btn v1-btn--quiet facility-meters__select" [disabled]="!canAct() || !entries.length" (click)="startSelection()">Select meters</button>
+      }
     </form>
     @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status">Meter actions are unavailable while the workspace is loading or switching.</div> }
     @else if (workspace.hasPending()) { <div class="v1-alert v1-alert--info" role="status">Another workspace update is still finishing.</div> }
@@ -29,40 +34,27 @@
     @if (!meterCards().length) {
       <article class="v1-empty-state" role="status"><h2>No meters</h2><p>Add or upload a meter to get started.</p></article>
     } @else {
-      <div class="facility-meters__columns" [class.facility-meters__columns--large]="showListFooter()" [class.facility-meters__columns--expanded]="listExpanded()">
-        <section id="facility-meter-directory" class="facility-meters__list" aria-label="Meter directory">
-          <header class="facility-meters__list-heading"><h2>Meters</h2>
-            @if (listExpanded()) { <button type="button" class="v1-btn v1-btn--quiet" aria-label="Return to list and charts" (click)="toggleListExpanded()"><app-ui-icon name="chartLine"/>Show charts</button> }
-            @if (!selecting()) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct() || !entries.length" (click)="startSelection()">Select meters</button> }
-          </header>
-          @if (selecting()) {
-            <div class="facility-meters__selection" role="group" aria-label="Meter selection">
-              <span aria-live="polite">{{ selected().length }} selected</span>
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct() || !entries.length" (click)="selectAll()">Select all matching</button>
-              <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct() || !selected().length" (click)="requestDeleteSelected()">Delete selected</button>
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelSelection()">Cancel selection</button>
-            </div>
-          }
-          @if (!entries.length) { <div class="facility-meters__empty" role="status"><h3>No meters match these filters</h3><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></div> }
-          <app-meter-directory [entries]="visibleMeterCards()" [selecting]="selecting()" [selected]="selected()" [canAct]="canAct()" [roundedBottom]="!showListFooter()" [twoColumns]="showListFooter()"
-            (selectionChanged)="changeSelection($event)" (action)="handleAction($event)" (emphasized)="emphasized.set($event)"/>
-          @if (showListFooter()) {
-          <nav class="facility-meters__pagination" aria-label="Meter list display">
-            <button #listDisplayToggle type="button" class="v1-btn v1-btn--quiet" [attr.aria-expanded]="listExpanded()" aria-controls="facility-meter-directory" (click)="toggleListExpanded()"><app-ui-icon [name]="listExpanded() ? 'chartLine' : 'chevronDown'"/>{{ listExpanded() ? 'Show charts' : 'Expand list' }}</button>
-            @if (!listExpanded() && pageCount() > 1) {
-              <span aria-live="polite">Meters {{ pageStart() }}–{{ pageEnd() }} of {{ entries.length }}</span>
-              <div>
-                <button type="button" class="v1-icon-btn" aria-label="Previous meter page" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)"><app-ui-icon name="chevronLeft"/></button>
-                <span>Page {{ currentPage() }} of {{ pageCount() }}</span>
-                <button type="button" class="v1-icon-btn" aria-label="Next meter page" [disabled]="currentPage() === pageCount()" (click)="changePage(currentPage() + 1)"><app-ui-icon name="chevronRight"/></button>
-              </div>
-            } @else if (listExpanded()) { <span aria-live="polite">All {{ entries.length }} matching meters</span> }
-          </nav>
-          }
-        </section>
-        @if (!listExpanded()) { <app-monthly-trends [charts]="chartViews()" [state]="workspace.calendarizationState()" [zoomRange]="zoomRange()" [emphasized]="emphasized()" (zoomChanged)="zoomRange.set($event)"/> }
-      </div>
+      <section class="facility-meters__inventory" aria-label="Meter inventory">
+        @if (selecting()) {
+          <div class="facility-meters__selection" role="group" aria-label="Meter selection">
+            <span aria-live="polite">{{ selected().length }} selected</span>
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct() || !entries.length" (click)="selectAll()">Select all matching</button>
+            <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct() || !selected().length" (click)="requestDeleteSelected()">Delete selected</button>
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelSelection()">Cancel selection</button>
+          </div>
+        }
+        @if (!entries.length) { <div class="facility-meters__empty" role="status"><h3>No meters match these filters</h3><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></div> }
+        @else {
+          <app-inventory-grid [tiles]="visibleTiles()" [printTiles]="tiles()" [detail]="detail()" [overrides]="overrides()" [actions]="tileActions()" [selecting]="selecting()" [selected]="selected()" [canSelect]="canAct()" [page]="currentPage() - 1" [pages]="pageCount()" [start]="pageStart()" [end]="pageEnd()" [total]="entries.length"
+            (pageSelected)="changePage($event + 1)" (detailChanged)="setTileDetail($event)" (actionRequested)="handleAction($event)" (selectionChanged)="changeSelection($event)" (navigationRequested)="navigateRoute($event)" (layoutReady)="layoutReady.set($event)"/>
+        }
+      </section>
     }
+    <div class="facility-meters__chart-dock">
+      <button type="button" class="facility-meters__chart-handle" aria-haspopup="dialog" [attr.aria-expanded]="chartsOpen()" aria-controls="meter-chart-sheet" [disabled]="saving() || !meterCards().length" (click)="openCharts()" (pointerdown)="startChartPull($event)" (pointerup)="finishChartPull($event)" (pointercancel)="cancelChartPull()">
+        <span class="facility-meters__grip" aria-hidden="true"></span><app-ui-icon name="chevronUp"/><span>Charts</span>
+      </button>
+    </div>
   </section>
 }
 <ng-template #addMeterPanel>
@@ -80,5 +72,11 @@
       <ul class="facility-meters__confirmation-list">@for (card of targets(); track card.meter.guid) { <li>{{ card.meter.name }}</li> }</ul>
       @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
     </app-confirmation-dialog>
+  }
+</ng-template>
+
+<ng-template #chartSheet>
+  @if (chartsOpen()) {
+    <app-meter-chart-sheet [charts]="chartViews()" [facilityName]="workspace.facility()?.name || 'Facility'" [state]="workspace.calendarizationState()" [view]="chartView()" (viewChanged)="chartView.set($event)" [zoomRange]="zoomRange()" (zoomChanged)="zoomRange.set($event)" (closed)="closeCharts()"/>
   }
 </ng-template>

@@ -23,7 +23,7 @@ function setup() {
   const statusState = signal('ready');
   TestBed.configureTestingModule({ imports: [RouterModule.forRoot([]), AccountDataModule], providers: [
     { provide: AccountWorkspaceStore, useValue: {
-      canWrite: signal(true), account, facilities, meters: signal([{ facilityId: 'alpha' }]), meterData: signal([]), predictors: signal([]), predictorData: signal([]),
+      canWrite: signal(true), hasPending: signal(false), account, facilities, meters: signal([{ facilityId: 'alpha' }]), meterData: signal([]), predictors: signal([]), predictorData: signal([]),
       facilityAnalyses: signal([]), facilityReports: signal([]), energyUseEquipment: signal([])
     } },
     { provide: WorkspaceStatusService, useValue: { state: statusState, items } },

@@ -1,23 +1,24 @@
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PortfolioFacilitySnapshot, PortfolioResourceSummary } from '../../portfolio-inventory.models';
+import { InventoryFacilitySnapshot, InventoryResourceSummary } from '../inventory.models';
 
-interface ResourceLink extends PortfolioResourceSummary {
+interface ResourceLink extends InventoryResourceSummary {
   readonly href: string;
   readonly description: string;
   readonly note: string;
 }
 
-@Component({ selector: 'app-facility-snapshot', standalone: false,
+@Component({ selector: 'app-facility-snapshot', standalone: true, imports: [IconComponent],
   templateUrl: './facility-snapshot.component.html', styleUrls: ['./facility-snapshot.component.css'] })
 export class FacilitySnapshotComponent {
   private readonly router = inject(Router);
-  @Input({ required: true }) snapshot!: PortfolioFacilitySnapshot;
+  @Input({ required: true }) snapshot!: InventoryFacilitySnapshot;
   @Input({ required: true }) facilityName!: string;
   @Input() detailed = false;
   @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
   resources: readonly ResourceLink[] = [];
-  findings: readonly (PortfolioFacilitySnapshot['findings'][number] & { readonly href: string })[] = [];
+  findings: readonly (InventoryFacilitySnapshot['findings'][number] & { readonly href: string })[] = [];
 
   ngOnChanges(): void {
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));

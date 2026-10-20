@@ -1,17 +1,18 @@
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PortfolioReadingSnapshot } from '../../portfolio-inventory.models';
+import { InventoryReadingSnapshot } from '../inventory.models';
 
-@Component({ selector: 'app-reading-snapshot', standalone: false,
+@Component({ selector: 'app-reading-snapshot', standalone: true, imports: [IconComponent],
   templateUrl: './reading-snapshot.component.html', styleUrls: ['./reading-snapshot.component.css'] })
 export class ReadingSnapshotComponent {
   private readonly router = inject(Router);
-  @Input({ required: true }) snapshot!: PortfolioReadingSnapshot;
+  @Input({ required: true }) snapshot!: InventoryReadingSnapshot;
   @Input({ required: true }) resourceName!: string;
   @Input() detailed = false;
   @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
   readingsHref = '';
-  findings: readonly (PortfolioReadingSnapshot['findings'][number] & { readonly href: string })[] = [];
+  findings: readonly (InventoryReadingSnapshot['findings'][number] & { readonly href: string })[] = [];
 
   ngOnChanges(): void {
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));

@@ -1,8 +1,8 @@
 import { AfterViewInit, Directive, ElementRef, EventEmitter, Input, NgZone, Output, inject } from '@angular/core';
 
 /** Ordered row spans fit measured tile content without dense backfilling or DOM reordering. */
-@Directive({ selector: '[appPortfolioGrid]', standalone: true })
-export class PortfolioGridDirective implements AfterViewInit {
+@Directive({ selector: '[appInventoryGrid]', standalone: true })
+export class InventoryGridDirective implements AfterViewInit {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly zone = inject(NgZone);
   private resize?: ResizeObserver;
@@ -13,7 +13,7 @@ export class PortfolioGridDirective implements AfterViewInit {
   private hasLaidOut = false;
   private anchor?: { element: HTMLElement; top: number; scroll: HTMLElement; scrollTop: number };
   @Output() readonly layoutReady = new EventEmitter<boolean>();
-  @Input() set appPortfolioGrid(value: string) {
+  @Input() set appInventoryGrid(_value: string) {
     if (this.hasLaidOut) this.captureAnchor();
     queueMicrotask(() => { if (!this.destroyed) this.layoutReady.emit(false); });
     this.schedule();

@@ -1,9 +1,0 @@
-:host { display: block; min-width: 0; --v1-metric-chart-height: 17rem; }
-.monthly-trends { display: grid; gap: 1rem; }
-.monthly-trends__zoom { display: flex; gap: .25rem; }
-.monthly-trends__panel { min-width: 0; padding: .5rem; background: var(--v1-surface); border: 1px solid var(--v1-border); border-radius: var(--v1-radius); }
-.monthly-trends__panel > header { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: .5rem; padding: .35rem .5rem 0; }
-.monthly-trends__panel h2 { margin: 0; font-size: 1rem; font-weight: 800; }
-h2 span { color: var(--v1-muted); font-size: .8rem; font-weight: 500; }
-.monthly-trends__panel p { margin: .25rem 0 .5rem; color: var(--v1-muted); font-size: .8rem; }
-@media print { .monthly-trends__zoom { display: none; } .monthly-trends__panel { break-inside: avoid; } }

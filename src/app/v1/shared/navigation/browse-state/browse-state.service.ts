@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, Signal, effect, inject, signal, untracked } from '@angular/core';
+import type { InventoryDetailLevel } from '@app/v1/shared/inventory/inventory.models';
 import { Observable } from 'rxjs';
 import type { PredictorInventoryFilters } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.models';
 import type { FacilitySort, FacilityStatusFilter } from '@app/v1/account/data/portfolio/portfolio-facility.view';
@@ -17,7 +18,7 @@ export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
 export interface FacilityPredictorBrowseView { readonly page: number; readonly expanded: boolean; readonly previewGuid?: string; readonly zoom: { start: number; end: number }; }
 export type AccountBrowseOrigin = 'facilities' | 'meters' | 'predictors';
-export interface FacilityMeterBrowseView { readonly page: number; readonly expanded: boolean; readonly zoom: { start: number; end: number }; }
+export interface FacilityMeterBrowseView { readonly page: number; readonly zoom: { start: number; end: number }; readonly detail?: InventoryDetailLevel; readonly overrides?: Readonly<Record<string, InventoryDetailLevel>>; }
 
 /** UI-only journey state. Nothing is written to storage or domain records. */
 @Injectable({ providedIn: 'root' })
@@ -34,8 +35,8 @@ export class BrowseStateService {
   saveFilters<K extends BrowseKind>(key: BrowseKey<K>, value: BrowseFilters[K]): void { this.filters.set(this.id(key), { ...value }); }
   readPosition(key: BrowseKey): BrowsePosition | undefined { return this.positions.get(this.id(key)); }
   savePosition(key: BrowseKey, value: BrowsePosition): void { this.positions.set(this.id(key), value); }
-  readFacilityView(key: BrowseKey<'facilityMeters'>): FacilityMeterBrowseView | undefined { return this.facilityViews.get(this.id(key)); }
-  saveFacilityView(key: BrowseKey<'facilityMeters'>, value: FacilityMeterBrowseView): void { this.facilityViews.set(this.id(key), { ...value, zoom: { ...value.zoom } }); }
+  readFacilityView(key: BrowseKey<'facilityMeters'>): FacilityMeterBrowseView | undefined { const view = this.facilityViews.get(this.id(key)); return view ? { ...view, zoom: { ...view.zoom }, overrides: { ...view.overrides } } : undefined; }
+  saveFacilityView(key: BrowseKey<'facilityMeters'>, value: FacilityMeterBrowseView): void { this.facilityViews.set(this.id(key), { ...value, zoom: { ...value.zoom }, overrides: { ...value.overrides } }); }
   readPredictorView(key: BrowseKey<'facilityPredictors'>): FacilityPredictorBrowseView | undefined { return this.predictorViews.get(this.id(key)); }
   savePredictorView(key: BrowseKey<'facilityPredictors'>, value: FacilityPredictorBrowseView): void { this.predictorViews.set(this.id(key), { ...value, zoom: { ...value.zoom } }); }
   readInventoryView(key: BrowseKey<AccountBrowseOrigin>): PortfolioInventoryView | undefined {

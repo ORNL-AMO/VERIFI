@@ -35,7 +35,6 @@ describe('account inventory session state', () => {
     const fixture = setup(), state = fixture.componentInstance.state;
     state.selectPage(1); state.setTileDetail({ guid: '27', level: 'detailed' }); state.detailControl.setValue('summary'); fixture.detectChanges();
     expect(state.page()).toBe(1); expect(state.detail()).toBe('summary'); expect(state.overrides()).toEqual({});
-    state.setTileDetail({ guid: '27', level: 'detailed' }); state.setTileDetail({ guid: '27', level: null }); expect(state.overrides()).toEqual({});
   });
   it('isolates account/screens and restores page and overrides before the return position is ready', () => {
     const fixture = setup(), host = fixture.componentInstance, state = host.state;

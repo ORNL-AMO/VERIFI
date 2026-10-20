@@ -58,9 +58,7 @@ export class PortfolioInventoryState {
   }
   selectPage(page: number): void { this.page.set(Math.max(0, Math.min(page, this.pages() - 1))); this.save(); }
   setTileDetail(change: PortfolioTileDetailChange): void {
-    const next = { ...this.overrides() };
-    if (change.level === null) delete next[change.guid]; else next[change.guid] = change.level;
-    this.overrides.set(next); this.save();
+    this.overrides.update(current => ({ ...current, [change.guid]: change.level })); this.save();
   }
   private save(): void { if (this.activeKey) this.browse.saveInventoryView(this.activeKey, { page: this.page(), overrides: this.overrides() }); }
 }

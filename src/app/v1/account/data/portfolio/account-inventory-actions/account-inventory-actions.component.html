@@ -1,0 +1,16 @@
+@if (error() && !pending()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+<ng-template #confirmation>
+  @if (pending(); as action) {
+    <app-confirmation-dialog [title]="(action.request.action === 'copy' ? 'Copy ' : 'Delete ') + action.name + '?'" titleId="account-inventory-confirmation" cancelAriaLabel="Cancel card action"
+      [confirmLabel]="(action.request.action === 'copy' ? 'Copy ' : 'Delete ') + label()" [confirmIcon]="action.request.action === 'copy' ? 'copy' : 'delete'" [confirmClass]="action.request.action === 'copy' ? 'v1-btn--action' : 'v1-btn--danger'"
+      [busy]="saving()" [disabled]="!canAct()" (confirmed)="confirm()" (cancelled)="dismiss()">
+      @if (action.request.action === 'copy') { <p>A copy of {{ action.name }} will be created in the same facility. Its readings will not be copied.</p> }
+      @else if (resource() === 'facilities') { <p>{{ action.name }} and all its meters, predictors, readings, energy uses, and facility analyses will be deleted. Related account analysis and report references will be updated. This cannot be undone.</p> }
+      @else {
+        <p>{{ action.name }} and its {{ action.readingCount }} readings will be deleted. This cannot be undone.</p>
+        @if (resource() === 'predictors') { <p>References will be removed from {{ affectedAnalyses() }} affected analyses. Regression models may require regeneration. Unselected predictors and their readings will be retained.</p> }
+      }
+      @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+    </app-confirmation-dialog>
+  }
+</ng-template>

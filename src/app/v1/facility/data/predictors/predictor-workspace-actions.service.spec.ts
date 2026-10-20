@@ -44,7 +44,7 @@ describe('PredictorWorkspaceActionsService', () => {
     TestBed.configureTestingModule({ providers: [
       PredictorWorkspaceActionsService,
       { provide: AccountWorkspaceStore, useValue: {
-        account: signal({ guid: 'account-a' }), selectedFacility: signal({ guid: 'facility-a' }),
+        account: signal({ guid: 'account-a' }), facilities: signal([{ guid: 'facility-a', accountId: 'account-a' }]), selectedFacility: signal({ guid: 'facility-a' }),
         predictors, facilityPredictors, predictorData: readings, facilityPredictorData: readings,
         facilityAnalyses: signal([]), revision: signal(4), canWrite, hasPending
       } },
@@ -56,6 +56,19 @@ describe('PredictorWorkspaceActionsService', () => {
     ] });
   });
 
+  it('supports explicit account-inventory ownership without changing the selected facility', async () => {
+    const store = TestBed.inject(AccountWorkspaceStore);
+    (store.selectedFacility as any).set(undefined); facilityPredictors.set([]);
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    await service.copyPredictor(existing, 'facility-a');
+    const preview = service.previewDeletion([existing.guid], 'facility-a');
+    await service.deletePredictors(preview, 'facility-a');
+    expect(store.selectedFacility()).toBeUndefined();
+    await expect(service.copyPredictor(existing, 'other')).rejects.toThrow('selected facility');
+    expect(() => service.previewDeletion([existing.guid], 'other')).toThrow('this account');
+    predictors.set([{ ...existing, accountId: 'other' }]);
+    await expect(service.copyPredictor(existing, 'facility-a')).rejects.toThrow('selected facility');
+  });
   it('copies settings into a new identity without copying readings', async () => {
     const copy = await TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing);
     expect(copy.guid).not.toBe(existing.guid);

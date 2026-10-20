@@ -1,0 +1,11 @@
+<ul class="portfolio-inventory" [class.portfolio-inventory--uniform]="uniformRows()" [attr.data-detail]="level()" [appInventoryGrid]="layoutSignature()" (layoutReady)="layoutReady.emit($event)" aria-label="Inventory tiles">
+  @for (entry of entries(); track entry.tile.guid) {
+    <li [attr.data-wide]="entry.wide"><app-inventory-tile [tile]="entry.tile" [level]="entry.level" [actions]="actionsByGuid[entry.tile.guid] ?? actions" [selecting]="selecting" [selected]="selected.includes(entry.tile.guid)" [canSelect]="canSelect" (actionRequested)="actionRequested.emit($event)" (selectionChanged)="selectionChanged.emit($event)" (detailChanged)="detailChanged.emit($event)" (navigationRequested)="navigationRequested.emit($event)"/></li>
+  }
+</ul>
+@if (pages > 1) {
+  <nav class="portfolio-pagination" aria-label="Inventory pages"><span>Items {{ start }}–{{ end }} of {{ total }}</span><div><button type="button" class="v1-btn v1-btn--secondary" [disabled]="page === 0" (click)="pageSelected.emit(page - 1)">Previous</button><span aria-live="polite">Page {{ page + 1 }} of {{ pages }}</span><button type="button" class="v1-btn v1-btn--secondary" [disabled]="page + 1 >= pages" (click)="pageSelected.emit(page + 1)">Next</button></div></nav>
+}
+<div class="portfolio-inventory-print">
+  @for (entry of printed(); track entry.tile.guid) { <app-inventory-tile [tile]="entry.tile" [level]="entry.level" [print]="true"/> }
+</div>

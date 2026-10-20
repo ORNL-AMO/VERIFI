@@ -4,8 +4,8 @@ import { makeFinding, StatusEvaluationState, StatusFinding } from '@app/v1/statu
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { buildPortfolioMeters } from './portfolio-meter.view';
-import { buildMeterSnapshots } from './portfolio-meter-snapshot.view';
+import { buildPortfolioMeters } from '@app/v1/account/data/portfolio/portfolio-meter.view';
+import { buildMeterSnapshots } from './meter-reading-snapshot.view';
 
 const entity = { kind:'meter' as const, guid:'m', name:'Electric', accountGuid:'account-a', facilityGuid:'f' };
 const nav = { ...inventoryNavigation, facilityMeterRoute:(facility:string,guid:string,tab:string)=>['/facility',facility,'meters',guid,tab] };
@@ -84,7 +84,7 @@ describe('meter reading snapshots',()=>{
     const empty=snapshot([],[], 'ready',{startingUnit:undefined,groupId:undefined});
     expect(empty).toMatchObject({readingCount:0,rangeLabel:'No readings yet',recentReadings:[]});
     expect(empty.facts).toEqual([]);
-    expect(empty.group).toEqual({label:'Meter group',value:'Not assigned',icon:'meterGroupItem',route:undefined});
+    expect(empty.group).toEqual({label:'Meter group',value:'Not assigned',route:undefined});
     const invalid=snapshot([row(13),row(0),row(1,{year:NaN})]);
     expect(invalid).toMatchObject({readingCount:3,rangeLabel:'Reading dates unavailable',invalidDateCount:3,recentReadings:[]});
     expect(snapshot([row(2,{day:31}),row(2,{day:0})])).toMatchObject({invalidDateCount:2,recentReadings:[]});
@@ -93,7 +93,7 @@ describe('meter reading snapshots',()=>{
   it('keeps ownership isolated and only adds fuel where relevant',()=>{
     const data=[row(1),row(2,{accountId:'other'}),row(3,{facilityId:'other'}),row(4,{meterId:'other'})];
     expect(snapshot(data).readingCount).toBe(1);
-    expect(snapshot(data).group).toMatchObject({icon:'meterGroupItem',route:nav.facilityMeterGroupRoute('f','g','monthly-table')});
+    expect(snapshot(data).group).toMatchObject({route:nav.facilityMeterGroupRoute('f','g','monthly-table')});
     expect(snapshot([row(1)],[], 'ready',{source:'Other Fuels',fuel:'Diesel',scope:1}).facts).toContainEqual({label:'Fuel',value:'Diesel'});
     expect(snapshot([row(1)],[], 'ready',{source:'Electricity',fuel:'Diesel'}).facts).not.toContainEqual({label:'Fuel',value:'Diesel'});
   });

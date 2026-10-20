@@ -3,11 +3,10 @@ import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import Invoice01Icon from '@hugeicons/core-free-icons/Invoice01Icon';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { AccountDataModule } from '../../../account-data.module';
-import { PortfolioReadingSnapshot } from '../../portfolio-inventory.models';
+import { InventoryReadingSnapshot } from '../inventory.models';
 import { ReadingSnapshotComponent } from './reading-snapshot.component';
 
-const snapshot: PortfolioReadingSnapshot = {
+const snapshot: InventoryReadingSnapshot = {
   readingCount:24,rangeLabel:'Jan 2024 – Aug 2026',invalidDateCount:0,readingsLink:{label:'Open readings',route:['/meter','readings']},
   recentReadings:[{guid:'r3',dateLabel:'Aug 1, 2026',dateKey:'2026-08-01',tone:'neutral',quantityLabel:'Energy use',valueLabel:'0 kWh',description:'Aug 1, 2026. Energy use: 0 kWh'},
     {guid:'r2',dateLabel:'Jul 1, 2026',dateKey:'2026-07-01',tone:'danger',quantityLabel:'Energy use',valueLabel:'-40 kWh',statusLabel:'Has errors',icon:'danger',description:'Jul 1, 2026. Energy use: -40 kWh. Has errors. Review negative readings'},
@@ -16,7 +15,7 @@ const snapshot: PortfolioReadingSnapshot = {
   findings:[{id:'negative',name:'Electric',title:'Review negative readings',description:'Negative readings are not allowed',severity:'error',action:{label:'Review readings',route:['/meter','readings']}}],remainingFindings:2
 };
 function setup(detailed=false){
-  TestBed.configureTestingModule({imports:[AccountDataModule],providers:[provideRouter([])]});
+  TestBed.configureTestingModule({imports:[ReadingSnapshotComponent],providers:[provideRouter([])]});
   const fixture=TestBed.createComponent(ReadingSnapshotComponent);
   fixture.componentRef.setInput('snapshot',snapshot);fixture.componentRef.setInput('resourceName','Electric');fixture.componentRef.setInput('detailed',detailed);
   fixture.detectChanges();return fixture;

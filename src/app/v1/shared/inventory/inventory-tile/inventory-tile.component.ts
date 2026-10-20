@@ -1,39 +1,52 @@
+import { CdkMenuModule, CdkMenuTrigger } from '@angular/cdk/menu';
+import { FacilitySnapshotComponent } from '../facility-snapshot/facility-snapshot.component';
+import { ReadingSnapshotComponent } from '../reading-snapshot/reading-snapshot.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, inject, signal } from '@angular/core';
-import { CdkMenuTrigger } from '@angular/cdk/menu';
 import { Router } from '@angular/router';
-import { PORTFOLIO_DETAIL_LEVELS, PortfolioDetailLevel, PortfolioTile, PortfolioTileDetailChange } from '../portfolio-inventory.models';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { InventoryTileMenuAction, InventoryTileActionRequest, InventoryDetailLevel, InventoryTile, InventoryTileDetailChange } from '../inventory.models';
 
-@Component({ selector: 'app-portfolio-tile', standalone: false,
-  templateUrl: './portfolio-tile.component.html', styleUrls: ['./portfolio-tile.component.css'] })
-export class PortfolioTileComponent {
+@Component({ selector: 'app-inventory-tile', standalone: true, imports: [IconComponent, CdkMenuModule, ReactiveFormsModule, FacilitySnapshotComponent, ReadingSnapshotComponent],
+  templateUrl: './inventory-tile.component.html', styleUrls: ['./inventory-tile.component.css'] })
+export class InventoryTileComponent {
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  @Input({ required: true }) tile!: PortfolioTile;
-  @Input() level: PortfolioDetailLevel = 'simple';
-  @Input() overridden = false;
+  @Input({ required: true }) tile!: InventoryTile;
+  @Input() level: InventoryDetailLevel = 'simple';
   @Input() print = false;
-  @Output() readonly detailChanged = new EventEmitter<PortfolioTileDetailChange>();
+  @Input() actions: readonly InventoryTileMenuAction[] = [];
+  @Input() selecting = false;
+  @Input() selected = false;
+  @Input() canSelect = true;
+  @Output() readonly actionRequested = new EventEmitter<InventoryTileActionRequest>();
+  @Output() readonly selectionChanged = new EventEmitter<{ guid: string; selected: boolean }>();
+  readonly selectionControl = new FormControl(false, { nonNullable: true });
+  @Output() readonly detailChanged = new EventEmitter<InventoryTileDetailChange>();
   @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
   @ViewChild(CdkMenuTrigger) private trigger?: CdkMenuTrigger;
   @ViewChild('menuButton') private menuButton?: ElementRef<HTMLButtonElement>;
-  readonly levels = PORTFOLIO_DETAIL_LEVELS;
   readonly menuClasses = signal('v1-root portfolio-tile-menu');
   private themeObserver?: MutationObserver;
   mainHref = '';
   ownerHref = '';
   groupHref = '';
   stationHref = '';
-  detailHref = '';
   locationLabel = '';
   chipLabel = '';
   stationLabel = '';
+  constructor() {
+    this.selectionControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(selected => this.selectionChanged.emit({ guid: this.tile.guid, selected }));
+  }
   ngOnChanges(): void {
+    this.selectionControl.setValue(this.selected, { emitEvent: false });
+    if (this.canSelect) this.selectionControl.enable({ emitEvent: false }); else this.selectionControl.disable({ emitEvent: false });
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));
     this.mainHref = href(this.tile.route);
     this.ownerHref = this.tile.owner ? href(this.tile.owner.route) : '';
     this.stationHref = this.tile.stationLink ? href(this.tile.stationLink.route) : '';
     this.groupHref = this.tile.meterSnapshot?.group.route ? href(this.tile.meterSnapshot.group.route) : '';
-    this.detailHref = this.tile.detailLink ? href(this.tile.detailLink.route) : '';
     this.chipLabel = (this.level === 'simple' ? this.tile.simpleChip ?? this.tile.chip : this.tile.chip) ?? '';
     this.stationLabel = (this.level === 'simple' ? this.tile.stationIssue : this.tile.station) ?? '';
     this.locationLabel = this.level === 'detailed' && this.tile.facilitySnapshot
@@ -54,7 +67,7 @@ export class PortfolioTileComponent {
   }
   private openMenu(): void {
     this.menuButton?.nativeElement.focus(); this.trigger?.open();
-    queueMicrotask(() => document.getElementById(`portfolio-detail-${this.tile.guid}`)?.querySelector<HTMLElement>('[role="menuitemradio"]')?.focus());
+    queueMicrotask(() => document.getElementById(`portfolio-detail-${this.tile.guid}`)?.querySelector<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"])')?.focus());
   }
   menuOpened(): void {
     this.themeObserver?.disconnect();
@@ -69,9 +82,14 @@ export class PortfolioTileComponent {
     this.themeObserver?.disconnect();
     queueMicrotask(() => { if (document.activeElement === document.body) this.menuButton?.nativeElement.focus(); });
   }
-  choose(level: PortfolioDetailLevel | null): void {
+  choose(level: InventoryDetailLevel): void {
     this.detailChanged.emit({ guid: this.tile.guid, level });
     this.trigger?.close(); this.menuButton?.nativeElement.focus();
+  }
+  chooseAction(action: InventoryTileMenuAction): void {
+    if (action.disabled) return;
+    this.trigger?.close(); this.menuButton?.nativeElement.focus();
+    this.actionRequested.emit({ guid: this.tile.guid, action: action.id });
   }
   ngOnDestroy(): void { this.themeObserver?.disconnect(); }
 }

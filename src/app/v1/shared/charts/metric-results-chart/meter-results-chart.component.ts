@@ -58,11 +58,11 @@ export class MeterResultsChartComponent implements OnChanges {
   /** Short tick labels and minimal gutters for embedded dashboard charts. */
   @Input() compactAxes = false;
   @Input() tooltipMaxRows?: number;
+  @Input() tooltipOverflowHint = 'Use the legend to show fewer series.';
   @Input() smoothLines = true;
   @Input() showPointSymbols = true;
   @Input() showChartActions = true;
   @Input() zoomRange?: V1EChartsDataZoomRange;
-  @Input() emphasizedMetricId?: string;
   @Output() zoomRangeChanged = new EventEmitter<V1EChartsDataZoomRange>();
   private readonly optionRevision = signal(0);
   @Input() showValueLabels = false;
@@ -78,6 +78,8 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() loadingDescription = 'VERIFI is calculating calendarized data.';
   @Input() errorTitle = 'Chart data could not be calculated';
   @Input() errorDescription = 'Check the meter data and try again.';
+  @Input() noVisibleSeriesTitle = 'No visible series';
+  @Input() noVisibleSeriesDescription = 'Turn on a chart series to show the chart.';
   @Input() emptyTitle = 'No results to chart';
   @Input() emptyDescription = 'Add meter data to see charted results.';
   @Input() downloadFileName = 'meter-results-chart';
@@ -181,8 +183,8 @@ export class MeterResultsChartComponent implements OnChanges {
           showSymbol: display === 'line' && this.showPointSymbols,
           symbolSize: display === 'line' ? 7 : undefined,
           stack: display === 'bar' && this.allMetricSeriesStacked() ? 'results' : undefined,
-          itemStyle: { color: metric.color ?? chartSeriesColor(index), opacity: this.emphasizedMetricId && this.emphasizedMetricId !== metric.id ? .25 : 1 },
-          lineStyle: { color: metric.color ?? chartSeriesColor(index), type: metric.lineStyle ?? 'solid', width: this.emphasizedMetricId === metric.id ? 4 : 3, opacity: this.emphasizedMetricId && this.emphasizedMetricId !== metric.id ? .25 : 1 },
+          itemStyle: { color: metric.color ?? chartSeriesColor(index) },
+          lineStyle: { color: metric.color ?? chartSeriesColor(index), type: metric.lineStyle ?? 'solid', width: 3 },
           z: 2,
           ...seriesValueLabel(this.showValueLabels, metric, this.compactValueLabels)
         });
@@ -225,7 +227,7 @@ export class MeterResultsChartComponent implements OnChanges {
       && visibleMetrics.length > 0 && visibleMetrics.every(metric => metric.unit === '%');
 
     return {
-      tooltip: { trigger: 'axis', ...(this.tooltipMaxRows ? { confine: true } : {}), formatter: params => formatChartTooltip(params, this.metricOptions(), this.emphasizedMetricId, this.tooltipMaxRows) },
+      tooltip: { trigger: 'axis', ...(this.tooltipMaxRows ? { confine: true } : {}), formatter: params => formatChartTooltip(params, this.metricOptions(), this.tooltipMaxRows, this.tooltipOverflowHint) },
       legend: { show: this.showLegend, top: 0, left: 'center', right: 88, data: this.visibleMetrics().map(metric => metric.label) },
       grid: {
         top: !this.showLegend ? (this.compactAxes ? 12 : 24) : this.showValueLabels ? 84 : 72,
@@ -566,26 +568,24 @@ function alignDualYAxis(yAxis: Array<Record<string, unknown>>): Array<Record<str
 function formatChartTooltip(
   params: unknown,
   metrics: readonly MeterResultsChartMetric[],
-  emphasizedMetricId?: string,
-  maxRows?: number
+  maxRows: number | undefined,
+  overflowHint: string
 ): string {
   const tooltipParams = (Array.isArray(params) ? params : [params])
     .filter(isTooltipParam)
     .filter(param => metrics.some(metric => metric.label === param.seriesName));
   const firstParam = tooltipParams[0];
   const header = firstParam ? `<div>${escapeHtml(firstParam.axisValueLabel ?? firstParam.name ?? '')}</div>` : '';
-  const emphasized = tooltipParams.filter(param => param.seriesId === emphasizedMetricId);
-  const visible = emphasized.length ? emphasized : tooltipParams;
-  const limit = maxRows && maxRows > 0 ? maxRows : visible.length;
-  const omitted = Math.max(0, visible.length - limit);
-  const rows = visible.slice(0, limit)
+  const limit = maxRows && maxRows > 0 ? maxRows : tooltipParams.length;
+  const omitted = Math.max(0, tooltipParams.length - limit);
+  const rows = tooltipParams.slice(0, limit)
     .map(param => {
       const metric = metrics.find(item => item.id === param.seriesId) ?? metrics.find(item => item.label === param.seriesName);
       const value = formatChartTooltipValue(param.value, metric?.currency, metric?.unit);
       return `<div>${param.marker ?? ''}${escapeHtml(param.seriesName ?? '')}: ${escapeHtml(value)}</div>`;
     })
     .join('');
-  const more = omitted ? `<div>+${omitted} more meters. Focus a meter in the list to inspect it.</div>` : '';
+  const more = omitted ? `<div>+${omitted} more meters. ${escapeHtml(overflowHint)}</div>` : '';
   return `${header}${rows}${more}`;
 }
 

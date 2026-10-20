@@ -1,14 +1,10 @@
+import { AccountInventoryActionsComponent } from './portfolio/account-inventory-actions/account-inventory-actions.component';
 import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
 import { CreatePredictorDrawerComponent } from './portfolio/create-predictor-drawer/create-predictor-drawer.component';
 import { CommonModule } from '@angular/common';
-import { CdkMenuModule } from '@angular/cdk/menu';
-import { PortfolioTileComponent } from './portfolio/portfolio-tile/portfolio-tile.component';
-import { FacilitySnapshotComponent } from './portfolio/portfolio-tile/facility-snapshot/facility-snapshot.component';
-import { ReadingSnapshotComponent } from './portfolio/portfolio-tile/reading-snapshot/reading-snapshot.component';
-import { PortfolioInventoryComponent } from './portfolio/portfolio-inventory/portfolio-inventory.component';
-import { PortfolioGridDirective } from './portfolio/portfolio-inventory/portfolio-grid.directive';
+import { InventoryGridComponent } from '@app/v1/shared/inventory/inventory-grid/inventory-grid.component';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -49,10 +45,6 @@ import { CreateMeterDrawerComponent } from './portfolio/create-meter-drawer/crea
     ExistingGwpPickerComponent,
     AccountPortfolioComponent,
     AccountPortfolioFacilitiesTabComponent,
-    PortfolioTileComponent,
-    FacilitySnapshotComponent,
-    ReadingSnapshotComponent,
-    PortfolioInventoryComponent,
     AccountPortfolioMetersTabComponent,
     AccountPortfolioPlaceholderTabComponent,
     AccountPortfolioPredictorsTabComponent,
@@ -60,7 +52,7 @@ import { CreateMeterDrawerComponent } from './portfolio/create-meter-drawer/crea
     CreateFacilityDrawerComponent,
     CreateMeterDrawerComponent
   ],
-  imports: [CdkMenuModule, PortfolioGridDirective, CreatePredictorDrawerComponent, PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
+  imports: [AccountInventoryActionsComponent, InventoryGridComponent, CreatePredictorDrawerComponent, PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
     CommonModule,
     MeterDraftSlideoutComponent,
     IconsModule,

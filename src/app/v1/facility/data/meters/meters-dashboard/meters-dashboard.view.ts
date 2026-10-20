@@ -5,15 +5,11 @@ import { MeterCardView } from '../models';
 import { MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/shared/charts/metric-results-chart.models';
 import { StatusEvaluationState } from '@app/v1/status/status.models';
 
-export interface MeterDirectoryEntry {
+export interface MeterInventoryEntry {
   readonly card: MeterCardView;
   readonly tone: 'success' | 'warning' | 'danger' | 'neutral';
   readonly statusLabel: string;
   readonly statusIcon: 'success' | 'warning' | 'danger' | 'loading' | 'info';
-  readonly color: string;
-  readonly lineStyle: MeterSeriesStyle['lineStyle'];
-  readonly dashArray: string | null;
-  readonly coverage: string;
   readonly latest: number;
   readonly attentionRank: number;
   readonly noReadings: boolean;
@@ -22,8 +18,6 @@ export interface MeterDirectoryEntry {
   readonly needsAttention: boolean;
   readonly searchText: string;
 }
-export type MeterDirectoryAction = 'settings' | 'readings' | 'copy' | 'delete';
-export interface MeterDirectoryActionRequest { readonly guid: string; readonly action: MeterDirectoryAction; }
 export interface MonthlyTrendView {
   readonly id: 'energy' | 'water' | 'cost';
   readonly title: string;
@@ -37,7 +31,6 @@ export interface MeterSeriesStyle {
   readonly slot: number;
   readonly color: string;
   readonly lineStyle: 'solid' | readonly number[];
-  readonly dashArray: string | null;
 }
 
 export function buildMeterChartStyles(guids: readonly string[], previous: ReadonlyMap<string, MeterSeriesStyle> = new Map()): ReadonlyMap<string, MeterSeriesStyle> {
@@ -51,14 +44,14 @@ export function buildMeterChartStyles(guids: readonly string[], previous: Readon
     const pattern = Math.floor(slot / 12);
     const dash = pattern === 0 ? null : pattern === 1 ? [8, 4] : pattern === 2 ? [2, 4]
       : [10 + (pattern - 3) * 2, 4, 2, 4];
-    styles.set(guid, { slot, color: `var(--v1-chart-series-${slot % 12 + 1})`, lineStyle: dash ?? 'solid', dashArray: dash?.join(' ') ?? null });
+    styles.set(guid, { slot, color: `var(--v1-chart-series-${slot % 12 + 1})`, lineStyle: dash ?? 'solid' });
     occupied.add(slot);
   }
   return styles;
 }
 
-export function buildMeterDirectory(cards: readonly MeterCardView[], readings: readonly IdbUtilityMeterData[],
-  calendarized: readonly CalanderizedMeter[], statusState: StatusEvaluationState, styles = buildMeterChartStyles(cards.map(card => card.meter.guid))): MeterDirectoryEntry[] {
+export function buildMeterInventory(cards: readonly MeterCardView[], readings: readonly IdbUtilityMeterData[],
+  statusState: StatusEvaluationState): MeterInventoryEntry[] {
   const ready = statusState === 'ready';
   return cards.map(card => {
     const ownReadings = readings.filter(reading => reading.meterId === card.meter.guid);
@@ -69,8 +62,7 @@ export function buildMeterDirectory(cards: readonly MeterCardView[], readings: r
       : tone === 'danger' ? 'Has errors' : tone === 'warning' ? 'Has warnings' : 'All data valid';
     const statusIcon = tone === 'neutral' ? statusState === 'error' ? 'info' : 'loading' : tone === 'danger' ? 'danger' : tone === 'warning' ? 'warning' : 'success';
     return {
-      card, tone, statusLabel, statusIcon, ...styles.get(card.meter.guid)!,
-      coverage: dateCoverage(calendarized.filter(item => item.meter.guid === card.meter.guid).flatMap(item => item.monthlyData.map(month => month.date))),
+      card, tone, statusLabel, statusIcon,
       latest: ownReadings.reduce((latest, reading) => Math.max(latest, reading.year * 12 + reading.month), 0),
       attentionRank: card.statusTone === 'danger' ? 0 : noReadings ? 1 : card.statusTone === 'warning' ? 2 : missingGroup ? 3 : !ready ? 4 : 5,
       noReadings, missingGroup, valid: ready && card.statusTone === 'success',

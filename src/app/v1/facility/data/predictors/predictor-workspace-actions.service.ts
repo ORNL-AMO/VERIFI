@@ -86,9 +86,10 @@ export class PredictorWorkspaceActionsService {
     });
   }
 
-  async copyPredictor(predictor: IdbPredictor): Promise<IdbPredictor> {
+  async copyPredictor(predictor: IdbPredictor, facilityGuid?: string): Promise<IdbPredictor> {
     const account = this.requireAccount();
-    const current = this.requirePredictor(predictor.guid);
+    const current = this.requirePredictor(predictor.guid, facilityGuid);
+    if (!isStandardPredictor(current)) throw new WorkspaceWriteError('validation-failed', 'Only standard predictors can be copied.');
     const copy = structuredClone(current);
     delete copy.id;
     if (isStandardPredictor(current)) copy.predictorType = 'Standard';
@@ -142,22 +143,23 @@ export class PredictorWorkspaceActionsService {
     });
   }
 
-  previewDeletion(guids: readonly string[]): PredictorDeletionPreview {
+  previewDeletion(guids: readonly string[], facilityGuid?: string): PredictorDeletionPreview {
     this.requireAccount();
-    const facility = this.requireFacility();
-    const predictors = [...new Set(guids)].map(guid => this.requirePredictor(guid));
+    const facility = facilityGuid ? this.workspace.facilities().find(item => item.guid === facilityGuid && item.accountId === this.workspace.account()?.guid) : this.requireFacility();
+    if (!facility) throw new WorkspaceWriteError('validation-failed', 'Select a facility in this account.');
+    const predictors = [...new Set(guids)].map(guid => this.requirePredictor(guid, facilityGuid));
     if (predictors.some(item => item.facilityId !== facility.guid || (!isStandardPredictor(item) && item.predictorType !== 'Weather'))) {
       throw new WorkspaceWriteError('validation-failed', 'Select standard or weather predictors from this facility.');
     }
     const selected = new Set(predictors.map(item => item.guid));
     return structuredClone({ facilityGuid: facility.guid, predictors,
-      predictorData: this.workspace.facilityPredictorData().filter(item => selected.has(item.predictorId)),
+      predictorData: this.workspace.predictorData().filter(item => selected.has(item.predictorId)),
       facilityAnalyses: this.facilityAnalyses(facility.guid) });
   }
 
-  async deletePredictors(preview: PredictorDeletionPreview): Promise<void> {
+  async deletePredictors(preview: PredictorDeletionPreview, facilityGuid?: string): Promise<void> {
     const account = this.requireAccount();
-    const current = this.previewDeletion(preview.predictors.map(item => item.guid));
+    const current = this.previewDeletion(preview.predictors.map(item => item.guid), facilityGuid);
     if (predictorDeletionSnapshot(current) !== predictorDeletionSnapshot(preview)) {
       throw new WorkspaceWriteError('stale-workspace', 'Predictor data changed. Review the deletion again.');
     }
@@ -537,8 +539,11 @@ export class PredictorWorkspaceActionsService {
     }
   }
 
-  private requirePredictor(guid: string): IdbPredictor {
-    const predictor = this.workspace.facilityPredictors().find(item => item.guid === guid);
+  private requirePredictor(guid: string, facilityGuid?: string): IdbPredictor {
+    const candidates = facilityGuid ? this.workspace.predictors() : this.workspace.facilityPredictors();
+    const predictor = candidates.find(item => item.guid === guid && (!facilityGuid ||
+      (item.facilityId === facilityGuid && item.accountId === this.workspace.account()?.guid &&
+        this.workspace.facilities().some(facility => facility.guid === facilityGuid && facility.accountId === item.accountId))));
     if (!predictor) {
       throw new WorkspaceWriteError('validation-failed', 'The predictor is not part of the selected facility.');
     }

@@ -4,16 +4,22 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { StatusItem } from '@app/v1/status/status.models';
 import { getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { formatMeterReadingNumber, isElectricityRecsMeter, meterReadingsTableType } from '@app/v1/facility/data/meters/meter-workbench/readings/meter-workbench-readings.models';
-import { PortfolioRecentReading, PortfolioMeterSnapshot, PortfolioTileFact } from './portfolio-inventory.models';
-import { PortfolioMeterView } from './portfolio-meter.view';
-import { portfolioFindingAction } from './portfolio-finding.view';
+import { InventoryRecentReading, InventoryMeterSnapshot, InventoryTileFact } from './inventory.models';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { StatusEvaluationState } from '@app/v1/status/status.models';
+interface MeterSnapshotEntry {
+  readonly meter: IdbUtilityMeter; readonly facility: IdbFacility; readonly evaluation: StatusEvaluationState;
+  readonly card: { readonly group?: { readonly guid: string; readonly name: string }; readonly fuelLabel?: string; readonly statusFindings?: readonly StatusItem[] };
+}
+import { inventoryFindingAction } from './inventory-finding.view';
 
 type SnapshotNavigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>;
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' });
 const dateFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
 /** Saved reading records, with active row findings rather than inferred monthly coverage. */
-export function buildMeterSnapshots(views: readonly PortfolioMeterView[], readings: readonly IdbUtilityMeterData[], navigation: SnapshotNavigation): ReadonlyMap<string, PortfolioMeterSnapshot> {
+export function buildMeterSnapshots(views: readonly MeterSnapshotEntry[], readings: readonly IdbUtilityMeterData[], navigation: SnapshotNavigation): ReadonlyMap<string, InventoryMeterSnapshot> {
   const byMeter = new Map<string, IdbUtilityMeterData[]>();
   for (const reading of readings) {
     const items = byMeter.get(reading.meterId) ?? [];
@@ -25,7 +31,7 @@ export function buildMeterSnapshots(views: readonly PortfolioMeterView[], readin
   }));
 }
 
-function meterSnapshot(view: PortfolioMeterView, readings: readonly IdbUtilityMeterData[], navigation: SnapshotNavigation): PortfolioMeterSnapshot {
+function meterSnapshot(view: MeterSnapshotEntry, readings: readonly IdbUtilityMeterData[], navigation: SnapshotNavigation): InventoryMeterSnapshot {
   const months = new Set<number>();
   for (const reading of readings) {
     const key = monthIndex(reading.year, reading.month);
@@ -43,7 +49,7 @@ function meterSnapshot(view: PortfolioMeterView, readings: readonly IdbUtilityMe
     return date ? [{ reading, date }] : [];
   }).sort((a, b) => b.date.getTime() - a.date.getTime() || a.reading.guid.localeCompare(b.reading.guid));
   const annotations = readingAnnotations(view, readings, active);
-  const recentReadings: PortfolioRecentReading[] = dated.slice(0, 3).map(({ reading, date }) => {
+  const recentReadings: InventoryRecentReading[] = dated.slice(0, 3).map(({ reading, date }) => {
     const findings = annotations.get(reading) ?? [];
     const tone = findings.some(finding => finding.severity === 'error') ? 'danger' : findings.length ? 'warning' : 'neutral';
     const statusLabel = view.evaluation === 'error' ? 'Checks unavailable' : view.evaluation !== 'ready' ? 'Checks pending'
@@ -55,7 +61,7 @@ function meterSnapshot(view: PortfolioMeterView, readings: readonly IdbUtilityMe
     return { guid: reading.guid, dateKey: readingDateKey(reading), dateLabel, tone, statusLabel, icon, ...value,
       description: `${dateLabel}. ${value.quantityLabel}: ${value.valueLabel}${statusLabel ? `. ${statusLabel}` : ''}${findings.length ? `. ${findings.map(finding => finding.title).join('; ')}` : ''}` };
   });
-  const facts: PortfolioTileFact[] = [
+  const facts: InventoryTileFact[] = [
     ...(view.meter.source === 'Other Fuels' ? [{ label: 'Fuel', value: view.card.fuelLabel?.trim() || 'Not set' }] : [])
   ];
   return {
@@ -65,16 +71,16 @@ function meterSnapshot(view: PortfolioMeterView, readings: readonly IdbUtilityMe
     invalidDateCount: readings.length - dated.length,
     readingsLink: { label: 'Open readings', route: navigation.facilityMeterRoute(view.facility.guid, view.meter.guid, 'readings') },
     recentReadings, facts,
-    group: { label: 'Meter group', value: view.card.group ? view.card.group.name?.trim() || 'Untitled group' : 'Not assigned', icon: 'meterGroupItem',
+    group: { label: 'Meter group', value: view.card.group ? view.card.group.name?.trim() || 'Untitled group' : 'Not assigned',
       route: view.card.group ? navigation.facilityMeterGroupRoute(view.facility.guid, view.card.group.guid, 'monthly-table') : undefined },
     findings: issues.slice(0, 2).map(finding => ({ id: finding.id, name: view.meter.name, title: finding.title,
-      description: finding.description, severity: finding.severity, action: portfolioFindingAction(finding, navigation) })),
+      description: finding.description, severity: finding.severity, action: inventoryFindingAction(finding, navigation) })),
     remainingFindings: Math.max(0, issues.length - 2)
   };
 }
 
 /** Match the workbench's energy/consumption context using saved values and their saved units. */
-function readingValue(view: PortfolioMeterView, reading: IdbUtilityMeterData): Pick<PortfolioRecentReading, 'quantityLabel' | 'valueLabel'> {
+function readingValue(view: MeterSnapshotEntry, reading: IdbUtilityMeterData): Pick<InventoryRecentReading, 'quantityLabel' | 'valueLabel'> {
   const meter = view.meter;
   const recs = meter.source === 'Electricity' && isElectricityRecsMeter(meter);
   const energy = meterReadingsTableType(meter) !== 'other'
@@ -88,7 +94,7 @@ function readingValue(view: PortfolioMeterView, reading: IdbUtilityMeterData): P
 }
 
 /** Only active findings flag individual records; meter-wide setup, gaps and currency stay at card level. */
-function readingAnnotations(view: PortfolioMeterView, readings: readonly IdbUtilityMeterData[], active: readonly StatusItem[]): ReadonlyMap<IdbUtilityMeterData, StatusItem[]> {
+function readingAnnotations(view: MeterSnapshotEntry, readings: readonly IdbUtilityMeterData[], active: readonly StatusItem[]): ReadonlyMap<IdbUtilityMeterData, StatusItem[]> {
   const annotations = new Map<IdbUtilityMeterData, StatusItem[]>();
   const add = (reading: IdbUtilityMeterData, finding: StatusItem) => {
     if (finding.severity === 'information') return;

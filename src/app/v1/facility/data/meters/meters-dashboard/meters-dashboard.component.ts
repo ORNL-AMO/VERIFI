@@ -1,9 +1,9 @@
 import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
-import { BrowseKey, BrowseStateService, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
+import { BrowseKey, BrowseStateService, FacilityMeterBrowseView, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
@@ -16,9 +16,11 @@ import { MetersDashboardActionsService } from './meters-dashboard-actions.servic
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { V1EChartsDataZoomRange } from '@app/v1/shared/charts/echarts-chart.directive';
-import { MeterDirectoryComponent } from './meter-directory/meter-directory.component';
-import { MonthlyTrendsComponent } from './monthly-trends/monthly-trends.component';
-import { buildMeterChartStyles, MeterSeriesStyle, buildMeterDirectory, buildMonthlyTrends, MeterDirectoryActionRequest } from './meters-dashboard.view';
+import { InventoryGridComponent } from '@app/v1/shared/inventory/inventory-grid/inventory-grid.component';
+import { InventoryDetailLevel, InventoryTile, InventoryTileMenuAction, InventoryTileDetailChange, InventoryTileActionRequest } from '@app/v1/shared/inventory/inventory.models';
+import { buildMeterSnapshots } from '@app/v1/shared/inventory/meter-reading-snapshot.view';
+import { MeterChartSheetComponent, MeterChartSheetView, DEFAULT_METER_CHART_VIEW } from './meter-chart-sheet/meter-chart-sheet.component';
+import { buildMeterChartStyles, MeterSeriesStyle, buildMeterInventory, buildMonthlyTrends } from './meters-dashboard.view';
 
 type StatusFilter = 'all' | 'attention' | 'noReadings' | 'missingGroup' | 'valid';
 type MeterSort = 'attention' | 'meterName' | 'latestReading';
@@ -26,7 +28,7 @@ type MeterSort = 'attention' | 'meterName' | 'latestReading';
 @Component({
   selector: 'app-meters-dashboard', standalone: true,
   templateUrl: './meters-dashboard.component.html', styleUrls: ['./meters-dashboard.component.css'],
-  imports: [PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective, ReactiveFormsModule, IconComponent, RouterLink, MeterDirectoryComponent, MonthlyTrendsComponent, MeterDraftSlideoutComponent, ConfirmationDialogComponent],
+  imports: [PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective, ReactiveFormsModule, IconComponent, RouterLink, InventoryGridComponent, MeterChartSheetComponent, MeterDraftSlideoutComponent, ConfirmationDialogComponent],
   providers: [MetersDashboardActionsService]
 })
 export class MetersDashboardComponent implements OnDestroy {
@@ -39,7 +41,7 @@ export class MetersDashboardComponent implements OnDestroy {
   private readonly browseState = inject(BrowseStateService);
   @ViewChild('addMeterPanel') private readonly addMeterPanel!: TemplateRef<unknown>;
   @ViewChild('confirmation') private readonly confirmation!: TemplateRef<unknown>;
-  @ViewChild('listDisplayToggle') private readonly listDisplayToggle?: ElementRef<HTMLButtonElement>;
+  @ViewChild('chartSheet') private readonly chartSheet!: TemplateRef<unknown>;
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly filtersForm = new FormGroup({
@@ -54,18 +56,22 @@ export class MetersDashboardComponent implements OnDestroy {
   private readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly pageControl = new FormControl(1, { nonNullable: true });
   private readonly page = toSignal(this.pageControl.valueChanges, { initialValue: 1 });
-  readonly pageSize = 8;
+  readonly pageSize = 24;
+  readonly detailControl = new FormControl<InventoryDetailLevel>('simple', { nonNullable: true });
+  readonly detail = signal<InventoryDetailLevel>('simple');
+  readonly overrides = signal<Readonly<Record<string, InventoryDetailLevel>>>({});
+  readonly layoutReady = signal(false);
   readonly search = computed(() => this.filters().search ?? '');
   readonly statusFilter = computed(() => this.filters().status ?? 'all');
   readonly sortBy = computed(() => this.filters().sort ?? 'attention');
   readonly collapsed = computed(() => this.sticky()?.collapsed() ?? false);
-  readonly listExpanded = signal(false);
+  readonly chartsOpen = signal(false);
+  readonly chartView = signal<MeterChartSheetView>(DEFAULT_METER_CHART_VIEW);
   readonly addMeterOpen = signal(false);
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly selecting = signal(false);
   readonly selected = signal<readonly string[]>([]);
-  readonly emphasized = signal<string | undefined>(undefined);
   readonly zoomRange = signal<V1EChartsDataZoomRange>({ start: 0, end: 100 });
   readonly confirmationKind = signal<'copy' | 'delete' | undefined>(undefined);
   readonly targets = signal<readonly MeterCardView[]>([]);
@@ -78,14 +84,13 @@ export class MetersDashboardComponent implements OnDestroy {
     return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) }, { label: facility.name }] : [];
   });
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState())
-    && !['idle', 'loading'].includes(this.workspace.calendarizationState()));
+    && (!this.filteredMeterCards().length || this.layoutReady()));
   readonly browseIds = computed(() => this.visibleMeterCards().map(item => item.card.meter.guid));
   readonly chartStyles = linkedSignal<{ context: string; guids: readonly string[] }, ReadonlyMap<string, MeterSeriesStyle>>({
     source: () => ({ context: `${this.workspace.account()?.guid}/${this.workspace.facility()?.guid}`, guids: this.workspace.meterCards().map(card => card.meter.guid) }),
     computation: (source, previous) => buildMeterChartStyles(source.guids, previous?.source.context === source.context ? previous.value : undefined)
   });
-  readonly meterCards = computed(() => buildMeterDirectory(this.workspace.meterCards(), this.workspace.meterData(),
-    this.workspace.facilityCalendarizedMeters(), this.workspace.statusState(), this.chartStyles()));
+  readonly meterCards = computed(() => buildMeterInventory(this.workspace.meterCards(), this.workspace.meterData(), this.workspace.statusState()));
   readonly filteredMeterCards = computed(() => {
     const query = this.search().trim().toLowerCase();
     const status = this.statusFilter();
@@ -98,18 +103,52 @@ export class MetersDashboardComponent implements OnDestroy {
   });
   readonly pageCount = computed(() => Math.max(1, Math.ceil(this.filteredMeterCards().length / this.pageSize)));
   readonly currentPage = computed(() => Math.min(this.page(), this.pageCount()));
-  readonly showListFooter = computed(() => this.pageCount() > 1 || this.listExpanded());
   readonly pageStart = computed(() => this.filteredMeterCards().length ? (this.currentPage() - 1) * this.pageSize + 1 : 0);
   readonly pageEnd = computed(() => Math.min(this.currentPage() * this.pageSize, this.filteredMeterCards().length));
-  readonly visibleMeterCards = computed(() => this.listExpanded() ? this.filteredMeterCards()
-    : this.filteredMeterCards().slice(this.pageStart() - 1, this.pageEnd()));
+  readonly visibleMeterCards = computed(() => this.filteredMeterCards().slice(this.pageStart() - 1, this.pageEnd()));
   readonly showWater = computed(() => this.meterCards().some(item => ['Water Intake', 'Water Discharge'].includes(item.card.meter.source)));
-  readonly chartViews = computed(() => {
-    const matching = new Set(this.filteredMeterCards().map(item => item.card.meter.guid));
-    return buildMonthlyTrends(this.workspace.facilityCalendarizedMeters().filter(item => matching.has(item.meter.guid)), this.workspace.facility(), this.showWater(), this.chartStyles());
+  readonly chartViews = computed(() => buildMonthlyTrends(this.workspace.facilityCalendarizedMeters(), this.workspace.facility(), this.showWater(), this.chartStyles()));
+  readonly tileActions = computed<readonly InventoryTileMenuAction[]>(() => [
+    { id: 'readings', label: 'Open readings', icon: 'invoice' },
+    { id: 'copy', label: 'Copy meter', icon: 'copy', disabled: !this.canAct() },
+    { id: 'delete', label: 'Delete meter', icon: 'delete', disabled: !this.canAct() }
+  ]);
+  readonly tiles = computed<readonly InventoryTile[]>(() => {
+    const facility = this.workspace.facility(); if (!facility) return [];
+    const entries = this.filteredMeterCards();
+    const snapshots = buildMeterSnapshots(entries.map(entry => ({ meter: entry.card.meter, facility, card: entry.card, evaluation: this.workspace.statusState() })), this.workspace.meterData(), this.navigation);
+    return entries.map(entry => ({ guid: entry.card.meter.guid, name: entry.card.meter.name, icon: entry.card.sourceIcon || 'meter',
+      route: this.navigation.facilityMeterRoute(facility.guid, entry.card.meter.guid, 'settings'), chip: entry.card.meter.source,
+      status: { tone: entry.tone, icon: entry.statusIcon, label: entry.statusLabel }, meterSnapshot: snapshots.get(entry.card.meter.guid) }));
   });
+  readonly visibleTiles = computed(() => this.tiles().slice(this.pageStart() - 1, this.pageEnd()));
+  setTileDetail(change: InventoryTileDetailChange): void {
+    this.overrides.update(current => ({ ...current, [change.guid]: change.level }));
+  }
+  navigateRoute(route: readonly string[]): void {
+    void this.router.navigate([...route]).catch(() => this.actionError.set('The meter could not be opened. Please try again.'));
+  }
+  private pullStart?: number;
+  startChartPull(event: PointerEvent): void {
+    if (event.button !== 0) return;
+    this.pullStart = event.clientY;
+    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+  }
+  finishChartPull(event: PointerEvent): void {
+    if (this.pullStart !== undefined && this.pullStart - event.clientY >= 35) this.openCharts();
+    this.pullStart = undefined;
+  }
+  cancelChartPull(): void { this.pullStart = undefined; }
+  openCharts(): void {
+    if (this.chartsOpen() || this.saving()) return;
+    this.closePortal(); this.chartsOpen.set(true); this.portal.show(new TemplatePortal(this.chartSheet, this.viewContainer));
+  }
+  closeCharts(): void { if (this.chartsOpen()) { this.portal.hide(); this.chartsOpen.set(false); } }
+
 
   constructor() {
+    const detailSubscription = this.detailControl.valueChanges.subscribe(value => { this.detail.set(value); this.overrides.set({}); });
+    this.destroyRef.onDestroy(() => detailSubscription.unsubscribe());
     effect(() => {
       const inventory = this.meterCards();
       const kind = this.confirmationKind();
@@ -127,15 +166,21 @@ export class MetersDashboardComponent implements OnDestroy {
     let previousFilter = '';
     let previousSort = '';
     let previousKey: BrowseKey<'facilityMeters'> | undefined;
-    let previousView: { page: number; expanded: boolean; zoom: { start: number; end: number } } | undefined;
+    let previousView: FacilityMeterBrowseView | undefined;
     effect(() => {
       const context = `${this.workspace.account()?.guid}/${this.workspace.facility()?.guid}`;
       const filter = `${this.search()}\0${this.statusFilter()}`;
       const sort = this.sortBy();
       const key = this.browseKey();
+      if (!this.workspace.canWrite()) {
+        if (context !== previousContext) { this.closePortal(); this.selecting.set(false); this.selected.set([]); }
+        return;
+      }
       const existing = new Set(this.meterCards().map(item => item.card.meter.guid));
       if (context !== previousContext) {
-        this.listExpanded.set(false);
+        this.overrides.set({});
+        this.detail.set('simple'); this.detailControl.setValue('simple', { emitEvent: false });
+        this.chartView.set(DEFAULT_METER_CHART_VIEW);
         this.selecting.set(false);
         this.selected.set([]);
         this.closePortal();
@@ -145,10 +190,9 @@ export class MetersDashboardComponent implements OnDestroy {
       } else {
         this.selected.update(selected => selected.filter(guid => existing.has(guid)));
       }
-      if (context !== previousContext || filter !== previousFilter) {
-        this.zoomRange.set({ start: 0, end: 100 });
-        this.emphasized.set(undefined);
-      }
+      if (context !== previousContext) this.zoomRange.set({ start: 0, end: 100 });
+      const overrides = Object.fromEntries(Object.entries(this.overrides()).filter(([guid]) => existing.has(guid)));
+      if (Object.keys(overrides).length !== Object.keys(this.overrides()).length) this.overrides.set(overrides);
       if (context !== previousContext || filter !== previousFilter || sort !== previousSort) this.pageControl.setValue(1);
       else if (this.page() > this.pageCount()) this.pageControl.setValue(this.pageCount());
       if (context !== previousContext) {
@@ -156,18 +200,19 @@ export class MetersDashboardComponent implements OnDestroy {
         const restored = key ? this.browseState.readFacilityView(key) : undefined;
         if (restored) {
           this.pageControl.setValue(Math.min(restored.page, this.pageCount()));
-          this.listExpanded.set(restored.expanded);
+          this.overrides.set(restored.overrides ?? {});
+          this.detail.set(restored.detail ?? 'simple'); this.detailControl.setValue(restored.detail ?? 'simple', { emitEvent: false });
           this.zoomRange.set(restored.zoom);
         }
       }
       previousKey = key;
-      previousView = { page: this.currentPage(), expanded: this.listExpanded(), zoom: this.zoomRange() };
+      previousView = { page: this.currentPage(), zoom: this.zoomRange(), detail: this.detail(), overrides: this.overrides() };
       previousContext = context;
       previousFilter = filter;
       previousSort = sort;
     });
     this.destroyRef.onDestroy(() => {
-      if (previousKey) this.browseState.saveFacilityView(previousKey, { page: this.currentPage(), expanded: this.listExpanded(), zoom: this.zoomRange() });
+      if (previousKey && previousView) this.browseState.saveFacilityView(previousKey, previousView);
     });
   }
 
@@ -175,12 +220,6 @@ export class MetersDashboardComponent implements OnDestroy {
   changePage(page: number): void {
     if (page < 1 || page > this.pageCount()) return;
     this.pageControl.setValue(page);
-    this.emphasized.set(undefined);
-  }
-  toggleListExpanded(): void {
-    this.listExpanded.update(expanded => !expanded);
-    this.emphasized.set(undefined);
-    if (!this.listExpanded()) this.listDisplayToggle?.nativeElement.focus();
   }
   startSelection(): void { if (this.canAct()) this.selecting.set(true); }
   cancelSelection(): void { if (!this.saving()) { this.selecting.set(false); this.selected.set([]); } }
@@ -190,10 +229,10 @@ export class MetersDashboardComponent implements OnDestroy {
     this.selected.update(current => change.selected ? [...new Set([...current, change.guid])] : current.filter(guid => guid !== change.guid));
   }
   requestDeleteSelected(): void { this.requestConfirmation('delete', this.selected()); }
-  handleAction(request: MeterDirectoryActionRequest): void {
+  handleAction(request: InventoryTileActionRequest): void {
     const meter = this.meterCards().find(item => item.card.meter.guid === request.guid)?.card.meter;
     if (!meter) return;
-    if (request.action === 'settings' || request.action === 'readings') {
+    if (request.action === 'readings') {
       void this.router.navigate(this.navigation.facilityMeterRoute(meter.facilityId, meter.guid, request.action)).catch(() => this.actionError.set('The meter could not be opened. Please try again.'));
     } else this.requestConfirmation(request.action, [request.guid]);
   }
@@ -215,7 +254,8 @@ export class MetersDashboardComponent implements OnDestroy {
   closeAddMeter(): void { if (!this.saving()) this.closePortal(); }
   closeConfirmation(): void { if (!this.saving()) this.closePortal(); }
   private closePortal(): void {
-    if (this.addMeterOpen() || this.confirmationKind()) this.portal.hide();
+    if (this.addMeterOpen() || this.confirmationKind() || this.chartsOpen()) this.portal.hide();
+    this.chartsOpen.set(false);
     this.addMeterOpen.set(false);
     this.confirmationKind.set(undefined);
     this.targets.set([]);

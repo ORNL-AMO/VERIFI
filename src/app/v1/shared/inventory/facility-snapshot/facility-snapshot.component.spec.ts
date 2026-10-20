@@ -1,17 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AccountDataModule } from '../../../account-data.module';
-import { PortfolioFacilitySnapshot } from '../../portfolio-inventory.models';
+import { InventoryFacilitySnapshot } from '../inventory.models';
 import { FacilitySnapshotComponent } from './facility-snapshot.component';
 
-const snapshot: PortfolioFacilitySnapshot = {
+const snapshot: InventoryFacilitySnapshot = {
   evaluation:'ready', address:'100 Industrial Drive, 00501', remainingFindings:3,
   resources:[{kind:'meters',label:'Meters',icon:'meter',route:['/facility','meters'],total:12,errorCount:1,warningCount:1,validCount:10},
     {kind:'predictors',label:'Predictors',icon:'predictor',route:['/facility','predictors'],total:0,errorCount:0,warningCount:0,validCount:0}],
   findings:[{id:'issue',name:'Boiler gas',title:'Add meter readings',description:'No readings have been entered.',severity:'error',action:{label:'Review readings',route:['/meter','readings']}}]
 };
 function setup(detailed = false) {
-  TestBed.configureTestingModule({imports:[AccountDataModule],providers:[provideRouter([])]});
+  TestBed.configureTestingModule({imports:[FacilitySnapshotComponent],providers:[provideRouter([])]});
   const fixture=TestBed.createComponent(FacilitySnapshotComponent);
   fixture.componentRef.setInput('snapshot',snapshot); fixture.componentRef.setInput('facilityName','Plant'); fixture.componentRef.setInput('detailed',detailed);
   fixture.detectChanges(); return fixture;

@@ -8,7 +8,7 @@ import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { StatusEvaluationState } from '@app/v1/status/status.models';
 import { buildPredictorSnapshots } from './portfolio-predictor-snapshot.view';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { buildMeterSnapshots } from './portfolio-meter-snapshot.view';
+import { buildMeterSnapshots } from '@app/v1/shared/inventory/meter-reading-snapshot.view';
 
 type Navigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 
@@ -17,7 +17,7 @@ export function facilityTiles(views: readonly PortfolioFacilityView[], input: Po
   return views.map(view => ({
     guid: view.facility.guid, name: view.facility.name, icon: 'facility', location: view.location || undefined, route: nav.facilityDataRoute(view.facility.guid, 'meters'),
     status: { tone: view.tone, icon: view.icon, label: view.statusLabel },
-    summary: [], details: [], findings: [], facilitySnapshot: snapshots.get(view.facility.guid)
+    facilitySnapshot: snapshots.get(view.facility.guid)
   }));
 }
 export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>, readings: readonly IdbUtilityMeterData[]): PortfolioTile[] {
@@ -26,7 +26,7 @@ export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<Works
     route: nav.facilityMeterRoute(view.facility.guid, view.meter.guid, 'settings'),
     owner: { label: view.facility.name, route: nav.facilityDataRoute(view.facility.guid, 'meters') }, chip: view.meter.source,
     status: { tone: view.statusTone, icon: view.statusIcon, label: view.statusLabel },
-    summary: [], details: [], findings: [], meterSnapshot: snapshots.get(view.meter.guid)
+    meterSnapshot: snapshots.get(view.meter.guid)
   }));
 }
 export function predictorTiles(entries: readonly PredictorInventoryEntry[], nav: Navigation, readings: readonly IdbPredictorData[], state: StatusEvaluationState): PortfolioTile[] {
@@ -39,7 +39,7 @@ export function predictorTiles(entries: readonly PredictorInventoryEntry[], nav:
     stationIssue: entry.station?.needsStationRepair ? 'Station required' : entry.station?.hasConflictingStationNames ? 'Station names differ' : undefined,
     status: entry.status,
     stationLink: entry.station ? { label: entry.station.stationName, route: nav.facilityWeatherPredictorRoute(entry.facility.guid, entry.station.routeKey) } : undefined,
-    summary: [], details: [], findings: [], predictorSnapshot: snapshots.get(entry.guid)
+    predictorSnapshot: snapshots.get(entry.guid)
   }));
 }
 
