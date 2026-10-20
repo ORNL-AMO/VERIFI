@@ -1,4 +1,4 @@
-<article class="portfolio-tile" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-detail]="level" [attr.aria-label]="tile.name" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
+<article class="portfolio-tile" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--meter-snapshot]="!!tile.meterSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-detail]="level" [attr.aria-label]="tile.name" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
   <div class="portfolio-tile__heading">
     <app-ui-icon [name]="tile.icon" [size]="level === 'simple' ? 32 : 24"/>
     <a class="portfolio-tile__name" [href]="mainHref" [attr.data-browse-id]="print ? null : tile.guid" [title]="tile.name" (click)="open($event, tile.route)">{{ tile.name }}</a>
@@ -7,12 +7,27 @@
     }
   </div>
   @if (locationLabel) { <p class="portfolio-tile__location"><app-ui-icon name="location" [size]="18"/>{{ locationLabel }}</p> }
-  @if (tile.owner; as owner) { <a class="portfolio-tile__owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" (click)="open($event, owner.route)"><app-ui-icon name="facility" [size]="18"/>{{ owner.label }}</a> }
+  @if (tile.owner; as owner) {
+    <div class="portfolio-tile__ownership">
+      <a class="portfolio-tile__owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" (click)="open($event, owner.route)"><app-ui-icon name="facility" [size]="18"/>{{ owner.label }}</a>
+      @if (level === 'detailed' && tile.meterSnapshot; as snapshot) {
+        <span class="portfolio-tile__group" [title]="snapshot.group.label + ': ' + snapshot.group.value">
+          <app-ui-icon name="meterGroupItem" [size]="18"/>
+          @if (snapshot.group.route; as route) { <a [href]="groupHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="'Open meter group ' + snapshot.group.value + ' for ' + tile.name" (click)="open($event, route)">{{ snapshot.group.value }}</a> }
+          @else { <span><span class="visually-hidden">Meter group: </span>Not assigned</span> }
+        </span>
+      }
+    </div>
+  }
   @if (tile.station) { <p class="portfolio-tile__station">{{ tile.station }}</p> }
-  @if (tile.chip) { <span class="portfolio-tile__chip">{{ tile.chip }}</span> }
-  <p class="portfolio-tile__status"><app-ui-icon [name]="tile.status.icon" [size]="18"/>{{ tile.status.label }}</p>
+  <div class="portfolio-tile__context">
+    @if (tile.chip) { <span class="portfolio-tile__chip">{{ tile.chip }}</span> }
+    <p class="portfolio-tile__status"><app-ui-icon [name]="tile.status.icon" [size]="18"/>{{ tile.status.label }}</p>
+  </div>
   @if (tile.facilitySnapshot; as snapshot) {
     @if (level !== 'simple') { <app-facility-snapshot [snapshot]="snapshot" [facilityName]="tile.name" [detailed]="level === 'detailed'" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
+  } @else if (tile.meterSnapshot; as snapshot) {
+    @if (level !== 'simple') { <app-meter-snapshot [snapshot]="snapshot" [meterName]="tile.name" [detailed]="level === 'detailed'" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
   } @else {
     @if (level !== 'simple') {
       <dl class="portfolio-tile__facts">@for (fact of tile.summary; track fact.label) { <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div> }</dl>

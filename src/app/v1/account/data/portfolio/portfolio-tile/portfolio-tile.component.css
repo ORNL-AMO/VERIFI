@@ -1,7 +1,7 @@
 :host { display: block; min-width: 0; height: var(--portfolio-tile-fill,auto); }
 .portfolio-tile { display: flex; flex-direction: column; gap: .65rem; min-height: 10rem; height: var(--portfolio-tile-fill,auto); padding: 1rem; border: 1px solid var(--v1-border); border-inline-start: 4px solid var(--tile-severity, var(--v1-border)); border-radius: var(--v1-radius-sm); background: var(--tile-background, var(--v1-surface)); color: var(--v1-text); overflow-wrap: anywhere; }
-.portfolio-tile[data-tone='danger'] { --tile-severity: var(--v1-danger); --tile-background: color-mix(in srgb, var(--v1-danger) var(--v1-error-row-tint), var(--v1-surface)); }
-.portfolio-tile[data-tone='warning'] { --tile-severity: var(--v1-warning); --tile-background: color-mix(in srgb, var(--v1-warning) var(--v1-warning-row-tint), var(--v1-surface)); }
+.portfolio-tile[data-tone='danger'] { --tile-severity: var(--v1-danger); --tile-background: color-mix(in srgb, var(--v1-danger) var(--v1-error-row-tint), var(--v1-surface)); --portfolio-tile-divider: color-mix(in srgb,var(--v1-text) 42%,var(--v1-border)); }
+.portfolio-tile[data-tone='warning'] { --tile-severity: var(--v1-warning); --tile-background: color-mix(in srgb, var(--v1-warning) var(--v1-warning-row-tint), var(--v1-surface)); --portfolio-tile-divider: color-mix(in srgb,var(--v1-text) 42%,var(--v1-border)); }
 .portfolio-tile__heading { display: flex; align-items: flex-start; gap: .65rem; min-width: 0; }
 .portfolio-tile__heading > app-ui-icon { flex: 0 0 1.5rem; color: var(--v1-muted); margin-top: .12rem; }
 .portfolio-tile a { color: var(--v1-text); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: .2em; }
@@ -11,12 +11,18 @@
 .portfolio-tile__menu-button { flex: 0 0 2rem; min-width: 2rem; min-height: 2rem; font-size: 1.3rem; line-height: 1; }
 .portfolio-tile__owner, .portfolio-tile__station, .portfolio-tile__location { margin: 0; color: var(--v1-muted) !important; font-size: max(.9rem,14px); }
 .portfolio-tile__owner, .portfolio-tile__location { display: inline-flex; gap: .4rem; align-items: center; }
+.portfolio-tile__ownership { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .4rem 1rem; min-width: 0; }
+.portfolio-tile__ownership > a { min-width: 0; }
+.portfolio-tile__group { display: inline-flex; align-items: center; gap: .4rem; min-width: 0; font-size: max(.9rem,14px); }
+.portfolio-tile__group > app-ui-icon { flex: 0 0 18px; color: var(--v1-muted); }
+.portfolio-tile__group > a { min-width: 0; text-decoration-color: currentColor; }
 .portfolio-tile__chip { align-self: start; padding: .18rem .45rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-content-block); font-size: max(.85rem,13px); }
+.portfolio-tile__context { display: contents; }
 .portfolio-tile__status { display: flex; align-items: center; gap: .4rem; margin: auto 0 0; font-size: max(.9rem,14px); color: var(--v1-muted); }
 [data-tone='danger'] .portfolio-tile__status { color: color-mix(in srgb, var(--v1-danger) 80%, var(--v1-text)); }
 [data-tone='warning'] .portfolio-tile__status { color: color-mix(in srgb, var(--v1-warning) 80%, var(--v1-text)); }
 [data-tone='success'] .portfolio-tile__status { color: color-mix(in srgb, var(--v1-success) 80%, var(--v1-text)); }
-.portfolio-tile__facts { display: grid; gap: .65rem; margin: .1rem 0 0; padding-top: .8rem; border-top: 1px solid var(--v1-border); font-size: max(1rem,14px); }
+.portfolio-tile__facts { display: grid; gap: .65rem; margin: .1rem 0 0; padding-top: .8rem; border-top: 1px solid var(--portfolio-tile-divider,var(--v1-border)); font-size: max(1rem,14px); }
 .portfolio-tile__facts div { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.5fr); gap: .65rem; }
 .portfolio-tile__facts dt { color: var(--v1-muted); font-weight: 500; }
 .portfolio-tile__facts dd { margin: 0; }
@@ -27,12 +33,16 @@
 .portfolio-tile--facility-snapshot .portfolio-tile__location app-ui-icon { flex: 0 0 18px; margin-top: .1rem; }
 .portfolio-tile--facility-snapshot .portfolio-tile__status { margin-top: .2rem; margin-bottom: .3rem; }
 .portfolio-tile--facility-snapshot app-facility-snapshot { display: flex; flex-direction: column; flex: 1; }
+.portfolio-tile--meter-snapshot .portfolio-tile__name { font-size: max(1.25rem,20px); }
+.portfolio-tile--meter-snapshot .portfolio-tile__context { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; margin-bottom: .3rem; }
+.portfolio-tile--meter-snapshot .portfolio-tile__status { margin: 0; }
 .portfolio-tile[data-detail='simple'] { position: relative; align-items: center; min-height: 13rem; text-align: center; padding-top: 1.65rem; }
 [data-detail='simple'] .portfolio-tile__heading { display: grid; justify-items: center; gap: .7rem; width: 100%; padding-inline: .6rem; }
 [data-detail='simple'] .portfolio-tile__heading > app-ui-icon { margin: 0; }
 [data-detail='simple'] .portfolio-tile__name { font-size: max(1.25rem,20px); }
 [data-detail='simple'] .portfolio-tile__menu-button { position: absolute; inset-block-start: .35rem; inset-inline-end: .35rem; }
 [data-detail='simple'] .portfolio-tile__chip { align-self: center; }
+[data-detail='simple'] .portfolio-tile__ownership { justify-content: center; }
 [data-detail='simple'] .portfolio-tile__status { justify-content: center; padding-top: .3rem; }
 .portfolio-tile-menu.v1-root { display: grid; min-height: 0; height: auto; width: min(16rem, calc(100vw - 2rem)); padding: .35rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-surface); color: var(--v1-text); box-shadow: 0 .4rem 1.2rem color-mix(in srgb, var(--v1-text) 15%, transparent); }
 .portfolio-tile-menu p { margin: .4rem .65rem; font-size: .85rem; color: var(--v1-muted); }
@@ -40,3 +50,4 @@
 .portfolio-tile-menu button:is(:hover,:focus-visible) { background: var(--v1-content-block); outline: 2px solid var(--v1-focus); outline-offset: -2px; }
 @media (pointer: coarse) { .portfolio-tile__menu-button { min-width: 44px; min-height: 44px; } .portfolio-tile__owner,.portfolio-tile__detail-link { min-height: 44px; display: inline-flex; align-items: center; } }
 @media print { .portfolio-tile { break-inside: avoid; min-height: 0; } }
+@media (pointer: coarse) { .portfolio-tile__group > a { min-height: 44px; display: inline-flex; align-items: center; } }

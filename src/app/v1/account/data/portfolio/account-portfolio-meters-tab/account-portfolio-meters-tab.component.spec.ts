@@ -1,9 +1,10 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
@@ -77,6 +78,20 @@ describe('AccountPortfolioMetersTabComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No meters');
     expect(fixture.nativeElement.querySelector('app-portfolio-inventory')).toBeNull();
+  });
+
+  it('refreshes the reading snapshot when committed readings change without resetting the chosen detail level', () => {
+    const fixture = setup(); fixture.detectChanges();
+    fixture.componentInstance.inventory.detailControl.setValue('detailed'); fixture.detectChanges();
+    const data = TestBed.inject(AccountWorkspaceStore).meterData as WritableSignal<IdbUtilityMeterData[]>;
+    data.set([reading({ guid:'new',meterId:'meter-electric',facilityId:'facility-a',year:2026,month:7,totalEnergyUse:0,totalCost:0 })]);
+    fixture.detectChanges();
+    const tile = fixture.nativeElement.querySelector('.portfolio-inventory .portfolio-tile__name[data-browse-id="meter-electric"]').closest('article') as HTMLElement;
+    expect(tile.getAttribute('data-detail')).toBe('detailed');
+    expect(tile.querySelector('.meter-snapshot__range')?.textContent).toBe('Jul 2026');
+    expect(tile.querySelector('.meter-snapshot__reading-heading strong')?.textContent).toBe('1');
+    expect(tile.querySelectorAll('.meter-snapshot__recent-reading')).toHaveLength(1);
+    expect(tile.querySelector('.meter-snapshot__recent-reading time')?.textContent).toBe('Jul 1, 2026');
   });
 
   it('reports navigation failure without changing the inventory', async () => {
@@ -159,6 +174,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
         provide: WorkspaceNavigationService,
         useValue: {
           facilityDataRoute: (facilityGuid: string, detail: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
+          facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [
             '/v1',
             'workspace',

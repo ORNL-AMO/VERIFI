@@ -18,6 +18,27 @@ function input(overrides: Partial<PortfolioFacilityInput> = {}): PortfolioFacili
     meterData: [], predictorData: [], equipment: [], findings: [], statusState: 'ready', ...overrides };
 }
 describe('facility resource snapshot', () => {
+  it.each([
+    [43228,'43228'],
+    [501,'501'],
+    ['00501','00501'],
+    [' 00501-1234 ','00501-1234'],
+    [undefined,''],
+    [null,''],
+    [NaN,''],
+    [Infinity,''],
+    [{},'']
+  ])('renders saved postal value %s safely without rewriting it', (zip, expected) => {
+    const stored=facility({guid:'f',address:'100 Industrial Drive',city:'Columbus',state:'OH',country:'US',zip:zip as string});
+    const original=structuredClone(stored);
+    const result=buildFacilitySnapshots(input({facilities:[stored]}),navigation).get('f')!;
+    expect(result.address).toBe(`100 Industrial Drive, Columbus, OH${expected?`, ${expected}`:''}`);
+    expect(stored).toEqual(original);
+  });
+  it('ignores malformed address parts rather than calling string methods or displaying object values', () => {
+    const stored={...facility({guid:'f'}),address:{},city:[],state:false,country:{},zip:'00501'} as unknown as ReturnType<typeof facility>;
+    expect(buildFacilitySnapshots(input({facilities:[stored]}),navigation).get('f')?.address).toBe('ZIP / postal code 00501');
+  });
   it('counts each resource once at its highest severity and keeps findings separate from affected resources', () => {
     const snapshot = buildFacilitySnapshots(input({ findings: presentFindings([
       finding('meter', 'm1', 'error', 'meter.data.duplicate-date'),

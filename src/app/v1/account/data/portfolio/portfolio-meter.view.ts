@@ -10,6 +10,7 @@ export type PortfolioMeterStatusFilter = 'all' | 'attention' | 'noReadings' | 'm
 export type PortfolioMeterSort = 'attention' | 'facilityName' | 'latestReading';
 
 export interface PortfolioMeterView {
+  readonly evaluation: StatusEvaluationState;
   readonly card: MeterCardView;
   readonly meter: IdbUtilityMeter;
   readonly facility: IdbFacility;
@@ -62,7 +63,7 @@ export function buildPortfolioMeters(input: PortfolioMeterInput): PortfolioMeter
     const statusLabel = !evaluated ? input.statusState === 'error' ? 'Checks unavailable' : 'Checks pending'
       : card.statusTone === 'danger' ? 'Has errors' : card.statusTone === 'warning' ? 'Has warnings' : 'All data valid';
     return {
-      card, meter: card.meter, facility, sourceIcon: card.sourceIcon || 'meter',
+      evaluation: input.statusState, card, meter: card.meter, facility, sourceIcon: card.sourceIcon || 'meter',
       statusTone: evaluated && card.statusTone !== 'info' ? card.statusTone || 'neutral' : 'neutral',
       statusIcon: evaluated ? card.statusIcon || 'info' : input.statusState === 'error' ? 'info' : 'loading',
       statusLabel,

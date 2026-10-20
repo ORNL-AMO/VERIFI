@@ -89,11 +89,14 @@ describe('WorkspaceNavigationService', () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/account/account-a/data/portfolio/meters'));
     router.events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/data/meters/meter-a/settings'));
     expect(service.accountReturn()?.label).toBe('Account Meters');
-    router.events.next(new NavigationEnd(3, '', '/v1/workspace/facility/facility-b/data/meters'));
+    router.events.next(new NavigationEnd(3, '', '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/monthly-table'));
+    expect(service.accountReturn()?.label).toBe('Account Meters');
+    expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a','meters'));
+    router.events.next(new NavigationEnd(4, '', '/v1/workspace/facility/facility-b/data/meters'));
     expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a', 'meters'));
     expect(service.accountDataReturnRoute('account-b')).toEqual(service.accountPortfolioRoute('account-b', 'facilities'));
-    router.events.next(new NavigationEnd(4, '', '/v1/workspace/account/account-a/data/portfolio/facilities'));
-    router.events.next(new NavigationEnd(5, '', '/v1/workspace/facility/facility-a/data/meters'));
+    router.events.next(new NavigationEnd(5, '', '/v1/workspace/account/account-a/data/portfolio/facilities'));
+    router.events.next(new NavigationEnd(6, '', '/v1/workspace/facility/facility-a/data/meters'));
     expect(service.accountReturn()?.label).toBe('Account Facilities');
   });
 
@@ -906,6 +909,16 @@ describe('WorkspaceNavigationService', () => {
     ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-a/data/meters/meter-b/settings', 'peer'],
     ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-b/data/meters', 'peer'],
     ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-a/data/meters/meter-a/readings', 'none'],
+    ['account/account-a/data/portfolio/meters', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'drill-in'],
+    ['facility/facility-a/data/meter-grouping', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'drill-in'],
+    ['facility/facility-a/data/meters', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'drill-in'],
+    ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'peer'],
+    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meters/meter-a/settings', 'peer'],
+    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meter-grouping/group-b/monthly-table', 'peer'],
+    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meter-grouping/group-a/monthly-chart', 'none'],
+    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meter-grouping', 'drill-out'],
+    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'account/account-a/data/portfolio/meters', 'drill-out'],
+    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-b/data/meter-grouping/group-b/monthly-table', 'peer'],
     ['account/account-a/data/portfolio/facilities', 'account/account-a/data/portfolio/meters', 'none'],
     ['account/account-a/home/overview', 'facility/facility-a/home/overview', 'none'],
     ['account/account-a/data/portfolio/facilities', 'facility/facility-a/settings/profile', 'none'],

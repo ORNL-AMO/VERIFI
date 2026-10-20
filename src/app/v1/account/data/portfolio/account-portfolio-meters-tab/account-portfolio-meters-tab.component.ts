@@ -41,7 +41,7 @@ export class AccountPortfolioMetersTabComponent {
   readonly facilities = computed(() => [...this.workspace.facilities()].sort((a,b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
   readonly filteredMeters = computed(() => orderPortfolioMeters(filterPortfolioMeters(this.meters(), this.filters().search, this.filters().status)
     .filter(item => !this.filters().facilityGuid || item.facility.guid === this.filters().facilityGuid), this.filters().sort));
-  readonly tiles = computed(() => meterTiles(this.filteredMeters(), this.navigation));
+  readonly tiles = computed(() => meterTiles(this.filteredMeters(), this.navigation, this.workspace.meterData()));
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.meters().map(item => item.meter.guid)), this.filters, this.workspace.canWrite);
 
   readonly browseIds = this.inventory.visibleIds;

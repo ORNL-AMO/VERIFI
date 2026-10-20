@@ -54,4 +54,24 @@ describe('portfolio tile interactions and additive details', () => {
     expect(changes.mock.calls).toEqual([[{ guid: 'm1', level: 'detailed' }], [{ guid: 'm1', level: null }]]);
     fixture.componentRef.setInput('print', true); fixture.detectChanges(); expect(fixture.nativeElement.querySelector('button')).toBeNull();
   });
+  it('places the detailed meter group beside facility ownership and preserves native group links', () => {
+    const fixture=setup(),root=fixture.nativeElement as HTMLElement,navigate=vi.fn();
+    const meterSnapshot={readingCount:0,rangeLabel:'No readings yet',invalidDateCount:0,
+      readingsLink:{label:'Open readings',route:['/meter','readings']},recentReadings:[],facts:[],findings:[],remainingFindings:0,
+      group:{label:'Meter group',value:'Main building',icon:'meterGroupItem' as const,route:['/facility','meter-grouping','g','monthly-table']}};
+    fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{label:'Plant',route:['/plant']},meterSnapshot}));
+    fixture.componentRef.setInput('level','summary');fixture.detectChanges();
+    expect(root.querySelector('.portfolio-tile__group')).toBeNull();
+    fixture.componentRef.setInput('level','detailed');fixture.detectChanges();
+    const group=root.querySelector<HTMLAnchorElement>('.portfolio-tile__ownership .portfolio-tile__group a')!;
+    expect(group.textContent).toBe('Main building');expect(group.getAttribute('href')).toBe('/facility/meter-grouping/g/monthly-table');
+    expect(root.textContent).not.toContain('Reading units');expect(root.querySelector('.meter-snapshot__facts')).toBeNull();
+    fixture.componentInstance.navigationRequested.subscribe(navigate);
+    group.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,metaKey:true}));expect(navigate).not.toHaveBeenCalled();
+    group.click();expect(navigate).toHaveBeenCalledWith(meterSnapshot.group.route);
+    fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{label:'Plant',route:['/plant']},
+      meterSnapshot:{...meterSnapshot,group:{label:'Meter group',value:'Not assigned',icon:'meterGroupItem'}}}));fixture.detectChanges();
+    expect(root.querySelector('.portfolio-tile__group')?.textContent).toContain('Not assigned');
+    expect(root.querySelector('.portfolio-tile__group a')).toBeNull();
+  });
 });

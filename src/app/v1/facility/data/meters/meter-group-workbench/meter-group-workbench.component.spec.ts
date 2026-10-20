@@ -2,10 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Directive, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/router';
+import { Router, UrlTree, provideRouter } from '@angular/router';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
@@ -16,6 +15,8 @@ import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/fac
 import { MeterGroupResultsView, MeterUsageFactsView } from '@app/v1/facility/data/meters/models';
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupWorkbenchComponent } from './meter-group-workbench.component';
+import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
+import { AccountBrowseOrigin } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 
 describe('MeterGroupWorkbenchComponent', () => {
   it('renders calendarized usage facts in the selected group header', () => {
@@ -24,24 +25,23 @@ describe('MeterGroupWorkbenchComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
-    const breadcrumb = fixture.nativeElement.querySelector('[aria-label="Meter group breadcrumb"]') as HTMLElement;
+    const breadcrumb = fixture.nativeElement.querySelector('[aria-label="Data context"]') as HTMLElement;
     expect(text).toContain('Account A');
     expect(breadcrumb.textContent).toContain('Facility A');
-    expect(breadcrumb.textContent).toContain('Meter Grouping');
+    expect(breadcrumb.textContent).not.toContain('Meter Grouping');
     expect(breadcrumb.textContent).not.toContain('Energy Group');
     expect(fixture.nativeElement.querySelector('.v1-meter-group-workbench-header .v1-eyebrow')).toBeNull();
-    expect(fixture.componentInstance.accountMetersRoute()).toEqual([
+    expect(fixture.componentInstance.breadcrumbs()[0].route).toEqual([
       '/v1',
       'workspace',
       'account',
       'account-a',
       'data',
       'portfolio',
-      'meters'
+      'facilities'
     ]);
     expect(text).toContain('Energy Group');
-    expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__group-crumb app-ui-icon'))).toBeNull();
-    expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__group-title app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
+    expect(fixture.debugElement.query(By.css('app-page-identity h1 > app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
     expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__type-chip app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
     expect(text).toContain('Meters');
     expect(text).toContain('Electric Main');
@@ -111,7 +111,7 @@ describe('MeterGroupWorkbenchComponent', () => {
     expect(factsToggle?.textContent).toContain('Show facts');
     expect(factsRegion?.hidden).toBe(true);
     expect(getComputedStyle(factsRegion as HTMLElement).display).toBe('none');
-    expect(element.querySelector('.v1-meter-group-workbench-header__group-title')?.textContent).toContain('Energy Group');
+    expect(element.querySelector('app-page-identity h1')?.textContent).toContain('Energy Group');
     expect(element.querySelector('[aria-label="Meter group workbench sections"]')).not.toBeNull();
   });
 
@@ -133,6 +133,15 @@ describe('MeterGroupWorkbenchComponent', () => {
     expect(menu?.querySelector('app-ui-icon')).toBeNull();
     expect(menuItems.map(item => item.textContent?.trim())).toEqual(['Energy Group', 'Water Group']);
   });
+  it.each(['facilities','meters','predictors'] as const)('links account context to the %s origin and facility context to meter grouping', origin => {
+    const fixture=setup({origin});fixture.detectChanges();
+    const links=fixture.nativeElement.querySelectorAll('app-page-identity nav a') as NodeListOf<HTMLAnchorElement>;
+    expect(links).toHaveLength(2);
+    expect(links[0].getAttribute('href')).toBe(`/v1/workspace/account/account-a/data/portfolio/${origin}`);
+    expect(links[1].getAttribute('href')).toBe('/v1/workspace/facility/facility-a/data/meter-grouping');
+    const router=TestBed.inject(Router), navigate=vi.spyOn(router,'navigateByUrl').mockResolvedValue(true);
+    links[1].click();expect(router.serializeUrl(navigate.mock.calls[0][0] as UrlTree)).toBe('/v1/workspace/facility/facility-a/data/meter-grouping');
+  });
 });
 
 @Directive({
@@ -145,9 +154,9 @@ function setup(options: {
   results?: MeterGroupResultsView;
   calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
   extraGroups?: ReturnType<typeof group>[];
+  origin?: AccountBrowseOrigin;
 } = {}): ComponentFixture<MeterGroupWorkbenchComponent> {
   const selectedGroup = group({ guid: 'group-energy', name: 'Energy Group', groupType: 'Energy' });
-  const routerEvents = new Subject<NavigationEnd>();
   const factsExpanded = signal(true);
 
   TestBed.configureTestingModule({
@@ -160,9 +169,10 @@ function setup(options: {
       DataWorkbenchFactsToggleComponent,
       DataWorkbenchResourceSwitcherComponent,
       IconComponent,
-      RouterModule
+      PageIdentityComponent
     ],
     providers: [
+      provideRouter([]),
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
@@ -196,6 +206,7 @@ function setup(options: {
             'data',
             detail
           ],
+          accountDataReturnRoute: (accountGuid: string) => ['/v1','workspace','account',accountGuid,'data','portfolio',options.origin ?? 'facilities'],
           facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab = 'monthly-table') => [
             '/v1',
             'workspace',
@@ -220,11 +231,9 @@ function setup(options: {
         useValue: { execute: vi.fn((_command: unknown, action: () => Promise<unknown>) => action()) }
       },
       { provide: FacilityCommandHandler, useValue: { update: vi.fn() } },
-      { provide: Router, useValue: { navigate: vi.fn(), events: routerEvents } },
-      { provide: ActivatedRoute, useValue: { firstChild: { snapshot: { data: { meterGroupTab: 'monthly-table' } } } } }
     ]
   });
-
+  vi.spyOn(TestBed.inject(Router),'navigate').mockResolvedValue(true);
   return TestBed.createComponent(MeterGroupWorkbenchComponent);
 }
 

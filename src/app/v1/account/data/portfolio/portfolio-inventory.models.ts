@@ -31,6 +31,32 @@ export interface PortfolioFacilitySnapshot {
   readonly remainingFindings: number;
   readonly address: string;
 }
+export interface PortfolioRecentReading {
+  readonly guid: string;
+  readonly dateLabel: string;
+  readonly dateKey: string;
+  readonly tone: 'neutral' | 'danger' | 'warning';
+  readonly valueLabel: string;
+  readonly quantityLabel: 'Energy use' | 'Consumption' | 'RECs';
+  readonly statusLabel?: string;
+  readonly icon?: IconName;
+  readonly description: string;
+}
+export interface PortfolioMeterSnapshotFact extends PortfolioTileFact {
+  readonly icon?: IconName;
+  readonly route?: readonly string[];
+}
+export interface PortfolioMeterSnapshot {
+  readonly readingCount: number;
+  readonly rangeLabel: string;
+  readonly invalidDateCount: number;
+  readonly readingsLink: PortfolioTileLink;
+  readonly recentReadings: readonly PortfolioRecentReading[];
+  readonly group: PortfolioMeterSnapshotFact;
+  readonly facts: readonly PortfolioTileFact[];
+  readonly findings: readonly PortfolioFindingPreview[];
+  readonly remainingFindings: number;
+}
 export interface PortfolioTile {
   readonly guid: string;
   readonly name: string;
@@ -46,6 +72,7 @@ export interface PortfolioTile {
   readonly findings: readonly string[];
   readonly detailLink?: PortfolioTileLink;
   readonly facilitySnapshot?: PortfolioFacilitySnapshot;
+  readonly meterSnapshot?: PortfolioMeterSnapshot;
 }
 export interface PortfolioTileDetailChange { readonly guid: string; readonly level: PortfolioDetailLevel | null; }
 export const PORTFOLIO_DETAIL_LEVELS: readonly PortfolioDetailLevel[] = ['simple', 'summary', 'detailed'];

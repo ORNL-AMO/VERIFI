@@ -16,12 +16,15 @@ describe('resource-specific portfolio tile facts', () => {
     expect(tile.status.label).toBe('Checks unavailable'); expect(tile.facilitySnapshot?.evaluation).toBe('error');
     expect(tile.details).toEqual([]); expect(tile.detailLink).toBeUndefined();
   });
-  it('prepares meter coverage, reading units, ownership and an existing quality route', () => {
+  it('prepares the meter reading snapshot, units, ownership and an existing readings route', () => {
+    const readings = [reading({ meterId: 'm', facilityId: 'f', year: 2024, month: 2 }), reading({ meterId: 'm', facilityId: 'f', year: 2025, month: 8 })];
     const tiles = meterTiles(buildPortfolioMeters({ facilities: [facility({ guid: 'f' })], meters: [meter({ guid: 'm', facilityId: 'f', startingUnit: 'kWh', groupId: 'g' })],
-      readings: [reading({ meterId: 'm', facilityId: 'f', year: 2024, month: 2 }), reading({ meterId: 'm', facilityId: 'f', year: 2025, month: 8 })], groups: [group({ guid: 'g', facilityId: 'f', name: 'Production' })], findings: [], statusState: 'ready' }), navigation);
-    expect(tiles[0].summary).toEqual([{ label: 'Readings', value: '2' }, { label: 'First reading', value: 'Feb 2024' }, { label: 'Latest reading', value: 'Aug 2025' }]);
-    expect(tiles[0].details).toContainEqual({ label: 'Units', value: 'kWh' }); expect(tiles[0].details).toContainEqual({ label: 'Group', value: 'Production' });
-    expect(tiles[0].detailLink?.route).toEqual(['/facility', 'f', 'meters', 'm', 'quality']);
+      readings, groups: [group({ guid: 'g', facilityId: 'f', name: 'Production' })], findings: [], statusState: 'ready' }), navigation, readings);
+    expect(tiles[0].meterSnapshot).toMatchObject({readingCount:2,rangeLabel:'Feb 2024 – Aug 2025'});
+    expect(tiles[0].meterSnapshot?.facts).toEqual([]);
+    expect(tiles[0].meterSnapshot?.group).toEqual({ label: 'Meter group', value: 'Production', icon: 'meterGroupItem', route: navigation.facilityMeterGroupRoute('f','g','monthly-table') });
+    expect(tiles[0].meterSnapshot?.readingsLink.route).toEqual(['/facility', 'f', 'meters', 'm', 'readings']);
+    expect(tiles[0].details).toEqual([]); expect(tiles[0].detailLink).toBeUndefined();
   });
   it('keeps weather predictors individual with station identity, units, and repair/setup access', () => {
     const workspace = inventoryWorkspace(5);

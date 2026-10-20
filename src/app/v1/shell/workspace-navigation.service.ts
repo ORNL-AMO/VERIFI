@@ -653,6 +653,7 @@ export class WorkspaceNavigationService {
       if (route.view !== 'workspace' || route.section !== 'data') return undefined;
       if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' || route.portfolioTab === 'predictors' ? 0 : undefined;
       if (route.detail === 'predictors') return route.predictorGuid || route.weatherPredictorGroupKey || url.includes('/predictors/weather/new') ? 2 : 1;
+      if (route.detail === 'meter-grouping') return route.meterGroupGuid ? 2 : 1;
       return route.detail === 'meters' ? route.meterGuid ? 2 : 1 : undefined;
     };
     const before = depth(previous, this.previousUrl());
@@ -663,7 +664,7 @@ export class WorkspaceNavigationService {
     if (!accountGuid || accountGuid !== accountFor(previous)) return 'none';
     if (previous.facilityGuid && current.facilityGuid && previous.facilityGuid !== current.facilityGuid) return 'peer';
     if (after !== before) return after > before ? 'drill-in' : 'drill-out';
-    if (previous.meterGuid !== current.meterGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
+    if (previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
     return 'none';
   }
 

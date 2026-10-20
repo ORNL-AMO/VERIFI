@@ -38,13 +38,15 @@ function setup(count = 260) {
     facilityAnalyses: signal([]), accountAnalyses: signal([]), facilityReports: signal([]), energyUseEquipment: signal([]), canWrite: signal(true), hasPending: signal(false) };
   const active = signal<PortfolioResource>('meters'); const stored = new Map<string,unknown>();
   const statusState = signal<StatusEvaluationState>('ready');
+  const statusItems = signal(findings);
   const routes = [{ path: 'portfolio', component: AccountPortfolioComponent, children: [
     { path:'facilities', component:AccountPortfolioFacilitiesTabComponent }, { path:'meters', component:AccountPortfolioMetersTabComponent }, { path:'predictors', component:AccountPortfolioPredictorsTabComponent }
-  ] }, { path:'v1/workspace/facility/:facility/data/meters/:meter/settings', component:ResourceDestination },
+  ] }, { path:'v1/workspace/facility/:facility/data/meters/:meter/:tab', component:ResourceDestination },
+    { path:'v1/workspace/facility/:facility/data/meter-grouping/:group/:tab', component:ResourceDestination },
     { path:'v1/workspace/facility/:facility/data/predictors/weather/:key/setup', component:ResourceDestination },
     { path:'v1/workspace/facility/:facility/data/:resource', component:ResourceDestination }];
   TestBed.configureTestingModule({ imports:[AccountDataModule, InventoryBrowserHost], providers:[provideRouter(routes),
-    { provide:AccountWorkspaceStore, useValue:workspace }, { provide:WorkspaceStatusService, useValue:{ state:statusState, items:signal(findings) } },
+    { provide:AccountWorkspaceStore, useValue:workspace }, { provide:WorkspaceStatusService, useValue:{ state:statusState, items:statusItems } },
     { provide:WorkspaceNavigationService, useValue:{ ...inventoryNavigation, activePortfolioTab:active, facilityMeterRoute:(facility:string,guid:string,tab:string)=>['/v1','workspace','facility',facility,'data','meters',guid,tab] } },
     { provide:ModalPortalService, useValue:{ show:vi.fn(), hide:vi.fn() } },
     { provide:LocalStorageService, useValue:{ retrieve:(key:string)=>stored.get(key), store:(key:string,value:unknown)=>stored.set(key,value) } }
@@ -57,7 +59,7 @@ function setup(count = 260) {
     await vi.waitFor(() => { fixture.detectChanges(); expect(fixture.debugElement.query(By.directive(type)).componentInstance.browseReady()).toBe(true); });
     await fixture.whenStable();
   };
-  return { fixture, root, router, open, workspace, statusState };
+  return { fixture, root, router, open, workspace, statusState, statusItems };
 }
 async function settled(root: HTMLElement) {
   await vi.waitFor(() => {
@@ -89,6 +91,84 @@ function expectResourceRows(tile: HTMLElement) {
 }
 
 describe('uniform account inventories in Chromium', () => {
+  it('shows recent reading values with exact-record severity, visible tinted-card dividers and a keyboard/narrow/print layout', async () => {
+    await page.viewport(1300,1000);
+    const {fixture,root,router,open,workspace,statusState,statusItems}=setup(25);
+    workspace.meters.update(items=>items.map((item,index)=>index===0?{...item,meterReadingDataApplication:'fullMonth',startingUnit:'kWh'}:item));
+    const saved=[1,3,4,5,6,6,6].map((month,index)=>reading({guid:`sample-${index}`,meterId:'m0',facilityId:'f0',year:2026,month,day:index===6?15:1,totalEnergyUse:index===6?100:month===5?-40:10,totalCost:0}));
+    workspace.meterData.update(items=>[...items.filter(item=>item.meterId!=='m0'),...saved]);
+    const entity={kind:'meter' as const,guid:'m0',name:'Electricity',accountGuid:account().guid,facilityGuid:'f0'};
+    statusItems.set(presentFindings([
+      makeFinding('meter.data.negative','error','quality',entity,{count:1}),
+      makeFinding('meter.quality.consumption-outlier','warning','quality',entity,{count:2}),
+      makeFinding('meter.data.gap','error','completeness',entity,{periods:['2026-02'],periodType:'month',count:1}),
+      makeFinding('meter.data.duplicate-date','error','quality',entity,{dates:['2026-06-01']}),
+      makeFinding('meter.configuration.invalid','warning','configuration',{...entity,guid:'m1',name:'Warning meter'})
+    ]));
+    await open('meters');
+    expect(root.querySelector('app-meter-snapshot')).toBeNull();
+    await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('summary');fixture.detectChanges();await settled(root);
+    let tile=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
+    expect(tile.querySelector('.meter-snapshot__reading-heading')?.textContent).toContain('7');
+    expect(tile.querySelector('.meter-snapshot__range')?.textContent).toBe('Jan 2026 – Jun 2026');
+    expect(tile.querySelector('.meter-snapshot__reading-heading')!.getBoundingClientRect().top).toBeCloseTo(tile.querySelector('.meter-snapshot__range')!.getBoundingClientRect().top,0);
+    expect(tile.querySelector('.meter-snapshot__history')).toBeNull();
+    await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('detailed');fixture.detectChanges();await settled(root);
+    tile=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
+    const rows=()=>[...tile.querySelectorAll<HTMLElement>('.meter-snapshot__recent-reading')];
+    expect(rows()).toHaveLength(3);
+    expect(rows().map(row=>row.querySelector('time')?.textContent)).toEqual(['Jun 15, 2026','Jun 1, 2026','Jun 1, 2026']);
+    expect(rows().map(row=>row.querySelector<HTMLElement>('.meter-snapshot__reading-value')?.dataset['tone'])).toEqual(['warning','danger','danger']);
+    expect(rows()[0].textContent).toContain('100 kWh');expect(rows()[1].textContent).toContain('10 kWh');
+    expect(rows()[0].getAttribute('aria-label')).toContain('Review consumption outliers');
+    expect(tile.querySelector('.meter-snapshot__attention')?.textContent).toContain('Fill missing meter data');
+    for(const palette of PORTFOLIO_PALETTES) for(const dark of [false,true]) for(const contrast of [false,true]) {
+      root.className=`v1-root v1-palette-${palette}${dark?' v1-theme-dark':''}${contrast?' v1-contrast-strong':''}`;
+      for(const selector of ['.meter-snapshot__range','.portfolio-tile__group a','.meter-snapshot__attention a','.meter-snapshot__recent-reading time','.meter-snapshot__reading-value[data-tone="danger"]','.meter-snapshot__reading-value[data-tone="warning"]']) {
+        const element=tile.querySelector<HTMLElement>(selector)!;
+        element.style.backgroundColor=getComputedStyle(tile).backgroundColor;
+        expect(textContrast(element),`${palette}, dark=${dark}, contrast=${contrast}: ${selector}`).toBeGreaterThanOrEqual(4.5);
+        element.style.backgroundColor='';
+      }
+      const warning=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile[data-tone="warning"]')!;
+      const divider=warning.querySelector<HTMLElement>('.meter-snapshot__readings')!;
+      divider.style.color=getComputedStyle(divider).borderTopColor;divider.style.backgroundColor=getComputedStyle(warning).backgroundColor;
+      expect(textContrast(divider),`${palette}, dark=${dark}, contrast=${contrast}: divider`).toBeGreaterThanOrEqual(2);
+      divider.style.color='';divider.style.backgroundColor='';
+    }
+    root.className='v1-root';
+    root.style.height='1000px';root.scrollTop=0;await page.viewport(1300,1200);
+    await page.screenshot({element:tile,path:'../../../../../../../.angular/meter-recent-readings.png'});
+    await page.screenshot({element:root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile[data-tone="warning"]')!,path:'../../../../../../../.angular/meter-warning-dividers.png'});
+    for(const state of ['evaluating','error','ready'] as const) {
+      statusState.set(state);fixture.detectChanges();await settled(root);
+      expect(rows().some(row=>row.querySelector<HTMLElement>('.meter-snapshot__reading-value')?.dataset['tone']==='danger')).toBe(state==='ready');
+      expect(tile.querySelector('.meter-snapshot__attention')!==null).toBe(state==='ready');
+    }
+    await page.viewport(390,750);fixture.detectChanges();await settled(root);
+    expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth);
+    const heading=tile.querySelector<HTMLElement>('.meter-snapshot__reading-heading')!;
+    const range=tile.querySelector<HTMLElement>('.meter-snapshot__range')!;
+    expect(getComputedStyle(heading.querySelector('strong')!).fontSize).toBe(getComputedStyle(range).fontSize);
+    const groupLink=tile.querySelector<HTMLAnchorElement>('.portfolio-tile__group a')!;
+    expect(groupLink.getAttribute('href')).toBe('/v1/workspace/facility/f0/data/meter-grouping/g/monthly-table');
+    root.scrollTop=0;await page.viewport(390,1200);
+    await page.screenshot({element:tile,path:'../../../../../../../.angular/meter-recent-readings-narrow.png'});
+    root.style.height='600px';await page.viewport(390,750);
+    const readingsLink=tile.querySelector<HTMLAnchorElement>('.meter-snapshot__recent-reading')!;
+    readingsLink.focus();await userEvent.keyboard('{Enter}');await fixture.whenStable();fixture.detectChanges();
+    expect(router.url).toBe('/v1/workspace/facility/f0/data/meters/m0/readings');
+    await open('meters');await vi.waitFor(()=>expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('m0'));
+    root.querySelector<HTMLAnchorElement>('.portfolio-inventory .portfolio-tile__group a')!.click();await fixture.whenStable();fixture.detectChanges();
+    expect(router.url).toBe('/v1/workspace/facility/f0/data/meter-grouping/g/monthly-table');
+    await open('meters');await vi.waitFor(()=>expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('m0'));
+    const client=cdp() as {send(command:string,parameters:unknown):Promise<void>};
+    await client.send('Emulation.setEmulatedMedia',{media:'print'});fixture.detectChanges();
+    expect(getComputedStyle(root.querySelector('.portfolio-inventory-print')!).display).toBe('grid');
+    expect(root.querySelectorAll('.portfolio-inventory-print app-meter-snapshot')).toHaveLength(25);
+    await client.send('Emulation.setEmulatedMedia',{media:''});
+    fixture.destroy();await page.viewport(1500,1000);
+  });
   it('keeps facility resource snapshots compact, accessible and navigable across detail levels, themes and narrow layouts', async () => {
     await page.viewport(1300,1000);
     const {fixture,root,router,open,workspace,statusState}=setup(25);
@@ -236,7 +316,7 @@ describe('uniform account inventories in Chromium', () => {
     for(const resource of ['meters','predictors'] as const) {
       await open(resource);expect(root.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(24);
       await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('summary');fixture.detectChanges();await settled(root);
-      expect(root.querySelector('.portfolio-inventory .portfolio-tile__facts')).not.toBeNull();
+      expect(root.querySelector(resource==='meters'?'.portfolio-inventory .meter-snapshot__readings':'.portfolio-inventory .portfolio-tile__facts')).not.toBeNull();
       await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('detailed');fixture.detectChanges();await settled(root);
       expect(root.querySelector('.portfolio-inventory .portfolio-tile')?.getAttribute('data-detail')).toBe('detailed');
       await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('simple');fixture.detectChanges();await settled(root);

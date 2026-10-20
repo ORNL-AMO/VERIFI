@@ -1,7 +1,8 @@
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
 import { PortfolioFacilityInput } from './portfolio-facility.view';
-import { PortfolioFacilitySnapshot, PortfolioFindingPreview, PortfolioResourceSummary, PortfolioTileLink } from './portfolio-inventory.models';
+import { PortfolioFacilitySnapshot, PortfolioFindingPreview, PortfolioResourceSummary } from './portfolio-inventory.models';
+import { portfolioFindingAction } from './portfolio-finding.view';
 
 export type FacilitySnapshotNavigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute'>;
 
@@ -54,14 +55,14 @@ export function buildFacilitySnapshots(input: PortfolioFacilityInput, navigation
       seen.add(key);
       previews.push({ id: finding.id, name: finding.entity.kind === 'facility' ? 'Facility setup' : finding.entity.name,
         title: finding.title, description: finding.description, severity: finding.severity,
-        action: findingAction(finding, navigation) });
+        action: portfolioFindingAction(finding, navigation) });
       if (previews.length === 2) break;
     }
-    const address = facility.address?.trim();
-    const zip = facility.zip?.trim();
-    const locality = [facility.city?.trim(), facility.state?.trim()].filter(Boolean).join(', ');
-    const country = facility.country !== 'US' ? facility.country?.trim() : undefined;
-    const fullAddress = [address, locality, zip && !address ? `ZIP / postal code ${zip}` : zip, country].filter(Boolean).join(', ');
+    const address = addressPart(facility.address);
+    const zip = addressPart(facility.zip);
+    const locality = [addressPart(facility.city), addressPart(facility.state)].filter(Boolean).join(', ');
+    const country = addressPart(facility.country);
+    const fullAddress = [address, locality, zip && !address ? `ZIP / postal code ${zip}` : zip, country !== 'US' ? country : ''].filter(Boolean).join(', ');
     return [facility.guid, {
       evaluation: input.statusState, resources, findings: previews, remainingFindings: issues.length - previews.length,
       address: fullAddress || 'Address not set'
@@ -69,15 +70,8 @@ export function buildFacilitySnapshots(input: PortfolioFacilityInput, navigation
   }));
 }
 
-function findingAction(finding: StatusItem, navigation: FacilitySnapshotNavigation): PortfolioTileLink | undefined {
-  const destination = finding.destination;
-  switch (destination.kind) {
-    case 'meter-tab': return { label: destination.tab === 'quality' ? 'Review quality' : destination.tab === 'settings' ? 'Open settings' : 'Review readings',
-      route: navigation.facilityMeterRoute(destination.facilityGuid, destination.meterGuid, destination.tab) };
-    case 'predictor-tab': return { label: destination.tab === 'quality' ? 'Review quality' : destination.tab === 'settings' ? 'Open settings' : 'Review readings',
-      route: navigation.facilityPredictorRoute(destination.facilityGuid, destination.predictorGuid, destination.tab) };
-    case 'facility-data': return { label: destination.detail === 'meter-grouping' ? 'Open meter grouping' : destination.detail === 'predictors' ? 'Open predictors' : 'Open meters',
-      route: navigation.facilityDataRoute(destination.facilityGuid, destination.detail) };
-    default: return undefined;
-  }
+/** Older/imported records can contain numeric address parts despite the model's string type. */
+function addressPart(value: unknown): string {
+  if (typeof value === 'string') return value.trim();
+  return typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 }

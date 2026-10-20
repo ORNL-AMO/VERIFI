@@ -40,6 +40,16 @@ function setup() {
 }
 
 describe('AccountPortfolioFacilitiesTabComponent', () => {
+  it('opens all detail levels when existing account data contains a numeric postal code', () => {
+    const { fixture, facilities } = setup();
+    facilities.update(items => items.map(item => item.guid === 'alpha' ? { ...item, address:'100 Industrial Drive', zip:43228 as unknown as string } : item));
+    for (const level of ['simple','summary','detailed'] as const) {
+      fixture.componentInstance.inventory.detailControl.setValue(level);fixture.detectChanges();
+      expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(2);
+    }
+    expect(fixture.nativeElement.querySelector('.portfolio-inventory .portfolio-tile__location')?.textContent).toBe('100 Industrial Drive, Oak Ridge, TN, 43228');
+    expect(facilities()[0].zip).toBe(43228);
+  });
   it('leaves facility selection to the route guard when navigation is cancelled', async () => {
     const { fixture, navigate } = setup();
     navigate.mockResolvedValueOnce(false);

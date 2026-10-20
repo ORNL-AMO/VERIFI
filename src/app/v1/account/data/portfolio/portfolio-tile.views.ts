@@ -4,6 +4,8 @@ import { PortfolioFacilityInput, PortfolioFacilityView } from './portfolio-facil
 import { PortfolioMeterView, PortfolioMeterSort } from './portfolio-meter.view';
 import { PortfolioTile } from './portfolio-inventory.models';
 import { buildFacilitySnapshots, FacilitySnapshotNavigation } from './portfolio-facility-snapshot.view';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { buildMeterSnapshots } from './portfolio-meter-snapshot.view';
 
 type Navigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 const value = (item: unknown): string => typeof item === 'string' && item.trim() ? item : 'Not set';
@@ -17,15 +19,13 @@ export function facilityTiles(views: readonly PortfolioFacilityView[], input: Po
     summary: [], details: [], findings: [], facilitySnapshot: snapshots.get(view.facility.guid)
   }));
 }
-export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<Navigation, 'facilityDataRoute' | 'facilityMeterRoute'>): PortfolioTile[] {
+export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>, readings: readonly IdbUtilityMeterData[]): PortfolioTile[] {
+  const snapshots = buildMeterSnapshots(views, readings, nav);
   return views.map(view => ({ guid: view.meter.guid, name: view.meter.name, icon: view.sourceIcon,
     route: nav.facilityMeterRoute(view.facility.guid, view.meter.guid, 'settings'),
     owner: { label: view.facility.name, route: nav.facilityDataRoute(view.facility.guid, 'meters') }, chip: view.meter.source,
     status: { tone: view.statusTone, icon: view.statusIcon, label: view.statusLabel },
-    summary: [{ label: 'Readings', value: String(view.card.readingCount) }, fact('First reading', view.card.firstReadingLabel), fact('Latest reading', view.card.latestReadingLabel)],
-    details: [fact('Units', view.meter.startingUnit), fact('Group', view.card.group?.name), fact('Scope', view.card.scopeLabel), ...(view.card.fuelLabel ? [fact('Fuel', view.card.fuelLabel)] : [])],
-    findings: (view.card.statusActionSummaries ?? []).slice(0, 2),
-    detailLink: { label: 'View quality report', route: nav.facilityMeterRoute(view.facility.guid, view.meter.guid, 'quality') }
+    summary: [], details: [], findings: [], meterSnapshot: snapshots.get(view.meter.guid)
   }));
 }
 export function predictorTiles(entries: readonly PredictorInventoryEntry[], nav: Navigation): PortfolioTile[] {

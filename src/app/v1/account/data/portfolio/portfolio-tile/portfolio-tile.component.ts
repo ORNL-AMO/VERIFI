@@ -21,12 +21,14 @@ export class PortfolioTileComponent {
   private themeObserver?: MutationObserver;
   mainHref = '';
   ownerHref = '';
+  groupHref = '';
   detailHref = '';
   locationLabel = '';
   ngOnChanges(): void {
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));
     this.mainHref = href(this.tile.route);
     this.ownerHref = this.tile.owner ? href(this.tile.owner.route) : '';
+    this.groupHref = this.tile.meterSnapshot?.group.route ? href(this.tile.meterSnapshot.group.route) : '';
     this.detailHref = this.tile.detailLink ? href(this.tile.detailLink.route) : '';
     this.locationLabel = this.level === 'detailed' && this.tile.facilitySnapshot
       ? this.tile.facilitySnapshot.address : this.tile.location ?? '';
