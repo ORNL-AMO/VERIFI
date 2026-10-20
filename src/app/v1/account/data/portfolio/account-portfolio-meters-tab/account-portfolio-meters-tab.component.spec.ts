@@ -88,10 +88,10 @@ describe('AccountPortfolioMetersTabComponent', () => {
     fixture.detectChanges();
     const tile = fixture.nativeElement.querySelector('.portfolio-inventory .portfolio-tile__name[data-browse-id="meter-electric"]').closest('article') as HTMLElement;
     expect(tile.getAttribute('data-detail')).toBe('detailed');
-    expect(tile.querySelector('.meter-snapshot__range')?.textContent).toBe('Jul 2026');
-    expect(tile.querySelector('.meter-snapshot__reading-heading strong')?.textContent).toBe('1');
-    expect(tile.querySelectorAll('.meter-snapshot__recent-reading')).toHaveLength(1);
-    expect(tile.querySelector('.meter-snapshot__recent-reading time')?.textContent).toBe('Jul 1, 2026');
+    expect(tile.querySelector('.reading-snapshot__range')?.textContent).toBe('Jul 2026');
+    expect(tile.querySelector('.reading-snapshot__reading-heading strong')?.textContent).toBe('1');
+    expect(tile.querySelectorAll('.reading-snapshot__recent-reading')).toHaveLength(1);
+    expect(tile.querySelector('.reading-snapshot__recent-reading time')?.textContent).toBe('Jul 1, 2026');
   });
 
   it('reports navigation failure without changing the inventory', async () => {

@@ -43,7 +43,9 @@ function setup(count = 260) {
     { path:'facilities', component:AccountPortfolioFacilitiesTabComponent }, { path:'meters', component:AccountPortfolioMetersTabComponent }, { path:'predictors', component:AccountPortfolioPredictorsTabComponent }
   ] }, { path:'v1/workspace/facility/:facility/data/meters/:meter/:tab', component:ResourceDestination },
     { path:'v1/workspace/facility/:facility/data/meter-grouping/:group/:tab', component:ResourceDestination },
-    { path:'v1/workspace/facility/:facility/data/predictors/weather/:key/setup', component:ResourceDestination },
+    { path:'v1/workspace/facility/:facility/data/predictors/weather/:key/quality/:guid', component:ResourceDestination },
+    { path:'v1/workspace/facility/:facility/data/predictors/weather/:key/:tab', component:ResourceDestination },
+    { path:'v1/workspace/facility/:facility/data/predictors/:guid/:tab', component:ResourceDestination },
     { path:'v1/workspace/facility/:facility/data/:resource', component:ResourceDestination }];
   TestBed.configureTestingModule({ imports:[AccountDataModule, InventoryBrowserHost], providers:[provideRouter(routes),
     { provide:AccountWorkspaceStore, useValue:workspace }, { provide:WorkspaceStatusService, useValue:{ state:statusState, items:statusItems } },
@@ -91,6 +93,59 @@ function expectResourceRows(tile: HTMLElement) {
 }
 
 describe('uniform account inventories in Chromium', () => {
+  it('aligns standard and weather predictor snapshots with meter cards and keeps their workflows, themes and responsive layout usable', async()=>{
+    await page.viewport(1300,1000);
+    const {fixture,root,router,open,workspace,statusItems,statusState}=setup(25);
+    workspace.predictors.update(items=>items.map(item=>item.guid==='p0'?{...item,name:'Heating degree days — Long manufacturing campus name',unit:'days'}:item));
+    workspace.predictorData.update(items=>[...items.filter(item=>item.predictorId!=='p0'),
+      ...[1,3,6,6].map((month,index)=>inventoryReading('p0',{guid:`recent-${index}`,accountId:account().guid,facilityId:'f0',year:2026,month,amount:index===1?-2:index===2?0:10}))]);
+    const entity={kind:'predictor' as const,guid:'p0',name:'Heating degree days',accountGuid:account().guid,facilityGuid:'f0'};
+    statusItems.set(presentFindings([makeFinding('predictor.data.negative','error','quality',entity,{count:1}),
+      makeFinding('predictor.data.duplicate-month','error','quality',entity,{count:1}),makeFinding('predictor.weather.warning','warning','quality',entity)]));
+    await open('predictors');
+    let tile=root.querySelector<HTMLElement>('.portfolio-tile__name[data-browse-id="p0"]')!.closest('article')!;
+    expect(tile.querySelector('.portfolio-tile__station')).toBeNull();expect(tile.textContent).not.toContain('65°F');
+    await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('summary');fixture.detectChanges();await settled(root);
+    tile=root.querySelector<HTMLElement>('.portfolio-tile__name[data-browse-id="p0"]')!.closest('article')!;
+    expect(tile.querySelector('.reading-snapshot__reading-heading')?.textContent).toContain('4');
+    expect(tile.querySelector('.reading-snapshot__range')?.textContent).toBe('Jan 2026 – Jun 2026');
+    expect(tile.querySelector('.reading-snapshot__history')).toBeNull();expect(tile.textContent).toContain('65°F');
+    expect(tile.querySelector('.portfolio-tile__station-link')?.getAttribute('href')).toContain('station:KORD/setup');
+    await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('detailed');fixture.detectChanges();await settled(root);
+    const recent=()=>[...tile.querySelectorAll<HTMLElement>('.reading-snapshot__recent-reading')];
+    expect(recent()).toHaveLength(3);expect(recent().map(row=>row.querySelector('time')?.textContent)).toEqual(['Jun 2026','Jun 2026','Mar 2026']);
+    expect(recent()[0].textContent).toContain('0 days');expect(recent()[2].textContent).toContain('-2 days');
+    expect(tile.textContent).not.toContain('Units');expect(tile.textContent).not.toContain('Station ID');expect(tile.textContent).not.toContain('KORD');
+    expect(tile.querySelector('.reading-snapshot__attention a')?.getAttribute('href')).toContain('station:KORD/readings');
+    for(const palette of PORTFOLIO_PALETTES) for(const dark of [false,true]) for(const contrast of [false,true]) {
+      root.className=`v1-root v1-palette-${palette}${dark?' v1-theme-dark':''}${contrast?' v1-contrast-strong':''}`;
+      for(const selector of ['.reading-snapshot__range','.reading-snapshot__recent-reading time','.reading-snapshot__reading-value[data-tone="danger"]','.portfolio-tile__station-link']) {
+        const element=tile.querySelector<HTMLElement>(selector)!;element.style.backgroundColor=getComputedStyle(tile).backgroundColor;
+        expect(textContrast(element),`${palette},dark=${dark},contrast=${contrast}:${selector}`).toBeGreaterThanOrEqual(4.5);element.style.backgroundColor='';
+      }
+    }
+    root.className='v1-root';root.style.height='1100px';await page.viewport(1300,1200);
+    await page.screenshot({element:tile,path:'../../../../../../../.angular/predictor-weather-snapshot.png'});
+    const standard=root.querySelector<HTMLElement>('.portfolio-tile__name[data-browse-id="p1"]')!.closest('article')!;
+    expect(standard.querySelector('.reading-snapshot__recent-reading')?.textContent).toContain('12 tons');
+    await page.screenshot({element:standard,path:'../../../../../../../.angular/predictor-standard-snapshot.png'});
+    await page.viewport(390,1000);fixture.detectChanges();await settled(root);
+    expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth);
+    expect([...tile.querySelectorAll<HTMLElement>('.reading-snapshot__recent-list li')].every(item=>getComputedStyle(item).borderTopWidth==='0px')).toBe(true);
+    await page.screenshot({element:tile,path:'../../../../../../../.angular/predictor-snapshot-narrow.png'});
+    for(const state of ['evaluating','error','ready'] as const) {
+      statusState.set(state);fixture.detectChanges();await settled(root);
+      expect(tile.querySelector('.reading-snapshot__attention')!==null).toBe(state==='ready');
+    }
+    recent()[0].focus();await userEvent.keyboard('{Enter}');await fixture.whenStable();fixture.detectChanges();
+    expect(router.url).toBe('/v1/workspace/facility/f0/data/predictors/weather/station:KORD/readings');
+    await open('predictors');
+    const station=root.querySelector<HTMLAnchorElement>('.portfolio-tile__name[data-browse-id="p0"]')!.closest('article')!.querySelector<HTMLAnchorElement>('.portfolio-tile__station-link')!;
+    station.click();await fixture.whenStable();expect(router.url).toBe('/v1/workspace/facility/f0/data/predictors/weather/station:KORD/setup');
+    await open('predictors');const client=cdp() as {send(command:string,parameters:unknown):Promise<void>};await client.send('Emulation.setEmulatedMedia',{media:'print'});
+    try { expect(root.querySelectorAll('.portfolio-inventory-print app-reading-snapshot')).toHaveLength(25); }
+    finally { await client.send('Emulation.setEmulatedMedia',{media:''}); }
+  });
   it('shows recent reading values with exact-record severity, visible tinted-card dividers and a keyboard/narrow/print layout', async () => {
     await page.viewport(1300,1000);
     const {fixture,root,router,open,workspace,statusState,statusItems}=setup(25);
@@ -106,32 +161,32 @@ describe('uniform account inventories in Chromium', () => {
       makeFinding('meter.configuration.invalid','warning','configuration',{...entity,guid:'m1',name:'Warning meter'})
     ]));
     await open('meters');
-    expect(root.querySelector('app-meter-snapshot')).toBeNull();
+    expect(root.querySelector('app-reading-snapshot')).toBeNull();
     await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('summary');fixture.detectChanges();await settled(root);
     let tile=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
-    expect(tile.querySelector('.meter-snapshot__reading-heading')?.textContent).toContain('7');
-    expect(tile.querySelector('.meter-snapshot__range')?.textContent).toBe('Jan 2026 – Jun 2026');
-    expect(tile.querySelector('.meter-snapshot__reading-heading')!.getBoundingClientRect().top).toBeCloseTo(tile.querySelector('.meter-snapshot__range')!.getBoundingClientRect().top,0);
-    expect(tile.querySelector('.meter-snapshot__history')).toBeNull();
+    expect(tile.querySelector('.reading-snapshot__reading-heading')?.textContent).toContain('7');
+    expect(tile.querySelector('.reading-snapshot__range')?.textContent).toBe('Jan 2026 – Jun 2026');
+    expect(tile.querySelector('.reading-snapshot__reading-heading')!.getBoundingClientRect().top).toBeCloseTo(tile.querySelector('.reading-snapshot__range')!.getBoundingClientRect().top,0);
+    expect(tile.querySelector('.reading-snapshot__history')).toBeNull();
     await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('detailed');fixture.detectChanges();await settled(root);
     tile=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
-    const rows=()=>[...tile.querySelectorAll<HTMLElement>('.meter-snapshot__recent-reading')];
+    const rows=()=>[...tile.querySelectorAll<HTMLElement>('.reading-snapshot__recent-reading')];
     expect(rows()).toHaveLength(3);
     expect(rows().map(row=>row.querySelector('time')?.textContent)).toEqual(['Jun 15, 2026','Jun 1, 2026','Jun 1, 2026']);
-    expect(rows().map(row=>row.querySelector<HTMLElement>('.meter-snapshot__reading-value')?.dataset['tone'])).toEqual(['warning','danger','danger']);
+    expect(rows().map(row=>row.querySelector<HTMLElement>('.reading-snapshot__reading-value')?.dataset['tone'])).toEqual(['warning','danger','danger']);
     expect(rows()[0].textContent).toContain('100 kWh');expect(rows()[1].textContent).toContain('10 kWh');
     expect(rows()[0].getAttribute('aria-label')).toContain('Review consumption outliers');
-    expect(tile.querySelector('.meter-snapshot__attention')?.textContent).toContain('Fill missing meter data');
+    expect(tile.querySelector('.reading-snapshot__attention')?.textContent).toContain('Fill missing meter data');
     for(const palette of PORTFOLIO_PALETTES) for(const dark of [false,true]) for(const contrast of [false,true]) {
       root.className=`v1-root v1-palette-${palette}${dark?' v1-theme-dark':''}${contrast?' v1-contrast-strong':''}`;
-      for(const selector of ['.meter-snapshot__range','.portfolio-tile__group a','.meter-snapshot__attention a','.meter-snapshot__recent-reading time','.meter-snapshot__reading-value[data-tone="danger"]','.meter-snapshot__reading-value[data-tone="warning"]']) {
+      for(const selector of ['.reading-snapshot__range','.portfolio-tile__group a','.reading-snapshot__attention a','.reading-snapshot__recent-reading time','.reading-snapshot__reading-value[data-tone="danger"]','.reading-snapshot__reading-value[data-tone="warning"]']) {
         const element=tile.querySelector<HTMLElement>(selector)!;
         element.style.backgroundColor=getComputedStyle(tile).backgroundColor;
         expect(textContrast(element),`${palette}, dark=${dark}, contrast=${contrast}: ${selector}`).toBeGreaterThanOrEqual(4.5);
         element.style.backgroundColor='';
       }
       const warning=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile[data-tone="warning"]')!;
-      const divider=warning.querySelector<HTMLElement>('.meter-snapshot__readings')!;
+      const divider=warning.querySelector<HTMLElement>('.reading-snapshot__readings')!;
       divider.style.color=getComputedStyle(divider).borderTopColor;divider.style.backgroundColor=getComputedStyle(warning).backgroundColor;
       expect(textContrast(divider),`${palette}, dark=${dark}, contrast=${contrast}: divider`).toBeGreaterThanOrEqual(2);
       divider.style.color='';divider.style.backgroundColor='';
@@ -142,20 +197,20 @@ describe('uniform account inventories in Chromium', () => {
     await page.screenshot({element:root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile[data-tone="warning"]')!,path:'../../../../../../../.angular/meter-warning-dividers.png'});
     for(const state of ['evaluating','error','ready'] as const) {
       statusState.set(state);fixture.detectChanges();await settled(root);
-      expect(rows().some(row=>row.querySelector<HTMLElement>('.meter-snapshot__reading-value')?.dataset['tone']==='danger')).toBe(state==='ready');
-      expect(tile.querySelector('.meter-snapshot__attention')!==null).toBe(state==='ready');
+      expect(rows().some(row=>row.querySelector<HTMLElement>('.reading-snapshot__reading-value')?.dataset['tone']==='danger')).toBe(state==='ready');
+      expect(tile.querySelector('.reading-snapshot__attention')!==null).toBe(state==='ready');
     }
     await page.viewport(390,750);fixture.detectChanges();await settled(root);
     expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth);
-    const heading=tile.querySelector<HTMLElement>('.meter-snapshot__reading-heading')!;
-    const range=tile.querySelector<HTMLElement>('.meter-snapshot__range')!;
+    const heading=tile.querySelector<HTMLElement>('.reading-snapshot__reading-heading')!;
+    const range=tile.querySelector<HTMLElement>('.reading-snapshot__range')!;
     expect(getComputedStyle(heading.querySelector('strong')!).fontSize).toBe(getComputedStyle(range).fontSize);
     const groupLink=tile.querySelector<HTMLAnchorElement>('.portfolio-tile__group a')!;
     expect(groupLink.getAttribute('href')).toBe('/v1/workspace/facility/f0/data/meter-grouping/g/monthly-table');
     root.scrollTop=0;await page.viewport(390,1200);
     await page.screenshot({element:tile,path:'../../../../../../../.angular/meter-recent-readings-narrow.png'});
     root.style.height='600px';await page.viewport(390,750);
-    const readingsLink=tile.querySelector<HTMLAnchorElement>('.meter-snapshot__recent-reading')!;
+    const readingsLink=tile.querySelector<HTMLAnchorElement>('.reading-snapshot__recent-reading')!;
     readingsLink.focus();await userEvent.keyboard('{Enter}');await fixture.whenStable();fixture.detectChanges();
     expect(router.url).toBe('/v1/workspace/facility/f0/data/meters/m0/readings');
     await open('meters');await vi.waitFor(()=>expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('m0'));
@@ -165,7 +220,7 @@ describe('uniform account inventories in Chromium', () => {
     const client=cdp() as {send(command:string,parameters:unknown):Promise<void>};
     await client.send('Emulation.setEmulatedMedia',{media:'print'});fixture.detectChanges();
     expect(getComputedStyle(root.querySelector('.portfolio-inventory-print')!).display).toBe('grid');
-    expect(root.querySelectorAll('.portfolio-inventory-print app-meter-snapshot')).toHaveLength(25);
+    expect(root.querySelectorAll('.portfolio-inventory-print app-reading-snapshot')).toHaveLength(25);
     await client.send('Emulation.setEmulatedMedia',{media:''});
     fixture.destroy();await page.viewport(1500,1000);
   });
@@ -316,7 +371,7 @@ describe('uniform account inventories in Chromium', () => {
     for(const resource of ['meters','predictors'] as const) {
       await open(resource);expect(root.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(24);
       await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('summary');fixture.detectChanges();await settled(root);
-      expect(root.querySelector(resource==='meters'?'.portfolio-inventory .meter-snapshot__readings':'.portfolio-inventory .portfolio-tile__facts')).not.toBeNull();
+      expect(root.querySelector('.portfolio-inventory .reading-snapshot__readings')).not.toBeNull();
       await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('detailed');fixture.detectChanges();await settled(root);
       expect(root.querySelector('.portfolio-inventory .portfolio-tile')?.getAttribute('data-detail')).toBe('detailed');
       await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('simple');fixture.detectChanges();await settled(root);

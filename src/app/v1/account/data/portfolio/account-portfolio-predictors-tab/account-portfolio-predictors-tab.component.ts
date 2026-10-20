@@ -38,7 +38,7 @@ export class AccountPortfolioPredictorsTabComponent {
   readonly facilities = computed(() => [...this.workspace.facilities()].sort((a,b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
   readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters())
     .filter(item => !this.filters().facilityGuid || item.facility.guid === this.filters().facilityGuid), this.filters().sort));
-  readonly tiles = computed(() => predictorTiles(this.filteredEntries(), this.navigation));
+  readonly tiles = computed(() => predictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(item => item.guid)), this.filters, this.workspace.canWrite);
   readonly browseIds = this.inventory.visibleIds;
   clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', type: 'all', sort: 'attention', facilityGuid: '' }); }

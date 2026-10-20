@@ -1,17 +1,17 @@
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PortfolioMeterSnapshot } from '../../portfolio-inventory.models';
+import { PortfolioReadingSnapshot } from '../../portfolio-inventory.models';
 
-@Component({ selector: 'app-meter-snapshot', standalone: false,
-  templateUrl: './meter-snapshot.component.html', styleUrls: ['./meter-snapshot.component.css'] })
-export class MeterSnapshotComponent {
+@Component({ selector: 'app-reading-snapshot', standalone: false,
+  templateUrl: './reading-snapshot.component.html', styleUrls: ['./reading-snapshot.component.css'] })
+export class ReadingSnapshotComponent {
   private readonly router = inject(Router);
-  @Input({ required: true }) snapshot!: PortfolioMeterSnapshot;
-  @Input({ required: true }) meterName!: string;
+  @Input({ required: true }) snapshot!: PortfolioReadingSnapshot;
+  @Input({ required: true }) resourceName!: string;
   @Input() detailed = false;
   @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
   readingsHref = '';
-  findings: readonly (PortfolioMeterSnapshot['findings'][number] & { readonly href: string })[] = [];
+  findings: readonly (PortfolioReadingSnapshot['findings'][number] & { readonly href: string })[] = [];
 
   ngOnChanges(): void {
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));

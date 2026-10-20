@@ -35,6 +35,24 @@ describe('portfolio tile interactions and additive details', () => {
     const owner = fixture.nativeElement.querySelector('.portfolio-tile__owner') as HTMLAnchorElement;
     owner.click(); expect(navigate).toHaveBeenLastCalledWith(['/plant']);
   });
+  it('keeps Simple weather identity compact while retaining station repair warnings and expanded details', () => {
+    const fixture=setup(),root=fixture.nativeElement as HTMLElement;
+    const weather=portfolioTile('weather',{name:'Heating degree days',station:'Chicago Airport',chip:'Heating degree days · 65°F',simpleChip:'Heating degree days'});
+    fixture.componentRef.setInput('tile',weather);fixture.detectChanges();
+    expect(root.querySelector('.portfolio-tile__chip')?.textContent).toBe('Heating degree days');
+    expect(root.querySelector('.portfolio-tile__station')).toBeNull();expect(root.textContent).not.toContain('65°F');
+    for(const level of ['summary','detailed'] as const) {
+      fixture.componentRef.setInput('level',level);fixture.detectChanges();
+      expect(root.querySelector('.portfolio-tile__station')?.textContent).toBe('Chicago Airport');
+      expect(root.querySelector('.portfolio-tile__chip')?.textContent).toContain('65°F');
+    }
+    fixture.componentRef.setInput('level','simple');
+    fixture.componentRef.setInput('tile',{...weather,stationIssue:'Station required'});fixture.detectChanges();
+    expect(root.querySelector('.portfolio-tile__station')?.textContent).toBe('Station required');
+    expect(root.textContent).not.toContain('Chicago Airport');
+    fixture.componentRef.setInput('tile',{...weather,stationIssue:'Station names differ'});fixture.detectChanges();
+    expect(root.querySelector('.portfolio-tile__station')?.textContent).toBe('Station names differ');
+  });
   it('shows the full facility address once in the Detailed header even when there are no attention findings', () => {
     const fixture=setup(), root=fixture.nativeElement as HTMLElement;
     fixture.componentRef.setInput('tile',portfolioTile('f', { location:'Oak Ridge, TN',
@@ -65,7 +83,7 @@ describe('portfolio tile interactions and additive details', () => {
     fixture.componentRef.setInput('level','detailed');fixture.detectChanges();
     const group=root.querySelector<HTMLAnchorElement>('.portfolio-tile__ownership .portfolio-tile__group a')!;
     expect(group.textContent).toBe('Main building');expect(group.getAttribute('href')).toBe('/facility/meter-grouping/g/monthly-table');
-    expect(root.textContent).not.toContain('Reading units');expect(root.querySelector('.meter-snapshot__facts')).toBeNull();
+    expect(root.textContent).not.toContain('Reading units');expect(root.querySelector('.reading-snapshot__facts')).toBeNull();
     fixture.componentInstance.navigationRequested.subscribe(navigate);
     group.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,metaKey:true}));expect(navigate).not.toHaveBeenCalled();
     group.click();expect(navigate).toHaveBeenCalledWith(meterSnapshot.group.route);

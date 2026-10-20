@@ -4,7 +4,7 @@ import { Router, provideRouter } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { inventoryNavigation, inventoryWorkspace } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.testing';
+import { inventoryNavigation, inventoryWorkspace, inventoryReading } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.testing';
 import { AccountDataModule } from '../../account-data.module';
 import { AccountPortfolioPredictorsTabComponent } from './account-portfolio-predictors-tab.component';
 
@@ -26,6 +26,11 @@ describe('account Predictor inventory', () => {
     expect(fixture.nativeElement.querySelector('[aria-label="Select predictors"]')).toBeNull();
     component.filtersForm.patchValue({ search: 'p2', type: 'weather', status: 'clear' }); fixture.detectChanges();
     expect(component.filteredEntries().map(item => item.guid)).toEqual(['p2']);
+    component.inventory.detailControl.setValue('detailed');fixture.detectChanges();
+    workspace.predictorReadings.update(items=>[...items,inventoryReading('p2',{guid:'latest',year:2026,month:2,amount:0})]);fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.reading-snapshot__reading-heading strong')?.textContent).toBe('2');
+    expect(fixture.nativeElement.querySelector('.reading-snapshot__recent-reading')?.textContent).toContain('0 HDD');
+    expect(fixture.nativeElement.querySelector('.reading-snapshot__range')?.textContent).toBe('Jan 2025 – Feb 2026');
     (fixture.nativeElement.querySelector('.portfolio-inventory .portfolio-tile__name') as HTMLAnchorElement).click(); expect(navigate).toHaveBeenCalledWith(inventoryNavigation.facilityWeatherPredictorRoute('facility', 'station:KORD'));
     component.filtersForm.controls.type.setValue('standard'); fixture.detectChanges(); expect(component.filteredEntries()).toHaveLength(0);
     expect(fixture.nativeElement.textContent).toContain('No predictors match these filters');

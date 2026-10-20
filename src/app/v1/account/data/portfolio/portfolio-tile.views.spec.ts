@@ -29,12 +29,15 @@ describe('resource-specific portfolio tile facts', () => {
   it('keeps weather predictors individual with station identity, units, and repair/setup access', () => {
     const workspace = inventoryWorkspace(5);
     const entries = buildPredictorInventory(workspace.predictorCards(), workspace.weatherStationGroups(), workspace.facility()!, 'ready');
-    const tiles = predictorTiles(entries, navigation);
+    const tiles = predictorTiles(entries, navigation, workspace.predictorReadings(), 'ready');
     expect(tiles).toHaveLength(5); expect(new Set(tiles.map(tile => tile.guid)).size).toBe(5);
     const weather = tiles.find(tile => tile.guid === 'p2')!;
-    expect(weather.station).toBe('Chicago'); expect(weather.chip).toContain('65°F'); expect(weather.summary).toContainEqual({ label: 'Units', value: 'HDD' });
-    expect(weather.detailLink?.route).toEqual(inventoryNavigation.facilityWeatherPredictorRoute('facility', 'station:KORD'));
-    expect(tiles.find(tile => tile.guid === 'p1')?.detailLink?.route).toEqual(inventoryNavigation.facilityPredictorRoute('facility', 'p1', 'quality'));
+    expect(weather.station).toBe('Chicago'); expect(weather.chip).toContain('65°F'); expect(weather.predictorSnapshot?.recentReadings[0].valueLabel).toBe('12 HDD');
+    expect(weather.simpleChip).toBe(entries.find(entry=>entry.guid==='p2')!.card.weatherTypeLabel);
+    expect(weather.simpleChip).not.toContain('65°F');expect(weather.stationIssue).toBeUndefined();
+    expect(weather.stationLink?.route).toEqual(inventoryNavigation.facilityWeatherPredictorRoute('facility', 'station:KORD'));
+    expect(tiles.find(tile => tile.guid === 'p1')?.predictorSnapshot?.readingsLink.route).toEqual(inventoryNavigation.facilityPredictorRoute('facility', 'p1', 'readings'));
+    expect(weather.summary).toEqual([]);expect(weather.details).toEqual([]);
   });
   it('orders individual predictor priorities and latest readings globally across duplicate facility and station names', () => {
     const workspace = inventoryWorkspace(5), all = buildPredictorInventory(workspace.predictorCards(), workspace.weatherStationGroups(), workspace.facility()!, 'ready');

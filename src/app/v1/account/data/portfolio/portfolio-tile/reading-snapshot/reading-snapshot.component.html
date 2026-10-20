@@ -1,0 +1,42 @@
+<a class="reading-snapshot__readings" [href]="readingsHref" [attr.aria-label]="snapshot.readingCount + ' saved readings for ' + resourceName + '. ' + snapshot.rangeLabel + '. Open readings'" (click)="open($event, snapshot.readingsLink.route)">
+  <app-ui-icon name="invoice" [size]="20"/>
+  <span class="reading-snapshot__reading-heading"><strong>{{ snapshot.readingCount }}</strong> {{ snapshot.readingCount === 1 ? 'reading' : 'readings' }}</span>
+  <span class="reading-snapshot__range">{{ snapshot.rangeLabel }}</span>
+</a>
+@if (detailed) {
+  <section class="reading-snapshot__history" [attr.aria-label]="'Recent readings for ' + resourceName">
+    <div class="reading-snapshot__history-heading"><h2>Recent readings</h2>@if (snapshot.recentReadings.length) { <span>Last {{ snapshot.recentReadings.length }} saved {{ snapshot.recentReadings.length === 1 ? 'entry' : 'entries' }}</span> }</div>
+    <ul class="reading-snapshot__recent-list">
+      @for (reading of snapshot.recentReadings; track reading.guid) {
+        <li>
+          <a class="reading-snapshot__recent-reading" [href]="readingsHref" [attr.aria-label]="'Open readings for ' + resourceName + '. ' + reading.description" [title]="reading.description" (click)="open($event, snapshot.readingsLink.route)">
+            <time [attr.datetime]="reading.dateKey">{{ reading.dateLabel }}</time>
+            <span class="reading-snapshot__reading-value" [attr.data-tone]="reading.tone">
+              @if (reading.icon; as icon) { <app-ui-icon [name]="icon" [size]="18"/><span class="visually-hidden">{{ reading.statusLabel }}: </span> }
+              <span>{{ reading.valueLabel }}</span>
+            </span>
+          </a>
+        </li>
+      } @empty { <li class="reading-snapshot__empty">{{ snapshot.readingCount ? 'No readings with usable dates' : 'No saved readings yet' }}</li> }
+    </ul>
+  </section>
+  @if (snapshot.invalidDateCount) { <p class="reading-snapshot__date-warning">{{ snapshot.invalidDateCount }} saved {{ snapshot.invalidDateCount === 1 ? 'reading has' : 'readings have' }} an unusable date and {{ snapshot.invalidDateCount === 1 ? 'is' : 'are' }} not shown in the recent list.</p> }
+  @if (snapshot.facts.length) { <dl class="reading-snapshot__facts">@for (fact of snapshot.facts; track fact.label) {
+    <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div>
+  }</dl> }
+  @if (findings.length) {
+    <section class="reading-snapshot__attention" aria-label="Data findings needing attention">
+      <h2>Needs attention</h2>
+      <ul>@for (finding of findings; track finding.id) {
+        <li [attr.data-severity]="finding.severity">
+          <app-ui-icon [name]="finding.severity === 'error' ? 'danger' : 'warning'" [size]="18"/>
+          <div><p [title]="finding.description"><span class="visually-hidden">{{ finding.severity === 'error' ? 'Error' : 'Warning' }}: </span>{{ finding.title }}</p>
+            @if (finding.action; as action) { <a [href]="finding.href" [attr.aria-label]="action.label + ' for ' + resourceName" (click)="open($event, action.route)">{{ action.label }}</a> }
+            @else { <p class="reading-snapshot__empty">Fix workflow unavailable</p> }
+          </div>
+        </li>
+      }</ul>
+      @if (snapshot.remainingFindings) { <p class="reading-snapshot__remaining">{{ snapshot.remainingFindings }} more {{ snapshot.remainingFindings === 1 ? 'finding' : 'findings' }} in the existing workflows.</p> }
+    </section>
+  }
+}

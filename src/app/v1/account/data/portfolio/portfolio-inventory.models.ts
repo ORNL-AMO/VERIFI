@@ -37,7 +37,7 @@ export interface PortfolioRecentReading {
   readonly dateKey: string;
   readonly tone: 'neutral' | 'danger' | 'warning';
   readonly valueLabel: string;
-  readonly quantityLabel: 'Energy use' | 'Consumption' | 'RECs';
+  readonly quantityLabel: 'Energy use' | 'Consumption' | 'RECs' | 'Value';
   readonly statusLabel?: string;
   readonly icon?: IconName;
   readonly description: string;
@@ -46,16 +46,18 @@ export interface PortfolioMeterSnapshotFact extends PortfolioTileFact {
   readonly icon?: IconName;
   readonly route?: readonly string[];
 }
-export interface PortfolioMeterSnapshot {
+export interface PortfolioReadingSnapshot {
   readonly readingCount: number;
   readonly rangeLabel: string;
   readonly invalidDateCount: number;
   readonly readingsLink: PortfolioTileLink;
   readonly recentReadings: readonly PortfolioRecentReading[];
-  readonly group: PortfolioMeterSnapshotFact;
   readonly facts: readonly PortfolioTileFact[];
   readonly findings: readonly PortfolioFindingPreview[];
   readonly remainingFindings: number;
+}
+export interface PortfolioMeterSnapshot extends PortfolioReadingSnapshot {
+  readonly group: PortfolioMeterSnapshotFact;
 }
 export interface PortfolioTile {
   readonly guid: string;
@@ -65,7 +67,10 @@ export interface PortfolioTile {
   readonly owner?: PortfolioTileLink;
   readonly location?: string;
   readonly chip?: string;
+  readonly simpleChip?: string;
   readonly station?: string;
+  readonly stationLink?: PortfolioTileLink;
+  readonly stationIssue?: string;
   readonly status: { readonly tone: 'danger' | 'warning' | 'success' | 'neutral'; readonly icon: IconName; readonly label: string };
   readonly summary: readonly PortfolioTileFact[];
   readonly details: readonly PortfolioTileFact[];
@@ -73,6 +78,7 @@ export interface PortfolioTile {
   readonly detailLink?: PortfolioTileLink;
   readonly facilitySnapshot?: PortfolioFacilitySnapshot;
   readonly meterSnapshot?: PortfolioMeterSnapshot;
+  readonly predictorSnapshot?: PortfolioReadingSnapshot;
 }
 export interface PortfolioTileDetailChange { readonly guid: string; readonly level: PortfolioDetailLevel | null; }
 export const PORTFOLIO_DETAIL_LEVELS: readonly PortfolioDetailLevel[] = ['simple', 'summary', 'detailed'];
