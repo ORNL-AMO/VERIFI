@@ -37,12 +37,6 @@
   min-width: 0;
 }
 
-.v1-account-portfolio__heading .v1-eyebrow {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .v1-account-portfolio__sticky.v1-data-workbench-sticky {
   background: transparent;
   box-shadow: none;

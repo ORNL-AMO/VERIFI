@@ -20,20 +20,18 @@
                 <span class="predictor-directory__status"><app-ui-icon [name]="entry.status.icon"/><span [class.visually-hidden]="entry.status.tone === 'success'">{{ entry.status.label }}</span></span>
               </span>
             </button>
-            @if (!readOnly()) {
-              @if (showPreview()) { <button type="button" class="v1-icon-btn predictor-directory__preview" [attr.aria-label]="'Preview ' + entry.card.predictor.name" [attr.aria-pressed]="previewGuid() === entry.guid" (click)="previewSelected.emit(entry.guid)"><app-ui-icon name="chartLine"/></button> }
-              <div ngbDropdown placement="bottom-end" class="predictor-directory__menu">
-                <button type="button" class="v1-icon-btn" ngbDropdownToggle [attr.aria-label]="'Actions for ' + entry.card.predictor.name"><span aria-hidden="true">⋯</span></button>
-                <div ngbDropdownMenu>
-                  <button type="button" ngbDropdownItem (click)="action.emit({ guid: entry.guid, action: 'readings' })">Open readings</button>
-                  @if (entry.station) { <button type="button" ngbDropdownItem (click)="action.emit({ guid: entry.guid, action: 'quality' })">Quality Report</button> }
-                  @if (entry.canCopy) {
-                    <button type="button" ngbDropdownItem [disabled]="!canAct()" (click)="action.emit({ guid: entry.guid, action: 'copy' })">Copy predictor</button>
-                    <button type="button" ngbDropdownItem [disabled]="!canAct()" (click)="action.emit({ guid: entry.guid, action: 'delete' })">Delete predictor</button>
-                  }
-                </div>
+            @if (showPreview()) { <button type="button" class="v1-icon-btn predictor-directory__preview" [attr.aria-label]="'Preview ' + entry.card.predictor.name" [attr.aria-pressed]="previewGuid() === entry.guid" (click)="previewSelected.emit(entry.guid)"><app-ui-icon name="chartLine"/></button> }
+            <div ngbDropdown placement="bottom-end" class="predictor-directory__menu">
+              <button type="button" class="v1-icon-btn" ngbDropdownToggle [attr.aria-label]="'Actions for ' + entry.card.predictor.name"><span aria-hidden="true">⋯</span></button>
+              <div ngbDropdownMenu>
+                <button type="button" ngbDropdownItem (click)="action.emit({ guid: entry.guid, action: 'readings' })">Open readings</button>
+                @if (entry.station) { <button type="button" ngbDropdownItem (click)="action.emit({ guid: entry.guid, action: 'quality' })">Quality Report</button> }
+                @if (entry.canCopy) {
+                  <button type="button" ngbDropdownItem [disabled]="!canAct()" (click)="action.emit({ guid: entry.guid, action: 'copy' })">Copy predictor</button>
+                  <button type="button" ngbDropdownItem [disabled]="!canAct()" (click)="action.emit({ guid: entry.guid, action: 'delete' })">Delete predictor</button>
+                }
               </div>
-            }
+            </div>
           </li>
         }
       </ul>

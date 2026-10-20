@@ -77,11 +77,6 @@
   align-items: stretch;
 }
 
-.v1-root .v1-data-browse-grid--portfolio {
-  grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
-  gap: .85rem;
-}
-
 .v1-root .v1-data-browse-grid--analysis {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -124,8 +119,8 @@
 .v1-root .v1-account-portfolio .v1-portfolio-browse-count { margin: 0; color: var(--v1-text); font-size: .85rem; }
 
 @media (max-width: 76rem) {
-  .v1-root :is(.v1-account-portfolio, .facility-meters, .facility-predictors) .v1-data-browse-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .v1-root .v1-account-portfolio .v1-portfolio-browse-search, .v1-root .facility-meters__search, .v1-root .facility-predictors__search { grid-column: 1 / -1; }
+  .v1-root :is(.facility-meters, .facility-predictors) .v1-data-browse-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v1-root .facility-meters__search, .v1-root .facility-predictors__search { grid-column: 1 / -1; }
 }
 
 @media (max-width: 48rem) {

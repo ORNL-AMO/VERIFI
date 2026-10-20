@@ -12,7 +12,6 @@ export class PredictorDirectoryComponent {
   readonly entries = input.required<readonly PredictorInventoryEntry[]>();
   readonly sort = input<PredictorInventorySort>('attention');
   readonly showPreview = input(true);
-  readonly readOnly = input(false);
   readonly selecting = input(false);
   readonly selected = input<readonly string[]>([]);
   readonly canAct = input(false);

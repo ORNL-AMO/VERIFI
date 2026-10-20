@@ -2,10 +2,10 @@
 @let visibleMeters = filteredMeters();
 
 <section [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseRestoreStickyGap]="true" [browseVisibleIds]="browseIds()" class="v1-account-portfolio-meters" aria-label="Portfolio meters">
-  <form class="v1-data-browse-toolbar portfolio-inventory-toolbar v1-account-portfolio-meters__toolbar" aria-label="Meter filters" [formGroup]="filtersForm">
+  <form class="v1-data-browse-toolbar portfolio-inventory-toolbar" aria-label="Meter filters" [formGroup]="filtersForm">
     <div class="v1-portfolio-browse-search">
       <p class="v1-portfolio-browse-count" role="status">Showing {{ visibleMeters.length }} of {{ allMeters.length }} meters</p>
-      <div class="v1-data-browse-search v1-account-portfolio-meters__search">
+      <div class="v1-data-browse-search">
         <span class="input-group-text">
           <app-ui-icon name="search"></app-ui-icon>
         </span>
