@@ -1,6 +1,7 @@
+import { buildPredictorTiles } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-tile.view';
 import { buildPortfolioFacilities, PortfolioFacilityInput } from './portfolio-facility.view';
 import { buildPortfolioMeters } from './portfolio-meter.view';
-import { facilityTiles, meterTiles, orderPortfolioPredictors, predictorTiles } from './portfolio-tile.views';
+import { facilityTiles, meterTiles, orderPortfolioPredictors } from './portfolio-tile.views';
 import { facility, meter, reading, group } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { inventoryNavigation, inventoryWorkspace } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.testing';
 import { buildPredictorInventory } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.models';
@@ -27,7 +28,7 @@ describe('resource-specific portfolio tile facts', () => {
   it('keeps weather predictors individual with station identity, units, and repair/setup access', () => {
     const workspace = inventoryWorkspace(5);
     const entries = buildPredictorInventory(workspace.predictorCards(), workspace.weatherStationGroups(), workspace.facility()!, 'ready');
-    const tiles = predictorTiles(entries, navigation, workspace.predictorReadings(), 'ready');
+    const tiles = buildPredictorTiles(entries, navigation, workspace.predictorReadings(), 'ready');
     expect(tiles).toHaveLength(5); expect(new Set(tiles.map(tile => tile.guid)).size).toBe(5);
     const weather = tiles.find(tile => tile.guid === 'p2')!;
     expect(weather.station).toBe('Chicago'); expect(weather.chip).toContain('65°F'); expect(weather.predictorSnapshot?.recentReadings[0].valueLabel).toBe('12 HDD');

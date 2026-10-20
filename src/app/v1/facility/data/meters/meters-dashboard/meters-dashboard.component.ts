@@ -1,3 +1,5 @@
+import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
+import { buildInventoryChartStyles, InventorySeriesStyle } from '@app/v1/shared/charts/inventory-chart-styles';
 import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
@@ -19,8 +21,9 @@ import { V1EChartsDataZoomRange } from '@app/v1/shared/charts/echarts-chart.dire
 import { InventoryGridComponent } from '@app/v1/shared/inventory/inventory-grid/inventory-grid.component';
 import { InventoryDetailLevel, InventoryTile, InventoryTileMenuAction, InventoryTileDetailChange, InventoryTileActionRequest } from '@app/v1/shared/inventory/inventory.models';
 import { buildMeterSnapshots } from '@app/v1/shared/inventory/meter-reading-snapshot.view';
-import { MeterChartSheetComponent, MeterChartSheetView, DEFAULT_METER_CHART_VIEW } from './meter-chart-sheet/meter-chart-sheet.component';
-import { buildMeterChartStyles, MeterSeriesStyle, buildMeterInventory, buildMonthlyTrends } from './meters-dashboard.view';
+import { InventoryChartSheetComponent } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.component';
+import { InventoryChartSheetView, DEFAULT_INVENTORY_CHART_VIEW } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.models';
+import { buildMeterInventory, buildMonthlyTrends } from './meters-dashboard.view';
 
 type StatusFilter = 'all' | 'attention' | 'noReadings' | 'missingGroup' | 'valid';
 type MeterSort = 'attention' | 'meterName' | 'latestReading';
@@ -28,7 +31,7 @@ type MeterSort = 'attention' | 'meterName' | 'latestReading';
 @Component({
   selector: 'app-meters-dashboard', standalone: true,
   templateUrl: './meters-dashboard.component.html', styleUrls: ['./meters-dashboard.component.css'],
-  imports: [PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective, ReactiveFormsModule, IconComponent, RouterLink, InventoryGridComponent, MeterChartSheetComponent, MeterDraftSlideoutComponent, ConfirmationDialogComponent],
+  imports: [PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective, ReactiveFormsModule, IconComponent, RouterLink, InventoryGridComponent, InventoryChartDockComponent, InventoryChartSheetComponent, MeterDraftSlideoutComponent, ConfirmationDialogComponent],
   providers: [MetersDashboardActionsService]
 })
 export class MetersDashboardComponent implements OnDestroy {
@@ -57,8 +60,8 @@ export class MetersDashboardComponent implements OnDestroy {
   readonly pageControl = new FormControl(1, { nonNullable: true });
   private readonly page = toSignal(this.pageControl.valueChanges, { initialValue: 1 });
   readonly pageSize = 24;
-  readonly detailControl = new FormControl<InventoryDetailLevel>('simple', { nonNullable: true });
-  readonly detail = signal<InventoryDetailLevel>('simple');
+  readonly detailControl = new FormControl<InventoryDetailLevel>('summary', { nonNullable: true });
+  readonly detail = signal<InventoryDetailLevel>('summary');
   readonly overrides = signal<Readonly<Record<string, InventoryDetailLevel>>>({});
   readonly layoutReady = signal(false);
   readonly search = computed(() => this.filters().search ?? '');
@@ -66,7 +69,7 @@ export class MetersDashboardComponent implements OnDestroy {
   readonly sortBy = computed(() => this.filters().sort ?? 'attention');
   readonly collapsed = computed(() => this.sticky()?.collapsed() ?? false);
   readonly chartsOpen = signal(false);
-  readonly chartView = signal<MeterChartSheetView>(DEFAULT_METER_CHART_VIEW);
+  readonly chartView = signal<InventoryChartSheetView>(DEFAULT_INVENTORY_CHART_VIEW);
   readonly addMeterOpen = signal(false);
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
@@ -86,9 +89,9 @@ export class MetersDashboardComponent implements OnDestroy {
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState())
     && (!this.filteredMeterCards().length || this.layoutReady()));
   readonly browseIds = computed(() => this.visibleMeterCards().map(item => item.card.meter.guid));
-  readonly chartStyles = linkedSignal<{ context: string; guids: readonly string[] }, ReadonlyMap<string, MeterSeriesStyle>>({
+  readonly chartStyles = linkedSignal<{ context: string; guids: readonly string[] }, ReadonlyMap<string, InventorySeriesStyle>>({
     source: () => ({ context: `${this.workspace.account()?.guid}/${this.workspace.facility()?.guid}`, guids: this.workspace.meterCards().map(card => card.meter.guid) }),
-    computation: (source, previous) => buildMeterChartStyles(source.guids, previous?.source.context === source.context ? previous.value : undefined)
+    computation: (source, previous) => buildInventoryChartStyles(source.guids, previous?.source.context === source.context ? previous.value : undefined)
   });
   readonly meterCards = computed(() => buildMeterInventory(this.workspace.meterCards(), this.workspace.meterData(), this.workspace.statusState()));
   readonly filteredMeterCards = computed(() => {
@@ -128,17 +131,6 @@ export class MetersDashboardComponent implements OnDestroy {
   navigateRoute(route: readonly string[]): void {
     void this.router.navigate([...route]).catch(() => this.actionError.set('The meter could not be opened. Please try again.'));
   }
-  private pullStart?: number;
-  startChartPull(event: PointerEvent): void {
-    if (event.button !== 0) return;
-    this.pullStart = event.clientY;
-    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
-  }
-  finishChartPull(event: PointerEvent): void {
-    if (this.pullStart !== undefined && this.pullStart - event.clientY >= 35) this.openCharts();
-    this.pullStart = undefined;
-  }
-  cancelChartPull(): void { this.pullStart = undefined; }
   openCharts(): void {
     if (this.chartsOpen() || this.saving()) return;
     this.closePortal(); this.chartsOpen.set(true); this.portal.show(new TemplatePortal(this.chartSheet, this.viewContainer));
@@ -179,8 +171,8 @@ export class MetersDashboardComponent implements OnDestroy {
       const existing = new Set(this.meterCards().map(item => item.card.meter.guid));
       if (context !== previousContext) {
         this.overrides.set({});
-        this.detail.set('simple'); this.detailControl.setValue('simple', { emitEvent: false });
-        this.chartView.set(DEFAULT_METER_CHART_VIEW);
+        this.detail.set('summary'); this.detailControl.setValue('summary', { emitEvent: false });
+        this.chartView.set(DEFAULT_INVENTORY_CHART_VIEW);
         this.selecting.set(false);
         this.selected.set([]);
         this.closePortal();
@@ -201,7 +193,7 @@ export class MetersDashboardComponent implements OnDestroy {
         if (restored) {
           this.pageControl.setValue(Math.min(restored.page, this.pageCount()));
           this.overrides.set(restored.overrides ?? {});
-          this.detail.set(restored.detail ?? 'simple'); this.detailControl.setValue(restored.detail ?? 'simple', { emitEvent: false });
+          this.detail.set(restored.detail ?? 'summary'); this.detailControl.setValue(restored.detail ?? 'summary', { emitEvent: false });
           this.zoomRange.set(restored.zoom);
         }
       }
@@ -232,7 +224,7 @@ export class MetersDashboardComponent implements OnDestroy {
   handleAction(request: InventoryTileActionRequest): void {
     const meter = this.meterCards().find(item => item.card.meter.guid === request.guid)?.card.meter;
     if (!meter) return;
-    if (request.action === 'readings') {
+    if (request.action === 'readings' || request.action === 'quality') {
       void this.router.navigate(this.navigation.facilityMeterRoute(meter.facilityId, meter.guid, request.action)).catch(() => this.actionError.set('The meter could not be opened. Please try again.'));
     } else this.requestConfirmation(request.action, [request.guid]);
   }

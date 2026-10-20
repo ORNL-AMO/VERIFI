@@ -1,8 +1,6 @@
 import { isStandardPredictor } from '@data/models/idbModels/predictor';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { StatusEvaluationState } from '@app/v1/status/status.models';
-import { MeterResultsChartRow } from '@app/v1/shared/charts/metric-results-chart.models';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { PredictorCardView, WeatherStationGroupView } from '../models';
 
@@ -87,25 +85,5 @@ export function groupPredictorInventory(entries: readonly PredictorInventoryEntr
   });
 }
 export function orderPredictorInventory(entries: readonly PredictorInventoryEntry[], sort: PredictorInventorySort): PredictorInventoryEntry[] {
-  return groupPredictorInventory(entries, sort).flatMap(group => group.entries);
-}
-export function buildPredictorPreviewRows(entry: PredictorInventoryEntry | undefined, readings: readonly IdbPredictorData[]): MeterResultsChartRow[] {
-  if (!entry) return [];
-  const ordered = readings.filter(item => item.predictorId === entry.guid && Number.isInteger(item.year) && item.year >= 1 && item.year <= 9999 && Number.isInteger(item.month) && item.month >= 1 && item.month <= 12)
-    .sort((a, b) => a.year - b.year || a.month - b.month || a.guid.localeCompare(b.guid));
-  const rows: MeterResultsChartRow[] = [];
-  let last: number | undefined;
-  for (const reading of ordered) {
-    const month = reading.year * 12 + reading.month - 1;
-    if (last !== undefined && month > last + 1) {
-      for (let missing = last + 1; missing < month; missing++) rows.push(previewRow(`gap-${missing}`, missing, null));
-    }
-    rows.push(previewRow(reading.guid, month, Number.isFinite(reading.amount) ? reading.amount : null));
-    last = month;
-  }
-  return rows;
-}
-function previewRow(key: string, month: number, value: number | null): MeterResultsChartRow {
-  const date = new Date(0); date.setUTCFullYear(Math.floor(month / 12), month % 12, 1);
-  return { periodKey: key, periodLabel: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }), sortValue: date.getTime(), values: { value } };
+  return [...entries].sort((a, b) => compareEntries(a, b, sort));
 }

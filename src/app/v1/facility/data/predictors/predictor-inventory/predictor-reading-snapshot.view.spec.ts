@@ -5,7 +5,7 @@ import { buildPredictorInventory } from '@app/v1/facility/data/predictors/predic
 import { inventoryNavigation, inventoryPredictor, inventoryReading, inventoryWorkspace } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.testing';
 import { makeFinding, StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
 import { presentFindings } from '@app/v1/status/status.catalog';
-import { buildPredictorSnapshots } from './portfolio-predictor-snapshot.view';
+import { buildPredictorSnapshots } from './predictor-reading-snapshot.view';
 
 const navigation = { ...inventoryNavigation, facilityMeterRoute: () => ['/unused'] };
 const row = (month: number, amount=10, options: Partial<IdbPredictorData>={}) => inventoryReading('p1',{guid:`r${month}`,year:2026,month,amount,...options});

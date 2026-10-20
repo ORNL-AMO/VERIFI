@@ -50,11 +50,7 @@
         }
       </section>
     }
-    <div class="facility-meters__chart-dock">
-      <button type="button" class="facility-meters__chart-handle" aria-haspopup="dialog" [attr.aria-expanded]="chartsOpen()" aria-controls="meter-chart-sheet" [disabled]="saving() || !meterCards().length" (click)="openCharts()" (pointerdown)="startChartPull($event)" (pointerup)="finishChartPull($event)" (pointercancel)="cancelChartPull()">
-        <span class="facility-meters__grip" aria-hidden="true"></span><app-ui-icon name="chevronUp"/><span>Charts</span>
-      </button>
-    </div>
+    <app-inventory-chart-dock [open]="chartsOpen()" [disabled]="saving() || !meterCards().length" (opened)="openCharts()"/>
   </section>
 }
 <ng-template #addMeterPanel>
@@ -77,6 +73,6 @@
 
 <ng-template #chartSheet>
   @if (chartsOpen()) {
-    <app-meter-chart-sheet [charts]="chartViews()" [facilityName]="workspace.facility()?.name || 'Facility'" [state]="workspace.calendarizationState()" [view]="chartView()" (viewChanged)="chartView.set($event)" [zoomRange]="zoomRange()" (zoomChanged)="zoomRange.set($event)" (closed)="closeCharts()"/>
+    <app-inventory-chart-sheet [charts]="chartViews()" [facilityName]="workspace.facility()?.name || 'Facility'" [state]="workspace.calendarizationState()" [view]="chartView()" (viewChanged)="chartView.set($event)" [zoomRange]="zoomRange()" (zoomChanged)="zoomRange.set($event)" (closed)="closeCharts()"/>
   }
 </ng-template>

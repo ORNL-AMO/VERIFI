@@ -1,6 +1,6 @@
 import { buildPredictorCards, buildWeatherStationGroups } from '../models';
-import { buildPredictorInventory, filterPredictorInventory, groupPredictorInventory, buildPredictorPreviewRows, predictorStatusPresentation, PredictorInventoryFilters } from './predictor-inventory.models';
-import { inventoryPredictor, inventoryReading, inventoryWorkspace } from './predictor-inventory.testing';
+import { buildPredictorInventory, filterPredictorInventory, groupPredictorInventory, predictorStatusPresentation, PredictorInventoryFilters } from './predictor-inventory.models';
+import { inventoryPredictor, inventoryWorkspace } from './predictor-inventory.testing';
 
 const filters: PredictorInventoryFilters = { search: '', type: 'all', status: 'all', sort: 'attention' };
 function entries() { const workspace = inventoryWorkspace(5); return buildPredictorInventory(workspace.predictorCards(), workspace.weatherStationGroups(), workspace.facility()!, 'ready'); }
@@ -23,11 +23,4 @@ describe('Predictor inventory projections', () => {
     ['danger', 'ready', 'Has errors'], ['warning', 'ready', 'Has warnings'], ['success', 'ready', 'All data valid'],
     ['success', 'evaluating', 'Checks pending'], ['success', 'error', 'Checks unavailable']
   ] as const)('presents %s / %s honestly', (tone, state, label) => expect(predictorStatusPresentation(tone, state).label).toBe(label));
-  it('retains zeros, negative and duplicate readings and inserts gaps without aggregation', () => {
-    const entry = entries()[0];
-    const rows = buildPredictorPreviewRows(entry, [inventoryReading(entry.guid, { guid: 'a', amount: 0 }), inventoryReading(entry.guid, { guid: 'b', amount: -5 }), inventoryReading(entry.guid, { guid: 'c', month: 4, amount: 7 }), inventoryReading(entry.guid, { guid: 'invalid', month: 99 })]);
-    expect(rows.map(item => item.values['value'])).toEqual([0, -5, null, null, 7]);
-    expect(rows.map(item => item.periodKey)).toEqual(['a', 'b', expect.stringMatching(/^gap-/), expect.stringMatching(/^gap-/), 'c']);
-    expect(buildPredictorPreviewRows(undefined, [])).toEqual([]);
-  });
 });

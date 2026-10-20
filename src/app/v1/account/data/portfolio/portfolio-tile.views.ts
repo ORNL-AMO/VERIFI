@@ -4,13 +4,8 @@ import { PortfolioFacilityInput, PortfolioFacilityView } from './portfolio-facil
 import { PortfolioMeterView, PortfolioMeterSort } from './portfolio-meter.view';
 import { PortfolioTile } from './portfolio-inventory.models';
 import { buildFacilitySnapshots, FacilitySnapshotNavigation } from './portfolio-facility-snapshot.view';
-import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { StatusEvaluationState } from '@app/v1/status/status.models';
-import { buildPredictorSnapshots } from './portfolio-predictor-snapshot.view';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { buildMeterSnapshots } from '@app/v1/shared/inventory/meter-reading-snapshot.view';
-
-type Navigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 
 export function facilityTiles(views: readonly PortfolioFacilityView[], input: PortfolioFacilityInput, nav: FacilitySnapshotNavigation): PortfolioTile[] {
   const snapshots = buildFacilitySnapshots(input, nav);
@@ -27,19 +22,6 @@ export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<Works
     owner: { label: view.facility.name, route: nav.facilityDataRoute(view.facility.guid, 'meters') }, chip: view.meter.source,
     status: { tone: view.statusTone, icon: view.statusIcon, label: view.statusLabel },
     meterSnapshot: snapshots.get(view.meter.guid)
-  }));
-}
-export function predictorTiles(entries: readonly PredictorInventoryEntry[], nav: Navigation, readings: readonly IdbPredictorData[], state: StatusEvaluationState): PortfolioTile[] {
-  const snapshots = buildPredictorSnapshots(entries, readings, state, nav);
-  return entries.map(entry => ({ guid: entry.guid, name: entry.card.predictor.name, icon: entry.card.icon,
-    route: entry.station ? nav.facilityWeatherPredictorRoute(entry.facility.guid, entry.station.routeKey) : nav.facilityPredictorRoute(entry.facility.guid, entry.guid, 'settings'),
-    owner: { label: entry.facility.name, route: nav.facilityDataRoute(entry.facility.guid, 'predictors') }, chip: entry.chip,
-    simpleChip: entry.station ? entry.card.weatherTypeLabel : undefined,
-    station: entry.station ? `${entry.station.stationName}${entry.station.needsStationRepair ? ' · Station required' : entry.station.hasConflictingStationNames ? ' · Station names differ' : ''}` : undefined,
-    stationIssue: entry.station?.needsStationRepair ? 'Station required' : entry.station?.hasConflictingStationNames ? 'Station names differ' : undefined,
-    status: entry.status,
-    stationLink: entry.station ? { label: entry.station.stationName, route: nav.facilityWeatherPredictorRoute(entry.facility.guid, entry.station.routeKey) } : undefined,
-    predictorSnapshot: snapshots.get(entry.guid)
   }));
 }
 

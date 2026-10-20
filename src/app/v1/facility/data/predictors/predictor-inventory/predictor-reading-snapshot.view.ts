@@ -4,14 +4,14 @@ import { PredictorInventoryEntry } from '@app/v1/facility/data/predictors/predic
 import { formatPredictorReadingAmount, predictorMonthKey, validPredictorReadingDate } from '@app/v1/facility/data/predictors/models/predictor-reading.models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
-import { PortfolioReadingSnapshot, PortfolioRecentReading, PortfolioTileFact, PortfolioTileLink } from './portfolio-inventory.models';
+import { InventoryReadingSnapshot, InventoryRecentReading, InventoryTileFact, InventoryTileLink } from '@app/v1/shared/inventory/inventory.models';
 import { inventoryFindingAction } from '@app/v1/shared/inventory/inventory-finding.view';
 
 type Navigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 /** Display saved monthly records without calendarization, weather generation or aggregation. */
-export function buildPredictorSnapshots(entries: readonly PredictorInventoryEntry[], readings: readonly IdbPredictorData[], state: StatusEvaluationState, navigation: Navigation): ReadonlyMap<string, PortfolioReadingSnapshot> {
+export function buildPredictorSnapshots(entries: readonly PredictorInventoryEntry[], readings: readonly IdbPredictorData[], state: StatusEvaluationState, navigation: Navigation): ReadonlyMap<string, InventoryReadingSnapshot> {
   const byPredictor = new Map<string, IdbPredictorData[]>();
   for (const reading of readings) {
     const items = byPredictor.get(reading.predictorId) ?? [];
@@ -23,14 +23,14 @@ export function buildPredictorSnapshots(entries: readonly PredictorInventoryEntr
   }));
 }
 
-function predictorSnapshot(entry: PredictorInventoryEntry, readings: readonly IdbPredictorData[], state: StatusEvaluationState, navigation: Navigation): PortfolioReadingSnapshot {
+function predictorSnapshot(entry: PredictorInventoryEntry, readings: readonly IdbPredictorData[], state: StatusEvaluationState, navigation: Navigation): InventoryReadingSnapshot {
   const predictor = entry.card.predictor;
   const dated = readings.filter(reading => validPredictorReadingDate(reading) && reading.year <= 9999)
     .sort((a, b) => b.year - a.year || b.month - a.month || a.guid.localeCompare(b.guid));
   const active = state === 'ready' ? entry.card.statusFindings : [];
   const annotations = readingAnnotations(entry, readings, active);
   const unit = predictorDataQualityUnit(predictor);
-  const recentReadings: PortfolioRecentReading[] = dated.slice(0, 3).map(reading => {
+  const recentReadings: InventoryRecentReading[] = dated.slice(0, 3).map(reading => {
     const findings = annotations.get(reading) ?? [];
     const tone = findings.some(finding => finding.severity === 'error') ? 'danger' : findings.length ? 'warning' : 'neutral';
     const statusLabel = state === 'error' ? 'Checks unavailable' : state !== 'ready' ? 'Checks pending'
@@ -45,7 +45,7 @@ function predictorSnapshot(entry: PredictorInventoryEntry, readings: readonly Id
   const findings = active.filter((finding): finding is StatusItem & { severity: 'error' | 'warning' } => finding.severity !== 'information')
     .sort((a, b) => (a.severity === b.severity ? 0 : a.severity === 'error' ? -1 : 1) || a.title.localeCompare(b.title) || a.id.localeCompare(b.id));
   const latest = dated[0], first = dated.at(-1);
-  const facts: PortfolioTileFact[] = [
+  const facts: InventoryTileFact[] = [
     ...(predictor.description?.trim() ? [{ label: 'Description', value: predictor.description.trim() }] : [])
   ];
   return {
@@ -62,7 +62,7 @@ function predictorSnapshot(entry: PredictorInventoryEntry, readings: readonly Id
   };
 }
 
-function findingAction(entry: PredictorInventoryEntry, finding: StatusItem, navigation: Navigation): PortfolioTileLink | undefined {
+function findingAction(entry: PredictorInventoryEntry, finding: StatusItem, navigation: Navigation): InventoryTileLink | undefined {
   const destination = finding.destination;
   if (entry.station && destination.kind === 'predictor-tab') {
     return destination.tab === 'quality'

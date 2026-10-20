@@ -9,7 +9,7 @@
   </div>
   <div class="portfolio-tile__metadata">
   @if (locationLabel) { <p class="portfolio-tile__location"><app-ui-icon name="location" [size]="18"/>{{ locationLabel }}</p> }
-  @if (tile.owner || (level === 'detailed' && tile.meterSnapshot)) {
+  @if (tile.owner || (level === 'detailed' && tile.meterSnapshot) || (level !== 'simple' && tile.stationLink)) {
     <div class="portfolio-tile__ownership">
       @if (tile.owner; as owner) { <a class="portfolio-tile__owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" (click)="open($event, owner.route)"><app-ui-icon name="facility" [size]="18"/>{{ owner.label }}</a> }
       @if (level === 'detailed' && tile.meterSnapshot; as snapshot) {

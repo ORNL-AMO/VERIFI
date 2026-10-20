@@ -5,48 +5,40 @@
 <section class="facility-predictors" [class.facility-predictors--scrolled]="collapsed()" [appBrowseHeader]="stickyHeader" [browseMarker]="marker" browseOffsetProperty="--predictor-sticky-height" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="browseIds()" aria-labelledby="facility-predictors-title">
   <span #marker class="facility-predictors__marker" aria-hidden="true"></span>
   <div #stickyHeader class="facility-predictors__sticky"><header class="v1-section-header v1-facility-predictors__header v1-page-header">
-    <app-page-identity [breadcrumbs]="breadcrumbs()" title="Predictors" icon="predictor" headingId="facility-predictors-title"/>
+    <app-page-identity class="facility-predictors__identity" [breadcrumbs]="breadcrumbs()" title="Predictors" icon="predictor" headingId="facility-predictors-title"/>
     <div class="v1-facility-predictors__header-actions" aria-label="Predictor actions">
       <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', account?.guid, 'imports', 'upload']" [queryParams]="{ facilityGuid: facility.guid, returnUrl: '/v1/workspace/facility/' + facility.guid + '/data/predictors' }"><app-ui-icon name="uploadData"/>Upload data</a>
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddPredictor()"><app-ui-icon name="add"/>Add predictor</button>
       <a class="v1-btn v1-facility-predictors__validation" [routerLink]="['/v1/workspace/facility', facility.guid, 'settings', 'data-validation']"><app-ui-icon name="settings"/>Data Validation</a>
     </div>
   </header></div>
-  <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four facility-predictors__toolbar" aria-label="Predictor filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
+  <form class="v1-data-browse-toolbar facility-predictors__toolbar" aria-label="Predictor filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
     <label class="facility-predictors__search"><span>Showing {{ matching().length }} of {{ entries().length }} predictors</span><input class="v1-input" type="search" formControlName="search" aria-label="Find predictor, type, station, unit, or status" placeholder="Find predictor, type, station, unit, or status"></label>
     <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">All data valid</option></select></label>
     <label><span>Type</span><select class="v1-select" formControlName="type"><option value="all">All</option><option value="standard">Standard</option><option value="weather">Weather</option></select></label>
     <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="predictorName">Predictor name</option><option value="latestReading">Latest reading</option></select></label>
+    <label><span>Detail level</span><select class="v1-select" [formControl]="detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
+    @if (!selecting() && entries().length) { <button type="button" class="v1-btn v1-btn--quiet facility-predictors__select" [disabled]="!canAct() || !matching().length" (click)="startSelection()">Select predictors</button> }
   </form>
   @if (!workspace.canWrite()) { <p class="v1-alert v1-alert--warning" role="status">Predictor actions are unavailable while the workspace is loading or switching.</p> }
   @else if (workspace.hasPending()) { <p class="v1-alert v1-alert--info" role="status">Another workspace update is still finishing.</p> }
   @if (actionError() && !deletion() && !addPredictorOpen()) { <p class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</p> }
   @if (!entries().length) { <article class="v1-empty-state" role="status"><h2>No predictors</h2><p>Add or upload a predictor to get started.</p></article> }
   @else {
-    <div class="facility-predictors__columns" [class.facility-predictors__columns--large]="showFooter()" [class.facility-predictors__columns--expanded]="expanded()">
-      <section id="facility-predictor-directory" class="facility-predictors__list" aria-label="Predictor directory">
-        <header class="facility-predictors__list-heading"><h2>Predictors</h2>
-          @if (expanded()) { <button type="button" class="v1-btn v1-btn--quiet" aria-label="Return to list and charts" (click)="toggleExpanded()"><app-ui-icon name="chartLine"/>Show charts</button> }
-          @if (!selecting()) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct() || !matching().length" (click)="startSelection()">Select predictors</button> }
-        </header>
-        @if (selecting()) { <div class="facility-predictors__selection" role="group" aria-label="Predictor selection"><span aria-live="polite">{{ selected().length }} selected</span>
-          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct() || !matching().length" (click)="selectAll()">Select all matching</button>
-          <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct() || !selected().length" (click)="requestDeleteSelected()">Delete selected</button>
-          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelSelection()">Cancel selection</button>
-        </div> }
-        @if (!matching().length) { <div class="facility-predictors__empty" role="status"><h3>No predictors match these filters</h3><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></div> }
-        <app-predictor-directory [entries]="visible()" [sort]="filters().sort" [selecting]="selecting()" [selected]="selected()" [canAct]="canAct()" [previewGuid]="previewGuid()" [showPreview]="!expanded()" [twoColumns]="showFooter()" [roundedBottom]="!showFooter()" (selectionChanged)="changeSelection($event)" (previewSelected)="selectPreview($event)" (stationOpened)="openStation($event)" (action)="handleAction($event)"/>
-        @if (showFooter()) { <nav class="facility-predictors__pagination" aria-label="Predictor list display">
-          <button #displayToggle type="button" class="v1-btn v1-btn--quiet" [attr.aria-expanded]="expanded()" aria-controls="facility-predictor-directory" (click)="toggleExpanded()"><app-ui-icon [name]="expanded() ? 'chartLine' : 'chevronDown'"/>{{ expanded() ? 'Show charts' : 'Expand list' }}</button>
-          @if (!expanded()) { <span aria-live="polite">Predictors {{ pageStart() }}–{{ pageEnd() }} of {{ matching().length }}</span><div>
-            <button type="button" class="v1-icon-btn" aria-label="Previous predictor page" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)"><app-ui-icon name="chevronLeft"/></button><span>Page {{ currentPage() }} of {{ pageCount() }}</span>
-            <button type="button" class="v1-icon-btn" aria-label="Next predictor page" [disabled]="currentPage() === pageCount()" (click)="changePage(currentPage() + 1)"><app-ui-icon name="chevronRight"/></button></div>
-          } @else { <span aria-live="polite">All {{ matching().length }} matching predictors</span> }
-        </nav> }
-      </section>
-      @if (!expanded()) { <app-predictor-preview [entry]="preview()" [rows]="previewRows()" [zoom]="zoom()" (zoomChanged)="zoom.set($event)"/> }
-    </div>
+    <section class="facility-predictors__inventory" aria-label="Predictor inventory">
+      @if (selecting()) { <div class="facility-predictors__selection" role="group" aria-label="Predictor selection"><span aria-live="polite">{{ selected().length }} selected</span>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct() || !matching().length" (click)="selectAll()">Select all matching</button>
+        <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct() || !selected().length" (click)="requestDeleteSelected()">Delete selected</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelSelection()">Cancel selection</button>
+      </div> }
+      @if (!matching().length) { <div class="facility-predictors__empty" role="status"><h3>No predictors match these filters</h3><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></div> }
+      @else {
+        <app-inventory-grid [tiles]="visibleTiles()" [printTiles]="tiles()" [detail]="detail()" [overrides]="overrides()" [actionsByGuid]="tileActions()" [selecting]="selecting()" [selected]="selected()" [canSelect]="canAct()" [canSelectByGuid]="selectable()" [page]="currentPage() - 1" [pages]="pageCount()" [start]="pageStart()" [end]="pageEnd()" [total]="matching().length"
+          (pageSelected)="changePage($event + 1)" (detailChanged)="setTileDetail($event)" (actionRequested)="handleAction($event)" (selectionChanged)="changeSelection($event)" (navigationRequested)="navigateRoute($event)" (layoutReady)="layoutReady.set($event)"/>
+      }
+    </section>
   }
+  <app-inventory-chart-dock [open]="chartsOpen()" [disabled]="saving() || !entries().length" (opened)="openCharts()"/>
 </section>
 }
 <ng-template #addPanel>@if (addPredictorOpen()) { <app-predictor-draft-slideout [saving]="saving()" [error]="actionError()" [canSubmit]="canAct()" (submitted)="savePredictorDraft($event)" (weatherSelected)="openWeatherWorkbench()" (cancelled)="closeAddPredictor()"/> }</ng-template>
@@ -58,5 +50,11 @@
       <p>Affected analyses: {{ affectedAnalyses().length }}</p><ul>@for (analysis of affectedAnalyses(); track analysis.guid) { <li>{{ analysis.name }}</li> }</ul></div>
       @if (actionError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</p> }
     </app-confirmation-dialog>
+  }
+</ng-template>
+
+<ng-template #chartSheet>
+  @if (chartsOpen()) {
+    <app-inventory-chart-sheet resource="predictors" [scrollableTabs]="true" [showTraceControls]="false" [charts]="chartViews()" [facilityName]="workspace.facility()?.name || 'Facility'" [state]="workspace.isLoading() ? 'loading' : 'ready'" [view]="chartView()" (viewChanged)="chartView.set($event)" [zoomRange]="zoom()" (zoomChanged)="zoom.set($event)" [smoothLines]="false" [showPointSymbols]="true" (closed)="closeCharts()"/>
   }
 </ng-template>

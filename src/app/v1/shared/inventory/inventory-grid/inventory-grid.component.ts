@@ -19,6 +19,7 @@ export class InventoryGridComponent {
   @Input() selecting = false;
   @Input() selected: readonly string[] = [];
   @Input() canSelect = true;
+  @Input() canSelectByGuid: Readonly<Record<string, boolean>> = {};
   @Output() readonly actionRequested = new EventEmitter<InventoryTileActionRequest>();
   @Output() readonly selectionChanged = new EventEmitter<{ guid: string; selected: boolean }>();
   @Input() page = 0;

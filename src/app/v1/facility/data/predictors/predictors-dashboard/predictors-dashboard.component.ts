@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, ElementRef, TemplateRef, ViewContainerRef, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { Component, DestroyRef, TemplateRef, ViewContainerRef, computed, effect, inject, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
@@ -16,14 +16,20 @@ import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-ident
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../predictor-workspace-actions.service';
 import { PredictorDraft } from '../models';
-import { buildPredictorInventory, buildPredictorPreviewRows, filterPredictorInventory, groupPredictorInventory, orderPredictorInventory, PredictorInventoryActionRequest, PredictorInventorySort, PredictorStatusFilter, PredictorTypeFilter } from '../predictor-inventory/predictor-inventory.models';
-import { PredictorDirectoryComponent } from '../predictor-inventory/predictor-directory/predictor-directory.component';
+import { buildPredictorInventory, filterPredictorInventory, groupPredictorInventory, orderPredictorInventory, PredictorInventoryActionRequest, PredictorInventorySort, PredictorStatusFilter, PredictorTypeFilter } from '../predictor-inventory/predictor-inventory.models';
 import { PredictorDraftSlideoutComponent } from './predictor-draft-slideout/predictor-draft-slideout.component';
-import { PredictorPreviewComponent } from './predictor-preview/predictor-preview.component';
+import { InventoryGridComponent } from '@app/v1/shared/inventory/inventory-grid/inventory-grid.component';
+import { InventoryDetailLevel, InventoryTileDetailChange, InventoryTileMenuAction } from '@app/v1/shared/inventory/inventory.models';
+import { InventoryChartSheetComponent } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.component';
+import { InventoryChartSheetView, DEFAULT_INVENTORY_CHART_VIEW } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.models';
+import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
+import { InventorySeriesStyle, buildInventoryChartStyles } from '@app/v1/shared/charts/inventory-chart-styles';
+import { buildPredictorTiles } from '../predictor-inventory/predictor-tile.view';
+import { buildPredictorCharts } from './predictor-chart.view';
 
 @Component({ selector: 'app-predictors-dashboard', standalone: true,
   templateUrl: './predictors-dashboard.component.html', styleUrls: ['./predictors-dashboard.component.css'],
-  imports: [ReactiveFormsModule, RouterLink, IconComponent, ConfirmationDialogComponent, BrowseHeaderDirective, BrowsePositionDirective, PageIdentityComponent, PredictorDirectoryComponent, PredictorDraftSlideoutComponent, PredictorPreviewComponent] })
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, ConfirmationDialogComponent, BrowseHeaderDirective, BrowsePositionDirective, PageIdentityComponent, InventoryGridComponent, InventoryChartSheetComponent, InventoryChartDockComponent, PredictorDraftSlideoutComponent] })
 export class PredictorsDashboardComponent {
   private readonly router = inject(Router);
   private readonly actions = inject(PredictorWorkspaceActionsService);
@@ -34,7 +40,7 @@ export class PredictorsDashboardComponent {
   private readonly sticky = viewChild(BrowseHeaderDirective);
   private readonly addPanel = viewChild.required<TemplateRef<unknown>>('addPanel');
   private readonly confirmation = viewChild.required<TemplateRef<unknown>>('confirmation');
-  private readonly displayToggle = viewChild<ElementRef<HTMLButtonElement>>('displayToggle');
+  private readonly chartSheet = viewChild.required<TemplateRef<unknown>>('chartSheet');
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly filtersForm = new FormGroup({ search: new FormControl('', { nonNullable: true }),
@@ -47,19 +53,23 @@ export class PredictorsDashboardComponent {
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly pageControl = new FormControl(1, { nonNullable: true });
   private readonly page = toSignal(this.pageControl.valueChanges, { initialValue: 1 });
-  readonly pageSize = 8;
-  readonly expanded = signal(false);
+  readonly pageSize = 24;
+  readonly detailControl = new FormControl<InventoryDetailLevel>('summary', { nonNullable: true });
+  readonly detail = signal<InventoryDetailLevel>('summary');
+  readonly overrides = signal<Readonly<Record<string, InventoryDetailLevel>>>({});
+  readonly layoutReady = signal(false);
+  readonly chartsOpen = signal(false);
+  readonly chartView = signal<InventoryChartSheetView>(DEFAULT_INVENTORY_CHART_VIEW);
   readonly saving = signal(false);
   readonly actionError = signal('');
   readonly addPredictorOpen = signal(false);
   readonly selecting = signal(false);
   readonly selected = signal<readonly string[]>([]);
   readonly deletion = signal<PredictorDeletionPreview | undefined>(undefined);
-  readonly previewGuid = signal<string | undefined>(undefined);
   readonly zoom = signal({ start: 0, end: 100 });
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly collapsed = computed(() => this.sticky()?.collapsed() ?? false);
-  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState()));
+  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState()) && (!this.matching().length || this.layoutReady()));
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) }, { label: facility.name }] : [];
@@ -73,11 +83,23 @@ export class PredictorsDashboardComponent {
   readonly currentPage = computed(() => Math.max(1, Math.min(this.page(), this.pageCount())));
   readonly pageStart = computed(() => this.matching().length ? (this.currentPage() - 1) * this.pageSize + 1 : 0);
   readonly pageEnd = computed(() => Math.min(this.currentPage() * this.pageSize, this.matching().length));
-  readonly showFooter = computed(() => this.pageCount() > 1 || this.expanded());
-  readonly visible = computed(() => this.expanded() ? this.matching() : this.matching().slice(this.pageStart() - 1, this.pageEnd()));
+  readonly visible = computed(() => this.matching().slice(this.pageStart() - 1, this.pageEnd()));
   readonly browseIds = computed(() => this.visible().map(item => item.guid));
-  readonly preview = computed(() => this.visible().find(item => item.guid === this.previewGuid()));
-  readonly previewRows = computed(() => buildPredictorPreviewRows(this.preview(), this.workspace.predictorReadings()));
+  readonly tiles = computed(() => buildPredictorTiles(this.matching(), this.navigation, this.workspace.predictorReadings(), this.workspace.statusState(), false));
+  readonly visibleTiles = computed(() => this.tiles().slice(this.pageStart() - 1, this.pageEnd()));
+  readonly tileActions = computed(() => Object.fromEntries(this.entries().map(entry => {
+    const actions: InventoryTileMenuAction[] = [{ id: 'readings', label: 'Open readings', icon: 'invoice' }];
+    if (entry.station) actions.push({ id: 'quality', label: 'Quality Report', icon: 'warning' });
+    if (entry.canCopy) actions.push({ id: 'copy', label: 'Copy predictor', icon: 'copy', disabled: !this.canAct() });
+    if (entry.canDelete) actions.push({ id: 'delete', label: 'Delete predictor', icon: 'delete', disabled: !this.canAct() });
+    return [entry.guid, actions];
+  })));
+  readonly selectable = computed(() => Object.fromEntries(this.entries().map(entry => [entry.guid, entry.canDelete])));
+  readonly chartStyles = linkedSignal<{ context: string; guids: readonly string[] }, ReadonlyMap<string, InventorySeriesStyle>>({
+    source: () => ({ context: JSON.stringify(this.browseKey()), guids: this.entries().map(entry => entry.guid) }),
+    computation: (source, previous) => buildInventoryChartStyles(source.guids, previous?.source.context === source.context ? previous.value : undefined)
+  });
+  readonly chartViews = computed(() => buildPredictorCharts(this.entries(), this.workspace.predictorReadings(), this.chartStyles()));
   readonly deletionGroups = computed(() => {
     const ids = new Set(this.deletion()?.predictors.map(item => item.guid));
     return groupPredictorInventory(this.entries().filter(item => ids.has(item.guid)), 'predictorName');
@@ -92,26 +114,39 @@ export class PredictorsDashboardComponent {
     let previousContext = '', previousFilter = '', previousSort = '';
     let previousKey: BrowseKey<'facilityPredictors'> | undefined;
     let previousView: FacilityPredictorBrowseView | undefined;
+    const detailSubscription = this.detailControl.valueChanges.subscribe(level => { this.detail.set(level); this.overrides.set({}); });
+    this.destroy.onDestroy(() => detailSubscription.unsubscribe());
     effect(() => {
       const key = this.browseKey(), context = JSON.stringify(key);
       const filters = this.filters(), filter = JSON.stringify([filters.search, filters.status, filters.type]);
-      const entries = this.entries(); this.page(); this.pageCount(); this.expanded(); this.previewGuid(); this.zoom();
+      const entries = this.entries(); this.page(); this.pageCount(); this.detail(); this.overrides(); this.zoom(); this.chartView();
+      if (!this.workspace.canWrite()) {
+        if (context !== previousContext) { this.closePortal(); this.selecting.set(false); this.selected.set([]); }
+        return;
+      }
       untracked(() => {
         if (context !== previousContext) {
           if (previousKey && previousView) this.browseState.savePredictorView(previousKey, previousView);
           this.closePortal(); this.actionError.set(''); this.selecting.set(false); this.selected.set([]);
           const restored = key ? this.browseState.readPredictorView(key) : undefined;
-          this.pageControl.setValue(Math.min(restored?.page ?? 1, this.pageCount())); this.expanded.set(restored?.expanded ?? false);
-          this.previewGuid.set(restored?.previewGuid); this.zoom.set(restored?.zoom ?? { start: 0, end: 100 });
+          this.pageControl.setValue(Math.min(restored?.page ?? 1, this.pageCount()));
+          this.detail.set(restored?.detail ?? 'summary'); this.detailControl.setValue(restored?.detail ?? 'summary', { emitEvent: false });
+          const existing = new Set(entries.map(entry => entry.guid));
+          this.overrides.set(Object.fromEntries(Object.entries(restored?.overrides ?? {}).filter(([guid]) => existing.has(guid))));
+          this.zoom.set(restored?.zoom ?? { start: 0, end: 100 });
+          this.chartView.set({ ...DEFAULT_INVENTORY_CHART_VIEW, metric: restored?.chartGuid ?? DEFAULT_INVENTORY_CHART_VIEW.metric });
         } else {
           if (filter !== previousFilter) { this.selected.set([]); this.pageControl.setValue(1); this.closeConfirmation(); }
           else if (filters.sort !== previousSort) this.pageControl.setValue(1);
           else if (this.page() > this.pageCount()) this.pageControl.setValue(this.pageCount());
           const existing = new Set(entries.map(item => item.guid));
           this.selected.update(ids => ids.filter(id => existing.has(id)));
+          const overrides = Object.fromEntries(Object.entries(this.overrides()).filter(([guid]) => existing.has(guid)));
+          if (Object.keys(overrides).length !== Object.keys(this.overrides()).length) this.overrides.set(overrides);
         }
-        const visible = this.visible();
-        if (!visible.some(item => item.guid === this.previewGuid())) this.selectPreview(visible[0]?.guid);
+        if (this.chartView().metric !== DEFAULT_INVENTORY_CHART_VIEW.metric && !entries.some(entry => entry.guid === this.chartView().metric)) {
+          this.chartView.set(DEFAULT_INVENTORY_CHART_VIEW); this.zoom.set({ start: 0, end: 100 });
+        }
         previousKey = key; previousContext = context; previousFilter = filter; previousSort = filters.sort;
         previousView = this.viewState();
       });
@@ -128,14 +163,19 @@ export class PredictorsDashboardComponent {
       });
     });
     this.destroy.onDestroy(() => {
-      if (previousKey) this.browseState.savePredictorView(previousKey, this.viewState());
+      if (previousKey && previousView) this.browseState.savePredictorView(previousKey, previousView);
       this.closePortal();
     });
   }
-  private viewState(): FacilityPredictorBrowseView { return { page: this.currentPage(), expanded: this.expanded(), previewGuid: this.previewGuid(), zoom: this.zoom() }; }
-  selectPreview(guid: string | undefined): void { if (guid !== this.previewGuid()) { this.previewGuid.set(guid); this.zoom.set({ start: 0, end: 100 }); } }
+  private viewState(): FacilityPredictorBrowseView { return { page: this.currentPage(), detail: this.detail(), overrides: this.overrides(), chartGuid: this.chartView().metric, zoom: this.zoom() }; }
+  setTileDetail(change: InventoryTileDetailChange): void { this.overrides.update(current => ({ ...current, [change.guid]: change.level })); }
   changePage(page: number): void { if (page >= 1 && page <= this.pageCount()) this.pageControl.setValue(page); }
-  toggleExpanded(): void { this.expanded.update(value => !value); if (!this.expanded()) this.displayToggle()?.nativeElement.focus(); }
+  openCharts(): void {
+    if (this.chartsOpen() || this.saving()) return;
+    this.closePortal(); this.chartsOpen.set(true); this.portal.show(new TemplatePortal(this.chartSheet(), this.viewContainer));
+  }
+  closeCharts(): void { if (this.chartsOpen()) { this.portal.hide(); this.chartsOpen.set(false); } }
+  navigateRoute(route: readonly string[]): void { void this.navigate([...route]); }
   clearFilters(): void { this.filtersForm.patchValue({ search: '', status: 'all', type: 'all' }); }
   startSelection(): void { if (this.canAct()) this.selecting.set(true); }
   cancelSelection(): void { if (!this.saving()) { this.selecting.set(false); this.selected.set([]); } }
@@ -155,11 +195,12 @@ export class PredictorsDashboardComponent {
   closeConfirmation(): void { if (!this.saving() && this.deletion()) this.closePortal(); }
   openAddPredictor(): void {
     if (!this.canAct()) return;
-    this.actionError.set(''); this.addPredictorOpen.set(true); this.portal.show(new TemplatePortal(this.addPanel(), this.viewContainer));
+    this.closeCharts(); this.actionError.set(''); this.addPredictorOpen.set(true); this.portal.show(new TemplatePortal(this.addPanel(), this.viewContainer));
   }
   closeAddPredictor(): void { if (!this.saving()) this.closePortal(); }
   private closePortal(): void {
-    if (this.addPredictorOpen() || this.deletion()) this.portal.hide();
+    if (this.addPredictorOpen() || this.deletion() || this.chartsOpen()) this.portal.hide();
+    this.chartsOpen.set(false);
     this.addPredictorOpen.set(false); this.deletion.set(undefined);
   }
   async openWeatherWorkbench(): Promise<void> {
@@ -180,7 +221,6 @@ export class PredictorsDashboardComponent {
       this.selected.set([]); this.selecting.set(false); this.closePortal();
     });
   }
-  openStation(key: string): void { const facility = this.workspace.facility(); if (facility) void this.navigate(this.navigation.facilityWeatherPredictorRoute(facility.guid, key)); }
   handleAction(request: PredictorInventoryActionRequest): void {
     const entry = this.entries().find(item => item.guid === request.guid); if (!entry) return;
     if (request.action === 'delete') { this.requestDelete([entry.guid]); return; }

@@ -54,7 +54,7 @@ describe('facility meter list and monthly charts in Chromium', () => {
     await page.viewport(1600, 1000);
     expect(host.querySelector('canvas')).toBeNull();
     expect(host.querySelector('.portfolio-tile__name svg')).toBeNull();
-    const handle = host.querySelector<HTMLButtonElement>('.facility-meters__chart-handle')!;
+    const handle = host.querySelector<HTMLButtonElement>('.inventory-chart-dock__handle')!;
     expect(handle.getBoundingClientRect().bottom).toBeCloseTo(1000, 0);
     await page.getByRole('button', { name: 'Next', exact: true }).click(); fixture.detectChanges();
     expect(component.currentPage()).toBe(2); expect(visibleCards()).toHaveLength(24);
@@ -72,7 +72,7 @@ describe('facility meter list and monthly charts in Chromium', () => {
     const chart = echarts.getInstanceByDom(chartElement)!;
     const series = () => (chart.getOption() as any).series.filter((item: any) => item?.type === 'line');
     await vi.waitFor(() => expect(series()).toHaveLength(42));
-    const chips = () => [...dialog.querySelectorAll<HTMLButtonElement>('.meter-chart-sheet__chip')];
+    const chips = () => [...dialog.querySelectorAll<HTMLButtonElement>('.inventory-chart-sheet__chip')];
     expect(chips()).toHaveLength(8);
     const firstLabel = chips()[0].textContent;
     chips()[0].click(); fixture.detectChanges();
@@ -99,7 +99,7 @@ describe('facility meter list and monthly charts in Chromium', () => {
     await vi.waitFor(() => expect(host.querySelector('[role="dialog"]')).not.toBeNull());
     expect(component.chartView().metric).toBe('cost');
     await page.getByRole('button', { name: 'Close charts', exact: true }).click(); fixture.detectChanges();
-    expect(host.querySelector('.meter-chart-sheet--closing')).not.toBeNull();
+    expect(host.querySelector('.inventory-chart-sheet--closing')).not.toBeNull();
     await vi.waitFor(() => expect(host.querySelector('[role="dialog"]')).toBeNull());
     const first = host.querySelector<HTMLAnchorElement>('.portfolio-inventory .portfolio-tile__name')!;
     first.focus(); await userEvent.keyboard('{Enter}'); expect(navigate).toHaveBeenCalled();
@@ -146,7 +146,7 @@ describe('facility meter list and monthly charts in Chromium', () => {
     expect(getComputedStyle(narrow).animationName).toBe('none');
     await userEvent.keyboard('{Escape}'); fixture.detectChanges();
     await media.send('Emulation.setEmulatedMedia', { media: 'print', features: [] });
-    expect(getComputedStyle(host.querySelector('.facility-meters__chart-dock')!).display).toBe('none');
+    expect(getComputedStyle(host.querySelector('.inventory-chart-dock')!).display).toBe('none');
     expect(getComputedStyle(host.querySelector('.portfolio-inventory-print')!).display).toBe('grid');
     expect(host.querySelectorAll('.portfolio-inventory-print .portfolio-tile')).toHaveLength(64);
     await media.send('Emulation.setEmulatedMedia', { media: '' });

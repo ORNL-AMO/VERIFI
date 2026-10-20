@@ -1,6 +1,7 @@
+import { buildInventoryChartStyles } from '@app/v1/shared/charts/inventory-chart-styles';
 import { facility, meter, reading, calendarizedMeter, monthlyData } from '../facility-meters.testing';
 import { buildMeterCards } from '../models';
-import { buildMeterInventory, buildMonthlyTrends, buildMeterChartStyles } from './meters-dashboard.view';
+import { buildMeterInventory, buildMonthlyTrends } from './meters-dashboard.view';
 
 describe('facility meter dashboard projections', () => {
   const electric = meter({ guid: 'e', name: 'Main' });
@@ -34,14 +35,14 @@ describe('facility meter dashboard projections', () => {
     expect(all[0].metrics[0].color).toBe(filtered[0].metrics[0].color);
     expect(all[0].metrics[0].color).toBe(all[2].metrics[0].color);
     expect(all[2].metrics[0].label).not.toBe(all[2].metrics[1].label);
-    expect(buildMeterChartStyles(['e']).get('e')).toEqual(buildMeterChartStyles(['e']).get('e'));
+    expect(buildInventoryChartStyles(['e']).get('e')).toEqual(buildInventoryChartStyles(['e']).get('e'));
   });
 
   it('assigns distinct combinations to 64 meters and retains assignments on filtering, reordering, additions and deletions', () => {
     const guids = Array.from({ length: 64 }, (_, index) => `m-${index}`);
-    const styles = buildMeterChartStyles(guids);
+    const styles = buildInventoryChartStyles(guids);
     expect(new Set([...styles.values()].map(style => `${style.color}/${JSON.stringify(style.lineStyle)}`)).size).toBe(64);
-    const next = buildMeterChartStyles(['new', ...guids.slice(1).reverse()], styles);
+    const next = buildInventoryChartStyles(['new', ...guids.slice(1).reverse()], styles);
     for (const guid of guids.slice(1)) expect(next.get(guid)).toEqual(styles.get(guid));
   });
 

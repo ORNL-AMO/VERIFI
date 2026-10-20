@@ -22,7 +22,7 @@ import { PredictorsDashboardComponent } from './predictors-dashboard.component';
 class DashboardHost { readonly portal = inject(ModalPortalService); }
 
 describe('compact Predictor journey in Chromium', () => {
-  it('renders a large mixed inventory, previews stored values, manages selection, and adapts to themes and window sizes', async () => {
+  it('renders full-width cards and an independent, keyboard-accessible chart sheet across themes, resizing and printing', async () => {
     await page.viewport(1600, 900);
     const workspace = inventoryWorkspace(64);
     workspace.predictors.update(items => items.map((item, index) => ({ ...item, name: index === 0 ? 'A long production predictor name for line one and several factory wing identifiers' : item.name })));
@@ -36,33 +36,48 @@ describe('compact Predictor journey in Chromium', () => {
     const fixture = TestBed.createComponent(DashboardHost); fixture.detectChanges();
     const root = fixture.nativeElement.querySelector('.v1-root') as HTMLElement;
     const component = fixture.debugElement.query(By.directive(PredictorsDashboardComponent)).componentInstance as PredictorsDashboardComponent;
+    const cards = () => root.querySelectorAll('.portfolio-inventory .portfolio-tile');
+    await vi.waitFor(() => expect(cards()).toHaveLength(24));
+    expect(root.querySelector('canvas')).toBeNull();
+    const handle = root.querySelector<HTMLButtonElement>('.inventory-chart-dock__handle')!;
+    expect(handle.getBoundingClientRect().bottom).toBeCloseTo(900, 0);
+    const search = page.getByRole('searchbox', { name: 'Find predictor, type, station, unit, or status' });
+    await search.fill('p2'); fixture.detectChanges();
+    expect(component.matching().every(item => item.card.predictor.name.includes('p2'))).toBe(true);
+    expect(component.chartViews().flatMap(chart => chart.metrics)).toHaveLength(64);
+    handle.focus(); await userEvent.keyboard('{Enter}'); fixture.detectChanges();
     await vi.waitFor(() => expect(root.querySelector('canvas')).not.toBeNull());
-    expect(root.querySelectorAll('.predictor-directory__open')).toHaveLength(8);
-    const columns = root.querySelector('.facility-predictors__columns')!;
-    expect(getComputedStyle(columns).gridTemplateColumns.split(' ')).toHaveLength(2);
-    await page.screenshot({ element: root, path: '../../../../../../../.angular/predictors-dashboard-wide.png' });
-    const firstGuid = component.visible()[0].guid;
-    await page.getByRole('button', { name: `Preview ${component.visible()[1].card.predictor.name}`, exact: true }).click(); fixture.detectChanges();
-    expect(component.previewGuid()).not.toBe(firstGuid);
-    expect(root.querySelector('.predictor-preview h2')?.textContent).toContain(component.preview()!.card.predictor.name);
+    const dialog = root.querySelector<HTMLElement>('[role="dialog"]')!;
+    expect(handle.getAttribute('aria-controls')).toBe(dialog.id);
+    expect(dialog.getBoundingClientRect().height).toBeGreaterThan(850);
+    expect(dialog.querySelector('[aria-label="Toggle predictor traces"]')).toBeNull();
+    expect(dialog.querySelectorAll('[role="tab"]')).toHaveLength(64);
+    const chart = () => echarts.getInstanceByDom(dialog.querySelector<HTMLElement>('.v1-meter-results-chart__chart')!)!;
+    const series = () => (chart().getOption() as any).series.filter((item: any) => item?.type === 'line');
+    await vi.waitFor(() => expect(series()).toHaveLength(1));
+    expect(series()[0].data).toContain(0);
+    const tabs = dialog.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    tabs[0].focus(); await userEvent.keyboard('{ArrowRight}'); fixture.detectChanges();
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true'); expect(document.activeElement).toBe(tabs[1]);
+    await vi.waitFor(() => expect(series()[0].id).toBe(component.chartViews()[1].id));
     await page.getByRole('button', { name: 'Zoom in', exact: true }).click(); fixture.detectChanges(); expect(component.zoom()).toEqual({ start: 20, end: 80 });
-    const chart = echarts.getInstanceByDom(root.querySelector<HTMLElement>('.v1-meter-results-chart__chart')!)!;
-    expect((chart.getOption() as any).series[0].data).toContain(0);
+    expect(dialog.querySelector('.v1-meter-results-chart__accessible-data')).not.toBeNull();
+    await page.screenshot({ element: dialog, path: '../../../../../../../.angular/facility-predictor-charts-sheet.png' });
+    await userEvent.keyboard('{Escape}'); fixture.detectChanges();
+    expect(root.querySelector('.inventory-chart-sheet--closing')).not.toBeNull();
+    await vi.waitFor(() => expect(root.querySelector('[role="dialog"]')).toBeNull()); expect(document.activeElement).toBe(handle);
+    await search.fill(''); fixture.detectChanges(); expect(component.zoom()).toEqual({ start: 20, end: 80 });
     await page.getByRole('button', { name: 'Select predictors', exact: true }).click(); fixture.detectChanges();
     await page.getByRole('button', { name: 'Select all matching', exact: true }).click(); fixture.detectChanges(); expect(component.selected()).toHaveLength(64);
-    await page.getByRole('button', { name: 'Next predictor page', exact: true }).click(); fixture.detectChanges(); expect(component.selected()).toHaveLength(64);
+    await page.getByRole('button', { name: 'Next', exact: true }).click(); fixture.detectChanges(); expect(component.selected()).toHaveLength(64);
     await page.getByRole('button', { name: 'Delete selected', exact: true }).click(); fixture.detectChanges();
     expect(root.querySelector('[role="dialog"]')?.textContent).toContain('64 predictors');
     expect(root.querySelector('[role="dialog"]')?.textContent).toContain('analysis references');
     await userEvent.keyboard('{Escape}'); fixture.detectChanges(); expect(component.selected()).toHaveLength(64);
     await page.getByRole('button', { name: 'Cancel selection', exact: true }).click(); fixture.detectChanges();
-    await page.getByRole('button', { name: 'Expand list', exact: true }).click(); fixture.detectChanges(); expect(root.querySelectorAll('.predictor-directory__open')).toHaveLength(64);
-    expect(root.querySelector('app-predictor-preview')).toBeNull();
-    await page.getByRole('button', { name: 'Return to list and charts', exact: true }).click(); fixture.detectChanges();
-    expect(document.activeElement?.textContent).toContain('Expand list');
-    const search = page.getByRole('searchbox', { name: 'Find predictor, type, station, unit, or status' });
-    await search.fill('p2'); fixture.detectChanges(); expect(component.matching().every(item => item.card.predictor.name.includes('p2'))).toBe(true);
-    await search.fill(''); fixture.detectChanges();
+    component.detailControl.setValue('detailed'); fixture.detectChanges();
+    await vi.waitFor(() => expect(root.querySelector('.reading-snapshot__recent-list')).not.toBeNull());
+    expect(root.querySelector('.portfolio-inventory .portfolio-tile__station-link')?.textContent).toContain('Chicago');
     const scroll = root.querySelector('main')!; scroll.scrollTop = 300;
     await vi.waitFor(() => {
       const header = root.querySelector('.facility-predictors__sticky')!.getBoundingClientRect(), toolbar = root.querySelector('.facility-predictors__toolbar')!.getBoundingClientRect();
@@ -71,21 +86,23 @@ describe('compact Predictor journey in Chromium', () => {
     scroll.scrollTop = 0;
     for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) for (const contrast of [false, true]) {
       root.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''}${contrast ? ' v1-contrast-strong' : ''}`;
-      for (const status of root.querySelectorAll<HTMLElement>('.predictor-directory__status')) {
+      for (const status of root.querySelectorAll<HTMLElement>('.portfolio-inventory .portfolio-tile__status')) {
         const probe = document.createElement('span'); probe.style.color = getComputedStyle(status).color;
-        probe.style.background = status.closest('[data-tone="danger"], [data-tone="warning"]') ? getComputedStyle(root).getPropertyValue('--v1-surface') : getComputedStyle(status.closest('li')!).backgroundColor;
-        document.body.append(probe); expect(textContrast(probe)).toBeGreaterThanOrEqual(status.closest('[data-tone="success"]') ? 3 : 4.5); probe.remove();
+        probe.style.background = getComputedStyle(status.closest('.portfolio-tile')!).backgroundColor;
+        document.body.append(probe); expect(textContrast(probe)).toBeGreaterThanOrEqual(4.5); probe.remove();
       }
     }
     root.className = 'v1-root'; await page.viewport(390, 700); fixture.detectChanges();
-    await vi.waitFor(() => expect(getComputedStyle(columns).gridTemplateColumns.split(' ')).toHaveLength(1));
     expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);
-    await page.screenshot({ element: root, path: '../../../../../../../.angular/predictors-dashboard-narrow.png' });
+    await page.screenshot({ element: root, path: '../../../../../../../.angular/predictors-dashboard-cards-narrow.png' });
     workspace.predictors.update(items => items.slice(0, 3)); fixture.detectChanges();
-    expect(root.querySelector('[aria-label="Predictor list display"]')).toBeNull();
-    const open = root.querySelector<HTMLButtonElement>('.predictor-directory__open')!; open.focus(); await userEvent.keyboard('{Enter}'); expect(navigate).toHaveBeenCalled();
+    expect(root.querySelector('.portfolio-pagination')).toBeNull();
+    const open = root.querySelector<HTMLAnchorElement>('.portfolio-inventory .portfolio-tile__name')!; open.focus(); await userEvent.keyboard('{Enter}'); expect(navigate).toHaveBeenCalled();
     const client = cdp() as { send(command: string, params: { media: string }): Promise<void> };
-    await client.send('Emulation.setEmulatedMedia', { media: 'print' }); expect(getComputedStyle(root.querySelector('.facility-predictors__toolbar')!).display).toBe('none');
+    await client.send('Emulation.setEmulatedMedia', { media: 'print' });
+    expect(getComputedStyle(root.querySelector('.facility-predictors__toolbar')!).display).toBe('none');
+    expect(getComputedStyle(root.querySelector('.inventory-chart-dock')!).display).toBe('none');
+    expect(root.querySelectorAll('.portfolio-inventory-print .portfolio-tile')).toHaveLength(3);
     await client.send('Emulation.setEmulatedMedia', { media: '' }); fixture.destroy(); await page.viewport(1600, 900);
   });
   it('keeps individual tiles distinct and paginated when stations and predictor names repeat across 60-plus facilities', async () => {

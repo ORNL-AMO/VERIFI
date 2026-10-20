@@ -32,15 +32,15 @@ describe('session browse state', () => {
     const restored = store.readFacilityView(key)!; (restored.zoom as { start: number }).start = 50;
     expect(store.readFacilityView(key)?.zoom.start).toBe(10);
   });
-  it('keeps Predictor controls and previews isolated from Meters, other facilities and other accounts', () => {
+  it('keeps Predictor controls and card detail isolated from Meters, other facilities and other accounts', () => {
     const store = new BrowseStateService(); store.setOrigin('a', 'predictors');
     store.saveFilters({ accountGuid: 'a', kind: 'predictors' }, { search: 'Weather', type: 'weather', status: 'attention', sort: 'latestReading' });
-    store.savePredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f1' }, { page: 2, expanded: true, previewGuid: 'p1', zoom: { start: 20, end: 80 } });
+    store.savePredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f1' }, { page: 2, detail: 'summary', overrides: { p1: 'detailed' }, zoom: { start: 20, end: 80 } });
     expect(store.origin('a')).toBe('predictors'); expect(store.origin('b')).toBe('facilities');
     expect(store.readFilters({ accountGuid: 'a', kind: 'meters' })).toBeUndefined();
     expect(store.readPredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f2' })).toBeUndefined();
     expect(store.readPredictorView({ accountGuid: 'b', kind: 'facilityPredictors', facilityGuid: 'f1' })).toBeUndefined();
-    expect(store.readPredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f1' })?.previewGuid).toBe('p1');
+    expect(store.readPredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f1' })?.overrides).toEqual({ p1: 'detailed' });
   });
 
   it('hydrates without emitting edits, restores account-specific filters, and saves on destroy', () => {

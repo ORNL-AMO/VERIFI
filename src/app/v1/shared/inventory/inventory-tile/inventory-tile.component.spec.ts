@@ -71,6 +71,18 @@ describe('portfolio tile interactions and additive details', () => {
     expect(root.textContent?.match(/100 Industrial Drive/g)).toHaveLength(1);
     expect(root.querySelector('app-facility-snapshot')?.textContent).not.toContain('100 Industrial Drive');
   });
+  it('keeps station setup linked in expanded facility Predictor cards without a repeated facility owner', () => {
+    const fixture = setup(), navigate = vi.fn();
+    fixture.componentRef.setInput('tile', portfolioTile('weather', { owner: undefined, station: 'Chicago Airport',
+      stationLink: { label: 'Chicago Airport', route: ['/station', 'setup'] }, chip: 'Heating degree days · 65°F' }));
+    fixture.componentInstance.navigationRequested.subscribe(navigate);
+    for (const level of ['summary', 'detailed']) {
+      fixture.componentRef.setInput('level', level); fixture.detectChanges();
+      const link = fixture.nativeElement.querySelector('.portfolio-tile__station-link') as HTMLAnchorElement;
+      expect(link.textContent).toContain('Chicago Airport'); expect(link.href).toContain('/station/setup');
+      link.click(); expect(navigate).toHaveBeenLastCalledWith(['/station', 'setup']);
+    }
+  });
   it('emits independent detail toggles, actions and selection without navigating', () => {
     const fixture = setup(), component = fixture.componentInstance;
     const detail = vi.fn(), action = vi.fn(), selection = vi.fn(), navigation = vi.fn();

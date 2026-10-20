@@ -74,7 +74,7 @@ export interface InventoryTile {
   readonly predictorSnapshot?: InventoryReadingSnapshot;
 }
 export interface InventoryTileDetailChange { readonly guid: string; readonly level: InventoryDetailLevel; }
-export interface InventoryTileMenuAction { readonly id: 'readings' | 'copy' | 'delete'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; }
+export interface InventoryTileMenuAction { readonly id: 'readings' | 'quality' | 'copy' | 'delete'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; }
 export interface InventoryTileActionRequest { readonly guid: string; readonly action: InventoryTileMenuAction['id']; }
 export const INVENTORY_DETAIL_LEVELS: readonly InventoryDetailLevel[] = ['simple', 'summary', 'detailed'];
 export const INVENTORY_PAGE_SIZE = 24;

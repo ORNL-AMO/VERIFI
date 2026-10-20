@@ -1,3 +1,4 @@
+import { buildPredictorTiles } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-tile.view';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -5,7 +6,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { buildPredictorCards, buildWeatherStationGroups } from '@app/v1/facility/data/predictors/models';
 import { buildPredictorInventory, filterPredictorInventory, PredictorInventorySort, PredictorStatusFilter, PredictorTypeFilter } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.models';
 import { PortfolioInventoryState } from '../portfolio-inventory-state';
-import { predictorTiles, orderPortfolioPredictors } from '../portfolio-tile.views';
+import { orderPortfolioPredictors } from '../portfolio-tile.views';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
@@ -38,7 +39,7 @@ export class AccountPortfolioPredictorsTabComponent {
   readonly facilities = computed(() => [...this.workspace.facilities()].sort((a,b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
   readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters())
     .filter(item => !this.filters().facilityGuid || item.facility.guid === this.filters().facilityGuid), this.filters().sort));
-  readonly tiles = computed(() => predictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
+  readonly tiles = computed(() => buildPredictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(item => item.guid)), this.filters, this.workspace.canWrite);
   readonly browseIds = this.inventory.visibleIds;
   clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', type: 'all', sort: 'attention', facilityGuid: '' }); }

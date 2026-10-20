@@ -16,7 +16,7 @@ export interface BrowseFilters {
 export type BrowseKind = keyof BrowseFilters;
 export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; }
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
-export interface FacilityPredictorBrowseView { readonly page: number; readonly expanded: boolean; readonly previewGuid?: string; readonly zoom: { start: number; end: number }; }
+export interface FacilityPredictorBrowseView { readonly page: number; readonly detail: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; readonly chartGuid?: string; readonly zoom: { start: number; end: number }; }
 export type AccountBrowseOrigin = 'facilities' | 'meters' | 'predictors';
 export interface FacilityMeterBrowseView { readonly page: number; readonly zoom: { start: number; end: number }; readonly detail?: InventoryDetailLevel; readonly overrides?: Readonly<Record<string, InventoryDetailLevel>>; }
 
@@ -37,8 +37,8 @@ export class BrowseStateService {
   savePosition(key: BrowseKey, value: BrowsePosition): void { this.positions.set(this.id(key), value); }
   readFacilityView(key: BrowseKey<'facilityMeters'>): FacilityMeterBrowseView | undefined { const view = this.facilityViews.get(this.id(key)); return view ? { ...view, zoom: { ...view.zoom }, overrides: { ...view.overrides } } : undefined; }
   saveFacilityView(key: BrowseKey<'facilityMeters'>, value: FacilityMeterBrowseView): void { this.facilityViews.set(this.id(key), { ...value, zoom: { ...value.zoom }, overrides: { ...value.overrides } }); }
-  readPredictorView(key: BrowseKey<'facilityPredictors'>): FacilityPredictorBrowseView | undefined { return this.predictorViews.get(this.id(key)); }
-  savePredictorView(key: BrowseKey<'facilityPredictors'>, value: FacilityPredictorBrowseView): void { this.predictorViews.set(this.id(key), { ...value, zoom: { ...value.zoom } }); }
+  readPredictorView(key: BrowseKey<'facilityPredictors'>): FacilityPredictorBrowseView | undefined { const view = this.predictorViews.get(this.id(key)); return view ? { ...view, zoom: { ...view.zoom }, overrides: { ...view.overrides } } : undefined; }
+  savePredictorView(key: BrowseKey<'facilityPredictors'>, value: FacilityPredictorBrowseView): void { this.predictorViews.set(this.id(key), { ...value, zoom: { ...value.zoom }, overrides: { ...value.overrides } }); }
   readInventoryView(key: BrowseKey<AccountBrowseOrigin>): PortfolioInventoryView | undefined {
     const value = this.inventoryViews.get(this.id(key));
     return value ? { page: value.page, overrides: { ...value.overrides } } : undefined;
