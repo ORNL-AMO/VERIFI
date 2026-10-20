@@ -32,7 +32,7 @@ export class AccountPortfolioMetersTabComponent {
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly layoutReady = signal(false);
-  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready() && this.layoutReady());
+  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready() && (!this.filteredMeters().length || this.layoutReady()));
   readonly navigationError = signal('');
   readonly meters = computed(() => buildPortfolioMeters({
     facilities: this.workspace.facilities(), meters: this.workspace.meters(), readings: this.workspace.meterData(),

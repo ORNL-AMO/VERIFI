@@ -93,6 +93,25 @@ function expectResourceRows(tile: HTMLElement) {
 }
 
 describe('uniform account inventories in Chromium', () => {
+  for (const resource of ['facilities', 'meters', 'predictors'] as const) {
+    it(`restores ${resource} with no matching items to the heading and a valid scroll position`, async () => {
+      const { fixture, root, open, router } = setup(3);
+      await open(resource);
+      const search = root.querySelector<HTMLInputElement>('input[type="search"]')!;
+      await userEvent.fill(search, 'No matching saved resource'); fixture.detectChanges();
+      expect(root.querySelector('app-inventory-grid')).toBeNull();
+      await router.navigateByUrl('/v1/workspace/facility/f0/data/meters'); fixture.detectChanges();
+      TestBed.inject(BrowseStateService).savePosition({ accountGuid: account().guid, kind: resource }, { scrollTop: 9999, focusId: 'deleted-resource' });
+      await router.navigateByUrl(`/portfolio/${resource}`); fixture.detectChanges(); await fixture.whenStable();
+      expect(root.querySelector<HTMLInputElement>('input[type="search"]')!.value).toBe('No matching saved resource');
+      expect(root.querySelector('app-inventory-grid')).toBeNull();
+      await vi.waitFor(() => {
+        expect(document.activeElement).toBe(root.querySelector('h1'));
+        expect(root.scrollTop).toBe(0);
+      });
+      fixture.destroy();
+    });
+  }
   it('aligns standard and weather predictor snapshots with meter cards and keeps their workflows, themes and responsive layout usable', async()=>{
     await page.viewport(1300,1000);
     const {fixture,root,router,open,workspace,statusItems,statusState}=setup(25);
