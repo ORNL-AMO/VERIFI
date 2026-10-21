@@ -70,6 +70,27 @@ describe('WorkspaceCalendarizationService browser contract', () => {
     FakeWorker.instances[2].emitMessage({ calanderizedMeters: [calendarizedResult('account-b', 30)] });
     expect(latest?.accountGuid).toBe('account-b');
   });
+
+  it('retries a failed shared calculation once for the current snapshot and publishes to all subscribers', async () => {
+    const snapshot = signal(workspaceSnapshot('account-a', 10));
+    const service = setup(snapshot, signal(true));
+    let first: WorkspaceCalendarizationBaseResult | undefined;
+    let second: WorkspaceCalendarizationBaseResult | undefined;
+    subscriptions.push(service.calendarizeBase().subscribe(result => first = result));
+    subscriptions.push(service.calendarizeBase().subscribe(result => second = result));
+    await settleSignals();
+    FakeWorker.instances[0].emitMessage({ error: true });
+    expect(first?.state).toBe('error');
+    service.retry();
+    await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(2);
+    expect(first?.state).toBe('evaluating');
+    expect(FakeWorker.instances[0].terminate).toHaveBeenCalled();
+    FakeWorker.instances[1].emitMessage({ calanderizedMeters: [calendarizedResult('account-a', 10)] });
+    expect(first?.state).toBe('ready');
+    expect(second).toBe(first);
+    expect(snapshot().meterData[0].totalEnergyUse).toBe(10);
+  });
 });
 
 function setup(snapshot: WritableSignal<AccountWorkspaceSnapshot>, ready: WritableSignal<boolean>): WorkspaceCalendarizationService {

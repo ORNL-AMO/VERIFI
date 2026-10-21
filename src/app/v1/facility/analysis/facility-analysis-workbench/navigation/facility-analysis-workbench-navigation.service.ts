@@ -157,6 +157,7 @@ function activeAnalysisWorkbenchTabId(url: string): AnalysisWorkbenchTabId {
   const segments = url.split(/[?#]/, 1)[0].split('/');
   const tabId = segments[segments.length - 1];
   return tabId === 'regression'
+    || tabId === 'visualization'
     || tabId === 'banking'
     || tabId === 'annual'
     || tabId === 'monthly-table'

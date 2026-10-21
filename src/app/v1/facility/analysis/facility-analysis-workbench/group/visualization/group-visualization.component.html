@@ -1,0 +1,65 @@
+<section class="group-visualization" aria-label="Group visualization">
+  <section class="visualization-section visualization-controls" aria-label="Visualization controls">
+    <div class="visualization-toolbar">
+      <div class="visualization-legend" role="group" aria-label="Chart traces">
+        <button type="button" class="visualization-chip visualization-chip--locked" aria-pressed="true" aria-disabled="true"
+          title="Group usage is always shown" aria-label="Group usage, always shown">
+          <svg width="22" height="14" aria-hidden="true"><line x1="1" x2="21" y1="7" y2="7" stroke="currentColor" stroke-width="3" /></svg>
+          <span>Group usage</span><app-ui-icon name="lock" [size]="12" />
+        </button>
+        @for (predictor of legend(); track predictor.guid) {
+          <button type="button" class="visualization-chip" [attr.aria-pressed]="predictor.visible"
+            title="Click to toggle; double-click or Shift+Enter to show only this predictor" aria-keyshortcuts="Shift+Enter"
+            (click)="facade.togglePredictor(predictor.guid)" (dblclick)="facade.isolatePredictor(predictor.guid)"
+            (keydown.shift.enter)="facade.isolatePredictor(predictor.guid); $event.preventDefault()">
+            <svg width="22" height="14" aria-hidden="true"><line x1="1" x2="21" y1="7" y2="7" [attr.stroke]="predictor.style.color" stroke-width="3" [attr.stroke-dasharray]="predictor.dash" /></svg>
+            <span>{{ predictor.name }}</span>
+          </button>
+        }
+      </div>
+      <div class="visualization-tools">
+        <div class="visualization-scale" role="radiogroup" aria-label="Time series scale">
+          <label><input class="visually-hidden" type="radio" name="time-series-scale" [formControl]="scaleControl" value="raw" /><span>Raw</span></label>
+          <label><input class="visually-hidden" type="radio" name="time-series-scale" [formControl]="scaleControl" value="z-score" /><span>Z-score</span></label>
+        </div>
+        <div class="visualization-chart-actions" role="group" aria-label="Time series actions">
+          <button type="button" class="v1-icon-btn" aria-label="Zoom in" [disabled]="chartActionsDisabled()" (click)="zoom(.6)"><app-ui-icon name="zoomIn" /></button>
+          <button type="button" class="v1-icon-btn" aria-label="Zoom out" [disabled]="chartActionsDisabled()" (click)="zoom(1.6)"><app-ui-icon name="zoomOut" /></button>
+          <button type="button" class="v1-icon-btn" aria-label="Reset zoom" [disabled]="chartActionsDisabled()" (click)="facade.update({zoom: {start: 0, end: 100}})"><app-ui-icon name="refresh" /></button>
+          <button type="button" class="v1-icon-btn" aria-label="Download time series chart" [disabled]="chartActionsDisabled()" (click)="download()"><app-ui-icon name="download" /></button>
+        </div>
+      </div>
+    </div>
+    @if (!facade.predictors().length) { <p>No facility predictors are available. Add predictor readings in Data to compare relationships.</p> }
+    @else if (!facade.visiblePredictors().length) { <p>No predictors selected. Select a predictor in the legend to compare it with group usage.</p> }
+  </section>
+  <section class="visualization-section visualization-plots" [attr.aria-busy]="facade.state() === 'loading'" aria-label="Visualization plots">
+    @if (facade.state() === 'loading') {
+      <p role="status">Preparing monthly data…</p>
+    } @else if (facade.state() === 'error') {
+      <p role="alert">{{ facade.error() || 'Monthly data could not be prepared.' }}</p>
+      <button type="button" class="v1-btn" (click)="facade.retry()">Retry</button>
+    } @else if (!facade.points().length) {
+      <p>No monthly group data is available. Add meter readings in Data to explore this group.</p>
+    } @else {
+      @if (!facade.filteredPoints().length) {
+        <p>No group data is available in the analysis period.</p>
+      } @else {
+        @if (facade.partialMonths()) { <p role="status">{{ facade.partialMonths() }} months have missing or incomplete group data. Available usage is shown; incomplete months are excluded from correlation.</p> }
+        @if (facade.duplicateMonths()) { <p role="status">{{ facade.duplicateMonths() }} months have multiple saved readings for a visible predictor. Their values are summed, matching monthly analysis.</p> }
+        @if (zScoreNotice(); as notice) { <p role="status">{{ notice }}</p> }
+        <section aria-label="Time series">
+          <div class="visualization-time-series" [appV1ECharts]="option()" (dataZoomChanged)="facade.update({zoom: $event})"
+            role="img" [attr.aria-label]="chartLabel()"></div>
+        </section>
+        <section class="visualization-correlations" aria-label="Correlation plots">
+          <div class="visualization-correlation-grid">
+            @for (correlation of facade.correlations(); track correlation.predictor.guid) {
+              <app-correlation-chart [predictor]="correlation.predictor" [summary]="correlation.summary" [usageLabel]="facade.usageLabel()" />
+            }
+          </div>
+        </section>
+      }
+    }
+  </section>
+</section>

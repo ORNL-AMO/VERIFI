@@ -5,7 +5,7 @@ import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 
-export type AnalysisWorkbenchTabId = 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
+export type AnalysisWorkbenchTabId = 'setup' | 'visualization' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
 export type AnalysisWorkbenchStageKind = 'analysis' | 'group' | 'facility' | 'used-by';
 
 export interface AnalysisWorkbenchTab {
@@ -36,6 +36,7 @@ export type AnalysisWorkbenchAttention = Readonly<Record<string, StatusAttention
 export type AnalysisWorkbenchTabAttention = Readonly<Partial<Record<AnalysisWorkbenchTabId, StatusAttentionSummary>>>;
 
 export const ANALYSIS_GROUP_SETUP_TAB: AnalysisWorkbenchTab = { id: 'setup', label: 'Setup', icon: 'settings' };
+export const ANALYSIS_GROUP_VISUALIZATION_TAB: AnalysisWorkbenchTab = { id: 'visualization', label: 'Visualization', icon: 'dataVisualization' };
 export const ANALYSIS_GROUP_BANKING_TAB: AnalysisWorkbenchTab = { id: 'banking', label: 'Banked Savings', icon: 'bank' };
 export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regression', label: 'Regression', icon: 'covariate' };
 export const ANALYSIS_GROUP_ANNUAL_TAB: AnalysisWorkbenchTab = { id: 'annual', label: 'Annual', icon: 'calendar' };
@@ -62,9 +63,11 @@ export function tabsForAnalysisGroup(
   analysisHasBanking = false,
   bankingAvailable = false
 ): readonly AnalysisWorkbenchTab[] {
-  if (!group || isSkippedAnalysisType(group.analysisType)) return [ANALYSIS_GROUP_SETUP_TAB];
+  if (!group) return [ANALYSIS_GROUP_SETUP_TAB];
+  if (isSkippedAnalysisType(group.analysisType)) return [ANALYSIS_GROUP_SETUP_TAB, ANALYSIS_GROUP_VISUALIZATION_TAB];
   return [
     ANALYSIS_GROUP_SETUP_TAB,
+    ANALYSIS_GROUP_VISUALIZATION_TAB,
     ...(analysisHasBanking && group.applyBanking ? [{
       ...ANALYSIS_GROUP_BANKING_TAB,
       disabled: !bankingAvailable,

@@ -1,0 +1,157 @@
+import { Component } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import * as echarts from 'echarts/core';
+import { cdp, page, userEvent } from 'vitest/browser';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
+import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
+import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
+import { GroupVisualizationComponent } from './group-visualization.component';
+import { GroupVisualizationSession } from './group-visualization-session.service';
+import { visualizationFixture } from './group-visualization.testing';
+
+@Component({ standalone: true, imports: [GroupVisualizationComponent],
+  template: '<div class="v1-root"><app-group-visualization /></div>' })
+class VisualizationHost {}
+
+describe('group visualization in Chromium', () => {
+  it('renders time series above responsive correlation columns, toggles traces, zooms, themes, prints and disposes charts', async () => {
+    await page.viewport(1200, 1000);
+    const data = visualizationFixture('regression');
+    data.context.workbench.workspace.facilityPredictors.update(predictors => predictors.map((predictor, index) =>
+      index ? { ...predictor, name: 'A very long predictor name with weather station and factory identifiers' } : predictor));
+    TestBed.configureTestingModule({ imports: [VisualizationHost], providers: [GroupVisualizationSession,
+      { provide: FacilityAnalysisGroupContext, useValue: data.context },
+      { provide: WorkspaceCalendarizationService, useValue: data.calendarization }] });
+    const fixture = TestBed.createComponent(VisualizationHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const host = fixture.nativeElement.querySelector('.v1-root') as HTMLElement;
+    const component = fixture.debugElement.query(By.directive(GroupVisualizationComponent)).componentInstance as GroupVisualizationComponent;
+    const timeHost = host.querySelector<HTMLElement>('.visualization-time-series')!;
+    await vi.waitFor(() => expect(echarts.getInstanceByDom(timeHost)).toBeDefined());
+    const chart = echarts.getInstanceByDom(timeHost)!;
+    await vi.waitFor(() => expect((chart.getOption() as any).series.filter(Boolean)).toHaveLength(2));
+    expect((chart.getOption() as any).yAxis).toHaveLength(2);
+    expect((chart.getOption() as any).series.map((series: any) => series.yAxisIndex)).toEqual([0, 1]);
+    expect((chart.getOption() as any).xAxis[0].data).toHaveLength(6);
+    const locked = host.querySelector<HTMLButtonElement>('.visualization-chip--locked')!;
+    const actions = host.querySelector<HTMLElement>('.visualization-chart-actions')!;
+    expect(host.querySelector('input[type="month"]')).toBeNull();
+    const tools = host.querySelector<HTMLElement>('.visualization-tools')!;
+    expect(tools.parentElement).toBe(locked.closest('.visualization-toolbar'));
+    expect(actions.getBoundingClientRect().top).toBeCloseTo(locked.getBoundingClientRect().top, 0);
+    expect(getComputedStyle(host.querySelector('.visualization-controls')!).borderBottomWidth).toBe('0px');
+    expect(getComputedStyle(host.querySelector('.visualization-plots')!).paddingTop).toBe('0px');
+    expect(locked.textContent?.trim()).toBe('Group usage');
+    expect(getComputedStyle(locked.querySelector('line')!).stroke).toBe(getComputedStyle(locked).color);
+    locked.focus();
+    await userEvent.keyboard('{Enter}'); fixture.detectChanges();
+    expect(locked.getAttribute('aria-pressed')).toBe('true');
+    expect(locked.getAttribute('aria-disabled')).toBe('true');
+    expect((chart.getOption() as any).series[0].id).toBe('group-usage');
+    expect(host.querySelector('header')).toBeNull();
+    expect(host.textContent).not.toContain('Baseline onward');
+    expect(host.textContent).not.toContain('Full history');
+    const chips = [...host.querySelectorAll<HTMLButtonElement>('.visualization-chip:not(.visualization-chip--locked)')];
+    const chip = chips.find(button => button.textContent?.includes('Production'))!;
+    expect(chip.textContent?.trim()).toBe('Production');
+    chip.focus();
+    await userEvent.keyboard('{Enter}'); fixture.detectChanges();
+    expect(chip.getAttribute('aria-pressed')).toBe('false');
+    const other = chips.find(button => button !== chip)!;
+    other.click(); chip.click(); fixture.detectChanges();
+    await vi.waitFor(() => expect((chart.getOption() as any).series).toHaveLength(3));
+    expect((chart.getOption() as any).yAxis[1].name).toBe('Predictors');
+    await page.getByRole('button', { name: 'Production', exact: true }).dblClick(); fixture.detectChanges();
+    await vi.waitFor(() => expect((chart.getOption() as any).series.filter(Boolean)).toHaveLength(2));
+    expect(chip.getAttribute('aria-pressed')).toBe('true');
+    expect(other.getAttribute('aria-pressed')).toBe('false');
+    expect((chart.getOption() as any).series[0].id).toBe('group-usage');
+    expect(host.querySelectorAll('app-correlation-chart')).toHaveLength(1);
+    other.focus(); await userEvent.keyboard('{Shift>}{Enter}{/Shift}'); fixture.detectChanges();
+    expect(other.getAttribute('aria-pressed')).toBe('true');
+    expect(chip.getAttribute('aria-pressed')).toBe('false');
+    chip.click(); fixture.detectChanges();
+    await vi.waitFor(() => expect((chart.getOption() as any).series).toHaveLength(3));
+    await vi.waitFor(() => expect(host.querySelectorAll('canvas')).toHaveLength(3));
+    expect(host.querySelector('table')).toBeNull();
+    expect(host.querySelector('[aria-label="Visualization view"]')).toBeNull();
+    const correlationPanels = [...host.querySelectorAll<HTMLElement>('app-correlation-chart')];
+    expect(correlationPanels).toHaveLength(2);
+    expect(getComputedStyle(host.querySelector('.visualization-correlations')!).borderTopWidth).toBe('0px');
+    expect(getComputedStyle(correlationPanels[0]).borderTopWidth).toBe('0px');
+    const widePanels = correlationPanels.map(panel => panel.getBoundingClientRect());
+    expect(widePanels[0].top).toBeGreaterThanOrEqual(timeHost.getBoundingClientRect().bottom);
+    expect(widePanels[0].top).toBeCloseTo(widePanels[1].top, 0);
+    expect(widePanels[0].right).toBeLessThan(widePanels[1].left);
+    expect(widePanels[0].width).toBeLessThan(timeHost.getBoundingClientRect().width);
+    await page.getByRole('button', { name: 'Zoom in', exact: true }).click(); fixture.detectChanges();
+    expect(component.facade.preferences().zoom).toEqual({ start: 20, end: 80 });
+    chart.dispatchAction({ type: 'dataZoom', start: 10, end: 50 }); fixture.detectChanges();
+    expect(component.facade.preferences().zoom).toEqual({ start: 10, end: 50 });
+    expect(component.facade.correlations()[0].summary.pairs).toHaveLength(6);
+    const rawCorrelations = component.facade.correlations().map(correlation => correlation.summary);
+    await page.getByText('Z-score', { exact: true }).click(); fixture.detectChanges();
+    await vi.waitFor(() => expect((chart.getOption() as any).yAxis).toHaveLength(1));
+    expect(component.facade.preferences().scale).toBe('z-score');
+    expect(component.facade.preferences().zoom).toEqual({ start: 10, end: 50 });
+    expect((chart.getOption() as any).series.every((series: any) => series.yAxisIndex === 0)).toBe(true);
+    expect((chart.getOption() as any).xAxis[0].axisLine.lineStyle.width).toBe(2);
+    const standardizedData = (chart.getOption() as any).series[0].data;
+    expect(typeof standardizedData[0]).toBe('number');
+    const zOption = chart.getOption() as any;
+    expect(zOption.tooltip[0].formatter([{ axisValueLabel: 'Jan 2024', seriesName: 'Group usage', value: standardizedData[0] }]))
+      .toMatch(/^Jan 2024\nGroup usage: z = -?[\d,.]+$/);
+    chart.dispatchAction({ type: 'dataZoom', start: 20, end: 80 }); fixture.detectChanges();
+    await vi.waitFor(() => expect((chart.getOption() as any).series[0].data).toEqual(standardizedData));
+    await page.getByText('Raw', { exact: true }).click(); fixture.detectChanges();
+    await vi.waitFor(() => expect((chart.getOption() as any).yAxis).toHaveLength(2));
+    const rawOption = chart.getOption() as any;
+    expect(rawOption.tooltip[0].formatter([{ axisValueLabel: 'Jan 2024', seriesName: rawOption.series[0].name, value: 12345.6789 }]))
+      .toBe(`Jan 2024\nGroup usage (MMBtu): ${(12346).toLocaleString()}`);
+    expect(component.facade.preferences().zoom).toEqual({ start: 20, end: 80 });
+    const rawRadio = host.querySelector<HTMLInputElement>('input[value="raw"]')!;
+    rawRadio.focus(); await userEvent.keyboard('{ArrowRight}'); fixture.detectChanges();
+    await vi.waitFor(() => expect((chart.getOption() as any).yAxis).toHaveLength(1));
+    expect(component.facade.correlations().map(correlation => correlation.summary)).toEqual(rawCorrelations);
+    await page.getByRole('button', { name: 'Reset zoom', exact: true }).click(); fixture.detectChanges();
+    await page.screenshot({ element: host, path: '../../../../../../../../.angular/group-visualization-wide.png' });
+    for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) for (const contrast of [false, true]) {
+      host.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''}${contrast ? ' v1-contrast-strong' : ''}`;
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      expect(textContrast(chip)).toBeGreaterThanOrEqual(4.5);
+      expect(textContrast(other)).toBeGreaterThanOrEqual(4.5);
+    }
+    host.className = 'v1-root';
+    await page.viewport(390, 800); fixture.detectChanges();
+    await vi.waitFor(() => expect(chart.getWidth()).toBeLessThan(390));
+    expect(host.scrollWidth).toBeLessThanOrEqual(host.clientWidth);
+    expect(tools.getBoundingClientRect().top).toBeCloseTo(locked.getBoundingClientRect().top, 0);
+    expect(other.getBoundingClientRect().top).toBeGreaterThan(locked.getBoundingClientRect().top);
+    expect(actions.getBoundingClientRect().right).toBeLessThanOrEqual(host.getBoundingClientRect().right);
+    const narrowPanels = correlationPanels.map(panel => panel.getBoundingClientRect());
+    expect(narrowPanels[1].top).toBeGreaterThanOrEqual(narrowPanels[0].bottom);
+    expect(narrowPanels[0].left).toBeCloseTo(narrowPanels[1].left, 0);
+    await page.screenshot({ element: host, path: '../../../../../../../../.angular/group-visualization-narrow.png' });
+    expect(echarts.getInstanceByDom(timeHost)).toBe(chart);
+    expect(host.querySelectorAll('canvas')).toHaveLength(3);
+    expect(host.textContent).not.toContain('paired months');
+    expect(host.textContent).not.toContain('Exploratory relationships');
+    expect(host.textContent).toContain('R² = 1');
+    const media = cdp() as { send(command: string, parameters: Record<string, unknown>): Promise<void> };
+    await media.send('Emulation.setEmulatedMedia', { media: 'print' });
+    expect(getComputedStyle(host.querySelector('.visualization-chart-actions button')!).display).toBe('none');
+    expect(getComputedStyle(host.querySelector('.visualization-scale')!).display).toBe('none');
+    expect(getComputedStyle(host.querySelector('app-correlation-chart button')!).display).toBe('none');
+    await media.send('Emulation.setEmulatedMedia', { media: '' });
+    const scatterHosts = [...host.querySelectorAll<HTMLElement>('.correlation-chart')];
+    const scatterCharts = scatterHosts.map(element => echarts.getInstanceByDom(element)!);
+    expect((scatterCharts[0].getOption() as any).series[0].data[0]).toHaveLength(3);
+    fixture.destroy();
+    expect(chart.isDisposed()).toBe(true);
+    expect(scatterCharts.every(scatter => scatter.isDisposed())).toBe(true);
+    expect(data.update).not.toHaveBeenCalled();
+    await page.viewport(1200, 1000);
+  });
+});

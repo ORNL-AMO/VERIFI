@@ -1,0 +1,19 @@
+@let predictorView = predictor();
+@let result = summary();
+<figure>
+  <figcaption>
+    <h4>{{ predictorView.label }}</h4>
+    <button type="button" class="v1-icon-btn" aria-label="Download correlation chart" title="Download correlation chart"
+      [disabled]="!result.pairs.length" (click)="download()"><app-ui-icon name="download" /></button>
+  </figcaption>
+  @if (statistics(); as stats) { <p>{{ stats }}</p> }
+  @if (equation(); as fitEquation) {
+    <p class="correlation-equation" [attr.aria-label]="'Best-fit line: ' + fitEquation + '. y is ' + usageLabel() + '; x is ' + predictorView.label + '.'"
+      [title]="'y: ' + usageLabel() + '; x: ' + predictorView.label">{{ fitEquation }}</p>
+  }
+  @if (result.unavailableReason) { <p class="correlation-note">{{ result.unavailableReason }}</p> }
+  @if (result.pairs.length) {
+    <div class="correlation-chart" [appV1ECharts]="option()"
+      role="img" [attr.aria-label]="'Scatter plot of ' + usageLabel() + ' against ' + predictorView.label + ' over the selected date range.'"></div>
+  }
+</figure>

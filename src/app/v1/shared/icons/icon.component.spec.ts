@@ -8,6 +8,8 @@ import SaveIcon from '@hugeicons/core-free-icons/SaveIcon';
 import Upload03Icon from '@hugeicons/core-free-icons/Upload03Icon';
 import { IconComponent } from './icon.component';
 import { ICON_REGISTRY } from './icon-registry';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 @Component({
   template: `
@@ -15,6 +17,7 @@ import { ICON_REGISTRY } from './icon-registry';
     <app-ui-icon name="download" [size]="20" [strokeWidth]="2" [decorative]="false" label="Download data"></app-ui-icon>
     <app-ui-icon name="loading" spin></app-ui-icon>
     <app-ui-icon name="uploadData"></app-ui-icon>
+    <app-ui-icon name="dataVisualization" [size]="24" [strokeWidth]="2" [decorative]="false" label="Visualization"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -36,8 +39,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(4);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(4);
+    expect(icons.length).toBe(5);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(5);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -65,6 +68,19 @@ describe('IconComponent', () => {
 
   it('maps the spreadsheet upload icon to Upload03Icon', () => {
     expect(ICON_REGISTRY.uploadData).toBe(Upload03Icon);
+  });
+
+  it('renders the supplied custom SVG geometry through the same themed, accessible icon API', () => {
+    const source = readFileSync(join(process.cwd(), 'src/assets/icons/verifi-chart.svg'), 'utf8');
+    const document = new DOMParser().parseFromString(source, 'image/svg+xml');
+    const original = [...document.querySelectorAll('path')].map(path => path.getAttribute('d'));
+    const host: HTMLElement = fixture.nativeElement.querySelectorAll('app-ui-icon')[4];
+    expect([...host.querySelectorAll('path')].map(path => path.getAttribute('d'))).toEqual(original);
+    expect(host.getAttribute('aria-label')).toBe('Visualization');
+    expect(host.querySelector('svg')?.getAttribute('width')).toBe('24');
+    expect(host.querySelector('path')?.getAttribute('stroke')).toBe('currentColor');
+    expect(host.querySelector('path')?.getAttribute('stroke-width')).toBe('2');
+    expect(host.querySelector('path')?.getAttribute('stroke-linecap')).toBe('round');
   });
 
   it('maps the spreadsheet columns icon to LayoutTable01Icon', () => {

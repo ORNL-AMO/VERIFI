@@ -195,6 +195,14 @@ The v1 account Analysis dashboard uses the shared inventory grid for both accoun
 
 Shared v1 analysis presentation lives under `src/app/v1/shared/analysis-results`. Its contribution heatmap owns the common fiscal-year chart, formatting, themed labels, horizontal overflow, and PNG download for account facility contributions and facility group contributions. Features supply precomputed percentages and retain ownership of calculations, tables, navigation, and vertical scrolling. See [V1 Account Analysis Architecture](docs/v1-account-analysis-architecture.md#shared-analysis-presentation).
 
+Facility analysis groups also offer exploratory Visualization before model completion.
+Its feature-owned projections read canonical calendarized usage and saved facility
+Predictor readings; chart controls remain transient for the workbench lifetime.
+See [facility-analysis presentation](docs/v1-facility-analysis-architecture.md#results-presentation).
+The shared `app-ui-icon` registry supports typed custom SVG definitions alongside
+Hugeicons, including the VERIFI data-visualization icon. Follow the
+[custom-icon guide](src/app/v1/shared/icons/README.md) when adding icons.
+
 ## Tests, builds, and delivery
 
 Test targets are configured in `angular.json` and exposed through `package.json`:

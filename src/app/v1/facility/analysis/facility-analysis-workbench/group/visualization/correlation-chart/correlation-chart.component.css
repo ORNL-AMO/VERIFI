@@ -1,0 +1,9 @@
+:host { display: block; min-width: 0; }
+figure { margin: 0; }
+figcaption { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+h4 { margin: .5rem 0; padding: 0; border: 0; font-size: 1.05rem; font-weight: 600; letter-spacing: normal; overflow-wrap: anywhere; }
+p { margin: 0; color: var(--v1-muted); }
+.correlation-equation { overflow-wrap: anywhere; }
+.correlation-chart { width: 100%; height: 23rem; }
+.correlation-note { margin: .5rem 0; padding: .75rem; background: var(--v1-content-block); }
+@media print { button { display: none; } }
