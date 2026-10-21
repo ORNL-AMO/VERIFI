@@ -99,8 +99,14 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   readonly activeCandidate = signal<FacilityAnalysisCard | undefined>(undefined);
   readonly deleteCandidate = signal<FacilityAnalysisCard | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving() && !!this.browseKey());
-  readonly energyAvailable = computed(() => this.actions.categoryAvailable('energy'));
-  readonly waterAvailable = computed(() => this.actions.categoryAvailable('water'));
+  // Empty groups must not introduce a hidden category outside the facility's meters and saved analyses.
+  private readonly creationCategories = computed(() => {
+    const categories = this.workspace.categories();
+    return (categories.length ? categories : ['energy', 'water'] as const)
+      .filter(category => this.actions.categoryAvailable(category));
+  });
+  readonly energyAvailable = computed(() => this.creationCategories().includes('energy'));
+  readonly waterAvailable = computed(() => this.creationCategories().includes('water'));
   readonly activeEligibility = computed(() => {
     const candidate = this.activeCandidate();
     return candidate ? this.actions.activeEligibility(candidate.analysis) : undefined;

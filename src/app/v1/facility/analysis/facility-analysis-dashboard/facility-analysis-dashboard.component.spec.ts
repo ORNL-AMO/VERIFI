@@ -209,6 +209,40 @@ describe('FacilityAnalysisDashboardComponent', () => {
     component.filtersForm.controls.status.setValue('active'); fixture.detectChanges(); expect(component.filteredEntries()).toHaveLength(1);
   });
 
+  it.each(['energy', 'water'] as const)('creates %s analysis when an empty group makes the other category eligible', async category => {
+    categories.set([category]);
+    cards.set(cards().filter(card => card.category === category));
+    fixture.detectChanges();
+
+    buttonByText('Add Analysis').click(); fixture.detectChanges();
+    const draft = fixture.debugElement.query(By.directive(AnalysisDraftSlideoutComponent));
+    expect(draft.nativeElement.querySelector('select')).toBeNull();
+    draft.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+
+    expect(actions.createAnalysis).toHaveBeenCalledExactlyOnceWith(category);
+    expect(router.navigate).toHaveBeenCalledWith(['/analysis', 'facility-a', 'created-analysis']);
+  });
+
+  it('disables creation when the only displayed category has no eligible meter group', () => {
+    actions.categoryAvailable.mockImplementation(category => category === 'energy');
+    categories.set(['water']); cards.set([cards()[1]]); fixture.detectChanges();
+
+    expect(buttonByText('Add Analysis').disabled).toBe(true);
+    expect(actions.createAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('keeps category selection available when the facility has both categories', async () => {
+    buttonByText('Add Analysis').click(); fixture.detectChanges();
+    const draft = fixture.debugElement.query(By.directive(AnalysisDraftSlideoutComponent));
+    expect(draft.nativeElement.querySelector('select')).not.toBeNull();
+    draft.componentInstance.category.setValue('water');
+    draft.nativeElement.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+
+    expect(actions.createAnalysis).toHaveBeenCalledExactlyOnceWith('water');
+  });
+
   it('keeps card demand when comparison closes and dismisses overlays on context changes', () => {
     component.inventory.detailControl.setValue('summary'); fixture.detectChanges();
     component.openComparison(cards()[0]); fixture.detectChanges(); component.clearComparison(); fixture.detectChanges();
