@@ -1,3 +1,4 @@
+import { analysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
@@ -50,7 +51,7 @@ export class AccountAnalysisWorkbenchHeaderComponent {
   });
   readonly dependencyMessage = computed(() => {
     const count = this.context.linkedReports().length;
-    return count ? `Changes can affect ${count} ${count === 1 ? 'report' : 'reports'}.` : undefined;
+    return analysisDependencyMessage(0, count, 0);
   });
 
   async switchAnalysis(analysisGuid: string): Promise<void> {

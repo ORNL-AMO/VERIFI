@@ -1,12 +1,4 @@
-<div class="v1-modal-layer inventory-chart-layer">
-  <button type="button" class="v1-modal-backdrop" aria-label="Dismiss chart sheet" (click)="requestClose()"></button>
-  <section id="inventory-chart-sheet" class="inventory-chart-sheet" [class.inventory-chart-sheet--closing]="closing()" (animationend)="finishClose($event)" role="dialog" aria-modal="true" aria-labelledby="inventory-chart-title" appModalFocusTrap (escapePressed)="requestClose()">
-    <div class="inventory-chart-sheet__handle-bar">
-      <button type="button" class="inventory-chart-sheet__handle" aria-label="Close charts" (click)="clickHandle()" (pointerdown)="startPull($event)" (pointerup)="finishPull($event)" (pointercancel)="cancelPull()"><span class="inventory-chart-sheet__grip" aria-hidden="true"></span><app-ui-icon name="chevronDown"/><span>Close charts</span></button>
-    </div>
-    <header class="inventory-chart-sheet__header">
-      <div class="inventory-chart-sheet__identity"><h2 id="inventory-chart-title" [title]="facilityName()">{{ facilityName() }} · Monthly data</h2></div>
-    </header>
+<app-workspace-bottom-sheet panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
     <div class="inventory-chart-sheet__body">
       <div class="inventory-chart-sheet__controls" [class.inventory-chart-sheet__controls--tabbed]="scrollableTabs()">
         <div class="inventory-chart-sheet__metrics" [class.inventory-chart-sheet__metrics--scrollable]="scrollableTabs()" [attr.role]="scrollableTabs() ? 'tablist' : 'group'" [attr.aria-label]="scrollableTabs() ? 'Predictor charts' : 'Chart metric'">@for (chart of charts(); track chart.id) {
@@ -40,5 +32,4 @@
         </div>
       }
     </div>
-  </section>
-</div>
+</app-workspace-bottom-sheet>

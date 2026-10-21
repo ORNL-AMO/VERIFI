@@ -1,12 +1,12 @@
-import { Component, computed, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, input, output, viewChild } from '@angular/core';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
+import { WorkspaceBottomSheetComponent } from '@app/v1/shared/workspace-bottom-sheet/workspace-bottom-sheet.component';
 import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { V1EChartsDataZoomRange } from '@app/v1/shared/charts/echarts-chart.directive';
 import { InventoryChartView, InventoryChartSheetView, DEFAULT_INVENTORY_CHART_VIEW } from './inventory-chart-sheet.models';
 
 @Component({ selector: 'app-inventory-chart-sheet', standalone: true,
-  imports: [IconComponent, ModalFocusTrapDirective, MeterResultsChartComponent],
+  imports: [IconComponent, WorkspaceBottomSheetComponent, MeterResultsChartComponent],
   templateUrl: './inventory-chart-sheet.component.html', styleUrls: ['./inventory-chart-sheet.component.css'] })
 export class InventoryChartSheetComponent {
   readonly charts = input.required<readonly InventoryChartView[]>();
@@ -21,20 +21,9 @@ export class InventoryChartSheetComponent {
   readonly view = input<InventoryChartSheetView>(DEFAULT_INVENTORY_CHART_VIEW);
   readonly zoomRange = input<V1EChartsDataZoomRange>({ start: 0, end: 100 });
   readonly closed = output<void>();
-  readonly closing = signal(false);
-  private closeTimer?: ReturnType<typeof setTimeout>;
-  requestClose(): void {
-    if (this.closing()) return;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { this.closed.emit(); return; }
-    this.closing.set(true);
-    this.closeTimer = setTimeout(() => this.finishClose(), 360);
-  }
-  finishClose(event?: AnimationEvent): void {
-    if (event && !event.animationName.endsWith('inventory-charts-down')) return;
-    if (!this.closing()) return;
-    clearTimeout(this.closeTimer); this.closed.emit();
-  }
-  ngOnDestroy(): void { clearTimeout(this.closeTimer); }
+  private readonly sheet = viewChild(WorkspaceBottomSheetComponent);
+  readonly closing = computed(() => this.sheet()?.closing() ?? false);
+  requestClose(): void { this.sheet()?.requestClose(); }
   readonly viewChanged = output<InventoryChartSheetView>();
   readonly zoomChanged = output<V1EChartsDataZoomRange>();
   private readonly renderer = viewChild(MeterResultsChartComponent);
@@ -72,22 +61,5 @@ export class InventoryChartSheetComponent {
     const start = Math.max(0, Math.min(100 - width, (current.start + current.end - width) / 2));
     this.zoomChanged.emit({ start, end: start + width });
   }
-  private pullStart?: number;
-  startPull(event: PointerEvent): void {
-    if (event.button !== 0) return;
-    this.pullStart = event.clientY;
-    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
-  }
-  finishPull(event: PointerEvent): void {
-    if (this.pullStart !== undefined) {
-      const distance = event.clientY - this.pullStart;
-      if (distance >= 35) this.requestClose();
-      else if (distance <= -35) this.suppressClick = true;
-    }
-    this.pullStart = undefined;
-  }
-  private suppressClick = false;
-  clickHandle(): void { if (this.suppressClick) this.suppressClick = false; else this.requestClose(); }
-  cancelPull(): void { this.pullStart = undefined; }
   download(): void { this.renderer()?.downloadPng(); }
 }

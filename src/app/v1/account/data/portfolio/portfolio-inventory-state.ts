@@ -1,6 +1,6 @@
 import { DestroyRef, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { AccountBrowseOrigin, BrowseKey, BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
+import { InventoryBrowseKind, BrowseKey, BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { PortfolioDetailPreferencesService } from './portfolio-detail-preferences.service';
 import { PORTFOLIO_PAGE_SIZE, PortfolioDetailLevel, PortfolioTile, PortfolioTileDetailChange } from './portfolio-inventory.models';
 
@@ -19,9 +19,9 @@ export class PortfolioInventoryState {
   readonly visibleIds = computed(() => this.visibleTiles().map(tile => tile.guid));
   readonly start = computed(() => this.tiles().length ? this.page() * PORTFOLIO_PAGE_SIZE + 1 : 0);
   readonly end = computed(() => Math.min((this.page() + 1) * PORTFOLIO_PAGE_SIZE, this.tiles().length));
-  private activeKey?: BrowseKey<AccountBrowseOrigin>;
+  private activeKey?: BrowseKey<InventoryBrowseKind>;
 
-  constructor(private readonly key: Signal<BrowseKey<AccountBrowseOrigin> | undefined>,
+  constructor(private readonly key: Signal<BrowseKey<InventoryBrowseKind> | undefined>,
     readonly tiles: Signal<readonly PortfolioTile[]>, allIds: Signal<readonly string[]>, filters: Signal<unknown>, inventoryReady: Signal<boolean>) {
     let previousFilters = '';
     effect(() => {

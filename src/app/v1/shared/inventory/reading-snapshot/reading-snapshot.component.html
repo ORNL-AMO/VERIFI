@@ -25,7 +25,7 @@
     <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div>
   }</dl> }
   @if (findings.length) {
-    <section class="reading-snapshot__attention" aria-label="Data findings needing attention">
+    <section class="reading-snapshot__attention inventory-attention" aria-label="Data findings needing attention">
       <h2>Needs attention</h2>
       <ul>@for (finding of findings; track finding.id) {
         <li [attr.data-severity]="finding.severity">

@@ -1,0 +1,10 @@
+<div class="v1-modal-layer workspace-bottom-sheet-layer">
+  <button type="button" class="v1-modal-backdrop" [attr.aria-label]="dismissLabel()" (click)="requestClose()"></button>
+  <section [id]="panelId()" [class]="classes()" (animationend)="finishClose($event)" role="dialog" aria-modal="true" [attr.aria-labelledby]="panelId() + '-title'" appModalFocusTrap [modalInitialFocus]="initialFocus()" [modalFocusFallback]="focusFallback()" (escapePressed)="requestClose()">
+    <div class="workspace-bottom-sheet__handle-bar">
+      <button type="button" class="workspace-bottom-sheet__handle" [attr.aria-label]="closeLabel()" (click)="clickHandle()" (pointerdown)="startPull($event)" (pointerup)="finishPull($event)" (pointercancel)="cancelPull()"><span class="workspace-bottom-sheet__grip" aria-hidden="true"></span><app-ui-icon name="chevronDown"/><span>{{ closeLabel() }}</span></button>
+    </div>
+    <header class="workspace-bottom-sheet__header"><h2 [id]="panelId() + '-title'" [title]="title()">{{ title() }}</h2></header>
+    <div class="workspace-bottom-sheet__body"><ng-content/></div>
+  </section>
+</div>

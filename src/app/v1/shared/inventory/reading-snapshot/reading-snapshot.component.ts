@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { InventoryReadingSnapshot } from '../inventory.models';
 
 @Component({ selector: 'app-reading-snapshot', standalone: true, imports: [IconComponent],
-  templateUrl: './reading-snapshot.component.html', styleUrls: ['./reading-snapshot.component.css'] })
+  templateUrl: './reading-snapshot.component.html', styleUrls: ['./reading-snapshot.component.css', '../inventory-attention.css'] })
 export class ReadingSnapshotComponent {
   private readonly router = inject(Router);
   @Input({ required: true }) snapshot!: InventoryReadingSnapshot;

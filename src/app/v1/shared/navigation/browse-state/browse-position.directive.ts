@@ -9,6 +9,8 @@ export class BrowsePositionDirective implements OnDestroy {
   readonly browsePositionReady = input(true);
   readonly browseVisibleIds = input<readonly string[]>([]);
   readonly browseRestoreStickyGap = input(false);
+  readonly browseHeading = input<HTMLElement>();
+  readonly browseSticky = input<HTMLElement>();
   private readonly store = inject(BrowseStateService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly injector = inject(Injector);
@@ -60,12 +62,12 @@ export class BrowsePositionDirective implements OnDestroy {
           if (this.destroyed || JSON.stringify(this.key) !== JSON.stringify(key)) return;
           const saved = this.store.readPosition(key);
           const scope = this.host.closest('.v1-account-portfolio') ?? this.host;
-          const heading = scope.querySelector<HTMLElement>('h1') ?? this.host.closest('.v1-facility-meters')?.querySelector<HTMLElement>('h1');
+          const heading = this.browseHeading() ?? scope.querySelector<HTMLElement>('h1') ?? this.host.closest('.v1-facility-meters')?.querySelector<HTMLElement>('h1');
           const target = saved?.focusId ? [...this.host.querySelectorAll<HTMLElement>('[data-browse-id]')]
             .find(element => element.dataset['browseId'] === saved.focusId && element.getClientRects().length > 0) : undefined;
           // Restoring a scrolled account page closes its header gap on the following observer cycle.
           // Reapply the saved offset once after that resize; user input always cancels this correction.
-          const sticky = this.browseRestoreStickyGap() && saved?.scrollTop ? scope.querySelector<HTMLElement>('.v1-account-portfolio__sticky') : undefined;
+          const sticky = this.browseRestoreStickyGap() && saved?.scrollTop ? this.browseSticky() ?? scope.querySelector<HTMLElement>('.v1-account-portfolio__sticky') : undefined;
           if (sticky && typeof ResizeObserver !== 'undefined') {
             this.stopStickyRestore();
             const height = sticky.getBoundingClientRect().height;

@@ -42,43 +42,17 @@ describe('AnalysisBrowseCardComponent', () => {
     expect(card.querySelector('app-facility-analysis-group-model-roster')).toBeNull();
   });
 
-  it('disables incompatible comparison actions with an accessible explanation', async () => {
+  it('keeps Compare in the action menu and closes the menu before emitting', async () => {
     await TestBed.configureTestingModule({ imports: [AnalysisBrowseCardComponent] }).compileComponents();
-    const fixture = TestBed.createComponent(AnalysisBrowseCardComponent);
-    fixture.componentRef.setInput('card', cardFixture());
-    fixture.componentRef.setInput('comparisonDisabledReason', 'Compare with another water analysis');
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')).toMatchObject({
-      label: 'Add to comparison',
-      disabled: true,
-      disabledReason: 'Compare with another water analysis'
-    });
-    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[aria-label="Add to comparison"]');
-    expect(button?.disabled).toBe(false);
-    expect(button?.getAttribute('aria-disabled')).toBe('true');
-    const descriptionId = button?.getAttribute('aria-describedby');
-    expect(descriptionId).toBeTruthy();
-    expect((fixture.nativeElement as HTMLElement).querySelector(`#${descriptionId}`)?.textContent)
-      .toContain('Compare with another water analysis');
+    const fixture = TestBed.createComponent(AnalysisBrowseCardComponent); fixture.componentRef.setInput('card', cardFixture()); fixture.componentRef.setInput('meterGroups', []); fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button[aria-label^="Options for"]') as HTMLButtonElement;
+    expect(button).not.toBeNull(); button.click(); fixture.detectChanges();
+    const compare = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(item => item.textContent?.trim() === 'Compare')!;
+    expect(compare).toBeTruthy(); const selected = vi.fn(); fixture.componentInstance.comparisonToggled.subscribe(selected);
+    compare.click(); fixture.detectChanges(); expect(selected).toHaveBeenCalledOnce(); expect(document.querySelector('[role="menu"]')).toBeNull();
+    expect(document.activeElement).toBe(button); fixture.destroy();
   });
 
-  it('uses an apple for the first selection and an orange for the second selection', async () => {
-    await TestBed.configureTestingModule({ imports: [AnalysisBrowseCardComponent] }).compileComponents();
-    const fixture = TestBed.createComponent(AnalysisBrowseCardComponent);
-    fixture.componentRef.setInput('card', cardFixture());
-
-    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')?.icon).toBe('apple');
-
-    fixture.componentRef.setInput('comparisonHasSelection', true);
-    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')?.icon).toBe('orange');
-
-    fixture.componentRef.setInput('selectedForComparison', true);
-    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')).toMatchObject({
-      label: 'Remove from comparison',
-      icon: 'apple'
-    });
-  });
 });
 
 function cardFixture() {

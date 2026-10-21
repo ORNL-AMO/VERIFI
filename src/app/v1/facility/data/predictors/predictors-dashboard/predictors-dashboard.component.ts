@@ -19,7 +19,7 @@ import { PredictorDraft } from '../models';
 import { buildPredictorInventory, filterPredictorInventory, groupPredictorInventory, orderPredictorInventory, PredictorInventoryActionRequest, PredictorInventorySort, PredictorStatusFilter, PredictorTypeFilter } from '../predictor-inventory/predictor-inventory.models';
 import { PredictorDraftSlideoutComponent } from './predictor-draft-slideout/predictor-draft-slideout.component';
 import { InventoryGridComponent } from '@app/v1/shared/inventory/inventory-grid/inventory-grid.component';
-import { InventoryDetailLevel, InventoryTileDetailChange, InventoryTileMenuAction } from '@app/v1/shared/inventory/inventory.models';
+import { InventoryDetailLevel, InventoryTileActionRequest, InventoryTileDetailChange, InventoryTileMenuAction } from '@app/v1/shared/inventory/inventory.models';
 import { InventoryChartSheetComponent } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.component';
 import { InventoryChartSheetView, DEFAULT_INVENTORY_CHART_VIEW } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.models';
 import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
@@ -221,7 +221,8 @@ export class PredictorsDashboardComponent {
       this.selected.set([]); this.selecting.set(false); this.closePortal();
     });
   }
-  handleAction(request: PredictorInventoryActionRequest): void {
+  handleAction(request: PredictorInventoryActionRequest | InventoryTileActionRequest): void {
+    if (request.action === 'details' || request.action === 'active' || request.action === 'compare') return;
     const entry = this.entries().find(item => item.guid === request.guid); if (!entry) return;
     if (request.action === 'delete') { this.requestDelete([entry.guid]); return; }
     if (request.action === 'copy') {

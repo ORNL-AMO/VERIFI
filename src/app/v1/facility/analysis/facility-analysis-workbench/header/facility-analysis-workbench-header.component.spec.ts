@@ -1,3 +1,4 @@
+import { analysisDependencyMessage as facilityAnalysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -12,7 +13,6 @@ import { FacilityAnalysisResultsService } from '../results/calculation/facility-
 import { AccountAnalysisReturnService } from '../navigation/account-analysis-return.service';
 import {
   FacilityAnalysisWorkbenchHeaderComponent,
-  facilityAnalysisDependencyMessage,
   facilityAnalysisResultOutcome
 } from './facility-analysis-workbench-header.component';
 

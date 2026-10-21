@@ -1,3 +1,5 @@
+import { AnalysisCardHeaderComponent } from '../analysis-card-header/analysis-card-header.component';
+import { AnalysisSnapshotComponent } from '../analysis-snapshot/analysis-snapshot.component';
 import { CdkMenuModule, CdkMenuTrigger } from '@angular/cdk/menu';
 import { FacilitySnapshotComponent } from '../facility-snapshot/facility-snapshot.component';
 import { ReadingSnapshotComponent } from '../reading-snapshot/reading-snapshot.component';
@@ -8,7 +10,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InventoryTileMenuAction, InventoryTileActionRequest, InventoryDetailLevel, InventoryTile, InventoryTileDetailChange } from '../inventory.models';
 
-@Component({ selector: 'app-inventory-tile', standalone: true, imports: [IconComponent, CdkMenuModule, ReactiveFormsModule, FacilitySnapshotComponent, ReadingSnapshotComponent],
+@Component({ selector: 'app-inventory-tile', standalone: true, imports: [IconComponent, CdkMenuModule, ReactiveFormsModule, FacilitySnapshotComponent, ReadingSnapshotComponent, AnalysisSnapshotComponent, AnalysisCardHeaderComponent],
   templateUrl: './inventory-tile.component.html', styleUrls: ['./inventory-tile.component.css'] })
 export class InventoryTileComponent {
   private readonly router = inject(Router);
@@ -29,6 +31,7 @@ export class InventoryTileComponent {
   @ViewChild('menuButton') private menuButton?: ElementRef<HTMLButtonElement>;
   readonly menuClasses = signal('v1-root portfolio-tile-menu');
   private themeObserver?: MutationObserver;
+  tileLabel = '';
   mainHref = '';
   ownerHref = '';
   groupHref = '';
@@ -40,6 +43,7 @@ export class InventoryTileComponent {
     this.selectionControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(selected => this.selectionChanged.emit({ guid: this.tile.guid, selected }));
   }
   ngOnChanges(): void {
+    this.tileLabel = this.tile.analysisSnapshot ? `${this.tile.analysisSnapshot.scope} analysis: ${this.tile.name}${this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.name;
     this.selectionControl.setValue(this.selected, { emitEvent: false });
     if (this.canSelect) this.selectionControl.enable({ emitEvent: false }); else this.selectionControl.disable({ emitEvent: false });
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));

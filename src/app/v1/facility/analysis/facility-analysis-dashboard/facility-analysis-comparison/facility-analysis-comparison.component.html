@@ -1,9 +1,5 @@
 @if (comparison(); as comparison) {
-  <app-workspace-slideout
-    [title]="comparison.first.analysis.name + ' vs ' + comparison.second.analysis.name"
-    description="Group setup and facility annual results"
-    size="large"
-    (closed)="closed.emit()">
+
     <div class="v1-analysis-comparison">
       <section aria-labelledby="comparison-analysis-setup-heading">
         <h3 id="comparison-analysis-setup-heading">Analysis setup</h3>
@@ -124,5 +120,5 @@
         }
       </section>
     </div>
-  </app-workspace-slideout>
+
 }

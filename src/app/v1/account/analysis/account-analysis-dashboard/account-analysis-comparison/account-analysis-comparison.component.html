@@ -1,5 +1,5 @@
 @if (comparison(); as comparison) {
-  <app-workspace-slideout [title]="comparison.first.analysis.name + ' vs ' + comparison.second.analysis.name" description="Account setup, facility selections, and annual results" size="large" (closed)="closed.emit()">
+
     <div class="v1-account-analysis-comparison">
       <section aria-labelledby="account-comparison-setup-heading">
         <h3 id="account-comparison-setup-heading">Analysis setup</h3>
@@ -53,5 +53,5 @@
         } @else if (comparison.bothResultsReady) { <p class="v1-account-analysis-comparison__empty">No complete annual results are available for comparison.</p> }
       </section>
     </div>
-  </app-workspace-slideout>
+
 }

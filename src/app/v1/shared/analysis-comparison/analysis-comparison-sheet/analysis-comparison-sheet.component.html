@@ -1,0 +1,8 @@
+<app-workspace-bottom-sheet panelId="analysis-comparison-sheet" title="Compare analyses" closeLabel="Close comparison" dismissLabel="Dismiss comparison" [initialFocus]="initialFocus()" focusFallback='button[aria-controls="analysis-comparison-sheet"]'  (closed)="closed.emit()">
+  <form class="analysis-comparison-selectors" [formGroup]="form" (ngSubmit)="$event.preventDefault()">
+    <label><span>Analysis 1</span><select class="v1-select" formControlName="first"><option [ngValue]="null">Choose an analysis</option>@for (option of options(); track option.key) { <option [value]="option.key">{{ option.label }}</option> }</select></label>
+    <label><span>Analysis 2</span><select class="v1-select" formControlName="second"><option [ngValue]="null">Choose an analysis</option>@for (option of secondOptions(); track option.key) { <option [value]="option.key">{{ option.label }}</option> }</select></label>
+  </form>
+  @if (notice(); as message) { <p class="v1-alert v1-alert--info" role="status">{{ message }}</p> }
+  @if (complete()) { <ng-content/> } @else { <p class="analysis-comparison-guidance" role="status">{{ guidance() }}</p> }
+</app-workspace-bottom-sheet>

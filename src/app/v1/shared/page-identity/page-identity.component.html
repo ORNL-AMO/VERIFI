@@ -2,7 +2,7 @@
 @if (crumbs.length === 1 && !crumbs[0].route) {
   <p class="v1-eyebrow" [title]="crumbs[0].label">{{ crumbs[0].label }}</p>
 } @else {
-  <nav aria-label="Data context"><ol>
+  <nav [attr.aria-label]="breadcrumbLabel()"><ol>
     @for (crumb of crumbs; track $index) {
       @if (!$first) { <li aria-hidden="true"><app-ui-icon name="chevronRight"/></li> }
       <li class="page-identity__crumb" [title]="crumb.label">

@@ -62,8 +62,10 @@ export interface InventoryTile {
   readonly icon: IconName;
   readonly route: readonly string[];
   readonly owner?: InventoryTileLink;
+  readonly analysisSnapshot?: InventoryAnalysisSnapshot;
   readonly location?: string;
   readonly chip?: string;
+  readonly chipIcon?: IconName;
   readonly simpleChip?: string;
   readonly station?: string;
   readonly stationLink?: InventoryTileLink;
@@ -74,7 +76,19 @@ export interface InventoryTile {
   readonly predictorSnapshot?: InventoryReadingSnapshot;
 }
 export interface InventoryTileDetailChange { readonly guid: string; readonly level: InventoryDetailLevel; }
-export interface InventoryTileMenuAction { readonly id: 'readings' | 'quality' | 'copy' | 'delete'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; }
+export interface InventoryAnalysisSnapshot {
+  readonly scope: 'account' | 'facility';
+  readonly active: boolean;
+  readonly outcomes: readonly { readonly label: string; readonly value: string; readonly description: string; readonly unavailable: boolean }[];
+  readonly facts: readonly InventoryTileFact[];
+  readonly rosterTitle: string;
+  readonly selectionProgress?: { readonly valid: number; readonly total: number; readonly evaluation: StatusEvaluationState };
+  readonly roster: readonly { readonly id: string; readonly name: string; readonly detail: string; readonly state: string }[];
+  readonly usage?: string;
+  readonly findings: readonly Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity'>[];
+  readonly modified: string;
+}
+export interface InventoryTileMenuAction { readonly id: 'readings' | 'quality' | 'copy' | 'delete' | 'details' | 'active' | 'compare'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; readonly disabledReason?: string; }
 export interface InventoryTileActionRequest { readonly guid: string; readonly action: InventoryTileMenuAction['id']; }
 export const INVENTORY_DETAIL_LEVELS: readonly InventoryDetailLevel[] = ['simple', 'summary', 'detailed'];
 export const INVENTORY_PAGE_SIZE = 24;

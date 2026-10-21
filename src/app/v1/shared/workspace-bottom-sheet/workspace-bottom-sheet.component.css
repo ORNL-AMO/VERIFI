@@ -1,0 +1,15 @@
+:host { display: contents; }
+.workspace-bottom-sheet { position: absolute; z-index: 1; inset: auto 0 0; width: min(100%,100rem); margin-inline: auto; display: flex; flex-direction: column; height: calc(100dvh - 1rem); max-height: calc(100dvh - 1rem); border: 1px solid var(--v1-border); border-radius: var(--v1-radius) var(--v1-radius) 0 0; background: var(--v1-surface); color: var(--v1-text); box-shadow: 0 -1rem 3rem var(--v1-shadow); animation: workspace-sheet-up .38s ease-out; }
+.workspace-bottom-sheet__header { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--v1-border); }
+.workspace-bottom-sheet h2 { min-width: 0; margin: 0; font-size: 1.25rem; overflow-wrap: anywhere; }
+.workspace-bottom-sheet__body { overflow: auto; min-height: 0; padding: 1rem 1.25rem; overscroll-behavior: contain; }
+.workspace-bottom-sheet__handle-bar { display: flex; justify-content: center; align-items: center; min-height: 3.5rem; flex-shrink: 0; }
+.workspace-bottom-sheet__handle { position: relative; touch-action: pan-x; display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 3.5rem; min-width: 12rem; padding: .6rem 1.5rem 1rem; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0 0 var(--v1-radius) var(--v1-radius); color: var(--v1-text); background: var(--v1-content-block); font: inherit; font-weight: 800; cursor: pointer; }
+.workspace-bottom-sheet__grip { position: absolute; bottom: .4rem; left: calc(50% - 1.25rem); width: 2.5rem; height: 3px; border-radius: 2px; background: var(--v1-muted); }
+.workspace-bottom-sheet__handle:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: 3px; }
+.workspace-bottom-sheet--closing { animation: workspace-sheet-down .3s cubic-bezier(.4,0,1,1) both; pointer-events: none; }
+@keyframes workspace-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes workspace-sheet-down { from { transform: translateY(0); } to { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) { .workspace-bottom-sheet { animation: none; } }
+@media (max-width: 40rem) { .workspace-bottom-sheet { height: calc(100dvh - .5rem); max-height: calc(100dvh - .5rem); } .workspace-bottom-sheet__body,.workspace-bottom-sheet__header { padding: .75rem; } }
+@media print { .workspace-bottom-sheet-layer { display: none; } }

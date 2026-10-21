@@ -133,6 +133,7 @@ export function setupSectionNavTest() {
         {
           provide: AccountWorkspaceStore,
           useValue: {
+            meters: facilityMeters,
             facilityMeters,
             facilityMeterGroups,
             facilityPredictors,

@@ -226,7 +226,7 @@ export class MetersDashboardComponent implements OnDestroy {
     if (!meter) return;
     if (request.action === 'readings' || request.action === 'quality') {
       void this.router.navigate(this.navigation.facilityMeterRoute(meter.facilityId, meter.guid, request.action)).catch(() => this.actionError.set('The meter could not be opened. Please try again.'));
-    } else this.requestConfirmation(request.action, [request.guid]);
+    } else if (request.action === 'copy' || request.action === 'delete') this.requestConfirmation(request.action, [request.guid]);
   }
   private requestConfirmation(kind: 'copy' | 'delete', guids: readonly string[]): void {
     if (!this.canAct() || !guids.length) return;

@@ -13,7 +13,7 @@ import { FacilityAnalysisDashboardComponent } from './facility-analysis-dashboar
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
-import { AnalysisComparisonSlideoutComponent } from './analysis-comparison-slideout/analysis-comparison-slideout.component';
+import { FacilityAnalysisComparisonComponent } from './facility-analysis-comparison/facility-analysis-comparison.component';
 
 describe('FacilityAnalysisDashboardComponent', () => {
   let fixture: ComponentFixture<FacilityAnalysisDashboardComponent>;
@@ -28,12 +28,12 @@ describe('FacilityAnalysisDashboardComponent', () => {
     setActiveAnalysis: ReturnType<typeof vi.fn>;
     deleteAnalysis: ReturnType<typeof vi.fn>;
   };
-  let modalPortal: { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
+  let modalPortal: { activePortal: ReturnType<typeof signal<any>>; show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     cards = signal([makeCard('energy-a', 'Energy A', 'ready'), makeCard('water-b', 'Water B', 'warning', 'water')]);
     router = { navigate: vi.fn() };
-    modalPortal = { show: vi.fn(), hide: vi.fn() };
+    modalPortal = { activePortal: signal(null), show: vi.fn(portal => modalPortal.activePortal.set(portal)), hide: vi.fn(() => modalPortal.activePortal.set(null)) };
     actions = {
       categoryAvailable: vi.fn(() => true),
       activeEligibility: vi.fn(() => ({ allowed: true })),
@@ -56,8 +56,8 @@ describe('FacilityAnalysisDashboardComponent', () => {
       }
     });
     TestBed.overrideComponent(FacilityAnalysisDashboardComponent, {
-      remove: { imports: [AnalysisComparisonSlideoutComponent] },
-      add: { imports: [AnalysisComparisonSlideoutStubComponent] }
+      remove: { imports: [FacilityAnalysisComparisonComponent] },
+      add: { imports: [FacilityAnalysisComparisonStubComponent] }
     });
     await TestBed.configureTestingModule({
       imports: [FacilityAnalysisDashboardComponent],
@@ -135,31 +135,18 @@ describe('FacilityAnalysisDashboardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Latest full year · 2025');
   });
 
-  it('opens canonical workbench routes and compares only two analyses from the same category', () => {
-    const third = makeCard('energy-c', 'Energy C', 'ready');
-    cards.set([...cards(), third]);
-    component.open(cards()[0]);
-    component.toggleComparison(cards()[0]);
-    fixture.detectChanges();
-    expect(browseCardByGuid('energy-a').actions().find(action => action.id === 'compare')?.icon).toBe('apple');
-    expect(browseCardByGuid('energy-c').actions().find(action => action.id === 'compare')?.icon).toBe('orange');
-    component.toggleComparison(cards()[1]);
-    expect(component.comparisonGuids()).toEqual(['energy-a']);
-    expect(component.comparisonDisabledReason(cards()[1])).toBe('Compare with another energy analysis');
-
-    component.toggleComparison(third);
-    fixture.detectChanges();
-
+  it('opens comparison in a portal, maintains column order, and clears selections on close', () => {
+    const third = makeCard('energy-c', 'Energy C', 'ready'); cards.set([...cards(), third]);
+    component.open(cards()[0]); component.openComparison(third); fixture.detectChanges();
+    expect(modalPortal.show).toHaveBeenCalledWith(expect.any(TemplatePortal));
+    expect(component.comparison.selection()).toEqual({ first: 'facility:energy-c', second: null });
+    component.comparison.select({ first: 'facility:energy-c', second: 'facility:water-b' });
+    expect(component.comparison.selection().second).toBeNull();
+    component.comparison.select({ first: 'facility:energy-c', second: 'facility:energy-a' }); fixture.detectChanges();
+    expect(component.comparisonCards().map(card => card.analysis.guid)).toEqual(['energy-c', 'energy-a']);
     expect(router.navigate).toHaveBeenCalledWith(['/analysis', 'facility-a', 'energy-a']);
-    expect(component.comparisonGuids()).toEqual(['energy-a', 'energy-c']);
-    const comparison = fixture.debugElement.query(By.directive(AnalysisComparisonSlideoutStubComponent));
-    expect(comparison).not.toBeNull();
-
-    comparison.componentInstance.closed.emit();
-    expect(component.comparisonGuids()).toEqual([]);
-    expect(component.comparisonDisabledReason(cards()[1])).toBeUndefined();
+    component.clearComparison(); expect(component.comparisonGuids()).toEqual([]);
   });
-
   it('keeps creation open with a visible command error, then closes and navigates after retry', async () => {
     actions.createAnalysis
       .mockRejectedValueOnce(new Error('Analysis creation failed.'))
@@ -278,8 +265,8 @@ describe('FacilityAnalysisDashboardComponent', () => {
 
 });
 
-@Component({ selector: 'app-analysis-comparison-slideout', template: '', standalone: true })
-class AnalysisComparisonSlideoutStubComponent {
+@Component({ selector: 'app-facility-analysis-comparison', template: '', standalone: true })
+class FacilityAnalysisComparisonStubComponent {
   @Input() cards: unknown;
   @Input() facility: unknown;
   @Input() meterGroups: unknown;

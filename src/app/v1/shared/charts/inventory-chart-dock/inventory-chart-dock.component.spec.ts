@@ -2,6 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { InventoryChartDockComponent } from './inventory-chart-dock.component';
 
 describe('Inventory chart pull handle', () => {
+  it('keeps Charts defaults and exposes a distinct Compare dialog target', () => {
+    const fixture = TestBed.configureTestingModule({ imports: [InventoryChartDockComponent] }).createComponent(InventoryChartDockComponent);
+    fixture.detectChanges(); const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.textContent).toContain('Charts'); expect(button.getAttribute('aria-controls')).toBe('inventory-chart-sheet');
+    fixture.componentRef.setInput('label', 'Compare'); fixture.componentRef.setInput('panelId', 'analysis-comparison-sheet'); fixture.componentRef.setInput('open', true); fixture.detectChanges();
+    expect(button.textContent).toContain('Compare'); expect(button.getAttribute('aria-controls')).toBe('analysis-comparison-sheet'); expect(button.getAttribute('aria-expanded')).toBe('true');
+  });
   it('opens from keyboard activation or upward pull, and rejects disabled or cancelled pulls', () => {
     TestBed.configureTestingModule({ imports: [InventoryChartDockComponent] });
     const fixture = TestBed.createComponent(InventoryChartDockComponent), opened = vi.fn();
