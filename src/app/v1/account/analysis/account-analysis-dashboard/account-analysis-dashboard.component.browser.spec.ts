@@ -209,7 +209,7 @@ describe('account Analysis inventory browser journeys', () => {
     await vi.waitFor(() => expect((document.activeElement as HTMLElement).id).toBe('v1-account-analysis-title'));
     view.fixture.destroy();
   });
-  it('restores the saved position after asynchronous result values and grid measurements settle', async () => {
+  it('returns to the originating card after asynchronous result values and grid measurements settle', async () => {
     await page.viewport(1200, 900);
     const view = setup(); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     view.host().filtersForm.controls.scope.setValue('facility');
@@ -217,15 +217,24 @@ describe('account Analysis inventory browser journeys', () => {
     view.host().inventory.selectPage(1); await settle(view.fixture);
     const id = view.host().inventory.visibleIds().at(-1)!;
     const link = view.root.querySelector<HTMLAnchorElement>(`a.portfolio-tile__name[data-browse-id="${id}"]`)!;
-    link.focus(); view.root.scrollTop = view.root.scrollHeight; const scroll = view.root.scrollTop;
+    link.focus(); view.root.scrollTop = view.root.scrollHeight;
     link.click(); await settle(view.fixture);
     const ready = view.results.states();
     view.results.states.set(Object.fromEntries(Object.keys(ready).map(key => [key, { state: 'loading', message: 'Calculating…' }])));
     view.root.querySelector<HTMLAnchorElement>('a')!.click(); await settle(view.fixture);
     expect(view.host().browseReady()).toBe(false);
     view.results.states.set(ready); await settle(view.fixture);
-    await vi.waitFor(() => expect(view.root.scrollTop).toBeCloseTo(scroll, 0));
-    expect((document.activeElement as HTMLElement).dataset['browseId']).toBe(id);
+    await vi.waitFor(() => {
+      expect(view.host().browseReady()).toBe(true);
+      expect(view.host().inventory.page()).toBe(1);
+      expect((document.activeElement as HTMLElement).dataset['browseId']).toBe(id);
+      // Header collapse can change the maximum scroll offset; the originating card must remain in view.
+      const restoredLink = view.root.querySelector<HTMLAnchorElement>(`a.portfolio-tile__name[data-browse-id="${id}"]`)!;
+      const bounds = restoredLink.getBoundingClientRect();
+      const toolbar = view.root.querySelector<HTMLElement>('.analysis-inventory__toolbar')!.getBoundingClientRect();
+      expect(bounds.top).toBeGreaterThanOrEqual(toolbar.bottom);
+      expect(bounds.bottom).toBeLessThanOrEqual(view.root.getBoundingClientRect().bottom);
+    });
     view.fixture.destroy();
   });
 
