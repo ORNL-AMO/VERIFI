@@ -1,77 +1,43 @@
 @let facility = workspace.facility();
-@let account = workspace.account();
-@let dashboardCards = cards();
-@let visibleCards = filteredCards();
-@let activeCards = activeReportingCards();
-
-@if (!facility) {
-  <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1><p>Select a facility before managing analyses.</p></article>
+@let workspaceState = workspace.workspaceState();
+@let requestedFacilityGuid = navigation.routeState().facilityGuid;
+@if (workspaceState === 'error') {
+  <div class="v1-alert v1-alert--danger" role="alert">{{ workspace.workspaceError()?.message || 'The analysis workspace could not be loaded.' }}</div>
+} @else if (workspaceState === 'loading' || workspaceState === 'switching' || (requestedFacilityGuid && facility?.guid !== requestedFacilityGuid)) {
+  <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin/>Loading analyses…</div>
+} @else if (!facility) {
+  <article class="v1-empty-state" role="status"><h1>No facility selected</h1><p>Select a facility before managing analyses.</p></article>
 } @else {
-  <header class="v1-section-header v1-analysis-dashboard__header">
-    <div><p class="v1-eyebrow">{{ account?.name || 'Account' }} / Facility Analysis</p><h1 id="v1-facility-analysis-title"><app-ui-icon name="analysis"></app-ui-icon> {{ facility.name || 'Facility' }} Analysis</h1></div>
-    <div class="v1-analysis-dashboard__header-actions">
-      <button
-        type="button"
-        class="v1-btn v1-btn--quiet v1-btn--sm"
-        aria-controls="v1-analysis-card-grid"
-        [attr.aria-expanded]="showGroupDetails()"
-        (click)="toggleGroupDetails()">
-        <span aria-hidden="true">{{ showGroupDetails() ? '−' : '+' }}</span>
-        {{ showGroupDetails() ? 'Hide group details' : 'Show group details' }}
-      </button>
-      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
+  <section class="analysis-inventory" aria-labelledby="v1-facility-analysis-title" [appBrowseHeader]="sticky" [browseMarker]="marker" #browseHeader="browseHeader" [class.analysis-inventory--scrolled]="browseHeader.collapsed()" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="inventory.visibleIds()" [browseRestoreStickyGap]="true" [browseSticky]="sticky">
+    <span #marker class="analysis-inventory__marker" aria-hidden="true"></span>
+    <div #sticky class="v1-data-workbench-sticky analysis-inventory__sticky">
+      <header class="v1-section-header v1-page-header analysis-inventory__header">
+        <app-page-identity [breadcrumbs]="breadcrumbs()" title="Analysis" icon="analysis" headingId="v1-facility-analysis-title" breadcrumbLabel="Analysis context"/>
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"/>Add Analysis</button>
+      </header>
     </div>
-  </header>
-
-  @if (workspace.workspaceState() === 'loading' || workspace.workspaceState() === 'switching') {
-    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Loading analyses…</div>
-  } @else if (workspace.workspaceState() === 'error') {
-    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ workspace.workspaceError()?.message || 'The analysis workspace could not be loaded.' }}</div>
-  } @else if (workspace.statusState() === 'error') {
-    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>Analysis validation could not be completed. Records remain available.</div>
-  } @else if (workspace.statusState() === 'evaluating') {
-    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Checking analysis readiness…</div>
-  }
-  @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ actionError() }}</div> }
-  @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
-
-  <div class="v1-data-dashboard-workspace v1-analysis-dashboard__workspace"><div id="v1-analysis-card-grid" class="v1-data-browse" aria-label="Facility analyses">
-    @if (activeCards.length) {
-      <section class="v1-analysis-dashboard__active-cards" aria-label="Active analyses for reporting">
-        @for (card of activeCards; track card.analysis.guid) {
-          <app-active-summary-card
-            [analysisName]="card.analysis.name"
-            [category]="card.category"
-            [route]="navigation.facilityAnalysisWorkbenchRoute(facility.guid, card.analysis.guid)"
-            [validationIssueCount]="card.findings.length"
-            [resultState]="card.outcome.state"
-            [resultMessage]="card.outcome.state === 'ready' ? '' : card.outcome.message"
-            [resultValueLabel]="card.outcomeDisplay.monthly.valueLabel"
-            [resultPeriodLabel]="card.outcomeDisplay.monthly.label">
-          </app-active-summary-card>
-        }
-      </section>
-    }
-    <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four" aria-label="Analysis filters" [formGroup]="filtersForm">
-      <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span><input type="search" aria-label="Find analysis, group, status, or dependency" placeholder="Find analysis, group, status, or dependency" formControlName="search"></div>
-      <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label>
-      <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="ready">Ready</option><option value="warning">Warning</option><option value="error">Error</option><option value="active">Active</option></select></label>
-      <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
-    </form>
-
-    @if (dashboardCards.length === 0) {
-      <app-data-empty-state icon="analysis" context="facility" title="No analyses" description="Create an energy or water analysis to get started."></app-data-empty-state>
-    } @else if (visibleCards.length === 0) {
-      <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
-    } @else {
-      <div class="v1-data-browse-grid v1-data-browse-grid--analysis" role="list" aria-label="Facility analyses">
-        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" (opened)="open($event)" (detailsRequested)="openDetails($event)" (comparisonToggled)="openComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
-      </div>
-    }
-  </div></div>
+    @if (workspace.statusState() === 'error') { <div class="v1-alert v1-alert--danger" role="alert">Analysis validation could not be completed. Records remain available.</div> }
+    @else if (workspace.statusState() === 'evaluating') { <div class="v1-alert v1-alert--info" role="status">Checking analysis readiness…</div> }
+    @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
+    @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status">Analysis actions are unavailable while the workspace is loading or switching.</div> }
+    <div class="v1-data-dashboard-workspace v1-analysis-dashboard__workspace"><div class="v1-data-browse" aria-label="Facility analyses">
+      <form class="v1-data-browse-toolbar analysis-inventory__toolbar" aria-label="Analysis filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
+        <label class="analysis-inventory__search"><span role="status">Showing {{ countLabel() }}</span><input class="v1-input" type="search" aria-label="Find analysis, group, status, or dependency" placeholder="Find analysis, group, status, or dependency" formControlName="search"></label>
+        @if (showCategory()) { <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label> }
+        <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="ready">All data valid</option><option value="warning">Has warnings</option><option value="error">Has errors</option><option value="active">Active</option></select></label>
+        <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
+        <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
+      </form>
+      @if (!entries().length) { <app-data-empty-state icon="analysis" context="facility" title="No analyses" description="Add an analysis to get started."/> }
+      @else if (!filteredEntries().length) { <article class="v1-empty-state" role="status"><h2>No analyses match these filters</h2><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></article> }
+      @else { <app-inventory-grid [tiles]="visibleTiles()" [printTiles]="printTiles()" [detail]="inventory.detail()" [overrides]="inventory.overrides()" [actionsByGuid]="menuActions()" [page]="inventory.page()" [pages]="inventory.pages()" [start]="inventory.start()" [end]="inventory.end()" [total]="filteredEntries().length" (detailChanged)="inventory.setTileDetail($event)" (pageSelected)="inventory.selectPage($event)" (layoutReady)="layoutReady.set($event)" (navigationRequested)="navigateRoute($event)" (actionRequested)="requestAction($event)"/> }
+    </div></div>
+    <app-inventory-chart-dock label="Compare" panelId="analysis-comparison-sheet" [open]="comparison.opened()" [disabled]="saving() || !comparisonContext()" (opened)="openComparison()"/>
+  </section>
 
   @if (detailsCard(); as card) {
     <app-analysis-details-slideout
+      [showCategory]="showCategory()"
       [card]="card"
       [meterGroups]="workspace.meterGroups()"
       [outcomeDisplay]="card.outcomeDisplay"
@@ -80,9 +46,7 @@
     </app-analysis-details-slideout>
   }
 
-  @if (createOpen()) { <app-analysis-draft-slideout [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"></app-analysis-draft-slideout> }
-
-  <app-inventory-chart-dock label="Compare" panelId="analysis-comparison-sheet" [open]="comparison.opened()" [disabled]="saving() || !comparisonContext()" (opened)="openComparison()"/>
+  @if (createOpen()) { <app-analysis-draft-slideout [showCategory]="showCategory()" [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"></app-analysis-draft-slideout> }
 
 }
 
@@ -99,7 +63,7 @@
       [disabled]="saving() || !activeEligibility()?.allowed"
       (confirmed)="confirmActive()"
       (cancelled)="cancelActiveConfirmation()">
-      <p>Use <strong>{{ candidate.analysis.name }}</strong> as the active {{ candidate.category }} analysis.</p>
+      <p>Use <strong>{{ candidate.analysis.name }}</strong> as the active {{ showCategory() ? candidate.category + ' ' : '' }}analysis for <strong>{{ facility?.name || 'Facility' }}</strong>.</p>
       @if (activeReplacement(); as current) { <p>This replaces <strong>{{ current.analysis.name }}</strong>.</p> }
       @if (candidate.dependencyCount) { <p>{{ candidate.dependencyCount }} downstream link(s) currently reference this analysis.</p> }
       @if (activeEligibility(); as eligibility) { @if (!eligibility.allowed) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ eligibility.reason }}</div> } }
@@ -134,7 +98,7 @@
   @if (comparison.opened()) {
     <app-analysis-comparison-sheet [options]="comparisonOptions()" [selection]="comparison.selection()" [initialFocus]="comparison.initialFocus()" [notice]="comparison.notice()" (selectionChanged)="comparison.select($event)" (closed)="clearComparison()">
   @if (comparisonCards().length === 2) {
-    <app-facility-analysis-comparison
+    <app-facility-analysis-comparison [showCategory]="showCategory()"
       [cards]="comparisonCards()"
       [facility]="workspace.facility()!"
       [meterGroups]="workspace.meterGroups()"

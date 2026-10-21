@@ -3,24 +3,9 @@
     @let displayedAnalysis = autosave.draft() || analysis;
     @let outcomes = resultDisplay();
     <header class="v1-data-workbench-header v1-analysis-workbench__header">
-      <nav class="v1-data-workbench-breadcrumb" aria-label="Facility analysis breadcrumb">
-        <ol>
-          @if (context.account(); as account) {
-            <li><a [routerLink]="navigation.accountAnalysisRoute(account.guid)">{{ account.name || 'Account' }}</a></li>
-          } @else {
-            <li>Account</li>
-          }
-          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><a [routerLink]="navigation.facilityRoute(facility.guid)">{{ facility.name || 'Facility' }}</a></li>
-          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Analyses</a></li>
-        </ol>
-      </nav>
-
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title">
-          <h1 id="v1-analysis-workbench-title">
-            <app-ui-icon name="analysis"></app-ui-icon>
+          <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="displayedAnalysis.name || 'Untitled analysis'" icon="analysis" headingId="v1-analysis-workbench-title" breadcrumbLabel="Facility analysis context" [customTitle]="true">
             <app-data-workbench-resource-switcher
               [resources]="analysisResources()"
               [selectedId]="displayedAnalysis.guid"
@@ -28,7 +13,7 @@
               ariaLabel="Switch facility analysis"
               (resourceSelected)="switchAnalysis($event)">
             </app-data-workbench-resource-switcher>
-          </h1>
+          </app-page-identity>
         </div>
         <div class="v1-data-workbench-actions" aria-label="Analysis summary and controls">
           @if (accountAnalysisReturn.origin()) {

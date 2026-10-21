@@ -28,7 +28,7 @@ import { accountEntry, facilityEntry, inventoryAccount, inventoryFacility, inven
 const dashboardUrl = '/v1/workspace/account/account-a/analysis/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, NavigationMotionDirective, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div [appNavigationMotion]="navigation.routeMotion()" [navigationMotionKey]="navigation.routeMotionKey()"><router-outlet/></div><ng-template [cdkPortalOutlet]="portal.activePortal()"/></main>' })
 class AnalysisBrowserHost { readonly portal = inject(ModalPortalService); readonly navigation = inject(WorkspaceNavigationService); }
-@Component({ standalone: true, imports: [RouterLink], template: '<h1>Facility analysis workbench</h1>@if (navigation.accountReturn(); as back) { <a [routerLink]="back.route">Account Analysis</a> }' })
+@Component({ standalone: true, imports: [RouterLink], template: '<h1>Facility analysis workbench</h1>@if (navigation.accountReturn(); as back) { <a [routerLink]="back.route">Account Analysis</a> } @if (navigation.facility(); as facility) { <a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Facility Analysis</a> }' })
 class FacilityDestination { readonly navigation = inject(WorkspaceNavigationService); }
 
 function setup(count = 35) {
@@ -49,7 +49,7 @@ function setup(count = 35) {
     { provide: AccountWorkspaceService, useValue: {} }, { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [inventoryAccount] } },
     { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
     { provide: AccountAnalysisWorkspaceService, useValue: { account, entries, categories, facilities, workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), facilityAnalyses: signal([]) } },
-    { provide: FacilityAnalysisWorkspaceService, useValue: { account, facility: selectedFacility,
+    { provide: FacilityAnalysisWorkspaceService, useValue: { account, facility: selectedFacility, categories,
       cards: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card] : [])),
       analyses: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card.analysis] : [])),
       workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]) } },
@@ -57,7 +57,7 @@ function setup(count = 35) {
     { provide: FacilityAnalysisActionsService, useValue: facilityActions },
     { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }
   ] }).overrideComponent(AccountAnalysisDashboardComponent, { set: { providers: [{ provide: AccountAnalysisDashboardResultsService, useValue: results }] } });
-  TestBed.overrideComponent(FacilityAnalysisDashboardComponent, { set: { providers: [{ provide: FacilityAnalysisDashboardResultsService, useValue: { states: computed(() => Object.fromEntries(entries().filter(entry => entry.scope === 'facility').map(entry => [entry.card.analysis.guid, inventoryOutcome()]))) } }] } });
+  TestBed.overrideComponent(FacilityAnalysisDashboardComponent, { set: { providers: [{ provide: FacilityAnalysisDashboardResultsService, useValue: { setDemand: vi.fn(), states: computed(() => Object.fromEntries(entries().filter(entry => entry.scope === 'facility').map(entry => [entry.card.analysis.guid, inventoryOutcome()]))) } }] } });
   const fixture = TestBed.createComponent(AnalysisBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router); router.setUpLocationChangeListener();
   const host = () => fixture.debugElement.query(By.directive(AccountAnalysisDashboardComponent)).componentInstance as AccountAnalysisDashboardComponent;
@@ -235,6 +235,59 @@ describe('account Analysis inventory browser journeys', () => {
       expect(bounds.top).toBeGreaterThanOrEqual(toolbar.bottom);
       expect(bounds.bottom).toBeLessThanOrEqual(view.root.getBoundingClientRect().bottom);
     });
+    view.fixture.destroy();
+  });
+
+  it('restores facility dashboard controls, originating-card visibility and focus on breadcrumb return and Back', async () => {
+    await page.viewport(1200, 900);
+    const view = setup(); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__owner')!.click(); await settle(view.fixture);
+    const dashboard = () => view.fixture.debugElement.query(By.directive(FacilityAnalysisDashboardComponent)).componentInstance as FacilityAnalysisDashboardComponent;
+    const facilityUrl = view.router.url;
+    expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('drill-in');
+    expect(view.root.querySelector('h1')?.textContent).toContain('Analysis');
+    expect(view.root.querySelector('.portfolio-tile__owner')).toBeNull();
+    dashboard().filtersForm.controls.search.setValue('Analysis'); await settle(view.fixture);
+    dashboard().inventory.selectPage(1); dashboard().inventory.detailControl.setValue('summary'); await settle(view.fixture);
+    const id = dashboard().inventory.visibleIds().at(-1)!;
+    dashboard().inventory.setTileDetail({ guid: id, level: 'detailed' }); await settle(view.fixture);
+    const origin = () => view.root.querySelector<HTMLAnchorElement>(`a.portfolio-tile__name[data-browse-id="${id}"]`)!;
+    origin().focus(); origin().scrollIntoView({ block: 'center' });
+    origin().click(); await settle(view.fixture);
+    expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('drill-in');
+    view.root.querySelectorAll<HTMLAnchorElement>('a')[1].click(); await settle(view.fixture);
+    await vi.waitFor(() => {
+      expect(view.router.url).toBe(facilityUrl);
+      expect(dashboard().filters().search).toBe('Analysis'); expect(dashboard().inventory.page()).toBe(1);
+      expect(dashboard().inventory.overrides()[id]).toBe('detailed');
+      expect((document.activeElement as HTMLElement).dataset['browseId']).toBe(id);
+      const bounds = origin().getBoundingClientRect();
+      expect(bounds.top).toBeGreaterThanOrEqual(view.root.querySelector('.analysis-inventory__toolbar')!.getBoundingClientRect().bottom);
+      expect(bounds.bottom).toBeLessThanOrEqual(view.root.getBoundingClientRect().bottom);
+    });
+    expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('drill-out');
+    origin().click(); await settle(view.fixture); TestBed.inject(Location).back(); await settle(view.fixture);
+    await vi.waitFor(() => expect(view.router.url).toBe(facilityUrl)); await settle(view.fixture);
+    expect(dashboard().inventory.page()).toBe(1);
+    view.root.querySelector<HTMLAnchorElement>('app-page-identity nav a')!.click(); await settle(view.fixture);
+    expect(view.router.url).toBe(dashboardUrl);
+    view.fixture.destroy();
+  });
+
+  it('keeps canceled facility navigation in place and falls back to the dashboard heading after an origin is deleted', async () => {
+    await page.viewport(1200, 900);
+    const view = setup(3); await view.router.navigateByUrl('/v1/workspace/facility/facility-a/analysis/dashboard'); await settle(view.fixture);
+    const link = () => view.root.querySelector<HTMLAnchorElement>('a.portfolio-tile__name')!;
+    const id = link().dataset['browseId'];
+    view.canEnter.set(false); link().focus(); link().click(); await settle(view.fixture);
+    expect(view.router.url).toContain('/analysis/dashboard');
+    view.canEnter.set(true); link().click(); await settle(view.fixture);
+    view.canLeave.set(false); view.root.querySelectorAll<HTMLAnchorElement>('a')[1].click(); await settle(view.fixture);
+    expect(view.router.url).toContain('/analysis/workbench/');
+    view.entries.update(entries => entries.filter(entry => entry.key !== id));
+    view.canLeave.set(true); view.root.querySelectorAll<HTMLAnchorElement>('a')[1].click(); await settle(view.fixture);
+    await vi.waitFor(() => expect((document.activeElement as HTMLElement).id).toBe('v1-facility-analysis-title'));
+    expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('drill-out');
     view.fixture.destroy();
   });
 

@@ -9,19 +9,19 @@ import { CALCULATION_WORKER_TIMEOUT_MS, runWorker } from '@platform/web-workers/
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
-import { Observable, Subscription, catchError, defer, distinctUntilChanged, finalize, map, of, tap, timeout } from 'rxjs';
+import { Observable, catchError, defer, distinctUntilChanged, map, of, tap, timeout } from 'rxjs';
 import { analysisOutcomeSummary } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { buildFacilityDashboardResultsRequest, facilityAnalysisResultsFingerprint } from '@app/v1/facility/analysis/facility-analysis-workbench/results/calculation/facility-analysis-results-request';
 import { AccountAnalysisDashboardResultState, buildAccountAnalysisFacilitySelections } from './account-analysis.models';
 import { accountAnalysisResultsFingerprint, buildAccountAnalysisResultsRequest } from '../results/account-analysis-results-request';
-import { AnalysisInventoryEntry } from './analysis-inventory.models';
+import { scheduleAnalysisResults } from '@app/v1/shared/analysis-inventory/analysis-results-scheduler';
+import { AnalysisInventoryEntry } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 
 type ResultState = AccountAnalysisDashboardResultState;
 type Job = { readonly accountGuid: string; readonly key: string; readonly fingerprint: string } & (
   | { readonly scope: 'account'; readonly request: AccountAnalysisResultsWorkerRequest }
   | { readonly scope: 'facility'; readonly request: FacilityAnalysisResultsWorkerRequest });
 interface ResultInput { readonly key: string; readonly states: Readonly<Record<string, ResultState>>; readonly jobs: readonly Job[]; }
-interface ScheduledJob { readonly job: Job; subscription?: Subscription; state?: ResultState; }
 
 /** One demand-bounded queue for both scopes; simple/off-page cards never enqueue analysis work. */
 @Injectable()
@@ -33,74 +33,11 @@ export class AccountAnalysisDashboardResultsService {
   private readonly demand = signal<readonly AnalysisInventoryEntry[]>([]);
   private readonly cache = new Map<string, { fingerprint: string; state: ResultState }>();
   private readonly input = computed(() => this.buildInput());
-  readonly states = toSignal(this.schedule(toObservable(this.input).pipe(
+  readonly states = toSignal(scheduleAnalysisResults(toObservable(this.input).pipe(
     distinctUntilChanged((a, b) => a.key === b.key)
-  )), { initialValue: {} as Readonly<Record<string, ResultState>> });
+  ), job => this.calculate(job)), { initialValue: {} as Readonly<Record<string, ResultState>> });
 
   setDemand(entries: readonly AnalysisInventoryEntry[]): void { this.demand.set(entries); }
-
-  /** Reconcile individual jobs so changing comparison demand does not restart card work. */
-  private schedule(inputs: Observable<ResultInput>): Observable<Readonly<Record<string, ResultState>>> {
-    return new Observable(subscriber => {
-      const scheduled = new Map<string, ScheduledJob>();
-      let states: Readonly<Record<string, ResultState>> = {};
-      let active = 0;
-      let reconciling = false;
-      let draining = false;
-
-      const drain = () => {
-        if (subscriber.closed || reconciling || draining) return;
-        draining = true;
-        try {
-          for (const item of scheduled.values()) {
-            if (active >= 2) break;
-            if (item.subscription || item.state) continue;
-            const subscription = new Subscription();
-            item.subscription = subscription;
-            active++;
-            subscription.add(this.calculate(item.job).pipe(finalize(() => {
-              // runWorker tears down before this finalizer releases the slot.
-              active--;
-              item.subscription = undefined;
-              drain();
-            })).subscribe(update => {
-              if (subscriber.closed || scheduled.get(update.key) !== item) return;
-              item.state = update.state;
-              states = { ...states, [update.key]: update.state };
-              subscriber.next(states);
-            }));
-          }
-        } finally { draining = false; }
-      };
-
-      const inputSubscription = inputs.subscribe({
-        next: input => {
-          reconciling = true;
-          try {
-            const desired = new Map(input.jobs.map(job => [job.key, job]));
-            for (const [key, item] of scheduled) {
-              const next = desired.get(key);
-              if (next?.accountGuid === item.job.accountGuid && next.fingerprint === item.job.fingerprint) continue;
-              scheduled.delete(key);
-              item.subscription?.unsubscribe();
-            }
-            for (const job of input.jobs) {
-              if (!scheduled.has(job.key)) scheduled.set(job.key, { job });
-            }
-            states = { ...input.states, ...Object.fromEntries([...scheduled].flatMap(([key, item]) => item.state ? [[key, item.state]] : [])) };
-            subscriber.next(states);
-          } finally { reconciling = false; }
-          drain();
-        },
-        error: error => subscriber.error(error)
-      });
-      return () => {
-        inputSubscription.unsubscribe();
-        for (const item of scheduled.values()) item.subscription?.unsubscribe();
-        scheduled.clear();
-      };
-    });
-  }
 
   private buildInput(): ResultInput {
     const snapshot = this.workspace.snapshot();

@@ -9,7 +9,7 @@ describe('AnalysisDraftSlideoutComponent', () => {
     component.submitted.subscribe(category => categories.push(category));
 
     component.submit();
-    component.setCategory('water');
+    component.ngOnChanges();
     component.submit();
 
     expect(categories).toEqual(['water']);

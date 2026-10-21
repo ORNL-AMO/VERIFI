@@ -9,7 +9,10 @@ describe('portfolio detail preferences', () => {
     return { service: TestBed.inject(PortfolioDetailPreferencesService), storage };
   }
   it.each([null, [], 'detailed', 42, { '["a","meters"]': 'unknown' }])('defaults safely for invalid or missing storage %s', stored => {
-    expect(setup(stored).service.read('a', 'meters')).toBe('simple');
+    const { service } = setup(stored);
+    expect(service.read('a', 'meters')).toBe('simple');
+    expect(service.read('a', 'analyses')).toBe('simple');
+    expect(service.read('a', 'facilityAnalyses')).toBe('summary');
   });
   it('persists only detail levels, isolated by account and resource, and reloads them in a new service', () => {
     const { service, storage } = setup();
@@ -18,6 +21,9 @@ describe('portfolio detail preferences', () => {
     expect(storage.store).toHaveBeenLastCalledWith(PORTFOLIO_DETAIL_STORAGE_KEY, { '["a","meters"]': 'summary', '["a","predictors"]': 'detailed', '["b","meters"]': 'detailed' });
     const reloaded = TestBed.runInInjectionContext(() => new PortfolioDetailPreferencesService());
     expect(reloaded.read('a', 'meters')).toBe('summary'); expect(reloaded.read('b', 'meters')).toBe('detailed');
+    service.save('a', 'facilityAnalyses', 'simple');
+    const restored = TestBed.runInInjectionContext(() => new PortfolioDetailPreferencesService());
+    expect(restored.read('a', 'facilityAnalyses')).toBe('simple');
   });
   it('keeps browsing and in-memory preferences working when storage throws', () => {
     const { service, storage } = setup(); storage.retrieve.mockImplementation(() => { throw Error('Blocked'); });
