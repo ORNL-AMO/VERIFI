@@ -35,6 +35,7 @@ import CloudRainIcon from '@hugeicons/core-free-icons/CloudRainIcon';
 import CombineIcon from '@hugeicons/core-free-icons/CombineIcon';
 import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
 import CovariateIcon from '@hugeicons/core-free-icons/CovariateIcon';
+import CrowdfundingIcon from '@hugeicons/core-free-icons/CrowdfundingIcon';
 import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon';
 import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon';
 import Download04Icon from '@hugeicons/core-free-icons/Download04Icon';
@@ -105,6 +106,7 @@ import ZoomOutIcon from '@hugeicons/core-free-icons/ZoomOutIcon';
 
 export const ICON_REGISTRY = {
   account: Building03Icon,
+  accountAnalysis: CrowdfundingIcon,
   accountIssue: Alert02Icon,
   add: Add01Icon,
   analysis: MicroscopeIcon,

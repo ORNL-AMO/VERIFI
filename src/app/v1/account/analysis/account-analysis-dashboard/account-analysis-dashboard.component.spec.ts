@@ -10,7 +10,7 @@ import { AccountAnalysisActionsService } from './account-analysis-actions.servic
 import { AccountAnalysisDashboardResultsService } from './account-analysis-dashboard-results.service';
 import { AccountAnalysisDashboardComponent } from './account-analysis-dashboard.component';
 import { AccountAnalysisWorkspaceService } from './account-analysis-workspace.service';
-import { AnalysisInventoryEntry } from './analysis-inventory.models';
+import { AnalysisInventoryEntry } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 import { accountEntry, facilityEntry, inventoryAccount, inventoryFacility, inventoryOutcome } from './analysis-inventory.testing';
 
 describe('Unified account Analysis dashboard', () => {
@@ -55,7 +55,7 @@ describe('Unified account Analysis dashboard', () => {
     expect(root.querySelector('[data-analysis-scope="facility"] .portfolio-tile__analysis-scope .portfolio-tile__owner')).toBeNull();
     expect(root.querySelector('[data-analysis-scope="facility"] .portfolio-tile__ownership .portfolio-tile__owner')?.textContent).toContain('Plant');
     for (const tile of root.querySelectorAll('.portfolio-inventory .portfolio-tile')) {
-      expect(tile.querySelector('.portfolio-tile__analysis-scope app-ui-icon')).toBeNull();
+      expect(tile.querySelectorAll('.portfolio-tile__analysis-scope app-ui-icon')).toHaveLength(1);
       expect(tile.querySelectorAll('.portfolio-tile__heading > app-ui-icon')).toHaveLength(1);
       expect(tile.querySelector('.portfolio-tile__owner app-ui-icon')).toBeNull();
     }

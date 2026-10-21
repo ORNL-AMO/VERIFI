@@ -1,1 +1,1 @@
-<header><span class="analysis-card-header__scope">{{ scope() === 'account' ? 'Account analysis' : 'Facility analysis' }}</span><ng-content/></header>
+<header><span class="analysis-card-header__scope"><app-ui-icon [name]="scope()" [size]="16"/>{{ scope() === 'account' ? 'Account analysis' : 'Facility analysis' }}</span><ng-content/></header>

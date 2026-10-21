@@ -1,4 +1,4 @@
-import { Injectable, Signal, computed, inject } from '@angular/core';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -7,6 +7,7 @@ import {
   FacilityAnalysisResultsWorkerRequest,
   FacilityAnalysisResultsWorkerResponse
 } from '@platform/web-workers/facility-analysis-results-worker.contract';
+import { scheduleAnalysisResults } from '@app/v1/shared/analysis-inventory/analysis-results-scheduler';
 import { CALCULATION_WORKER_TIMEOUT_MS, runWorker } from '@platform/web-workers/run-worker';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
@@ -16,13 +17,8 @@ import {
   catchError,
   defer,
   distinctUntilChanged,
-  from,
   map,
-  mergeMap,
   of,
-  scan,
-  startWith,
-  switchMap,
   tap,
   timeout
 } from 'rxjs';
@@ -38,6 +34,8 @@ import {
 
 interface DashboardResultRequest {
   readonly analysisGuid: string;
+  readonly key: string;
+  readonly accountGuid: string;
   readonly fingerprint: string;
   readonly request: FacilityAnalysisResultsWorkerRequest;
 }
@@ -49,7 +47,7 @@ interface DashboardResultInput {
 }
 
 interface DashboardResultUpdate {
-  readonly analysisGuid: string;
+  readonly key: string;
   readonly state: FacilityAnalysisDashboardResultState;
 }
 
@@ -66,32 +64,27 @@ export class FacilityAnalysisDashboardResultsService {
   private readonly calendarizationBase = toSignal(this.calendarization.calendarizeBase(), {
     initialValue: IDLE_WORKSPACE_CALENDARIZATION
   });
+  private readonly demand = signal<readonly string[]>([]);
   private readonly cache = new Map<string, CachedDashboardResult>();
   private readonly input = computed<DashboardResultInput>(() => this.buildInput());
-  private readonly stateStream = toObservable(this.input).pipe(
-    distinctUntilChanged((first, second) => first.key === second.key),
-    switchMap(input => {
-      if (!input.requests.length) return of(input.states);
-      return from(input.requests).pipe(
-        mergeMap(request => this.calculate(request), 2),
-        scan((states, update) => ({ ...states, [update.analysisGuid]: update.state }), input.states),
-        startWith(input.states)
-      );
-    })
-  );
-
   readonly states: Signal<Readonly<Record<string, FacilityAnalysisDashboardResultState>>> = toSignal(
-    this.stateStream,
+    scheduleAnalysisResults(toObservable(this.input).pipe(
+      distinctUntilChanged((first, second) => first.key === second.key),
+      map(input => ({ states: input.states, jobs: input.requests }))
+    ), request => this.calculate(request)),
     { initialValue: {} }
   );
 
+  setDemand(analysisGuids: readonly string[]): void { this.demand.set(analysisGuids); }
+
   private buildInput(): DashboardResultInput {
-    const analyses = [...this.workspace.selectedFacilityAnalyses()]
+    const demanded = new Set(this.demand());
+    const analyses = this.workspace.selectedFacilityAnalyses().filter(analysis => demanded.has(analysis.guid))
       .sort((first, second) => first.guid.localeCompare(second.guid));
     const facility = this.workspace.selectedFacility();
     const stateEntries: Array<readonly [string, FacilityAnalysisDashboardResultState]> = [];
     const requests: DashboardResultRequest[] = [];
-    const keyParts: string[] = [];
+    const keyParts: string[] = [this.workspace.account()?.guid ?? '', facility?.guid ?? ''];
     const scopeKey = analyses.map(analysis => analysis.guid).join(',');
 
     if (!facility || !this.workspace.isReady()) {
@@ -113,7 +106,7 @@ export class FacilityAnalysisDashboardResultsService {
       return dashboardInput(stateEntries, requests, `calendarization:error:${facility.guid}:${scopeKey}`);
     }
     const currentCalendarizationFingerprint = this.calendarization.currentInputFingerprint();
-    if (base.state !== 'ready' || base.inputFingerprint !== currentCalendarizationFingerprint) {
+    if (base.state !== 'ready' || base.accountGuid !== facility.accountId || base.inputFingerprint !== currentCalendarizationFingerprint) {
       analyses.forEach(analysis => stateEntries.push([analysis.guid, { state: 'loading', message: 'Preparing data…' }]));
       return dashboardInput(
         stateEntries,
@@ -135,14 +128,14 @@ export class FacilityAnalysisDashboardResultsService {
         return;
       }
       const fingerprint = facilityAnalysisResultsFingerprint(request);
-      const cached = this.cache.get(analysis.guid);
+      const cached = this.cache.get(`${analysis.accountId}:${analysis.guid}`);
       if (cached?.fingerprint === fingerprint) {
         stateEntries.push([analysis.guid, cached.state]);
         keyParts.push(`${analysis.guid}:${fingerprint}`);
         return;
       }
       stateEntries.push([analysis.guid, { state: 'loading', message: 'Calculating…' }]);
-      requests.push({ analysisGuid: analysis.guid, fingerprint, request });
+      requests.push({ analysisGuid: analysis.guid, key: analysis.guid, accountGuid: analysis.accountId, fingerprint, request });
       keyParts.push(`${analysis.guid}:${fingerprint}`);
     });
 
@@ -204,16 +197,16 @@ export class FacilityAnalysisDashboardResultsService {
     return response$.pipe(
       timeout(CALCULATION_WORKER_TIMEOUT_MS),
       map(response => ({
-        analysisGuid: input.analysisGuid,
+        key: input.analysisGuid,
         state: dashboardOutcomeState(response, input)
       })),
       tap(update => {
         if (update.state.state === 'ready') {
-          this.cache.set(update.analysisGuid, { fingerprint: input.fingerprint, state: update.state });
+          this.cache.set(`${input.accountGuid}:${update.key}`, { fingerprint: input.fingerprint, state: update.state });
         }
       }),
       catchError(() => of({
-        analysisGuid: input.analysisGuid,
+        key: input.analysisGuid,
         state: { state: 'error' as const, message: 'Calculation failed' }
       }))
     );

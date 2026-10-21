@@ -8,7 +8,7 @@ import { buildFacilityAnalysisGroupModelViews } from '@app/v1/facility/analysis/
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { StatusEvaluationState } from '@app/v1/status/status.models';
 import { analysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
-import { AccountAnalysisCard, AccountAnalysisDashboardResultState } from './account-analysis.models';
+import { AccountAnalysisCard, AccountAnalysisDashboardResultState } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis.models';
 
 export type AnalysisInventoryEntry =
   | { readonly scope: 'account'; readonly key: string; readonly ownerName: string; readonly card: AccountAnalysisCard }
@@ -41,7 +41,7 @@ export function filterAnalysisInventory(entries: readonly AnalysisInventoryEntry
 }
 
 export function analysisInventoryTile(entry: AnalysisInventoryEntry, outcome: AccountAnalysisDashboardResultState | undefined,
-  meterGroups: readonly IdbUtilityMeterGroup[], navigation: WorkspaceNavigationService, accountGuid: string, evaluation: StatusEvaluationState = 'ready', showCategory = true): InventoryTile {
+  meterGroups: readonly IdbUtilityMeterGroup[], navigation: WorkspaceNavigationService, accountGuid: string, evaluation: StatusEvaluationState = 'ready', showCategory = true, showOwner = true): InventoryTile {
   const card = entry.card;
   const analysis = card.analysis;
   const display = analysisOutcomeDisplay(outcome ?? { state: 'loading', message: 'Results not loaded' }, card.category);
@@ -57,9 +57,9 @@ export function analysisInventoryTile(entry: AnalysisInventoryEntry, outcome: Ac
       )) ? 'Incomplete' : ''
     }));
   return {
-    guid: entry.key, name: analysis.name || 'Untitled analysis', icon: entry.scope === 'account' ? 'account' : 'facility',
+    guid: entry.key, name: analysis.name || 'Untitled analysis', icon: entry.scope === 'account' ? 'accountAnalysis' : 'analysis',
     route: entry.scope === 'account' ? navigation.accountAnalysisWorkbenchRoute(accountGuid, analysis.guid) : navigation.facilityAnalysisWorkbenchRoute(entry.facility.guid, analysis.guid),
-    owner: entry.scope === 'facility' ? { label: entry.ownerName, route: navigation.facilityAnalysisRoute(entry.facility.guid) } : undefined,
+    owner: showOwner && entry.scope === 'facility' ? { label: entry.ownerName, route: navigation.facilityAnalysisRoute(entry.facility.guid) } : undefined,
     chip: showCategory ? card.category === 'water' ? 'Water' : 'Energy' : undefined,
     chipIcon: showCategory ? card.category === 'water' ? 'droplet' : 'energy' : undefined,
     status: { label: statusLabel, tone: unchecked ? 'neutral' : card.status === 'ready' ? 'success' : card.status === 'error' ? 'danger' : card.status === 'warning' ? 'warning' : 'neutral', icon: unchecked ? statusLabel === 'Checks unavailable' ? 'info' : 'loading' : card.status === 'ready' ? 'success' : 'warning' },

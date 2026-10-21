@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildAccountAnalysisCards } from './account-analysis.models';
 import { buildFacilityAnalysisCards } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis.models';
-import { AnalysisInventoryEntry, analysisInventoryStatusLabel } from './analysis-inventory.models';
+import { AnalysisInventoryEntry, analysisInventoryStatusLabel } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 import { analysisCategories } from '@app/v1/shared/analysis-category/analysis-category-presentation';
 
 @Injectable({ providedIn: 'root' })

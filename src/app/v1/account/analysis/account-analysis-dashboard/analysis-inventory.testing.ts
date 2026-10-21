@@ -4,7 +4,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { AnalysisInventoryEntry } from './analysis-inventory.models';
+import { AnalysisInventoryEntry } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 
 export const inventoryAccount = { guid: 'account-a', name: 'Portfolio A', selectedEnergyAnalysisId: 'account-energy',
   sustainabilityQuestions: { energyReductionBaselineYear: 2022, waterReductionBaselineYear: 2022 }, fiscalYear: 'calendarYear' } as IdbAccount;

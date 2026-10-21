@@ -4,7 +4,7 @@ import { InventoryBrowseKind, BrowseKey, BrowseStateService } from '@app/v1/shar
 import { PortfolioDetailPreferencesService } from './portfolio-detail-preferences.service';
 import { PORTFOLIO_PAGE_SIZE, PortfolioDetailLevel, PortfolioTile, PortfolioTileDetailChange } from './portfolio-inventory.models';
 
-/** Account inventory display state; feature controllers retain filtering and navigation. */
+/** Shared inventory display state; feature controllers retain filtering and navigation. */
 export class PortfolioInventoryState {
   private readonly browse = inject(BrowseStateService);
   private readonly preferences = inject(PortfolioDetailPreferencesService);

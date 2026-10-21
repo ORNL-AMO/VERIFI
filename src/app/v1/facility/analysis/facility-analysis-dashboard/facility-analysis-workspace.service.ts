@@ -1,6 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { analysisCategories } from '@app/v1/shared/analysis-category/analysis-category-presentation';
 import { buildFacilityAnalysisCards } from './facility-analysis.models';
 
 @Injectable({ providedIn: 'root' })
@@ -11,6 +12,7 @@ export class FacilityAnalysisWorkspaceService {
   readonly account = this.store.account;
   readonly facility = this.store.selectedFacility;
   readonly analyses = this.store.selectedFacilityAnalyses;
+  readonly categories = computed(() => analysisCategories(this.store.facilityMeters(), this.analyses()));
   readonly meterGroups = this.store.facilityMeterGroups;
   readonly canWrite = this.store.canWrite;
   readonly hasPending = this.store.hasPending;

@@ -13,7 +13,7 @@ export class PortfolioDetailPreferencesService {
   read(accountGuid: string, resource: InventoryBrowseKind): PortfolioDetailLevel {
     const key = JSON.stringify([accountGuid, resource]);
     if (this.levels.has(key)) return this.levels.get(key)!;
-    let level: PortfolioDetailLevel = 'simple';
+    let level: PortfolioDetailLevel = resource === 'facilityAnalyses' ? 'summary' : 'simple';
     try {
       const stored: unknown = this.injector.get(LocalStorageService).retrieve(PORTFOLIO_DETAIL_STORAGE_KEY);
       if (stored && typeof stored === 'object' && !Array.isArray(stored)) {

@@ -28,7 +28,7 @@ import { AccountAnalysisDashboardResultsService } from './account-analysis-dashb
 import { AccountAnalysisDashboardCard } from './account-analysis.models';
 import { AccountAnalysisDraftSlideoutComponent, AnalysisDraftFacility, AnalysisDraftRequest } from './account-analysis-draft-slideout/account-analysis-draft-slideout.component';
 import { AccountAnalysisComparisonComponent } from './account-analysis-comparison/account-analysis-comparison.component';
-import { AnalysisInventoryEntry, AnalysisInventoryResultEntry, analysisInventoryTile, filterAnalysisInventory } from './analysis-inventory.models';
+import { AnalysisInventoryEntry, AnalysisInventoryResultEntry, analysisInventoryTile, filterAnalysisInventory } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 
 @Component({
   selector: 'app-account-analysis-dashboard', host: { class: 'v1-analysis-dashboard-host' }, standalone: true,
@@ -36,7 +36,7 @@ import { AnalysisInventoryEntry, AnalysisInventoryResultEntry, analysisInventory
     AccountAnalysisDraftSlideoutComponent, AccountAnalysisComparisonComponent, AnalysisDetailsSlideoutComponent,
     FacilityAnalysisComparisonComponent, ReactiveFormsModule, BrowsePositionDirective, BrowseHeaderDirective, PageIdentityComponent],
   providers: [AccountAnalysisDashboardResultsService],
-  templateUrl: './account-analysis-dashboard.component.html', styleUrls: ['./account-analysis-dashboard.component.css']
+  templateUrl: './account-analysis-dashboard.component.html', styleUrls: ['../../../shared/analysis-inventory/analysis-inventory.css', './account-analysis-dashboard.component.css']
 })
 export class AccountAnalysisDashboardComponent implements OnDestroy {
   @ViewChild('comparisonPanel', { static: true }) private comparisonPanel!: TemplateRef<unknown>;

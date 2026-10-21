@@ -2,4 +2,4 @@
 :host([data-scope='facility']) { background: color-mix(in srgb,var(--v1-facility) 10%,var(--v1-surface)); }
 :host { min-height: calc(var(--analysis-menu-size,1.75rem) + .8rem); }
 header { display: flex; align-items: baseline; gap: .4rem; min-width: 0; width: 100%; }
-.analysis-card-header__scope { flex-shrink: 0; }
+.analysis-card-header__scope { display: inline-flex; align-items: center; gap: .4rem; flex-shrink: 0; }

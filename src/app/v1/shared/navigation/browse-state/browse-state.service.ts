@@ -8,6 +8,7 @@ import type { PortfolioInventoryView } from '@app/v1/account/data/portfolio/port
 
 export interface BrowseFilters {
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };
+  facilityAnalyses: Omit<BrowseFilters['analyses'], 'scope' | 'sort'> & { sort: 'attention' | 'modified' | 'name' | 'baseline' };
   predictors: PredictorInventoryFilters & { facilityGuid?: string };
   facilityPredictors: PredictorInventoryFilters;
   facilities: { search: string; status: FacilityStatusFilter; sort: FacilitySort };
@@ -19,7 +20,7 @@ export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
 export interface FacilityPredictorBrowseView { readonly page: number; readonly detail: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; readonly chartGuid?: string; readonly zoom: { start: number; end: number }; }
 export type AccountBrowseOrigin = 'facilities' | 'meters' | 'predictors';
-export type InventoryBrowseKind = AccountBrowseOrigin | 'analyses';
+export type InventoryBrowseKind = AccountBrowseOrigin | 'analyses' | 'facilityAnalyses';
 export interface FacilityMeterBrowseView { readonly page: number; readonly zoom: { start: number; end: number }; readonly detail?: InventoryDetailLevel; readonly overrides?: Readonly<Record<string, InventoryDetailLevel>>; }
 
 /** UI-only journey state. Nothing is written to storage or domain records. */

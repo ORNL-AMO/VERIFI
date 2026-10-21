@@ -1,6 +1,6 @@
 import { analysisInventoryStatusLabel, analysisInventoryTile, filterAnalysisInventory } from './analysis-inventory.models';
-import { accountEntry, facilityEntry, inventoryAccount, inventoryFacility, inventoryOutcome } from './analysis-inventory.testing';
-import { buildAccountAnalysisCards } from './account-analysis.models';
+import { accountEntry, facilityEntry, inventoryAccount, inventoryFacility, inventoryOutcome } from '@app/v1/account/analysis/account-analysis-dashboard/analysis-inventory.testing';
+import { buildAccountAnalysisCards } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis.models';
 import { BrowseFilters } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { makeFinding } from '@app/v1/status/status.models';
 import { presentFinding } from '@app/v1/status/status.catalog';
@@ -26,6 +26,7 @@ describe('analysis inventory projection', () => {
     expect(tiles.map(tile => tile.guid)).toEqual(['account:same', 'facility:same']);
     expect(tiles.map(tile => tile.route)).toEqual([['/account', 'account-a', 'same'], ['/facility', 'facility-a', 'same']]);
     expect(tiles.map(tile => tile.analysisSnapshot?.scope)).toEqual(['account', 'facility']);
+    expect(tiles.map(tile => tile.icon)).toEqual(['accountAnalysis', 'analysis']);
     expect(tiles[0].owner).toBeUndefined(); expect(tiles[1].owner?.label).toBe('Riverbend Plant');
   });
   it('searches owners and category while keeping active reporting scoped to each owner', () => {
