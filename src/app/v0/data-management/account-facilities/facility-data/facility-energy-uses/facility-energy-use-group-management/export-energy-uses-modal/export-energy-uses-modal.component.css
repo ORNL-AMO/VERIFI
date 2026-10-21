@@ -1,0 +1,32 @@
+.popup {
+    top: 5vh;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+    max-width: 600px;
+    max-height: 90vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.popup-body {
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.year-select {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+}
+
+.popup-header,
+.popup-footer {
+    flex-shrink: 0;
+}
+
+.export-summary {
+    background-color: var(--bs-tertiary-bg);
+}
+

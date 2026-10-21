@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-facility-energy-use-group-management',
@@ -18,9 +19,21 @@ export class FacilityEnergyUseGroupManagementComponent {
   private readonly energyUseHandler = inject(EnergyUseCommandHandler);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
+  private readonly sharedDataService = inject(SharedDataService);
+  showExportModal = false;
 
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]);
+
+  openExportModal(): void {
+    this.showExportModal = true;
+    this.sharedDataService.modalOpen.next(true);
+  }
+
+  closeExportModal(): void {
+    this.showExportModal = false;
+    this.sharedDataService.modalOpen.next(false);
+  }
 
   async addGroup() {
     let facility: IdbFacility = this.facility();

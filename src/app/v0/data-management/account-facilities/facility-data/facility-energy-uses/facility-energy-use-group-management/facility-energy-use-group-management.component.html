@@ -8,23 +8,33 @@
                 <h4>
                     {{_facility.name}} Energy Use Groups
                 </h4>
-                @if(_facilityEnergyUseGroups.length > 0){
                 <!-- Toolbar -->
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    @if(_facilityEnergyUseGroups.length > 0){
                     <div class="group-count-badge">
                         <span class="fa fa-layer-group me-1"></span>
                         {{_facilityEnergyUseGroups.length}} Groups
                     </div>
-                    <div class="ms-auto d-flex align-items-center gap-2">
+                    }
+                    <div class="ms-auto d-flex flex-wrap align-items-center gap-2">
+                        @if(_facilityEnergyUseGroups.length > 0){
                         <button class="btn action-btn" (click)="addGroup()">
                             <i class="fa fa-plus"></i> Add Group
                         </button>
                         <button class="btn action-btn" (click)="goToBulkSetup()">
                             <i class="fa fa-edit"></i> Bulk Setup
                         </button>
+                        }
+                        <button class="btn action-btn" (click)="openExportModal()">
+                            <i class="fa fa-file-export"></i> Export
+                        </button>
+                        <button class="btn action-btn">
+                            <i class="fa fa-file-import"></i> Import
+                        </button>
                     </div>
                 </div>
 
+                @if(_facilityEnergyUseGroups.length > 0){
                 <!-- Group Cards -->
                 <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
                     @for(group of _facilityEnergyUseGroups; track group.guid) {
@@ -51,3 +61,8 @@
     </div>
 </div>
 
+<div [ngClass]="{'windowOverlay': showExportModal}"></div>
+
+@if (showExportModal) {
+    <app-export-energy-uses-modal (closeModal)="closeExportModal()"></app-export-energy-uses-modal>
+}
