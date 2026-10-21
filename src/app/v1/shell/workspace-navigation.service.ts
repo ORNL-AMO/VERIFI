@@ -650,7 +650,9 @@ export class WorkspaceNavigationService {
     const current = this.routeState();
 
     const depth = (route: RouteState, url: string): number | undefined => {
-      if (route.view !== 'workspace' || route.section !== 'data') return undefined;
+      if (route.view !== 'workspace') return undefined;
+      if (route.section === 'analysis') return route.contextMode === 'account' ? route.analysisGuid ? 1 : 0 : route.analysisGuid ? 2 : 1;
+      if (route.section !== 'data') return undefined;
       if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' || route.portfolioTab === 'predictors' ? 0 : undefined;
       if (route.detail === 'predictors') return route.predictorGuid || route.weatherPredictorGroupKey || url.includes('/predictors/weather/new') ? 2 : 1;
       if (route.detail === 'meter-grouping') return route.meterGroupGuid ? 2 : 1;
@@ -658,13 +660,13 @@ export class WorkspaceNavigationService {
     };
     const before = depth(previous, this.previousUrl());
     const after = depth(current, this.currentUrl());
-    if (before === undefined || after === undefined) return 'none';
+    if (before === undefined || after === undefined || previous.section !== current.section) return 'none';
     const accountFor = (route: RouteState) => route.accountGuid || this.facilities().find(facility => facility.guid === route.facilityGuid)?.accountId;
     const accountGuid = accountFor(current);
     if (!accountGuid || accountGuid !== accountFor(previous)) return 'none';
     if (previous.facilityGuid && current.facilityGuid && previous.facilityGuid !== current.facilityGuid) return 'peer';
     if (after !== before) return after > before ? 'drill-in' : 'drill-out';
-    if (previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
+    if (previous.analysisGuid !== current.analysisGuid || previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
     return 'none';
   }
 

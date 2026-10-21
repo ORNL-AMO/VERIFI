@@ -5,18 +5,18 @@ import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results
 import { MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/shared/charts/metric-results-chart.models';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityAnalysisDashboardCard } from '../facility-analysis.models';
-import { AnalysisComparisonSlideoutComponent } from './analysis-comparison-slideout.component';
+import { FacilityAnalysisComparisonComponent } from './facility-analysis-comparison.component';
 
-describe('AnalysisComparisonSlideoutComponent', () => {
-  let fixture: ComponentFixture<AnalysisComparisonSlideoutComponent>;
+describe('FacilityAnalysisComparisonComponent', () => {
+  let fixture: ComponentFixture<FacilityAnalysisComparisonComponent>;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AnalysisComparisonSlideoutComponent, {
+    TestBed.overrideComponent(FacilityAnalysisComparisonComponent, {
       remove: { imports: [MeterResultsChartComponent] },
       add: { imports: [MeterResultsChartStubComponent] }
     });
-    await TestBed.configureTestingModule({ imports: [AnalysisComparisonSlideoutComponent] }).compileComponents();
-    fixture = TestBed.createComponent(AnalysisComparisonSlideoutComponent);
+    await TestBed.configureTestingModule({ imports: [FacilityAnalysisComparisonComponent] }).compileComponents();
+    fixture = TestBed.createComponent(FacilityAnalysisComparisonComponent);
   });
 
   it('renders aligned setup, annual results, differences, and both comparison charts', () => {
@@ -24,7 +24,8 @@ describe('AnalysisComparisonSlideoutComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent.replace(/\s+/g, ' ');
-    expect(fixture.nativeElement.querySelector('#v1-workspace-slideout-title')?.textContent).toBe('Analysis A vs Analysis B');
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
+    expect(text).toContain('Analysis A'); expect(text).toContain('Analysis B');
     expect(text).toContain('Analysis setup');
     expect(text).toContain('Group modeling setup');
     expect(text).toContain('Facility annual results');

@@ -147,3 +147,9 @@
   .v1-resource-browse-card__actions { width: 100%; }
   .v1-resource-browse-card__actions { justify-content: flex-end; }
 }
+
+.resource-action-menu.v1-root { display: grid; height: auto; min-height: 0; width: min(16rem,calc(100vw - 2rem)); padding: .35rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-surface); color: var(--v1-text); box-shadow: 0 .4rem 1.2rem var(--v1-shadow); }
+.resource-action-menu button { display: flex; gap: .5rem; align-items: center; min-height: 44px; padding: .6rem; border: 0; background: transparent; color: inherit; text-align: start; font: inherit; }
+.resource-action-menu button:is(:hover,:focus-visible) { background: var(--v1-content-block); outline: 2px solid var(--v1-focus); outline-offset: -2px; }
+.resource-action-menu button:disabled { opacity: .5; }
+.resource-action-menu .resource-action-menu__danger { color: var(--v1-danger); }

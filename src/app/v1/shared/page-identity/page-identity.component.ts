@@ -13,5 +13,6 @@ export class PageIdentityComponent {
   readonly title = input.required<string>();
   readonly icon = input.required<IconName>();
   readonly headingId = input.required<string>();
+  readonly breadcrumbLabel = input('Data context');
   readonly customTitle = input(false);
 }

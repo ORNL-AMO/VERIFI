@@ -122,6 +122,9 @@
         </span>
       }
       @if (!readOnly && actions.length > 0) {
+        @if (actionMenu) {
+          <button #actionMenuButton type="button" class="v1-icon-btn" [attr.aria-label]="'Options for ' + view.title" [cdkMenuTriggerFor]="cardMenu" (cdkMenuOpened)="menuOpened()">⋯</button>
+        } @else {
         <div class="v1-resource-browse-card__actions" aria-label="Resource actions">
           @for (action of actions; track action.id) {
             @let disabledDescriptionId = idPrefix + '-disabled-' + action.id;
@@ -142,7 +145,17 @@
             }
           }
         </div>
+        }
+
       }
     </footer>
   }
 </article>
+
+<ng-template #cardMenu>
+  <div cdkMenu [class]="menuClasses()" [attr.aria-label]="'Options for ' + view.title">
+    @for (action of actions; track action.id) {
+      <button type="button" cdkMenuItem [disabled]="!!action.disabled || !!action.loading" [cdkMenuItemDisabled]="!!action.disabled || !!action.loading" [title]="action.disabledReason || action.label" [class.resource-action-menu__danger]="action.tone === 'danger'" (cdkMenuItemTriggered)="selectMenuAction(action)"><app-ui-icon [name]="action.icon"/>{{ action.label }}</button>
+    }
+  </div>
+</ng-template>

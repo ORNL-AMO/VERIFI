@@ -10,7 +10,7 @@
   (closed)="closed.emit()">
   <div class="v1-analysis-details">
     <dl>
-      <div><dt>Category</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : 'Energy' }}</dd></div>
+      @if (showCategory()) { <div><dt>Category</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : 'Energy' }}</dd></div> }
       <div><dt>Status</dt><dd>{{ analysisCard.statusLabel }}</dd></div>
       <div><dt>Baseline</dt><dd>{{ analysisCard.analysis.baselineYear || 'Not set' }}</dd></div>
       <div><dt>Basis and units</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : (analysisCard.analysis.energyIsSource ? 'Source energy' : 'Site energy') }} · {{ analysisCard.category === 'water' ? analysisCard.analysis.waterUnit : analysisCard.analysis.energyUnit }}</dd></div>

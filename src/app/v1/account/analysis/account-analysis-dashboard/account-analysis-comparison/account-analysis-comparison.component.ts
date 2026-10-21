@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { AccountAnalysisDashboardCard } from '../account-analysis.models';
-import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { buildAccountAnalysisComparisonView } from './account-analysis-comparison.view';
@@ -8,7 +7,7 @@ import { buildAccountAnalysisComparisonView } from './account-analysis-compariso
 @Component({
   selector: 'app-account-analysis-comparison',
   standalone: true,
-  imports: [WorkspaceSlideoutComponent, MeterResultsChartComponent, AnalysisResultNumberPipe],
+  imports: [MeterResultsChartComponent, AnalysisResultNumberPipe],
   templateUrl: './account-analysis-comparison.component.html',
   styleUrls: ['./account-analysis-comparison.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -16,11 +15,11 @@ import { buildAccountAnalysisComparisonView } from './account-analysis-compariso
 export class AccountAnalysisComparisonComponent {
   readonly cards = input.required<readonly AccountAnalysisDashboardCard[]>();
   readonly fiscalYear = input<string | undefined>(undefined);
-  readonly closed = output<void>();
+  readonly showCategory = input(true);
   readonly comparison = computed(() => {
     const cards = this.cards();
-    return cards.length === 2
-      ? buildAccountAnalysisComparisonView(cards[0], cards[1], this.fiscalYear())
-      : undefined;
+    if (cards.length !== 2) return undefined;
+    const view = buildAccountAnalysisComparisonView(cards[0], cards[1], this.fiscalYear());
+    return { ...view, fields: this.showCategory() ? view.fields : view.fields.filter(field => field.id !== 'category') };
   });
 }

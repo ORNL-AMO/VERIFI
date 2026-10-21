@@ -4,6 +4,8 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 @Component({ selector: 'app-inventory-chart-dock', standalone: true, imports: [IconComponent],
   templateUrl: './inventory-chart-dock.component.html', styleUrls: ['./inventory-chart-dock.component.css'] })
 export class InventoryChartDockComponent {
+  readonly label = input('Charts');
+  readonly panelId = input('inventory-chart-sheet');
   readonly open = input(false);
   readonly disabled = input(false);
   readonly opened = output<void>();

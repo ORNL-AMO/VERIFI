@@ -1,0 +1,54 @@
+@let view = snapshot();
+<dl class="analysis-snapshot__outcomes" aria-label="Analysis results">
+  @for (fact of view.outcomes; track $index) {
+    <div><dt>{{ fact.label }}</dt><dd [class.analysis-snapshot__unavailable]="fact.unavailable">{{ fact.value }}<p>{{ fact.description }}</p></dd></div>
+  }
+</dl>
+<dl class="analysis-snapshot__facts">
+  @for (fact of view.facts; track fact.label) { <div class="analysis-snapshot__primary-fact"><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div> }
+</dl>
+@if (view.selectionProgress; as progress) {
+  <section class="analysis-snapshot__selections" aria-label="Facility selections">
+    <div class="analysis-snapshot__section-heading">
+      <h2>Facility selections</h2>
+      @if (!print()) { <button type="button" class="v1-icon-btn" aria-label="View full account analysis details" title="View full analysis details" (click)="detailsRequested.emit()"><app-ui-icon name="monocle" [size]="20"/></button> }
+    </div>
+      @if (progress.evaluation === 'ready') {
+        @if (progress.total) {
+          <p class="analysis-snapshot__selection-count">{{ progress.valid }} / {{ progress.total }}</p>
+          <div class="analysis-snapshot__progress" role="progressbar" aria-label="Valid facilities" [attr.aria-valuenow]="progress.valid" aria-valuemin="0" [attr.aria-valuemax]="progress.total" [attr.aria-valuetext]="progress.valid + ' of ' + progress.total + ' facilities valid, including explicit skips'">
+            <span [style.width.%]="selectionPercent()"></span>
+          </div>
+        } @else { <p>No facilities</p> }
+      } @else { <p>{{ progress.evaluation === 'error' ? 'Checks unavailable' : 'Checks pending' }}</p> }
+  </section>
+}
+@if (detailed()) {
+  @if (view.scope === 'facility') {
+  <section class="analysis-snapshot__roster" [attr.aria-label]="view.rosterTitle">
+    <div class="analysis-snapshot__section-heading">
+      <h2>{{ view.rosterTitle }}</h2>
+      @if (!print()) { <button type="button" class="v1-icon-btn" [attr.aria-label]="'View full ' + view.rosterTitle.toLowerCase()" title="View full analysis details" (click)="detailsRequested.emit()"><app-ui-icon name="monocle" [size]="20"/></button> }
+    </div>
+    @for (row of visibleRoster(); track row.id) { <div class="analysis-snapshot__row"><strong>{{ row.name }}</strong>@if (row.state) { <span [class.analysis-snapshot__incomplete]="row.state === 'Incomplete'">{{ row.state }}</span> }<p>{{ row.detail }}</p></div> }
+    @if (!view.roster.length) { <p>No entries.</p> }
+    @if (view.roster.length > 3) { <p>{{ view.roster.length - 3 }} more entries.</p> }
+  </section>
+  }
+  <section class="analysis-snapshot__usage" aria-label="Used By">
+    <h2>Used By</h2>
+    <p><app-ui-icon name="link" [size]="18"/><span>{{ view.usage || 'Not used by other analyses or reports.' }}</span></p>
+  </section>
+  @if (view.findings.length) {
+    <section class="inventory-attention" aria-label="Analysis findings needing attention">
+      <h2>Needs attention</h2>
+      <ul>@for (finding of visibleFindings(); track finding.id) {
+        <li [attr.data-severity]="finding.severity">
+          <app-ui-icon [name]="finding.severity === 'error' ? 'danger' : 'warning'" [size]="18"/>
+          <div><p><span class="visually-hidden">{{ finding.severity === 'error' ? 'Error' : 'Warning' }}: </span>{{ finding.title }}</p><p class="inventory-attention__description">{{ finding.description }}</p></div>
+        </li>
+      }</ul>
+      @if (view.findings.length > 2) { <p class="inventory-attention__remaining">{{ view.findings.length - 2 }} more findings in analysis details.</p> }
+    </section>
+  }
+}

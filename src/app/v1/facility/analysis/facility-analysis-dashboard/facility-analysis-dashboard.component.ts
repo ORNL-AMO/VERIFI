@@ -1,3 +1,6 @@
+import { AnalysisComparisonState, AnalysisComparisonOption } from '@app/v1/shared/analysis-comparison/analysis-comparison-state';
+import { AnalysisComparisonSheetComponent } from '@app/v1/shared/analysis-comparison/analysis-comparison-sheet/analysis-comparison-sheet.component';
+import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -16,7 +19,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
 import { facilityAnalysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
-import { AnalysisComparisonSlideoutComponent } from './analysis-comparison-slideout/analysis-comparison-slideout.component';
+import { FacilityAnalysisComparisonComponent } from './facility-analysis-comparison/facility-analysis-comparison.component';
 import { ActiveSummaryCardComponent } from '@app/v1/shared/analysis-results/active-summary-card/active-summary-card.component';
 import { AnalysisDetailsSlideoutComponent } from './analysis-details-slideout/analysis-details-slideout.component';
 
@@ -28,12 +31,13 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
   selector: 'app-facility-analysis-dashboard',
   host: { class: 'v1-analysis-dashboard-host' },
   standalone: true,
-  imports: [IconComponent, DataEmptyStateModule, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, AnalysisComparisonSlideoutComponent, ActiveSummaryCardComponent, AnalysisDetailsSlideoutComponent],
+  imports: [AnalysisComparisonSheetComponent, InventoryChartDockComponent, IconComponent, DataEmptyStateModule, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisComparisonComponent, ActiveSummaryCardComponent, AnalysisDetailsSlideoutComponent],
   providers: [FacilityAnalysisDashboardResultsService],
   templateUrl: './facility-analysis-dashboard.component.html',
   styleUrls: ['./facility-analysis-dashboard.component.css']
 })
 export class FacilityAnalysisDashboardComponent implements OnDestroy {
+  @ViewChild('comparisonPanel', { static: true }) private comparisonPanel!: TemplateRef<unknown>;
   @ViewChild('activeConfirmation', { static: true }) private activeConfirmation!: TemplateRef<unknown>;
   @ViewChild('deleteConfirmation', { static: true }) private deleteConfirmation!: TemplateRef<unknown>;
 
@@ -41,6 +45,7 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   private readonly actions = inject(FacilityAnalysisActionsService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+  private confirmationPortal?: TemplatePortal;
   private confirmationKind: 'active' | 'delete' | undefined;
   readonly workspace = inject(FacilityAnalysisWorkspaceService);
   readonly results = inject(FacilityAnalysisDashboardResultsService);
@@ -80,11 +85,18 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
     const guid = candidate.category === 'water' ? facility.selectedWaterAnalysisId : facility.selectedEnergyAnalysisId;
     return this.cards().find(card => card.analysis.guid === guid);
   });
-  readonly comparisonGuids = signal<readonly string[]>([]);
-  readonly comparisonCards = computed(() => this.comparisonGuids()
-    .map(guid => this.cards().find(card => card.analysis.guid === guid))
-    .filter((card): card is FacilityAnalysisDashboardCard => !!card));
-  readonly comparisonCategory = computed(() => this.comparisonCards()[0]?.category);
+  readonly comparisonOptions = computed<readonly AnalysisComparisonOption[]>(() => {
+    const showCategory = new Set(this.workspace.cards().map(card => card.category)).size > 1;
+    return this.workspace.cards().map(card => ({ key: `facility:${card.analysis.guid}`, scope: 'facility', category: card.category,
+      facilityGuid: this.workspace.facility()?.guid, label: `${card.analysis.name || 'Untitled analysis'} · Facility analysis · ${this.workspace.facility()?.name || 'Facility'}${showCategory ? ' · ' + (card.category === 'water' ? 'Water' : 'Energy') : ''}` }));
+  });
+  readonly comparisonContext = computed(() => this.workspace.workspaceState() === 'ready' && this.workspace.facility()
+    ? `${this.workspace.account()?.guid}:${this.workspace.facility()!.guid}` : undefined);
+  readonly comparison = new AnalysisComparisonState(this.comparisonOptions, this.comparisonContext);
+  readonly comparisonGuids = this.comparison.selectedKeys;
+  readonly comparisonCards = computed(() => this.comparison.complete() ? this.comparisonGuids()
+    .map(key => this.cards().find(card => `facility:${card.analysis.guid}` === key)!)
+    .filter(Boolean) : []);
   readonly filteredCards = computed(() => {
     const filters = this.filters();
     const search = filters.search.trim().toLocaleLowerCase();
@@ -102,7 +114,7 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
     if (facility) void this.router.navigate(this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, card.analysis.guid));
   }
 
-  openCreate(): void { if (this.canAct()) { this.actionError.set(undefined); this.createOpen.set(true); } }
+  openCreate(): void { if (this.canAct()) { this.clearComparison(); this.detailsGuid.set(undefined); this.actionError.set(undefined); this.createOpen.set(true); } }
   closeCreate(): void { if (!this.saving()) this.createOpen.set(false); }
 
   async create(category: AnalysisCategory): Promise<void> {
@@ -119,10 +131,11 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
 
   requestActive(card: FacilityAnalysisCard): void {
     if (!this.canAct()) return;
+    this.clearComparison(); this.detailsGuid.set(undefined); this.createOpen.set(false);
     this.actionError.set(undefined);
     this.activeCandidate.set(card);
     this.confirmationKind = 'active';
-    this.modalPortal.show(new TemplatePortal(this.activeConfirmation, this.viewContainerRef));
+    this.showConfirmation(this.activeConfirmation);
   }
 
   async confirmActive(): Promise<void> {
@@ -136,10 +149,11 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
 
   requestDelete(card: FacilityAnalysisCard): void {
     if (!this.canAct()) return;
+    this.clearComparison(); this.detailsGuid.set(undefined); this.createOpen.set(false);
     this.actionError.set(undefined);
     this.deleteCandidate.set(card);
     this.confirmationKind = 'delete';
-    this.modalPortal.show(new TemplatePortal(this.deleteConfirmation, this.viewContainerRef));
+    this.showConfirmation(this.deleteConfirmation);
   }
 
   async confirmDelete(): Promise<void> {
@@ -149,28 +163,18 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
       await this.actions.deleteAnalysis(candidate.analysis.guid);
       this.dismissDeleteConfirmation();
       this.detailsGuid.set(undefined);
-      this.comparisonGuids.update(guids => guids.filter(guid => guid !== candidate.analysis.guid));
+
     });
   }
 
-  toggleComparison(card: FacilityAnalysisCard): void {
-    const current = this.comparisonGuids();
-    if (current.includes(card.analysis.guid)) {
-      this.comparisonGuids.set(current.filter(guid => guid !== card.analysis.guid));
-      return;
-    }
-    const category = this.comparisonCategory();
-    if (category && card.category !== category) return;
-    this.comparisonGuids.set([...current, card.analysis.guid].slice(-2));
+  openComparison(card?: FacilityAnalysisCard): void {
+    if (this.saving() || !this.comparisonContext()) return;
+    this.detailsGuid.set(undefined); this.createOpen.set(false);
+    this.dismissActiveConfirmation(); this.dismissDeleteConfirmation();
+    this.comparison.open(this.comparisonPanel, this.viewContainerRef, card ? `facility:${card.analysis.guid}` : undefined);
   }
-
-  isCompared(guid: string): boolean { return this.comparisonGuids().includes(guid); }
-  comparisonDisabledReason(card: FacilityAnalysisCard): string | undefined {
-    const category = this.comparisonCategory();
-    if (!category || category === card.category || this.isCompared(card.analysis.guid)) return undefined;
-    return `Compare with another ${category} analysis`;
-  }
-  clearComparison(): void { this.comparisonGuids.set([]); }
+  openDetails(card: FacilityAnalysisCard): void { this.clearComparison(); this.detailsGuid.set(card.analysis.guid); }
+  clearComparison(): void { this.comparison.close(); }
   toggleGroupDetails(): void { this.showGroupDetails.update(visible => !visible); }
   cancelActiveConfirmation(): void {
     if (!this.saving()) this.dismissActiveConfirmation();
@@ -181,7 +185,8 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.confirmationKind) this.modalPortal.hide();
+    this.clearComparison();
+    if (this.confirmationKind) this.hideOwnedConfirmation();
   }
 
   private openAnalysisGuid(guid: string): void {
@@ -202,9 +207,16 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   private hideConfirmation(kind: 'active' | 'delete'): void {
     if (this.confirmationKind !== kind) return;
     this.confirmationKind = undefined;
-    this.modalPortal.hide();
+    this.hideOwnedConfirmation();
   }
 
+  private showConfirmation(template: TemplateRef<unknown>): void {
+    this.confirmationPortal = new TemplatePortal(template, this.viewContainerRef); this.modalPortal.show(this.confirmationPortal);
+  }
+  private hideOwnedConfirmation(): void {
+    if (this.confirmationPortal && this.modalPortal.activePortal() === this.confirmationPortal) this.modalPortal.hide();
+    this.confirmationPortal = undefined;
+  }
   private async runAction(action: () => Promise<void>): Promise<void> {
     if (!this.canAct()) return;
     this.saving.set(true);

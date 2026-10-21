@@ -1,0 +1,5 @@
+.analysis-comparison-selectors { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+.analysis-comparison-selectors label { display: grid; gap: .4rem; min-width: 0; font-weight: 700; }
+.analysis-comparison-selectors select { width: 100%; min-width: 0; }
+.analysis-comparison-guidance { color: var(--v1-muted); }
+@media (max-width: 40rem) { .analysis-comparison-selectors { grid-template-columns: minmax(0,1fr); } }

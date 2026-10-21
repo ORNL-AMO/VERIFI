@@ -1,4 +1,4 @@
-<app-resource-browse-card [view]="view()" [actions]="actions()" (opened)="opened.emit(card())" (actionSelected)="selectAction($event)">
+<app-resource-browse-card [view]="view()" [actions]="actions()" [actionMenu]="true" (opened)="opened.emit(card())" (actionSelected)="selectAction($event)">
   @if (showGroupDetails() && card().analysis.groups?.length) {
     <app-facility-analysis-group-model-roster
       resource-card-after-facts

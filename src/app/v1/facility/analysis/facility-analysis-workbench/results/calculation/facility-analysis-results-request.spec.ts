@@ -1,6 +1,6 @@
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityAnalysisResultsWorkerRequest } from '@platform/web-workers/facility-analysis-results-worker.contract';
-import { analysisDependencyClosure, facilityAnalysisResultsFingerprint, projectFacilityPredictorInputs } from './facility-analysis-results-request';
+import { analysisDependencyClosure, buildFacilityDashboardResultsRequest, facilityAnalysisResultsFingerprint, projectFacilityPredictorInputs } from './facility-analysis-results-request';
 
 describe('facility analysis result requests', () => {
   it('excludes display metadata while retaining calculation settings in the fingerprint', () => {
@@ -68,3 +68,24 @@ function analysis(guid: string, bankedAnalysisItemId?: string): IdbAnalysisItem 
     groups: [], baselineYear: 2020, hasBanking: !!bankedAnalysisItemId, bankedAnalysisItemId
   } as IdbAnalysisItem;
 }
+
+describe('explicit facility dashboard projection', () => {
+  it('uses only the owning facility meters, predictors and banking chain', () => {
+    const source = { ...analysis('source', 'bank'), groups: [{ idbGroupId: 'group-a' }] } as IdbAnalysisItem;
+    const bank = analysis('bank');
+    const foreign = { ...analysis('foreign'), facilityId: 'facility-b' };
+    const facility = { guid: 'facility-a', accountId: 'account-a' } as any;
+    const snapshot = { account: { guid: 'account-a' }, facilityAnalyses: [source, bank, foreign],
+      meters: [{ guid: 'meter-a', facilityId: 'facility-a', groupId: 'group-a' }, { guid: 'meter-b', facilityId: 'facility-b', groupId: 'group-a' }],
+      predictors: [{ guid: 'predictor-a', facilityId: 'facility-a' }, { guid: 'predictor-b', facilityId: 'facility-b' }],
+      predictorData: [{ guid: 'reading-a', facilityId: 'facility-a' }, { guid: 'reading-b', facilityId: 'facility-b' }] } as any;
+    const project = vi.fn(() => ({ state: 'ready' as const, accountGuid: 'account-a', inputFingerprint: 'base', meters: [] }));
+    const request = buildFacilityDashboardResultsRequest(source, facility, snapshot, project)!;
+    expect(project).toHaveBeenCalledWith(expect.objectContaining({ context: { kind: 'facility', guid: 'facility-a' }, meterGuids: ['meter-a'], energyUnit: 'MMBtu' }));
+    expect(request.accountAnalysisItems.map(item => item.guid)).toEqual(['source', 'bank']);
+    expect(request.accountPredictors.map(item => item.guid)).toEqual(['predictor-a']);
+    expect(request.accountPredictorEntries.map(item => item.guid)).toEqual(['reading-a']);
+    expect(request.analysisItem).not.toBe(source);
+    expect(buildFacilityDashboardResultsRequest(source, { ...facility, guid: 'facility-b' }, snapshot, project)).toBeUndefined();
+  });
+});

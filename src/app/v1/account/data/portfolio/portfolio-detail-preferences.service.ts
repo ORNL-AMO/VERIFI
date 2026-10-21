@@ -1,6 +1,7 @@
 import { Injectable, Injector, inject } from '@angular/core';
+import type { InventoryBrowseKind } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { LocalStorageService } from 'ngx-webstorage';
-import { PortfolioDetailLevel, PortfolioResource, isPortfolioDetailLevel } from './portfolio-inventory.models';
+import { PortfolioDetailLevel, isPortfolioDetailLevel } from './portfolio-inventory.models';
 
 export const PORTFOLIO_DETAIL_STORAGE_KEY = 'v1PortfolioDetailLevels';
 
@@ -9,7 +10,7 @@ export const PORTFOLIO_DETAIL_STORAGE_KEY = 'v1PortfolioDetailLevels';
 export class PortfolioDetailPreferencesService {
   private readonly injector = inject(Injector);
   private readonly levels = new Map<string, PortfolioDetailLevel>();
-  read(accountGuid: string, resource: PortfolioResource): PortfolioDetailLevel {
+  read(accountGuid: string, resource: InventoryBrowseKind): PortfolioDetailLevel {
     const key = JSON.stringify([accountGuid, resource]);
     if (this.levels.has(key)) return this.levels.get(key)!;
     let level: PortfolioDetailLevel = 'simple';
@@ -23,7 +24,7 @@ export class PortfolioDetailPreferencesService {
     this.levels.set(key, level);
     return level;
   }
-  save(accountGuid: string, resource: PortfolioResource, level: PortfolioDetailLevel): void {
+  save(accountGuid: string, resource: InventoryBrowseKind, level: PortfolioDetailLevel): void {
     this.levels.set(JSON.stringify([accountGuid, resource]), level);
     try {
       const storage = this.injector.get(LocalStorageService);

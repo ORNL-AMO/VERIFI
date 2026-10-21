@@ -899,6 +899,18 @@ describe('WorkspaceNavigationService', () => {
   });
 
   it.each([
+    ['account/account-a/analysis/dashboard', 'facility/facility-a/analysis/dashboard', 'drill-in'],
+    ['account/account-a/analysis/dashboard', 'account/account-a/analysis/workbench/account-analysis/setup', 'drill-in'],
+    ['account/account-a/analysis/dashboard', 'facility/facility-a/analysis/workbench/analysis-a/setup', 'drill-in'],
+    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'account/account-a/analysis/dashboard', 'drill-out'],
+    ['facility/facility-a/analysis/dashboard', 'facility/facility-a/analysis/workbench/analysis-a/setup', 'drill-in'],
+    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'facility/facility-a/analysis/dashboard', 'drill-out'],
+    ['account/account-a/analysis/workbench/account-analysis/select-items', 'facility/facility-a/analysis/workbench/analysis-a/setup', 'drill-in'],
+    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'account/account-a/analysis/workbench/account-analysis/select-items', 'drill-out'],
+    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'facility/facility-a/analysis/workbench/analysis-b/setup', 'peer'],
+    ['facility/facility-a/analysis/dashboard', 'facility/facility-b/analysis/dashboard', 'peer'],
+    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'facility/facility-a/analysis/workbench/analysis-a/facility/annual', 'none'],
+    ['facility/facility-a/data/meters', 'facility/facility-a/analysis/dashboard', 'none'],
     ['account/account-a/data/portfolio/facilities', 'facility/facility-a/data/meters', 'drill-in'],
     ['account/account-a/data/portfolio/meters', 'facility/facility-a/data/meters/meter-a/settings', 'drill-in'],
     ['facility/facility-a/data/meters', 'facility/facility-a/data/meters/meter-a/settings', 'drill-in'],

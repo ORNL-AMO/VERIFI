@@ -25,19 +25,20 @@ export class FacilityAnalysisActionsService {
   private readonly boundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
 
-  categoryAvailable(category: AnalysisCategory): boolean {
+  categoryAvailable(category: AnalysisCategory, facilityGuid?: string): boolean {
     const groupType = category === 'energy' ? 'Energy' : 'Water';
-    return this.workspace.facilityMeterGroups().some(group => group.groupType === groupType);
+    const groups = facilityGuid ? this.workspace.meterGroups().filter(group => group.facilityId === facilityGuid) : this.workspace.facilityMeterGroups();
+    return groups.some(group => group.groupType === groupType);
   }
 
-  activeEligibility(analysis: IdbAnalysisItem): ActiveAnalysisEligibility {
-    return getActiveAnalysisEligibility(this.requireAccount(false), this.requireFacility(false), analysis);
+  activeEligibility(analysis: IdbAnalysisItem, facilityGuid?: string): ActiveAnalysisEligibility {
+    return getActiveAnalysisEligibility(this.requireAccount(false), this.requireFacility(false, facilityGuid), analysis);
   }
 
-  async createAnalysis(category: AnalysisCategory): Promise<IdbAnalysisItem> {
+  async createAnalysis(category: AnalysisCategory, facilityGuid?: string): Promise<IdbAnalysisItem> {
     const account = this.requireAccount();
-    const facility = this.requireFacility();
-    if (!this.categoryAvailable(category)) {
+    const facility = this.requireFacility(true, facilityGuid);
+    if (!this.categoryAvailable(category, facilityGuid)) {
       throw new WorkspaceWriteError('validation-failed', `Create a ${category} meter group before creating this analysis.`);
     }
     const analysis = getNewIdbAnalysisItem(
@@ -55,9 +56,9 @@ export class FacilityAnalysisActionsService {
     return result.value.analysis;
   }
 
-  async copyAnalysis(analysisGuid: string): Promise<IdbAnalysisItem> {
+  async copyAnalysis(analysisGuid: string, facilityGuid?: string): Promise<IdbAnalysisItem> {
     const account = this.requireAccount();
-    const current = this.requireAnalysis(analysisGuid);
+    const current = this.requireAnalysis(analysisGuid, facilityGuid);
     const now = new Date();
     const copy = structuredClone(current);
     delete copy.id;
@@ -73,10 +74,10 @@ export class FacilityAnalysisActionsService {
     return result.value.analysis;
   }
 
-  async setActiveAnalysis(analysisGuid: string): Promise<IdbFacility> {
+  async setActiveAnalysis(analysisGuid: string, facilityGuid?: string): Promise<IdbFacility> {
     const account = this.requireAccount();
-    const facility = this.requireFacility();
-    const analysis = this.requireAnalysis(analysisGuid);
+    const facility = this.requireFacility(true, facilityGuid);
+    const analysis = this.requireAnalysis(analysisGuid, facilityGuid);
     const eligibility = getActiveAnalysisEligibility(account, facility, analysis);
     if (!eligibility.allowed) throw new WorkspaceWriteError('validation-failed', eligibility.reason!);
     const result = await this.boundary.execute({
@@ -87,10 +88,10 @@ export class FacilityAnalysisActionsService {
     return result.value.facility;
   }
 
-  async deleteAnalysis(analysisGuid: string): Promise<void> {
+  async deleteAnalysis(analysisGuid: string, facilityGuid?: string): Promise<void> {
     const account = this.requireAccount();
-    const facility = this.requireFacility();
-    const analysis = this.requireAnalysis(analysisGuid);
+    const facility = this.requireFacility(true, facilityGuid);
+    const analysis = this.requireAnalysis(analysisGuid, facilityGuid);
     await this.boundary.execute({
       entityKind: 'facilityAnalysis', changeKind: 'delete', entityGuid: analysis.guid, label: 'Deleting facility analysis',
       notification: { successTitle: 'Analysis deleted', successMessage: analysis.name },
@@ -110,16 +111,18 @@ export class FacilityAnalysisActionsService {
     return account;
   }
 
-  private requireFacility(requireWritable = true): IdbFacility {
-    const facility = this.workspace.selectedFacility();
+  private requireFacility(requireWritable = true, facilityGuid?: string): IdbFacility {
+    const facility = facilityGuid ? this.workspace.facilities().find(item => item.guid === facilityGuid && item.accountId === this.workspace.account()?.guid) : this.workspace.selectedFacility();
     if (!facility || (requireWritable && (!this.workspace.canWrite() || this.workspace.hasPending()))) {
       throw new WorkspaceWriteError('workspace-not-ready', 'A writable facility is required for analysis changes.');
     }
     return facility;
   }
 
-  private requireAnalysis(guid: string): IdbAnalysisItem {
-    const analysis = this.workspace.selectedFacilityAnalyses().find(item => item.guid === guid);
+  private requireAnalysis(guid: string, facilityGuid?: string): IdbAnalysisItem {
+    const facility = this.requireFacility(false, facilityGuid);
+    const candidates = facilityGuid ? this.workspace.facilityAnalyses() : this.workspace.selectedFacilityAnalyses();
+    const analysis = candidates.find(item => item.guid === guid && item.facilityId === facility.guid && item.accountId === this.workspace.account()?.guid);
     if (!analysis) throw new WorkspaceWriteError('validation-failed', 'The analysis is not part of the selected facility.');
     return analysis;
   }

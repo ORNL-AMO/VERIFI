@@ -1,3 +1,4 @@
+import { analysisDependencyMessage as facilityAnalysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
@@ -124,26 +125,4 @@ export function facilityAnalysisResultOutcome(
     state: 'ready',
     summary: facilityAnalysisOutcomeSummary(state.annual, state.monthly, state.reportYear, facility)
   };
-}
-
-export function facilityAnalysisDependencyMessage(
-  accountAnalysisCount: number,
-  reportCount: number,
-  bankingConsumerCount: number
-): string | undefined {
-  const dependencies = [
-    dependencyCountLabel(accountAnalysisCount, 'account analysis', 'account analyses'),
-    dependencyCountLabel(reportCount, 'report', 'reports'),
-    dependencyCountLabel(bankingConsumerCount, 'banking consumer', 'banking consumers')
-  ].filter((label): label is string => !!label);
-
-  if (!dependencies.length) return undefined;
-  if (dependencies.length === 1) return `Changes can affect ${dependencies[0]}.`;
-  if (dependencies.length === 2) return `Changes can affect ${dependencies[0]} and ${dependencies[1]}.`;
-  return `Changes can affect ${dependencies[0]}, ${dependencies[1]}, and ${dependencies[2]}.`;
-}
-
-function dependencyCountLabel(count: number, singular: string, plural: string): string | undefined {
-  if (!count) return undefined;
-  return `${count} ${count === 1 ? singular : plural}`;
 }

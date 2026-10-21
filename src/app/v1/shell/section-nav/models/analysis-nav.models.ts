@@ -2,7 +2,7 @@ import type { AnalysisCategory } from '@data/models/analysis';
 export type AnalysisNavItem = {
   readonly guid: string;
   readonly label: string;
-  readonly icon: 'energy' | 'droplet';
+  readonly icon: 'energy' | 'droplet' | 'analysis';
   readonly route: readonly string[];
   readonly expanded: boolean;
 };
@@ -18,11 +18,12 @@ export function buildAnalysisNavGroups(
   source: readonly { guid: string; name: string; analysisCategory: AnalysisCategory }[],
   selection: { selectedEnergyAnalysisId?: string; selectedWaterAnalysisId?: string },
   activeAnalysisGuid: string | undefined,
-  route: (guid: string) => readonly string[]
+  route: (guid: string) => readonly string[],
+  showCategory = true
 ): readonly AnalysisNavGroup[] {
   const analyses = source.map(analysis => ({
     guid: analysis.guid, label: analysis.name || 'Untitled analysis', category: analysis.analysisCategory,
-    icon: analysis.analysisCategory === 'water' ? 'droplet' as const : 'energy' as const,
+    icon: !showCategory ? 'analysis' as const : analysis.analysisCategory === 'water' ? 'droplet' as const : 'energy' as const,
     route: route(analysis.guid), expanded: analysis.guid === activeAnalysisGuid
   }));
   const active = [
@@ -33,8 +34,8 @@ export function buildAnalysisNavGroups(
   const sortByName = (first: AnalysisNavItem, second: AnalysisNavItem) => first.label.localeCompare(second.label) || first.guid.localeCompare(second.guid);
   const groups: AnalysisNavGroup[] = [
     { id: 'active', label: 'Active for Reporting', items: active },
-    { id: 'energy', label: 'Energy', items: analyses.filter(item => item.category === 'energy' && !activeGuids.has(item.guid)).sort(sortByName) },
-    { id: 'water', label: 'Water', items: analyses.filter(item => item.category === 'water' && !activeGuids.has(item.guid)).sort(sortByName) }
+    { id: 'energy', label: showCategory ? 'Energy' : 'Analyses', items: analyses.filter(item => item.category === 'energy' && !activeGuids.has(item.guid)).sort(sortByName) },
+    { id: 'water', label: showCategory ? 'Water' : 'Analyses', items: analyses.filter(item => item.category === 'water' && !activeGuids.has(item.guid)).sort(sortByName) }
   ];
   return groups.filter(group => group.items.length > 0);
 }

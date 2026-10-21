@@ -1,8 +1,15 @@
-<app-workspace-slideout title="Add account analysis" description="Choose a category, then select facility analyses in the workbench." [saving]="saving" (closed)="cancelled.emit()">
-  <form class="v1-analysis-draft" (submit)="$event.preventDefault(); submit()">
-    <label><span>Category</span><select class="v1-select" [formControl]="category" [attr.disabled]="saving ? '' : null"><option value="energy" [disabled]="!energyAvailable">Energy</option><option value="water" [disabled]="!waterAvailable">Water</option></select></label>
-    @if (!energyAvailable || !waterAvailable) { <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="info"></app-ui-icon><span>Categories without a facility analysis are unavailable.</span></div> }
-    @if (error) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ error }}</span></div> }
-    <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button><button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || (category.value === 'energy' ? !energyAvailable : !waterAvailable)">@if (saving) { <app-ui-icon name="loading" spin></app-ui-icon> } @else { <app-ui-icon name="add"></app-ui-icon> }Add analysis</button></footer>
+@let available = availability();
+<app-workspace-slideout title="Add Analysis" description="Choose an account or facility analysis to continue setup in its workbench." [saving]="saving()" (closed)="cancelled.emit()">
+  <form class="v1-analysis-draft" [formGroup]="form" (ngSubmit)="submit()">
+    <label><span>Type</span><select class="v1-select" formControlName="scope"><option value="account">Account</option><option value="facility">Facility</option></select></label>
+    @if (scope() === 'facility') {
+      <label><span>Facility</span><select class="v1-select" formControlName="facilityGuid"><option [ngValue]="null">Select a facility</option>@for (facility of facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select></label>
+    }
+    @if (showCategory()) {
+      <label><span>Category</span><select class="v1-select" formControlName="category"><option value="energy" [disabled]="!available.energy">Energy</option><option value="water" [disabled]="!available.water">Water</option></select></label>
+    }
+    @if (unavailableMessage(); as message) { <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="info"/><span>{{ message }}</span></div> }
+    @if (error(); as message) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"/><span>{{ message }}</span></div> }
+    <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelled.emit()">Cancel</button><button type="submit" class="v1-btn v1-btn--action" [disabled]="saving() || (category.value === 'energy' ? !available.energy : !available.water)">@if (saving()) { <app-ui-icon name="loading" spin/> } @else { <app-ui-icon name="add"/> }Add Analysis</button></footer>
   </form>
 </app-workspace-slideout>

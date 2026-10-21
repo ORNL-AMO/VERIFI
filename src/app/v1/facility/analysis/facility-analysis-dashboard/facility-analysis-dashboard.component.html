@@ -64,9 +64,8 @@
     } @else if (visibleCards.length === 0) {
       <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
     } @else {
-      @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
       <div class="v1-data-browse-grid v1-data-browse-grid--analysis" role="list" aria-label="Facility analyses">
-        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" [comparisonHasSelection]="comparisonGuids().length === 1" [comparisonDisabledReason]="comparisonDisabledReason(card)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
+        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" (opened)="open($event)" (detailsRequested)="openDetails($event)" (comparisonToggled)="openComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
       </div>
     }
   </div></div>
@@ -83,15 +82,8 @@
 
   @if (createOpen()) { <app-analysis-draft-slideout [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"></app-analysis-draft-slideout> }
 
-  @if (comparisonCards().length === 2) {
-    <app-analysis-comparison-slideout
-      [cards]="comparisonCards()"
-      [facility]="facility"
-      [meterGroups]="workspace.meterGroups()"
-      [analyses]="workspace.analyses()"
-      (closed)="clearComparison()">
-    </app-analysis-comparison-slideout>
-  }
+  <app-inventory-chart-dock label="Compare" panelId="analysis-comparison-sheet" [open]="comparison.opened()" [disabled]="saving() || !comparisonContext()" (opened)="openComparison()"/>
+
 }
 
 <ng-template #activeConfirmation>
@@ -135,5 +127,21 @@
       }
       @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actionError() }}</span></div> }
     </app-confirmation-dialog>
+  }
+</ng-template>
+
+<ng-template #comparisonPanel>
+  @if (comparison.opened()) {
+    <app-analysis-comparison-sheet [options]="comparisonOptions()" [selection]="comparison.selection()" [initialFocus]="comparison.initialFocus()" [notice]="comparison.notice()" (selectionChanged)="comparison.select($event)" (closed)="clearComparison()">
+  @if (comparisonCards().length === 2) {
+    <app-facility-analysis-comparison
+      [cards]="comparisonCards()"
+      [facility]="workspace.facility()!"
+      [meterGroups]="workspace.meterGroups()"
+      [analyses]="workspace.analyses()"
+     >
+    </app-facility-analysis-comparison>
+  }
+    </app-analysis-comparison-sheet>
   }
 </ng-template>
