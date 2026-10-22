@@ -59,6 +59,7 @@ describe('PredictorWorkbenchComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
+            isSingleSiteWorkspace: signal(false),
             accountDataReturnRoute: () => ['/account', 'portfolio'],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: (_facility: string, predictor: string, tab: string) => ['/predictors', predictor, tab],
@@ -108,6 +109,13 @@ describe('PredictorWorkbenchComponent', () => {
     });
     const fixture = TestBed.createComponent(PredictorWorkbenchComponent);
     fixture.detectChanges();
+    const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
+    const portfolioCrumbs = fixture.componentInstance.breadcrumbs();
+    singleSite.set(true); fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/facility', 'predictors'] }]);
+    expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
+    singleSite.set(false); fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual(portfolioCrumbs);
     const element: HTMLElement = fixture.nativeElement;
 
     expect(fixture.componentInstance.activeTab()).toBe('readings');
@@ -165,6 +173,7 @@ describe('PredictorWorkbenchComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
+            isSingleSiteWorkspace: signal(false),
             accountDataReturnRoute: () => [],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: () => []

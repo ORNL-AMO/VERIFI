@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
@@ -54,8 +55,9 @@ export class MeterGroupWorkbenchComponent {
   readonly hasNoGroupData = computed(() => !this.isLoading() && !this.hasError() && this.results().monthlyRows.length === 0);
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
-    return account && facility ? [{ label: account.name || 'Account', route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name || 'Facility', route: this.navigation.facilityDataRoute(facility.guid, 'meter-grouping') }] : [];
+    return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account.name || 'Account', route: this.navigation.accountDataReturnRoute(account.guid) },
+      { label: facility.name || 'Facility', route: this.navigation.facilityDataRoute(facility.guid, 'meter-grouping') }) : [];
   });
 
   constructor() {

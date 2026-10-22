@@ -30,7 +30,8 @@ describe('facility meter list and monthly charts in Chromium', () => {
     const actions = { createMeter: vi.fn(), copyMeter: vi.fn().mockResolvedValue(meter({ guid: 'copied' })), deleteMeters: vi.fn().mockResolvedValue(undefined) };
     TestBed.configureTestingModule({ imports: [DashboardHost], providers: [provideRouter([]), ModalPortalService,
       { provide: FacilityMetersWorkspaceService, useValue: { account: signal(account()), facility: signal(facility({ energyUnit: 'MMBtu', volumeLiquidUnit: 'gal' })), meterCards: cards, meterData: data, meterGroups: signal([]), facilityCalendarizedMeters: calendarized, statusState: signal('ready'), calendarizationState: signal('ready'), canWrite: signal(true), hasPending: signal(false) } },
-      { provide: WorkspaceNavigationService, useValue: { facilityMeterGroupRoute: (guid: string, id: string) => ['/facility', guid, 'meter-grouping', id, 'monthly-table'], accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
+      { provide: WorkspaceNavigationService, useValue: { facilityMeterGroupRoute: (guid: string, id: string) => ['/facility', guid, 'meter-grouping', id, 'monthly-table'], isSingleSiteWorkspace: signal(false),
+          accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
       accountDataRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio'], facilityMeterRoute: (guid: string, id: string, tab: string) => ['/v1', 'workspace', 'facility', guid, 'data', 'meters', id, tab] } }
     ] });
     TestBed.overrideComponent(MetersDashboardComponent, { set: { providers: [{ provide: MetersDashboardActionsService, useValue: actions }] } });

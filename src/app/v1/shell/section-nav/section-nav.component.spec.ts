@@ -16,15 +16,18 @@ describe('SectionNavComponent', () => {
   });
 
   it('hides context switching for a valid single-facility workspace', () => {
-    const { activeSection, contextMode, selectedFacility, isSingleSiteWorkspace } = state;
+    const { activeSection, contextMode, selectedFacility, isSingleSiteWorkspace, facilities } = state;
     isSingleSiteWorkspace.set(true);
     contextMode.set('facility');
     selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    facilities.set([{ guid: 'facility-a', name: 'Facility A' }]);
     activeSection.set('home');
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.v1-nav__context')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-facility-picker__toggle')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-facility-picker')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-nav__account-name')?.textContent).toContain('Account A');
     expect(fixture.nativeElement.textContent).toContain('Facility Home');
 
     activeSection.set('settings');

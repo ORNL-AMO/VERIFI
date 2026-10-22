@@ -20,6 +20,7 @@ export class AccountAnalysisReturnService {
   private readonly requestedOrigin = readAccountAnalysisReturnOrigin(this.route.snapshot.queryParamMap);
 
   readonly origin = computed(() => {
+    if (this.navigation.isSingleSiteWorkspace()) return undefined;
     const requested = this.requestedOrigin;
     const account = this.context.account();
     const facility = this.context.facility();

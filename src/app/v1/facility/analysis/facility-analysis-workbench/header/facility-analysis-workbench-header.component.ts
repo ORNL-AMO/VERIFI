@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { analysisDependencyMessage as facilityAnalysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
@@ -44,10 +45,10 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   readonly accountAnalysisReturn = inject(AccountAnalysisReturnService);
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.context.account(), facility = this.context.facility();
-    return facility ? [
-      { label: account?.name || 'Account', route: account && !this.navigation.isSingleSiteWorkspace() ? this.navigation.accountAnalysisRoute(account.guid) : undefined },
+    return facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account?.name || 'Account', route: account ? this.navigation.accountAnalysisRoute(account.guid) : undefined },
       { label: facility.name || 'Facility', route: this.navigation.facilityAnalysisRoute(facility.guid) }
-    ] : [];
+    ) : [];
   });
   readonly statusNotes = computed(() => facilityAnalysisHeaderFindings(this.context.findings()));
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({

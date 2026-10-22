@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { AnalysisComparisonState, AnalysisComparisonOption } from '@app/v1/shared/analysis-comparison/analysis-comparison-state';
 import { AnalysisComparisonSheetComponent } from '@app/v1/shared/analysis-comparison/analysis-comparison-sheet/analysis-comparison-sheet.component';
 import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
@@ -82,8 +83,9 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   readonly layoutReady = signal(false);
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
-    return account && facility ? [{ label: account.name || 'Account', route: this.navigation.isSingleSiteWorkspace() ? undefined : this.navigation.accountAnalysisRoute(account.guid) },
-      { label: facility.name || 'Facility' }] : [];
+    return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account.name || 'Account', route: this.navigation.accountAnalysisRoute(account.guid) },
+      { label: facility.name || 'Facility' }) : [];
   });
   readonly countLabel = computed(() => `${this.filteredEntries().length} of ${this.entries().length} analyses`);
   readonly cards = computed<readonly FacilityAnalysisDashboardCard[]>(() => this.workspace.cards().map(card => {

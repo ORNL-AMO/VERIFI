@@ -196,6 +196,7 @@ describe('facility analysis workbench header', () => {
     fixture.detectChanges();
     expect(statusNotes?.querySelector('ul')).toBeNull();
     singleSite.set(true); fixture.detectChanges();
+    expect(host.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
     expect(Array.from(host.querySelectorAll('app-page-identity nav a')).map(link => link.textContent?.trim())).toEqual(['Facility A']);
   });
 });

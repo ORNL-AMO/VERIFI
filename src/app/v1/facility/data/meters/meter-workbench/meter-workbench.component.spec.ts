@@ -24,6 +24,20 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { StatusItem } from '@app/v1/status/status.models';
 
 describe('MeterWorkbenchComponent', () => {
+  it('uses the facility as its single-site root and restores portfolio breadcrumbs after conversion', () => {
+    const fixture = setup();
+    const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
+    fixture.detectChanges();
+    const portfolio = fixture.componentInstance.breadcrumbs();
+    singleSite.set(true);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters'] }]);
+    expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
+    singleSite.set(false);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual(portfolio);
+  });
+
   it('renders the selected meter header and active workbench tab from the child route', () => {
     const fixture = setup({ tab: 'monthly', selectedMeter: meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', charges: [charge()] }) });
 
@@ -690,6 +704,7 @@ function setup(options: {
             meterGuid,
             tab
           ],
+          isSingleSiteWorkspace: signal(false),
           accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
       accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
             '/v1',

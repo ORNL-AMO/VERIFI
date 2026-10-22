@@ -25,6 +25,7 @@ function setup() {
     { provide: FacilityMetersWorkspaceService, useValue: workspace }, { provide: ModalPortalService, useValue: portal },
     { provide: WorkspaceNavigationService, useValue: {
       facilityMeterGroupRoute: (guid: string, id: string) => ['/facility', guid, 'meter-grouping', id, 'monthly-table'],
+      isSingleSiteWorkspace: signal(false),
       accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
       accountDataRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio'],
       facilityMeterRoute: (guid: string, id: string, tab: string) => ['/v1', 'workspace', 'facility', guid, 'data', 'meters', id, tab]
@@ -38,6 +39,20 @@ function setup() {
 }
 
 describe('compact facility meters dashboard', () => {
+  it('uses the facility as its single-site root and restores portfolio breadcrumbs after conversion', () => {
+    const { fixture } = setup();
+    const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
+    fixture.detectChanges();
+    const portfolio = fixture.componentInstance.breadcrumbs();
+    singleSite.set(true);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A' }]);
+    expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
+    singleSite.set(false);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual(portfolio);
+  });
+
   it('restores facility browse controls and chart range after a meter visit without restoring deletion selection', () => {
     const { fixture, component, cards } = setup();
     cards.set(buildMeterCards(Array.from({ length: 30 }, (_, index) => meter({ guid: `m-${index}` })), [], [])); fixture.detectChanges();

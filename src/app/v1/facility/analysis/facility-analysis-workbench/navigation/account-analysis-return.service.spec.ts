@@ -29,7 +29,7 @@ describe('AccountAnalysisReturnService', () => {
       { provide: Router, useValue: { navigate } },
       {
         provide: WorkspaceNavigationService,
-        useValue: { accountAnalysisWorkbenchRoute: () => ['/account-analysis', 'select-items'] }
+        useValue: { isSingleSiteWorkspace: signal(false), accountAnalysisWorkbenchRoute: () => ['/account-analysis', 'select-items'] }
       },
       {
         provide: FacilityAnalysisWorkbenchContext,
@@ -41,6 +41,12 @@ describe('AccountAnalysisReturnService', () => {
     ] });
     const service = TestBed.inject(AccountAnalysisReturnService);
 
+    const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
+    singleSite.set(true);
+    expect(service.origin()).toBeUndefined();
+    expect(await service.returnToAccountAnalysis()).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
+    singleSite.set(false);
     expect(service.origin()).toBeDefined();
     expect(await service.returnToAccountAnalysis()).toBe(true);
     expect(navigate).toHaveBeenCalledWith(['/account-analysis', 'select-items'], {
@@ -62,7 +68,7 @@ describe('AccountAnalysisReturnService', () => {
       { provide: Router, useValue: { navigate } },
       {
         provide: WorkspaceNavigationService,
-        useValue: { accountAnalysisResultsRoute: () => ['/account-analysis', 'results', 'facility-contributions'] }
+        useValue: { isSingleSiteWorkspace: signal(false), accountAnalysisResultsRoute: () => ['/account-analysis', 'results', 'facility-contributions'] }
       },
       {
         provide: FacilityAnalysisWorkbenchContext,
@@ -91,7 +97,7 @@ describe('AccountAnalysisReturnService', () => {
       { provide: Router, useValue: { navigate } },
       {
         provide: WorkspaceNavigationService,
-        useValue: { accountAnalysisResultsRoute: () => ['/account-analysis', 'results', 'facility-details'] }
+        useValue: { isSingleSiteWorkspace: signal(false), accountAnalysisResultsRoute: () => ['/account-analysis', 'results', 'facility-details'] }
       },
       {
         provide: FacilityAnalysisWorkbenchContext,
@@ -116,7 +122,7 @@ describe('AccountAnalysisReturnService', () => {
         }) } }
       },
       { provide: Router, useValue: { navigate: vi.fn() } },
-      { provide: WorkspaceNavigationService, useValue: {} },
+      { provide: WorkspaceNavigationService, useValue: { isSingleSiteWorkspace: signal(false) } },
       {
         provide: FacilityAnalysisWorkbenchContext,
         useValue: {

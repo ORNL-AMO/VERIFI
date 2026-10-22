@@ -53,11 +53,11 @@ describe('v1 canonical route guards', () => {
       .toEqual({ commands: facilityHomeCommands('facility-a') });
   });
 
-  it('allows single-facility Account Reports without reconciling analysis pairs', async () => {
+  it.each(['reports/dashboard', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {
     workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
     await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
-      { url: '/v1/workspace/account/account-a/reports/dashboard' })).resolves.toBe(true);
+      { url: `/v1/workspace/account/account-a/${path}` })).resolves.toBe(true);
     expect(ensurePairs).not.toHaveBeenCalled();
   });
 
@@ -93,15 +93,20 @@ describe('v1 canonical route guards', () => {
     )).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'custom-grid-factors']);
   });
 
-  it('keeps explicit account portfolio routes reachable for valid single-site accounts', async () => {
+  it.each([
+    ['data', 'meters'], ['data/portfolio', 'meters'], ['data/portfolio/facilities', 'meters'],
+    ['data/portfolio/meters', 'meters'], ['data/portfolio/predictors', 'predictors'],
+    ['data/portfolio/energy-uses', 'energy-uses'], ['data/custom-fuels', 'custom-fuels'],
+    ['data/custom-grid-factors', 'custom-grid-factors'], ['data/custom-gwps', 'custom-gwps']
+  ])('redirects single-site account %s to facility %s', async (path, detail) => {
     workspace.account.mockReturnValue({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', name: 'Site A', accountId: 'account-a' }]);
 
     await expect(invoke(
       singleSiteAccountRedirectGuard,
       route({ accountGuid: 'account-a' }),
-      { url: '/v1/workspace/account/account-a/data/portfolio' }
-    )).resolves.toBe(true);
+      { url: `/v1/workspace/account/account-a/${path}` }
+    )).resolves.toEqual({ commands: ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail] });
     expect(ensurePairs).toHaveBeenCalledOnce();
   });
 
@@ -123,6 +128,16 @@ describe('v1 canonical route guards', () => {
       route({ accountGuid: 'account-a' }),
       { url: '/v1/workspace/account/account-a/home/overview' }
     )).resolves.toBe(true);
+  });
+
+  it.each([
+    [false, 1], [false, 2], [true, 0], [true, 2]
+  ])('preserves account Data when the single-facility flag is %s and the facility count is %s', async (singleSite, count) => {
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: singleSite });
+    workspace.facilities.mockReturnValue(Array.from({ length: count }, (_, index) => ({ guid: `facility-${index}`, accountId: 'account-a' })));
+    await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
+      { url: '/v1/workspace/account/account-a/data/portfolio/meters' })).resolves.toBe(true);
+    expect(ensurePairs).not.toHaveBeenCalled();
   });
 
   it('bypasses account analysis and preserves the corresponding facility result view', () => {

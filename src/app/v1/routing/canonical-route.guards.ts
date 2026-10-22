@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
@@ -22,7 +22,7 @@ export const facilityHomeCanonicalGuard: CanActivateFn = route => {
   return inject(Router).createUrlTree(facilityHomeCommands(facilityGuid));
 };
 
-export const singleSiteAccountRedirectGuard: CanActivateFn = async (_route, state) => {
+export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route, state) => {
   const store = inject(AccountWorkspaceStore);
   const router = inject(Router);
   const account = store.account();
@@ -31,13 +31,11 @@ export const singleSiteAccountRedirectGuard: CanActivateFn = async (_route, stat
     return true;
   }
 
-  // Reports retain account scope even for a single-facility workspace.
-  if (accountRouteParts(state)[3] === 'reports') return true;
+  // Reports and Upload retain account scope even for a single-facility workspace.
+  const section = accountRouteParts(state)[3];
+  if (section === 'reports' || section === 'imports') return true;
 
   await inject(SingleFacilityAnalysisPairService).ensurePairs();
-  if (isAccountDataRoute(state) && !isAccountCustomDataRoute(state)) {
-    return true;
-  }
 
   const commands = singleSiteRedirectCommands(
     state,
@@ -67,8 +65,11 @@ export function singleSiteRedirectCommands(
   if (section === 'settings') {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail || 'profile'];
   }
-  if (section === 'data' && isCustomDataDetail(detail)) {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
+  if (section === 'data') {
+    const tab = detail === 'portfolio' ? parts[5] : undefined;
+    const facilityDetail = isCustomDataDetail(detail) ? detail
+      : tab === 'predictors' || tab === 'energy-uses' ? tab : 'meters';
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', facilityDetail];
   }
   if (section === 'analysis') {
     if (detail !== 'workbench') {
@@ -101,15 +102,6 @@ function facilityAnalysisWorkbenchCommands(
     return [...base, 'facility', accountResult];
   }
   return [...base, 'facility', 'annual'];
-}
-
-function isAccountDataRoute(state: RouterStateSnapshot): boolean {
-  return accountRouteParts(state)[3] === 'data';
-}
-
-function isAccountCustomDataRoute(state: RouterStateSnapshot): boolean {
-  const parts = accountRouteParts(state);
-  return parts[3] === 'data' && isCustomDataDetail(parts[4]);
 }
 
 function accountRouteParts(state: RouterStateSnapshot): Array<string> {

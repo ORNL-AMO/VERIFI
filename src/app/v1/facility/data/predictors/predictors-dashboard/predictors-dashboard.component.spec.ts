@@ -28,6 +28,15 @@ export function dashboardFixture(count = 3) {
 }
 
 describe('compact Predictor dashboard', () => {
+  it('uses the sole facility as its dashboard root', () => {
+    const { fixture, component } = dashboardFixture();
+    inventoryNavigation.isSingleSiteWorkspace.set(true); fixture.detectChanges();
+    expect(component.breadcrumbs()).toEqual([{ label: 'Facility' }]);
+    expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account');
+    inventoryNavigation.isSingleSiteWorkspace.set(false); fixture.detectChanges();
+    expect(component.breadcrumbs()).toHaveLength(2);
+  });
+
   beforeEach(() => vi.spyOn(EChartsChartDirective.prototype, 'ngAfterViewInit').mockImplementation(() => {}));
   afterEach(() => vi.restoreAllMocks());
   it('pages flat cards, offers detail and selection, and keeps charts independent of card filters', () => {

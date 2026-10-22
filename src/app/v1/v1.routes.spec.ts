@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
+import { singleSiteAccountRedirectGuard } from './routing/canonical-route.guards';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports.module';
@@ -508,6 +511,51 @@ function tabRoute(path: string): Route {
 
 @Component({ selector: 'app-reports-route-test', standalone: true, template: 'Reports route' })
 class ReportsRouteTestComponent { }
+
+describe('single-facility workspace route boundaries', () => {
+  it('redirects direct Data entries and child navigation from account exceptions, retaining Upload context', async () => {
+    const account = signal({ guid: 'account-a', isSingleFacilityCompany: true });
+    const facilities = signal([{ guid: 'facility-a', accountId: 'account-a' }]);
+    const accountRoute = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
+    const facilityRoute = V1Routes[0].children!.find(route => route.path === 'workspace/facility/:facilityGuid')!;
+    expect(accountRoute.canActivateChild).toEqual([singleSiteAccountRedirectGuard]);
+    function stub(route: Route): Route {
+      return { ...route, providers: [], canActivate: undefined, canActivateChild: undefined, canDeactivate: [],
+        ...(route.component ? { component: ReportsRouteTestComponent } : {}),
+        ...(route.children ? { children: route.children.map(stub) } : {}) };
+    }
+    TestBed.configureTestingModule({ providers: [
+      { provide: AccountWorkspaceStore, useValue: { account, facilities, accountAnalyses: signal([]) } },
+      { provide: SingleFacilityAnalysisPairService, useValue: { ensurePairs: async () => false } },
+      provideRouter([{ path: 'v1', children: [
+        { ...stub(accountRoute), component: undefined, canActivateChild: accountRoute.canActivateChild },
+        { ...stub(facilityRoute), component: undefined }
+      ] }])
+    ] });
+    const harness = await RouterTestingHarness.create();
+    const router = TestBed.inject(Router);
+    const accountBase = '/v1/workspace/account/account-a';
+    const facilityBase = '/v1/workspace/facility/facility-a';
+    await harness.navigateByUrl(`${accountBase}/data/portfolio/predictors`);
+    expect(router.url).toBe(`${facilityBase}/data/predictors`);
+    for (const exception of [
+      'reports/dashboard',
+      'imports/upload?facilityGuid=facility-a&returnUrl=%2Fv1%2Fworkspace%2Ffacility%2Ffacility-a%2Fdata%2Fmeters',
+      'imports/file/file-a/review'
+    ]) {
+      await harness.navigateByUrl(`${accountBase}/${exception}`);
+      expect(router.url).toBe(`${accountBase}/${exception}`);
+      await harness.navigateByUrl(`${accountBase}/data/portfolio/meters`);
+      expect(router.url).toBe(`${facilityBase}/data/meters`);
+    }
+    await harness.navigateByUrl(`${accountBase}/reports/dashboard`);
+    await harness.navigateByUrl(`${accountBase}/analysis/dashboard`);
+    expect(router.url).toBe(`${facilityBase}/analysis/dashboard`);
+    account.set({ guid: 'account-a', isSingleFacilityCompany: false });
+    await harness.navigateByUrl(`${accountBase}/data/portfolio/predictors`);
+    expect(router.url).toBe(`${accountBase}/data/portfolio/predictors`);
+  });
+});
 
 describe('V1 Reports route entry and canonicalization', () => {
   it('redirects former Data portfolio analysis/report bookmarks to their dedicated account sections', async () => {

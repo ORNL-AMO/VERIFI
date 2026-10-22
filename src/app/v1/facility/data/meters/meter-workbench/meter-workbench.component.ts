@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { Component, DestroyRef, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
@@ -85,8 +86,9 @@ export class MeterWorkbenchComponent {
   readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
-    return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'meters') }] : [];
+    return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
+      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'meters') }) : [];
   });
   readonly tabAttention = computed(() => {
     const meter = this.workspace.selectedMeter();
