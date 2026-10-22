@@ -1,0 +1,37 @@
+@let editor = lifecycle.editor();
+@if (editor) {
+  <app-workspace-slideout [title]="editor.entry ? 'Rename report' : 'Add report'" [saving]="lifecycle.saving()" [hasFooter]="true" (closed)="lifecycle.requestClose()">
+    <form id="report-draft" [formGroup]="lifecycle.form" (ngSubmit)="lifecycle.submit()">
+      <fieldset [disabled]="lifecycle.saving()">
+        <label for="report-name">Report name</label><input id="report-name" class="form-control" formControlName="name" autocomplete="off" [readOnly]="lifecycle.saving()" aria-describedby="report-draft-help">
+        @if (lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched) { <p class="v1-alert v1-alert--danger" role="alert">Enter a report name.</p> }
+        @if (!editor.entry) {
+          @if (!editor.fixedFacility) {
+            <label for="report-level">Report level</label><select id="report-level" class="v1-select" formControlName="scope"><option value="account">Account</option><option value="facility" [disabled]="!lifecycle.facilities().length">Facility</option></select>
+            @if (lifecycle.form.controls.scope.value === 'facility') {
+              <label for="report-facility">Facility</label><select id="report-facility" class="v1-select" formControlName="facilityGuid"><option value="">Select a facility</option>@for (facility of lifecycle.facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name || 'Unnamed facility' }}</option> }</select>
+            }
+          }
+          <label for="report-type">Report type</label><select id="report-type" class="v1-select" formControlName="type">@for (option of lifecycle.types(); track option.value) { <option [value]="option.value">{{ option.label }}</option> }</select>
+        } @else { <p>{{ editor.entry.typeLabel }} · {{ editor.entry.ownerName }}</p> }
+      </fieldset>
+      <p id="report-draft-help">Report settings and preview will be added in later migrations. Save or cancel your edits before leaving this page.</p>
+      @if (lifecycle.availabilityError(); as message) { <div class="v1-alert v1-alert--warning" role="status">{{ message }}</div> }
+      @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+    </form>
+    <div slideoutFooter class="report-draft-actions"><button type="button" class="v1-btn v1-btn--secondary" [disabled]="lifecycle.saving()" (click)="lifecycle.requestClose()">Cancel</button>
+      <button type="submit" form="report-draft" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canSave()">@if (lifecycle.saving()) { <app-ui-icon name="loading" spin/> }{{ editor.entry ? 'Save name' : 'Create report' }}</button>
+    </div>
+  </app-workspace-slideout>
+}
+<ng-template #deleteConfirmation>
+  @if (lifecycle.deleteCandidate(); as candidate) {
+    <app-confirmation-dialog title="Delete report?" titleId="delete-report-title" cancelAriaLabel="Cancel report deletion" confirmLabel="Delete report" confirmClass="v1-btn--danger" confirmIcon="delete" [busy]="lifecycle.saving()" [disabled]="!lifecycle.canAct()" (confirmed)="lifecycle.confirmDelete()" (cancelled)="lifecycle.cancelConfirmation()">
+      <p>Permanently delete <strong>{{ candidate.report.name || 'Untitled report' }}</strong>, a {{ candidate.scope }} report belonging to <strong>{{ candidate.ownerName }}</strong>? Its analyses and source data will remain available.</p>
+      @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
+<ng-template #discardConfirmation>
+  <app-confirmation-dialog title="Discard report edits?" titleId="discard-report-title" cancelAriaLabel="Keep editing report" confirmLabel="Discard edits" (confirmed)="lifecycle.discardEditor()" (cancelled)="lifecycle.cancelConfirmation()"><p>Your unsaved report edits will be discarded.</p></app-confirmation-dialog>
+</ng-template>

@@ -35,7 +35,8 @@ describe('facility report workbench navigation', () => {
     expect(host.querySelector('h1 app-ui-icon')?.getAttribute('name')).toBe('report');
     const crumbs = host.querySelectorAll('nav[aria-label="Facility report breadcrumb"] a');
     expect(crumbs[0].getAttribute('href')).toBe('/v1/workspace/account/account-a/reports/dashboard');
-    expect(crumbs[1].getAttribute('href')).toBe(crumbs[2].getAttribute('href'));
+    expect(crumbs).toHaveLength(2);
+    expect(host.querySelector('nav[aria-label="Facility report breadcrumb"] [aria-current="page"]')?.textContent).toBe('Saved report');
     expect(crumbs[1].getAttribute('href')).toContain('/facility-a/reports/dashboard');
     expect(host.querySelector('header')?.textContent).toContain('No Issues');
     expect(stageIcons()).toContain('checkmarkBadge');

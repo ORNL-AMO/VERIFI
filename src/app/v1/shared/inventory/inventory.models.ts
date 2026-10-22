@@ -63,6 +63,7 @@ export interface InventoryTile {
   readonly route: readonly string[];
   readonly owner?: InventoryTileLink;
   readonly analysisSnapshot?: InventoryAnalysisSnapshot;
+  readonly reportSnapshot?: InventoryReportSnapshot;
   readonly location?: string;
   readonly chip?: string;
   readonly chipIcon?: IconName;
@@ -88,10 +89,19 @@ export interface InventoryAnalysisSnapshot {
   readonly findings: readonly Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity'>[];
   readonly modified: string;
 }
-export interface InventoryTileMenuAction { readonly id: 'readings' | 'quality' | 'copy' | 'delete' | 'details' | 'active' | 'compare'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; readonly disabledReason?: string; }
+export interface InventoryTileMenuAction { readonly id: 'readings' | 'quality' | 'copy' | 'delete' | 'details' | 'active' | 'compare' | 'rename'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; readonly disabledReason?: string; }
 export interface InventoryTileActionRequest { readonly guid: string; readonly action: InventoryTileMenuAction['id']; }
 export const INVENTORY_DETAIL_LEVELS: readonly InventoryDetailLevel[] = ['simple', 'summary', 'detailed'];
 export const INVENTORY_PAGE_SIZE = 24;
 export function isInventoryDetailLevel(value: unknown): value is InventoryDetailLevel {
   return value === 'simple' || value === 'summary' || value === 'detailed';
+}
+
+export interface InventoryReportSnapshot {
+  readonly scope: 'account' | 'facility';
+  readonly typeLabel: string;
+  readonly facts: readonly InventoryTileFact[];
+  readonly modified: string;
+  readonly scopeLabel: string;
+  readonly findings: readonly Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity'>[];
 }

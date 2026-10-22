@@ -11,7 +11,7 @@
   <section class="analysis-inventory" aria-labelledby="v1-account-analysis-title" [appBrowseHeader]="sticky" [browseMarker]="marker" #browseHeader="browseHeader" [class.analysis-inventory--scrolled]="browseHeader.collapsed()" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="inventory.visibleIds()" [browseRestoreStickyGap]="true" [browseSticky]="sticky">
     <span #marker class="analysis-inventory__marker" aria-hidden="true"></span>
     <div #sticky class="v1-data-workbench-sticky analysis-inventory__sticky">
-      <header class="v1-section-header v1-page-header analysis-inventory__header">
+      <header class="v1-section-header v1-page-header v1-inventory-page-header analysis-inventory__header">
         <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="title()" icon="analysis" headingId="v1-account-analysis-title" breadcrumbLabel="Analysis context"/>
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openCreate()"><app-ui-icon name="add"/>Add Analysis</button>
       </header>

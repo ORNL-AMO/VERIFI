@@ -1,11 +1,6 @@
 /* Shared analysis dashboard and details presentation. */
 
-.v1-root .v1-analysis-dashboard-host {
-  display: grid;
-  gap: var(--v1-space-4);
-  min-width: 0;
-  padding: clamp(1rem, 3vw, 1.5rem);
-}
+
 
 .v1-root .v1-data-dashboard-workspace.v1-analysis-dashboard__workspace {
   padding-top: 0;

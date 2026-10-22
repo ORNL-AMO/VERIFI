@@ -45,6 +45,16 @@ describe('FacilityReportActionsService', () => {
     expect(store.facilityReports()).toContainEqual(created);
   });
 
+  it('operates on an explicit owned facility from an account inventory without selecting it', async () => {
+    store.publish(reportSnapshot());
+    expect(store.selectedFacility()).toBeUndefined();
+    const copy = await service.copy('facility-a', 'report-a');
+    await service.updateName('facility-a', copy.guid, 'Owned copy');
+    await service.delete('facility-a', copy.guid);
+    expect(store.selectedFacility()).toBeUndefined();
+    expect(store.facilityReports().map(report => report.guid)).toEqual(['report-a']);
+  });
+
   it('copies every setting and GUID reference without sharing nested settings', async () => {
     const source = reportFixture({ analysisItemId: 'analysis-a', checked: true });
     source.analysisReportSettings.reportYear = 2023;

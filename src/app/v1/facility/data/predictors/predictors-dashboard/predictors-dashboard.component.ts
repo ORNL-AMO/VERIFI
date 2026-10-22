@@ -224,7 +224,7 @@ export class PredictorsDashboardComponent {
     });
   }
   handleAction(request: PredictorInventoryActionRequest | InventoryTileActionRequest): void {
-    if (request.action === 'details' || request.action === 'active' || request.action === 'compare') return;
+    if (request.action === 'rename' || request.action === 'details' || request.action === 'active' || request.action === 'compare') return;
     const entry = this.entries().find(item => item.guid === request.guid); if (!entry) return;
     if (request.action === 'delete') { this.requestDelete([entry.guid]); return; }
     if (request.action === 'copy') {

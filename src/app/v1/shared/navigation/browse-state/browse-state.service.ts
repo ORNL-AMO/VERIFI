@@ -1,3 +1,4 @@
+import type { ReportInventoryFilters } from '@app/v1/shared/reports/report-inventory.models';
 import { DestroyRef, Injectable, Signal, effect, inject, signal, untracked } from '@angular/core';
 import type { InventoryDetailLevel } from '@app/v1/shared/inventory/inventory.models';
 import { Observable } from 'rxjs';
@@ -7,6 +8,8 @@ import type { PortfolioMeterSort, PortfolioMeterStatusFilter } from '@app/v1/acc
 import type { PortfolioInventoryView } from '@app/v1/account/data/portfolio/portfolio-inventory.models';
 
 export interface BrowseFilters {
+  reports: ReportInventoryFilters;
+  facilityReports: ReportInventoryFilters;
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };
   facilityAnalyses: Omit<BrowseFilters['analyses'], 'scope' | 'sort'> & { sort: 'attention' | 'modified' | 'name' | 'baseline' };
   predictors: PredictorInventoryFilters & { facilityGuid?: string };
@@ -20,7 +23,7 @@ export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
 export interface FacilityPredictorBrowseView { readonly page: number; readonly detail: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; readonly chartGuid?: string; readonly zoom: { start: number; end: number }; }
 export type AccountBrowseOrigin = 'facilities' | 'meters' | 'predictors';
-export type InventoryBrowseKind = AccountBrowseOrigin | 'analyses' | 'facilityAnalyses';
+export type InventoryBrowseKind = AccountBrowseOrigin | 'analyses' | 'facilityAnalyses' | 'reports' | 'facilityReports';
 export interface FacilityMeterBrowseView { readonly page: number; readonly zoom: { start: number; end: number }; readonly detail?: InventoryDetailLevel; readonly overrides?: Readonly<Record<string, InventoryDetailLevel>>; }
 
 /** UI-only journey state. Nothing is written to storage or domain records. */

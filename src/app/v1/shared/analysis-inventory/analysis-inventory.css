@@ -9,9 +9,5 @@
 @media print { .analysis-inventory__toolbar,.analysis-inventory .v1-btn { display: none; } .analysis-inventory__sticky { position: static; } }
 
 .analysis-inventory__sticky.v1-data-workbench-sticky { background: transparent; box-shadow: none; }
-.analysis-inventory__header { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: var(--v1-space-4); }
-.analysis-inventory__header > app-page-identity { min-width: 0; }
-.analysis-inventory__header > button { width: auto; justify-self: end; }
-@media (max-width: 42rem) { .analysis-inventory__header { grid-template-columns: minmax(0,1fr); } .analysis-inventory__header > button { justify-self: start; max-width: 100%; } }
 
 @media print { .analysis-inventory { padding-bottom: 0; } }

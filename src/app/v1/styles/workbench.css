@@ -312,3 +312,23 @@
 .v1-root .v1-page-header { padding: 1rem; min-width: 0; }
 .v1-root .v1-page-header app-page-identity { min-width: 0; }
 .v1-root .v1-page-header .v1-btn { font-size: 1rem; font-weight: 800; line-height: 1.5; }
+
+/* Inventory pages share the same workspace inset and title/action alignment. */
+.v1-root .v1-inventory-dashboard-host {
+  display: grid;
+  gap: var(--v1-space-4);
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+.v1-root .v1-inventory-page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--v1-space-4);
+}
+.v1-root .v1-inventory-page-header > app-page-identity { min-width: 0; }
+.v1-root .v1-inventory-page-header > button { width: auto; justify-self: end; }
+@media (max-width: 42rem) {
+  .v1-root .v1-inventory-page-header { grid-template-columns: minmax(0, 1fr); }
+  .v1-root .v1-inventory-page-header > button { justify-self: start; max-width: 100%; }
+}

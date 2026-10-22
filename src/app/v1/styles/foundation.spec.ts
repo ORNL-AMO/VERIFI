@@ -44,8 +44,9 @@ describe('v1 foundation styles', () => {
     expect(ruleFor('.v1-root .v1-data-workbench-status-notes')).toContain('display: grid');
   });
 
-  it('provides shared analysis dashboard and details presentation', () => {
-    expect(ruleFor('.v1-root .v1-analysis-dashboard-host')).toContain('display: grid');
+  it('provides shared inventory dashboard and analysis details presentation', () => {
+    expect(ruleFor('.v1-root .v1-inventory-dashboard-host')).toContain('display: grid');
+    expect(ruleFor('.v1-root .v1-inventory-page-header')).toContain('grid-template-columns: minmax(0, 1fr) auto');
     expect(ruleFor('.v1-root .v1-analysis-details dl'))
       .toContain('grid-template-columns: repeat(2, minmax(0, 1fr))');
   });

@@ -1,4 +1,1 @@
-:host { display: block; min-width: 0; padding: clamp(1rem, 3vw, 1.5rem); }
-.v1-section-header { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); flex-wrap: wrap; margin-bottom: var(--v1-space-4); }
-.v1-section-header h1 { display: inline-flex; align-items: center; gap: var(--v1-space-2); }
-.v1-data-dashboard-workspace { padding-top: 0; }
+:host { display: block; min-width: 0; }

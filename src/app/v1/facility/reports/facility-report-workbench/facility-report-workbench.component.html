@@ -16,14 +16,14 @@
       <nav class="v1-data-workbench-breadcrumb" aria-label="Facility report breadcrumb">
         <ol>
           @if (account) {
-            <li><a [routerLink]="context.navigation.accountReportsRoute(account.guid)">{{ account.name || 'Account' }}</a></li>
+            <li><a [routerLink]="context.navigation.accountReportsRoute(account.guid)">{{ account.name || 'Account' }} Reports</a></li>
           } @else {
             <li>Account</li>
           }
           <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><a [routerLink]="context.dashboardRoute()">{{ facility.name || 'Facility' }}</a></li>
+          <li><a [routerLink]="context.dashboardRoute()">{{ facility.name || 'Facility' }} Reports</a></li>
           <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><a [routerLink]="context.dashboardRoute()">Facility Reports</a></li>
+          <li aria-current="page">{{ report.name || 'Untitled facility report' }}</li>
         </ol>
       </nav>
       <div class="v1-data-workbench-title-row">

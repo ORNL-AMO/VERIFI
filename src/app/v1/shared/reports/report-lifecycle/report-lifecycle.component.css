@@ -1,0 +1,3 @@
+fieldset { display: grid; gap: .6rem; margin-bottom: 1rem; }
+label { margin: .6rem 0 0; font-weight: 600; }
+.report-draft-actions { display: flex; justify-content: flex-end; gap: .75rem; }

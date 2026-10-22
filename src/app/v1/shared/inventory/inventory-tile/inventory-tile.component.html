@@ -1,11 +1,11 @@
-<article class="portfolio-tile" [class.portfolio-tile--selecting]="selecting" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--reading-snapshot]="(!!tile.meterSnapshot || !!tile.predictorSnapshot) && level !== 'simple'" [class.portfolio-tile--predictor-snapshot]="!!tile.predictorSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-analysis-scope]="tile.analysisSnapshot?.scope" [attr.data-detail]="level" [attr.aria-label]="tileLabel" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
+<article class="portfolio-tile" [class.portfolio-tile--selecting]="selecting" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--reading-snapshot]="(!!tile.meterSnapshot || !!tile.predictorSnapshot) && level !== 'simple'" [class.portfolio-tile--predictor-snapshot]="!!tile.predictorSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-analysis-scope]="tile.analysisSnapshot?.scope" [attr.data-report-scope]="tile.reportSnapshot?.scope" [attr.data-detail]="level" [attr.aria-label]="tileLabel" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
   @if (selecting && !print) { <input class="portfolio-tile__selection" type="checkbox" [formControl]="selectionControl" [attr.aria-label]="'Select ' + tile.name"> }
-  @if (tile.analysisSnapshot; as analysis) {
-    <app-analysis-card-header [scope]="analysis.scope">
-      @if (analysis.scope === 'facility' && level !== 'simple') { @if (tile.owner; as owner) {
-        <span class="portfolio-tile__header-facility"><span aria-hidden="true">·</span><a class="portfolio-tile__owner portfolio-tile__header-owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="'Open ' + owner.label + ' Analysis dashboard'" [title]="owner.label" (click)="open($event, owner.route)">{{ owner.label }}</a></span>
+  @if (tile.analysisSnapshot || tile.reportSnapshot; as snapshot) {
+    <app-inventory-card-header [scope]="snapshot.scope" [resource]="tile.reportSnapshot ? 'report' : 'analysis'">
+      @if (snapshot.scope === 'facility' && level !== 'simple') { @if (tile.owner; as owner) {
+        <span class="portfolio-tile__header-facility"><span aria-hidden="true">·</span><a class="portfolio-tile__owner portfolio-tile__header-owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="'Open ' + owner.label + (tile.reportSnapshot ? ' Reports dashboard' : ' Analysis dashboard')" [title]="owner.label" (click)="open($event, owner.route)">{{ owner.label }}</a></span>
       } }
-    </app-analysis-card-header>
+    </app-inventory-card-header>
   }
   <div class="portfolio-tile__heading">
     <app-ui-icon [name]="tile.icon" [size]="level === 'simple' ? 32 : 24"/>
@@ -16,9 +16,9 @@
   </div>
   <div class="portfolio-tile__metadata">
   @if (locationLabel) { <p class="portfolio-tile__location"><app-ui-icon name="location" [size]="18"/>{{ locationLabel }}</p> }
-  @if ((tile.owner && (!tile.analysisSnapshot || level === 'simple')) || (level === 'detailed' && tile.meterSnapshot) || (level !== 'simple' && tile.stationLink)) {
+  @if ((tile.owner && (!(tile.analysisSnapshot || tile.reportSnapshot) || level === 'simple')) || (level === 'detailed' && tile.meterSnapshot) || (level !== 'simple' && tile.stationLink)) {
     <div class="portfolio-tile__ownership">
-      @if ((!tile.analysisSnapshot || level === 'simple') && tile.owner; as owner) { <a class="portfolio-tile__owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="tile.analysisSnapshot ? 'Open ' + owner.label + ' Analysis dashboard' : null" (click)="open($event, owner.route)">@if (!tile.analysisSnapshot) { <app-ui-icon name="facility" [size]="18"/> }{{ owner.label }}</a> }
+      @if ((!(tile.analysisSnapshot || tile.reportSnapshot) || level === 'simple') && tile.owner; as owner) { <a class="portfolio-tile__owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="(tile.analysisSnapshot || tile.reportSnapshot) ? 'Open ' + owner.label + (tile.reportSnapshot ? ' Reports dashboard' : ' Analysis dashboard') : null" (click)="open($event, owner.route)">@if (!(tile.analysisSnapshot || tile.reportSnapshot)) { <app-ui-icon name="facility" [size]="18"/> }{{ owner.label }}</a> }
       @if (level === 'detailed' && tile.meterSnapshot; as snapshot) {
         <span class="portfolio-tile__group" [title]="snapshot.group.label + ': ' + snapshot.group.value">
           <app-ui-icon name="meterGroupItem" [size]="18"/>
@@ -38,7 +38,10 @@
     @if (level !== 'simple' && tile.analysisSnapshot; as analysis) { <p class="portfolio-tile__analysis-modified">Updated {{ analysis.modified }}</p> }
   </div>
   </div>
-  @if (tile.analysisSnapshot; as analysis) {
+  @if (tile.reportSnapshot; as report) {
+    <p class="portfolio-tile__report-pending"><app-ui-icon name="info" [size]="18"/>Report content pending</p>
+    @if (level !== 'simple') { <app-report-snapshot [snapshot]="report" [detailed]="level === 'detailed'"/> }
+  } @else if (tile.analysisSnapshot; as analysis) {
     @if (analysis.active) { <p class="portfolio-tile__analysis-active"><app-ui-icon name="target" [size]="18"/>Active for {{ analysis.scope }} reporting</p> }
     @if (level !== 'simple') { <app-analysis-snapshot [snapshot]="analysis" [detailed]="level === 'detailed'" [print]="print" (detailsRequested)="actionRequested.emit({guid: tile.guid, action: 'details'})"/> }
   } @else if (tile.facilitySnapshot; as snapshot) {

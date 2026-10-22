@@ -66,17 +66,19 @@
 :is(.portfolio-tile--facility-snapshot,.portfolio-tile--reading-snapshot,[data-detail='simple']) .portfolio-tile__name { font-size: max(1.25rem,20px); }
 
 .portfolio-tile__analysis-active { display: flex; align-items: center; gap: .35rem; color: var(--v1-primary-strong); font-size: var(--analysis-card-text-size); font-weight: 400; line-height: 1.5; margin: 0; }
-[data-analysis-scope] .portfolio-tile__name { font-size: var(--analysis-card-title-size); font-weight: 700; }
-[data-analysis-scope] :is(.portfolio-tile__status,.portfolio-tile__chip) { font-size: var(--analysis-card-text-size); font-weight: 400; line-height: 1.5; }
-[data-analysis-scope] .portfolio-tile__status { margin-top: 0; }
-[data-analysis-scope]:not([data-detail='simple']) .portfolio-tile__context { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .8rem; }
+:is([data-analysis-scope],[data-report-scope]) .portfolio-tile__name { font-size: var(--analysis-card-title-size); font-weight: 700; }
+:is([data-analysis-scope],[data-report-scope]) :is(.portfolio-tile__status,.portfolio-tile__chip) { font-size: var(--analysis-card-text-size); font-weight: 400; line-height: 1.5; }
+:is([data-analysis-scope],[data-report-scope]) .portfolio-tile__status { margin-top: 0; }
+:is([data-analysis-scope],[data-report-scope]):not([data-detail='simple']) .portfolio-tile__context { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .8rem; }
 .portfolio-tile__analysis-modified { margin: 0 0 0 auto; font-size: var(--analysis-card-text-size); font-weight: 400; line-height: 1.5; color: color-mix(in srgb,var(--v1-muted) 75%,var(--v1-text)); }
-[data-analysis-scope][data-detail='simple'] { padding-top: 1rem; }
-[data-analysis-scope] { --analysis-menu-size: 1.75rem; --analysis-card-text-size: max(.875rem,14px); --analysis-card-title-size: max(1.25rem,20px); --analysis-card-value-size: 1.5rem; }
-[data-analysis-scope] .portfolio-tile__menu-button { position: absolute; top: .4rem; right: .4rem; width: var(--analysis-menu-size); height: var(--analysis-menu-size); min-width: var(--analysis-menu-size); min-height: var(--analysis-menu-size); font-size: 1.1rem; }
-[data-analysis-scope]:not([data-detail='simple']) .portfolio-tile__heading { align-items: center; }
-[data-analysis-scope]:not([data-detail='simple']) .portfolio-tile__heading > app-ui-icon { margin-top: 0; }
-@media (pointer: coarse) { [data-analysis-scope] { --analysis-menu-size: 2.75rem; } }
+:is([data-analysis-scope],[data-report-scope])[data-detail='simple'] { padding-top: 1rem; }
+:is([data-analysis-scope],[data-report-scope]) { --analysis-menu-size: 1.75rem; --analysis-card-text-size: max(.875rem,14px); --analysis-card-title-size: max(1.25rem,20px); --analysis-card-value-size: 1.5rem; }
+:is([data-analysis-scope],[data-report-scope]) .portfolio-tile__menu-button { position: absolute; top: .4rem; right: .4rem; width: var(--analysis-menu-size); height: var(--analysis-menu-size); min-width: var(--analysis-menu-size); min-height: var(--analysis-menu-size); font-size: 1.1rem; }
+:is([data-analysis-scope],[data-report-scope]):not([data-detail='simple']) .portfolio-tile__heading { align-items: center; }
+:is([data-analysis-scope],[data-report-scope]):not([data-detail='simple']) .portfolio-tile__heading > app-ui-icon { margin-top: 0; }
+@media (pointer: coarse) { :is([data-analysis-scope],[data-report-scope]) { --analysis-menu-size: 2.75rem; } }
 .portfolio-tile__header-facility { display: inline-flex; align-items: baseline; gap: .4rem; min-width: 0; }
 .portfolio-tile__header-owner { min-width: 0; font-size: inherit; color: inherit !important; }
 .portfolio-tile__header-owner:hover { color: var(--v1-link) !important; }
+
+.portfolio-tile__report-pending { display: flex; gap: .4rem; align-items: center; margin: 0; color: var(--v1-muted); font-size: max(.875rem,14px); }
