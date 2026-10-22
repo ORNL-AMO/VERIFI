@@ -159,6 +159,23 @@ describe('WorkspaceNavigationService', () => {
     expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports').detail).toBe('dashboard');
   });
 
+  it('parses account report links and applies report-specific drill-in, return, peer and stage motion', () => {
+    router.events.next(new NavigationEnd(1, '', '/v1/workspace/account/account-a/reports/dashboard'));
+    router.events.next(new NavigationEnd(2, '', '/v1/workspace/account/account-a/reports/workbench/report-a/setup'));
+    expect(service.activeReportGuid()).toBe('report-a'); expect(service.routeMotion()).toBe('drill-in');
+    expect(service.accountReportWorkbenchRoute('account-a', 'report-a')).toEqual(['/v1', 'workspace', 'account', 'account-a', 'reports', 'workbench', 'report-a', 'setup']);
+    router.events.next(new NavigationEnd(3, '', '/v1/workspace/account/account-a/reports/workbench/report-b/setup'));
+    expect(service.routeMotion()).toBe('peer');
+    router.events.next(new NavigationEnd(4, '', '/v1/workspace/account/account-a/reports/dashboard'));
+    expect(service.routeMotion()).toBe('drill-out');
+    router.events.next(new NavigationEnd(5, '', '/v1/workspace/facility/facility-a/reports/dashboard'));
+    expect(service.routeMotion()).toBe('drill-in');
+    router.events.next(new NavigationEnd(6, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
+    expect(service.routeMotion()).toBe('drill-in');
+    router.events.next(new NavigationEnd(7, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/report'));
+    expect(service.routeMotion()).toBe('none');
+  });
+
   it('lets report route guards finish edits before changing the selected facility', () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
     const confirmDiscard = vi.spyOn(TestBed.inject(UnsavedChangesService), 'confirmDiscard').mockReturnValue(false);

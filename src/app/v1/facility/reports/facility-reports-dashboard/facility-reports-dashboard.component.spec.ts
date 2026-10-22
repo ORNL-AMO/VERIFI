@@ -1,189 +1,71 @@
-import { signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
-import { vi } from 'vitest';
-import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { TestBed } from '@angular/core/testing';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { FacilityReportsModule } from '../facility-reports.module';
-import { FacilityReportActionsService } from '../facility-report-actions.service';
-import { reportFacility, reportFixture, reportSnapshot } from '../testing/report-test-fixtures';
-import { FacilityReportsDashboardComponent } from './facility-reports-dashboard.component';
+import { ReportsDashboardComponent } from '@app/v1/shared/reports/reports-dashboard/reports-dashboard.component';
+import { setupReportInventory } from '@app/v1/shared/reports/testing/report-inventory-test-setup';
+import { reportFixture } from '../testing/report-test-fixtures';
 
-describe('FacilityReportsDashboardComponent', () => {
-  let fixture: ComponentFixture<FacilityReportsDashboardComponent>;
-  let component: FacilityReportsDashboardComponent;
-  let store: AccountWorkspaceStore;
-  let navigate: ReturnType<typeof vi.fn>;
-  let actions: { create: ReturnType<typeof vi.fn>; copy: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> };
-  const status = signal<'ready' | 'error' | 'evaluating'>('ready');
-
-  beforeEach(async () => {
-    status.set('ready');
-    store = new AccountWorkspaceStore();
-    store.publish(reportSnapshot(), { facility: reportFacility });
-    actions = { create: vi.fn(async () => reportFixture({ guid: 'created' })), copy: vi.fn(), delete: vi.fn() };
-    await TestBed.configureTestingModule({
-      imports: [FacilityReportsModule], providers: [provideRouter([]),
-        { provide: AccountWorkspaceStore, useValue: store },
-        { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
-        { provide: WorkspaceNavigationService, useValue: {
-          routeState: signal({ facilityGuid: 'facility-a' }),
-          facilityReportWorkbenchRoute: (facilityGuid: string, reportGuid: string) => ['/v1', facilityGuid, reportGuid, 'setup']
-        } }, { provide: FacilityReportActionsService, useValue: actions }
-      ]
-    }).compileComponents();
-    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    fixture = TestBed.createComponent(FacilityReportsDashboardComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('renders saved cards, filtered empty results, and a distinct empty inventory', () => {
+describe('facility report inventory', () => {
+  async function setup() {
+    const context = await setupReportInventory('facility');
+    const fixture = TestBed.createComponent(ReportsDashboardComponent);
+    fixture.componentRef.setInput('scope', 'facility'); fixture.detectChanges();
+    return { ...context, fixture, component: fixture.componentInstance, lifecycle: fixture.componentInstance.lifecycle };
+  }
+  it('uses shared cards, facility-only filtering, breadcrumbs and explicit empty states', async () => {
+    const { fixture, component } = await setup();
+    expect(component.entries()).toHaveLength(1);
     expect(fixture.nativeElement.textContent).toContain('Saved report');
-    expect(component.cardActions().map(action => action.id)).toEqual(['copy', 'delete']);
-    expect(fixture.nativeElement.textContent).not.toContain('Rename report');
-    component.filtersForm.controls.search.setValue('no match');
-    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Account saved report');
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Reports');
+    expect(component.breadcrumbs().map(crumb => crumb.label)).toEqual(['Account A', 'Facility A']);
+    expect(fixture.nativeElement.querySelector('app-page-identity a').getAttribute('href')).toContain('/account/account-a/reports/dashboard');
+    expect(component.menuActions().map(action => action.id)).toEqual(['rename', 'copy', 'delete']);
+    expect(component.filtersForm.controls.sort.value).toBe('attention');
+    component.filtersForm.controls.search.setValue('no match'); fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No reports match these filters');
-    store.publish(reportSnapshot([]), { facility: reportFacility });
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('No reports');
-    expect(fixture.nativeElement.querySelector('app-resource-browse-card')).toBeNull();
   });
-
-  it('keeps lifecycle actions available when validation fails but disables them for pending workspace writes', () => {
-    status.set('error');
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Setup status is unavailable');
-    expect(component.canAct()).toBe(true);
-    store.setPending({ id: 1, label: 'Other change' });
-    fixture.detectChanges();
-    expect(component.canAct()).toBe(false);
-    component.openCreate();
-    expect(component.editor()).toBeUndefined();
+  it('keeps actions available after status failure and blocks pending workspace writes', async () => {
+    const { fixture, component, status, store } = await setup();
+    status.set('error'); fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Setup status is unavailable'); expect(component.canAct()).toBe(true);
+    store.setPending({ id: 1, label: 'Other change' }); fixture.detectChanges();
+    component.openCreate(); expect(component.lifecycle.editor()).toBeUndefined();
   });
-
-  it('hides Emission Factors cards and choices unless account Other Impacts is checked, preserving saved reports', () => {
-    const snapshot = reportSnapshot([reportFixture(), reportFixture({ guid: 'factors', id: 11, facilityReportType: 'emissionFactors', name: 'Saved factors' })]);
-    store.publish(snapshot, { facility: reportFacility });
-    component.filtersForm.controls.type.setValue('emissionFactors');
-    fixture.detectChanges();
-    expect(component.visibleCards().map(card => card.report.guid)).toEqual(['factors']);
-    store.publish({ ...snapshot, account: { ...snapshot.account, displayEmissions: false } }, { facility: reportFacility });
-    fixture.detectChanges();
-    expect(component.reportTypes().some(option => option.value === 'emissionFactors')).toBe(false);
-    expect(component.filtersForm.controls.type.value).toBe('all');
-    expect(component.cards().map(card => card.report.guid)).toEqual(['report-a']);
-    expect(fixture.nativeElement.textContent).not.toContain('Saved factors');
-    component.openCreate();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('app-report-draft-slideout option').length).toBe(6);
-    expect(store.facilityReports()).toHaveLength(2);
-    component.cancelEditor();
-    store.publish(snapshot, { facility: reportFacility });
-    fixture.detectChanges();
-    expect(component.cards()).toHaveLength(2);
+  it('retains failed drafts, blocks duplicate submissions, and opens the owned report after creation', async () => {
+    const { component, lifecycle, facilityActions, navigate } = await setup();
+    facilityActions.create.mockRejectedValueOnce(new Error('Disk full'));
+    component.openCreate(); lifecycle.form.controls.name.setValue('Annual report');
+    await lifecycle.submit(); expect(lifecycle.editor()).toBeDefined(); expect(lifecycle.error()).toBe('Disk full'); expect(navigate).not.toHaveBeenCalled();
+    await lifecycle.submit(); expect(lifecycle.editor()).toBeUndefined();
+    expect(facilityActions.create).toHaveBeenLastCalledWith('facility-a', 'Annual report', 'analysis');
+    expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-a', 'reports', 'workbench', 'created-facility', 'setup']);
   });
-
-  it('blocks dirty editor navigation, validates names, and cancels explicitly', () => {
-    component.openCreate();
-    component.editorForm.controls.name.setValue('   ');
-    expect(component.canSave()).toBe(false);
-    expect(component.isNavigationBlocked()).toBe(true);
+  it('protects dirty drafts and unload, and cleans up protection on destruction', async () => {
+    const { fixture, component, lifecycle } = await setup();
+    const unload = () => { const event = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(event); return event.defaultPrevented; };
+    component.openCreate(); expect(unload()).toBe(false);
+    lifecycle.form.controls.name.setValue(' '); expect(lifecycle.canSave()).toBe(false);
+    expect(unload()).toBe(true); expect(component.isNavigationBlocked()).toBe(true);
     expect(TestBed.inject(UnsavedChangesService).confirmDiscard()).toBe(false);
-    component.cancelEditor();
-    expect(component.hasUnsavedChanges()).toBe(false);
-    expect(component.isNavigationBlocked()).toBe(false);
-    expect(actions.create).not.toHaveBeenCalled();
+    lifecycle.requestClose(); fixture.detectChanges(); expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
+    lifecycle.discardEditor(); fixture.detectChanges(); expect(component.hasUnsavedChanges()).toBe(false);
+    component.openCreate(); lifecycle.form.controls.name.setValue('Changed'); fixture.destroy(); expect(unload()).toBe(false);
   });
-
-  it('warns on browser unload only for edited drafts or pending report actions and cleans up on destruction', async () => {
-    const unload = () => {
-      const event = new Event('beforeunload', { cancelable: true });
-      window.dispatchEvent(event);
-      return event.defaultPrevented;
-    };
-    expect(unload()).toBe(false);
-    component.openCreate();
-    expect(unload()).toBe(false);
-    component.editorForm.controls.name.setValue('Edited report');
-    expect(unload()).toBe(true);
-    component.cancelEditor();
-    expect(unload()).toBe(false);
-    component.openCreate();
-    component.editorForm.controls.type.setValue('overview');
-    expect(unload()).toBe(true);
-    component.cancelEditor();
-
-    let resolve!: (value: ReturnType<typeof reportFixture>) => void;
-    actions.create.mockImplementation(() => new Promise(done => { resolve = done; }));
-    component.openCreate();
-    const saving = component.submitEditor();
-    expect(component.hasUnsavedChanges()).toBe(false);
-    expect(unload()).toBe(true);
-    resolve(reportFixture());
-    await saving;
-    expect(unload()).toBe(false);
-
-    component.openCreate();
-    component.editorForm.controls.name.setValue('Another edit');
-    expect(unload()).toBe(true);
-    fixture.destroy();
-    expect(unload()).toBe(false);
+  it('retains failed deletions for retry in a portal confirmation', async () => {
+    const { fixture, component, lifecycle, facilityActions } = await setup();
+    component.requestAction({ guid: component.entries()[0].key, action: 'delete' }); fixture.detectChanges();
+    expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
+    facilityActions.delete.mockRejectedValueOnce(new Error('Could not delete')); await lifecycle.confirmDelete();
+    expect(lifecycle.deleteCandidate()).toBeDefined(); expect(lifecycle.error()).toBe('Could not delete');
+    await lifecycle.confirmDelete(); fixture.detectChanges(); expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
   });
-
-  it('retains failed drafts for retry and navigates only after successful creation', async () => {
-    actions.create.mockRejectedValueOnce(new Error('Storage unavailable. Try again.'));
-    component.openCreate();
-    component.editorForm.controls.name.setValue('Annual report');
-    await component.submitEditor();
-    fixture.detectChanges();
-    expect(component.editorForm.controls.name.value).toBe('Annual report');
-    expect(component.editor()).toBeDefined();
-    expect(fixture.nativeElement.textContent).toContain('Storage unavailable');
-    expect(navigate).not.toHaveBeenCalled();
-    await component.submitEditor();
-    expect(component.editor()).toBeUndefined();
-    expect(component.isNavigationBlocked()).toBe(false);
-    expect(navigate).toHaveBeenCalledWith(['/v1', 'facility-a', 'created', 'setup']);
-  });
-
-  it('prevents duplicate submissions and suppresses late navigation after a context change', async () => {
-    let resolve!: (value: ReturnType<typeof reportFixture>) => void;
-    actions.create.mockImplementation(() => new Promise(done => { resolve = done; }));
-    component.openCreate();
-    const first = component.submitEditor();
-    await component.submitEditor();
-    expect(actions.create).toHaveBeenCalledTimes(1);
-    store.publish({ ...reportSnapshot(), account: { ...reportSnapshot().account, guid: 'account-b' } });
-    fixture.detectChanges();
-    resolve(reportFixture());
-    await first;
-    expect(navigate).not.toHaveBeenCalled();
-    expect(component.editor()).toBeUndefined();
-  });
-
-  it('opens portal-hosted delete/discard confirmations and retains a failed deletion for retry', async () => {
-    const modal = TestBed.inject(ModalPortalService);
-    component.action(component.cards()[0], 'delete');
-    expect(modal.activePortal()).not.toBeNull();
-    component.cancelConfirmation();
-    expect(actions.delete).not.toHaveBeenCalled();
-    component.action(component.cards()[0], 'delete');
-    actions.delete.mockRejectedValueOnce(new Error('Could not delete'));
-    await component.confirmDelete();
-    expect(component.deleteCandidate()).toBeDefined();
-    expect(component.actionError()).toContain('Could not delete');
-    await component.confirmDelete();
-    expect(modal.activePortal()).toBeNull();
-    component.openCreate();
-    component.editorForm.controls.name.setValue('Changed');
-    component.requestCloseEditor();
-    expect(modal.activePortal()).not.toBeNull();
-    component.discardEditor();
-    expect(component.editor()).toBeUndefined();
+  it('suppresses duplicate submissions and late navigation after a context change', async () => {
+    const { fixture, component, lifecycle, facilityActions, state, navigate } = await setup();
+    let resolve!: (report: ReturnType<typeof reportFixture>) => void;
+    facilityActions.create.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+    component.openCreate(); const first = lifecycle.submit(); await lifecycle.submit(); expect(facilityActions.create).toHaveBeenCalledTimes(1);
+    state.set({ facilityGuid: 'facility-b' }); fixture.detectChanges(); resolve(reportFixture()); await first;
+    expect(navigate).not.toHaveBeenCalled(); expect(lifecycle.editor()).toBeUndefined();
   });
 });

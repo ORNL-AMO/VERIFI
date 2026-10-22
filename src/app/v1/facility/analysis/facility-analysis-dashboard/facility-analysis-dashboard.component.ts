@@ -31,7 +31,7 @@ import { AnalysisInventoryEntry, analysisInventoryStatusLabel, analysisInventory
 
 @Component({
   selector: 'app-facility-analysis-dashboard',
-  host: { class: 'v1-analysis-dashboard-host' },
+  host: { class: 'v1-analysis-dashboard-host v1-inventory-dashboard-host' },
   standalone: true,
   imports: [AnalysisComparisonSheetComponent, InventoryChartDockComponent, IconComponent, DataEmptyStateModule, InventoryGridComponent, BrowsePositionDirective, BrowseHeaderDirective, PageIdentityComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisComparisonComponent, AnalysisDetailsSlideoutComponent],
   providers: [FacilityAnalysisDashboardResultsService],

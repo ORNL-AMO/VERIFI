@@ -1,0 +1,18 @@
+@let view = snapshot();
+<dl aria-label="Saved report configuration">
+  @for (fact of view.facts; track fact.label) { <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div> }
+  <div><dt>Updated</dt><dd>{{ view.modified }}</dd></div>
+</dl>
+@if (detailed()) {
+  <section class="report-snapshot__scope"><h2>Saved scope</h2><p>{{ view.scopeLabel }}</p></section>
+  @if (view.findings.length) {
+    <section class="inventory-attention" aria-label="Report setup findings"><h2>Needs attention</h2>
+      <ul>@for (finding of visibleFindings(); track finding.id) {
+        <li [attr.data-severity]="finding.severity"><app-ui-icon [name]="finding.severity === 'error' ? 'danger' : 'warning'" [size]="18"/>
+          <div><p>{{ finding.title }}</p><p class="inventory-attention__description">{{ finding.description }}</p></div>
+        </li>
+      }</ul>
+      @if (view.findings.length > 2) { <p class="inventory-attention__remaining">{{ view.findings.length - 2 }} more setup findings.</p> }
+    </section>
+  }
+}

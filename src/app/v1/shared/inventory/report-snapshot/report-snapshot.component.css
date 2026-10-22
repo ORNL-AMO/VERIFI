@@ -1,0 +1,6 @@
+:host { display: block; --snapshot-muted: var(--v1-muted); font-size: max(.875rem,14px); }
+dl { display: grid; grid-template-columns: repeat(auto-fit,minmax(10rem,1fr)); gap: .8rem; margin: 0; }
+dt,h2 { font-size: inherit; font-weight: 600; color: var(--v1-muted); }
+dd { margin: .2rem 0 0; overflow-wrap: anywhere; }
+section { margin-top: .8rem; border-top: 1px solid var(--v1-border); padding-top: .8rem; }
+h2,p { margin: 0 0 .4rem; }

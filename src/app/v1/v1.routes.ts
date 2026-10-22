@@ -1,5 +1,5 @@
 import { FACILITY_REPORT_ROUTES } from '@app/v1/facility/reports/facility-reports.routes';
-import { AccountReportsLandingComponent } from '@app/v1/account/reports/account-reports-landing/account-reports-landing.component';
+import { ACCOUNT_REPORT_ROUTES } from '@app/v1/account/reports/account-reports.routes';
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
 import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
@@ -229,11 +229,7 @@ export const V1Routes: Routes = [
             ]
           },
           {
-            path: 'reports', children: [
-              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: AccountReportsLandingComponent },
-              { path: '**', redirectTo: 'dashboard' }
-            ]
+            path: 'reports', children: ACCOUNT_REPORT_ROUTES
           },
           { path: '**', redirectTo: 'home/overview' }
         ]

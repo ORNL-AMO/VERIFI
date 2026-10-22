@@ -1,0 +1,14 @@
+:host { display: block; min-width: 0; }
+.reports-inventory { position: relative; }
+.reports-inventory__marker { position: absolute; top: 0; width: 1px; height: 1px; pointer-events: none; }
+.reports-inventory__toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; }
+.reports-inventory__toolbar > label { flex: 1 1 8rem; min-width: 0; }
+.reports-inventory__search { flex: 3 1 18rem; min-width: 0; }
+.reports-inventory__search p { margin: 0 0 .4rem; color: var(--v1-muted); }
+@media (max-width: 640px) { .reports-inventory__search { flex-basis: 100%; } }
+
+.reports-inventory__sticky.v1-data-workbench-sticky { top: 0; padding-bottom: 1rem; background: transparent; box-shadow: none; }
+.reports-inventory--scrolled .reports-inventory__sticky { padding-bottom: 0; }
+.reports-inventory__workspace.v1-data-dashboard-workspace { padding-top: 0; }
+.reports-inventory__toolbar { position: sticky; top: var(--browse-sticky-height,0px); z-index: 3; }
+@media print { .reports-inventory__toolbar,.reports-inventory .v1-btn { display: none; } .reports-inventory__sticky { position: static; } }

@@ -1,3 +1,5 @@
+import { getNewIdbAccountReport } from '@data/models/idbModels/accountReport';
+import { reportAccount, reportFacility, reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -61,4 +63,30 @@ describe('ReportsNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Factors report');
     expect(fixture.componentInstance.reportGroups().map(group => group.id)).toEqual(['analysis', 'overview', 'emissionFactors']);
   });
+  it('groups account reports by type, highlights the selected landing, and preserves hidden impact reports', async () => {
+    const store = new AccountWorkspaceStore();
+    const base = getNewIdbAccountReport(reportAccount, [reportFacility], []);
+    store.publish({ ...reportSnapshot(), account: { ...reportAccount, displayEmissions: false }, accountReports: [
+      { ...base, guid: 'z', name: 'Zebra', reportType: 'analysis' }, { ...base, guid: 'a', name: 'Alpha', reportType: 'analysis' },
+      { ...base, guid: 'factors', name: 'Hidden factors', reportType: 'accountEmissionFactors' },
+      { ...base, guid: 'other', name: 'Wrong account', accountId: 'account-b', reportType: 'analysis' }
+    ] });
+    const active = signal<string | undefined>('z');
+    await TestBed.configureTestingModule({ imports: [SectionNavModule], providers: [provideRouter([]),
+      { provide: AccountWorkspaceStore, useValue: store },
+      { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]) } },
+      { provide: WorkspaceNavigationService, useValue: {
+        account: store.account, routeState: signal({ accountGuid: 'account-a' }), contextMode: signal('account'), activeReportGuid: active,
+        accountReportsRoute: () => ['/account/reports/dashboard'],
+        accountReportWorkbenchRoute: (_account: string, guid: string) => ['/account/reports/workbench', guid, 'setup']
+      } }
+    ] }).compileComponents();
+    const fixture = TestBed.createComponent(ReportsNavComponent); fixture.detectChanges();
+    expect(fixture.componentInstance.reportGroups().map(group => group.reports.map(report => report.guid))).toEqual([['a', 'z']]);
+    expect(fixture.nativeElement.querySelector('a[aria-current="page"]').textContent).toContain('Zebra');
+    expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(0);
+    expect(fixture.nativeElement.textContent).not.toContain('Hidden factors'); expect(fixture.nativeElement.textContent).not.toContain('Wrong account');
+    active.set(undefined); fixture.detectChanges(); expect(fixture.nativeElement.querySelector('a[aria-current="page"]').textContent).toContain('Dashboard');
+  });
+
 });

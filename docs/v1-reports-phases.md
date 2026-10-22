@@ -14,7 +14,7 @@ This document defines the implementation sequence only. Each phase will be plann
 
 **Completion checkpoint:** facility reports can be discovered and managed without losing existing settings.
 
-Implemented with a limited account Reports landing and facility dashboard links. The account report inventory and lifecycle actions remain in phase 3. Emission Factors reports are available only when account Other Impacts is enabled; apply the shared rule to account Emission Factors and Better Climate in phase 3.
+Phase 1 initially shipped with a limited account Reports landing and facility dashboard links; phase 3 replaces that landing with the combined inventory. The account report inventory and lifecycle actions remain in phase 3. Emission Factors reports are available only when account Other Impacts is enabled; apply the shared rule to account Emission Factors and Better Climate in phase 3.
 
 ## Phase 2 — Facility report workbench
 
@@ -27,12 +27,14 @@ Implemented with a limited account Reports landing and facility dashboard links.
 
 ## Phase 3 — Account report dashboard
 
-- [ ] Enable account Reports navigation and lifecycle actions.
-- [ ] Connect the portfolio Reports inventory across account and facility scopes.
-- [ ] Provide a minimal selected-account-report landing.
-- [ ] Make account-required reports accessible from single-facility workspaces.
+- [x] Enable account Reports navigation and lifecycle actions.
+- [x] Connect the portfolio Reports inventory across account and facility scopes.
+- [x] Provide a minimal selected-account-report landing.
+- [x] Make account-required reports accessible from single-facility workspaces.
 
 **Completion checkpoint:** account and facility reports are discoverable and route to the correct owning workspace.
+
+Implemented with a combined account inventory and shared Simple/Summary/Detailed cards on both dashboards. Scope headers, workspace insets, title/action placement, and browse returns follow Analysis. Account reports open a minimal saved-configuration landing; account report workbench stages remain phase 4. Both scopes support create, copy, rename, and delete through the existing command boundary. Single-facility workspaces retain explicit Account Reports access and existing hidden analysis references without report-entry reconciliation. Report content remains pending independently of setup status.
 
 ## Phase 4 — Account report workbench
 

@@ -31,7 +31,7 @@ import { AccountAnalysisComparisonComponent } from './account-analysis-compariso
 import { AnalysisInventoryEntry, AnalysisInventoryResultEntry, analysisInventoryTile, filterAnalysisInventory } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 
 @Component({
-  selector: 'app-account-analysis-dashboard', host: { class: 'v1-analysis-dashboard-host' }, standalone: true,
+  selector: 'app-account-analysis-dashboard', host: { class: 'v1-analysis-dashboard-host v1-inventory-dashboard-host' }, standalone: true,
   imports: [AnalysisComparisonSheetComponent, InventoryChartDockComponent, IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, ConfirmationDialogComponent, InventoryGridComponent,
     AccountAnalysisDraftSlideoutComponent, AccountAnalysisComparisonComponent, AnalysisDetailsSlideoutComponent,
     FacilityAnalysisComparisonComponent, ReactiveFormsModule, BrowsePositionDirective, BrowseHeaderDirective, PageIdentityComponent],

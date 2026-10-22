@@ -79,11 +79,11 @@ export class FacilityReportActionsService {
 
   private requireContext(facilityGuid: string, expectedAccount?: string): string {
     const account = this.workspace.account();
-    const facility = this.workspace.selectedFacility();
+    const facility = this.workspace.facilities().find(item => item.guid === facilityGuid && item.accountId === account?.guid);
     // The command boundary sets hasPending while executing this operation.
     if (!this.workspace.canWrite() || !account || (expectedAccount && account.guid !== expectedAccount)
       || facility?.guid !== facilityGuid || facility.accountId !== account.guid) {
-      throw new WorkspaceWriteError('workspace-not-ready', 'The report workspace changed. Reopen the facility and try again.');
+      throw new WorkspaceWriteError('workspace-not-ready', 'The report workspace changed. Reopen the reports dashboard and try again.');
     }
     return account.guid;
   }

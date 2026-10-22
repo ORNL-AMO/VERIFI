@@ -1,3 +1,4 @@
+import { AccountReportActionsService } from '@app/v1/account/reports/account-report-actions.service';
 import { computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -28,6 +29,7 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
   const status = { state: signal<'ready' | 'evaluating' | 'error'>('ready'), items: signal<StatusItem[]>([]) };
   await TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [
     provideLocationMocks(),
+    { provide: AccountReportActionsService, useValue: {} },
     { provide: WorkbenchLayoutService, useFactory: () => { const factsExpanded = signal(true); return { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) }; } },
     provideRouter([{ path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES }, { path: 'elsewhere', component: FacilityReportWorkbenchComponent }]),
     { provide: AccountWorkspaceStore, useValue: store },
