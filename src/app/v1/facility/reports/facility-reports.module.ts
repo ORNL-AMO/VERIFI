@@ -10,14 +10,10 @@ import { FacilityReportWorkbenchComponent } from './facility-report-workbench/fa
 import { FacilityReportSetupComponent } from './facility-report-workbench/setup/facility-report-setup.component';
 import { FacilityReportDataChecksComponent } from './facility-report-workbench/data-checks/facility-report-data-checks.component';
 import { FacilityReportPreviewComponent } from './facility-report-workbench/preview/facility-report-preview.component';
-import { AnalysisStageNavigationComponent } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';
-import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
-import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 
 @NgModule({
   declarations: [FacilityReportsDashboardComponent, FacilityReportWorkbenchComponent, FacilityReportSetupComponent,
     FacilityReportDataChecksComponent, FacilityReportPreviewComponent],
-  imports: [ReportsModule, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, DataEmptyStateComponent,
-    AnalysisStageNavigationComponent, DataWorkbenchResourceSwitcherComponent, DataWorkbenchFactsToggleComponent]
+  imports: [ReportsModule, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, DataEmptyStateComponent]
 })
 export class FacilityReportsModule { }

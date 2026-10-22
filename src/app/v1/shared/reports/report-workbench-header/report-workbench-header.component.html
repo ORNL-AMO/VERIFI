@@ -1,0 +1,48 @@
+@let state = editor();
+<div class="v1-data-workbench-sticky report-workbench-sticky">
+  <header class="v1-data-workbench-header">
+    <nav class="v1-data-workbench-breadcrumb" [attr.aria-label]="breadcrumbLabel()"><ol>
+      @for (crumb of breadcrumbs(); track $index) {
+        @if (!$first) { <li aria-hidden="true"><app-ui-icon name="chevronRight"/></li> }
+        <li [attr.aria-current]="$last ? 'page' : null">@if (crumb.route) { <a [routerLink]="crumb.route">{{ crumb.label }}</a> } @else {<span>{{ crumb.label }}</span>}</li>
+      }
+    </ol></nav>
+    <div class="v1-data-workbench-title-row">
+      <div class="v1-data-workbench-title"><h1 [id]="titleId()"><app-ui-icon name="report"/>
+        <app-data-workbench-resource-switcher [resources]="resources()" [selectedId]="selectedId()" [currentLabel]="name()" ariaLabel="Switch report" (resourceSelected)="reportSelected.emit($event)"/>
+      </h1></div>
+      <div class="v1-data-workbench-actions" aria-label="Report summary and controls">
+        <span class="report-save-state" [class.report-save-state--saved]="state.state() === 'saved'" [class.report-save-state--error]="state.state() === 'error' || state.state() === 'invalid'" role="status" aria-live="polite">
+          @if (state.saving()) { <app-ui-icon name="loading" spin/> Saving… } @else {
+            @switch (state.state()) {
+              @case ('saved') { <app-ui-icon name="check"/> Saved. }
+              @case ('invalid') { <app-ui-icon name="warning"/> Fix validation errors. }
+              @case ('error') { <app-ui-icon name="warning"/> Save failed. }
+              @default { Changes save automatically. }
+            }
+          }
+        </span>
+        <span class="v1-chip">{{ typeLabel() }}</span>
+        <span class="v1-chip" [class.v1-chip--danger]="status() === 'error'" [class.v1-chip--warning]="status() === 'warning'" [class.v1-chip--success]="status() === 'ready'" role="status">{{ statusLabel() }}</span>
+        <app-data-workbench-facts-toggle #factsToggle controls="report-workbench-facts"/>
+      </div>
+    </div>
+    @if (state.isDirty() || state.error()) {
+      <div class="v1-alert" [class.v1-alert--danger]="state.state() === 'error' || state.state() === 'invalid'" [class.v1-alert--info]="state.state() === 'dirty'" role="status">
+        @if (state.error()) { <span>{{ state.error() }}</span> }
+        @else if (state.state() === 'invalid') { <span>Enter a nonblank name in Setup or discard your changes before leaving this report.</span> }
+        @else { <span>Your edits will save automatically before leaving this report.</span> }
+        @if (state.state() === 'error') { <button type="button" class="v1-btn v1-btn--secondary" [disabled]="state.saving()" (click)="state.retry()">Retry</button> }
+        <button type="button" class="v1-btn v1-btn--ghost" [disabled]="state.saving()" (click)="requestDiscard()">Discard changes</button>
+      </div>
+    }
+    <div id="report-workbench-facts" [hidden]="!factsToggle.expanded()"><dl class="report-facts" aria-label="Saved report configuration">
+      <div><dt>Report type</dt><dd>{{ typeLabel() }}</dd></div>
+      @for (fact of facts(); track $index) { <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div> }
+    </dl></div>
+  </header>
+  <app-analysis-stage-navigation [stages]="stages()" layout="horizontal" ariaLabel="Report workflow stages"/>
+</div>
+<ng-template #discardConfirmation>
+  <app-confirmation-dialog title="Discard report edits?" titleId="discard-workbench-title" cancelAriaLabel="Keep editing report" confirmLabel="Discard edits" [disabled]="state.saving()" (confirmed)="closeDiscard(true)" (cancelled)="closeDiscard()"><p>Your unsaved report edits will be discarded.</p></app-confirmation-dialog>
+</ng-template>

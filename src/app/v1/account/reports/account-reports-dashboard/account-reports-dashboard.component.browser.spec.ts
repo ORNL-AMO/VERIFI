@@ -22,6 +22,9 @@ import { reportAccount, reportFacility, reportFixture, reportSnapshot } from '@a
 import { AccountReportsModule } from '../account-reports.module';
 import { ACCOUNT_REPORT_ROUTES } from '../account-reports.routes';
 import { AccountReportActionsService } from '../account-report-actions.service';
+import { AccountReportSetupChanges, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
+import { accountReportSnapshot } from '../testing/account-report-test-fixtures';
+import { reportAnalysisToken } from '../account-report-workbench/account-report-workbench.models';
 
 const dashboardUrl = '/v1/workspace/account/account-a/reports/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div style="position:relative;isolation:isolate"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
@@ -30,7 +33,14 @@ function setup(count = 30) {
   const store = new AccountWorkspaceStore();
   const report = { ...getNewIdbAccountReport(reportAccount, [reportFacility], []), guid: 'account-report', id: 4, name: 'Saved account report', reportType: 'analysis' as const, reportYear: 2024 };
   store.publish({ ...reportSnapshot(Array.from({ length: count }, (_, i) => reportFixture({ guid: `report-${i}`, id: i + 10, name: `Report ${String(i).padStart(2, '0')}` }))), accountReports: [report] }, { facility: reportFacility });
-  const accountActions = { updateName: vi.fn(async () => report), create: vi.fn(), copy: vi.fn(), delete: vi.fn() };
+  const accountActions = { updateName: vi.fn(async () => report), create: vi.fn(), copy: vi.fn(), delete: vi.fn(),
+    updateSetup: vi.fn(async (guid: string, changes: AccountReportSetupChanges) => {
+      const latest = store.accountReports().find(item => item.guid === guid)!;
+      const key = accountReportAnalysisSetupKey(latest.reportType);
+      const updated = { ...latest, ...(changes.name !== undefined ? { name: changes.name } : {}),
+        ...(key && changes.analysis !== undefined ? { [key]: { ...latest[key], analysisItemId: changes.analysis?.analysisGuid } } : {}) };
+      store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [updated] }] }); return updated;
+    }) };
   const status = signal<'ready' | 'evaluating'>('ready');
   TestBed.configureTestingModule({ imports: [ReportsBrowserHost, AccountReportsModule, FacilityReportsModule], providers: [provideRouter([
     { path: 'v1/workspace/account/:accountGuid/reports', children: ACCOUNT_REPORT_ROUTES },
@@ -53,16 +63,18 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
   fixture.detectChanges();
 }
 describe('report inventory browser journeys and presentation', () => {
-  it('restores filters, page, detail override, scroll and focus after a facility drill-in and browser Back', async () => {
+  it.each(['account', 'facility'] as const)('restores filters, page, detail, scroll and focus after a %s report drill-in and delayed browser Back', async scope => {
     await page.viewport(1200, 900);
-    const view = setup(); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
-    view.dashboard().filtersForm.patchValue({ scope: 'facility', status: 'ready' }); await settle(view.fixture);
+    const view = setup();
+    if (scope === 'account') { const saved = view.store.snapshot()!; view.store.publish({ ...saved, accountReports: Array.from({ length: 30 }, (_, index) => ({ ...saved.accountReports[0], guid: `account-report-${index}`, name: `Account report ${String(index).padStart(2, '0')}` })) }); }
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    view.dashboard().filtersForm.patchValue({ scope, status: 'ready' }); await settle(view.fixture);
     view.dashboard().inventory.selectPage(1); await settle(view.fixture);
     const entry = view.dashboard().inventory.visibleTiles()[0];
     view.dashboard().inventory.setTileDetail({ guid: entry.guid, level: 'detailed' }); await settle(view.fixture);
     const target = view.root.querySelector<HTMLAnchorElement>('.portfolio-inventory .portfolio-tile__name')!;
     target.focus(); view.root.scrollTop = 160; const scroll = view.root.scrollTop;
-    target.click(); await settle(view.fixture); expect(view.router.url).toContain('/facility/facility-a/reports/workbench/');
+    target.click(); await settle(view.fixture); expect(view.router.url).toContain(scope === 'facility' ? '/facility/facility-a/reports/workbench/' : '/account/account-a/reports/workbench/');
     view.status.set('evaluating');
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
     expect(view.dashboard().filtersForm.controls.status.value).toBe('ready');
@@ -70,7 +82,7 @@ describe('report inventory browser journeys and presentation', () => {
     expect(view.dashboard().inventory.page()).toBe(1);
     expect(view.dashboard().browseReady()).toBe(false);
     view.status.set('ready'); await settle(view.fixture);
-    expect(view.dashboard().filtersForm.controls.scope.value).toBe('facility'); expect(view.dashboard().inventory.page()).toBe(1);
+    expect(view.dashboard().filtersForm.controls.scope.value).toBe(scope); expect(view.dashboard().inventory.page()).toBe(1);
     expect(view.dashboard().inventory.overrides()[entry.guid]).toBe('detailed');
     await vi.waitFor(() => {
       expect((document.activeElement as HTMLElement)?.dataset['browseId']).toBe(entry.guid);
@@ -78,18 +90,41 @@ describe('report inventory browser journeys and presentation', () => {
     });
     view.fixture.destroy();
   });
-  it('blocks dirty account-report changes across same-component links and browser history until discarded', async () => {
+  it('blocks invalid account-report changes across same-component links and browser history until discarded', async () => {
     const view = setup(1); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
-    const rename = view.root.querySelector<HTMLButtonElement>('header button')!; rename.click(); await settle(view.fixture);
-    await page.getByRole('textbox', { name: 'Report name', exact: true }).fill('Unsaved name'); await settle(view.fixture);
+    await page.getByRole('textbox', { name: /^Name/ }).fill(' '); await settle(view.fixture);
     expect(await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/missing/setup')).toBe(false);
     TestBed.inject(Location).back(); await settle(view.fixture); expect(view.router.url).toContain('/account-report/setup');
-    await page.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view.fixture);
+    await page.getByRole('button', { name: 'Discard changes', exact: true }).click(); await settle(view.fixture);
     expect(view.root.querySelector('[role="dialog"]')).not.toBeNull();
     await page.getByRole('button', { name: 'Discard edits', exact: true }).click(); await settle(view.fixture);
     await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
-    expect(view.accountActions.updateName).not.toHaveBeenCalled(); view.fixture.destroy();
+    expect(view.accountActions.updateSetup).not.toHaveBeenCalled(); view.fixture.destroy();
+  });
+  it('edits common setup, keeps account reports accessible for single facilities, and fits practical themed windows', async () => {
+    await page.viewport(1200, 900);
+    const view = setup(1), snapshot = accountReportSnapshot(true); view.store.publish(snapshot);
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
+    const choice = reportAnalysisToken({ scope: 'facility', facilityGuid: 'facility-a', analysisGuid: 'facility-analysis' });
+    expect(view.root.querySelector<HTMLSelectElement>('#account-report-analysis')!.value).toBe(choice);
+    await page.getByRole('textbox', { name: /^Name/ }).fill('A long account report name that remains readable in a narrow window');
+    await page.getByRole('link', { name: 'Continue', exact: true }).click(); await settle(view.fixture);
+    expect(view.accountActions.updateSetup).toHaveBeenCalledExactlyOnceWith('account-report', { name: 'A long account report name that remains readable in a narrow window' });
+    expect(view.root.textContent).toContain('Report content pending');
+    for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) {
+      view.root.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`;
+      await settle(view.fixture);
+      for (const width of [1024, 640, 390]) {
+        await page.viewport(width, 800); await settle(view.fixture);
+        expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      }
+    }
+    await page.getByRole('link', { name: 'Back', exact: true }).click(); await settle(view.fixture);
+    const name = view.root.querySelector<HTMLInputElement>('#account-report-name')!; name.focus(); await userEvent.keyboard('{Tab}');
+    expect(document.activeElement?.id).toBe('account-report-analysis');
+    view.fixture.destroy();
   });
   it('matches Analysis insets and action placement, with flush scope headers and responsive themed cards', async () => {
     await page.viewport(1200, 900);

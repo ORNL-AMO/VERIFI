@@ -12,9 +12,14 @@ import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { ReportsDashboardComponent } from './reports-dashboard/reports-dashboard.component';
 import { ReportLifecycleComponent } from './report-lifecycle/report-lifecycle.component';
+import { ReportWorkbenchHeaderComponent } from './report-workbench-header/report-workbench-header.component';
+import { AnalysisStageNavigationComponent } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';
+import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 
-@NgModule({ declarations: [ReportsDashboardComponent, ReportLifecycleComponent],
+@NgModule({ declarations: [ReportsDashboardComponent, ReportLifecycleComponent, ReportWorkbenchHeaderComponent],
   imports: [CommonModule, ReactiveFormsModule, RouterModule, IconComponent, WorkspaceSlideoutComponent, ConfirmationDialogComponent,
-    DataEmptyStateComponent, InventoryGridComponent, PageIdentityComponent, BrowsePositionDirective, BrowseHeaderDirective],
-  exports: [ReportsDashboardComponent, ReportLifecycleComponent] })
+    DataEmptyStateComponent, InventoryGridComponent, PageIdentityComponent, BrowsePositionDirective, BrowseHeaderDirective,
+    AnalysisStageNavigationComponent, DataWorkbenchResourceSwitcherComponent, DataWorkbenchFactsToggleComponent],
+  exports: [ReportsDashboardComponent, ReportLifecycleComponent, ReportWorkbenchHeaderComponent] })
 export class ReportsModule { }

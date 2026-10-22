@@ -583,7 +583,7 @@ describe('V1 Reports route entry and canonicalization', () => {
   }
   function routeStubs(routes: Route[]): Route[] {
     return routes.map(route => ({ ...route,
-      ...(route.component ? { component: ReportsRouteTestComponent, canDeactivate: [], canActivate: [] } : {}),
+      ...(route.component ? { component: ReportsRouteTestComponent, canDeactivate: [], canActivate: [], canActivateChild: [] } : {}),
       ...(route.children ? { children: routeStubs(route.children) } : {})
     }));
   }
@@ -614,7 +614,9 @@ describe('V1 Reports route entry and canonicalization', () => {
       ['/account/account-a/reports', '/account/account-a/reports/dashboard'],
       ['/account/account-a/reports/unknown', '/account/account-a/reports/dashboard'],
       ['/account/account-a/reports/workbench/report-a', '/account/account-a/reports/workbench/report-a/setup'],
-      ['/account/account-a/reports/workbench/report-a/report', '/account/account-a/reports/workbench/report-a/setup']
+      ['/account/account-a/reports/workbench/report-a/report', '/account/account-a/reports/workbench/report-a/report'],
+      ['/account/account-a/reports/workbench/report-a/data-checks', '/account/account-a/reports/workbench/report-a/data-checks'],
+      ['/account/account-a/reports/workbench/report-a/unknown', '/account/account-a/reports/workbench/report-a/setup']
     ]) {
       await harness.navigateByUrl(input, ReportsRouteTestComponent);
       expect(router.url).toBe(canonical);

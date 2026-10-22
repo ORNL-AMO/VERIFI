@@ -1,3 +1,5 @@
+import { accountReportAnalysisGuid } from '@data/account-workspace/account-report-setup.models';
+export { accountReportAnalysisGuid } from '@data/account-workspace/account-report-setup.models';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { ReportType } from '@data/models/constantsAndTypes';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
@@ -118,15 +120,6 @@ export function reportInventoryTile(entry: ReportInventoryEntry, navigation: Wor
     chip: entry.typeLabel,
     status: { label: entry.statusLabel, tone: entry.status === 'ready' ? 'success' : entry.status === 'error' ? 'danger' : entry.status === 'warning' ? 'warning' : 'neutral',
       icon: entry.status === 'ready' ? 'success' : entry.status === 'checking' ? 'loading' : 'info' }, reportSnapshot: entry.snapshot };
-}
-export function accountReportAnalysisGuid(report: IdbAccountReport): string | undefined {
-  switch (report.reportType) {
-    case 'betterPlants': return report.betterPlantsReportSetup?.analysisItemId;
-    case 'performance': return report.performanceReportSetup?.analysisItemId;
-    case 'analysis': return report.analysisReportSetup?.analysisItemId;
-    case 'accountSavings': return report.accountSavingsReportSetup?.analysisItemId;
-    default: return undefined;
-  }
 }
 function accountReportPeriod(report: IdbAccountReport): string {
   const year = (value: number) => Number.isFinite(value) ? String(value) : 'Not set';

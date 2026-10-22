@@ -183,6 +183,12 @@ describe('WorkspaceNavigationService', () => {
     expect(service.routeMotion()).toBe('none');
   });
 
+  it.each(['setup', 'data-checks', 'report'] as const)('parses and builds the account report %s stage', stage => {
+    const route = service.accountReportWorkbenchRoute('account-a', 'report-a', stage);
+    expect(route[route.length - 1]).toBe(stage);
+    expect(parseWorkspaceRoute(route.join('/')).reportStage).toBe(stage);
+  });
+
   it('lets report route guards finish edits before changing the selected facility', () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
     const confirmDiscard = vi.spyOn(TestBed.inject(UnsavedChangesService), 'confirmDiscard').mockReturnValue(false);

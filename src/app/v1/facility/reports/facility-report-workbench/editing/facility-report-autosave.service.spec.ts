@@ -169,6 +169,14 @@ describe('FacilityReportAutosaveService', () => {
     expect(editor.state()).toBe('idle');
   });
 
+  it('pauses pending autosave and blocks navigation while a discard confirmation is open', async () => {
+    editor.name.setValue('Unsaved'); editor.pauseAutosave();
+    await vi.advanceTimersByTimeAsync(REPORT_AUTOSAVE_DEBOUNCE_MS * 2);
+    expect(updateName).not.toHaveBeenCalled(); expect(await editor.flush()).toBe(false);
+    editor.resumeAutosave(); await vi.advanceTimersByTimeAsync(REPORT_AUTOSAVE_DEBOUNCE_MS);
+    expect(updateName).toHaveBeenCalledWith('facility-a', 'report-a', 'Unsaved');
+  });
+
   it('cancels a queued save and unregisters navigation protection on destruction', async () => {
     editor.name.setValue('Draft');
     const unsaved = TestBed.inject(UnsavedChangesService);

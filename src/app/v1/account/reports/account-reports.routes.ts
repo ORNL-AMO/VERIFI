@@ -1,18 +1,21 @@
-import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
-import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
-import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountReportsDashboardComponent } from './account-reports-dashboard/account-reports-dashboard.component';
-import { AccountReportsLandingComponent } from './account-reports-landing/account-reports-landing.component';
+import { AccountReportWorkbenchComponent, accountReportLeaveGuard } from './account-report-workbench/account-report-workbench.component';
+import { AccountReportSetupComponent } from './account-report-workbench/setup/account-report-setup.component';
+import { AccountReportDataChecksComponent } from './account-report-workbench/data-checks/account-report-data-checks.component';
+import { AccountReportPreviewComponent } from './account-report-workbench/preview/account-report-preview.component';
 
 export const ACCOUNT_REPORT_ROUTES: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: 'dashboard', component: AccountReportsDashboardComponent, canDeactivate: [unsavedChangesGuard] },
-  { path: 'workbench/:reportGuid', children: [
-    { path: '', pathMatch: 'full', redirectTo: 'setup' },
-    { path: 'setup', component: AccountReportsLandingComponent, canDeactivate: [unsavedChangesGuard],
-      runGuardsAndResolvers: 'always', canActivate: [() => inject(UnsavedChangesService).confirmDiscard()] },
-    { path: '**', redirectTo: 'setup' }
-  ] },
+  { path: 'workbench/:reportGuid', component: AccountReportWorkbenchComponent,
+    canActivate: [flushPendingChangesGuard], canActivateChild: [flushPendingChangesGuard], canDeactivate: [accountReportLeaveGuard], runGuardsAndResolvers: 'always', children: [
+      { path: '', pathMatch: 'full', redirectTo: 'setup' },
+      { path: 'setup', component: AccountReportSetupComponent },
+      { path: 'data-checks', component: AccountReportDataChecksComponent },
+      { path: 'report', component: AccountReportPreviewComponent },
+      { path: '**', redirectTo: 'setup' }
+    ] },
   { path: '**', redirectTo: 'dashboard' }
 ];
