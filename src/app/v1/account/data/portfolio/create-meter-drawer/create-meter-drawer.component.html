@@ -1,0 +1,22 @@
+<app-meter-draft-slideout
+  [groups]="groups()"
+  [saving]="saving()"
+  [canSubmit]="canCreate()"
+  [error]="error()"
+  (submitted)="createMeter($event)"
+  (cancelled)="closed.emit()">
+  <label meterContext class="v1-portfolio-meter-facility">
+    <span>Facility</span>
+    <select class="v1-select" [formControl]="facilityControl" required>
+      <option value="" disabled>Select a facility</option>
+      @for (facility of facilities(); track facility.guid) {
+        <option [value]="facility.guid">{{ facility.name }}</option>
+      }
+    </select>
+    @if (!facilities().length) {
+      <span class="v1-muted">Add a facility before adding a meter.</span>
+    } @else if (!selectedFacility() && facilityGuid()) {
+      <span role="alert">This facility is no longer available. Select another facility.</span>
+    }
+  </label>
+</app-meter-draft-slideout>

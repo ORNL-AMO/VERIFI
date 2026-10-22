@@ -1,139 +1,78 @@
 @let currentFacility = workspace.facility();
 @let currentAccount = workspace.account();
-@let accountMetersLink = accountMetersRoute();
-@let allMeterCards = meterCards();
-@let visibleMeterCards = filteredMeterCards();
-
+@let entries = filteredMeterCards();
 @if (!currentFacility) {
-  <article class="v1-empty-state" role="status">
-    <app-ui-icon name="accountIssue"></app-ui-icon>
-    <h1>No facility selected</h1>
-    <p>Select a facility before managing meters and meter data.</p>
-  </article>
+  <article class="v1-empty-state" role="status"><h1>No facility selected</h1><p>Select a facility before managing meters and meter data.</p></article>
 } @else {
-  <header class="v1-section-header v1-facility-meters__header">
-    <div>
-      <nav class="v1-data-context-breadcrumb v1-facility-meters__breadcrumb" aria-label="Meters context">
-        <ol>
-          @if (currentAccount && accountMetersLink) {
-            <li>
-              <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
-            </li>
-            <li aria-hidden="true">
-              <app-ui-icon name="chevronRight"></app-ui-icon>
-            </li>
-          }
-          <li>{{ currentFacility.name || 'Facility' }}</li>
-        </ol>
-      </nav>
-      <h1 id="v1-facility-meters-title" class="v1-facility-meters__title">
-        <app-ui-icon name="meter"></app-ui-icon>
-        <span>Meters</span>
-      </h1>
-    </div>
-    <div class="v1-facility-meters__header-actions" aria-label="Meter actions">
-      <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="{ facilityGuid: currentFacility.guid, returnUrl: '/v1/workspace/facility/' + currentFacility.guid + '/data/meters' }">
-        <app-ui-icon name="uploadData"></app-ui-icon>Upload data
-      </a>
-      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()">
-        <app-ui-icon name="add"></app-ui-icon>
-        Add meter
-      </button>
-    </div>
-  </header>
+  <section [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" browseOffsetProperty="--meter-sticky-height" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="browseIds()" class="facility-meters" [class.facility-meters--scrolled]="collapsed()" aria-labelledby="v1-facility-meters-title">
+    <span #scrollMarker class="facility-meters__marker" aria-hidden="true"></span>
+    <div #stickyHeader class="facility-meters__sticky">
+      <header class="v1-section-header v1-facility-meters__header v1-page-header">
+        <app-page-identity class="facility-meters__identity" [breadcrumbs]="breadcrumbs()" title="Meters" icon="meter" headingId="v1-facility-meters-title"/>
+        <div class="v1-facility-meters__header-actions" aria-label="Meter actions">
+          <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="{ facilityGuid: currentFacility.guid, returnUrl: '/v1/workspace/facility/' + currentFacility.guid + '/data/meters' }"><app-ui-icon name="uploadData"/>Upload data</a>
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()"><app-ui-icon name="add"/>Add meter</button>
+          <a class="v1-btn v1-facility-meters__validation" [routerLink]="['/v1/workspace/facility', currentFacility.guid, 'settings', 'data-validation']"><app-ui-icon name="settings"/>Data Validation</a>
 
-  @if (!workspace.canWrite()) {
-    <div class="v1-alert v1-alert--warning" role="status">
-      <app-ui-icon name="lock"></app-ui-icon>
-      <span>Meter actions are unavailable while the workspace is loading or switching.</span>
-    </div>
-  } @else if (workspace.hasPending()) {
-    <div class="v1-alert v1-alert--info" role="status">
-      <app-ui-icon name="loading" spin></app-ui-icon>
-      <span>Another workspace update is still finishing.</span>
-    </div>
-  }
-
-  <div class="v1-data-dashboard-workspace v1-meter-dashboard-workspace">
-    <div class="v1-data-browse v1-meters-browse" aria-label="Facility meters">
-      @if (actionError()) {
-        <div class="v1-alert v1-alert--danger" role="alert">
-          <app-ui-icon name="warning"></app-ui-icon>
-          <span>{{ actionError() }}</span>
         </div>
-      }
-
-      <form class="v1-data-browse-toolbar v1-meters-browse__toolbar" aria-label="Meter filters">
-        <div class="v1-data-browse-search v1-meters-browse__search">
-          <span class="input-group-text">
-            <app-ui-icon name="search"></app-ui-icon>
-          </span>
-          <input #meterSearch
-            id="v1-facility-meter-search"
-            type="search"
-            aria-label="Find meter, source, group, or status"
-            placeholder="Find meter, source, group, or status"
-            [value]="search()"
-            (input)="setSearch(meterSearch.value)">
-        </div>
-
-        <label>
-          <span>Status</span>
-          <select #statusSelect class="v1-select" [value]="statusFilter()" (change)="setStatusFilter(statusSelect.value)">
-            <option value="all">All</option>
-            <option value="attention">Needs attention</option>
-            <option value="noReadings">No readings</option>
-            <option value="missingGroup">Missing group</option>
-            <option value="valid">Valid</option>
-          </select>
-        </label>
-
-        <label>
-          <span>Sort</span>
-          <select #sortSelect class="v1-select" [value]="sortBy()" (change)="setSortBy(sortSelect.value)">
-            <option value="attention">Attention first</option>
-            <option value="meterName">Meter name</option>
-            <option value="latestReading">Latest reading</option>
-          </select>
-        </label>
-      </form>
-
-      @if (allMeterCards.length === 0) {
-        <app-data-empty-state
-          icon="meter"
-          context="facility"
-          title="No meters"
-          description="Add or upload a meter to get started.">
-          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()">
-            <app-ui-icon name="add"></app-ui-icon>
-            Add meter
-          </button>
-        </app-data-empty-state>
-      } @else if (visibleMeterCards.length === 0) {
-        <article class="v1-empty-state" role="status">
-          <app-ui-icon name="clearFilter"></app-ui-icon>
-          <h2>No meters match these filters</h2>
-          <p>Adjust the search or filter controls to return to the full meter list.</p>
-        </article>
-      } @else {
-        <div class="v1-data-browse-grid v1-meters-browse__grid" role="list" aria-label="Facility meters">
-          @for (item of visibleMeterCards; track item.card.meter.guid) {
-            <app-meter-browse-card
-              [card]="item.card"
-              [usageFactsLoading]="workspace.calendarizationState() === 'loading'">
-            </app-meter-browse-card>
-          }
-        </div>
-      }
-
-      @if (addMeterOpen()) {
-        <app-meter-draft-slideout
-          [groups]="workspace.meterGroups()"
-          [saving]="saving()"
-          (submitted)="saveMeterDraft($event)"
-          (cancelled)="closeAddMeter()">
-        </app-meter-draft-slideout>
-      }
+      </header>
     </div>
-  </div>
+    <form class="v1-data-browse-toolbar facility-meters__toolbar" aria-label="Meter filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
+      <label class="facility-meters__search"><span>Showing {{ entries.length }} of {{ meterCards().length }} meters</span>
+        <input type="search" class="v1-input" formControlName="search" aria-label="Find meter, source, group, or status" placeholder="Find meter, source, group, or status">
+      </label>
+      <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="missingGroup">Missing group</option><option value="valid">All data valid</option></select></label>
+      <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="meterName">Meter name</option><option value="latestReading">Latest reading</option></select></label>
+      <label><span>Detail level</span><select class="v1-select" [formControl]="detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
+      @if (!selecting() && meterCards().length) {
+        <button type="button" class="v1-btn v1-btn--quiet facility-meters__select" [disabled]="!canAct() || !entries.length" (click)="startSelection()">Select meters</button>
+      }
+    </form>
+    @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status">Meter actions are unavailable while the workspace is loading or switching.</div> }
+    @else if (workspace.hasPending()) { <div class="v1-alert v1-alert--info" role="status">Another workspace update is still finishing.</div> }
+    @if (actionError() && !confirmationKind() && !addMeterOpen()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
+    @if (!meterCards().length) {
+      <article class="v1-empty-state" role="status"><h2>No meters</h2><p>Add or upload a meter to get started.</p></article>
+    } @else {
+      <section class="facility-meters__inventory" aria-label="Meter inventory">
+        @if (selecting()) {
+          <div class="facility-meters__selection" role="group" aria-label="Meter selection">
+            <span aria-live="polite">{{ selected().length }} selected</span>
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct() || !entries.length" (click)="selectAll()">Select all matching</button>
+            <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct() || !selected().length" (click)="requestDeleteSelected()">Delete selected</button>
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelSelection()">Cancel selection</button>
+          </div>
+        }
+        @if (!entries.length) { <div class="facility-meters__empty" role="status"><h3>No meters match these filters</h3><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></div> }
+        @else {
+          <app-inventory-grid [tiles]="visibleTiles()" [printTiles]="tiles()" [detail]="detail()" [overrides]="overrides()" [actions]="tileActions()" [selecting]="selecting()" [selected]="selected()" [canSelect]="canAct()" [page]="currentPage() - 1" [pages]="pageCount()" [start]="pageStart()" [end]="pageEnd()" [total]="entries.length"
+            (pageSelected)="changePage($event + 1)" (detailChanged)="setTileDetail($event)" (actionRequested)="handleAction($event)" (selectionChanged)="changeSelection($event)" (navigationRequested)="navigateRoute($event)" (layoutReady)="layoutReady.set($event)"/>
+        }
+      </section>
+    }
+    <app-inventory-chart-dock [open]="chartsOpen()" [disabled]="saving() || !meterCards().length" (opened)="openCharts()"/>
+  </section>
 }
+<ng-template #addMeterPanel>
+  @if (addMeterOpen()) {
+    <app-meter-draft-slideout [groups]="workspace.meterGroups()" [saving]="saving()" [canSubmit]="canAct()" [error]="actionError() || ''" (submitted)="saveMeterDraft($event)" (cancelled)="closeAddMeter()"/>
+  }
+</ng-template>
+<ng-template #confirmation>
+  @if (confirmationKind()) {
+    <app-confirmation-dialog [title]="confirmationTitle()" titleId="facility-meter-confirmation" cancelAriaLabel="Cancel meter action"
+      [confirmLabel]="confirmationKind() === 'copy' ? 'Copy meter' : targets().length === 1 ? 'Delete meter' : 'Delete selected meters'" [confirmIcon]="confirmationKind() === 'copy' ? 'copy' : 'delete'"
+      [confirmClass]="confirmationKind() === 'copy' ? 'v1-btn--action' : 'v1-btn--danger'" [busy]="saving()" [disabled]="!canAct()" (confirmed)="confirmAction()" (cancelled)="closeConfirmation()">
+      @if (confirmationKind() === 'delete') { <p>{{ targets().length === 1 ? 'This meter and its' : 'These ' + targets().length + ' meters and their' }} {{ targetReadingCount() }} readings will be deleted.</p> }
+      @else { <p>A copy of this meter will be created. Its readings will not be copied.</p> }
+      <ul class="facility-meters__confirmation-list">@for (card of targets(); track card.meter.guid) { <li>{{ card.meter.name }}</li> }</ul>
+      @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
+
+<ng-template #chartSheet>
+  @if (chartsOpen()) {
+    <app-inventory-chart-sheet [charts]="chartViews()" [facilityName]="workspace.facility()?.name || 'Facility'" [state]="workspace.calendarizationState()" [view]="chartView()" (viewChanged)="chartView.set($event)" [zoomRange]="zoomRange()" (zoomChanged)="zoomRange.set($event)" (closed)="closeCharts()"/>
+  }
+</ng-template>

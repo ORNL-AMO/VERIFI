@@ -23,17 +23,20 @@ describe('facility analysis workbench models', () => {
 
   it('shows regression and results only when the group supports them', () => {
     expect(tabsForAnalysisGroup(regression).map(tab => tab.id)).toEqual([
-      'setup', 'regression', 'annual', 'monthly-table', 'monthly-chart'
+      'setup', 'visualization', 'regression', 'annual', 'monthly-table', 'monthly-chart'
     ]);
     const bankedRegression = { ...regression, applyBanking: true };
     expect(tabsForAnalysisGroup(bankedRegression, true, true).map(tab => tab.id)).toEqual([
-      'setup', 'banking', 'regression', 'annual', 'monthly-table', 'monthly-chart'
+      'setup', 'visualization', 'banking', 'regression', 'annual', 'monthly-table', 'monthly-chart'
     ]);
     expect(tabsForAnalysisGroup(bankedRegression, false, true).some(tab => tab.id === 'banking')).toBe(false);
     const unavailableBankingTab = tabsForAnalysisGroup(bankedRegression, true).find(tab => tab.id === 'banking');
     expect(unavailableBankingTab).toMatchObject({ label: 'Banked Savings', disabled: true });
     expect(tabsForAnalysisGroup(bankedRegression, true, true).find(tab => tab.id === 'banking')?.disabled).toBe(false);
-    expect(tabsForAnalysisGroup(skipped).map(tab => tab.id)).toEqual(['setup']);
+    expect(tabsForAnalysisGroup(skipped).map(tab => tab.id)).toEqual(['setup', 'visualization']);
+    for (const analysisType of ['absoluteEnergyConsumption', 'energyIntensity', 'modifiedEnergyIntensity', 'skipAnalysis'] as const) {
+      expect(tabsForAnalysisGroup({ ...regression, analysisType })[1]).toMatchObject({ id: 'visualization', icon: 'dataVisualization' });
+    }
     expect(ANALYSIS_FACILITY_TABS.map(tab => tab.id)).toEqual([
       'annual', 'monthly-table', 'monthly-chart', 'group-contributions'
     ]);

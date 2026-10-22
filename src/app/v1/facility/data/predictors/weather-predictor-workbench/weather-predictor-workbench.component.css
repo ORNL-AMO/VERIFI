@@ -2,13 +2,6 @@
   display: block;
 }
 
-.weather-workbench__header h1 {
-  display: flex;
-  gap: .55rem;
-  align-items: center;
-  max-width: 100%;
-  margin: 0;
-}
 
 .weather-workbench__predictors {
   display: grid;
@@ -75,3 +68,7 @@
 .weather-workbench__status-detail {
   color: var(--v1-muted);
 }
+
+:host { position: relative; min-width: 0; }
+.predictor-workbench__marker { position: absolute; top: 0; left: 0; width: 1px; height: 1px; pointer-events: none; }
+.v1-data-workbench-sticky { border-radius: var(--v1-radius) var(--v1-radius) 0 0; }

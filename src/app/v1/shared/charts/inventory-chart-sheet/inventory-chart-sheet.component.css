@@ -1,0 +1,23 @@
+:host { display: contents; }
+.inventory-chart-sheet__body p { margin: .3rem 0 0; color: var(--v1-muted); font-size: max(.875rem,13px); }
+.inventory-chart-sheet__actions,.inventory-chart-sheet__metrics { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.inventory-chart-sheet__body { --v1-metric-chart-height: clamp(16rem,49dvh,38rem); }
+.inventory-chart-sheet__controls { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.inventory-chart-sheet__metrics .active { color: var(--v1-inverse-text); background: var(--v1-primary-strong); border-color: var(--v1-primary-strong); }
+.inventory-chart-sheet__coverage { margin-bottom: .5rem !important; }
+.inventory-chart-sheet__legend { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: .75rem; }
+.inventory-chart-sheet__chip { display: inline-flex; align-items: center; gap: .45rem; max-width: 100%; min-height: 2.4rem; padding: .4rem .65rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); color: var(--v1-text); background: var(--v1-content-block); font: inherit; font-size: max(.9rem,14px); text-align: start; overflow-wrap: anywhere; }
+.inventory-chart-sheet__chip svg { flex: 0 0 22px; }
+.inventory-chart-sheet__chip[aria-pressed='false'] { background: var(--v1-surface); color: var(--v1-muted); text-decoration: line-through; }
+.inventory-chart-sheet__chip[aria-pressed='false'] svg { opacity: .35; }
+.inventory-chart-sheet__chip:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: 3px; }
+@media (pointer: coarse) { .inventory-chart-sheet__chip { min-height: 44px; } }
+
+
+
+.inventory-chart-sheet__legend-pages { display: inline-flex; align-items: center; gap: .35rem; margin-left: auto; }
+
+.inventory-chart-sheet__controls--tabbed { display: grid; grid-template-columns: minmax(0,1fr) auto; }
+.inventory-chart-sheet__metrics--scrollable { min-width: 0; overflow-x: auto; flex-wrap: nowrap; padding: .2rem .2rem .6rem; }
+.inventory-chart-sheet__metrics--scrollable button { flex: 0 0 auto; max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 40rem) { .inventory-chart-sheet__controls--tabbed { grid-template-columns: minmax(0,1fr); } .inventory-chart-sheet__controls--tabbed .inventory-chart-sheet__actions { justify-content: flex-end; } }

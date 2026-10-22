@@ -15,6 +15,24 @@ import { PredictorWorkbenchSettingsComponent } from './predictor-workbench-setti
 describe('PredictorWorkbenchSettingsComponent', () => {
   afterEach(() => vi.useRealTimers());
 
+  it.each([undefined, null, '', '  '])('edits a legacy predictor with no type (%s) and saves it explicitly as Standard', async type => {
+    const updatePredictor = vi.fn(async (value: any) => value);
+    const legacy = predictor({ predictorType: type });
+    const fixture = createFixture({ predictor: legacy, updatePredictor });
+    expect(fixture.componentInstance.supportedPredictor()).toBe(true);
+    expect(fixture.nativeElement.textContent).not.toContain('cannot be edited');
+    const form = fixture.componentInstance.form()!;
+    form.controls.name.setValue('Updated production'); form.markAsDirty();
+    await fixture.componentInstance.saveNow();
+    expect(updatePredictor).toHaveBeenCalledWith(expect.objectContaining({ guid: legacy.guid, name: 'Updated production', predictorType: 'Standard' }));
+    expect(legacy.predictorType).toBe(type);
+  });
+  it.each(['Conversion', 'Math', 'Weather', 'Unknown'])('keeps explicit %s predictors out of the standard editor', type => {
+    const fixture = createFixture({ predictor: predictor({ predictorType: type }) });
+    expect(fixture.componentInstance.form()).toBeUndefined();
+    expect(fixture.nativeElement.textContent).toContain(type + ' predictors are preserved');
+  });
+
   it('debounces text saves and clears dirty state after persistence', async () => {
     vi.useFakeTimers();
     const updatePredictor = vi.fn(async (value: any) => value);

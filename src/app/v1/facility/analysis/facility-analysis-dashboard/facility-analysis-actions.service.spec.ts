@@ -121,3 +121,57 @@ function analysis(overrides: Partial<IdbAnalysisItem> = {}): IdbAnalysisItem {
     ...overrides
   };
 }
+
+describe('facility analysis actions from an account inventory', () => {
+  function explicitSetup() {
+    const selected = signal({ guid: 'facility-a', accountId: 'account-a' });
+    const owner = { guid: 'facility-b', accountId: 'account-a', energyUnit: 'kWh', volumeLiquidUnit: 'm3', energyIsSource: false,
+      sustainabilityQuestions: { energyReductionBaselineYear: 2020, waterReductionBaselineYear: 2021 } };
+    const meterGroups = signal([
+      { guid: 'selected-energy', facilityId: 'facility-a', groupType: 'Energy', name: 'Selected energy' },
+      { guid: 'owner-water', facilityId: owner.guid, groupType: 'Water', name: 'Owner water' }
+    ]);
+    const source = analysis({ facilityId: owner.guid });
+    const handler = { ...pairHandler(12), deleteFacilityAnalysisAtomic: vi.fn(async () => undefined) };
+    const boundary = boundaryFake();
+    TestBed.configureTestingModule({ providers: [FacilityAnalysisActionsService,
+      { provide: AccountWorkspaceStore, useValue: { account: signal({ guid: 'account-a', sustainabilityQuestions: { energyReductionBaselineYear: 2020 } }), selectedFacility: selected, facilities: signal([selected(), owner]), facilityAnalyses: signal([source]), selectedFacilityAnalyses: signal([]), canWrite: signal(true), hasPending: signal(false), meterGroups,
+        predictors: signal([{ guid: 'selected-predictor', facilityId: 'facility-a', name: 'Selected' }, { guid: 'owner-predictor', facilityId: owner.guid, name: 'Owner production', unit: 'ton', production: true }]) } },
+      { provide: AnalysisCommandHandler, useValue: handler }, { provide: WorkspaceCommandBoundary, useValue: boundary }
+    ] });
+    return { service: TestBed.inject(FacilityAnalysisActionsService), selected, handler, source, boundary };
+  }
+  it('copies, activates and deletes an unselected facility analysis without selecting its owner', async () => {
+    const { service, selected, handler, source } = explicitSetup();
+    const copy = await service.copyAnalysis(source.guid, 'facility-b');
+    expect(copy.facilityId).toBe('facility-b'); expect(copy.guid).not.toBe(source.guid);
+    await service.setActiveAnalysis(source.guid, 'facility-b');
+    expect(handler.setActiveFacilityAnalysisAtomic).toHaveBeenCalledWith('account-a', 'facility-b', source.guid);
+    await service.deleteAnalysis(source.guid, 'facility-b');
+    expect(handler.deleteFacilityAnalysisAtomic).toHaveBeenCalledWith({ accountGuid: 'account-a', facilityGuid: 'facility-b', analysisGuid: source.guid });
+    expect(selected().guid).toBe('facility-a');
+  });
+  it('rejects mismatched ownership before any persistence command', async () => {
+    const { service, source, boundary } = explicitSetup();
+    await expect(service.copyAnalysis(source.guid, 'facility-a')).rejects.toThrow('selected facility');
+    await expect(service.deleteAnalysis(source.guid, 'outside-account')).rejects.toThrow('facility');
+    expect(boundary.execute).not.toHaveBeenCalled();
+  });
+  it('creates for an unselected facility using only its groups, predictors, baseline and units', async () => {
+    const { service, selected, handler } = explicitSetup();
+    expect(service.categoryAvailable('energy', 'facility-b')).toBe(false);
+    expect(service.categoryAvailable('water', 'facility-b')).toBe(true);
+    const created = await service.createAnalysis('water', 'facility-b');
+    expect(created).toMatchObject({ accountId: 'account-a', facilityId: 'facility-b', analysisCategory: 'water', baselineYear: 2021, waterUnit: 'm3', energyUnit: 'kWh', energyIsSource: false });
+    expect(created.groups.map(group => group.idbGroupId)).toEqual(['owner-water']);
+    expect(created.groups[0].predictorVariables.map(predictor => predictor.id)).toEqual(['owner-predictor']);
+    expect(handler.addFacilityAnalysisWithSingleSitePair).toHaveBeenCalledWith(expect.objectContaining({ guid: created.guid, facilityId: 'facility-b' }), 'account-a');
+    expect(selected().guid).toBe('facility-a');
+  });
+  it('rejects creation for missing owners and categories absent from the owning facility', async () => {
+    const { service, boundary } = explicitSetup();
+    await expect(service.createAnalysis('energy', 'facility-b')).rejects.toThrow('meter group');
+    await expect(service.createAnalysis('water', 'outside-account')).rejects.toThrow('facility');
+    expect(boundary.execute).not.toHaveBeenCalled();
+  });
+});

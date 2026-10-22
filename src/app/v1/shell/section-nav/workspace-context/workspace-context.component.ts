@@ -8,7 +8,6 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 })
 export class WorkspaceContextComponent {
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly isSingleSiteWorkspace = this.navigation.isSingleSiteWorkspace;
   readonly hasSingleSiteRecovery = this.navigation.hasSingleSiteRecovery;
   readonly recoveryTitle = computed(() =>
     this.navigation.singleSiteWorkspaceState() === 'missing-facility'

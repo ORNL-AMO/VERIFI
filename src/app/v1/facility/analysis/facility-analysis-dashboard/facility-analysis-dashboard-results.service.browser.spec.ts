@@ -125,6 +125,37 @@ describe('FacilityAnalysisDashboardResultsService browser Worker lifecycle', () 
     });
   });
 
+  it('runs only demanded analyses, retains card jobs as comparison opens/closes, and reuses cached outcomes', async () => {
+    const analyses = signal(['analysis-a', 'analysis-b', 'analysis-c', 'off-page'].map(guid => analysisFixture(guid)));
+    configure(analyses, signal([]));
+    const service = TestBed.inject(FacilityAnalysisDashboardResultsService);
+    service.setDemand([]); await settleSignals(); expect(FakeWorker.instances).toHaveLength(0);
+    service.setDemand(['analysis-a', 'analysis-b']); await settleSignals();
+    const workers = [...FakeWorker.instances]; expect(workers).toHaveLength(2);
+    service.setDemand(['analysis-a', 'analysis-b', 'analysis-c']); await settleSignals();
+    service.setDemand(['analysis-a', 'analysis-b']); await settleSignals();
+    expect(FakeWorker.instances).toEqual(workers); expect(workers.every(worker => !worker.terminate.mock.calls.length)).toBe(true);
+    workers[0].emitMessage(completeResponse('analysis-a', 2025, 6.25)); await settleSignals();
+    service.setDemand(['analysis-b']); await settleSignals();
+    service.setDemand(['analysis-a', 'analysis-b']); await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(2);
+    expect(service.states()['analysis-a']).toMatchObject({ state: 'ready', summary: { annual: { value: 6.25 } } });
+    expect(service.states()['off-page']).toBeUndefined();
+  });
+
+  it('terminates only obsolete demand and tears down all remaining Workers on destruction', async () => {
+    configure(signal(['analysis-a', 'analysis-b', 'analysis-c'].map(guid => analysisFixture(guid))), signal([]));
+    const service = TestBed.inject(FacilityAnalysisDashboardResultsService); await settleSignals();
+    const [first, second] = FakeWorker.instances;
+    service.setDemand(['analysis-b', 'analysis-c']); await settleSignals();
+    expect(first.terminate).toHaveBeenCalledOnce(); expect(second.terminate).not.toHaveBeenCalled();
+    expect(FakeWorker.instances).toHaveLength(3);
+    first.emitMessage(completeResponse('analysis-a', 2025, 3));
+    expect(service.states()['analysis-a']).toBeUndefined();
+    TestBed.resetTestingModule();
+    expect(FakeWorker.instances.every(worker => worker.terminate.mock.calls.length === 1)).toBe(true);
+  });
+
   it('times out stalled workers and continues the queued dashboard calculations', async () => {
     vi.useFakeTimers();
     try {
@@ -156,7 +187,7 @@ describe('FacilityAnalysisDashboardResultsService browser Worker lifecycle', () 
 function configure(analyses: ReturnType<typeof signal<IdbAnalysisItem[]>>, items: ReturnType<typeof signal<any[]>>): void {
   const empty = signal<any[]>([]);
   const facility = signal({
-    guid: 'facility-a', fiscalYear: 'calendarYear', fiscalYearMonth: 0,
+    guid: 'facility-a', accountId: 'account-a', fiscalYear: 'calendarYear', fiscalYearMonth: 0,
     fiscalYearCalendarEnd: true
   });
   const base = { state: 'ready' as const, accountGuid: 'account-a', inputFingerprint: 'base-a', meters: [] };
@@ -165,7 +196,7 @@ function configure(analyses: ReturnType<typeof signal<IdbAnalysisItem[]>>, items
     {
       provide: AccountWorkspaceStore,
       useValue: {
-        selectedFacilityAnalyses: analyses, selectedFacility: facility, isReady: signal(true), status: signal('ready'),
+        account: signal({ guid: 'account-a' }), selectedFacilityAnalyses: analyses, selectedFacility: facility, isReady: signal(true), status: signal('ready'),
         facilityAnalyses: analyses, facilityMeters: empty, predictorData: empty, predictors: empty
       }
     },
@@ -178,6 +209,7 @@ function configure(analyses: ReturnType<typeof signal<IdbAnalysisItem[]>>, items
       }
     }
   ] });
+  TestBed.inject(FacilityAnalysisDashboardResultsService).setDemand(analyses().map(analysis => analysis.guid));
 }
 
 function analysisFixture(guid: string, bankedAnalysisItemId?: string): IdbAnalysisItem {

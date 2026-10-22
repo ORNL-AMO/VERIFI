@@ -12,6 +12,12 @@ import { group, meter, reading } from './facility-meters.testing';
 import { FacilityMetersWorkspaceService } from './facility-meters-workspace.service';
 
 describe('FacilityMetersWorkspaceService', () => {
+  it('builds the meter inventory without calculating the retired per-card usage facts', () => {
+    const { service, project } = setupService(new Subject<unknown>());
+    project.mockClear();
+    expect(service.meterCards()).toHaveLength(2);
+    expect(project).not.toHaveBeenCalled();
+  });
   it('exposes selected meter context from the current meter route', () => {
     const events = new Subject<unknown>();
     const { service } = setupService(events);

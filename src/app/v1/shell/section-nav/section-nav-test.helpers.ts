@@ -25,6 +25,7 @@ export function setupSectionNavTest() {
   let isSingleSiteWorkspace: ReturnType<typeof signal<boolean>>;
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
+  const activePortfolioTab = signal('facilities');
   let activeDetail: ReturnType<typeof signal<string>>;
   let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
   let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;
@@ -95,6 +96,8 @@ export function setupSectionNavTest() {
             singleSiteWorkspaceState,
             activeSection,
             activeDetail,
+            activePortfolioTab,
+            accountPortfolioRoute: (guid: string, tab: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', tab],
             activeMeterGuid,
             activeMeterGroupGuid,
             activePredictorGuid,
@@ -123,13 +126,14 @@ export function setupSectionNavTest() {
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
-            setContext: () => undefined,
+            setContext: () => undefined, accountReturn: signal(undefined), contextNavigationError: signal(''),
             setFacility
           }
         },
         {
           provide: AccountWorkspaceStore,
           useValue: {
+            meters: facilityMeters,
             facilityMeters,
             facilityMeterGroups,
             facilityPredictors,
@@ -152,7 +156,7 @@ export function setupSectionNavTest() {
       ]
     });
 
-  return { activeSection, contextMode, facilities, selectedFacility, account, isSingleSiteWorkspace, hasSingleSiteRecovery, singleSiteWorkspaceState, activeDetail, activeMeterGuid, activeMeterGroupGuid, activePredictorGuid, activeWeatherPredictorGroupKey, activeImportFileId, activeImportStep, activeAnalysisGuid, activeAnalysisGroupGuid, activeAnalysisStageScope, activeAccountAnalysisStageScope, facilityMeters, facilityMeterGroups, facilityPredictors, facilityPredictorData, selectedFacilityAnalyses, accountAnalyses, setFacility, statusState, statusItems };
+  return { activePortfolioTab, activeSection, contextMode, facilities, selectedFacility, account, isSingleSiteWorkspace, hasSingleSiteRecovery, singleSiteWorkspaceState, activeDetail, activeMeterGuid, activeMeterGroupGuid, activePredictorGuid, activeWeatherPredictorGroupKey, activeImportFileId, activeImportStep, activeAnalysisGuid, activeAnalysisGroupGuid, activeAnalysisStageScope, activeAccountAnalysisStageScope, facilityMeters, facilityMeterGroups, facilityPredictors, facilityPredictorData, selectedFacilityAnalyses, accountAnalyses, setFacility, statusState, statusItems };
 }
 
 export function activeLinks(element: HTMLElement): HTMLAnchorElement[] {

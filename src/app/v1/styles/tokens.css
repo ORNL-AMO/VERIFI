@@ -21,6 +21,8 @@
   --v1-success: #20734a;
   --v1-warning: #9a6212;
   --v1-danger: #a53f36;
+  --v1-error-row-tint: 14%;
+  --v1-warning-row-tint: 20%;
   --v1-info: #2c386b;
   --v1-content-control: var(--v1-primary);
   --v1-action: var(--v1-facility);
@@ -61,4 +63,12 @@
   --v1-chart-series-2: #1d8f5c;
   --v1-chart-series-3: #4156a6;
   --v1-chart-series-4: #b87816;
+  --v1-chart-series-5: #7653ac;
+  --v1-chart-series-6: #087f8c;
+  --v1-chart-series-7: #a14c7a;
+  --v1-chart-series-8: #617832;
+  --v1-chart-series-9: #b24d36;
+  --v1-chart-series-10: #356e9e;
+  --v1-chart-series-11: #826325;
+  --v1-chart-series-12: #756780;
 }

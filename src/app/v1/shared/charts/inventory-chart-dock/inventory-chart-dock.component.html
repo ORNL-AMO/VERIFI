@@ -1,0 +1,5 @@
+<div class="inventory-chart-dock">
+  <button type="button" class="inventory-chart-dock__handle" aria-haspopup="dialog" [attr.aria-expanded]="open()" [attr.aria-controls]="panelId()" [disabled]="disabled()" (click)="opened.emit()" (pointerdown)="startPull($event)" (pointerup)="finishPull($event)" (pointercancel)="cancelPull()">
+    <span class="inventory-chart-dock__grip" aria-hidden="true"></span><app-ui-icon name="chevronUp"/><span>{{ label() }}</span>
+  </button>
+</div>

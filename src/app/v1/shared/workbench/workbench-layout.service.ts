@@ -5,13 +5,13 @@ const FACTS_EXPANDED_STORAGE_KEY = 'v1WorkbenchFactsExpanded';
 
 @Injectable({ providedIn: 'root' })
 export class WorkbenchLayoutService {
-  private readonly factsExpandedState = signal(true);
+  private readonly factsExpandedState = signal(false);
 
   readonly factsExpanded = this.factsExpandedState.asReadonly();
 
   constructor(private sessionStorage: SessionStorageService) {
     const storedFactsExpanded = this.sessionStorage.retrieve(FACTS_EXPANDED_STORAGE_KEY);
-    this.factsExpandedState.set(typeof storedFactsExpanded === 'boolean' ? storedFactsExpanded : true);
+    this.factsExpandedState.set(typeof storedFactsExpanded === 'boolean' ? storedFactsExpanded : false);
   }
 
   toggleFacts(): void {

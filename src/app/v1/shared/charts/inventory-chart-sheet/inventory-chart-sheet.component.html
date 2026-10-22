@@ -1,0 +1,35 @@
+<app-workspace-bottom-sheet panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
+    <div class="inventory-chart-sheet__body">
+      <div class="inventory-chart-sheet__controls" [class.inventory-chart-sheet__controls--tabbed]="scrollableTabs()">
+        <div class="inventory-chart-sheet__metrics" [class.inventory-chart-sheet__metrics--scrollable]="scrollableTabs()" [attr.role]="scrollableTabs() ? 'tablist' : 'group'" [attr.aria-label]="scrollableTabs() ? 'Predictor charts' : 'Chart metric'">@for (chart of charts(); track chart.id) {
+          <button type="button" class="v1-btn v1-btn--quiet" [id]="'inventory-chart-tab-' + chart.id" [title]="chart.title" [attr.role]="scrollableTabs() ? 'tab' : null" [attr.aria-controls]="scrollableTabs() ? 'inventory-chart-panel' : null" [attr.aria-selected]="scrollableTabs() ? activeChart()?.id === chart.id : null" [attr.tabindex]="scrollableTabs() && activeChart()?.id !== chart.id ? -1 : 0" (keydown)="tabKey($event, chart.id)" [class.active]="activeChart()?.id === chart.id" [attr.aria-pressed]="activeChart()?.id === chart.id" (click)="chooseMetric(chart.id)">{{ chart.title }}</button>
+        }</div>
+        <div class="inventory-chart-sheet__actions" role="group" aria-label="Chart actions">
+          <button type="button" class="v1-icon-btn" aria-label="Download chart" title="Download chart" [disabled]="!visibleMetrics().length || state() !== 'ready'" (click)="download()"><app-ui-icon name="download"/></button>
+          <button type="button" class="v1-icon-btn" aria-label="Zoom in" (click)="zoom(.6)"><app-ui-icon name="zoomIn"/></button>
+          <button type="button" class="v1-icon-btn" aria-label="Zoom out" (click)="zoom(1.6)"><app-ui-icon name="zoomOut"/></button>
+          <button type="button" class="v1-icon-btn" aria-label="Reset zoom" (click)="zoomChanged.emit({ start: 0, end: 100 })"><app-ui-icon name="refresh"/></button>
+        </div>
+      </div>
+      @if (activeChart(); as chart) {
+        <div id="inventory-chart-panel" [attr.role]="scrollableTabs() ? 'tabpanel' : null" [attr.aria-labelledby]="scrollableTabs() ? 'inventory-chart-tab-' + chart.id : null">
+        <p class="inventory-chart-sheet__coverage">{{ chart.title }} {{ chart.unit }} · {{ state() === 'loading' || state() === 'idle' ? 'Preparing data' : state() === 'error' ? 'Unavailable' : chart.coverage }}</p>
+        <app-meter-results-chart [noVisibleSeriesTitle]="'No ' + resource() + ' selected'" [noVisibleSeriesDescription]="'Select a ' + singular() + ' in the legend to show its data.'" [chartRows]="chart.rows" [metrics]="visibleMetrics()" [state]="state() === 'idle' ? 'loading' : state()" [showAllMetrics]="true" [showLegend]="false" [showSeriesControls]="false" [showChartActions]="false" [showPointSymbols]="showPointSymbols()" [smoothLines]="smoothLines()" [tooltipMaxRows]="8" [tooltipOverflowHint]="'Use the legend to show fewer ' + resource() + '.'" [allowNegativeValues]="true" [compactAxes]="true" [yAxisTitle]="''" [embedded]="true" [compact]="true" [zoomRange]="zoomRange()" (zoomRangeChanged)="zoomChanged.emit($event)" [ariaLabel]="chart.title + ' monthly data by ' + singular()" [emptyTitle]="chart.metrics.length ? 'No ' + resource() + ' selected' : 'No monthly ' + chart.title.toLowerCase() + ' data'" [emptyDescription]="chart.metrics.length ? 'Select a ' + singular() + ' in the legend to show its data.' : 'No facility ' + resource() + ' have monthly data for this chart.'"/>
+        @if (showTraceControls()) {
+        <div class="inventory-chart-sheet__legend" role="group" [attr.aria-label]="'Toggle ' + singular() + ' traces'">
+          @for (metric of legendEntries(); track metric.id) {
+            <button type="button" class="inventory-chart-sheet__chip" [attr.aria-pressed]="metric.visible" [title]="metric.label" (click)="toggleTrace(metric.id)"><svg width="22" height="14" aria-hidden="true"><line x1="1" x2="21" y1="7" y2="7" [attr.stroke]="metric.color" stroke-width="3" [attr.stroke-dasharray]="metric.dash"/></svg><span>{{ metric.label }}</span></button>
+          }
+          @if (legendPages() > 1) {
+            <div class="inventory-chart-sheet__legend-pages" role="group" aria-label="Legend pages">
+              <button type="button" class="v1-icon-btn" aria-label="Previous legend page" [disabled]="legendPage() === 0" (click)="updateView({ legendPage: legendPage() - 1 })"><app-ui-icon name="chevronLeft"/></button>
+              <span class="visually-hidden" aria-live="polite">Legend page {{ legendPage() + 1 }} of {{ legendPages() }}</span>
+              <button type="button" class="v1-icon-btn" aria-label="Next legend page" [disabled]="legendPage() + 1 === legendPages()" (click)="updateView({ legendPage: legendPage() + 1 })"><app-ui-icon name="chevronRight"/></button>
+            </div>
+          }
+        </div>
+        }
+        </div>
+      }
+    </div>
+</app-workspace-bottom-sheet>

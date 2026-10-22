@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { AnalysisCategory } from '@data/models/analysis';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
@@ -11,7 +11,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
   templateUrl: './analysis-draft-slideout.component.html',
   styleUrls: ['./analysis-draft-slideout.component.css']
 })
-export class AnalysisDraftSlideoutComponent {
+export class AnalysisDraftSlideoutComponent implements OnChanges {
+  @Input() showCategory = true;
   @Input() energyAvailable = false;
   @Input() waterAvailable = false;
   @Input() saving = false;
@@ -20,7 +21,10 @@ export class AnalysisDraftSlideoutComponent {
   @Output() cancelled = new EventEmitter<void>();
   readonly category = new FormControl<AnalysisCategory>('energy', { nonNullable: true });
 
-  setCategory(category: AnalysisCategory): void { this.category.setValue(category); }
+  ngOnChanges(): void {
+    if (!this.energyAvailable && this.waterAvailable) this.category.setValue('water', { emitEvent: false });
+    else if (!this.waterAvailable && this.energyAvailable) this.category.setValue('energy', { emitEvent: false });
+  }
 
   submit(): void {
     const available = this.category.value === 'energy' ? this.energyAvailable : this.waterAvailable;

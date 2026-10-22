@@ -1,0 +1,4 @@
+:host { display: contents; }
+.predictor-facility { display: grid; gap: .35rem; margin-bottom: 1rem; }
+.predictor-facility > span { font-weight: 800; font-size: .85rem; }
+select { width: 100%; }

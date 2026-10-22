@@ -1,0 +1,5 @@
+:host { display: flex; align-items: center; align-self: stretch; margin: -1rem -1rem 0; padding: .65rem 3rem .65rem 1rem; border-bottom: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm) var(--v1-radius-sm) 0 0; color: var(--v1-text); background: color-mix(in srgb,var(--v1-account) 10%,var(--v1-surface)); font-size: var(--analysis-card-text-size,max(.875rem,14px)); font-weight: 600; line-height: 1.5; text-align: start; }
+:host([data-scope='facility']) { background: color-mix(in srgb,var(--v1-facility) 10%,var(--v1-surface)); }
+:host { min-height: calc(var(--analysis-menu-size,1.75rem) + .8rem); }
+header { display: flex; align-items: baseline; gap: .4rem; min-width: 0; width: 100%; }
+.analysis-card-header__scope { display: inline-flex; align-items: center; gap: .4rem; flex-shrink: 0; }

@@ -206,6 +206,7 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
       color: optionRecord['color'] ?? theme.series,
       textStyle: mergePlain({ color: theme.text, fontFamily: 'Arial, Helvetica, sans-serif' }, optionRecord['textStyle']),
       tooltip: mergePlain({
+        className: 'v1-chart-tooltip',
         backgroundColor: theme.surface,
         borderColor: theme.border,
         textStyle: { color: theme.text },

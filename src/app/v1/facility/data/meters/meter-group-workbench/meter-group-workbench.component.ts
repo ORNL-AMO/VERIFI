@@ -7,6 +7,7 @@ import { FacilityCommandHandler } from '@data/account-workspace/handlers/facilit
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { DataWorkbenchResource } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
+import { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import {
   METER_GROUP_WORKBENCH_TABS,
   MeterGroupWorkbenchTab,
@@ -51,9 +52,10 @@ export class MeterGroupWorkbenchComponent {
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite());
   readonly showWorkspacePending = computed(() => this.workspace.hasPending());
   readonly hasNoGroupData = computed(() => !this.isLoading() && !this.hasError() && this.results().monthlyRows.length === 0);
-  readonly accountMetersRoute = computed(() => {
-    const account = this.workspace.account();
-    return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
+    const account = this.workspace.account(), facility = this.workspace.facility();
+    return account && facility ? [{ label: account.name || 'Account', route: this.navigation.accountDataReturnRoute(account.guid) },
+      { label: facility.name || 'Facility', route: this.navigation.facilityDataRoute(facility.guid, 'meter-grouping') }] : [];
   });
 
   constructor() {

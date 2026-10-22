@@ -2,10 +2,10 @@ import { vi } from 'vitest';
 import { WorkbenchLayoutService } from './workbench-layout.service';
 
 describe('WorkbenchLayoutService', () => {
-  it('defaults workbench facts to expanded when no session setting exists', () => {
+  it('defaults workbench facts to collapsed when no session setting exists', () => {
     const service = new WorkbenchLayoutService(createStorage().storage as any);
 
-    expect(service.factsExpanded()).toBe(true);
+    expect(service.factsExpanded()).toBe(false);
   });
 
   it('restores and updates the workbench facts preference for the current session', () => {
@@ -25,7 +25,7 @@ describe('WorkbenchLayoutService', () => {
   it('ignores invalid stored values', () => {
     const service = new WorkbenchLayoutService(createStorage('collapsed').storage as any);
 
-    expect(service.factsExpanded()).toBe(true);
+    expect(service.factsExpanded()).toBe(false);
   });
 });
 

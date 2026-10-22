@@ -2,6 +2,29 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { FacilityAnalysisResultsWorkerRequest } from '@platform/web-workers/facility-analysis-results-worker.contract';
+import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { WorkspaceCalendarizationProjectionRequest, WorkspaceCalendarizationProjectionResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
+
+/** Explicit ownership allows account inventories to calculate without selecting a facility. */
+export function buildFacilityDashboardResultsRequest(analysis: IdbAnalysisItem, facility: IdbFacility,
+  snapshot: AccountWorkspaceSnapshot,
+  project: (request: WorkspaceCalendarizationProjectionRequest) => WorkspaceCalendarizationProjectionResult
+): FacilityAnalysisResultsWorkerRequest | undefined {
+  if (analysis.accountId !== snapshot.account.guid || facility.accountId !== snapshot.account.guid || analysis.facilityId !== facility.guid) return undefined;
+  const dependencies = analysisDependencyClosure(analysis, snapshot.facilityAnalyses.filter(item => item.facilityId === facility.guid));
+  const groupIds = new Set(dependencies.flatMap(item => item.groups.map(group => group.idbGroupId)));
+  const projection = project({
+    context: { kind: 'facility', guid: facility.guid },
+    meterGuids: snapshot.meters.filter(meter => meter.facilityId === facility.guid && groupIds.has(meter.groupId)).map(meter => meter.guid),
+    energyUnit: analysis.energyUnit, waterUnit: analysis.waterUnit, energyIsSource: analysis.energyIsSource, includeEmissions: false
+  });
+  if (projection.state !== 'ready') return undefined;
+  const predictors = projectFacilityPredictorInputs(facility.guid, snapshot.predictorData, snapshot.predictors);
+  return { analysisItem: structuredClone(analysis), facility: structuredClone(facility), calanderizedMeters: projection.meters,
+    accountPredictorEntries: predictors.entries, accountPredictors: predictors.predictors, accountAnalysisItems: dependencies,
+    calculateAllMonthlyData: true, includeGroupSummaries: false };
+}
 
 export function analysisDependencyClosure(
   analysis: IdbAnalysisItem,

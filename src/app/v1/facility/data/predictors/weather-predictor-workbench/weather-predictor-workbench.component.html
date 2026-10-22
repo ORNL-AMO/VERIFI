@@ -1,8 +1,6 @@
 @let facility = workspace.facility();
-@let account = workspace.account();
 @let group = context.group();
 @let creating = context.creating();
-@let accountLink = accountPredictorsRoute();
 @let checks = statusChecks();
 
 @if (!facility) {
@@ -21,23 +19,13 @@
     </button>
   </article>
 } @else if (creating || group) {
-  <div class="v1-data-workbench-sticky weather-workbench__sticky">
-    <header class="v1-data-workbench-header weather-workbench__header">
-      <nav class="v1-data-workbench-breadcrumb" aria-label="Weather predictor breadcrumb">
-        <ol>
-          @if (account && accountLink) {
-            <li><a [routerLink]="accountLink">{{ account.name || 'Account' }}</a></li>
-            <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          }
-          <li>{{ facility.name || 'Facility' }}</li>
-          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><button type="button" (click)="openPredictors()">Predictors</button></li>
-        </ol>
-      </nav>
+  <span #scrollMarker class="predictor-workbench__marker" aria-hidden="true"></span>
+  <div #stickyHeader [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" class="v1-data-workbench-sticky weather-workbench__sticky">
+    <header class="v1-data-workbench-header v1-page-header weather-workbench__header">
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title">
-          <h1 id="v1-weather-workbench-title">
-            <app-ui-icon name="cloudRain"></app-ui-icon>
+          <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="group?.stationName || 'New weather predictors'" [icon]="'cloudRain'" headingId="weather-predictor-workbench-title" [customTitle]="true">
+
             @if (group) {
               <app-data-workbench-resource-switcher
                 [resources]="resources()"
@@ -49,11 +37,11 @@
             } @else {
               <span>New weather predictors</span>
             }
-          </h1>
+          </app-page-identity>
         </div>
         @if (group) {
           <div class="v1-data-workbench-actions">
-            <span class="v1-chip v1-chip--{{ group.statusTone }}">{{ group.statusLabel }}</span>
+            <span class="v1-chip v1-chip--{{ headerStatus().tone === 'neutral' ? 'info' : headerStatus().tone }}"><app-ui-icon [name]="headerStatus().icon"/>{{ headerStatus().label }}</span>
             <app-data-workbench-facts-toggle
               #factsToggle
               controls="v1-weather-workbench-facts">

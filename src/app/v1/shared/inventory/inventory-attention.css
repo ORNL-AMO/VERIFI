@@ -1,0 +1,11 @@
+.inventory-attention { border-top: 1px solid var(--portfolio-tile-divider,var(--v1-border)); padding-top: .8rem; }
+.inventory-attention h2 { margin: 0 0 .4rem; font-size: max(.8rem,13px); font-weight: 700; letter-spacing: .035em; text-transform: uppercase; color: var(--snapshot-muted); }
+.inventory-attention ul { list-style: none; margin: 0; padding: 0; }
+.inventory-attention li { display: flex; align-items: flex-start; gap: .55rem; padding: .6rem 0; }
+.inventory-attention li > app-ui-icon { flex: 0 0 18px; margin-top: .1rem; color: color-mix(in srgb,var(--v1-warning) 80%,var(--v1-text)); }
+.inventory-attention li[data-severity='error'] > app-ui-icon { color: color-mix(in srgb,var(--v1-danger) 80%,var(--v1-text)); }
+.inventory-attention p { margin: 0; font-size: max(.9rem,14px); }
+.inventory-attention a { display: inline-block; color: color-mix(in srgb,var(--v1-link) 80%,var(--v1-text)); font-size: max(.875rem,14px); text-underline-offset: .2em; margin-top: .2rem; }
+
+.inventory-attention .inventory-attention__description,.inventory-attention__remaining { margin: .35rem 0 0; color: var(--snapshot-muted); font-size: max(.85rem,13px); }
+@media (pointer: coarse) { .inventory-attention a { min-height: 44px; display: inline-flex; align-items: center; } }

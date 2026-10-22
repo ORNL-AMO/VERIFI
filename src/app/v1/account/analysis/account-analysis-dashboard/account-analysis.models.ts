@@ -5,6 +5,7 @@ import { accountReportReferencesAnalysis, IdbAccountReport } from '@data/models/
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
+import { buildFacilitySelectionItems } from '../account-analysis-workbench/select-facility-items/account-analysis-facility-selection.models';
 import {
   FacilityAnalysisOutcomeDisplay,
   FacilityAnalysisOutcomeState,
@@ -42,6 +43,7 @@ export interface AccountAnalysisCard {
   readonly linkedReports: readonly IdbAccountReport[];
   readonly facilitySelections: readonly AccountAnalysisFacilitySelectionView[];
   readonly selectionCounts: AccountAnalysisSelectionCounts;
+  readonly selectionProgress: { readonly valid: number; readonly total: number };
   readonly basisLabel: string;
   readonly unitLabel: string;
   readonly modifiedDateLabel: string;
@@ -90,6 +92,8 @@ export function buildAccountAnalysisCards(input: BuildAccountAnalysisCardsInput)
       analysis, input.facilities, input.facilityAnalyses
     );
     const selectionCounts = countAccountAnalysisSelections(facilitySelections);
+    const selectionItems = buildFacilitySelectionItems(analysis, input.facilities, input.facilityAnalyses, input.statusItems, input.statusState);
+    const selectionProgress = { valid: selectionItems.filter(item => item.assigned && item.state !== 'error').length, total: selectionItems.length };
     const status = resolveStatus(input.statusState, findings, selectionCounts);
     const linkedReports = input.reports.filter(report => accountReportReferencesAnalysis(report, analysis.guid));
     const isActiveForReporting = analysis.analysisCategory === 'water'
@@ -127,6 +131,7 @@ export function buildAccountAnalysisCards(input: BuildAccountAnalysisCardsInput)
       linkedReports,
       facilitySelections,
       selectionCounts,
+      selectionProgress,
       basisLabel,
       unitLabel,
       modifiedDateLabel: formatDate(analysis.modifiedDate),

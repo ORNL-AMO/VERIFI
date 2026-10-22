@@ -7,10 +7,10 @@ import {
   buildFacilityAnalysesWithoutPredictors,
   buildFacilityAnalysesWithPredictors
 } from '@data/account-workspace/handlers/analysis-command-handler.service';
-import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { PredictorCommandHandler, PredictorDeletionPreview, predictorDeletionSnapshot } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
-import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictor, IdbPredictor, isStandardPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getGUID } from '@shared/sharedHelperFunctions';
 import {
@@ -33,9 +33,10 @@ export class PredictorWorkspaceActionsService {
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly predictorHandler = inject(PredictorCommandHandler);
 
-  async createPredictor(draft: PredictorDraft): Promise<IdbPredictor> {
+  async createPredictor(draft: PredictorDraft, facilityGuid?: string): Promise<IdbPredictor> {
     const account = this.requireAccount();
-    const facility = this.requireFacility();
+    const facility = facilityGuid ? this.workspace.facilities().find(item => item.guid === facilityGuid && item.accountId === account.guid) : this.requireFacility();
+    if (!facility) throw new WorkspaceWriteError('validation-failed', 'Select a facility in this account.');
     const predictor = this.predictorFromDraft(draft, account.guid, facility.guid);
     return this.executeWithRecovery(async () => {
       const result = await this.commandBoundary.execute(
@@ -48,7 +49,7 @@ export class PredictorWorkspaceActionsService {
         () => this.predictorHandler.createStandardPredictor({
           predictor,
           facilityAnalyses: buildFacilityAnalysesWithPredictors(
-            this.facilityAnalyses(predictor.facilityId),
+            this.workspace.facilityAnalyses().filter(item => item.facilityId === predictor.facilityId),
             [predictor]
           )
         }, account.guid)
@@ -61,7 +62,7 @@ export class PredictorWorkspaceActionsService {
     const account = this.requireAccount();
     const current = this.requirePredictor(updatedPredictor.guid);
     const updated = { ...structuredClone(updatedPredictor), id: current.id };
-    if (updated.predictorType !== current.predictorType) {
+    if (updated.predictorType !== current.predictorType && !(isStandardPredictor(current) && updated.predictorType === 'Standard')) {
       throw new WorkspaceWriteError('validation-failed', 'Predictor type cannot be changed after creation.');
     }
     this.validatePredictor(updated);
@@ -85,11 +86,13 @@ export class PredictorWorkspaceActionsService {
     });
   }
 
-  async copyPredictor(predictor: IdbPredictor): Promise<IdbPredictor> {
+  async copyPredictor(predictor: IdbPredictor, facilityGuid?: string): Promise<IdbPredictor> {
     const account = this.requireAccount();
-    const current = this.requirePredictor(predictor.guid);
+    const current = this.requirePredictor(predictor.guid, facilityGuid);
+    if (!isStandardPredictor(current)) throw new WorkspaceWriteError('validation-failed', 'Only standard predictors can be copied.');
     const copy = structuredClone(current);
     delete copy.id;
+    if (isStandardPredictor(current)) copy.predictorType = 'Standard';
     copy.guid = getGUID();
     copy.name = `${copy.name || 'Untitled predictor'} (copy)`;
     return this.executeWithRecovery(async () => {
@@ -138,6 +141,32 @@ export class PredictorWorkspaceActionsService {
         }, account.guid)
       );
     });
+  }
+
+  previewDeletion(guids: readonly string[], facilityGuid?: string): PredictorDeletionPreview {
+    this.requireAccount();
+    const facility = facilityGuid ? this.workspace.facilities().find(item => item.guid === facilityGuid && item.accountId === this.workspace.account()?.guid) : this.requireFacility();
+    if (!facility) throw new WorkspaceWriteError('validation-failed', 'Select a facility in this account.');
+    const predictors = [...new Set(guids)].map(guid => this.requirePredictor(guid, facilityGuid));
+    if (predictors.some(item => item.facilityId !== facility.guid || (!isStandardPredictor(item) && item.predictorType !== 'Weather'))) {
+      throw new WorkspaceWriteError('validation-failed', 'Select standard or weather predictors from this facility.');
+    }
+    const selected = new Set(predictors.map(item => item.guid));
+    return structuredClone({ facilityGuid: facility.guid, predictors,
+      predictorData: this.workspace.predictorData().filter(item => selected.has(item.predictorId)),
+      facilityAnalyses: this.facilityAnalyses(facility.guid) });
+  }
+
+  async deletePredictors(preview: PredictorDeletionPreview, facilityGuid?: string): Promise<void> {
+    const account = this.requireAccount();
+    const current = this.previewDeletion(preview.predictors.map(item => item.guid), facilityGuid);
+    if (predictorDeletionSnapshot(current) !== predictorDeletionSnapshot(preview)) {
+      throw new WorkspaceWriteError('stale-workspace', 'Predictor data changed. Review the deletion again.');
+    }
+    await this.commandBoundary.execute({ entityKind: 'predictor', changeKind: 'bulk', entityGuid: preview.facilityGuid,
+      label: 'Deleting predictors and readings', publication: { mode: 'reload' },
+      notification: { successTitle: 'Predictors deleted', successMessage: `${preview.predictors.length} predictors deleted` }
+    }, () => this.predictorHandler.deletePredictorsWithData(preview, account.guid));
   }
 
   async addPredictorReading(reading: IdbPredictorData): Promise<IdbPredictorData> {
@@ -510,8 +539,11 @@ export class PredictorWorkspaceActionsService {
     }
   }
 
-  private requirePredictor(guid: string): IdbPredictor {
-    const predictor = this.workspace.facilityPredictors().find(item => item.guid === guid);
+  private requirePredictor(guid: string, facilityGuid?: string): IdbPredictor {
+    const candidates = facilityGuid ? this.workspace.predictors() : this.workspace.facilityPredictors();
+    const predictor = candidates.find(item => item.guid === guid && (!facilityGuid ||
+      (item.facilityId === facilityGuid && item.accountId === this.workspace.account()?.guid &&
+        this.workspace.facilities().some(facility => facility.guid === facilityGuid && facility.accountId === item.accountId))));
     if (!predictor) {
       throw new WorkspaceWriteError('validation-failed', 'The predictor is not part of the selected facility.');
     }

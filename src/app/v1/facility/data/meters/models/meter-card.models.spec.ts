@@ -1,6 +1,6 @@
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
-import { calendarizedMeter, facility, meter, monthlyData, reading } from '../facility-meters.testing';
+import { meter, reading } from '../facility-meters.testing';
 import { buildMeterCards, meterSourceIcon } from './meter-card.models';
 
 describe('meter card models', () => {
@@ -26,13 +26,7 @@ describe('meter card models', () => {
 
   it('labels good meter status as valid for browse cards', () => {
     const cards = buildMeterCards(
-      [meter({ guid: 'meter-electric', name: 'Electric Main' })],
-      [reading({ meterId: 'meter-electric', month: 1, year: 2026 })],
-      [],
-      [],
-      undefined,
-      [],
-      true
+      [meter({ guid: 'meter-electric', name: 'Electric Main' })], [reading({ meterId: 'meter-electric', month: 1, year: 2026 })], [], [], true
     );
 
     expect(cards[0].statusLabel).toBe('Valid');
@@ -69,30 +63,5 @@ describe('meter card models', () => {
     expect(cards[0].latestReadingLabel).toBe('Mar 2026');
   });
 
-  it('adds calendarized usage facts to matching meter browse cards', () => {
-    const electricMeter = meter({ guid: 'meter-electric', name: 'Electric Main' });
-    const waterMeter = meter({ guid: 'meter-water', name: 'City Water', source: 'Water Intake' });
 
-    const cards = buildMeterCards(
-      [electricMeter, waterMeter],
-      [],
-      [],
-      [],
-      facility({ energyUnit: 'MMBtu' }),
-      [calendarizedMeter(electricMeter, [
-        monthlyData({ year: 2025, monthNumValue: 11, energyUse: 100 }),
-        monthlyData({ year: 2026, monthNumValue: 11, energyUse: 110 })
-      ], { energyUnit: 'MMBtu' })]
-    );
-
-    const electricFacts = cards.find(card => card.meter.guid === 'meter-electric')?.usageFacts;
-    expect(electricFacts?.unitLabel).toBe('MMBtu');
-    expect(electricFacts?.facts[0]).toMatchObject({
-      id: 'latest-month',
-      label: 'Dec 2026',
-      valueLabel: '110',
-      changeLabel: '+10% vs same month last year'
-    });
-    expect(cards.find(card => card.meter.guid === 'meter-water')?.usageFacts).toBeUndefined();
-  });
 });

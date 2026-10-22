@@ -36,7 +36,13 @@ Keep specs beside the implementation they protect. Do not introduce broad featur
 
 ## Route and ownership model
 
-The dashboard lists analyses, performs create, copy, activate, and delete commands, and progressively calculates concise latest-year and latest-month outcome snapshots for every unblocked analysis. Its wider analysis cards project a compact, globally collapsible group/model/equation roster directly from persisted analysis setup; the roster starts collapsed and does not require group calculation payloads. The dashboard-scoped result coordinator reuses canonical calendarization, limits facility-result Workers to two concurrent requests, isolates failures per card, and uses a dedicated dashboard Worker path that returns complete annual rows through the report year plus only the newest monthly row, with no group payloads. Cards display the latest annual and monthly facts; the dashboard comparison reuses the retained annual history. Each job uses the shared calculation timeout so a stalled Worker terminates and releases its queue slot. The core calculation still evaluates the history required for rolling and banking equivalence; the concurrency and timeout bound active work while the projection bounds the structured-clone response and retained dashboard cache. Opening an analysis creates one workbench component instance for the route `/v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid`.
+The dashboard lists the selected facility's analyses through the same Simple/Summary/Detailed inventory cards as the account dashboard. Shared tile projection, Analysis snapshots, and inventory layout live under `src/app/v1/shared/analysis-inventory/` and `src/app/v1/shared/inventory/`; feature services retain domain commands and calculation input ownership. Facility cards omit the repeated owning-facility link because the page breadcrumb supplies it. Summary shows annual/rolling improvement, baseline, energy basis, and modification date. Detailed adds a bounded Group Details roster, Used By, and Needs attention. Reporting badges and the Active filter replace a separate active-reporting strip.
+
+Filtering and sorting precede 24-item pagination. Page clamping and override pruning wait for ready validation, so temporarily empty status filters cannot overwrite a saved page during pending checks or return navigation. Facility meters and saved analyses determine category visibility, so a retained water analysis remains discoverable after water meters are removed. The default is Summary with attention-first sorting; a saved detail choice takes precedence. Search uses the facility Data toolbar layout: a Showing count above the expanding input and compact adjacent filters. A separate per-account facility-analysis detail preference persists through the existing display-preference boundary; filters, page, individual detail overrides, scroll, and originating-card focus are session-only and keyed by account plus facility. Global detail changes clear current overrides while retaining the page. Printing renders all filtered cards.
+
+The facility result coordinator calculates only current-page Summary/Detailed cards and records needed by open details/comparison. It shares the demand reconciler with the account coordinator, retains matching jobs, cancels obsolete work, and permits at most two Workers. Existing canonical calendarization, dependency closure, fingerprints, timeout, deterministic fallback, and compact dashboard Worker payload remain authoritative. Ready outcomes retain complete annual rows through the report year and the newest valid monthly row, with no group payloads; comparison reuses the annual history. The core calculation still evaluates the history required for rolling and banking equivalence. Opening an analysis creates one workbench component instance for `/v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid`.
+
+Dashboard and workbench headers use shared page identity. The account breadcrumb opens Account Analysis; the workbench's facility breadcrumb opens Facility Analysis, never Facility Home. Single-facility accounts show a non-linked account context to avoid redirect loops. Browse return waits for requested results and measured layout before restoring position and focus, with heading fallback and clamping after deletion. Existing page motion, guards, sidebar picker/account return, and explicit account-workbench return origins remain intact.
 
 The workbench owns the services that must survive child-tab navigation:
 
@@ -106,7 +112,7 @@ workspace snapshot
   -> all result views project from that state
 ```
 
-The dashboard applies the same status, calendarization, dependency-closure, projection, and fingerprint rules to persisted analyses without an autosave gate. Blocking findings suppress that analysis's request; warnings do not. Dashboard requests retain partial-year monthly calculation but project the shared result down to complete annual rows through `reportYear` and the newest valid monthly row before crossing the Worker boundary. Requests run at most two at a time and time out through `CALCULATION_WORKER_TIMEOUT_MS`; timeout becomes that card's error state and the queue continues. The coordinator retains one ready result per analysis while its fingerprint matches, so an unrelated analysis change does not discard completed work. A new dashboard input cancels active and queued stale work.
+The dashboard applies the same status, calendarization, dependency-closure, projection, and fingerprint rules to persisted analyses without an autosave gate. Blocking findings suppress that analysis's request; warnings do not. Dashboard requests retain partial-year monthly calculation but project the shared result down to complete annual rows through `reportYear` and the newest valid monthly row before crossing the Worker boundary. Requests run at most two at a time and time out through `CALCULATION_WORKER_TIMEOUT_MS`; timeout becomes that card's error state and the queue continues. The coordinator retains one ready result per analysis while its fingerprint matches, so an unrelated analysis change does not discard completed work. Demand is reconciled per account, analysis GUID, and fingerprint: unchanged running/queued work survives panel changes, and only obsolete jobs are canceled. Simple and off-page cards create no analysis demand. Service destruction terminates all remaining work.
 
 The facility coordinator starts a Worker only when all of these invariants hold:
 
@@ -168,6 +174,66 @@ For every Worker path:
 Calendarization is already coordinated at workspace scope for facility results. Do not calendarize again inside a result component. Regression generation and validation accept raw inputs because their model-specific calculations have an independent lifecycle; validation combines candidate and comparison work so it calendarizes only once per request.
 
 ## Results presentation
+
+Group **Visualization** is an exploratory input-data tab immediately after Setup,
+available for all analysis methods, including skipped groups. It does not consume
+completed analysis results or require a valid regression model. Its route-local
+facade reads the canonical calendarization projected into the analysis units and
+site/source basis, group meter GUIDs, and saved owning-facility Predictor readings.
+No weather readings are fetched or generated to draw these plots. Raw Time Series uses
+actual group usage on the left axis and visible raw Predictor values on the right;
+Correlation shows a separate scatter plot and intercept-bearing linear fit per
+visible Predictor. The time series stays visible above a responsive grid of
+correlation plots; the tab has no section headings, introductory descriptions,
+chart-view switch, or visible monthly data table. A screen-reader-only table exposes
+the full analysis-period values, coverage, and selected predictors in the active
+Raw/Z-score scale. Predictor controls use disambiguated accessible names while
+keeping visible names short and unit-free. A trace-colored Group usage legend button
+is locked on; Predictor buttons toggle only Predictor traces. Double-click or
+Shift+Enter isolates one Predictor alongside group usage, updating only transient
+visualization selections. Correlation summaries
+show r and R² without paired-month counts, followed by the best-fit line equation
+`y = mx + b` (y is group usage; x is the Predictor). Coefficients display five
+significant figures and use the existing raw-data fit without changing calculations.
+Trace buttons wrap beside the chart actions in one toolbar above the time series,
+without a divider or separate action row between controls and plot.
+Trace button labels omit units; axes, tooltips, and correlation plots retain them.
+
+The toolbar's typed reactive Raw / Z-score control defaults to Raw. Z-score mode
+standardizes group usage and each visible Predictor independently as `(x - mean) /
+population standard deviation`, using finite monthly values across the full
+analysis period. Missing values stay gaps. Each series' reference period is fixed
+while zooming or toggling other series. Standardized traces share one axis labeled
+Standard deviations from mean, with a thicker theme-aware horizontal zero line.
+Time-series tooltips show only the selected scale: raw values with units or z-scores.
+Raw axis labels and tooltip
+values use five significant figures; chart data and statistics keep full precision.
+Constant series or series
+with fewer than two finite readings show gaps and an explicit unavailable notice;
+no divide-by-zero result is plotted. Correlation plots/statistics retain their
+original raw-data contract. Printing and PNG download use the selected chart mode.
+Calendar-month alignment and duplicate-reading aggregation
+match monthly analysis; absent/non-finite values remain gaps. Source bills determine
+coverage independently of calendarized row presence, since calendarization can
+synthesize zero-valued rows for missing months. Full-month readings cover their
+calendar month, annual readings cover their calendar year, and backward bills cover
+the interval after the previous reading through the current reading. Finite source
+values are required; a legitimate zero is covered. Partial group totals are visible
+with coverage warnings and excluded from correlation pairs. Statistics
+require at least three complete pairs with varying values in both series.
+
+The chart history runs from the analysis baseline fiscal-year start through
+the latest group month, independently of analysis method. A missing baseline uses
+full history. Timeline selection uses chart zoom, with no separate date selector;
+zoom affects only the time-series viewport. `GroupVisualizationSession`, provided by the
+workbench, retains visible Predictor GUIDs, scale, and zoom
+per owning account/facility/analysis/group while navigating child routes. It never
+updates analysis drafts, validation, persistence, or backups. Scale-control edits
+are compared with the current session scale so silent hydration when a group route
+reuses the component cannot suppress a later edit. Explicit Retry asks
+the shared calendarization service to rerun its current snapshot, preserving its
+existing sharing, cancellation, and publication rules. The existing result-tab and
+stage guards remain authoritative.
 
 Shared modeled-equation labels parenthesize regression multiplication terms and additive modified-intensity products while preserving their signs and significant-digit formatting.
 

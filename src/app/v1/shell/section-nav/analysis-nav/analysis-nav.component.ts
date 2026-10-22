@@ -13,6 +13,7 @@ import {
 import { buildFacilitySelectionItems } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-facility-selection.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { analysisCategories } from '@app/v1/shared/analysis-category/analysis-category-presentation';
 
 import type { AnalysisNavigationStage } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';
 import { buildAnalysisNavGroups } from '../models';
@@ -100,7 +101,8 @@ export class AnalysisNavComponent {
       return facility ? buildAnalysisNavGroups(this.workspace.selectedFacilityAnalyses(), facility, active,
         guid => this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, guid)) : [];
     }
+    const showCategory = analysisCategories(this.workspace.meters(), [...this.workspace.accountAnalyses(), ...this.workspace.facilityAnalyses()]).length > 1;
     return account ? buildAnalysisNavGroups(this.workspace.accountAnalyses(), account, active,
-      guid => this.navigation.accountAnalysisWorkbenchRoute(account.guid, guid)) : [];
+      guid => this.navigation.accountAnalysisWorkbenchRoute(account.guid, guid), showCategory) : [];
   });
 }

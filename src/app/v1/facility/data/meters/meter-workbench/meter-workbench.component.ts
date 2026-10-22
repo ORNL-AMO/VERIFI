@@ -1,4 +1,7 @@
-import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
@@ -29,6 +32,11 @@ import {
   standalone: false
 })
 export class MeterWorkbenchComponent {
+  private readonly stickyHeader = viewChild(BrowseHeaderDirective);
+  private readonly factsToggle = viewChild(DataWorkbenchFactsToggleComponent);
+  private readonly collapseScrolledFacts = effect(() => {
+    if (this.stickyHeader()?.collapsed()) untracked(() => this.factsToggle()?.collapse());
+  });
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -75,9 +83,10 @@ export class MeterWorkbenchComponent {
   readonly isLoading = computed(() => this.workspace.calendarizationState() === 'loading');
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite() && this.activeTabState() !== 'settings');
   readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
-  readonly accountMetersRoute = computed(() => {
-    const account = this.workspace.account();
-    return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
+    const account = this.workspace.account(), facility = this.workspace.facility();
+    return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
+      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'meters') }] : [];
   });
   readonly tabAttention = computed(() => {
     const meter = this.workspace.selectedMeter();

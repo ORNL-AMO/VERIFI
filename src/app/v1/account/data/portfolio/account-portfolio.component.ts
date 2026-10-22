@@ -1,35 +1,17 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-
-export type PortfolioTabPath = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
-
-interface PortfolioSelectorSummary {
-  readonly path: PortfolioTabPath;
-  readonly label: string;
-  readonly icon: IconName;
-  readonly total: number;
-}
+import { AccountPortfolioTab, WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { IconName } from '@app/v1/shared/icons/icon-registry';
 
 interface PortfolioTotals {
   readonly facilities: number;
-  readonly meters: number;
-  readonly predictors: number;
-  readonly energyUses: number;
-  readonly analyses: number;
-  readonly reports: number;
 }
-
-const PORTFOLIO_SELECTORS: ReadonlyArray<Omit<PortfolioSelectorSummary, 'total'>> = [
-  { path: 'facilities', label: 'Facilities', icon: 'account' },
-  { path: 'meters', label: 'Meters', icon: 'meter' },
-  { path: 'predictors', label: 'Predictors', icon: 'predictor' },
-  { path: 'energy-uses', label: 'Energy Uses', icon: 'tools' },
-  { path: 'analyses', label: 'Analyses', icon: 'analysis' },
-  { path: 'reports', label: 'Reports', icon: 'reports' }
-];
 
 @Component({
   selector: 'app-account-portfolio',
@@ -38,59 +20,106 @@ const PORTFOLIO_SELECTORS: ReadonlyArray<Omit<PortfolioSelectorSummary, 'total'>
   standalone: false
 })
 export class AccountPortfolioComponent implements OnDestroy {
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private headerResizeObserver?: ResizeObserver;
+  private readonly router = inject(Router);
+  private readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
 
-  @ViewChild('portfolioSticky') set stickyHeader(header: ElementRef<HTMLElement> | undefined) {
-    this.headerResizeObserver?.disconnect();
-    this.headerResizeObserver = undefined;
-    if (!header) {
-      this.element.nativeElement.style.removeProperty('--portfolio-sticky-height');
-      return;
-    }
-    const updateHeight = () => this.element.nativeElement.style.setProperty(
-      '--portfolio-sticky-height', `${header.nativeElement.getBoundingClientRect().height}px`
-    );
-    updateHeight();
-    if (typeof ResizeObserver !== 'undefined') {
-      this.headerResizeObserver = new ResizeObserver(updateHeight);
-      this.headerResizeObserver.observe(header.nativeElement, { box: 'border-box' });
-    }
-  }
+  private readonly sticky = viewChild(BrowseHeaderDirective);
 
   @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
+
+  @ViewChild('createMeterDrawer') private readonly createMeterDrawer!: TemplateRef<unknown>;
+  private readonly meterDrawerAccountGuid = signal<string | undefined>(undefined);
+
+  @ViewChild('createPredictorDrawer') private readonly createPredictorDrawer!: TemplateRef<unknown>;
+  private readonly predictorDrawerAccountGuid = signal<string | undefined>(undefined);
+  readonly isCreatePredictorDrawerOpen = signal(false);
+  readonly isPredictors = computed(() => this.activeContent() === 'predictors');
 
   readonly account = this.workspace.account;
   readonly canWrite = this.workspace.canWrite;
   readonly hasPending = this.workspace.hasPending;
+  readonly activeContent = computed(() => this.navigation.activePortfolioTab() || 'facilities');
+  readonly isFacilities = computed(() => this.activeContent() === 'facilities');
+  readonly isMeters = computed(() => this.activeContent() === 'meters');
+  readonly title = computed(() => ({
+    facilities: 'Facilities', meters: 'Meters', predictors: 'Predictors',
+    'energy-uses': 'Energy Uses'
+  })[this.activeContent()]);
+  readonly headerIcon = computed(() => ({
+    facilities: 'facility', meters: 'meter', predictors: 'predictor',
+    'energy-uses': 'tools'
+  } satisfies Record<AccountPortfolioTab, IconName>)[this.activeContent()]);
+  readonly isCreateMeterDrawerOpen = signal(false);
+  readonly headerGapCollapsed = computed(() => this.sticky()?.collapsed() ?? false);
+  readonly breadcrumbs = computed(() => [{ label: this.account()?.name ?? 'Account' }]);
+  readonly meterNavigationError = signal('');
   readonly isCreateFacilityDrawerOpen = signal(false);
 
+  constructor() {
+    effect(() => {
+      if (this.isCreatePredictorDrawerOpen() && (!this.isPredictors() || this.account()?.guid !== this.predictorDrawerAccountGuid())) this.closeCreatePredictorDrawer();
+    });
+    effect(() => {
+      if (this.isCreateMeterDrawerOpen()
+        && (!this.isMeters() || this.account()?.guid !== this.meterDrawerAccountGuid())) {
+        this.closeCreateMeterDrawer();
+      }
+    });
+  }
+
+  openCreateMeterDrawer(): void {
+    if (!this.isMeters() || !this.canWrite() || this.hasPending() || !this.totals().facilities) { return; }
+    this.meterNavigationError.set('');
+    this.meterDrawerAccountGuid.set(this.account()?.guid);
+    this.isCreateMeterDrawerOpen.set(true);
+    this.modalPortal.show(new TemplatePortal(this.createMeterDrawer, this.viewContainerRef));
+  }
+
+  closeCreateMeterDrawer(): void {
+    this.isCreateMeterDrawerOpen.set(false);
+    this.modalPortal.hide();
+  }
+
+  async openCreatedMeter(meter: IdbUtilityMeter): Promise<void> {
+    this.closeCreateMeterDrawer();
+    if (meter.accountId !== this.account()?.guid) { return; }
+    try {
+      const opened = await this.router.navigate(this.navigation.facilityMeterRoute(meter.facilityId, meter.guid, 'settings'));
+      if (!opened) { throw new Error('Navigation cancelled'); }
+    } catch {
+      this.meterNavigationError.set('Meter added. Its settings could not be opened; select the meter from the list to continue.');
+    }
+  }
+
+  openCreatePredictorDrawer(): void {
+    if (!this.isPredictors() || !this.canWrite() || this.hasPending() || !this.totals().facilities) return;
+    this.meterNavigationError.set(''); this.predictorDrawerAccountGuid.set(this.account()?.guid);
+    this.isCreatePredictorDrawerOpen.set(true); this.modalPortal.show(new TemplatePortal(this.createPredictorDrawer, this.viewContainerRef));
+  }
+  closeCreatePredictorDrawer(): void { this.isCreatePredictorDrawerOpen.set(false); this.modalPortal.hide(); }
+  async openCreatedPredictor(predictor: IdbPredictor): Promise<void> {
+    this.closeCreatePredictorDrawer(); if (predictor.accountId !== this.account()?.guid) return;
+    try { const opened = await this.router.navigate(this.navigation.facilityPredictorRoute(predictor.facilityId, predictor.guid, 'settings')); if (!opened) throw new Error('Navigation cancelled'); }
+    catch { this.meterNavigationError.set('Predictor added. Select it from the list to open its settings.'); }
+  }
+  async openNewWeatherPredictors(facilityGuid: string): Promise<void> {
+    this.closeCreatePredictorDrawer();
+    if (!this.workspace.facilities().some(item => item.guid === facilityGuid)) return;
+    try { await this.router.navigate(this.navigation.facilityWeatherPredictorCreateRoute(facilityGuid)); }
+    catch { this.meterNavigationError.set('Weather setup could not be opened. Please try again.'); }
+  }
+
   ngOnDestroy(): void {
-    this.headerResizeObserver?.disconnect();
     this.modalPortal.hide();
   }
 
   readonly totals = computed<PortfolioTotals>(() => {
     return {
       facilities: this.workspace.facilities().length,
-      meters: this.workspace.meters().length,
-      predictors: this.workspace.predictors().length,
-      energyUses: this.workspace.energyUseEquipment().length,
-      analyses: this.workspace.facilityAnalyses().length
-        + (this.workspace.account()?.isSingleFacilityCompany ? 0 : this.workspace.accountAnalyses().length),
-      reports: this.workspace.facilityReports().length
     };
-  });
-
-  readonly portfolioSelectors = computed<PortfolioSelectorSummary[]>(() => {
-    const totals = this.totals();
-    return PORTFOLIO_SELECTORS.map(selector => ({
-      ...selector,
-      total: this.getSelectorTotal(selector.path, totals)
-    }));
   });
 
   openCreateFacilityDrawer(): void {
@@ -106,20 +135,4 @@ export class AccountPortfolioComponent implements OnDestroy {
     this.modalPortal.hide();
   }
 
-  private getSelectorTotal(path: PortfolioTabPath, totals: PortfolioTotals): number {
-    switch (path) {
-      case 'meters':
-        return totals.meters;
-      case 'predictors':
-        return totals.predictors;
-      case 'energy-uses':
-        return totals.energyUses;
-      case 'analyses':
-        return totals.analyses;
-      case 'reports':
-        return totals.reports;
-      default:
-        return totals.facilities;
-    }
-  }
 }

@@ -1,4 +1,5 @@
 import type { IconSvgObject } from './icon.types';
+import { CUSTOM_ICONS } from './custom-icons';
 import Add01Icon from '@hugeicons/core-free-icons/Add01Icon';
 import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon';
 import ArrowDataTransferHorizontalIcon from '@hugeicons/core-free-icons/ArrowDataTransferHorizontalIcon';
@@ -35,6 +36,7 @@ import CloudRainIcon from '@hugeicons/core-free-icons/CloudRainIcon';
 import CombineIcon from '@hugeicons/core-free-icons/CombineIcon';
 import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
 import CovariateIcon from '@hugeicons/core-free-icons/CovariateIcon';
+import CrowdfundingIcon from '@hugeicons/core-free-icons/CrowdfundingIcon';
 import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon';
 import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon';
 import Download04Icon from '@hugeicons/core-free-icons/Download04Icon';
@@ -63,6 +65,7 @@ import HelpCircleIcon from '@hugeicons/core-free-icons/HelpCircleIcon';
 import Home01Icon from '@hugeicons/core-free-icons/Home01Icon';
 import HumidityIcon from '@hugeicons/core-free-icons/HumidityIcon';
 import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon';
+import Invoice01Icon from '@hugeicons/core-free-icons/Invoice01Icon';
 import Loading03Icon from '@hugeicons/core-free-icons/Loading03Icon';
 import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
 import Link04Icon from '@hugeicons/core-free-icons/Link04Icon';
@@ -103,7 +106,9 @@ import ZoomInIcon from '@hugeicons/core-free-icons/ZoomInIcon';
 import ZoomOutIcon from '@hugeicons/core-free-icons/ZoomOutIcon';
 
 export const ICON_REGISTRY = {
+  ...CUSTOM_ICONS,
   account: Building03Icon,
+  accountAnalysis: CrowdfundingIcon,
   accountIssue: Alert02Icon,
   add: Add01Icon,
   analysis: MicroscopeIcon,
@@ -158,6 +163,7 @@ export const ICON_REGISTRY = {
   home: Home01Icon,
   humidity: HumidityIcon,
   info: InformationCircleIcon,
+  invoice: Invoice01Icon,
   loading: Loading03Icon,
   link: Link04Icon,
   location: Location01Icon,

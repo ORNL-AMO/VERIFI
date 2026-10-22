@@ -10,6 +10,18 @@ import { account, facility, group, meter, reading } from '@app/v1/facility/data/
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 
 describe('MetersDashboardActionsService', () => {
+  it('deletes distinct facility meters with readings through one bulk command and one reload', async () => {
+    const first = meter({ guid: 'first', id: 1 });
+    const second = meter({ guid: 'second', id: 2 });
+    const data = reading({ guid: 'data', id: 3, meterId: first.guid });
+    const { service, meterHandler, commandBoundary } = setup({ meters: [first, second], meterData: [data] });
+    await service.deleteMeters(['first', 'second', 'first']);
+    expect(commandBoundary.execute).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ changeKind: 'bulk', publication: { mode: 'reload' } }), expect.any(Function));
+    expect(meterHandler.deleteMetersWithData).toHaveBeenCalledExactlyOnceWith([
+      { meter: first, meterData: [data] }, { meter: second, meterData: [] }
+    ], 'account-a');
+  });
+
   it('creates a meter from factory defaults plus draft values', async () => {
     const energyGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy' });
     const { service, commandBoundary, meterHandler } = setup({ groups: [energyGroup] });
@@ -36,6 +48,22 @@ describe('MetersDashboardActionsService', () => {
       changeKind: 'add',
       label: 'Adding meter'
     }), expect.any(Function));
+  });
+
+  it('creates for an explicitly chosen facility without changing the selected facility', async () => {
+    const { service, meterHandler } = setup();
+    const created = await service.createMeter({ name: 'Boiler', source: 'Natural Gas' }, 'facility-b');
+    expect(created).toMatchObject({ facilityId: 'facility-b', accountId: 'account-a', energyUnit: 'MMBtu' });
+    expect(meterHandler.addMeter).toHaveBeenCalledOnce();
+  });
+
+  it('rejects missing facilities and groups owned by another facility before saving', async () => {
+    const { service, meterHandler } = setup({ groups: [group({ guid: 'group-a' })] });
+    await expect(service.createMeter({ name: 'Main', source: 'Electricity' }, 'deleted'))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(service.createMeter({ name: 'Main', source: 'Electricity', groupId: 'group-a' }, 'facility-b'))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    expect(meterHandler.addMeter).not.toHaveBeenCalled();
   });
 
   it('creates, updates, and deletes groups through atomic meter group commands', async () => {
@@ -198,6 +226,7 @@ function setup(options: {
     addMeter: vi.fn().mockImplementation(async item => ({ ...item, id: 10 })),
     updateMeter: vi.fn().mockImplementation(async item => item),
     deleteMeterWithData: vi.fn().mockResolvedValue(undefined),
+    deleteMetersWithData: vi.fn().mockResolvedValue(2),
     deleteMeter: vi.fn().mockResolvedValue(1),
     deleteMeterData: vi.fn().mockResolvedValue(1),
     addMeterGroup: vi.fn().mockImplementation(async item => ({ ...item, id: 20 })),
@@ -221,6 +250,8 @@ function setup(options: {
   const store = {
     account: signal(account()),
     selectedFacility: signal(facility()),
+    facilities: signal([facility(), facility({ guid: 'facility-b', energyUnit: 'MMBtu' })]),
+    meterGroups: signal(options.groups ?? []),
     canWrite: signal(true),
     hasPending: signal(false),
     meters: signal(options.meters ?? []),

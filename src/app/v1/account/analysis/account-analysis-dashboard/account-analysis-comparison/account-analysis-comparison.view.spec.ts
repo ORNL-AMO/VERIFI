@@ -90,7 +90,7 @@ function card(
   return {
     analysis: { guid, name: guid, analysisCategory: 'energy', baselineYear: 2022 } as any,
     category: 'energy', status: 'ready', statusLabel: 'Ready', findings: [], isActiveForReporting: false,
-    linkedReports: [], facilitySelections: [], selectionCounts: { included: 0, skipped: 0, missing: 0, invalid: 0 },
+    linkedReports: [], facilitySelections: [], selectionCounts: { included: 0, skipped: 0, missing: 0, invalid: 0 }, selectionProgress: { valid: 0, total: 0 },
     basisLabel, unitLabel, modifiedDateLabel: '', modifiedSortValue: 0, searchText: guid, attentionRank: 3,
     outcome: {
       state: 'ready', annualAnalysisSummaries: annualRows,

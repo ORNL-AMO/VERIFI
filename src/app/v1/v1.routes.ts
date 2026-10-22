@@ -7,13 +7,11 @@ import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-f
 import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
 import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
-import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
 import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
 import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
 import { AccountPortfolioMetersTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
 import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
-import { AccountPortfolioReportsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { AccountSettingsComponent } from '@app/v1/account/settings/account-settings.component';
 import { AccountSettingsBackupComponent } from '@app/v1/account/settings/backup/account-settings-backup.component';
 import { AccountSettingsDeleteComponent } from '@app/v1/account/settings/delete/account-settings-delete.component';
@@ -93,6 +91,7 @@ import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/fa
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
+import { GroupVisualizationComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/visualization/group-visualization.component';
 import { FacilityAnalysisGroupSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/setup/facility-analysis-group-setup.component';
 import { FacilityAnalysisBankingComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/banking/facility-analysis-banking.component';
 import { FacilityAnalysisRegressionComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/regression/facility-analysis-regression.component';
@@ -126,6 +125,8 @@ export const V1Routes: Routes = [
             component: AccountHomeComponent,
             canActivate: [accountHomeCanonicalGuard]
           },
+          { path: 'data/portfolio/analyses', pathMatch: 'full', redirectTo: 'analysis/dashboard' },
+          { path: 'data/portfolio/reports', pathMatch: 'full', redirectTo: 'reports/dashboard' },
           {
             path: 'data',
             children: [
@@ -139,8 +140,6 @@ export const V1Routes: Routes = [
                   { path: 'meters', component: AccountPortfolioMetersTabComponent },
                   { path: 'predictors', component: AccountPortfolioPredictorsTabComponent },
                   { path: 'energy-uses', component: AccountPortfolioEnergyUsesTabComponent },
-                  { path: 'analyses', component: AccountPortfolioAnalysesTabComponent },
-                  { path: 'reports', component: AccountPortfolioReportsTabComponent },
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },
@@ -412,6 +411,7 @@ export const V1Routes: Routes = [
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'setup' },
                       { path: 'setup', component: FacilityAnalysisGroupSetupComponent, data: { analysisScope: 'group', analysisTab: 'setup' } },
+                      { path: 'visualization', component: GroupVisualizationComponent, data: { analysisScope: 'group', analysisTab: 'visualization' } },
                       { path: 'banking', component: FacilityAnalysisBankingComponent, data: { analysisScope: 'group', analysisTab: 'banking' } },
                       { path: 'regression', component: FacilityAnalysisRegressionComponent, data: { analysisScope: 'group', analysisTab: 'regression' } },
                       { path: 'annual', component: FacilityAnalysisGroupAnnualComponent, data: { analysisScope: 'group', analysisTab: 'annual' } },

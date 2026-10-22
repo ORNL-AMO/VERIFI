@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -23,9 +24,11 @@ describe('AccountPortfolioComponent', () => {
   let canWrite: ReturnType<typeof signal<boolean>>;
   let hasPending: ReturnType<typeof signal<boolean>>;
   let portfolioFacilities: { deleteFacility: ReturnType<typeof vi.fn>; createFacility: ReturnType<typeof vi.fn> };
+  const activePortfolioTab = signal('facilities');
   let modalPortal: { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
+    activePortfolioTab.set('facilities');
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     account = signal(accountFixture());
     facilities = signal([facilityFixture('facility-a', 'Alpha Plant'), facilityFixture('facility-b', 'Beta Works')]);
@@ -71,6 +74,7 @@ describe('AccountPortfolioComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
+            activePortfolioTab,
             openFacility: vi.fn(async () => undefined),
             facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail],
             facilityDataRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
@@ -94,34 +98,89 @@ describe('AccountPortfolioComponent', () => {
   });
 
   it('renders the portfolio shell and delegates the default content to the facilities tab', () => {
-    expect(fixture.nativeElement.textContent).toContain('Portfolio');
-    expect(fixture.nativeElement.querySelector('#v1-account-portfolio-title app-ui-icon[name="portfolio"]')).not.toBeNull();
-    expect(selectorLabels()).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses', 'Analyses', 'Reports']);
-    expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.path === 'meters')?.total).toBe(1);
-    expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.path === 'predictors')?.total).toBe(2);
-    expect(fixture.componentInstance.portfolioSelectors().map(selector => selector.path)).toEqual([
-      'facilities',
-      'meters',
-      'predictors',
-      'energy-uses',
-      'analyses',
-      'reports'
-    ]);
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Facilities');
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Facilities');
+    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').textContent).toBe('Account A');
+    account.set({ ...account()!, name: 'Another Account' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Facilities');
+    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').textContent).toBe('Another Account');
+    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').title).toBe('Another Account');
+    expect(fixture.debugElement.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe('facility');
+    expect(fixture.nativeElement.querySelector('[aria-label="Portfolio content"]')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Upload data');
     expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
     expect(buttonByText('Add facility').classList.contains('v1-btn--action')).toBe(true);
   });
 
-  it('counts both account and facility analyses and keeps existing analyses reachable without facilities', () => {
-    expect(fixture.componentInstance.totals().analyses).toBe(2);
-    account.set({ ...account()!, isSingleFacilityCompany: true });
+  it('puts facility settings in the header and changes available actions with the current content', () => {
+    const settings = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('a'))
+      .find(link => link.textContent?.trim() === 'Manage Portfolio')!;
+    expect(settings.closest('.v1-account-portfolio__header-actions')).not.toBeNull();
+    expect(settings.getAttribute('href')).toContain('/account/account-a/settings/portfolio');
+    activePortfolioTab.set('meters');
     fixture.detectChanges();
-    expect(fixture.componentInstance.totals().analyses).toBe(1);
-    account.set({ ...account()!, isSingleFacilityCompany: false });
+    expect(fixture.nativeElement.textContent).not.toContain('Manage Portfolio');
+    expect(fixture.nativeElement.textContent).not.toContain('Add facility');
+    expect(fixture.nativeElement.textContent).toContain('Upload data');
+    expect(buttonByText('Add meter').disabled).toBe(false);
+    const validation = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('a'))
+      .find(link => link.textContent?.trim() === 'Data Validation')!;
+    expect(validation.getAttribute('href')).toContain('/account/account-a/settings/data-validation');
+
+  });
+
+  it('uses the active resource title for every portfolio destination', () => {
+    for (const [tab, [title, icon]] of Object.entries({ facilities: ['Facilities', 'facility'], meters: ['Meters', 'meter'], predictors: ['Predictors', 'predictor'], 'energy-uses': ['Energy Uses', 'tools'] })) {
+      activePortfolioTab.set(tab);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe(title);
+      expect(fixture.debugElement.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
+    }
+  });
+
+  it('opens the meter portal, guards writes, and closes it when the page or account changes', () => {
+    activePortfolioTab.set('meters');
+    fixture.detectChanges();
+    buttonByText('Add meter').click();
+    expect(modalPortal.show).toHaveBeenCalledOnce();
+    expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(true);
+    activePortfolioTab.set('predictors');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(false);
+    activePortfolioTab.set('meters');
+    fixture.detectChanges();
+    buttonByText('Add meter').click();
+    account.set({ ...account()!, guid: 'account-b' });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(false);
+    for (const blocked of ['read-only', 'pending', 'no-facilities']) {
+      canWrite.set(blocked !== 'read-only');
+      hasPending.set(blocked === 'pending');
+      facilities.set(blocked === 'no-facilities' ? [] : [facilityFixture('facility-a', 'Alpha')]);
+      fixture.detectChanges();
+      expect(buttonByText('Add meter').disabled).toBe(true);
+      fixture.componentInstance.openCreateMeterDrawer();
+      expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(false);
+    }
+  });
+
+  it('opens the created meter settings and reports navigation failure without another creation', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const meter = { guid: 'meter-new', facilityId: 'facility-b', accountId: 'account-a' } as any;
+    await fixture.componentInstance.openCreatedMeter(meter);
+    expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-b', 'data', 'meters', 'meter-new', 'settings']);
+    navigate.mockResolvedValue(false);
+    await fixture.componentInstance.openCreatedMeter(meter);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Meter added. Its settings could not be opened');
+  });
+
+  it('shows the empty Data portfolio when there are no facilities, even with saved analyses', () => {
     facilities.set([]);
-    (TestBed.inject(AccountWorkspaceStore).facilityAnalyses as ReturnType<typeof signal<any[]>>).set([]);
     fixture.detectChanges();
-    expect(fixture.componentInstance.totals().analyses).toBe(1);
-    expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('No facilities');
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeNull();
   });
 
   it('updates the routed-toolbar offset after header resizing and releases its observer', () => {
@@ -137,31 +196,41 @@ describe('AccountPortfolioComponent', () => {
     const resizedFixture = TestBed.createComponent(AccountPortfolioComponent);
     try {
       resizedFixture.detectChanges();
-      expect(resizedFixture.nativeElement.style.getPropertyValue('--portfolio-sticky-height')).toBe('180px');
+      expect(resizedFixture.nativeElement.querySelector('.v1-account-portfolio').style.getPropertyValue('--portfolio-sticky-height')).toBe('180px');
       expect(observe).toHaveBeenCalled();
       bounds.mockReturnValue({ height: 220 } as DOMRect);
       resized!([], {} as ResizeObserver);
-      expect(resizedFixture.nativeElement.style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
+      expect(resizedFixture.nativeElement.querySelector('.v1-account-portfolio').style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
+      bounds.mockReturnValue({ height: 217.8 } as DOMRect);
+      resized!([{ borderBoxSize: [{ blockSize: 220 }] }] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+      expect(resizedFixture.nativeElement.querySelector('.v1-account-portfolio').style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
       resizedFixture.destroy();
       expect(disconnect).toHaveBeenCalled();
     } finally { vi.unstubAllGlobals(); }
   });
 
-  it('renders selector links for each routed portfolio tab', () => {
-    const links = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('a.v1-portfolio-selector'));
-
-    expect(links.length).toBe(6);
-    expect(links[0].querySelector('.v1-portfolio-selector__label')?.textContent?.trim()).toBe('Facilities');
-    expect(links[0].querySelector('.v1-portfolio-selector__count app-ui-icon')).not.toBeNull();
-    expect(links[0].querySelector('.v1-portfolio-selector__count strong')?.textContent?.trim()).toBe('2');
-    expect(fixture.componentInstance.portfolioSelectors().map(selector => selector.path)).toEqual([
-      'facilities',
-      'meters',
-      'predictors',
-      'energy-uses',
-      'analyses',
-      'reports'
-    ]);
+  it('collapses the header gap after scrolling and restores it at the top, releasing the observer', () => {
+    let intersected!: IntersectionObserverCallback;
+    const disconnect = vi.fn();
+    const observe = vi.fn();
+    vi.stubGlobal('IntersectionObserver', class {
+      constructor(callback: IntersectionObserverCallback) { intersected = callback; }
+      observe = observe;
+      disconnect = disconnect;
+    });
+    const observedFixture = TestBed.createComponent(AccountPortfolioComponent);
+    try {
+      observedFixture.detectChanges();
+      expect(observe).toHaveBeenCalled();
+      intersected([{ isIntersecting: false }] as IntersectionObserverEntry[], {} as IntersectionObserver);
+      observedFixture.detectChanges();
+      expect(observedFixture.nativeElement.querySelector('.v1-account-portfolio--scrolled')).not.toBeNull();
+      intersected([{ isIntersecting: true }] as IntersectionObserverEntry[], {} as IntersectionObserver);
+      observedFixture.detectChanges();
+      expect(observedFixture.nativeElement.querySelector('.v1-account-portfolio--scrolled')).toBeNull();
+      observedFixture.destroy();
+      expect(disconnect).toHaveBeenCalled();
+    } finally { vi.unstubAllGlobals(); }
   });
 
   it('shows a shell-level empty state when the account has no facilities', () => {
@@ -194,10 +263,7 @@ describe('AccountPortfolioComponent', () => {
       .find(button => button.textContent?.includes(text))!;
   }
 
-  function selectorLabels(): string[] {
-    return Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('.v1-portfolio-selector'))
-      .map(link => link.querySelector('span')!.textContent!.trim());
-  }
+
 });
 
 function accountFixture(): IdbAccount {

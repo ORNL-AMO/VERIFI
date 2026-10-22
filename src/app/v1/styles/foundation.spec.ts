@@ -44,21 +44,8 @@ describe('v1 foundation styles', () => {
     expect(ruleFor('.v1-root .v1-data-workbench-status-notes')).toContain('display: grid');
   });
 
-  it('caps analysis dashboards at three equal-width cards per row', () => {
-    expect(ruleFor('.v1-root .v1-data-browse-grid--analysis'))
-      .toContain('grid-template-columns: repeat(3, minmax(0, 1fr))');
-    expect(foundationCss).toContain(
-      '.v1-root .v1-data-browse-grid--analysis { grid-template-columns: repeat(2, minmax(0, 1fr)); }'
-    );
-    expect(foundationCss).toContain(
-      '.v1-root .v1-data-browse-grid--analysis { grid-template-columns: 1fr; }'
-    );
-  });
-
   it('provides shared analysis dashboard and details presentation', () => {
     expect(ruleFor('.v1-root .v1-analysis-dashboard-host')).toContain('display: grid');
-    expect(ruleFor('.v1-root .v1-analysis-dashboard__header')).toContain('justify-content: space-between');
-    expect(ruleFor('.v1-root .v1-analysis-dashboard__compare-tray')).toContain('background: var(--v1-panel)');
     expect(ruleFor('.v1-root .v1-analysis-details dl'))
       .toContain('grid-template-columns: repeat(2, minmax(0, 1fr))');
   });

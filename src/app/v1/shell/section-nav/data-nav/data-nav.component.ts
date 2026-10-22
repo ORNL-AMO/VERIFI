@@ -3,6 +3,15 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ACCOUNT_CUSTOM_DATA_ITEMS, buildResourceNavGroups } from '../models';
+import { AccountPortfolioTab } from '@app/v1/shell/workspace-navigation.service';
+import { IconName } from '@app/v1/shared/icons/icon-registry';
+
+const PORTFOLIO_LINKS: ReadonlyArray<{ id: AccountPortfolioTab; label: string; icon: IconName }> = [
+  { id: 'facilities', label: 'Facilities', icon: 'facility' },
+  { id: 'meters', label: 'Meters', icon: 'meter' },
+  { id: 'predictors', label: 'Predictors', icon: 'predictor' },
+  { id: 'energy-uses', label: 'Energy Uses', icon: 'tools' }
+];
 
 @Component({
   selector: 'app-data-nav',
@@ -16,6 +25,16 @@ export class DataNavComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
   readonly facilityContext = computed(() => this.navigation.contextMode() === 'facility' && !!this.navigation.facility());
   readonly dataTitle = computed(() => this.navigation.contextMode() === 'facility' ? 'Facility Data' : 'Account Data');
+  readonly portfolioLinks = computed(() => {
+    const account = this.navigation.account();
+    if (!account || this.facilityContext()) return [];
+    return PORTFOLIO_LINKS.map(link => ({
+      ...link,
+      active: this.navigation.activeSection() === 'data' && this.navigation.activeDetail() === 'portfolio'
+        && (this.navigation.activePortfolioTab() || 'facilities') === link.id,
+      route: this.navigation.accountPortfolioRoute(account.guid, link.id)
+    }));
+  });
   readonly groups = computed(() => {
     const facility = this.navigation.facility();
     if (!this.facilityContext() || !facility) return [];

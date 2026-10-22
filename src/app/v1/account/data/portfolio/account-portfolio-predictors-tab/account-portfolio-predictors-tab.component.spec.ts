@@ -1,113 +1,42 @@
 import { signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { IdbFacility } from '@data/models/idbModels/facility';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { inventoryNavigation, inventoryWorkspace, inventoryReading } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.testing';
 import { AccountDataModule } from '../../account-data.module';
 import { AccountPortfolioPredictorsTabComponent } from './account-portfolio-predictors-tab.component';
 
-describe('AccountPortfolioPredictorsTabComponent', () => {
-  it('renders account-wide predictor cards and opens the owning facility workspace', () => {
-    const navigate = vi.fn(async () => true);
-    TestBed.configureTestingModule({
-      imports: [AccountDataModule],
-      providers: [
-        { provide: WorkspaceStatusService, useValue: { items: signal([]), state: signal('ready') } },
-        {
-          provide: AccountWorkspaceStore,
-          useValue: {
-            facilities: signal([
-              facility('facility-a', 'Alpha Plant'),
-              facility('facility-b', 'Beta Works')
-            ]),
-            predictors: signal([
-              predictor('predictor-production', 'Production', 'facility-a', true),
-              predictor('predictor-weather', 'HDD Generated', 'facility-b', false, 'Weather', 'station-a')
-            ]),
-            predictorData: signal([
-              { guid: 'reading-a', predictorId: 'predictor-production', facilityId: 'facility-a', year: 2026, month: 1 }
-            ])
-          }
-        },
-        {
-          provide: WorkspaceNavigationService,
-          useValue: {
-            facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab = 'settings') => [
-              '/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab
-            ],
-            facilityWeatherPredictorRoute: (facilityGuid: string, groupKey: string) => [
-              '/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', 'weather', groupKey, 'setup'
-            ]
-          }
-        },
-        { provide: Router, useValue: { navigate } }
-      ]
-    });
-    const fixture = TestBed.createComponent(AccountPortfolioPredictorsTabComponent);
-    fixture.detectChanges();
-
-    expect(cardTitles(fixture)).toEqual(['Station station-a', 'Production']);
-    expect(fixture.nativeElement.textContent).toContain('Alpha Plant');
-    expect(fixture.nativeElement.textContent).toContain('Beta Works');
-    expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__actions')).toHaveLength(0);
-
-    expect(fixture.nativeElement.querySelectorAll('.v1-select')).toHaveLength(3);
-    const controls = fixture.componentInstance.filtersForm.controls;
-    controls.search.setValue('beta');
-    controls.type.setValue('weather');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['Station station-a']);
-    controls.type.setValue('standard');
-    fixture.detectChanges();
+describe('account Predictor inventory', () => {
+  it('counts individual tiles, combines filters and opens canonical weather routes', () => {
+    const workspace = inventoryWorkspace(5);
+    const facilities = signal([workspace.facility()!, { ...workspace.facility()!, guid: 'other', name: 'Other' }]);
+    workspace.predictors.update(items => items.map(item => item.guid === 'p1' ? { ...item, facilityId: 'other' } : item));
+    TestBed.configureTestingModule({ imports: [AccountDataModule], providers: [provideRouter([]),
+      { provide: AccountWorkspaceStore, useValue: { ...workspace, facilities, predictorData: workspace.predictorReadings } },
+      { provide: WorkspaceStatusService, useValue: { items: signal([]), state: workspace.statusState } },
+      { provide: WorkspaceNavigationService, useValue: inventoryNavigation }] });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const fixture = TestBed.createComponent(AccountPortfolioPredictorsTabComponent); fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(component.entries()).toHaveLength(5); expect(new Set(component.entries().map(item => item.facility.guid)).size).toBe(2);
+    expect(fixture.nativeElement.textContent).toContain('Showing 5 of 5 predictors');
+    expect(fixture.nativeElement.querySelector('app-resource-browse-card')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Select predictors"]')).toBeNull();
+    component.filtersForm.patchValue({ search: 'p2', type: 'weather', status: 'clear' }); fixture.detectChanges();
+    expect(component.filteredEntries().map(item => item.guid)).toEqual(['p2']);
+    component.inventory.detailControl.setValue('detailed');fixture.detectChanges();
+    workspace.predictorReadings.update(items=>[...items,inventoryReading('p2',{guid:'latest',year:2026,month:2,amount:0})]);fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.reading-snapshot__reading-heading strong')?.textContent).toBe('2');
+    expect(fixture.nativeElement.querySelector('.reading-snapshot__recent-reading')?.textContent).toContain('0 HDD');
+    expect(fixture.nativeElement.querySelector('.reading-snapshot__range')?.textContent).toBe('Jan 2025 – Feb 2026');
+    (fixture.nativeElement.querySelector('.portfolio-inventory .portfolio-tile__name') as HTMLAnchorElement).click(); expect(navigate).toHaveBeenCalledWith(inventoryNavigation.facilityWeatherPredictorRoute('facility', 'station:KORD'));
+    component.filtersForm.controls.type.setValue('standard'); fixture.detectChanges(); expect(component.filteredEntries()).toHaveLength(0);
     expect(fixture.nativeElement.textContent).toContain('No predictors match these filters');
-    expect(controls.search.value).toBe('beta');
-    controls.search.setValue('alpha');
-    controls.status.setValue('clear');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['Production']);
-    controls.search.setValue('');
-    controls.type.setValue('all');
-    controls.status.setValue('noReadings');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['Station station-a']);
-
-    (fixture.nativeElement.querySelector('[aria-label="Open Station station-a weather workbench"]') as HTMLButtonElement).click();
-    expect(navigate).toHaveBeenCalledWith([
-      '/v1', 'workspace', 'facility', 'facility-b', 'data', 'predictors', 'weather', 'station:station-a', 'setup'
-    ]);
+    component.clearFilters(); fixture.detectChanges(); (fixture.nativeElement.querySelector('[data-browse-id="p1"]') as HTMLAnchorElement).click();
+    expect(navigate).toHaveBeenLastCalledWith(inventoryNavigation.facilityPredictorRoute('other', 'p1', 'settings'));
+    fixture.destroy(); const returned = TestBed.createComponent(AccountPortfolioPredictorsTabComponent); returned.detectChanges();
+    expect(returned.componentInstance.entries()).toHaveLength(5);
   });
 });
-
-function cardTitles(fixture: ComponentFixture<AccountPortfolioPredictorsTabComponent>): string[] {
-  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__title-text'))
-    .map(element => element.textContent!.trim());
-}
-
-function facility(guid: string, name: string): IdbFacility {
-  return { guid, accountId: 'account-a', name } as IdbFacility;
-}
-
-function predictor(
-  guid: string,
-  name: string,
-  facilityId: string,
-  production: boolean,
-  predictorType: 'Standard' | 'Weather' = 'Standard',
-  weatherStationId?: string
-): any {
-  return {
-    guid,
-    accountId: 'account-a',
-    facilityId,
-    name,
-    production,
-    predictorType,
-    weatherStationId,
-    weatherStationName: weatherStationId ? `Station ${weatherStationId}` : undefined,
-    weatherDataType: predictorType === 'Weather' ? 'HDD' : undefined,
-    unit: predictorType === 'Weather' ? 'HDD' : 'tons'
-  };
-}

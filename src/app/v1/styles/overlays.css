@@ -146,3 +146,21 @@
     width: 100%;
   }
 }
+
+/* Floating tooltip content uses the same surface/text pair as its v1 theme. */
+.v1-root .v1-meter-tooltip {
+  --bs-tooltip-bg: var(--v1-surface);
+  --bs-tooltip-color: var(--v1-text);
+}
+.v1-root .v1-meter-tooltip .tooltip-inner {
+  color: var(--v1-text);
+  background: var(--v1-surface);
+  border: 1px solid var(--v1-border);
+  box-shadow: 0 .3rem .8rem var(--v1-shadow-soft);
+}
+.v1-root .v1-chart-tooltip {
+  color: var(--v1-text) !important;
+  background-color: var(--v1-surface) !important;
+  border-color: var(--v1-border) !important;
+}
+.v1-root .v1-chart-tooltip div { color: inherit; }

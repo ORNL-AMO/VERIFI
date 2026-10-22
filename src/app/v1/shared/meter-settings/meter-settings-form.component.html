@@ -1,25 +1,4 @@
 <div class="meter-settings" [class.meter-settings--single-column]="layout === 'single-column'">
-  @if (meterDataExists && showSetupUnlockControl && !setupValuesUnlocked) {
-    <div class="v1-alert v1-alert--warning meter-settings__lock-alert">
-      <app-ui-icon name="warning" class="meter-settings__lock-alert-icon"></app-ui-icon>
-      <span class="meter-settings__lock-alert-message">
-        <strong>Readings exist for this meter.</strong>
-        Setup values are locked because calculations use these settings.
-      </span>
-      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canUnlockSetup" (click)="setupUnlockRequested.emit()">
-        Change values if necessary
-      </button>
-    </div>
-  } @else if (meterDataExists && showSetupUnlockControl && setupValuesUnlocked) {
-    <div class="v1-alert v1-alert--warning meter-settings__lock-alert">
-      <app-ui-icon name="warning" class="meter-settings__lock-alert-icon"></app-ui-icon>
-      <span class="meter-settings__lock-alert-message">
-        <strong>Setup values are unlocked.</strong>
-        Changing collection values does not alter amounts already entered in meter readings.
-      </span>
-    </div>
-  }
-
   <div class="meter-settings__layout">
     <div class="meter-settings__main">
       <app-meter-settings-core-form
@@ -31,6 +10,24 @@
         (textChange)="textChange.emit()"
         (immediateChange)="immediateChange.emit($event)">
       </app-meter-settings-core-form>
+
+      @if (meterDataExists && showSetupUnlockControl && !setupValuesUnlocked) {
+        <div class="meter-settings__setup-lock" role="status">
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canUnlockSetup" aria-describedby="meter-setup-lock-message" (click)="setupUnlockRequested.emit()">
+            <app-ui-icon name="lockKeyhole"></app-ui-icon>
+            Unlock setup to edit
+          </button>
+          <span id="meter-setup-lock-message">Setup values are locked because existing readings use these settings.</span>
+        </div>
+      } @else if (meterDataExists && showSetupUnlockControl && setupValuesUnlocked) {
+        <div class="v1-alert v1-alert--warning meter-settings__lock-alert" role="status">
+          <app-ui-icon name="warning" class="meter-settings__lock-alert-icon"></app-ui-icon>
+          <span class="meter-settings__lock-alert-message">
+            <strong>Setup values are unlocked.</strong>
+            Changing collection values does not alter amounts already entered in meter readings.
+          </span>
+        </div>
+      }
 
       @if (viewModel.displayVehicle) {
         <app-meter-settings-vehicle-form

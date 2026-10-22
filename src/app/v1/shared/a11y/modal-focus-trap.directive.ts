@@ -4,6 +4,7 @@ import {
   ElementRef,
   HostListener,
   inject,
+  input,
   OnInit,
   output
 } from '@angular/core';
@@ -20,6 +21,8 @@ const FOCUSABLE_SELECTOR = [
 /** Owns focus containment, initial focus, Escape, and focus restoration for modal surfaces. */
 @Directive({ selector: '[appModalFocusTrap]', standalone: true })
 export class ModalFocusTrapDirective implements OnInit {
+  readonly modalInitialFocus = input<string>();
+  readonly modalFocusFallback = input<string>();
   readonly escapePressed = output<void>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -32,6 +35,9 @@ export class ModalFocusTrapDirective implements OnInit {
     this.destroyRef.onDestroy(() => {
       if (this.opener instanceof HTMLElement && this.opener.isConnected) {
         this.opener.focus();
+      } else {
+        const fallback = this.modalFocusFallback();
+        if (fallback) document.querySelector<HTMLElement>(fallback)?.focus();
       }
     });
   }
@@ -69,7 +75,9 @@ export class ModalFocusTrapDirective implements OnInit {
   }
 
   private focusFirst(): void {
-    const first = this.getFocusable()[0];
+    const target = this.modalInitialFocus();
+    const focusable = this.getFocusable();
+    const first = (target ? focusable.find(element => element.matches(target)) : undefined) ?? focusable[0];
     if (first) {
       first.focus();
       return;

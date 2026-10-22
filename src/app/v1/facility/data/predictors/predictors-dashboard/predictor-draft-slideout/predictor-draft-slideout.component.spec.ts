@@ -29,8 +29,8 @@ describe('PredictorDraftSlideoutComponent', () => {
     fixture.componentInstance.submit();
     expect(submitted).not.toHaveBeenCalled();
 
-    fixture.componentInstance.setName('Production');
-    fixture.componentInstance.setUnit('tons');
+    fixture.componentInstance.form.controls.name.setValue('Production');
+    fixture.componentInstance.form.controls.unit.setValue('tons');
     fixture.componentInstance.submit();
 
     expect(submitted).toHaveBeenCalledWith(expect.objectContaining({

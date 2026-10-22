@@ -29,13 +29,7 @@ export class FacilityAnalysisGroupSetupFacade {
     const facility = this.workbench.facility();
     if (!facility) return [];
     return buildMeterCards(
-      this.groupContext.meters(),
-      this.workbench.workspace.facilityMeterData(),
-      this.workbench.meterGroups(),
-      this.workbench.status.items(),
-      facility,
-      [],
-      this.workbench.status.state() === 'ready'
+      this.groupContext.meters(), this.workbench.workspace.facilityMeterData(), this.workbench.meterGroups(), this.workbench.status.items(), this.workbench.status.state() === 'ready'
     ).map(card => ({
       ...card,
       route: this.navigation.facilityMeterRoute(facility.guid, card.meter.guid, 'settings'),

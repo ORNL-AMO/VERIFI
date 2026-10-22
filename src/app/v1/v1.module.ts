@@ -1,3 +1,4 @@
+import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports.module';
 import { AccountReportsModule } from '@app/v1/account/reports/account-reports.module';
 import { CommonModule } from '@angular/common';
@@ -44,6 +45,7 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     NotificationsModule,
     PortalModule,
     ScrollingModule,
+    NavigationMotionDirective,
     AccountDataModule,
     FacilityDataModule,
     FacilityReportsModule,

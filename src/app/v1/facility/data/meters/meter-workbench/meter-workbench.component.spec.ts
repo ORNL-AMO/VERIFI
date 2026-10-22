@@ -1,3 +1,5 @@
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { Directive, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
@@ -76,22 +78,22 @@ describe('MeterWorkbenchComponent', () => {
 
     const element: HTMLElement = fixture.nativeElement;
     const text = element.textContent;
-    const breadcrumb = element.querySelector('[aria-label="Meter breadcrumb"]');
-    expect(fixture.componentInstance.accountMetersRoute()).toEqual([
+    const breadcrumb = element.querySelector('[aria-label="Data context"]');
+    expect(fixture.componentInstance.breadcrumbs()[0].route).toEqual([
       '/v1',
       'workspace',
       'account',
       'account-a',
       'data',
       'portfolio',
-      'meters'
+      'facilities'
     ]);
     expect(breadcrumb?.textContent).toContain('Account A');
     expect(breadcrumb?.textContent).toContain('Facility A');
-    expect(breadcrumb?.textContent).toContain('Meters');
+    expect(breadcrumb?.textContent).not.toContain('Meters');
     expect(breadcrumb?.textContent).not.toContain('Electric Main');
-    expect(breadcrumb?.querySelectorAll('app-ui-icon').length).toBe(2);
-    expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
+    expect(breadcrumb?.querySelectorAll('app-ui-icon').length).toBe(1);
+    expect(element.querySelector('app-page-identity h1')?.textContent).toContain('Electric Main');
     expect(element.querySelector('.v1-eyebrow')).toBeNull();
     expect(text).toContain('Other Fuels');
     expect(text).toContain('Needs review');
@@ -133,6 +135,7 @@ describe('MeterWorkbenchComponent', () => {
 
   it('collapses and restores meter facts while keeping the heading and tabs available', () => {
     const fixture = setup({
+      factsExpanded: true,
       selectedMeterCard: {
         ...defaultMeterCard(),
         statusActionSummaries: ['A calendarization method is required.']
@@ -159,7 +162,7 @@ describe('MeterWorkbenchComponent', () => {
     expect(getComputedStyle(factsRegion as HTMLElement).display).toBe('none');
     expect(element.querySelector('.v1-data-workbench-status-notes')?.textContent)
       .toContain('A calendarization method is required.');
-    expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
+    expect(element.querySelector('app-page-identity h1')?.textContent).toContain('Electric Main');
     expect(element.querySelector('app-data-workbench-tabs')).not.toBeNull();
 
     toggle?.click();
@@ -190,7 +193,7 @@ describe('MeterWorkbenchComponent', () => {
     expect(actions?.textContent).toContain('Site');
     expect(actions?.textContent).toContain('Source');
     expect(actions?.textContent).not.toContain('Facility default');
-    expect(actions?.lastElementChild?.previousElementSibling?.textContent).toContain('Hide facts');
+    expect(actions?.lastElementChild?.previousElementSibling?.textContent).toContain('Show facts');
   });
 
   it('selects the inherited facility energy unit on initial render', () => {
@@ -284,7 +287,7 @@ describe('MeterWorkbenchComponent', () => {
     const element: HTMLElement = fixture.nativeElement;
     expect(element.querySelector('.v1-meter-workbench-header__facts-toggle')?.getAttribute('aria-expanded')).toBe('false');
     expect(element.querySelector<HTMLElement>('#v1-meter-workbench-facts')?.hidden).toBe(true);
-    expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
+    expect(element.querySelector('app-page-identity h1')?.textContent).toContain('Electric Main');
     expect(element.querySelector('app-data-workbench-tabs')).not.toBeNull();
   });
 
@@ -306,15 +309,7 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-    buttons.find(button => button.textContent?.trim() === 'Meters')?.click();
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters'
-    ]);
+    expect(fixture.componentInstance.breadcrumbs()[1].route).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters']);
 
     buttons.find(button => button.textContent?.includes('Quality Report'))?.click();
     expect(router.navigate).toHaveBeenCalledWith([
@@ -348,8 +343,8 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    expect(element.querySelector('[aria-label="Meter breadcrumb"]')?.textContent).not.toContain('Electric Main');
-    expect(element.querySelector('.v1-meter-workbench-header__meter-title .v1-data-workbench-switcher-toggle')).not.toBeNull();
+    expect(element.querySelector('[aria-label="Data context"]')?.textContent).not.toContain('Electric Main');
+    expect(element.querySelector('app-page-identity h1 .v1-data-workbench-switcher-toggle')).not.toBeNull();
     element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
 
@@ -628,7 +623,7 @@ function setup(options: {
   const hasMeterRoute = signal(options.hasMeterRoute ?? true);
   const calendarizationState = signal(options.calendarizationState ?? 'ready');
   const selectedMeterUsageFacts = signal(options.selectedMeterUsageFacts ?? usageFactsView());
-  const factsExpanded = signal(options.factsExpanded ?? true);
+  const factsExpanded = signal(options.factsExpanded ?? false);
   const routerEvents = new Subject<NavigationEnd>();
 
   TestBed.configureTestingModule({
@@ -637,7 +632,7 @@ function setup(options: {
       RouterOutletStubDirective,
       RouterLinkStubDirective
     ],
-    imports: [
+    imports: [BrowseHeaderDirective, PageIdentityComponent,
       CommonModule,
       DataWorkbenchFactsToggleComponent,
       DataWorkbenchResourceSwitcherComponent,
@@ -695,7 +690,8 @@ function setup(options: {
             meterGuid,
             tab
           ],
-          accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
+          accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
+      accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
             '/v1',
             'workspace',
             'account',

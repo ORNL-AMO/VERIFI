@@ -89,6 +89,70 @@ describe('FacilityReportAutosaveService', () => {
     expect(editor.saving()).toBe(false);
   });
 
+  it('preserves a space typed during a delayed save through completion and workspace hydration', async () => {
+    let resolve!: (report: ReturnType<typeof reportFixture>) => void;
+    updateName.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+    editor.name.setValue('Energy');
+    const saving = editor.flush();
+    editor.name.setValue('Energy ');
+    const committed = reportFixture({ name: 'Energy' });
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [committed] }] });
+    TestBed.tick();
+    expect(editor.name.value).toBe('Energy ');
+    resolve(committed);
+    expect(await saving).toBe(true);
+    expect(editor.name.value).toBe('Energy ');
+    TestBed.tick();
+    expect(editor.name.value).toBe('Energy ');
+    expect(editor.state()).toBe('saved');
+    expect(editor.saving()).toBe(false);
+    expect(updateName).toHaveBeenCalledTimes(1);
+
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [{ ...committed }] }] });
+    TestBed.tick();
+    expect(editor.name.value).toBe('Energy ');
+    editor.name.setValue(`${editor.name.value}Use`);
+    expect(await editor.flush()).toBe(true);
+    expect(store.facilityReports()[0].name).toBe('Energy Use');
+  });
+
+  it('retains whitespace-only edits on a workspace refresh without issuing a redundant save', async () => {
+    editor.name.setValue('Saved report ');
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [reportFixture()] }] });
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(REPORT_AUTOSAVE_DEBOUNCE_MS);
+    expect(editor.name.value).toBe('Saved report ');
+    expect(editor.state()).toBe('saved');
+    expect(updateName).not.toHaveBeenCalled();
+    editor.discard();
+    expect(editor.name.value).toBe('Saved report');
+  });
+
+  it('retains newer raw edits even when the user returns to the submitted input', async () => {
+    let resolve!: (report: ReturnType<typeof reportFixture>) => void;
+    updateName.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+    editor.name.setValue(' Energy ');
+    const saving = editor.flush();
+    editor.name.setValue(' Energy U');
+    editor.name.setValue(' Energy ');
+    const committed = reportFixture({ name: 'Energy' });
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [committed] }] });
+    resolve(committed);
+    expect(await saving).toBe(true);
+    TestBed.tick();
+    expect(editor.name.value).toBe(' Energy ');
+    expect(updateName).toHaveBeenCalledTimes(1);
+  });
+
+  it('hydrates committed updates again after edits are reverted to the exact saved name', () => {
+    editor.name.setValue('Draft');
+    editor.name.setValue('Saved report');
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [reportFixture({ name: 'Updated report' })] }] });
+    TestBed.tick();
+    expect(editor.name.value).toBe('Updated report');
+    expect(updateName).not.toHaveBeenCalled();
+  });
+
   it('does not overwrite a new report draft when an old save finishes after context changes', async () => {
     let resolve!: (report: ReturnType<typeof reportFixture>) => void;
     updateName.mockImplementationOnce(() => new Promise(done => { resolve = done; }));

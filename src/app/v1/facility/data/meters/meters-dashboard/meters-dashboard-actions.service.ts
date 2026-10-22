@@ -30,11 +30,19 @@ export class MetersDashboardActionsService {
     return canAssignMeterToGroup(meter, target.group);
   }
 
-  async createMeter(draft: MeterDraft): Promise<IdbUtilityMeter> {
+  async createMeter(draft: MeterDraft, facilityGuid = this.workspace.selectedFacility()?.guid): Promise<IdbUtilityMeter> {
     const account = this.requireAccount();
-    const facility = this.requireFacility();
+    const facility = this.workspace.facilities().find(item => item.guid === facilityGuid && item.accountId === account.guid);
+    if (!facility) {
+      throw new WorkspaceWriteError('validation-failed', 'Select a facility in the active account.');
+    }
     const name = this.requireName(draft.name, 'Meter name is required.');
-    const group = this.resolveGroup(draft.groupId);
+    const group = draft.groupId ? this.workspace.meterGroups().find(item =>
+      item.guid === draft.groupId && item.facilityId === facility.guid && item.accountId === account.guid
+    ) : undefined;
+    if (draft.groupId && !group) {
+      throw new WorkspaceWriteError('validation-failed', 'The meter group is not part of the selected facility.');
+    }
     if (!canAssignSourceToGroup(draft.source, group)) {
       throw new WorkspaceWriteError('validation-failed', `${draft.source} meters cannot be assigned to ${group?.groupType} groups.`);
     }
@@ -122,6 +130,28 @@ export class MetersDashboardActionsService {
       },
       () => this.meterHandler.deleteMeterWithData({ meter: current, meterData }, account.guid)
     );
+  }
+
+  async deleteMeters(meterGuids: readonly string[]): Promise<void> {
+    const account = this.requireAccount();
+    const facility = this.requireFacility();
+    const unique = [...new Set(meterGuids)];
+    if (!unique.length) return;
+    const changes = unique.map(guid => {
+      const meter = this.requireWorkspaceMeter(guid);
+      if (meter.facilityId !== facility.guid) {
+        throw new WorkspaceWriteError('validation-failed', 'Select meters from the current facility.');
+      }
+      return { meter, meterData: this.workspace.meterData().filter(reading => reading.meterId === guid) };
+    });
+    await this.commandBoundary.execute({
+      entityKind: 'meter', changeKind: 'bulk', entityGuid: facility.guid,
+      label: 'Deleting meters and readings', publication: { mode: 'reload' },
+      notification: {
+        successTitle: unique.length === 1 ? 'Meter deleted' : 'Meters deleted',
+        successMessage: `${unique.length} ${unique.length === 1 ? 'meter' : 'meters'} deleted`
+      }
+    }, () => this.meterHandler.deleteMetersWithData(changes, account.guid));
   }
 
   async createGroup(draft: MeterGroupDraft): Promise<IdbUtilityMeterGroup> {
@@ -295,13 +325,6 @@ export class MetersDashboardActionsService {
       throw new WorkspaceWriteError('validation-failed', 'The meter group is not part of the selected facility.');
     }
     return group;
-  }
-
-  private resolveGroup(groupGuid: string | undefined): IdbUtilityMeterGroup | undefined {
-    if (!groupGuid) {
-      return undefined;
-    }
-    return this.requireWorkspaceGroup(groupGuid);
   }
 
   private requireName(value: string, message: string): string {

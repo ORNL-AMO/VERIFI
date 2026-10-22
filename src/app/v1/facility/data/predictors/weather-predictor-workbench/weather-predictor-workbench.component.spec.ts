@@ -80,7 +80,7 @@ describe('WeatherPredictorWorkbenchComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            accountDataRoute: () => ['/account', 'data'],
+            accountDataReturnRoute: () => ['/account', 'data'],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: (_facility: string, predictor: string, tab: string) =>
               ['/predictors', predictor, tab],
@@ -98,6 +98,7 @@ describe('WeatherPredictorWorkbenchComponent', () => {
         {
           provide: FacilityPredictorsWorkspaceService,
           useValue: {
+            statusState: signal('ready'),
             account: signal({ guid: 'account-a', name: 'Account A' }),
             facility: signal({ guid: 'facility-a', name: 'Facility A' }),
             creatingWeatherGroup: signal(false),
@@ -128,7 +129,7 @@ describe('WeatherPredictorWorkbenchComponent', () => {
     expect(fixture.nativeElement.querySelector('.weather-workbench__predictors')?.textContent).toContain('HDD 65');
     expect(fixture.nativeElement.querySelector('.weather-workbench__predictors')?.textContent).toContain('CDD 70');
     expect(fixture.nativeElement.querySelectorAll('.v1-data-workbench-actions .v1-chip')).toHaveLength(1);
-    expect(fixture.nativeElement.querySelector('.v1-data-workbench-actions')?.textContent).toContain('Needs review');
+    expect(fixture.nativeElement.querySelector('.v1-data-workbench-actions')?.textContent).toContain('Has warnings');
     expect(fixture.nativeElement.textContent).not.toContain('output');
     expect(fixture.nativeElement.querySelector('.v1-data-workbench-status-notes')?.textContent)
       .toContain('Readings: Review weather data — 2 predictors: CDD 70, HDD 65');

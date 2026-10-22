@@ -1,7 +1,9 @@
+import { analysisDependencyMessage as facilityAnalysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
+import { PageBreadcrumb, PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -23,7 +25,7 @@ import { presentFinding } from '@app/v1/status/status.catalog';
   selector: 'app-facility-analysis-workbench-header',
   standalone: true,
   imports: [
-    RouterLink,
+    PageIdentityComponent,
     IconComponent,
     DataWorkbenchFactsToggleComponent,
     DataWorkbenchResourceSwitcherComponent,
@@ -40,6 +42,13 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly accountAnalysisReturn = inject(AccountAnalysisReturnService);
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
+    const account = this.context.account(), facility = this.context.facility();
+    return facility ? [
+      { label: account?.name || 'Account', route: account && !this.navigation.isSingleSiteWorkspace() ? this.navigation.accountAnalysisRoute(account.guid) : undefined },
+      { label: facility.name || 'Facility', route: this.navigation.facilityAnalysisRoute(facility.guid) }
+    ] : [];
+  });
   readonly statusNotes = computed(() => facilityAnalysisHeaderFindings(this.context.findings()));
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
@@ -124,26 +133,4 @@ export function facilityAnalysisResultOutcome(
     state: 'ready',
     summary: facilityAnalysisOutcomeSummary(state.annual, state.monthly, state.reportYear, facility)
   };
-}
-
-export function facilityAnalysisDependencyMessage(
-  accountAnalysisCount: number,
-  reportCount: number,
-  bankingConsumerCount: number
-): string | undefined {
-  const dependencies = [
-    dependencyCountLabel(accountAnalysisCount, 'account analysis', 'account analyses'),
-    dependencyCountLabel(reportCount, 'report', 'reports'),
-    dependencyCountLabel(bankingConsumerCount, 'banking consumer', 'banking consumers')
-  ].filter((label): label is string => !!label);
-
-  if (!dependencies.length) return undefined;
-  if (dependencies.length === 1) return `Changes can affect ${dependencies[0]}.`;
-  if (dependencies.length === 2) return `Changes can affect ${dependencies[0]} and ${dependencies[1]}.`;
-  return `Changes can affect ${dependencies[0]}, ${dependencies[1]}, and ${dependencies[2]}.`;
-}
-
-function dependencyCountLabel(count: number, singular: string, plural: string): string | undefined {
-  if (!count) return undefined;
-  return `${count} ${count === 1 ? singular : plural}`;
 }

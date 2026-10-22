@@ -1,3 +1,7 @@
+import { Injector, signal } from '@angular/core';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-actions.service';
 import { firstValueFrom } from 'rxjs';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
@@ -334,6 +338,47 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     expect(await harness.getAll('analysisItems')).toContainEqual(expect.objectContaining({
       guid: 'facility-analysis-copy'
     }));
+  });
+
+  it('commits account-inventory actions for an unselected facility and preserves dependency protection after reopening', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const owner = { ...accountAFixture.facility, id: 900, guid: 'unselected-facility', accountId: accountGuid,
+      sustainabilityQuestions: { energyReductionBaselineYear: 2022 }, energyUnit: 'MMBtu', volumeLiquidUnit: 'gal', energyIsSource: true };
+    const ownerGroup = { ...accountAFixture.meterGroup, id: 900, guid: 'unselected-group', facilityId: owner.guid, groupType: 'Energy' };
+    await harness.seed({ facilities: [owner], utilityMeterGroups: [ownerGroup] });
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+    const selected = signal(accountAFixture.facility), analyses = signal<IdbAnalysisItem[]>([]);
+    const injector = Injector.create({ providers: [FacilityAnalysisActionsService,
+      { provide: AccountWorkspaceStore, useValue: { account: signal({ ...accountAFixture.account, sustainabilityQuestions: { energyReductionBaselineYear: 2022 } }),
+        selectedFacility: selected, facilities: signal([accountAFixture.facility, owner]), facilityAnalyses: analyses, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([ownerGroup]), predictors: signal([]) } },
+      { provide: AnalysisCommandHandler, useValue: handler },
+      { provide: WorkspaceCommandBoundary, useValue: { execute: async (_options: unknown, persist: () => Promise<unknown>) => ({ value: await persist() }) } }
+    ] });
+    try {
+      const actions = injector.get(FacilityAnalysisActionsService);
+      const original = await actions.createAnalysis('energy', owner.guid); analyses.set([original]);
+      expect(original.facilityId).toBe(owner.guid); expect(original.groups.map(group => group.idbGroupId)).toEqual([ownerGroup.guid]);
+      expect(selected()).toEqual(accountAFixture.facility);
+      const copy = await actions.copyAnalysis(original.guid, owner.guid); analyses.set([original, copy]);
+      expect(copy.guid).not.toBe(original.guid); expect(copy.facilityId).toBe(owner.guid);
+      await actions.setActiveAnalysis(copy.guid, owner.guid);
+      expect(await harness.getAll('facilities')).toContainEqual(expect.objectContaining({ guid: owner.guid, selectedEnergyAnalysisId: copy.guid }));
+      await transactionService.runTransaction(['accountAnalysisItems', 'facilityReports'], 'readwrite', async tx => {
+        await tx.put('accountAnalysisItems', { ...accountAFixture.accountAnalysis, facilityAnalysisItems: [{ facilityId: owner.guid, analysisItemId: copy.guid }] });
+        await tx.add('facilityReports', { guid: 'unselected-report', accountId: accountGuid, facilityId: owner.guid, analysisItemId: copy.guid });
+      });
+      await expect(actions.deleteAnalysis(copy.guid, owner.guid)).rejects.toThrow('linked facility report');
+      const report = (await harness.getAll('facilityReports')).find(item => item.guid === 'unselected-report')!;
+      await transactionService.runTransaction(['facilityReports'], 'readwrite', tx => tx.deleteByKey('facilityReports', report.id!));
+      await actions.deleteAnalysis(copy.guid, owner.guid);
+      expect(selected()).toEqual(accountAFixture.facility);
+      await harness.reopen();
+      expect((await harness.getAll('analysisItems')).some(item => item.guid === copy.guid)).toBe(false);
+      expect(await harness.getAll('analysisItems')).toContainEqual(expect.objectContaining({ guid: original.guid, facilityId: owner.guid, baselineYear: 2022 }));
+      expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({ facilityAnalysisItems: [{ facilityId: owner.guid, analysisItemId: undefined }] }));
+      expect(await harness.getAll('facilities')).toContainEqual(expect.objectContaining({ guid: owner.guid, selectedEnergyAnalysisId: undefined }));
+      expect(await harness.getAll('analysisItems')).toContainEqual(accountBFixture.facilityAnalysis);
+    } finally { injector.destroy(); }
   });
 
   it('leaves the database unchanged when a report or banking workflow blocks analysis deletion', async () => {

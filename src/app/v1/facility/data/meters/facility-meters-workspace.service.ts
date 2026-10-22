@@ -3,7 +3,6 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -64,6 +63,7 @@ export class FacilityMetersWorkspaceService {
     });
     return { state: 'ready' as const, meters };
   });
+  readonly statusState = this.status.state;
   readonly meterFindings = computed(() => this.status.items().filter(item => item.entity.kind === 'meter' && item.entity.facilityGuid === this.facility()?.guid));
   readonly calendarizationState = computed<'idle' | 'loading' | 'ready' | 'error'>(() => {
     const state = this.calendarizationResult().state;
@@ -77,13 +77,7 @@ export class FacilityMetersWorkspaceService {
     : []);
   readonly calendarizedMeters = computed(() => this.meterDisplayProjection()?.meters ?? []);
   readonly meterCards = computed(() => buildMeterCards(
-    this.meters(),
-    this.meterData(),
-    this.meterGroups(),
-    this.meterFindings(),
-    this.facility(),
-    this.calendarizedMeters(),
-    this.status.state() === 'ready'
+    this.meters(), this.meterData(), this.meterGroups(), this.meterFindings(), this.status.state() === 'ready'
   ));
   readonly groupSections = computed(() => buildMeterGroupSections(
     this.meters(),
@@ -143,11 +137,6 @@ export class FacilityMetersWorkspaceService {
       .subscribe(event => this.currentUrl.set(event.urlAfterRedirects));
 
   }
-
-  countReadings(meter: IdbUtilityMeter): number {
-    return this.meterData().filter(reading => reading.meterId === meter.guid).length;
-  }
-
 }
 
 function parseSelectedMeterGuid(url: string): string | undefined {

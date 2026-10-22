@@ -9,11 +9,13 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { StatusItem } from '@app/v1/status/status.models';
+import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
+import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
+import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 export type ContextMode = 'account' | 'facility';
-export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
+export type WorkspaceRouteMotion = NavigationMotion;
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
 export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
@@ -25,7 +27,7 @@ export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'month
 export type AccountAnalysisRouteTab = 'setup' | 'select-items' | 'used-by';
 export type AccountAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details' | 'facility-contributions';
 export type AccountAnalysisStageScope = 'setup' | 'select-items' | 'results' | 'used-by';
-export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
+export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 export type FacilityAnalysisStageScope = 'analysis' | 'group' | 'facility' | 'used-by';
@@ -62,6 +64,7 @@ export interface AccountDropdownOption {
 }
 
 export interface RouteState {
+  readonly portfolioTab?: AccountPortfolioTab;
   readonly view: 'welcome' | 'workspace';
   readonly contextMode: ContextMode;
   readonly accountGuid?: string;
@@ -86,7 +89,7 @@ export interface RouteState {
 export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
   { id: 'home', label: 'Home', shortLabel: 'Home', icon: 'home', enabled: true },
   { id: 'data', label: 'Data', shortLabel: 'Data', icon: 'database', enabled: false },
-  { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'chartLine', enabled: false },
+  { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'dataVisualization', enabled: false },
   { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'analysis', enabled: false },
   { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'reports', enabled: false },
   { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'settings', enabled: true },
@@ -137,6 +140,7 @@ export class WorkspaceNavigationService {
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly status = inject(WorkspaceStatusService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
+  private readonly browseState = inject(BrowseStateService);
   private readonly currentUrl = signal(this.router.url);
   private readonly previousUrl = signal(this.router.url);
   private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
@@ -153,10 +157,12 @@ export class WorkspaceNavigationService {
 
   readonly routeState = computed(() => parseWorkspaceRoute(this.currentUrl()));
   readonly routeMotion = computed(() => this.resolveRouteMotion());
+  readonly routeMotionKey = this.currentUrl.asReadonly();
   readonly isWorkspaceRoute = computed(() => this.routeState().view === 'workspace');
   readonly contextMode = computed(() => this.routeState().contextMode);
   readonly activeSection = computed(() => this.routeState().section);
   readonly activeDetail = computed(() => this.routeState().detail);
+  readonly activePortfolioTab = computed(() => this.routeState().portfolioTab);
   readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
@@ -188,6 +194,13 @@ export class WorkspaceNavigationService {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(event => {
+        const previous = parseWorkspaceRoute(this.currentUrl());
+        const next = parseWorkspaceRoute(event.urlAfterRedirects);
+        if (previous.accountGuid && previous.section === 'data' && next.contextMode === 'facility'
+          && (previous.portfolioTab === 'facilities' || previous.portfolioTab === 'meters' || previous.portfolioTab === 'predictors')
+          && this.workspace.facilities().some(facility => facility.guid === next.facilityGuid && facility.accountId === previous.accountGuid)) {
+          this.browseState.setOrigin(previous.accountGuid, previous.portfolioTab);
+        }
         this.previousUrl.set(this.currentUrl());
         this.currentUrl.set(event.urlAfterRedirects);
       });
@@ -254,16 +267,36 @@ export class WorkspaceNavigationService {
   }
 
   setFacility(facilityGuid: string): void {
+    if (!this.facilities().some(facility => facility.guid === facilityGuid)) return;
     const state = this.routeState();
-    if (state.section === 'reports' && state.detail === 'workbench') {
-      // The workbench guard must save or retain its draft before the readiness guard selects another facility.
-      void this.router.navigate(this.facilityReportsRoute(facilityGuid));
-      return;
-    }
-    if (!this.unsavedChanges.confirmDiscard()) return;
-    this.workspaceService.selectFacility(facilityGuid);
-    void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
+    const reportWorkbench = state.section === 'reports' && state.detail === 'workbench';
+    // Report guards flush or retain the draft before readiness guards select another facility.
+    if (!reportWorkbench && !this.unsavedChanges.confirmDiscard()) return;
+    this.contextNavigationError.set('');
+    const route = reportWorkbench ? this.facilityReportsRoute(facilityGuid)
+      : this.facilityRouteForSection(facilityGuid, state.section, state.contextMode === 'account' && state.portfolioTab === 'predictors' ? 'predictors' : state.detail);
+    void this.router.navigate(route)
+      .catch(() => this.contextNavigationError.set('The facility could not be opened. Please try again.'));
   }
+
+  accountDataReturnRoute(accountGuid: string): string[] {
+    return this.accountPortfolioRoute(accountGuid, this.browseState.origin(accountGuid));
+  }
+
+  readonly contextNavigationError = signal('');
+
+  readonly accountReturn = computed(() => {
+    const account = this.account();
+    if (!account || this.contextMode() !== 'facility') return undefined;
+    const section = this.activeSection();
+    if (this.isSingleSiteWorkspace() && section !== 'data' && section !== 'reports') return undefined;
+    if (section === 'data') {
+      const origin = this.browseState.origin(account.guid);
+      return { label: origin === 'predictors' ? 'Account Predictors' : origin === 'meters' ? 'Account Meters' : 'Account Facilities', route: this.accountDataReturnRoute(account.guid) };
+    }
+    return { label: section === 'home' ? 'Account overview' : `Account ${section === 'analysis' ? 'analyses' : section}`,
+      route: this.accountRouteForSection(account.guid, section, this.activeDetail()) };
+  });
 
   setPanelTab(panelTab: PanelTabId): void {
     this.activePanelTabState.set(panelTab);
@@ -587,6 +620,9 @@ export class WorkspaceNavigationService {
     const predictorCount = isFacility ? this.workspace.facilityPredictors().length : this.workspace.predictors().length;
     const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
     const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
+    const isData = this.activeSection() === 'data';
+    const todos = isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos();
+    const discardedWarnings = isFacility ? this.status.selectedFacilityDiscardedWarnings() : this.status.accountDiscardedWarnings();
     const help = this.activeSection() === 'reports'
       ? ['Use the facility dashboard to create, copy, and delete saved reports. Report-specific settings and previews are coming in later migrations.', 'The account Reports landing links to facility dashboards; account report management is coming in phase 3.']
       : isFacility && this.activeSection() === 'data'
@@ -598,16 +634,16 @@ export class WorkspaceNavigationService {
 
     return {
       help,
-      todos: isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos(),
-      discardedWarnings: isFacility
-        ? this.status.selectedFacilityDiscardedWarnings()
-        : this.status.accountDiscardedWarnings(),
+      todos: isData ? todos.filter(isDataFinding) : todos,
+      discardedWarnings: isData ? discardedWarnings.filter(isDataFinding) : discardedWarnings,
       results: [
         { label: 'Facilities', value: String(this.facilities().length), tone: 'info' },
         { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },
         { label: 'Predictors', value: String(predictorCount), tone: predictorCount > 0 ? 'success' : 'neutral' },
-        { label: 'Analyses', value: String(analysisCount), tone: analysisCount > 0 ? 'success' : 'neutral' },
-        { label: 'Reports', value: String(reportCount), tone: reportCount > 0 ? 'success' : 'neutral' }
+        ...(!isData ? [
+          { label: 'Analyses', value: String(analysisCount), tone: analysisCount > 0 ? 'success' as const : 'neutral' as const },
+          { label: 'Reports', value: String(reportCount), tone: reportCount > 0 ? 'success' as const : 'neutral' as const }
+        ] : [])
       ],
       details: [
         { label: 'Context', value: isFacility ? 'Facility workspace' : 'Account workspace' },
@@ -621,20 +657,32 @@ export class WorkspaceNavigationService {
     const previous = parseWorkspaceRoute(this.previousUrl());
     const current = this.routeState();
 
-    if (previous.view === 'welcome' && current.view === 'workspace') {
-      return 'workspace-entry';
-    }
-    if (previous.view === 'workspace' && current.view === 'workspace' && previous.contextMode !== current.contextMode) {
-      return current.contextMode === 'facility' ? 'facility-drill-in' : 'account-drill-out';
-    }
+    const depth = (route: RouteState, url: string): number | undefined => {
+      if (route.view !== 'workspace') return undefined;
+      if (route.section === 'analysis') return route.contextMode === 'account' ? route.analysisGuid ? 1 : 0 : route.analysisGuid ? 2 : 1;
+      if (route.section !== 'data') return undefined;
+      if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' || route.portfolioTab === 'predictors' ? 0 : undefined;
+      if (route.detail === 'predictors') return route.predictorGuid || route.weatherPredictorGroupKey || url.includes('/predictors/weather/new') ? 2 : 1;
+      if (route.detail === 'meter-grouping') return route.meterGroupGuid ? 2 : 1;
+      return route.detail === 'meters' ? route.meterGuid ? 2 : 1 : undefined;
+    };
+    const before = depth(previous, this.previousUrl());
+    const after = depth(current, this.currentUrl());
+    if (before === undefined || after === undefined || previous.section !== current.section) return 'none';
+    const accountFor = (route: RouteState) => route.accountGuid || this.facilities().find(facility => facility.guid === route.facilityGuid)?.accountId;
+    const accountGuid = accountFor(current);
+    if (!accountGuid || accountGuid !== accountFor(previous)) return 'none';
+    if (previous.facilityGuid && current.facilityGuid && previous.facilityGuid !== current.facilityGuid) return 'peer';
+    if (after !== before) return after > before ? 'drill-in' : 'drill-out';
+    if (previous.analysisGuid !== current.analysisGuid || previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
     return 'none';
   }
 
   private buildFacilityDataHelp(): ReadonlyArray<string> {
     if (this.activeDetail() === 'meters') {
       return [
-        'Use Meters to review facility meters and open a meter workbench. Each card shows its assigned group in the footer.',
-        'Open a meter card to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
+        'Use Meters to search facility meters and compare their available monthly energy, water, and cost data.',
+        'Open a meter name for its workbench. Use the actions menu for readings, copy, and delete, or Select meters to delete several together.'
       ];
     }
     if (this.activeDetail() === 'meter-grouping') {
@@ -734,6 +782,9 @@ export function parseWorkspaceRoute(url: string): RouteState {
     view: 'workspace',
     contextMode: 'account',
     accountGuid: routeParts[2],
+    portfolioTab: section === 'data' && routeParts[4] === 'portfolio'
+      ? (['facilities', 'meters', 'predictors', 'energy-uses'].includes(routeParts[5]) ? routeParts[5] as AccountPortfolioTab : 'facilities')
+      : undefined,
     section,
     detail: routeParts[4] || DEFAULT_DETAILS[section],
     analysisGuid: isAccountAnalysisWorkbenchRoute

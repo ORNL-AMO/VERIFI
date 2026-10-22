@@ -7,6 +7,7 @@ export interface MeterResultsChartMetric {
   readonly unit?: string;
   readonly currency?: boolean;
   readonly color?: string;
+  readonly lineStyle?: 'solid' | 'dashed' | 'dotted' | readonly number[];
 }
 
 export interface MeterResultsChartComparisonBand {

@@ -305,3 +305,10 @@
     font-size: 1.72rem;
   }
 }
+
+/* Data drill-down screens share one content edge and header rhythm. */
+.v1-root .v1-account-portfolio,
+.v1-root .v1-facility-meters { padding: clamp(1rem, 3vw, 1.5rem); }
+.v1-root .v1-page-header { padding: 1rem; min-width: 0; }
+.v1-root .v1-page-header app-page-identity { min-width: 0; }
+.v1-root .v1-page-header .v1-btn { font-size: 1rem; font-weight: 800; line-height: 1.5; }

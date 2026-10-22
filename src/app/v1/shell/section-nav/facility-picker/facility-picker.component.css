@@ -60,18 +60,13 @@
   opacity: .6;
 }
 
-.v1-facility-picker__backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-}
+.v1-facility-picker__surface.v1-root { height: auto; min-height: 0; max-height: 100%; overflow: visible; background: transparent; }
 
 .v1-facility-picker__menu {
-  position: absolute;
-  top: calc(100% + .35rem);
-  left: 0;
-  right: 0;
-  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 2rem);
+  margin-top: .35rem;
   padding: .4rem;
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius-sm);
@@ -80,6 +75,7 @@
 }
 
 .v1-facility-picker__search {
+  flex-shrink: 0;
   position: relative;
   padding: .35rem .4rem;
   border-bottom: 1px solid var(--v1-border);
@@ -115,7 +111,8 @@
   display: flex;
   flex-direction: column;
   gap: .1rem;
-  max-height: 18rem;
+  max-height: min(32rem, 70dvh);
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -175,3 +172,5 @@
     transition: none;
   }
 }
+
+.v1-facility-picker__toggle:disabled { opacity: .55; cursor: not-allowed; }

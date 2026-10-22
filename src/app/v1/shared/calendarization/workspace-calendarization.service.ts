@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { CalanderizedMeter } from '@data/models/calanderization';
@@ -36,21 +36,24 @@ interface CalendarizationWorkerResponse {
 
 interface WorkspaceCalendarizationInput {
   readonly ready: boolean;
+  readonly attempt: number;
   readonly request?: BuiltWorkspaceCalendarizationRequest;
 }
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceCalendarizationService {
   private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly retryAttempt = signal(0);
   private readonly currentInput = computed<WorkspaceCalendarizationInput>(() => {
     const snapshot = this.workspace.snapshot();
     return this.workspace.isReady() && snapshot
-      ? { ready: true, request: buildWorkspaceCalendarizationRequest(snapshot) }
-      : { ready: false };
+      ? { ready: true, attempt: this.retryAttempt(), request: buildWorkspaceCalendarizationRequest(snapshot) }
+      : { ready: false, attempt: this.retryAttempt() };
   });
   readonly currentInputFingerprint = computed(() => this.currentInput().request?.inputFingerprint);
   private readonly input$ = toObservable(this.currentInput).pipe(
     distinctUntilChanged((first, second) => first.ready === second.ready
+      && first.attempt === second.attempt
       && first.request?.accountGuid === second.request?.accountGuid
       && first.request?.inputFingerprint === second.request?.inputFingerprint)
   );
@@ -63,6 +66,11 @@ export class WorkspaceCalendarizationService {
 
   calendarizeBase(): Observable<WorkspaceCalendarizationBaseResult> {
     return this.baseResult$;
+  }
+
+  /** Explicit retry reuses the current snapshot and existing shared Worker lifecycle. */
+  retry(): void {
+    this.retryAttempt.update(attempt => attempt + 1);
   }
 
   project(

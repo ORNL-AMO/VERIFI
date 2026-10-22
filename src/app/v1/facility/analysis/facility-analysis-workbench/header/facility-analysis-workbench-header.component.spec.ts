@@ -1,3 +1,4 @@
+import { analysisDependencyMessage as facilityAnalysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -12,7 +13,6 @@ import { FacilityAnalysisResultsService } from '../results/calculation/facility-
 import { AccountAnalysisReturnService } from '../navigation/account-analysis-return.service';
 import {
   FacilityAnalysisWorkbenchHeaderComponent,
-  facilityAnalysisDependencyMessage,
   facilityAnalysisResultOutcome
 } from './facility-analysis-workbench-header.component';
 
@@ -71,6 +71,7 @@ describe('facility analysis workbench header', () => {
       destination: { kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'regression' }
     }]);
     const factsExpanded = signal(true);
+    const singleSite = signal(false);
     const returnOrigin = signal({ accountGuid: 'account-a', accountAnalysisGuid: 'account-analysis-a', facilityGuid: 'facility-a' });
     const returnToAccountAnalysis = vi.fn();
     await TestBed.configureTestingModule({
@@ -115,8 +116,8 @@ describe('facility analysis workbench header', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            accountPortfolioRoute: (accountGuid: string, tab: string) => ['/account', accountGuid, 'data', 'portfolio', tab],
-            facilityRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'overview'],
+            accountAnalysisRoute: (accountGuid: string) => ['/account', accountGuid, 'analysis', 'dashboard'],
+            isSingleSiteWorkspace: singleSite,
             facilityAnalysisRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'analyses'],
             facilityAnalysisWorkbenchRoute: (facilityGuid: string, analysisGuid: string) => [
               '/facility', facilityGuid, 'analysis', analysisGuid
@@ -135,12 +136,11 @@ describe('facility analysis workbench header', () => {
     const fixture = TestBed.createComponent(FacilityAnalysisWorkbenchHeaderComponent);
     fixture.detectChanges();
     const host = fixture.nativeElement as HTMLElement;
-    const breadcrumbs = Array.from<HTMLAnchorElement>(host.querySelectorAll('.v1-data-workbench-breadcrumb a'));
+    const breadcrumbs = Array.from<HTMLAnchorElement>(host.querySelectorAll('app-page-identity nav a'));
 
-    expect(breadcrumbs.map(link => link.textContent?.trim())).toEqual(['Account A', 'Facility A', 'Analyses']);
+    expect(breadcrumbs.map(link => link.textContent?.trim())).toEqual(['Account A', 'Facility A']);
     expect(breadcrumbs.map(link => link.getAttribute('href'))).toEqual([
-      '/account/account-a/data/portfolio/analyses',
-      '/facility/facility-a/overview',
+      '/account/account-a/analysis/dashboard',
       '/facility/facility-a/analyses'
     ]);
     expect(host.textContent).toContain('Latest full year · FY 2025');
@@ -195,5 +195,7 @@ describe('facility analysis workbench header', () => {
     findings.set([]);
     fixture.detectChanges();
     expect(statusNotes?.querySelector('ul')).toBeNull();
+    singleSite.set(true); fixture.detectChanges();
+    expect(Array.from(host.querySelectorAll('app-page-identity nav a')).map(link => link.textContent?.trim())).toEqual(['Facility A']);
   });
 });

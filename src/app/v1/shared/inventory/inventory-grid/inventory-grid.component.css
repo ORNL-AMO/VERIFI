@@ -1,0 +1,10 @@
+:host { display: block; min-width: 0; }
+.portfolio-inventory { --tile-min-width: max(16rem,240px); display: grid; grid-template-columns: repeat(auto-fill,minmax(min(var(--tile-min-width),100%),1fr)); grid-auto-rows: 8px; grid-auto-flow: row; gap: 12px; align-items: start; margin: 0; padding: 0; list-style: none; overflow-anchor: none; }
+.portfolio-inventory[data-detail='summary'] { --tile-min-width: max(20rem,300px); }
+.portfolio-inventory[data-detail='detailed'] { --tile-min-width: max(24rem,360px); }
+.portfolio-inventory > li { min-width: 0; }
+.portfolio-inventory--uniform { --portfolio-tile-fill: 100%; grid-auto-rows: auto; align-items: stretch; }
+.portfolio-pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; padding: .85rem 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); color: var(--v1-muted); font-size: max(.9rem,14px); }
+.portfolio-pagination > div { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.portfolio-inventory-print { display: none; }
+@media print { .portfolio-inventory,.portfolio-pagination { display: none; } .portfolio-inventory-print { display: grid; grid-template-columns: 1fr; gap: .75rem; } }

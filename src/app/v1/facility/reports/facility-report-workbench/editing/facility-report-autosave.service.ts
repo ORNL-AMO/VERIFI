@@ -21,6 +21,8 @@ export class FacilityReportAutosaveService {
   private running?: Promise<boolean>;
   private generation = 0;
   private activeKey = '';
+  private editVersion = 0;
+  private synchronizedEditVersion = 0;
   readonly name = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] });
   readonly state = this.stateValue.asReadonly();
   readonly error = this.errorValue.asReadonly();
@@ -45,7 +47,8 @@ export class FacilityReportAutosaveService {
           this.stateValue.set('idle');
           this.errorValue.set(undefined);
           this.name.reset(report?.name ?? '', { emitEvent: false });
-        } else if (!this.needsProtection()) {
+          this.synchronizedEditVersion = this.editVersion;
+        } else if (!this.needsProtection() && this.editVersion === this.synchronizedEditVersion) {
           this.name.setValue(report.name, { emitEvent: false });
         }
         if (canEdit) this.name.enable({ emitEvent: false });
@@ -53,10 +56,14 @@ export class FacilityReportAutosaveService {
       });
     });
     this.name.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
+      this.editVersion++;
       this.clearTimer();
       this.errorValue.set(undefined);
       if (!value.trim()) this.stateValue.set('invalid');
-      else if (!this.saving() && value.trim() === this.context.report()?.name) this.stateValue.set('saved');
+      else if (!this.saving() && value.trim() === this.context.report()?.name) {
+        if (value === this.context.report()?.name) this.synchronizedEditVersion = this.editVersion;
+        this.stateValue.set('saved');
+      }
       else {
         this.stateValue.set('dirty');
         this.timer = setTimeout(() => { void this.flush(); }, REPORT_AUTOSAVE_DEBOUNCE_MS);
@@ -88,6 +95,7 @@ export class FacilityReportAutosaveService {
     if (this.saving()) return;
     this.clearTimer();
     this.name.reset(this.context.report()?.name ?? '', { emitEvent: false });
+    this.synchronizedEditVersion = this.editVersion;
     this.errorValue.set(undefined);
     this.stateValue.set('idle');
   }
@@ -99,10 +107,11 @@ export class FacilityReportAutosaveService {
       while (generation === this.generation && key === this.context.key() && !this.destroyRef.destroyed) {
         const report = this.context.report();
         const name = this.name.value.trim();
+        const submittedEditVersion = this.editVersion;
         if (!report || !this.context.workspace.canWrite()) throw new Error('The report workspace is unavailable. Try again or discard your changes.');
         if (!name) { this.stateValue.set('invalid'); return false; }
         if (name === report.name) {
-          this.name.setValue(name, { emitEvent: false });
+          if (this.name.value === name) this.synchronizedEditVersion = submittedEditVersion;
           this.stateValue.set('saved');
           return true;
         }
@@ -111,7 +120,11 @@ export class FacilityReportAutosaveService {
         const saved = await this.actions.updateName(report.facilityId, report.guid, name);
         if (generation !== this.generation || key !== this.context.key() || this.destroyRef.destroyed) return false;
         if (this.name.value.trim() === saved.name) {
-          this.name.setValue(saved.name, { emitEvent: false });
+          // A newer raw edit may only add whitespace needed for continued typing.
+          if (this.editVersion === submittedEditVersion) {
+            this.name.setValue(saved.name, { emitEvent: false });
+            this.synchronizedEditVersion = submittedEditVersion;
+          }
           this.stateValue.set('saved');
           return true;
         }

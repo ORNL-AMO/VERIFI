@@ -23,6 +23,7 @@ export class AnalysisDetailsSlideoutComponent {
   readonly meterGroups = input.required<readonly IdbUtilityMeterGroup[]>();
   readonly outcomeDisplay = input<FacilityAnalysisOutcomeDisplay>();
   readonly opening = input(false);
+  readonly showCategory = input(true);
   readonly closed = output<void>();
   readonly opened = output<void>();
 }
