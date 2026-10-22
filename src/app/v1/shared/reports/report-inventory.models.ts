@@ -65,7 +65,8 @@ export function buildReportInventory(snapshot: AccountWorkspaceSnapshot, finding
     } else if (report.reportType === 'betterClimate') {
       scope = `${report.betterClimateReportSetup?.includedFacilityGroups?.filter(item => item.include).length ?? 0} saved facility selection(s)`;
     } else if (analysisGuid) {
-      scope = analysis ? `${analysis.facilityAnalysisItems?.length ?? 0} saved facility analysis selection(s)` : 'Linked account analysis unavailable';
+      const selections = analysis?.facilityAnalysisItems?.filter(item => !!item.analysisItemId && item.analysisItemId !== 'skip').length ?? 0;
+      scope = analysis ? `${selections} saved facility analysis selection(s)` : 'Linked account analysis unavailable';
     }
     return { scope: 'account' as const, report, ...entryView('account', report, account.name || 'Account', typeLabel, report.reportType, status, facts, scope, items) };
   });

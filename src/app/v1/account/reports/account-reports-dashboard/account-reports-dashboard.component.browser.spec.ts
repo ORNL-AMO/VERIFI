@@ -31,12 +31,13 @@ function setup(count = 30) {
   const report = { ...getNewIdbAccountReport(reportAccount, [reportFacility], []), guid: 'account-report', id: 4, name: 'Saved account report', reportType: 'analysis' as const, reportYear: 2024 };
   store.publish({ ...reportSnapshot(Array.from({ length: count }, (_, i) => reportFixture({ guid: `report-${i}`, id: i + 10, name: `Report ${String(i).padStart(2, '0')}` }))), accountReports: [report] }, { facility: reportFacility });
   const accountActions = { updateName: vi.fn(async () => report), create: vi.fn(), copy: vi.fn(), delete: vi.fn() };
+  const status = signal<'ready' | 'evaluating'>('ready');
   TestBed.configureTestingModule({ imports: [ReportsBrowserHost, AccountReportsModule, FacilityReportsModule], providers: [provideRouter([
     { path: 'v1/workspace/account/:accountGuid/reports', children: ACCOUNT_REPORT_ROUTES },
     { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES }
   ]), { provide: AccountWorkspaceStore, useValue: store }, { provide: AccountWorkspaceService, useValue: {} },
     { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [reportAccount] } },
-    { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]) } },
+    { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
     { provide: AccountReportActionsService, useValue: accountActions }, { provide: FacilityReportActionsService, useValue: {} },
     { provide: WorkbenchLayoutService, useFactory: () => { const factsExpanded = signal(true); return { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) }; } },
     { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }
@@ -44,7 +45,7 @@ function setup(count = 30) {
   const fixture = TestBed.createComponent(ReportsBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router); router.setUpLocationChangeListener();
   const dashboard = () => fixture.debugElement.query(By.directive(ReportsDashboardComponent)).componentInstance as ReportsDashboardComponent;
-  return { fixture, router, store, accountActions, dashboard, root: fixture.nativeElement.querySelector('main') as HTMLElement };
+  return { fixture, router, store, status, accountActions, dashboard, root: fixture.nativeElement.querySelector('main') as HTMLElement };
 }
 async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<void> {
   fixture.detectChanges(); await fixture.whenStable();
@@ -55,14 +56,20 @@ describe('report inventory browser journeys and presentation', () => {
   it('restores filters, page, detail override, scroll and focus after a facility drill-in and browser Back', async () => {
     await page.viewport(1200, 900);
     const view = setup(); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
-    view.dashboard().filtersForm.controls.scope.setValue('facility'); await settle(view.fixture);
+    view.dashboard().filtersForm.patchValue({ scope: 'facility', status: 'ready' }); await settle(view.fixture);
     view.dashboard().inventory.selectPage(1); await settle(view.fixture);
     const entry = view.dashboard().inventory.visibleTiles()[0];
     view.dashboard().inventory.setTileDetail({ guid: entry.guid, level: 'detailed' }); await settle(view.fixture);
     const target = view.root.querySelector<HTMLAnchorElement>('.portfolio-inventory .portfolio-tile__name')!;
     target.focus(); view.root.scrollTop = 160; const scroll = view.root.scrollTop;
     target.click(); await settle(view.fixture); expect(view.router.url).toContain('/facility/facility-a/reports/workbench/');
+    view.status.set('evaluating');
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
+    expect(view.dashboard().filtersForm.controls.status.value).toBe('ready');
+    expect(view.dashboard().filteredEntries()).toHaveLength(0);
+    expect(view.dashboard().inventory.page()).toBe(1);
+    expect(view.dashboard().browseReady()).toBe(false);
+    view.status.set('ready'); await settle(view.fixture);
     expect(view.dashboard().filtersForm.controls.scope.value).toBe('facility'); expect(view.dashboard().inventory.page()).toBe(1);
     expect(view.dashboard().inventory.overrides()[entry.guid]).toBe('detailed');
     await vi.waitFor(() => {

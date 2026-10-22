@@ -43,6 +43,15 @@ describe('report inventory projections', () => {
     expect(buildReportInventory(data, [], 'evaluating').every(entry => entry.status === 'checking')).toBe(true);
     expect(buildReportInventory(data, [], 'ready').every(entry => entry.statusLabel === 'Setup ready')).toBe(true);
   });
+  it.each([
+    { selections: ['linked-analysis', 'skip', undefined, ''], count: 1 },
+    { selections: ['skip', undefined, ''], count: 0 },
+    { selections: undefined, count: 0 }
+  ])('counts only saved facility analysis GUIDs ($count selections)', ({ selections, count }) => {
+    const data = snapshot();
+    data.accountAnalyses[0].facilityAnalysisItems = selections?.map((analysisItemId, index) => ({ facilityId: `facility-${index}`, analysisItemId }));
+    expect(buildReportInventory(data, [], 'ready')[0].snapshot.scopeLabel).toBe(`${count} saved facility analysis selection(s)`);
+  });
   it('preserves hidden impact reports and scopes their availability across both levels', () => {
     const data = snapshot();
     data.accountReports[0].reportType = 'betterClimate';

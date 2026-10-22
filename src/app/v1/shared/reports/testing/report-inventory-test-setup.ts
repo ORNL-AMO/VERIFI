@@ -17,7 +17,7 @@ export async function setupReportInventory(scope: 'account' | 'facility' = 'acco
   const accountReport = { ...getNewIdbAccountReport(reportAccount, [reportFacility], []), id: 5, guid: 'account-report', name: 'Account saved report', reportType: 'analysis' as const, reportYear: 2024 };
   store.publish({ ...reportSnapshot(), accountReports: [accountReport] }, { facility: reportFacility });
   const state = signal<any>(scope === 'facility' ? { facilityGuid: 'facility-a' } : { accountGuid: 'account-a' });
-  const status = signal<'ready' | 'error' | 'evaluating'>('ready');
+  const status = signal<'ready' | 'error' | 'idle' | 'evaluating'>('ready');
   const accountActions = { create: vi.fn(async () => ({ ...accountReport, guid: 'created-account' })), copy: vi.fn(async () => ({ ...accountReport, guid: 'copied-account' })), updateName: vi.fn(async () => accountReport), delete: vi.fn(async () => {}) };
   const facilityActions = { create: vi.fn(async () => reportFixture({ guid: 'created-facility' })), copy: vi.fn(async () => reportFixture({ guid: 'copied-facility' })), updateName: vi.fn(async () => reportFixture()), delete: vi.fn(async () => {}) };
   const navigation = { routeState: state, activeReportGuid: computed(() => state().reportGuid),

@@ -44,9 +44,11 @@ export class ReportsDashboardComponent {
   });
   readonly filteredEntries = computed(() => filterReportInventory(this.entries(), this.filters()));
   readonly tiles = computed(() => this.filteredEntries().map(entry => reportInventoryTile(entry, this.navigation, this.scope() === 'account')));
-  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.key)), this.filters, this.workspace.canWrite);
+  private readonly setupSettled = computed(() => this.status.state() === 'ready' || this.status.state() === 'error');
+  private readonly inventoryReady = computed(() => this.workspace.canWrite() && this.setupSettled());
+  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.key)), this.filters, this.inventoryReady);
   readonly layoutReady = signal(false);
-  readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready() && (!this.filteredEntries().length || this.layoutReady()));
+  readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready() && this.setupSettled() && (!this.filteredEntries().length || this.layoutReady()));
   readonly canAct = computed(() => !!this.browseKey() && this.lifecycle.canAct() && !this.lifecycle.editor());
   readonly menuActions = computed<readonly InventoryTileMenuAction[]>(() => [
     { id: 'rename', label: 'Rename report', icon: 'edit', disabled: !this.canAct() },
@@ -68,9 +70,10 @@ export class ReportsDashboardComponent {
     effect(() => {
       const options = this.typeOptions();
       const facilityScope = this.scope() === 'facility';
+      const filters = this.rememberedFilters();
       untracked(() => {
-        if (facilityScope && this.filtersForm.controls.sort.value === 'account-first') this.filtersForm.controls.sort.setValue('attention');
-        const selectedType = this.filtersForm.controls.type.value;
+        if (facilityScope && filters.sort === 'account-first') this.filtersForm.controls.sort.setValue('attention');
+        const selectedType = filters.type;
         if (selectedType !== 'all' && !options.some(option => option.value === selectedType)) this.filtersForm.controls.type.setValue('all');
       });
     });
