@@ -6,6 +6,7 @@ import { firstValueFrom, filter } from 'rxjs';
 import { ACCOUNT_REPORT_TYPES } from '@app/v1/shared/reports/report-inventory.models';
 import { accountReportSnapshot } from '../testing/account-report-test-fixtures';
 import { setupAccountReportWorkbench } from '../testing/account-report-workbench-test-setup';
+import { buildSingleFacilityAnalysisPair } from '@data/account-workspace/single-facility-analysis-pairs';
 
 describe('account report workbench', () => {
   it.each(ACCOUNT_REPORT_TYPES)('opens $value with applicable stages and pending content without writes', async ({ value }) => {
@@ -54,6 +55,20 @@ describe('account report workbench', () => {
     const { open, harness, router } = await setupAccountReportWorkbench();
     await open('account-report', 'data-checks'); await harness.fixture.whenStable(); expect(router.url).toContain('/setup');
     await open('account-report', 'unknown'); expect(router.url).toContain('/setup');
+  });
+  it('offers refresh for a stale water pair independently of the source-energy flag', async () => {
+    const snapshot = accountReportSnapshot(true);
+    snapshot.facilityAnalyses[0].analysisCategory = 'water'; snapshot.facilityAnalyses[0].energyIsSource = false;
+    snapshot.accountAnalyses[0].analysisCategory = 'water'; snapshot.accountAnalyses[0].energyIsSource = false;
+    snapshot.accountAnalyses[0].name = 'Stale water analysis';
+    const { open, harness, store, updateSetup } = await setupAccountReportWorkbench(snapshot);
+    const workbench = await open();
+    expect(workbench.context.needsPairRefresh()).toBe(true);
+    expect(harness.routeNativeElement!.textContent).toContain('Refresh analysis link');
+    const current = buildSingleFacilityAnalysisPair(snapshot.account, snapshot.facilities[0], snapshot.facilityAnalyses[0], snapshot.accountAnalyses[0]);
+    store.publishCommittedPatch({ collections: [{ collection: 'accountAnalyses', upsert: [current] }] }); harness.detectChanges();
+    expect(workbench.context.needsPairRefresh()).toBe(false);
+    expect(updateSetup).not.toHaveBeenCalled();
   });
   it('renders missing, wrong-owner, unavailable-impact and loading/error states without writes', async () => {
     const { open, store, harness, updateSetup } = await setupAccountReportWorkbench();

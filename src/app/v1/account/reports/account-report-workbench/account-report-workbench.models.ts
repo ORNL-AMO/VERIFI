@@ -1,5 +1,5 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import { ReportAnalysisSelection, accountReportAnalysisGuid } from '@data/account-workspace/account-report-setup.models';
+import { ReportAnalysisSelection, accountReportAnalysisGuid, accountReportAnalysisIsEligible } from '@data/account-workspace/account-report-setup.models';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { ReportType } from '@data/models/constantsAndTypes';
 
@@ -28,10 +28,10 @@ export function reportAnalysisOptions(report: IdbAccountReport, snapshot: Accoun
   const facilities = snapshot.facilities.filter(item => item.accountId === accountGuid);
   const single = snapshot.account.isSingleFacilityCompany === true && facilities.length === 1;
   const options: ReportAnalysisOption[] = single
-    ? snapshot.facilityAnalyses.filter(item => item.accountId === accountGuid && item.facilityId === facilities[0].guid && item.energyIsSource)
+    ? snapshot.facilityAnalyses.filter(item => item.accountId === accountGuid && item.facilityId === facilities[0].guid && accountReportAnalysisIsEligible(item))
       .map(item => ({ selection: { scope: 'facility' as const, facilityGuid: item.facilityId, analysisGuid: item.guid }, name: item.name, category: item.analysisCategory, baseline: item.baselineYear }))
       .map(item => ({ selection: item.selection, value: reportAnalysisToken(item.selection), label: `${item.name || 'Untitled analysis'} · ${item.category} · Baseline ${item.baseline ?? 'not set'}` }))
-    : snapshot.accountAnalyses.filter(item => item.accountId === accountGuid && item.energyIsSource)
+    : snapshot.accountAnalyses.filter(item => item.accountId === accountGuid && accountReportAnalysisIsEligible(item))
       .map(item => { const selection = { scope: 'account' as const, analysisGuid: item.guid }; return { selection, value: reportAnalysisToken(selection), label: `${item.name || 'Untitled analysis'} · ${item.analysisCategory} · Baseline ${item.baselineYear ?? 'not set'}` }; });
   options.sort((a, b) => a.label.localeCompare(b.label) || a.value.localeCompare(b.value));
   const saved = savedReportAnalysisChoice(report, snapshot);

@@ -10,7 +10,7 @@ import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { WorkspaceWriteError } from '../workspace-commands.models';
-import { AccountReportSetupChanges, AccountReportSetupResult, accountReportAnalysisGuid, accountReportAnalysisSetupKey } from '../account-report-setup.models';
+import { AccountReportSetupChanges, AccountReportSetupResult, accountReportAnalysisGuid, accountReportAnalysisIsEligible, accountReportAnalysisSetupKey } from '../account-report-setup.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -89,7 +89,7 @@ export class ReportCommandHandler {
       }
       if (changes.name !== undefined && !changes.name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a nonblank report name.');
       let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
-      const writtenPairs: IdbAccountAnalysisItem[] = [];
+      const selectedAnalyses: IdbAccountAnalysisItem[] = [];
       if (changes.analysis !== undefined) {
         const key = accountReportAnalysisSetupKey(report.reportType);
         if (!key) throw new WorkspaceWriteError('validation-failed', 'This report does not use an analysis selection.');
@@ -106,7 +106,7 @@ export class ReportCommandHandler {
             const facility = facilities.find(item => item.guid === choice.facilityGuid);
             const analysis = (await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountGuid))
               .find(item => item.guid === choice.analysisGuid && item.facilityId === choice.facilityGuid);
-            if (!singleFacility || !facility || !analysis || !analysis.energyIsSource) {
+            if (!singleFacility || !facility || !analysis || !accountReportAnalysisIsEligible(analysis)) {
               throw new WorkspaceWriteError('validation-failed', 'The selected facility analysis is no longer available for this report.');
             }
             const candidates = singleFacilityAnalysisPairCandidates(accountAnalyses, facility.guid, analysis.guid);
@@ -118,10 +118,11 @@ export class ReportCommandHandler {
               selected = buildSingleFacilityAnalysisPair(account, facility, analysis, existing);
               if (existing?.id !== undefined) await transaction.put('accountAnalysisItems', selected);
               else selected.id = Number(await transaction.add('accountAnalysisItems', selected));
-              writtenPairs.push(selected);
             }
           }
-          if (!selected || !selected.energyIsSource) throw new WorkspaceWriteError('validation-failed', 'Choose an available source-energy or water analysis.');
+          if (!selected || !accountReportAnalysisIsEligible(selected)) throw new WorkspaceWriteError('validation-failed', 'Choose an available source-energy or water analysis.');
+          // A reused record may be newer than this window's workspace snapshot.
+          selectedAnalyses.push(selected);
         }
         updated = { ...updated, [key]: { ...report[key], analysisItemId: selected?.guid },
           ...(selected && report.reportType !== 'accountSavings' ? { baselineYear: selected.baselineYear } : {}) };
@@ -130,7 +131,7 @@ export class ReportCommandHandler {
         updated = { ...updated, modifiedDate: new Date() };
         await transaction.put('accountReports', updated);
       }
-      return { report: updated, accountAnalyses: writtenPairs };
+      return { report: updated, accountAnalyses: selectedAnalyses };
     });
   }
 

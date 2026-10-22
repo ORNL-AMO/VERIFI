@@ -2,7 +2,7 @@ import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { accountReportAnalysisGuid, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
+import { accountReportAnalysisGuid, accountReportAnalysisIsEligible, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { singleFacilityAnalysisPairIsCurrent } from '@data/account-workspace/single-facility-analysis-pairs';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -50,6 +50,6 @@ export class AccountReportWorkbenchContext {
     const pair = snapshot.accountAnalyses.find(item => item.guid === accountReportAnalysisGuid(report) && item.accountId === report.accountId);
     const facility = snapshot.facilities.find(item => item.guid === choice.facilityGuid && item.accountId === report.accountId);
     const analysis = snapshot.facilityAnalyses.find(item => item.guid === choice.analysisGuid && item.facilityId === choice.facilityGuid && item.accountId === report.accountId);
-    return !!pair && !!facility && !!analysis && analysis.energyIsSource && !singleFacilityAnalysisPairIsCurrent(pair, facility, analysis);
+    return !!pair && !!facility && !!analysis && accountReportAnalysisIsEligible(analysis) && !singleFacilityAnalysisPairIsCurrent(pair, facility, analysis);
   });
 }

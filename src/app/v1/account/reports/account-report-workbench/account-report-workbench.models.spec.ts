@@ -23,9 +23,19 @@ describe('account report analysis choices', () => {
   it('shows only owned source-energy/water choices without filtering away the saved link', () => {
     const snapshot = accountReportSnapshot();
     snapshot.accountAnalyses = [...snapshot.accountAnalyses,
-      { ...snapshot.accountAnalyses[0], id: 31, guid: 'water', name: 'Water', analysisCategory: 'water' },
+      { ...snapshot.accountAnalyses[0], id: 31, guid: 'water', name: 'Water', analysisCategory: 'water', energyIsSource: false },
       { ...snapshot.accountAnalyses[0], id: 32, guid: 'site', energyIsSource: false },
       { ...snapshot.accountAnalyses[0], id: 33, guid: 'wrong-owner', accountId: 'account-b' }];
     expect(reportAnalysisOptions(snapshot.accountReports[0], snapshot).map(option => option.selection.analysisGuid)).toEqual(['account-analysis', 'water']);
+  });
+  it.each([false, true])('keeps saved water analyses eligible with energyIsSource false in single-facility mode: %s', single => {
+    const snapshot = accountReportSnapshot(single);
+    snapshot.accountAnalyses[0].analysisCategory = 'water'; snapshot.accountAnalyses[0].energyIsSource = false;
+    snapshot.facilityAnalyses[0].analysisCategory = 'water'; snapshot.facilityAnalyses[0].energyIsSource = false;
+    const options = reportAnalysisOptions(snapshot.accountReports[0], snapshot);
+    expect(options).toHaveLength(1); expect(options[0].unavailable).not.toBe(true);
+    expect(options[0].selection).toEqual(single
+      ? { scope: 'facility', facilityGuid: 'facility-a', analysisGuid: 'facility-analysis' }
+      : { scope: 'account', analysisGuid: 'account-analysis' });
   });
 });

@@ -12,7 +12,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { accountReportAnalysisGuid } from '@data/account-workspace/account-report-setup.models';
 import { accountReportReferencesAnalysis, IdbAccountReport } from '@data/models/idbModels/accountReport';
-import { isSingleFacilityAnalysisPair } from '@data/account-workspace/single-facility-analysis-pairs';
+import { buildSingleFacilityAnalysisPair, isSingleFacilityAnalysisPair } from '@data/account-workspace/single-facility-analysis-pairs';
 import { AccountReportActionsService } from './account-report-actions.service';
 import { accountReportSnapshot } from './testing/account-report-test-fixtures';
 
@@ -83,6 +83,47 @@ describe('account report setup transactions in Chromium', () => {
     await expect(actions.updateSetup('account-report', { analysis: { scope: 'account', analysisGuid: 'account-analysis' } })).rejects.toThrow();
     await expect(actions.updateSetup('account-report', { name: ' ' })).rejects.toThrow();
     expect(store.revision()).toBe(1);
+  });
+  it('publishes an already-current durable pair over the stale workspace pair without rewriting it', async () => {
+    const snapshot = accountReportSnapshot(true); snapshot.accountAnalyses[0].name = 'Stale workspace name';
+    const { actions, store, transactions } = await setup(snapshot);
+    const current = buildSingleFacilityAnalysisPair(snapshot.account, snapshot.facilities[0], snapshot.facilityAnalyses[0], snapshot.accountAnalyses[0]);
+    await transactions.runTransaction(['accountAnalysisItems'], 'readwrite', tx => tx.put('accountAnalysisItems', current));
+    const put = vi.spyOn(IndexedDbTransactionContext.prototype, 'put');
+    await actions.updateSetup('account-report', { analysis: { scope: 'facility', facilityGuid: 'facility-a', analysisGuid: 'facility-analysis' } });
+    expect(store.accountAnalyses()[0]).toEqual(current);
+    expect(put.mock.calls.some(([storeName]) => storeName === 'accountAnalysisItems')).toBe(false);
+    expect(store.selectedFacility()?.guid).toBe('facility-a');
+    expect(await harness.getAll('accountAnalysisItems')).toEqual([current]);
+  });
+  it.each([false, true])('saves and reopens water selections with energyIsSource false in single-facility mode: %s', async single => {
+    const snapshot = accountReportSnapshot(single);
+    snapshot.facilityAnalyses[0].analysisCategory = 'water'; snapshot.facilityAnalyses[0].energyIsSource = false;
+    snapshot.accountAnalyses[0].analysisCategory = 'water'; snapshot.accountAnalyses[0].energyIsSource = false;
+    snapshot.accountAnalyses[0].name = 'Stale water analysis';
+    const { actions, store } = await setup(snapshot);
+    const selection = single
+      ? { scope: 'facility' as const, facilityGuid: 'facility-a', analysisGuid: 'facility-analysis' }
+      : { scope: 'account' as const, analysisGuid: 'account-analysis' };
+    const updated = await actions.updateSetup('account-report', { analysis: selection });
+    expect(accountReportAnalysisGuid(updated)).toBe('account-analysis');
+    expect(store.accountAnalyses()[0]).toMatchObject({ analysisCategory: 'water', energyIsSource: false,
+      name: single ? 'Energy analysis' : 'Stale water analysis' });
+    expect(store.account()).toEqual(snapshot.account); expect(store.selectedFacility()?.guid).toBe('facility-a');
+    await harness.reopen();
+    expect((await harness.getAll('accountReports'))[0]['analysisReportSetup']).toEqual(updated.analysisReportSetup);
+    expect((await harness.getAll('accountAnalysisItems'))[0]).toMatchObject({ guid: 'account-analysis', analysisCategory: 'water', energyIsSource: false });
+  });
+  it.each([false, true])('rejects site-energy selections in single-facility mode: %s', async single => {
+    const snapshot = accountReportSnapshot(single);
+    snapshot.facilityAnalyses[0].energyIsSource = false; snapshot.accountAnalyses[0].energyIsSource = false;
+    const { actions, store } = await setup(snapshot);
+    const selection = single
+      ? { scope: 'facility' as const, facilityGuid: 'facility-a', analysisGuid: 'facility-analysis' }
+      : { scope: 'account' as const, analysisGuid: 'account-analysis' };
+    await expect(actions.updateSetup('account-report', { name: 'Should not save', analysis: selection })).rejects.toThrow();
+    expect(store.revision()).toBe(0);
+    expect((await harness.getAll('accountReports'))[0]['name']).toBe('Saved account report');
   });
   it('rolls back a newly created pair if the report write fails and publishes nothing', async () => {
     const snapshot = accountReportSnapshot(true); snapshot.accountAnalyses = []; snapshot.accountReports[0].analysisReportSetup.analysisItemId = undefined;

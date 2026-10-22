@@ -24,6 +24,7 @@ export class AccountReportAutosaveService {
     setEnabled: enabled => enabled ? this.form.enable({ emitEvent: false }) : this.form.disable({ emitEvent: false }),
     persist: async (draft, _saved, force) => {
       const key = this.context.key();
+      const submittedRawName = this.form.controls.name.value;
       // Only explicit field edits become commands; an unrelated committed refresh must not rewrite a saved link.
       const changes: { name?: string; analysis?: AccountReportSetupChanges['analysis'] } = {};
       if (draft.name !== this.hydrated.name) changes.name = draft.name;
@@ -35,22 +36,19 @@ export class AccountReportAutosaveService {
       const saved = await this.actions.updateSetup(this.context.guid(), changes);
       if (key !== this.context.key()) return draft;
       let analysis = draft.analysis;
-      let name = changes.name !== undefined ? saved.name : draft.name;
       // Refresh untouched controls without replacing newer input typed during this save.
       if (changes.analysis === undefined && this.form.controls.analysis.value === draft.analysis) {
         analysis = this.context.savedAnalysisValue();
         this.form.controls.analysis.setValue(analysis, { emitEvent: false });
         this.hydrated = { ...this.hydrated, analysis };
       }
-      if (changes.name === undefined && this.form.controls.name.value === draft.name) {
-        name = saved.name;
-        this.form.controls.name.setValue(name, { emitEvent: false });
-        this.hydrated = { ...this.hydrated, name };
+      if (changes.name === undefined && this.form.controls.name.value === submittedRawName) {
+        this.form.controls.name.setValue(saved.name, { emitEvent: false });
       }
       // Advance submitted fields even if newer raw edits are waiting behind this save.
-      this.hydrated = { name: changes.name !== undefined ? saved.name : this.hydrated.name,
+      this.hydrated = { name: saved.name,
         analysis: changes.analysis !== undefined ? draft.analysis : this.hydrated.analysis };
-      return { name, analysis };
+      return { name: saved.name, analysis };
     }
   });
   readonly state = this.controller.state;

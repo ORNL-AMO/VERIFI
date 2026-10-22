@@ -72,6 +72,24 @@ describe('account report autosave', () => {
     expect(await editor.flush()).toBe(false); expect(editor.error()).toBe('Save failed'); expect(editor.form.controls.analysis.value).toBeNull();
     editor.retry(); expect(await editor.flush()).toBe(true); expect(editor.error()).toBeUndefined();
   });
+  it.each([false, true])('reconciles a concurrent rename after whitespace normalization while preserving newer input: %s', async newerInput => {
+    let resolve!: (report: ReturnType<typeof accountReportSnapshot>['accountReports'][number]) => void;
+    updateSetup.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+    editor.form.controls.name.setValue(`${store.accountReports()[0].name} `);
+    editor.form.controls.analysis.setValue(null);
+    const saving = editor.flush();
+    const committed = { ...store.accountReports()[0], name: 'Concurrent rename',
+      analysisReportSetup: { ...store.accountReports()[0].analysisReportSetup, analysisItemId: undefined } };
+    store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [committed] }] }); TestBed.tick();
+    if (newerInput) editor.form.controls.name.setValue('Newer name ');
+    resolve(committed); expect(await saving).toBe(true); TestBed.tick();
+    expect(updateSetup).toHaveBeenNthCalledWith(1, 'account-report', { analysis: null });
+    expect(updateSetup).toHaveBeenCalledTimes(newerInput ? 2 : 1);
+    if (newerInput) expect(updateSetup).toHaveBeenLastCalledWith('account-report', { name: 'Newer name' });
+    expect(store.accountReports()[0].name).toBe(newerInput ? 'Newer name' : 'Concurrent rename');
+    expect(editor.form.controls.name.value).toBe(newerInput ? 'Newer name' : 'Concurrent rename');
+    expect(editor.state()).toBe('saved');
+  });
   it('serializes a return to the original field values while an earlier save is in flight', async () => {
     let resolve!: (report: ReturnType<typeof accountReportSnapshot>['accountReports'][number]) => void;
     const original = store.accountReports()[0];

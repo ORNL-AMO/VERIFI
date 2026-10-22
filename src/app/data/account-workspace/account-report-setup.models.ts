@@ -13,7 +13,11 @@ export interface AccountReportSetupChanges {
 }
 export interface AccountReportSetupResult {
   readonly report: IdbAccountReport;
+  /** Selected durable analyses to publish, including unchanged records reused from storage. */
   readonly accountAnalyses: readonly IdbAccountAnalysisItem[];
+}
+export function accountReportAnalysisIsEligible(analysis: Pick<IdbAccountAnalysisItem, 'analysisCategory' | 'energyIsSource'>): boolean {
+  return analysis.analysisCategory === 'water' || analysis.energyIsSource;
 }
 export function accountReportAnalysisSetupKey(type: ReportType) {
   switch (type) {
