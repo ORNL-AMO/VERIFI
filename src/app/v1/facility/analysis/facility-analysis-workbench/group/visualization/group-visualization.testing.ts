@@ -4,12 +4,12 @@ import type { AnalysisGroup, AnalysisType } from '@data/models/analysis';
 import type { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import type { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { account, calendarizedMeter, facility, meter, monthlyData } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, calendarizedMeter, facility, meter, monthlyData, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import type { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 
 export function visualizationFixture(type: AnalysisType = 'absoluteEnergyConsumption') {
   const owningFacility = facility({ guid: 'facility-a', accountId: 'account-a', fiscalYear: 'calendarYear' });
-  const groupMeter = meter({ guid: 'meter-a', groupId: 'group-a', facilityId: 'facility-a', accountId: 'account-a' });
+  const groupMeter = meter({ guid: 'meter-a', groupId: 'group-a', facilityId: 'facility-a', accountId: 'account-a', meterReadingDataApplication: 'fullMonth' });
   const predictors = [
     { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'predictor-a', name: 'Production', unit: 'widgets' },
     { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'predictor-b', name: 'Temperature', unit: '°C' }
@@ -22,6 +22,8 @@ export function visualizationFixture(type: AnalysisType = 'absoluteEnergyConsump
     guid: `${predictor.guid}-${index}`, accountId: 'account-a', facilityId: 'facility-a', predictorId: predictor.guid,
     year: row.year, month: row.monthNumValue + 1, amount: predictorIndex ? 20 - index : index * 2
   } as IdbPredictorData)));
+  const sourceReadings = rows.map((row, index) => reading({ guid: `meter-a-${index}`, year: row.year,
+    month: row.monthNumValue + 1, totalEnergyUse: row.energyUse, totalVolume: row.energyConsumption }));
   const group = { idbGroupId: 'group-a', analysisType: type,
     predictorVariables: [{ id: 'predictor-a', productionInAnalysis: true }] } as AnalysisGroup;
   const analysis = { guid: 'analysis-a', accountId: 'account-a', facilityId: 'facility-a', baselineYear: 2024,
@@ -38,8 +40,8 @@ export function visualizationFixture(type: AnalysisType = 'absoluteEnergyConsump
     meterGroup: signal({ guid: 'group-a', name: 'Main group' }),
     autosave: { draft: signal(analysis), update },
     workbench: { account: signal(account({ guid: 'account-a' })), facility: signal(owningFacility), analysisGuid: signal('analysis-a'),
-      workspace: { facilityPredictors: signal(predictors), facilityPredictorData: signal(readings) } }
+      workspace: { facilityPredictors: signal(predictors), facilityPredictorData: signal(readings), facilityMeterData: signal(sourceReadings) } }
   };
-  return { context, meters, rows, readings, predictors, base, update,
+  return { context, meters, rows, readings, sourceReadings, predictors, base, update,
     calendarization: { calendarizeBase: () => base.asObservable(), project, retry } };
 }

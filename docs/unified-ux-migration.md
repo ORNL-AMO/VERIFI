@@ -311,7 +311,7 @@ Account Analysis drill-ins reuse the Data whole-page 480ms depth entrance and re
 ### Analysis group visualization
 
 - **Workflow:** v0 facility Visualization's group time-series and correlation inspection.
-- **Decision:** Embed Time Series above a responsive grid of Correlation plots in each v1 analysis group's Visualization tab, without a chart-view switch or monthly data table; keep the separate Visualization section deferred.
+- **Decision:** Embed Time Series above a responsive grid of Correlation plots in each v1 analysis group's Visualization tab, without a chart-view switch or visible monthly data table; provide screen-reader-only monthly values and keep the separate Visualization section deferred.
 - **Parity:** Actual calendarized group usage, saved Predictor values, multiple trace toggles, unit-bearing dual axes, per-Predictor scatter plots, linear fits, and PNG downloads. Default to baseline fiscal-year start through latest group month for every analysis method.
 - **Shared contracts:** Reuse calendarization projection and existing units/site-source rules; add an explicit current-snapshot retry without changing Worker messages. Controls are workbench-session state; no persisted analysis, report, export, or backup shapes change. Missing values remain gaps, partial group months are identified and omitted from correlation, and duplicate Predictor readings use monthly-analysis sums.
 - **Tests:** Pure monthly/statistics cases, route and form behavior, custom-icon geometry, shared calendarization retry, and Chromium chart/theme/resize/teardown checks. See [facility-analysis architecture](v1-facility-analysis-architecture.md#results-presentation).

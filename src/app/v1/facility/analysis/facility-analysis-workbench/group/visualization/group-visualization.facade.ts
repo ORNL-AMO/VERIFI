@@ -59,7 +59,8 @@ export class GroupVisualizationFacade {
     const readings = this.workbench.workspace.facilityPredictorData().filter(reading =>
       reading.facilityId === facilityGuid && reading.accountId === accountGuid);
     return buildGroupMonthlyPoints(this.projection()?.meters ?? [], readings,
-      new Set(this.predictors().map(predictor => predictor.guid)), this.analysis()?.analysisCategory ?? 'energy');
+      new Set(this.predictors().map(predictor => predictor.guid)), this.analysis()?.analysisCategory ?? 'energy',
+      this.workbench.workspace.facilityMeterData());
   });
   readonly preferences = computed<GroupVisualizationPreferences>(() => {
     const saved = this.session.get(this.key());

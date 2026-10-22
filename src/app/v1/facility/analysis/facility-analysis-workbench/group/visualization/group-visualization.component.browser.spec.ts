@@ -63,7 +63,7 @@ describe('group visualization in Chromium', () => {
     other.click(); chip.click(); fixture.detectChanges();
     await vi.waitFor(() => expect((chart.getOption() as any).series).toHaveLength(3));
     expect((chart.getOption() as any).yAxis[1].name).toBe('Predictors');
-    await page.getByRole('button', { name: 'Production', exact: true }).dblClick(); fixture.detectChanges();
+    await page.getByRole('button', { name: 'Production (widgets)', exact: true }).dblClick(); fixture.detectChanges();
     await vi.waitFor(() => expect((chart.getOption() as any).series.filter(Boolean)).toHaveLength(2));
     expect(chip.getAttribute('aria-pressed')).toBe('true');
     expect(other.getAttribute('aria-pressed')).toBe('false');
@@ -75,7 +75,11 @@ describe('group visualization in Chromium', () => {
     chip.click(); fixture.detectChanges();
     await vi.waitFor(() => expect((chart.getOption() as any).series).toHaveLength(3));
     await vi.waitFor(() => expect(host.querySelectorAll('canvas')).toHaveLength(3));
-    expect(host.querySelector('table')).toBeNull();
+    expect(host.querySelector('table:not(.visualization-accessible-data)')).toBeNull();
+    const accessibleData = host.querySelector<HTMLTableElement>('.visualization-accessible-data')!;
+    expect(accessibleData.caption?.textContent).toContain('raw values');
+    expect(accessibleData.parentElement!.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+    expect(accessibleData.querySelector('tbody tr')?.textContent).toContain('Jan 2024');
     expect(host.querySelector('[aria-label="Visualization view"]')).toBeNull();
     const correlationPanels = [...host.querySelectorAll<HTMLElement>('app-correlation-chart')];
     expect(correlationPanels).toHaveLength(2);
@@ -95,6 +99,8 @@ describe('group visualization in Chromium', () => {
     await page.getByText('Z-score', { exact: true }).click(); fixture.detectChanges();
     await vi.waitFor(() => expect((chart.getOption() as any).yAxis).toHaveLength(1));
     expect(component.facade.preferences().scale).toBe('z-score');
+    expect(accessibleData.caption?.textContent).toContain('Z-scores');
+    expect(accessibleData.querySelector('tbody td')?.textContent).toBe('-1.46385');
     expect(component.facade.preferences().zoom).toEqual({ start: 10, end: 50 });
     expect((chart.getOption() as any).series.every((series: any) => series.yAxisIndex === 0)).toBe(true);
     expect((chart.getOption() as any).xAxis[0].axisLine.lineStyle.width).toBe(2);

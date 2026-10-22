@@ -36,7 +36,7 @@ describe('GroupVisualizationComponent controls', () => {
     expect(facade.analysisRange()).toEqual({ start: '2024-01', end: '2024-06' });
     expect(host.querySelector('.visualization-time-series')).not.toBeNull();
     expect(host.querySelectorAll('app-correlation-chart')).toHaveLength(1);
-    expect(host.querySelector('table')).toBeNull();
+    expect(host.querySelector('table:not(.visualization-accessible-data)')).toBeNull();
     expect(host.querySelector('[aria-label="Visualization view"]')).toBeNull();
     expect(host.querySelector('header')).toBeNull();
     expect(host.textContent).not.toContain('Explore monthly');
@@ -116,6 +116,42 @@ describe('GroupVisualizationComponent controls', () => {
     expect(update).not.toHaveBeenCalled();
   });
 
+  it('disambiguates same-named predictor buttons while keeping their visible names unit-free', () => {
+    const { fixture, host, context, facade, update } = setup();
+    context.workbench.workspace.facilityPredictors.update(predictors => predictors.map(predictor => ({ ...predictor, name: 'Temperature' })));
+    fixture.detectChanges();
+    const chips = [...host.querySelectorAll<HTMLButtonElement>('.visualization-chip:not(.visualization-chip--locked)')];
+    expect(chips.map(chip => chip.textContent?.trim())).toEqual(['Temperature', 'Temperature']);
+    expect(chips.map(chip => chip.getAttribute('aria-label'))).toEqual(facade.predictors().map(predictor => predictor.label));
+    expect(new Set(chips.map(chip => chip.getAttribute('aria-label'))).size).toBe(2);
+    chips[1].dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); fixture.detectChanges();
+    expect(facade.preferences().visiblePredictors).toEqual(['predictor-b']);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('provides nonvisual monthly values synchronized with predictors, scale, and coverage gaps', () => {
+    const { fixture, host, context, facade, update } = setup();
+    const table = () => host.querySelector<HTMLTableElement>('.visualization-accessible-data')!;
+    const firstValues = () => [...table().querySelectorAll('tbody tr:first-child td')].map(cell => cell.textContent?.trim());
+    expect(table().parentElement!.classList.contains('visually-hidden')).toBe(true);
+    expect(table().caption?.textContent).toContain('raw values');
+    expect(firstValues()).toEqual(['120', '24', 'Complete']);
+    expect(table().querySelectorAll('tbody tr')).toHaveLength(6);
+    facade.togglePredictor('predictor-b'); fixture.detectChanges();
+    expect(table().querySelector('thead')?.textContent).toContain('Temperature (°C)');
+    expect(firstValues()).toEqual(['120', '24', '8', 'Complete']);
+    host.querySelector<HTMLInputElement>('input[value="z-score"]')!.click(); fixture.detectChanges();
+    expect(table().caption?.textContent).toContain('Z-scores');
+    expect(firstValues()).toEqual(['-1.46385', '-1.46385', '1.46385', 'Complete']);
+    context.workbench.workspace.facilityMeterData.update(readings => readings.filter(reading => !(reading.year === 2024 && reading.month === 1)));
+    fixture.detectChanges();
+    expect(firstValues()[0]).toBe('unavailable');
+    expect(firstValues().at(-1)).toBe('Incomplete group coverage');
+    facade.isolatePredictor('predictor-b'); fixture.detectChanges();
+    expect(table().querySelector('thead')?.textContent).not.toContain('Production');
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('renders loading, error/retry, missing-predictor, and empty-group states', () => {
     const { fixture, host, base, calendarization, context, click } = setup();
     base.next({ state: 'evaluating', meters: [] }); fixture.detectChanges();
@@ -129,6 +165,24 @@ describe('GroupVisualizationComponent controls', () => {
     base.next({ state: 'ready', meters: [] }); fixture.detectChanges();
     expect(host.textContent).toContain('No facility predictors');
     expect(host.textContent).toContain('No monthly group data');
+  });
+
+  it('applies repeated scale edits after silently hydrating another group into the same component', () => {
+    const { fixture, host, context, facade, update } = setup();
+    const select = (scale: string) => { host.querySelector<HTMLInputElement>(`input[value="${scale}"]`)!.click(); fixture.detectChanges(); };
+    select('z-score');
+    context.groupGuid.set('group-b'); fixture.detectChanges();
+    expect(fixture.componentInstance.scaleControl.value).toBe('raw');
+    select('z-score');
+    expect(facade.preferences().scale).toBe('z-score');
+    expect((fixture.componentInstance.option() as any).yAxis).toHaveLength(1);
+    select('raw');
+    context.groupGuid.set('group-a'); fixture.detectChanges();
+    expect(fixture.componentInstance.scaleControl.value).toBe('z-score');
+    select('raw');
+    expect(facade.preferences().scale).toBe('raw');
+    expect((fixture.componentInstance.option() as any).yAxis).toHaveLength(2);
+    expect(update).not.toHaveBeenCalled();
   });
 
   it('switches scale through a typed control, retains zoom and mode across tabs, and keeps raw correlations', () => {

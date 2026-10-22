@@ -1,11 +1,10 @@
 import { Component, DestroyRef, ViewChild, computed, effect, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { distinctUntilChanged } from 'rxjs';
 import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { GroupVisualizationFacade } from './group-visualization.facade';
-import { timeSeriesOption } from './group-visualization-charts';
+import { formatRawVisualizationValue, formatZScoreVisualizationValue, timeSeriesOption } from './group-visualization-charts';
 import { CorrelationChartComponent } from './correlation-chart/correlation-chart.component';
 import { buildTimeSeriesDisplay } from './group-visualization-standardization';
 import type { TimeSeriesScale } from './group-visualization.models';
@@ -40,6 +39,19 @@ export class GroupVisualizationComponent {
     return this.facade.predictors().map(predictor => ({ ...predictor, visible: visible.has(predictor.guid),
       dash: predictor.style.lineStyle === 'solid' ? null : Array.isArray(predictor.style.lineStyle) ? predictor.style.lineStyle.join(' ') : null }));
   });
+  readonly accessibleTimeSeries = computed(() => {
+    const display = this.seriesDisplay(), standardized = display.scale === 'z-score';
+    const predictors = this.facade.visiblePredictors();
+    const format = standardized ? formatZScoreVisualizationValue : formatRawVisualizationValue;
+    return {
+      caption: `${this.facade.groupName()} monthly time series, ${standardized ? 'Z-scores' : 'raw values'}, full analysis period`,
+      columns: [standardized ? 'Group usage (Z-score)' : this.facade.usageLabel(),
+        ...predictors.map(predictor => standardized ? `${predictor.name} · ${predictor.guid} (Z-score)` : predictor.label)],
+      rows: this.facade.filteredPoints().map((point, index) => ({ month: point.month, label: point.label,
+        coverage: point.complete ? 'Complete' : 'Incomplete group coverage',
+        values: [format(display.groupValues[index]), ...predictors.map(predictor => format(display.predictorValues[predictor.guid][index]))] }))
+    };
+  });
   private readonly synchronizeScale = effect(() => {
     this.scaleControl.setValue(this.facade.preferences().scale, { emitEvent: false });
     if (this.chartActionsDisabled()) this.scaleControl.disable({ emitEvent: false });
@@ -47,8 +59,9 @@ export class GroupVisualizationComponent {
   });
 
   constructor() {
-    this.scaleControl.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(scale => this.facade.update({ scale }));
+    this.scaleControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(scale => {
+      if (scale !== this.facade.preferences().scale) this.facade.update({ scale });
+    });
   }
 
   zoom(factor: number): void {

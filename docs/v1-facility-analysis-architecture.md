@@ -185,7 +185,10 @@ actual group usage on the left axis and visible raw Predictor values on the righ
 Correlation shows a separate scatter plot and intercept-bearing linear fit per
 visible Predictor. The time series stays visible above a responsive grid of
 correlation plots; the tab has no section headings, introductory descriptions,
-chart-view switch, or monthly data table. A trace-colored Group usage legend button
+chart-view switch, or visible monthly data table. A screen-reader-only table exposes
+the full analysis-period values, coverage, and selected predictors in the active
+Raw/Z-score scale. Predictor controls use disambiguated accessible names while
+keeping visible names short and unit-free. A trace-colored Group usage legend button
 is locked on; Predictor buttons toggle only Predictor traces. Double-click or
 Shift+Enter isolates one Predictor alongside group usage, updating only transient
 visualization selections. Correlation summaries
@@ -210,8 +213,13 @@ with fewer than two finite readings show gaps and an explicit unavailable notice
 no divide-by-zero result is plotted. Correlation plots/statistics retain their
 original raw-data contract. Printing and PNG download use the selected chart mode.
 Calendar-month alignment and duplicate-reading aggregation
-match monthly analysis; absent/non-finite values remain gaps. Partial group totals
-are visible with coverage warnings and excluded from correlation pairs. Statistics
+match monthly analysis; absent/non-finite values remain gaps. Source bills determine
+coverage independently of calendarized row presence, since calendarization can
+synthesize zero-valued rows for missing months. Full-month readings cover their
+calendar month, annual readings cover their calendar year, and backward bills cover
+the interval after the previous reading through the current reading. Finite source
+values are required; a legitimate zero is covered. Partial group totals are visible
+with coverage warnings and excluded from correlation pairs. Statistics
 require at least three complete pairs with varying values in both series.
 
 The chart history runs from the analysis baseline fiscal-year start through
@@ -220,7 +228,9 @@ full history. Timeline selection uses chart zoom, with no separate date selector
 zoom affects only the time-series viewport. `GroupVisualizationSession`, provided by the
 workbench, retains visible Predictor GUIDs, scale, and zoom
 per owning account/facility/analysis/group while navigating child routes. It never
-updates analysis drafts, validation, persistence, or backups. Explicit Retry asks
+updates analysis drafts, validation, persistence, or backups. Scale-control edits
+are compared with the current session scale so silent hydration when a group route
+reuses the component cannot suppress a later edit. Explicit Retry asks
 the shared calendarization service to rerun its current snapshot, preserving its
 existing sharing, cancellation, and publication rules. The existing result-tab and
 stage guards remain authoritative.

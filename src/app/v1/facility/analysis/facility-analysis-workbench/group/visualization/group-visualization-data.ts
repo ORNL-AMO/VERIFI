@@ -2,6 +2,7 @@ import type { CalanderizedMeter } from '@data/models/calanderization';
 import type { AnalysisCategory } from '@data/models/analysis';
 import type { IdbFacility } from '@data/models/idbModels/facility';
 import type { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import type { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import type { CorrelationSummary, GroupMonthlyPoint, VisualizationRange } from './group-visualization.models';
 
 /** Calendar months are integer ordinals; no timezone or daylight-saving arithmetic. */
@@ -53,7 +54,7 @@ export function filterVisualizationPoints(points: readonly GroupMonthlyPoint[], 
 /** Inputs are already scoped/projected to the owning group and analysis units. */
 export function buildGroupMonthlyPoints(
   meters: readonly CalanderizedMeter[], readings: readonly IdbPredictorData[],
-  predictorGuids: ReadonlySet<string>, category: AnalysisCategory
+  predictorGuids: ReadonlySet<string>, category: AnalysisCategory, sourceReadings: readonly IdbUtilityMeterData[]
 ): GroupMonthlyPoint[] {
   const meterMonths = meters.map(meter => {
     const months = new Map<number, number>();
@@ -63,7 +64,9 @@ export function buildGroupMonthlyPoints(
       const value = category === 'energy' ? row.energyUse : row.energyConsumption;
       months.set(month, (months.get(month) ?? 0) + value);
     }
-    return { meter: meter.meter, months };
+    const readings = sourceReadings.filter(reading => reading.meterId === meter.meter.guid
+      && reading.facilityId === meter.meter.facilityId && reading.accountId === meter.meter.accountId);
+    return { meter: meter.meter, months, coverage: meterReadingCoverage(meter, readings, category) };
   });
   const months = meterMonths.flatMap(item => [...item.months.keys()]).sort((a, b) => a - b);
   if (!months.length) return [];
@@ -80,7 +83,8 @@ export function buildGroupMonthlyPoints(
   for (let month = months[0]; month <= months.at(-1)!; month++) {
     let total = 0, present = 0, complete = true;
     for (const item of meterMonths) {
-      const value = item.months.get(month);
+      const coverage = item.coverage.get(month);
+      const value = coverage?.available ? item.months.get(month) : undefined;
       const retirement = item.meter.noLongerInUse
         ? monthValue(item.meter.noLongerInUseYear, item.meter.noLongerInUseMonth) : undefined;
       if (value == null) {
@@ -91,6 +95,7 @@ export function buildGroupMonthlyPoints(
       } else {
         total += value;
         present++;
+        if (!coverage.complete) complete = false;
       }
     }
     const values = predictorMonths.get(month);
@@ -103,6 +108,43 @@ export function buildGroupMonthlyPoints(
       duplicatePredictors: [...(values ?? [])].filter(([, value]) => value.count > 1).map(([guid]) => guid) });
   }
   return points;
+}
+
+/** Calendarization can synthesize zeroes. Coverage must come from the source bills. */
+function meterReadingCoverage(meter: CalanderizedMeter, readings: readonly IdbUtilityMeterData[], category: AnalysisCategory) {
+  const value = (reading: IdbUtilityMeterData) => category === 'energy' ? reading.totalEnergyUse : reading.totalVolume;
+  const coverage = new Map<number, { available: boolean; complete: boolean }>();
+  const datedReadings = readings.flatMap(reading => {
+    if (monthValue(reading.year, reading.month - 1) == null || !Number.isInteger(reading.day)) return [];
+    const date = new Date(0);
+    date.setUTCFullYear(reading.year, reading.month - 1, reading.day);
+    return date.getUTCMonth() === reading.month - 1 && date.getUTCDate() === reading.day
+      ? [{ day: date.getTime() / 86400000, valid: Number.isFinite(value(reading)) }] : [];
+  }).sort((a, b) => a.day - b.day);
+  for (const row of meter.monthlyData) {
+    const month = monthValue(row.year, row.monthNumValue);
+    if (month == null) continue;
+    if (meter.meter.meterReadingDataApplication === 'backward') {
+      const date = new Date(0);
+      date.setUTCFullYear(row.year, row.monthNumValue, 1);
+      const firstDay = date.getTime() / 86400000 - 1;
+      date.setUTCMonth(row.monthNumValue + 1);
+      const lastDay = date.getTime() / 86400000 - 1;
+      let coveredDays = 0;
+      for (let index = 1; index < datedReadings.length; index++) {
+        // A bill ending on a reading date covers the days after the previous reading.
+        if (datedReadings[index].valid) coveredDays += Math.max(0,
+          Math.min(lastDay, datedReadings[index].day) - Math.max(firstDay, datedReadings[index - 1].day));
+      }
+      coverage.set(month, { available: coveredDays > 0, complete: coveredDays === lastDay - firstDay });
+    } else {
+      const source = readings.filter(reading => reading.year === row.year
+        && (meter.meter.meterReadingDataApplication === 'fullYear' || reading.month === row.monthNumValue + 1));
+      const available = source.length > 0 && source.every(reading => Number.isFinite(value(reading)));
+      coverage.set(month, { available, complete: available });
+    }
+  }
+  return coverage;
 }
 
 /** Ordinary least squares with an intercept, over complete paired months only. */

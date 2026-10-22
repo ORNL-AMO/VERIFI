@@ -9,6 +9,7 @@
         </button>
         @for (predictor of legend(); track predictor.guid) {
           <button type="button" class="visualization-chip" [attr.aria-pressed]="predictor.visible"
+            [attr.aria-label]="predictor.label"
             title="Click to toggle; double-click or Shift+Enter to show only this predictor" aria-keyshortcuts="Shift+Enter"
             (click)="facade.togglePredictor(predictor.guid)" (dblclick)="facade.isolatePredictor(predictor.guid)"
             (keydown.shift.enter)="facade.isolatePredictor(predictor.guid); $event.preventDefault()">
@@ -51,6 +52,24 @@
         <section aria-label="Time series">
           <div class="visualization-time-series" [appV1ECharts]="option()" (dataZoomChanged)="facade.update({zoom: $event})"
             role="img" [attr.aria-label]="chartLabel()"></div>
+          @let accessibleSeries = accessibleTimeSeries();
+          <div class="visually-hidden">
+            <table class="visualization-accessible-data">
+              <caption>{{ accessibleSeries.caption }}</caption>
+              <thead><tr><th scope="col">Month</th>
+                @for (column of accessibleSeries.columns; track $index) { <th scope="col">{{ column }}</th> }
+                <th scope="col">Group coverage</th>
+              </tr></thead>
+              <tbody>
+                @for (row of accessibleSeries.rows; track row.month) {
+                  <tr><th scope="row">{{ row.label }}</th>
+                    @for (value of row.values; track $index) { <td>{{ value }}</td> }
+                    <td>{{ row.coverage }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </section>
         <section class="visualization-correlations" aria-label="Correlation plots">
           <div class="visualization-correlation-grid">

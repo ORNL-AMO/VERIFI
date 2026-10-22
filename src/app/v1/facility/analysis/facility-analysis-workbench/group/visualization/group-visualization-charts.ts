@@ -60,8 +60,12 @@ export function rawValueTooltip(params: unknown): string {
 }
 
 export function zScoreTooltip(params: unknown): string {
-  return axisTooltip(params, value => `z = ${typeof value === 'number' && Number.isFinite(value)
-    ? value.toLocaleString(undefined, { maximumFractionDigits: 5 }) : 'unavailable'}`);
+  return axisTooltip(params, value => `z = ${formatZScoreVisualizationValue(value)}`);
+}
+
+export function formatZScoreVisualizationValue(value: unknown): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? value.toLocaleString(undefined, { maximumFractionDigits: 5 }) : 'unavailable';
 }
 
 export function correlationOption(predictor: VisualizationPredictor, summary: CorrelationSummary, usageLabel: string): V1EChartsOption {
