@@ -1,5 +1,4 @@
-import { FacilityReportsDashboardComponent } from '@app/v1/facility/reports/facility-reports-dashboard/facility-reports-dashboard.component';
-import { FacilityReportLandingComponent } from '@app/v1/facility/reports/facility-report-landing/facility-report-landing.component';
+import { FACILITY_REPORT_ROUTES } from '@app/v1/facility/reports/facility-reports.routes';
 import { AccountReportsLandingComponent } from '@app/v1/account/reports/account-reports-landing/account-reports-landing.component';
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
@@ -442,20 +441,7 @@ export const V1Routes: Routes = [
               { path: '**', redirectTo: 'dashboard' }
             ]
           },
-          {
-            path: 'reports', children: [
-              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: FacilityReportsDashboardComponent, canDeactivate: [unsavedChangesGuard] },
-              {
-                path: 'workbench/:reportGuid', children: [
-                  { path: '', pathMatch: 'full', redirectTo: 'setup' },
-                  { path: 'setup', component: FacilityReportLandingComponent },
-                  { path: '**', redirectTo: 'setup' }
-                ]
-              },
-              { path: '**', redirectTo: 'dashboard' }
-            ]
-          },
+          { path: 'reports', children: FACILITY_REPORT_ROUTES },
           { path: '**', redirectTo: 'home/overview' }
         ]
       },

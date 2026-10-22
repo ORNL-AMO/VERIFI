@@ -18,10 +18,10 @@ Implemented with a limited account Reports landing and facility dashboard links.
 
 ## Phase 2 — Facility report workbench
 
-- [ ] Establish the selected-report layout, header, switching, and return navigation.
-- [ ] Provide shared Setup, applicable Data Checks, and Report stages.
-- [ ] Establish integration points for individual report migrations.
-- [ ] Include save feedback, error recovery, and unsaved-navigation protection.
+- [x] Establish the selected-report layout, header, switching, and return navigation.
+- [x] Provide shared Setup, applicable Data Checks, and Report stages.
+- [x] Establish integration points for individual report migrations.
+- [x] Include save feedback, error recovery, and unsaved-navigation protection.
 
 **Completion checkpoint:** individual facility report issues can supply their settings, checks, and previews within the shared workbench.
 

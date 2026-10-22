@@ -1,3 +1,0 @@
-:host { display: block; min-width: 0; padding: clamp(1rem, 3vw, 1.5rem); }
-.v1-section-header { margin-block: var(--v1-space-3); }
-.report-landing { display: grid; gap: var(--v1-space-3); max-width: 48rem; }

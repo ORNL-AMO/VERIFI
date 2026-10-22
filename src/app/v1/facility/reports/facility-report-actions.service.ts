@@ -39,6 +39,22 @@ export class FacilityReportActionsService {
     });
   }
 
+  async updateName(facilityGuid: string, reportGuid: string, name: string): Promise<IdbFacilityReport> {
+    const accountGuid = this.requireContext(facilityGuid);
+    const trimmed = this.requireName(name);
+    const report = this.requireReport(facilityGuid, reportGuid, accountGuid);
+    if (trimmed === report.name) return report;
+    const result = await this.boundary.execute({
+      entityKind: 'facilityReport', changeKind: 'update', entityGuid: reportGuid, label: 'Saving report name',
+      notification: { suppressSuccessToast: true },
+      publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }
+    }, async () => {
+      const latest = this.requireReport(facilityGuid, reportGuid, accountGuid);
+      return latest.name === trimmed ? latest : this.handler.updateFacilityReport({ ...latest, name: trimmed }, accountGuid);
+    });
+    return result.value;
+  }
+
   async delete(facilityGuid: string, reportGuid: string): Promise<void> {
     const accountGuid = this.requireContext(facilityGuid);
     await this.boundary.execute({

@@ -1,0 +1,7 @@
+@if (context.card(); as card) {
+  <section class="report-section" aria-labelledby="report-data-checks-heading">
+    <h2 id="report-data-checks-heading">Data Checks</h2>
+    <p>{{ card.view.chips?.[0]?.label }} report</p>
+    <p role="status">Data checks for this report are pending migration. Opening this stage does not complete checks or change the linked analysis.</p>
+  </section>
+}

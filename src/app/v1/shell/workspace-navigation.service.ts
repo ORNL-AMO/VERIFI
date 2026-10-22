@@ -74,6 +74,7 @@ export interface RouteState {
   readonly predictorGuid?: string;
   readonly weatherPredictorGroupKey?: string;
   readonly reportGuid?: string;
+  readonly reportStage?: 'setup' | 'data-checks' | 'report';
   readonly analysisGuid?: string;
   readonly analysisGroupGuid?: string;
   readonly analysisStageScope?: FacilityAnalysisStageScope;
@@ -214,6 +215,8 @@ export class WorkspaceNavigationService {
   }
 
   async openWorkspace(accountGuid: string): Promise<void> {
+    if (this.activeSection() === 'reports' && this.activeDetail() === 'workbench'
+      && !await this.unsavedChanges.flushPendingChanges()) return;
     if (!this.unsavedChanges.confirmDiscard()) return;
     const result = await this.workspaceService.selectAccount(accountGuid);
     if (result !== 'published') {
@@ -264,10 +267,15 @@ export class WorkspaceNavigationService {
   }
 
   setFacility(facilityGuid: string): void {
-    if (!this.facilities().some(facility => facility.guid === facilityGuid) || !this.unsavedChanges.confirmDiscard()) return;
+    if (!this.facilities().some(facility => facility.guid === facilityGuid)) return;
     const state = this.routeState();
+    const reportWorkbench = state.section === 'reports' && state.detail === 'workbench';
+    // Report guards flush or retain the draft before readiness guards select another facility.
+    if (!reportWorkbench && !this.unsavedChanges.confirmDiscard()) return;
     this.contextNavigationError.set('');
-    void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.contextMode === 'account' && state.portfolioTab === 'predictors' ? 'predictors' : state.detail))
+    const route = reportWorkbench ? this.facilityReportsRoute(facilityGuid)
+      : this.facilityRouteForSection(facilityGuid, state.section, state.contextMode === 'account' && state.portfolioTab === 'predictors' ? 'predictors' : state.detail);
+    void this.router.navigate(route)
       .catch(() => this.contextNavigationError.set('The facility could not be opened. Please try again.'));
   }
 
@@ -399,8 +407,8 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'dashboard'];
   }
 
-  facilityReportWorkbenchRoute(facilityGuid: string, reportGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'workbench', reportGuid, 'setup'];
+  facilityReportWorkbenchRoute(facilityGuid: string, reportGuid: string, stage: 'setup' | 'data-checks' | 'report' = 'setup'): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'workbench', reportGuid, stage];
   }
 
   accountAnalysisRoute(accountGuid: string): Array<string> {
@@ -728,6 +736,8 @@ export function parseWorkspaceRoute(url: string): RouteState {
       section,
       detail,
       reportGuid: section === 'reports' && detail === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
+      reportStage: section === 'reports' && detail === 'workbench' && routeParts[5]
+        ? routeParts[6] === 'data-checks' || routeParts[6] === 'report' ? routeParts[6] : 'setup' : undefined,
       meterGuid: section === 'data' && detail === 'meters' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,
