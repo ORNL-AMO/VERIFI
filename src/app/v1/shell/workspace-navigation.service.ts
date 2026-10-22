@@ -289,7 +289,7 @@ export class WorkspaceNavigationService {
     const account = this.account();
     if (!account || this.contextMode() !== 'facility') return undefined;
     const section = this.activeSection();
-    if (this.isSingleSiteWorkspace() && section !== 'data' && section !== 'reports') return undefined;
+    if (this.isSingleSiteWorkspace() && section !== 'reports') return undefined;
     if (section === 'data') {
       const origin = this.browseState.origin(account.guid);
       return { label: origin === 'predictors' ? 'Account Predictors' : origin === 'meters' ? 'Account Meters' : 'Account Facilities', route: this.accountDataReturnRoute(account.guid) };

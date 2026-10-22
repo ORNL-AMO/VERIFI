@@ -21,7 +21,7 @@ describe('account and facility header alignment', () => {
     TestBed.configureTestingModule({ imports: [AccountDataModule, FacilityMetersComponent, MetersDashboardComponent], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: { account: currentAccount, facilities: signal([currentFacility()]), meters: signal([]), predictors: signal([]), energyUseEquipment: signal([]), accountAnalyses: signal([]), facilityAnalyses: signal([]), facilityReports: signal([]), canWrite: signal(true), hasPending: signal(false) } },
       { provide: FacilityMetersWorkspaceService, useValue: facade },
-      { provide: WorkspaceNavigationService, useValue: { activePortfolioTab: signal('facilities'), accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'] } }
+      { provide: WorkspaceNavigationService, useValue: { activePortfolioTab: signal('facilities'), isSingleSiteWorkspace: signal(false), accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'] } }
     ] });
     TestBed.overrideComponent(FacilityMetersComponent, { set: { providers: [] } });
     TestBed.overrideComponent(MetersDashboardComponent, { set: { providers: [{ provide: MetersDashboardActionsService, useValue: {} }] } });

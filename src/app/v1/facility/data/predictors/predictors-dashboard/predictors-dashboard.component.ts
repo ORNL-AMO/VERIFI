@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, TemplateRef, ViewContainerRef, computed, effect, inject, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -72,7 +73,8 @@ export class PredictorsDashboardComponent {
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState()) && (!this.matching().length || this.layoutReady()));
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
-    return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) }, { label: facility.name }] : [];
+    return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) }, { label: facility.name }) : [];
   });
   readonly entries = computed(() => {
     const facility = this.workspace.facility();

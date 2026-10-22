@@ -116,7 +116,8 @@ export const V1Routes: Routes = [
       {
         path: 'workspace/account/:accountGuid',
         component: WorkspaceShellComponent,
-        canActivate: [accountGuidReadyGuard, singleSiteAccountRedirectGuard],
+        canActivate: [accountGuidReadyGuard],
+        canActivateChild: [singleSiteAccountRedirectGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },

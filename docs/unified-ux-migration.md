@@ -64,6 +64,14 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, or Electron contract changes.
 - **Tests:** Focused v1 navigation, header, side-nav, route guard, welcome, and facility settings specs; production web build before handoff.
 
+### Single-Facility Navigation
+
+- **Decision:** Valid single-facility companies (`isSingleFacilityCompany` with exactly one facility) use the facility as the root of Data and Analysis. Their sidebar shows the company name once in the top label with a facility icon in every section, without a separate facility row or dropdown. Data and Analysis have no account return or account breadcrumb; workbench facility breadcrumbs return to the matching facility inventory.
+- **Routes:** Account Data bookmarks redirect to the matching facility inventory; Facilities and the default Portfolio destination open Meters. Account Analysis retains its paired-analysis redirects. These rules apply to child navigation from an already-open account workspace as well as direct entry.
+- **Exceptions:** Account Reports and Upload remain explicitly reachable. Upload keeps its facility selection and return information. Invalid single-facility states retain recovery navigation, and conversion to a portfolio restores account/facility navigation.
+- **Shared contracts:** No persisted models, calculation inputs, file formats, or Electron boundaries change.
+- **Tests:** Focused sidebar, breadcrumb, return-control, and real-router transition specs; application type-check and production web build.
+
 ### Single-Site to Portfolio Conversion Workflow
 
 - **Workflow:** v1 single-site account conversion to portfolio presentation, issue #2641.

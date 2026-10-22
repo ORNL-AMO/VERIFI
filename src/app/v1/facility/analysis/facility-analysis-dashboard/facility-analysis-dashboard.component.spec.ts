@@ -196,7 +196,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     expect(component.filters().search).toBe('Energy'); expect(component.inventory.overrides()['facility:energy-a']).toBe('simple');
     expect(storage.store.mock.calls.at(-1)?.[1]['["account-a","facilityAnalyses"]']).toBe('detailed');
     expect(storage.store.mock.calls.at(-1)?.[1]['["account-a","analyses"]']).toBeUndefined();
-    singleSite.set(true); fixture.detectChanges(); expect(component.breadcrumbs()[0].route).toBeUndefined();
+    singleSite.set(true); fixture.detectChanges(); expect(component.breadcrumbs()).toEqual([{ label: 'Facility A' }]);
   });
 
   it('hides single-category UI without applying an invisible category filter', () => {

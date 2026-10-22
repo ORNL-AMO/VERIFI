@@ -27,6 +27,7 @@ export function inventoryWorkspace(count = 3) {
 }
 export const inventoryNavigation = {
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
+  isSingleSiteWorkspace: signal(false),
   accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'predictors'],
   facilityDataRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'data', detail],
   facilityPredictorRoute: (facility: string, guid: string, tab: string) => ['/v1', 'workspace', 'facility', facility, 'data', 'predictors', guid, tab],

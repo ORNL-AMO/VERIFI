@@ -19,6 +19,20 @@ import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identit
 import { AccountBrowseOrigin } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 
 describe('MeterGroupWorkbenchComponent', () => {
+  it('uses the facility as its single-site root and restores portfolio breadcrumbs after conversion', () => {
+    const fixture = setup();
+    const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
+    fixture.detectChanges();
+    const portfolio = fixture.componentInstance.breadcrumbs();
+    singleSite.set(true);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping'] }]);
+    expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
+    singleSite.set(false);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.breadcrumbs()).toEqual(portfolio);
+  });
+
   it('renders calendarized usage facts in the selected group header', () => {
     const fixture = setup();
 
@@ -206,6 +220,7 @@ function setup(options: {
             'data',
             detail
           ],
+          isSingleSiteWorkspace: signal(false),
           accountDataReturnRoute: (accountGuid: string) => ['/v1','workspace','account',accountGuid,'data','portfolio',options.origin ?? 'facilities'],
           facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab = 'monthly-table') => [
             '/v1',

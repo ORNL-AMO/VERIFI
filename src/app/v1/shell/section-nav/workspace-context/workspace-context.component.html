@@ -2,16 +2,19 @@
 @let facilities = navigation.facilities();
 @let selectedFacility = navigation.facility();
 @let account = navigation.account();
+@let singleSite = navigation.isSingleSiteWorkspace();
 
 @let accountReturn = navigation.accountReturn();
 @if (accountReturn) {
   <a class="v1-nav__account-return" [routerLink]="accountReturn.route"><app-ui-icon name="arrowLeft"/><span>{{ accountReturn.label }}</span></a>
 }
 @if (account) {
-  <div class="v1-nav__account-name" [title]="account.name"><app-ui-icon name="account"/><span>{{ account.name }}</span></div>
+  <div class="v1-nav__account-name" [title]="account.name"><app-ui-icon [name]="singleSite ? 'facility' : 'account'"/><span>{{ account.name }}</span></div>
 }
-<app-facility-picker [facilities]="facilities" [selectedFacility]="contextMode === 'facility' ? selectedFacility : undefined"
-  (facilitySelected)="navigation.setFacility($event)"/>
+@if (!singleSite) {
+  <app-facility-picker [facilities]="facilities" [selectedFacility]="contextMode === 'facility' ? selectedFacility : undefined"
+    (facilitySelected)="navigation.setFacility($event)"/>
+}
 
 @if (navigation.contextNavigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ navigation.contextNavigationError() }}</p> }
 @if (hasSingleSiteRecovery() && account) {

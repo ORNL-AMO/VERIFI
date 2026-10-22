@@ -122,6 +122,13 @@ describe('WorkspaceNavigationService', () => {
     accountSignal.set({ guid: 'account-a', isSingleFacilityCompany: true }); facilitiesSignal.set(facilitiesSignal().slice(0, 1));
     expect(service.accountReturn()).toBeUndefined();
     router.events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/data/meters'));
+    expect(service.accountReturn()).toBeUndefined();
+    router.events.next(new NavigationEnd(3, '', '/v1/workspace/facility/facility-a/analysis/dashboard'));
+    expect(service.accountReturn()).toBeUndefined();
+    router.events.next(new NavigationEnd(4, '', '/v1/workspace/facility/facility-a/reports/dashboard'));
+    expect(service.accountReturn()?.route).toEqual(service.accountReportsRoute('account-a'));
+    accountSignal.set({ guid: 'account-a', isSingleFacilityCompany: false });
+    router.events.next(new NavigationEnd(5, '', '/v1/workspace/facility/facility-a/data/meters'));
     expect(service.accountReturn()?.route).toEqual(service.accountPortfolioRoute('account-a', 'facilities'));
   });
 

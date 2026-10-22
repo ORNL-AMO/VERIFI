@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
 import { buildInventoryChartStyles, InventorySeriesStyle } from '@app/v1/shared/charts/inventory-chart-styles';
 import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
@@ -84,7 +85,8 @@ export class MetersDashboardComponent implements OnDestroy {
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
-    return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) }, { label: facility.name }] : [];
+    return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) }, { label: facility.name }) : [];
   });
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState())
     && (!this.filteredMeterCards().length || this.layoutReady()));

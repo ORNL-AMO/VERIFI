@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -57,6 +58,13 @@ export class MeterGroupingComponent implements OnDestroy {
   readonly accountMetersRoute = computed(() => {
     const account = this.workspace.account();
     return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  });
+  readonly breadcrumbs = computed(() => {
+    const account = this.workspace.account(), facility = this.workspace.facility();
+    return facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account?.name || 'Account', route: this.accountMetersRoute() },
+      { label: facility.name || 'Facility' }
+    ) : [];
   });
   readonly dropListIds = computed(() => this.workspace.groupSections().map(section => meterGroupDropListId(section.id)));
   readonly moveTargets = computed(() => this.workspace.groupSections().map(section => meterGroupTargetFromSection(section)));

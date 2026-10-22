@@ -1,3 +1,4 @@
+import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { predictorStatusPresentation } from '../predictor-inventory/predictor-inventory.models';
@@ -98,8 +99,9 @@ export class WeatherPredictorWorkbenchComponent {
   readonly headerStatus = computed(() => predictorStatusPresentation(this.context.group()?.statusTone ?? 'info', this.workspace.statusState()));
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
-    return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'predictors') }] : [];
+    return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+      { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
+      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'predictors') }) : [];
   });
 
   constructor() {
