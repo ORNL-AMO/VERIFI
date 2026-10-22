@@ -13,6 +13,7 @@ import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
 import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import type { ReportStageId } from '@app/v1/shared/reports/report-workbench.models';
 
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = NavigationMotion;
@@ -403,8 +404,8 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'dashboard'];
   }
 
-  accountReportWorkbenchRoute(accountGuid: string, reportGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'workbench', reportGuid, 'setup'];
+  accountReportWorkbenchRoute(accountGuid: string, reportGuid: string, stage: ReportStageId = 'setup'): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'workbench', reportGuid, stage];
   }
 
   facilityReportsRoute(facilityGuid: string): Array<string> {
@@ -793,7 +794,8 @@ export function parseWorkspaceRoute(url: string): RouteState {
     section,
     detail: routeParts[4] || DEFAULT_DETAILS[section],
     reportGuid: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
-    reportStage: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5] ? 'setup' : undefined,
+    reportStage: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5]
+      ? routeParts[6] === 'data-checks' || routeParts[6] === 'report' ? routeParts[6] : 'setup' : undefined,
     analysisGuid: isAccountAnalysisWorkbenchRoute
       ? safeDecodeRoutePart(routeParts[5])
       : undefined,

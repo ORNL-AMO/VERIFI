@@ -1,0 +1,26 @@
+@let entry = context.entry();
+@if (entry) {
+  <section class="report-section report-setup" aria-label="Report setup">
+    <div class="report-setup-panel"><h2>Report details</h2>
+      <label for="account-report-name">Name <span aria-hidden="true">*</span></label>
+      <input id="account-report-name" class="v1-input" [formControl]="editor.form.controls.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" aria-describedby="account-report-name-help">
+      <p id="account-report-name-help" [class.v1-field-error]="editor.state() === 'invalid'">@if (editor.state() === 'invalid') { Enter a nonblank report name. } @else { Changes save automatically. }</p>
+    </div>
+    @if (context.usesAnalysis()) {
+      <div class="report-setup-panel"><h2>Linked analysis</h2>
+        <label for="account-report-analysis">Analysis</label>
+        <select id="account-report-analysis" class="v1-select" [formControl]="editor.form.controls.analysis" aria-describedby="account-report-analysis-help">
+          <option [ngValue]="null">Not selected</option>
+          @for (option of context.analysisOptions(); track option.value) { <option [value]="option.value" [disabled]="option.unavailable">{{ option.label }}</option> }
+        </select>
+        <p id="account-report-analysis-help">Choose an existing analysis. You can name this report now and choose its analysis later.</p>
+        @if (context.savedAnalysisUnavailable()) { <p class="v1-alert v1-alert--warning" role="status">The saved analysis is unavailable or ineligible. Its reference is preserved until you choose a replacement or clear the selection.</p> }
+        @if (context.needsPairRefresh()) { <p class="v1-alert v1-alert--warning" role="status">Your facility analysis has changed. Refresh this report’s analysis link to use its latest setup.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit() || editor.needsProtection()" (click)="editor.refreshLink()">Refresh analysis link</button> }
+      </div>
+    }
+    <div class="report-setup-panel"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
+  </section>
+  @if (entry.snapshot.findings.length) {
+    <section class="report-section" aria-labelledby="account-report-findings"><h2 id="account-report-findings">Configuration findings</h2><ul>@for (finding of entry.snapshot.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul></section>
+  }
+}

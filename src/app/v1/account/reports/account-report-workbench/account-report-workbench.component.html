@@ -1,0 +1,19 @@
+@let report = context.report();
+@let entry = context.entry();
+@if (context.workspace.status() === 'loading' || context.workspace.status() === 'switching') {
+  <p role="status">Loading report…</p>
+} @else if (context.workspace.status() === 'error') {
+  <div class="v1-alert v1-alert--danger" role="alert">{{ context.workspace.error()?.message || 'The report workspace could not be loaded.' }}</div>
+  <a [routerLink]="context.dashboardRoute()">Return to account reports</a>
+} @else if (!report || !entry) {
+  <app-data-empty-state icon="report" context="account" title="Report unavailable" description="This report may have been deleted, belong to another account, or be hidden by the account’s Other Impacts setting."/>
+  <a class="v1-btn v1-btn--secondary" [routerLink]="context.dashboardRoute()">Return to account reports</a>
+} @else {
+  <app-report-workbench-header [editor]="editor" [breadcrumbs]="context.breadcrumbs()" [resources]="context.resources()" [selectedId]="report.guid" [name]="report.name || 'Untitled account report'" [typeLabel]="entry.typeLabel" [status]="entry.status" [statusLabel]="entry.statusLabel" [facts]="entry.snapshot.facts" [stages]="context.stages()" (reportSelected)="switchReport($event)"/>
+  <main class="report-workbench-content" aria-labelledby="account-report-workbench-title"><router-outlet/></main>
+  <footer class="v1-wizard-actions" aria-label="Report workflow navigation">
+    <a class="v1-btn v1-btn--quiet" [routerLink]="previous()?.route || context.dashboardRoute()"><app-ui-icon name="chevronLeft"/>Back</a>
+    @if (next(); as nextStage) { <a class="v1-btn v1-btn--action" [routerLink]="nextStage.route">Continue<app-ui-icon name="chevronRight"/></a> }
+    @else { <a class="v1-btn v1-btn--action" [routerLink]="context.dashboardRoute()">Back to reports<app-ui-icon name="arrowLeft"/></a> }
+  </footer>
+}

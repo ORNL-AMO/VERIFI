@@ -34,16 +34,18 @@ Phase 1 initially shipped with a limited account Reports landing and facility da
 
 **Completion checkpoint:** account and facility reports are discoverable and route to the correct owning workspace.
 
-Implemented with a combined account inventory and shared Simple/Summary/Detailed cards on both dashboards. Scope headers, workspace insets, title/action placement, and browse returns follow Analysis. Account reports open a minimal saved-configuration landing; account report workbench stages remain phase 4. Both scopes support create, copy, rename, and delete through the existing command boundary. Single-facility workspaces retain explicit Account Reports access and existing hidden analysis references without report-entry reconciliation. Report content remains pending independently of setup status.
+Implemented with a combined account inventory and shared Simple/Summary/Detailed cards on both dashboards. Scope headers, workspace insets, title/action placement, and browse returns follow Analysis. Account reports open a minimal saved-configuration landing; account report workbench stages are supplied by phase 4. Both scopes support create, copy, rename, and delete through the existing command boundary. Single-facility workspaces retain explicit Account Reports access and existing hidden analysis references without report-entry reconciliation. Report content remains pending independently of setup status.
 
 ## Phase 4 — Account report workbench
 
-- [ ] Apply the shared workbench structure to account reports.
-- [ ] Preserve account-specific settings and analysis references.
-- [ ] Support single-facility workflows through the existing hidden account-analysis pairing.
-- [ ] Provide integration points for individual account report migrations.
+- [x] Apply the shared workbench structure to account reports.
+- [x] Preserve account-specific settings and analysis references.
+- [x] Support single-facility workflows through the existing hidden account-analysis pairing.
+- [x] Provide integration points for individual account report migrations.
 
 **Completion checkpoint:** account report issues can add their content without rebuilding common workflow infrastructure or requiring redundant analysis setup.
+
+Implemented with shared report header/stage presentation and autosave scheduling, with scope-specific account and facility contexts. Account Setup edits the name and the linked analysis for Better Plants, Performance, Analysis, and Savings. Data Checks applies to Better Plants, Performance, and Savings; other account types use Setup and Report. Checks and previews remain pending integration points. Single-facility choices use facility analyses while retaining account-analysis GUID references: explicit selection or refresh reuses/creates only the required hidden pair and commits it with the report in one transaction. Browsing performs no reconciliation. Dates, report-specific settings, calculations, and output remain with their report migrations.
 
 ## Phase 5 — Shared workflow wrapup
 

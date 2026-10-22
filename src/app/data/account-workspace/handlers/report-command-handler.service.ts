@@ -10,6 +10,12 @@ import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { WorkspaceWriteError } from '../workspace-commands.models';
+import { AccountReportSetupChanges, AccountReportSetupResult, accountReportAnalysisGuid, accountReportAnalysisSetupKey } from '../account-report-setup.models';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { buildSingleFacilityAnalysisPair, singleFacilityAnalysisPairCandidates, singleFacilityAnalysisPairIsCurrent } from '../single-facility-analysis-pairs';
 
 @Injectable({ providedIn: 'root' })
 export class ReportCommandHandler {
@@ -67,6 +73,65 @@ export class ReportCommandHandler {
   async updateAccountReport(report: IdbAccountReport, activeAccountGuid: string): Promise<IdbAccountReport> {
     this.assertOwnership(report.accountId, activeAccountGuid, 'account report');
     return firstValueFrom(this.accountReportDb.updateWithObservable({ ...report }));
+  }
+
+  /** Read the latest records and commit a report edit and its optional hidden pair together. */
+  async updateAccountReportSetup(reportGuid: string, changes: AccountReportSetupChanges, accountGuid: string): Promise<AccountReportSetupResult> {
+    return this.transactions.runTransaction(['accounts', 'facilities', 'accountReports', 'accountAnalysisItems', 'analysisItems'], 'readwrite', async transaction => {
+      const account = (await transaction.getAll<IdbAccount>('accounts')).find(item => item.guid === accountGuid);
+      const reports = await transaction.getAllByIndex<IdbAccountReport>('accountReports', 'accountId', accountGuid);
+      const report = reports.find(item => item.guid === reportGuid);
+      if (!account || account.id === undefined || !report || report.id === undefined) {
+        throw new WorkspaceWriteError('validation-failed', 'The report or its account is no longer available.');
+      }
+      if (!account.displayEmissions && ['betterClimate', 'accountEmissionFactors'].includes(report.reportType)) {
+        throw new WorkspaceWriteError('validation-failed', 'Enable Other Impacts in Account Goals to access this report type.');
+      }
+      if (changes.name !== undefined && !changes.name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a nonblank report name.');
+      let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
+      const writtenPairs: IdbAccountAnalysisItem[] = [];
+      if (changes.analysis !== undefined) {
+        const key = accountReportAnalysisSetupKey(report.reportType);
+        if (!key) throw new WorkspaceWriteError('validation-failed', 'This report does not use an analysis selection.');
+        let selected: IdbAccountAnalysisItem | undefined;
+        if (changes.analysis) {
+          const choice = changes.analysis;
+          const accountAnalyses = await transaction.getAllByIndex<IdbAccountAnalysisItem>('accountAnalysisItems', 'accountId', accountGuid);
+          const facilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid);
+          const singleFacility = account.isSingleFacilityCompany === true && facilities.length === 1;
+          if (choice.scope === 'account') {
+            if (singleFacility) throw new WorkspaceWriteError('validation-failed', 'Choose a facility analysis for this single-facility account.');
+            selected = accountAnalyses.find(item => item.guid === choice.analysisGuid);
+          } else {
+            const facility = facilities.find(item => item.guid === choice.facilityGuid);
+            const analysis = (await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountGuid))
+              .find(item => item.guid === choice.analysisGuid && item.facilityId === choice.facilityGuid);
+            if (!singleFacility || !facility || !analysis || !analysis.energyIsSource) {
+              throw new WorkspaceWriteError('validation-failed', 'The selected facility analysis is no longer available for this report.');
+            }
+            const candidates = singleFacilityAnalysisPairCandidates(accountAnalyses, facility.guid, analysis.guid);
+            const currentGuid = accountReportAnalysisGuid(report);
+            const activeGuid = analysis.analysisCategory === 'water' ? account.selectedWaterAnalysisId : account.selectedEnergyAnalysisId;
+            const existing = candidates.find(item => item.guid === currentGuid) ?? candidates.find(item => item.guid === activeGuid) ?? candidates[0];
+            selected = existing;
+            if (!existing || !singleFacilityAnalysisPairIsCurrent(existing, facility, analysis)) {
+              selected = buildSingleFacilityAnalysisPair(account, facility, analysis, existing);
+              if (existing?.id !== undefined) await transaction.put('accountAnalysisItems', selected);
+              else selected.id = Number(await transaction.add('accountAnalysisItems', selected));
+              writtenPairs.push(selected);
+            }
+          }
+          if (!selected || !selected.energyIsSource) throw new WorkspaceWriteError('validation-failed', 'Choose an available source-energy or water analysis.');
+        }
+        updated = { ...updated, [key]: { ...report[key], analysisItemId: selected?.guid },
+          ...(selected && report.reportType !== 'accountSavings' ? { baselineYear: selected.baselineYear } : {}) };
+      }
+      if (JSON.stringify(updated) !== JSON.stringify(report)) {
+        updated = { ...updated, modifiedDate: new Date() };
+        await transaction.put('accountReports', updated);
+      }
+      return { report: updated, accountAnalyses: writtenPairs };
+    });
   }
 
   async deleteAccountReport(report: IdbAccountReport, activeAccountGuid: string): Promise<number> {

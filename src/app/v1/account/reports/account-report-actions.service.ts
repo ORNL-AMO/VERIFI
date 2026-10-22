@@ -8,6 +8,7 @@ import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { ReportType } from '@data/models/constantsAndTypes';
 import { ACCOUNT_REPORT_TYPES } from '@app/v1/shared/reports/report-inventory.models';
 import { reportTypeAvailable } from '@app/v1/shared/reports/report-availability';
+import { AccountReportSetupChanges } from '@data/account-workspace/account-report-setup.models';
 
 @Injectable({ providedIn: 'root' })
 export class AccountReportActionsService {
@@ -52,6 +53,23 @@ export class AccountReportActionsService {
       return latest.name === trimmed ? latest : this.handler.updateAccountReport({ ...latest, name: trimmed }, accountGuid);
     });
     return result.value;
+  }
+  async updateSetup(reportGuid: string, changes: AccountReportSetupChanges): Promise<IdbAccountReport> {
+    const accountGuid = this.requireContext();
+    this.requireReport(reportGuid, accountGuid);
+    if (changes.name !== undefined) this.requireName(changes.name);
+    const result = await this.boundary.execute({
+      entityKind: 'accountReport', changeKind: 'update', entityGuid: reportGuid, label: 'Saving report setup',
+      notification: { suppressSuccessToast: true },
+      publication: { mode: 'patch', buildPatch: value => ({ collections: [
+        { collection: 'accountReports', upsert: [value.report] },
+        ...(value.accountAnalyses.length ? [{ collection: 'accountAnalyses' as const, upsert: value.accountAnalyses }] : [])
+      ] }) }
+    }, () => {
+      this.requireReport(reportGuid, accountGuid);
+      return this.handler.updateAccountReportSetup(reportGuid, changes, accountGuid);
+    });
+    return result.value.report;
   }
   async delete(reportGuid: string): Promise<void> {
     const accountGuid = this.requireContext();

@@ -14,6 +14,13 @@ import { hasFacilityReportDataChecks } from './facility-report-workbench.models'
 export class FacilityReportWorkbenchComponent {
   readonly context = inject(FacilityReportWorkbenchContext);
   readonly editor = inject(FacilityReportAutosaveService);
+  readonly breadcrumbs = computed(() => [
+    { label: `${this.context.workspace.account()?.name || 'Account'} Reports`, route: this.context.navigation.accountReportsRoute(this.context.workspace.account()?.guid ?? '') },
+    { label: `${this.context.facility()?.name || 'Facility'} Reports`, route: this.context.dashboardRoute() },
+    { label: this.context.report()?.name || 'Untitled facility report' }
+  ]);
+  readonly facts = computed(() => this.context.card()?.view.factSections.flatMap(section => section.facts.map(fact => ({ label: fact.label, value: fact.valueLabel }))) ?? []);
+  readonly statusLabel = computed(() => ({ ready: 'No Issues', error: 'Needs attention', warning: 'Needs review', checking: 'Checking setup', unavailable: 'Setup status unavailable' })[this.context.card()?.status ?? 'checking']);
   private readonly router = inject(Router);
   readonly previous = computed(() => {
     const stages = this.context.stages();

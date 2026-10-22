@@ -1,6 +1,1 @@
-:host { display: block; min-width: 0; }
-.report-section { margin: 0; padding: clamp(1rem, 3vw, 1.5rem); border: 1px solid var(--v1-border); border-top: 0; border-radius: 0; background: var(--v1-surface); }
-.report-section h2 { margin: 0 0 var(--v1-space-3); font-size: 1.15rem; }
-.report-section p:last-child { margin-bottom: 0; }
-.report-section label { display: block; margin-bottom: var(--v1-space-2); }
-.report-section input { width: min(100%, 42rem); }
+@import '../../../shared/reports/report-workbench-stage.css';

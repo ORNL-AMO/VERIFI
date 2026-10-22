@@ -1,6 +1,0 @@
-:host { display: block; min-width: 0; }
-.account-report-section { border: 1px solid var(--v1-border); padding: 1.25rem; background: var(--v1-surface); }
-.account-report-section + .account-report-section { border-top: 0; }
-.account-report-section__status { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; }
-h2 { font-size: 1.1rem; margin: 1rem 0 .6rem; }
-p { margin: .8rem 0 0; }
