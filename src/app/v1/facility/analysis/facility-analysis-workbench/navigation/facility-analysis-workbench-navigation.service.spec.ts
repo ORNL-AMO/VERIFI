@@ -78,6 +78,10 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
     expect(navigation.activeStageId()).toBe('group:group-a');
     expect(navigation.activeContextTabId()).toBe('monthly-chart');
 
+    events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/group/group-a/visualization'));
+    expect(navigation.activeStageId()).toBe('group:group-a');
+    expect(navigation.activeContextTabId()).toBe('visualization');
+
     events.next(new NavigationEnd(
       2,
       '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/group/group-a/monthly-chart',

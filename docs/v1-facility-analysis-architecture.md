@@ -175,6 +175,66 @@ Calendarization is already coordinated at workspace scope for facility results. 
 
 ## Results presentation
 
+Group **Visualization** is an exploratory input-data tab immediately after Setup,
+available for all analysis methods, including skipped groups. It does not consume
+completed analysis results or require a valid regression model. Its route-local
+facade reads the canonical calendarization projected into the analysis units and
+site/source basis, group meter GUIDs, and saved owning-facility Predictor readings.
+No weather readings are fetched or generated to draw these plots. Raw Time Series uses
+actual group usage on the left axis and visible raw Predictor values on the right;
+Correlation shows a separate scatter plot and intercept-bearing linear fit per
+visible Predictor. The time series stays visible above a responsive grid of
+correlation plots; the tab has no section headings, introductory descriptions,
+chart-view switch, or visible monthly data table. A screen-reader-only table exposes
+the full analysis-period values, coverage, and selected predictors in the active
+Raw/Z-score scale. Predictor controls use disambiguated accessible names while
+keeping visible names short and unit-free. A trace-colored Group usage legend button
+is locked on; Predictor buttons toggle only Predictor traces. Double-click or
+Shift+Enter isolates one Predictor alongside group usage, updating only transient
+visualization selections. Correlation summaries
+show r and R² without paired-month counts, followed by the best-fit line equation
+`y = mx + b` (y is group usage; x is the Predictor). Coefficients display five
+significant figures and use the existing raw-data fit without changing calculations.
+Trace buttons wrap beside the chart actions in one toolbar above the time series,
+without a divider or separate action row between controls and plot.
+Trace button labels omit units; axes, tooltips, and correlation plots retain them.
+
+The toolbar's typed reactive Raw / Z-score control defaults to Raw. Z-score mode
+standardizes group usage and each visible Predictor independently as `(x - mean) /
+population standard deviation`, using finite monthly values across the full
+analysis period. Missing values stay gaps. Each series' reference period is fixed
+while zooming or toggling other series. Standardized traces share one axis labeled
+Standard deviations from mean, with a thicker theme-aware horizontal zero line.
+Time-series tooltips show only the selected scale: raw values with units or z-scores.
+Raw axis labels and tooltip
+values use five significant figures; chart data and statistics keep full precision.
+Constant series or series
+with fewer than two finite readings show gaps and an explicit unavailable notice;
+no divide-by-zero result is plotted. Correlation plots/statistics retain their
+original raw-data contract. Printing and PNG download use the selected chart mode.
+Calendar-month alignment and duplicate-reading aggregation
+match monthly analysis; absent/non-finite values remain gaps. Source bills determine
+coverage independently of calendarized row presence, since calendarization can
+synthesize zero-valued rows for missing months. Full-month readings cover their
+calendar month, annual readings cover their calendar year, and backward bills cover
+the interval after the previous reading through the current reading. Finite source
+values are required; a legitimate zero is covered. Partial group totals are visible
+with coverage warnings and excluded from correlation pairs. Statistics
+require at least three complete pairs with varying values in both series.
+
+The chart history runs from the analysis baseline fiscal-year start through
+the latest group month, independently of analysis method. A missing baseline uses
+full history. Timeline selection uses chart zoom, with no separate date selector;
+zoom affects only the time-series viewport. `GroupVisualizationSession`, provided by the
+workbench, retains visible Predictor GUIDs, scale, and zoom
+per owning account/facility/analysis/group while navigating child routes. It never
+updates analysis drafts, validation, persistence, or backups. Scale-control edits
+are compared with the current session scale so silent hydration when a group route
+reuses the component cannot suppress a later edit. Explicit Retry asks
+the shared calendarization service to rerun its current snapshot, preserving its
+existing sharing, cancellation, and publication rules. The existing result-tab and
+stage guards remain authoritative.
+
 Shared modeled-equation labels parenthesize regression multiplication terms and additive modified-intensity products while preserving their signs and significant-digit formatting.
 
 Result pages are projections, not calculation owners. Facility pages read `FacilityAnalysisResultsService.state`; ordinary group pages read `FacilityAnalysisGroupResultsService.state`; the Banking tab and setup preview read `FacilityAnalysisBankingResultsService.state`. Annual and monthly tables share accessible banked-source, banked-savings, transition, and group model-period markers, and render only the markers present in each table's legend. Transition rows preserve actual use, the applied year's carried total improvement, cumulative values supplied by calculation, and rolling values while suppressing adjusted/model-derived, annual-improvement, and directly attributed savings fields that are not meaningful. Chart row values use `null` for those unavailable points so charts create a gap, omit comparison bands across it, display an em dash visually, and announce the value as unavailable rather than plotting zero. Positive and negative values belong to exactly one ordinary or banked savings series.

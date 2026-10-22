@@ -69,6 +69,7 @@ export class FacilityAnalysisGroupShellComponent {
 
 function isAnalysisWorkbenchTab(value: unknown): value is AnalysisWorkbenchTabId {
   return value === 'setup'
+    || value === 'visualization'
     || value === 'banking'
     || value === 'regression'
     || value === 'annual'

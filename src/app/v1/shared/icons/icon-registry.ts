@@ -1,4 +1,5 @@
 import type { IconSvgObject } from './icon.types';
+import { CUSTOM_ICONS } from './custom-icons';
 import Add01Icon from '@hugeicons/core-free-icons/Add01Icon';
 import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon';
 import ArrowDataTransferHorizontalIcon from '@hugeicons/core-free-icons/ArrowDataTransferHorizontalIcon';
@@ -105,6 +106,7 @@ import ZoomInIcon from '@hugeicons/core-free-icons/ZoomInIcon';
 import ZoomOutIcon from '@hugeicons/core-free-icons/ZoomOutIcon';
 
 export const ICON_REGISTRY = {
+  ...CUSTOM_ICONS,
   account: Building03Icon,
   accountAnalysis: CrowdfundingIcon,
   accountIssue: Alert02Icon,
