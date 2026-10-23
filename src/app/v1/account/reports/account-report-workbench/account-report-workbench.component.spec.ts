@@ -9,6 +9,34 @@ import { setupAccountReportWorkbench } from '../testing/account-report-workbench
 import { buildSingleFacilityAnalysisPair } from '@data/account-workspace/single-facility-analysis-pairs';
 
 describe('account report workbench', () => {
+  it('disables later tabs and Continue immediately for invalid setup and restores them after correction', async () => {
+    const snapshot = accountReportSnapshot();
+    snapshot.accountReports[0].reportType = 'betterPlants';
+    snapshot.accountReports[0].betterPlantsReportSetup.analysisItemId = 'account-analysis';
+    const { open, harness } = await setupAccountReportWorkbench(snapshot);
+    const workbench = await open();
+    const laterTabs = () => [...harness.routeNativeElement!.querySelectorAll('.v1-analysis-stages li')].slice(1);
+    const expectBlocked = (blocked: boolean) => {
+      harness.detectChanges();
+      for (const tab of laterTabs()) expect(!!tab.querySelector('[aria-disabled="true"]')).toBe(blocked);
+      expect(!!harness.routeNativeElement!.querySelector('footer button[disabled]')).toBe(blocked);
+      expect(harness.routeNativeElement!.querySelector('footer a')?.textContent).toContain('Back');
+    };
+    expectBlocked(false);
+    workbench.editor.form.controls.name.setValue(' '); expectBlocked(true);
+    workbench.editor.discard(); expectBlocked(false);
+    workbench.editor.form.controls.analysis.setValue(null); expectBlocked(true);
+    workbench.editor.discard(); expectBlocked(false);
+    for (const year of [null, 2018, 2017, 2024.5]) {
+      workbench.editor.form.controls.betterPlants.controls.reportYear.setValue(year); expectBlocked(true);
+    }
+    workbench.editor.discard(); expectBlocked(false);
+    await open('account-report', 'data-checks');
+    workbench.editor.form.controls.name.setValue(' '); harness.detectChanges();
+    expect(harness.routeNativeElement!.querySelector('footer a')?.getAttribute('href')).toContain('/setup');
+    expect(harness.routeNativeElement!.querySelector('footer button[disabled]')?.textContent).toContain('Continue');
+    workbench.editor.discard();
+  });
   it.each(ACCOUNT_REPORT_TYPES)('opens $value with applicable stages and pending content without writes', async ({ value }) => {
     const snapshot = accountReportSnapshot(); snapshot.accountReports[0].reportType = value;
     const { open, harness, updateSetup, store } = await setupAccountReportWorkbench(snapshot);

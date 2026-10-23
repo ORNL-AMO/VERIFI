@@ -1,12 +1,13 @@
-@import '../../../../shared/reports/report-workbench-stage.css';
+@import '../../../../shared/reports/report-setup.css';
 
-:host { display: contents; }
-.option { display: flex; align-items: baseline; gap: .6rem; margin-block: .75rem; }
-textarea { width: 100%; resize: vertical; margin-bottom: 1rem; }
+:host {
+  display: block;
+  min-width: 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
+}
 
-.report-setup-panel { padding-block: 1rem; border-bottom: 1px solid var(--v1-border); }
-.report-setup-panel:last-child { border-bottom: 0; padding-bottom: 0; }
-.report-setup-panel h2 { font-size: 1.1rem; margin-bottom: 1rem; }
-.report-setup-panel label { display: block; margin-block: .5rem; }
-.report-setup-panel .option { display: flex; }
-.option input { width: auto; }
+.better-plants-content .report-setup-option + .report-setup-option { margin-top: .75rem; }
+.better-plants-content__names { padding-left: 1.65rem; }
+.better-plants-settings__full-width { grid-column: 1 / -1; }
+.better-plants-metrics { margin-top: 1rem; max-width: 42rem; }

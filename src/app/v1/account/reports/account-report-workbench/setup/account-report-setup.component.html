@@ -1,25 +1,45 @@
 @let entry = context.entry();
 @if (entry) {
   <section class="report-section report-setup" aria-label="Report setup">
-    <div class="report-setup-panel"><h2>Report details</h2>
-      <label for="account-report-name">Name <span aria-hidden="true">*</span></label>
-      <input id="account-report-name" class="v1-input" [formControl]="editor.form.controls.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" aria-describedby="account-report-name-help">
-      <p id="account-report-name-help" [class.v1-field-error]="editor.state() === 'invalid'">@if (editor.state() === 'invalid') { Enter a nonblank report name. } @else { Changes save automatically. }</p>
+    <div class="report-setup-section report-setup-top" [class.report-setup-top--with-period]="entry.report.reportType === 'betterPlants'">
+      <div>
+        <h2>Report information</h2>
+        <div class="report-setup-field report-setup-name">
+          <label for="account-report-name">Name <span class="report-setup-required" aria-hidden="true">*</span></label>
+          <input id="account-report-name" class="v1-input" [formControl]="editor.form.controls.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" aria-describedby="account-report-name-help">
+          <p id="account-report-name-help" class="report-setup-help" [class.v1-field-error]="editor.state() === 'invalid'">@if (editor.state() === 'invalid') { Enter a nonblank report name. } @else { Changes save automatically. }</p>
+        </div>
+      </div>
+      @if (entry.report.reportType === 'betterPlants') { <app-better-plants-reporting-period/> }
     </div>
     @if (context.usesAnalysis()) {
-      <div class="report-setup-panel"><h2>Linked analysis</h2>
-        <label for="account-report-analysis">Analysis</label>
-        <select id="account-report-analysis" class="v1-select" [formControl]="editor.form.controls.analysis" aria-describedby="account-report-analysis-help">
-          <option [ngValue]="null">Not selected</option>
-          @for (option of context.analysisOptions(); track option.value) { <option [value]="option.value" [disabled]="option.unavailable">{{ option.label }}</option> }
-        </select>
-        <p id="account-report-analysis-help">Choose an existing analysis. You can name this report now and choose its analysis later.</p>
+      <div class="report-setup-section">
+        <fieldset id="account-report-analysis" class="report-analysis-selection" tabindex="-1" aria-describedby="account-report-analysis-help" [disabled]="!editor.canEdit()">
+          <legend>Analysis</legend>
+          <p id="account-report-analysis-help" class="report-setup-help">Choose the analysis to use for this report.</p>
+          <div class="report-analysis-grid">
+            @for (analysis of analysisCards(); track analysis.value) {
+              <label class="report-analysis-card">
+                <input type="radio" name="analysis" [formControl]="editor.form.controls.analysis" [value]="analysis.value">
+                <span class="report-analysis-card__content">
+                  <strong>{{ analysis.name }}</strong>
+                  <span>{{ analysis.category }} · Baseline {{ analysis.baseline }}</span>
+                </span>
+              </label>
+            }
+            <label class="report-analysis-card report-analysis-card--empty">
+              <input type="radio" name="analysis" [formControl]="editor.form.controls.analysis" [value]="null">
+              <span class="report-analysis-card__content"><strong>Choose later</strong><span>Keep setting up your report.</span></span>
+            </label>
+          </div>
+          @if (!analysisCards().length) { <p class="report-setup-help" role="status">No eligible analyses are available. Create an analysis before continuing to data checks.</p> }
+        </fieldset>
         @if (context.savedAnalysisUnavailable()) { <p class="v1-alert v1-alert--warning" role="status">The saved analysis is unavailable or ineligible. Its reference is preserved until you choose a replacement or clear the selection.</p> }
         @if (context.needsPairRefresh()) { <p class="v1-alert v1-alert--warning" role="status">Your facility analysis has changed. Refresh this report’s analysis link to use its latest setup.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit() || editor.needsProtection()" (click)="editor.refreshLink()">Refresh analysis link</button> }
       </div>
     }
     @if (entry.report.reportType === 'betterPlants') { <app-better-plants-setup/> } @else {
-    <div class="report-setup-panel"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
+    <div class="report-setup-section"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
     }
   </section>
   @if (entry.snapshot.findings.length) {

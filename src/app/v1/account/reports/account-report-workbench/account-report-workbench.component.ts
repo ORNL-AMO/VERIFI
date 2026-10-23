@@ -13,8 +13,12 @@ export class AccountReportWorkbenchComponent {
   readonly editor = inject(AccountReportAutosaveService);
   private readonly betterPlants = inject(BetterPlantsReportService);
   private readonly router = inject(Router);
-  readonly previous = computed(() => { const stages = this.context.stages(); return stages[stages.findIndex(stage => stage.current) - 1]; });
-  readonly next = computed(() => { const stages = this.context.stages(); return stages[stages.findIndex(stage => stage.current) + 1]; });
+  readonly stages = computed(() => this.context.stages().map(stage => ({ ...stage,
+    canOpen: stage.id === 'setup' || this.editor.setupValid(),
+    ...(stage.id === 'setup' ? { completed: this.editor.setupValid(), hasBlockingErrors: !this.editor.setupValid() } : {})
+  })));
+  readonly previous = computed(() => { const stages = this.stages(); return stages[stages.findIndex(stage => stage.current) - 1]; });
+  readonly next = computed(() => { const stages = this.stages(); return stages[stages.findIndex(stage => stage.current) + 1]; });
   constructor() {
     effect(() => this.context.checksReviewed.set(this.betterPlants.state().value?.reviewed ?? false));
     effect(() => {

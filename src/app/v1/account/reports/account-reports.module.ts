@@ -2,6 +2,7 @@ import { BetterPlantsPreviewComponent } from './better-plants/preview/better-pla
 import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { BetterPlantsDataChecksComponent } from './better-plants/data-checks/better-plants-data-checks.component';
 import { BetterPlantsSetupComponent } from './better-plants/setup/better-plants-setup.component';
+import { BetterPlantsReportingPeriodComponent } from './better-plants/setup/reporting-period/better-plants-reporting-period.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -15,6 +16,6 @@ import { AccountReportDataChecksComponent } from './account-report-workbench/dat
 import { AccountReportPreviewComponent } from './account-report-workbench/preview/account-report-preview.component';
 import { AccountReportsDashboardComponent } from './account-reports-dashboard/account-reports-dashboard.component';
 
-@NgModule({ declarations: [BetterPlantsPreviewComponent, BetterPlantsDataChecksComponent, BetterPlantsSetupComponent, AccountReportWorkbenchComponent, AccountReportSetupComponent, AccountReportDataChecksComponent, AccountReportPreviewComponent, AccountReportsDashboardComponent],
+@NgModule({ declarations: [BetterPlantsPreviewComponent, BetterPlantsDataChecksComponent, BetterPlantsSetupComponent, BetterPlantsReportingPeriodComponent, AccountReportWorkbenchComponent, AccountReportSetupComponent, AccountReportDataChecksComponent, AccountReportPreviewComponent, AccountReportsDashboardComponent],
   imports: [AnalysisResultNumberPipe, ReactiveFormsModule, CommonModule, RouterModule, IconComponent, DataEmptyStateComponent, ReportsModule] })
 export class AccountReportsModule { }

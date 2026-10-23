@@ -25,7 +25,6 @@ import { ACCOUNT_REPORT_ROUTES } from '../account-reports.routes';
 import { AccountReportActionsService } from '../account-report-actions.service';
 import { AccountReportSetupChanges, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { accountReportSnapshot } from '../testing/account-report-test-fixtures';
-import { reportAnalysisToken } from '../account-report-workbench/account-report-workbench.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
@@ -240,8 +239,7 @@ describe('report inventory browser journeys and presentation', () => {
     const view = setup(1), snapshot = accountReportSnapshot(true); view.store.publish(snapshot);
     await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
-    const choice = reportAnalysisToken({ scope: 'facility', facilityGuid: 'facility-a', analysisGuid: 'facility-analysis' });
-    expect(view.root.querySelector<HTMLSelectElement>('#account-report-analysis')!.value).toBe(choice);
+    expect(view.root.querySelector('#account-report-analysis input:checked')?.closest('label')?.textContent).toContain('Energy analysis');
     await page.getByRole('textbox', { name: /^Name/ }).fill('A long account report name that remains readable in a narrow window');
     await page.getByRole('link', { name: 'Continue', exact: true }).click(); await settle(view.fixture);
     expect(view.accountActions.updateSetup).toHaveBeenCalledExactlyOnceWith('account-report', { name: 'A long account report name that remains readable in a narrow window' });
@@ -256,7 +254,7 @@ describe('report inventory browser journeys and presentation', () => {
     }
     await page.getByRole('link', { name: 'Back', exact: true }).click(); await settle(view.fixture);
     const name = view.root.querySelector<HTMLInputElement>('#account-report-name')!; name.focus(); await userEvent.keyboard('{Tab}');
-    expect(document.activeElement?.id).toBe('account-report-analysis');
+    expect(document.activeElement).toBe(view.root.querySelector('#account-report-analysis input:checked'));
     view.fixture.destroy();
   });
   it('matches Analysis insets and action placement, with flush scope headers and responsive themed cards', async () => {

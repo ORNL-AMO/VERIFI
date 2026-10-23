@@ -1,0 +1,27 @@
+@let selectedAnalysis = analysis();
+<section class="report-setup-section" [formGroup]="form" aria-labelledby="better-plants-period-title">
+  <h2 id="better-plants-period-title">Reporting period</h2>
+  <div class="report-setup-fields">
+    <div class="report-setup-field">
+      <span class="better-plants-baseline-label">Baseline year</span>
+      <strong class="better-plants-baseline">{{ selectedAnalysis?.baselineYear ?? 'Choose an analysis' }}</strong>
+    </div>
+    <div class="report-setup-field">
+      <label for="better-plants-report-year">Report year</label>
+      <select id="better-plants-report-year" class="v1-select" formControlName="reportYear" aria-describedby="better-plants-period-help">
+        <option [ngValue]="null">Not selected</option>
+        @if (savedYearUnavailable()) { <option [ngValue]="form.controls.reportYear.value">{{ form.controls.reportYear.value }} — saved year unavailable</option> }
+        @for (year of years(); track year) { <option [ngValue]="year">{{ fiscal() ? 'FY ' : '' }}{{ year }}</option> }
+      </select>
+    </div>
+  </div>
+  <p id="better-plants-period-help" class="report-setup-help">Choose a complete reporting year after the analysis baseline.</p>
+  @if (periodState() === 'evaluating' || periodState() === 'idle') { <p class="report-setup-help" role="status">Finding complete reporting years…</p> }
+  @if (periodState() === 'error') {
+    <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p>
+    <button class="v1-btn v1-btn--secondary" type="button" (click)="retryPeriods()">Retry reporting years</button>
+  }
+  @if (periodState() === 'ready' && !years().length) { <p class="v1-alert v1-alert--warning">No complete reporting years are available. Review the account’s meter data.</p> }
+  @if (baselineWarning()) { <p class="v1-alert v1-alert--warning">This baseline year does not match your corporate baseline year.</p> }
+  <label class="report-setup-option"><input type="checkbox" formControlName="includeAllYears"><span>Generate a report for every year</span></label>
+</section>

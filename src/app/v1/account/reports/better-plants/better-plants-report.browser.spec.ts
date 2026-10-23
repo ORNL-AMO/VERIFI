@@ -54,6 +54,39 @@ describe('Better Plants review and display in Chromium', () => {
       TestBed.tick(); await waiting; view.harness.detectChanges();
     };
     expect(view.store.committedRevision()).toBeUndefined();
+    await page.viewport(1200, 900);
+    const setup = root.querySelector<HTMLElement>('app-account-report-setup')!;
+    const information = setup.querySelector<HTMLElement>('.report-setup-top h2')!.getBoundingClientRect();
+    const period = setup.querySelector<HTMLElement>('app-better-plants-reporting-period h2')!.getBoundingClientRect();
+    expect(period.left).toBeGreaterThan(information.right);
+    expect(period.top).toBeCloseTo(information.top, 0);
+    const radio = setup.querySelector<HTMLInputElement>('.report-analysis-card input:checked')!;
+    const selectedAnalysis = component.editor.form.controls.analysis.value;
+    radio.focus(); await userEvent.keyboard('{ArrowRight}');
+    expect(component.editor.form.controls.analysis.value).toBeNull();
+    expect(root.querySelectorAll('.v1-analysis-stages [aria-disabled="true"]')).toHaveLength(2);
+    expect(root.querySelector<HTMLButtonElement>('footer button')?.disabled).toBe(true);
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(component.editor.form.controls.analysis.value).toBe(selectedAnalysis);
+    const main = root.querySelector<HTMLElement>('main')!;
+    const mainTop = main.getBoundingClientRect().top;
+    await page.getByRole('textbox', { name: /^Name/ }).fill(`Updated ${category} report`);
+    expect(root.querySelector('app-report-workbench-header .v1-alert')).toBeNull();
+    expect(main.getBoundingClientRect().top).toBeCloseTo(mainTop, 0);
+    await component.editor.flush(); view.harness.detectChanges();
+    for (const dark of [false, true]) {
+      root.className = `v1-root v1-palette-blueprint${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`;
+      for (const width of [1024, 640, 390]) {
+        await page.viewport(width, 900); view.harness.detectChanges();
+        expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+        if (width === 390) {
+          expect(setup.querySelector<HTMLElement>('app-better-plants-reporting-period h2')!.getBoundingClientRect().top)
+            .toBeGreaterThan(setup.querySelector<HTMLElement>('#account-report-name')!.getBoundingClientRect().bottom);
+        }
+      }
+    }
+    await page.viewport(1200, 1100); root.className = 'v1-root v1-palette-blueprint';
+    await page.screenshot({ element: setup, path: `./__screenshots__/better-plants-setup-${category}.png` });
     await view.open('report', 'report'); await waitFor(state => state.state === 'review-required');
     expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
     await view.open('report', 'data-checks'); await waitFor(state => state.state === 'ready' && !!state.value?.checks);

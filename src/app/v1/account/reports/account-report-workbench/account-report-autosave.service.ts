@@ -1,5 +1,6 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { AccountReportSetupChanges } from '@data/account-workspace/account-report-setup.models';
 import { ReportAutosaveController } from '@app/v1/shared/reports/report-autosave-controller';
@@ -109,6 +110,24 @@ export class AccountReportAutosaveService {
   readonly isDirty = this.controller.isDirty;
   readonly needsProtection = this.controller.needsProtection;
   readonly canEdit = this.controller.canEdit;
+  private readonly draftChanges = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  readonly setupValid = computed(() => {
+    this.draftChanges();
+    const state = this.state(), report = this.context.report(), draft = this.form.getRawValue();
+    if (!report || !draft.name.trim() || state === 'invalid' || state === 'error') return false;
+    if (this.context.findings().some(item => item.code === 'report.configuration.invalid' || item.code === 'report.dates.invalid')) return false;
+    if (!this.context.usesAnalysis()) return true;
+    const choice = this.context.analysisOptions().find(option => option.value === draft.analysis && !option.unavailable)?.selection;
+    if (!choice || this.context.needsPairRefresh()) return false;
+    if (report.reportType !== 'betterPlants') return true;
+    const analysis = choice.scope === 'facility'
+      ? this.context.workspace.facilityAnalyses().find(item => item.guid === choice.analysisGuid && item.facilityId === choice.facilityGuid)
+      : this.context.workspace.accountAnalyses().find(item => item.guid === choice.analysisGuid);
+    return validBetterPlantsDraft(draft.betterPlants)
+      && Number.isInteger(analysis?.baselineYear)
+      && draft.betterPlants.reportYear !== null
+      && draft.betterPlants.reportYear > analysis!.baselineYear;
+  });
   flush(): Promise<boolean> { return this.controller.flush(); }
   retry(): void { this.controller.retry(); }
   discard(): void { this.controller.discard(); }
