@@ -92,7 +92,7 @@ describe('compact facility meters dashboard', () => {
   it('allows empty-result return focus without waiting for a grid that is not rendered', () => {
     const { fixture, component } = setup();
     component.filtersForm.controls.search.setValue('No matching meters'); fixture.detectChanges();
-    expect(component.filteredMeterCards()).toEqual([]); expect(component.layoutReady()).toBe(false);
+    expect(component.filteredMeterCards()).toEqual([]);
     expect(component.browseReady()).toBe(true);
   });
 

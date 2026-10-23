@@ -1,9 +1,15 @@
-:host { display: block; min-width: 0; }
-.portfolio-inventory { --tile-min-width: max(16rem,240px); display: grid; grid-template-columns: repeat(auto-fill,minmax(min(var(--tile-min-width),100%),1fr)); grid-auto-rows: 8px; grid-auto-flow: row; gap: 12px; align-items: start; margin: 0; padding: 0; list-style: none; overflow-anchor: none; }
+:host { display: block; min-width: 0; container: inventory-grid / inline-size; }
+.portfolio-inventory { --tile-min-width: max(16rem,240px); --portfolio-tile-fill: 100%; display: grid; grid-template-columns: repeat(auto-fill,minmax(min(var(--tile-min-width),100%),1fr)); grid-auto-rows: auto; grid-auto-flow: row; gap: 12px; align-items: stretch; margin: 0; padding: 0; list-style: none; }
 .portfolio-inventory[data-detail='summary'] { --tile-min-width: max(20rem,300px); }
 .portfolio-inventory[data-detail='detailed'] { --tile-min-width: max(24rem,360px); }
 .portfolio-inventory > li { min-width: 0; }
-.portfolio-inventory--uniform { --portfolio-tile-fill: 100%; grid-auto-rows: auto; align-items: stretch; }
+/* Both minimums must fit: each detail level uses the larger rem/px width above. */
+@container inventory-grid (min-width: calc(32rem + 12px)) and (min-width: 492px) {
+  .portfolio-inventory[data-detail='simple'] > li[data-wide='true'] { grid-column: span 2; }
+}
+@container inventory-grid (min-width: calc(40rem + 12px)) and (min-width: 612px) {
+  .portfolio-inventory[data-detail='summary'] > li[data-wide='true'] { grid-column: span 2; }
+}
 .portfolio-pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; padding: .85rem 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); color: var(--v1-muted); font-size: max(.9rem,14px); }
 .portfolio-pagination > div { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
 .portfolio-inventory-print { display: none; }

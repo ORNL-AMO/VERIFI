@@ -8,6 +8,20 @@
   box-shadow: 0 .45rem .9rem color-mix(in srgb, var(--v1-shadow-soft) 45%, transparent);
 }
 
+/* Headers and filters owned by one inventory share a CSS sticky surface. */
+.v1-root .v1-inventory-sticky-stack {
+  display: grid;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: transparent;
+  box-shadow: none;
+}
+
+.v1-root .v1-inventory-sticky-stack--joined { gap: 0; }
+@media print { .v1-root .v1-inventory-sticky-stack { position: static; } }
+
 .v1-root .v1-data-dashboard-workspace {
   position: relative;
   display: grid;

@@ -30,8 +30,7 @@ export class AccountPortfolioFacilitiesTabComponent {
     return account ? { accountGuid: account.guid, kind: 'facilities' } : undefined;
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
-  readonly layoutReady = signal(false);
-  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready() && (!this.filteredSummaries().length || this.layoutReady()));
+  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready());
   readonly navigationError = signal('');
   readonly facilityInput = computed(() => ({
     facilities: this.workspace.facilities(), meters: this.workspace.meters(), meterData: this.workspace.meterData(),

@@ -123,7 +123,11 @@ describe('facility meter list and monthly charts in Chromium', () => {
     await userEvent.keyboard('{Escape}'); fixture.detectChanges(); expect(component.selected()).toHaveLength(64);
     await page.getByRole('button', { name: 'Cancel selection', exact: true }).click(); fixture.detectChanges();
     const scroll = host.querySelector('main')!; scroll.scrollTop = 400;
-    await vi.waitFor(() => expect(getComputedStyle(host.querySelector('.facility-meters__sticky')!).paddingBottom).toBe('0px'));
+    await vi.waitFor(() => {
+      const header = host.querySelector('.v1-facility-meters__header')!.getBoundingClientRect();
+      expect(toolbar.getBoundingClientRect().top).toBeCloseTo(header.bottom, 0);
+      expect(header.top).toBeCloseTo(scroll.getBoundingClientRect().top, 0);
+    });
     expect(handle.getBoundingClientRect().bottom).toBeCloseTo(1000, 0);
     scroll.scrollTop = 0;
     for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) for (const contrast of [false, true]) {

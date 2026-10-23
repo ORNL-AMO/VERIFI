@@ -209,7 +209,7 @@ describe('account Analysis inventory browser journeys', () => {
     await vi.waitFor(() => expect((document.activeElement as HTMLElement).id).toBe('v1-account-analysis-title'));
     view.fixture.destroy();
   });
-  it('returns to the originating card after asynchronous result values and grid measurements settle', async () => {
+  it('returns to the originating card after asynchronous results settle and the CSS grid renders', async () => {
     await page.viewport(1200, 900);
     const view = setup(); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     view.host().filtersForm.controls.scope.setValue('facility');

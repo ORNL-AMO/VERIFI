@@ -58,7 +58,6 @@ export class PredictorsDashboardComponent {
   readonly detailControl = new FormControl<InventoryDetailLevel>('summary', { nonNullable: true });
   readonly detail = signal<InventoryDetailLevel>('summary');
   readonly overrides = signal<Readonly<Record<string, InventoryDetailLevel>>>({});
-  readonly layoutReady = signal(false);
   readonly chartsOpen = signal(false);
   readonly chartView = signal<InventoryChartSheetView>(DEFAULT_INVENTORY_CHART_VIEW);
   readonly saving = signal(false);
@@ -70,7 +69,7 @@ export class PredictorsDashboardComponent {
   readonly zoom = signal({ start: 0, end: 100 });
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly collapsed = computed(() => this.sticky()?.collapsed() ?? false);
-  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState()) && (!this.matching().length || this.layoutReady()));
+  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState()));
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
