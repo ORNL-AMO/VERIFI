@@ -32,7 +32,7 @@ describe('report browse state', () => {
       expect(TestBed.inject(BrowseStateService).readInventoryView(key)?.page).toBe(1);
       expect(component.browseReady()).toBe(false);
 
-      status.set('ready'); returned.detectChanges(); component.layoutReady.set(true); returned.detectChanges();
+      status.set('ready'); returned.detectChanges();
       expect(component.browseReady()).toBe(true);
       expect(component.inventory.page()).toBe(1);
       expect(component.inventory.visibleIds()).toContain(target);

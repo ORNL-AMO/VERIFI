@@ -67,12 +67,12 @@ async function settled(root: HTMLElement) {
   await vi.waitFor(() => {
     const items = root.querySelectorAll<HTMLElement>('.portfolio-inventory > li');
     expect(items.length).toBeGreaterThan(0);
-    const uniform = root.querySelector('.portfolio-inventory')!.classList.contains('portfolio-inventory--uniform');
-    expect([...items].every(item => uniform ? item.style.gridRowEnd === '' : item.style.gridRowEnd.startsWith('span '))).toBe(true);
     const articles = [...root.querySelectorAll<HTMLElement>('.portfolio-inventory .portfolio-tile')];
+    for (const item of items) expect(item.getBoundingClientRect().height).toBeGreaterThan(0);
     for(let index=1;index<articles.length;index++) {
       const prev=articles[index-1].getBoundingClientRect(), next=articles[index].getBoundingClientRect();
       expect(next.top>prev.top-.5 || (Math.abs(next.top-prev.top)<.5 && next.left>prev.left)).toBe(true);
+      if (Math.abs(next.top-prev.top)<.5) expect(next.height).toBeCloseTo(prev.height, 0);
     }
   });
 }
@@ -323,7 +323,7 @@ describe('uniform account inventories in Chromium', () => {
     await page.screenshot({element:root,path:'../../../../../../../.angular/account-inventory-long-names.png'});
     fixture.destroy();
   });
-  it('packs expanded tiles in sorted order, centers Simple identity, and supports themed keyboard/right-click menus without navigating', async () => {
+  it('lays out expanded tiles in sorted rows, centers Simple identity, and supports themed keyboard/right-click menus without navigating', async () => {
     await page.viewport(1500,1000); const {fixture,root,open,router}=setup(); await open('meters');
     const articles=()=>[...root.querySelectorAll<HTMLElement>('.portfolio-inventory .portfolio-tile')];
     expect(articles()).toHaveLength(24); expect(root.textContent).toContain('Showing 260 of 260 meters');

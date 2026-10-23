@@ -80,7 +80,6 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.baseTiles, computed(() => this.entries().map(entry => entry.key)), this.filters, this.workspace.canWrite);
   readonly visibleTiles = computed(() => this.inventory.visibleTiles().map(tile => this.tile(this.entries().find(entry => entry.key === tile.guid)!)));
   readonly printTiles = computed(() => this.filteredEntries().map(entry => this.tile(entry)));
-  readonly layoutReady = signal(false);
   readonly detailsGuid = signal<string | undefined>(undefined);
   readonly comparisonGuids = this.comparison.selectedKeys;
   private readonly activeKey = signal<string | undefined>(undefined);
@@ -94,7 +93,6 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
     return this.browseKey() ? this.entries().filter(entry => keys.has(entry.key)) : [];
   });
   readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready() && !['idle', 'evaluating'].includes(this.workspace.statusState())
-    && (!this.filteredEntries().length || this.layoutReady())
     && this.resultDemand().every(entry => this.results.states()[entry.key]?.state !== 'loading' && !!this.results.states()[entry.key]));
   readonly resultEntries = computed<readonly AnalysisInventoryResultEntry[]>(() => this.entries().map(entry => {
     const outcome = this.results.states()[entry.key] ?? { state: 'loading' as const, message: 'Results not loaded' };

@@ -27,8 +27,7 @@ export class AccountPortfolioPredictorsTabComponent {
     const account = this.workspace.account(); return account ? { kind: 'predictors', accountGuid: account.guid } : undefined;
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
-  readonly layoutReady = signal(false);
-  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready() && (!this.filteredEntries().length || this.layoutReady()));
+  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready());
   readonly navigationError = signal('');
   readonly entries = computed(() => this.workspace.facilities().flatMap(facility => {
     const predictors = this.workspace.predictors().filter(item => item.facilityId === facility.guid);

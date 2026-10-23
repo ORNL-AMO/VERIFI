@@ -42,7 +42,7 @@ One ready result per requested account/scope/GUID is cached while its calculatio
 
 ## Dashboard navigation and return
 
-Analysis names open their existing owning workbench; a facility owner link opens its Analysis dashboard. Account return links and browser Back restore browse controls, page, individual detail, scroll, and originating-card focus after measured layout and requested results settle. Deleted or filtered-out origins fall back to the dashboard heading and a clamped page/scroll offset. Analysis browse state is independent of Data journey origins.
+Analysis names open their existing owning workbench; a facility owner link opens its Analysis dashboard. Account return links and browser Back restore browse controls, page, individual detail, scroll, and originating-card focus after requested results settle and Angular renders the ready inventory. The shared CSS grid stretches cards within each row and uses container queries for expanded widths; no grid measurement signal is required. Deleted or filtered-out origins fall back to the dashboard heading and a clamped page/scroll offset. Analysis browse state is independent of Data journey origins.
 
 Analysis reuses the Data page motion directive: account dashboard depth 0; account workbench or facility dashboard depth 1; facility workbench depth 2. Drill-ins use the existing 480ms directional page entrance, ancestor returns reverse it, and facility/analysis peers fade for 300ms. Tabs/stages within one workbench remain still. Shell/navigation stay stationary, rapid navigation cancels previous motion, and reduced-motion/print modes skip effects. Existing workbench-origin query parameters still return to Select Facility Items, Facility Details, or Facility Contributions.
 

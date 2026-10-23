@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, ElementRef, HostListener, Injector, OnDestroy, afterNextRender, effect, inject, input, untracked } from '@angular/core';
+import { AfterRenderRef, DestroyRef, Directive, ElementRef, HostListener, Injector, OnDestroy, afterNextRender, effect, inject, input, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
 import { BrowseKey, BrowsePosition, BrowseStateService } from './browse-state.service';
@@ -16,14 +16,18 @@ export class BrowsePositionDirective implements OnDestroy {
   private readonly injector = inject(Injector);
   private key?: BrowseKey;
   private restored = false;
+  private pendingRestore?: AfterRenderRef;
   private focusedId?: string;
   private destroyed = false;
   private departurePosition?: BrowsePosition;
   private returnHighlight?: Animation;
   private stickyRestore?: ResizeObserver;
+  private stickyRestoreFrame?: number;
   private stickyRestoreTimer?: ReturnType<typeof setTimeout>;
   private readonly stopStickyRestore = () => {
     this.stickyRestore?.disconnect(); this.stickyRestore = undefined;
+    if (this.stickyRestoreFrame !== undefined) cancelAnimationFrame(this.stickyRestoreFrame);
+    this.stickyRestoreFrame = undefined;
     if (this.stickyRestoreTimer !== undefined) clearTimeout(this.stickyRestoreTimer);
     this.stickyRestoreTimer = undefined;
     for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) this.host.ownerDocument.removeEventListener(event, this.stopStickyRestore, true);
@@ -53,13 +57,15 @@ export class BrowsePositionDirective implements OnDestroy {
       this.browseVisibleIds();
       untracked(() => {
         if (JSON.stringify(key) !== JSON.stringify(this.key)) {
+          this.cancelPendingRestore();
           this.stopStickyRestore();
           this.stopHighlight(); this.save(); this.key = key; this.departurePosition = undefined; this.restored = false; this.focusedId = undefined;
         }
-        if (!key || !ready || this.restored) return;
-        this.restored = true;
-        afterNextRender(() => {
-          if (this.destroyed || JSON.stringify(this.key) !== JSON.stringify(key)) return;
+        if (!key || !ready) { this.cancelPendingRestore(); return; }
+        if (this.restored || this.pendingRestore) return;
+        this.pendingRestore = afterNextRender(() => {
+          this.pendingRestore = undefined;
+          if (this.destroyed || !this.browsePositionReady() || JSON.stringify(this.appBrowsePosition()) !== JSON.stringify(key)) return;
           const saved = this.store.readPosition(key);
           const scope = this.host.closest('.v1-account-portfolio') ?? this.host;
           const heading = this.browseHeading() ?? scope.querySelector<HTMLElement>('h1') ?? this.host.closest('.v1-facility-meters')?.querySelector<HTMLElement>('h1');
@@ -74,8 +80,14 @@ export class BrowsePositionDirective implements OnDestroy {
             this.stickyRestore = new ResizeObserver(() => {
               if (this.destroyed || !this.stickyRestore || JSON.stringify(this.key) !== JSON.stringify(key)) return;
               if (Math.abs(sticky.getBoundingClientRect().height - height) < .5) return;
-              this.scrollRoot().scrollTop = saved!.scrollTop;
-              this.stopStickyRestore();
+              this.stickyRestore.disconnect(); this.stickyRestore = undefined;
+              // Native scroll anchoring follows this resize notification. Apply the
+              // single navigation correction next frame, unless user input cancels it.
+              this.stickyRestoreFrame = requestAnimationFrame(() => {
+                this.stickyRestoreFrame = undefined;
+                if (!this.destroyed && this.browsePositionReady() && JSON.stringify(this.appBrowsePosition()) === JSON.stringify(key)) this.scrollRoot().scrollTop = saved!.scrollTop;
+                this.stopStickyRestore();
+              });
             });
             this.stickyRestore.observe(sticky, { box: 'border-box' });
             this.stickyRestoreTimer = setTimeout(this.stopStickyRestore, 500);
@@ -83,6 +95,7 @@ export class BrowsePositionDirective implements OnDestroy {
           }
           (target ?? heading)?.focus({ preventScroll: true });
           this.scrollRoot().scrollTop = saved?.scrollTop ?? 0;
+          this.restored = true;
           if (target && !this.reduced?.matches && !this.print?.matches && typeof target.animate === 'function') {
             const accent = getComputedStyle(target).getPropertyValue('--v1-focus').trim() || 'Highlight';
             this.returnHighlight = target.animate([
@@ -105,8 +118,10 @@ export class BrowsePositionDirective implements OnDestroy {
     while (root && !/(auto|scroll|overlay)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
     return root ?? (this.host.ownerDocument.scrollingElement as HTMLElement | null) ?? this.host.ownerDocument.documentElement;
   }
-  private save(): void { if (this.key) this.store.savePosition(this.key, this.departurePosition ?? { scrollTop: this.scrollRoot().scrollTop, focusId: this.focusedId }); }
+  private cancelPendingRestore(): void { this.pendingRestore?.destroy(); this.pendingRestore = undefined; }
+  private save(): void { if (this.key && this.restored) this.store.savePosition(this.key, this.departurePosition ?? { scrollTop: this.scrollRoot().scrollTop, focusId: this.focusedId }); }
   ngOnDestroy(): void {
+    this.cancelPendingRestore();
     this.stopStickyRestore();
     this.save(); this.destroyed = true;
     this.stopHighlight();

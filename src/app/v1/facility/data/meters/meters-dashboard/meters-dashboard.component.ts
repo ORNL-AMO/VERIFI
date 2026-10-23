@@ -64,7 +64,6 @@ export class MetersDashboardComponent implements OnDestroy {
   readonly detailControl = new FormControl<InventoryDetailLevel>('summary', { nonNullable: true });
   readonly detail = signal<InventoryDetailLevel>('summary');
   readonly overrides = signal<Readonly<Record<string, InventoryDetailLevel>>>({});
-  readonly layoutReady = signal(false);
   readonly search = computed(() => this.filters().search ?? '');
   readonly statusFilter = computed(() => this.filters().status ?? 'all');
   readonly sortBy = computed(() => this.filters().sort ?? 'attention');
@@ -89,7 +88,7 @@ export class MetersDashboardComponent implements OnDestroy {
       { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) }, { label: facility.name }) : [];
   });
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.workspace.statusState())
-    && (!this.filteredMeterCards().length || this.layoutReady()));
+   );
   readonly browseIds = computed(() => this.visibleMeterCards().map(item => item.card.meter.guid));
   readonly chartStyles = linkedSignal<{ context: string; guids: readonly string[] }, ReadonlyMap<string, InventorySeriesStyle>>({
     source: () => ({ context: `${this.workspace.account()?.guid}/${this.workspace.facility()?.guid}`, guids: this.workspace.meterCards().map(card => card.meter.guid) }),

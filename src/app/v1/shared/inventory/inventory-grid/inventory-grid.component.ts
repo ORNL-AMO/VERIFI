@@ -1,9 +1,8 @@
 import { InventoryTileComponent } from '../inventory-tile/inventory-tile.component';
-import { InventoryGridDirective } from './inventory-grid.directive';
 import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
 import { InventoryDetailLevel, InventoryTile, InventoryTileDetailChange, InventoryTileMenuAction, InventoryTileActionRequest, INVENTORY_DETAIL_LEVELS } from '../inventory.models';
 
-@Component({ selector: 'app-inventory-grid', standalone: true, imports: [InventoryTileComponent, InventoryGridDirective],
+@Component({ selector: 'app-inventory-grid', standalone: true, imports: [InventoryTileComponent],
   templateUrl: './inventory-grid.component.html', styleUrls: ['./inventory-grid.component.css'] })
 export class InventoryGridComponent {
   private readonly tileState = signal<readonly InventoryTile[]>([]);
@@ -30,12 +29,9 @@ export class InventoryGridComponent {
   @Output() readonly detailChanged = new EventEmitter<InventoryTileDetailChange>();
   @Output() readonly pageSelected = new EventEmitter<number>();
   @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
-  @Output() readonly layoutReady = new EventEmitter<boolean>();
   readonly level = this.detailState.asReadonly();
   readonly entries = computed(() => this.prepare(this.tileState()));
-  readonly uniformRows = computed(() => this.entries().every(entry => !entry.wide));
   readonly printed = computed(() => this.prepare(this.printState()));
-  readonly layoutSignature = computed(() => JSON.stringify([this.level(), this.entries().map(item => [item.tile.guid, item.level])]));
   private prepare(tiles: readonly InventoryTile[]) {
     const overrides = this.overrideState(); const base = this.detailState();
     return tiles.map(tile => {

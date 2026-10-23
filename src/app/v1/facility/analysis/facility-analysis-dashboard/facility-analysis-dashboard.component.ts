@@ -80,7 +80,6 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.baseTiles, computed(() => this.entries().map(entry => entry.key)), this.filters, this.inventoryReady);
   readonly visibleTiles = computed(() => this.inventory.visibleTiles().map(tile => this.tile(this.entries().find(entry => entry.key === tile.guid)!)));
   readonly printTiles = computed(() => this.filteredEntries().map(entry => this.tile(entry)));
-  readonly layoutReady = signal(false);
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
@@ -139,7 +138,6 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
     return this.browseKey() ? this.entries().filter(entry => keys.has(entry.key)).map(entry => entry.card.analysis.guid) : [];
   });
   readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready() && !['idle', 'evaluating'].includes(this.workspace.statusState())
-    && (!this.filteredEntries().length || this.layoutReady())
     && this.resultDemand().every(guid => !!this.results.states()[guid] && this.results.states()[guid].state !== 'loading'));
   readonly menuActions = computed<Readonly<Record<string, readonly InventoryTileMenuAction[]>>>(() => Object.fromEntries(this.entries().map(entry => [entry.key, [
     { id: 'details', label: 'View analysis details', icon: 'monocle' },

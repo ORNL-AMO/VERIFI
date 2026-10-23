@@ -47,8 +47,7 @@ export class ReportsDashboardComponent {
   private readonly setupSettled = computed(() => this.status.state() === 'ready' || this.status.state() === 'error');
   private readonly inventoryReady = computed(() => this.workspace.canWrite() && this.setupSettled());
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.key)), this.filters, this.inventoryReady);
-  readonly layoutReady = signal(false);
-  readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready() && this.setupSettled() && (!this.filteredEntries().length || this.layoutReady()));
+  readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready() && this.setupSettled());
   readonly canAct = computed(() => !!this.browseKey() && this.lifecycle.canAct() && !this.lifecycle.editor());
   readonly menuActions = computed<readonly InventoryTileMenuAction[]>(() => [
     { id: 'rename', label: 'Rename report', icon: 'edit', disabled: !this.canAct() },

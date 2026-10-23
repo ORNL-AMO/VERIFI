@@ -46,7 +46,7 @@
         @if (!entries.length) { <div class="facility-meters__empty" role="status"><h3>No meters match these filters</h3><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></div> }
         @else {
           <app-inventory-grid [tiles]="visibleTiles()" [printTiles]="tiles()" [detail]="detail()" [overrides]="overrides()" [actions]="tileActions()" [selecting]="selecting()" [selected]="selected()" [canSelect]="canAct()" [page]="currentPage() - 1" [pages]="pageCount()" [start]="pageStart()" [end]="pageEnd()" [total]="entries.length"
-            (pageSelected)="changePage($event + 1)" (detailChanged)="setTileDetail($event)" (actionRequested)="handleAction($event)" (selectionChanged)="changeSelection($event)" (navigationRequested)="navigateRoute($event)" (layoutReady)="layoutReady.set($event)"/>
+            (pageSelected)="changePage($event + 1)" (detailChanged)="setTileDetail($event)" (actionRequested)="handleAction($event)" (selectionChanged)="changeSelection($event)" (navigationRequested)="navigateRoute($event)"/>
         }
       </section>
     }
