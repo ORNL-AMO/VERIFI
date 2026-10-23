@@ -2,6 +2,8 @@
 
 Use one row to start a task. Load only the linked sections and add another subsystem skill when a cross-boundary trigger applies. Source and executable configuration remain authoritative.
 
+For an explicitly requested UI feedback loop, use [`$ui-iterate`](../../.agents/skills/ui-iterate/SKILL.md) alongside the relevant UI skill. It defers validation until the user is ready to test the accumulated changes and asks whether to continue editing after each change. Do not activate it automatically for ordinary UI work.
+
 | Task | Stable starting points | Read | Mode and skill | Cross-boundary triggers | First validation |
 | --- | --- | --- | --- | --- | --- |
 | Unified UI/UX migration | `src/app/v0/`, `src/app/v0/shared/`, `src/app/v1/`, `src/app/ux-prototypes/`, `src/app/shared/`, `src/app/data/`, `src/app/domain/`, `src/app/platform/`, issues #2559 and #2558 | [Unified UI/UX migration guide](../unified-ux-migration.md); [current-state notes guide](../unified-ux-current-state.md); [UI architecture](../../ARCHITECTURE.md#ui-architecture) | [Implementer](personas.md#implementer), [Designer](personas.md#designer), and [Reviewer](personas.md#reviewer); add subsystem skills only when touched | Protect data, domain, file, Worker, Electron, account workspace, and report contracts; use `@shared/*` for version-neutral code and `@v0/shared/*` for legacy reusable UI; do not build exhaustive feature or current-state registers | `npm run validate:agent -- --mode plan`, then selected focused tests/builds |
