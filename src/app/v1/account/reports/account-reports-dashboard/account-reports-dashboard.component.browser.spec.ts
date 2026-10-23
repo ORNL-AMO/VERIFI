@@ -1,10 +1,11 @@
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { PortalModule } from '@angular/cdk/portal';
-import { Component, inject, signal } from '@angular/core';
+import { Component, Provider, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Location } from '@angular/common';
-import { Router, RouterOutlet, provideRouter } from '@angular/router';
+import { NavigationCancel, NavigationEnd, NavigationStart, Router, RouterOutlet, provideRouter } from '@angular/router';
+import { BehaviorSubject, filter, firstValueFrom, take } from 'rxjs';
 import { page, userEvent } from 'vitest/browser';
 import { LocalStorageService } from 'ngx-webstorage';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
@@ -25,14 +26,31 @@ import { AccountReportActionsService } from '../account-report-actions.service';
 import { AccountReportSetupChanges, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { accountReportSnapshot } from '../testing/account-report-test-fixtures';
 import { reportAnalysisToken } from '../account-report-workbench/account-report-workbench.models';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
+import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
+import { AccountReportDbService } from '@data/indexedDB/account-report-db.service';
+import { FacilityReportsDbService } from '@data/indexedDB/facility-reports-db.service';
+import { IndexedDbAccessService } from '@data/indexedDB/indexed-db-access.service';
+import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
+import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
+import { dbConfig } from '@data/indexedDB/_dbConfig';
+import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/single-facility-analysis-pair.guard';
+import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding } from '@app/v1/status/status.models';
 
 const dashboardUrl = '/v1/workspace/account/account-a/reports/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div style="position:relative;isolation:isolate"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
 class ReportsBrowserHost { readonly modal = inject(ModalPortalService); }
-function setup(count = 30) {
-  const store = new AccountWorkspaceStore();
+@Component({ standalone: true, template: '<h1>Analysis Setup</h1>' })
+class StatusAnalysisTarget { }
+function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceStore, providers: Provider[] = []) {
+  const store = existingStore ?? new AccountWorkspaceStore();
   const report = { ...getNewIdbAccountReport(reportAccount, [reportFacility], []), guid: 'account-report', id: 4, name: 'Saved account report', reportType: 'analysis' as const, reportYear: 2024 };
-  store.publish({ ...reportSnapshot(Array.from({ length: count }, (_, i) => reportFixture({ guid: `report-${i}`, id: i + 10, name: `Report ${String(i).padStart(2, '0')}` }))), accountReports: [report] }, { facility: reportFacility });
+  if (!existingStore) store.publish({ ...reportSnapshot(Array.from({ length: count }, (_, i) => reportFixture({ guid: `report-${i}`, id: i + 10, name: `Report ${String(i).padStart(2, '0')}` }))), accountReports: [report] }, { facility: reportFacility });
   const accountActions = { updateName: vi.fn(async () => report), create: vi.fn(), copy: vi.fn(), delete: vi.fn(),
     updateSetup: vi.fn(async (guid: string, changes: AccountReportSetupChanges) => {
       const latest = store.accountReports().find(item => item.guid === guid)!;
@@ -42,20 +60,28 @@ function setup(count = 30) {
       store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [updated] }] }); return updated;
     }) };
   const status = signal<'ready' | 'evaluating'>('ready');
+  const coverage = new BehaviorSubject<WorkspaceCalendarizationBaseResult>({ state: 'ready', accountGuid: 'account-a', inputFingerprint: 'reports-status', meters: [] });
   TestBed.configureTestingModule({ imports: [ReportsBrowserHost, AccountReportsModule, FacilityReportsModule], providers: [provideRouter([
     { path: 'v1/workspace/account/:accountGuid/reports', children: ACCOUNT_REPORT_ROUTES },
-    { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES }
+    { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES },
+    { path: 'v1/workspace/facility/:facilityGuid/analysis', canActivateChild: [singleFacilityAnalysisPairGuard], children: [
+      { path: 'workbench/:analysisGuid/setup', component: StatusAnalysisTarget }
+    ] }
   ]), { provide: AccountWorkspaceStore, useValue: store }, { provide: AccountWorkspaceService, useValue: {} },
     { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [reportAccount] } },
-    { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
+    ...(realStatus ? [WorkspaceStatusService,
+      { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => coverage.asObservable(), currentInputFingerprint: () => 'reports-status' } },
+      { provide: AccountCommandHandler, useValue: {} }, { provide: WorkspaceCommandBoundary, useValue: {} }]
+      : [{ provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } }]),
     { provide: AccountReportActionsService, useValue: accountActions }, { provide: FacilityReportActionsService, useValue: {} },
+    { provide: SingleFacilityAnalysisPairService, useValue: { ensurePairs: vi.fn(async () => true) } },
     { provide: WorkbenchLayoutService, useFactory: () => { const factsExpanded = signal(true); return { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) }; } },
-    { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }
+    { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }, ...providers
   ] });
   const fixture = TestBed.createComponent(ReportsBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router); router.setUpLocationChangeListener();
   const dashboard = () => fixture.debugElement.query(By.directive(ReportsDashboardComponent)).componentInstance as ReportsDashboardComponent;
-  return { fixture, router, store, status, accountActions, dashboard, root: fixture.nativeElement.querySelector('main') as HTMLElement };
+  return { fixture, router, store, status, coverage, accountActions, dashboard, root: fixture.nativeElement.querySelector('main') as HTMLElement };
 }
 async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<void> {
   fixture.detectChanges(); await fixture.whenStable();
@@ -63,6 +89,113 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
   fixture.detectChanges();
 }
 describe('report inventory browser journeys and presentation', () => {
+  let database: IndexedDbTestHarness | undefined;
+  afterEach(async () => { await database?.destroy(); database = undefined; });
+  it('opens a linked single-facility analysis through its saved pair and keeps browser Forward read-only', async () => {
+    const view = setup(1, true), snapshot = accountReportSnapshot(true); snapshot.accountAnalyses[0].name = 'Stale pair metadata'; view.store.publish(snapshot);
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
+    const before = structuredClone(view.store.snapshot());
+    const status = TestBed.inject(WorkspaceStatusService);
+    const item = presentFinding(makeFinding('report.analysis.warning', 'warning', 'quality', {
+      kind: 'account-report', guid: 'account-report', name: 'Saved account report', accountGuid: 'account-a'
+    }));
+    const url = '/v1/workspace/facility/facility-a/analysis/workbench/facility-analysis/setup';
+    status.navigateTo(item); await vi.waitFor(() => expect(view.router.url).toBe(url)); await settle(view.fixture);
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toContain('/reports/workbench/account-report/setup')); await settle(view.fixture);
+    TestBed.inject(Location).forward(); await vi.waitFor(() => expect(view.router.url).toBe(url)); await settle(view.fixture);
+    expect(TestBed.inject(SingleFacilityAnalysisPairService).ensurePairs).not.toHaveBeenCalled();
+    expect(view.store.snapshot()).toEqual(before); expect(view.accountActions.updateSetup).not.toHaveBeenCalled(); view.fixture.destroy();
+  });
+  it.each(['account', 'facility'] as const)('opens a %s finding from saved data and restores browse state without navigation writes', async scope => {
+    await page.viewport(1200, 900);
+    const snapshot = accountReportSnapshot(true);
+    snapshot.accountReports = Array.from({ length: 30 }, (_, index) => ({ ...snapshot.accountReports[0], id: 500 + index, guid: `account-report-${index}`, name: '', reportYear: undefined }));
+    snapshot.facilityReports = Array.from({ length: 30 }, (_, index) => reportFixture({ id: 100 + index, guid: `facility-report-${index}`, name: '' }));
+    const store = new AccountWorkspaceStore(); store.publish(snapshot, { facility: snapshot.facilities[0] });
+    database = await IndexedDbTestHarness.create('report-status-navigation');
+    await database.seed({ accounts: [{ ...snapshot.account }], facilities: snapshot.facilities.map(item => ({ ...item })),
+      accountReports: snapshot.accountReports.map(item => ({ ...item })), facilityReports: snapshot.facilityReports.map(item => ({ ...item })),
+      analysisItems: snapshot.facilityAnalyses.map(item => ({ ...item })), accountAnalysisItems: snapshot.accountAnalyses.map(item => ({ ...item })) });
+    const access = new IndexedDbAccessService(database.dbService);
+    const transaction = new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: database.databaseName } });
+    const handler = new ReportCommandHandler(new FacilityReportsDbService(database.dbService, access), new AccountReportDbService(database.dbService, access), store, transaction);
+    const boundary = new WorkspaceCommandBoundary(store, {} as AccountWorkspaceService);
+    const writing = vi.spyOn(transaction, 'runTransaction');
+    // The database harness instantiates its own TestBed before the routed UI is configured.
+    TestBed.resetTestingModule();
+    const view = setup(0, true, store, [
+      { provide: WorkspaceCommandBoundary, useValue: boundary }, { provide: ReportCommandHandler, useValue: handler },
+      { provide: AccountReportActionsService, useClass: AccountReportActionsService }, { provide: FacilityReportActionsService, useClass: FacilityReportActionsService }
+    ]);
+    const accountNames = vi.spyOn(TestBed.inject(AccountReportActionsService), 'updateName');
+    const accountSetup = vi.spyOn(TestBed.inject(AccountReportActionsService), 'updateSetup');
+    const facilityNames = vi.spyOn(TestBed.inject(FacilityReportActionsService), 'updateName');
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    view.dashboard().filtersForm.patchValue({ scope, status: 'error', sort: 'name' }); await settle(view.fixture);
+    view.dashboard().inventory.selectPage(1); await settle(view.fixture);
+    const entry = view.dashboard().inventory.visibleTiles()[0];
+    view.dashboard().inventory.setTileDetail({ guid: entry.guid, level: 'detailed' }); await settle(view.fixture);
+    const action = [...view.root.querySelectorAll<HTMLAnchorElement>('.portfolio-inventory app-report-snapshot a')].find(link => link.textContent === 'Review name')!;
+    expect(action.textContent).toContain('Review name'); action.focus(); view.root.scrollTop = 160;
+    let scroll = 0;
+    view.router.events.pipe(filter(event => event instanceof NavigationStart), take(1)).subscribe(() => { scroll = view.root.scrollTop; });
+    await userEvent.keyboard('{Enter}'); await settle(view.fixture);
+    expect(scroll).toBeGreaterThan(0);
+    expect(view.router.url).toContain(scope === 'account' ? '/account/account-a/reports/workbench/' : '/facility/facility-a/reports/workbench/');
+    expect(view.root.textContent).toContain('Other report settings are pending migration.');
+    expect(view.root.textContent).toContain('Report-specific settings');
+    view.coverage.next({ state: 'evaluating', meters: [] });
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
+    expect(view.dashboard().browseReady()).toBe(false);
+    view.coverage.next({ state: 'ready', accountGuid: 'account-a', inputFingerprint: 'reports-status', meters: [] }); await settle(view.fixture);
+    expect(view.dashboard().filtersForm.controls.scope.value).toBe(scope); expect(view.dashboard().inventory.page()).toBe(1);
+    expect(view.dashboard().inventory.overrides()[entry.guid]).toBe('detailed');
+    await vi.waitFor(() => { expect((document.activeElement as HTMLElement)?.dataset['browseId']).toBe(entry.guid); expect(view.root.scrollTop).toBeCloseTo(scroll, 0); });
+    expect(accountNames).not.toHaveBeenCalled(); expect(accountSetup).not.toHaveBeenCalled(); expect(facilityNames).not.toHaveBeenCalled(); expect(writing).not.toHaveBeenCalled();
+    expect(store.selectedFacility()?.guid).toBe('facility-a');
+    for (const dark of [false, true]) {
+      view.root.className = `v1-root v1-palette-blueprint${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`; await settle(view.fixture);
+      const link = view.root.querySelector<HTMLElement>('.portfolio-inventory app-report-snapshot a')!;
+      expect(textContrast(link, link.closest<HTMLElement>('.portfolio-tile')!)).toBeGreaterThanOrEqual(4.5);
+      for (const width of [1024, 640, 390]) {
+        await page.viewport(width, 800); await settle(view.fixture);
+        const edge = view.root.getBoundingClientRect().right;
+        const overflow = [...view.root.querySelectorAll<HTMLElement>('*')].filter(element => element.getBoundingClientRect().right > edge + 1)
+          .map(element => `${element.tagName}.${element.className}: ${element.getBoundingClientRect().right}`).slice(0, 16);
+        expect(view.root.scrollWidth, overflow.join('\n')).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      }
+    }
+    view.fixture.destroy();
+    await database.reopen();
+    expect(await database.getAll('accountReports')).toEqual(snapshot.accountReports);
+    expect(await database.getAll('facilityReports')).toEqual(snapshot.facilityReports);
+    expect(await database.getAll('accountAnalysisItems')).toEqual(snapshot.accountAnalyses);
+  });
+  it('protects status navigation during invalid, pending and failed account-report saves', async () => {
+    const view = setup(1, true); const saved = view.store.snapshot()!;
+    view.store.publish({ ...saved, accountReports: [...saved.accountReports, { ...saved.accountReports[0], guid: 'second-report', id: 50, name: 'Second report' }] });
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
+    const status = TestBed.inject(WorkspaceStatusService);
+    const destination = status.items().find(item => item.entity.guid === 'second-report' && item.code === 'report.analysis.invalid')!;
+    await page.getByRole('textbox', { name: /^Name/ }).fill(' '); await settle(view.fixture);
+    let completed = firstValueFrom(view.router.events.pipe(filter(event => event instanceof NavigationCancel)));
+    status.navigateTo(destination); await completed; expect(view.router.url).toContain('/account-report/setup');
+    await page.getByRole('textbox', { name: /^Name/ }).fill('Saved after waiting');
+    let release!: () => void;
+    const persist = view.accountActions.updateSetup.getMockImplementation()!;
+    view.accountActions.updateSetup.mockImplementationOnce((guid, changes) => new Promise(resolve => { release = async () => resolve(await persist(guid, changes)); }));
+    const ended = firstValueFrom(view.router.events.pipe(filter(event => event instanceof NavigationEnd)));
+    status.navigateTo(destination); await vi.waitFor(() => expect(release).toBeTypeOf('function'));
+    expect(view.router.url).toContain('/account-report/setup'); release(); await ended; await settle(view.fixture);
+    expect(view.router.url).toContain('/second-report/setup'); expect(view.store.accountReports()[0].name).toBe('Saved after waiting');
+    await page.getByRole('textbox', { name: /^Name/ }).fill('Failed draft');
+    view.accountActions.updateSetup.mockRejectedValueOnce(new Error('Save failed'));
+    const first = status.items().find(item => item.entity.guid === 'account-report' && item.code === 'report.analysis.invalid')!;
+    completed = firstValueFrom(view.router.events.pipe(filter(event => event instanceof NavigationCancel)));
+    status.navigateTo(first); await completed; await settle(view.fixture);
+    expect(view.router.url).toContain('/second-report/setup'); expect(view.root.querySelector<HTMLInputElement>('#account-report-name')!.value).toBe('Failed draft');
+    expect(view.root.textContent).toContain('Save failed'); view.fixture.destroy();
+  });
   it.each(['account', 'facility'] as const)('restores filters, page, detail, scroll and focus after a %s report drill-in and delayed browser Back', async scope => {
     await page.viewport(1200, 900);
     const view = setup();

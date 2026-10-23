@@ -18,6 +18,7 @@ import { ShellHeaderComponent } from '@app/v1/shell/header/shell-header.componen
 import { PrimaryRailComponent } from '@app/v1/shell/primary-rail/primary-rail.component';
 import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
 import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-evaluation-message/status-evaluation-message.component';
+import { StatusFindingActionComponent } from '@app/v1/shared/status/status-finding-action/status-finding-action.component';
 import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { ShellComponent } from '@app/v1/shell/shell.component';
@@ -40,6 +41,7 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     CommonModule,
     SectionNavModule,
     StatusEvaluationMessageComponent,
+    StatusFindingActionComponent,
     FormsModule,
     IconsModule,
     NotificationsModule,

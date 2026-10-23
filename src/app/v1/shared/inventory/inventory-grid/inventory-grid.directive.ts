@@ -40,11 +40,14 @@ export class InventoryGridDirective implements AfterViewInit {
   }
   private measure(): void {
     if (this.destroyed) return;
+    const tiles = [...this.host.querySelectorAll<HTMLElement>(':scope > li')];
+    // A previous two-column span can create an implicit track after the viewport
+    // narrows. Remove spans before counting the grid's actual available columns.
+    for (const item of tiles) item.style.gridColumnEnd = '';
     const styles = getComputedStyle(this.host);
     const gap = parseFloat(styles.rowGap) || 12;
     const columns = styles.gridTemplateColumns.split(' ').filter(Boolean).length;
     const uniform = this.host.classList.contains('portfolio-inventory--uniform');
-    const tiles = [...this.host.querySelectorAll<HTMLElement>(':scope > li')];
     const signature: string[] = [String(columns), String(uniform)];
     for (const item of tiles) {
       const tile = item.querySelector<HTMLElement>('.portfolio-tile');

@@ -13,6 +13,7 @@ import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/c
 import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
 import { SectionNavModule } from '../section-nav/section-nav.module';
 import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-evaluation-message/status-evaluation-message.component';
+import { StatusFindingActionComponent } from '@app/v1/shared/status/status-finding-action/status-finding-action.component';
 import { PrimaryRailComponent } from '../primary-rail/primary-rail.component';
 import { SupportPanelComponent } from '../support-panel/support-panel.component';
 import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } from '../workspace-navigation.service';
@@ -22,7 +23,7 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 
 @NgModule({
-  imports: [NavigationMotionDirective, SectionNavModule, StatusEvaluationMessageComponent, CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
+  imports: [NavigationMotionDirective, SectionNavModule, StatusEvaluationMessageComponent, StatusFindingActionComponent, CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,

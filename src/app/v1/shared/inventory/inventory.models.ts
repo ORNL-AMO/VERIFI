@@ -103,5 +103,5 @@ export interface InventoryReportSnapshot {
   readonly facts: readonly InventoryTileFact[];
   readonly modified: string;
   readonly scopeLabel: string;
-  readonly findings: readonly Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity'>[];
+  readonly findings: readonly (Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity' | 'action'> & { readonly unavailableReason?: string })[];
 }

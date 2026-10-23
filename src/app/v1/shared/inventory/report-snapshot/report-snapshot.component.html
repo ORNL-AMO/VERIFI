@@ -9,7 +9,10 @@
     <section class="inventory-attention" aria-label="Report setup findings"><h2>Needs attention</h2>
       <ul>@for (finding of visibleFindings(); track finding.id) {
         <li [attr.data-severity]="finding.severity"><app-ui-icon [name]="finding.severity === 'error' ? 'danger' : 'warning'" [size]="18"/>
-          <div><p>{{ finding.title }}</p><p class="inventory-attention__description">{{ finding.description }}</p></div>
+          <div><p>{{ finding.title }}</p><p class="inventory-attention__description">{{ finding.description }}</p>
+            @if (finding.action; as action) { <a [href]="finding.href" [attr.aria-label]="action.label + ' for ' + resourceName()" (click)="open($event, action.route)">{{ action.label }}</a> }
+            @else if (finding.unavailableReason) { <p class="inventory-attention__description">{{ finding.unavailableReason }}</p> }
+          </div>
         </li>
       }</ul>
       @if (view.findings.length > 2) { <p class="inventory-attention__remaining">{{ view.findings.length - 2 }} more setup findings.</p> }

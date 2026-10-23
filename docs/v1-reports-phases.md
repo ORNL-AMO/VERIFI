@@ -49,13 +49,39 @@ Implemented with shared report header/stage presentation and autosave scheduling
 
 ## Phase 5 — Shared workflow wrapup
 
-- [ ] Audit the remaining acceptance criteria in [#2790](https://github.com/ORNL-AMO/VERIFI/issues/2790).
-- [ ] Connect available analysis Used By references and report status destinations.
-- [ ] Verify navigation, ownership, saved-report compatibility, and lifecycle behavior.
-- [ ] Complete accessibility, theme, responsive, and practical Electron-window checks.
-- [ ] Record remaining report-specific work under its owning issues.
+- [x] Audit the remaining acceptance criteria in [#2790](https://github.com/ORNL-AMO/VERIFI/issues/2790), with the deferrals below.
+- [x] Connect actionable report status destinations to existing common Setup controls and linked analyses.
+- [x] Verify navigation, ownership, saved-report compatibility, and lifecycle behavior through automated coverage.
+- [x] Cover keyboard/focus, light/dark/high-contrast themes, narrow layouts, and practical renderer widths in Chromium.
+- [x] Record report-specific work under its owning issues.
+- [ ] Analysis Used By integration — explicitly deferred to a later maintainer update; screens, counts, and links are unchanged.
+- [ ] Native Electron interaction/manual screen-reader verification — not exercised by this change.
 
-**Completion checkpoint:** the shared Reports foundation satisfies #2790, with unfinished report content explicitly tracked elsewhere.
+**Completion checkpoint:** the scoped status-link and foundation-audit work is implemented. Do not describe all of #2790 as complete or automatically close it: Used By integration remains deferred, and native manual validation remains a gap.
+
+Report names open common Setup for either scope. Account report analysis findings open the existing selector; linked-analysis warnings open the owned analysis Setup, using only an existing saved pair for single-facility accounts. Dates, reporting periods, data selection, and facility-report analysis selection stay unavailable until their editors migrate. Mixed name/settings findings offer **Review name** while identifying the remaining settings as pending. One workspace-aware presentation projection serves active findings, Todos, entity findings, discarded warnings, and report-card findings without changing validation or dismissal identities.
+
+### Acceptance audit for #2790
+
+| Acceptance criterion | Evidence and remaining work |
+| --- | --- |
+| Account/facility navigation and combined inventory | Existing [inventory](../src/app/v1/shared/reports/reports-dashboard/reports-dashboard.component.spec.ts), [route](../src/app/v1/v1.routes.spec.ts), and [browser journey](../src/app/v1/account/reports/account-reports-dashboard/account-reports-dashboard.component.browser.spec.ts) coverage verifies scope ownership, controls, pagination, breadcrumbs, and browse returns. |
+| Create, open, copy, rename, delete through command boundaries | Existing [account lifecycle](../src/app/v1/account/reports/account-report-actions.service.browser.spec.ts) and [facility lifecycle](../src/app/v1/facility/reports/facility-report-actions.service.browser.spec.ts) coverage verifies writes, failures, isolation, and reopen behavior. |
+| Shared Setup, applicable Data Checks, and Report stages | Account/facility workbench specs cover every supported report type and pending stages; report-specific editors and output remain outside this foundation. |
+| Open existing reports without recreation or lost settings | Lifecycle/reopen specs and [setup transactions](../src/app/v1/account/reports/account-report-setup.browser.spec.ts) preserve settings and GUID links. Status browser journeys additionally use real repositories and transactions, assert no navigation writes, and reopen the stored records. |
+| Analysis Used By references | Deferred by maintainer direction. Existing informational screens and dependency presentation remain unchanged. |
+| Single-facility account-required reports | Existing route/setup coverage and the status browser journeys retain account Reports access and saved hidden-pair GUIDs without navigation reconciliation. |
+| Persisted shapes, backups, ownership, and v0 compatibility | No models, schema, migrations, backup formats, calculation contracts, or v0 sources change. Existing lifecycle/setup tests exercise durable GUID relationships; destination tests cover missing/foreign owners, duplicate GUIDs across scopes, and Other Impacts availability. |
+| Loading, empty, invalid, disabled, pending, success, error, and unsaved protection | Existing workbench/inventory tests plus status journeys cover these states, pending/failed saves, browser Back, retries/discard, and unchanged pending-content distinctions. |
+| Typed forms, shared UI, keyboard/focus, themes, and responsive windows | Existing reactive editors and shared navigation/modal conventions remain. Chromium checks cover status-link keyboard activation, resource focus and scroll restoration, contrast, and 1024/640/390 px layouts. The audit exposed and fixed a shared inventory-grid issue where a previous expanded span retained an implicit second column after narrowing; columns are now measured without stale spans. Native Electron interaction and manual screen-reader checks remain unperformed. |
+
+Validation completed for this change: focused status/report/shell specs, `npm run test:all:ci`, `npx tsc -p tsconfig.app.json --noEmit`, the agent validation planner, `npm run build-prod`, local documentation-link checks, and `git diff --check`. The production build retains existing browser-support, component-style budget, and CommonJS warnings. No Electron runtime boundary changed; native Electron and screen-reader manual checks remain deferred as recorded above.
+
+### Remaining report migrations
+
+Facility report content stays in Data Overview [#2792](https://github.com/ORNL-AMO/VERIFI/issues/2792), Analysis [#2793](https://github.com/ORNL-AMO/VERIFI/issues/2793), Savings [#2794](https://github.com/ORNL-AMO/VERIFI/issues/2794), Modeling [#2795](https://github.com/ORNL-AMO/VERIFI/issues/2795), Cost Savings [#2796](https://github.com/ORNL-AMO/VERIFI/issues/2796), Data Quality [#2797](https://github.com/ORNL-AMO/VERIFI/issues/2797), and Emission Factors [#2798](https://github.com/ORNL-AMO/VERIFI/issues/2798).
+
+Account report content stays in Data Overview [#2799](https://github.com/ORNL-AMO/VERIFI/issues/2799), Savings [#2800](https://github.com/ORNL-AMO/VERIFI/issues/2800), Analysis/Modeling [#2801](https://github.com/ORNL-AMO/VERIFI/issues/2801), Performance [#2802](https://github.com/ORNL-AMO/VERIFI/issues/2802), Emission Factors [#2803](https://github.com/ORNL-AMO/VERIFI/issues/2803), Better Plants [#2804](https://github.com/ORNL-AMO/VERIFI/issues/2804), and Other Impacts [#2805](https://github.com/ORNL-AMO/VERIFI/issues/2805). Printing/export infrastructure stays in #2791 and final output verification in #2806.
 
 ## Boundaries and working rules
 
