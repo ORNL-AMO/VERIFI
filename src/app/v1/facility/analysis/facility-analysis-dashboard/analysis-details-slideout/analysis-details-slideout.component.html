@@ -42,13 +42,13 @@
     slideoutFooter
     type="button"
     class="v1-btn v1-btn--action"
-    [disabled]="opening()"
+    [disabled]="opening() || actionDisabled()"
     [attr.aria-busy]="opening()"
     (click)="opened.emit()">
     @if (opening()) {
       <app-ui-icon name="loading" spin></app-ui-icon> Opening…
     } @else {
-      Open full analysis <app-ui-icon name="arrowRight"></app-ui-icon>
+      {{ actionLabel() }} <app-ui-icon name="arrowRight"></app-ui-icon>
     }
   </button>
 </app-workspace-slideout>

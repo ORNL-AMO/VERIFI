@@ -7,7 +7,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
-import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
+import { AccountAnalysisDetailsSlideoutComponent } from './account-analysis-details-slideout/account-analysis-details-slideout.component';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -32,11 +32,11 @@ import { AnalysisInventoryEntry, AnalysisInventoryResultEntry, analysisInventory
 
 @Component({
   selector: 'app-account-analysis-dashboard', host: { class: 'v1-analysis-dashboard-host v1-inventory-dashboard-host' }, standalone: true,
-  imports: [AnalysisComparisonSheetComponent, InventoryChartDockComponent, IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, ConfirmationDialogComponent, InventoryGridComponent,
+  imports: [AnalysisComparisonSheetComponent, InventoryChartDockComponent, IconComponent, DataEmptyStateModule, AccountAnalysisDetailsSlideoutComponent, ConfirmationDialogComponent, InventoryGridComponent,
     AccountAnalysisDraftSlideoutComponent, AccountAnalysisComparisonComponent, AnalysisDetailsSlideoutComponent,
     FacilityAnalysisComparisonComponent, ReactiveFormsModule, BrowsePositionDirective, BrowseHeaderDirective, PageIdentityComponent],
   providers: [AccountAnalysisDashboardResultsService],
-  templateUrl: './account-analysis-dashboard.component.html', styleUrls: ['../../../shared/analysis-inventory/analysis-inventory.css', './account-analysis-dashboard.component.css']
+  templateUrl: './account-analysis-dashboard.component.html', styleUrls: ['../../../shared/analysis-inventory/analysis-inventory.css']
 })
 export class AccountAnalysisDashboardComponent implements OnDestroy {
   @ViewChild('comparisonPanel', { static: true }) private comparisonPanel!: TemplateRef<unknown>;

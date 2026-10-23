@@ -40,19 +40,7 @@
     @if (entry.scope === 'facility') {
       <app-analysis-details-slideout [showCategory]="showCategory()" [card]="entry.card" [meterGroups]="workspace.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay" (closed)="detailsGuid.set(undefined)" (opened)="open(entry)"/>
     } @else {
-      @let card = entry.card;
-      <app-workspace-slideout [title]="card.analysis.name" [description]="entry.ownerName + ' · Account analysis details'" size="large" (closed)="detailsGuid.set(undefined)">
-        <div class="v1-analysis-details v1-account-analysis-details">
-          <dl>
-            @if (showCategory()) { <div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div> }<div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div>
-            <div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div><div><dt>Basis and units</dt><dd>{{ card.basisLabel }} · {{ card.unitLabel }}</dd></div>
-            <div><dt>{{ entry.outcomeDisplay.annual.label }}</dt><dd>{{ entry.outcomeDisplay.annual.valueLabel }}</dd></div><div><dt>{{ entry.outcomeDisplay.monthly.label }}</dt><dd>{{ entry.outcomeDisplay.monthly.valueLabel }}</dd></div><div><dt>Modified</dt><dd>{{ card.modifiedDateLabel }}</dd></div>
-          </dl>
-          <h3>Facility selections</h3><div class="v1-table-shell"><table><thead><tr><th scope="col">Facility</th><th scope="col">Selected analysis</th><th scope="col">State</th></tr></thead><tbody>@for (selection of card.facilitySelections; track selection.facilityGuid) { <tr><th scope="row">{{ selection.facilityName }}</th><td>{{ selection.analysisName }}</td><td>{{ selection.detail }}</td></tr> }</tbody></table></div>
-          <h3>Linked reports</h3>@if (card.linkedReports.length) { <ul>@for (report of card.linkedReports; track report.guid) { <li>{{ report.name }}</li> }</ul> } @else { <p>No linked account reports.</p> }
-          @if (card.findings.length) { <h3>Validation</h3><ul>@for (finding of card.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul> }
-        </div>
-      </app-workspace-slideout>
+      <app-account-analysis-details-slideout [card]="entry.card" [outcomeDisplay]="entry.outcomeDisplay" [ownerName]="entry.ownerName" [showCategory]="showCategory()" (closed)="detailsGuid.set(undefined)"/>
     }
   }
   @if (createOpen()) { <app-account-analysis-draft-slideout [facilities]="creationFacilities()" [showCategory]="showCategory()" [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"/> }

@@ -1,0 +1,26 @@
+@let analysisCard = card();
+@let results = outcomeDisplay();
+<app-workspace-slideout [title]="analysisCard.analysis.name" [description]="ownerName() + ' · Account analysis details'" size="large" [hasFooter]="!!actionLabel()" (closed)="closed.emit()">
+  <div class="v1-analysis-details v1-account-analysis-details">
+    <dl>
+      @if (showCategory()) { <div><dt>Category</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : 'Energy' }}</dd></div> }
+      <div><dt>Status</dt><dd>{{ analysisCard.statusLabel }}</dd></div>
+      <div><dt>Baseline</dt><dd>{{ analysisCard.analysis.baselineYear || 'Not set' }}</dd></div>
+      <div><dt>Basis and units</dt><dd>{{ analysisCard.basisLabel }} · {{ analysisCard.unitLabel }}</dd></div>
+      <div><dt>{{ results.annual.label }}</dt><dd>{{ results.annual.valueLabel }}</dd></div>
+      <div><dt>{{ results.monthly.label }}</dt><dd>{{ results.monthly.valueLabel }}</dd></div>
+      <div><dt>Modified</dt><dd>{{ analysisCard.modifiedDateLabel }}</dd></div>
+    </dl>
+    <h3>Facility selections</h3>
+    <div class="v1-table-shell"><table>
+      <thead><tr><th scope="col">Facility</th><th scope="col">Selected analysis</th><th scope="col">State</th></tr></thead>
+      <tbody>@for (selection of analysisCard.facilitySelections; track selection.facilityGuid) { <tr><th scope="row">{{ selection.facilityName }}</th><td>{{ selection.analysisName }}</td><td>{{ selection.detail }}</td></tr> }</tbody>
+    </table></div>
+    <h3>Linked reports</h3>
+    @if (analysisCard.linkedReports.length) { <ul>@for (report of analysisCard.linkedReports; track report.guid) { <li>{{ report.name }}</li> }</ul> } @else { <p>No linked account reports.</p> }
+    @if (analysisCard.findings.length) { <h3>Validation</h3><ul>@for (finding of analysisCard.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul> }
+  </div>
+  @if (actionLabel(); as label) {
+    <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="actionDisabled()" (click)="actionSelected.emit()">{{ label }}<app-ui-icon name="arrowRight"/></button>
+  }
+</app-workspace-slideout>

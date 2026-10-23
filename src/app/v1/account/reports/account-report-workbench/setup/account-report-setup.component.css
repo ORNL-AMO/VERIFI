@@ -85,6 +85,18 @@
   overflow-wrap: anywhere;
 }
 
+.report-setup .report-analysis-card__selection {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: .75rem;
+  min-width: 0;
+  margin: 0;
+  cursor: inherit;
+}
+
+.report-analysis-card__inspect { flex: 0 0 auto; }
+
 .report-analysis-card__content strong {
   color: var(--v1-ink);
   font-size: .9rem;

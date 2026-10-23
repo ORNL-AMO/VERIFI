@@ -24,6 +24,8 @@ export class AnalysisDetailsSlideoutComponent {
   readonly outcomeDisplay = input<FacilityAnalysisOutcomeDisplay>();
   readonly opening = input(false);
   readonly showCategory = input(true);
+  readonly actionLabel = input('Open full analysis');
+  readonly actionDisabled = input(false);
   readonly closed = output<void>();
   readonly opened = output<void>();
 }

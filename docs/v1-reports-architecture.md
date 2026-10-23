@@ -18,6 +18,8 @@ One committed account workspace snapshot supplies the selected account analysis,
 
 Setup computes review freshness without starting a checks or report Worker. Data Checks requests model validation at each included reporting year. Report generation starts only after matching reviews exist for every requested year and current workspace/report validation permits calculation. All-year output runs newest first, excludes the baseline itself, and is bounded by the loaded meter history.
 
+Setup's analysis inspection buttons reuse the account and facility dashboard detail slideouts and their demand-driven outcome coordinator. Only the inspected analysis requests outcome results, and closing the slideout cancels that demand. Inspection does not change the report link; **Select for report** updates the existing typed draft and uses normal autosave. Account and facility active-reporting selections remain independent.
+
 The coordinator retains only its current checks and report results. Changes to account/report identity, readiness, operation, or checked content cancel obsolete work. A synchronous state projection hides old results before Observable scheduling can publish another result. Changes to names or report notes reproject presentation without regenerating calculations. Hashing participates in Angular pending-task tracking; Worker unsubscription, error, timeout, and completion terminate the Worker.
 
 ## Explicit shared analysis review

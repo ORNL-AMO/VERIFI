@@ -19,13 +19,16 @@
           <p id="account-report-analysis-help" class="report-setup-help">Choose the analysis to use for this report.</p>
           <div class="report-analysis-grid">
             @for (analysis of analysisCards(); track analysis.value) {
-              <label class="report-analysis-card">
-                <input type="radio" name="analysis" [formControl]="editor.form.controls.analysis" [value]="analysis.value">
-                <span class="report-analysis-card__content">
-                  <strong>{{ analysis.name }}</strong>
-                  <span>{{ analysis.category }} · Baseline {{ analysis.baseline }}</span>
-                </span>
-              </label>
+              <div class="report-analysis-card">
+                <label class="report-analysis-card__selection">
+                  <input type="radio" name="analysis" [formControl]="editor.form.controls.analysis" [value]="analysis.value">
+                  <span class="report-analysis-card__content">
+                    <strong>{{ analysis.name }}</strong>
+                    <span>{{ analysis.category }} · Baseline {{ analysis.baseline }}</span>
+                  </span>
+                </label>
+                <button type="button" class="v1-icon-btn report-analysis-card__inspect" [attr.aria-label]="'Inspect ' + analysis.name" title="Inspect analysis" (click)="inspectAnalysis(analysis.value)"><app-ui-icon name="monocle"/></button>
+              </div>
             }
             <label class="report-analysis-card report-analysis-card--empty">
               <input type="radio" name="analysis" [formControl]="editor.form.controls.analysis" [value]="null">
@@ -44,5 +47,12 @@
   </section>
   @if (entry.snapshot.findings.length) {
     <section class="report-section" aria-labelledby="account-report-findings"><h2 id="account-report-findings">Configuration findings</h2><ul>@for (finding of context.findings(); track finding.id) { <li>{{ finding.description }}<app-status-finding-action [item]="finding"/></li> }</ul></section>
+  }
+}
+@if (inspectedAnalysis(); as entry) {
+  @if (entry.scope === 'facility') {
+    <app-analysis-details-slideout [card]="entry.card" [meterGroups]="analyses.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay" [showCategory]="analyses.categories().length > 1" actionLabel="Select for report" [actionDisabled]="!editor.canEdit()" (closed)="closeInspection()" (opened)="selectInspectedAnalysis()"/>
+  } @else {
+    <app-account-analysis-details-slideout [card]="entry.card" [outcomeDisplay]="entry.outcomeDisplay" [ownerName]="entry.ownerName" [showCategory]="analyses.categories().length > 1" actionLabel="Select for report" [actionDisabled]="!editor.canEdit()" (closed)="closeInspection()" (actionSelected)="selectInspectedAnalysis()"/>
   }
 }

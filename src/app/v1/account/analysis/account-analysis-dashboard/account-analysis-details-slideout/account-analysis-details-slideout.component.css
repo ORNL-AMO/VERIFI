@@ -1,0 +1,4 @@
+:host { display: contents; }
+.v1-table-shell { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: .7rem; border: 1px solid var(--v1-border); text-align: left; }
