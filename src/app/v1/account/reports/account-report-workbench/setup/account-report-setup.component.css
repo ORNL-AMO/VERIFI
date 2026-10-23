@@ -21,14 +21,16 @@
   border: 0;
 }
 
-.report-analysis-selection legend {
-  float: none;
-  width: auto;
-  margin: 0 0 .5rem;
-  color: var(--v1-ink);
-  font-size: 1.02rem;
-  font-weight: 800;
+.report-analysis-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem 1.25rem;
+  margin-bottom: .5rem;
 }
+
+.report-analysis-heading h2 { margin: 0; }
 
 .report-analysis-grid {
   display: grid;
@@ -39,14 +41,23 @@
 
 .report-analysis-filters {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-wrap: wrap;
-  gap: .75rem;
-  margin-block: 1rem;
+  gap: .5rem;
+  min-width: 0;
 }
 
-.report-analysis-filters .report-setup-field { flex: 0 1 12rem; }
-.report-analysis-filters select { width: 100%; }
+.report-analysis-filters .report-setup-field { flex: 0 1 auto; }
+.report-analysis-filters select { width: 100%; min-width: 8rem; }
+.report-analysis-filters__label {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: var(--v1-muted);
+  font-size: .8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
 .report-setup .report-analysis-card {
   display: flex;

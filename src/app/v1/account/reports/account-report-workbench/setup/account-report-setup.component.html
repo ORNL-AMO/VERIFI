@@ -14,18 +14,18 @@
     </div>
     @if (context.usesAnalysis()) {
       <div class="report-setup-section">
-        <fieldset id="account-report-analysis" class="report-analysis-selection" tabindex="-1" aria-describedby="account-report-analysis-help" [disabled]="!editor.canEdit()">
-          <legend>Analysis</legend>
-          <p id="account-report-analysis-help" class="report-setup-help">Choose the analysis to use for this report.</p>
+        <div class="report-analysis-heading">
+          <h2 id="account-report-analysis-title">Analysis</h2>
           <div class="report-analysis-filters" [formGroup]="analysisFilters" role="group" aria-label="Filter analyses">
+            <span class="report-analysis-filters__label"><app-ui-icon name="filter"/>Filter analyses</span>
             @if (showTypeFilter()) {
               <div class="report-setup-field">
-                <label for="account-report-analysis-type">Type</label>
+                <label for="account-report-analysis-type" class="visually-hidden">Type</label>
                 <select id="account-report-analysis-type" class="v1-select" formControlName="category"><option value="all">All types</option><option value="energy">Energy</option><option value="water">Water</option></select>
               </div>
             }
             <div class="report-setup-field">
-              <label for="account-report-analysis-baseline">Baseline year</label>
+              <label for="account-report-analysis-baseline" class="visually-hidden">Baseline year</label>
               <select id="account-report-analysis-baseline" class="v1-select" formControlName="baselineYear">
                 <option [ngValue]="null">All baseline years</option>
                 @for (year of baselineYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
@@ -33,6 +33,9 @@
             </div>
             @if (filtersActive()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="clearAnalysisFilters()">Clear filters</button> }
           </div>
+        </div>
+        <p id="account-report-analysis-help" class="report-setup-help">Choose the analysis to use for this report.</p>
+        <fieldset id="account-report-analysis" class="report-analysis-selection" tabindex="-1" aria-labelledby="account-report-analysis-title" aria-describedby="account-report-analysis-help" [disabled]="!editor.canEdit()">
           @if (hiddenSelectedAnalysis(); as selected) { <p class="report-setup-help" role="status">Selected analysis: <strong>{{ selected.name }}</strong>. Hidden by the current filters.</p> }
           @if (analysisCards().length && !filteredAnalysisCards().length) { <p class="report-setup-help" role="status">No analyses match these filters. Clear the filters to see all available analyses.</p> }
           <div class="report-analysis-grid">

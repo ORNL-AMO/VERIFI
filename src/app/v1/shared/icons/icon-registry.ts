@@ -55,6 +55,7 @@ import FileDownloadIcon from '@hugeicons/core-free-icons/FileDownloadIcon';
 import FileImportIcon from '@hugeicons/core-free-icons/FileImportIcon';
 import FileUploadIcon from '@hugeicons/core-free-icons/FileUploadIcon';
 import FilterRemoveIcon from '@hugeicons/core-free-icons/FilterRemoveIcon';
+import FilterIcon from '@hugeicons/core-free-icons/FilterIcon';
 import FireIcon from '@hugeicons/core-free-icons/FireIcon';
 import Fuel01Icon from '@hugeicons/core-free-icons/Fuel01Icon';
 import GasPipeIcon from '@hugeicons/core-free-icons/GasPipeIcon';
@@ -130,6 +131,7 @@ export const ICON_REGISTRY = {
   chevronRight: ChevronRightIcon,
   chevronUp: ChevronUpIcon,
   clearFilter: FilterRemoveIcon,
+  filter: FilterIcon,
   checklist: CheckListIcon,
   checkmarkBadge: CheckmarkBadge01Icon,
   close: Cancel01Icon,
