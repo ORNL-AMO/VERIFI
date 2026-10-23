@@ -11,6 +11,9 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ACCOUNT_REPORT_TYPES, ReportInventoryEntry, ReportScope } from './report-inventory.models';
 import { reportTypeAvailable } from './report-availability';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { isReportStatusItem, reportStatusNavigationState, resolveReportStatusItem } from '@app/v1/status/report-status-destination';
+import { statusDestinationRoute } from '@app/v1/status/status-destination-route';
 
 type ReportDraft = { name: string; scope: ReportScope; type: ReportType | FacilityReportType; facilityGuid: string };
 interface ReportEditor { readonly initial: ReportDraft; readonly fixedFacility?: string; readonly entry?: ReportInventoryEntry; }
@@ -23,6 +26,7 @@ export class ReportLifecycleService {
   private readonly facilityActions = inject(FacilityReportActionsService);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
+  private readonly status = inject(WorkspaceStatusService);
   private readonly destroyRef = inject(DestroyRef);
   readonly saving = signal(false);
   readonly error = signal<string | undefined>(undefined);
@@ -143,7 +147,14 @@ export class ReportLifecycleService {
   cancelConfirmation(): void { if (!this.saving()) { this.confirmation.set(undefined); this.deleteCandidate.set(undefined); } }
   async navigate(route: readonly string[]): Promise<void> {
     if (this.navigationBlocked()) return;
-    try { if (!await this.router.navigate([...route])) this.error.set('The report could not be opened. Finish any pending edits and try again.'); }
+    // Analysis links in this inventory originate only from report findings.
+    const analysisLink = route[4] === 'analysis';
+    const finding = analysisLink ? this.status.items().filter(isReportStatusItem)
+      .map(item => resolveReportStatusItem(item, this.workspace.isReady() ? this.workspace.snapshot() : undefined))
+      .find(item => JSON.stringify(statusDestinationRoute(item.destination)) === JSON.stringify(route)) : undefined;
+    if (analysisLink && !finding) return;
+    const state = finding && reportStatusNavigationState(finding);
+    try { if (!await (state ? this.router.navigate([...route], { state }) : this.router.navigate([...route]))) this.error.set('The report could not be opened. Finish any pending edits and try again.'); }
     catch { this.error.set('The report could not be opened. Please try again.'); }
   }
   private async run(action: (isCurrent: () => boolean) => Promise<void>): Promise<void> {

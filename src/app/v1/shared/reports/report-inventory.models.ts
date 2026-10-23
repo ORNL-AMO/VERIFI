@@ -9,6 +9,7 @@ import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models'
 import { InventoryReportSnapshot, InventoryTile } from '@app/v1/shared/inventory/inventory.models';
 import { FACILITY_REPORT_TYPES, ReportConfigurationStatus, buildFacilityReportCard } from '@app/v1/facility/reports/facility-report.models';
 import { reportTypeAvailable } from './report-availability';
+import { statusDestinationRoute } from '@app/v1/status/status-destination-route';
 
 export const ACCOUNT_REPORT_TYPES: ReadonlyArray<{ value: ReportType; label: string }> = [
   { value: 'betterPlants', label: 'Better Plants' },
@@ -98,7 +99,11 @@ function entryView(scope: ReportScope, report: IdbAccountReport | IdbFacilityRep
     searchText: [report.name, typeLabel, owner, ...facts.map(fact => fact.value), REPORT_STATUS_LABELS[status]].join(' ').toLocaleLowerCase(),
     snapshot: { scope, typeLabel, facts, scopeLabel,
       modified: modified ? new Date(modified).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date unavailable',
-      findings: findings.filter(item => item.severity !== 'information').map(item => ({ id: item.id, title: item.title, description: item.description, severity: item.severity === 'error' ? 'error' as const : 'warning' as const })) }
+      findings: findings.filter(item => item.severity !== 'information').map(item => {
+        const route = statusDestinationRoute(item.destination);
+        return { id: item.id, title: item.title, description: item.description, severity: item.severity === 'error' ? 'error' as const : 'warning' as const,
+          action: route ? { label: item.actionLabel ?? 'Review', route } : undefined, unavailableReason: item.unavailableReason };
+      }) }
   };
 }
 export function filterReportInventory(entries: readonly ReportInventoryEntry[], filters: ReportInventoryFilters): ReportInventoryEntry[] {

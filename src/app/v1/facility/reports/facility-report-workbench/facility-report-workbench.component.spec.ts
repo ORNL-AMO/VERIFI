@@ -48,7 +48,7 @@ describe('facility report workbench navigation', () => {
     harness.detectChanges();
     expect(host.querySelector('header')?.textContent).toContain('Checking setup');
     expect(stageIcons()).not.toContain('checkmarkBadge');
-    status.items.set([{ id: 'invalid-setup', severity: 'error', description: 'Select a reporting period.', entity: {
+    status.items.set([{ id: 'invalid-setup', severity: 'error', description: 'Select a reporting period.', destination: { kind: 'unavailable' }, entity: {
       kind: 'facility-report', guid: 'report-a', facilityGuid: 'facility-a', accountGuid: 'account-a'
     } } as import('@app/v1/status/status.models').StatusItem]);
     status.state.set('ready');

@@ -24,6 +24,8 @@ export class AccountReportWorkbenchContext {
     ? this.workspace.accountReports().filter(report => report.accountId === this.workspace.account()?.guid && reportTypeAvailable(report.reportType, this.workspace.account()?.displayEmissions))
       .slice().sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid)) : []);
   readonly report = computed(() => this.reports().find(item => item.guid === this.guid()));
+  readonly findings = computed(() => this.status.items().filter(item => item.entity.kind === 'account-report'
+    && item.entity.accountGuid === this.workspace.account()?.guid && item.entity.guid === this.report()?.guid));
   readonly entry = computed(() => {
     const snapshot = this.workspace.snapshot(), report = this.report();
     return snapshot && report ? buildReportInventory(snapshot, this.status.items(), this.status.state()).find((item): item is Extract<ReportInventoryEntry, { scope: 'account' }> => item.scope === 'account' && item.report.guid === report.guid) : undefined;

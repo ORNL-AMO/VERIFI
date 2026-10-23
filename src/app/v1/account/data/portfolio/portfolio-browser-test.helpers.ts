@@ -1,4 +1,4 @@
-export function textContrast(element: HTMLElement): number {
+export function textContrast(element: HTMLElement, backgroundElement: HTMLElement = element): number {
   const context = document.createElement('canvas').getContext('2d')!;
   const luminance = (color: string) => {
     context.fillStyle = color;
@@ -11,7 +11,7 @@ export function textContrast(element: HTMLElement): number {
   };
   const style = getComputedStyle(element);
   const foreground = luminance(style.color);
-  const background = luminance(style.backgroundColor);
+  const background = luminance(getComputedStyle(backgroundElement).backgroundColor);
   return (Math.max(foreground, background) + .05) / (Math.min(foreground, background) + .05);
 }
 

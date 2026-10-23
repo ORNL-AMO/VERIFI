@@ -53,11 +53,7 @@
                     <span>{{ item.severity }} · {{ item.category }} · {{ item.entity.name }}</span>
                     <h3>{{ item.title }}</h3>
                     <p>{{ item.description }}</p>
-                    @if (item.destination.kind === 'unavailable') {
-                      <small>Fix workflow not yet available in v1</small>
-                    } @else {
-                      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="status.navigateTo(item)">Review</button>
-                    }
+                    <app-status-finding-action [item]="item"/>
                     @if (item.severity === 'warning') {
                       <button
                         type="button"

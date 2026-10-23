@@ -19,7 +19,7 @@
   @if (context.findings().length) {
     <section class="report-section" aria-labelledby="report-configuration-heading">
       <h2 id="report-configuration-heading">Configuration findings</h2>
-      <ul>@for (finding of context.findings(); track finding.id) { <li>{{ finding.description }}</li> }</ul>
+      <ul>@for (finding of context.findings(); track finding.id) { <li>{{ finding.description }}<app-status-finding-action [item]="finding"/></li> }</ul>
     </section>
   }
 }

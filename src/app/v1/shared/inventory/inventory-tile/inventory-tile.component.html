@@ -40,7 +40,7 @@
   </div>
   @if (tile.reportSnapshot; as report) {
     <p class="portfolio-tile__report-pending"><app-ui-icon name="info" [size]="18"/>Report content pending</p>
-    @if (level !== 'simple') { <app-report-snapshot [snapshot]="report" [detailed]="level === 'detailed'"/> }
+    @if (level !== 'simple') { <app-report-snapshot [snapshot]="report" [detailed]="level === 'detailed'" [resourceName]="tile.name" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
   } @else if (tile.analysisSnapshot; as analysis) {
     @if (analysis.active) { <p class="portfolio-tile__analysis-active"><app-ui-icon name="target" [size]="18"/>Active for {{ analysis.scope }} reporting</p> }
     @if (level !== 'simple') { <app-analysis-snapshot [snapshot]="analysis" [detailed]="level === 'detailed'" [print]="print" (detailsRequested)="actionRequested.emit({guid: tile.guid, action: 'details'})"/> }

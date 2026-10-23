@@ -12,8 +12,46 @@ import { BehaviorSubject } from 'rxjs';
 import { WorkspaceStatusService } from './workspace-status.service';
 import { presentFinding } from './status.catalog';
 import { makeFinding } from './status.models';
+import { accountReportSnapshot } from '@app/v1/account/reports/testing/account-report-test-fixtures';
+import { reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
 
 describe('WorkspaceStatusService', () => {
+  it('shares report actions between items, Todos and entity findings, and rechecks stale actions before navigation', () => {
+    const data = accountReportSnapshot(); data.accountReports[0].name = '';
+    data.facilityReports = [reportFixture({ name: '' })];
+    const snapshot = signal<AccountWorkspaceSnapshot>(data);
+    const service = setup(snapshot, signal(1), new BehaviorSubject(result('ready')));
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const item = service.items().find(item => item.code === 'report.configuration.invalid' && item.entity.kind === 'account-report')!;
+    expect(item.destination.kind).toBe('account-report-setup');
+    expect(service.accountTodos().find(todo => todo.id === item.id)).toEqual(item);
+    expect(service.findingsForEntity(item.entity.guid).find(finding => finding.id === item.id)).toEqual(item);
+    const facilityItem = service.items().find(item => item.code === 'report.configuration.invalid' && item.entity.kind === 'facility-report')!;
+    expect(service.selectedFacilityTodos().find(todo => todo.id === facilityItem.id)).toEqual(facilityItem);
+    service.navigateTo(item); service.navigateTo(facilityItem);
+    expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'account', 'account-a', 'reports', 'workbench', 'account-report', 'setup']);
+    expect(router.navigate).toHaveBeenNthCalledWith(2, ['/v1', 'workspace', 'facility', 'facility-a', 'reports', 'workbench', 'report-a', 'setup']);
+    snapshot.update(value => ({ ...value, accountReports: [], facilityReports: [] }));
+    service.navigateTo(item); service.navigateTo(facilityItem); expect(router.navigate).toHaveBeenCalledTimes(2);
+    snapshot.set({ ...data, account: { ...data.account, displayEmissions: false }, accountReports: [{ ...data.accountReports[0], reportType: 'betterClimate' }] });
+    service.navigateTo(item); expect(router.navigate).toHaveBeenCalledTimes(2);
+  });
+  it('enriches discarded report warnings with the same destinations without changing dismissal behavior', async () => {
+    const snapshot = signal<AccountWorkspaceSnapshot>(accountReportSnapshot());
+    const service = setup(snapshot, signal(1), new BehaviorSubject(result('ready')));
+    const warning = makeFinding('report.analysis.warning', 'warning', 'quality', {
+      kind: 'account-report', guid: 'account-report', name: 'Annual report', accountGuid: 'account-a'
+    });
+    // Isolate presentation and dismissal from calculation-specific warning generation.
+    vi.spyOn(service, 'evaluation').mockReturnValue({ accountGuid: 'account-a', revision: 1, evaluatedAt: new Date().toISOString(), findings: [warning] });
+    const item = service.items()[0]; expect(item.destination.kind).toBe('account-analysis');
+    expect(await service.discardWarning(item)).toBe(true);
+    expect(service.items()).toEqual([]); expect(service.discardedItems()[0].destination).toEqual(item.destination);
+    snapshot.update(value => ({ ...value, accountAnalyses: [] }));
+    expect(service.discardedItems()[0].destination.kind).toBe('unavailable');
+    expect(await service.restoreWarning(service.discardedItems()[0])).toBe(true);
+    expect(service.items()[0].id).toBe(item.id); expect(service.discardedItems()).toEqual([]);
+  });
   it('publishes ready only after the current revision evaluates successfully', () => {
     const snapshot = signal(workspaceSnapshot());
     const revision = signal(3);

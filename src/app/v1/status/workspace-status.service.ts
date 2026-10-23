@@ -8,9 +8,11 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { evaluateWorkspaceStatus } from './status.evaluator';
-import { presentFindings, todoItems } from './status.catalog';
+import { presentFindings } from './status.catalog';
 import { StatusEvaluationState, StatusFinding, StatusItem, summarizeFindings } from './status.models';
 import { createStatusWarningDismissal, partitionStatusFindings, statusFindingEvidenceSignature } from './status.dismissals';
+import { isReportStatusItem, reportStatusNavigationState, resolveReportStatusItem } from './report-status-destination';
+import { statusDestinationRoute } from './status-destination-route';
 
 interface WarningActionState {
   readonly accountGuid: string;
@@ -73,16 +75,19 @@ export class WorkspaceStatusService {
   ));
   readonly findings = computed<readonly StatusFinding[]>(() => this.findingPartition().active);
   readonly discardedFindings = computed<readonly StatusFinding[]>(() => this.findingPartition().discarded);
-  readonly items = computed<readonly StatusItem[]>(() => presentFindings(this.findings()));
-  readonly discardedItems = computed<readonly StatusItem[]>(() => presentFindings(this.discardedFindings()));
+  readonly items = computed<readonly StatusItem[]>(() => this.present(this.findings()));
+  readonly discardedItems = computed<readonly StatusItem[]>(() => this.present(this.discardedFindings()));
   readonly accountSummary = computed(() => summarizeFindings(this.findings()));
-  readonly accountTodos = computed(() => todoItems(this.findings()));
+  readonly accountTodos = computed(() => this.items().filter(item => item.todo && (item.severity === 'error' || item.severity === 'warning')));
   readonly selectedFacilityFindings = computed(() => {
     const facilityGuid = this.workspace.selectedFacility()?.guid;
     return facilityGuid ? this.findings().filter(finding => finding.entity.facilityGuid === facilityGuid) : [];
   });
   readonly selectedFacilitySummary = computed(() => summarizeFindings(this.selectedFacilityFindings()));
-  readonly selectedFacilityTodos = computed(() => todoItems(this.selectedFacilityFindings()));
+  readonly selectedFacilityTodos = computed(() => {
+    const facilityGuid = this.workspace.selectedFacility()?.guid;
+    return facilityGuid ? this.accountTodos().filter(item => item.entity.facilityGuid === facilityGuid) : [];
+  });
   readonly accountDiscardedWarnings = computed(() => this.discardedItems());
   readonly selectedFacilityDiscardedWarnings = computed(() => {
     const facilityGuid = this.workspace.selectedFacility()?.guid;
@@ -110,7 +115,7 @@ export class WorkspaceStatusService {
   }
 
   findingsForEntity(guid: string): StatusItem[] {
-    return presentFindings(this.findings().filter(finding => finding.entity.guid === guid));
+    return this.items().filter(finding => finding.entity.guid === guid);
   }
 
   meterFindings(meterGuid: string): StatusItem[] {
@@ -152,31 +157,16 @@ export class WorkspaceStatusService {
   }
 
   navigateTo(item: StatusItem): void {
-    switch (item.destination.kind) {
-      case 'account-settings':
-        void this.router.navigate(['/v1', 'workspace', 'account', item.destination.accountGuid, 'settings', item.destination.detail]);
-        break;
-      case 'facility-data':
-        void this.router.navigate(['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'data', item.destination.detail]);
-        break;
-      case 'meter-tab':
-        void this.router.navigate(['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'data', 'meters', item.destination.meterGuid, item.destination.tab]);
-        break;
-      case 'predictor-tab':
-        void this.router.navigate(['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'data', 'predictors', item.destination.predictorGuid, item.destination.tab]);
-        break;
-      case 'facility-analysis':
-        void this.router.navigate(item.destination.scope === 'group' && item.destination.groupGuid
-          ? ['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'analysis', 'workbench', item.destination.analysisGuid, 'group', item.destination.groupGuid, item.destination.tab]
-          : ['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'analysis', 'workbench', item.destination.analysisGuid, item.destination.tab]);
-        break;
-      case 'account-analysis':
-        void this.router.navigate([
-          '/v1', 'workspace', 'account', item.destination.accountGuid,
-          'analysis', 'workbench', item.destination.analysisGuid, 'setup'
-        ]);
-        break;
-    }
+    // A rendered action can outlive the report, its owner, or an availability preference.
+    if (isReportStatusItem(item)) item = resolveReportStatusItem(item, this.workspace.isReady() ? this.workspace.snapshot() : undefined);
+    const route = statusDestinationRoute(item.destination);
+    const state = reportStatusNavigationState(item);
+    if (route) void (state ? this.router.navigate([...route], { state }) : this.router.navigate([...route]));
+  }
+
+  private present(findings: readonly StatusFinding[]): StatusItem[] {
+    const snapshot = this.workspace.isReady() ? this.workspace.snapshot() : undefined;
+    return presentFindings(findings).map(item => resolveReportStatusItem(item, snapshot));
   }
 
   private scheduleDateRefresh(): void {

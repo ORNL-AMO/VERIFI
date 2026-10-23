@@ -87,6 +87,8 @@ export type StatusDestination =
     readonly tab: 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
   }
   | { readonly kind: 'account-analysis'; readonly accountGuid: string; readonly analysisGuid: string }
+  | { readonly kind: 'account-report-setup'; readonly accountGuid: string; readonly reportGuid: string }
+  | { readonly kind: 'facility-report-setup'; readonly accountGuid: string; readonly facilityGuid: string; readonly reportGuid: string }
   | { readonly kind: 'unavailable' };
 
 export interface StatusItem extends StatusFinding {
@@ -94,6 +96,8 @@ export interface StatusItem extends StatusFinding {
   readonly description: string;
   readonly todo: boolean;
   readonly destination: StatusDestination;
+  readonly actionLabel?: string;
+  readonly unavailableReason?: string;
 }
 
 /** Data views exclude analysis and report findings without changing their evaluation. */
