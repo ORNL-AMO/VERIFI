@@ -274,6 +274,7 @@ export class BackupDataService {
         oldId: facilityAnalysisItem.guid
       });
       delete facilityAnalysisItem.id;
+        delete facilityAnalysisItem.dataCheckReviews;
       facilityAnalysisItem.guid = newGUID;
       facilityAnalysisItem.accountId = accountGUIDs.newId;
       facilityAnalysisItem.facilityId = this.getNewId(facilityAnalysisItem.facilityId, facilityGUIDs);
@@ -323,6 +324,7 @@ export class BackupDataService {
         oldId: accountAnalysisItem.guid
       });
       delete accountAnalysisItem.id;
+        delete accountAnalysisItem.dataCheckReviews;
       accountAnalysisItem.guid = newGUID;
       accountAnalysisItem.accountId = accountGUIDs.newId;
       accountAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -593,6 +595,7 @@ export class BackupDataService {
         oldId: facilityAnalysisItem.guid
       });
       delete facilityAnalysisItem.id;
+        delete facilityAnalysisItem.dataCheckReviews;
       facilityAnalysisItem.guid = newGUID;
       facilityAnalysisItem.accountId = accountGUID;
       facilityAnalysisItem.facilityId = newFacilityGUID;

@@ -61,7 +61,7 @@ export function accountAnalysisResultsFingerprint(request: AccountAnalysisResult
   return `${request.accountAnalysisItem.guid}:${(hash >>> 0).toString(16)}:${serialized.length}`;
 }
 
-const DISPLAY_ONLY_KEYS = new Set(['name', 'createdDate', 'modifiedDate', 'checked', 'isAnalysisVisited']);
+const DISPLAY_ONLY_KEYS = new Set(['name', 'createdDate', 'modifiedDate', 'checked', 'isAnalysisVisited', 'dataCheckReviews']);
 
 function stableCalculationValue(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(stableCalculationValue).sort((first, second) => JSON.stringify(first).localeCompare(JSON.stringify(second)));

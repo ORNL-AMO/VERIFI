@@ -59,6 +59,7 @@ export class AccountAnalysisActionsService {
     const now = new Date();
     const copy = structuredClone(current);
     delete copy.id;
+    delete copy.dataCheckReviews;
     copy.guid = getGUID();
     copy.name = `${copy.name} (copy)`;
     copy.createdDate = now;
