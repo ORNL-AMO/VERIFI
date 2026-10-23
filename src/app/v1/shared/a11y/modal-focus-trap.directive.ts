@@ -27,8 +27,13 @@ export class ModalFocusTrapDirective {
       this.focusInitial();
     });
     afterEveryRender(() => {
-      // Disabling the focused control during a save can send focus to the body.
-      if (this.trap && this.stack.isActive(this.trap) && this.document.activeElement === this.document.body) this.focusInitial();
+      if (!this.trap || !this.stack.isActive(this.trap)) return;
+      const active = this.document.activeElement;
+      // Browsers may blur a disabled control to the body or retain it as active.
+      if (active === this.document.body ||
+          (active instanceof HTMLElement && this.host.contains(active) && !this.checker.isFocusable(active))) {
+        this.focusInitial();
+      }
     });
     this.destroyRef.onDestroy(() => {
       if (!this.trap) return;

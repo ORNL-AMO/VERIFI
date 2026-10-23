@@ -77,6 +77,32 @@ describe('CDK-backed modal focus', () => {
     fixture.destroy();
   });
 
+  it('recovers when the browser still reports a disabled control as focused after rendering', async () => {
+    const { fixture, host, find, settle } = await setup();
+    const last = find('modal-last');
+    last.focus();
+    // Chromium platforms differ in when a disabled active control loses focus.
+    // Model the retained-control case while keeping focus movement and Tab native.
+    const activeElement = Object.getOwnPropertyDescriptor(Document.prototype, 'activeElement')!.get!;
+    const retainedFocus = vi.spyOn(document, 'activeElement', 'get').mockImplementation(() => {
+      const active = activeElement.call(document) as Element | null;
+      return active === document.body ? last : active;
+    });
+    try {
+      host.busy.set(true); await settle();
+      retainedFocus.mockRestore();
+      expect(document.activeElement).toBe(find('test-modal'));
+      await userEvent.keyboard('{Tab}{Shift>}{Tab}{/Shift}{Escape}'); await settle();
+      expect(document.activeElement).toBe(find('test-modal'));
+      expect(host.shown()).toBe(true);
+      host.busy.set(false); await settle();
+      await userEvent.keyboard('{Tab}'); expect(document.activeElement).toBe(find('modal-first'));
+    } finally {
+      retainedFocus.mockRestore();
+      fixture.destroy();
+    }
+  });
+
   it.each(['hidden', 'disabled', 'removed'] as const)('uses the workflow fallback when the opener is %s', async state => {
     const { fixture, host, find, settle } = await setup();
     if (state === 'hidden') host.hideOpener.set(true);
