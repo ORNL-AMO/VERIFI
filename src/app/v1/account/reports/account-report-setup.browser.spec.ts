@@ -159,4 +159,19 @@ describe('account report setup transactions in Chromium', () => {
     const cleared = await actions.updateSetup('account-report', { analysis: null });
     expect(cleared.analysisReportSetup.analysisItemId).toBeUndefined(); expect(cleared.performanceReportSetup.analysisItemId).toBe('unrelated-saved-reference');
   });
+  it('merges Better Plants edits with durable settings and rejects invalid option patches', async () => {
+    const snapshot = accountReportSnapshot(); snapshot.accountReports[0].reportType = 'betterPlants';
+    const { actions, transactions } = await setup(snapshot);
+    await transactions.runTransaction(['accountReports'], 'readwrite', tx => tx.put('accountReports', {
+      ...snapshot.accountReports[0], betterPlantsReportSetup: { ...snapshot.accountReports[0].betterPlantsReportSetup, methodologyNotes: 'Concurrent notes' }
+    }));
+    const saved = await actions.updateSetup('account-report', { reportYear: 2025, betterPlants: { includeAllYears: true, modificationNotes: 'New projects', baselineYearWaterPilotGoal: 0 } });
+    expect(saved.betterPlantsReportSetup).toMatchObject({ methodologyNotes: 'Concurrent notes', includeAllYears: true, modificationNotes: 'New projects', baselineYearWaterPilotGoal: 0 });
+    expect(saved.reportYear).toBe(2025);
+    await expect(actions.updateSetup('account-report', { betterPlants: { analysisItemId: 'foreign' } as never })).rejects.toThrow('invalid');
+    await expect(actions.updateSetup('account-report', { reportYear: 2025.5 })).rejects.toThrow('valid report year');
+    await harness.reopen();
+    expect((await harness.getAll('accountReports'))[0]).toMatchObject({ reportYear: 2025, betterPlantsReportSetup: { methodologyNotes: 'Concurrent notes', modificationNotes: 'New projects' } });
+  });
+
 });

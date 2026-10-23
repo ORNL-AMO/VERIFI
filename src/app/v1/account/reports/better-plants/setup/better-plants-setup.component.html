@@ -1,0 +1,39 @@
+@let selectedAnalysis = analysis();
+@let isWater = water();
+<div class="report-setup-panel" [formGroup]="form">
+  <h2>Reporting period</h2>
+  <p>Baseline year: <strong>{{ selectedAnalysis?.baselineYear ?? 'Choose an analysis' }}</strong></p>
+  <label for="better-plants-report-year">Report year</label>
+  <select id="better-plants-report-year" class="v1-select" formControlName="reportYear" aria-describedby="better-plants-period-help">
+    <option [ngValue]="null">Not selected</option>
+    @if (savedYearUnavailable()) { <option [ngValue]="form.controls.reportYear.value">{{ form.controls.reportYear.value }} — saved year unavailable</option> }
+    @for (year of years(); track year) { <option [ngValue]="year">{{ fiscal() ? 'FY ' : '' }}{{ year }}</option> }
+  </select>
+  <p id="better-plants-period-help">Choose a complete reporting year after the analysis baseline. Saved years remain unchanged until you select a replacement.</p>
+  @if (periodState() === 'evaluating' || periodState() === 'idle') { <p role="status">Finding complete reporting years…</p> }
+  @if (periodState() === 'error') { <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p><button class="v1-btn v1-btn--secondary" type="button" (click)="retryPeriods()">Retry reporting years</button> }
+  @if (periodState() === 'ready' && !years().length) { <p class="v1-alert v1-alert--warning">No complete reporting years are available. Review the account’s meter data.</p> }
+  @if (baselineWarning()) { <p class="v1-alert v1-alert--warning">This baseline year does not match your corporate baseline year.</p> }
+  <label class="option"><input type="checkbox" formControlName="includeAllYears">Generate reports for every year after the baseline through the report year.</label>
+</div>
+<div class="report-setup-panel" [formGroup]="form">
+  <h2>Included content</h2>
+  <label class="option"><input type="checkbox" formControlName="includePerformanceTable">Include the facility performance table.</label>
+  @if (includePerformance()) { <label class="option"><input type="checkbox" formControlName="includeFacilityNames">Include facility names in the performance table.</label> }
+</div>
+<div class="report-setup-panel" [formGroup]="form">
+  <h2>{{ isWater ? 'Water' : 'Energy' }} report notes</h2>
+  <label for="better-plants-baseline-notes">{{ isWater ? 'If a baseline adjustment was made, indicate the reason for making the adjustment.' : 'Describe methods used to normalize energy intensity data or adjust the baseline for economic and other factors affecting energy use.' }}</label>
+  <textarea id="better-plants-baseline-notes" class="v1-input" formControlName="baselineAdjustmentNotes" rows="4"></textarea>
+  @if (isWater) {
+    <label for="better-plants-methodology">Describe the methodology used for calculating water intensity improvements.</label>
+    <textarea id="better-plants-methodology" class="v1-input" formControlName="methodologyNotes" rows="4"></textarea>
+  }
+  <label for="better-plants-modifications">{{ isWater ? 'Describe technologies, strategies, and practices used to decrease water intensity, including systems affected, approximate savings, and implementation costs.' : 'Describe energy-efficient technologies, strategies, and practices used to decrease intensity, including systems affected and approximate project savings.' }}</label>
+  <textarea id="better-plants-modifications" class="v1-input" formControlName="modificationNotes" rows="4"></textarea>
+  @if (isWater) {
+    <p>For partners using a single water intensity metric across all plants, enter the metric used to track the Water Savings Pilot goal.</p>
+    <label for="better-plants-baseline-metric">Baseline year metric</label><input id="better-plants-baseline-metric" type="number" class="v1-input" formControlName="baselineYearWaterPilotGoal">
+    <label for="better-plants-report-metric">Report year metric</label><input id="better-plants-report-metric" type="number" class="v1-input" formControlName="reportYearWaterPilotGoal">
+  }
+</div>

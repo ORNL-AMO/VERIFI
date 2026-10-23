@@ -1,3 +1,4 @@
+import { BetterPlantsSetupComponent } from './better-plants/setup/better-plants-setup.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -11,6 +12,6 @@ import { AccountReportDataChecksComponent } from './account-report-workbench/dat
 import { AccountReportPreviewComponent } from './account-report-workbench/preview/account-report-preview.component';
 import { AccountReportsDashboardComponent } from './account-reports-dashboard/account-reports-dashboard.component';
 
-@NgModule({ declarations: [AccountReportWorkbenchComponent, AccountReportSetupComponent, AccountReportDataChecksComponent, AccountReportPreviewComponent, AccountReportsDashboardComponent],
+@NgModule({ declarations: [BetterPlantsSetupComponent, AccountReportWorkbenchComponent, AccountReportSetupComponent, AccountReportDataChecksComponent, AccountReportPreviewComponent, AccountReportsDashboardComponent],
   imports: [ReactiveFormsModule, CommonModule, RouterModule, IconComponent, DataEmptyStateComponent, ReportsModule] })
 export class AccountReportsModule { }

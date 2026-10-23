@@ -89,6 +89,29 @@ export class ReportCommandHandler {
       }
       if (changes.name !== undefined && !changes.name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a nonblank report name.');
       let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
+      if (changes.reportYear !== undefined || changes.betterPlants !== undefined) {
+        if (report.reportType !== 'betterPlants') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a Better Plants report.');
+        if (changes.reportYear !== undefined) {
+          if (changes.reportYear !== null && (!Number.isInteger(changes.reportYear) || changes.reportYear < 1800 || changes.reportYear > 9999)) {
+            throw new WorkspaceWriteError('validation-failed', 'Enter a valid report year.');
+          }
+          updated = { ...updated, reportYear: changes.reportYear ?? undefined };
+        }
+        if (changes.betterPlants) {
+          const options = { ...report.betterPlantsReportSetup };
+          for (const [key, value] of Object.entries(changes.betterPlants)) {
+            const booleans = ['includeFacilityNames', 'includeAllYears', 'includePerformanceTable'];
+            const metrics = ['baselineYearWaterPilotGoal', 'reportYearWaterPilotGoal'];
+            const notes = ['baselineAdjustmentNotes', 'modificationNotes', 'methodologyNotes'];
+            const valid = booleans.includes(key) ? typeof value === 'boolean'
+              : metrics.includes(key) ? value === null || (typeof value === 'number' && Number.isFinite(value))
+              : notes.includes(key) ? value === null || typeof value === 'string' : false;
+            if (!valid) throw new WorkspaceWriteError('validation-failed', 'A Better Plants setting is invalid.');
+            options[key] = value ?? undefined;
+          }
+          updated = { ...updated, betterPlantsReportSetup: options };
+        }
+      }
       const selectedAnalyses: IdbAccountAnalysisItem[] = [];
       if (changes.analysis !== undefined) {
         const key = accountReportAnalysisSetupKey(report.reportType);
@@ -124,7 +147,7 @@ export class ReportCommandHandler {
           // A reused record may be newer than this window's workspace snapshot.
           selectedAnalyses.push(selected);
         }
-        updated = { ...updated, [key]: { ...report[key], analysisItemId: selected?.guid },
+        updated = { ...updated, [key]: { ...updated[key], analysisItemId: selected?.guid },
           ...(selected && report.reportType !== 'accountSavings' ? { baselineYear: selected.baselineYear } : {}) };
       }
       if (JSON.stringify(updated) !== JSON.stringify(report)) {

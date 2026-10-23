@@ -18,7 +18,8 @@ describe('account report autosave', () => {
     vi.useFakeTimers(); store = new AccountWorkspaceStore(); store.publish(accountReportSnapshot());
     updateSetup = vi.fn(async (_guid, changes) => {
       const latest = store.accountReports()[0];
-      const report = { ...latest, ...(changes.name !== undefined ? { name: changes.name } : {}),
+      const report = { ...latest, ...(changes.reportYear !== undefined ? { reportYear: changes.reportYear ?? undefined } : {}),
+        ...(changes.betterPlants ? { betterPlantsReportSetup: { ...latest.betterPlantsReportSetup, ...changes.betterPlants } } : {}), ...(changes.name !== undefined ? { name: changes.name } : {}),
         analysisReportSetup: { ...latest.analysisReportSetup, ...(changes.analysis !== undefined ? { analysisItemId: changes.analysis?.analysisGuid } : {}) } };
       store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [report] }] }); return report;
     });
@@ -104,4 +105,27 @@ describe('account report autosave', () => {
     expect(updateSetup).toHaveBeenLastCalledWith('account-report', { name: original.name, analysis: { scope: 'account', analysisGuid: 'account-analysis' } });
     expect(store.accountReports()[0].name).toBe(original.name); expect(store.accountReports()[0].analysisReportSetup.analysisItemId).toBe('account-analysis');
   });
+  it('saves only changed Better Plants fields and leaves absent legacy options untouched', async () => {
+    const report = { ...store.accountReports()[0], reportType: 'betterPlants' as const };
+    store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [report] }] }); TestBed.tick();
+    expect(updateSetup).not.toHaveBeenCalled();
+    editor.form.controls.betterPlants.controls.reportYear.setValue(2025);
+    expect(await editor.flush()).toBe(true);
+    expect(updateSetup).toHaveBeenLastCalledWith('account-report', { reportYear: 2025 });
+    expect(store.accountReports()[0].betterPlantsReportSetup.includeAllYears).toBeUndefined();
+    editor.form.controls.betterPlants.controls.modificationNotes.setValue('New controls');
+    expect(await editor.flush()).toBe(true);
+    expect(updateSetup).toHaveBeenLastCalledWith('account-report', { betterPlants: { modificationNotes: 'New controls' } });
+  });
+  it('retains invalid numeric drafts and allows incomplete report setup to be saved', async () => {
+    const report = { ...store.accountReports()[0], reportType: 'betterPlants' as const };
+    store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [report] }] }); TestBed.tick();
+    editor.form.controls.betterPlants.controls.reportYear.setValue(2023.5);
+    expect(editor.state()).toBe('invalid'); expect(await editor.flush()).toBe(false);
+    expect(updateSetup).not.toHaveBeenCalled();
+    editor.form.controls.betterPlants.controls.reportYear.setValue(null);
+    expect(await editor.flush()).toBe(true);
+    expect(updateSetup).toHaveBeenLastCalledWith('account-report', { reportYear: null });
+  });
+
 });

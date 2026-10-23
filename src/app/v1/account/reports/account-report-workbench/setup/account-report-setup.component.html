@@ -18,7 +18,9 @@
         @if (context.needsPairRefresh()) { <p class="v1-alert v1-alert--warning" role="status">Your facility analysis has changed. Refresh this report’s analysis link to use its latest setup.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit() || editor.needsProtection()" (click)="editor.refreshLink()">Refresh analysis link</button> }
       </div>
     }
+    @if (entry.report.reportType === 'betterPlants') { <app-better-plants-setup/> } @else {
     <div class="report-setup-panel"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
+    }
   </section>
   @if (entry.snapshot.findings.length) {
     <section class="report-section" aria-labelledby="account-report-findings"><h2 id="account-report-findings">Configuration findings</h2><ul>@for (finding of context.findings(); track finding.id) { <li>{{ finding.description }}<app-status-finding-action [item]="finding"/></li> }</ul></section>
