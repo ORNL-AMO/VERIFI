@@ -411,6 +411,14 @@ Shared account/facility presentation lives under the v1 shared analysis-results 
 - **Navigation and validation:** Report actions use the existing guarded router flow and recheck availability when invoked through the status service. Browser coverage verifies pending/failed/invalid saves, delayed-status browser Back, inventory controls/detail/page/scroll/focus restoration, contrast, narrow windows, and saved settings/references after a read-only journey through real repositories. No persistence, backup, formula, Worker, or Electron boundary changes are introduced.
 - **Deferrals:** Analysis Used By screens, links, counts, and dependency presentation are unchanged by maintainer direction. Report-specific settings, checks, previews, and output remain with their migrations. The [Reports roadmap acceptance audit](v1-reports-phases.md#acceptance-audit-for-2790) records evidence and manual-validation gaps; #2790 is not represented as wholly complete.
 
+### Better Plants setup, review, and in-app report (#2804)
+
+- **Workflow:** Rebuild the existing account Better Plants energy/water report within the shared Setup, Data Checks, and Report stages, retaining official-form structure with v1 themes and responsive tables.
+- **Editing:** Typed report settings use existing autosave and transactional report commands. Baseline comes from the linked analysis; single-facility reports retain explicit hidden-pair selection/refresh.
+- **Review:** Data Checks shows analysis methods, model details, issues, and predictor validation. Explicit confirmation persists a versioned, input-specific receipt on the canonical analysis. Matching reports share confirmation; dependent changes require review again. Browsing never marks review complete. The Report stage withholds values until review is current.
+- **Contracts:** Existing calculations, units, report shapes, GUID links, and v0 output remain. Optional review metadata needs no backfill/schema-version change; import and analysis-copy paths clear it. Printing and file exports are deferred by maintainer direction to #2791 and later output work.
+- **Architecture and tests:** See [V1 report architecture](v1-reports-architecture.md) for the repeatable boundaries, known legacy quirks, focused tests, Chromium journey, and validation policy.
+
 ## Validation
 
 - For develop foundation changes, run `npx tsc -p tsconfig.app.json --noEmit` after each module or folder move.

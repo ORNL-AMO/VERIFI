@@ -12,6 +12,7 @@ description: Change VERIFI calculations, conversions, validation/status checks, 
 5. When a Worker is involved, update its request payload, response, error result, caller, and structured-clone assumptions together. Check all synchronous and Worker-backed paths using the shared calculation. For queued or fan-out work, verify timeout and teardown behavior, concurrency and queue progress, total calculation scope, and response payload size; limiting concurrency alone does not bound total work.
 6. Keep on-screen, printed, and exported values aligned. Inspect Excel, PDF, and PowerPoint writers when a shared report value changes.
 7. Add table-driven tests with normal, boundary, zero, missing, invalid, and representative unit-conversion cases. Include a regression case for the issue being solved.
+8. For v1 report migrations, follow [V1 report architecture](../../../docs/v1-reports-architecture.md): separate typed editing, detached inputs, on-demand Worker coordination, pure presentation, and explicit shared analysis review. Preserve canonical review ownership, period coverage, content-based invalidation, and transactional confirmation; visiting a stage must not acknowledge review. Keep print/file adapters outside in-app migrations unless explicitly scoped in.
 
 ## Validate
 
