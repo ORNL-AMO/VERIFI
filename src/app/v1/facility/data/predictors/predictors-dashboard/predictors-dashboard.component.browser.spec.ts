@@ -80,7 +80,7 @@ describe('compact Predictor journey in Chromium', () => {
     expect(root.querySelector('.portfolio-inventory .portfolio-tile__station-link')?.textContent).toContain('Chicago');
     const scroll = root.querySelector('main')!; scroll.scrollTop = 300;
     await vi.waitFor(() => {
-      const header = root.querySelector('.facility-predictors__sticky')!.getBoundingClientRect(), toolbar = root.querySelector('.facility-predictors__toolbar')!.getBoundingClientRect();
+      const header = root.querySelector('.v1-facility-predictors__header')!.getBoundingClientRect(), toolbar = root.querySelector('.facility-predictors__toolbar')!.getBoundingClientRect();
       expect(toolbar.top).toBeCloseTo(header.bottom, 0);
     });
     scroll.scrollTop = 0;

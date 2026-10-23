@@ -1,13 +1,10 @@
 .analysis-inventory { padding-bottom: 4.5rem; position: relative; min-width: 0; }
 .analysis-inventory__marker { position: absolute; top: 0; left: 0; width: 1px; height: 1px; pointer-events: none; }
-.analysis-inventory__sticky { top: 0; padding-bottom: 1rem; }
-.analysis-inventory--scrolled .analysis-inventory__sticky { padding-bottom: 0; }
-.analysis-inventory__toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; position: sticky; top: var(--browse-sticky-height,0px); z-index: 3; }
+.analysis-inventory__sticky { margin-bottom: var(--v1-space-3); }
+.analysis-inventory__toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; }
 .analysis-inventory__search { flex: 1 1 22rem; min-width: 0; }
 .analysis-inventory__count { color: var(--v1-muted); font-size: .9rem; margin: 0 0 .4rem; }
 .analysis-inventory__toolbar label { flex: 1 1 8rem; }
 @media print { .analysis-inventory__toolbar,.analysis-inventory .v1-btn { display: none; } .analysis-inventory__sticky { position: static; } }
-
-.analysis-inventory__sticky.v1-data-workbench-sticky { background: transparent; box-shadow: none; }
 
 @media print { .analysis-inventory { padding-bottom: 0; } }

@@ -10,17 +10,11 @@
 } @else {
   <section class="analysis-inventory" aria-labelledby="v1-facility-analysis-title" [appBrowseHeader]="sticky" [browseMarker]="marker" #browseHeader="browseHeader" [class.analysis-inventory--scrolled]="browseHeader.collapsed()" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="inventory.visibleIds()" [browseRestoreStickyGap]="true" [browseSticky]="sticky">
     <span #marker class="analysis-inventory__marker" aria-hidden="true"></span>
-    <div #sticky class="v1-data-workbench-sticky analysis-inventory__sticky">
+    <div #sticky class="v1-data-workbench-sticky v1-inventory-sticky-stack analysis-inventory__sticky" [class.v1-inventory-sticky-stack--joined]="browseHeader.collapsed()">
       <header class="v1-section-header v1-page-header v1-inventory-page-header analysis-inventory__header">
         <app-page-identity [breadcrumbs]="breadcrumbs()" title="Analysis" icon="analysis" headingId="v1-facility-analysis-title" breadcrumbLabel="Analysis context"/>
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"/>Add Analysis</button>
       </header>
-    </div>
-    @if (workspace.statusState() === 'error') { <div class="v1-alert v1-alert--danger" role="alert">Analysis validation could not be completed. Records remain available.</div> }
-    @else if (workspace.statusState() === 'evaluating') { <div class="v1-alert v1-alert--info" role="status">Checking analysis readiness…</div> }
-    @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
-    @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status">Analysis actions are unavailable while the workspace is loading or switching.</div> }
-    <div class="v1-data-dashboard-workspace v1-analysis-dashboard__workspace"><div class="v1-data-browse" aria-label="Facility analyses">
       <form class="v1-data-browse-toolbar analysis-inventory__toolbar" aria-label="Analysis filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
         <label class="analysis-inventory__search"><span role="status">Showing {{ countLabel() }}</span><input class="v1-input" type="search" aria-label="Find analysis, group, status, or dependency" placeholder="Find analysis, group, status, or dependency" formControlName="search"></label>
         @if (showCategory()) { <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label> }
@@ -28,6 +22,13 @@
         <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
         <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
       </form>
+    </div>
+    @if (workspace.statusState() === 'error') { <div class="v1-alert v1-alert--danger" role="alert">Analysis validation could not be completed. Records remain available.</div> }
+    @else if (workspace.statusState() === 'evaluating') { <div class="v1-alert v1-alert--info" role="status">Checking analysis readiness…</div> }
+    @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
+    @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status">Analysis actions are unavailable while the workspace is loading or switching.</div> }
+    <div class="v1-data-dashboard-workspace v1-analysis-dashboard__workspace"><div class="v1-data-browse" aria-label="Facility analyses">
+
       @if (!entries().length) { <app-data-empty-state icon="analysis" context="facility" title="No analyses" description="Add an analysis to get started."/> }
       @else if (!filteredEntries().length) { <article class="v1-empty-state" role="status"><h2>No analyses match these filters</h2><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></article> }
       @else { <app-inventory-grid [tiles]="visibleTiles()" [printTiles]="printTiles()" [detail]="inventory.detail()" [overrides]="inventory.overrides()" [actionsByGuid]="menuActions()" [page]="inventory.page()" [pages]="inventory.pages()" [start]="inventory.start()" [end]="inventory.end()" [total]="filteredEntries().length" (detailChanged)="inventory.setTileDetail($event)" (pageSelected)="inventory.selectPage($event)" (navigationRequested)="navigateRoute($event)" (actionRequested)="requestAction($event)"/> }

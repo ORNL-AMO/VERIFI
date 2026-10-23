@@ -7,16 +7,10 @@
 } @else {
   <section class="reports-inventory" [class.reports-inventory--scrolled]="browseHeader.collapsed()" aria-labelledby="reports-title" [appBrowseHeader]="sticky" [browseMarker]="marker" #browseHeader="browseHeader" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="inventory.visibleIds()" [browseRestoreStickyGap]="true" [browseSticky]="sticky">
     <span #marker class="reports-inventory__marker" aria-hidden="true"></span>
-    <div #sticky class="v1-data-workbench-sticky reports-inventory__sticky">
+    <div #sticky class="v1-data-workbench-sticky v1-inventory-sticky-stack reports-inventory__sticky" [class.v1-inventory-sticky-stack--joined]="browseHeader.collapsed()">
       <header class="v1-section-header v1-page-header v1-inventory-page-header"><app-page-identity [breadcrumbs]="breadcrumbs()" [title]="title()" icon="reports" headingId="reports-title" breadcrumbLabel="Reports context"/>
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openCreate()"><app-ui-icon name="add"/>Add report</button>
       </header>
-    </div>
-    @if (status.state() === 'error') { <div class="v1-alert v1-alert--warning" role="alert">Setup status is unavailable. Saved reports and lifecycle actions remain available.</div> }
-    @else if (status.state() !== 'ready') { <div class="v1-alert v1-alert--info" role="status">Checking saved report setup…</div> }
-    @if (!workspace.canWrite() || workspace.hasPending()) { <div class="v1-alert v1-alert--info" role="status">Report actions are unavailable while workspace changes are pending.</div> }
-    @if (lifecycle.error() && !lifecycle.editor() && !lifecycle.deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert">{{ lifecycle.error() }}</div> }
-    <div class="v1-data-dashboard-workspace reports-inventory__workspace"><div class="v1-data-browse" aria-label="Reports inventory">
       <form class="v1-data-browse-toolbar reports-inventory__toolbar" aria-label="Report filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
         <div class="reports-inventory__search"><p role="status">{{ countLabel() }}</p><div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"/></span><input type="search" aria-label="Find report, owner, type, analysis, or period" placeholder="Find report, owner, type, analysis, or period" formControlName="search"></div></div>
         @if (scope() === 'account') { <label><span>Report level</span><select class="v1-select" formControlName="scope"><option value="all">Account + facility</option><option value="account">Account only</option><option value="facility">Facility only</option></select></label> }
@@ -25,6 +19,12 @@
         <label><span>Sort</span><select class="v1-select" formControlName="sort">@if (scope() === 'account') { <option value="account-first">Account reports first</option> }<option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option></select></label>
         <label><span>Detail level</span><select class="v1-select" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
       </form>
+    </div>
+    @if (status.state() === 'error') { <div class="v1-alert v1-alert--warning" role="alert">Setup status is unavailable. Saved reports and lifecycle actions remain available.</div> }
+    @else if (status.state() !== 'ready') { <div class="v1-alert v1-alert--info" role="status">Checking saved report setup…</div> }
+    @if (!workspace.canWrite() || workspace.hasPending()) { <div class="v1-alert v1-alert--info" role="status">Report actions are unavailable while workspace changes are pending.</div> }
+    @if (lifecycle.error() && !lifecycle.editor() && !lifecycle.deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert">{{ lifecycle.error() }}</div> }
+    <div class="v1-data-dashboard-workspace reports-inventory__workspace"><div class="v1-data-browse" aria-label="Reports inventory">
       @if (!entries().length) { <app-data-empty-state icon="reports" [context]="scope()" title="No reports" description="Add a report to start organizing your reporting."/> }
       @else if (!filteredEntries().length) { <article class="v1-empty-state" role="status"><h2>No reports match these filters</h2><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></article> }
       @else {

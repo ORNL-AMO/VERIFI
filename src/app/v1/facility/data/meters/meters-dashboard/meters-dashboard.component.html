@@ -4,9 +4,9 @@
 @if (!currentFacility) {
   <article class="v1-empty-state" role="status"><h1>No facility selected</h1><p>Select a facility before managing meters and meter data.</p></article>
 } @else {
-  <section [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" browseOffsetProperty="--meter-sticky-height" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="browseIds()" class="facility-meters" [class.facility-meters--scrolled]="collapsed()" aria-labelledby="v1-facility-meters-title">
+  <section [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="browseIds()" class="facility-meters" [class.facility-meters--scrolled]="collapsed()" aria-labelledby="v1-facility-meters-title">
     <span #scrollMarker class="facility-meters__marker" aria-hidden="true"></span>
-    <div #stickyHeader class="facility-meters__sticky">
+    <div #stickyHeader class="v1-inventory-sticky-stack facility-meters__sticky" [class.v1-inventory-sticky-stack--joined]="collapsed()">
       <header class="v1-section-header v1-facility-meters__header v1-page-header">
         <app-page-identity class="facility-meters__identity" [breadcrumbs]="breadcrumbs()" title="Meters" icon="meter" headingId="v1-facility-meters-title"/>
         <div class="v1-facility-meters__header-actions" aria-label="Meter actions">
@@ -16,18 +16,19 @@
 
         </div>
       </header>
+
+      <form class="v1-data-browse-toolbar facility-meters__toolbar" aria-label="Meter filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
+        <label class="facility-meters__search"><span>Showing {{ entries.length }} of {{ meterCards().length }} meters</span>
+          <input type="search" class="v1-input" formControlName="search" aria-label="Find meter, source, group, or status" placeholder="Find meter, source, group, or status">
+        </label>
+        <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="missingGroup">Missing group</option><option value="valid">All data valid</option></select></label>
+        <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="meterName">Meter name</option><option value="latestReading">Latest reading</option></select></label>
+        <label><span>Detail level</span><select class="v1-select" [formControl]="detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
+        @if (!selecting() && meterCards().length) {
+          <button type="button" class="v1-btn v1-btn--quiet facility-meters__select" [disabled]="!canAct() || !entries.length" (click)="startSelection()">Select meters</button>
+        }
+      </form>
     </div>
-    <form class="v1-data-browse-toolbar facility-meters__toolbar" aria-label="Meter filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
-      <label class="facility-meters__search"><span>Showing {{ entries.length }} of {{ meterCards().length }} meters</span>
-        <input type="search" class="v1-input" formControlName="search" aria-label="Find meter, source, group, or status" placeholder="Find meter, source, group, or status">
-      </label>
-      <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="missingGroup">Missing group</option><option value="valid">All data valid</option></select></label>
-      <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="meterName">Meter name</option><option value="latestReading">Latest reading</option></select></label>
-      <label><span>Detail level</span><select class="v1-select" [formControl]="detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
-      @if (!selecting() && meterCards().length) {
-        <button type="button" class="v1-btn v1-btn--quiet facility-meters__select" [disabled]="!canAct() || !entries.length" (click)="startSelection()">Select meters</button>
-      }
-    </form>
     @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status">Meter actions are unavailable while the workspace is loading or switching.</div> }
     @else if (workspace.hasPending()) { <div class="v1-alert v1-alert--info" role="status">Another workspace update is still finishing.</div> }
     @if (actionError() && !confirmationKind() && !addMeterOpen()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
