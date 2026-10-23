@@ -1,0 +1,34 @@
+@for (period of periods(); track period.reportYear) {
+  <section class="report-section" [attr.aria-label]="period.reportYear + ' analysis checks'">
+    <h2>{{ period.reportYear }} — Model validation check</h2>
+    @if (!period.groups.length) { <p class="v1-alert v1-alert--warning">No included analysis groups are available. Review the linked analysis setup.</p> }
+    @for (item of period.groups; track item.facilityGuid + ':' + item.group.idbGroupId) {
+      <article class="check-group">
+        <h3>{{ item.facilityLabel }} · {{ item.groupLabel }}</h3>
+        <a [routerLink]="item.route">Review this analysis group</a>
+        <h4>Issues summary</h4>
+        @if (item.critical.length) { <div class="v1-alert v1-alert--danger"><strong>Critical issues</strong><ul>@for (note of item.critical; track $index) { <li>{{ note }}</li> }</ul></div> }
+        @if (item.moderate.length) { <div class="v1-alert v1-alert--warning"><strong>Moderate issues</strong><ul>@for (note of item.moderate; track $index) { <li>{{ note }}</li> }</ul></div> }
+        @if (item.minor.length) { <div class="v1-alert v1-alert--info"><strong>Minor issues</strong><ul>@for (note of item.minor; track $index) { <li>{{ note }}</li> }</ul></div> }
+        @if (!item.critical.length && !item.moderate.length && !item.minor.length) { <p>{{ item.group.analysisType === 'regression' ? 'No issues identified.' : 'Regression model validation does not apply to this analysis method.' }}</p> }
+        <h4>Executive summary</h4>
+        <dl class="check-facts"><div><dt>Analysis type</dt><dd>{{ item.typeLabel }}</dd></div><div><dt>Baseline year</dt><dd>{{ item.baselineYear }}</dd></div><div><dt>Predictor variables</dt><dd>{{ item.predictors }}</dd></div></dl>
+        @if (item.model; as model) {
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Regression model details">
+            <table><caption>Regression model details</caption><thead><tr><th scope="col">Model period</th><th scope="col">Variable p-values</th><th scope="col">R²</th><th scope="col">Adjusted R²</th><th scope="col">Model p-value</th><th scope="col">Formula</th></tr></thead>
+              <tbody><tr><td>{{ item.modelPeriod }}{{ model.isUserDefinedModel ? ' (User defined)' : '' }}</td><td>{{ model.isUserDefinedModel ? '—' : item.variablePValues }}</td><td>{{ model.isUserDefinedModel ? '—' : (model.R2 | number:'1.3-3') }}</td><td>{{ model.isUserDefinedModel ? '—' : (model.adjust_R2 | number:'1.3-3') }}</td><td>{{ model.isUserDefinedModel ? '—' : (model.modelPValue | number:'1.2-2') }}</td><td>{{ item.formula }}</td></tr></tbody>
+            </table>
+          </div>
+          @if (model.SEPValidation?.length) {
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Predictor data validation">
+              <table><caption>Data validation</caption><thead><tr><th scope="col">Validation metric</th>@for (validation of model.SEPValidation; track $index) { <th scope="col">{{ validation.predictorVariable }}</th> }</tr></thead>
+                <tbody>@for (row of item.validation; track row.label) { <tr><th scope="row">{{ row.label }}</th>@for (cell of row.cells; track $index) { <td [class.check-failed]="cell.failed">{{ cell.value | analysisResultNumber }}@if (cell.failed) { <span class="validation-label"> — Fail</span> }</td> }</tr> }</tbody>
+                <tfoot><tr><th scope="row">Validation check</th>@for (validation of model.SEPValidation; track $index) { <td [class.check-failed]="!validation.isValid">{{ validation.isValid ? 'Pass' : 'Fail' }}</td> }</tr></tfoot>
+              </table>
+            </div>
+          }
+        }
+      </article>
+    }
+  </section>
+}

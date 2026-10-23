@@ -42,8 +42,10 @@ describe('AccountAnalysisActionsService', () => {
   });
 
   it('copies facility selections without sharing nested references', async () => {
-    const { service, analysisHandler } = setup([{ guid: 'facility-analysis-a', analysisCategory: 'energy' }], [source]);
+    const reviewed = { ...source, dataCheckReviews: [{ checksVersion: 1, reportYear: 2023, inputFingerprint: 'reviewed-inputs', reviewedAt: '2026-01-01T00:00:00Z' }] };
+    const { service, analysisHandler } = setup([{ guid: 'facility-analysis-a', analysisCategory: 'energy' }], [reviewed]);
     const copy = await service.copyAnalysis(source.guid);
+    expect(copy.dataCheckReviews).toBeUndefined(); expect(reviewed.dataCheckReviews).toHaveLength(1);
     expect(copy.id).toBeUndefined();
     expect(copy.guid).not.toBe(source.guid);
     expect(copy.facilityAnalysisItems).toEqual(source.facilityAnalysisItems);

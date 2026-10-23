@@ -1,4 +1,4 @@
-import { buildAnalysisReportInputs, reportYears } from './analysis-report-inputs';
+import { assertAnalysisReportYears, buildAnalysisReportInputs, reportYears } from './analysis-report-inputs';
 import { calculateAnalysisDataChecks } from './analysis-data-checks';
 import { calculateBetterPlantsReport } from './better-plants-report-calculation';
 import { BetterPlantsReportClass } from '@domain/calculations/better-plants-calculations/betterPlantsReportClass';
@@ -45,4 +45,11 @@ describe('analysis report inputs and calculations', () => {
     inputs.facilityAnalyses[0].groups[0].analysisType = 'regression';
     expect(calculateAnalysisDataChecks(inputs, 2023)).toMatchObject({ hasBlockingErrors: true, groups: [{ critical: ['Select an available regression model in the analysis.'] }] });
   });
+  it('bounds all-year work by actual meter history before starting calculation', () => {
+    const inputs = buildAnalysisReportInputs(analysisReportFixture(), 'account-analysis');
+    expect(() => assertAnalysisReportYears(inputs, [9999])).toThrow('available meter history');
+    expect(() => assertAnalysisReportYears({ ...inputs, analysis: { ...inputs.analysis, baselineYear: 1800 } }, [2023])).toThrow('available meter history');
+    expect(() => assertAnalysisReportYears(inputs, [2024, 2023])).not.toThrow();
+  });
+
 });

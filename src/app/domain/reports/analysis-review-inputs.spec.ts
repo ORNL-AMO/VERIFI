@@ -19,6 +19,8 @@ describe('analysis review freshness', () => {
     const original = analysisReviewContent(inputs, 2023);
     const reordered = { ...inputs, meterData: [...inputs.meterData].reverse() };
     expect(analysisReviewContent(reordered, 2023)).toBe(original);
+    inputs.facilityAnalyses[0].groups[0].analysisType = 'regression';
+    inputs.facilityAnalyses[0].groups[0].selectedModelId = 'selected';
     inputs.facilityAnalyses[0].groups[0].models = [{ coef: [1, 2], modelId: 'selected' } as never];
     const first = analysisReviewContent(inputs, 2023);
     inputs.facilityAnalyses[0].groups[0].models[0].coef.reverse();

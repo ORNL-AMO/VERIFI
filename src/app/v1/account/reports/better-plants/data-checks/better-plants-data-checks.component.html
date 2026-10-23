@@ -1,0 +1,20 @@
+@let result = report.state();
+<section class="report-section" aria-labelledby="better-plants-checks-title">
+  <h2 id="better-plants-checks-title">Review your analysis</h2>
+  <p>Check the analysis methods, selected models, and any issues below. Opening this step does not complete checks. Confirm your review before displaying the report.</p>
+  <p>Confirmation also applies to other reports using this analysis and the same checked periods. Changes to dependent data require a new review.</p>
+  @if (context.findings().length) { <ul>@for (finding of context.findings(); track finding.id) { <li>{{ finding.description }}<app-status-finding-action [item]="finding"/></li> }</ul> }
+  @if (result.state === 'loading' || result.state === 'waiting') { <p role="status">{{ result.message }}</p> }
+  @if (result.state === 'error') { <div class="v1-alert v1-alert--danger" role="alert">{{ result.message }}</div><a [routerLink]="context.navigation.accountReportWorkbenchRoute(context.report()!.accountId, context.guid())">Review report setup</a><button type="button" class="v1-btn v1-btn--secondary" (click)="report.retry()">Retry checks</button> }
+</section>
+@if (result.state === 'ready' && result.value; as value) {
+  <app-analysis-data-checks [checks]="value.checks ?? []" [groupNames]="groupNames()" [facilityNames]="facilityNames()"/>
+  <section class="report-section" aria-label="Confirm analysis review">
+    @if (value.reviewed) { <p class="v1-alert v1-alert--success" role="status">Reviewed. Your confirmation is current for these analysis inputs and reporting periods.</p> }
+    @else {
+      <p>Confirm that you have checked this analysis and understand the issues shown above. Resolve critical issues before confirming.</p>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!report.canConfirm()" (click)="report.confirmReview()">I’ve reviewed the analysis and any issues</button>
+    }
+  </section>
+}
+@if (report.reviewError(); as error) { <section class="report-section"><p class="v1-alert v1-alert--danger" role="alert">{{ error }}</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!report.canConfirm()" (click)="report.confirmReview()">Retry confirmation</button></section> }

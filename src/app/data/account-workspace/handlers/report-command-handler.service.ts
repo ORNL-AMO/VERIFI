@@ -100,6 +100,7 @@ export class ReportCommandHandler {
         if (changes.betterPlants) {
           const options = { ...report.betterPlantsReportSetup };
           for (const [key, value] of Object.entries(changes.betterPlants)) {
+            if (value === undefined) continue;
             const booleans = ['includeFacilityNames', 'includeAllYears', 'includePerformanceTable'];
             const metrics = ['baselineYearWaterPilotGoal', 'reportYearWaterPilotGoal'];
             const notes = ['baselineAdjustmentNotes', 'modificationNotes', 'methodologyNotes'];

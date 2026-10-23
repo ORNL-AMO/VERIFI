@@ -1,3 +1,5 @@
+import { AnalysisDataChecksComponent } from './analysis-data-checks/analysis-data-checks.component';
+import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -18,9 +20,9 @@ import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-work
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { StatusFindingActionComponent } from '@app/v1/shared/status/status-finding-action/status-finding-action.component';
 
-@NgModule({ declarations: [ReportsDashboardComponent, ReportLifecycleComponent, ReportWorkbenchHeaderComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IconComponent, WorkspaceSlideoutComponent, ConfirmationDialogComponent,
+@NgModule({ declarations: [AnalysisDataChecksComponent, ReportsDashboardComponent, ReportLifecycleComponent, ReportWorkbenchHeaderComponent],
+  imports: [AnalysisResultNumberPipe, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, WorkspaceSlideoutComponent, ConfirmationDialogComponent,
     DataEmptyStateComponent, InventoryGridComponent, PageIdentityComponent, BrowsePositionDirective, BrowseHeaderDirective,
     AnalysisStageNavigationComponent, DataWorkbenchResourceSwitcherComponent, DataWorkbenchFactsToggleComponent, StatusFindingActionComponent],
-  exports: [ReportsDashboardComponent, ReportLifecycleComponent, ReportWorkbenchHeaderComponent, StatusFindingActionComponent] })
+  exports: [AnalysisDataChecksComponent, ReportsDashboardComponent, ReportLifecycleComponent, ReportWorkbenchHeaderComponent, StatusFindingActionComponent] })
 export class ReportsModule { }

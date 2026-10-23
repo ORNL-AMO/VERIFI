@@ -4,7 +4,7 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 import { BetterPlantsReportSetup } from '@data/models/overview-report';
 
 export type BetterPlantsSetupChanges = {
-  readonly [K in Exclude<keyof BetterPlantsReportSetup, 'analysisItemId'>]?: BetterPlantsReportSetup[K] | null;
+  readonly [K in Exclude<keyof BetterPlantsReportSetup, 'analysisItemId'>]?: K extends 'includeFacilityNames' | 'includeAllYears' | 'includePerformanceTable' ? boolean : BetterPlantsReportSetup[K] | null;
 };
 
 export type ReportAnalysisSelection =

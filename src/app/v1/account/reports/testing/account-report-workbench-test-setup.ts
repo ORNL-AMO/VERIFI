@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { computed, inject, signal } from '@angular/core';
+import { computed, inject, signal, Provider } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -20,7 +20,7 @@ import { FacilityReportActionsService } from '@app/v1/facility/reports/facility-
 import { AccountReportWorkbenchComponent } from '../account-report-workbench/account-report-workbench.component';
 import { accountReportSnapshot } from './account-report-test-fixtures';
 
-export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnapshot = accountReportSnapshot()) {
+export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnapshot = accountReportSnapshot(), providers: Provider[] = []) {
   const store = new AccountWorkspaceStore(); store.publish(snapshot);
   const status = { state: signal<'ready' | 'evaluating' | 'error'>('ready'), items: signal<StatusItem[]>([]) };
   const updateSetup = vi.fn(async (guid: string, changes: AccountReportSetupChanges) => {
@@ -42,9 +42,9 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
       return { routeState, activeReportGuid: computed(() => routeState().reportGuid),
         accountReportsRoute: (account: string) => ['/v1', 'workspace', 'account', account, 'reports', 'dashboard'],
         accountReportWorkbenchRoute: (account: string, report: string, stage = 'setup') => ['/v1', 'workspace', 'account', account, 'reports', 'workbench', report, stage] };
-    } }
+    } }, ...providers
   ] }).compileComponents();
   const harness = await RouterTestingHarness.create(); const router = TestBed.inject(Router); router.setUpLocationChangeListener();
-  const open = (report = 'account-report', stage = 'setup') => harness.navigateByUrl(`/v1/workspace/account/account-a/reports/workbench/${report}/${stage}`, AccountReportWorkbenchComponent);
+  const open = (report = 'account-report', stage = 'setup') => harness.navigateByUrl(`/v1/workspace/account/${snapshot.account.guid}/reports/workbench/${report}/${stage}`, AccountReportWorkbenchComponent);
   return { store, status, updateSetup, harness, router, open };
 }

@@ -1,0 +1,96 @@
+import { Injector, inject } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, firstValueFrom, of, take, timeout } from 'rxjs';
+import { page, userEvent } from 'vitest/browser';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AnalysisReviewCommandHandler } from '@data/account-workspace/handlers/analysis-review-command-handler.service';
+import { dbConfig } from '@data/indexedDB/_dbConfig';
+import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
+import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
+import { analysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { analysisReviewFingerprint } from '@platform/reports/analysis-review-fingerprint';
+import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
+import { runWorker } from '@platform/web-workers/run-worker';
+import { AnalysisReportCalculationService } from '@app/v1/shared/reports/analysis-report-calculation.service';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
+import { setupAccountReportWorkbench } from '../testing/account-report-workbench-test-setup';
+import { BetterPlantsReportService } from './better-plants-report.service';
+
+describe('Better Plants review and display in Chromium', () => {
+  let database: IndexedDbTestHarness;
+  afterEach(async () => { TestBed.resetTestingModule(); await database?.destroy(); await page.viewport(1200, 900); });
+  it.each(['energy', 'water'] as const)('confirms shared %s checks, displays the form, and invalidates it after input changes', async category => {
+    const original = analysisReportFixture(category);
+    const report = { ...original.accountReports[0], name: `Better Plants ${category}`, betterPlantsReportSetup: {
+      ...original.accountReports[0].betterPlantsReportSetup, includePerformanceTable: true, includeFacilityNames: true, modificationNotes: 'Process improvements\nVerified with the facilities team.' } };
+    const snapshot = { ...original, accountReports: [report, { ...report, id: 51, guid: 'second-report', name: 'Shared analysis report' }] };
+    database = await IndexedDbTestHarness.create('better-plants-journey');
+    await database.seed({ accounts: [{ ...snapshot.account }], facilities: snapshot.facilities.map(item => ({ ...item })),
+      analysisItems: snapshot.facilityAnalyses.map(item => ({ ...item })), accountAnalysisItems: snapshot.accountAnalyses.map(item => ({ ...item })),
+      utilityMeter: snapshot.meters.map(item => ({ ...item })), utilityMeterData: snapshot.meterData.map(item => ({ ...item })), accountReports: snapshot.accountReports });
+    TestBed.resetTestingModule();
+    const transactions = new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: database.databaseName } });
+    // Vite serves source Worker modules; the production build owns emitted Worker URLs.
+    const workerUrl = new URL('../../../../platform/web-workers/analysis-report.worker', import.meta.url);
+    expect((await fetch(workerUrl)).ok).toBe(true);
+    const meters = getCalanderizedMeterData([...snapshot.meters], [...snapshot.meterData], snapshot.account, false,
+      { energyIsSource: true, neededUnits: 'MMBtu' }, [], [], [...snapshot.facilities], snapshot.account.assessmentReportVersion, []);
+    const view = await setupAccountReportWorkbench(snapshot, [
+      { provide: WorkspaceCommandBoundary, useFactory: () => new WorkspaceCommandBoundary(inject(AccountWorkspaceStore), {} as AccountWorkspaceService) },
+      { provide: AnalysisReviewCommandHandler, useValue: new AnalysisReviewCommandHandler(transactions) },
+      { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of({ state: 'ready', meters }), project: () => ({ state: 'ready', meters }) } },
+      { provide: AnalysisReportCalculationService, useValue: { fingerprint: analysisReviewFingerprint,
+        execute: (request: AnalysisReportWorkerRequest) => runWorker<AnalysisReportWorkerResponse>(new Worker(workerUrl, { type: 'module' }), request) } }
+    ]);
+    const root = view.harness.fixture.nativeElement as HTMLElement; root.className = 'v1-root v1-palette-blueprint';
+    const component = await view.open('report'); view.harness.fixture.autoDetectChanges();
+    const coordinator = view.harness.routeDebugElement!.injector.get(BetterPlantsReportService);
+    const waitFor = async (predicate: (state: ReturnType<typeof coordinator.state>) => boolean) => {
+      const waiting = firstValueFrom(toObservable(coordinator.state, { injector: TestBed.inject(Injector) }).pipe(filter(predicate), take(1), timeout(10000)));
+      TestBed.tick(); await waiting; view.harness.detectChanges();
+    };
+    expect(view.store.committedRevision()).toBeUndefined();
+    await view.open('report', 'report'); await waitFor(state => state.state === 'review-required');
+    expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
+    await view.open('report', 'data-checks'); await waitFor(state => state.state === 'ready' && !!state.value?.checks);
+    expect(view.store.accountAnalyses()[0].dataCheckReviews).toBeUndefined();
+    const confirmation = view.harness.routeNativeElement!.querySelector<HTMLButtonElement>('app-better-plants-data-checks .v1-btn--action')!;
+    confirmation.focus(); await userEvent.keyboard('{Enter}'); await waitFor(state => state.value?.reviewed === true);
+    expect(view.store.accountAnalyses()[0].isAnalysisVisited).toBe(false);
+    expect(component.context.stages().find(stage => stage.id === 'data-checks')?.completed).toBe(true);
+    await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
+    root.className = 'v1-root v1-palette-blueprint';
+    expect(root.querySelectorAll('app-better-plants-preview table').length).toBeGreaterThanOrEqual(4);
+    expect(root.textContent).toContain('Process improvements');
+    for (const dark of [false, true]) {
+      root.className = `v1-root v1-palette-blueprint${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`;
+      for (const width of [1024, 640, 390]) {
+        await page.viewport(width, 900); view.harness.detectChanges();
+        expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+      }
+    }
+    await page.viewport(1100, 900); root.className = 'v1-root v1-palette-blueprint';
+    // Capture the complete rendered form independently of the workbench's scroll viewport.
+    const frame = document.createElement('div'); frame.className = 'v1-root v1-palette-blueprint';
+    frame.style.cssText = 'position:absolute;inset:0 auto auto 0;width:1100px;height:auto;min-height:0;overflow:visible;z-index:10000';
+    const form = root.querySelector('app-better-plants-preview')!.cloneNode(true) as HTMLElement;
+    frame.append(form); document.body.append(frame);
+    try {
+      await page.viewport(1100, Math.ceil(frame.scrollHeight) + 20);
+      await page.screenshot({ element: frame, path: `./__screenshots__/better-plants-${category}.png` });
+      frame.classList.add('v1-theme-dark');
+      await page.screenshot({ element: frame, path: `./__screenshots__/better-plants-${category}-dark.png` });
+    } finally { frame.remove(); await page.viewport(1100, 900); }
+    await view.open('second-report', 'report'); await waitFor(state => !!state.value?.summaries);
+    const changed = { ...snapshot.meterData[0], totalEnergyUse: 5, totalVolume: 5 };
+    await transactions.runTransaction(['utilityMeterData'], 'readwrite', tx => tx.put('utilityMeterData', changed));
+    view.store.publishCommittedPatch({ collections: [{ collection: 'meterData', upsert: [changed] }] });
+    view.harness.detectChanges(); expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
+    await waitFor(state => state.state === 'review-required');
+    await database.reopen(); expect((await database.getAll('accountAnalysisItems'))[0]['dataCheckReviews']).toHaveLength(1);
+  });
+});

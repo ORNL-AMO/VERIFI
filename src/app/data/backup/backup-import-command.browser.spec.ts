@@ -6,6 +6,8 @@ import { VerifiStoreName } from '@data/indexedDB/indexed-db-schema';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { BackupImportCommandService } from './backup-import-command.service';
 import { PreparedBackupFile } from './backup-preparation.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 describe('BackupImportCommandService restore transactions in Chromium', () => {
   let harness: IndexedDbTestHarness;
@@ -61,6 +63,21 @@ describe('BackupImportCommandService restore transactions in Chromium', () => {
     await harness.reopen();
     expect((await harness.getAll<any>('accounts'))[0].statusWarningDismissals)
       .toEqual(storedAccount.statusWarningDismissals);
+  });
+
+  it('clears shared review receipts when importing remapped account and facility analyses', async () => {
+    const backup = createAccountBackup();
+    const review = { checksVersion: 1, reportYear: 2023, inputFingerprint: 'old-inputs', reviewedAt: '2026-01-01T00:00:00Z' };
+    backup.facilityAnalysisItems = [{ guid: 'reviewed-facility-analysis', accountId: backup.account.guid, facilityId: backup.facilities[0].guid,
+      groups: [], dataCheckReviews: [review] } as IdbAnalysisItem];
+    backup.accountAnalysisItems = [{ guid: 'reviewed-account-analysis', accountId: backup.account.guid,
+      facilityAnalysisItems: [{ facilityId: backup.facilities[0].guid, analysisItemId: 'reviewed-facility-analysis' }], dataCheckReviews: [review] } as IdbAccountAnalysisItem];
+    await createService().importAccountBackupFile(backup, 0);
+    await harness.reopen();
+    const facility = (await harness.getAll('analysisItems'))[0];
+    const account = (await harness.getAll('accountAnalysisItems'))[0];
+    expect(facility['dataCheckReviews']).toBeUndefined(); expect(account['dataCheckReviews']).toBeUndefined();
+    expect(account['facilityAnalysisItems']).toEqual([{ facilityId: facility['facilityId'], analysisItemId: facility.guid }]);
   });
 
   it('ignores malformed warning dismissals instead of aborting account restore', async () => {

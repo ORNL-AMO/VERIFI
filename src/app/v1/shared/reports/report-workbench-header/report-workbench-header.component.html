@@ -30,7 +30,7 @@
     @if (state.isDirty() || state.error()) {
       <div class="v1-alert" [class.v1-alert--danger]="state.state() === 'error' || state.state() === 'invalid'" [class.v1-alert--info]="state.state() === 'dirty'" role="status">
         @if (state.error()) { <span>{{ state.error() }}</span> }
-        @else if (state.state() === 'invalid') { <span>Enter a nonblank name in Setup or discard your changes before leaving this report.</span> }
+        @else if (state.state() === 'invalid') { <span>Correct invalid fields in Setup or discard your changes before leaving this report.</span> }
         @else { <span>Your edits will save automatically before leaving this report.</span> }
         @if (state.state() === 'error') { <button type="button" class="v1-btn v1-btn--secondary" [disabled]="state.saving()" (click)="state.retry()">Retry</button> }
         <button type="button" class="v1-btn v1-btn--ghost" [disabled]="state.saving()" (click)="requestDiscard()">Discard changes</button>

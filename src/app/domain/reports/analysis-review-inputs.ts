@@ -1,9 +1,14 @@
 import { ANALYSIS_DATA_CHECKS_VERSION, AnalysisDataCheckReview } from '@data/models/analysis-review';
 import { AnalysisReportInputs } from './analysis-report-inputs';
+import { getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 /** Canonical content, also compared synchronously inside the acknowledgment transaction. */
 export function analysisReviewContent(inputs: AnalysisReportInputs, reportYear: number): string {
   const analysis = inputs.analysis;
+  const groupIds = new Set(inputs.facilityAnalyses.flatMap(item => item.groups)
+    .filter(group => group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis').map(group => group.idbGroupId));
+  const meters = inputs.meters.filter(meter => groupIds.has(meter.groupId));
+  const meterIds = new Set(meters.map(meter => meter.guid));
   return JSON.stringify(canonical({
     checksVersion: ANALYSIS_DATA_CHECKS_VERSION, owner: inputs.owner, reportYear,
     account: fiscalContext(inputs.account),
@@ -12,7 +17,9 @@ export function analysisReviewContent(inputs: AnalysisReportInputs, reportYear: 
       hasBanking: analysis.hasBanking, facilityAnalysisItems: [...analysis.facilityAnalysisItems].sort((a, b) => a.facilityId.localeCompare(b.facilityId)) },
     facilities: byGuid(inputs.facilities).map(facility => ({ ...fiscalContext(facility), guid: facility.guid,
       isNewFacility: facility.isNewFacility })),
-    facilityAnalyses: byGuid(inputs.facilityAnalyses), meters: byGuid(inputs.meters), meterData: byGuid(inputs.meterData),
+    facilityAnalyses: byGuid(inputs.facilityAnalyses).map(item => ({ ...item, groups: item.groups.map(group => ({ ...group,
+      models: group.analysisType === 'regression' ? [getSelectedRegressionModel(group)].filter(Boolean) : undefined })) })),
+    meters: byGuid(meters), meterData: byGuid(inputs.meterData.filter(reading => meterIds.has(reading.meterId))),
     predictors: byGuid(inputs.predictors), predictorData: byGuid(inputs.predictorData)
   }));
 }

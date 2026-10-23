@@ -1,0 +1,12 @@
+@import '../report-workbench-stage.css';
+.check-group { padding-block: 1.25rem; border-top: 1px solid var(--v1-border); }
+h3 { font-size: 1.1rem; } h4 { font-size: 1rem; margin-top: 1rem; }
+.table-scroll { max-width: 100%; overflow-x: auto; margin-block: 1rem; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: .6rem; border: 1px solid var(--v1-border); vertical-align: top; }
+thead, tfoot { background: var(--v1-surface-muted); }
+caption { caption-side: top; color: var(--v1-text); font-weight: 600; }
+.check-failed { color: var(--v1-danger); font-weight: 600; }
+.check-facts { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-block: 1rem; }
+.check-facts dd { margin: .25rem 0 0; }
+ul:last-child { margin-bottom: 0; }

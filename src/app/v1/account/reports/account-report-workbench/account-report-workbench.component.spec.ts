@@ -18,8 +18,13 @@ describe('account report workbench', () => {
     expect(harness.routeNativeElement!.querySelector('nav a')?.getAttribute('href')).toContain('/account-a/reports/dashboard');
     await open('account-report', 'report');
     expect(workbench.context.stage()).toBe('report');
-    expect(harness.routeNativeElement!.textContent).toContain('Report content pending');
-    expect(harness.routeNativeElement!.textContent).toContain('Setup readiness does not indicate');
+    if (value === 'betterPlants') {
+      expect(harness.routeNativeElement!.querySelector('app-better-plants-preview')).not.toBeNull();
+      expect(harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
+    } else {
+      expect(harness.routeNativeElement!.textContent).toContain('Report content pending');
+      expect(harness.routeNativeElement!.textContent).toContain('Setup readiness does not indicate');
+    }
     expect(updateSetup).not.toHaveBeenCalled(); expect(store.committedRevision()).toBeUndefined();
   });
   it('flushes before stage changes, reused report routes and dashboard returns', async () => {

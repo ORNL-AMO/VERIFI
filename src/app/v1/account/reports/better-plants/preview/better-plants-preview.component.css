@@ -1,0 +1,19 @@
+@import '../../../../shared/reports/report-workbench-stage.css';
+@import '../../../../shared/reports/report-document.css';
+.document-title { padding: 1.25rem; text-align: center; }
+.document-title h2 { font-size: 1.4rem; margin: 0 0 .3rem; }
+.document-title p { margin: 0; color: var(--v1-muted); }
+.company-information { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1.25rem; border-bottom: 1px solid var(--v1-border); }
+.company-information h3 { font-size: 1.05rem; font-weight: 600; }
+.company-information p { margin-block: .5rem; }
+.company-information dl { margin: 0; }
+.company-information dl div { display: flex; gap: .5rem; }
+.company-information dt { font-weight: 500; }
+.company-information dt::after { content: ':'; }
+.company-information dd { margin: 0; overflow-wrap: anywhere; }
+.report-note h3, .document-section h3 { font-size: 1rem; font-weight: 600; line-height: 1.5; }
+.report-note p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.footnote { font-size: .85rem; }
+.report-footer { margin-top: 1rem; }
+.v1-btn { margin: .5rem; }
+@media (max-width: 640px) { .company-information { grid-template-columns: 1fr; gap: .75rem; } }

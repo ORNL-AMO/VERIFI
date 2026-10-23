@@ -1,3 +1,4 @@
+import { BetterPlantsReportService } from '../better-plants/better-plants-report.service';
 import { Component, computed, effect, inject } from '@angular/core';
 import { CanDeactivateFn, Router } from '@angular/router';
 import { AccountReportWorkbenchContext } from './account-report-workbench-context.service';
@@ -6,14 +7,16 @@ import { hasAccountReportDataChecks } from './account-report-workbench.models';
 
 @Component({ selector: 'app-account-report-workbench', standalone: false,
   templateUrl: './account-report-workbench.component.html', styleUrls: ['./account-report-workbench.component.css'],
-  providers: [AccountReportWorkbenchContext, AccountReportAutosaveService], host: { '(window:beforeunload)': 'beforeUnload($event)' } })
+  providers: [AccountReportWorkbenchContext, AccountReportAutosaveService, BetterPlantsReportService], host: { '(window:beforeunload)': 'beforeUnload($event)' } })
 export class AccountReportWorkbenchComponent {
   readonly context = inject(AccountReportWorkbenchContext);
   readonly editor = inject(AccountReportAutosaveService);
+  private readonly betterPlants = inject(BetterPlantsReportService);
   private readonly router = inject(Router);
   readonly previous = computed(() => { const stages = this.context.stages(); return stages[stages.findIndex(stage => stage.current) - 1]; });
   readonly next = computed(() => { const stages = this.context.stages(); return stages[stages.findIndex(stage => stage.current) + 1]; });
   constructor() {
+    effect(() => this.context.checksReviewed.set(this.betterPlants.state().value?.reviewed ?? false));
     effect(() => {
       const report = this.context.report();
       if (report && this.context.stage() === 'data-checks' && !hasAccountReportDataChecks(report.reportType)) {

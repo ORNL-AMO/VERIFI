@@ -82,3 +82,15 @@ export function reportYears(baselineYear: number, reportYear: number, includeAll
   }
   return Array.from({ length: includeAllYears ? reportYear - baselineYear : 1 }, (_, index) => reportYear - index);
 }
+
+/** Bound total work by the loaded history, including a fiscal/backward-reading boundary year. */
+export function assertAnalysisReportYears(inputs: AnalysisReportInputs, years: readonly number[]): void {
+  const dataYears = inputs.meterData.map(item => item.year).filter(year => Number.isInteger(year) && year >= 1800 && year <= 9999);
+  const first = dataYears.reduce((value, year) => Math.min(value, year), Infinity);
+  const last = dataYears.reduce((value, year) => Math.max(value, year), -Infinity);
+  if (!years.length || new Set(years).size !== years.length || !dataYears.length
+    || inputs.analysis.baselineYear < first - 1 || years.length > last - first + 2
+    || years.some(year => !Number.isInteger(year) || year <= inputs.analysis.baselineYear || year > last + 1)) {
+    throw new Error('The reporting periods fall outside the available meter history. Review the analysis baseline and report year.');
+  }
+}

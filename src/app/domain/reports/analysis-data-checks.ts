@@ -2,7 +2,7 @@ import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { convertOrphanedGeneratedModelToUserDefined, getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { buildUserDefinedRegressionModel } from '@shared/shared-analysis/calculations/regression-models-calculation';
 import { RegressionModelsCalculator } from '@shared/shared-analysis/calculations/regression-models-calculator';
-import { AnalysisReportInputs } from './analysis-report-inputs';
+import { AnalysisReportInputs, assertAnalysisReportYears } from './analysis-report-inputs';
 
 export interface AnalysisDataCheckGroup {
   readonly facilityGuid: string;
@@ -23,6 +23,7 @@ export interface AnalysisDataChecks {
 
 /** Use the same model validation as v0, on detached inputs and at the requested year. */
 export function calculateAnalysisDataChecks(inputs: AnalysisReportInputs, reportYear: number): AnalysisDataChecks {
+  assertAnalysisReportYears(inputs, [reportYear]);
   const detached = structuredClone(inputs);
   const groups: AnalysisDataCheckGroup[] = [];
   for (const link of detached.analysis.facilityAnalysisItems) {
@@ -33,27 +34,34 @@ export function calculateAnalysisDataChecks(inputs: AnalysisReportInputs, report
     for (let group of analysis.groups) {
       if (group.analysisType === 'skip' || group.analysisType === 'skipAnalysis') continue;
       let model: JStatRegressionModel | undefined;
+      let modelFailure: string | undefined;
       if (group.analysisType === 'regression') {
-        if (group.selectedModelId) {
-          model = getSelectedRegressionModel(group);
-          if (model) {
-            // Match v0's read-time repair of old imported predictor IDs without persisting it.
-            model.predictorVariables.forEach(variable => {
-              if (!group.predictorVariables.some(candidate => candidate.id === variable.id)) {
-                const match = group.predictorVariables.find(candidate => candidate.name === variable.name);
-                if (match) variable.id = match.id;
-              }
-            });
-            model = new RegressionModelsCalculator([...data]).setModelVaildAndNotes(model, reportYear, facility, analysis.baselineYear, group);
+        try {
+          if (group.selectedModelId) {
+            model = getSelectedRegressionModel(group);
+            if (model) {
+              // Match v0's read-time repair of old imported predictor IDs without persisting it.
+              model.predictorVariables.forEach(variable => {
+                if (!group.predictorVariables.some(candidate => candidate.id === variable.id)) {
+                  const match = group.predictorVariables.find(candidate => candidate.name === variable.name);
+                  if (match) variable.id = match.id;
+                }
+              });
+              model = new RegressionModelsCalculator([...data]).setModelVaildAndNotes(model, reportYear, facility, analysis.baselineYear, group);
+            }
           }
+          if (!model && group.isGeneratedModel && group.selectedModelId) {
+            group = convertOrphanedGeneratedModelToUserDefined(group, facility, analysis.baselineYear);
+          }
+          if (!model && !group.isGeneratedModel) model = buildUserDefinedRegressionModel(group, facility, analysis, reportYear, data);
+          if (model?.errorModeling) { model = undefined; modelFailure = 'The saved regression model could not be calculated. Review the model setup.'; }
+        } catch {
+          model = undefined;
+          modelFailure = 'The saved regression model is incomplete or invalid. Review the model setup.';
         }
-        if (!model && group.isGeneratedModel && group.selectedModelId) {
-          group = convertOrphanedGeneratedModelToUserDefined(group, facility, analysis.baselineYear);
-        }
-        if (!model && !group.isGeneratedModel) model = buildUserDefinedRegressionModel(group, facility, analysis, reportYear, data);
       }
       const regression = group.analysisType === 'regression';
-      const critical = regression ? !model ? ['Select an available regression model in the analysis.']
+      const critical = regression ? !model ? [modelFailure ?? 'Select an available regression model in the analysis.']
         : !model.isValid ? nonblank(model.modelValidationNotes, 'The regression model is invalid.') : [] : [];
       groups.push({ facilityGuid: facility.guid, analysisGuid: analysis.guid, facilityName: facility.name,
         baselineYear: analysis.baselineYear, group, model, critical,
