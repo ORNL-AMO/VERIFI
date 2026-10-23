@@ -3,6 +3,65 @@ import { setupAccountReportWorkbench } from '../../testing/account-report-workbe
 import { reportAnalysisToken } from '../account-report-workbench.models';
 
 describe('account report Setup', () => {
+  it.each([false, true])('filters by type and baseline without changing the selection or saved report for a single facility: %s', async single => {
+    const snapshot = accountReportSnapshot(single);
+    if (single) {
+      snapshot.facilityAnalyses.push(
+        { ...snapshot.facilityAnalyses[0], id: 21, guid: 'recent-energy', name: 'Recent energy', baselineYear: 2020 },
+        { ...snapshot.facilityAnalyses[0], id: 22, guid: 'water-analysis', name: 'Water analysis', analysisCategory: 'water', baselineYear: 2020 });
+    } else {
+      snapshot.accountAnalyses.push(
+        { ...snapshot.accountAnalyses[0], id: 31, guid: 'recent-energy', name: 'Recent energy', baselineYear: 2020 },
+        { ...snapshot.accountAnalyses[0], id: 32, guid: 'water-analysis', name: 'Water analysis', analysisCategory: 'water', baselineYear: 2020 });
+    }
+    const { open, harness, updateSetup, store } = await setupAccountReportWorkbench(snapshot);
+    const workbench = await open();
+    const root = harness.routeNativeElement!;
+    const selected = workbench.editor.form.controls.analysis.value;
+    const type = root.querySelector<HTMLSelectElement>('#account-report-analysis-type')!;
+    const baseline = root.querySelector<HTMLSelectElement>('#account-report-analysis-baseline')!;
+    const names = () => [...root.querySelectorAll('.report-analysis-card:not(.report-analysis-card--empty) strong')].map(item => item.textContent);
+    expect([...baseline.options].map(option => option.textContent?.trim())).toEqual(['All baseline years', '2020', '2018']);
+    type.value = 'water'; type.dispatchEvent(new Event('change')); harness.detectChanges();
+    expect(names()).toEqual(['Water analysis']);
+    expect(root.textContent).toContain('Hidden by the current filters');
+    baseline.value = [...baseline.options].find(option => option.textContent?.trim() === '2018')!.value;
+    baseline.dispatchEvent(new Event('change')); harness.detectChanges();
+    expect(names()).toEqual([]);
+    expect(root.textContent).toContain('No analyses match these filters');
+    expect(workbench.editor.form.controls.analysis.value).toBe(selected);
+    expect(updateSetup).not.toHaveBeenCalled();
+    const clear = () => [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Clear filters')!;
+    clear().click(); harness.detectChanges();
+    expect(names()).toEqual(['Energy analysis', 'Recent energy', 'Water analysis']);
+    baseline.value = [...baseline.options].find(option => option.textContent?.trim() === '2020')!.value;
+    baseline.dispatchEvent(new Event('change')); harness.detectChanges();
+    expect(names()).toEqual(['Recent energy', 'Water analysis']);
+    clear().click(); harness.detectChanges();
+    type.value = 'water'; type.dispatchEvent(new Event('change')); harness.detectChanges();
+    const current = store.snapshot()!;
+    store.publish({ ...current,
+      accountAnalyses: current.accountAnalyses.filter(item => item.guid !== 'water-analysis'),
+      facilityAnalyses: current.facilityAnalyses.filter(item => item.guid !== 'water-analysis') });
+    harness.detectChanges();
+    expect(root.querySelector('#account-report-analysis-type')).toBeNull();
+    expect(names()).toEqual(['Energy analysis', 'Recent energy']);
+    expect(workbench.editor.form.controls.analysis.value).toBe(selected);
+    expect(updateSetup).not.toHaveBeenCalled();
+  });
+  it.each(['energy', 'water'] as const)('hides the type filter for a %s-only account and resets filters when switching reports', async category => {
+    const snapshot = accountReportSnapshot();
+    snapshot.accountAnalyses[0].analysisCategory = category;
+    snapshot.facilityAnalyses[0].analysisCategory = category;
+    snapshot.accountReports.push({ ...snapshot.accountReports[0], id: 41, guid: 'other-report' });
+    const { open, harness } = await setupAccountReportWorkbench(snapshot);
+    await open();
+    expect(harness.routeNativeElement!.querySelector('#account-report-analysis-type')).toBeNull();
+    const baseline = harness.routeNativeElement!.querySelector<HTMLSelectElement>('#account-report-analysis-baseline')!;
+    baseline.selectedIndex = 1; baseline.dispatchEvent(new Event('change')); harness.detectChanges();
+    await open('other-report');
+    expect(harness.routeNativeElement!.querySelector<HTMLSelectElement>('#account-report-analysis-baseline')!.selectedIndex).toBe(0);
+  });
   it.each([false, true])('inspects an unselected analysis without editing, then explicitly selects it for a single facility: %s', async single => {
     const snapshot = accountReportSnapshot(single);
     if (single) snapshot.facilityAnalyses.push({ ...snapshot.facilityAnalyses[0], id: 21, guid: 'other-analysis', name: 'Another analysis' });

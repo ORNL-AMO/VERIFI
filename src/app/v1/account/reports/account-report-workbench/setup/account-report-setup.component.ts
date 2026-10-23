@@ -1,4 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup } from '@angular/forms';
 import { AccountAnalysisWorkspaceService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-workspace.service';
 import { AccountAnalysisDashboardResultsService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard-results.service';
 import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
@@ -13,6 +15,17 @@ export class AccountReportSetupComponent {
   readonly editor = inject(AccountReportAutosaveService);
   readonly analyses = inject(AccountAnalysisWorkspaceService);
   private readonly results = inject(AccountAnalysisDashboardResultsService);
+  readonly analysisFilters = new FormGroup({
+    category: new FormControl<'all' | 'energy' | 'water'>('all', { nonNullable: true }),
+    baselineYear: new FormControl<number | null>(null)
+  });
+  private readonly filterChanges = toSignal(this.analysisFilters.valueChanges, { initialValue: this.analysisFilters.getRawValue() });
+  private readonly selectionChanges = toSignal(this.editor.form.controls.analysis.valueChanges, { initialValue: this.editor.form.controls.analysis.value });
+  readonly showTypeFilter = computed(() => this.analyses.categories().length > 1);
+  private readonly filters = computed(() => {
+    const filters = this.filterChanges();
+    return { category: this.showTypeFilter() ? filters.category ?? 'all' : 'all', baselineYear: filters.baselineYear ?? null };
+  });
   private readonly inspection = signal<{ key: string; value: string } | undefined>(undefined);
   private readonly inspectionEntry = computed(() => {
     const target = this.inspection();
@@ -38,16 +51,37 @@ export class AccountReportSetupComponent {
         value: option.value,
         name: analysis?.name || 'Untitled analysis',
         category: analysis?.analysisCategory === 'water' ? 'Water' : 'Energy',
+        categoryValue: analysis?.analysisCategory,
+        baselineYear: analysis?.baselineYear,
         baseline: analysis?.baselineYear ?? 'Not set'
       };
     }));
+  readonly baselineYears = computed(() => [...new Set(this.analysisCards().flatMap(card =>
+    Number.isInteger(card.baselineYear) ? [card.baselineYear!] : []))].sort((a, b) => b - a));
+  readonly filteredAnalysisCards = computed(() => {
+    const filters = this.filters();
+    return this.analysisCards().filter(card => (filters.category === 'all' || card.categoryValue === filters.category)
+      && (filters.baselineYear === null || card.baselineYear === filters.baselineYear));
+  });
+  readonly filtersActive = computed(() => this.filters().category !== 'all' || this.filters().baselineYear !== null);
+  readonly hiddenSelectedAnalysis = computed(() => {
+    this.selectionChanges(); this.context.report(); this.editor.state();
+    const selected = this.analysisCards().find(card => card.value === this.editor.form.controls.analysis.value);
+    return selected && !this.filteredAnalysisCards().some(card => card.value === selected.value) ? selected : undefined;
+  });
 
   constructor() {
+    effect(() => {
+      this.context.key();
+      this.clearAnalysisFilters();
+    });
     effect(() => {
       const entry = this.inspectionEntry();
       this.results.setDemand(entry ? [entry] : []);
     });
   }
+
+  clearAnalysisFilters(): void { this.analysisFilters.reset({ category: 'all', baselineYear: null }); }
 
   inspectAnalysis(value: string): void {
     if (this.context.analysisOptions().some(option => option.value === value && !option.unavailable)) {

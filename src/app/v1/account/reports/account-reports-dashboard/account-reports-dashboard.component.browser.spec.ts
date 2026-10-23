@@ -254,7 +254,39 @@ describe('report inventory browser journeys and presentation', () => {
     }
     await page.getByRole('link', { name: 'Back', exact: true }).click(); await settle(view.fixture);
     const name = view.root.querySelector<HTMLInputElement>('#account-report-name')!; name.focus(); await userEvent.keyboard('{Tab}');
+    expect(document.activeElement?.id).toBe('account-report-analysis-baseline');
+    await userEvent.keyboard('{Tab}');
     expect(document.activeElement).toBe(view.root.querySelector('#account-report-analysis input:checked'));
+    view.fixture.destroy();
+  });
+  it('filters report analysis cards by type and baseline year without saving or replacing a hidden selection', async () => {
+    await page.viewport(1200, 900);
+    const view = setup(1), snapshot = accountReportSnapshot();
+    snapshot.accountAnalyses.push({ ...snapshot.accountAnalyses[0], id: 31, guid: 'water-analysis', name: 'Water analysis', analysisCategory: 'water', baselineYear: 2020 });
+    view.store.publish(snapshot);
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
+    await page.getByRole('button', { name: 'Hide facts', exact: true }).click(); await settle(view.fixture);
+    const names = () => [...view.root.querySelectorAll('.report-analysis-card:not(.report-analysis-card--empty) strong')].map(item => item.textContent);
+    await page.getByRole('combobox', { name: 'Type', exact: true }).selectOptions('water'); await settle(view.fixture);
+    expect(names()).toEqual(['Water analysis']);
+    const baseline = view.root.querySelector<HTMLSelectElement>('#account-report-analysis-baseline')!;
+    await page.getByRole('combobox', { name: 'Baseline year', exact: true }).selectOptions([...baseline.options].find(option => option.textContent?.trim() === '2018')!.value);
+    await settle(view.fixture);
+    expect(names()).toEqual([]);
+    expect(view.root.textContent).toContain('No analyses match these filters');
+    expect(view.root.textContent).toContain('Selected analysis: Energy analysis');
+    for (const dark of [false, true]) {
+      view.root.className = `v1-root v1-palette-blueprint${dark ? ' v1-theme-dark' : ''}`;
+      for (const width of [1024, 640, 390]) {
+        await page.viewport(width, 800); await settle(view.fixture);
+        expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      }
+    }
+    await page.getByRole('button', { name: 'Clear filters', exact: true }).click(); await settle(view.fixture);
+    expect(names()).toEqual(['Energy analysis', 'Water analysis']);
+    expect(view.root.querySelector('#account-report-analysis input:checked')?.closest('label')?.textContent).toContain('Energy analysis');
+    expect(view.store.accountReports()[0].analysisReportSetup.analysisItemId).toBe('account-analysis');
+    expect(view.accountActions.updateSetup).not.toHaveBeenCalled();
     view.fixture.destroy();
   });
   it('matches Analysis insets and action placement, with flush scope headers and responsive themed cards', async () => {

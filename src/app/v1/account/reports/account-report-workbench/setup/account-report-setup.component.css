@@ -37,6 +37,17 @@
   margin-block: 1rem;
 }
 
+.report-analysis-filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-block: 1rem;
+}
+
+.report-analysis-filters .report-setup-field { flex: 0 1 12rem; }
+.report-analysis-filters select { width: 100%; }
+
 .report-setup .report-analysis-card {
   display: flex;
   align-items: flex-start;
