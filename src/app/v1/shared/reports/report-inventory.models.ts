@@ -9,6 +9,7 @@ import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models'
 import { InventoryReportSnapshot, InventoryTile } from '@app/v1/shared/inventory/inventory.models';
 import { FACILITY_REPORT_TYPES, ReportConfigurationStatus, buildFacilityReportCard } from '@app/v1/facility/reports/facility-report.models';
 import { reportTypeAvailable } from './report-availability';
+import { reportIcon } from './report-icons';
 import { statusDestinationRoute } from '@app/v1/status/status-destination-route';
 
 export const ACCOUNT_REPORT_TYPES: ReadonlyArray<{ value: ReportType; label: string }> = [
@@ -97,7 +98,7 @@ function entryView(scope: ReportScope, report: IdbAccountReport | IdbFacilityRep
     key: JSON.stringify([scope, scope === 'facility' ? (report as IdbFacilityReport).facilityId : report.accountId, report.guid]),
     ownerName: owner, typeKey: `${scope}:${type}`, typeLabel, status, statusLabel: REPORT_STATUS_LABELS[status], modified,
     searchText: [report.name, typeLabel, owner, ...facts.map(fact => fact.value), REPORT_STATUS_LABELS[status]].join(' ').toLocaleLowerCase(),
-    snapshot: { scope, typeLabel, facts, scopeLabel,
+    snapshot: { scope, typeLabel, facts, scopeLabel, contentPending: scope !== 'account' || type !== 'betterPlants',
       modified: modified ? new Date(modified).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date unavailable',
       findings: findings.filter(item => item.severity !== 'information').map(item => {
         const route = statusDestinationRoute(item.destination);
@@ -118,7 +119,7 @@ export function filterReportInventory(entries: readonly ReportInventoryEntry[], 
     });
 }
 export function reportInventoryTile(entry: ReportInventoryEntry, navigation: WorkspaceNavigationService, showOwner = true): InventoryTile {
-  return { guid: entry.key, name: entry.report.name || `Untitled ${entry.scope} report`, icon: 'report',
+  return { guid: entry.key, name: entry.report.name || `Untitled ${entry.scope} report`, icon: reportIcon(entry.report),
     route: entry.scope === 'account' ? navigation.accountReportWorkbenchRoute(entry.report.accountId, entry.report.guid)
       : navigation.facilityReportWorkbenchRoute(entry.facilityGuid, entry.report.guid),
     owner: showOwner && entry.scope === 'facility' ? { label: entry.ownerName, route: navigation.facilityReportsRoute(entry.facilityGuid) } : undefined,

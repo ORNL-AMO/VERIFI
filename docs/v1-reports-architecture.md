@@ -12,6 +12,7 @@ Account report Setup ends with a Delete report action using the existing report 
 - Keep input preparation and deterministic checks/calculations under `domain/reports`; platform owns Worker messages, teardown, and SHA-256 hashing. `AnalysisReportCalculationService` supplies the existing two-minute Worker timeout and the synchronous fallback.
 - A route-scoped coordinator owns demand, current results, errors, and retry. Shared report state vocabulary and form-surface CSS live under v1 shared reports. Components render prepared values rather than starting Workers or querying repositories.
 - Separate pure presentation projections from rendering. Better Plants consumes the existing `BetterPlantsSummary` contract and builds form rows without rounding calculated values. Future print/file adapters can consume those results separately from the DOM.
+- Resolve report identity icons through the shared [`reportIcon`](../src/app/v1/shared/reports/report-icons.ts) lookup. It maps account and facility types separately and falls back to the existing page icon until a custom design is available. Cards, sidebars, workbench titles/switchers/stages, and analysis linked-report rows share this presentation metadata; icon names are never persisted. Follow the [custom-icon guide](../src/app/v1/shared/icons/README.md#report-icons) to add another report design.
 
 This is an extension pattern, not a dynamic report-authoring framework. Add common capabilities only when an implemented report needs them.
 
@@ -58,6 +59,8 @@ Absent receipts mean unreviewed; completion can still be established by current 
 Energy and water reports preserve the current program calculations, selected data, source/site conversions, units, fiscal-year treatment, precision, optional sections, notes, and saved report configuration. The official banner, footer, and form relationships remain, with v1 theme tokens, accessible tables, wrapped notes, and horizontal table overflow at narrow widths.
 
 The in-app preview adds space above the first report and between yearly reports. Facility performance uses a compact table with horizontally and vertically centered cells, adapting to the available width.
+
+Inventory snapshots mark Better Plants content as implemented, so its cards omit the pending-content notice at every detail level. Other report types retain that notice independently of setup readiness.
 
 Two existing presentation/calculation quirks are deliberately characterized rather than corrected in this migration: facility-performance bands use strict inequalities, excluding exact band endpoints; the legacy water participation table places report-year counts in its first numeric column and baseline-year counts in the second. Any correction needs a separate reviewed behavior change and output parity work.
 

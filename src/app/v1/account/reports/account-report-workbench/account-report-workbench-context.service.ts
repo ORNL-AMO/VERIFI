@@ -8,6 +8,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildReportInventory, ReportInventoryEntry } from '@app/v1/shared/reports/report-inventory.models';
 import { reportTypeAvailable } from '@app/v1/shared/reports/report-availability';
+import { reportIcon } from '@app/v1/shared/reports/report-icons';
 import { buildReportStages, reportStage } from '@app/v1/shared/reports/report-workbench.models';
 import { hasAccountReportDataChecks, reportAnalysisOptions, reportAnalysisToken, savedReportAnalysisChoice } from './account-report-workbench.models';
 
@@ -34,8 +35,8 @@ export class AccountReportWorkbenchContext {
   readonly checksBlocked = signal(false);
   readonly checksCompleted = signal(false);
   readonly stages = computed(() => { const entry = this.entry(); return entry ? buildReportStages(
-    ['/v1', 'workspace', 'account', entry.report.accountId, 'reports', 'workbench', entry.report.guid], entry.typeLabel, this.stage(), hasAccountReportDataChecks(entry.report.reportType), entry.status).map(stage => stage.id === 'data-checks' && entry.report.reportType === 'betterPlants' ? { ...stage, completed: this.checksCompleted(), hasBlockingErrors: this.checksBlocked() } : stage) : []; });
-  readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled account report', icon: 'report' as const })));
+    ['/v1', 'workspace', 'account', entry.report.accountId, 'reports', 'workbench', entry.report.guid], entry.typeLabel, this.stage(), hasAccountReportDataChecks(entry.report.reportType), entry.status, reportIcon(entry.report)).map(stage => stage.id === 'data-checks' && entry.report.reportType === 'betterPlants' ? { ...stage, completed: this.checksCompleted(), hasBlockingErrors: this.checksBlocked() } : stage) : []; });
+  readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled account report', icon: reportIcon(report) })));
   readonly dashboardRoute = computed(() => this.navigation.accountReportsRoute(this.navigation.routeState().accountGuid ?? ''));
   readonly breadcrumbs = computed(() => [{ label: `${this.workspace.account()?.name || 'Account'} Reports`, route: this.dashboardRoute() }, { label: this.report()?.name || 'Report' }]);
   readonly usesAnalysis = computed(() => !!this.report() && !!accountReportAnalysisSetupKey(this.report()!.reportType));

@@ -8,7 +8,7 @@
       }
     </ol></nav>
     <div class="v1-data-workbench-title-row">
-      <div class="v1-data-workbench-title"><h1 [id]="titleId()"><app-ui-icon name="report"/>
+      <div class="v1-data-workbench-title"><h1 [id]="titleId()"><app-ui-icon [name]="icon()"/>
         <app-data-workbench-resource-switcher [resources]="resources()" [selectedId]="selectedId()" [currentLabel]="name()" ariaLabel="Switch report" (resourceSelected)="reportSelected.emit($event)"/>
       </h1></div>
       <div class="v1-data-workbench-actions" aria-label="Report summary and controls">

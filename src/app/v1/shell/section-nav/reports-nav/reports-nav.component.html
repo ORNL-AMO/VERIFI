@@ -10,7 +10,7 @@
         <span class="v1-nav__sublabel" [id]="'reports-nav-' + group.id + '-title'">{{ group.label }}</span>
         @for (report of group.reports; track report.guid) {
           <div class="v1-nav__report-entry">
-            <a class="v1-nav__link" [class.active]="active === report.guid" [attr.aria-expanded]="facilityGuid ? active === report.guid : null" [attr.aria-current]="!facilityGuid && active === report.guid ? 'page' : null" [routerLink]="report.route" [title]="report.name"><app-ui-icon name="report"></app-ui-icon><span class="v1-nav__item-label">{{ report.name }}</span></a>
+            <a class="v1-nav__link" [class.active]="active === report.guid" [attr.aria-expanded]="facilityGuid ? active === report.guid : null" [attr.aria-current]="!facilityGuid && active === report.guid ? 'page' : null" [routerLink]="report.route" [title]="report.name"><app-ui-icon [name]="report.icon"></app-ui-icon><span class="v1-nav__item-label">{{ report.name }}</span></a>
             @if (active === report.guid && activeStages().length) {
               <app-analysis-stage-navigation class="v1-nav__report-workflow" [stages]="activeStages()" [ariaLabel]="'Report stages for ' + report.name"></app-analysis-stage-navigation>
             }

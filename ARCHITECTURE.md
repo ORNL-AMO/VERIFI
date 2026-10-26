@@ -214,6 +214,10 @@ See [facility-analysis presentation](docs/v1-facility-analysis-architecture.md#r
 The shared `app-ui-icon` registry supports typed custom SVG definitions alongside
 Hugeicons, including the VERIFI data-visualization icon. Follow the
 [custom-icon guide](src/app/v1/shared/icons/README.md) when adding icons.
+Report identity icons use the shared [report-icon lookup](src/app/v1/shared/reports/report-icons.ts)
+across cards, navigation, workbenches, and linked-report lists. Separate account
+and facility mappings fall back to the page icon; these choices are presentation
+metadata and are not stored in report records.
 
 Shared modal surfaces delegate tabbable-element discovery and boundary containment to Angular CDK through `ModalFocusTrapDirective`. The adapter applies the existing initial-focus selector, Escape output, and workflow fallback contracts after rendering; it keeps busy dialogs focusable and restores only to a visible, enabled opener or fallback. `ModalFocusStackService` pauses underlying traps so only the active modal handles containment and restoration. Confirmation and slideout guards retain ownership of whether a close request is allowed. Native keyboard/focus behavior is covered in Chromium rather than synthetic Tab events in jsdom.
 

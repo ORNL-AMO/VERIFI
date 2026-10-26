@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -47,5 +48,19 @@ describe('shared report workbench header', () => {
     header.requestDiscard(); expect(modal.activePortal()).toBeTruthy(); expect(editor.pauseAutosave).toHaveBeenCalledOnce(); expect(editor.discard).not.toHaveBeenCalled();
     header.closeDiscard(); expect(editor.resumeAutosave).toHaveBeenCalledOnce(); expect(editor.discard).not.toHaveBeenCalled();
     header.requestDiscard(); header.closeDiscard(true); expect(editor.discard).toHaveBeenCalledOnce(); expect(modal.activePortal()).toBeNull();
+  });
+  it('updates the title icon from the selected report and falls back for an unavailable selection', () => {
+    const { fixture } = setup();
+    fixture.componentRef.setInput('resources', [
+      { id: 'plants', label: 'Better Plants', icon: 'betterPlantsReport' },
+      { id: 'report', label: 'Analysis', icon: 'report' }
+    ]);
+    const icon = () => fixture.debugElement.query(By.css('h1 app-ui-icon')).componentInstance.name;
+    fixture.componentRef.setInput('selectedId', 'plants'); fixture.detectChanges();
+    expect(icon()).toBe('betterPlantsReport');
+    fixture.componentRef.setInput('selectedId', 'report'); fixture.detectChanges();
+    expect(icon()).toBe('report');
+    fixture.componentRef.setInput('selectedId', 'missing'); fixture.detectChanges();
+    expect(icon()).toBe('report');
   });
 });

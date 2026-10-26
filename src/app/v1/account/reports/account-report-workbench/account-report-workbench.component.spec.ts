@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
 import { SpyLocation } from '@angular/common/testing';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { NavigationCancel } from '@angular/router';
 import { firstValueFrom, filter } from 'rxjs';
 import { ACCOUNT_REPORT_TYPES } from '@app/v1/shared/reports/report-inventory.models';
@@ -42,6 +43,10 @@ describe('account report workbench', () => {
     const { open, harness, updateSetup, store } = await setupAccountReportWorkbench(snapshot);
     const workbench = await open();
     expect(workbench.context.stages().map(stage => stage.id)).toEqual(['betterPlants', 'performance', 'accountSavings'].includes(value) ? ['setup', 'data-checks', 'report'] : ['setup', 'report']);
+    const icon = value === 'betterPlants' ? 'betterPlantsReport' : 'report';
+    expect(workbench.context.stages().find(stage => stage.id === 'report')?.icon).toBe(icon);
+    expect(workbench.context.resources().find(resource => resource.id === 'account-report')?.icon).toBe(icon);
+    expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
     expect(!!harness.routeNativeElement!.querySelector('#account-report-analysis')).toBe(['betterPlants', 'performance', 'analysis', 'accountSavings'].includes(value));
     expect(harness.routeNativeElement!.querySelector('nav a')?.getAttribute('href')).toContain('/account-a/reports/dashboard');
     await open('account-report', 'report');

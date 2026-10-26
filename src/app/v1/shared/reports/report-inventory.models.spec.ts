@@ -42,6 +42,7 @@ describe('report inventory projections', () => {
     const data = snapshot(); data.accountReports[0].reportType = value as any;
     const entry = buildReportInventory(data, [], 'ready')[0];
     expect(entry.typeLabel).not.toBe('Unknown report type');
+    expect(entry.snapshot.contentPending).toBe(value !== 'betterPlants');
     expect(entry.snapshot.facts.some(fact => fact.label === 'Reporting period')).toBe(true);
     expect(entry.snapshot.modified).toBeDefined();
     expect(entry.snapshot).not.toHaveProperty('outcomes');
@@ -50,6 +51,7 @@ describe('report inventory projections', () => {
     const data = reportSnapshot([reportFixture({ facilityReportType: value })]);
     const entry = buildReportInventory(data, [], 'ready')[0];
     expect(entry.scope).toBe('facility'); expect(entry.typeLabel).not.toBe('Unknown report type');
+    expect(entry.snapshot.contentPending).toBe(true);
   });
   it('shows missing dates and analyses explicitly and distinguishes unavailable checks from readiness', () => {
     const data = snapshot(); data.accountReports[0].reportYear = undefined;
