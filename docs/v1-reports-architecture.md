@@ -57,9 +57,13 @@ Absent receipts mean unreviewed; completion can still be established by current 
 
 Energy and water reports preserve the current program calculations, selected data, source/site conversions, units, fiscal-year treatment, precision, optional sections, notes, and saved report configuration. The official banner, footer, and form relationships remain, with v1 theme tokens, accessible tables, wrapped notes, and horizontal table overflow at narrow widths.
 
+The in-app preview adds space above the first report and between yearly reports. Facility performance uses a compact table with horizontally and vertically centered cells, adapting to the available width.
+
 Two existing presentation/calculation quirks are deliberately characterized rather than corrected in this migration: facility-performance bands use strict inequalities, excluding exact band endpoints; the legacy water participation table places report-year counts in its first numeric column and baseline-year counts in the second. Any correction needs a separate reviewed behavior change and output parity work.
 
 Per maintainer direction, this migration covers setup, checks/review, and in-app display. Printing and file output remain separate work under [#2791](https://github.com/ORNL-AMO/VERIFI/issues/2791) and subsequent output tasks. Existing v0 calculations and writers remain functional; production v1 does not import v0 UI.
+
+The account report stage footer shows disabled PDF, PowerPoint, and Present actions as placeholders for that output work.
 
 ## Verification
 

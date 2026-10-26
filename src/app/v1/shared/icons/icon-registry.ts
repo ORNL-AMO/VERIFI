@@ -79,8 +79,11 @@ import OrangeIcon from '@hugeicons/core-free-icons/OrangeIcon';
 import PackageIcon from '@hugeicons/core-free-icons/PackageIcon';
 import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon';
 import PaintRollerIcon from '@hugeicons/core-free-icons/PaintRollerIcon';
+import Pdf01Icon from '@hugeicons/core-free-icons/Pdf01Icon';
 import PiggyBankIcon from '@hugeicons/core-free-icons/PiggyBankIcon';
 import PieChartIcon from '@hugeicons/core-free-icons/PieChartIcon';
+import Ppt01Icon from '@hugeicons/core-free-icons/Ppt01Icon';
+import Presentation01Icon from '@hugeicons/core-free-icons/Presentation01Icon';
 import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
 import RainDropIcon from '@hugeicons/core-free-icons/RainDropIcon';
 import RulerIcon from '@hugeicons/core-free-icons/RulerIcon';
@@ -179,8 +182,11 @@ export const ICON_REGISTRY = {
   overview: PieChartIcon,
   package: PackageIcon,
   paintRoller: PaintRollerIcon,
+  pdf: Pdf01Icon,
   piggyBank: PiggyBankIcon,
   predictor: ShippingLoadingIcon,
+  powerpoint: Ppt01Icon,
+  present: Presentation01Icon,
   otherEnergy: EnergyIcon,
   otherFuel: Fuel01Icon,
   reports: Files02Icon,

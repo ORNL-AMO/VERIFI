@@ -1,5 +1,8 @@
 @import '../../../../shared/reports/report-workbench-stage.css';
 @import '../../../../shared/reports/report-document.css';
+:host { padding-block-start: 1.25rem; }
+.report-document { padding-block-start: .75rem; border-top: 1px solid var(--v1-border); }
+.report-document + .report-document { margin-block-start: 2rem; }
 .document-title { padding: 1.25rem; text-align: center; }
 .document-title h2 { font-size: 1.4rem; margin: 0 0 .3rem; }
 .document-title p { margin: 0; color: var(--v1-muted); }
@@ -15,5 +18,9 @@
 .report-note p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .footnote { font-size: .85rem; }
 .report-footer { margin-top: 1rem; }
+.facility-performance table { width: min(100%, 46rem); min-width: 0; margin-inline: auto; }
+.facility-performance th, .facility-performance td { text-align: center; vertical-align: middle; }
+.facility-performance td { overflow-wrap: anywhere; }
+.facility-performance tbody th { width: auto; }
 .v1-btn { margin: .5rem; }
 @media (max-width: 640px) { .company-information { grid-template-columns: 1fr; gap: .75rem; } }

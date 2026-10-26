@@ -24,7 +24,11 @@
         @if (canContinue()) { <a class="v1-btn v1-btn--action" [routerLink]="nextStage.route">Continue<app-ui-icon name="chevronRight"/></a> }
         @else { <button type="button" class="v1-btn v1-btn--action" disabled>Continue<app-ui-icon name="chevronRight"/></button> }
       }
-      @else { <a class="v1-btn v1-btn--action" [routerLink]="context.dashboardRoute()">Back to reports<app-ui-icon name="arrowLeft"/></a> }
+      @else {
+        <button type="button" class="v1-btn v1-btn--secondary" disabled><app-ui-icon name="pdf"/>PDF</button>
+        <button type="button" class="v1-btn v1-btn--secondary" disabled><app-ui-icon name="powerpoint"/>PowerPoint</button>
+        <button type="button" class="v1-btn v1-btn--action" disabled><app-ui-icon name="present"/>Present</button>
+      }
     </div>
   </footer>
 }
