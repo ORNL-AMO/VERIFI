@@ -26,8 +26,8 @@ describe('Better Plants review and display in Chromium', () => {
   afterEach(async () => { TestBed.resetTestingModule(); await database?.destroy(); await page.viewport(1200, 900); });
   it.each(['energy', 'water'] as const)('confirms shared %s checks, displays the form, and invalidates it after input changes', async category => {
     const original = analysisReportFixture(category);
-    const report = { ...original.accountReports[0], name: `Better Plants ${category}`, betterPlantsReportSetup: {
-      ...original.accountReports[0].betterPlantsReportSetup, includePerformanceTable: true, includeFacilityNames: true, modificationNotes: 'Process improvements\nVerified with the facilities team.' } };
+    const report = { ...original.accountReports[0], name: `Better Plants ${category}`, reportYear: 2024, betterPlantsReportSetup: {
+      ...original.accountReports[0].betterPlantsReportSetup, includeAllYears: true, includePerformanceTable: true, includeFacilityNames: true, modificationNotes: 'Process improvements\nVerified with the facilities team.' } };
     const snapshot = { ...original, accountReports: [report, { ...report, id: 51, guid: 'second-report', name: 'Shared analysis report' }] };
     database = await IndexedDbTestHarness.create('better-plants-journey');
     await database.seed({ accounts: [{ ...snapshot.account }], facilities: snapshot.facilities.map(item => ({ ...item })),
@@ -127,9 +127,11 @@ describe('Better Plants review and display in Chromium', () => {
     await page.viewport(1200, 1100); root.className = 'v1-root v1-palette-blueprint';
     await page.screenshot({ element: setup, path: `./__screenshots__/better-plants-setup-${category}.png` });
     await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
+    expect(coordinator.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
     expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).not.toBeNull();
     expect((await database.getAll('accountAnalysisItems'))[0]['dataCheckReviews']).toBeUndefined();
     await view.open('report', 'data-checks'); await waitFor(state => state.state === 'ready' && !!state.value?.checks);
+    expect(coordinator.state().value?.checks?.map(check => check.reportYear)).toEqual([2024]);
     expect(view.store.accountAnalyses()[0].dataCheckReviews).toBeUndefined();
     expectBottomCorners(root.querySelector<HTMLElement>('app-analysis-data-checks > .report-section:last-of-type')!);
     expect(getComputedStyle(root.querySelector<HTMLElement>('app-analysis-data-checks > .report-section')!).borderBottomLeftRadius).toBe('0px');
@@ -159,6 +161,7 @@ describe('Better Plants review and display in Chromium', () => {
     await page.screenshot({ element: checksPage, path: `./__screenshots__/better-plants-checks-${category}.png` });
     const confirmation = root.querySelector<HTMLInputElement>('footer input[type="checkbox"]')!;
     confirmation.focus(); await userEvent.keyboard(' '); await waitFor(state => state.value?.reviewed === true);
+    expect(view.store.accountAnalyses()[0].dataCheckReviews?.map(review => review.reportYear)).toEqual([2024]);
     expect(root.querySelector('footer input[type="checkbox"]')).toBeNull();
     expect(root.querySelector('footer')!.textContent).toContain('Data Checks Completed');
     expect(document.activeElement?.textContent).toContain('Data Checks Completed');
@@ -166,6 +169,7 @@ describe('Better Plants review and display in Chromium', () => {
     expect(view.store.accountAnalyses()[0].isAnalysisVisited).toBe(false);
     expect(component.context.stages().find(stage => stage.id === 'data-checks')?.completed).toBe(true);
     await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
+    expect(coordinator.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
     root.className = 'v1-root v1-palette-blueprint';
     expect(root.querySelectorAll('app-better-plants-preview table').length).toBeGreaterThanOrEqual(4);
     expect(root.textContent).toContain('Process improvements');

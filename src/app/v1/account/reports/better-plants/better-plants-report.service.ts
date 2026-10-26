@@ -26,17 +26,24 @@ export class BetterPlantsReportService {
   private reportCache?: { readonly content: string; readonly value: readonly BetterPlantsSummary[] };
   private readonly input = computed<AnalysisChecksRequest>(() => this.buildInput());
   readonly checks = new AnalysisChecksController(this.input, value => this.persistReview(value));
-  private readonly result = toSignal(toObservable(this.checks.state).pipe(
-    distinctUntilChanged((a, b) => a === b),
-    switchMap(result => {
+  private readonly reportRequest = computed(() => {
+    const checks = this.checks.state(), report = this.context.report();
+    const years = checks.value && report && this.context.stage() === 'report'
+      ? reportYears(checks.value.inputs.analysis.baselineYear, report.reportYear, report.betterPlantsReportSetup.includeAllYears === true) : [];
+    return { checks, years, key: JSON.stringify([checks.key, years]) };
+  });
+  private readonly result = toSignal(toObservable(this.reportRequest).pipe(
+    distinctUntilChanged((a, b) => a.checks === b.checks && a.key === b.key),
+    switchMap(request => {
+      const result = { ...request.checks, key: request.key };
       if (result.state !== 'ready' || !result.value || this.context.stage() !== 'report') return of(result);
       const value = result.value;
       if (!value.completed) return of<ReportResultState<BetterPlantsResult>>({ ...result, state: 'review-required',
         message: value.blocked ? 'Resolve critical analysis issues before displaying this report.' : 'Review the current analysis checks and acknowledge the issues before displaying this report.' });
-      const content = JSON.stringify(value.years.map(year => analysisReviewContent(value.inputs, year)));
+      const content = JSON.stringify(request.years.map(year => analysisReviewContent(value.inputs, year)));
       if (this.reportCache?.content === content) return of({ ...result, value: { ...value, summaries: this.reportCache.value } });
       return concat(of<ReportResultState<BetterPlantsResult>>({ key: result.key, state: 'loading', message: 'Preparing the Better Plants report…' }),
-        this.calculations.execute({ operation: 'better-plants', inputs: value.inputs, years: value.years }).pipe(map(response => {
+        this.calculations.execute({ operation: 'better-plants', inputs: value.inputs, years: request.years }).pipe(map(response => {
           if (response.ok === false) throw new Error(response.message);
           if (response.operation !== 'better-plants') throw new Error('Report processing returned an unexpected result.');
           this.reportCache = { content, value: response.value };
@@ -45,8 +52,8 @@ export class BetterPlantsReportService {
     })
   ), { initialValue: { key: '', state: 'idle' } as ReportResultState<BetterPlantsResult> });
   readonly state = computed<ReportResultState<BetterPlantsResult>>(() => {
-    const checks = this.checks.state(), result = this.result();
-    return result.key === checks.key ? result : { key: checks.key, state: checks.state === 'error' ? 'error' : 'waiting', message: checks.message ?? 'Checking the current analysis inputs…' };
+    const request = this.reportRequest(), result = this.result();
+    return result.key === request.key ? result : { key: request.key, state: request.checks.state === 'error' ? 'error' : 'waiting', message: request.checks.message ?? 'Checking the current analysis inputs…' };
   });
   readonly workflow = this.checks.workflow;
   readonly canConfirm = computed(() => this.workflow().canConfirm);
@@ -90,7 +97,7 @@ export class BetterPlantsReportService {
       const analysis = owner.scope === 'account' ? workspace.accountAnalyses().find(item => item.guid === owner.analysisGuid)
         : workspace.facilityAnalyses().find(item => item.guid === owner.analysisGuid && item.facilityId === owner.facilityGuid);
       const reviews = analysis?.dataCheckReviews ?? [];
-      return { key: base, state: 'calculate', demand: stage === 'setup' ? 'freshness' : stage === 'data-checks' ? 'checks' : 'gate', inputs, years, reviews,
+      return { key: base, state: 'calculate', demand: stage === 'setup' ? 'freshness' : stage === 'data-checks' ? 'checks' : 'gate', inputs, years: [report.reportYear], reviews,
         blocking: this.context.findings().some(item => item.severity === 'error'),
         warnings: this.context.findings().some(item => item.severity === 'warning') };
     } catch (error) { return { key: `${base}:${String(error)}`, state: 'error', message: error instanceof Error ? error.message : 'Complete report setup before continuing.' }; }

@@ -16,7 +16,13 @@ import { AnalysisReportCalculationService } from '@app/v1/shared/reports/analysi
 import { AccountReportWorkbenchContext } from '../account-report-workbench/account-report-workbench-context.service';
 import { AccountReportAutosaveService } from '../account-report-workbench/account-report-autosave.service';
 import { BetterPlantsReportService } from './better-plants-report.service';
+import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
 
+function calculate(request: AnalysisReportWorkerRequest) {
+  return of<AnalysisReportWorkerResponse>(request.operation === 'checks'
+    ? { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }
+    : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(request.inputs, request.years) });
+}
 
 describe('Better Plants workflow coordinator', () => {
   let store: AccountWorkspaceStore;
@@ -26,9 +32,7 @@ describe('Better Plants workflow coordinator', () => {
   let execute: ReturnType<typeof vi.fn>;
   beforeEach(() => {
     findings.set([]); stage.set('setup'); store = new AccountWorkspaceStore(); store.publish(analysisReportFixture());
-    execute = vi.fn(request => of(request.operation === 'checks'
-      ? { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }
-      : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(request.inputs, request.years) }));
+    execute = vi.fn(calculate);
     const confirm = vi.fn(async (_account, _analysis, inputs, years) => ({ scope: 'account', analysis: { ...store.accountAnalyses()[0],
       dataCheckReviews: years.map(reportYear => ({ checksVersion: ANALYSIS_DATA_CHECKS_VERSION, reportYear,
         inputFingerprint: analysisReviewContent(inputs, reportYear), reviewedAt: '2026-01-01T00:00:00Z' })) } }));
@@ -46,6 +50,82 @@ describe('Better Plants workflow coordinator', () => {
   });
   afterEach(() => TestBed.resetTestingModule());
   async function settle() { TestBed.tick(); await TestBed.inject(ApplicationRef).whenStable(); TestBed.tick(); }
+  function setReportPeriod(year: number, includeAllYears: boolean) {
+    const report = store.accountReports()[0];
+    const updated = { ...report, reportYear: year, betterPlantsReportSetup: { ...report.betterPlantsReportSetup, includeAllYears } };
+    store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [updated] }] });
+  }
+  function saveReview(year: number) {
+    const inputs = buildAnalysisReportInputs(store.snapshot()!, 'account-analysis');
+    const analysis = { ...store.accountAnalyses()[0], dataCheckReviews: [{ checksVersion: ANALYSIS_DATA_CHECKS_VERSION,
+      reportYear: year, inputFingerprint: analysisReviewContent(inputs, year), reviewedAt: '2026-01-01T00:00:00Z' }] };
+    store.publishCommittedPatch({ collections: [{ collection: 'accountAnalyses', upsert: [analysis] }] });
+  }
+  it.each(['energy', 'water'] as const)('checks only the selected year while still generating all included %s years', async category => {
+    store.publish(analysisReportFixture(category)); setReportPeriod(2024, true);
+    await settle(); expect(execute).not.toHaveBeenCalled();
+    stage.set('data-checks'); await settle();
+    expect(service.state().value?.checks?.map(check => check.reportYear)).toEqual([2024]);
+    expect(execute.mock.calls.map(([request]) => [request.operation, request.years])).toEqual([['checks', [2024]]]);
+    stage.set('report'); await settle();
+    expect(service.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
+    expect(execute.mock.calls.map(([request]) => [request.operation, request.years])).toEqual([
+      ['checks', [2024]], ['better-plants', [2024, 2023]]
+    ]);
+    expect(store.accountAnalyses()[0].dataCheckReviews).toBeUndefined();
+  });
+  it('saves acknowledgment for the selected year only, then permits every requested report page', async () => {
+    setReportPeriod(2024, true); findings.set([{ severity: 'warning' }]);
+    stage.set('report'); await settle(); expect(service.state().state).toBe('review-required');
+    stage.set('data-checks'); await settle(); await service.confirmReview(); await settle();
+    expect(store.accountAnalyses()[0].dataCheckReviews?.map(review => review.reportYear)).toEqual([2024]);
+    expect(TestBed.inject(AnalysisReviewCommandHandler).confirm).toHaveBeenCalledWith('account', 'account-analysis', expect.anything(), [2024]);
+    stage.set('report'); await settle();
+    expect(service.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
+  });
+  it('reuses a current selected-year receipt for direct all-year Report entry without checking historical periods', async () => {
+    setReportPeriod(2024, true); findings.set([{ severity: 'warning' }]);
+    saveReview(2024);
+    stage.set('report'); await settle();
+    expect(service.workflow().completed).toBe(true);
+    expect(execute.mock.calls.map(([request]) => [request.operation, request.years])).toEqual([['better-plants', [2024, 2023]]]);
+  });
+  it('does not accept a historical-year receipt in place of the selected report year', async () => {
+    setReportPeriod(2024, true); findings.set([{ severity: 'warning' }]);
+    saveReview(2023);
+    stage.set('report'); await settle();
+    expect(service.state().state).toBe('review-required');
+    expect(execute.mock.calls.map(([request]) => [request.operation, request.years])).toEqual([['checks', [2024]]]);
+  });
+  it('updates displayed years immediately without rerunning current-year checks when include-all-years changes', async () => {
+    setReportPeriod(2024, true); stage.set('report'); await settle();
+    expect(service.state().value?.summaries).toHaveLength(2);
+    setReportPeriod(2024, false);
+    expect(service.state().value?.summaries).toBeUndefined(); expect(service.workflow().completed).toBe(true);
+    await settle(); expect(service.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024]);
+    setReportPeriod(2024, true);
+    expect(service.state().value?.summaries).toBeUndefined();
+    await settle(); expect(service.state().value?.summaries).toHaveLength(2);
+    expect(execute.mock.calls.filter(([request]) => request.operation === 'checks')).toHaveLength(1);
+  });
+  it('invalidates current completion and requests the new year when the selected report year changes', async () => {
+    setReportPeriod(2024, true); stage.set('report'); await settle();
+    setReportPeriod(2023, true);
+    expect(service.workflow().completed).toBe(false); expect(service.state().value?.summaries).toBeUndefined();
+    await settle();
+    expect(service.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2023]);
+    expect(execute.mock.calls.filter(([request]) => request.operation === 'checks').map(([request]) => request.years)).toEqual([[2024], [2023]]);
+  });
+  it('cancels report work and suppresses late pages when output years change while checks remain current', async () => {
+    setReportPeriod(2024, true);
+    const pending = new Subject<AnalysisReportWorkerResponse>();
+    execute.mockImplementation(request => request.operation === 'better-plants' && request.years.length === 2 ? pending : calculate(request));
+    stage.set('report'); await settle(); expect(pending.observed).toBe(true);
+    setReportPeriod(2024, false); expect(service.state().value?.summaries).toBeUndefined();
+    await settle(); expect(pending.observed).toBe(false); expect(service.state().value?.summaries).toHaveLength(1);
+    pending.next({ ok: true, operation: 'better-plants', value: [] });
+    expect(service.state().value?.summaries).toHaveLength(1);
+  });
   it('does no calculation in Setup and automatically allows a clean report without saving a review', async () => {
     await settle(); expect(execute).not.toHaveBeenCalled();
     stage.set('report'); await settle();
