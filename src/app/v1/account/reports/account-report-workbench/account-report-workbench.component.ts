@@ -4,10 +4,11 @@ import { CanDeactivateFn, Router } from '@angular/router';
 import { AccountReportWorkbenchContext } from './account-report-workbench-context.service';
 import { AccountReportAutosaveService } from './account-report-autosave.service';
 import { hasAccountReportDataChecks } from './account-report-workbench.models';
+import { AccountReportDeleteService } from './delete/account-report-delete.service';
 
 @Component({ selector: 'app-account-report-workbench', standalone: false,
   templateUrl: './account-report-workbench.component.html', styleUrls: ['./account-report-workbench.component.css'],
-  providers: [AccountReportWorkbenchContext, AccountReportAutosaveService, BetterPlantsReportService], host: { '(window:beforeunload)': 'beforeUnload($event)' } })
+  providers: [AccountReportWorkbenchContext, AccountReportAutosaveService, AccountReportDeleteService, BetterPlantsReportService], host: { '(window:beforeunload)': 'beforeUnload($event)' } })
 export class AccountReportWorkbenchComponent {
   readonly context = inject(AccountReportWorkbenchContext);
   readonly editor = inject(AccountReportAutosaveService);

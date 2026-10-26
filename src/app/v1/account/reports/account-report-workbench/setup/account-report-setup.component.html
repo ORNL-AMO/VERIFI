@@ -70,6 +70,7 @@
     @if (entry.report.reportType === 'betterPlants') { <app-better-plants-setup/> } @else {
     <div class="report-setup-section"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
     }
+    <app-account-report-delete/>
   </section>
 }
 @if (inspectedAnalysis(); as entry) {

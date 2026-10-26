@@ -2,6 +2,8 @@
 
 The existing account/facility Reports workbench owns inventory, lifecycle, routes, common editing, navigation protection, and stage presentation. Individual report migrations supply their settings, applicable checks, and in-app content. Better Plants is the first implemented account report; see [#2804](https://github.com/ORNL-AMO/VERIFI/issues/2804).
 
+Account report Setup ends with a Delete report action using the existing report deletion command and shell confirmation portal. Confirmation pauses autosave and permits deletion of incomplete drafts. Cancel or failure preserves the draft; only a committed deletion discards it and returns to the account Reports dashboard. The workbench owns the deletion coordinator so removing the selected report can unmount Setup without interrupting the return navigation. Analyses, source data, and other reports remain unchanged.
+
 ## Ownership and extension pattern
 
 - Keep each report in its owning feature folder. The existing routed Setup, Data Checks, and Report components compose report-specific components; unmigrated types keep their explicit placeholders.

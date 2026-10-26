@@ -30,10 +30,14 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
       ...(key && changes.analysis !== undefined ? { [key]: { ...report[key], analysisItemId: changes.analysis?.analysisGuid } } : {}) };
     store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [updated] }] }); return updated;
   });
+  const deleteReport = vi.fn(async (guid: string) => {
+    const report = store.accountReports().find(item => item.guid === guid)!;
+    store.publishCommittedPatch({ collections: [{ collection: 'accountReports', deleteIds: [report.id!] }] });
+  });
   await TestBed.configureTestingModule({ imports: [AccountReportsModule], providers: [provideLocationMocks(),
     provideRouter([{ path: 'v1/workspace/account/:accountGuid/reports', children: ACCOUNT_REPORT_ROUTES }, { path: 'elsewhere', component: AccountReportWorkbenchComponent }]),
     { provide: AccountWorkspaceStore, useValue: store }, { provide: WorkspaceStatusService, useValue: status },
-    { provide: AccountReportActionsService, useValue: { updateSetup } }, { provide: FacilityReportActionsService, useValue: {} },
+    { provide: AccountReportActionsService, useValue: { updateSetup, delete: deleteReport } }, { provide: FacilityReportActionsService, useValue: {} },
     { provide: WorkbenchLayoutService, useFactory: () => { const factsExpanded = signal(true); return { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) }; } },
     { provide: WorkspaceNavigationService, useFactory: () => {
       const router = inject(Router);
@@ -48,5 +52,5 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
   ] }).compileComponents();
   const harness = await RouterTestingHarness.create(); const router = TestBed.inject(Router); router.setUpLocationChangeListener();
   const open = (report = 'account-report', stage = 'setup') => harness.navigateByUrl(`/v1/workspace/account/${snapshot.account.guid}/reports/workbench/${report}/${stage}`, AccountReportWorkbenchComponent);
-  return { store, status, updateSetup, harness, router, open };
+  return { store, status, updateSetup, deleteReport, harness, router, open };
 }

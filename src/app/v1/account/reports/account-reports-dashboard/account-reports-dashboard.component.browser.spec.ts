@@ -94,6 +94,40 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
 describe('report inventory browser journeys and presentation', () => {
   let database: IndexedDbTestHarness | undefined;
   afterEach(async () => { await database?.destroy(); database = undefined; });
+  it('confirms deletion from invalid Setup, returns to Reports, and preserves other reports and source analyses in IndexedDB', async () => {
+    await page.viewport(1200, 900);
+    const snapshot = accountReportSnapshot();
+    snapshot.accountReports.push({ ...snapshot.accountReports[0], id: 41, guid: 'other-report', name: 'Other report' });
+    database = await IndexedDbTestHarness.create('report-setup-delete');
+    await database.seed({ accounts: [{ ...snapshot.account }], facilities: snapshot.facilities.map(item => ({ ...item })),
+      accountReports: snapshot.accountReports.map(item => ({ ...item })),
+      analysisItems: snapshot.facilityAnalyses.map(item => ({ ...item })), accountAnalysisItems: snapshot.accountAnalyses.map(item => ({ ...item })) });
+    const store = new AccountWorkspaceStore(); store.publish(snapshot);
+    const access = new IndexedDbAccessService(database.dbService);
+    const transactions = new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: database.databaseName } });
+    const handler = new ReportCommandHandler(new FacilityReportsDbService(database.dbService, access), new AccountReportDbService(database.dbService, access), store, transactions);
+    const boundary = new WorkspaceCommandBoundary(store, {} as AccountWorkspaceService);
+    TestBed.resetTestingModule();
+    const view = setup(0, false, store, [{ provide: WorkspaceCommandBoundary, useValue: boundary },
+      { provide: ReportCommandHandler, useValue: handler }, { provide: AccountReportActionsService, useClass: AccountReportActionsService }]);
+    const update = vi.spyOn(TestBed.inject(AccountReportActionsService), 'updateSetup');
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
+    await page.getByRole('textbox', { name: /^Name/ }).fill('');
+    await page.getByRole('button', { name: 'Delete report', exact: true }).click(); await settle(view.fixture);
+    expect(page.getByRole('dialog').element().textContent).toContain('Saved account report');
+    await userEvent.keyboard('{Escape}'); await settle(view.fixture);
+    expect(view.root.querySelector('[role="dialog"]')).toBeNull();
+    expect(await database.getAll('accountReports')).toHaveLength(2);
+    expect(view.root.querySelector<HTMLInputElement>('#account-report-name')?.value).toBe('');
+    await page.getByRole('button', { name: 'Delete report', exact: true }).click(); await settle(view.fixture);
+    await page.getByRole('dialog').getByRole('button', { name: 'Delete report', exact: true }).click();
+    await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
+    expect((await database.getAll('accountReports')).map(item => item.guid)).toEqual(['other-report']);
+    expect(await database.getAll('analysisItems')).toHaveLength(1); expect(await database.getAll('accountAnalysisItems')).toHaveLength(1);
+    expect(view.store.accountReports().map(item => item.guid)).toEqual(['other-report']);
+    expect(update).not.toHaveBeenCalled();
+    view.fixture.destroy();
+  });
   it.each([false, true])('opens an unselected analysis from report inspection and returns without changing the report for a single facility: %s', async single => {
     await page.viewport(1200, 900);
     const view = setup(1), snapshot = accountReportSnapshot(single);

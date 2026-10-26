@@ -17,7 +17,9 @@ import { AccountReportSetupComponent } from './account-report-workbench/setup/ac
 import { AccountReportDataChecksComponent } from './account-report-workbench/data-checks/account-report-data-checks.component';
 import { AccountReportPreviewComponent } from './account-report-workbench/preview/account-report-preview.component';
 import { AccountReportsDashboardComponent } from './account-reports-dashboard/account-reports-dashboard.component';
+import { AccountReportDeleteComponent } from './account-report-workbench/delete/account-report-delete.component';
+import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 
-@NgModule({ declarations: [BetterPlantsPreviewComponent, BetterPlantsDataChecksComponent, BetterPlantsSetupComponent, BetterPlantsReportingPeriodComponent, AccountReportWorkbenchComponent, AccountReportSetupComponent, AccountReportDataChecksComponent, AccountReportPreviewComponent, AccountReportsDashboardComponent],
-  imports: [AccountAnalysisDetailsSlideoutComponent, AnalysisDetailsSlideoutComponent, AnalysisResultNumberPipe, ReactiveFormsModule, CommonModule, RouterModule, IconComponent, DataEmptyStateComponent, ReportsModule] })
+@NgModule({ declarations: [AccountReportDeleteComponent, BetterPlantsPreviewComponent, BetterPlantsDataChecksComponent, BetterPlantsSetupComponent, BetterPlantsReportingPeriodComponent, AccountReportWorkbenchComponent, AccountReportSetupComponent, AccountReportDataChecksComponent, AccountReportPreviewComponent, AccountReportsDashboardComponent],
+  imports: [ConfirmationDialogComponent, AccountAnalysisDetailsSlideoutComponent, AnalysisDetailsSlideoutComponent, AnalysisResultNumberPipe, ReactiveFormsModule, CommonModule, RouterModule, IconComponent, DataEmptyStateComponent, ReportsModule] })
 export class AccountReportsModule { }
