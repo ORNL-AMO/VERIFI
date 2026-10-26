@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FacilityAnalysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { FacilityAnalysisGroupModelRosterComponent } from '../../group-model-roster/facility-analysis-group-model-roster.component';
@@ -25,7 +26,11 @@ export class AnalysisDetailsSlideoutComponent {
   readonly opening = input(false);
   readonly showCategory = input(true);
   readonly actionLabel = input('Open full analysis');
+  readonly actionIcon = input<IconName>('arrowRight');
   readonly actionDisabled = input(false);
+  readonly secondaryActionLabel = input<string>();
+  readonly secondaryActionDisabled = input(false);
   readonly closed = output<void>();
   readonly opened = output<void>();
+  readonly secondaryActionSelected = output<void>();
 }

@@ -1,10 +1,12 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AccountAnalysisWorkspaceService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-workspace.service';
 import { AccountAnalysisDashboardResultsService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard-results.service';
 import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { analysisInventoryStatusLabel } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
+import { REPORT_ANALYSIS_ORIGIN_QUERY } from '@app/v1/shared/reports/report-analysis-origin';
 import { AccountReportWorkbenchContext } from '../account-report-workbench-context.service';
 import { AccountReportAutosaveService } from '../account-report-autosave.service';
 
@@ -16,6 +18,8 @@ export class AccountReportSetupComponent {
   readonly editor = inject(AccountReportAutosaveService);
   readonly analyses = inject(AccountAnalysisWorkspaceService);
   private readonly results = inject(AccountAnalysisDashboardResultsService);
+  private readonly router = inject(Router);
+  readonly openingAnalysis = signal(false);
   readonly analysisFilters = new FormGroup({
     category: new FormControl<'all' | 'energy' | 'water'>('all', { nonNullable: true }),
     baselineYear: new FormControl<number | null>(null)
@@ -99,6 +103,26 @@ export class AccountReportSetupComponent {
   }
 
   closeInspection(): void { this.inspection.set(undefined); }
+
+  async goToAnalysis(): Promise<void> {
+    if (this.openingAnalysis()) return;
+    this.openingAnalysis.set(true);
+    const key = this.context.key();
+    try {
+      if (!await this.editor.flush() || key !== this.context.key()) return;
+      const entry = this.inspectionEntry(), report = this.context.report();
+      if (!entry || !report) return;
+      const route = entry.scope === 'facility'
+        ? this.context.navigation.facilityAnalysisWorkbenchRoute(entry.facility.guid, entry.card.analysis.guid)
+        : this.context.navigation.accountAnalysisWorkbenchRoute(report.accountId, entry.card.analysis.guid);
+      await this.router.navigate(route, { queryParams: {
+        [REPORT_ANALYSIS_ORIGIN_QUERY.accountGuid]: report.accountId,
+        [REPORT_ANALYSIS_ORIGIN_QUERY.reportGuid]: report.guid
+      } });
+    } finally {
+      this.openingAnalysis.set(false);
+    }
+  }
 
   selectInspectedAnalysis(): void {
     const target = this.inspection();

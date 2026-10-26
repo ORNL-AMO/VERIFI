@@ -81,14 +81,15 @@ describe('Better Plants review and display in Chromium', () => {
     inspect.focus(); await userEvent.keyboard('{Enter}');
     let dialog = root.querySelector<HTMLElement>('[role="dialog"]')!;
     expect(dialog.textContent).toContain('Facility selections');
-    expect(dialog.querySelector('footer button')?.textContent).toContain('Select for report');
+    expect(dialog.querySelector('footer .v1-btn--action')?.textContent).toContain('Select for report');
+    expect(dialog.querySelector('footer .v1-btn--secondary')?.textContent).toContain('Go To Analysis');
     expect(component.editor.form.controls.analysis.value).toBe(selectedAnalysis);
     await userEvent.keyboard('{Escape}');
     expect(root.querySelector('[role="dialog"]')).toBeNull();
     expect(document.activeElement).toBe(inspect);
     await userEvent.keyboard('{Enter}');
     dialog = root.querySelector<HTMLElement>('[role="dialog"]')!;
-    dialog.querySelector<HTMLButtonElement>('footer button')!.click();
+    dialog.querySelector<HTMLButtonElement>('footer .v1-btn--action')!.click();
     view.harness.detectChanges();
     expect(root.querySelector('[role="dialog"]')).toBeNull();
     expect(component.editor.form.controls.analysis.value).toBe(selectedAnalysis);

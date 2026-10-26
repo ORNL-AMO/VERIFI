@@ -40,6 +40,8 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
       const url = toSignal(router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd), map(event => event.urlAfterRedirects)), { initialValue: router.url });
       const routeState = computed(() => parseWorkspaceRoute(url()));
       return { routeState, activeReportGuid: computed(() => routeState().reportGuid),
+        accountAnalysisWorkbenchRoute: (account: string, analysis: string) => ['/v1', 'workspace', 'account', account, 'analysis', 'workbench', analysis, 'setup'],
+        facilityAnalysisWorkbenchRoute: (facility: string, analysis: string) => ['/v1', 'workspace', 'facility', facility, 'analysis', 'workbench', analysis, 'setup'],
         accountReportsRoute: (account: string) => ['/v1', 'workspace', 'account', account, 'reports', 'dashboard'],
         accountReportWorkbenchRoute: (account: string, report: string, stage = 'setup') => ['/v1', 'workspace', 'account', account, 'reports', 'workbench', report, stage] };
     } }, ...providers

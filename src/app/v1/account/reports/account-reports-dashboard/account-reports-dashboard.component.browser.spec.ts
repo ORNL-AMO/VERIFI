@@ -40,12 +40,13 @@ import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/singl
 import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 
 const dashboardUrl = '/v1/workspace/account/account-a/reports/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div style="position:relative;isolation:isolate"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
 class ReportsBrowserHost { readonly modal = inject(ModalPortalService); }
-@Component({ standalone: true, template: '<h1>Analysis Setup</h1>' })
-class StatusAnalysisTarget { }
+@Component({ standalone: true, providers: [ReportAnalysisReturnService], template: '<h1>Analysis Setup</h1>@if (reportReturn.origin()) { <button type="button" (click)="reportReturn.returnToReport()">Return to Report</button> }' })
+class StatusAnalysisTarget { readonly reportReturn = inject(ReportAnalysisReturnService); }
 function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceStore, providers: Provider[] = []) {
   const store = existingStore ?? new AccountWorkspaceStore();
   const report = { ...getNewIdbAccountReport(reportAccount, [reportFacility], []), guid: 'account-report', id: 4, name: 'Saved account report', reportType: 'analysis' as const, reportYear: 2024 };
@@ -62,6 +63,7 @@ function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceS
   const coverage = new BehaviorSubject<WorkspaceCalendarizationBaseResult>({ state: 'ready', accountGuid: 'account-a', inputFingerprint: 'reports-status', meters: [] });
   TestBed.configureTestingModule({ imports: [ReportsBrowserHost, AccountReportsModule, FacilityReportsModule], providers: [provideRouter([
     { path: 'v1/workspace/account/:accountGuid/reports', children: ACCOUNT_REPORT_ROUTES },
+    { path: 'v1/workspace/account/:accountGuid/analysis/workbench/:analysisGuid/setup', component: StatusAnalysisTarget },
     { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES },
     { path: 'v1/workspace/facility/:facilityGuid/analysis', canActivateChild: [singleFacilityAnalysisPairGuard], children: [
       { path: 'workbench/:analysisGuid/setup', component: StatusAnalysisTarget }
@@ -90,6 +92,41 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
 describe('report inventory browser journeys and presentation', () => {
   let database: IndexedDbTestHarness | undefined;
   afterEach(async () => { await database?.destroy(); database = undefined; });
+  it.each([false, true])('opens an unselected analysis from report inspection and returns without changing the report for a single facility: %s', async single => {
+    await page.viewport(1200, 900);
+    const view = setup(1), snapshot = accountReportSnapshot(single);
+    if (single) snapshot.facilityAnalyses.push({ ...snapshot.facilityAnalyses[0], id: 21, guid: 'other-analysis', name: 'Another analysis' });
+    else snapshot.accountAnalyses.push({ ...snapshot.accountAnalyses[0], id: 31, guid: 'other-analysis', name: 'Another analysis' });
+    view.store.publish(snapshot);
+    const reportUrl = '/v1/workspace/account/account-a/reports/workbench/account-report/setup';
+    await view.router.navigateByUrl(reportUrl); await settle(view.fixture);
+    const before = structuredClone(view.store.snapshot());
+    await page.getByRole('button', { name: 'Hide facts' }).click();
+    await page.getByRole('button', { name: 'Inspect Another analysis' }).click();
+    expect(view.root.querySelector('[role="dialog"]')?.textContent).toContain('Select for report');
+    expect(view.root.querySelector('[role="dialog"] footer button')?.textContent).toContain('Select for report');
+    for (const dark of [false, true]) {
+      view.root.classList.toggle('v1-theme-dark', dark);
+      view.root.classList.add('v1-contrast-strong');
+      for (const width of [390, 1200]) {
+        await page.viewport(width, 900);
+        const dialog = view.root.querySelector<HTMLElement>('[role="dialog"]')!;
+        expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth + 1);
+      }
+      await page.screenshot({ element: view.root.querySelector<HTMLElement>('[role="dialog"]')!, path: `./__screenshots__/report-analysis-inspector-${single ? 'facility' : 'account'}${dark ? '-dark' : ''}.png` });
+    }
+    view.root.classList.remove('v1-theme-dark');
+    await page.getByRole('button', { name: 'Go To Analysis', exact: true }).click(); await settle(view.fixture);
+    expect(view.router.url).toContain(single ? '/facility/facility-a/analysis/workbench/other-analysis/setup' : '/account/account-a/analysis/workbench/other-analysis/setup');
+    expect(view.router.url).toContain('returnReportGuid=account-report');
+    await page.getByRole('button', { name: 'Return to Report', exact: true }).click(); await settle(view.fixture);
+    expect(view.router.url).toBe(reportUrl);
+    expect(view.root.querySelector('.report-analysis-card input:checked')?.closest('label')?.textContent).toContain('Energy analysis');
+    expect(view.store.snapshot()).toEqual(before);
+    expect(view.accountActions.updateSetup).not.toHaveBeenCalled();
+    expect(TestBed.inject(SingleFacilityAnalysisPairService).ensurePairs).not.toHaveBeenCalled();
+    view.fixture.destroy();
+  });
   it('opens a linked single-facility analysis through its saved pair and keeps browser Forward read-only', async () => {
     const view = setup(1, true), snapshot = accountReportSnapshot(true); snapshot.accountAnalyses[0].name = 'Stale pair metadata'; view.store.publish(snapshot);
     await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);

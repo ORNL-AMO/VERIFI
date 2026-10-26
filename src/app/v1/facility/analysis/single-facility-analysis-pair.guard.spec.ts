@@ -27,6 +27,19 @@ describe('single-facility Analysis entry from report status', () => {
   it('keeps normal Analysis entry reconciliation', async () => {
     const { ensurePairs, open } = setup(); expect(await open()).toBe(true); expect(ensurePairs).toHaveBeenCalledOnce();
   });
+  it('opens an inspected, unselected analysis with a report return without repairing saved pairs', async () => {
+    const { store, snapshot, ensurePairs, open } = setup();
+    const other = { ...snapshot.facilityAnalyses[0], id: 21, guid: 'other-analysis' };
+    store.publish({ ...snapshot, facilityAnalyses: [...snapshot.facilityAnalyses, other] });
+    const original = store.snapshot();
+    const query = '?returnReportAccountGuid=account-a&returnReportGuid=account-report';
+    expect(await open('/v1/workspace/facility/facility-a/analysis/workbench/other-analysis/setup' + query)).toBe(true);
+    expect(ensurePairs).not.toHaveBeenCalled(); expect(store.snapshot()).toBe(original);
+    expect(await open('/v1/workspace/facility/facility-a/analysis/workbench/missing/setup' + query)).toBe(false);
+    store.publish({ ...snapshot, accountReports: [] });
+    expect(await open('/v1/workspace/facility/facility-a/analysis/workbench/facility-analysis/setup' + query)).toBe(false);
+    expect(ensurePairs).not.toHaveBeenCalled();
+  });
   it('blocks stale history origins or a different destination without repairing records', async () => {
     const { store, ensurePairs, open } = setup(origin);
     expect(await open('/v1/workspace/facility/facility-a/analysis/workbench/other/setup')).toBe(false);

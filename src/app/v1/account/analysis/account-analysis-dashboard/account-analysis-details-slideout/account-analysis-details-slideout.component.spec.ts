@@ -26,5 +26,14 @@ describe('account analysis details slideout', () => {
     fixture.componentInstance.actionSelected.subscribe(() => selected = true);
     root.querySelector<HTMLButtonElement>('footer button')!.click();
     expect(selected).toBe(true);
+    fixture.componentRef.setInput('secondaryActionLabel', 'Go To Analysis');
+    fixture.componentRef.setInput('secondaryActionDisabled', true); fixture.detectChanges();
+    const go = root.querySelector<HTMLButtonElement>('footer .v1-btn--secondary')!;
+    expect(go.disabled).toBe(true);
+    let navigated = false;
+    fixture.componentInstance.secondaryActionSelected.subscribe(() => navigated = true);
+    selected = false;
+    fixture.componentRef.setInput('secondaryActionDisabled', false); fixture.detectChanges(); go.click();
+    expect(navigated).toBe(true); expect(selected).toBe(false);
   });
 });

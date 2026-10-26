@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { RouterLink } from '@angular/router';
 import { ContributionHeatmapComponent } from '@app/v1/shared/analysis-results/contribution-heatmap/contribution-heatmap.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -36,6 +37,7 @@ export class AccountAnalysisFacilityContributionsComponent {
   readonly selection = inject(AccountAnalysisFacilitySelectionService);
   readonly results = inject(AccountAnalysisResultsService);
   private readonly navigation = inject(WorkspaceNavigationService);
+  private readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
   readonly blocking = computed(() => this.context.hasBlockingErrors() || !this.selection.resultsReady());
   readonly rows = computed(() => {
     const state = this.results.state();
@@ -60,6 +62,7 @@ export class AccountAnalysisFacilityContributionsComponent {
       {
         route: this.navigation.facilityAnalysisResultsRoute(facility.facilityGuid, facility.analysisGuid, 'group-contributions'),
         queryParams: {
+          ...this.reportReturn?.queryParams(),
           [ACCOUNT_ANALYSIS_ORIGIN_QUERY.accountGuid]: account.guid,
           [ACCOUNT_ANALYSIS_ORIGIN_QUERY.analysisGuid]: analysis.guid,
           [ACCOUNT_ANALYSIS_ORIGIN_QUERY.facilityGuid]: facility.facilityGuid,

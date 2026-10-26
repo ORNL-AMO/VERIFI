@@ -24,6 +24,13 @@ describe('AnalysisDetailsSlideoutComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Latest full year · 2025');
     expect(fixture.nativeElement.querySelector('.v1-workspace-slideout__footer')).toBeTruthy();
     expect(opened).toHaveLength(1);
+    fixture.componentRef.setInput('secondaryActionLabel', 'Go To Analysis');
+    fixture.componentRef.setInput('secondaryActionDisabled', true); fixture.detectChanges();
+    const go = fixture.nativeElement.querySelector('footer .v1-btn--secondary') as HTMLButtonElement;
+    expect(go.disabled).toBe(true);
+    const navigated = vi.fn(); fixture.componentInstance.secondaryActionSelected.subscribe(navigated);
+    fixture.componentRef.setInput('secondaryActionDisabled', false); fixture.detectChanges(); go.click();
+    expect(navigated).toHaveBeenCalledOnce(); expect(opened).toHaveLength(1);
   });
 
   it('disables closing and navigation while the full analysis is opening', () => {

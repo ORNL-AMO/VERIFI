@@ -48,7 +48,10 @@
     @if (opening()) {
       <app-ui-icon name="loading" spin></app-ui-icon> Opening…
     } @else {
-      {{ actionLabel() }} <app-ui-icon name="arrowRight"></app-ui-icon>
+      {{ actionLabel() }} <app-ui-icon [name]="actionIcon()"></app-ui-icon>
     }
   </button>
+  @if (secondaryActionLabel(); as label) {
+    <button slideoutFooter type="button" class="v1-btn v1-btn--secondary" [disabled]="opening() || secondaryActionDisabled()" (click)="secondaryActionSelected.emit()">{{ label }}<app-ui-icon name="arrowRight"/></button>
+  }
 </app-workspace-slideout>

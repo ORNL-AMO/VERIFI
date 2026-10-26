@@ -1,6 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
@@ -33,6 +34,7 @@ export class AccountAnalysisFacilitySelectionService {
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
   private readonly requestedFacility = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap
   });
@@ -260,6 +262,7 @@ export class AccountAnalysisFacilitySelectionService {
 
   private returnOriginQueryParams(accountGuid: string, analysisGuid: string, facilityGuid: string): Record<string, string> {
     return {
+      ...this.reportReturn?.queryParams(),
       [ACCOUNT_ANALYSIS_ORIGIN_QUERY.accountGuid]: accountGuid,
       [ACCOUNT_ANALYSIS_ORIGIN_QUERY.analysisGuid]: analysisGuid,
       [ACCOUNT_ANALYSIS_ORIGIN_QUERY.facilityGuid]: facilityGuid

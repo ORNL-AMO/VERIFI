@@ -1,6 +1,6 @@
 @let analysisCard = card();
 @let results = outcomeDisplay();
-<app-workspace-slideout [title]="analysisCard.analysis.name" [description]="ownerName() + ' · Account analysis details'" size="large" [hasFooter]="!!actionLabel()" (closed)="closed.emit()">
+<app-workspace-slideout [title]="analysisCard.analysis.name" [description]="ownerName() + ' · Account analysis details'" size="large" [hasFooter]="!!actionLabel() || !!secondaryActionLabel()" (closed)="closed.emit()">
   <div class="v1-analysis-details v1-account-analysis-details">
     <dl>
       @if (showCategory()) { <div><dt>Category</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : 'Energy' }}</dd></div> }
@@ -21,6 +21,9 @@
     @if (analysisCard.findings.length) { <h3>Validation</h3><ul>@for (finding of analysisCard.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul> }
   </div>
   @if (actionLabel(); as label) {
-    <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="actionDisabled()" (click)="actionSelected.emit()">{{ label }}<app-ui-icon name="arrowRight"/></button>
+    <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="actionDisabled()" (click)="actionSelected.emit()">{{ label }}<app-ui-icon [name]="actionIcon()"/></button>
+  }
+  @if (secondaryActionLabel(); as label) {
+    <button slideoutFooter type="button" class="v1-btn v1-btn--secondary" [disabled]="secondaryActionDisabled()" (click)="secondaryActionSelected.emit()">{{ label }}<app-ui-icon name="arrowRight"/></button>
   }
 </app-workspace-slideout>

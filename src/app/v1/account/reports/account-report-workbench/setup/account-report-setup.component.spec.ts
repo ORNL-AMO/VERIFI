@@ -3,8 +3,43 @@ import { setupAccountReportWorkbench } from '../../testing/account-report-workbe
 import { reportAnalysisToken } from '../account-report-workbench.models';
 import { makeFinding } from '@app/v1/status/status.models';
 import { presentFinding } from '@app/v1/status/status.catalog';
+import { By } from '@angular/platform-browser';
 
 describe('account report Setup', () => {
+  it('keeps the report inspector open after a failed save instead of navigating to analysis', async () => {
+    const { open, harness, router, updateSetup } = await setupAccountReportWorkbench();
+    const workbench = await open();
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    updateSetup.mockRejectedValue(new Error('Save failed'));
+    harness.routeNativeElement!.querySelector<HTMLButtonElement>('.report-analysis-card__inspect')!.click(); harness.detectChanges();
+    workbench.editor.form.controls.name.setValue('Unsaved report'); harness.detectChanges();
+    harness.routeNativeElement!.querySelector<HTMLButtonElement>('[role="dialog"] footer .v1-btn--secondary')!.click();
+    await vi.waitFor(() => expect(workbench.editor.state()).toBe('error'));
+    expect(navigate).not.toHaveBeenCalled();
+    expect(harness.routeNativeElement!.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(workbench.editor.form.controls.name.value).toBe('Unsaved report');
+  });
+  it.each([false, true])('opens the inspected analysis with a report return after saving, without selecting it for a single facility: %s', async single => {
+    const snapshot = accountReportSnapshot(single);
+    if (single) snapshot.facilityAnalyses.push({ ...snapshot.facilityAnalyses[0], id: 21, guid: 'other-analysis', name: 'Another analysis' });
+    else snapshot.accountAnalyses.push({ ...snapshot.accountAnalyses[0], id: 31, guid: 'other-analysis', name: 'Another analysis' });
+    const { open, harness, router, updateSetup } = await setupAccountReportWorkbench(snapshot);
+    const workbench = await open();
+    const selected = workbench.editor.form.controls.analysis.value;
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    harness.routeNativeElement!.querySelector<HTMLButtonElement>('[aria-label="Inspect Another analysis"]')!.click(); harness.detectChanges();
+    const go = [...harness.routeNativeElement!.querySelectorAll<HTMLButtonElement>('[role="dialog"] footer button')].find(button => button.textContent?.includes('Go To Analysis'))!;
+    workbench.editor.form.controls.name.setValue(''); harness.detectChanges(); go.click();
+    await vi.waitFor(() => expect(workbench.editor.state()).toBe('invalid'));
+    expect(navigate).not.toHaveBeenCalled();
+    workbench.editor.form.controls.name.setValue('Renamed report'); harness.detectChanges(); go.click();
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith(single
+      ? ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'other-analysis', 'setup']
+      : ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'other-analysis', 'setup'],
+    { queryParams: { returnReportAccountGuid: 'account-a', returnReportGuid: 'account-report' } }));
+    expect(updateSetup).toHaveBeenLastCalledWith('account-report', { name: 'Renamed report' });
+    expect(workbench.editor.form.controls.analysis.value).toBe(selected);
+  });
   it.each([false, true])('updates analysis validation status without editing the report for a single facility: %s', async single => {
     const { open, harness, status, updateSetup } = await setupAccountReportWorkbench(accountReportSnapshot(single));
     const workbench = await open();
@@ -117,8 +152,10 @@ describe('account report Setup', () => {
     expect(workbench.editor.form.controls.analysis.value).toBe(original);
     inspect.click(); harness.detectChanges();
     dialog = harness.routeNativeElement!.querySelector('[role="dialog"]')!;
+    expect(dialog.querySelector('footer .v1-btn--action')?.textContent).toContain('Select for report');
     expect(dialog.querySelector('footer button')?.textContent).toContain('Select for report');
-    dialog.querySelector<HTMLButtonElement>('footer button')!.click(); harness.detectChanges();
+    expect(harness.routeDebugElement!.query(By.css('[role="dialog"] footer .v1-btn--action app-ui-icon')).componentInstance.name).toBe('check');
+    dialog.querySelector<HTMLButtonElement>('footer .v1-btn--action')!.click(); harness.detectChanges();
     expect(harness.routeNativeElement!.querySelector('[role="dialog"]')).toBeNull();
     expect(await workbench.editor.flush()).toBe(true);
     expect(updateSetup).toHaveBeenLastCalledWith('account-report', { analysis: single
