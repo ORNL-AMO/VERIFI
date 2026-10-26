@@ -6,7 +6,7 @@ import { AnalysisReviewCommandHandler } from '@data/account-workspace/handlers/a
 import { BetterPlantsSummary } from '@data/models/overview-report';
 import { assertAnalysisReportYears, buildAnalysisReportInputs, reportYears } from '@domain/reports/analysis-report-inputs';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { analysisReviewContent } from '@domain/reports/analysis-review-inputs';
+import { analysisReportContent } from '@domain/reports/analysis-review-inputs';
 import { AnalysisReportCalculationService } from '@app/v1/shared/reports/analysis-report-calculation.service';
 import { AnalysisChecksController, AnalysisChecksRequest, AnalysisChecksResult } from '@app/v1/shared/reports/analysis-checks-controller';
 import { ReportResultState } from '@app/v1/shared/reports/report-result-state';
@@ -27,20 +27,22 @@ export class BetterPlantsReportService {
   private readonly input = computed<AnalysisChecksRequest>(() => this.buildInput());
   readonly checks = new AnalysisChecksController(this.input, value => this.persistReview(value));
   private readonly reportRequest = computed(() => {
-    const checks = this.checks.state(), report = this.context.report();
-    const years = checks.value && report && this.context.stage() === 'report'
-      ? reportYears(checks.value.inputs.analysis.baselineYear, report.reportYear, report.betterPlantsReportSetup.includeAllYears === true) : [];
-    return { checks, years, key: JSON.stringify([checks.key, years]) };
+    const checks = this.checks.state(), report = this.context.report(), input = this.input();
+    const inputs = input.state === 'calculate' ? input.inputs : undefined;
+    const years = checks.value && inputs && report && this.context.stage() === 'report'
+      ? reportYears(inputs.analysis.baselineYear, report.reportYear, report.betterPlantsReportSetup.includeAllYears === true) : [];
+    const content = inputs && years.length ? analysisReportContent(inputs, years) : undefined;
+    return { checks, inputs, years, content, key: JSON.stringify([checks.key, years, content]) };
   });
   private readonly result = toSignal(toObservable(this.reportRequest).pipe(
     distinctUntilChanged((a, b) => a.checks === b.checks && a.key === b.key),
     switchMap(request => {
       const result = { ...request.checks, key: request.key };
-      if (result.state !== 'ready' || !result.value || this.context.stage() !== 'report') return of(result);
-      const value = result.value;
+      if (result.state !== 'ready' || !result.value || !request.inputs || !request.content || this.context.stage() !== 'report') return of(result);
+      const value = { ...result.value, inputs: request.inputs };
       if (!value.completed) return of<ReportResultState<BetterPlantsResult>>({ ...result, state: 'review-required',
         message: value.blocked ? 'Resolve critical analysis issues before displaying this report.' : 'Review the current analysis checks and acknowledge the issues before displaying this report.' });
-      const content = JSON.stringify(request.years.map(year => analysisReviewContent(value.inputs, year)));
+      const content = request.content;
       if (this.reportCache?.content === content) return of({ ...result, value: { ...value, summaries: this.reportCache.value } });
       return concat(of<ReportResultState<BetterPlantsResult>>({ key: result.key, state: 'loading', message: 'Preparing the Better Plants report…' }),
         this.calculations.execute({ operation: 'better-plants', inputs: value.inputs, years: request.years }).pipe(map(response => {

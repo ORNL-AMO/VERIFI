@@ -24,6 +24,15 @@ export function analysisReviewContent(inputs: AnalysisReportInputs, reportYear: 
   }));
 }
 
+/** Report values also use additional intake meters and facility manufacturing classification. */
+export function analysisReportContent(inputs: AnalysisReportInputs, years: readonly number[]): string {
+  return JSON.stringify(canonical({
+    periods: years.map(year => analysisReviewContent(inputs, year)),
+    meters: byGuid(inputs.meters), meterData: byGuid(inputs.meterData),
+    facilities: byGuid(inputs.facilities).map(facility => ({ guid: facility.guid, classification: facility.classification }))
+  }));
+}
+
 export function analysisReviewIsCurrent(reviews: readonly AnalysisDataCheckReview[] | undefined, reportYear: number, fingerprint: string): boolean {
   return !!reviews?.some(review => review.checksVersion === ANALYSIS_DATA_CHECKS_VERSION && review.reportYear === reportYear
     && review.inputFingerprint === fingerprint && Number.isFinite(Date.parse(review.reviewedAt)));

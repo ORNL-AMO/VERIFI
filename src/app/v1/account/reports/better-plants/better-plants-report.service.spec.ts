@@ -17,6 +17,7 @@ import { AccountReportWorkbenchContext } from '../account-report-workbench/accou
 import { AccountReportAutosaveService } from '../account-report-workbench/account-report-autosave.service';
 import { BetterPlantsReportService } from './better-plants-report.service';
 import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
+import { getNewAnalysisGroup } from '@data/models/idbModels/analysisItem';
 
 function calculate(request: AnalysisReportWorkerRequest) {
   return of<AnalysisReportWorkerResponse>(request.operation === 'checks'
@@ -164,6 +165,38 @@ describe('Better Plants workflow coordinator', () => {
     const report = { ...store.accountReports()[0], name: 'Renamed', betterPlantsReportSetup: { ...store.accountReports()[0].betterPlantsReportSetup, modificationNotes: 'New notes' } };
     store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [report] }] }); await settle();
     expect(service.state().state).toBe('ready'); expect(execute).toHaveBeenCalledTimes(count);
+  });
+  it('refreshes additional water use immediately without repeating unchanged analysis checks', async () => {
+    const snapshot = analysisReportFixture('water');
+    const group = getNewAnalysisGroup('additional-group', []); group.analysisType = 'skipAnalysis';
+    snapshot.facilityAnalyses[0].groups.push(group);
+    const meter = { ...snapshot.meters[0], id: 99, guid: 'additional-water', groupId: group.idbGroupId };
+    const readings = snapshot.meterData.map((reading, index) => ({ ...reading, id: 100 + index, guid: `extra-${index}`,
+      meterId: meter.guid, totalVolume: 10, totalEnergyUse: 10 }));
+    store.publish({ ...snapshot, meters: [...snapshot.meters, meter], meterData: [...snapshot.meterData, ...readings] });
+    stage.set('report'); await settle();
+    expect(service.state().value?.summaries?.[0].reportYearWaterResults.additionalWaterUtility.use).toBe(120);
+    const changed = store.meterData().filter(reading => reading.meterId === meter.guid && reading.year === 2023)
+      .map(reading => ({ ...reading, totalVolume: 20, totalEnergyUse: 20 }));
+    store.publishCommittedPatch({ collections: [{ collection: 'meterData', upsert: changed }] });
+    expect(service.state().value?.summaries).toBeUndefined(); expect(service.workflow().completed).toBe(true);
+    await settle();
+    expect(service.state().value?.summaries?.[0].reportYearWaterResults.additionalWaterUtility.use).toBe(240);
+    expect(execute.mock.calls.filter(([request]) => request.operation === 'checks')).toHaveLength(1);
+  });
+  it('refreshes manufacturing counts when facility classification changes and retains its current review', async () => {
+    const snapshot = analysisReportFixture('water');
+    store.publish({ ...snapshot, facilities: [{ ...snapshot.facilities[0], classification: 'Manufacturing' }] });
+    findings.set([{ severity: 'warning' }]); saveReview(2023);
+    stage.set('report'); await settle();
+    expect(service.state().value?.summaries?.[0].reportYearWaterResults.numberOfManufacturingFacilities).toBe(1);
+    const facility = { ...store.facilities()[0], classification: 'Commercial' as const };
+    store.publishCommittedPatch({ collections: [{ collection: 'facilities', upsert: [facility] }] });
+    expect(service.state().value?.summaries).toBeUndefined(); expect(service.workflow().completed).toBe(true);
+    await settle();
+    expect(service.state().value?.summaries?.[0].reportYearWaterResults.numberOfManufacturingFacilities).toBe(0);
+    expect(execute.mock.calls.map(([request]) => request.operation)).toEqual(['better-plants', 'better-plants']);
+    expect(store.accountAnalyses()[0].dataCheckReviews).toHaveLength(1);
   });
   it('cancels obsolete work, drops late results, and exposes a retryable failure', async () => {
     const first = new Subject(); execute.mockReturnValueOnce(first);
