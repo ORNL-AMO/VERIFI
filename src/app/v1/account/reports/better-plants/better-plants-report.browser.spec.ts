@@ -63,11 +63,20 @@ describe('Better Plants review and display in Chromium', () => {
     const radio = setup.querySelector<HTMLInputElement>('.report-analysis-card input:checked')!;
     const selectedAnalysis = component.editor.form.controls.analysis.value;
     radio.focus(); await userEvent.keyboard('{ArrowRight}');
-    expect(component.editor.form.controls.analysis.value).toBeNull();
-    expect(root.querySelectorAll('.v1-analysis-stages [aria-disabled="true"]')).toHaveLength(2);
-    expect(root.querySelector<HTMLButtonElement>('footer button')?.disabled).toBe(true);
-    await userEvent.keyboard('{ArrowLeft}');
     expect(component.editor.form.controls.analysis.value).toBe(selectedAnalysis);
+    expect(setup.querySelectorAll('.report-analysis-card input')).toHaveLength(1);
+    const includedContent = setup.querySelector<HTMLElement>('.report-setup-content')!;
+    expect(includedContent.closest('.report-setup-top')).not.toBeNull();
+    expect(includedContent.getBoundingClientRect().top).toBeGreaterThan(setup.querySelector('#account-report-name')!.getBoundingClientRect().bottom);
+    for (const helpId of ['better-plants-baseline-help', 'better-plants-modifications-help', ...(category === 'water' ? ['better-plants-methodology-help'] : [])]) {
+      const help = setup.querySelector<HTMLElement>(`#${helpId}`)!;
+      const textarea = setup.querySelector<HTMLTextAreaElement>(`textarea[aria-describedby="${helpId}"]`)!;
+      expect(help.getBoundingClientRect().bottom).toBeLessThanOrEqual(textarea.getBoundingClientRect().top);
+      expect(parseFloat(getComputedStyle(help).fontSize)).toBeCloseTo(.95 * parseFloat(getComputedStyle(document.documentElement).fontSize), 1);
+    }
+    expect(setup.querySelector('#account-report-analysis-help')).toBeNull();
+    expect(setup.querySelector('#better-plants-period-help')).toBeNull();
+    expect(setup.querySelector('#account-report-name-help')).toBeNull();
     const inspect = setup.querySelector<HTMLButtonElement>('.report-analysis-card__inspect')!;
     inspect.focus(); await userEvent.keyboard('{Enter}');
     let dialog = root.querySelector<HTMLElement>('[role="dialog"]')!;

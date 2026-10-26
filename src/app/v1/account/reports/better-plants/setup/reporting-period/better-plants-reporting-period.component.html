@@ -8,14 +8,13 @@
     </div>
     <div class="report-setup-field">
       <label for="better-plants-report-year">Report year</label>
-      <select id="better-plants-report-year" class="v1-select" formControlName="reportYear" aria-describedby="better-plants-period-help">
+      <select id="better-plants-report-year" class="v1-select" formControlName="reportYear">
         <option [ngValue]="null">Not selected</option>
         @if (savedYearUnavailable()) { <option [ngValue]="form.controls.reportYear.value">{{ form.controls.reportYear.value }} — saved year unavailable</option> }
         @for (year of years(); track year) { <option [ngValue]="year">{{ fiscal() ? 'FY ' : '' }}{{ year }}</option> }
       </select>
     </div>
   </div>
-  <p id="better-plants-period-help" class="report-setup-help">Choose a complete reporting year after the analysis baseline.</p>
   @if (periodState() === 'evaluating' || periodState() === 'idle') { <p class="report-setup-help" role="status">Finding complete reporting years…</p> }
   @if (periodState() === 'error') {
     <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p>

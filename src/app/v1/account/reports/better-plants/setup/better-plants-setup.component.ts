@@ -18,5 +18,4 @@ export class BetterPlantsSetupComponent {
       : this.context.workspace.accountAnalyses().find(item => item.guid === choice?.analysisGuid);
   });
   readonly water = computed(() => this.analysis()?.analysisCategory === 'water');
-  readonly includePerformance = computed(() => this.current().betterPlants?.includePerformanceTable ?? false);
 }

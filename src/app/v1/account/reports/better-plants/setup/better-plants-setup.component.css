@@ -7,7 +7,6 @@
   border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
 }
 
-.better-plants-content .report-setup-option + .report-setup-option { margin-top: .75rem; }
-.better-plants-content__names { padding-left: 1.65rem; }
+.better-plants-notes .report-setup-help { flex: 1; }
 .better-plants-settings__full-width { grid-column: 1 / -1; }
 .better-plants-metrics { margin-top: 1rem; max-width: 42rem; }

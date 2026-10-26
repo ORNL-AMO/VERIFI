@@ -32,6 +32,8 @@ describe('shared report workbench header', () => {
     editor.state.set('saved'); editor.saving.set(false); editor.isDirty.set(false); fixture.detectChanges();
     expect(indicator?.textContent).toContain('Saved');
     expect(root.querySelector('.v1-alert')).toBeNull();
+    editor.state.set('idle'); editor.isDirty.set(false); fixture.detectChanges();
+    expect(indicator?.textContent?.trim()).toBe('');
     editor.state.set('invalid'); editor.isDirty.set(true); fixture.detectChanges();
     expect(root.querySelector('.v1-alert')?.textContent).toContain('Correct invalid fields');
     editor.state.set('error'); editor.error.set('Disk full'); fixture.detectChanges();

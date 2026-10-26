@@ -30,14 +30,14 @@
 .report-setup-field > label {
   margin: 0;
   color: var(--v1-muted);
-  font-size: .78rem;
+  font-size: .9rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .report-setup-field input,
 .report-setup-field select,
-.report-setup-field textarea { width: 100%; }
+.report-setup-field textarea { width: 100%; font-size: 1rem; }
 
 .report-setup-field textarea { resize: vertical; }
 .report-setup-required { color: var(--v1-danger); }
@@ -45,7 +45,7 @@
 .report-setup-help {
   margin: 0;
   color: var(--v1-muted);
-  font-size: .82rem;
+  font-size: .95rem;
   line-height: 1.5;
 }
 
@@ -63,7 +63,7 @@
   gap: .65rem;
   margin: 0;
   color: var(--v1-ink);
-  font-size: .9rem;
+  font-size: 1rem;
   line-height: 1.5;
 }
 

@@ -141,7 +141,7 @@ describe('report inventory browser journeys and presentation', () => {
     await userEvent.keyboard('{Enter}'); await settle(view.fixture);
     expect(scroll).toBeGreaterThan(0);
     expect(view.router.url).toContain(scope === 'account' ? '/account/account-a/reports/workbench/' : '/facility/facility-a/reports/workbench/');
-    expect(view.root.textContent).toContain('Other report settings are pending migration.');
+    expect(view.root.querySelector<HTMLInputElement>(scope === 'account' ? '#account-report-name' : '#report-workbench-name')?.value).toBe('');
     expect(view.root.textContent).toContain('Report-specific settings');
     view.coverage.next({ state: 'evaluating', meters: [] });
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);

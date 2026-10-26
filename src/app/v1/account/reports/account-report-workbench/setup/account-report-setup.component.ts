@@ -4,6 +4,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { AccountAnalysisWorkspaceService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-workspace.service';
 import { AccountAnalysisDashboardResultsService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard-results.service';
 import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
+import { analysisInventoryStatusLabel } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 import { AccountReportWorkbenchContext } from '../account-report-workbench-context.service';
 import { AccountReportAutosaveService } from '../account-report-autosave.service';
 
@@ -47,13 +48,21 @@ export class AccountReportSetupComponent {
       const analysis = selection.scope === 'facility'
         ? this.context.workspace.facilityAnalyses().find(item => item.guid === selection.analysisGuid && item.facilityId === selection.facilityGuid)
         : this.context.workspace.accountAnalyses().find(item => item.guid === selection.analysisGuid);
+      const entry = this.analyses.entries().find(item => item.scope === selection.scope && item.card.analysis.guid === selection.analysisGuid
+        && (selection.scope !== 'facility' || (item.scope === 'facility' && item.facility.guid === selection.facilityGuid)));
+      const evaluation = this.analyses.statusState();
+      const status = evaluation === 'ready' ? entry?.card.status ?? 'evaluating' : 'evaluating';
       return {
         value: option.value,
         name: analysis?.name || 'Untitled analysis',
         category: analysis?.analysisCategory === 'water' ? 'Water' : 'Energy',
         categoryValue: analysis?.analysisCategory,
         baselineYear: analysis?.baselineYear,
-        baseline: analysis?.baselineYear ?? 'Not set'
+        baseline: analysis?.baselineYear ?? 'Not set',
+        statusLabel: analysisInventoryStatusLabel(status, evaluation),
+        statusTone: status === 'ready' ? 'success' : status === 'error' ? 'danger' : status === 'warning' ? 'warning' : 'neutral',
+        statusIcon: status === 'evaluating' ? evaluation === 'error' ? 'info' as const : 'loading' as const
+          : status === 'ready' ? 'success' as const : 'warning' as const
       };
     }));
   readonly baselineYears = computed(() => [...new Set(this.analysisCards().flatMap(card =>
