@@ -23,6 +23,9 @@
         </span>
         <span class="v1-chip">{{ typeLabel() }}</span>
         <span class="v1-chip" [class.v1-chip--danger]="status() === 'error'" [class.v1-chip--warning]="status() === 'warning'" [class.v1-chip--success]="status() === 'ready'" role="status">{{ statusLabel() }}</span>
+        @if (checksStatus(); as checks) {
+          <span class="v1-chip" [class.v1-chip--success]="checks.completed" [class.v1-chip--warning]="!checks.completed && !checks.blocked" [class.v1-chip--danger]="checks.blocked" role="status">{{ checks.completed ? 'Data Checks Completed' : 'Data Check Pending' }}</span>
+        }
         <app-data-workbench-facts-toggle #factsToggle controls="report-workbench-facts"/>
       </div>
     </div>

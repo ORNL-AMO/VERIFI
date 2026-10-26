@@ -1,0 +1,6 @@
+:host { display: block; min-width: 0; max-width: 30rem; }
+.checks-acknowledgment { display: flex; align-items: center; gap: .6rem; margin: 0; color: var(--v1-text); font-weight: 600; }
+.checks-acknowledgment input { flex: 0 0 auto; width: 1.1rem; height: 1.1rem; accent-color: var(--v1-action); }
+.checks-completed { display: inline-flex; align-items: center; gap: .5rem; color: var(--v1-success); font-weight: 600; }
+p { margin: .3rem 0 0; color: var(--v1-muted); font-size: .85rem; }
+input:focus-visible, .checks-completed:focus-visible { outline: 2px solid var(--v1-action); outline-offset: 3px; }

@@ -20,11 +20,12 @@ import { BetterPlantsReportService } from './better-plants-report.service';
 
 describe('Better Plants workflow coordinator', () => {
   let store: AccountWorkspaceStore;
+  const findings = signal<{ severity: string }[]>([]);
   const stage = signal<'setup' | 'data-checks' | 'report'>('setup');
   let service: BetterPlantsReportService;
   let execute: ReturnType<typeof vi.fn>;
   beforeEach(() => {
-    stage.set('setup'); store = new AccountWorkspaceStore(); store.publish(analysisReportFixture());
+    findings.set([]); stage.set('setup'); store = new AccountWorkspaceStore(); store.publish(analysisReportFixture());
     execute = vi.fn(request => of(request.operation === 'checks'
       ? { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }
       : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(request.inputs, request.years) }));
@@ -38,26 +39,33 @@ describe('Better Plants workflow coordinator', () => {
       { provide: AccountReportAutosaveService, useValue: { state: signal('idle') } },
       { provide: AccountReportWorkbenchContext, useValue: { workspace: store, stage,
         key: computed(() => store.accountReports()[0]?.guid ?? ''), report: computed(() => store.accountReports()[0]),
-        status: { state: signal('ready') }, findings: signal([]),
+        status: { state: signal('ready') }, findings,
         navigation: { accountReportWorkbenchRoute: (_account, _report, tab) => [tab] }, dashboardRoute: () => ['dashboard'] } }
     ] });
     service = TestBed.inject(BetterPlantsReportService);
   });
   afterEach(() => TestBed.resetTestingModule());
   async function settle() { TestBed.tick(); await TestBed.inject(ApplicationRef).whenStable(); TestBed.tick(); }
-  it('does no report work in Setup and requires an explicit review before generating the report', async () => {
+  it('does no calculation in Setup and automatically allows a clean report without saving a review', async () => {
     await settle(); expect(execute).not.toHaveBeenCalled();
     stage.set('report'); await settle();
-    expect(service.state().state).toBe('review-required'); expect(execute).not.toHaveBeenCalled();
-    stage.set('data-checks'); await settle();
-    expect(service.state().value?.checks).toHaveLength(1); expect(service.canConfirm()).toBe(true);
+    expect(service.state().value?.summaries).toHaveLength(1);
+    expect(service.workflow().completed).toBe(true);
     expect(store.accountAnalyses()[0].dataCheckReviews).toBeUndefined();
-    await service.confirmReview(); await settle();
-    expect(service.state().value?.reviewed).toBe(true);
+    expect(execute.mock.calls.map(([request]) => request.operation)).toEqual(['checks', 'better-plants']);
+    stage.set('data-checks'); await settle(); expect(service.canConfirm()).toBe(false);
+  });
+  it('requires explicit acknowledgment of warnings before generating the report', async () => {
+    findings.set([{ severity: 'warning' }]);
+    stage.set('report'); await settle(); expect(service.state().state).toBe('review-required');
+    expect(execute.mock.calls.map(([request]) => request.operation)).toEqual(['checks']);
+    stage.set('data-checks'); await settle(); expect(service.canConfirm()).toBe(true);
+    await service.confirmReview(); await settle(); expect(service.state().value?.reviewed).toBe(true);
     stage.set('report'); await settle(); expect(service.state().value?.summaries).toHaveLength(1);
     expect(execute.mock.calls.map(([request]) => request.operation)).toEqual(['checks', 'better-plants']);
   });
   it('shares confirmation across reports and invalidates immediately after dependent data changes', async () => {
+    findings.set([{ severity: 'warning' }]);
     stage.set('data-checks'); await settle(); await service.confirmReview(); await settle();
     const original = store.accountReports()[0];
     store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [{ ...original, guid: 'second-report', id: 60 }] }] });
@@ -70,6 +78,7 @@ describe('Better Plants workflow coordinator', () => {
     await settle(); expect(service.state().state).toBe('review-required');
   });
   it('reprojects name and note edits without regenerating report calculations', async () => {
+    findings.set([{ severity: 'warning' }]);
     stage.set('data-checks'); await settle(); await service.confirmReview(); await settle(); stage.set('report'); await settle();
     const count = execute.mock.calls.length;
     const report = { ...store.accountReports()[0], name: 'Renamed', betterPlantsReportSetup: { ...store.accountReports()[0].betterPlantsReportSetup, modificationNotes: 'New notes' } };

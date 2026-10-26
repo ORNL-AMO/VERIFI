@@ -31,9 +31,10 @@ export class AccountReportWorkbenchContext {
     return snapshot && report ? buildReportInventory(snapshot, this.status.items(), this.status.state()).find((item): item is Extract<ReportInventoryEntry, { scope: 'account' }> => item.scope === 'account' && item.report.guid === report.guid) : undefined;
   });
   readonly stage = computed(() => reportStage(this.navigation.routeState().reportStage));
-  readonly checksReviewed = signal(false);
+  readonly checksBlocked = signal(false);
+  readonly checksCompleted = signal(false);
   readonly stages = computed(() => { const entry = this.entry(); return entry ? buildReportStages(
-    ['/v1', 'workspace', 'account', entry.report.accountId, 'reports', 'workbench', entry.report.guid], entry.typeLabel, this.stage(), hasAccountReportDataChecks(entry.report.reportType), entry.status).map(stage => stage.id === 'data-checks' && entry.report.reportType === 'betterPlants' ? { ...stage, completed: this.checksReviewed() } : stage) : []; });
+    ['/v1', 'workspace', 'account', entry.report.accountId, 'reports', 'workbench', entry.report.guid], entry.typeLabel, this.stage(), hasAccountReportDataChecks(entry.report.reportType), entry.status).map(stage => stage.id === 'data-checks' && entry.report.reportType === 'betterPlants' ? { ...stage, completed: this.checksCompleted(), hasBlockingErrors: this.checksBlocked() } : stage) : []; });
   readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled account report', icon: 'report' as const })));
   readonly dashboardRoute = computed(() => this.navigation.accountReportsRoute(this.navigation.routeState().accountGuid ?? ''));
   readonly breadcrumbs = computed(() => [{ label: `${this.workspace.account()?.name || 'Account'} Reports`, route: this.dashboardRoute() }, { label: this.report()?.name || 'Report' }]);

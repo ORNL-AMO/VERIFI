@@ -17,7 +17,7 @@ describe('Better Plants in-app report', () => {
   async function setup(category: 'energy' | 'water' = 'energy') {
     const snapshot = analysisReportFixture(category), workspace = new AccountWorkspaceStore(); workspace.publish(snapshot);
     const inputs = buildAnalysisReportInputs(snapshot, 'account-analysis');
-    const state = signal<ReportResultState<BetterPlantsResult>>({ key: 'view', state: 'ready', value: { inputs, summaries: calculateBetterPlantsReport(inputs, [2023]), reviewed: true, years: [2023], fingerprints: ['current'] } });
+    const state = signal<ReportResultState<BetterPlantsResult>>({ key: 'view', state: 'ready', value: { inputs, summaries: calculateBetterPlantsReport(inputs, [2023]), reviewed: true, completed: true, blocked: false, years: [2023], fingerprints: ['current'] } });
     await TestBed.configureTestingModule({ imports: [AccountReportsModule], providers: [provideRouter([]),
       { provide: AccountReportWorkbenchContext, useValue: { workspace, report: computed(() => workspace.accountReports()[0]) } },
       { provide: BetterPlantsReportService, useValue: { state, checksRoute: () => ['/checks'] } }

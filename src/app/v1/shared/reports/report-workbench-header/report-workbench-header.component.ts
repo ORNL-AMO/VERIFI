@@ -5,6 +5,7 @@ import { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.compo
 import { AnalysisNavigationStage } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';
 import { ReportConfigurationStatus } from '@app/v1/facility/reports/facility-report.models';
 import { ReportWorkbenchEditor } from '../report-autosave-controller';
+import { AnalysisChecksWorkflow } from '../analysis-checks.models';
 
 @Component({ selector: 'app-report-workbench-header', standalone: false,
   templateUrl: './report-workbench-header.component.html', styleUrls: ['./report-workbench-header.component.css'] })
@@ -19,6 +20,7 @@ export class ReportWorkbenchHeaderComponent implements OnDestroy {
   readonly typeLabel = input.required<string>();
   readonly status = input.required<ReportConfigurationStatus>();
   readonly statusLabel = input.required<string>();
+  readonly checksStatus = input<AnalysisChecksWorkflow>();
   readonly facts = input.required<readonly { label: string; value: string }[]>();
   readonly stages = input.required<readonly AnalysisNavigationStage[]>();
   readonly reportSelected = output<string>();

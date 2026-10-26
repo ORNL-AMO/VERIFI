@@ -18,6 +18,7 @@ import { runWorker } from '@platform/web-workers/run-worker';
 import { AnalysisReportCalculationService } from '@app/v1/shared/reports/analysis-report-calculation.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { setupAccountReportWorkbench } from '../testing/account-report-workbench-test-setup';
+import { StatusItem } from '@app/v1/status/status.models';
 import { BetterPlantsReportService } from './better-plants-report.service';
 
 describe('Better Plants review and display in Chromium', () => {
@@ -48,6 +49,17 @@ describe('Better Plants review and display in Chromium', () => {
     ]);
     const root = view.harness.fixture.nativeElement as HTMLElement; root.className = 'v1-root v1-palette-blueprint';
     const component = await view.open('report'); view.harness.fixture.autoDetectChanges();
+    const expectBottomCorners = (surface: HTMLElement) => {
+      for (const square of [false, true]) {
+        root.classList.toggle('v1-corners-square', square);
+        const radius = getComputedStyle(root).getPropertyValue('--v1-radius').trim();
+        const style = getComputedStyle(surface);
+        expect(style.borderBottomLeftRadius).toBe(radius);
+        expect(style.borderBottomRightRadius).toBe(radius);
+        if (!square) { expect(style.borderTopLeftRadius).toBe('0px'); expect(style.borderTopRightRadius).toBe('0px'); }
+      }
+      root.classList.remove('v1-corners-square');
+    };
     const coordinator = view.harness.routeDebugElement!.injector.get(BetterPlantsReportService);
     const waitFor = async (predicate: (state: ReturnType<typeof coordinator.state>) => boolean) => {
       const waiting = firstValueFrom(toObservable(coordinator.state, { injector: TestBed.inject(Injector) }).pipe(filter(predicate), take(1), timeout(10000)));
@@ -56,6 +68,7 @@ describe('Better Plants review and display in Chromium', () => {
     expect(view.store.committedRevision()).toBeUndefined();
     await page.viewport(1200, 900);
     const setup = root.querySelector<HTMLElement>('app-account-report-setup')!;
+    expectBottomCorners(setup.querySelector<HTMLElement>('.report-setup')!);
     const information = setup.querySelector<HTMLElement>('.report-setup-top h2')!.getBoundingClientRect();
     const period = setup.querySelector<HTMLElement>('app-better-plants-reporting-period h2')!.getBoundingClientRect();
     expect(period.left).toBeGreaterThan(information.right);
@@ -113,12 +126,43 @@ describe('Better Plants review and display in Chromium', () => {
     }
     await page.viewport(1200, 1100); root.className = 'v1-root v1-palette-blueprint';
     await page.screenshot({ element: setup, path: `./__screenshots__/better-plants-setup-${category}.png` });
-    await view.open('report', 'report'); await waitFor(state => state.state === 'review-required');
-    expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
+    await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
+    expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).not.toBeNull();
+    expect((await database.getAll('accountAnalysisItems'))[0]['dataCheckReviews']).toBeUndefined();
     await view.open('report', 'data-checks'); await waitFor(state => state.state === 'ready' && !!state.value?.checks);
     expect(view.store.accountAnalyses()[0].dataCheckReviews).toBeUndefined();
-    const confirmation = view.harness.routeNativeElement!.querySelector<HTMLButtonElement>('app-better-plants-data-checks .v1-btn--action')!;
-    confirmation.focus(); await userEvent.keyboard('{Enter}'); await waitFor(state => state.value?.reviewed === true);
+    expectBottomCorners(root.querySelector<HTMLElement>('app-analysis-data-checks > .report-section:last-of-type')!);
+    expect(getComputedStyle(root.querySelector<HTMLElement>('app-analysis-data-checks > .report-section')!).borderBottomLeftRadius).toBe('0px');
+    expect(root.querySelector('footer input[type="checkbox"]')).toBeNull();
+    expect(root.querySelector('footer')!.textContent).toContain('Data Checks Completed');
+    expect(root.querySelector('footer a.v1-btn--action')!.textContent).toContain('Continue');
+    // Report findings participate in the same review gate as model warnings.
+    view.status.items.set(snapshot.accountReports.map(item => ({ id: `warning-${item.guid}`, code: 'report.analysis.warning', severity: 'warning',
+      category: 'readiness', entity: { kind: 'account-report', guid: item.guid, accountGuid: snapshot.account.guid, name: item.name },
+      evidence: {}, title: 'Analysis needs review', description: 'Review the linked analysis warning.', todo: false,
+      destination: { kind: 'unavailable' } } satisfies StatusItem)));
+    await waitFor(state => state.state === 'ready' && !!state.value?.checks && !state.value.completed);
+    expect(root.querySelector('app-report-workbench-header')!.textContent).toContain('Data Check Pending');
+    expect(root.querySelector<HTMLButtonElement>('footer button.v1-btn--action')!.disabled).toBe(true);
+    const checksPage = root.querySelector<HTMLElement>('app-better-plants-data-checks')!;
+    for (const dark of [false, true]) {
+      root.className = `v1-root v1-palette-blueprint${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`;
+      for (const width of [1024, 640, 390]) {
+        await page.viewport(width, 900); view.harness.detectChanges();
+        expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+        const checkbox = root.querySelector<HTMLInputElement>('footer input[type="checkbox"]')!;
+        expect(checkbox.getBoundingClientRect().right).toBeLessThanOrEqual(root.getBoundingClientRect().right + 1);
+        if (category === 'energy' && width === 390) await page.screenshot({ element: root, path: `./__screenshots__/better-plants-checks-footer-${dark ? 'dark' : 'light'}.png` });
+      }
+    }
+    await page.viewport(1024, 900); root.className = 'v1-root v1-palette-blueprint';
+    await page.screenshot({ element: checksPage, path: `./__screenshots__/better-plants-checks-${category}.png` });
+    const confirmation = root.querySelector<HTMLInputElement>('footer input[type="checkbox"]')!;
+    confirmation.focus(); await userEvent.keyboard(' '); await waitFor(state => state.value?.reviewed === true);
+    expect(root.querySelector('footer input[type="checkbox"]')).toBeNull();
+    expect(root.querySelector('footer')!.textContent).toContain('Data Checks Completed');
+    expect(document.activeElement?.textContent).toContain('Data Checks Completed');
+    await userEvent.keyboard('{Tab}'); expect(document.activeElement?.textContent).toContain('Continue');
     expect(view.store.accountAnalyses()[0].isAnalysisVisited).toBe(false);
     expect(component.context.stages().find(stage => stage.id === 'data-checks')?.completed).toBe(true);
     await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);

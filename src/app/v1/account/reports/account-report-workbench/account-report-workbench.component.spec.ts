@@ -62,7 +62,7 @@ describe('account report workbench', () => {
     const workbench = await open(); workbench.editor.form.controls.name.setValue('Renamed');
     await open('account-report', 'data-checks');
     expect(updateSetup).toHaveBeenCalledWith('account-report', { name: 'Renamed' });
-    expect(harness.routeNativeElement!.textContent).toContain('does not complete checks');
+    expect(harness.routeNativeElement!.textContent).toContain('Data Check Pending');
     workbench.editor.form.controls.name.setValue('Final name'); await open('other');
     expect(store.accountReports()[0].name).toBe('Final name'); expect(workbench.editor.form.controls.name.value).toBe('Other report');
     workbench.editor.form.controls.name.setValue('Final other');
