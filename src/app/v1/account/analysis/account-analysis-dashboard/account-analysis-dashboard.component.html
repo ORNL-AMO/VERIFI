@@ -38,9 +38,9 @@
 
   @if (detailsEntry(); as entry) {
     @if (entry.scope === 'facility') {
-      <app-analysis-details-slideout [showCategory]="showCategory()" [card]="entry.card" [meterGroups]="workspace.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay" (closed)="detailsGuid.set(undefined)" (opened)="open(entry)"/>
+      <app-analysis-details-slideout [showCategory]="showCategory()" [card]="entry.card" [evaluation]="workspace.statusState()" [meterGroups]="workspace.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay" (closed)="detailsGuid.set(undefined)" (opened)="open(entry)"/>
     } @else {
-      <app-account-analysis-details-slideout [card]="entry.card" [outcomeDisplay]="entry.outcomeDisplay" [ownerName]="entry.ownerName" [showCategory]="showCategory()" (closed)="detailsGuid.set(undefined)"/>
+      <app-account-analysis-details-slideout [card]="entry.card" [evaluation]="workspace.statusState()" [facilityInputs]="workspace.facilityInputs()" [facilityFindings]="workspace.statusItems()" [outcomeDisplay]="entry.outcomeDisplay" [ownerName]="entry.ownerName" [showCategory]="showCategory()" (closed)="detailsGuid.set(undefined)"/>
     }
   }
   @if (createOpen()) { <app-account-analysis-draft-slideout [facilities]="creationFacilities()" [showCategory]="showCategory()" [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"/> }

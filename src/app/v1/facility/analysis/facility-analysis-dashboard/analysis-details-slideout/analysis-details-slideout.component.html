@@ -9,9 +9,9 @@
   [hasFooter]="true"
   (closed)="closed.emit()">
   <div class="v1-analysis-details">
+    <app-analysis-details-status [status]="analysisCard.status" [evaluation]="evaluation()" [findings]="analysisCard.findings"/>
     <dl>
       @if (showCategory()) { <div><dt>Category</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : 'Energy' }}</dd></div> }
-      <div><dt>Status</dt><dd>{{ analysisCard.statusLabel }}</dd></div>
       <div><dt>Baseline</dt><dd>{{ analysisCard.analysis.baselineYear || 'Not set' }}</dd></div>
       <div><dt>Basis and units</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : (analysisCard.analysis.energyIsSource ? 'Source energy' : 'Site energy') }} · {{ analysisCard.category === 'water' ? analysisCard.analysis.waterUnit : analysisCard.analysis.energyUnit }}</dd></div>
       @if (results) {
@@ -22,20 +22,7 @@
     </dl>
     <app-facility-analysis-group-model-roster [analysis]="analysisCard.analysis" [meterGroups]="meterGroups()"></app-facility-analysis-group-model-roster>
     <h3>Used by</h3>
-    @if (analysisCard.dependencyCount || analysisCard.bankingSource) {
-      <ul>
-        @for (item of analysisCard.linkedAccountAnalyses; track item.guid) { <li>Account analysis: {{ item.name }}</li> }
-        @for (item of analysisCard.linkedReports; track item.guid) { <li>Facility report: {{ item.name }}</li> }
-        @for (item of analysisCard.bankingConsumers; track item.guid) { <li>Banking analysis: {{ item.name }}</li> }
-        @if (analysisCard.bankingSource) { <li>Uses banked source: {{ analysisCard.bankingSource.name }}</li> }
-      </ul>
-    } @else {
-      <p>No downstream links.</p>
-    }
-    @if (analysisCard.findings.length) {
-      <h3>Validation</h3>
-      <ul>@for (finding of analysisCard.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul>
-    }
+    <app-analysis-linked-items [items]="linkedItems()" label="Analysis dependencies" emptyMessage="No downstream links."/>
   </div>
 
   <button

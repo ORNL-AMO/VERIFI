@@ -40,6 +40,7 @@
     <app-analysis-details-slideout
       [showCategory]="showCategory()"
       [card]="card"
+      [evaluation]="workspace.statusState()"
       [meterGroups]="workspace.meterGroups()"
       [outcomeDisplay]="card.outcomeDisplay"
       (opened)="open(card)"

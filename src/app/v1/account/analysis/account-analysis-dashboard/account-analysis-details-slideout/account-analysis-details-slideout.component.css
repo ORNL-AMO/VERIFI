@@ -1,4 +1,30 @@
 :host { display: contents; }
-.v1-table-shell { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: .7rem; border: 1px solid var(--v1-border); text-align: left; }
+.analysis-details-section { min-width: 0; }
+.analysis-details-section > h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: .65rem; margin: 0; padding: 0; font-size: 1.15rem; font-weight: 800; line-height: 1.3; }
+.selection-count { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.selection-count--pending { color: var(--v1-muted); font-size: .9rem; font-weight: 500; }
+.v1-table-shell { min-width: 0; border: 1px solid var(--v1-border); container-type: inline-size; }
+table { width: 100%; margin: 0; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+th, td { padding: .75rem; border: 0; border-right: 1px solid var(--v1-border); border-bottom: 1px solid var(--v1-border); text-align: left; vertical-align: middle; overflow-wrap: anywhere; }
+th:last-child, td:last-child { border-right: 0; }
+tbody tr:last-child > * { border-bottom: 0; }
+thead { background: var(--v1-panel); }
+thead th:nth-child(1) { width: 17%; }
+thead th:nth-child(2) { width: 25%; }
+thead th:nth-child(3) { width: 28%; }
+thead th:nth-child(4), thead th:nth-child(5) { width: 15%; }
+.v1-chip { gap: .3rem; font-size: .8rem; line-height: 1.25; white-space: normal; }
+.selection-facility { display: flex; align-items: center; gap: .35rem; margin-top: .4rem; color: var(--v1-muted); font-weight: 500; }
+.selection-detail { display: block; margin-top: .35rem; color: var(--v1-muted); font-size: .85rem; font-weight: 500; }
+ul.selection-groups { padding: 0; list-style: none; font-weight: 500; }
+.selection-help { margin: .65rem 0 0; color: var(--v1-muted); font-size: .9rem; }
+
+@container (max-width: 36rem) {
+  table, tbody { display: block; }
+  thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; padding: .5rem; border-bottom: 1px solid var(--v1-border); }
+  tbody tr:last-child { border-bottom: 0; }
+  tbody th, tbody td { display: block; min-width: 0; padding: .5rem; border: 0; }
+  tbody tr > :nth-child(-n+3) { grid-column: 1 / -1; }
+  tbody tr > *::before { content: attr(data-label); display: block; margin-bottom: .35rem; color: var(--v1-muted); font-size: .8rem; font-weight: 700; }
+}

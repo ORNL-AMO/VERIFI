@@ -162,6 +162,7 @@
 @if (detailsCard(); as card) {
   <app-analysis-details-slideout
     [card]="card"
+    [evaluation]="context.status.state()"
     [meterGroups]="context.workspace.meterGroups()"
     [outcomeDisplay]="detailsOutcomeDisplay()"
     [opening]="leaving()"

@@ -48,7 +48,7 @@ function setup(count = 35) {
     { provide: AccountWorkspaceStore, useValue: { account, facilities, selectedFacility } },
     { provide: AccountWorkspaceService, useValue: {} }, { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [inventoryAccount] } },
     { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
-    { provide: AccountAnalysisWorkspaceService, useValue: { account, entries, categories, facilities, workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), facilityAnalyses: signal([]) } },
+    { provide: AccountAnalysisWorkspaceService, useValue: { account, entries, categories, facilities, workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), statusItems: signal([]), facilityInputs: signal({ meterGroups: [], meters: [], meterData: [], predictorData: [] }), facilityAnalyses: signal([]) } },
     { provide: FacilityAnalysisWorkspaceService, useValue: { account, facility: selectedFacility, categories,
       cards: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card] : [])),
       analyses: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card.analysis] : [])),
