@@ -33,7 +33,7 @@
                         <i class="fa fa-calculator text-primary icon-style"></i>
                     </button>
                 </span>
-                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="100"
+                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="115"
                     id="{{'loadFactor_'+selectedYear}}">
                 <span class="input-group-text">%</span>
             </div>
@@ -92,7 +92,7 @@
         </label>
         <div class="col-7">
             <div class="input-group">
-                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="100"
+                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="115"
                     id="{{'loadFactor_'+selectedYear}}">
                 <span class="input-group-text">%</span>
             </div>
@@ -159,6 +159,7 @@
 
 @if (showCalculateLoadFactorModal) {
 <app-load-factor-modal [year]="_annualOperatingConditionsDataForm.controls.year.value"
+    [hasElectricityUtility]="hasElectricityUtility()"
     (saveCalculatedLoadFactor)="handleCalculatedLoadFactor($event)"
     (closeModal)="closeCalculateLoadFactorModal()"></app-load-factor-modal>
 }

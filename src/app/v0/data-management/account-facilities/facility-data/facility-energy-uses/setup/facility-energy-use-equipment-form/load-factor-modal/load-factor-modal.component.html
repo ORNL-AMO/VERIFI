@@ -6,6 +6,7 @@
 
     <div class="popup-body">
         <div class="mb-4">
+            @if (hasElectricityUtility) {
             <div class="btn-group calculation-method-toggle">
                 <input class="btn-check" type="radio" name="loadFactorCalculationMethod"
                     id="voltageCurrentMethod_{{year}}" value="voltageCurrent" [ngModel]="calculationMethod"
@@ -21,10 +22,13 @@
                     Measured Power
                 </label>
             </div>
+            } 
         </div>
 
+        @if (hasElectricityUtility) {
         <div class="fw-bold text-size">Inputs</div>
         <hr class="mt-0">
+        }
 
         <div class="row mb-2 mt-4">
             <label class="col-5 col-form-label" for="ratedPower_{{year}}">Rated Power</label>
@@ -78,8 +82,7 @@
         <div class="row mb-2">
             <label class="col-5 col-form-label" for="powerFactor_{{year}}">Power Factor</label>
             <div class="col-7">
-                <input class="form-control" type="number" id="powerFactor_{{year}}"
-                    [(ngModel)]="powerFactor">
+                <input class="form-control" type="number" id="powerFactor_{{year}}" [(ngModel)]="powerFactor">
             </div>
         </div>
         } @else {
@@ -122,11 +125,12 @@
             <div class="text-size fst-italic mb-2 fw-bold">
                 Load Factor: <strong class="text-size">{{displayedLoadFactorPercent | number:'1.1-1'}}%</strong>
             </div>
-            @if (loadFactorPercent != null && loadFactorPercent < 40) { <div class="text-danger">The load factor is
-                below 40%.
+            @if (loadFactorPercent != null && loadFactorPercent > 100 && loadFactorPercent <= 115) { <div
+                class="text-danger">The load factor is above 100%
         </div>
-        } @else if (loadFactorPercent != null && loadFactorPercent > 100) {
-        <div class="text-danger">The load factor is above 100%. Apply will use 100.0%.</div>
+        }
+        @else if (loadFactorPercent != null && loadFactorPercent > 115) {
+        <div class="text-danger">The load factor is above 115%</div>
         }
     </div>
     <hr>
