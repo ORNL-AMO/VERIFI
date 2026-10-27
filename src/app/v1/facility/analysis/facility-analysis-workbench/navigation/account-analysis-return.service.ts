@@ -1,5 +1,6 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ACCOUNT_ANALYSIS_ORIGIN_QUERY } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-facility-selection.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
@@ -17,6 +18,7 @@ export class AccountAnalysisReturnService {
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly context = inject(FacilityAnalysisWorkbenchContext);
+  private readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
   private readonly requestedOrigin = readAccountAnalysisReturnOrigin(this.route.snapshot.queryParamMap);
 
   readonly origin = computed(() => {
@@ -37,13 +39,9 @@ export class AccountAnalysisReturnService {
     const origin = this.origin();
     if (!origin) return false;
     if (origin.resultTab) {
-      return this.router.navigate(
-        this.navigation.accountAnalysisResultsRoute(
-          origin.accountGuid,
-          origin.accountAnalysisGuid,
-          origin.resultTab
-        )
-      );
+      const route = this.navigation.accountAnalysisResultsRoute(origin.accountGuid, origin.accountAnalysisGuid, origin.resultTab);
+      const queryParams = this.reportReturn?.queryParams();
+      return queryParams ? this.router.navigate(route, { queryParams }) : this.router.navigate(route);
     }
     return this.router.navigate(
       this.navigation.accountAnalysisWorkbenchRoute(
@@ -51,7 +49,7 @@ export class AccountAnalysisReturnService {
         origin.accountAnalysisGuid,
         'select-items'
       ),
-      { queryParams: { facilityGuid: origin.facilityGuid } }
+      { queryParams: { ...this.reportReturn?.queryParams(), facilityGuid: origin.facilityGuid } }
     );
   }
 }

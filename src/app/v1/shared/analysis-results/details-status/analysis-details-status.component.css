@@ -1,0 +1,10 @@
+:host { display: block; min-width: 0; }
+.analysis-details-status { padding: 1rem; border: 1px solid var(--v1-border); background: var(--v1-panel); }
+.analysis-details-status--danger { border-color: var(--v1-danger); }
+.analysis-details-status--warning { border-color: var(--v1-warning); }
+h3 { margin: 0 0 .5rem; color: var(--v1-muted); font-size: .9rem; font-weight: 700; }
+p { display: flex; align-items: center; gap: .5rem; margin: 0; font-weight: 800; }
+.analysis-details-status--danger > p { color: var(--v1-danger); }
+.analysis-details-status--warning > p { color: var(--v1-warning); }
+.analysis-details-status--success > p { color: var(--v1-success); }
+app-analysis-status-notes { display: block; margin-top: .75rem; }

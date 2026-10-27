@@ -1,3 +1,4 @@
+import { AnalysisDataCheckReview } from '../analysis-review';
 import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable } from "../analysis";
 import { IdbAccount } from "./account";
 import { IdbFacility } from "./facility";
@@ -19,6 +20,7 @@ export interface IdbAnalysisItem extends IdbEntry {
     baselineYear: number,
     hasBanking: boolean,
     bankedAnalysisItemId: string,
+    dataCheckReviews?: AnalysisDataCheckReview[],
     isAnalysisVisited?: boolean,
     dataCheckedDate?: Date,
     checked?: boolean

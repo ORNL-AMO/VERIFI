@@ -101,7 +101,7 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
     );
     TestBed.flushEffects();
 
-    expect(navigate).toHaveBeenCalledWith(['/group-a'], { replaceUrl: true });
+    expect(navigate).toHaveBeenCalledWith(['/group-a'], { replaceUrl: true, queryParams: undefined });
   });
 
   it('redirects a locked group deep link to Analysis Setup', () => {
@@ -113,7 +113,7 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
     );
     TestBed.flushEffects();
 
-    expect(navigate).toHaveBeenCalledWith(['/setup'], { replaceUrl: true });
+    expect(navigate).toHaveBeenCalledWith(['/setup'], { replaceUrl: true, queryParams: undefined });
   });
 
   it('redirects locked Facility Results to Setup before considering incomplete groups', () => {
@@ -128,7 +128,7 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
     );
     TestBed.flushEffects();
 
-    expect(navigate).toHaveBeenCalledWith(['/setup'], { replaceUrl: true });
+    expect(navigate).toHaveBeenCalledWith(['/setup'], { replaceUrl: true, queryParams: undefined });
   });
 
   it('backs out of early Used By to the nearest previous accessible stage', () => {
@@ -141,7 +141,7 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
 
     navigation.back();
 
-    expect(navigate).toHaveBeenCalledWith(['/setup']);
+    expect(navigate).toHaveBeenCalledWith(['/setup'], { queryParams: undefined });
   });
 });
 

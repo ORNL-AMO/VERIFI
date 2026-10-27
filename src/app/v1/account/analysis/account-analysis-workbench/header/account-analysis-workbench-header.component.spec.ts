@@ -12,6 +12,7 @@ import { AccountAnalysisResultsService, AccountAnalysisResultState } from '../re
 import { analysisOutcomeDisplay, analysisOutcomeSummary } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { projectAccountAnalysisDashboardResults } from '@domain/calculations/analysis-calculations/account-analysis-results-calculation';
 import { AccountAnalysisSelectionCounts } from '../../account-analysis-dashboard/account-analysis.models';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 
 function readyState(): Extract<AccountAnalysisResultState, { state: 'ready' }> {
   return {
@@ -40,10 +41,13 @@ function configureHeader() {
   const selectionCounts = signal<AccountAnalysisSelectionCounts>({ included: 2, skipped: 1, missing: 1, invalid: 1 });
   const navigateTo = vi.fn();
   const flush = vi.fn().mockResolvedValue(true);
+  const reportOrigin = signal<{ accountGuid: string; reportGuid: string } | undefined>(undefined);
+  const returnToReport = vi.fn().mockResolvedValue(true);
   TestBed.configureTestingModule({
     imports: [AccountAnalysisWorkbenchHeaderComponent],
     providers: [
       provideRouter([]),
+      { provide: ReportAnalysisReturnService, useValue: { origin: reportOrigin, returnToReport } },
       { provide: WorkspaceNavigationService, useValue: {
         accountPortfolioRoute: (accountGuid: string, tab: string) => ['/v1', 'workspace', 'account', accountGuid, 'data', 'portfolio', tab],
         accountAnalysisRoute: (accountGuid: string) => ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'],
@@ -69,10 +73,22 @@ function configureHeader() {
   const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
   const fixture = TestBed.createComponent(AccountAnalysisWorkbenchHeaderComponent);
   fixture.detectChanges();
-  return { fixture, expanded, analysis, results, saveState, findings, linkedReports, selectionCounts, navigateTo, flush, navigate };
+  return { fixture, expanded, analysis, results, saveState, findings, linkedReports, selectionCounts, navigateTo, flush, navigate, reportOrigin, returnToReport };
 }
 
 describe('AccountAnalysisWorkbenchHeaderComponent', () => {
+  it('shows Return to Report only for an available origin and waits for a successful save', async () => {
+    const { fixture, reportOrigin, returnToReport, flush } = configureHeader();
+    const button = () => [...fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>].find(item => item.textContent?.includes('Return to Report'));
+    expect(button()).toBeUndefined();
+    reportOrigin.set({ accountGuid: 'account-a', reportGuid: 'report-a' }); fixture.detectChanges();
+    flush.mockResolvedValue(false); button()!.click();
+    await vi.waitFor(() => expect(flush).toHaveBeenCalledOnce());
+    expect(returnToReport).not.toHaveBeenCalled();
+    flush.mockResolvedValue(true); button()!.click();
+    await vi.waitFor(() => expect(returnToReport).toHaveBeenCalledOnce());
+    reportOrigin.set(undefined); fixture.detectChanges(); expect(button()).toBeUndefined();
+  });
   it('renders the five dashboard facts and keeps status and dependencies visible with facts collapsed', () => {
     const { fixture } = configureHeader();
     const host = fixture.nativeElement as HTMLElement;

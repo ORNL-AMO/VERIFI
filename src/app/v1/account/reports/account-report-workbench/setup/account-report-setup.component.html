@@ -1,26 +1,82 @@
 @let entry = context.entry();
 @if (entry) {
   <section class="report-section report-setup" aria-label="Report setup">
-    <div class="report-setup-panel"><h2>Report details</h2>
-      <label for="account-report-name">Name <span aria-hidden="true">*</span></label>
-      <input id="account-report-name" class="v1-input" [formControl]="editor.form.controls.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" aria-describedby="account-report-name-help">
-      <p id="account-report-name-help" [class.v1-field-error]="editor.state() === 'invalid'">@if (editor.state() === 'invalid') { Enter a nonblank report name. } @else { Changes save automatically. }</p>
+    <div class="report-setup-section report-setup-top" [class.report-setup-top--with-period]="entry.report.reportType === 'betterPlants'">
+      <div>
+        <h2>Report information</h2>
+        <div class="report-setup-field report-setup-name">
+          <label for="account-report-name">Name <span class="report-setup-required" aria-hidden="true">*</span></label>
+          <input id="account-report-name" class="v1-input" [formControl]="editor.form.controls.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" [attr.aria-describedby]="editor.state() === 'invalid' ? 'account-report-name-help' : null">
+          @if (editor.state() === 'invalid') { <p id="account-report-name-help" class="report-setup-help v1-field-error">Enter a nonblank report name.</p> }
+        </div>
+        @if (entry.report.reportType === 'betterPlants') {
+          <section class="report-setup-content" [formGroup]="editor.form.controls.betterPlants" aria-labelledby="better-plants-content-title">
+            <h3 id="better-plants-content-title">Included content</h3>
+            <label class="report-setup-option"><input type="checkbox" formControlName="includePerformanceTable"><span>Facility performance table</span></label>
+            @if (editor.form.controls.betterPlants.controls.includePerformanceTable.value) {
+              <label class="report-setup-option report-setup-content__names"><input type="checkbox" formControlName="includeFacilityNames"><span>Show facility names</span></label>
+            }
+          </section>
+        }
+      </div>
+      @if (entry.report.reportType === 'betterPlants') { <app-better-plants-reporting-period/> }
     </div>
     @if (context.usesAnalysis()) {
-      <div class="report-setup-panel"><h2>Linked analysis</h2>
-        <label for="account-report-analysis">Analysis</label>
-        <select id="account-report-analysis" class="v1-select" [formControl]="editor.form.controls.analysis" aria-describedby="account-report-analysis-help">
-          <option [ngValue]="null">Not selected</option>
-          @for (option of context.analysisOptions(); track option.value) { <option [value]="option.value" [disabled]="option.unavailable">{{ option.label }}</option> }
-        </select>
-        <p id="account-report-analysis-help">Choose an existing analysis. You can name this report now and choose its analysis later.</p>
-        @if (context.savedAnalysisUnavailable()) { <p class="v1-alert v1-alert--warning" role="status">The saved analysis is unavailable or ineligible. Its reference is preserved until you choose a replacement or clear the selection.</p> }
+      <div class="report-setup-section">
+        <div class="report-analysis-heading">
+          <h2 id="account-report-analysis-title">Analysis</h2>
+          <div class="report-analysis-filters" [formGroup]="analysisFilters" role="group" aria-label="Filter analyses">
+            <span class="report-analysis-filters__label"><app-ui-icon name="filter"/>Filter analyses</span>
+            @if (showTypeFilter()) {
+              <div class="report-setup-field">
+                <label for="account-report-analysis-type" class="visually-hidden">Type</label>
+                <select id="account-report-analysis-type" class="v1-select" formControlName="category"><option value="all">All types</option><option value="energy">Energy</option><option value="water">Water</option></select>
+              </div>
+            }
+            <div class="report-setup-field">
+              <label for="account-report-analysis-baseline" class="visually-hidden">Baseline year</label>
+              <select id="account-report-analysis-baseline" class="v1-select" formControlName="baselineYear">
+                <option [ngValue]="null">All baseline years</option>
+                @for (year of baselineYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
+              </select>
+            </div>
+            @if (filtersActive()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="clearAnalysisFilters()">Clear filters</button> }
+          </div>
+        </div>
+        <fieldset id="account-report-analysis" class="report-analysis-selection" tabindex="-1" aria-labelledby="account-report-analysis-title" [disabled]="!editor.canEdit()">
+          @if (hiddenSelectedAnalysis(); as selected) { <p class="report-setup-help" role="status">Selected analysis: <strong>{{ selected.name }}</strong>. Hidden by the current filters.</p> }
+          @if (analysisCards().length && !filteredAnalysisCards().length) { <p class="report-setup-help" role="status">No analyses match these filters. Clear the filters to see all available analyses.</p> }
+          <div class="report-analysis-grid">
+            @for (analysis of filteredAnalysisCards(); track analysis.value) {
+              <div class="report-analysis-card">
+                <label class="report-analysis-card__selection">
+                  <input type="radio" name="analysis" [formControl]="editor.form.controls.analysis" [value]="analysis.value">
+                  <span class="report-analysis-card__content">
+                    <strong>{{ analysis.name }}</strong>
+                    <span class="report-analysis-card__metadata">{{ analysis.category }} · Baseline {{ analysis.baseline }}</span>
+                    <span class="v1-chip report-analysis-card__status" [class]="'v1-chip--' + analysis.statusTone" role="status"><app-ui-icon [name]="analysis.statusIcon"/>{{ analysis.statusLabel }}</span>
+                  </span>
+                </label>
+                <button type="button" class="v1-icon-btn report-analysis-card__inspect" [attr.aria-label]="'Inspect ' + analysis.name" title="Inspect analysis" (click)="inspectAnalysis(analysis.value)"><app-ui-icon name="monocle"/></button>
+              </div>
+            }
+          </div>
+          @if (!analysisCards().length) { <p class="report-setup-help" role="status">No eligible analyses are available. Create an analysis before continuing to data checks.</p> }
+        </fieldset>
+        @if (context.savedAnalysisUnavailable()) { <p class="v1-alert v1-alert--warning" role="status">The saved analysis is unavailable or ineligible. Its reference is preserved until you choose a replacement.</p> }
         @if (context.needsPairRefresh()) { <p class="v1-alert v1-alert--warning" role="status">Your facility analysis has changed. Refresh this report’s analysis link to use its latest setup.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit() || editor.needsProtection()" (click)="editor.refreshLink()">Refresh analysis link</button> }
       </div>
     }
-    <div class="report-setup-panel"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
+    @if (entry.report.reportType === 'betterPlants') { <app-better-plants-setup/> } @else {
+    <div class="report-setup-section"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
+    }
+    <app-account-report-delete/>
   </section>
-  @if (entry.snapshot.findings.length) {
-    <section class="report-section" aria-labelledby="account-report-findings"><h2 id="account-report-findings">Configuration findings</h2><ul>@for (finding of context.findings(); track finding.id) { <li>{{ finding.description }}<app-status-finding-action [item]="finding"/></li> }</ul></section>
+}
+@if (inspectedAnalysis(); as entry) {
+  @if (entry.scope === 'facility') {
+    <app-analysis-details-slideout [card]="entry.card" [evaluation]="analyses.statusState()" [meterGroups]="analyses.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay" [showCategory]="analyses.categories().length > 1" actionLabel="Select for report" actionIcon="check" [actionDisabled]="!editor.canEdit() || openingAnalysis()" secondaryActionLabel="Go To Analysis" [secondaryActionDisabled]="openingAnalysis()" (secondaryActionSelected)="goToAnalysis()" (closed)="closeInspection()" (opened)="selectInspectedAnalysis()"/>
+  } @else {
+    <app-account-analysis-details-slideout [card]="entry.card" [evaluation]="analyses.statusState()" [facilityInputs]="analyses.facilityInputs()" [facilityFindings]="analyses.statusItems()" [outcomeDisplay]="entry.outcomeDisplay" [ownerName]="entry.ownerName" [showCategory]="analyses.categories().length > 1" actionLabel="Select for report" actionIcon="check" [actionDisabled]="!editor.canEdit() || openingAnalysis()" secondaryActionLabel="Go To Analysis" [secondaryActionDisabled]="openingAnalysis()" (secondaryActionSelected)="goToAnalysis()" (closed)="closeInspection()" (actionSelected)="selectInspectedAnalysis()"/>
   }
 }

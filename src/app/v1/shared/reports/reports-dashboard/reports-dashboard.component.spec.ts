@@ -5,6 +5,26 @@ import { setupReportInventory } from '../testing/report-inventory-test-setup';
 import { ReportsDashboardComponent } from './reports-dashboard.component';
 
 describe('report browse state', () => {
+  it('uses the Better Plants icon in portfolio cards and retains the page icon for other account and facility reports', async () => {
+    const { store } = await setupReportInventory();
+    const saved = store.snapshot()!;
+    store.publish({ ...saved, accountReports: [
+      { ...saved.accountReports[0], guid: 'plants', name: 'Better Plants report', reportType: 'betterPlants' },
+      { ...saved.accountReports[0], guid: 'analysis', reportType: 'analysis' }
+    ] });
+    const fixture = TestBed.createComponent(ReportsDashboardComponent); fixture.detectChanges();
+    const tiles = fixture.componentInstance.tiles();
+    expect(tiles.filter(tile => tile.icon === 'betterPlantsReport')).toHaveLength(1);
+    expect(tiles.filter(tile => tile.icon === 'report')).toHaveLength(2);
+    for (const level of ['simple', 'summary', 'detailed'] as const) {
+      fixture.componentInstance.inventory.detailControl.setValue(level); fixture.detectChanges();
+      for (const tile of fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile') as NodeListOf<HTMLElement>) {
+        const plants = tile.querySelector('.portfolio-tile__name')?.textContent?.trim() === 'Better Plants report';
+        expect(!!tile.querySelector('.portfolio-tile__report-pending')).toBe(!plants);
+      }
+    }
+    expect(store.committedRevision()).toBeUndefined();
+  });
   for (const scope of ['account', 'facility'] as const) {
     it.each(['idle', 'evaluating'] as const)(`preserves ${scope} browse state while checks are %s, then clamps settled changes`, async pending => {
       const { store, status } = await setupReportInventory(scope);

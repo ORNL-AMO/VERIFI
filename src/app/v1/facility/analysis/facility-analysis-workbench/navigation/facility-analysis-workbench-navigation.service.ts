@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
@@ -23,6 +24,7 @@ import { FacilityAnalysisPeriodService } from '../analysis-setup/facility-analys
 @Injectable()
 export class FacilityAnalysisWorkbenchNavigationService {
   private readonly router = inject(Router);
+  private readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly context = inject(FacilityAnalysisWorkbenchContext);
   private readonly autosave = inject(FacilityAnalysisAutosaveService);
@@ -56,7 +58,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
       this.context.findings(),
       this.navigationBlocked(),
       this.context.status.state() === 'ready'
-    ).map(stage => ({ ...stage, attention: attention[stage.id] }));
+    ).map(stage => ({ ...stage, attention: attention[stage.id], queryParams: this.reportReturn?.queryParams() }));
   });
   readonly currentNavigationStage = computed(() => this.stages().find(stage => stage.id === this.activeStageId()));
   readonly previousStage = computed(() => this.stages()
@@ -106,7 +108,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
     const fallback = current.kind === 'facility' && setup?.completed
       ? this.stages().find(stage => stage.kind === 'group' && !stage.completed) ?? setup
       : setup;
-    if (fallback) void this.router.navigate(fallback.route, { replaceUrl: true });
+    if (fallback) void this.router.navigate(fallback.route, { replaceUrl: true, queryParams: this.reportReturn?.queryParams() });
   });
 
   constructor() {
@@ -121,7 +123,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
     if (this.navigationBlocked()) return;
     const previous = this.previousStage();
     if (previous) {
-      void this.router.navigate(previous.route);
+      void this.router.navigate(previous.route, { queryParams: this.reportReturn?.queryParams() });
       return;
     }
     const facility = this.context.facility();
@@ -131,7 +133,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
   continue(): void {
     if (this.disabled()) return;
     const next = this.nextStage();
-    if (next) void this.router.navigate(next.route);
+    if (next) void this.router.navigate(next.route, { queryParams: this.reportReturn?.queryParams() });
   }
 
   finish(): void {
@@ -144,7 +146,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
     const stage = this.currentStage();
     const tab = this.contextTabs().find(item => item.id === tabId);
     if (!stage || !tab || tab.disabled) return;
-    void this.router.navigate([...stage.route.slice(0, -1), tabId]);
+    void this.router.navigate([...stage.route.slice(0, -1), tabId], { queryParams: this.reportReturn?.queryParams() });
   }
 
   private syncActiveStage(url: string): void {

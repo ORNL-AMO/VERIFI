@@ -1,6 +1,7 @@
 import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { analysisDependencyMessage as facilityAnalysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { Router } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
@@ -43,6 +44,7 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly accountAnalysisReturn = inject(AccountAnalysisReturnService);
+  readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.context.account(), facility = this.context.facility();
     return facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
@@ -80,6 +82,10 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   switchAnalysis(analysisGuid: string): void {
     const facility = this.context.facility();
     if (facility) void this.router.navigate(this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, analysisGuid));
+  }
+
+  async returnToReport(): Promise<void> {
+    if (await this.autosave.flush()) await this.reportReturn?.returnToReport();
   }
 }
 

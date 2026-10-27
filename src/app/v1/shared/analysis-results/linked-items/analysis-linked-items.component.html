@@ -1,0 +1,7 @@
+@if (items().length) {
+  <ul class="analysis-links" [attr.aria-label]="label()">
+    @for (item of items(); track item.key) {
+      <li><app-ui-icon class="analysis-links__icon" [name]="item.icon" [size]="22"/><span><strong>{{ item.name }}</strong><small>{{ item.detail }}</small></span></li>
+    }
+  </ul>
+} @else { <p class="analysis-links__empty">{{ emptyMessage() }}</p> }

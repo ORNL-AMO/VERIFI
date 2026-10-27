@@ -1,1 +1,6 @@
 @import '../../../shared/reports/report-workbench.css';
+.v1-wizard-actions__next { flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .v1-wizard-actions { align-items: flex-start; }
+  .v1-wizard-actions__next { flex: 1; }
+}

@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { AccountAnalysisReturnService, readAccountAnalysisReturnOrigin } from './account-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 
 describe('AccountAnalysisReturnService', () => {
   afterEach(() => TestBed.resetTestingModule());
@@ -20,6 +21,7 @@ describe('AccountAnalysisReturnService', () => {
     const navigate = vi.fn().mockResolvedValue(true);
     TestBed.configureTestingModule({ providers: [
       AccountAnalysisReturnService,
+      { provide: ReportAnalysisReturnService, useValue: { queryParams: () => ({ returnReportAccountGuid: 'account-a', returnReportGuid: 'report-a' }) } },
       {
         provide: ActivatedRoute,
         useValue: { snapshot: { queryParamMap: convertToParamMap({
@@ -50,7 +52,7 @@ describe('AccountAnalysisReturnService', () => {
     expect(service.origin()).toBeDefined();
     expect(await service.returnToAccountAnalysis()).toBe(true);
     expect(navigate).toHaveBeenCalledWith(['/account-analysis', 'select-items'], {
-      queryParams: { facilityGuid: 'facility-a' }
+      queryParams: { returnReportAccountGuid: 'account-a', returnReportGuid: 'report-a', facilityGuid: 'facility-a' }
     });
   });
 

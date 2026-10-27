@@ -1,0 +1,14 @@
+/* Form-like report surfaces, independent of future print and file layout adapters. */
+.report-document { width: 100%; max-width: 76rem; margin-inline: auto; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0; background: var(--v1-surface); color: var(--v1-text); }
+.report-banner { display: block; width: 100%; height: auto; }
+.document-section { padding: 1.25rem; border-bottom: 1px solid var(--v1-border); }
+.table-scroll { max-width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+th, td { padding: .65rem .75rem; border: 1px solid var(--v1-border); vertical-align: top; }
+thead th { text-align: center; background: var(--v1-surface-muted); }
+tbody th { width: 52%; font-weight: 400; }
+td { text-align: right; }
+caption { caption-side: top; padding: 0 0 .75rem; color: var(--v1-text); font-size: 1.05rem; font-weight: 600; }
+.total-row { font-weight: 600; background: var(--v1-surface-muted); }
+.total-row th { font-weight: 600; }
+@media (max-width: 640px) { .document-section { padding: .85rem; } table { min-width: 34rem; } }

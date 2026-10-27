@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
@@ -59,6 +60,16 @@ describe('AccountAnalysisFacilitySelectionService', () => {
     expect(service.detailCards()[0]).toMatchObject({ statusLabel: 'Ready', category: 'energy' });
   });
 
+  it('carries the report origin when opening an existing facility analysis', async () => {
+    const { service, navigate, update } = setup({ reportOrigin: true }); TestBed.flushEffects();
+    expect(await service.openFacilityAnalysis(service.detailCards()[0].analysis)).toBe(true);
+    expect(navigate).toHaveBeenCalledWith(['/facility', 'facility-a', 'analysis-a', 'setup'], { queryParams: {
+      returnReportAccountGuid: 'account-a', returnReportGuid: 'report-a',
+      returnAccountGuid: 'account-a', returnAccountAnalysisGuid: 'account-analysis-a', returnFacilityGuid: 'facility-a'
+    } });
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('excludes selected analyses with blocking errors from the valid count', () => {
     const { service } = setup({
       facilityAnalysisItems: [
@@ -80,6 +91,7 @@ describe('AccountAnalysisFacilitySelectionService', () => {
 });
 
 function setup(options: {
+  reportOrigin?: boolean;
   requestedFacilityGuid?: string;
   facilityAnalysisItems?: readonly { facilityId: string; analysisItemId?: string }[];
   findings?: readonly any[];
@@ -122,6 +134,7 @@ function setup(options: {
   const params = convertToParamMap(options.requestedFacilityGuid ? { facilityGuid: options.requestedFacilityGuid } : {});
 
   TestBed.configureTestingModule({ providers: [
+    ...(options.reportOrigin ? [{ provide: ReportAnalysisReturnService, useValue: { queryParams: () => ({ returnReportAccountGuid: 'account-a', returnReportGuid: 'report-a' }) } }] : []),
     AccountAnalysisFacilitySelectionService,
     {
       provide: AccountAnalysisWorkbenchContext,

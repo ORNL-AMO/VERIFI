@@ -1,0 +1,91 @@
+@let summary = overview();
+<section class="report-section" aria-labelledby="analysis-issues-title">
+  <h2 id="analysis-issues-title" class="checks-heading">Issues summary</h2>
+  @if (!summary.hasResults) { <p class="v1-alert v1-alert--warning">Analysis checks are unavailable. Retry checks before continuing.</p> }
+  @else {
+    <dl class="issue-totals" aria-label="Issue totals">
+      <div class="issue-total--danger"><dt>Critical</dt><dd>{{ summary.critical }}</dd></div>
+      <div class="issue-total--warning"><dt>Moderate</dt><dd>{{ summary.moderate }}</dd></div>
+      <div class="issue-total--info"><dt>Minor</dt><dd>{{ summary.minor }}</dd></div>
+    </dl>
+    @if (!summary.critical && !summary.moderate && !summary.minor && !summary.emptyPeriods.length) { <p>No issues identified.</p> }
+    @if (issueCards().length) { <p class="checks-help">{{ issueCards().length }} {{ issueCards().length === 1 ? 'analysis group has' : 'analysis groups have' }} issues.</p> }
+  }
+  @for (year of summary.emptyPeriods; track year) { <p class="v1-alert v1-alert--danger">{{ year }}: No included analysis groups are available. Review the linked analysis setup.</p> }
+  @if (reportFindings().length) {
+    <ul class="check-issues" aria-label="Report findings">@for (finding of reportFindings(); track finding.id) {
+      <li><strong [class.issue-message--danger]="finding.severity === 'error'" [class.issue-message--warning]="finding.severity === 'warning'">{{ finding.severityLabel }}:</strong> {{ finding.description }}<app-status-finding-action [item]="finding"/></li>
+    }</ul>
+  }
+  @if (issueCards().length) {
+    <div class="issue-cards" role="list" aria-label="Analysis groups with issues">
+      @for (card of issueCards(); track card.key) {
+        <section class="issue-card" role="listitem" [class.issue-card--danger]="card.tone === 'danger'" [class.issue-card--warning]="card.tone === 'warning'" [class.issue-card--info]="card.tone === 'info'" [attr.aria-label]="card.facilityLabel + ' · ' + card.groupLabel">
+          <p class="issue-card-facility">{{ card.facilityLabel }}</p>
+          <h3 class="issue-card-title">{{ card.groupLabel }}<span class="issue-card-count" [attr.aria-label]="card.count + (card.count === 1 ? ' issue' : ' issues')">{{ card.count }}</span></h3>
+          <ul class="check-issues">
+            @for (issue of card.issues; track $index) {
+              <li><strong [class.issue-message--danger]="issue.severity === 'Critical'" [class.issue-message--warning]="issue.severity === 'Moderate'" [class.issue-message--info]="issue.severity === 'Minor'">{{ issue.severity }}:</strong> {{ issue.note }}<button type="button" class="issue-link" (click)="openGroup(issue.key)">{{ issue.item.reportYear }} — View validation details</button></li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+  }
+</section>
+<section class="report-section" aria-labelledby="analysis-executive-title">
+  <h2 id="analysis-executive-title" class="checks-heading">Executive summary</h2>
+  @for (summaryGroup of summaryGroups(); track summaryGroup.key) {
+    <div class="table-scroll executive-summary-scroll" tabindex="0" role="region" [attr.aria-label]="summaryGroup.caption">
+      <table class="executive-summary-table">
+        <caption>{{ summaryGroup.caption }}</caption>
+        <thead><tr>
+          <th scope="col">Facility</th><th scope="col">Group</th>
+          @if (summaryGroup.regression) {
+            <th scope="col">Model year</th><th scope="col">Variable p-values</th><th scope="col">R²</th><th scope="col">Adjusted R²</th><th scope="col">Model p-value</th><th scope="col">Formula</th>
+          } @else {
+            <th scope="col">Baseline year</th><th scope="col">Predictor variables</th>
+          }
+          <th scope="col">Minor issues</th>
+        </tr></thead>
+        <tbody>
+          @for (item of summaryGroup.rows; track item.key) {
+            <tr class="executive-summary-row" [attr.data-check-key]="item.key">
+              <td>{{ item.facilityLabel }}</td>
+              <th scope="row" class="summary-group-cell"><a [routerLink]="item.route">{{ item.groupLabel }}</a>
+                <button #validationButton type="button" class="validation-toggle" [attr.data-check-key]="item.key" [attr.aria-expanded]="expandedKeys().has(item.key)" [attr.aria-controls]="item.validationId" [attr.aria-label]="(expandedKeys().has(item.key) ? 'Hide checks for ' : summaryGroup.regression ? 'View data validation for ' : 'Inspect checks for ') + item.reportYear + ' · ' + item.facilityLabel + ' · ' + item.groupLabel" (click)="toggleValidation(item.key)">{{ expandedKeys().has(item.key) ? 'Hide checks' : summaryGroup.regression ? 'View data validation' : 'Inspect checks' }}</button>
+              </th>
+              @if (summaryGroup.regression) {
+                @let model = item.model;
+                <td>{{ item.modelPeriod }}@if (model?.isUserDefinedModel) { <span class="summary-model-note">User defined</span> }</td>
+                <td class="predictor-p-values">@if (model && !model.isUserDefinedModel && item.variablePValues.length) { @for (variable of item.variablePValues; track $index) { <div>{{ variable.name }}: {{ variable.value }}</div> } } @else { — }</td>
+                <td class="summary-number">{{ model && !model.isUserDefinedModel ? ((model.R2 | number:'1.3-3') ?? '—') : '—' }}</td>
+                <td class="summary-number">{{ model && !model.isUserDefinedModel ? ((model.adjust_R2 | number:'1.3-3') ?? '—') : '—' }}</td>
+                <td class="summary-number">{{ model && !model.isUserDefinedModel ? ((model.modelPValue | number:'1.2-2') ?? '—') : '—' }}</td>
+                <td class="summary-formula">{{ item.formula }}</td>
+              } @else {
+                <td>{{ item.baselineYear }}</td><td>{{ item.predictors }}</td>
+              }
+              <td>@if (item.minor.length) { @for (note of item.minor; track $index) { <div>{{ note }}</div> } } @else { — }</td>
+            </tr>
+            @if (expandedKeys().has(item.key)) {
+              <tr class="validation-detail-row"><td [attr.colspan]="summaryGroup.regression ? 9 : 5">
+                <section #validationPanel class="validation-detail" tabindex="-1" [id]="item.validationId" [attr.data-check-key]="item.key" [attr.aria-label]="item.reportYear + ' · ' + item.facilityLabel + ' · ' + item.groupLabel + ' data validation'">
+                  <div class="validation-detail-heading"><h3>{{ item.reportYear }} · {{ item.facilityLabel }} · {{ item.groupLabel }}</h3><button type="button" class="v1-btn v1-btn--quiet" (click)="closeValidation(item.key)">Close checks</button></div>
+                  @if (item.model?.SEPValidation?.length) {
+                    <div class="table-scroll" tabindex="0" role="region" aria-label="Predictor data validation">
+                      <table><caption>Data validation</caption><thead><tr><th scope="col">Validation metric</th>@for (validation of item.model!.SEPValidation; track $index) { <th scope="col">{{ validation.predictorVariable }}</th> }</tr></thead>
+                        <tbody>@for (row of item.validation; track row.label) { <tr><th scope="row">{{ row.label }}</th>@for (cell of row.cells; track $index) { <td [class.check-failed]="cell.failed">{{ cell.value | analysisResultNumber }}@if (cell.failed) { <span class="validation-label"> — Fail</span> }</td> }</tr> }</tbody>
+                        <tfoot><tr><th scope="row">Validation check</th>@for (validation of item.model!.SEPValidation; track $index) { <td [class.check-failed]="!validation.isValid">{{ validation.isValid ? 'Pass' : 'Fail' }}</td> }</tr></tfoot>
+                      </table>
+                    </div>
+                  } @else { <p>{{ summaryGroup.regression ? 'Predictor validation is unavailable for this model. Review the analysis setup.' : 'Regression model validation does not apply to this analysis method.' }}</p> }
+                </section>
+              </td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  } @empty { <p>No analysis groups are available for the executive summary.</p> }
+</section>

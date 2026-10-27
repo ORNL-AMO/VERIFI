@@ -1,0 +1,6 @@
+interface:
+  display_name: "VERIFI UI Iterate"
+  short_description: "Iterate on VERIFI UI, then validate the batch"
+  default_prompt: "Use $ui-iterate to make UI changes and defer validation until I am ready to test the batch."
+policy:
+  allow_implicit_invocation: false

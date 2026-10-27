@@ -25,7 +25,6 @@ import { ACCOUNT_REPORT_ROUTES } from '../account-reports.routes';
 import { AccountReportActionsService } from '../account-report-actions.service';
 import { AccountReportSetupChanges, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { accountReportSnapshot } from '../testing/account-report-test-fixtures';
-import { reportAnalysisToken } from '../account-report-workbench/account-report-workbench.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
@@ -40,13 +39,15 @@ import { dbConfig } from '@data/indexedDB/_dbConfig';
 import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/single-facility-analysis-pair.guard';
 import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
-import { makeFinding } from '@app/v1/status/status.models';
+import { makeFinding, StatusItem } from '@app/v1/status/status.models';
+import { getNewAnalysisGroup } from '@data/models/idbModels/analysisItem';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 
 const dashboardUrl = '/v1/workspace/account/account-a/reports/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div style="position:relative;isolation:isolate"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
 class ReportsBrowserHost { readonly modal = inject(ModalPortalService); }
-@Component({ standalone: true, template: '<h1>Analysis Setup</h1>' })
-class StatusAnalysisTarget { }
+@Component({ standalone: true, providers: [ReportAnalysisReturnService], template: '<h1>Analysis Setup</h1>@if (reportReturn.origin()) { <button type="button" (click)="reportReturn.returnToReport()">Return to Report</button> }' })
+class StatusAnalysisTarget { readonly reportReturn = inject(ReportAnalysisReturnService); }
 function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceStore, providers: Provider[] = []) {
   const store = existingStore ?? new AccountWorkspaceStore();
   const report = { ...getNewIdbAccountReport(reportAccount, [reportFacility], []), guid: 'account-report', id: 4, name: 'Saved account report', reportType: 'analysis' as const, reportYear: 2024 };
@@ -60,9 +61,11 @@ function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceS
       store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [updated] }] }); return updated;
     }) };
   const status = signal<'ready' | 'evaluating'>('ready');
+  const findingItems = signal<StatusItem[]>([]);
   const coverage = new BehaviorSubject<WorkspaceCalendarizationBaseResult>({ state: 'ready', accountGuid: 'account-a', inputFingerprint: 'reports-status', meters: [] });
   TestBed.configureTestingModule({ imports: [ReportsBrowserHost, AccountReportsModule, FacilityReportsModule], providers: [provideRouter([
     { path: 'v1/workspace/account/:accountGuid/reports', children: ACCOUNT_REPORT_ROUTES },
+    { path: 'v1/workspace/account/:accountGuid/analysis/workbench/:analysisGuid/setup', component: StatusAnalysisTarget },
     { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES },
     { path: 'v1/workspace/facility/:facilityGuid/analysis', canActivateChild: [singleFacilityAnalysisPairGuard], children: [
       { path: 'workbench/:analysisGuid/setup', component: StatusAnalysisTarget }
@@ -72,7 +75,7 @@ function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceS
     ...(realStatus ? [WorkspaceStatusService,
       { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => coverage.asObservable(), currentInputFingerprint: () => 'reports-status' } },
       { provide: AccountCommandHandler, useValue: {} }, { provide: WorkspaceCommandBoundary, useValue: {} }]
-      : [{ provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } }]),
+      : [{ provide: WorkspaceStatusService, useValue: { state: status, items: findingItems } }]),
     { provide: AccountReportActionsService, useValue: accountActions }, { provide: FacilityReportActionsService, useValue: {} },
     { provide: SingleFacilityAnalysisPairService, useValue: { ensurePairs: vi.fn(async () => true) } },
     { provide: WorkbenchLayoutService, useFactory: () => { const factsExpanded = signal(true); return { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) }; } },
@@ -81,7 +84,7 @@ function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceS
   const fixture = TestBed.createComponent(ReportsBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router); router.setUpLocationChangeListener();
   const dashboard = () => fixture.debugElement.query(By.directive(ReportsDashboardComponent)).componentInstance as ReportsDashboardComponent;
-  return { fixture, router, store, status, coverage, accountActions, dashboard, root: fixture.nativeElement.querySelector('main') as HTMLElement };
+  return { fixture, router, store, status, findingItems, coverage, accountActions, dashboard, root: fixture.nativeElement.querySelector('main') as HTMLElement };
 }
 async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<void> {
   fixture.detectChanges(); await fixture.whenStable();
@@ -91,6 +94,97 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
 describe('report inventory browser journeys and presentation', () => {
   let database: IndexedDbTestHarness | undefined;
   afterEach(async () => { await database?.destroy(); database = undefined; });
+  it('confirms deletion from invalid Setup, returns to Reports, and preserves other reports and source analyses in IndexedDB', async () => {
+    await page.viewport(1200, 900);
+    const snapshot = accountReportSnapshot();
+    snapshot.accountReports.push({ ...snapshot.accountReports[0], id: 41, guid: 'other-report', name: 'Other report' });
+    database = await IndexedDbTestHarness.create('report-setup-delete');
+    await database.seed({ accounts: [{ ...snapshot.account }], facilities: snapshot.facilities.map(item => ({ ...item })),
+      accountReports: snapshot.accountReports.map(item => ({ ...item })),
+      analysisItems: snapshot.facilityAnalyses.map(item => ({ ...item })), accountAnalysisItems: snapshot.accountAnalyses.map(item => ({ ...item })) });
+    const store = new AccountWorkspaceStore(); store.publish(snapshot);
+    const access = new IndexedDbAccessService(database.dbService);
+    const transactions = new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: database.databaseName } });
+    const handler = new ReportCommandHandler(new FacilityReportsDbService(database.dbService, access), new AccountReportDbService(database.dbService, access), store, transactions);
+    const boundary = new WorkspaceCommandBoundary(store, {} as AccountWorkspaceService);
+    TestBed.resetTestingModule();
+    const view = setup(0, false, store, [{ provide: WorkspaceCommandBoundary, useValue: boundary },
+      { provide: ReportCommandHandler, useValue: handler }, { provide: AccountReportActionsService, useClass: AccountReportActionsService }]);
+    const update = vi.spyOn(TestBed.inject(AccountReportActionsService), 'updateSetup');
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
+    await page.getByRole('textbox', { name: /^Name/ }).fill('');
+    await page.getByRole('button', { name: 'Delete report', exact: true }).click(); await settle(view.fixture);
+    expect(page.getByRole('dialog').element().textContent).toContain('Saved account report');
+    await userEvent.keyboard('{Escape}'); await settle(view.fixture);
+    expect(view.root.querySelector('[role="dialog"]')).toBeNull();
+    expect(await database.getAll('accountReports')).toHaveLength(2);
+    expect(view.root.querySelector<HTMLInputElement>('#account-report-name')?.value).toBe('');
+    await page.getByRole('button', { name: 'Delete report', exact: true }).click(); await settle(view.fixture);
+    await page.getByRole('dialog').getByRole('button', { name: 'Delete report', exact: true }).click();
+    await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
+    expect((await database.getAll('accountReports')).map(item => item.guid)).toEqual(['other-report']);
+    expect(await database.getAll('analysisItems')).toHaveLength(1); expect(await database.getAll('accountAnalysisItems')).toHaveLength(1);
+    expect(view.store.accountReports().map(item => item.guid)).toEqual(['other-report']);
+    expect(update).not.toHaveBeenCalled();
+    view.fixture.destroy();
+  });
+  it.each([false, true])('opens an unselected analysis from report inspection and returns without changing the report for a single facility: %s', async single => {
+    await page.viewport(1200, 900);
+    const view = setup(1), snapshot = accountReportSnapshot(single);
+    snapshot.facilityAnalyses[0].groups = [{ ...getNewAnalysisGroup('group', []), analysisType: 'absoluteEnergyConsumption' }];
+    if (single) snapshot.facilityAnalyses.push({ ...snapshot.facilityAnalyses[0], id: 21, guid: 'other-analysis', name: 'Another analysis' });
+    else snapshot.accountAnalyses.push({ ...snapshot.accountAnalyses[0], id: 31, guid: 'other-analysis', name: 'Another analysis' });
+    if (single) snapshot.facilityReports = [...snapshot.facilityReports, reportFixture({ guid: 'linked-report', facilityReportType: 'costSavings', analysisItemId: 'other-analysis', name: 'Facility savings report' })];
+    else snapshot.accountReports.push({ ...snapshot.accountReports[0], id: 42, guid: 'linked-report', name: 'Annual plant report', reportType: 'betterPlants',
+      betterPlantsReportSetup: { ...snapshot.accountReports[0].betterPlantsReportSetup, analysisItemId: 'other-analysis' } });
+    view.store.publish(snapshot);
+    view.findingItems.set([presentFinding(single
+      ? makeFinding('analysis-group.model.invalid', 'warning', 'quality', { kind: 'analysis-group', guid: 'other-analysis:group', accountGuid: 'account-a', facilityGuid: 'facility-a', name: 'Group' })
+      : makeFinding('account-analysis.children.warning', 'warning', 'quality', { kind: 'account-analysis', guid: 'other-analysis', accountGuid: 'account-a', name: 'Another analysis' }))]);
+    const reportUrl = '/v1/workspace/account/account-a/reports/workbench/account-report/setup';
+    await view.router.navigateByUrl(reportUrl); await settle(view.fixture);
+    const before = structuredClone(view.store.snapshot());
+    await page.getByRole('button', { name: 'Hide facts' }).click();
+    await page.getByRole('button', { name: 'Inspect Another analysis' }).click();
+    expect(view.root.querySelector('[role="dialog"]')?.textContent).toContain('Select for report');
+    expect(view.root.querySelector('[role="dialog"] footer button')?.textContent).toContain('Select for report');
+    const summary = view.root.querySelector<HTMLElement>('[role="dialog"] [aria-label="Analysis status"]')!;
+    expect(summary.textContent).toContain(view.findingItems()[0].description);
+    expect(view.root.querySelectorAll('[role="dialog"] [aria-label="Analysis validation findings"] li')).toHaveLength(1);
+    expect(view.root.querySelector('[role="dialog"] app-analysis-linked-items')?.textContent).toContain(single ? 'Cost Savings · Facility report' : 'Better Plants · Account report');
+    for (const dark of [false, true]) {
+      view.root.classList.toggle('v1-theme-dark', dark);
+      view.root.classList.add('v1-contrast-strong');
+      for (const width of [390, 1200]) {
+        await page.viewport(width, 900);
+        const dialog = view.root.querySelector<HTMLElement>('[role="dialog"]')!;
+        expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth + 1);
+        const tableFrame = dialog.querySelector<HTMLElement>('.v1-table-shell');
+        if (tableFrame) {
+          expect(tableFrame.scrollWidth).toBeLessThanOrEqual(tableFrame.clientWidth + 1);
+          expect(getComputedStyle(tableFrame).borderTopStyle).toBe('solid');
+          expect(parseFloat(getComputedStyle(tableFrame).borderTopWidth)).toBeGreaterThanOrEqual(1);
+          for (const heading of dialog.querySelectorAll<HTMLElement>('.analysis-details-section > h3')) {
+            expect(parseInt(getComputedStyle(heading).fontWeight, 10)).toBeGreaterThanOrEqual(700);
+            expect(getComputedStyle(heading).marginBottom).toBe('0px');
+          }
+          if (width === 1200) expect(getComputedStyle(tableFrame.querySelector('td')!).verticalAlign).toBe('middle');
+        }
+      }
+      await page.screenshot({ element: view.root.querySelector<HTMLElement>('[role="dialog"]')!, path: `./__screenshots__/report-analysis-inspector-${single ? 'facility' : 'account'}${dark ? '-dark' : ''}.png` });
+    }
+    view.root.classList.remove('v1-theme-dark');
+    await page.getByRole('button', { name: 'Go To Analysis', exact: true }).click(); await settle(view.fixture);
+    expect(view.router.url).toContain(single ? '/facility/facility-a/analysis/workbench/other-analysis/setup' : '/account/account-a/analysis/workbench/other-analysis/setup');
+    expect(view.router.url).toContain('returnReportGuid=account-report');
+    await page.getByRole('button', { name: 'Return to Report', exact: true }).click(); await settle(view.fixture);
+    expect(view.router.url).toBe(reportUrl);
+    expect(view.root.querySelector('.report-analysis-card input:checked')?.closest('label')?.textContent).toContain('Energy analysis');
+    expect(view.store.snapshot()).toEqual(before);
+    expect(view.accountActions.updateSetup).not.toHaveBeenCalled();
+    expect(TestBed.inject(SingleFacilityAnalysisPairService).ensurePairs).not.toHaveBeenCalled();
+    view.fixture.destroy();
+  });
   it('opens a linked single-facility analysis through its saved pair and keeps browser Forward read-only', async () => {
     const view = setup(1, true), snapshot = accountReportSnapshot(true); snapshot.accountAnalyses[0].name = 'Stale pair metadata'; view.store.publish(snapshot);
     await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
@@ -142,7 +236,7 @@ describe('report inventory browser journeys and presentation', () => {
     await userEvent.keyboard('{Enter}'); await settle(view.fixture);
     expect(scroll).toBeGreaterThan(0);
     expect(view.router.url).toContain(scope === 'account' ? '/account/account-a/reports/workbench/' : '/facility/facility-a/reports/workbench/');
-    expect(view.root.textContent).toContain('Other report settings are pending migration.');
+    expect(view.root.querySelector<HTMLInputElement>(scope === 'account' ? '#account-report-name' : '#report-workbench-name')?.value).toBe('');
     expect(view.root.textContent).toContain('Report-specific settings');
     view.coverage.next({ state: 'evaluating', meters: [] });
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
@@ -240,8 +334,7 @@ describe('report inventory browser journeys and presentation', () => {
     const view = setup(1), snapshot = accountReportSnapshot(true); view.store.publish(snapshot);
     await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
-    const choice = reportAnalysisToken({ scope: 'facility', facilityGuid: 'facility-a', analysisGuid: 'facility-analysis' });
-    expect(view.root.querySelector<HTMLSelectElement>('#account-report-analysis')!.value).toBe(choice);
+    expect(view.root.querySelector('#account-report-analysis input:checked')?.closest('label')?.textContent).toContain('Energy analysis');
     await page.getByRole('textbox', { name: /^Name/ }).fill('A long account report name that remains readable in a narrow window');
     await page.getByRole('link', { name: 'Continue', exact: true }).click(); await settle(view.fixture);
     expect(view.accountActions.updateSetup).toHaveBeenCalledExactlyOnceWith('account-report', { name: 'A long account report name that remains readable in a narrow window' });
@@ -256,7 +349,44 @@ describe('report inventory browser journeys and presentation', () => {
     }
     await page.getByRole('link', { name: 'Back', exact: true }).click(); await settle(view.fixture);
     const name = view.root.querySelector<HTMLInputElement>('#account-report-name')!; name.focus(); await userEvent.keyboard('{Tab}');
-    expect(document.activeElement?.id).toBe('account-report-analysis');
+    expect(document.activeElement?.id).toBe('account-report-analysis-baseline');
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(view.root.querySelector('#account-report-analysis input:checked'));
+    view.fixture.destroy();
+  });
+  it('filters report analysis cards by type and baseline year without saving or replacing a hidden selection', async () => {
+    await page.viewport(1200, 900);
+    const view = setup(1), snapshot = accountReportSnapshot();
+    snapshot.accountAnalyses.push({ ...snapshot.accountAnalyses[0], id: 31, guid: 'water-analysis', name: 'Water analysis', analysisCategory: 'water', baselineYear: 2020 });
+    view.store.publish(snapshot);
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
+    await page.getByRole('button', { name: 'Hide facts', exact: true }).click(); await settle(view.fixture);
+    const heading = view.root.querySelector<HTMLElement>('#account-report-analysis-title')!.getBoundingClientRect();
+    const filters = view.root.querySelector<HTMLElement>('.report-analysis-filters')!.getBoundingClientRect();
+    expect(filters.left).toBeGreaterThan(heading.right);
+    expect(filters.top).toBeLessThan(heading.bottom);
+    expect(view.root.querySelector('.report-analysis-filters app-ui-icon[name="filter"]')).not.toBeNull();
+    const names = () => [...view.root.querySelectorAll('.report-analysis-card:not(.report-analysis-card--empty) strong')].map(item => item.textContent);
+    await page.getByRole('combobox', { name: 'Type', exact: true }).selectOptions('water'); await settle(view.fixture);
+    expect(names()).toEqual(['Water analysis']);
+    const baseline = view.root.querySelector<HTMLSelectElement>('#account-report-analysis-baseline')!;
+    await page.getByRole('combobox', { name: 'Baseline year', exact: true }).selectOptions([...baseline.options].find(option => option.textContent?.trim() === '2018')!.value);
+    await settle(view.fixture);
+    expect(names()).toEqual([]);
+    expect(view.root.textContent).toContain('No analyses match these filters');
+    expect(view.root.textContent).toContain('Selected analysis: Energy analysis');
+    for (const dark of [false, true]) {
+      view.root.className = `v1-root v1-palette-blueprint${dark ? ' v1-theme-dark' : ''}`;
+      for (const width of [1024, 640, 390]) {
+        await page.viewport(width, 800); await settle(view.fixture);
+        expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      }
+    }
+    await page.getByRole('button', { name: 'Clear filters', exact: true }).click(); await settle(view.fixture);
+    expect(names()).toEqual(['Energy analysis', 'Water analysis']);
+    expect(view.root.querySelector('#account-report-analysis input:checked')?.closest('label')?.textContent).toContain('Energy analysis');
+    expect(view.store.accountReports()[0].analysisReportSetup.analysisItemId).toBe('account-analysis');
+    expect(view.accountActions.updateSetup).not.toHaveBeenCalled();
     view.fixture.destroy();
   });
   it('matches Analysis insets and action placement, with flush scope headers and responsive themed cards', async () => {

@@ -1,6 +1,11 @@
 import { ReportType } from '@data/models/constantsAndTypes';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { BetterPlantsReportSetup } from '@data/models/overview-report';
+
+export type BetterPlantsSetupChanges = {
+  readonly [K in Exclude<keyof BetterPlantsReportSetup, 'analysisItemId'>]?: K extends 'includeFacilityNames' | 'includeAllYears' | 'includePerformanceTable' ? boolean : BetterPlantsReportSetup[K] | null;
+};
 
 export type ReportAnalysisSelection =
   | { readonly scope: 'account'; readonly analysisGuid: string }
@@ -10,6 +15,8 @@ export type ReportAnalysisSelection =
 export interface AccountReportSetupChanges {
   readonly name?: string;
   readonly analysis?: ReportAnalysisSelection | null;
+  readonly reportYear?: number | null;
+  readonly betterPlants?: BetterPlantsSetupChanges;
 }
 export interface AccountReportSetupResult {
   readonly report: IdbAccountReport;

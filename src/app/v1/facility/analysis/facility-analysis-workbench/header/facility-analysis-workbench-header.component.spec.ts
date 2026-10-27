@@ -11,6 +11,7 @@ import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench
 import { FacilityAnalysisWorkbenchNavigationService } from '../navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisResultsService } from '../results/calculation/facility-analysis-results.service';
 import { AccountAnalysisReturnService } from '../navigation/account-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import {
   FacilityAnalysisWorkbenchHeaderComponent,
   facilityAnalysisResultOutcome
@@ -74,10 +75,14 @@ describe('facility analysis workbench header', () => {
     const singleSite = signal(false);
     const returnOrigin = signal({ accountGuid: 'account-a', accountAnalysisGuid: 'account-analysis-a', facilityGuid: 'facility-a' });
     const returnToAccountAnalysis = vi.fn();
+    const reportOrigin = signal<{ accountGuid: string; reportGuid: string } | undefined>(undefined);
+    const returnToReport = vi.fn().mockResolvedValue(true);
+    const flush = vi.fn().mockResolvedValue(false);
     await TestBed.configureTestingModule({
       imports: [FacilityAnalysisWorkbenchHeaderComponent],
       providers: [
         provideRouter([]),
+        { provide: ReportAnalysisReturnService, useValue: { origin: reportOrigin, returnToReport } },
         {
           provide: FacilityAnalysisWorkbenchContext,
           useValue: {
@@ -93,7 +98,7 @@ describe('facility analysis workbench header', () => {
           provide: FacilityAnalysisAutosaveService,
           useValue: {
             draft: signal(analysis), state: signal('saved'), error: signal(undefined),
-            retry: vi.fn(), discard: vi.fn()
+            retry: vi.fn(), discard: vi.fn(), flush
           }
         },
         {
@@ -153,6 +158,14 @@ describe('facility analysis workbench header', () => {
     expect(returnButton).toBeTruthy();
     returnButton?.click();
     expect(returnToAccountAnalysis).toHaveBeenCalledOnce();
+    const reportButton = () => [...host.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.includes('Return to Report'));
+    expect(reportButton()).toBeUndefined();
+    reportOrigin.set({ accountGuid: 'account-a', reportGuid: 'report-a' }); fixture.detectChanges();
+    reportButton()!.click(); await vi.waitFor(() => expect(flush).toHaveBeenCalledOnce());
+    expect(returnToReport).not.toHaveBeenCalled();
+    flush.mockResolvedValue(true); reportButton()!.click();
+    await vi.waitFor(() => expect(returnToReport).toHaveBeenCalledOnce());
+    reportOrigin.set(undefined); fixture.detectChanges(); expect(reportButton()).toBeUndefined();
 
     const toggle = Array.from(host.querySelectorAll<HTMLButtonElement>('button'))
       .find(button => button.textContent?.includes('Hide facts'));

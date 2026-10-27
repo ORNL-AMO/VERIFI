@@ -2,6 +2,7 @@ import { getNewIdbAccountReport } from '@data/models/idbModels/accountReport';
 import { reportAccount, reportFacility, reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -39,7 +40,8 @@ describe('ReportsNavComponent', () => {
     const sections: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.v1-nav__report-section'));
     expect(sections.map(section => section.querySelector('.v1-nav__sublabel')?.textContent)).toEqual(['Analysis', 'Data Overview']);
     expect(sections.every(section => section.querySelector(`#${section.getAttribute('aria-labelledby')}`))).toBe(true);
-    expect(sections[0].querySelectorAll('app-ui-icon[name="report"]')).toHaveLength(2);
+    expect(fixture.debugElement.queryAll(By.css('.v1-nav__report-section:first-of-type .v1-nav__report-entry > a app-ui-icon'))
+      .map(icon => icon.componentInstance.name)).toEqual(['report', 'report']);
     expect(fixture.nativeElement.querySelector('a app-ui-icon[name="reports"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('a[aria-expanded="true"]').textContent).toContain('Zebra');
     expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(1);
@@ -68,6 +70,7 @@ describe('ReportsNavComponent', () => {
     const base = getNewIdbAccountReport(reportAccount, [reportFacility], []);
     store.publish({ ...reportSnapshot(), account: { ...reportAccount, displayEmissions: false }, accountReports: [
       { ...base, guid: 'z', name: 'Zebra', reportType: 'analysis' }, { ...base, guid: 'a', name: 'Alpha', reportType: 'analysis' },
+      { ...base, guid: 'plants', name: 'Better Plants report', reportType: 'betterPlants' },
       { ...base, guid: 'factors', name: 'Hidden factors', reportType: 'accountEmissionFactors' },
       { ...base, guid: 'other', name: 'Wrong account', accountId: 'account-b', reportType: 'analysis' }
     ] });
@@ -82,7 +85,9 @@ describe('ReportsNavComponent', () => {
       } }
     ] }).compileComponents();
     const fixture = TestBed.createComponent(ReportsNavComponent); fixture.detectChanges();
-    expect(fixture.componentInstance.reportGroups().map(group => group.reports.map(report => report.guid))).toEqual([['a', 'z']]);
+    expect(fixture.componentInstance.reportGroups().map(group => group.reports.map(report => report.guid))).toEqual([['plants'], ['a', 'z']]);
+    expect(fixture.debugElement.queryAll(By.css('.v1-nav__report-entry > a app-ui-icon')).map(icon => icon.componentInstance.name))
+      .toEqual(['betterPlantsReport', 'report', 'report']);
     expect(fixture.nativeElement.querySelector('a[aria-current="page"]').textContent).toContain('Zebra');
     expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(0);
     expect(fixture.nativeElement.textContent).not.toContain('Hidden factors'); expect(fixture.nativeElement.textContent).not.toContain('Wrong account');

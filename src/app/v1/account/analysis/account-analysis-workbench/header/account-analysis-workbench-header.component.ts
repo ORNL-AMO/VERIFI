@@ -1,5 +1,6 @@
 import { analysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { Router, RouterLink } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
@@ -27,6 +28,7 @@ export class AccountAnalysisWorkbenchHeaderComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly results = inject(AccountAnalysisResultsService);
   readonly autosave = inject(AccountAnalysisAutosaveService);
+  readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
     label: analysis.name || 'Untitled analysis',
@@ -58,6 +60,10 @@ export class AccountAnalysisWorkbenchHeaderComponent {
     if (!await this.autosave.flush()) return;
     const account = this.context.account();
     if (account) await this.router.navigate(this.navigation.accountAnalysisWorkbenchRoute(account.guid, analysisGuid));
+  }
+
+  async returnToReport(): Promise<void> {
+    if (await this.autosave.flush()) await this.reportReturn?.returnToReport();
   }
 }
 

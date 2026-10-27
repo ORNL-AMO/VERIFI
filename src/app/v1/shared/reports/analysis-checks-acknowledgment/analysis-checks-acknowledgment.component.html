@@ -1,0 +1,9 @@
+@let state = workflow();
+@if (state.completed) {
+  <span #completion class="checks-completed" role="status" tabindex="-1"><app-ui-icon name="check"/>Data Checks Completed</span>
+} @else {
+  <label class="checks-acknowledgment"><input #checkbox type="checkbox" [formControl]="control" [attr.aria-describedby]="state.message || state.error ? 'analysis-checks-requirement' : null">I’ve reviewed the analysis and any issues</label>
+  @if (state.message || state.error) {
+    <p id="analysis-checks-requirement" [attr.role]="state.error ? 'alert' : 'status'">{{ state.error || state.message }}</p>
+  }
+}

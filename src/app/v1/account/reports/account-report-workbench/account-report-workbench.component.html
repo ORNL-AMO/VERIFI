@@ -9,11 +9,26 @@
   <app-data-empty-state icon="report" context="account" title="Report unavailable" description="This report may have been deleted, belong to another account, or be hidden by the account’s Other Impacts setting."/>
   <a class="v1-btn v1-btn--secondary" [routerLink]="context.dashboardRoute()">Return to account reports</a>
 } @else {
-  <app-report-workbench-header [editor]="editor" [breadcrumbs]="context.breadcrumbs()" [resources]="context.resources()" [selectedId]="report.guid" [name]="report.name || 'Untitled account report'" [typeLabel]="entry.typeLabel" [status]="entry.status" [statusLabel]="entry.statusLabel" [facts]="entry.snapshot.facts" [stages]="context.stages()" (reportSelected)="switchReport($event)"/>
+  <app-report-workbench-header [editor]="editor" [breadcrumbs]="context.breadcrumbs()" [resources]="context.resources()" [selectedId]="report.guid" [name]="report.name || 'Untitled account report'" [typeLabel]="entry.typeLabel" [status]="entry.status" [statusLabel]="entry.statusLabel" [facts]="entry.snapshot.facts" [stages]="stages()" [checksStatus]="checksWorkflow()" (reportSelected)="switchReport($event)"/>
   <main class="report-workbench-content" aria-labelledby="account-report-workbench-title"><router-outlet/></main>
   <footer class="v1-wizard-actions" aria-label="Report workflow navigation">
-    <a class="v1-btn v1-btn--quiet" [routerLink]="previous()?.route || context.dashboardRoute()"><app-ui-icon name="chevronLeft"/>Back</a>
-    @if (next(); as nextStage) { <a class="v1-btn v1-btn--action" [routerLink]="nextStage.route">Continue<app-ui-icon name="chevronRight"/></a> }
-    @else { <a class="v1-btn v1-btn--action" [routerLink]="context.dashboardRoute()">Back to reports<app-ui-icon name="arrowLeft"/></a> }
+    @if (previous(); as previousStage) {
+      @if (previousStage.canOpen) { <a class="v1-btn v1-btn--quiet" [routerLink]="previousStage.route"><app-ui-icon name="chevronLeft"/>Back</a> }
+      @else { <button type="button" class="v1-btn v1-btn--quiet" disabled><app-ui-icon name="chevronLeft"/>Back</button> }
+    } @else { <a class="v1-btn v1-btn--quiet" [routerLink]="context.dashboardRoute()"><app-ui-icon name="chevronLeft"/>Back</a> }
+    <div class="v1-wizard-actions__next">
+      @if (context.stage() === 'data-checks') {
+        @if (checksWorkflow(); as checks) { <app-analysis-checks-acknowledgment [workflow]="checks" (acknowledged)="betterPlants.confirmReview()"/> }
+      }
+      @if (next(); as nextStage) {
+        @if (canContinue()) { <a class="v1-btn v1-btn--action" [routerLink]="nextStage.route">Continue<app-ui-icon name="chevronRight"/></a> }
+        @else { <button type="button" class="v1-btn v1-btn--action" disabled>Continue<app-ui-icon name="chevronRight"/></button> }
+      }
+      @else {
+        <button type="button" class="v1-btn v1-btn--secondary" disabled><app-ui-icon name="pdf"/>PDF</button>
+        <button type="button" class="v1-btn v1-btn--secondary" disabled><app-ui-icon name="powerpoint"/>PowerPoint</button>
+        <button type="button" class="v1-btn v1-btn--action" disabled><app-ui-icon name="present"/>Present</button>
+      }
+    </div>
   </footer>
 }

@@ -19,7 +19,7 @@
           }
         </ng-template>
         @if (stage.canOpen) {
-          <a [routerLink]="stage.route" [attr.aria-current]="stage.current ? 'step' : null">
+          <a [routerLink]="stage.route" [queryParams]="stage.queryParams" [attr.aria-current]="stage.current ? 'step' : null">
             <ng-container [ngTemplateOutlet]="contents"></ng-container>
           </a>
         } @else {

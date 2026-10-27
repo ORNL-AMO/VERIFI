@@ -10,6 +10,7 @@ export interface AnalysisNavigationStage {
   readonly id: string;
   readonly label: string;
   readonly route: readonly string[];
+  readonly queryParams?: Readonly<Record<string, string>>;
   readonly current: boolean;
   readonly completed: boolean;
   readonly hasBlockingErrors: boolean;

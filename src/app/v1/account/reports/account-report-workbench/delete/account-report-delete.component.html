@@ -1,0 +1,11 @@
+<div class="report-setup-delete">
+  <button type="button" class="v1-btn v1-btn--danger" [disabled]="!deletion.canDelete()" (click)="deletion.request()"><app-ui-icon name="delete"/>Delete report</button>
+</div>
+<ng-template #deleteConfirmation>
+  @if (deletion.candidate(); as candidate) {
+    <app-confirmation-dialog title="Delete report?" titleId="delete-setup-report-title" cancelAriaLabel="Cancel report deletion" confirmLabel="Delete report" confirmClass="v1-btn--danger" confirmIcon="delete" [busy]="deletion.deleting()" [disabled]="deletion.deleting()" (confirmed)="deletion.confirm()" (cancelled)="deletion.cancel()">
+      <p>Permanently delete <strong>{{ candidate.name }}</strong>? Its analyses and source data will remain available.</p>
+      @if (deletion.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>

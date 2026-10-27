@@ -1,0 +1,42 @@
+@let isWater = water();
+<div class="better-plants-settings" [formGroup]="form">
+  <section class="report-setup-section better-plants-notes" aria-labelledby="better-plants-notes-title">
+    <h2 id="better-plants-notes-title">{{ isWater ? 'Water' : 'Energy' }} report notes</h2>
+    <div class="report-setup-fields">
+      <div class="report-setup-field">
+        <label for="better-plants-baseline-notes">{{ isWater ? 'Baseline adjustment' : 'Normalization and baseline adjustments' }}</label>
+        <p id="better-plants-baseline-help" class="report-setup-help">{{ isWater ? 'If the baseline was adjusted, explain the reason.' : 'Describe how intensity data was normalized or the baseline adjusted for economic and other factors affecting energy use.' }}</p>
+        <textarea id="better-plants-baseline-notes" class="v1-input" formControlName="baselineAdjustmentNotes" rows="4" aria-describedby="better-plants-baseline-help"></textarea>
+      </div>
+      @if (isWater) {
+        <div class="report-setup-field">
+          <label for="better-plants-methodology">Water intensity methodology</label>
+          <p id="better-plants-methodology-help" class="report-setup-help">Describe how water intensity improvements were calculated.</p>
+          <textarea id="better-plants-methodology" class="v1-input" formControlName="methodologyNotes" rows="4" aria-describedby="better-plants-methodology-help"></textarea>
+        </div>
+      }
+      <div class="report-setup-field" [class.better-plants-settings__full-width]="isWater">
+        <label for="better-plants-modifications">Technologies and improvements</label>
+        <p id="better-plants-modifications-help" class="report-setup-help">{{ isWater ? 'Describe technologies, strategies, and practices used to decrease water intensity, including systems affected, approximate savings, and implementation costs.' : 'Describe energy-efficient technologies, strategies, and practices used to decrease intensity, including systems affected and approximate project savings.' }}</p>
+        <textarea id="better-plants-modifications" class="v1-input" formControlName="modificationNotes" rows="4" aria-describedby="better-plants-modifications-help"></textarea>
+      </div>
+    </div>
+  </section>
+
+  @if (isWater) {
+    <section class="report-setup-section" aria-labelledby="better-plants-metrics-title">
+      <h2 id="better-plants-metrics-title">Water Savings Pilot metric</h2>
+      <p class="report-setup-help">For partners using a single water intensity metric across all plants, enter the metric used to track the Water Savings Pilot goal.</p>
+      <div class="report-setup-fields better-plants-metrics">
+        <div class="report-setup-field">
+          <label for="better-plants-baseline-metric">Baseline year metric</label>
+          <input id="better-plants-baseline-metric" type="number" class="v1-input" formControlName="baselineYearWaterPilotGoal">
+        </div>
+        <div class="report-setup-field">
+          <label for="better-plants-report-metric">Report year metric</label>
+          <input id="better-plants-report-metric" type="number" class="v1-input" formControlName="reportYearWaterPilotGoal">
+        </div>
+      </div>
+    </section>
+  }
+</div>

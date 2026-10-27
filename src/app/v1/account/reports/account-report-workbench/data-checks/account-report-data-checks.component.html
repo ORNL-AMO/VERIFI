@@ -1,5 +1,8 @@
+@if (context.report()?.reportType === 'betterPlants') { <app-better-plants-data-checks/> } @else {
 @if (context.entry(); as entry) {
   <section class="report-section" aria-labelledby="account-report-checks"><h2 id="account-report-checks">Data Checks</h2><p>{{ entry.typeLabel }} report</p>
     <p role="status">Data checks for this report are pending migration. Opening this stage does not complete checks or change the linked analysis.</p>
   </section>
+}
+
 }

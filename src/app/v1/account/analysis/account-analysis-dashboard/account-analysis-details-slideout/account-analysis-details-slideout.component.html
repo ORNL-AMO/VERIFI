@@ -1,0 +1,47 @@
+@let analysisCard = card();
+@let results = outcomeDisplay();
+<app-workspace-slideout [title]="analysisCard.analysis.name" [description]="ownerName() + ' · Account analysis details'" size="large" [hasFooter]="!!actionLabel() || !!secondaryActionLabel()" (closed)="closed.emit()">
+  <div class="v1-analysis-details v1-account-analysis-details">
+    <app-analysis-details-status [status]="analysisCard.status" [evaluation]="evaluation()" [findings]="analysisCard.findings"/>
+    <dl>
+      @if (showCategory()) { <div><dt>Category</dt><dd>{{ analysisCard.category === 'water' ? 'Water' : 'Energy' }}</dd></div> }
+      <div><dt>Baseline</dt><dd>{{ analysisCard.analysis.baselineYear || 'Not set' }}</dd></div>
+      <div><dt>Basis and units</dt><dd>{{ analysisCard.basisLabel }} · {{ analysisCard.unitLabel }}</dd></div>
+      <div><dt>{{ results.annual.label }}</dt><dd>{{ results.annual.valueLabel }}</dd></div>
+      <div><dt>{{ results.monthly.label }}</dt><dd>{{ results.monthly.valueLabel }}</dd></div>
+      <div><dt>Modified</dt><dd>{{ analysisCard.modifiedDateLabel }}</dd></div>
+    </dl>
+    <section class="analysis-details-section" aria-label="Facility selections">
+    <h3>Facility selections
+      @if (evaluation() === 'ready') {
+        <span class="selection-count" [attr.aria-label]="analysisCard.selectionProgress.valid + ' of ' + analysisCard.selectionProgress.total + ' facilities valid, including explicit skips'">{{ analysisCard.selectionProgress.valid }} / {{ analysisCard.selectionProgress.total }}</span>
+      } @else { <span class="selection-count selection-count--pending">{{ evaluation() === 'error' ? 'Checks unavailable' : 'Checks pending' }}</span> }
+    </h3>
+    <div class="v1-table-shell" role="region" aria-label="Selected facility analyses"><table>
+      <caption class="visually-hidden">Selected facility analysis details</caption>
+      <thead><tr><th scope="col">Status</th><th scope="col">Analysis Item</th><th scope="col">Group Analysis</th><th scope="col">Data Through</th><th scope="col">Last Modified</th></tr></thead>
+      <tbody>@for (selection of facilityRows(); track selection.facilityGuid) {
+        <tr>
+          <td data-label="Status"><span class="v1-chip" [class]="'v1-chip--' + selection.statusTone"><app-ui-icon [name]="selection.statusIcon" [spin]="selection.pending"/>{{ selection.statusLabel }}</span>
+          </td>
+          <th scope="row" data-label="Analysis Item"><strong>{{ selection.analysisName }}</strong><span class="selection-facility"><app-ui-icon name="facility"/>{{ selection.facilityName }}</span>@if (selection.showDetail) { <span class="selection-detail">{{ selection.detail }}</span> }</th>
+          <td data-label="Group Analysis"><ul class="selection-groups">@for (group of selection.candidate?.groups ?? []; track group.groupId) { <li><strong>{{ group.groupName }}:</strong> {{ group.analysisLabel }}</li> } @empty { <li>—</li> }</ul></td>
+          <td data-label="Data Through" class="selection-date">{{ selection.candidate?.dataThrough ? (selection.candidate!.dataThrough | date:'MMM y') : '—' }}</td>
+          <td data-label="Last Modified" class="selection-date">{{ selection.modified ? (selection.modified | date:'shortDate') : '—' }}</td>
+        </tr>
+      } @empty { <tr><td colspan="5">No facility selections.</td></tr> }</tbody>
+    </table></div>
+    <p class="selection-help">Data Through shows the latest month covered by every meter and predictor used in the analysis.</p>
+    </section>
+    <section class="analysis-details-section" aria-label="Linked reports">
+    <h3>Linked reports</h3>
+    <app-analysis-linked-items [items]="linkedReports()" label="Linked account reports" emptyMessage="No linked account reports."/>
+    </section>
+  </div>
+  @if (actionLabel(); as label) {
+    <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="actionDisabled()" (click)="actionSelected.emit()">{{ label }}<app-ui-icon [name]="actionIcon()"/></button>
+  }
+  @if (secondaryActionLabel(); as label) {
+    <button slideoutFooter type="button" class="v1-btn v1-btn--secondary" [disabled]="secondaryActionDisabled()" (click)="secondaryActionSelected.emit()">{{ label }}<app-ui-icon name="arrowRight"/></button>
+  }
+</app-workspace-slideout>

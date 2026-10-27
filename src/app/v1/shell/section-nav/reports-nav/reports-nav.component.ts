@@ -3,6 +3,7 @@ import { Component, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { reportTypeAvailable } from '@app/v1/shared/reports/report-availability';
+import { reportIcon } from '@app/v1/shared/reports/report-icons';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FACILITY_REPORT_TYPES, buildFacilityReportCard } from '@app/v1/facility/reports/facility-report.models';
 import { buildFacilityReportStages } from '@app/v1/facility/reports/facility-report-workbench/facility-report-workbench.models';
@@ -30,10 +31,10 @@ export class ReportsNavComponent {
     const facilityGuid = this.navigation.routeState().facilityGuid;
     const reports = (facilityGuid
       ? this.workspace.facilityReports().filter(report => report.facilityId === facilityGuid && report.accountId === accountGuid)
-        .map(report => ({ guid: report.guid, name: report.name || 'Untitled facility report', type: report.facilityReportType,
+        .map(report => ({ guid: report.guid, name: report.name || 'Untitled facility report', type: report.facilityReportType, icon: reportIcon(report),
           route: this.navigation.facilityReportWorkbenchRoute(facilityGuid, report.guid) }))
       : this.workspace.accountReports().filter(report => report.accountId === accountGuid)
-        .map(report => ({ guid: report.guid, name: report.name || 'Untitled account report', type: report.reportType,
+        .map(report => ({ guid: report.guid, name: report.name || 'Untitled account report', type: report.reportType, icon: reportIcon(report),
           route: this.navigation.accountReportWorkbenchRoute(accountGuid!, report.guid) })))
       .filter(report => reportTypeAvailable(report.type, this.workspace.account()?.displayEmissions))
       .sort((first, second) => first.name.localeCompare(second.name) || first.guid.localeCompare(second.guid));

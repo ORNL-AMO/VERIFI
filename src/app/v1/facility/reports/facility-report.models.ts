@@ -2,6 +2,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityReportType, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
 import { ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
+import { reportIcon } from '@app/v1/shared/reports/report-icons';
 
 export const FACILITY_REPORT_TYPES: ReadonlyArray<{ value: FacilityReportType; label: string }> = [
   { value: 'analysis', label: 'Analysis' },
@@ -67,7 +68,7 @@ export function buildFacilityReportCard(
     searchText: [report.name, type, analysis?.name, period].filter(Boolean).join(' ').toLocaleLowerCase(),
     view: {
       title: report.name || 'Untitled facility report', openLabel: `Open ${report.name || 'facility report'}`,
-      icon: 'report', statusTone: tone,
+      icon: reportIcon(report), statusTone: tone,
       chips: [
         { id: 'type', label: type, tone: 'neutral' },
         { id: 'configuration', label: labels[status], tone, icon: status === 'checking' ? 'loading' : 'info', loading: status === 'checking' }

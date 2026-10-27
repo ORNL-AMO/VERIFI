@@ -1,0 +1,6 @@
+@let summary = presentation();
+<section class="analysis-details-status" [class]="'analysis-details-status--' + summary.tone" aria-label="Analysis status">
+  <h3>Status</h3>
+  <p role="status"><app-ui-icon [name]="summary.icon" [spin]="summary.pending"/>{{ summary.label }}</p>
+  @if (evaluation() === 'ready') { <app-analysis-status-notes [findings]="findings()" label="Analysis validation findings"/> }
+</section>

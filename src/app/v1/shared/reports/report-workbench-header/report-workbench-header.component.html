@@ -8,30 +8,31 @@
       }
     </ol></nav>
     <div class="v1-data-workbench-title-row">
-      <div class="v1-data-workbench-title"><h1 [id]="titleId()"><app-ui-icon name="report"/>
+      <div class="v1-data-workbench-title"><h1 [id]="titleId()"><app-ui-icon [name]="icon()"/>
         <app-data-workbench-resource-switcher [resources]="resources()" [selectedId]="selectedId()" [currentLabel]="name()" ariaLabel="Switch report" (resourceSelected)="reportSelected.emit($event)"/>
       </h1></div>
       <div class="v1-data-workbench-actions" aria-label="Report summary and controls">
         <span class="report-save-state" [class.report-save-state--saved]="state.state() === 'saved'" [class.report-save-state--error]="state.state() === 'error' || state.state() === 'invalid'" role="status" aria-live="polite">
-          @if (state.saving()) { <app-ui-icon name="loading" spin/> Saving… } @else {
+          @if (state.saving() || state.state() === 'dirty') { <app-ui-icon name="loading" spin/> Saving… } @else {
             @switch (state.state()) {
               @case ('saved') { <app-ui-icon name="check"/> Saved. }
               @case ('invalid') { <app-ui-icon name="warning"/> Fix validation errors. }
               @case ('error') { <app-ui-icon name="warning"/> Save failed. }
-              @default { Changes save automatically. }
             }
           }
         </span>
         <span class="v1-chip">{{ typeLabel() }}</span>
         <span class="v1-chip" [class.v1-chip--danger]="status() === 'error'" [class.v1-chip--warning]="status() === 'warning'" [class.v1-chip--success]="status() === 'ready'" role="status">{{ statusLabel() }}</span>
+        @if (checksStatus(); as checks) {
+          <span class="v1-chip" [class.v1-chip--success]="checks.completed" [class.v1-chip--warning]="!checks.completed && !checks.blocked" [class.v1-chip--danger]="checks.blocked" role="status">{{ checks.completed ? 'Data Checks Completed' : 'Data Check Pending' }}</span>
+        }
         <app-data-workbench-facts-toggle #factsToggle controls="report-workbench-facts"/>
       </div>
     </div>
-    @if (state.isDirty() || state.error()) {
-      <div class="v1-alert" [class.v1-alert--danger]="state.state() === 'error' || state.state() === 'invalid'" [class.v1-alert--info]="state.state() === 'dirty'" role="status">
+    @if (state.state() === 'error' || state.state() === 'invalid' || state.error()) {
+      <div class="v1-alert v1-alert--danger" role="status">
         @if (state.error()) { <span>{{ state.error() }}</span> }
-        @else if (state.state() === 'invalid') { <span>Enter a nonblank name in Setup or discard your changes before leaving this report.</span> }
-        @else { <span>Your edits will save automatically before leaving this report.</span> }
+        @else { <span>Correct invalid fields in Setup or discard your changes before leaving this report.</span> }
         @if (state.state() === 'error') { <button type="button" class="v1-btn v1-btn--secondary" [disabled]="state.saving()" (click)="state.retry()">Retry</button> }
         <button type="button" class="v1-btn v1-btn--ghost" [disabled]="state.saving()" (click)="requestDiscard()">Discard changes</button>
       </div>

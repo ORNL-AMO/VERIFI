@@ -113,6 +113,12 @@ Generated regression groups require a selected model, model year, constant, and 
 
 Report findings contribute to their facility or account summary.
 
+### Explicit report analysis review
+
+Migrated Better Plants reports validate the selected report year before displaying report content. Clean checks complete without acknowledgment; issues require explicit review. Visiting Data Checks never confirms review. Existing blocking findings and critical model issues prevent confirmation; warnings remain visible and can be acknowledged. A Report route that still requires review remains reachable but shows a review action instead of values.
+
+Confirmation is shared by reports using the same canonical analysis, reporting year, checks version, and dependency fingerprint. Better Plants validates and acknowledges only the selected report year, even when **Include all years** adds historical report pages. Calculation/validation input changes or selecting a different report year require fresh checks; name, contact, note, and display-option edits do not. This gate is separate from configuration status and warning dismissal: dismissing a warning does not confirm review or bypass critical model checks. Legacy visited flags do not establish freshness. See [V1 report architecture](v1-reports-architecture.md#explicit-shared-analysis-review).
+
 ## Maintenance requirement
 
 Every validation change must update this document, the stable rule catalog, presentation copy, and automated tests in the same change. New rules must define severity, category, evidence, scope, Todo behavior, exceptions, and remediation availability before implementation.

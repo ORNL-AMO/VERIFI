@@ -5,6 +5,16 @@ import { BackupPreparationService } from './backup-preparation.service';
 import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 
 describe('WorkspaceBackupSnapshotBuilder', () => {
+  it('preserves optional review receipts in current backups while older records remain unreviewed', () => {
+    const original = createSnapshot();
+    const review = { checksVersion: 1, reportYear: 2023, inputFingerprint: 'reviewed-inputs', reviewedAt: '2026-01-01T00:00:00Z' };
+    const snapshot = { ...original, facilityAnalyses: original.facilityAnalyses.map((analysis, index) => index === 0 ? { ...analysis, dataCheckReviews: [review] } : analysis) };
+    const builder = new WorkspaceBackupSnapshotBuilder();
+    const backup = new BackupPreparationService().prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(snapshot))));
+    expect(backup.dataVersion).toBe(CURRENT_DATA_VERSION);
+    expect(backup.facilityAnalysisItems[0].dataCheckReviews).toEqual([review]);
+    expect(builder.buildAccountBackup(original).facilityAnalysisItems[0].dataCheckReviews).toBeUndefined();
+  });
   it('round trips account and facility expected-range settings without a version change', () => {
     const original = createSnapshot();
     const snapshot = { ...original,

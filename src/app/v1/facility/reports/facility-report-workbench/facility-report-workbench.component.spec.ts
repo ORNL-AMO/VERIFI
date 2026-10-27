@@ -32,7 +32,7 @@ describe('facility report workbench navigation', () => {
     await open();
     const host = harness.routeNativeElement!;
     const stageIcons = () => harness.routeDebugElement!.query(By.css('app-analysis-stage-navigation')).queryAll(By.directive(IconComponent)).map(icon => (icon.componentInstance as IconComponent).name);
-    expect(host.querySelector('h1 app-ui-icon')?.getAttribute('name')).toBe('report');
+    expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe('report');
     const crumbs = host.querySelectorAll('nav[aria-label="Facility report breadcrumb"] a');
     expect(crumbs[0].getAttribute('href')).toBe('/v1/workspace/account/account-a/reports/dashboard');
     expect(crumbs).toHaveLength(2);

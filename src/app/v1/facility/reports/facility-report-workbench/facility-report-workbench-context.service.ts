@@ -5,6 +5,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { reportTypeAvailable } from '@app/v1/shared/reports/report-availability';
+import { reportIcon } from '@app/v1/shared/reports/report-icons';
 import { buildFacilityReportCard } from '../facility-report.models';
 import { buildFacilityReportStages, facilityReportStage } from './facility-report-workbench.models';
 
@@ -40,5 +41,5 @@ export class FacilityReportWorkbenchContext {
     && item.entity.guid === this.guid() && item.entity.facilityGuid === this.facility()?.guid
     && item.entity.accountGuid === this.workspace.account()?.guid));
   readonly dashboardRoute = computed(() => this.navigation.facilityReportsRoute(this.navigation.routeState().facilityGuid ?? ''));
-  readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled facility report', icon: 'report' as const })));
+  readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled facility report', icon: reportIcon(report) })));
 }

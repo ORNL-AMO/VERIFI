@@ -22,6 +22,9 @@ export class AccountAnalysisWorkspaceService {
   readonly workspaceState = this.store.status;
   readonly workspaceError = this.store.error;
   readonly statusState = this.statusService.state;
+  readonly statusItems = this.statusService.items;
+  readonly facilityInputs = computed(() => ({ meterGroups: this.store.meterGroups(), meters: this.store.meters(),
+    meterData: this.store.meterData(), predictorData: this.store.predictorData() }));
   readonly categories = computed(() => analysisCategories(this.store.meters(), [...this.analyses(), ...this.facilityAnalyses()]));
   readonly cards = computed(() => buildAccountAnalysisCards({
     account: this.account(),
