@@ -43,10 +43,14 @@ export class EditBillComponent implements OnInit {
   paramsSub: Subscription;
   isElectron: boolean;
 
+  get canSaveReading(): boolean {
+    return this.meterDataForm?.valid === true && !this.invalidDate;
+  }
+
   handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();
-      if (!this.meterDataForm.invalid && !this.invalidDate) {
+      if (this.canSaveReading) {
         this.saveAndQuit();
       }
     }
@@ -110,6 +114,9 @@ export class EditBillComponent implements OnInit {
   }
 
   async saveAndQuit() {
+    if (!this.canSaveReading) {
+      return;
+    }
     this.loadingService.setLoadingMessage('Saving Reading...');
     this.loadingService.setLoadingStatus(true);
     let meterDataToSave: IdbUtilityMeterData;
@@ -156,6 +163,9 @@ export class EditBillComponent implements OnInit {
   }
 
   async saveAndAddAnother() {
+    if (!this.canSaveReading) {
+      return;
+    }
     this.loadingService.setLoadingMessage('Saving Reading...');
     this.loadingService.setLoadingStatus(true);
     let meterDataToSave: IdbUtilityMeterData;
@@ -195,12 +205,12 @@ export class EditBillComponent implements OnInit {
     } else if (this.editMeter.source == 'Other') {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = (getIsEnergyUnit(this.editMeter.startingUnit) == true);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, false, this.editMeter.source);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, false, this.editMeter.source, this.editMeter.canBeNegative);
     } else {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = getIsEnergyMeter(this.editMeter.source);
       this.displayVehicleFuelEfficiency = (this.editMeter.scope == 2 && this.editMeter.vehicleCategory == 2);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, this.displayVehicleFuelEfficiency, this.editMeter.source);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, this.displayVehicleFuelEfficiency, this.editMeter.source, this.editMeter.canBeNegative);
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
       }
@@ -216,10 +226,13 @@ export class EditBillComponent implements OnInit {
 
   canDeactivate(): Observable<boolean> {
     if (this.meterDataForm && this.meterDataForm.dirty) {
-      this.routerGuardService.setShowSave(true);
+      this.routerGuardService.setShowSave(this.canSaveReading);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {
+          if (!this.canSaveReading) {
+            return of(false);
+          }
           return from(this.saveAndQuit()).pipe(map(() => true));
         } else if (action == 'discard') {
           return of(true);
