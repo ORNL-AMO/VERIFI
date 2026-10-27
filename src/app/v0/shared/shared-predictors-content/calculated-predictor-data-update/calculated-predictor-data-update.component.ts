@@ -331,7 +331,10 @@ export class CalculatedPredictorDataUpdateComponent {
           deleted: false,
           added: true
         };
-        this.predictorData.push(tableItem);
+        const monthExists = this.predictorData.some(pData => pData.year === tableItem.year && pData.month === tableItem.month);
+        if (!monthExists) {
+          this.predictorData.push(tableItem);
+        }
       } else {
         this.toastNotificationService.weatherDataErrorToast();
       }
