@@ -6,6 +6,8 @@ import { getNewAnalysisGroup, getNewIdbAnalysisItem } from '@data/models/idbMode
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
 
 export function analysisReportFixture(category: 'energy' | 'water' = 'energy'): AccountWorkspaceSnapshot {
   const account = { ...getNewIdbAccount(), id: 1, guid: 'account', energyIsSource: true };
@@ -30,4 +32,21 @@ export function analysisReportFixture(category: 'energy' | 'water' = 'energy'): 
   report.betterPlantsReportSetup.analysisItemId = rollup.guid;
   return { account, facilities: [facility], meters: [meter], meterData, meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [analysis], accountAnalyses: [rollup],
     accountReports: [report], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] };
+}
+
+/** Distinct predictor series and coefficients expose changes to GUID-to-coefficient mapping. */
+export function regressionAnalysisReportFixture(): AccountWorkspaceSnapshot {
+  const snapshot = analysisReportFixture();
+  const predictors = [0, 1].map(index => ({ ...getNewIdbPredictor('account', 'facility'),
+    id: 100 + index, guid: `predictor-${index}`, name: `Predictor ${index}`, production: index === 0 }));
+  const group = snapshot.facilityAnalyses[0].groups[0];
+  Object.assign(group, { analysisType: 'regression', isGeneratedModel: false, regressionModelYear: 2022,
+    regressionStartYear: 2022, regressionEndYear: 2022, regressionModelStartMonth: 0, regressionModelEndMonth: 11,
+    regressionConstant: 5, predictorVariables: predictors.map((predictor, index) => ({ id: predictor.guid,
+      name: predictor.name, production: predictor.production, productionInAnalysis: true,
+      regressionCoefficient: index === 0 ? 1 : 3, unit: 'units' })) });
+  return { ...snapshot, predictors, predictorData: predictors.flatMap((predictor, index) => snapshot.meterData.map((reading, monthIndex) => ({
+    ...getNewIdbPredictorData(predictor), id: 200 + index * 36 + monthIndex, guid: `${predictor.guid}-${monthIndex}`,
+    year: reading.year, month: reading.month, amount: reading.year === 2022 ? [10, 20][index] : [12, 28][index]
+  }))) };
 }

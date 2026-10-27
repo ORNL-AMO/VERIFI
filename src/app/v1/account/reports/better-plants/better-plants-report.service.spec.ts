@@ -11,7 +11,7 @@ import { buildAnalysisReportInputs } from '@domain/reports/analysis-report-input
 import { analysisReviewContent } from '@domain/reports/analysis-review-inputs';
 import { calculateAnalysisDataChecks } from '@domain/reports/analysis-data-checks';
 import { calculateBetterPlantsReport } from '@domain/reports/better-plants-report-calculation';
-import { analysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
+import { analysisReportFixture, regressionAnalysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
 import { AnalysisReportCalculationService } from '@app/v1/shared/reports/analysis-report-calculation.service';
 import { AccountReportWorkbenchContext } from '../account-report-workbench/account-report-workbench-context.service';
 import { AccountReportAutosaveService } from '../account-report-workbench/account-report-autosave.service';
@@ -62,6 +62,25 @@ describe('Better Plants workflow coordinator', () => {
       reportYear: year, inputFingerprint: analysisReviewContent(inputs, year), reviewedAt: '2026-01-01T00:00:00Z' }] };
     store.publishCommittedPatch({ collections: [{ collection: 'accountAnalyses', upsert: [analysis] }] });
   }
+  it('immediately suppresses cached reports and acknowledgment after predictor GUID references change', async () => {
+    store.publish(regressionAnalysisReportFixture());
+    saveReview(2023); stage.set('report'); await settle();
+    const before = service.state().value?.summaries?.[0].adjustedBaselinePrimaryEnergy;
+    expect(before).toBeDefined(); expect(service.workflow().completed).toBe(true);
+    const updated = structuredClone(store.facilityAnalyses()[0]);
+    const [first, second] = updated.groups[0].predictorVariables;
+    [first.id, second.id] = [second.id, first.id];
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityAnalyses', upsert: [updated] }] });
+    expect(service.state().value?.summaries).toBeUndefined();
+    expect(service.workflow().completed).toBe(false);
+    await settle();
+    expect(service.state().state).toBe('review-required');
+    expect(execute.mock.calls.filter(([request]) => request.operation === 'checks')).toHaveLength(1);
+    stage.set('data-checks'); await settle(); await service.confirmReview(); await settle();
+    stage.set('report'); await settle();
+    expect(service.state().value?.summaries?.[0].adjustedBaselinePrimaryEnergy).not.toBe(before);
+    expect(service.workflow().completed).toBe(true);
+  });
   it.each(['energy', 'water'] as const)('checks only the selected year while still generating all included %s years', async category => {
     store.publish(analysisReportFixture(category)); setReportPeriod(2024, true);
     await settle(); expect(execute).not.toHaveBeenCalled();

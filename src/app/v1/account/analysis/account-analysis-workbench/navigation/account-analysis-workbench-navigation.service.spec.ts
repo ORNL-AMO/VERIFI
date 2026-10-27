@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
 import { buildAccountAnalysisWorkbenchStages } from '../account-analysis-workbench.models';
@@ -43,7 +44,7 @@ describe('accountAnalysisNavigationRequirement', () => {
     expect(accountAnalysisNavigationRequirement('used-by', 'ready', false, false)).toBeUndefined();
   });
 
-  it('flushes drafts, moves the footer by primary stage, and switches Results tabs independently', async () => {
+  it.each([undefined, { returnReportAccountGuid: 'account-a', returnReportGuid: 'report-a' }])('preserves the report origin through stage and Results tab navigation (%j)', async queryParams => {
     const navigate = vi.fn();
     const router = {
       url: '/v1/workspace/account/account-a/analysis/workbench/analysis-a/results/monthly-chart',
@@ -53,6 +54,7 @@ describe('accountAnalysisNavigationRequirement', () => {
     TestBed.configureTestingModule({
       providers: [
         AccountAnalysisWorkbenchNavigationService,
+        { provide: ReportAnalysisReturnService, useValue: { queryParams: signal(queryParams) } },
         { provide: Router, useValue: router },
         {
           provide: AccountAnalysisWorkbenchContext,
@@ -93,18 +95,19 @@ describe('accountAnalysisNavigationRequirement', () => {
     });
     const service = TestBed.inject(AccountAnalysisWorkbenchNavigationService);
 
+    expect(service.stages().every(stage => stage.queryParams === queryParams)).toBe(true);
     expect(service.activeStageId()).toBe('results');
     expect(service.activeResultTabId()).toBe('monthly-chart');
     await service.back();
     expect(navigate).toHaveBeenCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'select-items'
-    ]);
+    ], { queryParams });
     await service.continue();
     expect(navigate).toHaveBeenCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'used-by'
-    ]);
+    ], { queryParams });
     service.openResultTab('facility-contributions');
-    expect(navigate).toHaveBeenCalledWith(['/results', 'facility-contributions']);
+    expect(navigate).toHaveBeenCalledWith(['/results', 'facility-contributions'], { queryParams });
   });
 
   it('steps the Select footer through facilities before navigating to Results', async () => {
@@ -160,6 +163,6 @@ describe('accountAnalysisNavigationRequirement', () => {
     await service.continue();
     expect(navigate).toHaveBeenCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'results', 'annual'
-    ]);
+    ], { queryParams: undefined });
   });
 });

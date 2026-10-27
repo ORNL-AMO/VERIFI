@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { StatusEvaluationState } from '@app/v1/status/status.models';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
@@ -21,6 +22,7 @@ import { AccountAnalysisFacilitySelectionService } from '../select-facility-item
 @Injectable()
 export class AccountAnalysisWorkbenchNavigationService {
   private readonly router = inject(Router);
+  private readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly context = inject(AccountAnalysisWorkbenchContext);
   private readonly autosave = inject(AccountAnalysisAutosaveService);
@@ -46,7 +48,7 @@ export class AccountAnalysisWorkbenchNavigationService {
     this.activeStageId(),
     this.readiness(),
     this.context.findings()
-  ));
+  ).map(stage => ({ ...stage, queryParams: this.reportReturn?.queryParams() })));
   readonly stageIndex = computed(() => this.stages().findIndex(stage => stage.id === this.activeStageId()));
   readonly currentStage = computed(() => this.stages()[this.stageIndex()]);
   readonly currentStageFindings = computed(() => findingsForAccountAnalysisStage(
@@ -84,7 +86,7 @@ export class AccountAnalysisWorkbenchNavigationService {
     const fallback = this.readiness().setupComplete
       ? this.stages().find(stage => stage.id === 'select-items')
       : this.stages().find(stage => stage.id === 'setup');
-    if (fallback) void this.router.navigate(fallback.route, { replaceUrl: true });
+    if (fallback) void this.router.navigate(fallback.route, { replaceUrl: true, queryParams: this.reportReturn?.queryParams() });
   });
 
   constructor() {
@@ -100,7 +102,7 @@ export class AccountAnalysisWorkbenchNavigationService {
     if (this.activeStageId() === 'select-items' && this.facilitySelection.focusPrevious()) return;
     const previous = this.previousStage();
     if (previous) {
-      void this.router.navigate(previous.route);
+      void this.router.navigate(previous.route, { queryParams: this.reportReturn?.queryParams() });
       return;
     }
     const account = this.context.account();
@@ -112,7 +114,7 @@ export class AccountAnalysisWorkbenchNavigationService {
     if (!await this.autosave.flush()) return;
     if (this.activeStageId() === 'select-items' && this.facilitySelection.focusNext()) return;
     const next = this.nextStage();
-    if (next?.available) void this.router.navigate(next.route);
+    if (next?.available) void this.router.navigate(next.route, { queryParams: this.reportReturn?.queryParams() });
   }
 
   async finish(): Promise<void> {
@@ -131,7 +133,7 @@ export class AccountAnalysisWorkbenchNavigationService {
       account.guid,
       analysis.guid,
       tab.id
-    ));
+    ), { queryParams: this.reportReturn?.queryParams() });
   }
 
   private syncFromUrl(url: string): void {

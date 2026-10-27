@@ -43,14 +43,16 @@ function fiscalContext(value: AnalysisReportInputs['account'] | AnalysisReportIn
     energyUnit: value.energyUnit, energyIsSource: value.energyIsSource, volumeLiquidUnit: value.volumeLiquidUnit,
     assessmentReportVersion: 'assessmentReportVersion' in value ? value.assessmentReportVersion : undefined };
 }
-const METADATA = new Set(['id', 'name', 'createdDate', 'modifiedDate', 'checked', 'isAnalysisVisited', 'dataCheckedDate',
+const METADATA = new Set(['name', 'createdDate', 'modifiedDate', 'checked', 'isAnalysisVisited', 'dataCheckedDate',
   'dataCheckReviews', 'displayEnergyUnit', 'displayEnergyIsSource', 'notes', 'visible', 'sidebarOpen']);
 function canonical(value: unknown): unknown {
   if (value instanceof Date) return value.toISOString();
   // Only GUID collections are sorted above. Coefficients, predictors and adjustments retain their order.
   if (Array.isArray(value)) return value.map(canonical);
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value)
-    .filter(([key]) => !METADATA.has(key)).sort(([a], [b]) => a.localeCompare(b)).map(([key, nested]) => [key, canonical(nested)]));
+    // Numeric IDs are local database keys; string IDs include calculation-critical predictor GUIDs.
+    .filter(([key, nested]) => !METADATA.has(key) && !(key === 'id' && typeof nested === 'number'))
+    .sort(([a], [b]) => a.localeCompare(b)).map(([key, nested]) => [key, canonical(nested)]));
   return value;
 }
 function byGuid<T extends { readonly guid: string }>(items: readonly T[]): T[] { return [...items].sort((a, b) => a.guid.localeCompare(b.guid)); }

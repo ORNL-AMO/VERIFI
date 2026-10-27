@@ -1,9 +1,32 @@
 import { ANALYSIS_DATA_CHECKS_VERSION } from '@data/models/analysis-review';
-import { analysisReviewContent, analysisReviewIsCurrent } from './analysis-review-inputs';
+import { analysisReportContent, analysisReviewContent, analysisReviewIsCurrent } from './analysis-review-inputs';
 import { buildAnalysisReportInputs } from './analysis-report-inputs';
-import { analysisReportFixture } from './testing/analysis-report-fixtures';
+import { analysisReportFixture, regressionAnalysisReportFixture } from './testing/analysis-report-fixtures';
+import { calculateBetterPlantsReport } from './better-plants-report-calculation';
+import { buildUserDefinedRegressionModel } from '@shared/shared-analysis/calculations/regression-models-calculation';
 
 describe('analysis review freshness', () => {
+  it('invalidates review and report content when predictor GUID references swap without changing the predictor collection', () => {
+    const inputs = buildAnalysisReportInputs(regressionAnalysisReportFixture(), 'account-analysis');
+    const review = analysisReviewContent(inputs, 2023);
+    const report = analysisReportContent(inputs, [2023]);
+    const summary = calculateBetterPlantsReport(inputs, [2023])[0];
+    const [first, second] = inputs.facilityAnalyses[0].groups[0].predictorVariables;
+    [first.id, second.id] = [second.id, first.id];
+    expect(calculateBetterPlantsReport(inputs, [2023])[0].adjustedBaselinePrimaryEnergy).not.toBe(summary.adjustedBaselinePrimaryEnergy);
+    expect(analysisReviewContent(inputs, 2023)).not.toBe(review);
+    expect(analysisReportContent(inputs, [2023])).not.toBe(report);
+  });
+  it('retains predictor GUID references inside the selected saved model', () => {
+    const inputs = buildAnalysisReportInputs(regressionAnalysisReportFixture(), 'account-analysis');
+    const group = inputs.facilityAnalyses[0].groups[0];
+    const model = buildUserDefinedRegressionModel(group, inputs.facilities[0], inputs.facilityAnalyses[0], 2023, inputs.predictorData);
+    group.isGeneratedModel = true; group.selectedModelId = model.modelId = 'selected'; group.models = [structuredClone(model)];
+    const original = analysisReviewContent(inputs, 2023);
+    const [first, second] = group.models[0].predictorVariables;
+    [first.id, second.id] = [second.id, first.id];
+    expect(analysisReviewContent(inputs, 2023)).not.toBe(original);
+  });
   it('ignores names, local IDs, timestamps and receipt metadata but detects changed reading values', () => {
     const inputs = buildAnalysisReportInputs(analysisReportFixture(), 'account-analysis');
     const original = analysisReviewContent(inputs, 2023);
