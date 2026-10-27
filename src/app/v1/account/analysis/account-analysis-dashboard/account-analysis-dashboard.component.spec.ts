@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { AccountAnalysisActionsService } from './account-analysis-actions.servic
 import { AccountAnalysisDashboardResultsService } from './account-analysis-dashboard-results.service';
 import { AccountAnalysisDashboardComponent } from './account-analysis-dashboard.component';
 import { AccountAnalysisWorkspaceService } from './account-analysis-workspace.service';
+import { AccountAnalysisDraftSlideoutComponent } from './account-analysis-draft-slideout/account-analysis-draft-slideout.component';
 import { AnalysisInventoryEntry } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 import { accountEntry, facilityEntry, inventoryAccount, inventoryFacility, inventoryOutcome } from './analysis-inventory.testing';
 
@@ -36,13 +37,52 @@ describe('Unified account Analysis dashboard', () => {
       provideRouter([]), { provide: LocalStorageService, useValue: storage },
       { provide: AccountAnalysisWorkspaceService, useValue: { account, entries, categories, facilities: signal([inventoryFacility(), inventoryFacility('facility-b')]), workspaceState: state, workspaceError: signal(undefined), statusState: signal('ready'), canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), statusItems: signal([]), facilityInputs: signal({ meterGroups: [], meters: [], meterData: [], predictorData: [] }), facilityAnalyses: signal(entries().flatMap(e => e.scope === 'facility' ? [e.card.analysis] : [])) } },
       { provide: AccountAnalysisActionsService, useValue: actions }, { provide: FacilityAnalysisActionsService, useValue: facilityActions },
-      { provide: WorkspaceNavigationService, useValue: { routeState: route,
+      { provide: WorkspaceNavigationService, useValue: { routeState: route, inventoryFacilityGuid: signal<string | undefined>(undefined), headerFacility: () => undefined,
         accountAnalysisWorkbenchRoute: (_a: string, id: string) => ['/account-analysis', id], accountAnalysisRoute: () => ['/analyses'],
         facilityAnalysisWorkbenchRoute: (f: string, id: string) => ['/facility', f, 'analysis', id], facilityAnalysisRoute: (f: string) => ['/facility', f, 'analysis'] } },
       { provide: ModalPortalService, useValue: modal }
     ] }).overrideComponent(AccountAnalysisDashboardComponent, { set: { providers: [{ provide: AccountAnalysisDashboardResultsService, useValue: results }] } }).compileComponents();
     navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(AccountAnalysisDashboardComponent); fixture.detectChanges();
+  });
+
+  it('scopes comparisons, demand, pagination and local controls to facility-owned analyses', () => {
+    const host = fixture.componentInstance;
+    entries.set([...Array.from({ length: 30 }, (_, i) => facilityEntry(`a-${i}`)), facilityEntry('other', inventoryFacility('facility-b')), accountEntry()]);
+    host.filtersForm.controls.scope.setValue('account'); fixture.detectChanges();
+    const scope = host.navigation.inventoryFacilityGuid as WritableSignal<string | undefined>;
+    scope.set('facility-a'); fixture.detectChanges();
+    expect(host.filteredEntries()).toHaveLength(30);
+    expect(host.filters().sort).toBe('attention');
+    expect(fixture.nativeElement.querySelector('[formControlName="scope"]')).toBeNull();
+    expect(host.comparisonOptions().every(entry => entry.facilityGuid === 'facility-a')).toBe(true);
+    host.inventory.selectPage(1); fixture.detectChanges();
+    host.inventory.detailControl.setValue('summary'); fixture.detectChanges();
+    expect(host.resultDemand().every(entry => entry.scope === 'facility' && entry.facility.guid === 'facility-a')).toBe(true);
+    scope.set('facility-b'); fixture.detectChanges();
+    expect(host.inventory.page()).toBe(0);
+    expect(host.filteredEntries().map(entry => entry.card.analysis.guid)).toEqual(['other']);
+    host.clearFilters(); fixture.detectChanges();
+    expect(scope()).toBe('facility-b'); expect(host.filteredEntries()).toHaveLength(1);
+    scope.set(undefined); fixture.detectChanges();
+    expect(host.entries()).toHaveLength(32);
+  });
+
+  it.each([false, true])('allows Water creation under facility scope with existing energy analyses: %s', async hasEnergyAnalysis => {
+    const host = fixture.componentInstance;
+    entries.set([accountEntry(), accountEntry('water', 'water'), ...(hasEnergyAnalysis ? [facilityEntry()] : [])]);
+    (host.navigation.inventoryFacilityGuid as WritableSignal<string | undefined>).set('facility-a');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[formControlName="category"]')).toBeNull();
+    actions.createAnalysis.mockResolvedValue({ accountId: 'account-a', guid: 'new-water-analysis' });
+    host.openCreate(); fixture.detectChanges();
+    const draft = fixture.debugElement.query(By.directive(AccountAnalysisDraftSlideoutComponent)).componentInstance as AccountAnalysisDraftSlideoutComponent;
+    expect(fixture.nativeElement.querySelector('app-account-analysis-draft-slideout [formControlName="category"]')).not.toBeNull();
+    draft.form.controls.category.setValue('water'); fixture.detectChanges();
+    fixture.nativeElement.querySelector('app-account-analysis-draft-slideout button[type="submit"]').click();
+    await fixture.whenStable();
+    expect(actions.createAnalysis).toHaveBeenCalledExactlyOnceWith('water');
+    expect(navigate).toHaveBeenLastCalledWith(['/account-analysis', 'new-water-analysis']);
   });
 
   it('defaults to simple mixed cards with explicit ownership/reporting and no duplicate active strip', () => {
@@ -74,7 +114,7 @@ describe('Unified account Analysis dashboard', () => {
   it('defaults to account-first ordering before pagination and restores a chosen alternative sort', () => {
     const host = fixture.componentInstance;
     expect(host.filters().sort).toBe('account-first');
-    expect((fixture.nativeElement.querySelector('[formControlName="sort"]') as HTMLSelectElement).selectedOptions[0].textContent).toBe('Account analyses first');
+    expect((fixture.nativeElement.querySelector('[aria-label="Analysis sort"]') as HTMLSelectElement).selectedOptions[0].textContent).toBe('Account analyses first');
     entries.set([...Array.from({ length: 25 }, (_, index) => facilityEntry(`A-${index}`)), accountEntry('Z-account')]); fixture.detectChanges();
     expect(host.inventory.visibleIds()[0]).toBe('account:Z-account');
     host.filtersForm.controls.sort.setValue('name'); fixture.detectChanges();

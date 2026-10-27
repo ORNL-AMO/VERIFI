@@ -5,6 +5,27 @@ import { setupReportInventory } from '../testing/report-inventory-test-setup';
 import { ReportsDashboardComponent } from './reports-dashboard.component';
 
 describe('report browse state', () => {
+  it('excludes account reports under a facility and normalizes incompatible remembered controls', async () => {
+    const { store, navigation } = await setupReportInventory();
+    store.publish({ ...store.snapshot()!, facilities: [...store.facilities(), { ...reportFacility, guid: 'facility-b' }],
+      facilityReports: [reportFixture(), reportFixture({ guid: 'other-report', facilityId: 'facility-b' })] });
+    const fixture = TestBed.createComponent(ReportsDashboardComponent); fixture.detectChanges();
+    const host = fixture.componentInstance;
+    host.filtersForm.patchValue({ scope: 'account', type: 'account:analysis' }); fixture.detectChanges();
+    navigation.inventoryFacilityGuid.set('facility-a'); fixture.detectChanges();
+    expect(host.filteredEntries().map(entry => entry.report.guid)).toEqual(['report-a']);
+    expect(host.filtersForm.controls.type.value).toBe('all');
+    expect(host.filters().sort).toBe('attention');
+    expect(host.typeOptions().every(option => option.value.startsWith('facility:'))).toBe(true);
+    expect(fixture.nativeElement.querySelector('[formControlName="scope"]')).toBeNull();
+    host.clearFilters(); fixture.detectChanges();
+    expect(navigation.inventoryFacilityGuid()).toBe('facility-a');
+    navigation.inventoryFacilityGuid.set('facility-b'); fixture.detectChanges();
+    expect(host.filteredEntries().map(entry => entry.report.guid)).toEqual(['other-report']);
+    navigation.inventoryFacilityGuid.set(undefined); fixture.detectChanges();
+    expect(host.entries()).toHaveLength(3);
+  });
+
   it('uses the Better Plants icon in portfolio cards and retains the page icon for other account and facility reports', async () => {
     const { store } = await setupReportInventory();
     const saved = store.snapshot()!;

@@ -1,3 +1,5 @@
+import { OverlayModule } from '@angular/cdk/overlay';
+import { ShellHeaderTestModule } from '@app/v1/shell/header/shell-header.testing';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -48,8 +50,8 @@ describe('header backup with live Settings drafts', () => {
     };
     writes = { update: vi.fn(async value => value) };
     TestBed.configureTestingModule({
-      imports: [CommonModule, ReactiveFormsModule, IconComponent],
-      declarations: [ShellHeaderComponent, AccountSettingsProfileComponent, FacilitySettingsProfileComponent],
+      imports: [ShellHeaderTestModule, OverlayModule, CommonModule, ReactiveFormsModule, IconComponent],
+      declarations: [AccountSettingsProfileComponent, FacilitySettingsProfileComponent],
       providers: [SettingsFormService,
         { provide: AccountWorkspaceStore, useValue: store },
         { provide: BackupExportCoordinator, useValue: exports },
@@ -65,7 +67,7 @@ describe('header backup with live Settings drafts', () => {
         { provide: ApplicationLifecycleService, useValue: { refreshAccountCatalog: vi.fn(async () => []) } },
         { provide: NotificationService, useValue: { success: vi.fn(), warning: vi.fn(), danger: vi.fn() } },
         { provide: WorkspaceNavigationService, useValue: {
-          account: store.account, accountOptions: () => [], isWorkspaceRoute: () => true, isSupportPanelOpen: () => false
+          facilities: store.facilities, headerFacility: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', account: store.account, isWorkspaceRoute: () => true, isSupportPanelOpen: () => false
         } },
         { provide: AppearanceService, useValue: {} }
       ]

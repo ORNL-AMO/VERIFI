@@ -3,7 +3,9 @@ import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports
 import { AccountReportsModule } from '@app/v1/account/reports/account-reports.module';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { FacilityPickerComponent } from './shell/header/facility-picker/facility-picker.component';
 import { RouterModule } from '@angular/router';
 import { PortalModule } from '@angular/cdk/portal';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -31,6 +33,7 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
   declarations: [
     ShellComponent,
     ShellHeaderComponent,
+    FacilityPickerComponent,
     WorkspaceShellComponent,
     PrimaryRailComponent,
     SupportPanelComponent,
@@ -43,6 +46,8 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     StatusEvaluationMessageComponent,
     StatusFindingActionComponent,
     FormsModule,
+    ReactiveFormsModule,
+    OverlayModule,
     IconsModule,
     NotificationsModule,
     PortalModule,

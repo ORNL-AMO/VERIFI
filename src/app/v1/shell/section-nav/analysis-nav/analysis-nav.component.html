@@ -12,6 +12,7 @@
       [routerLink]="contextMode === 'facility' && selectedFacility
         ? navigation.facilityAnalysisRoute(selectedFacility.guid)
         : navigation.accountAnalysisRoute(account.guid)"
+      [queryParams]="contextMode === 'account' ? navigation.inventoryScopeQuery() : {}"
       [attr.aria-current]="navigation.activeDetail() === 'dashboard' ? 'page' : null">
       <app-ui-icon name="analysis"></app-ui-icon>
       Dashboard

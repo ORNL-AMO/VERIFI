@@ -20,8 +20,7 @@ export class AccountPortfolioPredictorsTabComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }), type: new FormControl<PredictorTypeFilter>('all', { nonNullable: true }),
-    status: new FormControl<PredictorStatusFilter>('all', { nonNullable: true }), sort: new FormControl<PredictorInventorySort>('attention', { nonNullable: true }),
-    facilityGuid: new FormControl('', { nonNullable: true })
+    status: new FormControl<PredictorStatusFilter>('all', { nonNullable: true }), sort: new FormControl<PredictorInventorySort>('attention', { nonNullable: true })
   });
   readonly browseKey = computed<BrowseKey<'predictors'> | undefined>(() => {
     const account = this.workspace.account(); return account ? { kind: 'predictors', accountGuid: account.guid } : undefined;
@@ -29,19 +28,18 @@ export class AccountPortfolioPredictorsTabComponent {
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready());
   readonly navigationError = signal('');
-  readonly entries = computed(() => this.workspace.facilities().flatMap(facility => {
+  readonly entries = computed(() => this.workspace.facilities().filter(facility => !this.navigation.inventoryFacilityGuid() || facility.guid === this.navigation.inventoryFacilityGuid()).flatMap(facility => {
     const predictors = this.workspace.predictors().filter(item => item.facilityId === facility.guid);
     const readings = this.workspace.predictorData().filter(item => item.facilityId === facility.guid);
     return buildPredictorInventory(buildPredictorCards(predictors, readings, this.status.items(), this.status.state() === 'ready'),
       buildWeatherStationGroups(predictors, readings, this.status.items(), this.status.state() === 'ready'), facility, this.status.state());
   }));
-  readonly facilities = computed(() => [...this.workspace.facilities()].sort((a,b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
-  readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters())
-    .filter(item => !this.filters().facilityGuid || item.facility.guid === this.filters().facilityGuid), this.filters().sort));
+
+  readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters()), this.filters().sort));
   readonly tiles = computed(() => buildPredictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
-  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(item => item.guid)), this.filters, this.workspace.canWrite);
+  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(item => item.guid)), computed(() => ({ ...this.filters(), facility: this.navigation.inventoryFacilityGuid() })), this.workspace.canWrite);
   readonly browseIds = this.inventory.visibleIds;
-  clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', type: 'all', sort: 'attention', facilityGuid: '' }); }
+  clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', type: 'all', sort: 'attention' }); }
   navigateRoute(route: readonly string[]): void { this.navigate([...route]); }
   private navigate(route: string[]): void {
     this.navigationError.set('');

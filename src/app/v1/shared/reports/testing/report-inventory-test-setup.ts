@@ -20,7 +20,7 @@ export async function setupReportInventory(scope: 'account' | 'facility' = 'acco
   const status = signal<'ready' | 'error' | 'idle' | 'evaluating'>('ready');
   const accountActions = { create: vi.fn(async () => ({ ...accountReport, guid: 'created-account' })), copy: vi.fn(async () => ({ ...accountReport, guid: 'copied-account' })), updateName: vi.fn(async () => accountReport), delete: vi.fn(async () => {}) };
   const facilityActions = { create: vi.fn(async () => reportFixture({ guid: 'created-facility' })), copy: vi.fn(async () => reportFixture({ guid: 'copied-facility' })), updateName: vi.fn(async () => reportFixture()), delete: vi.fn(async () => {}) };
-  const navigation = { routeState: state, activeReportGuid: computed(() => state().reportGuid),
+  const navigation = { inventoryFacilityGuid: signal<string | undefined>(undefined), headerFacility: () => undefined, routeState: state, activeReportGuid: computed(() => state().reportGuid),
     accountReportsRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'reports', 'dashboard'],
     facilityReportsRoute: (guid: string) => ['/v1', 'workspace', 'facility', guid, 'reports', 'dashboard'],
     accountReportWorkbenchRoute: (account: string, report: string) => ['/v1', 'workspace', 'account', account, 'reports', 'workbench', report, 'setup'],

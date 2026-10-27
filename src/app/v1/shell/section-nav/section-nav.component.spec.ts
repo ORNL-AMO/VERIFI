@@ -27,7 +27,7 @@ describe('SectionNavComponent', () => {
 
     expect(fixture.nativeElement.querySelector('.v1-facility-picker__toggle')).toBeNull();
     expect(fixture.nativeElement.querySelector('app-facility-picker')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-nav__account-name')?.textContent).toContain('Account A');
+    expect(fixture.nativeElement.querySelector('.v1-nav__account-name')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Facility Home');
 
     activeSection.set('settings');

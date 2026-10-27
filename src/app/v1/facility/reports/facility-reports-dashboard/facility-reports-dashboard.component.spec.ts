@@ -21,7 +21,7 @@ describe('facility report inventory', () => {
     expect(component.breadcrumbs().map(crumb => crumb.label)).toEqual(['Account A', 'Facility A']);
     expect(fixture.nativeElement.querySelector('app-page-identity a').getAttribute('href')).toContain('/account/account-a/reports/dashboard');
     expect(component.menuActions().map(action => action.id)).toEqual(['rename', 'copy', 'delete']);
-    expect(component.filtersForm.controls.sort.value).toBe('attention');
+    expect(component.filters().sort).toBe('attention');
     component.filtersForm.controls.search.setValue('no match'); fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No reports match these filters');
   });

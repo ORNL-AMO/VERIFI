@@ -1,12 +1,13 @@
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { AnalysisComparisonState, AnalysisComparisonOption } from '@app/v1/shared/analysis-comparison/analysis-comparison-state';
 import { AnalysisComparisonSheetComponent } from '@app/v1/shared/analysis-comparison/analysis-comparison-sheet/analysis-comparison-sheet.component';
 import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
+import { DataEmptyStateComponent } from '@app/v1/shared/data-empty-state/data-empty-state.component';
 import { AccountAnalysisDetailsSlideoutComponent } from './account-analysis-details-slideout/account-analysis-details-slideout.component';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
@@ -17,7 +18,7 @@ import { InventoryTileActionRequest, InventoryTileMenuAction } from '@app/v1/sha
 import { BrowseFilters, BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
-import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
+import { PageIdentityComponent, inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
 import { PortfolioInventoryState } from '@app/v1/account/data/portfolio/portfolio-inventory-state';
 import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-actions.service';
 import { AnalysisDetailsSlideoutComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/analysis-details-slideout/analysis-details-slideout.component';
@@ -32,7 +33,7 @@ import { AnalysisInventoryEntry, AnalysisInventoryResultEntry, analysisInventory
 
 @Component({
   selector: 'app-account-analysis-dashboard', host: { class: 'v1-analysis-dashboard-host v1-inventory-dashboard-host' }, standalone: true,
-  imports: [AnalysisComparisonSheetComponent, InventoryChartDockComponent, IconComponent, DataEmptyStateModule, AccountAnalysisDetailsSlideoutComponent, ConfirmationDialogComponent, InventoryGridComponent,
+  imports: [AnalysisComparisonSheetComponent, InventoryChartDockComponent, IconComponent, DataEmptyStateComponent, AccountAnalysisDetailsSlideoutComponent, ConfirmationDialogComponent, InventoryGridComponent,
     AccountAnalysisDraftSlideoutComponent, AccountAnalysisComparisonComponent, AnalysisDetailsSlideoutComponent,
     FacilityAnalysisComparisonComponent, ReactiveFormsModule, BrowsePositionDirective, BrowseHeaderDirective, PageIdentityComponent],
   providers: [AccountAnalysisDashboardResultsService],
@@ -66,18 +67,29 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
       ? { kind: 'analyses', accountGuid: account.guid } : undefined;
   });
   private readonly rememberedFilters = rememberBrowseForm(this.browseKey, this.filtersForm);
-  readonly showCategory = computed(() => this.workspace.categories().length > 1);
+  readonly scopedFacilityGuid = this.navigation.inventoryFacilityGuid;
+  readonly showCategory = computed(() => this.scopedFacilityGuid()
+    ? new Set(this.entries().map(entry => entry.card.category)).size > 1 : this.workspace.categories().length > 1);
+  readonly showCreationCategory = computed(() => this.workspace.categories().length > 1);
   // A remembered category must never silently filter a dashboard with no category control.
-  readonly filters = computed(() => this.showCategory() ? this.rememberedFilters() : { ...this.rememberedFilters(), category: 'all' as const });
-  readonly entries = this.workspace.entries;
+  readonly filters = computed(() => {
+    const filters = this.rememberedFilters();
+    return { ...filters, category: this.showCategory() ? filters.category : 'all' as const,
+      ...(this.scopedFacilityGuid() ? { scope: 'facility' as const, sort: filters.sort === 'account-first' ? 'attention' as const : filters.sort } : {}) };
+  });
+  readonly effectiveSort = new FormControl<BrowseFilters['analyses']['sort']>('account-first', { nonNullable: true });
+  readonly entries = computed(() => {
+    const guid = this.scopedFacilityGuid();
+    return this.workspace.entries().filter(entry => !guid || (entry.scope === 'facility' && entry.facility.guid === guid));
+  });
   readonly comparisonOptions = computed<readonly AnalysisComparisonOption[]>(() => this.entries().map(entry => ({
     key: entry.key, scope: entry.scope, category: entry.card.category, facilityGuid: entry.scope === 'facility' ? entry.facility.guid : undefined,
     label: `${entry.card.analysis.name || 'Untitled analysis'} · ${entry.scope === 'account' ? 'Account analysis' : 'Facility analysis · ' + entry.ownerName}${this.showCategory() ? ' · ' + (entry.card.category === 'water' ? 'Water' : 'Energy') : ''}`
   })));
-  readonly comparison = new AnalysisComparisonState(this.comparisonOptions, computed(() => this.browseKey()?.accountGuid));
+  readonly comparison = new AnalysisComparisonState(this.comparisonOptions, computed(() => this.browseKey() ? JSON.stringify([this.browseKey()!.accountGuid, this.scopedFacilityGuid()]) : undefined));
   readonly filteredEntries = computed(() => filterAnalysisInventory(this.entries(), this.filters()));
   private readonly baseTiles = computed(() => this.filteredEntries().map(entry => analysisInventoryTile(entry, undefined, this.workspace.meterGroups(), this.navigation, this.workspace.account()?.guid ?? '', this.workspace.statusState(), this.showCategory())));
-  readonly inventory = new PortfolioInventoryState(this.browseKey, this.baseTiles, computed(() => this.entries().map(entry => entry.key)), this.filters, this.workspace.canWrite);
+  readonly inventory = new PortfolioInventoryState(this.browseKey, this.baseTiles, computed(() => this.entries().map(entry => entry.key)), computed(() => ({ ...this.filters(), facility: this.scopedFacilityGuid() })), this.workspace.canWrite);
   readonly visibleTiles = computed(() => this.inventory.visibleTiles().map(tile => this.tile(this.entries().find(entry => entry.key === tile.guid)!)));
   readonly printTiles = computed(() => this.filteredEntries().map(entry => this.tile(entry)));
   readonly detailsGuid = signal<string | undefined>(undefined);
@@ -118,8 +130,9 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
       { id: 'delete', label: 'Delete analysis', icon: 'delete', disabled: !this.canAct() }
     ] as InventoryTileMenuAction[]];
   })));
-  readonly breadcrumbs = computed(() => [{ label: this.workspace.account()?.name || 'Account' }, { label: 'Analysis' }]);
-  readonly title = computed(() => `${this.workspace.account()?.name || 'Account'} Analysis`);
+  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account',
+    this.workspace.facilities().find(facility => facility.guid === this.scopedFacilityGuid())?.name));
+  readonly title = computed(() => `${this.navigation.headerFacility()?.name || this.workspace.account()?.name || 'Account'} Analysis`);
   readonly countLabel = computed(() => {
     const entries = this.filteredEntries();
     return `${entries.length} of ${this.entries().length} analyses · ${entries.filter(entry => entry.scope === 'account').length} account · ${entries.filter(entry => entry.scope === 'facility').length} facility`;
@@ -153,9 +166,14 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
   });
 
   constructor() {
+    const unregister = inject(UnsavedChangesService).register(() => false, () => {}, () => this.saving() || this.createOpen() || !!this.confirmationKind);
+    inject(DestroyRef).onDestroy(unregister);
+    const sortSubscription = this.effectiveSort.valueChanges.subscribe(value => this.filtersForm.controls.sort.setValue(value));
+    inject(DestroyRef).onDestroy(() => sortSubscription.unsubscribe());
+    effect(() => this.effectiveSort.setValue(this.filters().sort, { emitEvent: false }));
     effect(() => this.results.setDemand(this.resultDemand()));
     effect(() => {
-      const accountGuid = this.browseKey()?.accountGuid;
+      const accountGuid = JSON.stringify([this.browseKey()?.accountGuid, this.scopedFacilityGuid()]);
       if (accountGuid === this.dashboardAccountGuid) return;
       this.dashboardAccountGuid = accountGuid;
       this.resetTransientState();
@@ -180,6 +198,8 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
         : await this.facilityActions.createAnalysis(request.category, request.facilityGuid);
       if (!isCurrent()) return;
       this.createOpen.set(false);
+      // The write is complete; its workbench handoff can now pass the scope guard.
+      this.saving.set(false);
       await this.navigateRoute(request.scope === 'account'
         ? this.navigation.accountAnalysisWorkbenchRoute(analysis.accountId, analysis.guid)
         : this.navigation.facilityAnalysisWorkbenchRoute(request.facilityGuid, analysis.guid));

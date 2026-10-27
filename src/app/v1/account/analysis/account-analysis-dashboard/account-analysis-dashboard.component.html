@@ -12,15 +12,15 @@
     <span #marker class="analysis-inventory__marker" aria-hidden="true"></span>
     <div #sticky class="v1-data-workbench-sticky v1-inventory-sticky-stack analysis-inventory__sticky" [class.v1-inventory-sticky-stack--joined]="browseHeader.collapsed()">
       <header class="v1-section-header v1-page-header v1-inventory-page-header analysis-inventory__header">
-        <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="title()" icon="analysis" headingId="v1-account-analysis-title" breadcrumbLabel="Analysis context"/>
+        <app-page-identity [breadcrumbs]="breadcrumbs()" (breadcrumbSelected)="navigation.changeFacilityScope({ kind: 'all' })" [title]="title()" icon="analysis" headingId="v1-account-analysis-title" breadcrumbLabel="Analysis context"/>
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openCreate()"><app-ui-icon name="add"/>Add Analysis</button>
       </header>
       <form class="v1-data-browse-toolbar analysis-inventory__toolbar" aria-label="Analysis filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
         <div class="analysis-inventory__search"><p class="analysis-inventory__count" role="status">{{ countLabel() }}</p><div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"/></span><input type="search" aria-label="Find analysis, owner, status, or report" placeholder="Find analysis, owner, status, or report" formControlName="search"></div></div>
-        <label><span>Analysis level</span><select class="v1-select" formControlName="scope"><option value="all">Account + facility</option><option value="account">Account only</option><option value="facility">Facility only</option></select></label>
+        @if (!scopedFacilityGuid()) { <label><span>Analysis level</span><select class="v1-select" formControlName="scope"><option value="all">Account + facility</option><option value="account">Account only</option><option value="facility">Facility only</option></select></label> }
         @if (showCategory()) { <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label> }
         <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="ready">All data valid</option><option value="warning">Has warnings</option><option value="error">Has errors</option><option value="active">Active</option></select></label>
-        <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="account-first">Account analyses first</option><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
+        <label><span>Sort</span><select class="v1-select" aria-label="Analysis sort" [formControl]="effectiveSort">@if (!scopedFacilityGuid()) { <option value="account-first">Account analyses first</option> }<option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
         <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
       </form>
     </div>
@@ -43,7 +43,7 @@
       <app-account-analysis-details-slideout [card]="entry.card" [evaluation]="workspace.statusState()" [facilityInputs]="workspace.facilityInputs()" [facilityFindings]="workspace.statusItems()" [outcomeDisplay]="entry.outcomeDisplay" [ownerName]="entry.ownerName" [showCategory]="showCategory()" (closed)="detailsGuid.set(undefined)"/>
     }
   }
-  @if (createOpen()) { <app-account-analysis-draft-slideout [facilities]="creationFacilities()" [showCategory]="showCategory()" [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"/> }
+  @if (createOpen()) { <app-account-analysis-draft-slideout [facilities]="creationFacilities()" [showCategory]="showCreationCategory()" [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"/> }
 
 }
 <ng-template #activeConfirmation>

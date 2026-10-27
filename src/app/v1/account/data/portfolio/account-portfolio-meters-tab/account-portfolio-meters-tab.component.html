@@ -37,7 +37,6 @@
         <option value="latestReading">Latest reading</option>
       </select>
     </label>
-    <label><span>Facility</span><select class="v1-select" formControlName="facilityGuid" aria-label="Facility"><option value="">All facilities</option>@for (facility of facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select></label>
     <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
   </form>
 
@@ -46,7 +45,7 @@
     <app-data-empty-state
       icon="meter"
       title="No meters"
-      description="Meters will appear here after you add or upload them for a facility.">
+      description="Add or upload meters for the selected scope to get started.">
     </app-data-empty-state>
   } @else if (visibleMeters.length === 0) {
     <app-data-empty-state

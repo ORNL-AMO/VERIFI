@@ -23,7 +23,7 @@
 .v1-workspace__brand {
   display: inline-flex;
   gap: .35rem;
-  align-items: baseline;
+  align-items: center;
   min-height: 2.35rem;
   padding: 0;
   border: 0;
@@ -34,7 +34,7 @@
 
 .v1-workspace__brand strong {
   color: var(--v1-text);
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 600;
   line-height: 1;
 }
@@ -45,149 +45,26 @@
 
 .v1-workspace__brand span {
   color: var(--v1-muted);
-  font-size: .85rem;
+  font-size: .7rem;
   font-weight: 800;
-}
-
-.v1-workspace__spacer,
-.v1-workspace__account-menu {
-  flex: 1 1 auto;
-}
-
-.v1-workspace__account-menu {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-width: 0;
-}
-
-.v1-account-switcher {
-  position: relative;
-  min-width: 0;
-}
-
-.v1-account-switcher__button {
-  display: inline-flex;
-  gap: .45rem;
-  align-items: center;
-  min-height: 2.25rem;
-  max-width: 22rem;
-  padding: .35rem .65rem;
+  line-height: 1;
+  padding: .2rem .3rem;
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius-sm);
-  background: var(--v1-panel);
-  color: var(--v1-text);
-  font-size: .86rem;
-  font-weight: 800;
-  transition: border-color .18s ease, background-color .18s ease, color .18s ease;
-  cursor: pointer;
 }
 
-.v1-account-switcher__button:hover,
-.v1-account-switcher__button.open {
-  border-color: color-mix(in srgb, var(--v1-account) 48%, var(--v1-border));
-  background: color-mix(in srgb, var(--v1-account) 9%, var(--v1-panel));
-  color: var(--v1-account);
-}
-
-.v1-account-switcher__name {
-  max-width: 16rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.v1-account-switcher__chevron {
-  flex-shrink: 0;
-  font-size: .65rem;
-  opacity: .68;
-}
-
-.v1-account-switcher__dropdown,
-.v1-settings__menu {
-  position: absolute;
-  top: calc(100% + .5rem);
-  right: 0;
-  z-index: 20;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius);
-  background: var(--v1-surface);
-  box-shadow: 0 .9rem 2.2rem var(--v1-shadow);
-}
-
-.v1-account-switcher__dropdown {
-  width: min(18rem, calc(100vw - 2rem));
-  padding: .4rem;
-}
-
-.v1-account-switcher__section {
-  display: grid;
-  gap: .1rem;
-}
-
-.v1-account-switcher__label {
-  display: block;
-  padding: .3rem .55rem .2rem;
-  color: var(--v1-muted);
-  font-size: .72rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.v1-account-switcher__divider {
-  height: 1px;
-  margin: .35rem .1rem;
-  background: var(--v1-border);
-}
-
-.v1-account-switcher__item {
-  display: flex;
-  gap: .55rem;
-  align-items: flex-start;
-  width: 100%;
-  min-height: 2.25rem;
-  padding: .45rem .55rem;
-  border: 0;
-  border-radius: var(--v1-radius-sm);
-  background: transparent;
-  color: var(--v1-text);
-  font-size: .85rem;
-  text-align: left;
-  cursor: pointer;
-}
-
-.v1-account-switcher__item small {
-  display: block;
-  color: var(--v1-muted);
-  font-size: .75rem;
-}
-
-.v1-account-switcher__item:hover:not(:disabled) {
-  background: var(--v1-surface-muted);
-}
-
-.v1-account-switcher__item.active {
-  color: var(--v1-account);
-  font-weight: 800;
-  box-shadow: inset 3px 0 0 currentColor;
-}
-
-.v1-account-switcher__item:disabled {
-  cursor: not-allowed;
-  opacity: .55;
-}
-
-.v1-account-switcher__check {
-  flex-shrink: 0;
-  margin-top: .15rem;
-  color: var(--v1-account);
-  font-size: .8rem;
-  opacity: 0;
-}
-
-.v1-account-switcher__item.active .v1-account-switcher__check {
-  opacity: 1;
-}
+.v1-workspace__spacer { flex: 1 1 auto; }
+.v1-workspace__context { display: flex; align-items: center; gap: .5rem; min-width: 0; flex: 1 1 auto; padding-inline-start: .85rem; border-inline-start: 1px solid var(--v1-border); }
+.v1-workspace__context app-facility-picker { min-width: 0; }
+.v1-workspace__account-link { display: inline-flex; align-items: center; gap: .55rem; min-width: 0; max-width: 24rem; padding: .3rem .45rem; border: 1px solid transparent; border-radius: var(--v1-radius-sm); background: transparent; color: var(--v1-text); font-size: .9rem; font-weight: 700; line-height: 1.2; cursor: pointer; }
+.v1-workspace__account-link > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v1-workspace__account-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 1.9rem; height: 1.9rem; border-radius: var(--v1-radius-sm); background: color-mix(in srgb, var(--v1-account) 10%, var(--v1-surface)); color: var(--v1-account); font-size: 1.1rem; }
+.v1-workspace__account-link:hover { background: var(--v1-surface-muted); border-color: var(--v1-border); }
+.v1-workspace__account-link:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: 3px; }
+.v1-workspace__account-link:disabled { opacity: .65; cursor: wait; }
+.v1-workspace__context-divider { flex-shrink: 0; color: var(--v1-muted); font-size: 1.15rem; }
+.v1-header-context-message { margin: 0; }
+.v1-settings__menu { position: absolute; top: calc(100% + .5rem); right: 0; z-index: 20; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); box-shadow: 0 .9rem 2.2rem var(--v1-shadow); }
 
 .v1-workspace__actions {
   display: flex;
@@ -356,31 +233,18 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .v1-account-switcher__button,
   .v1-settings__toggle-track span {
     transition: none;
   }
 }
 
 @media (max-width: 820px) {
-  .v1-workspace__header {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .v1-workspace__account-menu {
-    justify-content: flex-start;
-  }
-
-  .v1-account-switcher,
-  .v1-account-switcher__button {
-    max-width: 100%;
-  }
-
-  .v1-account-switcher__dropdown {
-    left: 0;
-    right: auto;
-  }
+  .v1-workspace__header { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .55rem .75rem; align-items: center; }
+  .v1-workspace__brand { grid-column: 1; grid-row: 1; }
+  .v1-workspace__actions { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+  .v1-workspace__context { grid-column: 1 / -1; grid-row: 2; width: 100%; padding-inline-start: 0; border-inline-start: 0; }
+  .v1-workspace__account-link { max-width: 50%; }
+  .v1-workspace__spacer { display: none; }
 }
 
 .v1-header-backup { position: relative; flex: 0 0 auto; }

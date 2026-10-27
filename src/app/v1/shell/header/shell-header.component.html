@@ -11,64 +11,21 @@
   </button>
 
   @if (isWorkspaceRoute) {
-    @let accountOptions = navigation.accountOptions();
-
-    <div class="v1-workspace__account-menu" aria-label="Account selection">
-      @if (navigation.account(); as account) {
-        <div class="v1-account-switcher">
-        <button
-          type="button"
-          class="v1-account-switcher__button"
-          [class.open]="accountMenuOpen"
-          (click)="toggleAccountMenu()"
-          aria-haspopup="true"
-          [attr.aria-expanded]="accountMenuOpen">
-          <app-ui-icon name="account"></app-ui-icon>
-          <span class="v1-account-switcher__name">{{ account.name }}</span>
-          <app-ui-icon name="chevronDown" class="v1-account-switcher__chevron"></app-ui-icon>
+    @if (navigation.account(); as account) {
+      <nav class="v1-workspace__context" aria-label="Account and facility">
+        <button type="button" class="v1-workspace__account-link" (click)="navigation.changeFacilityScope({ kind: 'all' })"
+          [title]="account.name" [disabled]="navigation.scopeChangePending()"
+          [attr.aria-label]="account.name + '. Show all facilities'">
+          <app-ui-icon class="v1-workspace__account-icon" name="account"/>
+          <span>{{ account.name }}</span>
         </button>
-
-        @if (accountMenuOpen) {
-          <div class="v1-account-switcher__dropdown" role="menu" aria-label="Switch account">
-            <div class="v1-account-switcher__section">
-              <span class="v1-account-switcher__label">Switch account</span>
-              @for (option of accountOptions; track option.guid) {
-                <button
-                  type="button"
-                  class="v1-account-switcher__item"
-                  role="menuitem"
-                  [class.active]="option.active"
-                  (click)="selectAccount(option.guid)">
-                  <app-ui-icon name="check" class="v1-account-switcher__check"></app-ui-icon>
-                  <span>
-                    {{ option.name }}
-                    <small>{{ option.descriptor }}</small>
-                  </span>
-                </button>
-              }
-            </div>
-
-            <div class="v1-account-switcher__divider"></div>
-
-            <div class="v1-account-switcher__section">
-              <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
-                <app-ui-icon name="add"></app-ui-icon>
-                Add new account
-              </button>
-              <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
-                <app-ui-icon name="upload"></app-ui-icon>
-                Import backup
-              </button>
-              <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
-                <app-ui-icon name="gears"></app-ui-icon>
-                Manage accounts
-              </button>
-            </div>
-          </div>
-        }
-        </div>
-      }
-    </div>
+        <span class="v1-workspace__context-divider" aria-hidden="true">/</span>
+        <app-facility-picker #facilityPicker [facilities]="navigation.facilities()" [selectedFacility]="navigation.headerFacility()"
+          [singleSite]="navigation.isSingleSiteWorkspace()" [disabled]="navigation.scopeChangePending() || !!navigation.scopeAvailability()"
+          [unavailableMessage]="navigation.scopeAvailability()" (opened)="closeAll()"
+          (facilitySelected)="navigation.changeFacilityScope($event)"/>
+      </nav>
+    }
   } @else {
     <span class="v1-workspace__spacer" aria-hidden="true"></span>
   }
@@ -198,3 +155,6 @@
     }
   </div>
 </header>
+
+@if (navigation.scopeNotice()) { <p class="v1-header-context-message v1-alert v1-alert--info" role="status">{{ navigation.scopeNotice() }}</p> }
+@if (navigation.contextNavigationError()) { <p class="v1-header-context-message v1-alert v1-alert--danger" role="alert">{{ navigation.contextNavigationError() }}</p> }

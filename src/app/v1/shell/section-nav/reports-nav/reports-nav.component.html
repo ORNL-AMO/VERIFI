@@ -4,7 +4,7 @@
 <section class="v1-nav__group" aria-labelledby="reports-nav-title">
   <span id="reports-nav-title" class="v1-nav__label">{{ navigation.contextMode() === 'facility' ? 'Facility Reports' : 'Reports' }}</span>
   @if (account) {
-    <a class="v1-nav__link" [class.active]="!active" [attr.aria-current]="!active ? 'page' : null" [routerLink]="facilityGuid ? navigation.facilityReportsRoute(facilityGuid) : navigation.accountReportsRoute(account.guid)"><app-ui-icon name="reports"></app-ui-icon>Dashboard</a>
+    <a class="v1-nav__link" [class.active]="!active" [attr.aria-current]="!active ? 'page' : null" [routerLink]="facilityGuid ? navigation.facilityReportsRoute(facilityGuid) : navigation.accountReportsRoute(account.guid)" [queryParams]="facilityGuid ? {} : navigation.inventoryScopeQuery()"><app-ui-icon name="reports"></app-ui-icon>Dashboard</a>
     @for (group of reportGroups(); track group.id) {
       <section class="v1-nav__report-section" [attr.aria-labelledby]="'reports-nav-' + group.id + '-title'">
         <span class="v1-nav__sublabel" [id]="'reports-nav-' + group.id + '-title'">{{ group.label }}</span>

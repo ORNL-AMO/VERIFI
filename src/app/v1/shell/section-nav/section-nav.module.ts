@@ -1,4 +1,3 @@
-import { OverlayModule } from '@angular/cdk/overlay';
 import { ReportsNavComponent } from './reports-nav/reports-nav.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -10,7 +9,6 @@ import { AnalysisStageNavigationComponent } from '@app/v1/shared/analysis-stage-
 import { StatusAttentionComponent } from '@app/v1/shared/status/status-attention/status-attention.component';
 import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-evaluation-message/status-evaluation-message.component';
 import { SectionNavComponent } from './section-nav.component';
-import { FacilityPickerComponent } from './facility-picker/facility-picker.component';
 import { WorkspaceContextComponent } from './workspace-context/workspace-context.component';
 import { SettingsNavComponent } from './settings-nav/settings-nav.component';
 import { DataNavComponent } from './data-nav/data-nav.component';
@@ -19,8 +17,8 @@ import { AnalysisNavComponent } from './analysis-nav/analysis-nav.component';
 import { ResourceNavGroupComponent } from './resource-nav-group/resource-nav-group.component';
 
 @NgModule({
-  declarations: [ReportsNavComponent, SectionNavComponent, FacilityPickerComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent],
-  imports: [OverlayModule,CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent, StatusEvaluationMessageComponent],
-  exports: [SectionNavComponent, FacilityPickerComponent]
+  declarations: [ReportsNavComponent, SectionNavComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent, StatusEvaluationMessageComponent],
+  exports: [SectionNavComponent]
 })
 export class SectionNavModule { }

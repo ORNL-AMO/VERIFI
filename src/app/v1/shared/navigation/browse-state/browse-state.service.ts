@@ -12,10 +12,10 @@ export interface BrowseFilters {
   facilityReports: ReportInventoryFilters;
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };
   facilityAnalyses: Omit<BrowseFilters['analyses'], 'scope' | 'sort'> & { sort: 'attention' | 'modified' | 'name' | 'baseline' };
-  predictors: PredictorInventoryFilters & { facilityGuid?: string };
+  predictors: PredictorInventoryFilters;
   facilityPredictors: PredictorInventoryFilters;
   facilities: { search: string; status: FacilityStatusFilter; sort: FacilitySort };
-  meters: { search: string; status: PortfolioMeterStatusFilter; sort: PortfolioMeterSort; facilityGuid?: string };
+  meters: { search: string; status: PortfolioMeterStatusFilter; sort: PortfolioMeterSort };
   facilityMeters: { search: string; status: PortfolioMeterStatusFilter; sort: 'attention' | 'meterName' | 'latestReading' };
 }
 export type BrowseKind = keyof BrowseFilters;

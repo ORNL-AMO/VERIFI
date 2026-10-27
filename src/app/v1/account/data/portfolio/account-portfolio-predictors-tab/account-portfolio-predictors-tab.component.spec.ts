@@ -9,6 +9,25 @@ import { AccountDataModule } from '../../account-data.module';
 import { AccountPortfolioPredictorsTabComponent } from './account-portfolio-predictors-tab.component';
 
 describe('account Predictor inventory', () => {
+  it('scopes predictors and printed tiles before local filtering without a duplicate facility control', () => {
+    const workspace = inventoryWorkspace(5);
+    const scope = signal<string | undefined>('other');
+    workspace.predictors.update(items => items.map(item => item.guid === 'p1' ? { ...item, facilityId: 'other' } : item));
+    TestBed.configureTestingModule({ imports: [AccountDataModule], providers: [provideRouter([]),
+      { provide: AccountWorkspaceStore, useValue: { ...workspace, facilities: signal([workspace.facility()!, { ...workspace.facility()!, guid: 'other', name: 'Other' }]), predictorData: workspace.predictorReadings } },
+      { provide: WorkspaceStatusService, useValue: { items: signal([]), state: workspace.statusState } },
+      { provide: WorkspaceNavigationService, useValue: { ...inventoryNavigation, inventoryFacilityGuid: scope } }
+    ] });
+    const fixture = TestBed.createComponent(AccountPortfolioPredictorsTabComponent); fixture.detectChanges();
+    expect(fixture.componentInstance.entries().map(item => item.guid)).toEqual(['p1']);
+    expect(fixture.componentInstance.tiles()).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('[formControlName="facilityGuid"]')).toBeNull();
+    fixture.componentInstance.clearFilters(); fixture.detectChanges();
+    expect(scope()).toBe('other');
+    scope.set(undefined); fixture.detectChanges();
+    expect(fixture.componentInstance.entries()).toHaveLength(5);
+  });
+
   it('counts individual tiles, combines filters and opens canonical weather routes', () => {
     const workspace = inventoryWorkspace(5);
     const facilities = signal([workspace.facility()!, { ...workspace.facility()!, guid: 'other', name: 'Other' }]);

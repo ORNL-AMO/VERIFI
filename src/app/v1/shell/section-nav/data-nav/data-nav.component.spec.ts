@@ -1,3 +1,4 @@
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { TestBed } from '@angular/core/testing';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
@@ -7,6 +8,17 @@ import { setupSectionNavTest, activeLinks, meterChildLinks, groupChildLinks, pre
 describe('DataNavComponent', () => {
   let state: ReturnType<typeof setupSectionNavTest>;
   beforeEach(() => { state = setupSectionNavTest(); });
+
+  it('clears facility scope on the Facilities link while retaining it for resource inventories', () => {
+    const navigation = TestBed.inject(WorkspaceNavigationService);
+    vi.spyOn(navigation, 'inventoryScopeQuery').mockReturnValue({ facility: 'facility-b' });
+    state.activeSection.set('data'); state.activeDetail.set('portfolio');
+    const fixture = TestBed.createComponent(DataNavComponent); fixture.detectChanges();
+    const links = [...fixture.nativeElement.querySelectorAll('.v1-nav__link')] as HTMLAnchorElement[];
+    const facilities = links.find(link => link.textContent?.trim() === 'Facilities')!;
+    expect(facilities.getAttribute('href')).not.toContain('facility=');
+    expect(links.find(link => link.textContent?.trim() === 'Meters')!.getAttribute('href')).toContain('facility=facility-b');
+  });
 
   it('shows account portfolio and fuels custom data navigation when the Data rail section is active', () => {
     const { activeSection, account, activeDetail } = state;

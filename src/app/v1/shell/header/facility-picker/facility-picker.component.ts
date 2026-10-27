@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed, signal, inject, Injector, afterNextRender } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ALL_FACILITIES, FacilityScope } from '../../facility-scope.models';
 import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
@@ -18,7 +19,12 @@ export class FacilityPickerComponent {
   @Input() set facilities(value: readonly IdbFacility[]) { this.facilitiesState.set(value); }
   get facilities(): readonly IdbFacility[] { return this.facilitiesState(); }
   @Input() selectedFacility: IdbFacility | undefined;
-  @Output() readonly facilitySelected = new EventEmitter<string>();
+  @Input() singleSite = false;
+  @Input() disabled = false;
+  @Input() unavailableMessage = '';
+  @Output() readonly facilitySelected = new EventEmitter<FacilityScope>();
+
+  @Output() readonly opened = new EventEmitter<void>();
 
   @ViewChild('toggleButton') private readonly toggleButton?: ElementRef<HTMLButtonElement>;
 
@@ -29,12 +35,14 @@ export class FacilityPickerComponent {
     const query = this.query().trim().toLowerCase();
     return this.facilitiesState().map(facility => ({
       ...facility, location: [facility.city, facility.state].filter(Boolean).join(', ')
-    })).filter(facility => !query || facility.name.toLowerCase().includes(query) || facility.location.toLowerCase().includes(query));
+    })).filter(facility => !query || (facility.name || '').toLowerCase().includes(query) || facility.location.toLowerCase().includes(query))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid));
   });
 
   toggle(): void {
-    if (!this.facilities.length) return;
+    if (this.disabled || !this.facilities.length || this.singleSite) return;
     if (this.open) { this.close(); return; }
+    this.opened.emit();
     this.open = true;
     this.search.setValue('');
     const root = this.toggleButton?.nativeElement.closest('.v1-root');
@@ -44,18 +52,19 @@ export class FacilityPickerComponent {
       this.themeObserver = new MutationObserver(syncTheme);
       this.themeObserver.observe(root, { attributes: true, attributeFilter: ['class'] });
     }
-    this.menuWidth = Math.max(240, this.toggleButton?.nativeElement.getBoundingClientRect().width ?? 240);
+    this.menuWidth = Math.max(300, this.toggleButton?.nativeElement.getBoundingClientRect().width ?? 300);
     afterNextRender(() => document.querySelector<HTMLInputElement>('.v1-facility-picker__menu input')?.focus(), { injector: this.injector });
   }
 
-  close(): void {
+  close(restoreFocus = true): void {
+    if (!this.open) return;
     this.open = false;
     this.themeObserver?.disconnect();
-    this.toggleButton?.nativeElement.focus();
+    if (restoreFocus) this.toggleButton?.nativeElement.focus();
   }
 
-  select(facilityGuid: string): void {
-    this.facilitySelected.emit(facilityGuid);
+  select(facilityGuid?: string): void {
+    this.facilitySelected.emit(facilityGuid ? { kind: 'facility', facilityGuid } : ALL_FACILITIES);
     this.close();
   }
 
@@ -71,6 +80,10 @@ export class FacilityPickerComponent {
     const index = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
       : event.key === 'ArrowDown' ? (current + 1) % items.length : current <= 0 ? items.length - 1 : current - 1;
     items[index].focus();
+  }
+
+  onMenuFocusOut(event: FocusEvent): void {
+    if (event.relatedTarget && !(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node)) this.close(false);
   }
 
   onEscape(): void {

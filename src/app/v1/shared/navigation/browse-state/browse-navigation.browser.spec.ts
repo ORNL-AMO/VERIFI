@@ -1,5 +1,9 @@
-import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
-import { Component, computed, signal } from '@angular/core';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { CommonModule } from '@angular/common';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { FacilityPickerTestModule } from '@app/v1/shell/header/facility-picker/facility-picker.testing';
+import { FacilityScope } from '@app/v1/shell/facility-scope.models';
+import { Component, NgModule, computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterOutlet, provideRouter } from '@angular/router';
@@ -17,10 +21,10 @@ class BrowsePage {
   readonly form = new FormGroup({ search: new FormControl('', { nonNullable: true }), status: new FormControl<BrowseFilters['facilities']['status']>('all', { nonNullable: true }), sort: new FormControl<BrowseFilters['facilities']['sort']>('facilityName', { nonNullable: true }) });
   readonly filters = rememberBrowseForm(this.key, this.form);
 }
-@Component({ standalone: true, imports: [SectionNavModule], template: `<div class="v1-root v1-theme-dark" style="height:180px;min-height:0;width:220px;overflow:auto"><app-facility-picker [facilities]="facilities" (facilitySelected)="selected.set($event)"/></div>` })
+@Component({ standalone: true, imports: [FacilityPickerTestModule], template: `<div class="v1-root v1-theme-dark" style="height:180px;min-height:0;width:220px;overflow:auto"><app-facility-picker [facilities]="facilities" (facilitySelected)="selected.set($event)"/></div>` })
 class PickerHost {
   readonly facilities = Array.from({ length: 64 }, (_, index) => ({ guid: `f-${index}`, name: `Plant ${index}`, city: index === 63 ? 'Memphis' : 'Knoxville', state: 'TN' } as IdbFacility));
-  readonly selected = signal<string | undefined>(undefined);
+  readonly selected = signal<FacilityScope>({ kind: 'all' });
 }
 
 @Component({ standalone: true, imports: [RouterOutlet], template: '<main style="height:400px;overflow:auto"><router-outlet/></main>' })
@@ -77,8 +81,8 @@ describe('drill-down browser behavior', () => {
     const fixture = TestBed.createComponent(PickerHost); fixture.detectChanges();
     await page.getByRole('button', { name: /Choose facility/ }).click(); fixture.detectChanges();
     const search = page.getByRole('searchbox', { name: 'Search facilities' }); await search.fill('Memphis'); fixture.detectChanges();
-    await userEvent.keyboard('{ArrowDown}{Enter}'); fixture.detectChanges();
-    expect(fixture.componentInstance.selected()).toBe('f-63');
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}'); fixture.detectChanges();
+    expect(fixture.componentInstance.selected()).toEqual({ kind: 'facility', facilityGuid: 'f-63' });
     expect(document.querySelector('.v1-facility-picker__menu')).toBeNull();
     await page.getByRole('button', { name: /Choose facility/ }).click(); fixture.detectChanges();
     const menu = document.querySelector<HTMLElement>('.v1-facility-picker__menu')!;

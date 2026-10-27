@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityPickerComponent } from './facility-picker.component';
+import { FacilityPickerTestModule } from './facility-picker.testing';
 
 function facility(guid: string, name: string, city = '', state = ''): IdbFacility {
   return { guid, name, city, state } as IdbFacility;
@@ -12,8 +13,7 @@ function facility(guid: string, name: string, city = '', state = ''): IdbFacilit
 describe('FacilityPickerComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [FacilityPickerComponent],
-      imports: [OverlayModule, ReactiveFormsModule, IconComponent]
+      imports: [FacilityPickerTestModule, OverlayModule, ReactiveFormsModule, IconComponent]
     });
   });
 
@@ -21,6 +21,27 @@ describe('FacilityPickerComponent', () => {
     const fixture = TestBed.createComponent(FacilityPickerComponent);
     return { fixture, component: fixture.componentInstance };
   }
+
+  it('keeps All facilities available during search and emits a typed all scope for a one-facility portfolio', () => {
+    const { fixture, component } = createComponent();
+    component.facilities = [facility('f1', 'Only facility')];
+    component.selectedFacility = component.facilities[0];
+    const select = vi.fn(); component.facilitySelected.subscribe(select);
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.v1-facility-picker__toggle').click(); fixture.detectChanges();
+    component.search.setValue('no match'); fixture.detectChanges();
+    expect(document.querySelector('.v1-facility-picker__empty')?.textContent).toContain('No facilities match');
+    document.querySelector<HTMLButtonElement>('.v1-facility-picker__all')!.click();
+    expect(select).toHaveBeenCalledWith({ kind: 'all' });
+  });
+
+  it('sorts names and disables selection when there are no facilities', () => {
+    const { fixture, component } = createComponent(); fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('button') as HTMLButtonElement).disabled).toBe(true);
+    component.facilities = [facility('z', 'Zebra'), facility('a', 'Alpha')]; fixture.detectChanges();
+    fixture.nativeElement.querySelector('button').click(); fixture.detectChanges();
+    expect([...document.querySelectorAll('.v1-facility-picker__list button')].map(item => item.textContent?.trim())).toEqual(['Alpha', 'Zebra']);
+  });
 
   it('moves from the search field to the last facility with ArrowUp', () => {
     const { fixture, component } = createComponent();
@@ -30,13 +51,14 @@ describe('FacilityPickerComponent', () => {
     fixture.detectChanges();
     const search = document.querySelector<HTMLInputElement>('.v1-facility-picker__search-input')!;
     search.focus(); search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
-    expect(document.activeElement?.textContent).toContain('Last');
+    expect(document.activeElement?.textContent).toContain('Second');
   });
 
   it('renders a static label when there is a single facility', () => {
     const { fixture, component } = createComponent();
     component.facilities = [facility('f1', 'Facility One')];
     component.selectedFacility = component.facilities[0];
+    component.singleSite = true;
     fixture.detectChanges();
 
     const element: HTMLElement = fixture.nativeElement;
@@ -58,7 +80,7 @@ describe('FacilityPickerComponent', () => {
     fixture.detectChanges();
 
     expect(document.querySelector('.v1-facility-picker__search')).not.toBeNull();
-    expect(document.querySelectorAll('.v1-facility-picker__item').length).toBe(2);
+    expect(document.querySelectorAll('.v1-facility-picker__item').length).toBe(3);
   });
 
   it('shows a search box once there are more than five facilities and filters the list', () => {
@@ -79,8 +101,8 @@ describe('FacilityPickerComponent', () => {
     fixture.detectChanges();
 
     const items = document.querySelectorAll('.v1-facility-picker__item');
-    expect(items.length).toBe(1);
-    expect(items[0].textContent).toContain('Warehouse');
+    expect(items.length).toBe(2);
+    expect(items[1].textContent).toContain('Warehouse');
   });
 
   it('emits the selected facility guid and closes the menu on selection', () => {
@@ -89,7 +111,7 @@ describe('FacilityPickerComponent', () => {
     component.selectedFacility = component.facilities[0];
     fixture.detectChanges();
 
-    let emittedGuid: string | undefined;
+    let emittedGuid: import('../../facility-scope.models').FacilityScope | undefined;
     component.facilitySelected.subscribe(guid => (emittedGuid = guid));
 
     const element: HTMLElement = fixture.nativeElement;
@@ -97,10 +119,10 @@ describe('FacilityPickerComponent', () => {
     fixture.detectChanges();
 
     const items = document.querySelectorAll<HTMLButtonElement>('.v1-facility-picker__item');
-    items[1].click();
+    items[2].click();
     fixture.detectChanges();
 
-    expect(emittedGuid).toBe('f2');
+    expect(emittedGuid).toEqual({ kind: 'facility', facilityGuid: 'f2' });
     expect(document.querySelector('.v1-facility-picker__menu')).toBeNull();
   });
 
@@ -152,12 +174,12 @@ describe('FacilityPickerComponent', () => {
     input.value = '  MEMPHIS  ';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(document.querySelectorAll('.v1-facility-picker__item')).toHaveLength(1);
-    expect(document.querySelector('.v1-facility-picker__item')?.textContent).toContain('Memphis');
+    expect(document.querySelectorAll('.v1-facility-picker__item')).toHaveLength(2);
+    expect(document.querySelector('.v1-facility-picker__list .v1-facility-picker__item')?.textContent).toContain('Memphis');
     toggle.click();
     toggle.click();
     fixture.detectChanges();
     expect(document.querySelector<HTMLInputElement>('.v1-facility-picker__menu input')!.value).toBe('');
-    expect(document.querySelectorAll('.v1-facility-picker__item')).toHaveLength(6);
+    expect(document.querySelectorAll('.v1-facility-picker__item')).toHaveLength(7);
   });
 });

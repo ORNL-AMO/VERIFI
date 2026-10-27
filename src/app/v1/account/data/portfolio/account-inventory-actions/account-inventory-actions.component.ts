@@ -11,6 +11,8 @@ import { InventoryTileActionRequest, InventoryTileMenuAction } from '@app/v1/sha
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { PortfolioFacilityService } from '../portfolio-facility.service';
 
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+
 type Resource = 'facilities' | 'meters' | 'predictors';
 interface PendingAction { readonly request: InventoryTileActionRequest; readonly accountGuid: string; readonly name: string; readonly snapshot: string; readonly readingCount: number; readonly predictorPreview?: PredictorDeletionPreview; readonly facilityGuid?: string; }
 
@@ -43,6 +45,8 @@ export class AccountInventoryActionsComponent {
   });
 
   constructor() {
+    const unregister = inject(UnsavedChangesService).register(() => false, () => {}, () => this.saving() || !!this.pending());
+    this.destroy.onDestroy(unregister);
     effect(() => {
       const pending = this.pending();
       if (pending && this.workspace.account()?.guid !== pending.accountGuid) { this.portal.hide(); this.pending.set(undefined); }

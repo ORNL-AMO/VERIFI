@@ -38,14 +38,17 @@ export class AccountPortfolioFacilitiesTabComponent {
     equipment: this.workspace.energyUseEquipment(),
     findings: this.status.items(), statusState: this.status.state()
   }));
-  readonly facilitySummaries = computed(() => buildPortfolioFacilities(this.facilityInput()));
+  readonly facilitySummaries = computed(() => {
+    const guid = this.navigation.inventoryFacilityGuid();
+    return buildPortfolioFacilities(this.facilityInput()).filter(item => !guid || item.facility.guid === guid);
+  });
   readonly filteredSummaries = computed(() => {
     const filters = this.filters();
     return filterPortfolioFacilities(this.facilitySummaries(), filters.search, filters.status, filters.sort);
   });
 
   readonly tiles = computed(() => facilityTiles(this.filteredSummaries(), this.facilityInput(), this.navigation));
-  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.facilitySummaries().map(item => item.facility.guid)), this.filters, this.workspace.canWrite);
+  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.facilitySummaries().map(item => item.facility.guid)), computed(() => ({ ...this.filters(), facility: this.navigation.inventoryFacilityGuid() })), this.workspace.canWrite);
   readonly browseIds = this.inventory.visibleIds;
 
   async navigateRoute(route: readonly string[]): Promise<void> {

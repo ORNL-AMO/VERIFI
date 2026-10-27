@@ -16,7 +16,7 @@ describe('portfolio sticky browse layout', () => {
       imports: [AccountDataModule],
       providers: [
         provideRouter([]),
-        { provide: WorkspaceNavigationService, useValue: { activePortfolioTab: signal('facilities') } },
+        { provide: WorkspaceNavigationService, useValue: { activePortfolioTab: signal('facilities'), inventoryFacilityGuid: () => undefined } },
         { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         { provide: AccountWorkspaceStore, useValue: {
           account: signal({ guid: 'account-a', name: 'A very long account name with unusual lengths '.repeat(8) }), facilities: signal([{ guid: 'facility-a' }]),
@@ -31,7 +31,7 @@ describe('portfolio sticky browse layout', () => {
     host.classList.add('v1-root');
     Object.assign(host.style, { width: '900px', height: '500px', overflow: 'auto' });
     fixture.detectChanges();
-    const eyebrow = host.querySelector<HTMLElement>('header .v1-eyebrow')!;
+    const eyebrow = host.querySelector<HTMLElement>('header .page-identity__crumb button > span')!;
     expect(eyebrow.scrollWidth).toBeGreaterThan(eyebrow.clientWidth);
     expect(getComputedStyle(eyebrow).textOverflow).toBe('ellipsis');
     expect(eyebrow.title).toBe(eyebrow.textContent);

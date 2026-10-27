@@ -26,6 +26,7 @@ export function inventoryWorkspace(count = 3) {
     weatherStationGroups: computed(() => buildWeatherStationGroups(predictors(), predictorReadings(), [], state() === 'ready')) };
 }
 export const inventoryNavigation = {
+  inventoryFacilityGuid: () => undefined as string | undefined,
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
   isSingleSiteWorkspace: signal(false),
   accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'predictors'],

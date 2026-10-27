@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -8,6 +8,10 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountPortfolioTab, WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
+
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+
+import { inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
 
 interface PortfolioTotals {
   readonly facilities: number;
@@ -21,7 +25,7 @@ interface PortfolioTotals {
 })
 export class AccountPortfolioComponent implements OnDestroy {
   private readonly router = inject(Router);
-  private readonly navigation = inject(WorkspaceNavigationService);
+  readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
@@ -54,11 +58,15 @@ export class AccountPortfolioComponent implements OnDestroy {
   } satisfies Record<AccountPortfolioTab, IconName>)[this.activeContent()]);
   readonly isCreateMeterDrawerOpen = signal(false);
   readonly headerGapCollapsed = computed(() => this.sticky()?.collapsed() ?? false);
-  readonly breadcrumbs = computed(() => [{ label: this.account()?.name ?? 'Account' }]);
+  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.account()?.name ?? 'Account',
+    this.workspace.facilities().find(facility => facility.guid === this.navigation.inventoryFacilityGuid())?.name));
   readonly meterNavigationError = signal('');
   readonly isCreateFacilityDrawerOpen = signal(false);
 
   constructor() {
+    const unregister = inject(UnsavedChangesService).register(() => false, () => {},
+      () => this.isCreateFacilityDrawerOpen() || this.isCreateMeterDrawerOpen() || this.isCreatePredictorDrawerOpen());
+    inject(DestroyRef).onDestroy(unregister);
     effect(() => {
       if (this.isCreatePredictorDrawerOpen() && (!this.isPredictors() || this.account()?.guid !== this.predictorDrawerAccountGuid())) this.closeCreatePredictorDrawer();
     });

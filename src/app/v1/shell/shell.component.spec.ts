@@ -1,3 +1,6 @@
+import { OverlayModule } from '@angular/cdk/overlay';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ShellHeaderTestModule } from './header/shell-header.testing';
 import { CommonModule } from '@angular/common';
 import { PortalModule } from '@angular/cdk/portal';
 import { NgModule } from '@angular/core';
@@ -13,8 +16,8 @@ import { ShellComponent } from './shell.component';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
 
 @NgModule({
-  imports: [CommonModule, IconComponent, NoopAnimationsModule, PortalModule, RouterModule.forRoot([])],
-  declarations: [ShellComponent, ShellHeaderComponent]
+  imports: [ShellHeaderTestModule, OverlayModule, ReactiveFormsModule, CommonModule, IconComponent, NoopAnimationsModule, PortalModule, RouterModule.forRoot([])],
+  declarations: [ShellComponent]
 })
 class ShellTestModule { }
 
@@ -150,6 +153,7 @@ describe('ShellComponent', () => {
 
 function createNavigation() {
   return {
+    headerFacility: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '',
     isWorkspaceRoute: vi.fn(() => false),
     showWelcome: vi.fn()
   };

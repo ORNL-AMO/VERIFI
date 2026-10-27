@@ -87,6 +87,7 @@ export function setupSectionNavTest() {
         {
           provide: WorkspaceNavigationService,
           useValue: {
+            inventoryScopeQuery: () => ({}),
             contextMode,
             facilities,
             facility: selectedFacility,

@@ -4,7 +4,7 @@
     <span #scrollMarker class="v1-account-portfolio__scroll-marker" aria-hidden="true"></span>
     <div #portfolioSticky class="v1-data-workbench-sticky v1-account-portfolio__sticky">
     <header class="v1-section-header v1-account-portfolio__header v1-page-header">
-      <app-page-identity class="v1-account-portfolio__heading" [breadcrumbs]="breadcrumbs()" [title]="title()" [icon]="headerIcon()" headingId="v1-account-portfolio-title"/>
+      <app-page-identity class="v1-account-portfolio__heading" [breadcrumbs]="breadcrumbs()" (breadcrumbSelected)="navigation.changeFacilityScope({ kind: 'all' })" [title]="title()" [icon]="headerIcon()" headingId="v1-account-portfolio-title"/>
       <div class="v1-account-portfolio__header-actions">
         <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
         @if (isMeters()) {

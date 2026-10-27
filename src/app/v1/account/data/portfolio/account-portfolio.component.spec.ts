@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
@@ -74,7 +74,7 @@ describe('AccountPortfolioComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            activePortfolioTab,
+            activePortfolioTab, inventoryFacilityGuid: signal<string | undefined>(undefined), changeFacilityScope: vi.fn(),
             openFacility: vi.fn(async () => undefined),
             facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail],
             facilityDataRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
@@ -97,15 +97,23 @@ describe('AccountPortfolioComponent', () => {
     vi.restoreAllMocks();
   });
 
+  it('shows account and selected-facility breadcrumbs and clears scope through the account action', () => {
+    const navigation = TestBed.inject(WorkspaceNavigationService);
+    (navigation.inventoryFacilityGuid as WritableSignal<string | undefined>).set('facility-b'); fixture.detectChanges();
+    expect([...fixture.nativeElement.querySelectorAll('header .page-identity__crumb')].map((item: HTMLElement) => item.textContent.trim())).toEqual(['Account A', 'Beta Works']);
+    fixture.nativeElement.querySelector('header .page-identity__crumb button').click();
+    expect(navigation.changeFacilityScope).toHaveBeenCalledWith({ kind: 'all' });
+  });
+
   it('renders the portfolio shell and delegates the default content to the facilities tab', () => {
     expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Facilities');
     expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Facilities');
-    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').textContent).toBe('Account A');
+    expect(fixture.nativeElement.querySelector('header .page-identity__crumb').textContent).toBe('Account A');
     account.set({ ...account()!, name: 'Another Account' });
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Facilities');
-    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').textContent).toBe('Another Account');
-    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').title).toBe('Another Account');
+    expect(fixture.nativeElement.querySelector('header .page-identity__crumb').textContent).toBe('Another Account');
+    expect(fixture.nativeElement.querySelector('header .page-identity__crumb').title).toBe('Another Account');
     expect(fixture.debugElement.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe('facility');
     expect(fixture.nativeElement.querySelector('[aria-label="Portfolio content"]')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Upload data');

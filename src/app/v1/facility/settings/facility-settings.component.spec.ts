@@ -58,6 +58,7 @@ describe('Facility settings routed components', () => {
     replaceFacility: ReturnType<typeof vi.fn>;
   };
   let navigation: {
+    changeFacilityScope: ReturnType<typeof vi.fn>;
     accountRoute: ReturnType<typeof vi.fn>;
     openAccount: ReturnType<typeof vi.fn>;
     setFacility: ReturnType<typeof vi.fn>;
@@ -100,6 +101,7 @@ describe('Facility settings routed components', () => {
       replaceFacility: vi.fn(async () => facilityFixture('replacement-facility'))
     };
     navigation = {
+      changeFacilityScope: vi.fn(),
       accountRoute: vi.fn((accountGuid: string) => ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview']),
       openAccount: vi.fn(async () => undefined),
       setFacility: vi.fn(),
@@ -164,8 +166,13 @@ describe('Facility settings routed components', () => {
     const fixture = TestBed.createComponent(FacilitySettingsComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Facility settings');
+    expect(fixture.nativeElement.textContent).toContain('Settings');
     expect(fixture.nativeElement.textContent).toContain('Facility A');
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Settings');
+    const accountCrumb = fixture.nativeElement.querySelector('header .page-identity__crumb button') as HTMLButtonElement;
+    expect(accountCrumb.textContent).toContain('Account A'); accountCrumb.click();
+    expect(navigation.changeFacilityScope).toHaveBeenCalledWith({ kind: 'all' });
+    expect([...fixture.nativeElement.querySelectorAll('header .page-identity__crumb')].map((item: HTMLElement) => item.textContent.trim())).toEqual(['Account A', 'Facility A']);
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
     expect(fixture.nativeElement.textContent).not.toContain('Facility information');
 
@@ -181,7 +188,7 @@ describe('Facility settings routed components', () => {
     const fixture = TestBed.createComponent(FacilitySettingsComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Facility settings');
+    expect(fixture.nativeElement.textContent).toContain('Settings');
     expect(fixture.nativeElement.textContent).not.toContain('Site setup');
   });
 

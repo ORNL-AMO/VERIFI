@@ -1,13 +1,27 @@
 @let crumbs = breadcrumbs();
-@if (crumbs.length === 1 && !crumbs[0].route) {
+@if (crumbs.length === 1 && !crumbs[0].route && !crumbs[0].action) {
   <p class="v1-eyebrow" [title]="crumbs[0].label">{{ crumbs[0].label }}</p>
 } @else {
   <nav [attr.aria-label]="breadcrumbLabel()"><ol>
     @for (crumb of crumbs; track $index) {
       @if (!$first) { <li aria-hidden="true"><app-ui-icon name="chevronRight"/></li> }
       <li class="page-identity__crumb" [title]="crumb.label">
-        @if (crumb.route) { <a [routerLink]="crumb.route">{{ crumb.label }}</a> }
-        @else { <span>{{ crumb.label }}</span> }
+        @if (crumb.action) {
+          <button type="button" [title]="crumb.label" (click)="breadcrumbSelected.emit(crumb.action)">
+            @if (crumb.icon) { <app-ui-icon [name]="crumb.icon"/> }
+            <span [title]="crumb.label">{{ crumb.label }}</span>
+          </button>
+        } @else if (crumb.route) {
+          <a [routerLink]="crumb.route">
+            @if (crumb.icon) { <app-ui-icon [name]="crumb.icon"/> }
+            <span [title]="crumb.label">{{ crumb.label }}</span>
+          </a>
+        } @else {
+          <span class="page-identity__current">
+            @if (crumb.icon) { <app-ui-icon [name]="crumb.icon"/> }
+            <span [title]="crumb.label">{{ crumb.label }}</span>
+          </span>
+        }
       </li>
     }
   </ol></nav>

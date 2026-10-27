@@ -106,6 +106,8 @@ import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/facility/an
 import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/used-by/facility-analysis-used-by.component';
 import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/single-facility-analysis-pair.guard';
 
+import { inventoryScopeChangeGuard } from './shell/inventory-scope-change.guard';
+
 export const V1Routes: Routes = [
   {
     path: '',
@@ -117,7 +119,7 @@ export const V1Routes: Routes = [
         path: 'workspace/account/:accountGuid',
         component: WorkspaceShellComponent,
         canActivate: [accountGuidReadyGuard],
-        canActivateChild: [singleSiteAccountRedirectGuard],
+        canActivateChild: [singleSiteAccountRedirectGuard, inventoryScopeChangeGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
@@ -137,10 +139,10 @@ export const V1Routes: Routes = [
                 component: AccountPortfolioComponent,
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'facilities' },
-                  { path: 'facilities', component: AccountPortfolioFacilitiesTabComponent },
-                  { path: 'meters', component: AccountPortfolioMetersTabComponent },
-                  { path: 'predictors', component: AccountPortfolioPredictorsTabComponent },
-                  { path: 'energy-uses', component: AccountPortfolioEnergyUsesTabComponent },
+                  { path: 'facilities', component: AccountPortfolioFacilitiesTabComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'meters', component: AccountPortfolioMetersTabComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'predictors', component: AccountPortfolioPredictorsTabComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'energy-uses', component: AccountPortfolioEnergyUsesTabComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },
@@ -198,7 +200,7 @@ export const V1Routes: Routes = [
             path: 'analysis',
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: AccountAnalysisDashboardComponent },
+              { path: 'dashboard', component: AccountAnalysisDashboardComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
               {
                 path: 'workbench/:analysisGuid',
                 component: AccountAnalysisWorkbenchComponent,

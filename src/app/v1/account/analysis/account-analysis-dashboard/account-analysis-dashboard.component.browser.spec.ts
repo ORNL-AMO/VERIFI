@@ -15,6 +15,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
+import { flushPendingChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-actions.service';
@@ -30,22 +32,28 @@ const dashboardUrl = '/v1/workspace/account/account-a/analysis/dashboard';
 class AnalysisBrowserHost { readonly portal = inject(ModalPortalService); readonly navigation = inject(WorkspaceNavigationService); }
 @Component({ standalone: true, imports: [RouterLink], template: '<h1>Facility analysis workbench</h1>@if (navigation.accountReturn(); as back) { <a [routerLink]="back.route">Account Analysis</a> } @if (navigation.facility(); as facility) { <a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Facility Analysis</a> }' })
 class FacilityDestination { readonly navigation = inject(WorkspaceNavigationService); }
+@Component({ standalone: true, template: '<h1>Account analysis workbench</h1>' })
+class AccountDestination {}
 
 function setup(count = 35) {
   const entries = signal([accountEntry(), accountEntry('water', 'water'), ...Array.from({ length: count }, (_, i) => facilityEntry(`Analysis ${String(i).padStart(2,'0')}`))]);
   const account = signal(inventoryAccount), facilities = signal([inventoryFacility(), inventoryFacility('facility-b')]);
   const selectedFacility = signal(facilities()[0]);
   const facilityActions = { categoryAvailable: (category: string, guid: string) => guid === 'facility-b' ? category === 'water' : category === 'energy', createAnalysis: vi.fn() };
+  const accountActions = { categoryAvailable: () => true, createAnalysis: vi.fn() };
   const status = signal('ready');
   const categories = signal<readonly ('energy' | 'water')[]>(['energy', 'water']);
   const results = { states: signal(Object.fromEntries(entries().map(entry => [entry.key, inventoryOutcome()]))), setDemand: vi.fn() };
   const canEnter = signal(true), canLeave = signal(true);
   TestBed.configureTestingModule({ imports: [AnalysisBrowserHost], providers: [provideRouter([
-    { path: 'v1/workspace/account/:accountGuid/analysis/dashboard', component: AccountAnalysisDashboardComponent },
+    { path: 'v1/workspace/account/:accountGuid', canActivateChild: [inventoryScopeChangeGuard], children: [
+      { path: 'analysis/dashboard', component: AccountAnalysisDashboardComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+      { path: 'analysis/workbench/:analysisGuid/setup', component: AccountDestination, canActivate: [flushPendingChangesGuard] }
+    ] },
     { path: 'v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid/setup', component: FacilityDestination, canActivate: [() => canEnter()], canDeactivate: [() => canLeave()] },
     { path: 'v1/workspace/facility/:facilityGuid/analysis/dashboard', component: FacilityAnalysisDashboardComponent }
   ]),
-    { provide: AccountWorkspaceStore, useValue: { account, facilities, selectedFacility } },
+    { provide: AccountWorkspaceStore, useValue: { account, facilities, selectedFacility, status: () => 'ready', hasPending: () => false } },
     { provide: AccountWorkspaceService, useValue: {} }, { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [inventoryAccount] } },
     { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
     { provide: AccountAnalysisWorkspaceService, useValue: { account, entries, categories, facilities, workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), statusItems: signal([]), facilityInputs: signal({ meterGroups: [], meters: [], meterData: [], predictorData: [] }), facilityAnalyses: signal([]) } },
@@ -53,7 +61,7 @@ function setup(count = 35) {
       cards: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card] : [])),
       analyses: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card.analysis] : [])),
       workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]) } },
-    { provide: AccountAnalysisActionsService, useValue: { categoryAvailable: () => true } },
+    { provide: AccountAnalysisActionsService, useValue: accountActions },
     { provide: FacilityAnalysisActionsService, useValue: facilityActions },
     { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }
   ] }).overrideComponent(AccountAnalysisDashboardComponent, { set: { providers: [{ provide: AccountAnalysisDashboardResultsService, useValue: results }] } });
@@ -61,7 +69,7 @@ function setup(count = 35) {
   const fixture = TestBed.createComponent(AnalysisBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router); router.setUpLocationChangeListener();
   const host = () => fixture.debugElement.query(By.directive(AccountAnalysisDashboardComponent)).componentInstance as AccountAnalysisDashboardComponent;
-  return { fixture, entries, categories, results, router, host, canEnter, canLeave, selectedFacility, facilityActions, root: fixture.nativeElement.querySelector('main') as HTMLElement };
+  return { fixture, entries, categories, results, router, host, canEnter, canLeave, selectedFacility, accountActions, facilityActions, root: fixture.nativeElement.querySelector('main') as HTMLElement };
 }
 async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<void> {
   fixture.detectChanges(); await fixture.whenStable();
@@ -71,6 +79,21 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
 
 describe('account Analysis inventory browser journeys', () => {
   afterEach(async () => { await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '', features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] }); });
+  it('blocks scope changes during creation and opens the saved account analysis from a facility-filtered inventory', async () => {
+    const view = setup(1);
+    await view.router.navigateByUrl(dashboardUrl + '?facility=facility-a'); await settle(view.fixture);
+    let complete!: (analysis: ReturnType<typeof accountEntry>['card']['analysis']) => void;
+    view.accountActions.createAnalysis.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    const dashboard = view.host(); dashboard.openCreate(); await settle(view.fixture);
+    const creation = dashboard.create({ scope: 'account', category: 'energy' });
+    expect(await TestBed.inject(WorkspaceNavigationService).changeFacilityScope({ kind: 'all' })).toBe(false);
+    expect(view.router.url).toBe(dashboardUrl + '?facility=facility-a');
+    complete({ ...accountEntry().card.analysis, guid: 'new-account-analysis' });
+    await creation; await settle(view.fixture);
+    expect(view.accountActions.createAnalysis).toHaveBeenCalledExactlyOnceWith('energy');
+    expect(view.router.url).toBe('/v1/workspace/account/account-a/analysis/workbench/new-account-analysis/setup');
+    expect(view.root.textContent).toContain('Account analysis workbench');
+  });
   it('opens Compare from a card menu, focuses the second slot, preserves pair order, and clears on close', async () => {
     await page.viewport(1200, 900);
     const view = setup(4); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);

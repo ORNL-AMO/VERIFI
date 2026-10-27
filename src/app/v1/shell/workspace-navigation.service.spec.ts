@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NavigationEnd, Router } from '@angular/router';
+import { DefaultUrlSerializer, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
@@ -16,13 +16,14 @@ describe('WorkspaceNavigationService', () => {
   afterEach(() => vi.restoreAllMocks());
 
   let service: WorkspaceNavigationService;
-  let router: { url: string; events: Subject<unknown>; navigate: ReturnType<typeof vi.fn> };
+  let router: { parseUrl: DefaultUrlSerializer['parse']; navigateByUrl: ReturnType<typeof vi.fn>; url: string; events: Subject<unknown>; navigate: ReturnType<typeof vi.fn> };
   let workspaceService: { selectAccount: ReturnType<typeof vi.fn>; selectFacility: ReturnType<typeof vi.fn> };
   let usableAccounts: ReturnType<typeof vi.fn>;
   let accountSignal: ReturnType<typeof signal<any>>;
   let facilitiesSignal: ReturnType<typeof signal<any[]>>;
   let selectedFacilitySignal: ReturnType<typeof signal<any>>;
   let workspaceStore: {
+    status: ReturnType<typeof vi.fn>; hasPending: ReturnType<typeof vi.fn>;
     account: ReturnType<typeof vi.fn>;
     facilities: ReturnType<typeof vi.fn>;
     selectedFacility: ReturnType<typeof vi.fn>;
@@ -38,6 +39,8 @@ describe('WorkspaceNavigationService', () => {
 
   beforeEach(() => {
     router = {
+      parseUrl: new DefaultUrlSerializer().parse.bind(new DefaultUrlSerializer()),
+      navigateByUrl: vi.fn().mockResolvedValue(true),
       url: '/v1/workspace/account/account-a/home/overview',
       events: new Subject<unknown>(),
       navigate: vi.fn().mockResolvedValue(true)
@@ -51,6 +54,7 @@ describe('WorkspaceNavigationService', () => {
     facilitiesSignal = signal([{ guid: 'facility-a', name: 'Facility A', accountId: 'account-a' }, { guid: 'facility-b', name: 'Facility B', accountId: 'account-a' }]);
     selectedFacilitySignal = signal({ guid: 'facility-a', name: 'Facility A' });
     workspaceStore = {
+      status: vi.fn(() => 'ready'), hasPending: vi.fn(() => false),
       account: vi.fn(() => accountSignal()),
       facilities: vi.fn(() => facilitiesSignal()),
       selectedFacility: vi.fn(() => selectedFacilitySignal()),
@@ -148,10 +152,10 @@ describe('WorkspaceNavigationService', () => {
     expect(parseWorkspaceRoute('/v1/workspace/account/account-a/data/portfolio').portfolioTab).toBe('facilities');
   });
 
-  it('enables Reports and retains its dashboard on context and facility switches', () => {
+  it('enables Reports and retains its dashboard on context and facility switches', async () => {
     expect(service.sections().find(section => section.id === 'reports')?.enabled).toBe(true);
-    service.openSection('reports');
-    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
+    await service.openSection('reports');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'), { queryParams: {} });
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
     expect(service.activeReportGuid()).toBe('report-a');
     expect(service.routeState().reportStage).toBe('setup');
@@ -161,8 +165,8 @@ describe('WorkspaceNavigationService', () => {
     expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
     service.setFacility('facility-b');
     expect(router.navigate).toHaveBeenLastCalledWith(service.facilityReportsRoute('facility-b'));
-    service.openSection('reports');
-    expect(router.navigate).toHaveBeenLastCalledWith(service.facilityReportsRoute('facility-a'));
+    await service.openSection('reports');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'), { queryParams: { facility: 'facility-a' } });
     expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports').detail).toBe('dashboard');
   });
 
@@ -534,19 +538,6 @@ describe('WorkspaceNavigationService', () => {
     expect(service.singleSiteWorkspaceState()).toBe('multiple-facilities');
   });
 
-  it('exposes account dropdown options with descriptors and active state', () => {
-    usableAccounts.mockReturnValue([
-      { guid: 'account-a', name: 'Account A', numberOfFacilities: '2' },
-      { guid: 'account-b', name: 'Account B', isSingleFacilityCompany: true },
-      { guid: 'deleted-account', name: 'Deleted', deleteAccount: true }
-    ]);
-
-    expect(service.accountOptions()).toEqual([
-      { guid: 'account-a', name: 'Account A', descriptor: '2 facilities', active: true },
-      { guid: 'account-b', name: 'Account B', descriptor: 'Single facility', active: false }
-    ]);
-  });
-
   it('opens facilities on the canonical workspace route after selecting the facility', async () => {
     await service.openFacility('facility-a');
 
@@ -594,11 +585,11 @@ describe('WorkspaceNavigationService', () => {
     );
   });
 
-  it('opens and parses Analysis routes in account and facility contexts', () => {
-    service.openSection('analysis');
+  it('opens and parses Analysis routes in account and facility contexts', async () => {
+    await service.openSection('analysis');
     expect(router.navigate).toHaveBeenLastCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
-    ]);
+    ], { queryParams: {} });
 
     router.events.next(new NavigationEnd(
       2,
@@ -620,10 +611,10 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeAnalysisStageScope()).toBe('group');
     expect(service.activeAnalysisGroupGuid()).toBe('group a');
 
-    service.openSection('analysis');
+    await service.openSection('analysis');
     expect(router.navigate).toHaveBeenLastCalledWith([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'
-    ]);
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
+    ], { queryParams: { facility: 'facility-a' } });
   });
 
   it('parses account and facility settings routes and enables settings in workspace context', () => {
@@ -795,8 +786,8 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('opens data from the active workspace context', () => {
-    service.openSection('data');
+  it('opens data from the active workspace context', async () => {
+    await service.openSection('data');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -805,7 +796,7 @@ describe('WorkspaceNavigationService', () => {
       'account-a',
       'data',
       'portfolio'
-    ]);
+    ], { queryParams: {} });
 
     router.navigate.mockClear();
     router.events.next(new NavigationEnd(
@@ -814,16 +805,16 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-a/home/overview'
     ));
 
-    service.openSection('data');
+    await service.openSection('data');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
       'workspace',
-      'facility',
-      'facility-a',
+      'account',
+      'account-a',
       'data',
-      'meters'
-    ]);
+      'portfolio'
+    ], { queryParams: {} });
   });
 
   it('keeps the active rail section when toggling between account and facility contexts', () => {

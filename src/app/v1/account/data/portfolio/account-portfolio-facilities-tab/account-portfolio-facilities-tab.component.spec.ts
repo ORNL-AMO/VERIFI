@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
@@ -29,6 +29,7 @@ function setup() {
     { provide: WorkspaceStatusService, useValue: { state: statusState, items } },
     { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
     { provide: WorkspaceNavigationService, useValue: {
+          inventoryFacilityGuid: signal<string | undefined>(undefined),
       accountSettingsRoute: (guid: string) => ['/v1/workspace/account', guid, 'settings/portfolio'],
       facilityDataRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'data', detail]
     } },
@@ -40,6 +41,17 @@ function setup() {
 }
 
 describe('AccountPortfolioFacilitiesTabComponent', () => {
+  it('shows only the selected facility card and keeps scope when clearing local filters', () => {
+    const { fixture } = setup();
+    const scope = TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>;
+    scope.set('beta'); fixture.detectChanges();
+    expect(fixture.componentInstance.facilitySummaries().map(item => item.facility.guid)).toEqual(['beta']);
+    expect(fixture.nativeElement.textContent).toContain('Showing 1 of 1 facilities');
+    fixture.componentInstance.filtersForm.controls.search.setValue('missing'); fixture.detectChanges();
+    fixture.componentInstance.clearFilters(); fixture.detectChanges();
+    expect(scope()).toBe('beta'); expect(fixture.componentInstance.filteredSummaries()).toHaveLength(1);
+  });
+
   it('opens all detail levels when existing account data contains a numeric postal code', () => {
     const { fixture, facilities } = setup();
     facilities.update(items => items.map(item => item.guid === 'alpha' ? { ...item, address:'100 Industrial Drive', zip:43228 as unknown as string } : item));

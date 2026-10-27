@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -14,6 +14,8 @@ import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-moti
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import type { ReportStageId } from '@app/v1/shared/reports/report-workbench.models';
+
+import { ALL_FACILITIES, FacilityScope, facilityScopeQuery } from './facility-scope.models';
 
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = NavigationMotion;
@@ -56,13 +58,6 @@ export interface PanelContent {
 }
 
 export type SingleSiteWorkspaceState = 'portfolio' | 'valid' | 'missing-facility' | 'multiple-facilities';
-
-export interface AccountDropdownOption {
-  readonly guid: string;
-  readonly name: string;
-  readonly descriptor: string;
-  readonly active: boolean;
-}
 
 export interface RouteState {
   readonly portfolioTab?: AccountPortfolioTab;
@@ -185,10 +180,53 @@ export class WorkspaceNavigationService {
     const state = this.singleSiteWorkspaceState();
     return state === 'missing-facility' || state === 'multiple-facilities';
   });
-  readonly accountOptions = computed(() => this.buildAccountOptions());
+  readonly scopeChangePending = signal(false);
+  readonly scopeNotice = signal('');
+  readonly scopeAvailability = computed(() => this.workspace.status() === 'ready'
+    ? this.facilities().length ? '' : 'No facilities are available in this account.'
+    : this.workspace.status() === 'error' ? 'Facilities are unavailable. Retry loading the account.' : 'Loading facilities…');
+  readonly inventoryScope = computed<FacilityScope>(() => {
+    const state = this.routeState();
+    if (!this.isAccountInventory(state) || this.workspace.status() !== 'ready' || state.accountGuid !== this.workspace.account()?.guid) return ALL_FACILITIES;
+    const guid = this.router.parseUrl(this.currentUrl()).queryParamMap.get('facility');
+    return guid && this.facilities().some(facility => facility.guid === guid && facility.accountId === state.accountGuid)
+      ? { kind: 'facility', facilityGuid: guid } : ALL_FACILITIES;
+  });
+  readonly inventoryFacilityGuid = computed(() => {
+    const scope = this.inventoryScope();
+    return scope.kind === 'facility' ? scope.facilityGuid : undefined;
+  });
+  readonly headerScope = computed<FacilityScope>(() => {
+    const state = this.routeState();
+    const facility = this.facilities().find(item => item.guid === state.facilityGuid && item.accountId === this.workspace.account()?.guid);
+    if (facility) return { kind: 'facility', facilityGuid: facility.guid };
+    if (this.isSingleSiteWorkspace()) return { kind: 'facility', facilityGuid: this.facilities()[0].guid };
+    return this.inventoryScope();
+  });
+  readonly headerFacility = computed(() => {
+    const scope = this.headerScope();
+    return scope.kind === 'facility' ? this.facilities().find(facility => facility.guid === scope.facilityGuid) : undefined;
+  });
+  readonly inventoryScopeQuery = computed(() => facilityScopeQuery(this.inventoryScope()));
   readonly panelContent = computed(() => this.buildPanelContent());
 
   constructor() {
+    effect(() => {
+      const state = this.routeState();
+      const ready = this.workspace.status() === 'ready';
+      const accountGuid = this.workspace.account()?.guid;
+      const facilities = this.facilities();
+      const url = this.currentUrl();
+      if (!ready || state.accountGuid !== accountGuid || !this.isAccountInventory(state)) return;
+      const tree = this.router.parseUrl(url);
+      const guid = tree.queryParamMap.get('facility');
+      if (guid === null || facilities.some(facility => facility.guid === guid && facility.accountId === accountGuid)) return;
+      untracked(() => {
+        this.scopeNotice.set('The selected facility is unavailable. Showing All facilities.');
+        delete tree.queryParams['facility'];
+        void this.router.navigateByUrl(tree, { replaceUrl: true }).catch(() => this.contextNavigationError.set('The facility filter could not be updated. Please try again.'));
+      });
+    });
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -248,8 +286,61 @@ export class WorkspaceNavigationService {
     }
   }
 
-  showWelcome(): void {
-    void this.router.navigate(['/v1']);
+  async showWelcome(): Promise<void> {
+    await this.navigateScopeDestination(['/v1']);
+  }
+
+  isAccountInventory(state: RouteState): boolean {
+    return state.contextMode === 'account' && ((state.section === 'data' && state.detail === 'portfolio')
+      || ((state.section === 'analysis' || state.section === 'reports') && state.detail === 'dashboard'));
+  }
+
+  async changeFacilityScope(scope: FacilityScope): Promise<boolean> {
+    if (this.scopeChangePending() || this.workspace.status() !== 'ready' || this.workspace.hasPending()) return false;
+    const account = this.workspace.account();
+    if (!account || this.isSingleSiteWorkspace()) return false;
+    if (scope.kind === 'facility' && !this.facilities().some(item => item.guid === scope.facilityGuid && item.accountId === account.guid)) return false;
+    const state = this.routeState();
+    const facilityGuid = scope.kind === 'facility' ? scope.facilityGuid : undefined;
+    let route: string[];
+    let query = facilityScopeQuery(scope);
+    if (state.section === 'settings') {
+      const detail = facilityGuid ? FACILITY_SETTINGS_DETAILS.has(state.detail) ? state.detail : 'profile'
+        : ACCOUNT_SETTINGS_DETAILS.has(state.detail) ? state.detail : 'profile';
+      route = facilityGuid ? this.facilitySettingsRoute(facilityGuid, detail) : this.accountSettingsRoute(account.guid, detail);
+      query = {};
+    } else if (state.section === 'data' && state.detail === 'meter-grouping' && !state.meterGroupGuid && facilityGuid) {
+      route = this.facilityDataRoute(facilityGuid, 'meter-grouping'); query = {};
+    } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
+    else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
+    else {
+      const tab = state.portfolioTab ?? (state.detail === 'predictors' ? 'predictors'
+        : state.detail === 'meters' || state.detail === 'meter-grouping' ? 'meters' : 'facilities');
+      route = this.accountPortfolioRoute(account.guid, tab);
+    }
+    return this.navigateScopeDestination(route, query);
+  }
+
+  private async navigateScopeDestination(route: string[], queryParams?: { facility?: string }): Promise<boolean> {
+    if (this.scopeChangePending() || this.workspace.hasPending()) return false;
+    this.scopeChangePending.set(true);
+    this.contextNavigationError.set('');
+    try {
+      // Report leave guards own their save/discard UI; other editors flush before their ordinary leave guard.
+      if (!(this.activeSection() === 'reports' && this.activeDetail() === 'workbench')
+        && !await this.unsavedChanges.flushPendingChanges()) return false;
+      // Query-only transitions can reuse the component without running its leave guard.
+      if (this.activeDetail() !== 'workbench' && !this.activeMeterGuid() && !this.activePredictorGuid()
+        && !this.activeWeatherPredictorGroupKey() && !this.activeMeterGroupGuid()) {
+        if (!this.unsavedChanges.confirmDiscard()) return false;
+      }
+      const opened = await (queryParams ? this.router.navigate(route, { queryParams }) : this.router.navigate(route));
+      if (opened) this.scopeNotice.set('');
+      return opened;
+    } catch {
+      this.contextNavigationError.set('The destination could not be opened. Your current context has been retained.');
+      return false;
+    } finally { this.scopeChangePending.set(false); }
   }
 
   setContext(contextMode: ContextMode): void {
@@ -312,7 +403,16 @@ export class WorkspaceNavigationService {
     this.isSupportPanelOpen.set(false);
   }
 
-  openSection(sectionId: SectionId): void {
+  async openSection(sectionId: SectionId): Promise<void> {
+    if (!this.isSingleSiteWorkspace() && ['data', 'analysis', 'reports'].includes(sectionId)) {
+      const account = this.account();
+      if (account) {
+        const route = sectionId === 'data' ? this.accountDataRoute(account.guid)
+          : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : this.accountReportsRoute(account.guid);
+        await this.navigateScopeDestination(route, sectionId === 'data' ? {} : facilityScopeQuery(this.headerScope()));
+      }
+      return;
+    }
     const contextMode = this.contextMode();
     if (sectionId === 'home') {
       this.setContext(contextMode);
@@ -603,18 +703,6 @@ export class WorkspaceNavigationService {
     return facilityCount === 0 ? 'missing-facility' : 'multiple-facilities';
   }
 
-  private buildAccountOptions(): Array<AccountDropdownOption> {
-    const activeAccountGuid = this.workspace.account()?.guid || this.routeState().accountGuid;
-    return this.lifecycle.usableAccounts()
-      .filter(account => !account.deleteAccount)
-      .map(account => ({
-        guid: account.guid,
-        name: account.name || 'Untitled account',
-        descriptor: accountDescriptor(account),
-        active: account.guid === activeAccountGuid
-      }));
-  }
-
   private buildPanelContent(): PanelContent {
     const context = this.contextMode();
     const account = this.account();
@@ -820,15 +908,4 @@ function safeDecodeRoutePart(value: string): string {
   } catch {
     return value;
   }
-}
-
-function accountDescriptor(account: IdbAccount): string {
-  if (account.isSingleFacilityCompany === true) {
-    return 'Single facility';
-  }
-  const facilityCount = Number(account.numberOfFacilities);
-  if (Number.isFinite(facilityCount)) {
-    return `${facilityCount} ${facilityCount === 1 ? 'facility' : 'facilities'}`;
-  }
-  return 'Portfolio';
 }

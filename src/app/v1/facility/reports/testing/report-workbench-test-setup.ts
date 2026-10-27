@@ -40,7 +40,7 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
       const url = toSignal(router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd), map(event => event.urlAfterRedirects)), { initialValue: router.url });
       const routeState = computed(() => parseWorkspaceRoute(url()));
       return {
-        routeState, activeReportGuid: computed(() => routeState().reportGuid),
+        inventoryFacilityGuid: () => undefined, routeState, activeReportGuid: computed(() => routeState().reportGuid),
         accountReportsRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'reports', 'dashboard'],
         facilityReportsRoute: (guid: string) => ['/v1', 'workspace', 'facility', guid, 'reports', 'dashboard'],
         facilityReportWorkbenchRoute: (facility: string, report: string, stage = 'setup') => ['/v1', 'workspace', 'facility', facility, 'reports', 'workbench', report, stage]

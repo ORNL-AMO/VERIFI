@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
+import { inventoryScopeChangeGuard } from './shell/inventory-scope-change.guard';
 import { singleSiteAccountRedirectGuard } from './routing/canonical-route.guards';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -518,7 +519,7 @@ describe('single-facility workspace route boundaries', () => {
     const facilities = signal([{ guid: 'facility-a', accountId: 'account-a' }]);
     const accountRoute = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
     const facilityRoute = V1Routes[0].children!.find(route => route.path === 'workspace/facility/:facilityGuid')!;
-    expect(accountRoute.canActivateChild).toEqual([singleSiteAccountRedirectGuard]);
+    expect(accountRoute.canActivateChild).toEqual([singleSiteAccountRedirectGuard, inventoryScopeChangeGuard]);
     function stub(route: Route): Route {
       return { ...route, providers: [], canActivate: undefined, canActivateChild: undefined, canDeactivate: [],
         ...(route.component ? { component: ReportsRouteTestComponent } : {}),

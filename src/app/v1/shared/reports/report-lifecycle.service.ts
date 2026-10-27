@@ -46,7 +46,7 @@ export class ReportLifecycleService {
     .slice().sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid)));
   readonly contextKey = computed(() => {
     const route = this.navigation.routeState();
-    return JSON.stringify([this.workspace.account()?.guid, route.accountGuid, route.facilityGuid, route.reportGuid]);
+    return JSON.stringify([this.workspace.account()?.guid, route.accountGuid, route.facilityGuid, route.reportGuid, this.navigation.inventoryFacilityGuid()]);
   });
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly draftChanged = computed(() => !!this.editor() && JSON.stringify(this.draft()) !== JSON.stringify(this.editor()!.initial));

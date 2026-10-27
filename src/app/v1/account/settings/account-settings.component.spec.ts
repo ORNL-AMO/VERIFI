@@ -62,6 +62,7 @@ describe('Account settings routed components', () => {
     inspectCurrentAccountFile: ReturnType<typeof vi.fn>;
   };
   let navigation: {
+    changeFacilityScope: ReturnType<typeof vi.fn>;
     openAccount: ReturnType<typeof vi.fn>;
     showWelcome: ReturnType<typeof vi.fn>;
   };
@@ -107,6 +108,7 @@ describe('Account settings routed components', () => {
       inspectCurrentAccountFile: vi.fn(async () => undefined)
     };
     navigation = {
+      changeFacilityScope: vi.fn(),
       openAccount: vi.fn(async () => undefined),
       showWelcome: vi.fn()
     };
@@ -155,6 +157,11 @@ describe('Account settings routed components', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Account A');
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Settings');
+    const accountCrumb = fixture.nativeElement.querySelector('header .page-identity__crumb button') as HTMLButtonElement;
+    expect(accountCrumb.textContent).toContain('Account A'); accountCrumb.click();
+    expect(navigation.changeFacilityScope).toHaveBeenCalledWith({ kind: 'all' });
+    expect(fixture.nativeElement.querySelectorAll('header .page-identity__crumb')).toHaveLength(1);
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
     expect(fixture.nativeElement.textContent).not.toContain('Corporate information');
 

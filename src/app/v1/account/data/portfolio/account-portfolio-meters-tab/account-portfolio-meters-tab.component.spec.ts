@@ -14,6 +14,21 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-tab.component';
 
 describe('AccountPortfolioMetersTabComponent', () => {
+  it('uses shared scope before local filters and retains it when local filters are cleared', () => {
+    const fixture = setup(); fixture.detectChanges();
+    const scope = TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>;
+    scope.set('facility-b'); fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['City Water']);
+    expect(fixture.nativeElement.textContent).toContain('Showing 1 of 1 meters');
+    expect(fixture.nativeElement.querySelector('[formControlName="facilityGuid"]')).toBeNull();
+    fixture.componentInstance.filtersForm.controls.search.setValue('missing'); fixture.detectChanges();
+    expect(fixture.componentInstance.filteredMeters()).toHaveLength(0);
+    fixture.componentInstance.clearFilters(); fixture.detectChanges();
+    expect(scope()).toBe('facility-b'); expect(cardTitles(fixture)).toEqual(['City Water']);
+    scope.set(undefined); fixture.detectChanges();
+    expect(cardTitles(fixture)).toHaveLength(2);
+  });
+
   it('restores account meter filters when returning from a drilled-in page', () => {
     const fixture = setup(); fixture.detectChanges();
     fixture.componentInstance.filtersForm.patchValue({ search: 'Beta', sort: 'latestReading' }); fixture.detectChanges(); fixture.destroy();
@@ -173,6 +188,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
       {
         provide: WorkspaceNavigationService,
         useValue: {
+          inventoryFacilityGuid: signal<string | undefined>(undefined),
           facilityDataRoute: (facilityGuid: string, detail: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
           facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [

@@ -1,9 +1,13 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 
-export interface PageBreadcrumb { readonly label: string; readonly route?: readonly string[]; }
+export interface PageBreadcrumb { readonly label: string; readonly route?: readonly string[]; readonly action?: string; readonly icon?: IconName; }
+
+export function inventoryScopeBreadcrumbs(accountName: string, facilityName?: string): readonly PageBreadcrumb[] {
+  return [{ label: accountName, action: 'account', icon: 'account' }, ...(facilityName ? [{ label: facilityName, icon: 'facility' as const }] : [])];
+}
 @Component({
   selector: 'app-page-identity', standalone: true, imports: [RouterLink, IconComponent],
   templateUrl: './page-identity.component.html', styleUrls: ['./page-identity.component.css']
@@ -15,4 +19,5 @@ export class PageIdentityComponent {
   readonly headingId = input.required<string>();
   readonly breadcrumbLabel = input('Data context');
   readonly customTitle = input(false);
+  readonly breadcrumbSelected = output<string>();
 }

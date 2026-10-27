@@ -395,7 +395,7 @@ describe('report inventory browser journeys and presentation', () => {
     const host = view.root.querySelector<HTMLElement>('app-reports-dashboard')!;
     const inset = parseFloat(getComputedStyle(host).paddingLeft); expect(inset).toBeGreaterThanOrEqual(16);
     const header = view.root.querySelector<HTMLElement>('.v1-inventory-page-header')!;
-    const add = header.querySelector<HTMLButtonElement>('button')!;
+    const add = header.querySelector<HTMLButtonElement>('.v1-btn--action')!;
     expect(add.getBoundingClientRect().width).toBeLessThan(header.getBoundingClientRect().width / 2);
     expect(add.getBoundingClientRect().left).toBeGreaterThan(header.querySelector('h1')!.getBoundingClientRect().right);
     for (const level of ['simple', 'summary', 'detailed'] as const) {

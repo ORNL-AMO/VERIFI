@@ -1,3 +1,4 @@
+import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { DataValidationSettingsPanelComponent } from '@app/v1/shared/settings/data-validation-settings-panel/data-validation-settings-panel.component';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { CommonModule } from '@angular/common';
@@ -29,6 +30,7 @@ import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.
     FacilitySettingsDeleteComponent
   ],
   imports: [
+    PageIdentityComponent,
     CommonModule,
     ConfirmationDialogComponent,
     DataValidationSettingsPanelComponent,

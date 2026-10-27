@@ -1,8 +1,8 @@
 <div class="v1-facility-picker" (keydown.escape)="onEscape()">
-  @if (facilities.length === 1 && selectedFacility) {
+  @if (singleSite && selectedFacility) {
     <div class="v1-facility-picker__single">
       <app-ui-icon name="facility"></app-ui-icon>
-      <span>{{ facilities[0]?.name ?? 'Select facility' }}</span>
+      <span>{{ selectedFacility.name }}</span>
     </div>
   } @else {
     <div cdkOverlayOrigin #origin="cdkOverlayOrigin" class="v1-facility-picker__wrap" [class.open]="open">
@@ -12,15 +12,16 @@
         class="v1-facility-picker__toggle"
         (click)="toggle()"
         [attr.aria-expanded]="open"
-        aria-haspopup="dialog" [disabled]="!facilities.length">
+        aria-haspopup="dialog" [disabled]="disabled || !facilities.length" [attr.aria-label]="'Choose facility. ' + (selectedFacility?.name || 'All facilities')" [attr.title]="unavailableMessage || selectedFacility?.name || 'All facilities'">
         <app-ui-icon name="facility"></app-ui-icon>
-        <span class="v1-facility-picker__label">{{ selectedFacility?.name ?? 'Choose facility…' }}</span>
+        <span class="v1-facility-picker__label">{{ selectedFacility?.name ?? 'All facilities' }}</span>
         <app-ui-icon name="chevronDown" class="v1-facility-picker__chevron"></app-ui-icon>
       </button>
 
       <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="origin" [cdkConnectedOverlayOpen]="open" [cdkConnectedOverlayWidth]="menuWidth" [cdkConnectedOverlayHasBackdrop]="true" [cdkConnectedOverlayFlexibleDimensions]="true" [cdkConnectedOverlayPush]="true" [cdkConnectedOverlayViewportMargin]="12" cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop" (backdropClick)="close()">
         <div [class]="overlayClasses()">
-        <div class="v1-facility-picker__menu" role="dialog" aria-label="Choose facility" (keydown)="onMenuKeydown($event)">
+        <div class="v1-facility-picker__menu" role="dialog" aria-label="Choose facility" (keydown)="onMenuKeydown($event)" (focusout)="onMenuFocusOut($event)">
+          <strong class="v1-facility-picker__title">Choose facility</strong>
             <div class="v1-facility-picker__search">
               <app-ui-icon name="search" class="v1-facility-picker__search-icon"></app-ui-icon>
               <input
@@ -31,6 +32,11 @@
                 autocomplete="off"
                 [formControl]="search" />
             </div>
+          <button type="button" class="v1-facility-picker__item v1-facility-picker__all"
+            [class.active]="!selectedFacility" [attr.aria-pressed]="!selectedFacility" (click)="select()">
+            <app-ui-icon name="check" class="v1-facility-picker__check"/>
+            <span>All facilities</span>
+          </button>
           <div class="v1-facility-picker__list">
             @for (facility of filteredFacilities(); track facility.guid) {
               <button
@@ -58,3 +64,5 @@
     </div>
   }
 </div>
+
+@if (unavailableMessage) { <span class="visually-hidden" role="status">{{ unavailableMessage }}</span> }

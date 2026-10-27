@@ -6,7 +6,6 @@
     <label><span>Type</span><select class="v1-select" formControlName="type"><option value="all">All</option><option value="standard">Standard</option><option value="weather">Weather</option></select></label>
     <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">All data valid</option></select></label>
     <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="facilityName">Facility name</option><option value="latestReading">Latest reading</option></select></label>
-    <label><span>Facility</span><select class="v1-select" formControlName="facilityGuid" aria-label="Facility"><option value="">All facilities</option>@for (facility of facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select></label>
     <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
   </form>
   @if (navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ navigationError() }}</p> }
