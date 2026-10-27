@@ -28,7 +28,7 @@
                         <button class="btn action-btn" (click)="openExportModal()">
                             <i class="fa fa-file-export"></i> Export
                         </button>
-                        <button class="btn action-btn">
+                        <button class="btn action-btn" (click)="openImportModal()">
                             <i class="fa fa-file-import"></i> Import
                         </button>
                     </div>
@@ -61,8 +61,12 @@
     </div>
 </div>
 
-<div [ngClass]="{'windowOverlay': showExportModal}"></div>
+<div [ngClass]="{'windowOverlay': showExportModal || showImportModal}"></div>
 
 @if (showExportModal) {
     <app-export-energy-uses-modal (closeModal)="closeExportModal()"></app-export-energy-uses-modal>
+}
+
+@if (showImportModal) {
+    <app-import-energy-uses-modal (closeModal)="closeImportModal()"></app-import-energy-uses-modal>
 }

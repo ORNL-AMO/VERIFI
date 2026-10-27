@@ -21,6 +21,7 @@ export class FacilityEnergyUseGroupManagementComponent {
   private router: Router = inject(Router);
   private readonly sharedDataService = inject(SharedDataService);
   showExportModal = false;
+  showImportModal = false;
 
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]);
@@ -32,6 +33,16 @@ export class FacilityEnergyUseGroupManagementComponent {
 
   closeExportModal(): void {
     this.showExportModal = false;
+    this.sharedDataService.modalOpen.next(false);
+  }
+
+  openImportModal(): void {
+    this.showImportModal = true;
+    this.sharedDataService.modalOpen.next(true);
+  }
+
+  closeImportModal(): void {
+    this.showImportModal = false;
     this.sharedDataService.modalOpen.next(false);
   }
 

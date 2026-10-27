@@ -3,14 +3,10 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import * as ExcelJS from 'exceljs';
+import { capacityUnitToExcel, ENERGY_USES_HEADERS, ENERGY_USES_SHEET, escapeMeterGroupName } from './energy-uses-excel-format';
+export { ENERGY_USES_HEADERS } from './energy-uses-excel-format';
 
 export const ENERGY_USES_TEMPLATE_URL = 'assets/csv_templates/VERIFI-Energy-Uses-Template.xlsx';
-export const ENERGY_USES_HEADERS = [
-  'Facility', 'Energy Use Group', 'Equipment Name', 'Industrial System', 'Utility Meter Group', 'Notes',
-  'Operating hours (hrs/yr)', 'Load factor (%)', 'Duty Factor (%)', 'Efficiency (%)',
-  'Utility Type 1', 'Rated Power/Rated Capacity 1', 'Rated Power 1 Unit', 'Number of Equipment 1', 'Energy Use 1', 'Energy Use 1 Unit',
-  'Utility Type 2', 'Rated Power/Rated Capacity 2', 'Rated Power 2 Unit', 'Number of Equipment 2', 'Energy Use 2', 'Energy Use 2 Unit'
-];
 
 export interface EnergyUsesExportData {
   year: number;
@@ -33,10 +29,6 @@ export function getEnergyUsesExportYears(equipment: readonly Readonly<IdbFacilit
     ...(item.utilityData ?? []).flatMap(utility => (utility.energyUse ?? []).map(data => data.year))
   ]);
   return [...new Set(years)].sort((a, b) => a - b);
-}
-
-function escapeMeterGroupName(name: string): string {
-  return name.replaceAll('\\', '\\\\').replaceAll(';', '\\;');
 }
 
 @Injectable({ providedIn: 'root' })
@@ -113,7 +105,7 @@ export class EnergyUsesExcelExportService {
         row.push(
           utility?.energySource ?? null,
           utility?.size ?? null,
-          utility?.units === 'MMBtuhr' ? 'MMBtu/hr' : utility?.units === 'btuhr' ? 'Btu/hr' : utility?.units ?? null,
+          capacityUnitToExcel(utility?.units) ?? null,
           utility?.numberOfEquipment ?? null,
           annual?.energyUse ?? null,
           annual?.energyUseUnit ?? null
@@ -144,7 +136,7 @@ export class EnergyUsesExcelExportService {
   }
 
   fillWorkbook(workbook: ExcelJS.Workbook, exportData: EnergyUsesExportData): void {
-    const sheet = workbook.getWorksheet('Energy Uses');
+    const sheet = workbook.getWorksheet(ENERGY_USES_SHEET);
     const styles = ENERGY_USES_HEADERS.map((_, index) => ({ ...sheet.getCell(2, index + 1).style }));
     const validations = ENERGY_USES_HEADERS.map((_, index) => sheet.getCell(2, index + 1).dataValidation);
     
