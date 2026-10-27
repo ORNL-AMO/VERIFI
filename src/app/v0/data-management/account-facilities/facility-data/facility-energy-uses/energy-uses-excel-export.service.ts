@@ -1,6 +1,5 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import * as ExcelJS from 'exceljs';
 import { capacityUnitToExcel, ENERGY_USES_HEADERS, ENERGY_USES_SHEET, escapeMeterGroupName } from './energy-uses-excel-format';
@@ -11,17 +10,8 @@ export const ENERGY_USES_TEMPLATE_URL = 'assets/csv_templates/VERIFI-Energy-Uses
 export interface EnergyUsesExportData {
   year: number;
   rows: Array<Array<string | number | null>>;
-  utilitySelections: Array<{
-    equipmentGuid: string;
-    facilityName: string;
-    equipmentName: string;
-    sources: MeterSource[];
-    selectedSources: MeterSource[];
-  }>;
-  needsUtilitySelection: boolean;
+  hasExcessUtilityTypes: boolean;
 }
-
-export type EnergyUsesUtilitySelections = Record<string, MeterSource[]>;
 
 export function getEnergyUsesExportYears(equipment: readonly Readonly<IdbFacilityEnergyUseEquipment>[]): number[] {
   const years = equipment.flatMap(item => [
@@ -36,8 +26,8 @@ export class EnergyUsesExcelExportService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   readonly exportYears = computed(() => getEnergyUsesExportYears(this.accountWorkspaceStore.energyUseEquipment()));
 
-  prepareExportData(year: number, selections: EnergyUsesUtilitySelections = {}): EnergyUsesExportData {
-    const exportData: EnergyUsesExportData = { year, rows: [], utilitySelections: [], needsUtilitySelection: false };
+  prepareExportData(year: number): EnergyUsesExportData {
+    const exportData: EnergyUsesExportData = { year, rows: [], hasExcessUtilityTypes: false };
     const facilities = this.accountWorkspaceStore.facilities();
     const energyUseGroups = this.accountWorkspaceStore.energyUseGroups();
     const meterGroups = this.accountWorkspaceStore.meterGroups();
@@ -62,31 +52,16 @@ export class EnergyUsesExcelExportService {
     for (const item of orderedEquipment) {
       const facility = facilities.find(value => value.guid === item.facilityId);
       const group = energyUseGroups.find(value => value.guid === item.energyUseGroupId && value.facilityId === item.facilityId);
-      const allUtilities = item.utilityData ?? [];
-      let utilities = allUtilities;
+      const utilities = item.utilityData ?? [];
       const conditions = (item.operatingConditionsData ?? []).filter(data => data.year === year);
-      if (allUtilities.length > 2) {
-        const selectedSources = selections[item.guid] ?? [];
-        const validSelection = selectedSources.length >= 1 && selectedSources.length <= 2
-          && new Set(selectedSources).size === selectedSources.length
-          && selectedSources.every(source => allUtilities.some(utility => utility.energySource === source));
-        exportData.utilitySelections.push({
-          equipmentGuid: item.guid, facilityName: facility?.name ?? 'Unknown facility', equipmentName: item.name,
-          sources: allUtilities.map(utility => utility.energySource), selectedSources
-        });
-        if (!exportData.needsUtilitySelection) {
-          exportData.needsUtilitySelection = !validSelection;
-        }
-        utilities = validSelection ? allUtilities.filter(utility => selectedSources.includes(utility.energySource)) : [];
+      if (utilities.length > 2) {
+        exportData.hasExcessUtilityTypes = true;
       }
       const meterGroupNames = (item.utilityMeterGroupIds ?? []).map(guid => {
         const meterGroup = meterGroups.find(value => value.guid === guid && value.facilityId === item.facilityId);
         return meterGroup ? escapeMeterGroupName(meterGroup.name) : '';
       });
 
-      if (allUtilities.length > 2 && utilities.length === 0) {
-        continue;
-      }
       const operating = conditions[0];
       const row: Array<string | number | null> = [
         facility?.name ?? '',
@@ -117,6 +92,9 @@ export class EnergyUsesExcelExportService {
   }
 
   async createExport(exportData: EnergyUsesExportData): Promise<Blob> {
+    if (exportData.hasExcessUtilityTypes) {
+      throw new Error('Some equipment has more than two utility types. Reduce it to two utility types before exporting.');
+    }
     const template = await new Promise<ArrayBuffer>((resolve, reject) => {
       const request = new XMLHttpRequest();
       request.open('GET', ENERGY_USES_TEMPLATE_URL, true);

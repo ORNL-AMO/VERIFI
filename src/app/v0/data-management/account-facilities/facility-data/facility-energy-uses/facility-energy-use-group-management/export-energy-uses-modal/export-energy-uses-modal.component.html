@@ -1,4 +1,3 @@
-@let _data = exportData();
 @let _exportYears = exportYears();
 
 <div class="popup open">
@@ -7,7 +6,6 @@
         <button type="button" class="item-right" (click)="closeExportModal()">x</button>
     </div>
     <div class="popup-body">
-        <p class="text-muted">Download one year of equipment data across all facilities in this account.</p>
         @if(_exportYears.length > 0) {
         <div class="d-flex align-items-center gap-5">
             <label for="energy-uses-export-year" class="form-label fw-bold mb-0">Year</label>
@@ -19,31 +17,6 @@
             </select>
         </div>
 
-        @if(_data && _data.utilitySelections.length > 0) {
-        <div class="mb-3 mt-5">
-            <h6 class="fw-bold">Choose utilities to export</h6>
-            <p class="text-muted">These equipment records have more than two utility types. Select upto two for
-                each record. Only the selected utilities will appear in the file; all utility data remains in VERIFI.
-            </p>
-            @for(selection of _data.utilitySelections; track selection.equipmentGuid) {
-            <fieldset class="border rounded p-3 mb-2">
-                <legend class="float-none w-auto fs-6 px-1 mb-2 fw-bold">{{selection.facilityName}} — {{selection.equipmentName}}
-                </legend>
-                @for(source of selection.sources; track source) {
-                <label class="d-flex align-items-center gap-2 mb-2">
-                    <input type="checkbox" class="form-check-input mt-0"
-                        [checked]="selection.selectedSources.includes(source)"
-                        [disabled]="selection.selectedSources.length >= 2 && !selection.selectedSources.includes(source)"
-                        (change)="toggleExportUtility(selection.equipmentGuid, source, $any($event.target).checked)">
-                    {{source}}
-                </label>
-                }
-                <div class="small text-muted">{{selection.selectedSources.length}} selected (choose upto 2)
-                </div>
-            </fieldset>
-            }
-        </div>
-        }
         } @else {
         <div class="alert alert-info mb-0 mt-3">No annual energy use equipment data is available to export. Add
             a year of equipment data to get started.</div>
@@ -52,7 +25,7 @@
     <div class="popup-footer text-end">
         <button type="button" class="btn btn-secondary" (click)="closeExportModal()">Cancel</button>
         <button type="button" class="btn action-btn" (click)="exportEnergyUses()"
-            [disabled]="!exportData()?.rows?.length || !!exportData()?.needsUtilitySelection">
+            [disabled]="!exportData()?.rows?.length">
             <span class="fa fa-download me-1"></span> Export Excel
         </button>
     </div>

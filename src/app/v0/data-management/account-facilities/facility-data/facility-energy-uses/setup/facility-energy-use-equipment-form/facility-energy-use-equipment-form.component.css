@@ -26,3 +26,10 @@ span.badge.larger{
 a.click-link .fa{
     color: inherit;
 }
+
+a.click-link.disabled {
+    color: #6c757d !important;
+    cursor: default;
+    pointer-events: none;
+    text-decoration: none;
+}

@@ -146,6 +146,9 @@ export class FacilityEnergyUseEquipmentFormComponent {
   }
 
   openAddUtilityModal() {
+    if (this.utilityDataForms().length >= 2) {
+      return;
+    }
     this.showUtilityTypeModal = true;
   }
 
@@ -164,22 +167,24 @@ export class FacilityEnergyUseEquipmentFormComponent {
     if (!equipmentDetailsForm) {
       return;
     }
-    const utilityDataForms = this.utilityDataForms();
     let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return equipmentDetailsForm.controls['utilityMeterGroupIds'].value.includes(meter.groupId); });
     let sources: Array<MeterSource> = groupMeters.map(meter => { return meter.source; });
     sources = _.uniq(sources);
+    
+    this.utilityDataForms.update(forms => forms.filter(udf => sources.includes(udf.energySource)));
     sources.forEach(source => {
-      if (!utilityDataForms.find(udf => { return udf.energySource == source })) {
+      if (!this.utilityDataForms().find(udf => { return udf.energySource == source })) {
         this.addSourceToUtilitydata(source)
       }
     });
-    //remove any that are not in the meter group
-    this.utilityDataForms.set(this.utilityDataForms().filter(udf => { return sources.includes(udf.energySource) }));
     this.saveChanges();
   }
 
   addSourceToUtilitydata(source: MeterSource) {
+    if (this.utilityDataForms().length >= 2) {
+      return;
+    }
     let years: Array<number> = this.annualOperatingConditionsDataForms().map(form => { return form.controls['year'].value });
     let utilityData: EquipmentUtilityData = {
       energySource: source,
