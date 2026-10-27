@@ -61,7 +61,7 @@ export class ProcessMeterReadingsComponent {
             let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
             let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
             let displayVehicleFuelEfficiency: boolean = (meter.scope == 2 && meter.vehicleCategory == 2);
-            form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency, meter.source);
+            form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency, meter.source, meter.canBeNegative);
           }
           if (form.invalid) {
             invalidReadings.push(reading);
