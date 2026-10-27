@@ -15,13 +15,16 @@ export class ExportEnergyUsesModalComponent {
   @Output() closeModal = new EventEmitter<void>();
 
   readonly exportYears = this.energyExportService.exportYears;
+  readonly facilities = this.energyExportService.facilities;
+  readonly selectedFacilityGuids = signal<ReadonlySet<string>>(new Set());
   readonly selectedExportYear = signal<number | null>(null);
   readonly exportData = computed(() => {
     const year = this.selectedExportYear();
-    return year !== null ? this.energyExportService.prepareExportData(year) : null;
+    return year !== null ? this.energyExportService.prepareExportData(year, this.selectedFacilityGuids()) : null;
   });
 
   ngOnInit(): void {
+    this.selectedFacilityGuids.set(new Set(this.facilities().map(facility => facility.guid)));
     this.selectExportYear(this.exportYears()[0] ?? null);
   }
 
@@ -31,6 +34,16 @@ export class ExportEnergyUsesModalComponent {
 
   selectExportYear(year: number | null): void {
     this.selectedExportYear.set(year);
+  }
+
+  toggleFacility(facilityGuid: string, checked: boolean): void {
+    const selected = new Set(this.selectedFacilityGuids());
+    if (checked) {
+      selected.add(facilityGuid);
+    } else {
+      selected.delete(facilityGuid);
+    }
+    this.selectedFacilityGuids.set(selected);
   }
 
   async exportEnergyUses(): Promise<void> {

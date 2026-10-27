@@ -25,15 +25,17 @@ export function getEnergyUsesExportYears(equipment: readonly Readonly<IdbFacilit
 export class EnergyUsesExcelExportService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   readonly exportYears = computed(() => getEnergyUsesExportYears(this.accountWorkspaceStore.energyUseEquipment()));
+  readonly facilities = this.accountWorkspaceStore.facilities;
 
-  prepareExportData(year: number): EnergyUsesExportData {
+  prepareExportData(year: number, selectedFacilityGuids: ReadonlySet<string>): EnergyUsesExportData {
     const exportData: EnergyUsesExportData = { year, rows: [], hasExcessUtilityTypes: false };
     const facilities = this.accountWorkspaceStore.facilities();
     const energyUseGroups = this.accountWorkspaceStore.energyUseGroups();
     const meterGroups = this.accountWorkspaceStore.meterGroups();
     const equipment = this.accountWorkspaceStore.energyUseEquipment().filter(item =>
-      (item.operatingConditionsData ?? []).some(data => data.year === year)
-      || (item.utilityData ?? []).some(utility => (utility.energyUse ?? []).some(data => data.year === year))
+      selectedFacilityGuids.has(item.facilityId) && (
+        (item.operatingConditionsData ?? []).some(data => data.year === year)
+        || (item.utilityData ?? []).some(utility => (utility.energyUse ?? []).some(data => data.year === year)))
     );
     
     const groupedEquipment = new Map<string, Map<string, typeof equipment>>();

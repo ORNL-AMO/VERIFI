@@ -21,6 +21,10 @@
     min-width: 0;
 }
 
+.facility-list {
+    max-height: 240px;
+}
+
 .popup-header,
 .popup-footer {
     flex-shrink: 0;

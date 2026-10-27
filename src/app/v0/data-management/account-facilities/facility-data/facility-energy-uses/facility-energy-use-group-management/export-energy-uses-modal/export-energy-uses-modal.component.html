@@ -17,6 +17,24 @@
             </select>
         </div>
 
+        <fieldset class="border rounded p-3 mt-3">
+            <legend class="float-none w-auto fs-6 fw-bold px-1">Select Facilities to Export</legend>
+            <div class="facility-list overflow-auto">
+                @for(facility of facilities(); track facility.guid) {
+                <label class="d-flex align-items-center gap-2 py-2 ms-1">
+                    <input type="checkbox" class="form-check-input m-0 flex-shrink-0"
+                        [checked]="selectedFacilityGuids().has(facility.guid)"
+                        (change)="toggleFacility(facility.guid, $any($event.target).checked)">
+                    <span class="text-break">{{facility.name}}</span>
+                </label>
+                }
+            </div>
+        </fieldset>
+        @if(!selectedFacilityGuids().size) {
+        <p class="small text-muted mt-2 mb-0">Select at least one facility to export.</p>
+        } @else if(!exportData()?.rows?.length) {
+        <p class="small text-muted mt-2 mb-0">The selected facilities have no energy-use data for this year.</p>
+        }
         } @else {
         <div class="alert alert-info mb-0 mt-3">No annual energy use equipment data is available to export. Add
             a year of equipment data to get started.</div>
