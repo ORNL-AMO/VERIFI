@@ -16,6 +16,7 @@ import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
+import { getBetterPlantsReportYears } from '@domain/calculations/better-plants-calculations/betterPlantsReportHelpers';
 
 @Component({
   selector: 'app-better-plants-report',
@@ -116,8 +117,12 @@ export class BetterPlantsReportComponent implements OnInit {
     } else {
       // Web Workers are not supported in this environment.
       this.betterPlantsSummaries = new Array();
-      let reportYear: number = this.selectedReport.reportYear;
-      while (reportYear > this.selectedAnalysisItem.baselineYear) {
+      const reportYears = getBetterPlantsReportYears(
+        this.selectedAnalysisItem.baselineYear,
+        this.selectedReport.reportYear,
+        this.selectedReport.betterPlantsReportSetup.includeAllYears
+      );
+      reportYears.forEach(reportYear => {
         let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
           this.selectedAnalysisItem.baselineYear,
           reportYear,
@@ -132,12 +137,7 @@ export class BetterPlantsReportComponent implements OnInit {
         );
         let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
         this.betterPlantsSummaries.push(betterPlantsSummary);
-        if (this.selectedReport.betterPlantsReportSetup.includeAllYears) {
-          reportYear--;
-        } else {
-          reportYear = this.selectedAnalysisItem.baselineYear;
-        }
-      }
+      });
       this.calculating = false;
     }
   }
