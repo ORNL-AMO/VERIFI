@@ -43,7 +43,7 @@
       <app-account-analysis-details-slideout [card]="entry.card" [evaluation]="workspace.statusState()" [facilityInputs]="workspace.facilityInputs()" [facilityFindings]="workspace.statusItems()" [outcomeDisplay]="entry.outcomeDisplay" [ownerName]="entry.ownerName" [showCategory]="showCategory()" (closed)="detailsGuid.set(undefined)"/>
     }
   }
-  @if (createOpen()) { <app-account-analysis-draft-slideout [facilities]="creationFacilities()" [showCategory]="showCreationCategory()" [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"/> }
+  @if (createOpen()) { <app-account-analysis-draft-slideout [fixedFacilityGuid]="scopedFacilityGuid()" [facilities]="creationFacilities()" [showCategory]="showCreationCategory()" [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"/> }
 
 }
 <ng-template #activeConfirmation>

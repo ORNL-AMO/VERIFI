@@ -56,12 +56,22 @@
 }
 
 .v1-account-portfolio__header-actions .v1-btn {
+  min-height: 2.75rem;
   color: var(--v1-inverse-text);
+}
+
+.v1-account-portfolio__header-actions .v1-btn--quiet {
+  color: var(--v1-text);
 }
 
 .v1-account-portfolio__header-actions .v1-btn--secondary {
   border-color: var(--v1-primary-strong);
   background: var(--v1-primary-strong);
+}
+
+.v1-account-portfolio__select--active {
+  outline: 2px solid var(--v1-content-control);
+  outline-offset: 2px;
 }
 
 .v1-account-portfolio__manage {

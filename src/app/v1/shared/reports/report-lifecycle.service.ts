@@ -53,7 +53,8 @@ export class ReportLifecycleService {
   readonly navigationBlocked = computed(() => this.saving() || this.draftChanged());
   readonly availabilityError = computed(() => {
     if (!this.editor()) return undefined;
-    const draft = this.draft();
+    const draft = this.draft(), fixedFacility = this.editor()?.fixedFacility;
+    if (fixedFacility && (draft.scope !== 'facility' || draft.facilityGuid !== fixedFacility)) return 'Choose a report owned by the selected facility.';
     if (!this.editor()?.entry && !this.types().some(option => option.value === draft.type)) return 'Select an available report type.';
     if (draft.scope === 'facility' && !this.facilities().some(facility => facility.guid === draft.facilityGuid)) return 'Select an available facility.';
     if (this.editor()?.entry && !reportTypeAvailable(draft.type, this.workspace.account()?.displayEmissions)) return 'Enable Other Impacts in Account Goals to access this report type.';

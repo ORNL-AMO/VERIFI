@@ -6,6 +6,8 @@ import { ModalFocusStackService } from './modal-focus-stack.service';
 /** CDK owns tabbing; this adapter owns the modal's focus and dismissal policy. */
 @Directive({ selector: '[appModalFocusTrap]', standalone: true, host: { tabindex: '-1' } })
 export class ModalFocusTrapDirective {
+  /** Modeless sheets keep initial focus and Escape handling while allowing header navigation. */
+  readonly modalFocusEnabled = input(true);
   readonly modalInitialFocus = input<string>();
   readonly modalFocusFallback = input<string>();
   readonly escapePressed = output<void>();
@@ -22,6 +24,10 @@ export class ModalFocusTrapDirective {
   constructor() {
     afterNextRender(() => {
       if (this.destroyRef.destroyed || !this.host.isConnected) return;
+      if (!this.modalFocusEnabled()) {
+        if (!this.focus(this.host.querySelector('button'))) this.host.focus({ preventScroll: true });
+        return;
+      }
       this.trap = this.factory.create(this.host);
       this.stack.activate(this.trap);
       this.focusInitial();
@@ -48,6 +54,12 @@ export class ModalFocusTrapDirective {
 
   @HostListener('keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
+    if (!this.modalFocusEnabled()) {
+      if (event.key === 'Escape') {
+        event.preventDefault(); event.stopPropagation(); this.escapePressed.emit();
+      }
+      return;
+    }
     if (!this.trap || !this.stack.isActive(this.trap)) return;
     if (event.key === 'Escape') {
       event.preventDefault(); event.stopPropagation(); this.escapePressed.emit();

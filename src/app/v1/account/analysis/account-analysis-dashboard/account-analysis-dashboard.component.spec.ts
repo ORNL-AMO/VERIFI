@@ -75,15 +75,16 @@ describe('Unified account Analysis dashboard', () => {
     (host.navigation.inventoryFacilityGuid as WritableSignal<string | undefined>).set('facility-a');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[formControlName="category"]')).toBeNull();
-    actions.createAnalysis.mockResolvedValue({ accountId: 'account-a', guid: 'new-water-analysis' });
+    facilityActions.createAnalysis.mockResolvedValue({ accountId: 'account-a', facilityId: 'facility-a', guid: 'new-water-analysis' });
     host.openCreate(); fixture.detectChanges();
     const draft = fixture.debugElement.query(By.directive(AccountAnalysisDraftSlideoutComponent)).componentInstance as AccountAnalysisDraftSlideoutComponent;
     expect(fixture.nativeElement.querySelector('app-account-analysis-draft-slideout [formControlName="category"]')).not.toBeNull();
     draft.form.controls.category.setValue('water'); fixture.detectChanges();
     fixture.nativeElement.querySelector('app-account-analysis-draft-slideout button[type="submit"]').click();
     await fixture.whenStable();
-    expect(actions.createAnalysis).toHaveBeenCalledExactlyOnceWith('water');
-    expect(navigate).toHaveBeenLastCalledWith(['/account-analysis', 'new-water-analysis']);
+    expect(facilityActions.createAnalysis).toHaveBeenCalledExactlyOnceWith('water', 'facility-a');
+    expect(actions.createAnalysis).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenLastCalledWith(['/facility', 'facility-a', 'analysis', 'new-water-analysis']);
   });
 
   it('defaults to simple mixed cards with explicit ownership/reporting and no duplicate active strip', () => {

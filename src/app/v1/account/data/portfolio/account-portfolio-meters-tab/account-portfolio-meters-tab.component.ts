@@ -1,5 +1,5 @@
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -8,6 +8,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { buildPortfolioMeters, filterPortfolioMeters, PortfolioMeterSort, PortfolioMeterStatusFilter } from '../portfolio-meter.view';
 import { PortfolioInventoryState } from '../portfolio-inventory-state';
 import { meterTiles, orderPortfolioMeters } from '../portfolio-tile.views';
+import { InventoryToolsComponent } from '../inventory-tools/inventory-tools.component';
 
 @Component({
   selector: 'app-account-portfolio-meters-tab',
@@ -16,6 +17,7 @@ import { meterTiles, orderPortfolioMeters } from '../portfolio-tile.views';
   standalone: false
 })
 export class AccountPortfolioMetersTabComponent {
+  readonly tools = viewChild(InventoryToolsComponent);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
@@ -44,6 +46,9 @@ export class AccountPortfolioMetersTabComponent {
   readonly tiles = computed(() => meterTiles(this.filteredMeters(), this.navigation, this.workspace.meterData()));
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.meters().map(item => item.meter.guid)), computed(() => ({ ...this.filters(), facility: this.navigation.inventoryFacilityGuid() })), this.workspace.canWrite);
 
+  readonly matchingGuids = computed(() => this.filteredMeters().map(item => item.meter.guid));
+  readonly scopeGuids = computed(() => this.meters().map(item => item.meter.guid));
+  readonly toolsFiltersKey = computed(() => JSON.stringify(this.filters()));
   readonly browseIds = this.inventory.visibleIds;
 
   clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', sort: 'attention' }); }

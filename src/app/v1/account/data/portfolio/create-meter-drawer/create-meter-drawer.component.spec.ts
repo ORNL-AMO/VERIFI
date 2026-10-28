@@ -75,6 +75,8 @@ describe('CreateMeterDrawerComponent', () => {
 
   it('keeps the form open with the draft after a failed save and supports retry', async () => {
     const { fixture, component, form, actions } = setup(true);
+    expect(component.facilityControl.value).toBe('');
+    fixture.componentRef.setInput('initialFacilityGuid', 'facility-a'); fixture.detectChanges();
     expect(component.facilityControl.value).toBe('facility-a');
     form.form.controls.name.setValue(draft.name);
     actions.createMeter.mockRejectedValueOnce(new Error('Could not save meter'));

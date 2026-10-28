@@ -26,6 +26,7 @@ export type AnalysisDraftRequest =
 export class AccountAnalysisDraftSlideoutComponent {
   readonly energyAvailable = input(false);
   readonly waterAvailable = input(false);
+  readonly fixedFacilityGuid = input<string>();
   readonly facilities = input<readonly AnalysisDraftFacility[]>([]);
   readonly showCategory = input(true);
   readonly saving = input(false);
@@ -38,9 +39,10 @@ export class AccountAnalysisDraftSlideoutComponent {
     category: new FormControl<AnalysisCategory>('energy', { nonNullable: true })
   });
   readonly category = this.form.controls.category;
-  readonly scope = toSignal(this.form.controls.scope.valueChanges, { initialValue: this.form.controls.scope.value });
+  private readonly scopeValue = toSignal(this.form.controls.scope.valueChanges, { initialValue: this.form.controls.scope.value });
   private readonly facilityGuid = toSignal(this.form.controls.facilityGuid.valueChanges, { initialValue: this.form.controls.facilityGuid.value });
-  readonly selectedFacility = computed(() => this.facilities().find(facility => facility.guid === this.facilityGuid()));
+  readonly scope = computed(() => this.fixedFacilityGuid() ? 'facility' : this.scopeValue());
+  readonly selectedFacility = computed(() => this.facilities().find(facility => facility.guid === (this.fixedFacilityGuid() ?? this.facilityGuid())));
   readonly availability = computed(() => this.scope() === 'account'
     ? { energy: this.energyAvailable(), water: this.waterAvailable() }
     : { energy: this.selectedFacility()?.energyAvailable ?? false, water: this.selectedFacility()?.waterAvailable ?? false });
@@ -53,6 +55,7 @@ export class AccountAnalysisDraftSlideoutComponent {
   });
 
   constructor() {
+    effect(() => { const guid = this.fixedFacilityGuid(); if (guid) this.form.patchValue({ scope: 'facility', facilityGuid: guid }, { emitEvent: false }); });
     effect(() => {
       const availability = this.availability();
       if (!(this.category.value === 'energy' ? availability.energy : availability.water) && (availability.energy || availability.water)) {
@@ -61,12 +64,13 @@ export class AccountAnalysisDraftSlideoutComponent {
     });
     effect(() => {
       if (this.saving()) this.form.disable({ emitEvent: false });
-      else this.form.enable({ emitEvent: false });
+      else { this.form.enable({ emitEvent: false }); if (this.fixedFacilityGuid()) { this.form.controls.scope.disable({ emitEvent: false }); this.form.controls.facilityGuid.disable({ emitEvent: false }); } }
     });
   }
 
   submit(): void {
-    const { scope, category, facilityGuid } = this.form.getRawValue();
+    const { category } = this.form.getRawValue();
+    const scope = this.scope(), facilityGuid = this.selectedFacility()?.guid;
     const availability = this.availability();
     if (this.saving() || !(category === 'energy' ? availability.energy : availability.water)) return;
     if (scope === 'account') this.submitted.emit({ scope, category });

@@ -7,7 +7,6 @@ import { LocalStorageService } from 'ngx-webstorage';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { makeFinding } from '@app/v1/status/status.models';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { StatusEvaluationState } from '@app/v1/status/status.models';
@@ -56,7 +55,6 @@ function setup(count = 260) {
         if (opened) { scope.set(selected.facilityGuid); active.set(resource); }
         return opened;
       }, facilityMeterRoute:(facility:string,guid:string,tab:string)=>['/v1','workspace','facility',facility,'data','meters',guid,tab] } },
-    { provide:ModalPortalService, useValue:{ show:vi.fn(), hide:vi.fn() } },
     { provide:LocalStorageService, useValue:{ retrieve:(key:string)=>stored.get(key), store:(key:string,value:unknown)=>stored.set(key,value) } }
   ] });
   const fixture = TestBed.createComponent(InventoryBrowserHost); fixture.detectChanges();
@@ -68,7 +66,7 @@ function setup(count = 260) {
     await vi.waitFor(() => { fixture.detectChanges(); expect(fixture.debugElement.query(By.directive(type)).componentInstance.browseReady()).toBe(true); });
     await fixture.whenStable();
   };
-  return { fixture, root, router, open, workspace, statusState, statusItems };
+  return { fixture, root, router, open, workspace, statusState, statusItems, scope };
 }
 async function settled(root: HTMLElement) {
   await vi.waitFor(() => {
@@ -100,6 +98,67 @@ function expectResourceRows(tile: HTMLElement) {
 }
 
 describe('uniform account inventories in Chromium', () => {
+  for (const resource of ['meters', 'predictors'] as const) {
+    it(`toggles ${resource} selection from the quiet header before Upload and keeps centered actions usable across pages and narrow themes`, async () => {
+      await page.viewport(1300, 950);
+      const { fixture, root, open, workspace, scope } = setup(35);
+      try {
+        await open(resource);
+        const toggle = [...root.querySelectorAll<HTMLButtonElement>('header button')].find(button => button.textContent.trim() === `Select ${resource}`)!;
+        const upload = [...root.querySelectorAll<HTMLAnchorElement>('header a')].find(link => link.textContent.trim() === 'Upload data')!;
+        const tabType = resource === 'meters' ? AccountPortfolioMetersTabComponent : AccountPortfolioPredictorsTabComponent;
+        const tab = fixture.debugElement.query(By.directive(tabType)).componentInstance as AccountPortfolioMetersTabComponent | AccountPortfolioPredictorsTabComponent;
+        const tools = tab.tools()!;
+        expect(toggle.disabled).toBe(false);
+        expect(toggle.classList.contains('v1-btn--quiet')).toBe(true);
+        expect(toggle.compareDocumentPosition(upload) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        const heights = [...root.querySelectorAll<HTMLElement>('.v1-account-portfolio__header-actions .v1-btn')].map(button => button.getBoundingClientRect().height);
+        expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+        expect(toggle.getAttribute('aria-pressed')).toBe('false');
+        expect(root.querySelector(`#${resource}-selection-actions`)).toBeNull();
+        toggle.focus(); await userEvent.keyboard('{Enter}'); fixture.detectChanges(); await fixture.whenStable();
+        expect(toggle.getAttribute('aria-pressed')).toBe('true');
+        expect(fixture.debugElement.query(By.css('header button[aria-pressed] app-ui-icon')).componentInstance.name).toBe('check');
+        const actions = root.querySelector<HTMLElement>(`#${resource}-selection-actions`)!;
+        expect(getComputedStyle(actions).justifyContent).toBe('center');
+        expect(getComputedStyle(actions).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+        await page.getByRole('button', { name: 'Select all', exact: true }).click(); fixture.detectChanges();
+        expect(tools.selected()).toHaveLength(35);
+        await page.getByRole('button', { name: 'Next', exact: true }).click(); fixture.detectChanges(); await settled(root);
+        const boxes = [...root.querySelectorAll<HTMLInputElement>('.portfolio-inventory .portfolio-tile__selection')];
+        expect(boxes.length).toBeGreaterThan(0); expect(boxes.every(box => box.checked)).toBe(true);
+        for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) for (const contrast of [false, true]) {
+          root.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''}${contrast ? ' v1-contrast-strong' : ''}`;
+          expect(textContrast(toggle)).toBeGreaterThanOrEqual(4.5);
+        }
+        root.className = 'v1-root';
+        toggle.focus({ preventScroll: true });
+        await page.viewport(390, 800); fixture.detectChanges(); await fixture.whenStable(); await settled(root);
+        root.scrollTop = 0;
+        await vi.waitFor(() => expect(root.scrollTop).toBe(0));
+        expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+        for (const button of actions.querySelectorAll('button')) {
+          expect(button.getBoundingClientRect().left).toBeGreaterThanOrEqual(actions.getBoundingClientRect().left);
+          expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(actions.getBoundingClientRect().right);
+        }
+        await page.screenshot({ element: root, path: `../../../../../../../.angular/${resource}-selection-header.png` });
+        await page.getByRole('button', { name: 'Cancel selection', exact: true }).click(); fixture.detectChanges();
+        expect(toggle.getAttribute('aria-pressed')).toBe('false'); expect(tools.selected()).toEqual([]);
+        expect(root.querySelector('.portfolio-tile__selection')).toBeNull();
+        await page.getByRole('button', { name: `Select ${resource}`, exact: true }).click(); fixture.detectChanges();
+        await page.getByRole('button', { name: 'Select all', exact: true }).click(); fixture.detectChanges();
+        toggle.click(); fixture.detectChanges();
+        expect(tools.selecting()).toBe(false); expect(tools.selected()).toEqual([]);
+        workspace.hasPending.set(true); fixture.detectChanges(); expect(toggle.disabled).toBe(true);
+        workspace.hasPending.set(false); fixture.detectChanges(); expect(toggle.disabled).toBe(false);
+        await open(resource === 'meters' ? 'predictors' : 'meters'); expect(root.querySelector('header')?.textContent).not.toContain(`Select ${resource}`);
+        await open(resource);
+        const returned = [...root.querySelectorAll<HTMLButtonElement>('header button')].find(button => button.textContent.trim() === `Select ${resource}`)!;
+        expect(returned.disabled).toBe(false); expect(returned.getAttribute('aria-pressed')).toBe('false');
+        scope.set('f1'); fixture.detectChanges(); expect(returned.disabled).toBe(true);
+      } finally { fixture.destroy(); }
+    });
+  }
   for (const resource of ['facilities', 'meters', 'predictors'] as const) {
     it(`restores ${resource} with no matching items to the heading and a valid scroll position`, async () => {
       const { fixture, root, open, router } = setup(3);

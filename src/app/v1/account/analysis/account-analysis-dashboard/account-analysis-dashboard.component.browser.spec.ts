@@ -89,15 +89,15 @@ describe('account Analysis inventory browser journeys', () => {
     view.fixture.destroy();
   });
   afterEach(async () => { await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '', features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] }); });
-  it('blocks scope changes during creation and opens the saved account analysis from a facility-filtered inventory', async () => {
+  it('blocks scope changes during creation and opens the saved account analysis from All facilities', async () => {
     const view = setup(1);
-    await view.router.navigateByUrl(dashboardUrl + '?facility=facility-a'); await settle(view.fixture);
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     let complete!: (analysis: ReturnType<typeof accountEntry>['card']['analysis']) => void;
     view.accountActions.createAnalysis.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
     const dashboard = view.host(); dashboard.openCreate(); await settle(view.fixture);
     const creation = dashboard.create({ scope: 'account', category: 'energy' });
-    expect(await TestBed.inject(WorkspaceNavigationService).changeFacilityScope({ kind: 'all' })).toBe(false);
-    expect(view.router.url).toBe(dashboardUrl + '?facility=facility-a');
+    expect(await TestBed.inject(WorkspaceNavigationService).changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-a' })).toBe(false);
+    expect(view.router.url).toBe(dashboardUrl);
     complete({ ...accountEntry().card.analysis, guid: 'new-account-analysis' });
     await creation; await settle(view.fixture);
     expect(view.accountActions.createAnalysis).toHaveBeenCalledExactlyOnceWith('energy');

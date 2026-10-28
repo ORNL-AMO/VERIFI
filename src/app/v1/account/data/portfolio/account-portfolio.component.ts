@@ -12,6 +12,8 @@ import { IconName } from '@app/v1/shared/icons/icon-registry';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 import { inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
+import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-tab/account-portfolio-meters-tab.component';
+import { AccountPortfolioPredictorsTabComponent } from './account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
 
 interface PortfolioTotals {
   readonly facilities: number;
@@ -48,6 +50,13 @@ export class AccountPortfolioComponent implements OnDestroy {
   readonly activeContent = computed(() => this.navigation.activePortfolioTab() || 'facilities');
   readonly isFacilities = computed(() => this.activeContent() === 'facilities');
   readonly isMeters = computed(() => this.activeContent() === 'meters');
+  private readonly selectionInventory = signal<AccountPortfolioMetersTabComponent | AccountPortfolioPredictorsTabComponent | undefined>(undefined);
+  readonly selectionTools = computed(() => this.selectionInventory()?.tools());
+  readonly canSelectItems = computed(() => {
+    const inventory = this.selectionInventory(), tools = this.selectionTools();
+    if (!inventory || !tools) return false;
+    return tools.canAct() && (tools.selecting() || !!inventory.matchingGuids().length);
+  });
   readonly dataValidationRoute = computed(() => {
     const facilityGuid = this.navigation.inventoryFacilityGuid();
     const account = this.account();
@@ -82,6 +91,14 @@ export class AccountPortfolioComponent implements OnDestroy {
         this.closeCreateMeterDrawer();
       }
     });
+  }
+
+  inventoryActivated(component: unknown): void {
+    this.selectionInventory.set(component instanceof AccountPortfolioMetersTabComponent || component instanceof AccountPortfolioPredictorsTabComponent ? component : undefined);
+  }
+
+  inventoryDeactivated(component: unknown): void {
+    if (this.selectionInventory() === component) this.selectionInventory.set(undefined);
   }
 
   openCreateMeterDrawer(): void {

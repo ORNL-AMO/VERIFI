@@ -1,3 +1,4 @@
+import { firstValueFrom } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transaction.service';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
@@ -17,6 +18,30 @@ describe('atomic bulk meter deletion in Chromium', () => {
   });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
 
+  async function crossFacilityChanges() {
+    await harness.seed({ facilities: [{id:1,guid:'facility',accountId:'account'},{id:2,guid:'other-facility',accountId:'account'}] });
+    return [meters[0],meters[2]].map(item => ({meter:item as IdbUtilityMeter,meterData:readings.filter(r => r.meterId===item.guid) as IdbUtilityMeterData[]}));
+  }
+  it('deletes across facilities in one transaction and preserves unselected records after reopening', async () => {
+    const selected=await crossFacilityChanges();
+    expect(await TestBed.inject(MeterCommandHandler).deleteMetersAcrossFacilities(selected,'account')).toBe(2);
+    await harness.reopen(); expect((await harness.getAll('utilityMeter')).map(m => m.guid)).toEqual(['meter-2','meter-4']);
+    expect((await harness.getAll('utilityMeterData')).map(r => r.guid)).toEqual(['reading-2','reading-4']);
+  });
+  it('rolls back the entire cross-facility batch when a later deletion fails', async () => {
+    const selected=await crossFacilityChanges(), original=IndexedDbTransactionContext.prototype.deleteByKey;
+    vi.spyOn(IndexedDbTransactionContext.prototype,'deleteByKey').mockImplementation(function(store,id) {
+      return store==='utilityMeter' && id===3 ? Promise.reject(new Error('Later facility failed')) : original.call(this,store,id);
+    });
+    await expect(TestBed.inject(MeterCommandHandler).deleteMetersAcrossFacilities(selected,'account')).rejects.toThrow('Later facility failed');
+    await harness.reopen();expect(await harness.getAll('utilityMeter')).toEqual(meters);expect(await harness.getAll('utilityMeterData')).toEqual(readings);
+  });
+  it('rejects stale reviewed settings and foreign facility ownership without deleting anything', async () => {
+    const selected=await crossFacilityChanges(), handler=TestBed.inject(MeterCommandHandler);
+    await expect(handler.deleteMetersAcrossFacilities([{...selected[0],meter:{...selected[0].meter,name:'Stale'}},selected[1]],'account')).rejects.toThrow();
+    await firstValueFrom(harness.dbService.update('facilities',{id:2,guid:'other-facility',accountId:'foreign'}));
+    await expect(handler.deleteMetersAcrossFacilities(selected,'account')).rejects.toThrow();expect(await harness.getAll('utilityMeter')).toEqual(meters);
+  });
   it('deletes selected meters and readings, retains all other records and survives reopening', async () => {
     const result = await TestBed.inject(MeterCommandHandler).deleteMetersWithData(changes(), 'account');
     expect(result).toBe(2);

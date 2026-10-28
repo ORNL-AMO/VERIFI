@@ -16,3 +16,14 @@
 .v1-route-stage > app-workspace-shell {
   overflow: hidden;
 }
+
+.v1-route-stage--blocked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: var(--v1-backdrop);
+  pointer-events: none;
+}
+
+@media print { .v1-route-stage--blocked::after { display: none; } }

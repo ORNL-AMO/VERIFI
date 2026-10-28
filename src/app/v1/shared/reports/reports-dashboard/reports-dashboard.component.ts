@@ -86,7 +86,7 @@ export class ReportsDashboardComponent {
     });
   }
   clearFilters(): void { this.filtersForm.reset({ ...DEFAULT_REPORT_FILTERS, sort: this.scope() === 'facility' ? 'attention' : 'account-first' }); }
-  openCreate(): void { if (this.canAct()) this.lifecycle.openCreate(this.scope() === 'facility' ? this.facility()?.guid : undefined); }
+  openCreate(): void { if (this.canAct()) this.lifecycle.openCreate(this.scopedFacilityGuid()); }
   requestAction(request: InventoryTileActionRequest): void {
     if (!this.canAct()) return;
     const entry = this.entries().find(item => item.key === request.guid);

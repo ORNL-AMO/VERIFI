@@ -27,6 +27,20 @@ describe('report browse state', () => {
     expect(host.entries()).toHaveLength(3);
   });
 
+  it('starts named-scope creation with fixed facility ownership', async () => {
+    const { navigation } = await setupReportInventory();
+    navigation.inventoryFacilityGuid.set('facility-a');
+    const fixture = TestBed.createComponent(ReportsDashboardComponent); fixture.detectChanges();
+    const host = fixture.componentInstance;
+    host.openCreate(); fixture.detectChanges();
+    expect(host.lifecycle.form.controls.scope.value).toBe('facility');
+    expect(host.lifecycle.form.controls.facilityGuid.value).toBe('facility-a');
+    expect(host.lifecycle.editor()?.fixedFacility).toBe('facility-a');
+    expect(fixture.nativeElement.querySelector('#report-facility')).toBeNull();
+    host.lifecycle.form.controls.scope.setValue('account'); fixture.detectChanges();
+    expect(host.lifecycle.canSave()).toBe(false);
+  });
+
   it('uses the Better Plants icon in portfolio cards and retains the page icon for other account and facility reports', async () => {
     const { store } = await setupReportInventory();
     const saved = store.snapshot()!;

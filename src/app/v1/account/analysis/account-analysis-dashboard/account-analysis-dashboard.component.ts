@@ -192,6 +192,11 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
   openCreate(): void { if (this.canAct()) { this.clearComparison(); this.detailsGuid.set(undefined); this.actionError.set(undefined); this.createOpen.set(true); } }
   closeCreate(): void { if (!this.saving()) this.createOpen.set(false); }
   async create(request: AnalysisDraftRequest): Promise<void> {
+    const facilityGuid = this.scopedFacilityGuid();
+    if (facilityGuid && (request.scope !== 'facility' || request.facilityGuid !== facilityGuid)) {
+      this.actionError.set('Choose an analysis owned by the selected facility.');
+      return;
+    }
     await this.runAction(async isCurrent => {
       const analysis = request.scope === 'account'
         ? await this.actions.createAnalysis(request.category)

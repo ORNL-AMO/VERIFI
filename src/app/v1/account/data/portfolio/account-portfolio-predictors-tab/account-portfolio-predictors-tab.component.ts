@@ -1,5 +1,5 @@
 import { buildPredictorTiles } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-tile.view';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -10,10 +10,12 @@ import { orderPortfolioPredictors } from '../portfolio-tile.views';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
+import { InventoryToolsComponent } from '../inventory-tools/inventory-tools.component';
 
 @Component({ selector: 'app-account-portfolio-predictors-tab', standalone: false,
   templateUrl: './account-portfolio-predictors-tab.component.html', styleUrls: ['./account-portfolio-predictors-tab.component.css'] })
 export class AccountPortfolioPredictorsTabComponent {
+  readonly tools = viewChild(InventoryToolsComponent);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
@@ -38,6 +40,9 @@ export class AccountPortfolioPredictorsTabComponent {
   readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters()), this.filters().sort));
   readonly tiles = computed(() => buildPredictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(item => item.guid)), computed(() => ({ ...this.filters(), facility: this.navigation.inventoryFacilityGuid() })), this.workspace.canWrite);
+  readonly matchingGuids = computed(() => this.filteredEntries().map(item => item.guid));
+  readonly scopeGuids = computed(() => this.entries().map(item => item.guid));
+  readonly toolsFiltersKey = computed(() => JSON.stringify(this.filters()));
   readonly browseIds = this.inventory.visibleIds;
   clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', type: 'all', sort: 'attention' }); }
   navigateRoute(route: readonly string[]): void { this.navigate([...route]); }

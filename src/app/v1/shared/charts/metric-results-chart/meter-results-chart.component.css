@@ -4,6 +4,8 @@
 
 .v1-meter-results-chart {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: var(--v1-space-3);
   padding: var(--v1-space-4);
   border: 1px solid var(--v1-border);
@@ -73,6 +75,7 @@
 
 .v1-meter-results-chart__chart {
   width: 100%;
+  min-width: 0;
   min-height: var(--v1-metric-chart-height, 24rem);
   background: var(--v1-surface);
 }

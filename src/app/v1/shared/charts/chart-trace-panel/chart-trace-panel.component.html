@@ -1,0 +1,44 @@
+<header class="chart-traces__header">
+  <strong>Traces</strong><span class="chart-traces__count" aria-live="polite">{{ visibleCount() }} / {{ traces().length }} visible</span>
+  <ng-content select="[tracePanelAction]"/>
+</header>
+<p id="chart-traces-help" class="visually-hidden">{{ singleSelection() ? 'Select one predictor to show its saved history.' : 'Use checkboxes to show or hide traces. Double-click a name, or activate the focused name with Enter or Space, to show only that trace or facility. Repeat to show all traces.' }}</p>
+@if (traces().length) {
+  @if (!singleSelection()) { <label class="chart-traces__all"><input type="checkbox" [formControl]="allControl" [indeterminate]="allIndeterminate()">All traces</label> }
+  @if (facilityLabel()) { <p class="chart-traces__facility">{{ facilityLabel() }}</p> }
+  <div class="chart-traces__list">
+    @for (group of groups(); track group.guid) {
+      @if (grouped()) {
+        <section class="chart-traces__group" [attr.aria-label]="group.name">
+          <div class="chart-traces__group-header">
+            @if (!singleSelection()) { <label class="chart-traces__checkbox"><input type="checkbox" [formControl]="group.control" [indeterminate]="group.indeterminate" [attr.aria-label]="'Show traces for ' + group.name"></label> }
+            <button type="button" class="v1-icon-btn chart-traces__disclosure" [attr.aria-expanded]="group.expanded" [attr.aria-controls]="'trace-facility-' + group.guid" [attr.aria-label]="(group.expanded ? 'Collapse ' : 'Expand ') + group.name" (click)="toggleFacility(group.guid)"><app-ui-icon [name]="group.expanded ? 'chevronDown' : 'chevronRight'"/></button>
+            @if (singleSelection()) { <strong class="chart-traces__name chart-traces__group-name">{{ group.name }}</strong> } @else {
+              <button type="button" class="chart-traces__name chart-traces__group-name" [title]="group.name + ' · Double-click to isolate; repeat to show all'" aria-describedby="chart-traces-help" (click)="activateName($event, group.ids)" (dblclick)="isolate(group.ids)">{{ group.name }}</button>
+            }
+            <span class="chart-traces__count">{{ group.visible }}/{{ group.rows.length }}</span>
+          </div>
+          <div [id]="'trace-facility-' + group.guid" [hidden]="!group.expanded">
+            @if (group.expanded) { @for (row of group.rows; track row.trace.id) {
+              <ng-container [ngTemplateOutlet]="traceRow" [ngTemplateOutletContext]="{ $implicit: row }"/>
+            } }
+          </div>
+        </section>
+      } @else {
+        @for (row of group.rows; track row.trace.id) { <ng-container [ngTemplateOutlet]="traceRow" [ngTemplateOutletContext]="{ $implicit: row }"/> }
+      }
+    }
+  </div>
+} @else {
+  <p class="chart-traces__empty" role="status">{{ state() === 'idle' || state() === 'loading' ? 'Preparing traces…' : state() === 'error' ? 'Traces are unavailable.' : 'No traces for this chart.' }}</p>
+}
+<ng-template #traceRow let-row>
+  <div class="chart-traces__row" (mouseenter)="highlighted.emit(row.trace.id)" (mouseleave)="leaveRow($event)" (focusin)="highlighted.emit(row.trace.id)" (focusout)="leaveRow($event)">
+    <label class="chart-traces__checkbox">@if (singleSelection()) {
+      <input type="radio" name="chart-single-trace" [formControl]="singleControl" [value]="row.trace.id" [attr.aria-label]="'Show ' + row.trace.label">
+    } @else { <input type="checkbox" [formControl]="row.control" [attr.aria-label]="'Show ' + row.trace.label"> }</label>
+    <svg width="22" height="14" aria-hidden="true"><line x1="1" x2="21" y1="7" y2="7" [attr.stroke]="row.trace.color" stroke-width="3" [attr.stroke-dasharray]="row.dash"/></svg>
+    <button type="button" class="chart-traces__name" [title]="row.trace.label + (singleSelection() ? ' · Show predictor' : ' · Double-click to isolate; repeat to show all')" [attr.aria-label]="row.trace.label" aria-describedby="chart-traces-help" (click)="activateName($event, row.ids)" (dblclick)="isolate(row.ids)">{{ row.label }}</button>
+  </div>
+</ng-template>
+<p class="chart-traces__hint">{{ singleSelection() ? 'Choose a predictor, or enable Multiple predictors to compare.' : 'Double-click a name to isolate; repeat to show all.' }}</p>

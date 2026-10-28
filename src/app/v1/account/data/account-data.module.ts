@@ -1,3 +1,4 @@
+import { InventoryToolsComponent } from './portfolio/inventory-tools/inventory-tools.component';
 import { AccountInventoryActionsComponent } from './portfolio/account-inventory-actions/account-inventory-actions.component';
 import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
@@ -52,7 +53,7 @@ import { CreateMeterDrawerComponent } from './portfolio/create-meter-drawer/crea
     CreateFacilityDrawerComponent,
     CreateMeterDrawerComponent
   ],
-  imports: [AccountInventoryActionsComponent, InventoryGridComponent, CreatePredictorDrawerComponent, PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
+  imports: [InventoryToolsComponent, AccountInventoryActionsComponent, InventoryGridComponent, CreatePredictorDrawerComponent, PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
     CommonModule,
     MeterDraftSlideoutComponent,
     IconsModule,

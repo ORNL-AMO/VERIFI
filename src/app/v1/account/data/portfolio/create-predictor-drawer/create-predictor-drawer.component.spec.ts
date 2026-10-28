@@ -16,7 +16,9 @@ describe('account Predictor creation', () => {
     const component = fixture.componentInstance, weather = vi.fn(), created = vi.fn();
     component.weatherSelected.subscribe(weather); component.created.subscribe(created);
     component.openWeather(); expect(weather).not.toHaveBeenCalled(); expect(component.canCreate()).toBe(false);
-    component.facilityControl.setValue('f2'); fixture.detectChanges(); component.openWeather(); expect(weather).toHaveBeenCalledWith('f2');
+    expect(component.facilityControl.value).toBe('');
+    fixture.componentRef.setInput('initialFacilityGuid', 'f2'); fixture.detectChanges();
+    expect(component.facilityControl.value).toBe('f2'); component.openWeather(); expect(weather).toHaveBeenCalledWith('f2');
     const draft = { name: 'Production', unit: 'tons', production: true, predictorType: 'Standard' as const };
     await component.create(draft); expect(actions.createPredictor).toHaveBeenCalledWith(draft, 'f2'); expect(created).toHaveBeenCalled();
     facilities.set(facilities().slice(0, 1)); fixture.detectChanges(); expect(component.canCreate()).toBe(false);

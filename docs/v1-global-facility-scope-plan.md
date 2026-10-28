@@ -10,8 +10,9 @@ This document records the agreed target experience and implementation roadmap. I
 | --- | --- | --- |
 | 1 | Header chooser and shared filtering | Complete |
 | 2 | Contextual navigation and workbench journeys | Complete |
-| 3 | Unified inventories and removal of facility dashboards | Not started |
-| 4 | Shared screens for single-facility accounts | Not started |
+| 3 | Shared inventory charts, selection, and creation | Complete |
+| 4 | Dashboard retirement and resource-based folders | Not started |
+| 5 | Single-facility presentation | Not started |
 
 ### Greenfield policy
 
@@ -56,7 +57,7 @@ This policy does not authorize discarding shared application data or changing v0
 - Apply the shared scope to Facilities, Meters, Predictors, Analysis, and Reports. Remove local facility selectors from Meters and Predictors.
 - Under a named facility, hide incompatible account-scope Analysis/Reports controls and prevent remembered account-only filters from silently hiding valid facility items.
 - Validate scope against the committed account workspace. An invalid or deleted inventory facility falls back to All facilities with an explanatory message. Keep item ownership validation separate.
-- Keep current single-facility account routing during the portfolio phases; the shared single-facility presentation lands in Phase 4.
+- Keep current single-facility account routing during the portfolio phases; minimal routing adaptation lands in Phase 4 and single-facility presentation in Phase 5.
 
 ### Phase 1 implementation notes
 
@@ -145,45 +146,120 @@ Phase 2 presentation follow-up: unified facility ownership headers across Meter/
 
 Review fixes: synchronized the meter-creation and facility meter-dashboard Chromium navigation fixtures. Upload now captures and accepts only inventory/workbench return destinations, using the existing fallback for Home, Settings, custom database, or import workflow origins while retaining facility mapping context. Validation passed: 444 fast-spec files / 2,536 tests, 55 Chromium files / 251 tests, application type-check, production web build, and documentation/whitespace checks. Existing build warnings remain.
 
-## Phase 3 — Unified inventories and removal of facility dashboards
+## Phase 3 — Shared inventory capabilities
+
+**Status: Complete**
+
+### Changes
+
+- Unified Meters and Predictors offer the existing chart dock and bottom sheet at All facilities and named facilities. Controls remain visible; empty sources, unavailable calculations, and disabled actions explain their state.
+- Meter charts offer **Facility totals**, **Meter groups** (default), and **Individual meters**. Facility-qualified group/meter labels distinguish owners; each facility has an **Unassigned** series for ungrouped meters. Duplicate labels retain separate GUID identities.
+- Meter and Predictor charts follow the current inventory filters across every page, without a separate source selector. Meter grouping tooltips describe totals as belonging to matching meters.
+- Account energy/water units and site/source settings apply at All facilities; named facilities use their settings. Units remain visible in the chart coverage label. The shared canonical calendarization result is projected once for the chosen source; no per-facility calculation jobs or formula changes are introduced. Metric eligibility, zeros, gaps, conversions, and existing saved precision are preserved.
+- Predictors retain individual saved histories, units, duplicate readings, and gaps. A facility-grouped trace panel selects individual histories by default; an explicit multiple-predictor mode compares raw saved values on one scale, ignoring units. Charts never generate or fetch weather data.
+- Unified chart sheets are nonmodal so the header chooser stays accessible. Charts stay open across facility-scope changes and restore destination-scope grouping, metric/visibility, zoom, and Predictor single/multiple mode in session memory. Bulk selection clears. Inventory filters determine chart demand.
+- Meters and Predictors share bulk selection across inventory pages. Filter or scope changes clear it. Deletion presents one confirmation grouped by facility, with reading counts and predictor-analysis consequences.
+- Account batch commands validate explicit ownership and reviewed snapshots inside one native transaction, roll back the whole selection on failure, and publish one committed workspace reload. Existing single-facility handler contracts remain intact.
+- Named scope prefills Meter/Predictor creation. All facilities requires an explicit facility choice, including one-facility portfolios. Named Analysis/Report creation offers facility-owned items; All facilities retains existing ownership choices.
+- Preserve weather-station navigation, Meter Grouping, Analysis comparison, Report lifecycle actions, Upload, and contextual Data Validation access. Retain old dashboards and current single-facility routing throughout this phase.
+
+### Acceptance and validation
+
+- Exercise all meter groupings and sources across multiple facilities, duplicate names, unassigned meters, mixed units/bases, missing months, zeros, negative values, and filtered subsets. Group totals match the corresponding individual series.
+- Verify chart scope preferences, loading/errors, keyboard navigation, paginated search, narrow layouts, themes, reduced motion, downloads, and print behavior through focused projection/component and Chromium checks.
+- Test atomic cross-facility deletion with real IndexedDB: success and reopening, stale snapshots, foreign ownership, dependency cleanup, and rollback of earlier writes when a later item fails. Verify one command boundary per reviewed selection.
+- Exercise named-scope creation handoffs and pending-save navigation protections; retain shared Analysis/Reports regressions.
+- Run affected tests, the validation planner, full fast/browser suites, application type-check, and production web build. For this pass, Electron testing is explicitly excluded by the user because no Electron boundary changes.
+
+### Phase 3 validation evidence
+
+Completed 2026-10-28. Dashboard removal, routing retirement, folder moves, and single-facility presentation remain outside this pass.
+
+| Check | Result |
+| --- | --- |
+| `npm run validate:agent -- --mode plan` | Passed; affected unit, type-check, and native-browser checks selected |
+| `npm run test:all:ci` | Passed after final review fix: 448 fast-spec files / 2,585 tests; 56 Chromium files / 262 tests |
+| `npx tsc -p tsconfig.app.json --noEmit` | Passed |
+| `npm run build-prod` | Passed; existing Browserslist, stylesheet budget, and CommonJS dependency warnings remain |
+| Chart interaction and presentation | Passed automated and visual checks for scope changes with the header accessible, matching-filter projections, facility-grouped traces, single/multiple Predictor histories, keyboard access, themes/high contrast, 390-pixel layouts, reduced motion, and print suppression |
+| Atomic deletion | Passed native IndexedDB success/reopen, stale preview, foreign ownership, dependency update, and rollback checks; one command boundary per reviewed selection |
+| Documentation and whitespace | 205 local link targets/heading anchors validated; `git diff --check` passed |
+| Electron testing | Excluded by explicit user instruction for this pass; Electron boundaries are unchanged |
+
+The narrow-window check caught chart canvas overflow; the shared chart grid now constrains its column so the canvas resizes to the available width. Obsolete creation expectations and incomplete overlay/focus fixtures were corrected before the final complete suite passed. Shared record shapes, GUID relationships, schema version, calculations, import/backup formats, and v0 command contracts remain unchanged; no migration trigger or migration is needed.
+
+### Inventory selection UI follow-up
+
+- The quiet **Select meters** and **Select predictors** toggles sit before Upload in their page headers, uses an unchecked/checked square icon, and matches the other header actions in height. Selection actions appear in a centered, themed panel; **Select all** retains matching-page eligibility behavior.
+- The routed inventory owns selection state; the header delegates its toggle and derives availability from the inventory projection, avoiding reads of unbound child inputs during route activation. Cancelling or toggling off clears selection; chart demand continues to follow inventory filters.
+- Predictor dashboard parity validation: 31 focused fast tests across four files and 12 Chromium inventory checks passed, including the shared header toggle for both resources, cross-page selection, cancellation, pending-state/empty-scope guards, route changes, themes, and narrow layouts. Application type-check, production web build, documentation links, and whitespace checks passed; the narrow Predictor dashboard was visually reviewed. Existing build warnings remain; Electron validation stays excluded.
+- Batch validation: 30 focused fast tests across four files and 13 Chromium tests across two files passed, along with the application type-check and production web build. Chromium covers header order, button sizing, keyboard toggling, checked icons, selection across pages, cancellation, pending commands, resource changes, empty facility scope, themes/contrast, and 390-pixel layouts. The full-suite evidence above predates this UI-only follow-up. Electron testing remains excluded.
+
+### Meter chart UI follow-up
+
+- Removed the visible context heading/divider, Meter chart source controls and summary, and series search. Energy/Water/Cost and Meter groups/Facility totals/Individual meters now share a right-aligned toolbar with chart actions and dividers between groups. Lines connect data points with straight segments.
+- Meter charts follow current inventory filters across all pages. Predictors now follow this same filtering contract and use the shared trace panel described below.
+- Energy, Water, and Cost choices appear only when the matching meters provide finite monthly samples for that metric; zero and negative values remain valid data. A sole metric displays automatically without metric toggles or their leading divider. Unavailable remembered choices fall back to an available metric, and hiding traces does not remove metric choices. Loading, failure, and no-data states remain distinct.
+- Metric availability validation passed: 35 focused fast tests, four Chromium checks, application type-check, and production web build. Coverage includes all metric combinations, empty/non-finite histories, valid zeros, automatic fallback after filtering, restored controls, and Predictor regressions. Desktop layout was reviewed; existing build and Chromium ResizeObserver warnings remain. Electron validation is excluded.
+- A shell-owned backdrop covers routed content below the actual header boundary. Routed content becomes inert while Meter charts are open; the facility chooser and chart portal remain interactive. Dismissal clears the backdrop/inert state and restores focus after rendering. Print suppresses the backdrop and chart sheet. Other portal owners clear workspace blocking by default.
+- Validation: focused component and Chromium checks protect simplified controls, projection through current filters, straight-line options with three monthly points, toolbar alignment/separators, header facility switching, background inertness, focus return, themes, 390-pixel layouts, print, and modal comparison/Predictor regressions. Passed: 21 focused fast tests across four files, 15 Chromium tests across three files, the application type-check, production web build, documentation links, and whitespace checks. Desktop and narrow screenshots were reviewed. Existing build warnings remain; Electron testing stays excluded.
+
+### Facility-grouped trace browser
+
+- Unified Meter charts now use a collapsible panel on the right with independent scrolling, facility headings, short trace labels, visible counts, and master/facility/trace checkboxes. One-facility views and facility-total charts use flat lists without repeated owner headings. Duplicate facility/trace names remain distinguishable by GUID.
+- Double-clicking a trace or facility name isolates it; Enter/Space on a focused name performs the same action. Repeating isolation restores all traces in the current chart. Collapsing a facility preserves visible lines and checkbox state. Hover/focus highlights an already-visible line without changing values or zoom.
+- Narrow layouts open the browser as a drawer with focus containment, Escape/backdrop dismissal, and focus return. Panel and facility-collapse preferences remain session-only and restore independently per scope.
+- The trace panel fills the remaining height below chart controls, with its own scrolling list. Chevron and close controls use plain icons with keyboard focus outlines. The bottom sheet opts into a bounded flex body for Meter charts; other sheets retain their existing layout.
+- Calculations, shared records, Worker inputs/results, imports, and backup formats are unchanged. Predictors retain saved-history selection. Old facility dashboards are retained for Phase 4.
+- Validation passed: 56 focused tests across five fast-spec files, four Chromium tests across two files, application type-check, and production web build. Coverage includes 24 meters/two facilities, duplicate names, checkbox counts, double-click/keyboard isolation and restoration, paging removal, independent scrolling, scope preferences, hover styling without value/zoom changes, theme contrast, drawer focus/Escape/backdrop behavior, and Predictor regressions. Desktop and 390-pixel drawer screenshots were reviewed after chart animations finished. Documentation links and whitespace checks passed. Existing build warnings remain; Electron testing stays excluded. The height/icon follow-up passed 17 focused tests and four Chromium tests, type-check and web build, with panel-bottom alignment, unboxed controls, and refreshed desktop/narrow screenshots verified.
+
+### Predictor chart consistency follow-up
+
+- Unified Predictor charts use the same full-height facility-grouped trace panel, right-aligned actions, straight lines, header-accessible backdrop, mobile drawer, plain disclosure/close icons, download/zoom, and print behavior as Meters. Removed the chart heading, source selector/summary, history search, and paginated tabs.
+- Single-history mode is the default. Radio choices and name activation select one predictor with its saved unit; unavailable selections fall back to an available history. Empty histories remain selectable and show an explicit empty state.
+- Predictor chart titles and trace labels keep GUIDs internal. Repeated names across facilities need no type suffix; duplicates within one facility use station/type details and a simple ordinal only when those details also match. Record and trace identities remain GUID-based. Label regression validation passed: 22 focused tests, four Chromium checks, and application type-check; existing Chromium ResizeObserver warnings remain.
+- **Multiple predictors** enables checkbox selection, facility/master toggles, and double-click or keyboard isolation. **Units ignored** explicitly marks a shared raw-value scale; original units stay in labels. No unit conversion, normalization, summation, or weather fetching occurs. Month/occurrence alignment preserves duplicate records, zeros, negatives, and missing values.
+- Both resources follow all matching inventory pages, independent of bulk selection. Mode, selected history, multi-trace visibility, facility collapse, panel state, and zoom remain session-only and restore per account/resource/scope. Switching back to single mode preserves the prior history even if it is hidden in multiple mode.
+- Phase 3 review fix: duplicate readings no longer introduce false gaps in other predictors. Explicit alignment padding is omitted from each rendered series while saved null samples still break its line. Category positions, duplicates, raw values, tooltip/value labels, and accessible gap descriptions remain intact. Both new fast regressions failed before the fix and passed afterward; the Chromium regression verifies rendered series, retained gaps, tooltips, and accessible descriptions. Final review has no remaining actionable findings.
+- Shared data, calculations, Worker contracts, imports, backups, v0, and retained facility dashboards are unchanged. Phases 4–5 remain Not started.
+- Validation: 50 focused fast tests across six files and four Chromium checks passed, covering 24 mixed-unit predictors across two facilities, single/multiple selection, raw values, duplicate/gap preservation, scope memory, themes, narrow-drawer focus/Escape, backdrop cleanup, print, and retained dashboard/Meter regressions. Desktop and narrow screenshots were reviewed; application type-check, production web build, documentation links, and whitespace checks passed. Existing build and Chromium ResizeObserver warnings remain. Electron validation stays excluded.
+
+## Phase 4 — Dashboard retirement and resource-based folders
 
 **Status: Not started**
 
 ### Changes
 
-- Preserve facility meter/predictor charts, bulk selection/deletion, creation, upload, and validation shortcuts within unified inventories when a named facility is selected. Reuse existing projections and command handlers.
-- Retain grouping, weather-station navigation, analysis comparison, and report lifecycle behavior. Scope changes clear transient selections and comparison/chart sessions as appropriate so they cannot act on hidden items from the previous scope.
-- Prefill creation with the selected facility. Facility-scoped Analysis/Report creation offers facility-owned items; All facilities retains existing scope choices.
-- After capability parity is verified, delete superseded facility Meters, Predictors, Analysis, and Reports inventory/dashboard components and routes. Do not redirect their former URLs.
-- Update all internal links, breadcrumbs, status destinations, upload returns, and navigation helpers to target the unified workflow directly. Remove obsolete tests and replace their expectations with the new behavior.
-- Retain item workbenches, Meter Grouping, settings, and distinct facility tools. Home overview redesign and implementation of unfinished Energy Uses functionality are outside this effort.
+- Adapt single-facility routing before deletion: unified Meters, Predictors, and Analysis inventories automatically use the sole facility. Preserve hidden analysis pairing and direct workbench entry.
+- Preserve the single-facility Reports exception: account-backed reports remain accessible rather than being excluded by a facility-only filter.
+- After capability parity passes, delete obsolete facility Meters, Predictors, Analysis, and Reports dashboards, their routes, wrappers, providers, and superseded tests. Add no compatibility redirects.
+- Update internal links, status destinations, breadcrumbs, Upload fallbacks/returns, and navigation helpers to use unified inventories. Retain facility-owned workbench, grouping, settings, and tool routes.
+- Organize resource UI under feature roots such as `v1/data/{facilities,meters,predictors,energy-uses,custom-database}`, `v1/analysis`, and `v1/reports`. Place inventories and workbenches with their resource; retain account/facility subdivisions where workflows genuinely differ.
+- Move feature modules, projections, actions, and tests with their owners. Keep `shared` for cross-feature presentation and infrastructure. Leave unrelated Home, Settings, and Imports reorganization outside this cleanup.
+- Perform folder moves after dashboard deletion in separately reviewable commits. Update imports, documentation links, and architectural entry points together; leave no compatibility re-exports. Keep current inventory URLs unless removing an obsolete dashboard route.
 
 ### Acceptance and validation
 
-- Portfolio users browse one inventory per resource, with no intermediate facility inventory dashboard.
-- Existing facility charts, bulk operations, item creation, comparison, and report actions remain available in the appropriate selected-facility context.
-- No internal caller targets a deleted dashboard route, and no compatibility redirect or unused dashboard presentation remains.
-- Test capability parity, contextual creation, scope changes during transient actions, ownership checks, and direct workbench entry.
-- Use browser checks for chart behavior, bulk-action confirmations, guarded exits, upload returns, and the complete inventory-to-workbench journey. Confirm calculations and command semantics remain unchanged.
+- No internal caller, route, module, or test references a deleted dashboard or former folder location.
+- Unified inventories preserve direct workbench entry, guarded navigation, Back/Forward restoration, status links, Upload returns/fallbacks, hidden analysis pairing, and single-facility report access.
+- Run focused routing/module tests, full fast/browser suites, application type-check, and production web build. Check both portfolio and single-facility accounts before retiring their old destinations.
+- Update roadmap, architecture, migration notes, and task context index with final feature entry points and validation evidence.
 
-## Phase 4 — Shared screens for single-facility accounts
+## Phase 5 — Single-facility presentation
 
 **Status: Not started**
 
 ### Changes
 
-- Route valid single-facility accounts through the same inventory components, automatically scoped to their sole facility.
-- Hide redundant account identity, All facilities, facility management, and account-analysis choices. Show the facility/company identity once in the header.
-- Present custom database tools, combined settings, upload, backups, and supported reports with facility-oriented labels. This is a presentation change; retain their underlying ownership.
-- Preserve account records, hidden analysis pairs, and account-backed reports without exposing duplicate account workflows or hiding supported reports.
-- Remove superseded single-site v1 redirects and presentation branches. Preserve invalid-state recovery and conversion to a portfolio; a converted account regains portfolio scope choices and account-level navigation.
+- Complete the previously planned single-facility presentation using shared screens. Remove redundant account/facility choices and duplicate identity while preserving supported custom data, settings, backups, Upload, and reports.
+- Preserve underlying account ownership, hidden analysis pairs, invalid-state recovery, and conversion to a portfolio.
+- Remove remaining obsolete single-site presentation branches. A converted account regains portfolio navigation and scope choices without losing records or relationships.
 
 ### Acceptance and validation
 
-- Single- and multi-facility accounts share inventory screens, with navigation adapted to their capabilities.
 - A valid single-facility account has no redundant scope choice or duplicate account workflow, while all supported settings, custom data, reports, and backups remain accessible.
 - Test hidden analysis pairing, account-backed reports, settings, direct item entry, invalid single-site states, and conversion to a portfolio.
-- Verify that conversion restores portfolio navigation without losing records or relationships.
+- Verify that conversion restores portfolio navigation without losing records or relationships; run focused and full validation appropriate to the changed boundaries.
 
 ## Validation and documentation policy
 
