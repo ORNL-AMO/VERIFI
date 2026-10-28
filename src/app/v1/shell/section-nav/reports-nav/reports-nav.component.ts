@@ -7,6 +7,7 @@ import { reportIcon } from '@app/v1/shared/reports/report-icons';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FACILITY_REPORT_TYPES, buildFacilityReportCard } from '@app/v1/facility/reports/facility-report.models';
 import { buildFacilityReportStages } from '@app/v1/facility/reports/facility-report-workbench/facility-report-workbench.models';
+import { RecentItemsService } from '../recent-items.service';
 
 @Component({
   selector: 'app-reports-nav', standalone: false,
@@ -14,6 +15,7 @@ import { buildFacilityReportStages } from '@app/v1/facility/reports/facility-rep
   styleUrls: ['./reports-nav.component.css']
 })
 export class ReportsNavComponent {
+  readonly recent = inject(RecentItemsService);
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);

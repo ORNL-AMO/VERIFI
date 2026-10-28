@@ -34,7 +34,7 @@ This policy does not authorize discarding shared application data or changing v0
 - **All facilities** shows combined inventories, including account-owned analyses/reports, and exposes account settings and custom database tools.
 - A named facility shows only that facility's items and exposes its item links, meter groups, and facility settings. Account analyses/reports are excluded even when they reference that facility.
 - Facility scope applies across Facilities, Meters, Predictors, Analysis, and Reports. Individual inventories retain local search, status, category, type, sorting, and detail controls, but do not duplicate facility selection.
-- Clearing local filters retains the header selection. Counts and empty states explain the current scope. Facilities appears in the sidebar at All facilities only. The Data section opens Facilities at All facilities; facility-context sidebars contain scoped resources and tools.
+- Clearing local filters retains the header selection. Counts and empty states explain the current scope. Facilities appears in the sidebar at All facilities only. The Data section opens Facilities at All facilities, or scoped Meters when a facility is selected; facility-context sidebars contain scoped resources and tools.
 - Inventory and Settings headers share account → selected facility breadcrumbs with account/facility icons. All facilities/account Settings show only the actionable account name; clicking it clears scope while keeping the corresponding inventory or Settings detail. The sidebar does not repeat the account name.
 - Account-wide backup actions remain explicitly labeled as account-wide.
 
@@ -79,7 +79,7 @@ This policy does not authorize discarding shared application data or changing v0
 
 - Refined the global header alignment and account icon treatment.
 - Account-name clicks now clear facility scope; only the VERIFI brand opens Home.
-- Facilities navigation resets to All facilities, while other inventory links preserve scope.
+- Explicit Facilities navigation resets to All facilities, while the Data rail preserves a named facility and opens Meters. Other inventory links preserve scope.
 - Inventory and Settings page headers share an actionable account breadcrumb and an optional selected-facility breadcrumb, each with its account or facility icon.
 - Removed the redundant sidebar account-name label.
 
@@ -223,6 +223,20 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 - Phase 3 review fix: duplicate readings no longer introduce false gaps in other predictors. Explicit alignment padding is omitted from each rendered series while saved null samples still break its line. Category positions, duplicates, raw values, tooltip/value labels, and accessible gap descriptions remain intact. Both new fast regressions failed before the fix and passed afterward; the Chromium regression verifies rendered series, retained gaps, tooltips, and accessible descriptions. Final review has no remaining actionable findings.
 - Shared data, calculations, Worker contracts, imports, backups, v0, and retained facility dashboards are unchanged. Phases 4–5 remain Not started.
 - Validation: 50 focused fast tests across six files and four Chromium checks passed, covering 24 mixed-unit predictors across two facilities, single/multiple selection, raw values, duplicate/gap preservation, scope memory, themes, narrow-drawer focus/Escape, backdrop cleanup, print, and retained dashboard/Meter regressions. Desktop and narrow screenshots were reviewed; application type-check, production web build, documentation links, and whitespace checks passed. Existing build and Chromium ResizeObserver warnings remain. Electron validation stays excluded.
+
+### Navigation consistency follow-up
+
+- The Data rail preserves effective facility ownership/scope and opens unified Meters for that facility. At All facilities it retains the Facilities portfolio destination; remembered facility hints do not determine the destination.
+- Choosing a facility from the Facilities portfolio opens the filtered Meters inventory, matching facility-card entry. Choosing All facilities there keeps the Facilities portfolio. Other resource inventories retain their destination when scope changes.
+- Existing guarded navigation handles saves, cancellation, failure, and pending transitions before changing the URL or header context. Browser Back restores the originating Facilities portfolio; current single-facility routing remains unchanged.
+- Validation passed: 90 focused fast tests across three files, two Chromium history checks, application type-check, production web build, documentation links/anchors, and whitespace checks. Coverage includes selected and All-facility Data entry, facility-owned workbench exits, chooser destinations, cancellation/failure, independent Predictor navigation, and Back/Forward. Existing web-build warnings remain; no Electron validation was required.
+
+### Account sidebar Recents follow-up
+
+- At All facilities, Analysis and Reports retain their account items grouped by type and add **Recents** for up to five recently opened facility-owned items per section. Item names are primary; a smaller facility icon and label sit beneath them, with full accessible names and title text for truncated labels.
+- History records successful workbench entry, including direct URLs after workspace readiness. Revisits move an item to the top without duplicates; cancelled or failed navigation, inventories, and account workbenches do not add entries. Links use canonical owning-facility workbenches and existing leave guards.
+- History remains session-only and independent per account/resource. Names and ownership resolve from the committed workspace; deleted records/facilities and unavailable report types are omitted. Named-facility sidebars keep their existing resource/stage navigation. No stored-record, backup, schema, calculation, or Electron changes are introduced.
+- Validation passed: 35 focused fast tests across six files and three Chromium checks across two files, plus application type-check, production web build, documentation links/anchors, and whitespace checks. Existing web-build warnings remain; Electron validation is excluded. Coverage includes recency/capping/deduplication, initial readiness, account isolation, live names/deletions, hidden report types, guarded navigation, unchanged account groups, keyboard entry, secondary label hierarchy/contrast, long-name truncation, and narrow layouts. Desktop Analysis and narrow Reports screenshots were reviewed.
 
 ## Phase 4 — Dashboard retirement and resource-based folders
 

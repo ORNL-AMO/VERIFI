@@ -18,11 +18,49 @@ describe('facility scope navigation', () => {
     expect(router.url).not.toContain('?');
   });
 
-  it('clears scope when entering Facilities through the Data section', async () => {
+  it('preserves the named facility when entering Meters through the Data section', async () => {
     const { navigation, router } = await setup('/v1/workspace/account/account-a/analysis/dashboard?facility=facility-b');
     await navigation.openSection('data');
-    expect(router.url).not.toContain('facility=');
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-b');
+    expect(navigation.headerScope()).toEqual({ kind: 'facility', facilityGuid: 'facility-b' });
+  });
+
+  it('keeps Data entry at All facilities independent of remembered facility selection', async () => {
+    const { navigation, router } = await setup('/v1/workspace/account/account-a/analysis/dashboard');
+    await navigation.openSection('data');
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/facilities');
     expect(navigation.headerScope()).toEqual({ kind: 'all' });
+  });
+
+  it('opens scoped Meters when choosing a facility from Facilities and retains other inventory destinations', async () => {
+    const { navigation, router } = await setup('/v1/workspace/account/account-a/data/portfolio/facilities');
+    expect(await navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(true);
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-b');
+    await router.navigateByUrl('/v1/workspace/account/account-a/data/portfolio/facilities');
+    await navigation.changeFacilityScope({ kind: 'all' });
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/facilities');
+    await router.navigateByUrl('/v1/workspace/account/account-a/data/portfolio/predictors?facility=facility-a');
+    await navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' });
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/predictors?facility=facility-b');
+  });
+
+  it('retains the current facility and URL when Data or Facilities chooser navigation is blocked or fails', async () => {
+    const { navigation, router, canLeave } = await setup('/v1/workspace/facility/facility-a/data/meters/meter-a/settings');
+    canLeave.set(false); await navigation.openSection('data');
+    expect(router.url).toBe('/v1/workspace/facility/facility-a/data/meters/meter-a/settings');
+    expect(navigation.headerFacility()?.guid).toBe('facility-a');
+    canLeave.set(true); await navigation.openSection('data');
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-a');
+    await router.navigateByUrl('/v1/workspace/account/account-a/data/portfolio/facilities');
+    const unregister = TestBed.inject(UnsavedChangesService).register(() => false, () => {}, () => true);
+    expect(await navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(false);
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/facilities');
+    expect(navigation.headerScope()).toEqual({ kind: 'all' });
+    unregister();
+    vi.spyOn(router, 'navigate').mockRejectedValueOnce(new Error('Navigation failed'));
+    expect(await navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(false);
+    expect(navigation.headerScope()).toEqual({ kind: 'all' });
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/facilities');
   });
 
   it('resolves copied URLs and normalizes foreign or deleted facilities only after workspace readiness', async () => {

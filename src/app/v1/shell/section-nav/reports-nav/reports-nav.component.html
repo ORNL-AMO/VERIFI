@@ -6,6 +6,7 @@
   <span id="reports-nav-title" class="v1-nav__label">{{ facilityGuid ? 'Facility Reports' : 'Reports' }}</span>
   @if (account) {
     <a class="v1-nav__link" [class.active]="!active" [attr.aria-current]="!active ? 'page' : null" [routerLink]="inventory.route" [queryParams]="inventory.queryParams"><app-ui-icon name="reports"></app-ui-icon>Dashboard</a>
+    @if (!facilityGuid && recent.reports().length) { <app-recent-items-nav section="reports" [items]="recent.reports()"/> }
     @for (group of reportGroups(); track group.id) {
       <section class="v1-nav__report-section" [attr.aria-labelledby]="'reports-nav-' + group.id + '-title'">
         <span class="v1-nav__sublabel" [id]="'reports-nav-' + group.id + '-title'">{{ group.label }}</span>

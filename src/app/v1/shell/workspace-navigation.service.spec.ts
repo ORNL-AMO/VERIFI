@@ -799,8 +799,9 @@ describe('WorkspaceNavigationService', () => {
       'account',
       'account-a',
       'data',
-      'portfolio'
-    ], { queryParams: {} });
+      'portfolio',
+      'meters'
+    ], { queryParams: { facility: 'facility-a' } });
   });
 
   it('keeps the active rail section when toggling between account and facility contexts', async () => {

@@ -37,6 +37,8 @@ export async function setupFacilityScopeNavigation(url = '/v1/workspace/account/
         { path: 'imports/upload', component: ScopeDestination }
       ] },
       { path: 'v1/workspace/facility/:facilityGuid/data/meters/:guid/settings', component: ScopeDestination, canDeactivate: [() => canLeave()] },
+      { path: 'v1/workspace/facility/:facilityGuid/analysis/workbench/:guid/:stage', component: ScopeDestination, canDeactivate: [() => canLeave()] },
+      { path: 'v1/workspace/facility/:facilityGuid/reports/workbench/:guid/setup', component: ScopeDestination, canDeactivate: [() => canLeave()] },
       { path: 'v1/workspace/facility/:facilityGuid/settings/:detail', component: ScopeDestination }
     ]),
     { provide: AccountWorkspaceStore, useValue: store },

@@ -15,9 +15,10 @@ import { DataNavComponent } from './data-nav/data-nav.component';
 import { ImportsNavComponent } from './imports-nav/imports-nav.component';
 import { AnalysisNavComponent } from './analysis-nav/analysis-nav.component';
 import { ResourceNavGroupComponent } from './resource-nav-group/resource-nav-group.component';
+import { RecentItemsNavComponent } from './recent-items-nav/recent-items-nav.component';
 
 @NgModule({
-  declarations: [ReportsNavComponent, SectionNavComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent],
+  declarations: [ReportsNavComponent, SectionNavComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent, RecentItemsNavComponent],
   imports: [CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent, StatusEvaluationMessageComponent],
   exports: [SectionNavComponent]
 })

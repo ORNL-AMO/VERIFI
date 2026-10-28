@@ -324,6 +324,7 @@ export class WorkspaceNavigationService {
       route = this.facilityDataRoute(facilityGuid, 'meter-grouping'); query = {};
     } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
     else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
+    else if (state.portfolioTab === 'facilities' && facilityGuid) route = this.accountPortfolioRoute(account.guid, 'meters');
     else {
       const tab = state.portfolioTab ?? (state.detail === 'predictors' ? 'predictors'
         : state.detail === 'meters' || state.detail === 'meter-grouping' ? 'meters' : 'facilities');
@@ -426,9 +427,10 @@ export class WorkspaceNavigationService {
     if (!this.isSingleSiteWorkspace() && ['data', 'analysis', 'reports'].includes(sectionId)) {
       const account = this.account();
       if (account) {
-        const route = sectionId === 'data' ? this.accountDataRoute(account.guid)
+        const scope = this.headerScope();
+        const route = sectionId === 'data' ? scope.kind === 'facility' ? this.accountPortfolioRoute(account.guid, 'meters') : this.accountDataRoute(account.guid)
           : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : this.accountReportsRoute(account.guid);
-        await this.navigateScopeDestination(route, sectionId === 'data' ? {} : facilityScopeQuery(this.headerScope()));
+        await this.navigateScopeDestination(route, facilityScopeQuery(scope));
       }
       return;
     }

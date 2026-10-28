@@ -17,6 +17,7 @@ import { analysisCategories } from '@app/v1/shared/analysis-category/analysis-ca
 
 import type { AnalysisNavigationStage } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';
 import { buildAnalysisNavGroups } from '../models';
+import { RecentItemsService } from '../recent-items.service';
 interface AnalysisNavigation { readonly guid: string; readonly name: string; readonly steps: readonly AnalysisNavigationStage[]; }
 
 @Component({
@@ -26,6 +27,7 @@ interface AnalysisNavigation { readonly guid: string; readonly name: string; rea
   standalone: false
 })
 export class AnalysisNavComponent {
+  readonly recent = inject(RecentItemsService);
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   readonly status = inject(WorkspaceStatusService);

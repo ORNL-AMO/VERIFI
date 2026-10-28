@@ -16,6 +16,7 @@
       <app-ui-icon name="analysis"></app-ui-icon>
       Dashboard
     </a>
+    @if (!selectedFacility && recent.analyses().length) { <app-recent-items-nav section="analysis" [items]="recent.analyses()"/> }
     @if ((contextMode === 'facility' && selectedFacility) || contextMode === 'account') {
       @let workflow = selectedFacility ? activeAnalysisNavigation() : activeAccountAnalysisNavigation();
       @let groups = analysisGroups();
