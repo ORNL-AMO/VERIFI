@@ -8,7 +8,6 @@ import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { getIncludedMeters } from "../shared-calculations/calculationsHelpers";
-import { ConvertValue } from "../conversions/convertValue";
 import { AssessmentReportVersion, IdbAccount } from "@data/models/idbModels/account";
 import { IdbFacility } from "@data/models/idbModels/facility";
 import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
@@ -17,6 +16,7 @@ import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import { IdbPredictor } from "@data/models/idbModels/predictor";
 import { IdbAccountAnalysisItem } from "@data/models/idbModels/accountAnalysisItem";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
+import { convertBetterPlantsAnnualSummary } from "./betterPlantsReportHelpers";
 
 export class BetterPlantsReportClass {
 
@@ -143,10 +143,10 @@ export class BetterPlantsReportClass {
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAccountAnalysisSummaryClass.getAnnualAnalysisSummaries();
         //report
         this.reportYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportYear });
-        this.reportYearAnalysisSummary = this.convertAnnualAnalysisSummary(this.reportYearAnalysisSummary, accountAnalysisItem);
+        this.reportYearAnalysisSummary = convertBetterPlantsAnnualSummary(this.reportYearAnalysisSummary, accountAnalysisItem);
         //baseline
         this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == baselineYear });
-        this.baselineYearAnalysisSummary = this.convertAnnualAnalysisSummary(this.baselineYearAnalysisSummary, accountAnalysisItem);
+        this.baselineYearAnalysisSummary = convertBetterPlantsAnnualSummary(this.baselineYearAnalysisSummary, accountAnalysisItem);
     }
 
     //Energy
@@ -219,21 +219,4 @@ export class BetterPlantsReportClass {
         }
     }
 
-    convertAnnualAnalysisSummary(summary: AnnualAnalysisSummary, analysisItem: IdbAccountAnalysisItem): AnnualAnalysisSummary {
-        let startingUnit: string = analysisItem.energyUnit;
-        let neededUnits: 'MMBtu' | 'kgal' = 'MMBtu';
-        if (analysisItem.analysisCategory == 'water') {
-            neededUnits = 'kgal';
-            startingUnit = analysisItem.waterUnit;
-        }
-        summary.energyUse = new ConvertValue(summary.energyUse, startingUnit, neededUnits).convertedValue;
-        summary.adjusted = new ConvertValue(summary.adjusted, startingUnit, neededUnits).convertedValue
-        summary.baselineAdjustmentForNormalization = new ConvertValue(summary.baselineAdjustmentForNormalization, startingUnit, neededUnits).convertedValue
-        summary.baselineAdjustmentForOtherV2 = new ConvertValue(summary.baselineAdjustmentForOtherV2, startingUnit, neededUnits).convertedValue
-        summary.baselineAdjustment = new ConvertValue(summary.baselineAdjustment, startingUnit, neededUnits).convertedValue
-        summary.savings = new ConvertValue(summary.savings, startingUnit, neededUnits).convertedValue
-        summary.cummulativeSavings = new ConvertValue(summary.cummulativeSavings, startingUnit, neededUnits).convertedValue
-        summary.newSavings = new ConvertValue(summary.newSavings, startingUnit, neededUnits).convertedValue
-        return summary;
-    }
 }
