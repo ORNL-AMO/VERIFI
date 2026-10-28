@@ -42,7 +42,7 @@ export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route,
     facilities[0].guid,
     store.accountAnalyses()
   );
-  return router.createUrlTree(commands);
+  return commands ? router.createUrlTree(commands) : true;
 };
 
 export function accountHomeCommands(accountGuid: string): Array<string> {
@@ -57,23 +57,26 @@ export function singleSiteRedirectCommands(
   state: RouterStateSnapshot,
   facilityGuid: string,
   accountAnalyses: readonly IdbAccountAnalysisItem[] = []
-): Array<string> {
+): Array<string> | undefined {
   const parts = accountRouteParts(state);
   const section = parts[3];
   const detail = parts[4];
+  const accountGuid = parts[2];
 
   if (section === 'settings') {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail || 'profile'];
   }
   if (section === 'data') {
     const tab = detail === 'portfolio' ? parts[5] : undefined;
-    const facilityDetail = isCustomDataDetail(detail) ? detail
-      : tab === 'predictors' || tab === 'energy-uses' ? tab : 'meters';
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', facilityDetail];
+    if (detail === 'portfolio' && (tab === 'meters' || tab === 'predictors')) return undefined;
+    if (isCustomDataDetail(detail) || tab === 'energy-uses') {
+      return ['/v1', 'workspace', 'facility', facilityGuid, 'data', tab === 'energy-uses' ? tab : detail];
+    }
+    return ['/v1', 'workspace', 'account', accountGuid, 'data', 'portfolio', 'meters'];
   }
   if (section === 'analysis') {
     if (detail !== 'workbench') {
-      return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
+      return detail === 'dashboard' ? undefined : ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
     }
     const pair = accountAnalyses.find(item => item.guid === parts[5]);
     const facilityAnalysisGuid = pair?.facilityAnalysisItems?.length === 1
@@ -81,7 +84,7 @@ export function singleSiteRedirectCommands(
         ? pair.facilityAnalysisItems[0].analysisItemId
         : undefined;
     if (!facilityAnalysisGuid) {
-      return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
+      return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
     }
     return facilityAnalysisWorkbenchCommands(parts, facilityGuid, facilityAnalysisGuid);
   }

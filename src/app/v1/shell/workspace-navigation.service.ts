@@ -187,6 +187,8 @@ export class WorkspaceNavigationService {
   readonly inventoryScope = computed<FacilityScope>(() => {
     const state = this.routeState();
     if (!this.isAccountInventory(state) || this.workspace.status() !== 'ready' || state.accountGuid !== this.workspace.account()?.guid) return ALL_FACILITIES;
+    if (this.isSingleSiteWorkspace()) return state.section === 'reports' ? ALL_FACILITIES
+      : { kind: 'facility', facilityGuid: this.facilities()[0].guid };
     const guid = this.router.parseUrl(this.currentUrl()).queryParamMap.get('facility');
     return guid && this.facilities().some(facility => facility.guid === guid && facility.accountId === state.accountGuid)
       ? { kind: 'facility', facilityGuid: guid } : ALL_FACILITIES;
@@ -207,7 +209,7 @@ export class WorkspaceNavigationService {
     return scope.kind === 'facility' ? this.facilities().find(facility => facility.guid === scope.facilityGuid) : undefined;
   });
   readonly inventoryScopeQuery = computed(() => facilityScopeQuery(this.inventoryScope()));
-  readonly effectiveScope = computed<FacilityScope>(() => this.isSingleSiteWorkspace() && this.contextMode() === 'account'
+  readonly effectiveScope = computed<FacilityScope>(() => this.isSingleSiteWorkspace() && this.contextMode() === 'account' && this.activeSection() === 'reports'
     ? ALL_FACILITIES : this.headerScope());
   readonly contextFacility = computed(() => {
     const scope = this.effectiveScope();
@@ -389,12 +391,10 @@ export class WorkspaceNavigationService {
   }
 
   facilityInventoryLink(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): { route: string[]; queryParams?: Params } {
-    if (this.isSingleSiteWorkspace()) return { route: resource === 'analysis' ? this.facilityAnalysisRoute(facilityGuid)
-      : resource === 'reports' ? this.facilityReportsRoute(facilityGuid) : this.facilityDataRoute(facilityGuid, resource) };
     const accountGuid = this.workspace.account()?.guid ?? '';
     return { route: resource === 'analysis' ? this.accountAnalysisRoute(accountGuid)
       : resource === 'reports' ? this.accountReportsRoute(accountGuid) : this.accountPortfolioRoute(accountGuid, resource),
-      queryParams: { facility: facilityGuid } };
+      queryParams: this.isSingleSiteWorkspace() ? {} : { facility: facilityGuid } };
   }
 
   readonly contextNavigationError = signal('');
@@ -424,54 +424,19 @@ export class WorkspaceNavigationService {
       await this.navigateScopeDestination(facility ? this.facilitySettingsRoute(facility.guid, detail) : this.accountSettingsRoute(account.guid, detail));
       return;
     }
-    if (!this.isSingleSiteWorkspace() && ['data', 'analysis', 'reports'].includes(sectionId)) {
+    if (['data', 'analysis', 'reports'].includes(sectionId)) {
       const account = this.account();
       if (account) {
         const scope = this.headerScope();
         const route = sectionId === 'data' ? scope.kind === 'facility' ? this.accountPortfolioRoute(account.guid, 'meters') : this.accountDataRoute(account.guid)
           : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : this.accountReportsRoute(account.guid);
-        await this.navigateScopeDestination(route, facilityScopeQuery(scope));
+        await this.navigateScopeDestination(route, this.isSingleSiteWorkspace() ? {} : facilityScopeQuery(scope));
       }
       return;
     }
     const contextMode = this.contextMode();
     if (sectionId === 'home') {
       await this.setContext(contextMode);
-      return;
-    }
-    if (sectionId === 'data') {
-      if (contextMode === 'facility') {
-        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-        if (facilityGuid) {
-          await this.navigateScopeDestination(this.facilityDataRoute(facilityGuid));
-        }
-        return;
-      }
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        await this.navigateScopeDestination(this.accountDataRoute(accountGuid));
-      }
-      return;
-    }
-    if (sectionId === 'reports') {
-      const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (contextMode === 'facility' && facilityGuid) await this.navigateScopeDestination(this.facilityReportsRoute(facilityGuid));
-      else if (accountGuid) await this.navigateScopeDestination(this.accountReportsRoute(accountGuid));
-      return;
-    }
-    if (sectionId === 'analysis') {
-      if (contextMode === 'facility') {
-        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-        if (facilityGuid) {
-          await this.navigateScopeDestination(this.facilityAnalysisRoute(facilityGuid));
-        }
-        return;
-      }
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        await this.navigateScopeDestination(this.accountAnalysisRoute(accountGuid));
-      }
       return;
     }
   }

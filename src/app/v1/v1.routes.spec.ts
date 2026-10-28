@@ -514,7 +514,7 @@ function tabRoute(path: string): Route {
 class ReportsRouteTestComponent { }
 
 describe('single-facility workspace route boundaries', () => {
-  it('redirects direct Data entries and child navigation from account exceptions, retaining Upload context', async () => {
+  it('keeps single-site shared inventories on account routes while retaining Upload context', async () => {
     const account = signal({ guid: 'account-a', isSingleFacilityCompany: true });
     const facilities = signal([{ guid: 'facility-a', accountId: 'account-a' }]);
     const accountRoute = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
@@ -538,7 +538,7 @@ describe('single-facility workspace route boundaries', () => {
     const accountBase = '/v1/workspace/account/account-a';
     const facilityBase = '/v1/workspace/facility/facility-a';
     await harness.navigateByUrl(`${accountBase}/data/portfolio/predictors`);
-    expect(router.url).toBe(`${facilityBase}/data/predictors`);
+    expect(router.url).toBe(`${accountBase}/data/portfolio/predictors`);
     for (const exception of [
       'reports/dashboard',
       'imports/upload?facilityGuid=facility-a&returnUrl=%2Fv1%2Fworkspace%2Ffacility%2Ffacility-a%2Fdata%2Fmeters',
@@ -547,11 +547,11 @@ describe('single-facility workspace route boundaries', () => {
       await harness.navigateByUrl(`${accountBase}/${exception}`);
       expect(router.url).toBe(`${accountBase}/${exception}`);
       await harness.navigateByUrl(`${accountBase}/data/portfolio/meters`);
-      expect(router.url).toBe(`${facilityBase}/data/meters`);
+      expect(router.url).toBe(`${accountBase}/data/portfolio/meters`);
     }
     await harness.navigateByUrl(`${accountBase}/reports/dashboard`);
     await harness.navigateByUrl(`${accountBase}/analysis/dashboard`);
-    expect(router.url).toBe(`${facilityBase}/analysis/dashboard`);
+    expect(router.url).toBe(`${accountBase}/analysis/dashboard`);
     account.set({ guid: 'account-a', isSingleFacilityCompany: false });
     await harness.navigateByUrl(`${accountBase}/data/portfolio/predictors`);
     expect(router.url).toBe(`${accountBase}/data/portfolio/predictors`);

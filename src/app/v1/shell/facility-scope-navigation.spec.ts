@@ -63,6 +63,24 @@ describe('facility scope navigation', () => {
     expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/facilities');
   });
 
+  it('implicitly scopes single-site Data/Analysis while preserving combined account Reports', async () => {
+    const { navigation, store, router, fixture } = await setup();
+    const snapshot = store.snapshot()!;
+    store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true }, facilities: snapshot.facilities.slice(0, 1) });
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(navigation.inventoryFacilityGuid()).toBe('facility-a');
+    expect(navigation.contextFacility()?.guid).toBe('facility-a');
+    expect(navigation.facilityInventoryLink('facility-a', 'meters')).toEqual({ route: navigation.accountPortfolioRoute('account-a', 'meters'), queryParams: {} });
+    await navigation.openSection('analysis');
+    expect(router.url).toBe('/v1/workspace/account/account-a/analysis/dashboard');
+    expect(navigation.inventoryFacilityGuid()).toBe('facility-a');
+    await navigation.openSection('reports');
+    expect(router.url).toBe('/v1/workspace/account/account-a/reports/dashboard');
+    expect(navigation.inventoryFacilityGuid()).toBeUndefined(); expect(navigation.contextFacility()).toBeUndefined();
+    await navigation.openSection('data');
+    expect(router.url).toBe('/v1/workspace/account/account-a/data/portfolio/meters');
+  });
+
   it('resolves copied URLs and normalizes foreign or deleted facilities only after workspace readiness', async () => {
     const { navigation, router, store, fixture } = await setup('/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-b');
     expect(navigation.inventoryFacilityGuid()).toBe('facility-b');

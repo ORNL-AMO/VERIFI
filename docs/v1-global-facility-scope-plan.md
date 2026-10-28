@@ -11,7 +11,7 @@ This document records the agreed target experience and implementation roadmap. I
 | 1 | Header chooser and shared filtering | Complete |
 | 2 | Contextual navigation and workbench journeys | Complete |
 | 3 | Shared inventory charts, selection, and creation | Complete |
-| 4 | Dashboard retirement and resource-based folders | Not started |
+| 4 | Dashboard retirement and resource-based folders | In progress |
 | 5 | Single-facility presentation | Not started |
 
 ### Greenfield policy
@@ -240,7 +240,7 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 
 ## Phase 4 — Dashboard retirement and resource-based folders
 
-**Status: Not started**
+**Status: In progress**
 
 ### Changes
 
@@ -258,6 +258,11 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 - Unified inventories preserve direct workbench entry, guarded navigation, Back/Forward restoration, status links, Upload returns/fallbacks, hidden analysis pairing, and single-facility report access.
 - Run focused routing/module tests, full fast/browser suites, application type-check, and production web build. Check both portfolio and single-facility accounts before retiring their old destinations.
 - Update roadmap, architecture, migration notes, and task context index with final feature entry points and validation evidence.
+
+### Implementation progress
+
+- Shared Meters, Predictors, and Analysis now derive valid single-facility scope without a query parameter. Reports retains the combined account inventory; invalid single-facility recovery and hidden-analysis workbench handoffs remain intact.
+- Focused routing/navigation checks cover section propagation, guarded transitions, and the Reports exception. Dashboard retirement and resource moves follow in separate commits.
 
 ## Phase 5 — Single-facility presentation
 

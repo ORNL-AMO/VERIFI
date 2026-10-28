@@ -455,3 +455,7 @@ Shared account/facility presentation lives under the v1 shared analysis-results 
 - Before opening the develop foundation PR, run `npm run test:ci`, `npm run test:browser:ci`, `npm run build-prod`, and `npm run build-prod-electron`.
 - After merging the foundation into `unified-ux`, verify legacy routes, `/p1`, and `/v1`.
 - For each future v1 workflow, add focused tests for changed behavior. Add browser tests when IndexedDB, File APIs, or Workers are involved, and Electron validation when renderer or desktop behavior changes.
+
+### Phase 4 shared inventory routing
+
+Valid single-facility accounts now use unified Meters, Predictors, and Analysis inventories with implicit sole-facility scope. Reports retains combined account/facility content. Hidden analysis pairs and guarded workbench handoffs remain unchanged; zero/multiple-facility recovery never selects an arbitrary facility. Dashboard retirement and feature moves are tracked in the [scope roadmap](v1-global-facility-scope-plan.md#phase-4--dashboard-retirement-and-resource-based-folders).
