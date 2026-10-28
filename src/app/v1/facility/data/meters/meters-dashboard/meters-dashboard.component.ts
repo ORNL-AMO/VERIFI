@@ -122,6 +122,7 @@ export class MetersDashboardComponent implements OnDestroy {
     const entries = this.filteredMeterCards();
     const snapshots = buildMeterSnapshots(entries.map(entry => ({ meter: entry.card.meter, facility, card: entry.card, evaluation: this.workspace.statusState() })), this.workspace.meterData(), this.navigation);
     return entries.map(entry => ({ guid: entry.card.meter.guid, name: entry.card.meter.name, icon: entry.card.sourceIcon || 'meter',
+      owner: { label: facility.name, facilityGuid: facility.guid, ...this.navigation.facilityInventoryLink(facility.guid, 'meters') },
       route: this.navigation.facilityMeterRoute(facility.guid, entry.card.meter.guid, 'settings'), chip: entry.card.meter.source,
       status: { tone: entry.tone, icon: entry.statusIcon, label: entry.statusLabel }, meterSnapshot: snapshots.get(entry.card.meter.guid) }));
   });

@@ -1,3 +1,4 @@
+import type { Params } from '@angular/router';
 import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import type { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import type { IdbPredictor } from '@data/models/idbModels/predictor';
@@ -14,6 +15,7 @@ export interface NavigationLink {
   readonly label: string;
   readonly icon: IconName;
   readonly route: readonly string[];
+  readonly queryParams?: Params;
   readonly active: boolean;
   readonly attention?: StatusAttentionSummary;
   readonly outputs?: readonly { readonly guid: string; readonly label: string; readonly icon: IconName }[];

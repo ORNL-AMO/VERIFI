@@ -1,6 +1,6 @@
 import type { InventoryDetailLevel } from '@app/v1/shared/inventory/inventory.models';
 export type PortfolioResource = 'facilities' | 'meters' | 'predictors';
-export interface PortfolioInventoryView { readonly page: number; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; }
+export interface PortfolioInventoryView { readonly page: number; readonly detail?: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; }
 export type {
   InventoryDetailLevel as PortfolioDetailLevel,
   InventoryTileLink as PortfolioTileLink,

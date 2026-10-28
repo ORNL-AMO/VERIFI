@@ -26,6 +26,13 @@ export function inventoryWorkspace(count = 3) {
     weatherStationGroups: computed(() => buildWeatherStationGroups(predictors(), predictorReadings(), [], state() === 'ready')) };
 }
 export const inventoryNavigation = {
+  uploadQuery: () => ({}),
+  accountSettingsRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'account', guid, 'settings', detail],
+  facilitySettingsRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'settings', detail],
+  facilityInventoryLink(facilityGuid: string, resource: string): { route: string[]; queryParams?: { facility: string } } {
+    return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+      : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
+  },
   inventoryFacilityGuid: () => undefined as string | undefined,
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
   isSingleSiteWorkspace: signal(false),

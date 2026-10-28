@@ -32,6 +32,10 @@ describe('meter workbench facts in Chromium', () => {
       { provide: WorkspaceStatusService, useValue: { state: signal('ready'), meterFindings: () => [] } },
       { provide: WorkspaceNavigationService, useValue: {
         isSingleSiteWorkspace: signal(false),
+        facilityInventoryLink(facilityGuid: string, resource: string) {
+              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+                : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
+            },
         accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'meters'],
         facilityDataRoute: (guid: string) => ['/v1', 'workspace', 'facility', guid, 'data', 'meters']
       } }

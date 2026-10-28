@@ -26,7 +26,7 @@ describe('ReportsNavComponent', () => {
           { guid: 'factors', name: 'Factors report', facilityReportType: 'emissionFactors', facilityId: 'facility-a', accountId: 'account-a' }
         ])
       } }, { provide: WorkspaceNavigationService, useValue: {
-        inventoryScopeQuery: () => ({}), account: signal({ guid: 'account-a' }), routeState: signal({ facilityGuid: 'facility-a' }), activeReportGuid: active,
+        contextFacility: () => ({ guid: 'facility-a' }), contextAnalyses: () => [], facilityInventoryLink: () => ({ route: ['/reports/dashboard'] }), inventoryScopeQuery: () => ({}), account: signal({ guid: 'account-a' }), routeState: signal({ facilityGuid: 'facility-a' }), activeReportGuid: active,
         contextMode: signal('facility'), isSingleSiteWorkspace: signal(true),
         facilityReportsRoute: () => ['/reports/dashboard'], accountReportsRoute: () => ['/account/reports/dashboard'],
         facilityReportWorkbenchRoute: (_facility: string, guid: string) => ['/reports/workbench', guid, 'setup']
@@ -79,7 +79,7 @@ describe('ReportsNavComponent', () => {
       { provide: AccountWorkspaceStore, useValue: store },
       { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]) } },
       { provide: WorkspaceNavigationService, useValue: {
-        inventoryScopeQuery: () => ({}), account: store.account, routeState: signal({ accountGuid: 'account-a' }), contextMode: signal('account'), activeReportGuid: active,
+        contextFacility: () => undefined, inventoryScopeQuery: () => ({}), account: store.account, routeState: signal({ accountGuid: 'account-a' }), contextMode: signal('account'), activeReportGuid: active,
         accountReportsRoute: () => ['/account/reports/dashboard'],
         accountReportWorkbenchRoute: (_account: string, guid: string) => ['/account/reports/workbench', guid, 'setup']
       } }

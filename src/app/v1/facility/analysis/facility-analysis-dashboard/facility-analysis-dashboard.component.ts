@@ -160,7 +160,7 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   }
   private tile(entry: AnalysisInventoryEntry, withResults = true) {
     return analysisInventoryTile(entry, withResults ? this.results.states()[entry.card.analysis.guid] : undefined, this.workspace.meterGroups(), this.navigation,
-      this.workspace.account()?.guid ?? '', this.workspace.statusState(), this.showCategory(), false);
+      this.workspace.account()?.guid ?? '', this.workspace.statusState(), this.showCategory());
   }
   clearFilters(): void { this.filtersForm.reset({ search: '', category: 'all', status: 'all', sort: 'attention' }); }
   async navigateRoute(route: readonly string[]): Promise<void> {

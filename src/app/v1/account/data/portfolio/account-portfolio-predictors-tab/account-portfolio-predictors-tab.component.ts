@@ -23,7 +23,7 @@ export class AccountPortfolioPredictorsTabComponent {
     status: new FormControl<PredictorStatusFilter>('all', { nonNullable: true }), sort: new FormControl<PredictorInventorySort>('attention', { nonNullable: true })
   });
   readonly browseKey = computed<BrowseKey<'predictors'> | undefined>(() => {
-    const account = this.workspace.account(); return account ? { kind: 'predictors', accountGuid: account.guid } : undefined;
+    const account = this.workspace.account(); return account ? { kind: 'predictors', facilityGuid: this.navigation.inventoryFacilityGuid(), accountGuid: account.guid } : undefined;
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready());

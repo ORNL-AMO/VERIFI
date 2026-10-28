@@ -60,6 +60,10 @@ describe('PredictorWorkbenchComponent', () => {
           provide: WorkspaceNavigationService,
           useValue: {
             isSingleSiteWorkspace: signal(false),
+            facilityInventoryLink(facilityGuid: string, resource: string) {
+              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+                : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
+            },
             accountDataReturnRoute: () => ['/account', 'portfolio'],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: (_facility: string, predictor: string, tab: string) => ['/predictors', predictor, tab],
@@ -174,6 +178,10 @@ describe('PredictorWorkbenchComponent', () => {
           provide: WorkspaceNavigationService,
           useValue: {
             isSingleSiteWorkspace: signal(false),
+            facilityInventoryLink(facilityGuid: string, resource: string) {
+              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+                : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
+            },
             accountDataReturnRoute: () => [],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: () => []

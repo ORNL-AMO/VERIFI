@@ -4,7 +4,7 @@
     <nav class="v1-data-workbench-breadcrumb" [attr.aria-label]="breadcrumbLabel()"><ol>
       @for (crumb of breadcrumbs(); track $index) {
         @if (!$first) { <li aria-hidden="true"><app-ui-icon name="chevronRight"/></li> }
-        <li [attr.aria-current]="$last ? 'page' : null">@if (crumb.route) { <a [routerLink]="crumb.route">{{ crumb.label }}</a> } @else {<span>{{ crumb.label }}</span>}</li>
+        <li [attr.aria-current]="$last ? 'page' : null">@if (crumb.route) { <a [routerLink]="crumb.route" [queryParams]="crumb.queryParams">{{ crumb.label }}</a> } @else {<span>{{ crumb.label }}</span>}</li>
       }
     </ol></nav>
     <div class="v1-data-workbench-title-row">

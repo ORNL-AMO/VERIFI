@@ -1,9 +1,9 @@
 import { Component, input, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Params, RouterLink } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 
-export interface PageBreadcrumb { readonly label: string; readonly route?: readonly string[]; readonly action?: string; readonly icon?: IconName; }
+export interface PageBreadcrumb { readonly label: string; readonly route?: readonly string[]; readonly queryParams?: Params; readonly action?: string; readonly icon?: IconName; }
 
 export function inventoryScopeBreadcrumbs(accountName: string, facilityName?: string): readonly PageBreadcrumb[] {
   return [{ label: accountName, action: 'account', icon: 'account' }, ...(facilityName ? [{ label: facilityName, icon: 'facility' as const }] : [])];

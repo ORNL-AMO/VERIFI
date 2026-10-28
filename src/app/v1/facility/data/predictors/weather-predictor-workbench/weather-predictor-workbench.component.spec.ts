@@ -81,6 +81,10 @@ describe('WeatherPredictorWorkbenchComponent', () => {
           provide: WorkspaceNavigationService,
           useValue: {
             isSingleSiteWorkspace: signal(false),
+            facilityInventoryLink(facilityGuid: string, resource: string) {
+              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+                : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
+            },
             accountDataReturnRoute: () => ['/account', 'data'],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: (_facility: string, predictor: string, tab: string) =>

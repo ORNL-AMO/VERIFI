@@ -38,6 +38,7 @@ describe('Unified account Analysis dashboard', () => {
       { provide: AccountAnalysisWorkspaceService, useValue: { account, entries, categories, facilities: signal([inventoryFacility(), inventoryFacility('facility-b')]), workspaceState: state, workspaceError: signal(undefined), statusState: signal('ready'), canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), statusItems: signal([]), facilityInputs: signal({ meterGroups: [], meters: [], meterData: [], predictorData: [] }), facilityAnalyses: signal(entries().flatMap(e => e.scope === 'facility' ? [e.card.analysis] : [])) } },
       { provide: AccountAnalysisActionsService, useValue: actions }, { provide: FacilityAnalysisActionsService, useValue: facilityActions },
       { provide: WorkspaceNavigationService, useValue: { routeState: route, inventoryFacilityGuid: signal<string | undefined>(undefined), headerFacility: () => undefined,
+        changeFacilityScope: vi.fn(), facilityInventoryLink: (guid: string) => ({ route: ['/analyses'], queryParams: { facility: guid } }),
         accountAnalysisWorkbenchRoute: (_a: string, id: string) => ['/account-analysis', id], accountAnalysisRoute: () => ['/analyses'],
         facilityAnalysisWorkbenchRoute: (f: string, id: string) => ['/facility', f, 'analysis', id], facilityAnalysisRoute: (f: string) => ['/facility', f, 'analysis'] } },
       { provide: ModalPortalService, useValue: modal }
@@ -88,12 +89,14 @@ describe('Unified account Analysis dashboard', () => {
   it('defaults to simple mixed cards with explicit ownership/reporting and no duplicate active strip', () => {
     const root = fixture.nativeElement;
     expect(root.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(5);
-    expect(root.textContent).toContain('Account analysis'); expect(root.textContent).toContain('Facility analysis');
+    expect(root.querySelector('h1')?.textContent.trim()).toBe('Analysis');
+    expect(root.textContent).toContain('Account analysis');
+    expect(root.querySelector('[data-analysis-scope="facility"] app-inventory-card-header')?.textContent).toContain('Plant');
     expect(root.textContent).toContain('Active for account reporting'); expect(root.textContent).toContain('Active for facility reporting');
     expect(root.querySelector('app-active-summary-card')).toBeNull();
     expect(root.querySelector('[data-analysis-scope="account"] .portfolio-tile__owner')).toBeNull();
-    expect(root.querySelector('[data-analysis-scope="facility"] .portfolio-tile__analysis-scope .portfolio-tile__owner')).toBeNull();
-    expect(root.querySelector('[data-analysis-scope="facility"] .portfolio-tile__ownership .portfolio-tile__owner')?.textContent).toContain('Plant');
+    expect(root.querySelector('[data-analysis-scope="facility"] .portfolio-tile__analysis-scope .portfolio-tile__owner')).not.toBeNull();
+    expect(root.querySelector('[data-analysis-scope="facility"] .portfolio-tile__ownership .portfolio-tile__owner')).toBeNull();
     for (const tile of root.querySelectorAll('.portfolio-inventory .portfolio-tile')) {
       expect(tile.querySelectorAll('.portfolio-tile__analysis-scope app-ui-icon')).toHaveLength(1);
       expect(tile.querySelectorAll('.portfolio-tile__heading > app-ui-icon')).toHaveLength(1);
@@ -182,10 +185,11 @@ describe('Unified account Analysis dashboard', () => {
     expect(host.inventory.page()).toBe(2); expect(host.resultDemand()).toHaveLength(7);
     entries.update(all => all.slice(0, 25)); fixture.detectChanges(); expect(host.inventory.page()).toBe(1);
   });
-  it('opens the owning workbench and owning facility route without selecting a facility', async () => {
+  it('opens the owning workbench and filters the inventory through facility header links', async () => {
     fixture.componentInstance.open(entries()[2]); expect(navigate).toHaveBeenCalledWith(['/facility', 'facility-a', 'analysis', 'facility-a-energy']);
-    const link = fixture.nativeElement.querySelector('.portfolio-tile__owner[href="/facility/facility-a/analysis"]') as HTMLAnchorElement;
-    link.click(); expect(navigate).toHaveBeenCalledWith(['/facility', 'facility-a', 'analysis']);
+    const link = fixture.nativeElement.querySelector('.portfolio-tile__owner[href="/analyses?facility=facility-a"]') as HTMLAnchorElement;
+    link.click(); expect(TestBed.inject(WorkspaceNavigationService).changeFacilityScope).toHaveBeenCalledExactlyOnceWith({ kind: 'facility', facilityGuid: 'facility-a' });
+    expect(navigate).toHaveBeenCalledTimes(1);
   });
   it('opens comparison from a card, preserves slot order, and rejects incompatible pairs', () => {
     const host = fixture.componentInstance;

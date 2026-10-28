@@ -57,7 +57,7 @@ export class MeterGroupWorkbenchComponent {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account.name || 'Account', route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name || 'Facility', route: this.navigation.facilityDataRoute(facility.guid, 'meter-grouping') }) : [];
+      { label: facility.name || 'Facility', ...(this.navigation.isSingleSiteWorkspace() ? { route: this.navigation.facilityDataRoute(facility.guid, 'meter-grouping') } : this.navigation.facilityInventoryLink(facility.guid, 'meters')) }) : [];
   });
 
   constructor() {

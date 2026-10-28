@@ -43,7 +43,7 @@ describe('compact Predictor dashboard', () => {
     const { fixture, component, portal } = dashboardFixture(50);
     expect(component.visible()).toHaveLength(24); expect(component.matching()).toHaveLength(50);
     expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(24);
-    expect(component.tiles().every(tile => !tile.owner)).toBe(true);
+    expect(component.tiles().every(tile => tile.owner?.label === component.breadcrumbs().at(-1)?.label)).toBe(true);
     component.detailControl.setValue('summary'); component.setTileDetail({ guid: 'p1', level: 'detailed' }); fixture.detectChanges();
     expect(component.detail()).toBe('summary'); expect(component.overrides()).toEqual({ p1: 'detailed' });
     component.startSelection(); component.selectAll(); expect(component.selected()).toHaveLength(50);
@@ -85,7 +85,6 @@ describe('compact Predictor dashboard', () => {
     expect(returned.componentInstance.currentPage()).toBe(2); expect(returned.componentInstance.detail()).toBe('summary');
     expect(returned.componentInstance.overrides()).toEqual({ p1: 'detailed' }); expect(returned.componentInstance.chartView().metric).toBe('p49');
     expect(returned.componentInstance.zoom()).toEqual({ start: 10, end: 70 }); expect(returned.componentInstance.selecting()).toBe(false);
-    expect(TestBed.inject(BrowseStateService).origin('account')).toBe('facilities');
   });
   it('preserves saved card state through transient workspace unloading and prunes deleted overrides after a committed load', () => {
     const { fixture, component, workspace } = dashboardFixture(50);

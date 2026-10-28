@@ -16,7 +16,7 @@ export class FacilityReportWorkbenchComponent {
   readonly editor = inject(FacilityReportAutosaveService);
   readonly breadcrumbs = computed(() => [
     { label: `${this.context.workspace.account()?.name || 'Account'} Reports`, route: this.context.navigation.accountReportsRoute(this.context.workspace.account()?.guid ?? '') },
-    { label: `${this.context.facility()?.name || 'Facility'} Reports`, route: this.context.dashboardRoute() },
+    { label: `${this.context.facility()?.name || 'Facility'} Reports`, ...this.context.navigation.facilityInventoryLink(this.context.facility()?.guid ?? '', 'reports') },
     { label: this.context.report()?.name || 'Untitled facility report' }
   ]);
   readonly facts = computed(() => this.context.card()?.view.factSections.flatMap(section => section.facts.map(fact => ({ label: fact.label, value: fact.valueLabel }))) ?? []);

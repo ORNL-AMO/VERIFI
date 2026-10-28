@@ -19,7 +19,7 @@ export class AccountPortfolioMetersTabComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
-  private readonly navigation = inject(WorkspaceNavigationService);
+  readonly navigation = inject(WorkspaceNavigationService);
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
     status: new FormControl<PortfolioMeterStatusFilter>('all', { nonNullable: true }),
@@ -27,7 +27,7 @@ export class AccountPortfolioMetersTabComponent {
   });
   readonly browseKey = computed<BrowseKey<'meters'> | undefined>(() => {
     const account = this.workspace.account();
-    return account ? { accountGuid: account.guid, kind: 'meters' } : undefined;
+    return account ? { accountGuid: account.guid, kind: 'meters', facilityGuid: this.navigation.inventoryFacilityGuid() } : undefined;
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready());

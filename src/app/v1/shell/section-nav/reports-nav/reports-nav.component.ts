@@ -24,11 +24,16 @@ export class ReportsNavComponent {
       && item.facilityId === state.facilityGuid && item.accountId === this.workspace.account()?.guid
       && reportTypeAvailable(item.facilityReportType, this.workspace.account()?.displayEmissions));
     return report ? buildFacilityReportStages(report, state.reportStage ?? 'setup',
-      buildFacilityReportCard(report, this.workspace.selectedFacilityAnalyses(), this.status.items(), this.status.state()).status) : [];
+      buildFacilityReportCard(report, this.navigation.contextAnalyses(), this.status.items(), this.status.state()).status) : [];
+  });
+  readonly inventoryLink = computed(() => {
+    const facility = this.navigation.contextFacility();
+    return facility ? this.navigation.facilityInventoryLink(facility.guid, 'reports')
+      : { route: this.navigation.accountReportsRoute(this.navigation.account()?.guid ?? ''), queryParams: {} };
   });
   readonly reportGroups = computed(() => {
     const accountGuid = this.workspace.account()?.guid;
-    const facilityGuid = this.navigation.routeState().facilityGuid;
+    const facilityGuid = this.navigation.contextFacility()?.guid;
     const reports = (facilityGuid
       ? this.workspace.facilityReports().filter(report => report.facilityId === facilityGuid && report.accountId === accountGuid)
         .map(report => ({ guid: report.guid, name: report.name || 'Untitled facility report', type: report.facilityReportType, icon: reportIcon(report),

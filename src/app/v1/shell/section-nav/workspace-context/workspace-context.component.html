@@ -1,10 +1,5 @@
 @let account = navigation.account();
 
-@let accountReturn = navigation.accountReturn();
-@if (accountReturn) {
-  <a class="v1-nav__account-return" [routerLink]="accountReturn.route"><app-ui-icon name="arrowLeft"/><span>{{ accountReturn.label }}</span></a>
-}
-
 @if (hasSingleSiteRecovery() && account) {
   <section class="v1-nav__recovery v1-alert v1-alert--warning" aria-labelledby="v1-single-site-recovery-title">
     <app-ui-icon name="warning"></app-ui-icon>

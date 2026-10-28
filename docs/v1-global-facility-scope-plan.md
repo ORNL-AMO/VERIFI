@@ -9,7 +9,7 @@ This document records the agreed target experience and implementation roadmap. I
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Header chooser and shared filtering | Complete |
-| 2 | Contextual navigation and workbench journeys | Not started |
+| 2 | Contextual navigation and workbench journeys | Complete |
 | 3 | Unified inventories and removal of facility dashboards | Not started |
 | 4 | Shared screens for single-facility accounts | Not started |
 
@@ -33,7 +33,7 @@ This policy does not authorize discarding shared application data or changing v0
 - **All facilities** shows combined inventories, including account-owned analyses/reports, and exposes account settings and custom database tools.
 - A named facility shows only that facility's items and exposes its item links, meter groups, and facility settings. Account analyses/reports are excluded even when they reference that facility.
 - Facility scope applies across Facilities, Meters, Predictors, Analysis, and Reports. Individual inventories retain local search, status, category, type, sorting, and detail controls, but do not duplicate facility selection.
-- Clearing local filters retains the header selection. Counts and empty states explain the current scope. Entering Facilities through the sidebar or the Data section resets scope to All facilities.
+- Clearing local filters retains the header selection. Counts and empty states explain the current scope. Facilities appears in the sidebar at All facilities only. The Data section opens Facilities at All facilities; facility-context sidebars contain scoped resources and tools.
 - Inventory and Settings headers share account → selected facility breadcrumbs with account/facility icons. All facilities/account Settings show only the actionable account name; clicking it clears scope while keeping the corresponding inventory or Settings detail. The sidebar does not repeat the account name.
 - Account-wide backup actions remain explicitly labeled as account-wide.
 
@@ -103,25 +103,47 @@ Sandbox test/build aborts were resolved by running outside the sandbox. A later 
 
 ## Phase 2 — Contextual navigation and workbench journeys
 
-**Status: Not started**
+**Status: Complete**
 
 ### Changes
 
 - Derive sidebar context from the shared scope and active item ownership rather than account-versus-facility route shape alone.
-- Under a named facility, show its meters, predictors/weather stations, analyses, reports, Meter Grouping, Energy Uses, and facility settings. Inventory parent links open unified filtered inventories; item links retain their workbench destinations.
+- Under a named facility, show its meters, predictors/weather stations, analyses, reports, Meter Grouping, Energy Uses, and facility settings; omit the Facilities sidebar item. Inventory parent links open unified filtered inventories; item links retain their workbench destinations.
 - Under All facilities, expose account settings and custom fuels, grid factors, and GWPs. Portfolio users choose All facilities to access these account-wide tools.
 - Make support-panel counts, findings, and section navigation follow the same effective context while retaining existing section-specific status rules.
-- Extend browse restoration keys to include account, inventory kind, and facility scope. Preserve the originating All facilities journey independently from the facility ownership displayed inside a workbench.
+- Key filters, pages, detail level, overrides, scroll, and focus by account, inventory kind, and facility scope for session restoration. Existing saved detail preferences seed unvisited scopes. Preserve the originating All facilities journey independently from the facility ownership displayed inside a workbench.
 - Centralize guarded context-change navigation and publish context only after successful navigation. Preserve existing autosave, discard, and save-failure protections.
 - Preserve upload mapping behavior, pass the selected facility as initial context, and return to the originating inventory. Keep upload mapping query parameters distinct from the new inventory scope parameter.
 
 ### Acceptance and validation
 
 - Header, sidebar, content, and support panel agree on the current context, including a filtered inventory rendered on an account route.
-- Opening an item from All facilities shows its owning facility; returning restores the original list and focused item.
+- Opening an item from All facilities shows its owning facility. Browser Back restores the original list and focused item; account/facility breadcrumbs open the matching unfiltered/owner-filtered inventory without a new generic Return link.
 - Switching facility from each workbench opens the corresponding filtered inventory after pending edits are handled.
 - Test successful, cancelled, failed, and rapid navigation; browser Back/Forward; settings transitions; upload returns; and missing focus-target fallback.
 - Preserve report-to-analysis and account-to-facility inspection returns without changing report or analysis ownership.
+
+### Phase 2 implementation and validation evidence
+
+- Effective-context projections drive the sidebar, support panel, and Settings entry from committed GUID ownership. Portfolio inventory parent links target account screens with scope; valid single-site routing and the account Reports exception remain intact.
+- Account workbench breadcrumbs open the unfiltered matching inventory; facility breadcrumbs open its owner-filtered inventory. Meter groups use Meters, and Browser Back restores the exact source. The account-global last-Data-inventory shortcut and the sidebar account-return link were removed; regular sidebar resource links retain facility scope and breadcrumbs provide account-wide destinations. Specialized report/analysis returns remain unchanged.
+- All five inventories use account/inventory/facility session keys. Filters project before view hydration, preserving remembered pages, detail, overrides, scroll, and focus across scope switches. Existing saved display preferences seed unseen scopes.
+- Upload entry carries initial facility context and a scoped source return URL through the existing mapping/session boundaries. Completion accepts only existing validated account/facility destinations.
+
+| Check | Result |
+| --- | --- |
+| Risk-based validation planner | Reviewed the complete Phase 2 diff. |
+| Fast suite (`npm run test:ci`) | Passed: 443 files, 2,509 tests. |
+| Chromium suite (`npm run test:browser:ci`) | Passed: 54 files, 248 tests. Includes query-only Back/Forward restoration, focus/deletion fallback, keyboard, themes, narrow windows, reduced motion, print, guarded workbench creation/exits, and import journeys. |
+| Application type-check | Passed (`npx tsc -p tsconfig.app.json --noEmit`). |
+| Production web build | Passed (`npm run build-prod`); existing untouched CSS-budget and dependency CommonJS warnings remain. |
+| Documentation and whitespace | Updated roadmap, architecture, and migration links/anchors validated; `git diff --check` passed. |
+
+No Electron boundary changed; no Electron production build or separate interactive desktop walkthrough was performed. Automated UI evidence comes from Chromium. Shared persisted data and v0 contracts are unchanged.
+
+Phase 2 presentation follow-up: unified facility ownership headers across Meter/Predictor/Analysis/Report cards, stronger ownership colors, border-aligned inner corners, and concise Analysis/Reports page titles. Facility header links now filter the current inventory through guarded scope navigation, with filtered inventory URLs for native modified-click navigation; card titles retain workbench drill-in. Focused validation passed: 66 fast-spec files / 450 tests, four Chromium files / 25 tests, application type-check, production web build, and visual inspection of narrow cards with long facility names. Chromium covers corner settings, all palettes and contrast modes, keyboard menus, inventory journeys, reduced motion, and print. Existing CSS-budget and dependency warnings remain. Facility portfolio cards open unified Meters filtered to their facility; their expanded resource links open scoped Meters/Predictors. Card header filtering follow-up passed 46 focused fast-spec files / 376 tests and four Chromium files / 36 tests, plus application type-check and production web build. Guarded owner-link tests cover each resource, modified clicks, cancellation, and navigation failure; browser tests cover in-place Analysis/Reports filtering. Facility portfolio/sidebar follow-up passed 34 focused fast-spec files / 285 tests, two Chromium files / 15 tests, application type-check, and production web build. This includes guarded facility-card title/resource navigation, omission of Facilities in facility context, and browse restoration.
+
+Review fixes: synchronized the meter-creation and facility meter-dashboard Chromium navigation fixtures. Upload now captures and accepts only inventory/workbench return destinations, using the existing fallback for Home, Settings, custom database, or import workflow origins while retaining facility mapping context. Validation passed: 444 fast-spec files / 2,536 tests, 55 Chromium files / 251 tests, application type-check, production web build, and documentation/whitespace checks. Existing build warnings remain.
 
 ## Phase 3 — Unified inventories and removal of facility dashboards
 

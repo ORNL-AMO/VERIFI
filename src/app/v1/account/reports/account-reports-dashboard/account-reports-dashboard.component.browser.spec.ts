@@ -92,6 +92,16 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
   fixture.detectChanges();
 }
 describe('report inventory browser journeys and presentation', () => {
+  it('filters the unified Reports inventory when a card facility header is selected', async () => {
+    const view = setup(3); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    const link = view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__header-owner')!;
+    const facilityGuid = new URL(link.href).searchParams.get('facility')!;
+    expect(facilityGuid).toBeTruthy(); link.click(); await settle(view.fixture);
+    expect(view.router.url).toBe(`${dashboardUrl}?facility=${facilityGuid}`);
+    expect(view.dashboard().filteredEntries().length).toBeGreaterThan(0);
+    expect(view.dashboard().filteredEntries().every(entry => entry.scope === 'facility' && entry.facilityGuid === facilityGuid)).toBe(true);
+    view.fixture.destroy();
+  });
   let database: IndexedDbTestHarness | undefined;
   afterEach(async () => { await database?.destroy(); database = undefined; });
   it('confirms deletion from invalid Setup, returns to Reports, and preserves other reports and source analyses in IndexedDB', async () => {
@@ -407,8 +417,9 @@ describe('report inventory browser journeys and presentation', () => {
         expect(scope.right).toBeCloseTo(bounds.right - parseFloat(getComputedStyle(tile).borderRightWidth), 0);
         expect(tile.textContent).toContain('Report content pending');
         if (tile.dataset['reportScope'] === 'facility') {
-          expect(!!tile.querySelector('app-inventory-card-header .portfolio-tile__owner')).toBe(level !== 'simple');
-          expect(!!tile.querySelector('.portfolio-tile__ownership .portfolio-tile__owner')).toBe(level === 'simple');
+          expect(tile.querySelector('app-inventory-card-header .portfolio-tile__owner')).not.toBeNull();
+          expect(tile.querySelector('.portfolio-tile__ownership .portfolio-tile__owner')).toBeNull();
+          expect(tile.querySelector('app-inventory-card-header .portfolio-tile__owner')).not.toBeNull();
         }
       }
     }

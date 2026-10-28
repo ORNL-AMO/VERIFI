@@ -28,6 +28,7 @@ describe('portfolio facility projections', () => {
     expect(filterPortfolioFacilities(views, '', 'error', 'attention')).toEqual([]);
     expect(filterPortfolioFacilities(views, '', 'attention', 'attention').map(view => view.facility.guid)).toEqual(['beta']);
     const tiles = facilityTiles(views, source, {
+      facilityInventoryLink: (guid, resource) => ({ route: ['/account', 'data', resource], queryParams: { facility: guid } }),
       facilityDataRoute: (guid, detail) => ['/facility', guid, 'data', detail],
       facilityMeterRoute: (guid, meter, tab) => ['/facility', guid, 'meters', meter, tab],
       facilityPredictorRoute: (guid, predictor, tab) => ['/facility', guid, 'predictors', predictor, tab]

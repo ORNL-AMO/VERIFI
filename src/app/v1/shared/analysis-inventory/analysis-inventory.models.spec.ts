@@ -7,6 +7,7 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 
 const filters: BrowseFilters['analyses'] = { search: '', scope: 'all', category: 'all', status: 'all', sort: 'attention' };
 const navigation = {
+  facilityInventoryLink: (guid: string) => ({ route: ['/account', 'analysis'], queryParams: { facility: guid } }),
   accountAnalysisWorkbenchRoute: (account: string, guid: string) => ['/account', account, guid],
   accountAnalysisRoute: (account: string) => ['/account', account],
   facilityAnalysisWorkbenchRoute: (facility: string, guid: string) => ['/facility', facility, guid],

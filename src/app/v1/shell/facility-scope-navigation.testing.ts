@@ -7,6 +7,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { reportFacility, reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
 import { inventoryScopeChangeGuard } from './inventory-scope-change.guard';
 
@@ -22,6 +23,7 @@ export async function setupFacilityScopeNavigation(url = '/v1/workspace/account/
   store.publish(snapshot, { facility: reportFacility });
   const canLeave = signal(true);
   const workspaceService = { selectFacility: vi.fn() };
+  const status = { state: signal('ready'), items: signal<StatusItem[]>([]), accountTodos: signal<StatusItem[]>([]), discardedItems: signal<StatusItem[]>([]) };
   TestBed.configureTestingModule({ imports: [ScopeHost], providers: [
     provideRouter([
       { path: 'v1', component: ScopeDestination },
@@ -31,7 +33,8 @@ export async function setupFacilityScopeNavigation(url = '/v1/workspace/account/
         { path: 'analysis/dashboard', component: ScopeDestination, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
         { path: 'reports/dashboard', component: ScopeDestination, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
         { path: 'analysis/workbench/:guid/setup', component: ScopeDestination, canDeactivate: [() => canLeave()] },
-        { path: 'settings/:detail', component: ScopeDestination }
+        { path: 'settings/:detail', component: ScopeDestination },
+        { path: 'imports/upload', component: ScopeDestination }
       ] },
       { path: 'v1/workspace/facility/:facilityGuid/data/meters/:guid/settings', component: ScopeDestination, canDeactivate: [() => canLeave()] },
       { path: 'v1/workspace/facility/:facilityGuid/settings/:detail', component: ScopeDestination }
@@ -39,11 +42,11 @@ export async function setupFacilityScopeNavigation(url = '/v1/workspace/account/
     { provide: AccountWorkspaceStore, useValue: store },
     { provide: AccountWorkspaceService, useValue: workspaceService },
     { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [snapshot.account] } },
-    { provide: WorkspaceStatusService, useValue: {} }
+    { provide: WorkspaceStatusService, useValue: status }
   ] });
   const navigation = TestBed.inject(WorkspaceNavigationService);
   const router = TestBed.inject(Router);
   const fixture = TestBed.createComponent(ScopeHost); fixture.detectChanges();
   await router.navigateByUrl(url); fixture.detectChanges(); await fixture.whenStable();
-  return { store, router, navigation, fixture, workspaceService, canLeave };
+  return { store, router, navigation, fixture, workspaceService, canLeave, status };
 }

@@ -1,5 +1,5 @@
 import type { ReportInventoryFilters } from '@app/v1/shared/reports/report-inventory.models';
-import { DestroyRef, Injectable, Signal, effect, inject, signal, untracked } from '@angular/core';
+import { DestroyRef, Injectable, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import type { InventoryDetailLevel } from '@app/v1/shared/inventory/inventory.models';
 import { Observable } from 'rxjs';
 import type { PredictorInventoryFilters } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.models';
@@ -22,8 +22,7 @@ export type BrowseKind = keyof BrowseFilters;
 export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; }
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
 export interface FacilityPredictorBrowseView { readonly page: number; readonly detail: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; readonly chartGuid?: string; readonly zoom: { start: number; end: number }; }
-export type AccountBrowseOrigin = 'facilities' | 'meters' | 'predictors';
-export type InventoryBrowseKind = AccountBrowseOrigin | 'analyses' | 'facilityAnalyses' | 'reports' | 'facilityReports';
+export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'analyses' | 'facilityAnalyses' | 'reports' | 'facilityReports';
 export interface FacilityMeterBrowseView { readonly page: number; readonly zoom: { start: number; end: number }; readonly detail?: InventoryDetailLevel; readonly overrides?: Readonly<Record<string, InventoryDetailLevel>>; }
 
 /** UI-only journey state. Nothing is written to storage or domain records. */
@@ -34,9 +33,6 @@ export class BrowseStateService {
   private readonly facilityViews = new Map<string, FacilityMeterBrowseView>();
   private readonly predictorViews = new Map<string, FacilityPredictorBrowseView>();
   private readonly inventoryViews = new Map<string, PortfolioInventoryView>();
-  private readonly origins = signal<ReadonlyMap<string, AccountBrowseOrigin>>(new Map());
-  origin(accountGuid: string): AccountBrowseOrigin { return this.origins().get(accountGuid) ?? 'facilities'; }
-  setOrigin(accountGuid: string, kind: AccountBrowseOrigin): void { this.origins.update(current => new Map(current).set(accountGuid, kind)); }
   readFilters<K extends BrowseKind>(key: BrowseKey<K>): BrowseFilters[K] | undefined { return this.filters.get(this.id(key)) as BrowseFilters[K] | undefined; }
   saveFilters<K extends BrowseKind>(key: BrowseKey<K>, value: BrowseFilters[K]): void { this.filters.set(this.id(key), { ...value }); }
   readPosition(key: BrowseKey): BrowsePosition | undefined { return this.positions.get(this.id(key)); }
@@ -47,10 +43,10 @@ export class BrowseStateService {
   savePredictorView(key: BrowseKey<'facilityPredictors'>, value: FacilityPredictorBrowseView): void { this.predictorViews.set(this.id(key), { ...value, zoom: { ...value.zoom }, overrides: { ...value.overrides } }); }
   readInventoryView(key: BrowseKey<InventoryBrowseKind>): PortfolioInventoryView | undefined {
     const value = this.inventoryViews.get(this.id(key));
-    return value ? { page: value.page, overrides: { ...value.overrides } } : undefined;
+    return value ? { ...value, overrides: { ...value.overrides } } : undefined;
   }
   saveInventoryView(key: BrowseKey<InventoryBrowseKind>, value: PortfolioInventoryView): void {
-    this.inventoryViews.set(this.id(key), { page: value.page, overrides: { ...value.overrides } });
+    this.inventoryViews.set(this.id(key), { ...value, overrides: { ...value.overrides } });
   }
   private id(key: BrowseKey): string { return JSON.stringify([key.accountGuid, key.kind, key.facilityGuid ?? '']); }
 }
@@ -81,5 +77,12 @@ export function rememberBrowseForm<K extends BrowseKind>(key: Signal<BrowseKey<K
     });
   });
   destroy.onDestroy(() => { if (previous) store.saveFilters(previous, form.getRawValue()); subscription.unsubscribe(); });
-  return value.asReadonly();
+  // Project the destination filters synchronously so view hydration never sees
+  // the previous scope's criteria and resets a restored page on the next effect.
+  return computed(() => {
+    const current = value();
+    const next = key();
+    return JSON.stringify(previous) === JSON.stringify(next) ? current
+      : next ? { ...defaults, ...store.readFilters(next) } : defaults;
+  });
 }

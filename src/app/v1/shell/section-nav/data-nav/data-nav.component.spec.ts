@@ -9,6 +9,15 @@ describe('DataNavComponent', () => {
   let state: ReturnType<typeof setupSectionNavTest>;
   beforeEach(() => { state = setupSectionNavTest(); });
 
+  it('omits Facilities in facility context while preserving its scoped resource links', () => {
+    state.activeSection.set('data'); state.activeDetail.set('meter-grouping');
+    state.contextMode.set('facility'); state.selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    const fixture = TestBed.createComponent(DataNavComponent); fixture.detectChanges();
+    const links = [...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('a')];
+    expect(links.some(link => link.textContent?.trim() === 'Facilities')).toBe(false);
+    expect(links.find(link => link.textContent?.trim() === 'Meters')?.getAttribute('href')).toContain('facility=facility-a');
+  });
+
   it('clears facility scope on the Facilities link while retaining it for resource inventories', () => {
     const navigation = TestBed.inject(WorkspaceNavigationService);
     vi.spyOn(navigation, 'inventoryScopeQuery').mockReturnValue({ facility: 'facility-b' });

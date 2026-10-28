@@ -1,7 +1,8 @@
 import { Component, computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, FormGroup } from '@angular/forms';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BrowseKey, BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
+import { BrowseFilters, BrowseKey, BrowseStateService, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { PortfolioInventoryState } from './portfolio-inventory-state';
 import { PortfolioResource } from './portfolio-inventory.models';
 import { portfolioTile } from './portfolio-inventory.testing';
@@ -16,7 +17,37 @@ class InventoryStateHost {
   readonly state = new PortfolioInventoryState(this.key, this.visible, computed(() => this.all().map(item => item.guid)), this.filter, this.loaded);
 }
 
+@Component({ standalone: true, template: '' })
+class ScopedInventoryHost {
+  readonly facilityGuid = signal<string | undefined>(undefined);
+  readonly key = computed<BrowseKey<'facilities'>>(() => ({ kind: 'facilities', accountGuid: 'a', facilityGuid: this.facilityGuid() }));
+  readonly form = new FormGroup({ search: new FormControl('', { nonNullable: true }),
+    status: new FormControl<BrowseFilters['facilities']['status']>('all', { nonNullable: true }),
+    sort: new FormControl<BrowseFilters['facilities']['sort']>('facilityName', { nonNullable: true }) });
+  readonly filters = rememberBrowseForm(this.key, this.form);
+  readonly tiles = signal(Array.from({ length: 60 }, (_, index) => portfolioTile(String(index))));
+  readonly state = new PortfolioInventoryState(this.key, this.tiles, computed(() => this.tiles().map(tile => tile.guid)), this.filters, signal(true));
+}
+
 describe('account inventory session state', () => {
+  it('restores each scope’s filters, page, detail and exceptions together without a hydration reset', () => {
+    TestBed.configureTestingModule({ imports: [ScopedInventoryHost], providers: [{ provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }] });
+    const fixture = TestBed.createComponent(ScopedInventoryHost); fixture.detectChanges();
+    const host = fixture.componentInstance, state = host.state;
+    host.form.controls.search.setValue('All view'); fixture.detectChanges();
+    state.detailControl.setValue('summary'); state.selectPage(2); state.setTileDetail({ guid: '50', level: 'detailed' });
+    host.facilityGuid.set('facility-a'); fixture.detectChanges();
+    expect(host.filters().search).toBe(''); expect(state.page()).toBe(0);
+    host.form.controls.search.setValue('Plant A view'); fixture.detectChanges();
+    state.detailControl.setValue('detailed'); state.selectPage(1);
+    host.facilityGuid.set('facility-b'); fixture.detectChanges();
+    expect(host.filters().search).toBe(''); expect(state.page()).toBe(0);
+    host.facilityGuid.set('facility-a'); fixture.detectChanges();
+    expect(host.filters().search).toBe('Plant A view'); expect(state.page()).toBe(1); expect(state.detail()).toBe('detailed');
+    host.facilityGuid.set(undefined); fixture.detectChanges();
+    expect(host.filters().search).toBe('All view'); expect(state.page()).toBe(2); expect(state.detail()).toBe('summary');
+    expect(state.overrides()).toEqual({ '50': 'detailed' });
+  });
   function setup() {
     TestBed.configureTestingModule({ imports: [InventoryStateHost], providers: [{ provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }] });
     const fixture = TestBed.createComponent(InventoryStateHost); fixture.detectChanges(); return fixture;

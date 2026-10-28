@@ -6,6 +6,22 @@ describe('SectionNavComponent', () => {
   let state: ReturnType<typeof setupSectionNavTest>;
   beforeEach(() => { state = setupSectionNavTest(); });
 
+  it('keeps Meters scoped to the owning facility without an account-return shortcut in Meter Grouping', () => {
+    state.contextMode.set('facility');
+    state.selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    state.activeSection.set('data'); state.activeDetail.set('meter-grouping');
+    state.activeMeterGroupGuid.set('group-a');
+    state.facilityMeterGroups.set([{ guid: 'group-a', name: 'Group A' }]);
+    const fixture = TestBed.createComponent(SectionNavComponent); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const meters = [...root.querySelectorAll<HTMLAnchorElement>('.v1-nav__link')]
+      .find(link => link.textContent?.trim() === 'Meters')!;
+    expect(meters.getAttribute('href')).toBe('/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-a');
+    expect(root.textContent).not.toContain('Account Meters');
+    expect(root.querySelector('app-workspace-context a')).toBeNull();
+    expect(root.querySelector('[aria-current="page"]')?.textContent).toContain('Group A');
+  });
+
   it('shows home navigation only when the Home rail section is active', () => {
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();

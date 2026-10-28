@@ -64,7 +64,7 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
   readonly browseKey = computed<BrowseKey<'analyses'> | undefined>(() => {
     const account = this.workspace.account();
     return account && this.workspace.workspaceState() === 'ready' && account.guid === this.navigation.routeState().accountGuid
-      ? { kind: 'analyses', accountGuid: account.guid } : undefined;
+      ? { kind: 'analyses', accountGuid: account.guid, facilityGuid: this.navigation.inventoryFacilityGuid() } : undefined;
   });
   private readonly rememberedFilters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly scopedFacilityGuid = this.navigation.inventoryFacilityGuid;
@@ -132,7 +132,7 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
   })));
   readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account',
     this.workspace.facilities().find(facility => facility.guid === this.scopedFacilityGuid())?.name));
-  readonly title = computed(() => `${this.navigation.headerFacility()?.name || this.workspace.account()?.name || 'Account'} Analysis`);
+  readonly title = 'Analysis';
   readonly countLabel = computed(() => {
     const entries = this.filteredEntries();
     return `${entries.length} of ${this.entries().length} analyses · ${entries.filter(entry => entry.scope === 'account').length} account · ${entries.filter(entry => entry.scope === 'facility').length} facility`;

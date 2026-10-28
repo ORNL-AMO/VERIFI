@@ -1,5 +1,5 @@
 @let account = navigation.account();
-@let selectedFacility = navigation.facility();
+@let selectedFacility = navigation.contextFacility();
 @let contextMode = navigation.contextMode();
 @if (account && (contextMode === 'account' || selectedFacility)) {
   <section class="v1-nav__group" aria-labelledby="v1-settings-nav-title">

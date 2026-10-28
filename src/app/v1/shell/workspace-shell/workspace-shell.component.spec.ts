@@ -59,7 +59,7 @@ describe('WorkspaceShellComponent', () => {
         details: [{ label: 'Context', value: 'Account workspace' }]
       })),
       showWelcome: vi.fn(),
-      setContext: vi.fn(), accountReturn: signal(undefined), contextNavigationError: signal(''),
+      setContext: vi.fn(), contextNavigationError: signal(''),
       setFacility: vi.fn(),
       setPanelTab: vi.fn(),
       hideSupportPanel: vi.fn(),

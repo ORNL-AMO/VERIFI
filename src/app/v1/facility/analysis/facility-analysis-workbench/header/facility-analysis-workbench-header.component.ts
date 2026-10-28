@@ -49,7 +49,7 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
     const account = this.context.account(), facility = this.context.facility();
     return facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account?.name || 'Account', route: account ? this.navigation.accountAnalysisRoute(account.guid) : undefined },
-      { label: facility.name || 'Facility', route: this.navigation.facilityAnalysisRoute(facility.guid) }
+      { label: facility.name || 'Facility', ...this.navigation.facilityInventoryLink(facility.guid, 'analysis') }
     ) : [];
   });
   readonly statusNotes = computed(() => facilityAnalysisHeaderFindings(this.context.findings()));

@@ -16,7 +16,6 @@ import { MeterGroupResultsView, MeterUsageFactsView } from '@app/v1/facility/dat
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupWorkbenchComponent } from './meter-group-workbench.component';
 import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
-import { AccountBrowseOrigin } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 
 describe('MeterGroupWorkbenchComponent', () => {
   it('uses the facility as its single-site root and restores portfolio breadcrumbs after conversion', () => {
@@ -52,7 +51,7 @@ describe('MeterGroupWorkbenchComponent', () => {
       'account-a',
       'data',
       'portfolio',
-      'facilities'
+      'meters'
     ]);
     expect(text).toContain('Energy Group');
     expect(fixture.debugElement.query(By.css('app-page-identity h1 > app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
@@ -147,14 +146,15 @@ describe('MeterGroupWorkbenchComponent', () => {
     expect(menu?.querySelector('app-ui-icon')).toBeNull();
     expect(menuItems.map(item => item.textContent?.trim())).toEqual(['Energy Group', 'Water Group']);
   });
-  it.each(['facilities','meters','predictors'] as const)('links account context to the %s origin and facility context to meter grouping', origin => {
-    const fixture=setup({origin});fixture.detectChanges();
-    const links=fixture.nativeElement.querySelectorAll('app-page-identity nav a') as NodeListOf<HTMLAnchorElement>;
+  it('links account context to unfiltered Meters and facility context to owner-filtered Meters', () => {
+    const fixture = setup(); fixture.detectChanges();
+    const links = fixture.nativeElement.querySelectorAll('app-page-identity nav a') as NodeListOf<HTMLAnchorElement>;
     expect(links).toHaveLength(2);
-    expect(links[0].getAttribute('href')).toBe(`/v1/workspace/account/account-a/data/portfolio/${origin}`);
-    expect(links[1].getAttribute('href')).toBe('/v1/workspace/facility/facility-a/data/meter-grouping');
-    const router=TestBed.inject(Router), navigate=vi.spyOn(router,'navigateByUrl').mockResolvedValue(true);
-    links[1].click();expect(router.serializeUrl(navigate.mock.calls[0][0] as UrlTree)).toBe('/v1/workspace/facility/facility-a/data/meter-grouping');
+    expect(links[0].getAttribute('href')).toBe('/v1/workspace/account/account-a/data/portfolio/meters');
+    expect(links[1].getAttribute('href')).toBe('/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-a');
+    const router = TestBed.inject(Router), navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    links[1].click();
+    expect(router.serializeUrl(navigate.mock.calls[0][0] as UrlTree)).toBe('/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-a');
   });
 });
 
@@ -168,7 +168,6 @@ function setup(options: {
   results?: MeterGroupResultsView;
   calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
   extraGroups?: ReturnType<typeof group>[];
-  origin?: AccountBrowseOrigin;
 } = {}): ComponentFixture<MeterGroupWorkbenchComponent> {
   const selectedGroup = group({ guid: 'group-energy', name: 'Energy Group', groupType: 'Energy' });
   const factsExpanded = signal(true);
@@ -221,7 +220,11 @@ function setup(options: {
             detail
           ],
           isSingleSiteWorkspace: signal(false),
-          accountDataReturnRoute: (accountGuid: string) => ['/v1','workspace','account',accountGuid,'data','portfolio',options.origin ?? 'facilities'],
+          facilityInventoryLink(facilityGuid: string, resource: string) {
+              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+                : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
+            },
+          accountDataReturnRoute: (accountGuid: string) => ['/v1','workspace','account',accountGuid,'data','portfolio','meters'],
           facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab = 'monthly-table') => [
             '/v1',
             'workspace',

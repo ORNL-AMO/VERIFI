@@ -100,7 +100,7 @@ describe('MeterWorkbenchComponent', () => {
       'account-a',
       'data',
       'portfolio',
-      'facilities'
+      'meters'
     ]);
     expect(breadcrumb?.textContent).toContain('Account A');
     expect(breadcrumb?.textContent).toContain('Facility A');
@@ -323,7 +323,7 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-    expect(fixture.componentInstance.breadcrumbs()[1].route).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters']);
+    expect(fixture.componentInstance.breadcrumbs()[1]).toMatchObject({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], queryParams: { facility: 'facility-a' } });
 
     buttons.find(button => button.textContent?.includes('Quality Report'))?.click();
     expect(router.navigate).toHaveBeenCalledWith([
@@ -705,7 +705,11 @@ function setup(options: {
             tab
           ],
           isSingleSiteWorkspace: signal(false),
-          accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
+          facilityInventoryLink(facilityGuid: string, resource: string) {
+              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+                : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
+            },
+          accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'meters'],
       accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
             '/v1',
             'workspace',

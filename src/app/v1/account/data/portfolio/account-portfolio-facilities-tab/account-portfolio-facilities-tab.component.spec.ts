@@ -29,6 +29,8 @@ function setup() {
     { provide: WorkspaceStatusService, useValue: { state: statusState, items } },
     { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
     { provide: WorkspaceNavigationService, useValue: {
+      changeFacilityScope: vi.fn(async () => false),
+      facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }),
           inventoryFacilityGuid: signal<string | undefined>(undefined),
       accountSettingsRoute: (guid: string) => ['/v1/workspace/account', guid, 'settings/portfolio'],
       facilityDataRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'data', detail]
@@ -63,10 +65,10 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(facilities()[0].zip).toBe(43228);
   });
   it('leaves facility selection to the route guard when navigation is cancelled', async () => {
-    const { fixture, navigate } = setup();
-    navigate.mockResolvedValueOnce(false);
+    const { fixture } = setup();
     (fixture.nativeElement.querySelector('.portfolio-inventory > li:last-child .portfolio-tile__name') as HTMLAnchorElement).click();
     await fixture.whenStable();
+    expect(TestBed.inject(WorkspaceNavigationService).changeFacilityScope).toHaveBeenCalledWith({ kind: 'facility', facilityGuid: 'beta' }, 'meters');
     expect(TestBed.inject(AccountWorkspaceService).selectFacility).not.toHaveBeenCalled();
   });
   it('updates warnings filtering through the native select change event', async () => {
@@ -109,7 +111,7 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(2);
   });
 
-  it('retains setup filters, neutral status, empty state, and opens Facility Data > Meters', async () => {
+  it('retains setup filters, neutral status, empty state, and opens facility-filtered account Meters', async () => {
     const { fixture, statusState, navigate } = setup();
     const component = fixture.componentInstance;
     component.filtersForm.controls.status.setValue('noMeters');
@@ -120,7 +122,8 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(tile.closest('article')!.textContent).toContain('Checks unavailable');
     tile.click();
     await fixture.whenStable();
-    expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'beta', 'data', 'meters']);
+    expect(TestBed.inject(WorkspaceNavigationService).changeFacilityScope).toHaveBeenCalledWith({ kind: 'facility', facilityGuid: 'beta' }, 'meters');
+    expect(navigate).not.toHaveBeenCalled();
     component.filtersForm.controls.search.setValue('missing');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No facilities match');

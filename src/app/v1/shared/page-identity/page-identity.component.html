@@ -12,7 +12,7 @@
             <span [title]="crumb.label">{{ crumb.label }}</span>
           </button>
         } @else if (crumb.route) {
-          <a [routerLink]="crumb.route">
+          <a [routerLink]="crumb.route" [queryParams]="crumb.queryParams">
             @if (crumb.icon) { <app-ui-icon [name]="crumb.icon"/> }
             <span [title]="crumb.label">{{ crumb.label }}</span>
           </a>

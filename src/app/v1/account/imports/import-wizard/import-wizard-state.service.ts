@@ -1,5 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { parseWorkspaceRoute } from '@app/v1/shell/workspace-navigation.service';
+import { isWorkspaceDataDestination } from '@app/v1/shared/navigation/workspace-data-destination';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SpreadsheetImportCommandService } from '@data/import/spreadsheet-import-command.service';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
@@ -551,6 +553,7 @@ function allowedWorkspaceReturnUrl(
 ): string | undefined {
   if (!returnUrl?.startsWith('/') || returnUrl.startsWith('//')) return undefined;
   try {
+    if (!isWorkspaceDataDestination(parseWorkspaceRoute(returnUrl))) return undefined;
     const segments = returnUrl.split(/[?#]/, 1)[0]
       .split('/')
       .filter(Boolean)

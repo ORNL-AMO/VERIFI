@@ -31,6 +31,7 @@ describe('facility meter list and monthly charts in Chromium', () => {
     TestBed.configureTestingModule({ imports: [DashboardHost], providers: [provideRouter([]), ModalPortalService,
       { provide: FacilityMetersWorkspaceService, useValue: { account: signal(account()), facility: signal(facility({ energyUnit: 'MMBtu', volumeLiquidUnit: 'gal' })), meterCards: cards, meterData: data, meterGroups: signal([]), facilityCalendarizedMeters: calendarized, statusState: signal('ready'), calendarizationState: signal('ready'), canWrite: signal(true), hasPending: signal(false) } },
       { provide: WorkspaceNavigationService, useValue: { facilityMeterGroupRoute: (guid: string, id: string) => ['/facility', guid, 'meter-grouping', id, 'monthly-table'], isSingleSiteWorkspace: signal(false),
+      facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', account().guid, 'data', 'portfolio', resource], queryParams: { facility: guid } }),
           accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
       accountDataRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio'], facilityMeterRoute: (guid: string, id: string, tab: string) => ['/v1', 'workspace', 'facility', guid, 'data', 'meters', id, tab] } }
     ] });

@@ -27,7 +27,7 @@ export class ReportsDashboardComponent {
     if (!account || this.workspace.status() !== 'ready') return undefined;
     return this.scope() === 'facility'
       ? this.facility() ? { kind: 'facilityReports', accountGuid: account.guid, facilityGuid: this.facility()!.guid } : undefined
-      : route.accountGuid === account.guid ? { kind: 'reports', accountGuid: account.guid } : undefined;
+      : route.accountGuid === account.guid ? { kind: 'reports', accountGuid: account.guid, facilityGuid: this.navigation.inventoryFacilityGuid() } : undefined;
   });
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
@@ -50,7 +50,7 @@ export class ReportsDashboardComponent {
     return this.facilityOnly() ? entries.filter(entry => entry.scope === 'facility' && entry.facilityGuid === this.scopedFacilityGuid()) : entries;
   });
   readonly filteredEntries = computed(() => filterReportInventory(this.entries(), this.filters()));
-  readonly tiles = computed(() => this.filteredEntries().map(entry => reportInventoryTile(entry, this.navigation, this.scope() === 'account')));
+  readonly tiles = computed(() => this.filteredEntries().map(entry => reportInventoryTile(entry, this.navigation)));
   private readonly setupSettled = computed(() => this.status.state() === 'ready' || this.status.state() === 'error');
   private readonly inventoryReady = computed(() => this.workspace.canWrite() && this.setupSettled());
   readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.key)), computed(() => ({ ...this.filters(), facility: this.scopedFacilityGuid() })), this.inventoryReady);
@@ -65,7 +65,7 @@ export class ReportsDashboardComponent {
     ...(!this.facilityOnly() ? ACCOUNT_REPORT_TYPES.map(option => ({ value: `account:${option.value}`, label: `Account · ${option.label}`, type: option.value })) : []),
     ...FACILITY_REPORT_TYPES.map(option => ({ value: `facility:${option.value}`, label: !this.facilityOnly() ? `Facility · ${option.label}` : option.label, type: option.value }))
   ].filter(option => reportTypeAvailable(option.type, this.workspace.account()?.displayEmissions)));
-  readonly title = computed(() => this.scope() === 'facility' ? 'Reports' : `${this.navigation.headerFacility()?.name || this.workspace.account()?.name || 'Account'} Reports`);
+  readonly title = 'Reports';
   readonly breadcrumbs = computed(() => this.scope() === 'account'
     ? inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', this.workspace.facilities().find(item => item.guid === this.scopedFacilityGuid())?.name)
     : [{ label: this.workspace.account()?.name || 'Account', route: this.navigation.accountReportsRoute(this.workspace.account()?.guid ?? '') }, { label: this.facility()?.name || 'Facility' }]);

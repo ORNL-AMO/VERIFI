@@ -123,6 +123,8 @@ describe('facility analysis workbench header', () => {
           useValue: {
             accountAnalysisRoute: (accountGuid: string) => ['/account', accountGuid, 'analysis', 'dashboard'],
             isSingleSiteWorkspace: singleSite,
+            facilityInventoryLink: (guid: string) => singleSite() ? { route: ['/facility', guid, 'analyses'] }
+              : { route: ['/account', 'account-a', 'analysis', 'dashboard'], queryParams: { facility: guid } },
             facilityAnalysisRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'analyses'],
             facilityAnalysisWorkbenchRoute: (facilityGuid: string, analysisGuid: string) => [
               '/facility', facilityGuid, 'analysis', analysisGuid
@@ -146,7 +148,7 @@ describe('facility analysis workbench header', () => {
     expect(breadcrumbs.map(link => link.textContent?.trim())).toEqual(['Account A', 'Facility A']);
     expect(breadcrumbs.map(link => link.getAttribute('href'))).toEqual([
       '/account/account-a/analysis/dashboard',
-      '/facility/facility-a/analyses'
+      '/account/account-a/analysis/dashboard?facility=facility-a'
     ]);
     expect(host.textContent).toContain('Latest full year · FY 2025');
     expect(host.textContent).toContain('8.75%');

@@ -120,13 +120,13 @@ describe('AccountPortfolioMetersTabComponent', () => {
     expect(router.navigate).toHaveBeenCalledTimes(1);
   });
 
-  it('links each tile owner to that facility meter dashboard', () => {
+  it('links each tile owner to the current inventory filtered by its facility', () => {
     const fixture = setup();
     fixture.detectChanges();
     const headings = [...fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile__owner')] as HTMLAnchorElement[];
     expect(headings.map(link => link.getAttribute('href'))).toEqual([
-      '/v1/workspace/facility/facility-a/data/meters',
-      '/v1/workspace/facility/facility-b/data/meters'
+      '/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-a',
+      '/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-b'
     ]);
   });
 
@@ -189,6 +189,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
         provide: WorkspaceNavigationService,
         useValue: {
           inventoryFacilityGuid: signal<string | undefined>(undefined),
+          facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }),
           facilityDataRoute: (facilityGuid: string, detail: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
           facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [

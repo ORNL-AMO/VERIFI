@@ -12,16 +12,13 @@ class FormHost {
 }
 
 describe('session browse state', () => {
-  it('isolates lists, accounts and facilities, with an explicit direct-link origin fallback', () => {
+  it('isolates lists, accounts and facilities', () => {
     const store = new BrowseStateService();
-    store.setOrigin('a', 'meters');
-    expect(store.origin('a')).toBe('meters'); expect(store.origin('b')).toBe('facilities');
     store.saveFilters({ accountGuid: 'a', kind: 'facilities' }, { search: 'Plant', status: 'all', sort: 'attention' });
     expect(store.readFilters({ accountGuid: 'a', kind: 'meters' })).toBeUndefined();
     expect(store.readFilters({ accountGuid: 'b', kind: 'facilities' })).toBeUndefined();
     store.saveFacilityView({ accountGuid: 'a', kind: 'facilityMeters', facilityGuid: 'f1' }, { page: 2, zoom: { start: 20, end: 80 } });
     expect(store.readFacilityView({ accountGuid: 'a', kind: 'facilityMeters', facilityGuid: 'f2' })).toBeUndefined();
-    expect(new BrowseStateService().origin('a')).toBe('facilities');
   });
   it('copies facility card detail overrides and zoom without sharing mutable browse state', () => {
     const store = new BrowseStateService(), key = { accountGuid: 'a', kind: 'facilityMeters' as const, facilityGuid: 'f' };
@@ -33,10 +30,9 @@ describe('session browse state', () => {
     expect(store.readFacilityView(key)?.zoom.start).toBe(10);
   });
   it('keeps Predictor controls and card detail isolated from Meters, other facilities and other accounts', () => {
-    const store = new BrowseStateService(); store.setOrigin('a', 'predictors');
+    const store = new BrowseStateService();
     store.saveFilters({ accountGuid: 'a', kind: 'predictors' }, { search: 'Weather', type: 'weather', status: 'attention', sort: 'latestReading' });
     store.savePredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f1' }, { page: 2, detail: 'summary', overrides: { p1: 'detailed' }, zoom: { start: 20, end: 80 } });
-    expect(store.origin('a')).toBe('predictors'); expect(store.origin('b')).toBe('facilities');
     expect(store.readFilters({ accountGuid: 'a', kind: 'meters' })).toBeUndefined();
     expect(store.readPredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f2' })).toBeUndefined();
     expect(store.readPredictorView({ accountGuid: 'b', kind: 'facilityPredictors', facilityGuid: 'f1' })).toBeUndefined();

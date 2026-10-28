@@ -74,8 +74,9 @@ describe('AccountPortfolioComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            activePortfolioTab, inventoryFacilityGuid: signal<string | undefined>(undefined), changeFacilityScope: vi.fn(),
+            activePortfolioTab, uploadQuery: () => ({}), inventoryFacilityGuid: signal<string | undefined>(undefined), changeFacilityScope: vi.fn(),
             openFacility: vi.fn(async () => undefined),
+            accountSettingsRoute: (accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', accountGuid, 'settings', detail],
             facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail],
             facilityDataRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
             facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab]
@@ -136,6 +137,19 @@ describe('AccountPortfolioComponent', () => {
       .find(link => link.textContent?.trim() === 'Data Validation')!;
     expect(validation.getAttribute('href')).toContain('/account/account-a/settings/data-validation');
 
+  });
+
+  it.each(['meters', 'predictors'])('opens Data Validation settings for the selected scope from %s', tab => {
+    activePortfolioTab.set(tab);
+    const scope = TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>;
+    for (const facilityGuid of [undefined, 'facility-a', 'facility-b', undefined]) {
+      scope.set(facilityGuid); fixture.detectChanges();
+      const link = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('a'))
+        .find(item => item.textContent?.trim() === 'Data Validation')!;
+      expect(link.getAttribute('href')).toBe(facilityGuid
+        ? `/v1/workspace/facility/${facilityGuid}/settings/data-validation`
+        : '/v1/workspace/account/account-a/settings/data-validation');
+    }
   });
 
   it('uses the active resource title for every portfolio destination', () => {

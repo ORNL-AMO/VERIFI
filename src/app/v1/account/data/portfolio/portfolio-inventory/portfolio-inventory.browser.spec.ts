@@ -36,6 +36,7 @@ function setup(count = 260) {
   const workspace = { account: signal(account()), facilities, meters, meterData: signal(meters().map(item => reading({ meterId: item.guid, facilityId: item.facilityId }))),
     meterGroups: signal(facilities().map(item => group({ guid:'g', facilityId:item.guid }))), predictors, predictorData: signal(predictors().map(item => inventoryReading(item.guid, { accountId: account().guid, facilityId: item.facilityId }))),
     facilityAnalyses: signal([]), accountAnalyses: signal([]), facilityReports: signal([]), energyUseEquipment: signal([]), canWrite: signal(true), hasPending: signal(false) };
+  const scope = signal<string | undefined>(undefined);
   const active = signal<PortfolioResource>('meters'); const stored = new Map<string,unknown>();
   const statusState = signal<StatusEvaluationState>('ready');
   const statusItems = signal(findings);
@@ -49,13 +50,19 @@ function setup(count = 260) {
     { path:'v1/workspace/facility/:facility/data/:resource', component:ResourceDestination }];
   TestBed.configureTestingModule({ imports:[AccountDataModule, InventoryBrowserHost], providers:[provideRouter(routes),
     { provide:AccountWorkspaceStore, useValue:workspace }, { provide:WorkspaceStatusService, useValue:{ state:statusState, items:statusItems } },
-    { provide:WorkspaceNavigationService, useValue:{ ...inventoryNavigation, activePortfolioTab:active, facilityMeterRoute:(facility:string,guid:string,tab:string)=>['/v1','workspace','facility',facility,'data','meters',guid,tab] } },
+    { provide:WorkspaceNavigationService, useValue:{ ...inventoryNavigation, inventoryFacilityGuid: scope, activePortfolioTab:active,
+      changeFacilityScope: async (selected: { kind: 'facility'; facilityGuid: string }, resource: 'meters' | 'predictors') => {
+        const opened = await TestBed.inject(Router).navigate(['/portfolio', resource], { queryParams: { facility: selected.facilityGuid } });
+        if (opened) { scope.set(selected.facilityGuid); active.set(resource); }
+        return opened;
+      }, facilityMeterRoute:(facility:string,guid:string,tab:string)=>['/v1','workspace','facility',facility,'data','meters',guid,tab] } },
     { provide:ModalPortalService, useValue:{ show:vi.fn(), hide:vi.fn() } },
     { provide:LocalStorageService, useValue:{ retrieve:(key:string)=>stored.get(key), store:(key:string,value:unknown)=>stored.set(key,value) } }
   ] });
   const fixture = TestBed.createComponent(InventoryBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router), root = fixture.nativeElement.querySelector('main') as HTMLElement;
   const open = async(resource:PortfolioResource) => {
+    if (resource === 'facilities') scope.set(undefined);
     active.set(resource); await router.navigateByUrl(`/portfolio/${resource}`); fixture.detectChanges(); await fixture.whenStable(); await settled(root);
     const type = resource === 'facilities' ? AccountPortfolioFacilitiesTabComponent : resource === 'meters' ? AccountPortfolioMetersTabComponent : AccountPortfolioPredictorsTabComponent;
     await vi.waitFor(() => { fixture.detectChanges(); expect(fixture.debugElement.query(By.directive(type)).componentInstance.browseReady()).toBe(true); });
@@ -258,7 +265,7 @@ describe('uniform account inventories in Chromium', () => {
     const resource=first.querySelector<HTMLAnchorElement>('.facility-snapshot__resource')!;
     expect(resource.getAttribute('aria-label')).toContain('25 meters');
     resource.focus();resource.click();await fixture.whenStable();fixture.detectChanges();
-    expect(router.url).toBe('/v1/workspace/facility/f0/data/meters');
+    expect(router.url).toBe('/portfolio/meters?facility=f0');
     await open('facilities');
     await vi.waitFor(()=>expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('f0'));
     await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('detailed');fixture.detectChanges();await settled(root);
@@ -333,7 +340,7 @@ describe('uniform account inventories in Chromium', () => {
     const title=articles()[0].querySelector<HTMLElement>('.portfolio-tile__name')!, icon=articles()[0].querySelector<HTMLElement>('.portfolio-tile__heading app-ui-icon')!;
     const center=articles()[0].getBoundingClientRect();
     expect(Math.abs((title.getBoundingClientRect().left+title.getBoundingClientRect().right)/2-(center.left+center.right)/2)).toBeLessThan(4);
-    expect(icon.querySelector('svg')!.getAttribute('width')).toBe('32'); expect(articles()[0].querySelector('.portfolio-tile__owner app-ui-icon')).not.toBeNull();
+    expect(icon.querySelector('svg')!.getAttribute('width')).toBe('32'); expect(articles()[0].querySelector('app-inventory-card-header app-ui-icon')).not.toBeNull();
     const before=root.querySelectorAll('.portfolio-inventory .portfolio-tile__name').length;
     const menuButton=articles()[0].querySelector<HTMLButtonElement>('button')!; menuButton.click(); fixture.detectChanges();
     await page.getByRole('menuitemcheckbox',{name:'Show details',exact:true}).click(); fixture.detectChanges(); await settled(root);

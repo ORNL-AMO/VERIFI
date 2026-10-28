@@ -11,6 +11,7 @@ describe('report browse state', () => {
       facilityReports: [reportFixture(), reportFixture({ guid: 'other-report', facilityId: 'facility-b' })] });
     const fixture = TestBed.createComponent(ReportsDashboardComponent); fixture.detectChanges();
     const host = fixture.componentInstance;
+    expect(fixture.nativeElement.querySelector('h1')?.textContent.trim()).toBe('Reports');
     host.filtersForm.patchValue({ scope: 'account', type: 'account:analysis' }); fixture.detectChanges();
     navigation.inventoryFacilityGuid.set('facility-a'); fixture.detectChanges();
     expect(host.filteredEntries().map(entry => entry.report.guid)).toEqual(['report-a']);

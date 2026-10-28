@@ -30,7 +30,7 @@ import { accountEntry, facilityEntry, inventoryAccount, inventoryFacility, inven
 const dashboardUrl = '/v1/workspace/account/account-a/analysis/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, NavigationMotionDirective, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div [appNavigationMotion]="navigation.routeMotion()" [navigationMotionKey]="navigation.routeMotionKey()"><router-outlet/></div><ng-template [cdkPortalOutlet]="portal.activePortal()"/></main>' })
 class AnalysisBrowserHost { readonly portal = inject(ModalPortalService); readonly navigation = inject(WorkspaceNavigationService); }
-@Component({ standalone: true, imports: [RouterLink], template: '<h1>Facility analysis workbench</h1>@if (navigation.accountReturn(); as back) { <a [routerLink]="back.route">Account Analysis</a> } @if (navigation.facility(); as facility) { <a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Facility Analysis</a> }' })
+@Component({ standalone: true, imports: [RouterLink], template: '<h1>Facility analysis workbench</h1>@if (navigation.account(); as account) { <a [routerLink]="navigation.accountAnalysisRoute(account.guid)">Account Analysis</a> } @if (navigation.facility(); as facility) { <a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Facility Analysis</a> }' })
 class FacilityDestination { readonly navigation = inject(WorkspaceNavigationService); }
 @Component({ standalone: true, template: '<h1>Account analysis workbench</h1>' })
 class AccountDestination {}
@@ -78,6 +78,16 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
 }
 
 describe('account Analysis inventory browser journeys', () => {
+  it('filters the unified Analysis inventory when a card facility header is selected', async () => {
+    const view = setup(3); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    const link = view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__header-owner')!;
+    const facilityGuid = new URL(link.href).searchParams.get('facility')!;
+    expect(facilityGuid).toBeTruthy(); link.click(); await settle(view.fixture);
+    expect(view.router.url).toBe(`${dashboardUrl}?facility=${facilityGuid}`);
+    expect(view.host().filteredEntries().length).toBeGreaterThan(0);
+    expect(view.host().filteredEntries().every(entry => entry.scope === 'facility' && entry.facility.guid === facilityGuid)).toBe(true);
+    view.fixture.destroy();
+  });
   afterEach(async () => { await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '', features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] }); });
   it('blocks scope changes during creation and opens the saved account analysis from a facility-filtered inventory', async () => {
     const view = setup(1);
@@ -264,12 +274,12 @@ describe('account Analysis inventory browser journeys', () => {
   it('restores facility dashboard controls, originating-card visibility and focus on breadcrumb return and Back', async () => {
     await page.viewport(1200, 900);
     const view = setup(); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
-    view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__owner')!.click(); await settle(view.fixture);
+    await view.router.navigateByUrl('/v1/workspace/facility/facility-a/analysis/dashboard'); await settle(view.fixture);
     const dashboard = () => view.fixture.debugElement.query(By.directive(FacilityAnalysisDashboardComponent)).componentInstance as FacilityAnalysisDashboardComponent;
     const facilityUrl = view.router.url;
     expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('drill-in');
     expect(view.root.querySelector('h1')?.textContent).toContain('Analysis');
-    expect(view.root.querySelector('.portfolio-tile__owner')).toBeNull();
+    expect(view.root.querySelector('app-inventory-card-header .portfolio-tile__owner')).not.toBeNull();
     dashboard().filtersForm.controls.search.setValue('Analysis'); await settle(view.fixture);
     dashboard().inventory.selectPage(1); dashboard().inventory.detailControl.setValue('summary'); await settle(view.fixture);
     const id = dashboard().inventory.visibleIds().at(-1)!;

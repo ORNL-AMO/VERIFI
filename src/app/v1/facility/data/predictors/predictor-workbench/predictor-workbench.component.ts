@@ -70,7 +70,7 @@ export class PredictorWorkbenchComponent {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'predictors') }) : [];
+      { label: facility.name, ...this.navigation.facilityInventoryLink(facility.guid, 'predictors') }) : [];
   });
 
   constructor() {

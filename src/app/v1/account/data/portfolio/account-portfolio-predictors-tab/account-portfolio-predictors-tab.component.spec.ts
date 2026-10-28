@@ -53,7 +53,7 @@ describe('account Predictor inventory', () => {
     (fixture.nativeElement.querySelector('.portfolio-inventory .portfolio-tile__name') as HTMLAnchorElement).click(); expect(navigate).toHaveBeenCalledWith(inventoryNavigation.facilityWeatherPredictorRoute('facility', 'station:KORD'));
     component.filtersForm.controls.type.setValue('standard'); fixture.detectChanges(); expect(component.filteredEntries()).toHaveLength(0);
     expect(fixture.nativeElement.textContent).toContain('No predictors match these filters');
-    component.clearFilters(); fixture.detectChanges(); (fixture.nativeElement.querySelector('[data-browse-id="p1"]') as HTMLAnchorElement).click();
+    component.clearFilters(); fixture.detectChanges(); (fixture.nativeElement.querySelector('.portfolio-tile__name[data-browse-id="p1"]') as HTMLAnchorElement).click();
     expect(navigate).toHaveBeenLastCalledWith(inventoryNavigation.facilityPredictorRoute('other', 'p1', 'settings'));
     fixture.destroy(); const returned = TestBed.createComponent(AccountPortfolioPredictorsTabComponent); returned.detectChanges();
     expect(returned.componentInstance.entries()).toHaveLength(5);

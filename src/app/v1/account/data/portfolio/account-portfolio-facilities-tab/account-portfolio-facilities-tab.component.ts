@@ -18,7 +18,7 @@ import { facilityTiles } from '../portfolio-tile.views';
 export class AccountPortfolioFacilitiesTabComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
-  private readonly navigation = inject(WorkspaceNavigationService);
+  readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
@@ -27,7 +27,7 @@ export class AccountPortfolioFacilitiesTabComponent {
   });
   readonly browseKey = computed<BrowseKey<'facilities'> | undefined>(() => {
     const account = this.workspace.account();
-    return account ? { accountGuid: account.guid, kind: 'facilities' } : undefined;
+    return account ? { accountGuid: account.guid, kind: 'facilities', facilityGuid: this.navigation.inventoryFacilityGuid() } : undefined;
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready());

@@ -34,10 +34,9 @@
 .portfolio-tile--predictor-snapshot .portfolio-tile__ownership,.portfolio-tile--predictor-snapshot .portfolio-tile__context { display: contents; }
 .portfolio-tile--predictor-snapshot .portfolio-tile__chip { max-width: 100%; }
 .portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__metadata { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.4fr); align-items: center; gap: .45rem 1rem; }
-.portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__owner { grid-area: 1 / 1; }
-.portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__status { grid-area: 2 / 1; }
+.portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__status { grid-area: 1 / 1; }
 .portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__station-link { grid-area: 1 / 2; justify-self: end; justify-content: flex-end; text-align: end; }
-.portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__chip { grid-area: 2 / 2; justify-self: end; text-align: end; }
+.portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__chip { grid-area: 2 / 1 / auto / -1; justify-self: end; text-align: end; }
 @container (max-width: 22rem) {
   .portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__metadata { display: flex; align-items: flex-start; }
   .portfolio-tile--predictor-snapshot[data-detail='detailed'] .portfolio-tile__station-link { justify-content: flex-start; text-align: start; }
@@ -71,14 +70,17 @@
 :is([data-analysis-scope],[data-report-scope]) .portfolio-tile__status { margin-top: 0; }
 :is([data-analysis-scope],[data-report-scope]):not([data-detail='simple']) .portfolio-tile__context { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .8rem; }
 .portfolio-tile__analysis-modified { margin: 0 0 0 auto; font-size: var(--analysis-card-text-size); font-weight: 400; line-height: 1.5; color: color-mix(in srgb,var(--v1-muted) 75%,var(--v1-text)); }
-:is([data-analysis-scope],[data-report-scope])[data-detail='simple'] { padding-top: 1rem; }
+.portfolio-tile--scoped[data-detail='simple'] { padding-top: 1rem; }
 :is([data-analysis-scope],[data-report-scope]) { --analysis-menu-size: 1.75rem; --analysis-card-text-size: max(.875rem,14px); --analysis-card-title-size: max(1.25rem,20px); --analysis-card-value-size: 1.5rem; }
-:is([data-analysis-scope],[data-report-scope]) .portfolio-tile__menu-button { position: absolute; top: .4rem; right: .4rem; width: var(--analysis-menu-size); height: var(--analysis-menu-size); min-width: var(--analysis-menu-size); min-height: var(--analysis-menu-size); font-size: 1.1rem; }
+.portfolio-tile--scoped .portfolio-tile__menu-button { position: absolute; top: .4rem; right: .4rem; width: var(--analysis-menu-size); height: var(--analysis-menu-size); min-width: var(--analysis-menu-size); min-height: var(--analysis-menu-size); font-size: 1.1rem; }
 :is([data-analysis-scope],[data-report-scope]):not([data-detail='simple']) .portfolio-tile__heading { align-items: center; }
 :is([data-analysis-scope],[data-report-scope]):not([data-detail='simple']) .portfolio-tile__heading > app-ui-icon { margin-top: 0; }
 @media (pointer: coarse) { :is([data-analysis-scope],[data-report-scope]) { --analysis-menu-size: 2.75rem; } }
-.portfolio-tile__header-facility { display: inline-flex; align-items: baseline; gap: .4rem; min-width: 0; }
 .portfolio-tile__header-owner { min-width: 0; font-size: inherit; color: inherit !important; }
 .portfolio-tile__header-owner:hover { color: var(--v1-link) !important; }
 
 .portfolio-tile__report-pending { display: flex; gap: .4rem; align-items: center; margin: 0; color: var(--v1-muted); font-size: max(.875rem,14px); }
+
+.portfolio-tile--scoped { --analysis-menu-size: 1.75rem; }
+.portfolio-tile--scoped.portfolio-tile--selecting app-inventory-card-header { padding-inline-start: 2.5rem; }
+@media (pointer: coarse) { .portfolio-tile--scoped { --analysis-menu-size: 2.75rem; } }

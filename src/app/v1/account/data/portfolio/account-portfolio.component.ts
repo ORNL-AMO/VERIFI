@@ -48,6 +48,12 @@ export class AccountPortfolioComponent implements OnDestroy {
   readonly activeContent = computed(() => this.navigation.activePortfolioTab() || 'facilities');
   readonly isFacilities = computed(() => this.activeContent() === 'facilities');
   readonly isMeters = computed(() => this.activeContent() === 'meters');
+  readonly dataValidationRoute = computed(() => {
+    const facilityGuid = this.navigation.inventoryFacilityGuid();
+    const account = this.account();
+    return facilityGuid ? this.navigation.facilitySettingsRoute(facilityGuid, 'data-validation')
+      : account ? this.navigation.accountSettingsRoute(account.guid, 'data-validation') : [];
+  });
   readonly title = computed(() => ({
     facilities: 'Facilities', meters: 'Meters', predictors: 'Predictors',
     'energy-uses': 'Energy Uses'

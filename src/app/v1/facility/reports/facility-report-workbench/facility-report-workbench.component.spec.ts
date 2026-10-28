@@ -37,7 +37,7 @@ describe('facility report workbench navigation', () => {
     expect(crumbs[0].getAttribute('href')).toBe('/v1/workspace/account/account-a/reports/dashboard');
     expect(crumbs).toHaveLength(2);
     expect(host.querySelector('nav[aria-label="Facility report breadcrumb"] [aria-current="page"]')?.textContent).toBe('Saved report');
-    expect(crumbs[1].getAttribute('href')).toContain('/facility-a/reports/dashboard');
+    expect(crumbs[1].getAttribute('href')).toBe('/v1/workspace/account/account-a/reports/dashboard?facility=facility-a');
     expect(host.querySelector('header')?.textContent).toContain('No Issues');
     expect(stageIcons()).toContain('checkmarkBadge');
     const toggle = host.querySelector<HTMLButtonElement>('button[aria-controls="report-workbench-facts"]')!;

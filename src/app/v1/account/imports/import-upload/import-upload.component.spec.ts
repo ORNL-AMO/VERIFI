@@ -66,6 +66,14 @@ describe('ImportUploadComponent', () => {
     component = TestBed.runInInjectionContext(() => new ImportUploadComponent());
   });
 
+  it('uses Upload’s initial facility context without treating the inventory scope as a mapping parameter', () => {
+    const params: Record<string, string> = { facilityGuid: 'facility-a', facility: 'not-a-mapping-choice',
+      returnUrl: '/v1/workspace/account/account-1/data/portfolio/meters?facility=facility-a' };
+    vi.spyOn(TestBed.inject(ActivatedRoute).snapshot.queryParamMap, 'get').mockImplementation(key => params[key] ?? null);
+    component.ngOnInit();
+    expect(session.begin).toHaveBeenCalledWith({ facilityGuid: 'facility-a', returnUrl: params['returnUrl'] });
+  });
+
   it('transfers an unsaved upload session to its processing route without discard confirmation', () => {
     expect(component.hasUnsavedChanges()).toBe(true);
     expect(component.canNavigateWithoutDiscard(state('/v1/workspace/account/account-1/imports/file/draft-1/facilities'))).toBe(true);

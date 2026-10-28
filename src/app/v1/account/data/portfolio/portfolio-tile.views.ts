@@ -10,16 +10,17 @@ import { buildMeterSnapshots } from '@app/v1/shared/inventory/meter-reading-snap
 export function facilityTiles(views: readonly PortfolioFacilityView[], input: PortfolioFacilityInput, nav: FacilitySnapshotNavigation): PortfolioTile[] {
   const snapshots = buildFacilitySnapshots(input, nav);
   return views.map(view => ({
-    guid: view.facility.guid, name: view.facility.name, icon: 'facility', location: view.location || undefined, route: nav.facilityDataRoute(view.facility.guid, 'meters'),
+    guid: view.facility.guid, name: view.facility.name, icon: 'facility', location: view.location || undefined, ...nav.facilityInventoryLink(view.facility.guid, 'meters'),
+    facilityInventory: { facilityGuid: view.facility.guid, resource: 'meters' },
     status: { tone: view.tone, icon: view.icon, label: view.statusLabel },
     facilitySnapshot: snapshots.get(view.facility.guid)
   }));
 }
-export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>, readings: readonly IdbUtilityMeterData[]): PortfolioTile[] {
+export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>, readings: readonly IdbUtilityMeterData[]): PortfolioTile[] {
   const snapshots = buildMeterSnapshots(views, readings, nav);
   return views.map(view => ({ guid: view.meter.guid, name: view.meter.name, icon: view.sourceIcon,
     route: nav.facilityMeterRoute(view.facility.guid, view.meter.guid, 'settings'),
-    owner: { label: view.facility.name, route: nav.facilityDataRoute(view.facility.guid, 'meters') }, chip: view.meter.source,
+    owner: { label: view.facility.name, facilityGuid: view.facility.guid, ...nav.facilityInventoryLink(view.facility.guid, 'meters') }, chip: view.meter.source,
     status: { tone: view.statusTone, icon: view.statusIcon, label: view.statusLabel },
     meterSnapshot: snapshots.get(view.meter.guid)
   }));

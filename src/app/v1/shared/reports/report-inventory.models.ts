@@ -118,11 +118,11 @@ export function filterReportInventory(entries: readonly ReportInventoryEntry[], 
       return primary || (a.report.name || '').localeCompare(b.report.name || '') || a.key.localeCompare(b.key);
     });
 }
-export function reportInventoryTile(entry: ReportInventoryEntry, navigation: WorkspaceNavigationService, showOwner = true): InventoryTile {
+export function reportInventoryTile(entry: ReportInventoryEntry, navigation: WorkspaceNavigationService): InventoryTile {
   return { guid: entry.key, name: entry.report.name || `Untitled ${entry.scope} report`, icon: reportIcon(entry.report),
     route: entry.scope === 'account' ? navigation.accountReportWorkbenchRoute(entry.report.accountId, entry.report.guid)
       : navigation.facilityReportWorkbenchRoute(entry.facilityGuid, entry.report.guid),
-    owner: showOwner && entry.scope === 'facility' ? { label: entry.ownerName, route: navigation.facilityReportsRoute(entry.facilityGuid) } : undefined,
+    owner: entry.scope === 'facility' ? { label: entry.ownerName, facilityGuid: entry.facilityGuid, ...navigation.facilityInventoryLink(entry.facilityGuid, 'reports') } : undefined,
     chip: entry.typeLabel,
     status: { label: entry.statusLabel, tone: entry.status === 'ready' ? 'success' : entry.status === 'error' ? 'danger' : entry.status === 'warning' ? 'warning' : 'neutral',
       icon: entry.status === 'ready' ? 'success' : entry.status === 'checking' ? 'loading' : 'info' }, reportSnapshot: entry.snapshot };

@@ -86,7 +86,7 @@ export class PredictorsDashboardComponent {
   readonly pageEnd = computed(() => Math.min(this.currentPage() * this.pageSize, this.matching().length));
   readonly visible = computed(() => this.matching().slice(this.pageStart() - 1, this.pageEnd()));
   readonly browseIds = computed(() => this.visible().map(item => item.guid));
-  readonly tiles = computed(() => buildPredictorTiles(this.matching(), this.navigation, this.workspace.predictorReadings(), this.workspace.statusState(), false));
+  readonly tiles = computed(() => buildPredictorTiles(this.matching(), this.navigation, this.workspace.predictorReadings(), this.workspace.statusState()));
   readonly visibleTiles = computed(() => this.tiles().slice(this.pageStart() - 1, this.pageEnd()));
   readonly tileActions = computed(() => Object.fromEntries(this.entries().map(entry => {
     const actions: InventoryTileMenuAction[] = [{ id: 'readings', label: 'Open readings', icon: 'invoice' }];

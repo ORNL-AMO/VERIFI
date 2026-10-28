@@ -5,6 +5,7 @@ import { PortfolioFacilityInput } from './portfolio-facility.view';
 import { buildFacilitySnapshots, FacilitySnapshotNavigation } from './portfolio-facility-snapshot.view';
 
 const navigation: FacilitySnapshotNavigation = {
+  facilityInventoryLink: (guid, resource) => ({ route: ['/account', 'data', resource], queryParams: { facility: guid } }),
   facilityDataRoute: (guid, detail) => ['/facility', guid, 'data', detail],
   facilityMeterRoute: (guid, meter, tab) => ['/facility', guid, 'meters', meter, tab],
   facilityPredictorRoute: (guid, predictor, tab) => ['/facility', guid, 'predictors', predictor, tab]
@@ -57,7 +58,8 @@ describe('facility resource snapshot', () => {
     expect(snapshot.findings.map(item => item.name)).toEqual(['m1', 'm2']);
     expect(snapshot.remainingFindings).toBe(3);
     expect(snapshot.address).toBe('100 Industrial Drive, 00501');
-    expect(snapshot.resources.map(resource => resource.route)).toEqual([['/facility','f','data','meters'], ['/facility','f','data','predictors']]);
+    expect(snapshot.resources.map(resource => resource.route)).toEqual([['/account','data','meters'], ['/account','data','predictors']]);
+    expect(snapshot.resources.every(resource => resource.facilityGuid === 'f' && resource.queryParams?.['facility'] === 'f')).toBe(true);
   });
   it.each(['idle', 'evaluating', 'error'] as const)('keeps %s checks neutral with no stale previews or successful resource counts', state => {
     const snapshot = buildFacilitySnapshots(input({ statusState: state, findings: presentFindings([finding('meter','m1','error','meter.data.missing')]) }),navigation).get('f')!;

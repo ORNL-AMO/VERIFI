@@ -83,6 +83,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
         { provide: ModalPortalService, useValue: modalPortal },
         { provide: WorkspaceNavigationService, useValue: {
           routeState: route, isSingleSiteWorkspace: singleSite,
+          changeFacilityScope: vi.fn(), facilityInventoryLink: (guid: string) => singleSite() ? ({ route: ['/facility', guid, 'analysis'] }) : ({ route: ['/account', 'account-a', 'analysis'], queryParams: { facility: guid } }),
           accountAnalysisRoute: (id: string) => ['/account', id, 'analysis'],
           facilityAnalysisRoute: (id: string) => ['/facility', id, 'analysis'],
           facilityAnalysisWorkbenchRoute: vi.fn((facilityGuid: string, analysisGuid: string) => ['/analysis', facilityGuid, analysisGuid])
@@ -99,7 +100,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     expect(component.breadcrumbs()).toEqual([{ label: 'Account A', route: ['/account', 'account-a', 'analysis'] }, { label: 'Facility A' }]);
     expect(fixture.nativeElement.querySelector('h1')?.textContent.trim()).toBe('Analysis');
     expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(2);
-    expect(fixture.nativeElement.querySelector('.portfolio-tile__owner')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-inventory-card-header .portfolio-tile__owner')?.textContent).toBe('Facility A');
     expect(component.inventory.detail()).toBe('summary');
     expect(fixture.nativeElement.textContent).toContain('8.75%');
     expect(component.resultDemand()).toEqual(['energy-a', 'water-b']);

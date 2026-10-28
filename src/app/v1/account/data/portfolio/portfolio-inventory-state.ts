@@ -31,7 +31,7 @@ export class PortfolioInventoryState {
           this.save(); this.activeKey = next;
           const saved = next ? this.browse.readInventoryView(next) : undefined;
           this.page.set(saved?.page ?? 0); this.overrides.set(saved?.overrides ?? {});
-          const level = next ? this.preferences.read(next.accountGuid, next.kind) : 'simple';
+          const level = saved?.detail ?? (next ? this.preferences.read(next.accountGuid, next.kind) : 'simple');
           this.detail.set(level); this.detailControl.setValue(level, { emitEvent: false });
           previousFilters = criteria; this.hydratedKey.set(JSON.stringify(next));
         } else if (criteria !== previousFilters) { previousFilters = criteria; this.page.set(0); this.save(); }
@@ -60,5 +60,5 @@ export class PortfolioInventoryState {
   setTileDetail(change: PortfolioTileDetailChange): void {
     this.overrides.update(current => ({ ...current, [change.guid]: change.level })); this.save();
   }
-  private save(): void { if (this.activeKey) this.browse.saveInventoryView(this.activeKey, { page: this.page(), overrides: this.overrides() }); }
+  private save(): void { if (this.activeKey) this.browse.saveInventoryView(this.activeKey, { page: this.page(), detail: this.detail(), overrides: this.overrides() }); }
 }

@@ -88,7 +88,7 @@ export class MeterWorkbenchComponent {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'meters') }) : [];
+      { label: facility.name, ...this.navigation.facilityInventoryLink(facility.guid, 'meters') }) : [];
   });
   readonly tabAttention = computed(() => {
     const meter = this.workspace.selectedMeter();

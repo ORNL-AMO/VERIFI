@@ -89,6 +89,13 @@ export function setupSectionNavTest() {
           useValue: {
             inventoryScopeQuery: () => ({}),
             contextMode,
+            contextFacility: () => contextMode() === 'facility' ? selectedFacility() : undefined,
+            contextMeters: facilityMeters, contextMeterGroups: facilityMeterGroups,
+            contextPredictors: facilityPredictors, contextPredictorData: facilityPredictorData,
+            contextAnalyses: selectedFacilityAnalyses,
+            facilityInventoryLink: (guid: string, resource: string) => isSingleSiteWorkspace()
+              ? { route: ['/v1', 'workspace', 'facility', guid, ...(resource === 'analysis' || resource === 'reports' ? [resource, 'dashboard'] : ['data', resource])], queryParams: {} }
+              : { route: ['/v1', 'workspace', 'account', 'account-a', ...(resource === 'analysis' || resource === 'reports' ? [resource, 'dashboard'] : ['data', 'portfolio', resource])], queryParams: { facility: guid } },
             facilities,
             facility: selectedFacility,
             account,
@@ -127,7 +134,7 @@ export function setupSectionNavTest() {
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
-            setContext: () => undefined, accountReturn: signal(undefined), contextNavigationError: signal(''),
+            setContext: () => undefined, contextNavigationError: signal(''),
             setFacility
           }
         },

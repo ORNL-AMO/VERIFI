@@ -1,5 +1,7 @@
-:host { display: flex; align-items: center; align-self: stretch; margin: -1rem -1rem 0; padding: .65rem 3rem .65rem 1rem; border-bottom: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm) var(--v1-radius-sm) 0 0; color: var(--v1-text); background: color-mix(in srgb,var(--v1-account) 10%,var(--v1-surface)); font-size: var(--analysis-card-text-size,max(.875rem,14px)); font-weight: 600; line-height: 1.5; text-align: start; }
-:host([data-scope='facility']) { background: color-mix(in srgb,var(--v1-facility) 10%,var(--v1-surface)); }
+:host { display: flex; align-items: center; align-self: stretch; margin: -1rem -1rem 0; padding: .65rem 3rem .65rem 1rem; border-bottom: 2px solid color-mix(in srgb,var(--v1-account) 70%,var(--v1-border)); border-radius: var(--v1-radius-sm) var(--v1-radius-sm) 0 0; color: var(--v1-text); background: color-mix(in srgb,var(--v1-account) 26%,var(--v1-surface)); font-size: var(--analysis-card-text-size,max(.875rem,14px)); font-weight: 600; line-height: 1.5; text-align: start; }
+:host([data-scope='facility']) { background: color-mix(in srgb,var(--v1-facility) 26%,var(--v1-surface)); border-bottom-color: color-mix(in srgb,var(--v1-facility) 70%,var(--v1-border)); }
 :host { min-height: calc(var(--analysis-menu-size,1.75rem) + .8rem); }
-header { display: flex; align-items: baseline; gap: .4rem; min-width: 0; width: 100%; }
-.inventory-card-header__scope { display: inline-flex; align-items: center; gap: .4rem; flex-shrink: 0; }
+:host { border-start-start-radius: max(0px, calc(var(--v1-radius-sm) - 4px)) max(0px, calc(var(--v1-radius-sm) - 1px)); border-start-end-radius: max(0px, calc(var(--v1-radius-sm) - 1px)); }
+header { display: flex; align-items: center; gap: .4rem; min-width: 0; width: 100%; }
+.inventory-card-header__scope > app-ui-icon { flex: 0 0 16px; }
+.inventory-card-header__scope { display: inline-flex; align-items: center; gap: .4rem; min-width: 0; }
