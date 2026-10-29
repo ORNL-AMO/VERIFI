@@ -3,8 +3,8 @@ import { CommonModule, Location } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { By } from '@angular/platform-browser';
 import { LocalStorageService } from 'ngx-webstorage';
-import { PortfolioInventoryState } from '@app/v1/account/data/portfolio/portfolio-inventory-state';
-import { portfolioTile } from '@app/v1/account/data/portfolio/portfolio-inventory.testing';
+import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
+import { portfolioTile } from '@app/v1/shared/inventory/inventory.testing';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityPickerTestModule } from '@app/v1/shell/header/facility-picker/facility-picker.testing';
 import { FacilityScope } from '@app/v1/shell/facility-scope.models';
@@ -36,7 +36,7 @@ class ScopedBrowsePage {
     status: new FormControl<BrowseFilters['meters']['status']>('all', { nonNullable: true }), sort: new FormControl<BrowseFilters['meters']['sort']>('attention', { nonNullable: true }) });
   readonly filters = rememberBrowseForm(this.key, this.form);
   readonly tiles = signal(Array.from({ length: 60 }, (_, index) => portfolioTile(String(index))));
-  readonly inventory = new PortfolioInventoryState(this.key, this.tiles, computed(() => this.tiles().map(tile => tile.guid)), this.filters, signal(true));
+  readonly inventory = new InventoryViewState(this.key, this.tiles, computed(() => this.tiles().map(tile => tile.guid)), this.filters, signal(true));
 }
 @Component({ standalone: true, imports: [FacilityPickerTestModule], template: `<div class="v1-root v1-theme-dark" style="height:180px;min-height:0;width:220px;overflow:auto"><app-facility-picker [facilities]="facilities" (facilitySelected)="selected.set($event)"/></div>` })
 class PickerHost {

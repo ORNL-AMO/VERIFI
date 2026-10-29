@@ -3,7 +3,7 @@ import { baselineStartMonth, buildGroupMonthlyPoints, defaultVisualizationRange,
 import { visualizationFixture } from './group-visualization.testing';
 import type { GroupMonthlyPoint } from './group-visualization.models';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
-import { facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { facility, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import type { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 

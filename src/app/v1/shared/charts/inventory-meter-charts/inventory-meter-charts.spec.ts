@@ -1,5 +1,5 @@
 import { buildInventoryMeterCharts } from './inventory-meter-charts';
-import { calendarizedMeter, facility, group, meter, monthlyData } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { calendarizedMeter, facility, group, meter, monthlyData } from '@app/v1/data/meters/facility-meters.testing';
 
 describe('scoped inventory meter chart projections', () => {
   const facilities = [facility({ guid: 'a', name: 'Plant' }), facility({ guid: 'b', name: 'Plant' })];

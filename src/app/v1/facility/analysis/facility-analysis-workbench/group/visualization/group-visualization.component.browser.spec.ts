@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import * as echarts from 'echarts/core';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
+import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { GroupVisualizationComponent } from './group-visualization.component';
 import { GroupVisualizationSession } from './group-visualization-session.service';

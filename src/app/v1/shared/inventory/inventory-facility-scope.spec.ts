@@ -3,17 +3,17 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { setupFacilityScopeNavigation } from '@app/v1/shell/facility-scope-navigation.testing';
 import { InventoryGridComponent } from './inventory-grid/inventory-grid.component';
 import { InventoryTile } from './inventory.models';
-import { facilityTiles } from '@app/v1/account/data/portfolio/portfolio-tile.views';
-import { buildPortfolioFacilities, PortfolioFacilityInput } from '@app/v1/account/data/portfolio/portfolio-facility.view';
+import { facilityTiles } from '@app/v1/data/inventory/data-inventory-tiles.view';
+import { buildFacilityInventory, FacilityInventoryInput } from '@app/v1/data/facilities/inventory/facility-inventory.view';
 
 describe('inventory facility header links', () => {
   it.each(['title', 'meters', 'predictors'] as const)('opens a filtered inventory from the facility card %s link', async linkKind => {
     TestBed.configureTestingModule({ imports: [InventoryGridComponent] });
     const url = '/v1/workspace/account/account-a/data/portfolio/facilities';
     const view = await setupFacilityScopeNavigation(url);
-    const input: PortfolioFacilityInput = { facilities: view.store.facilities(), meters: [], predictors: [],
+    const input: FacilityInventoryInput = { facilities: view.store.facilities(), meters: [], predictors: [],
       meterData: [], predictorData: [], equipment: [], findings: [], statusState: 'ready' };
-    const tiles = facilityTiles(buildPortfolioFacilities(input), input, view.navigation);
+    const tiles = facilityTiles(buildFacilityInventory(input), input, view.navigation);
     const tile = tiles[0];
     const grid = TestBed.createComponent(InventoryGridComponent);
     grid.componentRef.setInput('tiles', [tile]); grid.componentRef.setInput('printTiles', []);

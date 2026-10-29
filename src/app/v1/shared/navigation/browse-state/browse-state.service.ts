@@ -1,17 +1,17 @@
 import type { ReportInventoryFilters } from '@app/v1/shared/reports/report-inventory.models';
 import { DestroyRef, Injectable, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Observable } from 'rxjs';
-import type { PredictorInventoryFilters } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.models';
-import type { FacilitySort, FacilityStatusFilter } from '@app/v1/account/data/portfolio/portfolio-facility.view';
-import type { PortfolioMeterSort, PortfolioMeterStatusFilter } from '@app/v1/account/data/portfolio/portfolio-meter.view';
-import type { PortfolioInventoryView } from '@app/v1/account/data/portfolio/portfolio-inventory.models';
+import type { PredictorInventoryFilters } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
+import type { FacilitySort, FacilityStatusFilter } from '@app/v1/data/facilities/inventory/facility-inventory.view';
+import type { MeterInventorySort, MeterInventoryStatusFilter } from '@app/v1/data/meters/inventory/meter-inventory.view';
+import { InventoryView } from '@app/v1/shared/inventory/inventory.models';
 
 export interface BrowseFilters {
   reports: ReportInventoryFilters;
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };
   predictors: PredictorInventoryFilters;
   facilities: { search: string; status: FacilityStatusFilter; sort: FacilitySort };
-  meters: { search: string; status: PortfolioMeterStatusFilter; sort: PortfolioMeterSort };
+  meters: { search: string; status: MeterInventoryStatusFilter; sort: MeterInventorySort };
 }
 export type BrowseKind = keyof BrowseFilters;
 export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; }
@@ -23,16 +23,16 @@ export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'anal
 export class BrowseStateService {
   private readonly filters = new Map<string, BrowseFilters[BrowseKind]>();
   private readonly positions = new Map<string, BrowsePosition>();
-  private readonly inventoryViews = new Map<string, PortfolioInventoryView>();
+  private readonly inventoryViews = new Map<string, InventoryView>();
   readFilters<K extends BrowseKind>(key: BrowseKey<K>): BrowseFilters[K] | undefined { return this.filters.get(this.id(key)) as BrowseFilters[K] | undefined; }
   saveFilters<K extends BrowseKind>(key: BrowseKey<K>, value: BrowseFilters[K]): void { this.filters.set(this.id(key), { ...value }); }
   readPosition(key: BrowseKey): BrowsePosition | undefined { return this.positions.get(this.id(key)); }
   savePosition(key: BrowseKey, value: BrowsePosition): void { this.positions.set(this.id(key), value); }
-  readInventoryView(key: BrowseKey<InventoryBrowseKind>): PortfolioInventoryView | undefined {
+  readInventoryView(key: BrowseKey<InventoryBrowseKind>): InventoryView | undefined {
     const value = this.inventoryViews.get(this.id(key));
     return value ? { ...value, overrides: { ...value.overrides } } : undefined;
   }
-  saveInventoryView(key: BrowseKey<InventoryBrowseKind>, value: PortfolioInventoryView): void {
+  saveInventoryView(key: BrowseKey<InventoryBrowseKind>, value: InventoryView): void {
     this.inventoryViews.set(this.id(key), { ...value, overrides: { ...value.overrides } });
   }
   private id(key: BrowseKey): string { return JSON.stringify([key.accountGuid, key.kind, key.facilityGuid ?? '']); }

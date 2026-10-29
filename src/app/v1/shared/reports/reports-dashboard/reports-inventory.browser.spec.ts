@@ -14,8 +14,8 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { getNewIdbAccountReport } from '@data/models/idbModels/accountReport';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { ReportsDashboardComponent } from '@app/v1/shared/reports/reports-dashboard/reports-dashboard.component';
-import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
+import { ReportsDashboardComponent } from './reports-dashboard.component';
+import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports.module';
 import { FACILITY_REPORT_ROUTES } from '@app/v1/facility/reports/facility-reports.routes';
 import { FacilityReportActionsService } from '@app/v1/facility/reports/facility-report-actions.service';
@@ -41,7 +41,7 @@ import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/sin
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 import { getNewAnalysisGroup } from '@data/models/idbModels/analysisItem';
-import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '../report-analysis-return.service';
 
 const dashboardUrl = '/v1/workspace/account/account-a/reports/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div style="position:relative;isolation:isolate"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })

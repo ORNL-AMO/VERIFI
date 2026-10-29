@@ -1,10 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import {
-  buildAnalysisWorkbenchStageAttention,
-  buildAnalysisWorkbenchStageNavigation,
-  buildAnalysisWorkbenchStages,
-} from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
+import { buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
 import {
   accountAnalysisWorkbenchReadiness,
   buildAccountAnalysisWorkbenchStageNavigation,
@@ -12,7 +8,7 @@ import {
 } from '@app/v1/account/analysis/account-analysis-workbench/account-analysis-workbench.models';
 import { buildFacilitySelectionItems } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-facility-selection.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceNavigationService } from '../../workspace-navigation.service';
 import { analysisCategories } from '@app/v1/shared/analysis-category/analysis-category-presentation';
 
 import type { AnalysisNavigationStage } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';

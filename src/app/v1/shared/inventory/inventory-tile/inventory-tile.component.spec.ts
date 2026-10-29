@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { portfolioTile } from '@app/v1/account/data/portfolio/portfolio-inventory.testing';
+import { portfolioTile } from '../inventory.testing';
 import { InventoryTileComponent } from './inventory-tile.component';
 
 describe('portfolio tile interactions and additive details', () => {

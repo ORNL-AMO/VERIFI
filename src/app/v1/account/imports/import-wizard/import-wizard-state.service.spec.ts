@@ -10,7 +10,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { facility, group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { ImportSessionService } from '../import-session.service';
 import { ImportMeterReviewStateService } from './import-meter-review-state.service';
 import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';

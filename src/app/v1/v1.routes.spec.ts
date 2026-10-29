@@ -1,50 +1,50 @@
 import { Component, signal } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
-import { inventoryScopeChangeGuard } from './shell/inventory-scope-change.guard';
-import { singleSiteAccountRedirectGuard } from './routing/canonical-route.guards';
-import { provideRouter, Router } from '@angular/router';
+import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
+import { singleSiteAccountRedirectGuard } from '@app/v1/routing/canonical-route.guards';
+import { provideRouter, Router, Route, RouterModule } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports.module';
 import { AccountReportsModule } from '@app/v1/account/reports/account-reports.module';
 import { TestBed } from '@angular/core/testing';
-import { Route } from '@angular/router';
-import { RouterModule } from '@angular/router';
-import { AccountDataModule } from '@app/v1/account/data/account-data.module';
-import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
-import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
-import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
-import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
-import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
-import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
-import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
-import { AccountPortfolioMetersTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
-import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
-import { FacilityDataModule } from '@app/v1/facility/data/facility-data.module';
-import { FacilityMetersComponent } from '@app/v1/facility/data/meters/facility-meters.component';
-import { MeterWorkbenchBillInspectionComponent } from '@app/v1/facility/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
-import { MeterWorkbenchMonthlyChartComponent } from '@app/v1/facility/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
-import { MeterWorkbenchMonthlyDataComponent } from '@app/v1/facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
-import { MeterWorkbenchQualityReportComponent } from '@app/v1/facility/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
-import { MeterWorkbenchReadingsComponent } from '@app/v1/facility/data/meters/meter-workbench/readings/meter-workbench-readings.component';
-import { MeterWorkbenchSettingsComponent } from '@app/v1/facility/data/meters/meter-workbench/settings/meter-workbench-settings.component';
-import { MeterWorkbenchComponent } from '@app/v1/facility/data/meters/meter-workbench/meter-workbench.component';
-import { MeterWorkbenchYearlyDataComponent } from '@app/v1/facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
-import { MeterGroupWorkbenchGraphComponent } from '@app/v1/facility/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
-import { MeterGroupWorkbenchTableComponent } from '@app/v1/facility/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
-import { MeterGroupWorkbenchYearlyDataComponent } from '@app/v1/facility/data/meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
-import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter-group-workbench/meter-group-workbench.component';
-import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
-import { FacilityPredictorsWorkspaceService } from '@app/v1/facility/data/predictors/facility-predictors-workspace.service';
-import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
-import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
-import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
-import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
-import { WeatherPredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
-import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
-import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
-import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
-import { V1Routes } from './v1.routes';
+
+
+import { DataModule } from '@app/v1/data/data.module';
+import { CustomGridFactorsComponent } from '@app/v1/data/custom-database/custom-grid-factors/custom-grid-factors.component';
+import { CustomFuelsComponent } from '@app/v1/data/custom-database/custom-fuels/custom-fuels.component';
+import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/custom-gwps.component';
+import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
+import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
+import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
+import { FacilitiesInventoryComponent } from '@app/v1/data/facilities/inventory/facilities-inventory.component';
+import { MetersInventoryComponent } from '@app/v1/data/meters/inventory/meters-inventory.component';
+import { PredictorsInventoryComponent } from '@app/v1/data/predictors/inventory/predictors-inventory.component';
+import { MetersModule } from '@app/v1/data/meters/meters.module';
+import { MeterWorkspaceComponent } from '@app/v1/data/meters/meter-workspace/meter-workspace.component';
+import { MeterWorkbenchBillInspectionComponent } from '@app/v1/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
+import { MeterWorkbenchMonthlyChartComponent } from '@app/v1/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
+import { MeterWorkbenchMonthlyDataComponent } from '@app/v1/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
+import { MeterWorkbenchQualityReportComponent } from '@app/v1/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
+import { MeterWorkbenchReadingsComponent } from '@app/v1/data/meters/meter-workbench/readings/meter-workbench-readings.component';
+import { MeterWorkbenchSettingsComponent } from '@app/v1/data/meters/meter-workbench/settings/meter-workbench-settings.component';
+import { MeterWorkbenchComponent } from '@app/v1/data/meters/meter-workbench/meter-workbench.component';
+import { MeterWorkbenchYearlyDataComponent } from '@app/v1/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { MeterGroupWorkbenchGraphComponent } from '@app/v1/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
+import { MeterGroupWorkbenchTableComponent } from '@app/v1/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchYearlyDataComponent } from '@app/v1/data/meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
+import { MeterGroupWorkbenchComponent } from '@app/v1/data/meters/meter-group-workbench/meter-group-workbench.component';
+import { MeterGroupingComponent } from '@app/v1/data/meters/meter-grouping/meter-grouping.component';
+import { FacilityPredictorsWorkspaceService } from '@app/v1/data/predictors/facility-predictors-workspace.service';
+import { PredictorWorkbenchComponent } from '@app/v1/data/predictors/predictor-workbench/predictor-workbench.component';
+import { PredictorWorkbenchQualityReportComponent } from '@app/v1/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
+import { PredictorWorkbenchReadingsComponent } from '@app/v1/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
+import { PredictorWorkbenchSettingsComponent } from '@app/v1/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
+import { WeatherPredictorWorkbenchComponent } from '@app/v1/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
+import { WeatherPredictorSetupComponent } from '@app/v1/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
+import { WeatherPredictorReadingsComponent } from '@app/v1/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
+import { WeatherPredictorQualityComponent } from '@app/v1/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
+import { V1Routes } from '@app/v1/v1.routes';
 import { ImportUploadComponent } from '@app/v1/account/imports/import-upload/import-upload.component';
 import { ImportWizardComponent } from '@app/v1/account/imports/import-wizard/import-wizard.component';
 import { ImportColumnsStepComponent } from '@app/v1/account/imports/import-wizard/steps/columns/import-columns-step.component';
@@ -94,11 +94,11 @@ describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        AccountDataModule,
+        DataModule,
         FacilityReportsModule,
         AccountReportsModule,
         RouterModule.forRoot([]),
-        FacilityDataModule
+        MetersModule
       ]
     });
   });
@@ -192,16 +192,16 @@ describe('V1Routes facility data meters routes', () => {
     const route = accountPortfolioRoute();
     const children = route.children ?? [];
 
-    expect(route.component).toBe(AccountPortfolioComponent);
+    expect(route.component).toBe(DataInventoryComponent);
     expect(children.find(child => child.path === '')).toMatchObject({
       path: '',
       pathMatch: 'full',
       redirectTo: 'facilities'
     });
-    expect(children.find(child => child.path === 'facilities')).toMatchObject({ component: AccountPortfolioFacilitiesTabComponent });
-    expect(children.find(child => child.path === 'meters')).toMatchObject({ component: AccountPortfolioMetersTabComponent });
-    expect(children.find(child => child.path === 'predictors')).toMatchObject({ component: AccountPortfolioPredictorsTabComponent });
-    expect(children.find(child => child.path === 'energy-uses')).toMatchObject({ component: AccountPortfolioEnergyUsesTabComponent });
+    expect(children.find(child => child.path === 'facilities')).toMatchObject({ component: FacilitiesInventoryComponent });
+    expect(children.find(child => child.path === 'meters')).toMatchObject({ component: MetersInventoryComponent });
+    expect(children.find(child => child.path === 'predictors')).toMatchObject({ component: PredictorsInventoryComponent });
+    expect(children.find(child => child.path === 'energy-uses')).toMatchObject({ component: EnergyUsesInventoryComponent });
     expect(children.some(child => child.path === 'analyses' || child.path === 'reports')).toBe(false);
     expect(children.find(child => child.path === '**')).toMatchObject({
       path: '**',
@@ -307,7 +307,7 @@ describe('V1Routes facility data meters routes', () => {
 
     expect(groupingRoute).toMatchObject({
       path: 'meter-grouping',
-      component: FacilityMetersComponent
+      component: MeterWorkspaceComponent
     });
     expect(groupingLandingRoute).toMatchObject({
       path: '',

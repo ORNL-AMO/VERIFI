@@ -1,6 +1,6 @@
 import { Injectable, WritableSignal, computed, inject, signal } from '@angular/core';
 import { AnalysisGroup, AnalysisType } from '@data/models/analysis';
-import { buildMeterCards } from '@app/v1/facility/data/meters/models';
+import { buildMeterCards } from '@app/v1/data/meters/models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { isSkippedAnalysisType } from '../../facility-analysis-workbench.models';

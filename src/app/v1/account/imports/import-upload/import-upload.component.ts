@@ -8,7 +8,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
-import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
+import { HasUnsavedChanges } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 interface UploadFailure { name: string; message: string; }

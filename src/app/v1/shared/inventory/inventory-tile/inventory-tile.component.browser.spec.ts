@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { page, userEvent } from 'vitest/browser';
-import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
+import { PORTFOLIO_PALETTES, textContrast } from '../inventory-browser-test.helpers';
 import { InventoryTileComponent } from './inventory-tile.component';
 import { InventoryTile } from '../inventory.models';
 

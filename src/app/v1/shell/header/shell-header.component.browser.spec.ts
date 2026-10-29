@@ -1,5 +1,5 @@
 import { cdp, page, userEvent } from 'vitest/browser';
-import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
+import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { ShellHeaderTestModule } from './shell-header.testing';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';

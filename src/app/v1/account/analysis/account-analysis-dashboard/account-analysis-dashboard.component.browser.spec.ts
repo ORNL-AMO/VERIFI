@@ -13,11 +13,11 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
-import { flushPendingChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { flushPendingChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-actions.service';
-import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
+import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { AccountAnalysisDashboardComponent } from './account-analysis-dashboard.component';
 import { AccountAnalysisWorkspaceService } from './account-analysis-workspace.service';
 import { AccountAnalysisActionsService } from './account-analysis-actions.service';

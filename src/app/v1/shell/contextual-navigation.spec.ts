@@ -3,7 +3,7 @@ import { makeFinding } from '@app/v1/status/status.models';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
-import { meter } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { meter } from '@app/v1/data/meters/facility-meters.testing';
 import { SectionNavModule } from './section-nav/section-nav.module';
 import { DataNavComponent } from './section-nav/data-nav/data-nav.component';
 import { ReportsNavComponent } from './section-nav/reports-nav/reports-nav.component';

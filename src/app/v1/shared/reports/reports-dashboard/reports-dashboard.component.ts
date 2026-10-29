@@ -6,7 +6,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { InventoryTileActionRequest, InventoryTileMenuAction } from '@app/v1/shared/inventory/inventory.models';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
-import { PortfolioInventoryState } from '@app/v1/account/data/portfolio/portfolio-inventory-state';
+import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
 import { FACILITY_REPORT_TYPES } from '@app/v1/facility/reports/facility-report.models';
 import { ReportLifecycleService } from '../report-lifecycle.service';
 import { ACCOUNT_REPORT_TYPES, DEFAULT_REPORT_FILTERS, ReportInventoryFilters, buildReportInventory, filterReportInventory, reportInventoryTile } from '../report-inventory.models';
@@ -49,7 +49,7 @@ export class ReportsDashboardComponent {
   readonly tiles = computed(() => this.filteredEntries().map(entry => reportInventoryTile(entry, this.navigation)));
   private readonly setupSettled = computed(() => this.status.state() === 'ready' || this.status.state() === 'error');
   private readonly inventoryReady = computed(() => this.workspace.canWrite() && this.setupSettled());
-  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.key)), computed(() => ({ ...this.filters(), facility: this.scopedFacilityGuid() })), this.inventoryReady);
+  readonly inventory = new InventoryViewState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.key)), computed(() => ({ ...this.filters(), facility: this.scopedFacilityGuid() })), this.inventoryReady);
   readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready() && this.setupSettled());
   readonly canAct = computed(() => !!this.browseKey() && this.lifecycle.canAct() && !this.lifecycle.editor());
   readonly menuActions = computed<readonly InventoryTileMenuAction[]>(() => [

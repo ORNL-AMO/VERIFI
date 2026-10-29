@@ -1,6 +1,6 @@
 import { ReportsDashboardComponent } from '@app/v1/shared/reports/reports-dashboard/reports-dashboard.component';
 import { Routes } from '@angular/router';
-import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { AccountReportWorkbenchComponent, accountReportLeaveGuard } from './account-report-workbench/account-report-workbench.component';
 import { AccountReportSetupComponent } from './account-report-workbench/setup/account-report-setup.component';
 import { AccountReportDataChecksComponent } from './account-report-workbench/data-checks/account-report-data-checks.component';

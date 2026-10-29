@@ -120,3 +120,5 @@ export interface InventoryReportSnapshot {
   readonly scopeLabel: string;
   readonly findings: readonly (Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity' | 'action'> & { readonly unavailableReason?: string })[];
 }
+
+export interface InventoryView { readonly page: number; readonly detail?: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; }

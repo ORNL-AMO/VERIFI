@@ -16,7 +16,7 @@ import { AccountSettingsPortfolioComponent } from './portfolio/account-settings-
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
 import { AccountSettingsDataValidationComponent } from './data-validation/account-settings-data-validation.component';
 import { AccountSettingsUnitsComponent } from './units/account-settings-units.component';
-import { AccountDataModule } from '@app/v1/account/data/account-data.module';
+import { DataModule } from '@app/v1/data/data.module';
 
 @NgModule({
   declarations: [
@@ -38,7 +38,7 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
     IconsModule,
     ReactiveFormsModule,
     RouterModule,
-    AccountDataModule,
+    DataModule,
     ImportAccountBackupComponent
   ],
   exports: [AccountSettingsComponent]

@@ -4,7 +4,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { getNewIdbAccountReport } from '@data/models/idbModels/accountReport';
 import { reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
-import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
+import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { setupFacilityScopeNavigation } from '../../facility-scope-navigation.testing';
 import { SectionNavModule } from '../section-nav.module';
 import { SectionNavComponent } from '../section-nav.component';

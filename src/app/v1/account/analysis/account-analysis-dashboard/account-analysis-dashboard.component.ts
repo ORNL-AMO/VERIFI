@@ -19,7 +19,7 @@ import { BrowseFilters, BrowseKey, rememberBrowseForm } from '@app/v1/shared/nav
 import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { PageIdentityComponent, inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
-import { PortfolioInventoryState } from '@app/v1/account/data/portfolio/portfolio-inventory-state';
+import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
 import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-actions.service';
 import { AnalysisDetailsSlideoutComponent } from '@app/v1/facility/analysis/analysis-details-slideout/analysis-details-slideout.component';
 import { FacilityAnalysisComparisonComponent } from '@app/v1/facility/analysis/facility-analysis-comparison/facility-analysis-comparison.component';
@@ -89,7 +89,7 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
   readonly comparison = new AnalysisComparisonState(this.comparisonOptions, computed(() => this.browseKey() ? JSON.stringify([this.browseKey()!.accountGuid, this.scopedFacilityGuid()]) : undefined));
   readonly filteredEntries = computed(() => filterAnalysisInventory(this.entries(), this.filters()));
   private readonly baseTiles = computed(() => this.filteredEntries().map(entry => analysisInventoryTile(entry, undefined, this.workspace.meterGroups(), this.navigation, this.workspace.account()?.guid ?? '', this.workspace.statusState(), this.showCategory())));
-  readonly inventory = new PortfolioInventoryState(this.browseKey, this.baseTiles, computed(() => this.entries().map(entry => entry.key)), computed(() => ({ ...this.filters(), facility: this.scopedFacilityGuid() })), this.workspace.canWrite);
+  readonly inventory = new InventoryViewState(this.browseKey, this.baseTiles, computed(() => this.entries().map(entry => entry.key)), computed(() => ({ ...this.filters(), facility: this.scopedFacilityGuid() })), this.workspace.canWrite);
   readonly visibleTiles = computed(() => this.inventory.visibleTiles().map(tile => this.tile(this.entries().find(entry => entry.key === tile.guid)!)));
   readonly printTiles = computed(() => this.filteredEntries().map(entry => this.tile(entry)));
   readonly detailsGuid = signal<string | undefined>(undefined);

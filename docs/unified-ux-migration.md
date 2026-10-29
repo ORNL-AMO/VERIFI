@@ -463,3 +463,7 @@ Valid single-facility accounts now use unified Meters, Predictors, and Analysis 
 ### Phase 4 dashboard retirement
 
 The unified inventories now replace facility Meters, Predictors, Analysis, and Reports dashboards. Obsolete v1 routes and transient dashboard state are removed without aliases; unknown paths recover through normal routing. Shared creation forms, projections, inspectors, and comparisons remain active. Reports uses one directly routed inventory. Meter workbenches and Meter Grouping retain scoped provider hosts; Predictor workflow providers belong to their owning workbench components. Historical dashboard workflow notes above are superseded by the [Phase 4 roadmap](v1-global-facility-scope-plan.md#phase-4--dashboard-retirement-and-resource-based-folders).
+
+### Phase 4 Data feature organization
+
+Data now lives under `src/app/v1/data/{facilities,meters,predictors,energy-uses,custom-database}`. Data-only inventory composition lives in `data/inventory`; neutral view state and detail preferences live in `shared/inventory`. Resource NgModules own their inventories, workbenches, and forms. The old account/facility Data folders and inventory type-alias facade are removed. URL contracts and responsive workbench gutters remain unchanged.

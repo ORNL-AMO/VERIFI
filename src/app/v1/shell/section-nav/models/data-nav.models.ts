@@ -4,8 +4,8 @@ import type { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGr
 import type { IdbPredictor } from '@data/models/idbModels/predictor';
 import type { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
-import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
-import { buildWeatherStationGroups, predictorIcon } from '@app/v1/facility/data/predictors/models';
+import { meterSourceIcon } from '@app/v1/data/meters/models';
+import { buildWeatherStationGroups, predictorIcon } from '@app/v1/data/predictors/models';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 export type ResourceNavGroupId = 'meters' | 'meter-grouping' | 'predictors';

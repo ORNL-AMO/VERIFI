@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { flushPendingChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { flushPendingChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { FacilityReportWorkbenchComponent, facilityReportLeaveGuard } from './facility-report-workbench/facility-report-workbench.component';
 import { FacilityReportSetupComponent } from './facility-report-workbench/setup/facility-report-setup.component';
 import { FacilityReportDataChecksComponent } from './facility-report-workbench/data-checks/facility-report-data-checks.component';

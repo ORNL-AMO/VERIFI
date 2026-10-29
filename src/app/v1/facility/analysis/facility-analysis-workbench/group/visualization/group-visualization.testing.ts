@@ -4,7 +4,7 @@ import type { AnalysisGroup, AnalysisType } from '@data/models/analysis';
 import type { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import type { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { account, calendarizedMeter, facility, meter, monthlyData, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, calendarizedMeter, facility, meter, monthlyData, reading } from '@app/v1/data/meters/facility-meters.testing';
 import type { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 
 export function visualizationFixture(type: AnalysisType = 'absoluteEnergyConsumption') {

@@ -5,7 +5,7 @@ import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-worksp
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { account, facility } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, facility } from '@app/v1/data/meters/facility-meters.testing';
 import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { BehaviorSubject } from 'rxjs';
