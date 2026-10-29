@@ -5,8 +5,8 @@ import { IconName } from '@app/v1/shared/icons/icon-registry';
 
 export interface PageBreadcrumb { readonly label: string; readonly route?: readonly string[]; readonly queryParams?: Params; readonly action?: string; readonly icon?: IconName; }
 
-export function inventoryScopeBreadcrumbs(accountName: string, facilityName?: string): readonly PageBreadcrumb[] {
-  return [{ label: accountName, action: 'account', icon: 'account' }, ...(facilityName ? [{ label: facilityName, icon: 'facility' as const }] : [])];
+export function inventoryScopeBreadcrumbs(accountName: string, facilityName?: string, singleFacility = false): readonly PageBreadcrumb[] {
+  return singleFacility ? [] : [{ label: accountName, action: 'account', icon: 'account' }, ...(facilityName ? [{ label: facilityName, icon: 'facility' as const }] : [])];
 }
 @Component({
   selector: 'app-page-identity', standalone: true, imports: [RouterLink, IconComponent],

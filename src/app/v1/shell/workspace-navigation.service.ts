@@ -165,7 +165,13 @@ export class WorkspaceNavigationService {
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
   readonly singleSiteWorkspaceState = computed(() => this.resolveSingleSiteWorkspaceState());
-  readonly isSingleSiteWorkspace = computed(() => this.singleSiteWorkspaceState() === 'valid');
+  readonly singleFacilityContext = computed<IdbFacility | undefined>(() => {
+    const account = this.workspace.account();
+    if (this.workspace.status() !== 'ready' || account?.isSingleFacilityCompany !== true) return undefined;
+    const facilities = this.facilities().filter(facility => facility.accountId === account.guid);
+    return facilities.length === 1 ? facilities[0] : undefined;
+  });
+  readonly isSingleSiteWorkspace = computed(() => !!this.singleFacilityContext());
   readonly hasSingleSiteRecovery = computed(() => {
     const state = this.singleSiteWorkspaceState();
     return state === 'missing-facility' || state === 'multiple-facilities';
@@ -179,7 +185,7 @@ export class WorkspaceNavigationService {
     const state = this.routeState();
     if (!this.isAccountInventory(state) || this.workspace.status() !== 'ready' || state.accountGuid !== this.workspace.account()?.guid) return ALL_FACILITIES;
     if (this.isSingleSiteWorkspace()) return state.section === 'reports' ? ALL_FACILITIES
-      : { kind: 'facility', facilityGuid: this.facilities()[0].guid };
+      : { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
     const guid = this.router.parseUrl(this.currentUrl()).queryParamMap.get('facility');
     return guid && this.facilities().some(facility => facility.guid === guid && facility.accountId === state.accountGuid)
       ? { kind: 'facility', facilityGuid: guid } : ALL_FACILITIES;
@@ -192,7 +198,7 @@ export class WorkspaceNavigationService {
     const state = this.routeState();
     const facility = this.facilities().find(item => item.guid === state.facilityGuid && item.accountId === this.workspace.account()?.guid);
     if (facility) return { kind: 'facility', facilityGuid: facility.guid };
-    if (this.isSingleSiteWorkspace()) return { kind: 'facility', facilityGuid: this.facilities()[0].guid };
+    if (this.isSingleSiteWorkspace()) return { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
     return this.inventoryScope();
   });
   readonly headerFacility = computed(() => {
@@ -638,7 +644,7 @@ export class WorkspaceNavigationService {
     if (account?.isSingleFacilityCompany !== true) {
       return 'portfolio';
     }
-    const facilityCount = this.facilities().length;
+    const facilityCount = this.facilities().filter(facility => facility.accountId === account.guid).length;
     if (facilityCount === 1) {
       return 'valid';
     }
@@ -648,16 +654,19 @@ export class WorkspaceNavigationService {
   private buildPanelContent(): PanelContent {
     const account = this.account();
     const facility = this.contextFacility();
+    const single = this.singleFacilityContext();
     const isFacility = !!facility;
-    const name = isFacility ? facility?.name : account?.name;
+    const name = single?.name ?? (isFacility ? facility?.name : account?.name);
     const meterCount = this.contextMeters().length;
     const predictorCount = this.contextPredictors().length;
-    const analysisCount = this.contextAnalyses().length + (isFacility ? 0 : this.workspace.accountAnalyses().length);
-    const reportCount = this.contextReports().length + (isFacility ? 0 : this.workspace.accountReports().length);
+    const analysisCount = this.contextAnalyses().length + (isFacility || single ? 0 : this.workspace.accountAnalyses().length);
+    const reportCount = this.contextReports().length + (isFacility && !single ? 0 : this.workspace.accountReports().length);
     const isData = this.activeSection() === 'data';
-    const todos = this.status.accountTodos().filter(item => !facility || item.entity.facilityGuid === facility.guid);
-    const discardedWarnings = this.status.discardedItems().filter(item => !facility || item.entity.facilityGuid === facility.guid);
-    const help = this.activeSection() === 'reports'
+    const todos = this.status.accountTodos().filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
+    const discardedWarnings = this.status.discardedItems().filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
+    const help = single
+      ? [`Browse data, analyses, and reports for ${single.name}.`, 'Open an item to work with its saved data and settings.']
+      : this.activeSection() === 'reports'
       ? ['Use Reports to browse, create, copy, rename, and delete saved reports. Account Reports includes reports from every facility.', 'Open a report name to view its saved configuration. Report-specific settings and previews are coming in later migrations.']
       : isFacility && this.activeSection() === 'data'
       ? this.buildFacilityDataHelp()
@@ -671,7 +680,7 @@ export class WorkspaceNavigationService {
       todos: isData ? todos.filter(isDataFinding) : todos,
       discardedWarnings: isData ? discardedWarnings.filter(isDataFinding) : discardedWarnings,
       results: [
-        { label: 'Facilities', value: String(facility ? 1 : this.facilities().length), tone: 'info' },
+        ...(!single ? [{ label: 'Facilities', value: String(facility ? 1 : this.facilities().length), tone: 'info' as const }] : []),
         { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },
         { label: 'Predictors', value: String(predictorCount), tone: predictorCount > 0 ? 'success' : 'neutral' },
         ...(!isData ? [
@@ -680,7 +689,7 @@ export class WorkspaceNavigationService {
         ] : [])
       ],
       details: [
-        { label: 'Context', value: isFacility ? 'Facility workspace' : 'Account workspace' },
+        { label: 'Context', value: single ? 'Single-facility workspace' : isFacility ? 'Facility workspace' : 'Account workspace' },
         { label: 'Active section', value: `${this.activeSection()} / ${this.activeDetail()}` },
         { label: 'Support tab', value: this.activePanelTab() }
       ]

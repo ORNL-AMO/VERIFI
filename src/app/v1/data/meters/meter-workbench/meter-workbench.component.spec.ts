@@ -31,7 +31,7 @@ describe('MeterWorkbenchComponent', () => {
     const portfolio = fixture.componentInstance.breadcrumbs();
     singleSite.set(true);
     fixture.detectChanges();
-    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], queryParams: {} }]);
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Meters', icon: 'meter', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], queryParams: {} }]);
     expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
     singleSite.set(false);
     fixture.detectChanges();

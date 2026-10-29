@@ -33,6 +33,16 @@ describe('CreateMeterDrawerComponent', () => {
     return { fixture, component, form, submit, actions, facilities, canWrite, hasPending, activeAccount };
   }
 
+  it('hides single-site ownership selection while creating with the explicitly supplied facility', async () => {
+    const { fixture, component, form, actions } = setup(true);
+    fixture.componentRef.setInput('singleFacility', true);
+    fixture.componentRef.setInput('initialFacilityGuid', 'facility-a'); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[meterContext] select')).toBeNull();
+    form.form.controls.name.setValue(draft.name); fixture.detectChanges();
+    await component.createMeter(draft);
+    expect(actions.createMeter).toHaveBeenCalledWith(expect.objectContaining(draft), 'facility-a');
+  });
+
   it('requires a facility and meter name, filters groups and clears stale selections when switching facilities', () => {
     const { fixture, component, form, submit } = setup();
     form.form.controls.name.setValue(draft.name);

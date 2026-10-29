@@ -6,7 +6,7 @@
   <section class="v1-nav__group" aria-labelledby="v1-analysis-nav-title">
     <app-status-evaluation-message [state]="status.state()" [compact]="true"></app-status-evaluation-message>
     <span id="v1-analysis-nav-title" class="v1-nav__label">
-      {{ selectedFacility ? 'Facility Analysis' : 'Account Analysis' }}
+      {{ navigation.isSingleSiteWorkspace() ? 'Analysis' : selectedFacility ? 'Facility Analysis' : 'Account Analysis' }}
     </span>
     <a class="v1-nav__link"
       [class.active]="navigation.activeDetail() === 'dashboard'"

@@ -1,4 +1,5 @@
 @let crumbs = breadcrumbs();
+@if (crumbs.length) {
 @if (crumbs.length === 1 && !crumbs[0].route && !crumbs[0].action) {
   <p class="v1-eyebrow" [title]="crumbs[0].label">{{ crumbs[0].label }}</p>
 } @else {
@@ -25,6 +26,7 @@
       </li>
     }
   </ol></nav>
+}
 }
 <h1 [id]="headingId()" tabindex="-1"><app-ui-icon [name]="icon()"/>
   @if (customTitle()) { <ng-content/> } @else { <span>{{ title() }}</span> }

@@ -10,6 +10,7 @@ import { PredictorDraftSlideoutComponent } from '../predictor-draft-slideout/pre
   imports: [ReactiveFormsModule, PredictorDraftSlideoutComponent],
   templateUrl: './create-predictor-drawer.component.html', styleUrls: ['./create-predictor-drawer.component.css'] })
 export class CreatePredictorDrawerComponent {
+  readonly singleFacility = input(false);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly actions = inject(PredictorWorkspaceActionsService);
   private readonly destroy = inject(DestroyRef);

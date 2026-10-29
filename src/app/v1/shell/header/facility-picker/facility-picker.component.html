@@ -1,10 +1,4 @@
 <div class="v1-facility-picker" (keydown.escape)="onEscape()">
-  @if (singleSite && selectedFacility) {
-    <div class="v1-facility-picker__single">
-      <app-ui-icon name="facility"></app-ui-icon>
-      <span>{{ selectedFacility.name }}</span>
-    </div>
-  } @else {
     <div cdkOverlayOrigin #origin="cdkOverlayOrigin" class="v1-facility-picker__wrap" [class.open]="open">
       <button
         #toggleButton
@@ -62,7 +56,7 @@
         </div>
       </ng-template>
     </div>
-  }
+
 </div>
 
 @if (unavailableMessage) { <span class="visually-hidden" role="status">{{ unavailableMessage }}</span> }

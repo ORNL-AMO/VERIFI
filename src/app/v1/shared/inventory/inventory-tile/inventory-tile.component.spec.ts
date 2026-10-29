@@ -17,6 +17,15 @@ describe('portfolio tile interactions and additive details', () => {
       } }));
     fixture.detectChanges(); return fixture;
   }
+  it('removes repeated ownership while keeping title and card actions for a single facility', () => {
+    const fixture = setup(); fixture.componentRef.setInput('showOwnership', false); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-inventory-card-header')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.portfolio-tile__name')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.portfolio-tile__menu-button')).not.toBeNull();
+    fixture.componentRef.setInput('print', true); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-inventory-card-header')).toBeNull();
+  });
+
   it('shows identity, location, facility icon, and status in Simple; facts accumulate at higher levels', () => {
     const fixture = setup(), root = fixture.nativeElement as HTMLElement;
     expect(root.querySelector('.portfolio-tile__location')?.textContent).toBe('Oak Ridge, TN');

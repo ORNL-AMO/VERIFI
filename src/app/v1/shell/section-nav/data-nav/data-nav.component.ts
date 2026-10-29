@@ -22,7 +22,7 @@ export class DataNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly status = inject(WorkspaceStatusService);
   readonly facilityContext = computed(() => !!this.navigation.contextFacility());
-  readonly dataTitle = computed(() => this.facilityContext() ? 'Facility Data' : 'Account Data');
+  readonly dataTitle = computed(() => this.navigation.isSingleSiteWorkspace() ? 'Data' : this.facilityContext() ? 'Facility Data' : 'Account Data');
   readonly portfolioLinks = computed(() => {
     const account = this.navigation.account();
     if (!account || this.facilityContext()) return [];

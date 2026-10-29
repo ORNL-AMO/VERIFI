@@ -63,7 +63,8 @@ export class MeterGroupingComponent implements OnDestroy {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account?.name || 'Account', route: this.accountMetersRoute() },
-      { label: facility.name || 'Facility' }
+      { label: facility.name || 'Facility' },
+      { label: 'Meters', icon: 'meter', ...this.navigation.facilityInventoryLink(facility.guid, 'meters') }
     ) : [];
   });
   readonly dropListIds = computed(() => this.workspace.groupSections().map(section => meterGroupDropListId(section.id)));

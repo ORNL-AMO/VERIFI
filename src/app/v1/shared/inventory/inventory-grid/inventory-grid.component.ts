@@ -15,6 +15,7 @@ export class InventoryGridComponent {
   @Input() set overrides(value: Readonly<Record<string, InventoryDetailLevel>>) { this.overrideState.set(value); }
   @Input() actionsByGuid: Readonly<Record<string, readonly InventoryTileMenuAction[]>> = {};
   @Input() actions: readonly InventoryTileMenuAction[] = [];
+  @Input() showOwnership = true;
   @Input() selecting = false;
   @Input() selected: readonly string[] = [];
   @Input() canSelect = true;

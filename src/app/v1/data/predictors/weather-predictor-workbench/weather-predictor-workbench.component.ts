@@ -102,7 +102,9 @@ export class WeatherPredictorWorkbenchComponent {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name, ...this.navigation.facilityInventoryLink(facility.guid, 'predictors') }) : [];
+      { label: facility.name, ...this.navigation.facilityInventoryLink(facility.guid, 'predictors') },
+      { label: 'Predictors', icon: 'predictor', ...this.navigation.facilityInventoryLink(facility.guid, 'predictors') }
+    ) : [];
   });
 
   constructor() {

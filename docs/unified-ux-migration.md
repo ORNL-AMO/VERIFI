@@ -477,3 +477,7 @@ The unified Analysis inventory and comparison flow live under `src/app/v1/analys
 Reports inventory, lifecycle presentation, shared report editors/checks, and account/facility workbenches now live under `src/app/v1/reports`. The routed `ReportsInventoryComponent` replaces the old wrapper composition. Account/facility workflow modules import resource-owned presentation through `ReportsModule`. Existing URLs, report settings, single-facility account report access, calculation demand, and save/leave protections remain unchanged. Phase 5 presentation simplification remains Not started.
 
 Phase 4 acceptance is complete. The [roadmap evidence](v1-global-facility-scope-plan.md#implementation-and-validation-evidence) records the full fast/Chromium suites, production web build, type-check, documentation/source scans, and preserved workbench spacing. Phase 5 remains Not started.
+
+### Phase 5 single-facility presentation
+
+The ready sole-facility projection supplies one static header identity. Shared inventories omit repeated ownership and context breadcrumbs; workbenches retain resource return links. Meter/Predictor creation keeps an explicit owner while hiding the redundant selector, and fixed-facility Analysis creation hides ownership controls. Portfolio and recovery experiences remain separate; Reports and Settings/Backup changes are tracked in the [roadmap](v1-global-facility-scope-plan.md#phase-5--single-facility-presentation).

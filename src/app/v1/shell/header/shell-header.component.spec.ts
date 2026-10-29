@@ -1,3 +1,5 @@
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { facility } from '@app/v1/data/meters/facility-meters.testing';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ShellHeaderTestModule } from './shell-header.testing';
@@ -12,6 +14,21 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { ShellHeaderComponent } from './shell-header.component';
 
 describe('ShellHeaderComponent', () => {
+  it('shows one static facility identity and restores account scope controls after conversion', () => {
+    const { fixture, navigation } = setup(true);
+    navigation.singleFacilityContext.set(facility({ name: 'Plant identity' })); fixture.detectChanges();
+    const identity = fixture.nativeElement.querySelector('.v1-workspace__single-identity');
+    expect(identity.textContent).toContain('Plant identity');
+    expect(identity.querySelector('app-ui-icon')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-facility-picker')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-workspace__account-link')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-header-backup')).not.toBeNull();
+    fixture.nativeElement.querySelector('.v1-workspace__brand').click(); expect(navigation.showWelcome).toHaveBeenCalledOnce();
+    navigation.singleFacilityContext.set(undefined); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-facility-picker')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-workspace__account-link').textContent).toContain('Account A');
+  });
+
   it('downloads the whole account immediately, including in facility context', () => {
     const { fixture, backups, navigation } = setup(true);
     navigation.contextMode.mockReturnValue('facility');
@@ -129,7 +146,7 @@ function setup(isWorkspaceRoute: boolean): {
     isSupportPanelOpen: vi.fn(() => true),
     contextMode: vi.fn(() => 'account'),
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
-    headerFacility: () => undefined, isSingleSiteWorkspace: () => false,
+    headerFacility: () => undefined, singleFacilityContext: signal<IdbFacility | undefined>(undefined), isSingleSiteWorkspace: () => false,
     scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '',
     changeFacilityScope: vi.fn(),
     facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),

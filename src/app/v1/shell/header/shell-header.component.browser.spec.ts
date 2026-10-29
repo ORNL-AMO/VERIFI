@@ -16,7 +16,7 @@ describe('backup tooltip contrast', () => {
         { provide: AppearanceService, useValue: {} },
         { provide: WorkspaceNavigationService, useValue: {
           isWorkspaceRoute: () => true, account: () => ({ guid: 'account-a', name: 'Account A' }),
-          facilities: () => [], headerFacility: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', isSupportPanelOpen: () => false
+          facilities: () => [], headerFacility: () => undefined, singleFacilityContext: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', isSupportPanelOpen: () => false
         } },
         { provide: ManualBackupDownloadService, useValue: {
           available: signal(true), preparing: signal(false),
@@ -55,7 +55,7 @@ describe('header facility chooser presentation', () => {
     const selected = signal<typeof facility | undefined>(undefined);
     const account = { guid: 'account-a', name: 'Industrial Portfolio ' + 'Division '.repeat(12) };
     const navigation = {
-      isWorkspaceRoute: () => true, account: () => account, facilities: () => [facility], headerFacility: selected,
+      isWorkspaceRoute: () => true, account: () => account, facilities: () => [facility], headerFacility: selected, singleFacilityContext: signal<typeof facility | undefined>(undefined),
       isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '',
       isSupportPanelOpen: () => false, showWelcome: vi.fn(), toggleSupportPanel: vi.fn(),
       changeFacilityScope: vi.fn(scope => selected.set(scope.kind === 'facility' ? facility : undefined))
@@ -97,6 +97,15 @@ describe('header facility chooser presentation', () => {
     expect(fixture.nativeElement.querySelector('header').scrollWidth).toBeLessThanOrEqual(480);
     await userEvent.keyboard('{Escape}'); fixture.detectChanges();
     await page.screenshot({ element: fixture.nativeElement.querySelector('header'), path: '../../../../../.angular/facility-scope/header-narrow.png' });
+    navigation.singleFacilityContext.set(facility); fixture.detectChanges();
+    const identity = fixture.nativeElement.querySelector('.v1-workspace__single-identity') as HTMLElement;
+    expect(identity.title).toBe(facility.name);
+    expect(identity.querySelector('button')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-facility-picker')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-workspace__account-link')).toBeNull();
+    expect(fixture.nativeElement.querySelector('header').scrollWidth).toBeLessThanOrEqual(480);
+    navigation.singleFacilityContext.set(undefined); fixture.detectChanges();
+    expect(toggle()).not.toBeNull();
     await (cdp() as any).send('Emulation.setEmulatedMedia', { media: 'print' });
     try { expect(getComputedStyle(fixture.nativeElement.querySelector('app-facility-picker')).display).toBe('none'); }
     finally { await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '' }); fixture.destroy(); }

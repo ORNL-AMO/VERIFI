@@ -20,6 +20,7 @@ export class InventoryTileComponent {
   @Input() level: InventoryDetailLevel = 'simple';
   @Input() print = false;
   @Input() actions: readonly InventoryTileMenuAction[] = [];
+  @Input() showOwnership = true;
   @Input() selecting = false;
   @Input() selected = false;
   @Input() canSelect = true;
@@ -46,7 +47,7 @@ export class InventoryTileComponent {
     this.selectionControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(selected => this.selectionChanged.emit({ guid: this.tile.guid, selected }));
   }
   ngOnChanges(): void {
-    this.tileLabel = this.tile.reportSnapshot ? `${this.tile.reportSnapshot.scope} report: ${this.tile.name}${this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.analysisSnapshot ? `${this.tile.analysisSnapshot.scope} analysis: ${this.tile.name}${this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.name;
+    this.tileLabel = this.tile.reportSnapshot ? `${this.showOwnership ? this.tile.reportSnapshot.scope + ' ' : ''}report: ${this.tile.name}${this.showOwnership && this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.analysisSnapshot ? `${this.showOwnership ? this.tile.analysisSnapshot.scope + ' ' : ''}analysis: ${this.tile.name}${this.showOwnership && this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.name;
     this.selectionControl.setValue(this.selected, { emitEvent: false });
     if (this.canSelect) this.selectionControl.enable({ emitEvent: false }); else this.selectionControl.disable({ emitEvent: false });
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));

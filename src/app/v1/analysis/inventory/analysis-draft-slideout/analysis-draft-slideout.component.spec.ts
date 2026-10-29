@@ -2,6 +2,16 @@ import { TestBed } from '@angular/core/testing';
 import { AnalysisDraftSlideoutComponent } from './analysis-draft-slideout.component';
 
 describe('account analysis creation categories', () => {
+  it('hides fixed ownership controls and submits the sole facility without an account-level choice', () => {
+    const fixture = TestBed.configureTestingModule({ imports: [AnalysisDraftSlideoutComponent] }).createComponent(AnalysisDraftSlideoutComponent);
+    fixture.componentRef.setInput('facilities', [{ guid: 'f', name: 'Plant', energyAvailable: true, waterAvailable: false }]);
+    fixture.componentRef.setInput('fixedFacilityGuid', 'f'); fixture.componentRef.setInput('energyAvailable', true);
+    const submitted = vi.fn(); fixture.componentInstance.submitted.subscribe(submitted); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[formControlName="scope"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[formControlName="facilityGuid"]')).toBeNull();
+    fixture.componentInstance.submit(); expect(submitted).toHaveBeenCalledWith({ scope: 'facility', facilityGuid: 'f', category: 'energy' });
+  });
+
   for (const category of ['energy', 'water'] as const) {
     it(`creates a ${category}-only analysis without showing a category choice`, () => {
       const fixture = TestBed.configureTestingModule({ imports: [AnalysisDraftSlideoutComponent] })

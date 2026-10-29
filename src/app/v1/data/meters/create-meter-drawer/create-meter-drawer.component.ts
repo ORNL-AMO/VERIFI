@@ -13,6 +13,7 @@ import { MeterActionsService } from '../meter-actions.service';
   providers: [MeterActionsService]
 })
 export class CreateMeterDrawerComponent {
+  readonly singleFacility = input(false);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly actions = inject(MeterActionsService);
   private readonly accountGuid = this.workspace.account()?.guid;

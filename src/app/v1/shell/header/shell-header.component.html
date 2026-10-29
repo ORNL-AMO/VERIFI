@@ -12,6 +12,11 @@
 
   @if (isWorkspaceRoute) {
     @if (navigation.account(); as account) {
+      @if (navigation.singleFacilityContext(); as facility) {
+        <div class="v1-workspace__context" aria-label="Workspace">
+          <span class="v1-workspace__single-identity" [title]="facility.name"><app-ui-icon name="facility"/><span>{{ facility.name }}</span></span>
+        </div>
+      } @else {
       <nav class="v1-workspace__context" aria-label="Account and facility">
         <button type="button" class="v1-workspace__account-link" (click)="navigation.changeFacilityScope({ kind: 'all' })"
           [title]="account.name" [disabled]="navigation.scopeChangePending()"
@@ -21,10 +26,11 @@
         </button>
         <span class="v1-workspace__context-divider" aria-hidden="true">/</span>
         <app-facility-picker #facilityPicker [facilities]="navigation.facilities()" [selectedFacility]="navigation.headerFacility()"
-          [singleSite]="navigation.isSingleSiteWorkspace()" [disabled]="navigation.scopeChangePending() || !!navigation.scopeAvailability()"
+          [disabled]="navigation.scopeChangePending() || !!navigation.scopeAvailability()"
           [unavailableMessage]="navigation.scopeAvailability()" (opened)="closeAll()"
           (facilitySelected)="navigation.changeFacilityScope($event)"/>
       </nav>
+      }
     }
   } @else {
     <span class="v1-workspace__spacer" aria-hidden="true"></span>

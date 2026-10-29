@@ -19,7 +19,6 @@ export class FacilityPickerComponent {
   @Input() set facilities(value: readonly IdbFacility[]) { this.facilitiesState.set(value); }
   get facilities(): readonly IdbFacility[] { return this.facilitiesState(); }
   @Input() selectedFacility: IdbFacility | undefined;
-  @Input() singleSite = false;
   @Input() disabled = false;
   @Input() unavailableMessage = '';
   @Output() readonly facilitySelected = new EventEmitter<FacilityScope>();
@@ -40,7 +39,7 @@ export class FacilityPickerComponent {
   });
 
   toggle(): void {
-    if (this.disabled || !this.facilities.length || this.singleSite) return;
+    if (this.disabled || !this.facilities.length) return;
     if (this.open) { this.close(); return; }
     this.opened.emit();
     this.open = true;

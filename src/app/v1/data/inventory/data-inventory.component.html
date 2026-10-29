@@ -66,8 +66,8 @@
 
 <ng-template #createMeterDrawer>
   @if (isCreateMeterDrawerOpen()) {
-    <app-create-portfolio-meter-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" (created)="openCreatedMeter($event)" (closed)="closeCreateMeterDrawer()"></app-create-portfolio-meter-drawer>
+    <app-create-portfolio-meter-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreatedMeter($event)" (closed)="closeCreateMeterDrawer()"></app-create-portfolio-meter-drawer>
   }
 </ng-template>
 
-<ng-template #createPredictorDrawer>@if (isCreatePredictorDrawerOpen()) { <app-create-portfolio-predictor-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" (created)="openCreatedPredictor($event)" (weatherSelected)="openNewWeatherPredictors($event)" (closed)="closeCreatePredictorDrawer()"/> }</ng-template>
+<ng-template #createPredictorDrawer>@if (isCreatePredictorDrawerOpen()) { <app-create-portfolio-predictor-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreatedPredictor($event)" (weatherSelected)="openNewWeatherPredictors($event)" (closed)="closeCreatePredictorDrawer()"/> }</ng-template>

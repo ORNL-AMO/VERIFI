@@ -128,7 +128,7 @@ describe('WeatherPredictorWorkbenchComponent', () => {
     const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
     const portfolioCrumbs = fixture.componentInstance.breadcrumbs();
     singleSite.set(true); fixture.detectChanges();
-    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], queryParams: {} }]);
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Predictors', icon: 'predictor', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], queryParams: {} }]);
     expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
     singleSite.set(false); fixture.detectChanges();
     expect(fixture.componentInstance.breadcrumbs()).toEqual(portfolioCrumbs);

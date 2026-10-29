@@ -5,6 +5,7 @@
   [error]="error()"
   (submitted)="createMeter($event)"
   (cancelled)="closed.emit()">
+  @if (!singleFacility()) {
   <label meterContext class="v1-portfolio-meter-facility">
     <span>Facility</span>
     <select class="v1-select" [formControl]="facilityControl" required>
@@ -19,4 +20,5 @@
       <span role="alert">This facility is no longer available. Select another facility.</span>
     }
   </label>
+  }
 </app-meter-draft-slideout>

@@ -54,16 +54,12 @@ describe('FacilityPickerComponent', () => {
     expect(document.activeElement?.textContent).toContain('Second');
   });
 
-  it('renders a static label when there is a single facility', () => {
+  it('keeps All facilities and a chooser for portfolios with one facility', () => {
     const { fixture, component } = createComponent();
-    component.facilities = [facility('f1', 'Facility One')];
-    component.selectedFacility = component.facilities[0];
-    component.singleSite = true;
-    fixture.detectChanges();
-
-    const element: HTMLElement = fixture.nativeElement;
-    expect(element.querySelector('.v1-facility-picker__single')?.textContent).toContain('Facility One');
-    expect(element.querySelector('.v1-facility-picker__toggle')).toBeNull();
+    component.facilities = [facility('f1', 'Facility One')]; fixture.detectChanges();
+    fixture.nativeElement.querySelector('button').click(); fixture.detectChanges();
+    expect(document.querySelector('.v1-facility-picker__menu')?.textContent).toContain('All facilities');
+    expect(document.querySelector('.v1-facility-picker__menu')?.textContent).toContain('Facility One');
   });
 
   it('shows a searchable toggle even for a small facility inventory', () => {

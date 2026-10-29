@@ -3,18 +3,6 @@
   min-width: 0;
 }
 
-.v1-facility-picker__single {
-  display: flex;
-  gap: .5rem;
-  align-items: center;
-  padding: .5rem .65rem;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius-sm);
-  background: var(--v1-surface);
-  color: var(--v1-text);
-  font-size: .85rem;
-  font-weight: 700;
-}
 
 .v1-facility-picker__wrap {
   position: relative;
@@ -181,6 +169,4 @@
 .v1-facility-picker__title { padding: .35rem .55rem; color: var(--v1-text); font-size: .85rem; }
 .v1-facility-picker__all { flex-shrink: 0; border-bottom: 1px solid var(--v1-border); }
 .v1-facility-picker__item-text { min-width: 0; overflow-wrap: anywhere; }
-.v1-facility-picker__single { max-width: 24rem; }
-.v1-facility-picker__single span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media print { :host { display: none; } }

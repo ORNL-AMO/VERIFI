@@ -1,11 +1,13 @@
-<article class="portfolio-tile" [class.portfolio-tile--scoped]="!!tile.owner || !!tile.analysisSnapshot || !!tile.reportSnapshot" [class.portfolio-tile--selecting]="selecting" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--reading-snapshot]="(!!tile.meterSnapshot || !!tile.predictorSnapshot) && level !== 'simple'" [class.portfolio-tile--predictor-snapshot]="!!tile.predictorSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-analysis-scope]="tile.analysisSnapshot?.scope" [attr.data-report-scope]="tile.reportSnapshot?.scope" [attr.data-detail]="level" [attr.aria-label]="tileLabel" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
+<article class="portfolio-tile" [class.portfolio-tile--scoped]="showOwnership && (!!tile.owner || !!tile.analysisSnapshot || !!tile.reportSnapshot)" [class.portfolio-tile--selecting]="selecting" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--reading-snapshot]="(!!tile.meterSnapshot || !!tile.predictorSnapshot) && level !== 'simple'" [class.portfolio-tile--predictor-snapshot]="!!tile.predictorSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-analysis-scope]="tile.analysisSnapshot?.scope" [attr.data-report-scope]="tile.reportSnapshot?.scope" [attr.data-detail]="level" [attr.aria-label]="tileLabel" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
   @if (selecting && !print) { <input class="portfolio-tile__selection" type="checkbox" [formControl]="selectionControl" [attr.aria-label]="'Select ' + tile.name"> }
+  @if (showOwnership) {
   @if (tile.owner; as owner) {
     <app-inventory-card-header scope="facility" [resource]="tile.reportSnapshot ? 'report' : tile.analysisSnapshot ? 'analysis' : undefined">
       <a class="portfolio-tile__owner portfolio-tile__header-owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="'Filter by facility ' + owner.label" [title]="owner.label" (click)="filterFacility($event)">{{ owner.label }}</a>
     </app-inventory-card-header>
   } @else if (tile.analysisSnapshot || tile.reportSnapshot; as snapshot) {
     <app-inventory-card-header [scope]="snapshot.scope" [resource]="tile.reportSnapshot ? 'report' : 'analysis'"/>
+  }
   }
   <div class="portfolio-tile__heading">
     <app-ui-icon [name]="tile.icon" [size]="level === 'simple' ? 32 : 24"/>

@@ -5,6 +5,26 @@ import { setupFacilityScopeNavigation as setup } from './facility-scope-navigati
 
 describe('facility scope navigation', () => {
 
+  it('derives presentation from the ready owned facility rather than remembered selection', async () => {
+    const view = await setup();
+    const snapshot = view.store.snapshot()!;
+    const sole = { ...snapshot.facilities[0], name: 'Distinct plant' };
+    view.store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true }, facilities: [sole] });
+    view.fixture.detectChanges();
+    expect(view.navigation.singleFacilityContext()?.guid).toBe(sole.guid);
+    expect(view.navigation.singleFacilityContext()?.name).toBe('Distinct plant');
+    view.store.beginLoad(false); view.fixture.detectChanges();
+    expect(view.navigation.singleFacilityContext()).toBeUndefined();
+    view.store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true }, facilities: [] }); view.fixture.detectChanges();
+    expect(view.navigation.singleFacilityContext()).toBeUndefined();
+    expect(view.navigation.hasSingleSiteRecovery()).toBe(true);
+    view.store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true } }); view.fixture.detectChanges();
+    expect(view.navigation.singleFacilityContext()).toBeUndefined();
+    expect(view.navigation.hasSingleSiteRecovery()).toBe(true);
+    view.store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: false }, facilities: [sole] }); view.fixture.detectChanges();
+    expect(view.navigation.singleFacilityContext()).toBeUndefined();
+  });
+
   it('starts at All despite durable facility hints and carries scope across sections', async () => {
     const { navigation, router, fixture } = await setup();
     expect(navigation.headerScope()).toEqual({ kind: 'all' });

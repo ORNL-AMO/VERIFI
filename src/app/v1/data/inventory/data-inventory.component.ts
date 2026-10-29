@@ -74,7 +74,7 @@ export class DataInventoryComponent implements OnDestroy {
   readonly isCreateMeterDrawerOpen = signal(false);
   readonly headerGapCollapsed = computed(() => this.sticky()?.collapsed() ?? false);
   readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.account()?.name ?? 'Account',
-    this.workspace.facilities().find(facility => facility.guid === this.navigation.inventoryFacilityGuid())?.name));
+    this.workspace.facilities().find(facility => facility.guid === this.navigation.inventoryFacilityGuid())?.name, this.navigation.isSingleSiteWorkspace()));
   readonly meterNavigationError = signal('');
   readonly isCreateFacilityDrawerOpen = signal(false);
 

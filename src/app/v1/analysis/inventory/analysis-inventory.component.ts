@@ -131,7 +131,7 @@ export class AnalysisInventoryComponent implements OnDestroy {
     ] as InventoryTileMenuAction[]];
   })));
   readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account',
-    this.workspace.facilities().find(facility => facility.guid === this.scopedFacilityGuid())?.name));
+    this.workspace.facilities().find(facility => facility.guid === this.scopedFacilityGuid())?.name, this.navigation.isSingleSiteWorkspace()));
   readonly title = 'Analysis';
   readonly countLabel = computed(() => {
     const entries = this.filteredEntries();

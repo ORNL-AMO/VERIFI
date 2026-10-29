@@ -12,7 +12,7 @@ This document records the agreed target experience and implementation roadmap. I
 | 2 | Contextual navigation and workbench journeys | Complete |
 | 3 | Shared inventory charts, selection, and creation | Complete |
 | 4 | Dashboard retirement and resource-based folders | Complete |
-| 5 | Single-facility presentation | Not started |
+| 5 | Single-facility presentation | In progress |
 
 ### Greenfield policy
 
@@ -272,13 +272,19 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 
 ## Phase 5 — Single-facility presentation
 
-**Status: Not started**
+**Status: In progress**
 
 ### Changes
 
 - Complete the previously planned single-facility presentation using shared screens. Remove redundant account/facility choices and duplicate identity while preserving supported custom data, settings, backups, Upload, and reports.
 - Preserve underlying account ownership, hidden analysis pairs, invalid-state recovery, and conversion to a portfolio.
 - Remove remaining obsolete single-site presentation branches. A converted account regains portfolio navigation and scope choices without losing records or relationships.
+
+### Implementation progress
+
+- Shared presentation derives one owned facility only from a ready committed single-facility workspace. The shell shows that facility once; inventory ownership strips and duplicate context breadcrumbs are hidden while workbench resource returns remain available.
+- Meter/Predictor creation receives its explicit facility without a redundant picker; fixed-facility Analysis creation hides ownership selectors. Portfolio presentation remains the default, including portfolios with only one facility.
+- The first group passes 158 focused tests and 10 Chromium checks covering header keyboard/narrow/print behavior and preserved Meter/Predictor gutters. Reports and unified Settings/Backup follow in separate commits.
 
 ### Acceptance and validation
 
