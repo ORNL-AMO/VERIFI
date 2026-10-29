@@ -7,7 +7,7 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { meter } from '@app/v1/data/meters/facility-meters.testing';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { InventoryToolsComponent } from './inventory-tools.component';

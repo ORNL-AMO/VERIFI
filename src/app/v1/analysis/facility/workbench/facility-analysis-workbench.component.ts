@@ -14,7 +14,7 @@ import { FacilityAnalysisWorkbenchStageNavigationComponent } from './stage-navig
 import { FacilityAnalysisWorkbenchFooterComponent } from './footer/facility-analysis-workbench-footer.component';
 import { AccountAnalysisReturnService } from './navigation/account-analysis-return.service';
 import { GroupVisualizationSession } from './group/visualization/group-visualization-session.service';
-import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',

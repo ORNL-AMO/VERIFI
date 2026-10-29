@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { reportFacility } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { reportFacility } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { setupFacilityScopeNavigation as setup } from './facility-scope-navigation.testing';
 
 describe('facility scope navigation', () => {

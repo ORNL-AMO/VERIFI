@@ -1,5 +1,5 @@
 import { getNewIdbAccountReport } from '@data/models/idbModels/accountReport';
-import { reportAccount, reportFacility, reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { reportAccount, reportFacility, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';

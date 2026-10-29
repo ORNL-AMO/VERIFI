@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';

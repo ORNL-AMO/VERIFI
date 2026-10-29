@@ -1,7 +1,7 @@
 import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { analysisDependencyMessage as facilityAnalysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
-import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
 import { Router } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';

@@ -6,7 +6,7 @@ import { reportStatusNavigationSource, resolveReportStatusItem } from '@app/v1/s
 import { statusDestinationRoute } from '@app/v1/status/status-destination-route';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
-import { readReportAnalysisOrigin, resolveReportAnalysisOrigin } from '@app/v1/shared/reports/report-analysis-origin';
+import { readReportAnalysisOrigin, resolveReportAnalysisOrigin } from '@app/v1/reports/report-analysis-origin';
 import { parseWorkspaceRoute } from '@app/v1/shell/workspace-navigation.service';
 
 export const singleFacilityAnalysisPairGuard: CanActivateChildFn = async (_route, state) => {

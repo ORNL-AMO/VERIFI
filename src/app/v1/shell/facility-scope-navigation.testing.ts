@@ -4,7 +4,7 @@ import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { reportFacility, reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { reportFacility, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { StatusItem } from '@app/v1/status/status.models';

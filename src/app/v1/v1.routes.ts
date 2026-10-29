@@ -1,5 +1,5 @@
-import { FACILITY_REPORT_ROUTES } from '@app/v1/facility/reports/facility-reports.routes';
-import { ACCOUNT_REPORT_ROUTES } from '@app/v1/account/reports/account-reports.routes';
+import { FACILITY_REPORT_ROUTES } from '@app/v1/reports/facility/facility-reports.routes';
+import { ACCOUNT_REPORT_ROUTES } from '@app/v1/reports/account/account-reports.routes';
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
 import { CustomGridFactorsComponent } from '@app/v1/data/custom-database/custom-grid-factors/custom-grid-factors.component';

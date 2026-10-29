@@ -3,7 +3,7 @@ import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angul
 import { Subject } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { reportFixture, reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { reportFixture, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { RecentItemsService } from './recent-items.service';
 

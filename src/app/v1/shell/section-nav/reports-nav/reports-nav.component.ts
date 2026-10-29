@@ -1,12 +1,12 @@
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/shared/reports/report-inventory.models';
+import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
 import { Component, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { reportTypeAvailable } from '@app/v1/shared/reports/report-availability';
-import { reportIcon } from '@app/v1/shared/reports/report-icons';
+import { reportTypeAvailable } from '@app/v1/reports/report-availability';
+import { reportIcon } from '@app/v1/reports/report-icons';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { FACILITY_REPORT_TYPES, buildFacilityReportCard } from '@app/v1/facility/reports/facility-report.models';
-import { buildFacilityReportStages } from '@app/v1/facility/reports/facility-report-workbench/facility-report-workbench.models';
+import { FACILITY_REPORT_TYPES, buildFacilityReportCard } from '@app/v1/reports/facility/facility-report.models';
+import { buildFacilityReportStages } from '@app/v1/reports/facility/workbench/facility-report-workbench.models';
 import { RecentItemsService } from '../recent-items.service';
 
 @Component({

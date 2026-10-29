@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';

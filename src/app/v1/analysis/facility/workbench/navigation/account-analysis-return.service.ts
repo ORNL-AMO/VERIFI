@@ -1,6 +1,6 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReportAnalysisReturnService } from '@app/v1/shared/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ACCOUNT_ANALYSIS_ORIGIN_QUERY } from '@app/v1/analysis/account/workbench/select-facility-items/account-analysis-facility-selection.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';

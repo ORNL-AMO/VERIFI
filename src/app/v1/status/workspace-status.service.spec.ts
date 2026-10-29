@@ -12,8 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import { WorkspaceStatusService } from './workspace-status.service';
 import { presentFinding } from './status.catalog';
 import { makeFinding } from './status.models';
-import { accountReportSnapshot } from '@app/v1/account/reports/testing/account-report-test-fixtures';
-import { reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
+import { reportFixture } from '@app/v1/reports/facility/testing/report-test-fixtures';
 
 describe('WorkspaceStatusService', () => {
   it('shares report actions between items, Todos and entity findings, and rechecks stale actions before navigation', () => {

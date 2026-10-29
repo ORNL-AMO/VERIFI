@@ -73,7 +73,7 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Session state:** The inventory-tools controller owns selection, portal confirmations, and chart preferences keyed by account/resource/facility scope. The unified chart sheet is nonmodal so the header chooser stays available. Both inventory chart sheets request a shell backdrop and inert routed content below that header; dismissal/replacement clears blocking and focus returns after rendering. Print omits the backdrop. Meter lines are straight, and their context heading, source summary, and series search are omitted. Charts remain open when scope changes; destination preferences restore while selection and search clear. Predictor mode and single/multiple selections restore independently per scope.
 - **Trace browser:** Unified Meter and Predictor charts replace paginated choices with a scrolling facility-grouped side panel. Trace metadata carries explicit ownership and short names while preserving full tooltip/accessibility labels. Checkboxes control visibility; double-click or Enter/Space on names isolates a trace/facility, and repeating restores all current traces. Facility collapse preserves visibility. Hover/focus highlights a visible trace without recalculation. Panel/collapse state is session-only per scope; narrow layouts use a focus-managed drawer. Predictor single mode uses radio selection; multiple mode uses the same checkbox/isolation controls. Retained facility dashboards keep their existing behavior.
 - **Commands and creation:** Cross-facility deletion reviews complete snapshots grouped by owner, validates inside one native transaction, and publishes once through the existing command boundary. Existing single-facility commands keep their contracts. Named scope prefills Meter/Predictor creation and fixes Analysis/Report ownership; All facilities requires an explicit Meter/Predictor owner.
-- **Boundaries:** No data schema, GUID relationship, calculation formula, backup/import format, v0 contract, or IPC changes. Existing dashboards and single-facility routing are retained. Phase 4 will adapt routing, retire dashboards, and move features into resource folders; Phase 5 will finish single-facility presentation. Both remain Not started.
+- **Boundaries:** No data schema, GUID relationship, calculation formula, backup/import format, v0 contract, or IPC changes. Phase 3 retained dashboards and single-facility routing pending Phase 4 retirement and organization, documented below. Phase 5 single-facility presentation remains Not started.
 - **Validation:** See the [Phase 3 evidence](v1-global-facility-scope-plan.md#phase-3-validation-evidence) for completed checks and limitations.
 
 ### Spreadsheet Data Import Workflow
@@ -96,11 +96,11 @@ If the workflow needs current-state detail, add a short current-state note using
 
 ### Single-Facility Navigation
 
-- **Decision:** Valid single-facility companies (`isSingleFacilityCompany` with exactly one facility) use the facility as the root of Data and Analysis. Their header shows the sole facility as a static label; the sidebar omits the duplicate account-name label. Data and Analysis have no account return or account breadcrumb; workbench facility breadcrumbs return to the matching facility inventory.
-- **Routes:** Account Data bookmarks redirect to the matching facility inventory; Facilities and the default Portfolio destination open Meters. Account Analysis retains its paired-analysis redirects. These rules apply to child navigation from an already-open account workspace as well as direct entry.
-- **Exceptions:** Account Reports and Upload remain explicitly reachable. Upload keeps its facility selection and return information. Invalid single-facility states retain recovery navigation, and conversion to a portfolio restores account/facility navigation.
+- **Decision:** Valid single-facility companies (`isSingleFacilityCompany` with exactly one facility) use unified Meters, Predictors, and Analysis inventories with implicit sole-facility scope. No facility query parameter is required. The static header label and existing tailored workbench presentation remain until Phase 5.
+- **Routes:** Unified account inventory URLs remain canonical. Facilities/default Portfolio entry opens Meters for valid single-facility accounts. Account-analysis workbench entry retains hidden-pair handoffs to the corresponding facility workbench. Facility-owned workbench, grouping, settings, and weather routes remain stable; retired dashboard paths use ordinary recovery.
+- **Exceptions:** Reports remains a combined inventory so account-backed reports stay accessible. Upload keeps its independent initial facility and validated return URL. Zero/multiple-facility states retain recovery without substituting a remembered or first facility; explicitly owned repair/inspection routes remain available. Portfolio conversion restores scope choices without changing records or GUID relationships.
 - **Shared contracts:** No persisted models, calculation inputs, file formats, or Electron boundaries change.
-- **Tests:** Focused sidebar, breadcrumb, return-control, and real-router transition specs; application type-check and production web build.
+- **Tests:** Focused sidebar, breadcrumb, return-control, scoped-host teardown, and real-router transitions; application type-check, Chromium journeys, and production web build.
 
 ### Single-Site to Portfolio Conversion Workflow
 
@@ -471,3 +471,9 @@ Data now lives under `src/app/v1/data/{facilities,meters,predictors,energy-uses,
 ### Phase 4 Analysis feature organization
 
 The unified Analysis inventory and comparison flow live under `src/app/v1/analysis`, alongside account and facility workbenches, projections, actions, and inspectors. Generic inventory presentation and chart infrastructure remain shared. The feature keeps existing inventory/workbench URLs, Worker contracts, hidden pairs, guarded handoffs, and session browse state.
+
+### Phase 4 Reports feature organization
+
+Reports inventory, lifecycle presentation, shared report editors/checks, and account/facility workbenches now live under `src/app/v1/reports`. The routed `ReportsInventoryComponent` replaces the old wrapper composition. Account/facility workflow modules import resource-owned presentation through `ReportsModule`. Existing URLs, report settings, single-facility account report access, calculation demand, and save/leave protections remain unchanged. Phase 5 presentation simplification remains Not started.
+
+Phase 4 acceptance is complete. The [roadmap evidence](v1-global-facility-scope-plan.md#implementation-and-validation-evidence) records the full fast/Chromium suites, production web build, type-check, documentation/source scans, and preserved workbench spacing. Phase 5 remains Not started.

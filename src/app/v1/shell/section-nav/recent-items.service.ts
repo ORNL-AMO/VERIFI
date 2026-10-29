@@ -4,8 +4,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
-import { reportTypeAvailable } from '@app/v1/shared/reports/report-availability';
-import { reportIcon } from '@app/v1/shared/reports/report-icons';
+import { reportTypeAvailable } from '@app/v1/reports/report-availability';
+import { reportIcon } from '@app/v1/reports/report-icons';
 import { WorkspaceNavigationService, parseWorkspaceRoute } from '../workspace-navigation.service';
 
 type RecentItemSection = 'analysis' | 'reports';

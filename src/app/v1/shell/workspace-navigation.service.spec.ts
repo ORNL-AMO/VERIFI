@@ -522,6 +522,22 @@ describe('WorkspaceNavigationService', () => {
     expect(service.singleSiteWorkspaceState()).toBe('multiple-facilities');
   });
 
+  it('does not substitute a remembered or first facility when a single-site account requires recovery', async () => {
+    accountSignal.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
+    for (const facilities of [[], [
+      { guid: 'facility-a', name: 'Facility A', accountId: 'account-a' },
+      { guid: 'facility-b', name: 'Facility B', accountId: 'account-a' }
+    ]]) {
+      facilitiesSignal.set(facilities); router.navigate.mockClear();
+      expect(await service.setContext('facility')).toBe(false);
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(workspaceService.selectFacility).not.toHaveBeenCalled();
+    }
+    router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-b/settings/profile'));
+    expect(await service.setContext('facility')).toBe(true);
+    expect(router.navigate).toHaveBeenLastCalledWith(service.facilitySettingsRoute('facility-b', 'profile'));
+  });
+
   it('opens facilities on the canonical workspace route after selecting the facility', async () => {
     await service.openFacility('facility-a');
 

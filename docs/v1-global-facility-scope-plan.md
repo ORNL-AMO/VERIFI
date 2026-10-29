@@ -11,7 +11,7 @@ This document records the agreed target experience and implementation roadmap. I
 | 1 | Header chooser and shared filtering | Complete |
 | 2 | Contextual navigation and workbench journeys | Complete |
 | 3 | Shared inventory charts, selection, and creation | Complete |
-| 4 | Dashboard retirement and resource-based folders | In progress |
+| 4 | Dashboard retirement and resource-based folders | Complete |
 | 5 | Single-facility presentation | Not started |
 
 ### Greenfield policy
@@ -221,7 +221,7 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 - **Multiple predictors** enables checkbox selection, facility/master toggles, and double-click or keyboard isolation. **Units ignored** explicitly marks a shared raw-value scale; original units stay in labels. No unit conversion, normalization, summation, or weather fetching occurs. Month/occurrence alignment preserves duplicate records, zeros, negatives, and missing values.
 - Both resources follow all matching inventory pages, independent of bulk selection. Mode, selected history, multi-trace visibility, facility collapse, panel state, and zoom remain session-only and restore per account/resource/scope. Switching back to single mode preserves the prior history even if it is hidden in multiple mode.
 - Phase 3 review fix: duplicate readings no longer introduce false gaps in other predictors. Explicit alignment padding is omitted from each rendered series while saved null samples still break its line. Category positions, duplicates, raw values, tooltip/value labels, and accessible gap descriptions remain intact. Both new fast regressions failed before the fix and passed afterward; the Chromium regression verifies rendered series, retained gaps, tooltips, and accessible descriptions. Final review has no remaining actionable findings.
-- Shared data, calculations, Worker contracts, imports, backups, v0, and retained facility dashboards are unchanged. Phases 4–5 remain Not started.
+- At Phase 3 completion, shared data, calculations, Worker contracts, imports, backups, v0, and retained facility dashboards were unchanged. Dashboard retirement and single-facility presentation were deferred to Phases 4 and 5.
 - Validation: 50 focused fast tests across six files and four Chromium checks passed, covering 24 mixed-unit predictors across two facilities, single/multiple selection, raw values, duplicate/gap preservation, scope memory, themes, narrow-drawer focus/Escape, backdrop cleanup, print, and retained dashboard/Meter regressions. Desktop and narrow screenshots were reviewed; application type-check, production web build, documentation links, and whitespace checks passed. Existing build and Chromium ResizeObserver warnings remain. Electron validation stays excluded.
 
 ### Navigation consistency follow-up
@@ -240,7 +240,7 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 
 ## Phase 4 — Dashboard retirement and resource-based folders
 
-**Status: In progress**
+**Status: Complete**
 
 ### Changes
 
@@ -254,17 +254,21 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 
 ### Acceptance and validation
 
-- No internal caller, route, module, or test references a deleted dashboard or former folder location.
+- No live import, module, or internal link references a deleted dashboard or former folder. Retired URLs appear only in ordinary-recovery regression coverage.
 - Unified inventories preserve direct workbench entry, guarded navigation, Back/Forward restoration, status links, Upload returns/fallbacks, hidden analysis pairing, and single-facility report access.
 - Run focused routing/module tests, full fast/browser suites, application type-check, and production web build. Check both portfolio and single-facility accounts before retiring their old destinations.
 - Update roadmap, architecture, migration notes, and task context index with final feature entry points and validation evidence.
 
-### Implementation progress
+### Implementation and validation evidence
 
-- Shared Meters, Predictors, and Analysis now derive valid single-facility scope without a query parameter. Reports retains the combined account inventory; invalid single-facility recovery and hidden-analysis workbench handoffs remain intact.
-- Routing/navigation checks cover section propagation, guarded transitions, and the Reports exception.
-- Workbench spacing remains owned once: the Meter provider host keeps its existing responsive gutter; standard and weather Predictor workbenches inherit that gutter directly after wrapper removal.
-- Facility dashboards and Reports wrappers are retired. Reusable creation forms, actions, chart projections, details, and comparisons survive outside deleted folders. Workbench returns, status links, and Upload fallbacks target scoped unified inventories. Data is organized under resource roots and resource-owned modules, with neutral inventory state and save/leave guards in shared code. The Data commit passes 107 focused spec files / 619 tests, inventory Chromium journeys (including narrow/theme/print coverage), app type-check, and production web build. Analysis is organized under its resource root, with inventory/comparison and account/facility workflow subdivisions. It passes 88 focused spec files / 405 tests and 11 Chromium files / 59 tests. Reports organization follows in its own commit. Retirement checks include focused routing/guard tests, real scoped-host subscription teardown, retained Analysis/Reports Chromium journeys, wide/narrow workbench padding, application type-check, and a production web build. Full acceptance runs after resource organization.
+- Delivered in the agreed commit order: shared routing; dashboard retirement; Data organization; Analysis organization; Reports organization.
+- Unified Meters, Predictors, and Analysis derive valid single-facility scope without a query parameter. Reports remains combined. Zero/multiple-facility recovery never substitutes a remembered or first facility, while explicit repair/inspection destinations remain available.
+- Retired facility dashboards, unnecessary Predictor/Reports wrappers, dashboard-only providers, and obsolete transient state. Retained creation forms, actions, chart projections, inspectors, comparisons, scoped Meter/Meter Grouping hosts, and all owning workbench/tool URLs. Returns, findings, and Upload fallbacks use scoped unified inventories.
+- Data, Analysis, and Reports live under their resource roots; neutral inventory state, navigation guards, chart rendering, and bottom-sheet infrastructure remain shared. Active documentation links and callers use current locations without compatibility re-exports.
+- Meter workbenches retain their existing responsive host gutter. Standard and weather Predictor workbenches own the same gutter directly. Chromium checks verify wide/narrow padding, keyboard access, themes, reduced motion, and print alongside existing chart, selection, comparison, lifecycle, and return journeys.
+- Final `npm run test:all:ci` passed: **444 fast files / 2,535 tests** and **53 Chromium files / 252 tests**. An earlier run concurrent with the production build hit three five-second test timeouts; the isolated full rerun passed without raising timeouts or weakening tests.
+- `npm run validate:agent -- --mode plan`, `npx tsc -p tsconfig.app.json --noEmit`, `npm run build-prod`, documentation checks (**229 local links across eight changed Markdown documents**), and whitespace checks passed. Source scans found no imports to former feature folders or retired dashboard components.
+- Shared records, GUID relationships, calculations, import/backup formats, v0 contracts, and Electron boundaries are preserved. No schema migration or Electron testing was needed. Phase 5 remains **Not started**.
 
 ## Phase 5 — Single-facility presentation
 

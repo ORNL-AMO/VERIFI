@@ -20,7 +20,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { projectWorkspaceCalendarization } from '@app/v1/shared/calendarization/workspace-calendarization-projection';
-import { reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { calendarizedMeter, meter, monthlyData } from '@app/v1/data/meters/facility-meters.testing';
 import { InventoryToolsComponent } from './inventory-tools.component';
 import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';

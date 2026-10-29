@@ -5,8 +5,8 @@ import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.
 import { singleSiteAccountRedirectGuard } from '@app/v1/routing/canonical-route.guards';
 import { provideRouter, Router, Route, RouterModule } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports.module';
-import { AccountReportsModule } from '@app/v1/account/reports/account-reports.module';
+import { FacilityReportsModule } from '@app/v1/reports/facility/facility-reports.module';
+import { AccountReportsModule } from '@app/v1/reports/account/account-reports.module';
 import { TestBed } from '@angular/core/testing';
 
 

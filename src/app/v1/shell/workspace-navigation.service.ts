@@ -13,7 +13,7 @@ import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
 import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { isWorkspaceDataDestination } from '@app/v1/shared/navigation/workspace-data-destination';
-import type { ReportStageId } from '@app/v1/shared/reports/report-workbench.models';
+import type { ReportStageId } from '@app/v1/reports/report-workbench.models';
 
 import { ALL_FACILITIES, FacilityScope, facilityScopeQuery } from './facility-scope.models';
 
@@ -115,15 +115,6 @@ const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
   data: 'meters'
 };
 const ACCOUNT_DATA_DETAILS = new Set(['portfolio', 'custom-grid-factors', 'custom-fuels', 'custom-gwps']);
-const FACILITY_DATA_DETAILS = new Set([
-  'meters',
-  'meter-grouping',
-  'predictors',
-  'energy-uses',
-  'custom-grid-factors',
-  'custom-fuels',
-  'custom-gwps'
-]);
 const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'portfolio', 'delete']);
 const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'delete']);
 
@@ -360,6 +351,7 @@ export class WorkspaceNavigationService {
   async setContext(contextMode: ContextMode): Promise<boolean> {
     const state = this.routeState();
     if (contextMode === 'facility') {
+      if (this.hasSingleSiteRecovery() && !this.facilities().some(facility => facility.guid === state.facilityGuid)) return false;
       const facilityGuid = this.facility()?.guid || this.facilities()[0]?.guid;
       if (facilityGuid) {
         const link = this.facilityDestination(facilityGuid, state.section, state.detail);
@@ -381,7 +373,7 @@ export class WorkspaceNavigationService {
     if (this.facilities().some(facility => facility.guid === facilityGuid)) {
       const state = this.routeState();
       const link = this.facilityDestination(facilityGuid, state.section, state.detail);
-        return this.navigateScopeDestination(link.route, link.queryParams);
+      return this.navigateScopeDestination(link.route, link.queryParams);
     }
     return false;
   }

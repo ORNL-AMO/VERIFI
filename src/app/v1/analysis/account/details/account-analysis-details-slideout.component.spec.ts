@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
-import { accountReportSnapshot } from '@app/v1/account/reports/testing/account-report-test-fixtures';
+import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
 import { buildAccountAnalysisCards } from '../account-analysis.models';
 import { AccountAnalysisDetailsSlideoutComponent } from './account-analysis-details-slideout.component';
 import { analysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';

@@ -1,4 +1,4 @@
-import type { ReportInventoryFilters } from '@app/v1/shared/reports/report-inventory.models';
+import type { ReportInventoryFilters } from '@app/v1/reports/report-inventory.models';
 import { DestroyRef, Injectable, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Observable } from 'rxjs';
 import type { PredictorInventoryFilters } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
