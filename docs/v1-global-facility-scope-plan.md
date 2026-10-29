@@ -307,6 +307,12 @@ Completed 2026-10-29 in the three agreed commit groups.
 - Real IndexedDB backup round trips retain Better Plants, Performance, Analysis, and Savings report references to their restored hidden analysis pair and owning facility analysis after reopening. Existing import preparation, facility replace/new choices, invalid-state recovery, and portfolio-conversion tests remain green.
 - Application type-check, the validation planner (covering the complete Phase 5 diff), production web build, documentation checks (**233 local links across eight changed Markdown documents**), and whitespace checks passed. The web build retains existing CSS budget and CommonJS dependency warnings. Final review found no remaining actionable findings. No schema migration, calculation or backup-format changes, v0 UI changes, or Electron boundary changes were required. Electron validation is excluded as requested.
 
+### Home entry regression follow-up
+
+- Single-facility Home previously indexed the support-panel result rows. Removing its Facilities row shifted every displayed count and caused the Reports binding to throw. Both Home screens now use the shared named `contextCounts` projection, independent of panel row visibility.
+- The regression test first reproduced the exact template error through the real navigation service and router. Coverage includes Welcome entry, direct facility Home URLs, single-facility account-backed Reports, hidden analysis pairs, committed count changes, portfolio conversion, and a portfolio with one facility.
+- Focused Home/navigation checks pass: **five files / 91 tests**. Application type-check, production web build, validation planner, documentation links, and whitespace checks pass. The build retains CSS budget/CommonJS warnings. No data, calculation, backup, route destination, or Electron behavior changes are involved.
+
 ## Validation and documentation policy
 
 For each implementation phase, use the [risk-based testing policy](testing.md#what-a-change-requires) and the [validation skill](../.agents/skills/validate-web-and-electron/SKILL.md). Start with affected behavior tests, run `npm run validate:agent -- --mode plan`, and complete the selected checks. TypeScript changes require the application type-check; production UI/routing changes require the production web build under the repository policy. Use native-browser coverage for history, focus/overlay geometry, charts, and browser-dependent behavior. Add Electron-specific builds and manual checks when a changed runtime boundary requires them.

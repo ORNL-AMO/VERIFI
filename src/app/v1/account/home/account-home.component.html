@@ -1,6 +1,6 @@
 <article class="v1-home v1-home--account" aria-labelledby="v1-account-home-title">
   @if (navigation.account(); as account) {
-    @let content = navigation.panelContent();
+    @let counts = navigation.contextCounts();
 
     <header class="v1-section-header">
       <p class="v1-eyebrow">Account Home</p>
@@ -26,19 +26,19 @@
     <div class="v1-home__metrics" aria-label="Account summary">
       <article>
         <span>Facilities</span>
-        <strong>{{ navigation.facilities().length }}</strong>
+        <strong>{{ counts.facilities }}</strong>
       </article>
       <article>
         <span>Meters</span>
-        <strong>{{ content.results[1].value }}</strong>
+        <strong>{{ counts.meters }}</strong>
       </article>
       <article>
         <span>Analyses</span>
-        <strong>{{ content.results[3].value }}</strong>
+        <strong>{{ counts.analyses }}</strong>
       </article>
       <article>
         <span>Reports</span>
-        <strong>{{ content.results[4].value }}</strong>
+        <strong>{{ counts.reports }}</strong>
       </article>
     </div>
   }

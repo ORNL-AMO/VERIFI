@@ -50,6 +50,14 @@ export interface PanelTab {
   readonly icon: IconName;
 }
 
+export interface WorkspaceInventoryCounts {
+  readonly facilities: number;
+  readonly meters: number;
+  readonly predictors: number;
+  readonly analyses: number;
+  readonly reports: number;
+}
+
 export interface PanelContent {
   readonly help: ReadonlyArray<string>;
   readonly todos: ReadonlyArray<StatusItem>;
@@ -217,6 +225,17 @@ export class WorkspaceNavigationService {
   readonly contextPredictorData = computed(() => this.workspace.predictorData().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextAnalyses = computed(() => this.workspace.facilityAnalyses().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextReports = computed(() => this.workspace.facilityReports().filter(item => this.inContext(item.accountId, item.facilityId)));
+  /** Named counts are independent of which summary rows the support panel displays. */
+  readonly contextCounts = computed<WorkspaceInventoryCounts>(() => {
+    const facility = this.contextFacility(), single = this.singleFacilityContext();
+    return {
+      facilities: facility ? 1 : this.facilities().length,
+      meters: this.contextMeters().length,
+      predictors: this.contextPredictors().length,
+      analyses: this.contextAnalyses().length + (facility || single ? 0 : this.workspace.accountAnalyses().length),
+      reports: this.contextReports().length + (facility && !single ? 0 : this.workspace.accountReports().length)
+    };
+  });
   readonly uploadQuery = computed(() => ({ ...(isWorkspaceDataDestination(this.routeState()) ? { returnUrl: this.currentUrl() } : {}),
     ...(this.contextFacility() ? { facilityGuid: this.contextFacility()!.guid } : {}) }));
   readonly panelContent = computed(() => this.buildPanelContent());
@@ -656,10 +675,7 @@ export class WorkspaceNavigationService {
     const single = this.singleFacilityContext();
     const isFacility = !!facility;
     const name = single?.name ?? (isFacility ? facility?.name : account?.name);
-    const meterCount = this.contextMeters().length;
-    const predictorCount = this.contextPredictors().length;
-    const analysisCount = this.contextAnalyses().length + (isFacility || single ? 0 : this.workspace.accountAnalyses().length);
-    const reportCount = this.contextReports().length + (isFacility && !single ? 0 : this.workspace.accountReports().length);
+    const counts = this.contextCounts();
     const isData = this.activeSection() === 'data';
     const todos = this.status.accountTodos().filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
     const discardedWarnings = this.status.discardedItems().filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
@@ -679,12 +695,12 @@ export class WorkspaceNavigationService {
       todos: isData ? todos.filter(isDataFinding) : todos,
       discardedWarnings: isData ? discardedWarnings.filter(isDataFinding) : discardedWarnings,
       results: [
-        ...(!single ? [{ label: 'Facilities', value: String(facility ? 1 : this.facilities().length), tone: 'info' as const }] : []),
-        { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },
-        { label: 'Predictors', value: String(predictorCount), tone: predictorCount > 0 ? 'success' : 'neutral' },
+        ...(!single ? [{ label: 'Facilities', value: String(counts.facilities), tone: 'info' as const }] : []),
+        { label: 'Meters', value: String(counts.meters), tone: counts.meters > 0 ? 'success' : 'neutral' },
+        { label: 'Predictors', value: String(counts.predictors), tone: counts.predictors > 0 ? 'success' : 'neutral' },
         ...(!isData ? [
-          { label: 'Analyses', value: String(analysisCount), tone: analysisCount > 0 ? 'success' as const : 'neutral' as const },
-          { label: 'Reports', value: String(reportCount), tone: reportCount > 0 ? 'success' as const : 'neutral' as const }
+          { label: 'Analyses', value: String(counts.analyses), tone: counts.analyses > 0 ? 'success' as const : 'neutral' as const },
+          { label: 'Reports', value: String(counts.reports), tone: counts.reports > 0 ? 'success' as const : 'neutral' as const }
         ] : [])
       ],
       details: [

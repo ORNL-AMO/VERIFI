@@ -1,6 +1,6 @@
 <article class="v1-home v1-home--facility" aria-labelledby="v1-facility-home-title">
   @if (navigation.facility(); as facility) {
-    @let content = navigation.panelContent();
+    @let counts = navigation.contextCounts();
 
     <header class="v1-section-header">
       <p class="v1-eyebrow">Facility Home</p>
@@ -26,19 +26,19 @@
     <div class="v1-home__metrics" aria-label="Facility summary">
       <article>
         <span>Meters</span>
-        <strong>{{ content.results[1].value }}</strong>
+        <strong>{{ counts.meters }}</strong>
       </article>
       <article>
         <span>Predictors</span>
-        <strong>{{ content.results[2].value }}</strong>
+        <strong>{{ counts.predictors }}</strong>
       </article>
       <article>
         <span>Analyses</span>
-        <strong>{{ content.results[3].value }}</strong>
+        <strong>{{ counts.analyses }}</strong>
       </article>
       <article>
         <span>Reports</span>
-        <strong>{{ content.results[4].value }}</strong>
+        <strong>{{ counts.reports }}</strong>
       </article>
     </div>
   }
