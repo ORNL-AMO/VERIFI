@@ -71,7 +71,7 @@ describe('facility report workbench navigation', () => {
     expect(store.facilityReports().find(report => report.guid === 'report-a')?.name).toBe('New name');
     expect(workbench.editor.name.value).toBe('Overview');
     workbench.editor.name.setValue('Changed overview');
-    expect(await router.navigateByUrl('/v1/workspace/facility/facility-a/reports/dashboard')).toBe(true);
+    expect(await router.navigateByUrl('/v1/workspace/account/account-a/reports/dashboard?facility=facility-a')).toBe(true);
     expect(store.facilityReports().find(report => report.guid === 'report-b')?.name).toBe('Changed overview');
   });
 
@@ -86,11 +86,11 @@ describe('facility report workbench navigation', () => {
     workbench.editor.discard();
     updateName.mockRejectedValueOnce(new Error('Save unavailable'));
     workbench.editor.name.setValue('Failed draft');
-    expect(await router.navigateByUrl('/v1/workspace/facility/facility-a/reports/dashboard')).toBe(false);
+    expect(await router.navigateByUrl('/v1/workspace/account/account-a/reports/dashboard?facility=facility-a')).toBe(false);
     expect(workbench.editor.name.value).toBe('Failed draft');
     workbench.editor.retry();
     await workbench.editor.flush();
-    expect(await router.navigateByUrl('/v1/workspace/facility/facility-a/reports/dashboard')).toBe(true);
+    expect(await router.navigateByUrl('/v1/workspace/account/account-a/reports/dashboard?facility=facility-a')).toBe(true);
   });
 
   it('resolves only an owned, available report and keeps validation failures separate from pending stages', async () => {

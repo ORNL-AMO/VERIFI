@@ -1,3 +1,4 @@
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { TestBed } from '@angular/core/testing';
 import { reportFacility, reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
@@ -69,7 +70,7 @@ describe('report browse state', () => {
         accountReports: Array.from({ length: 50 }, (_, i) => ({ ...saved.accountReports[0], guid: `account-${i}` })),
         facilityReports: Array.from({ length: 50 }, (_, i) => reportFixture({ guid: `facility-${i}` }))
       });
-      const first = TestBed.createComponent(ReportsDashboardComponent); first.componentRef.setInput('scope', scope); first.detectChanges();
+      const first = TestBed.createComponent(ReportsDashboardComponent); first.detectChanges();
       first.componentInstance.filtersForm.controls.status.setValue('ready'); first.detectChanges();
       first.componentInstance.inventory.selectPage(1);
       const target = first.componentInstance.inventory.visibleIds()[0];
@@ -81,7 +82,7 @@ describe('report browse state', () => {
       expect(first.componentInstance.browseReady()).toBe(false);
       first.destroy();
 
-      const returned = TestBed.createComponent(ReportsDashboardComponent); returned.componentRef.setInput('scope', scope); returned.detectChanges();
+      const returned = TestBed.createComponent(ReportsDashboardComponent); returned.detectChanges();
       const component = returned.componentInstance;
       expect(component.filters().status).toBe('ready');
       expect(component.inventory.page()).toBe(1);
@@ -106,18 +107,20 @@ describe('report browse state', () => {
     const saved = store.snapshot()!;
     store.publish({ ...saved, facilities: [...saved.facilities, { ...reportFacility, guid: 'facility-b', name: 'Facility B' }],
       facilityReports: [...saved.facilityReports, reportFixture({ guid: 'factors', facilityReportType: 'emissionFactors' })] });
-    const fixture = TestBed.createComponent(ReportsDashboardComponent); fixture.componentRef.setInput('scope', 'facility'); fixture.detectChanges();
+    const fixture = TestBed.createComponent(ReportsDashboardComponent); fixture.detectChanges();
     const component = fixture.componentInstance;
     component.filtersForm.controls.type.setValue('facility:emissionFactors'); fixture.detectChanges();
     expect(component.filteredEntries()).toHaveLength(1);
     state.set({ facilityGuid: 'facility-b' }); fixture.detectChanges();
     store.publish({ ...store.snapshot()!, account: { ...saved.account, displayEmissions: false } }); fixture.detectChanges();
-    state.set({ facilityGuid: 'facility-a' }); fixture.detectChanges();
+    state.set({ accountGuid: 'account-a' }); TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid;
+    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as import('@angular/core').WritableSignal<string | undefined>).set('facility-a'); fixture.detectChanges();
     expect(component.filtersForm.controls.type.value).toBe('all');
     expect(component.filters().type).toBe('all');
     expect(component.filteredEntries().map(entry => entry.report.guid)).toEqual(['report-a']);
     state.set({ facilityGuid: 'facility-b' }); fixture.detectChanges();
-    state.set({ facilityGuid: 'facility-a' }); fixture.detectChanges();
+    state.set({ accountGuid: 'account-a' }); TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid;
+    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as import('@angular/core').WritableSignal<string | undefined>).set('facility-a'); fixture.detectChanges();
     expect(component.filtersForm.controls.type.value).toBe('all');
   });
 
@@ -154,10 +157,11 @@ describe('report browse state', () => {
     expect(returned.componentInstance.filtersForm.controls.search.value).toBe('saved');
     expect(returned.componentInstance.inventory.detail()).toBe('summary');
     expect(returned.componentInstance.inventory.overrides()[key]).toBe('detailed'); returned.destroy();
-    state.set({ facilityGuid: 'facility-a' });
-    const facility = TestBed.createComponent(ReportsDashboardComponent); facility.componentRef.setInput('scope', 'facility'); facility.detectChanges();
+    state.set({ accountGuid: 'account-a' }); TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid;
+    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as import('@angular/core').WritableSignal<string | undefined>).set('facility-a');
+    const facility = TestBed.createComponent(ReportsDashboardComponent); facility.detectChanges();
     expect(facility.componentInstance.filtersForm.controls.search.value).toBe('');
-    expect(facility.componentInstance.inventory.detail()).toBe('simple'); expect(facility.componentInstance.inventory.overrides()).toEqual({});
+    expect(facility.componentInstance.inventory.detail()).toBe('summary'); expect(facility.componentInstance.inventory.overrides()).toEqual({});
     expect(accountActions.updateName).not.toHaveBeenCalled(); expect(facilityActions.updateName).not.toHaveBeenCalled();
   });
   it('drops a remembered impact filter when Other Impacts is disabled without deleting saved reports', async () => {

@@ -203,7 +203,7 @@ function setup(options: {
       {
         provide: WorkspaceNavigationService,
         useValue: {
-          facilityDataRoute: (facilityGuid: string, detail = 'meter-grouping') => [
+          facilityDataToolRoute: (facilityGuid: string, detail = 'meter-grouping') => [
             '/v1',
             'workspace',
             'facility',
@@ -221,7 +221,7 @@ function setup(options: {
           ],
           isSingleSiteWorkspace: signal(false),
           facilityInventoryLink(facilityGuid: string, resource: string) {
-              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+              return this.isSingleSiteWorkspace() ? { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: {} }
                 : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
             },
           accountDataReturnRoute: (accountGuid: string) => ['/v1','workspace','account',accountGuid,'data','portfolio','meters'],

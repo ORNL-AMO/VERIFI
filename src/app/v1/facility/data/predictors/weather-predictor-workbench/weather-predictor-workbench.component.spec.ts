@@ -1,3 +1,4 @@
+import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '../facility-predictors.providers';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
@@ -82,11 +83,12 @@ describe('WeatherPredictorWorkbenchComponent', () => {
           useValue: {
             isSingleSiteWorkspace: signal(false),
             facilityInventoryLink(facilityGuid: string, resource: string) {
-              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+              return this.isSingleSiteWorkspace() ? { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: {} }
                 : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
             },
             accountDataReturnRoute: () => ['/account', 'data'],
-            facilityDataRoute: () => ['/facility', 'predictors'],
+            openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
+          facilityDataToolRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: (_facility: string, predictor: string, tab: string) =>
               ['/predictors', predictor, tab],
             facilityWeatherPredictorRoute: (_facility: string, key: string, tab = 'setup') => ['/weather', key, tab],
@@ -121,12 +123,12 @@ describe('WeatherPredictorWorkbenchComponent', () => {
     TestBed.overrideComponent(WeatherPredictorWorkbenchComponent, {
       set: { providers: [{ provide: WeatherPredictorWorkbenchContextService, useValue: context }] }
     });
-    const fixture = TestBed.createComponent(WeatherPredictorWorkbenchComponent);
+    const fixture = TestBed.overrideComponent(WeatherPredictorWorkbenchComponent, { remove: { providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } }).createComponent(WeatherPredictorWorkbenchComponent);
     fixture.detectChanges();
     const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
     const portfolioCrumbs = fixture.componentInstance.breadcrumbs();
     singleSite.set(true); fixture.detectChanges();
-    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/facility', 'predictors'] }]);
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], queryParams: {} }]);
     expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
     singleSite.set(false); fixture.detectChanges();
     expect(fixture.componentInstance.breadcrumbs()).toEqual(portfolioCrumbs);

@@ -162,7 +162,7 @@ describe('WorkspaceStatusService', () => {
     service.navigateTo(presentFinding(makeFinding('facility.predictors.missing', 'error', 'readiness', facilityEntity)));
     service.navigateTo(presentFinding(makeFinding('predictor.quality.outlier', 'warning', 'quality', predictorEntity, { count: 1, periods: ['2026-01'] })));
 
-    expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors']);
+    expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], { queryParams: { facility: 'facility-a' } });
     expect(router.navigate).toHaveBeenNthCalledWith(2, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'predictor-a', 'quality']);
   });
 

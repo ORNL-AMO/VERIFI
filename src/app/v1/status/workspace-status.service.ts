@@ -159,9 +159,12 @@ export class WorkspaceStatusService {
   navigateTo(item: StatusItem): void {
     // A rendered action can outlive the report, its owner, or an availability preference.
     if (isReportStatusItem(item)) item = resolveReportStatusItem(item, this.workspace.isReady() ? this.workspace.snapshot() : undefined);
-    const route = statusDestinationRoute(item.destination);
+    const route = statusDestinationRoute(item.destination, this.workspace.account()?.guid);
     const state = reportStatusNavigationState(item);
-    if (route) void (state ? this.router.navigate([...route], { state }) : this.router.navigate([...route]));
+    const destination = item.destination;
+    const queryParams = destination.kind === 'facility-data' && destination.detail !== 'meter-grouping'
+      && this.workspace.account()?.isSingleFacilityCompany !== true ? { facility: destination.facilityGuid } : undefined;
+    if (route) void (state || queryParams ? this.router.navigate([...route], { ...(state ? { state } : {}), ...(queryParams ? { queryParams } : {}) }) : this.router.navigate([...route]));
   }
 
   private present(findings: readonly StatusFinding[]): StatusItem[] {

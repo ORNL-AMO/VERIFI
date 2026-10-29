@@ -33,7 +33,7 @@ function setup() {
       facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }),
           inventoryFacilityGuid: signal<string | undefined>(undefined),
       accountSettingsRoute: (guid: string) => ['/v1/workspace/account', guid, 'settings/portfolio'],
-      facilityDataRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'data', detail]
+      facilityDataToolRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'data', detail]
     } },
   ] });
   vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);

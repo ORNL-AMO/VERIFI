@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
 import { PredictorWorkspaceActionsService } from '@app/v1/facility/data/predictors/predictor-workspace-actions.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { PortfolioFacilityService } from '../portfolio-facility.service';
@@ -20,7 +20,7 @@ function setup(resource: 'facilities' | 'meters' | 'predictors' = 'meters') {
   TestBed.configureTestingModule({ imports: [AccountInventoryActionsComponent], providers: [
     { provide: AccountWorkspaceStore, useValue: workspace }, { provide: ModalPortalService, useValue: portal }, { provide: PortfolioFacilityService, useValue: facilities }
   ] }).overrideComponent(AccountInventoryActionsComponent, { set: { providers: [
-    { provide: MetersDashboardActionsService, useValue: meters }, { provide: PredictorWorkspaceActionsService, useValue: predictors }
+    { provide: MeterActionsService, useValue: meters }, { provide: PredictorWorkspaceActionsService, useValue: predictors }
   ] } });
   const fixture = TestBed.createComponent(AccountInventoryActionsComponent); fixture.componentRef.setInput('resource', resource); fixture.detectChanges();
   return { fixture, component: fixture.componentInstance, workspace, meters, predictors, facilities, portal, preview };

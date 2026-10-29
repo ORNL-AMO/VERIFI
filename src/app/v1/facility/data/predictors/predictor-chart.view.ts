@@ -2,8 +2,8 @@ import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { predictorDataQualityUnit } from '@domain/calculations/data-quality/predictor-data-quality';
 import { InventoryChartView } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.models';
 import { InventorySeriesStyle, buildInventoryChartStyles } from '@app/v1/shared/charts/inventory-chart-styles';
-import { validPredictorReadingDate } from '../models/predictor-reading.models';
-import { PredictorInventoryEntry } from '../predictor-inventory/predictor-inventory.models';
+import { validPredictorReadingDate } from './models/predictor-reading.models';
+import { PredictorInventoryEntry } from './predictor-inventory/predictor-inventory.models';
 
 /** One saved history per predictor; no aggregation, conversions or weather generation. */
 export function buildPredictorCharts(entries: readonly PredictorInventoryEntry[], readings: readonly IdbPredictorData[],

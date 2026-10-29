@@ -40,6 +40,6 @@ export class FacilityReportWorkbenchContext {
   readonly findings = computed(() => this.status.items().filter(item => item.entity.kind === 'facility-report'
     && item.entity.guid === this.guid() && item.entity.facilityGuid === this.facility()?.guid
     && item.entity.accountGuid === this.workspace.account()?.guid));
-  readonly dashboardRoute = computed(() => this.navigation.facilityReportsRoute(this.navigation.routeState().facilityGuid ?? ''));
+  readonly inventoryLink = computed(() => this.navigation.facilityInventoryLink(this.navigation.routeState().facilityGuid ?? '', 'reports'));
   readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled facility report', icon: reportIcon(report) })));
 }

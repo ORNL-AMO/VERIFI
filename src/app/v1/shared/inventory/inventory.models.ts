@@ -4,7 +4,7 @@ import type { Params } from '@angular/router';
 
 export type InventoryDetailLevel = 'simple' | 'summary' | 'detailed';
 export interface InventoryTileFact { readonly label: string; readonly value: string; }
-export interface InventoryTileLink { readonly label: string; readonly route: readonly string[]; }
+export interface InventoryTileLink { readonly label: string; readonly route: readonly string[]; readonly queryParams?: Params; readonly facilityInventory?: FacilityInventoryDestination; }
 export interface InventoryFacilityLink extends InventoryTileLink {
   readonly facilityGuid: string;
   readonly queryParams?: Params;

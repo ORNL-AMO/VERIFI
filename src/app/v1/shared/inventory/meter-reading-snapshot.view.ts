@@ -14,7 +14,7 @@ interface MeterSnapshotEntry {
 }
 import { inventoryFindingAction } from './inventory-finding.view';
 
-type SnapshotNavigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>;
+type SnapshotNavigation = Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataToolRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>;
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' });
 const dateFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 

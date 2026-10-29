@@ -120,7 +120,7 @@ export function setupSectionNavTest() {
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
             accountImportsRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
-            facilityDataRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
+            facilityDataToolRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
             facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
@@ -128,7 +128,7 @@ export function setupSectionNavTest() {
             accountAnalysisRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'],
             accountAnalysisWorkbenchRoute: (_accountGuid: string, analysisGuid: string, tab = 'setup') =>
               ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', analysisGuid, tab],
-            facilityAnalysisRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'],
+
             facilityAnalysisWorkbenchRoute: (_facilityGuid: string, analysisGuid: string, tab = 'setup') =>
               ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', analysisGuid, tab],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],

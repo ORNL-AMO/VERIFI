@@ -20,9 +20,9 @@ import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { PageIdentityComponent, inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
 import { PortfolioInventoryState } from '@app/v1/account/data/portfolio/portfolio-inventory-state';
-import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-actions.service';
-import { AnalysisDetailsSlideoutComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/analysis-details-slideout/analysis-details-slideout.component';
-import { FacilityAnalysisComparisonComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-comparison/facility-analysis-comparison.component';
+import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-actions.service';
+import { AnalysisDetailsSlideoutComponent } from '@app/v1/facility/analysis/analysis-details-slideout/analysis-details-slideout.component';
+import { FacilityAnalysisComparisonComponent } from '@app/v1/facility/analysis/facility-analysis-comparison/facility-analysis-comparison.component';
 import { AccountAnalysisWorkspaceService } from './account-analysis-workspace.service';
 import { AccountAnalysisActionsService } from './account-analysis-actions.service';
 import { AccountAnalysisDashboardResultsService } from './account-analysis-dashboard-results.service';

@@ -27,8 +27,8 @@ describe('ReportsNavComponent', () => {
         ])
       } }, { provide: WorkspaceNavigationService, useValue: {
         contextFacility: () => ({ guid: 'facility-a' }), contextAnalyses: () => [], facilityInventoryLink: () => ({ route: ['/reports/dashboard'] }), inventoryScopeQuery: () => ({}), account: signal({ guid: 'account-a' }), routeState: signal({ facilityGuid: 'facility-a' }), activeReportGuid: active,
-        contextMode: signal('facility'), isSingleSiteWorkspace: signal(true),
-        facilityReportsRoute: () => ['/reports/dashboard'], accountReportsRoute: () => ['/account/reports/dashboard'],
+        contextMode: signal('facility'), isSingleSiteWorkspace: signal(true), accountReportsRoute: () => ['/account/reports/dashboard'],
+
         facilityReportWorkbenchRoute: (_facility: string, guid: string) => ['/reports/workbench', guid, 'setup']
       } }
     ] }).compileComponents();

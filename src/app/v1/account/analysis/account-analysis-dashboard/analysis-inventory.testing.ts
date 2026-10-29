@@ -1,5 +1,5 @@
 import { buildAccountAnalysisCards } from './account-analysis.models';
-import { buildFacilityAnalysisCards } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis.models';
+import { buildFacilityAnalysisCards } from '@app/v1/facility/analysis/facility-analysis.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';

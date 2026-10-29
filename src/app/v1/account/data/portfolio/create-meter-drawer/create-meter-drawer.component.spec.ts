@@ -4,8 +4,8 @@ import { By } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
-import { MeterDraftSlideoutComponent } from '@app/v1/facility/data/meters/meters-dashboard/meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
+import { MeterDraftSlideoutComponent } from '@app/v1/facility/data/meters/meter-draft-slideout/meter-draft-slideout.component';
 import { CreateMeterDrawerComponent } from './create-meter-drawer.component';
 
 const draft = { name: 'Main Electric', source: 'Electricity' as const };
@@ -24,7 +24,7 @@ describe('CreateMeterDrawerComponent', () => {
         account: activeAccount, facilities, canWrite, hasPending,
         meterGroups: signal([group({ guid: 'group-a' }), group({ guid: 'group-b', facilityId: 'facility-b', name: 'Beta group' })])
       } }]
-    }).overrideComponent(CreateMeterDrawerComponent, { set: { providers: [{ provide: MetersDashboardActionsService, useValue: actions }] } });
+    }).overrideComponent(CreateMeterDrawerComponent, { set: { providers: [{ provide: MeterActionsService, useValue: actions }] } });
     const fixture = TestBed.createComponent(CreateMeterDrawerComponent);
     fixture.detectChanges();
     const component = fixture.componentInstance;

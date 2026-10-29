@@ -127,7 +127,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
       return;
     }
     const facility = this.context.facility();
-    if (facility) void this.router.navigate(this.workspaceNavigation.facilityAnalysisRoute(facility.guid));
+    if (facility) void this.workspaceNavigation.openFacilityInventory(facility.guid, 'analysis');
   }
 
   continue(): void {
@@ -139,7 +139,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
   finish(): void {
     if (this.disabled()) return;
     const facility = this.context.facility();
-    if (facility) void this.router.navigate(this.workspaceNavigation.facilityAnalysisRoute(facility.guid));
+    if (facility) void this.workspaceNavigation.openFacilityInventory(facility.guid, 'analysis');
   }
 
   openContextTab(tabId: string): void {

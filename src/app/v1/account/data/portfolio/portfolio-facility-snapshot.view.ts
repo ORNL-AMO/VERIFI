@@ -4,7 +4,7 @@ import { PortfolioFacilityInput } from './portfolio-facility.view';
 import { PortfolioFacilitySnapshot, PortfolioFindingPreview, PortfolioResourceSummary } from './portfolio-inventory.models';
 import { inventoryFindingAction } from '@app/v1/shared/inventory/inventory-finding.view';
 
-export type FacilitySnapshotNavigation = Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute'>;
+export type FacilitySnapshotNavigation = Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataToolRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute'>;
 
 /** Counts resources once at their highest active severity; finding counts remain separate. */
 export function buildFacilitySnapshots(input: PortfolioFacilityInput, navigation: FacilitySnapshotNavigation): ReadonlyMap<string, PortfolioFacilitySnapshot> {

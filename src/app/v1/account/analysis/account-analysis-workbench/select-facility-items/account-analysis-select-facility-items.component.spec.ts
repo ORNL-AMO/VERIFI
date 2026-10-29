@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
-import { FacilityAnalysisDetailsResultsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/analysis-details-slideout/facility-analysis-details-results.service';
+import { FacilityAnalysisDetailsResultsService } from '@app/v1/facility/analysis/analysis-details-slideout/facility-analysis-details-results.service';
 import { AccountAnalysisFacilitySelectionService } from './account-analysis-facility-selection.service';
 import { AccountAnalysisSelectFacilityItemsComponent } from './account-analysis-select-facility-items.component';
 

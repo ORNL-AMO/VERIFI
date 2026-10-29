@@ -4,7 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { PredictorDraft } from '@app/v1/facility/data/predictors/models';
 import { PredictorWorkspaceActionsService } from '@app/v1/facility/data/predictors/predictor-workspace-actions.service';
-import { PredictorDraftSlideoutComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictor-draft-slideout/predictor-draft-slideout.component';
+import { PredictorDraftSlideoutComponent } from '@app/v1/facility/data/predictors/predictor-draft-slideout/predictor-draft-slideout.component';
 
 @Component({ selector: 'app-create-portfolio-predictor-drawer', standalone: true, providers: [PredictorWorkspaceActionsService],
   imports: [ReactiveFormsModule, PredictorDraftSlideoutComponent],

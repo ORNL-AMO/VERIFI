@@ -1,7 +1,7 @@
 import { Injector, signal } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-actions.service';
+import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-actions.service';
 import { firstValueFrom } from 'rxjs';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';

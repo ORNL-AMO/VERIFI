@@ -4,7 +4,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { FacilityAnalysisGroupModelRosterComponent } from '../../group-model-roster/facility-analysis-group-model-roster.component';
+import { FacilityAnalysisGroupModelRosterComponent } from '../group-model-roster/facility-analysis-group-model-roster.component';
 import { FacilityAnalysisCard } from '../facility-analysis.models';
 import { StatusEvaluationState } from '@app/v1/status/status.models';
 import { AnalysisDetailsStatusComponent } from '@app/v1/shared/analysis-results/details-status/analysis-details-status.component';

@@ -5,7 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { LocalStorageService } from 'ngx-webstorage';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-actions.service';
+import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-actions.service';
 import { AccountAnalysisActionsService } from './account-analysis-actions.service';
 import { AccountAnalysisDashboardResultsService } from './account-analysis-dashboard-results.service';
 import { AccountAnalysisDashboardComponent } from './account-analysis-dashboard.component';

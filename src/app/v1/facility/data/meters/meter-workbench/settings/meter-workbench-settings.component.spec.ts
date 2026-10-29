@@ -13,7 +13,7 @@ import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
 import { MeterCalendarizationHelpSlideoutComponent } from './meter-calendarization-help-slideout/meter-calendarization-help-slideout.component';
@@ -388,7 +388,7 @@ describe('MeterWorkbenchSettingsComponent', () => {
 
   it('opens a delete confirmation from the form footer and deletes the meter', async () => {
     const fixture = setup({ withReading: true });
-    const actions = TestBed.inject(MetersDashboardActionsService) as unknown as { deleteMeter: ReturnType<typeof vi.fn> };
+    const actions = TestBed.inject(MeterActionsService) as unknown as { deleteMeter: ReturnType<typeof vi.fn> };
     const modalPortal = TestBed.inject(ModalPortalService) as unknown as { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
 
@@ -403,14 +403,7 @@ describe('MeterWorkbenchSettingsComponent', () => {
 
     expect(actions.deleteMeter).toHaveBeenCalledWith(expect.objectContaining({ guid: 'meter-a' }));
     expect(modalPortal.hide).toHaveBeenCalledOnce();
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters'
-    ]);
+    expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], { queryParams: { facility: 'facility-a' } });
   });
 
   it('toggles no longer in use from the form footer and saves the meter', async () => {
@@ -535,7 +528,7 @@ function setup(options: {
         useValue: { updateMeterWithData }
       },
       {
-        provide: MetersDashboardActionsService,
+        provide: MeterActionsService,
         useValue: { deleteMeter }
       },
       {
@@ -545,7 +538,8 @@ function setup(options: {
       {
         provide: WorkspaceNavigationService,
         useValue: {
-          facilityDataRoute: (facilityGuid: string, detail = 'meters') => [
+          openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
+          facilityDataToolRoute: (facilityGuid: string, detail = 'meters') => [
             '/v1',
             'workspace',
             'facility',

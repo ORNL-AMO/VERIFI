@@ -57,7 +57,7 @@ export class MeterGroupWorkbenchComponent {
     const account = this.workspace.account(), facility = this.workspace.facility();
     return account && facility ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account.name || 'Account', route: this.navigation.accountDataReturnRoute(account.guid) },
-      { label: facility.name || 'Facility', ...(this.navigation.isSingleSiteWorkspace() ? { route: this.navigation.facilityDataRoute(facility.guid, 'meter-grouping') } : this.navigation.facilityInventoryLink(facility.guid, 'meters')) }) : [];
+      { label: facility.name || 'Facility', ...(this.navigation.isSingleSiteWorkspace() ? { route: this.navigation.facilityDataToolRoute(facility.guid, 'meter-grouping') } : this.navigation.facilityInventoryLink(facility.guid, 'meters')) }) : [];
   });
 
   constructor() {
@@ -77,7 +77,7 @@ export class MeterGroupWorkbenchComponent {
   openGrouping(): void {
     const facility = this.workspace.facility();
     if (facility) {
-      void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'meter-grouping'));
+      void this.router.navigate(this.navigation.facilityDataToolRoute(facility.guid, 'meter-grouping'));
     }
   }
 

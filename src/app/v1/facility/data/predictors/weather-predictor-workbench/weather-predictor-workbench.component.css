@@ -1,5 +1,5 @@
 :host {
-  display: block;
+  display: block; min-width: 0; padding: clamp(1rem, 3vw, 1.5rem);
 }
 
 

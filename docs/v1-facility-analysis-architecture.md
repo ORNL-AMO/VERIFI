@@ -1,6 +1,6 @@
 # V1 Facility Analysis Architecture
 
-This document is the implementation reference for the production v1 facility-analysis dashboard and workbench. It explains ownership, state lifetimes, calculation orchestration, and extension points. Use it before adding a setup field, regression option, result calculation, or results page.
+This document is the implementation reference for the production v1 facility-analysis workbench and reusable inventory projections. It explains ownership, state lifetimes, calculation orchestration, and extension points. Use it before adding a setup field, regression option, result calculation, or results page.
 
 ## Scope and boundaries
 
@@ -12,7 +12,10 @@ The feature is organized by workflow ownership:
 
 ```text
 facility/analysis/
-  facility-analysis-dashboard/       inventory, commands, cards, and dashboard projections
+  analysis-details-slideout/         reusable inspector and result demand
+  facility-analysis-comparison/      facility comparison presentation
+  facility-analysis.models           inventory projections shared by unified Analysis
+  facility-analysis-actions.service  commands used by unified inventory and workbenches
   facility-analysis-outcome-summary  shared annual/monthly outcome presentation projection
   group-model-roster/                shared group method, model, and equation presentation
   regression-number-format           shared significant-digit presentation formatting
@@ -36,7 +39,7 @@ Keep specs beside the implementation they protect. Do not introduce broad featur
 
 ## Route and ownership model
 
-The dashboard lists the selected facility's analyses through the same Simple/Summary/Detailed inventory cards as the account dashboard. Shared tile projection, Analysis snapshots, and inventory layout live under `src/app/v1/shared/analysis-inventory/` and `src/app/v1/shared/inventory/`; feature services retain domain commands and calculation input ownership. Facility cards omit the repeated owning-facility link because the page breadcrumb supplies it. Summary shows annual/rolling improvement, baseline, energy basis, and modification date. Detailed adds a bounded Group Details roster, Used By, and Needs attention. Reporting badges and the Active filter replace a separate active-reporting strip.
+The unified account Analysis inventory lists the selected facility's analyses through the same Simple/Summary/Detailed inventory cards as the account dashboard. Shared tile projection, Analysis snapshots, and inventory layout live under `src/app/v1/shared/analysis-inventory/` and `src/app/v1/shared/inventory/`; feature services retain domain commands and calculation input ownership. Facility cards omit the repeated owning-facility link because the page breadcrumb supplies it. Summary shows annual/rolling improvement, baseline, energy basis, and modification date. Detailed adds a bounded Group Details roster, Used By, and Needs attention. Reporting badges and the Active filter replace a separate active-reporting strip.
 
 Filtering and sorting precede 24-item pagination. Page clamping and override pruning wait for ready validation, so temporarily empty status filters cannot overwrite a saved page during pending checks or return navigation. Facility meters and saved analyses determine category visibility, so a retained water analysis remains discoverable after water meters are removed. The default is Summary with attention-first sorting; a saved detail choice takes precedence. Search uses the facility Data toolbar layout: a Showing count above the expanding input and compact adjacent filters. A separate per-account facility-analysis detail preference persists through the existing display-preference boundary; filters, page, individual detail overrides, scroll, and originating-card focus are session-only and keyed by account plus facility. Global detail changes clear current overrides while retaining the page. Printing renders all filtered cards.
 

@@ -4,7 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { buildFacilityAnalysesWithoutPredictors } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { predictorDeletionSnapshot, PredictorDeletionPreview } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { isStandardPredictor } from '@data/models/idbModels/predictor';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
 import { PredictorWorkspaceActionsService } from '@app/v1/facility/data/predictors/predictor-workspace-actions.service';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { InventoryTileActionRequest, InventoryTileMenuAction } from '@app/v1/shared/inventory/inventory.models';
@@ -17,7 +17,7 @@ type Resource = 'facilities' | 'meters' | 'predictors';
 interface PendingAction { readonly request: InventoryTileActionRequest; readonly accountGuid: string; readonly name: string; readonly snapshot: string; readonly readingCount: number; readonly predictorPreview?: PredictorDeletionPreview; readonly facilityGuid?: string; }
 
 @Component({ selector: 'app-account-inventory-actions', standalone: true, imports: [ConfirmationDialogComponent],
-  providers: [MetersDashboardActionsService, PredictorWorkspaceActionsService],
+  providers: [MeterActionsService, PredictorWorkspaceActionsService],
   templateUrl: './account-inventory-actions.component.html' })
 export class AccountInventoryActionsComponent {
   readonly resource = input.required<Resource>();
@@ -87,7 +87,7 @@ export class AccountInventoryActionsComponent {
         await this.injector.get(PortfolioFacilityService).deleteFacility(facility);
       } else if (this.resource() === 'meters') {
         const meter = this.workspace.meters().find(item => item.guid === record.guid)!;
-        const actions = this.injector.get(MetersDashboardActionsService);
+        const actions = this.injector.get(MeterActionsService);
         if (pending.request.action === 'copy') await actions.copyMeter(meter); else await actions.deleteMeter(meter);
       } else {
         const actions = this.injector.get(PredictorWorkspaceActionsService);

@@ -13,8 +13,8 @@ import {
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { AnalysisDetailsSlideoutComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/analysis-details-slideout/analysis-details-slideout.component';
-import { FacilityAnalysisDetailsResultsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/analysis-details-slideout/facility-analysis-details-results.service';
+import { AnalysisDetailsSlideoutComponent } from '@app/v1/facility/analysis/analysis-details-slideout/analysis-details-slideout.component';
+import { FacilityAnalysisDetailsResultsService } from '@app/v1/facility/analysis/analysis-details-slideout/facility-analysis-details-results.service';
 import { facilityAnalysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';

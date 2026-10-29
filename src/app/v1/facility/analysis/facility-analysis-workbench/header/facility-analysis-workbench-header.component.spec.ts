@@ -125,7 +125,7 @@ describe('facility analysis workbench header', () => {
             isSingleSiteWorkspace: singleSite,
             facilityInventoryLink: (guid: string) => singleSite() ? { route: ['/facility', guid, 'analyses'] }
               : { route: ['/account', 'account-a', 'analysis', 'dashboard'], queryParams: { facility: guid } },
-            facilityAnalysisRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'analyses'],
+
             facilityAnalysisWorkbenchRoute: (facilityGuid: string, analysisGuid: string) => [
               '/facility', facilityGuid, 'analysis', analysisGuid
             ]

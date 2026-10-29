@@ -1,5 +1,5 @@
 import { inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
-import { Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -9,25 +9,21 @@ import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-
 import { PortfolioInventoryState } from '@app/v1/account/data/portfolio/portfolio-inventory-state';
 import { FACILITY_REPORT_TYPES } from '@app/v1/facility/reports/facility-report.models';
 import { ReportLifecycleService } from '../report-lifecycle.service';
-import { ACCOUNT_REPORT_TYPES, DEFAULT_REPORT_FILTERS, ReportInventoryFilters, ReportScope, buildReportInventory, filterReportInventory, reportInventoryTile } from '../report-inventory.models';
+import { ACCOUNT_REPORT_TYPES, DEFAULT_REPORT_FILTERS, ReportInventoryFilters, buildReportInventory, filterReportInventory, reportInventoryTile } from '../report-inventory.models';
 import { reportTypeAvailable } from '../report-availability';
 
 @Component({ selector: 'app-reports-dashboard', standalone: false, host: { class: 'v1-inventory-dashboard-host' }, providers: [ReportLifecycleService],
   templateUrl: './reports-dashboard.component.html', styleUrls: ['./reports-dashboard.component.css'] })
 export class ReportsDashboardComponent {
-  readonly scope = input<ReportScope>('account');
   readonly workspace = inject(AccountWorkspaceStore);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly status = inject(WorkspaceStatusService);
   readonly lifecycle = inject(ReportLifecycleService);
-  readonly facility = computed(() => this.workspace.facilities().find(item => item.guid === this.navigation.routeState().facilityGuid && item.accountId === this.workspace.account()?.guid));
-  readonly browseKey = computed<BrowseKey<'reports' | 'facilityReports'> | undefined>(() => {
+  readonly browseKey = computed<BrowseKey<'reports'> | undefined>(() => {
     const account = this.workspace.account();
     const route = this.navigation.routeState();
     if (!account || this.workspace.status() !== 'ready') return undefined;
-    return this.scope() === 'facility'
-      ? this.facility() ? { kind: 'facilityReports', accountGuid: account.guid, facilityGuid: this.facility()!.guid } : undefined
-      : route.accountGuid === account.guid ? { kind: 'reports', accountGuid: account.guid, facilityGuid: this.navigation.inventoryFacilityGuid() } : undefined;
+    return route.accountGuid === account.guid ? { kind: 'reports', accountGuid: account.guid, facilityGuid: this.navigation.inventoryFacilityGuid() } : undefined;
   });
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
@@ -37,8 +33,8 @@ export class ReportsDashboardComponent {
     sort: new FormControl<ReportInventoryFilters['sort']>('account-first', { nonNullable: true })
   });
   private readonly rememberedFilters = rememberBrowseForm(this.browseKey, this.filtersForm);
-  readonly scopedFacilityGuid = computed(() => this.scope() === 'facility' ? this.facility()?.guid : this.navigation.inventoryFacilityGuid());
-  readonly facilityOnly = computed(() => this.scope() === 'facility' || !!this.scopedFacilityGuid());
+  readonly scopedFacilityGuid = computed(() => this.navigation.inventoryFacilityGuid());
+  readonly facilityOnly = computed(() => !!this.scopedFacilityGuid());
   readonly effectiveSort = new FormControl<ReportInventoryFilters['sort']>('account-first', { nonNullable: true });
   readonly filters = computed(() => {
     const filters = this.rememberedFilters();
@@ -66,11 +62,9 @@ export class ReportsDashboardComponent {
     ...FACILITY_REPORT_TYPES.map(option => ({ value: `facility:${option.value}`, label: !this.facilityOnly() ? `Facility · ${option.label}` : option.label, type: option.value }))
   ].filter(option => reportTypeAvailable(option.type, this.workspace.account()?.displayEmissions)));
   readonly title = 'Reports';
-  readonly breadcrumbs = computed(() => this.scope() === 'account'
-    ? inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', this.workspace.facilities().find(item => item.guid === this.scopedFacilityGuid())?.name)
-    : [{ label: this.workspace.account()?.name || 'Account', route: this.navigation.accountReportsRoute(this.workspace.account()?.guid ?? '') }, { label: this.facility()?.name || 'Facility' }]);
+  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', this.workspace.facilities().find(item => item.guid === this.scopedFacilityGuid())?.name));
   readonly countLabel = computed(() => `${this.filteredEntries().length} of ${this.entries().length} reports`);
-  readonly unavailable = computed(() => this.scope() === 'facility' ? !this.facility() : !this.workspace.account() || this.navigation.routeState().accountGuid !== this.workspace.account()?.guid);
+  readonly unavailable = computed(() => !this.workspace.account() || this.navigation.routeState().accountGuid !== this.workspace.account()?.guid);
 
   constructor() {
     const sortSubscription = this.effectiveSort.valueChanges.subscribe(value => this.filtersForm.controls.sort.setValue(value));
@@ -85,7 +79,7 @@ export class ReportsDashboardComponent {
       });
     });
   }
-  clearFilters(): void { this.filtersForm.reset({ ...DEFAULT_REPORT_FILTERS, sort: this.scope() === 'facility' ? 'attention' : 'account-first' }); }
+  clearFilters(): void { this.filtersForm.reset({ ...DEFAULT_REPORT_FILTERS, sort: this.facilityOnly() ? 'attention' : 'account-first' }); }
   openCreate(): void { if (this.canAct()) this.lifecycle.openCreate(this.scopedFacilityGuid()); }
   requestAction(request: InventoryTileActionRequest): void {
     if (!this.canAct()) return;

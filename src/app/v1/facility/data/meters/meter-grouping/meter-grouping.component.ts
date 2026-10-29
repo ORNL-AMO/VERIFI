@@ -17,7 +17,7 @@ import {
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterGroupDraftSlideoutComponent } from './meter-group-draft-slideout/meter-group-draft-slideout.component';
 import { MeterGroupLaneComponent } from './meter-group-lane/meter-group-lane.component';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
 import { MoveMeterSlideoutComponent } from './move-meter-slideout/move-meter-slideout.component';
 import { ConfirmDeleteGroupModalComponent } from './confirm-delete-group-modal/confirm-delete-group-modal.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -41,7 +41,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 })
 export class MeterGroupingComponent implements OnDestroy {
   private readonly router = inject(Router);
-  private readonly actions = inject(MetersDashboardActionsService);
+  private readonly actions = inject(MeterActionsService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private deleteModalOpen = false;

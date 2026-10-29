@@ -39,16 +39,13 @@ import { MeterGroupWorkbenchTableComponent } from './meters/meter-group-workbenc
 import { MeterGroupWorkbenchYearlyDataComponent } from './meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
 import { MeterGroupWorkbenchComponent } from './meters/meter-group-workbench/meter-group-workbench.component';
 import { ConfirmDeleteMeterModalComponent } from './meters/meter-workbench/settings/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
-import { MetersDashboardActionsService } from './meters/meters-dashboard/meters-dashboard-actions.service';
-import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
+import { MeterActionsService } from './meters/meter-actions.service';
 import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.component';
 import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
-import { FacilityPredictorsComponent } from './predictors/facility-predictors.component';
 import { PredictorWorkbenchComponent } from './predictors/predictor-workbench/predictor-workbench.component';
 import { PredictorWorkbenchQualityReportComponent } from './predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
 import { PredictorWorkbenchReadingsComponent } from './predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from './predictors/predictor-workbench/settings/predictor-workbench-settings.component';
-import { PredictorsDashboardComponent } from './predictors/predictors-dashboard/predictors-dashboard.component';
 import { WeatherPredictorWorkbenchComponent } from './predictors/weather-predictor-workbench/weather-predictor-workbench.component';
 import { WeatherPredictorSetupComponent } from './predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
 import { WeatherPredictorReadingsComponent } from './predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
@@ -88,7 +85,6 @@ import { WeatherPredictorQualityComponent } from './predictors/weather-predictor
     MeterFiscalYearComparisonChartComponent,
     FacilityMetersComponent,
     ConfirmDeleteMeterModalComponent,
-    MetersDashboardComponent,
     MeterGroupingComponent,
     MeterReadingBillSlideoutComponent,
     MeterReadingsConfirmationModalComponent,
@@ -97,8 +93,6 @@ import { WeatherPredictorQualityComponent } from './predictors/weather-predictor
     TooltipComponent,
     MeterReadingsStatusComponent,
     MeterReadingsTableComponent,
-    FacilityPredictorsComponent,
-    PredictorsDashboardComponent,
     PredictorWorkbenchComponent,
     PredictorWorkbenchSettingsComponent,
     PredictorWorkbenchReadingsComponent,
@@ -111,14 +105,11 @@ import { WeatherPredictorQualityComponent } from './predictors/weather-predictor
   exports: [
     FacilityDataPlaceholderComponent,
     FacilityMetersComponent,
-    MetersDashboardComponent,
     MeterGroupingComponent,
     MeterGroupWorkbenchComponent,
     MeterWorkbenchComponent,
-    FacilityPredictorsComponent,
-    PredictorsDashboardComponent,
     PredictorWorkbenchComponent
   ],
-  providers: [MetersDashboardActionsService]
+  providers: [MeterActionsService]
 })
 export class FacilityDataModule { }

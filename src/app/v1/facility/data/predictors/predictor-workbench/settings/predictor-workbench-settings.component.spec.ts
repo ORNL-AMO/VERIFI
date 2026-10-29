@@ -110,7 +110,8 @@ function createFixture(options: { updatePredictor?: any; readings?: any[]; predi
       { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()) } },
       { provide: WeatherStationLookupService, useValue: { getStation: vi.fn(async () => undefined), searchLocations: vi.fn(), findStations: vi.fn() } },
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
-      { provide: WorkspaceNavigationService, useValue: { facilityDataRoute: vi.fn(() => ['/predictors']) } },
+      { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
+          facilityDataToolRoute: vi.fn(() => ['/predictors']) } },
       { provide: Router, useValue: { navigate: vi.fn() } }
     ]
   });

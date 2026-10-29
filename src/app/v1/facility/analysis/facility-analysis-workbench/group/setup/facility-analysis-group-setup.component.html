@@ -6,7 +6,7 @@
   <section class="v1-analysis-section" aria-label="Group setup">
 
     @if (missingMeters()) {
-      <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>This group has no meters. Add meters or exclude the group before continuing.</span><a [routerLink]="navigation.facilityDataRoute(facility.guid, 'meter-grouping')">Open Meter Grouping</a></p>
+      <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>This group has no meters. Add meters or exclude the group before continuing.</span><a [routerLink]="navigation.facilityDataToolRoute(facility.guid, 'meter-grouping')">Open Meter Grouping</a></p>
     }
 
     <div class="v1-analysis-group-setup__configuration">
@@ -36,7 +36,7 @@
       @if (currentGroup.analysisType === 'energyIntensity' || currentGroup.analysisType === 'modifiedEnergyIntensity') {
         <section class="v1-analysis-group-setup__panel" aria-labelledby="production-variables-heading">
           <h2 id="production-variables-heading" class="v1-analysis-group-setup__section-title">Production variables</h2>
-          @if (!productionVariables().length) { <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No production predictors are available.</span><a [routerLink]="navigation.facilityDataRoute(facility.guid, 'predictors')">Open Predictors</a></p> }
+          @if (!productionVariables().length) { <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No production predictors are available.</span><a [routerLink]="navigation.facilityInventoryLink(facility.guid, 'predictors').route" [queryParams]="navigation.facilityInventoryLink(facility.guid, 'predictors').queryParams">Open Predictors</a></p> }
           @for (predictor of productionVariables(); track predictor.id) { <label class="v1-analysis-group-setup__check"><input type="checkbox" [formControl]="controller.predictorControl(predictor.id)" /><span>{{ predictor.name }} <small>{{ predictor.unit }}</small></span></label> }
           @if (productionVariables().length && selectedProductionCount() === 0) { <p class="v1-field-error" role="alert">Select at least one production variable.</p> }
           @if (modeledEquation(); as equation) {

@@ -55,7 +55,7 @@ export class DataNavComponent {
     const facility = this.navigation.contextFacility();
     const account = this.navigation.account();
     return this.facilityContext() && facility
-      ? { label: 'Energy Uses', icon: 'tools' as const, active: this.navigation.activeDetail() === 'energy-uses', route: this.navigation.facilityDataRoute(facility.guid, 'energy-uses') }
+      ? { label: 'Energy Uses', icon: 'tools' as const, active: this.navigation.activeDetail() === 'energy-uses', route: this.navigation.facilityDataToolRoute(facility.guid, 'energy-uses') }
       : { label: 'Portfolio', icon: 'portfolio' as const, active: this.navigation.activeDetail() === 'portfolio', route: account ? this.navigation.accountDataRoute(account.guid, 'portfolio') : [] };
   });
   readonly customLinks = computed(() => {
@@ -64,7 +64,7 @@ export class DataNavComponent {
     const items = account?.displayEmissions ? ACCOUNT_CUSTOM_DATA_ITEMS : ACCOUNT_CUSTOM_DATA_ITEMS.filter(item => item.id === 'custom-fuels');
     return items.map(item => ({
       ...item, active: this.navigation.activeDetail() === item.id,
-      route: this.facilityContext() && facility ? this.navigation.facilityDataRoute(facility.guid, item.id)
+      route: this.facilityContext() && facility ? this.navigation.facilityDataToolRoute(facility.guid, item.id)
         : account ? this.navigation.accountDataRoute(account.guid, item.id) : []
     }));
   });

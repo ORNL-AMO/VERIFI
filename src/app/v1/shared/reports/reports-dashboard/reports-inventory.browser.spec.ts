@@ -20,11 +20,11 @@ import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports
 import { FACILITY_REPORT_ROUTES } from '@app/v1/facility/reports/facility-reports.routes';
 import { FacilityReportActionsService } from '@app/v1/facility/reports/facility-report-actions.service';
 import { reportAccount, reportFacility, reportFixture, reportSnapshot } from '@app/v1/facility/reports/testing/report-test-fixtures';
-import { AccountReportsModule } from '../account-reports.module';
-import { ACCOUNT_REPORT_ROUTES } from '../account-reports.routes';
-import { AccountReportActionsService } from '../account-report-actions.service';
+import { AccountReportsModule } from '@app/v1/account/reports/account-reports.module';
+import { ACCOUNT_REPORT_ROUTES } from '@app/v1/account/reports/account-reports.routes';
+import { AccountReportActionsService } from '@app/v1/account/reports/account-report-actions.service';
 import { AccountReportSetupChanges, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
-import { accountReportSnapshot } from '../testing/account-report-test-fixtures';
+import { accountReportSnapshot } from '@app/v1/account/reports/testing/account-report-test-fixtures';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';

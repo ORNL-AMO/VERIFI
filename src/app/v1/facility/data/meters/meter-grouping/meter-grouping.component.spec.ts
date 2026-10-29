@@ -7,7 +7,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { buildMeterGroupSections } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { MeterGroupingComponent } from './meter-grouping.component';
 
@@ -137,7 +137,7 @@ describe('MeterGroupingComponent', () => {
     fixture.componentInstance.requestDeleteGroup(energyGroup);
     await fixture.componentInstance.confirmDeleteGroup();
 
-    const actions = TestBed.inject(MetersDashboardActionsService) as any;
+    const actions = TestBed.inject(MeterActionsService) as any;
     expect(actions.createGroup).toHaveBeenCalledWith({ name: 'Steam', groupType: 'Energy' });
     expect(actions.updateGroup).toHaveBeenCalledWith(energyGroup, { name: 'Electricity', groupType: 'Energy' });
     expect(actions.reassignMeter).toHaveBeenCalledWith(electricMeter, target);
@@ -261,7 +261,7 @@ function setup(options: {
           hide: vi.fn()
         }
       },
-      { provide: MetersDashboardActionsService, useValue: actions }
+      { provide: MeterActionsService, useValue: actions }
     ]
   });
 

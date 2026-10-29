@@ -1,3 +1,4 @@
+import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '../facility-predictors.providers';
 import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
@@ -28,7 +29,7 @@ import { WeatherPredictorWorkbenchContextService } from './weather-predictor-wor
   templateUrl: './weather-predictor-workbench.component.html',
   styleUrls: ['./weather-predictor-workbench.component.css'],
   standalone: true,
-  providers: [WeatherPredictorWorkbenchContextService],
+  providers: [...FACILITY_PREDICTORS_WORKSPACE_PROVIDERS, WeatherPredictorWorkbenchContextService],
   imports: [PageIdentityComponent, BrowseHeaderDirective,
     DataWorkbenchFactsToggleComponent,
     DataWorkbenchResourceSwitcherComponent,
@@ -116,7 +117,7 @@ export class WeatherPredictorWorkbenchComponent {
 
   openPredictors(): void {
     const facility = this.workspace.facility();
-    if (facility) void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'predictors'));
+    if (facility) void this.navigation.openFacilityInventory(facility.guid, 'predictors');
   }
 
   switchStandardPredictor(predictorGuid: string): void {

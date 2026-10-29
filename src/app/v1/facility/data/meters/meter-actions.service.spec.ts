@@ -7,9 +7,9 @@ import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { account, facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
-import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
+import { MeterActionsService } from './meter-actions.service';
 
-describe('MetersDashboardActionsService', () => {
+describe('MeterActionsService', () => {
   it('deletes distinct facility meters with readings through one bulk command and one reload', async () => {
     const first = meter({ guid: 'first', id: 1 });
     const second = meter({ guid: 'second', id: 2 });
@@ -263,7 +263,7 @@ function setup(options: {
 
   TestBed.configureTestingModule({
     providers: [
-      MetersDashboardActionsService,
+      MeterActionsService,
       { provide: AccountWorkspaceStore, useValue: store },
       { provide: WorkspaceCommandBoundary, useValue: commandBoundary },
       { provide: MeterCommandHandler, useValue: meterHandler },
@@ -272,7 +272,7 @@ function setup(options: {
   });
 
   return {
-    service: TestBed.inject(MetersDashboardActionsService),
+    service: TestBed.inject(MeterActionsService),
     commandBoundary,
     meterHandler,
     meterGroupHandler

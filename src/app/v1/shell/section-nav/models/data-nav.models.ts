@@ -37,7 +37,8 @@ export const ACCOUNT_CUSTOM_DATA_ITEMS: readonly { id: string; label: string; ic
 ];
 
 export interface ResourceNavRoutes {
-  facilityDataRoute: (facilityGuid: string, detail: string) => readonly string[];
+  facilityInventoryLink: (facilityGuid: string, resource: 'meters' | 'predictors') => { route: readonly string[]; queryParams?: Params };
+  facilityDataToolRoute: (facilityGuid: string, detail: string) => readonly string[];
   facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab: 'settings') => readonly string[];
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: 'monthly-table') => readonly string[];
   facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab: 'settings') => readonly string[];
@@ -94,18 +95,18 @@ export function buildResourceNavGroups(input: ResourceNavInput, routes: Resource
   }));
   return [
     {
-      id: 'meters', label: 'Meters', icon: 'meter', route: routes.facilityDataRoute(facilityGuid, 'meters'),
+      id: 'meters', label: 'Meters', icon: 'meter', ...routes.facilityInventoryLink(facilityGuid, 'meters'),
       active: input.detail === 'meters' && !input.activeMeterGuid, routeActive: input.detail === 'meters', facilityGuid,
       childrenId: `v1-meter-nav-items-${facilityGuid}`, childrenLabel: 'Meter links', children: sorted(meterChildren),
       attention: parentAttention('meter-tab', 'meters')
     },
     {
-      id: 'meter-grouping', label: 'Meter Grouping', icon: 'meterGroup', route: routes.facilityDataRoute(facilityGuid, 'meter-grouping'),
+      id: 'meter-grouping', label: 'Meter Grouping', icon: 'meterGroup', route: routes.facilityDataToolRoute(facilityGuid, 'meter-grouping'),
       active: input.detail === 'meter-grouping' && !input.activeGroupGuid, routeActive: input.detail === 'meter-grouping', facilityGuid,
       childrenId: `v1-meter-group-nav-items-${facilityGuid}`, childrenLabel: 'Meter group links', children: sorted(groupChildren)
     },
     {
-      id: 'predictors', label: 'Predictors', icon: 'predictor', route: routes.facilityDataRoute(facilityGuid, 'predictors'),
+      id: 'predictors', label: 'Predictors', icon: 'predictor', ...routes.facilityInventoryLink(facilityGuid, 'predictors'),
       active: input.detail === 'predictors' && !input.activePredictorGuid && !input.activeWeatherKey, routeActive: input.detail === 'predictors', facilityGuid,
       childrenId: `v1-predictor-nav-items-${facilityGuid}`, childrenLabel: 'Predictor links', children: sorted([...standardChildren, ...weatherChildren]),
       attention: parentAttention('predictor-tab', 'predictors')

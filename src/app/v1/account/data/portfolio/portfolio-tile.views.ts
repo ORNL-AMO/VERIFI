@@ -16,7 +16,7 @@ export function facilityTiles(views: readonly PortfolioFacilityView[], input: Po
     facilitySnapshot: snapshots.get(view.facility.guid)
   }));
 }
-export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>, readings: readonly IdbUtilityMeterData[]): PortfolioTile[] {
+export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataToolRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityMeterGroupRoute'>, readings: readonly IdbUtilityMeterData[]): PortfolioTile[] {
   const snapshots = buildMeterSnapshots(views, readings, nav);
   return views.map(view => ({ guid: view.meter.guid, name: view.meter.name, icon: view.sourceIcon,
     route: nav.facilityMeterRoute(view.facility.guid, view.meter.guid, 'settings'),

@@ -1,3 +1,4 @@
+import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '../facility-predictors.providers';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
@@ -61,11 +62,12 @@ describe('PredictorWorkbenchComponent', () => {
           useValue: {
             isSingleSiteWorkspace: signal(false),
             facilityInventoryLink(facilityGuid: string, resource: string) {
-              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+              return this.isSingleSiteWorkspace() ? { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: {} }
                 : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
             },
             accountDataReturnRoute: () => ['/account', 'portfolio'],
-            facilityDataRoute: () => ['/facility', 'predictors'],
+            openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
+          facilityDataToolRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: (_facility: string, predictor: string, tab: string) => ['/predictors', predictor, tab],
             facilityWeatherPredictorRoute: (_facility: string, group: string, tab: string) => ['/weather', group, tab]
           }
@@ -111,12 +113,12 @@ describe('PredictorWorkbenchComponent', () => {
     TestBed.overrideComponent(PredictorWorkbenchComponent, {
       set: { providers: [{ provide: PredictorWorkbenchContextService, useValue: context }] }
     });
-    const fixture = TestBed.createComponent(PredictorWorkbenchComponent);
+    const fixture = TestBed.overrideComponent(PredictorWorkbenchComponent, { remove: { providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } }).createComponent(PredictorWorkbenchComponent);
     fixture.detectChanges();
     const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
     const portfolioCrumbs = fixture.componentInstance.breadcrumbs();
     singleSite.set(true); fixture.detectChanges();
-    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/facility', 'predictors'] }]);
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], queryParams: {} }]);
     expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
     singleSite.set(false); fixture.detectChanges();
     expect(fixture.componentInstance.breadcrumbs()).toEqual(portfolioCrumbs);
@@ -179,11 +181,12 @@ describe('PredictorWorkbenchComponent', () => {
           useValue: {
             isSingleSiteWorkspace: signal(false),
             facilityInventoryLink(facilityGuid: string, resource: string) {
-              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+              return this.isSingleSiteWorkspace() ? { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: {} }
                 : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
             },
             accountDataReturnRoute: () => [],
-            facilityDataRoute: () => ['/facility', 'predictors'],
+            openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
+          facilityDataToolRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: () => []
           }
         },
@@ -212,12 +215,12 @@ describe('PredictorWorkbenchComponent', () => {
     TestBed.overrideComponent(PredictorWorkbenchComponent, {
       set: { providers: [{ provide: PredictorWorkbenchContextService, useValue: context }] }
     });
-    const fixture = TestBed.createComponent(PredictorWorkbenchComponent);
+    const fixture = TestBed.overrideComponent(PredictorWorkbenchComponent, { remove: { providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } }).createComponent(PredictorWorkbenchComponent);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Predictor not found');
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
-    expect(navigate).toHaveBeenCalledWith(['/facility', 'predictors']);
+    expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], { queryParams: { facility: 'facility-a' } });
   });
 
 });

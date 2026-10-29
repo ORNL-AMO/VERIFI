@@ -1,3 +1,4 @@
+import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '../facility-predictors.providers';
 import { facilityContextBreadcrumbs } from '@app/v1/shared/page-identity/facility-context-breadcrumbs';
 import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
@@ -24,7 +25,7 @@ import { PredictorWorkbenchContextService } from './predictor-workbench-context.
   templateUrl: './predictor-workbench.component.html',
   styleUrls: ['./predictor-workbench.component.css'],
   standalone: true,
-  providers: [
+  providers: [...FACILITY_PREDICTORS_WORKSPACE_PROVIDERS,
     PredictorWorkbenchContextService,
     { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: PredictorWorkbenchContextService }
   ],
@@ -85,7 +86,7 @@ export class PredictorWorkbenchComponent {
 
   openPredictors(): void {
     const facility = this.workspace.facility();
-    if (facility) void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'predictors'));
+    if (facility) void this.navigation.openFacilityInventory(facility.guid, 'predictors');
   }
 
   openTab(tab: string): void {

@@ -1,7 +1,7 @@
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { FacilityInventoryDestination, InventoryFacilitySnapshot, InventoryResourceSummary } from '../inventory.models';
+import { FacilityInventoryDestination, InventoryTileLink, InventoryFacilitySnapshot, InventoryResourceSummary } from '../inventory.models';
 
 interface ResourceLink extends InventoryResourceSummary {
   readonly href: string;
@@ -22,7 +22,7 @@ export class FacilitySnapshotComponent {
   findings: readonly (InventoryFacilitySnapshot['findings'][number] & { readonly href: string })[] = [];
 
   ngOnChanges(): void {
-    const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));
+    const href = (action: InventoryTileLink) => this.router.serializeUrl(this.router.createUrlTree([...action.route], { queryParams: action.queryParams }));
     const state = this.snapshot.evaluation;
     this.resources = this.snapshot.resources.map(resource => {
       const counts = `${resource.errorCount} with errors, ${resource.warningCount} with warnings, ${resource.validCount} with all data valid`;
@@ -30,14 +30,16 @@ export class FacilitySnapshotComponent {
       return { ...resource, href: this.router.serializeUrl(this.router.createUrlTree([...resource.route], { queryParams: resource.queryParams })), description: `${resource.total} ${resource.label.toLowerCase()} for ${this.facilityName}. ${evaluation}.`,
         note: !resource.total ? `No ${resource.label.toLowerCase()} yet` : state === 'ready' ? `${resource.errorCount + resource.warningCount} need attention` : evaluation };
     });
-    this.findings = this.snapshot.findings.map(finding => ({ ...finding, href: finding.action ? href(finding.action.route) : '' }));
+    this.findings = this.snapshot.findings.map(finding => ({ ...finding, href: finding.action ? href(finding.action) : '' }));
   }
   openResource(event: MouseEvent, resource: InventoryResourceSummary): void {
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); this.facilityInventoryRequested.emit({ facilityGuid: resource.facilityGuid, resource: resource.kind });
   }
-  open(event: MouseEvent, route: readonly string[]): void {
+  open(event: MouseEvent, action: InventoryTileLink): void {
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    event.preventDefault(); this.navigationRequested.emit(route);
+    event.preventDefault();
+    if (action.facilityInventory) this.facilityInventoryRequested.emit(action.facilityInventory);
+    else this.navigationRequested.emit(action.route);
   }
 }

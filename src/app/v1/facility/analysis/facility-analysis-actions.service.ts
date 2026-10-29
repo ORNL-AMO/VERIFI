@@ -12,7 +12,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getGUID } from '@shared/sharedHelperFunctions';
-import { facilityAnalysisPairWritePatch } from '../single-facility-analysis-pair.service';
+import { facilityAnalysisPairWritePatch } from './single-facility-analysis-pair.service';
 
 export interface ActiveAnalysisEligibility {
   readonly allowed: boolean;

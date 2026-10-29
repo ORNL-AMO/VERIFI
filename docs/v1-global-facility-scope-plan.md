@@ -262,7 +262,9 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 ### Implementation progress
 
 - Shared Meters, Predictors, and Analysis now derive valid single-facility scope without a query parameter. Reports retains the combined account inventory; invalid single-facility recovery and hidden-analysis workbench handoffs remain intact.
-- Focused routing/navigation checks cover section propagation, guarded transitions, and the Reports exception. Dashboard retirement and resource moves follow in separate commits.
+- Routing/navigation checks cover section propagation, guarded transitions, and the Reports exception.
+- Workbench spacing remains owned once: the Meter provider host keeps its existing responsive gutter; standard and weather Predictor workbenches inherit that gutter directly after wrapper removal.
+- Facility dashboards and Reports wrappers are retired. Reusable creation forms, actions, chart projections, details, and comparisons survive outside deleted folders. Workbench returns, status links, and Upload fallbacks target scoped unified inventories. Resource moves follow in separate commits. Retirement checks include focused routing/guard tests, real scoped-host subscription teardown, retained Analysis/Reports Chromium journeys, wide/narrow workbench padding, application type-check, and a production web build. Full acceptance runs after resource organization.
 
 ## Phase 5 — Single-facility presentation
 

@@ -1,5 +1,5 @@
-import { buildPredictorInventory, orderPredictorInventory } from '../predictor-inventory/predictor-inventory.models';
-import { inventoryReading, inventoryWorkspace } from '../predictor-inventory/predictor-inventory.testing';
+import { buildPredictorInventory, orderPredictorInventory } from './predictor-inventory/predictor-inventory.models';
+import { inventoryReading, inventoryWorkspace } from './predictor-inventory/predictor-inventory.testing';
 import { buildPredictorCharts } from './predictor-chart.view';
 
 function entries(workspace: ReturnType<typeof inventoryWorkspace>) {

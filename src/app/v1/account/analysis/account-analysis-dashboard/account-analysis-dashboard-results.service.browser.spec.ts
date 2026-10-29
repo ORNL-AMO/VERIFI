@@ -8,7 +8,7 @@ import { CALCULATION_WORKER_TIMEOUT_MS } from '@platform/web-workers/run-worker'
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { of } from 'rxjs';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { buildFacilityAnalysisCards } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis.models';
+import { buildFacilityAnalysisCards } from '@app/v1/facility/analysis/facility-analysis.models';
 import { buildAccountAnalysisCards } from './account-analysis.models';
 import { AnalysisInventoryEntry } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
 import { AccountAnalysisDashboardResultsService } from './account-analysis-dashboard-results.service';

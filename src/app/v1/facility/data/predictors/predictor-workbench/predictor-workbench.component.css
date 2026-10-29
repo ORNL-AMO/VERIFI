@@ -1,4 +1,4 @@
-:host { display: block; }
+:host { display: block; min-width: 0; padding: clamp(1rem, 3vw, 1.5rem); }
 
 .v1-predictor-workbench-header__chips { display: inline-flex; flex-wrap: wrap; gap: var(--v1-space-1); align-items: center; }
 .v1-predictor-workbench-header__chip { gap: .28rem; min-height: 1.5rem; padding: .18rem .45rem; border-radius: var(--v1-radius-pill); font-size: .8rem; }

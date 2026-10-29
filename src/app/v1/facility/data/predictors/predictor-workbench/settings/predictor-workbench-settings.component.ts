@@ -158,7 +158,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
       await this.actions.deletePredictor(predictor);
       this.form()?.markAsPristine();
       this.hideDeleteModal();
-      await this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'predictors'));
+      await this.navigation.openFacilityInventory(facility.guid, 'predictors');
     } catch (error) {
       this.deleteError.set(error instanceof Error ? error.message : 'The predictor could not be deleted.');
     } finally { this.deleting.set(false); }

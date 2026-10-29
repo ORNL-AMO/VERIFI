@@ -3,7 +3,7 @@ import { InventoryAnalysisSnapshot, InventoryTile } from '@app/v1/shared/invento
 import { BrowseFilters } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { analysisOutcomeDisplay, FacilityAnalysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
-import { FacilityAnalysisCard } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis.models';
+import { FacilityAnalysisCard } from '@app/v1/facility/analysis/facility-analysis.models';
 import { buildFacilityAnalysisGroupModelViews } from '@app/v1/facility/analysis/group-model-roster/facility-analysis-group-model.view';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { StatusEvaluationState } from '@app/v1/status/status.models';

@@ -424,7 +424,7 @@ export class ImportWizardStateService {
       void this.router.navigate(['/v1/workspace/facility', draft.selectedFacilityId, 'data', 'energy-uses']);
     } else if (affected.length === 1) {
       const detail = draft.predictors.length && !draft.meters.length ? 'predictors' : 'meters';
-      void this.router.navigate(['/v1/workspace/facility', affected[0], 'data', detail]);
+      void this.router.navigate(['/v1/workspace/account', accountGuid, 'data', 'portfolio', detail], { queryParams: this.workspace.account()?.isSingleFacilityCompany === true ? {} : { facility: affected[0] } });
     } else {
       void this.router.navigate(['/v1/workspace/account', accountGuid, 'data', 'portfolio', 'facilities']);
     }

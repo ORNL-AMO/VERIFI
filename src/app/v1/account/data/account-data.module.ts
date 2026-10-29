@@ -10,7 +10,7 @@ import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
-import { MeterDraftSlideoutComponent } from '@app/v1/facility/data/meters/meters-dashboard/meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
+import { MeterDraftSlideoutComponent } from '@app/v1/facility/data/meters/meter-draft-slideout/meter-draft-slideout.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';

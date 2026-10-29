@@ -30,7 +30,7 @@ import {
   analysisDependencyClosure,
   facilityAnalysisResultsFingerprint,
   projectFacilityPredictorInputs
-} from '../../facility-analysis-workbench/results/calculation/facility-analysis-results-request';
+} from '../facility-analysis-workbench/results/calculation/facility-analysis-results-request';
 export type FacilityAnalysisDetailsResultState =
   | { readonly state: 'idle' }
   | ({ readonly analysisGuid: string } & FacilityAnalysisOutcomeState);
@@ -159,7 +159,7 @@ export class FacilityAnalysisDetailsResultsService {
   ): Observable<FacilityAnalysisDetailsResultState> {
     const response$ = defer(() => typeof Worker !== 'undefined'
       ? runWorker<FacilityAnalysisResultsWorkerResponse>(
-          new Worker(new URL('../../../../../platform/web-workers/facility-analysis-dashboard-results.worker', import.meta.url)),
+          new Worker(new URL('../../../../platform/web-workers/facility-analysis-dashboard-results.worker', import.meta.url)),
           input.request
         )
       : of<FacilityAnalysisResultsWorkerResponse>({

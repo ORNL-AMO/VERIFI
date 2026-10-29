@@ -12,7 +12,7 @@
     <app-ui-icon name="warning"></app-ui-icon>
     <h1>Analysis not found</h1>
     <p>This analysis is not available in {{ facility.name }}.</p>
-    <a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">
+    <a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityInventoryLink(facility.guid, 'analysis').route" [queryParams]="navigation.facilityInventoryLink(facility.guid, 'analysis').queryParams">
       <app-ui-icon name="arrowLeft"></app-ui-icon> Back to analyses
     </a>
   </article>

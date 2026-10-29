@@ -16,6 +16,17 @@ function setup(detailed = false) {
   fixture.detectChanges(); return fixture;
 }
 describe('facility snapshot detail presentation', () => {
+  it('preserves scope in finding links and uses the guarded inventory request on activation', () => {
+    const fixture = setup(true), requested = vi.fn();
+    fixture.componentInstance.facilityInventoryRequested.subscribe(requested);
+    fixture.componentRef.setInput('snapshot', { ...snapshot, findings: [{ ...snapshot.findings[0], action: {
+      label: 'Open predictors', route: ['/account', 'predictors'], queryParams: { facility: 'facility-a' },
+      facilityInventory: { facilityGuid: 'facility-a', resource: 'predictors' }
+    } }] }); fixture.detectChanges();
+    const link = fixture.nativeElement.querySelector('.facility-snapshot__attention a') as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('/account/predictors?facility=facility-a');
+    link.click(); expect(requested).toHaveBeenCalledExactlyOnceWith({ facilityGuid: 'facility-a', resource: 'predictors' });
+  });
   it('shows compact linked inventory in Summary and adds distributions and targeted findings in Detailed', () => {
     const fixture=setup(), root=fixture.nativeElement as HTMLElement, navigate=vi.fn(), inventory=vi.fn();
     fixture.componentInstance.navigationRequested.subscribe(navigate); fixture.componentInstance.facilityInventoryRequested.subscribe(inventory);

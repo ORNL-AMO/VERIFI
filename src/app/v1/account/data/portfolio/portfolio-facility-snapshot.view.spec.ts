@@ -6,7 +6,7 @@ import { buildFacilitySnapshots, FacilitySnapshotNavigation } from './portfolio-
 
 const navigation: FacilitySnapshotNavigation = {
   facilityInventoryLink: (guid, resource) => ({ route: ['/account', 'data', resource], queryParams: { facility: guid } }),
-  facilityDataRoute: (guid, detail) => ['/facility', guid, 'data', detail],
+  facilityDataToolRoute: (guid, detail) => ['/facility', guid, 'data', detail],
   facilityMeterRoute: (guid, meter, tab) => ['/facility', guid, 'meters', meter, tab],
   facilityPredictorRoute: (guid, predictor, tab) => ['/facility', guid, 'predictors', predictor, tab]
 };
@@ -73,7 +73,7 @@ describe('facility resource snapshot', () => {
       findings: presentFindings([finding('facility','f','error','facility.predictors.missing')]) }),navigation).get('f')!;
     expect(snapshot.address).toBe('Address not set');
     expect(snapshot.resources.every(item => item.total === 0 && item.validCount === 0)).toBe(true);
-    expect(snapshot.findings[0]).toMatchObject({ name:'Facility setup', action:{label:'Open predictors',route:['/facility','f','data','predictors']} });
+    expect(snapshot.findings[0]).toMatchObject({ name:'Facility setup', action:{label:'Open predictors',route:['/account','data','predictors'],queryParams:{facility:'f'}} });
     const postalOnly = buildFacilitySnapshots(input({facilities:[facility({guid:'f',address:'',zip:'00501'})]}),navigation).get('f')!;
     expect(postalOnly.address).toBe('ZIP / postal code 00501');
   });

@@ -20,7 +20,7 @@ import {
 } from '@app/v1/facility/data/meters/models';
 
 @Injectable()
-export class MetersDashboardActionsService {
+export class MeterActionsService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly meterHandler = inject(MeterCommandHandler);

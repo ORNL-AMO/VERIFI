@@ -1,3 +1,5 @@
+import { page } from 'vitest/browser';
+import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '../facility-predictors.providers';
 import { computed } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
@@ -13,6 +15,7 @@ import { inventoryNavigation, inventoryWorkspace } from './predictor-inventory.t
 
 describe('Predictor workbench identity and sticky facts in Chromium', () => {
   for (const weather of [false, true]) it(`keeps ${weather ? 'weather' : 'standard'} identity and tabs connected as facts collapse`, async () => {
+    await page.viewport(1100, 850);
     const workspace = inventoryWorkspace();
     const context = { predictor: computed(() => workspace.predictors()[0]), card: computed(() => workspace.predictorCards()[0]),
       group: computed(() => workspace.weatherStationGroups()[0]), predictors: computed(() => workspace.weatherStationGroups()[0].predictors),
@@ -25,9 +28,15 @@ describe('Predictor workbench identity and sticky facts in Chromium', () => {
       { provide: WorkspaceNavigationService, useValue: inventoryNavigation }] });
     if (weather) TestBed.overrideComponent(WeatherPredictorWorkbenchComponent, { set: { providers: [{ provide: WeatherPredictorWorkbenchContextService, useValue: context }] } });
     else TestBed.overrideComponent(PredictorWorkbenchComponent, { set: { providers: [{ provide: PredictorWorkbenchContextService, useValue: context }] } });
-    const root = document.createElement('main'); root.className = 'v1-root'; Object.assign(root.style, { height: '420px', width: '1000px', overflow: 'auto', minHeight: '0' }); document.body.append(root);
-    const fixture = weather ? TestBed.createComponent(WeatherPredictorWorkbenchComponent) : TestBed.createComponent(PredictorWorkbenchComponent);
+    const root = document.createElement('main'); root.className = 'v1-root'; Object.assign(root.style, { height: '420px', width: 'min(1000px,100%)', overflow: 'auto', minHeight: '0' }); document.body.append(root);
+    const fixture = weather ? TestBed.overrideComponent(WeatherPredictorWorkbenchComponent, { remove: { providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } }).createComponent(WeatherPredictorWorkbenchComponent) : TestBed.overrideComponent(PredictorWorkbenchComponent, { remove: { providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } }).createComponent(PredictorWorkbenchComponent);
     root.append(fixture.nativeElement); fixture.detectChanges();
+    expect(getComputedStyle(fixture.nativeElement).paddingLeft).toBe(`${1.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`);
+    expect(getComputedStyle(fixture.nativeElement).paddingRight).toBe(`${1.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`);
+    await page.viewport(390, 800); fixture.detectChanges();
+    expect(getComputedStyle(fixture.nativeElement).paddingLeft).toBe(`${parseFloat(getComputedStyle(document.documentElement).fontSize)}px`);
+    expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+    await page.viewport(1100, 850);
     const filler = document.createElement('div'); filler.style.height = '1200px'; fixture.nativeElement.append(filler);
     const facts = root.querySelector<HTMLElement>(weather ? '#v1-weather-workbench-facts' : '#v1-predictor-workbench-facts')!;
     const toggle = root.querySelector<HTMLButtonElement>('app-data-workbench-facts-toggle button')!;

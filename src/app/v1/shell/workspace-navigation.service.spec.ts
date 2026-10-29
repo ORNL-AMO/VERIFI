@@ -266,7 +266,7 @@ describe('WorkspaceNavigationService', () => {
       'home',
       'overview'
     ]);
-    expect(service.facilityDataRoute('facility-a', 'predictors')).toEqual([
+    expect(service.facilityDataToolRoute('facility-a', 'predictors')).toEqual([
       '/v1',
       'workspace',
       'facility',
@@ -274,7 +274,7 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'predictors'
     ]);
-    expect(service.facilityDataRoute('facility-a', 'meter-grouping')).toEqual([
+    expect(service.facilityDataToolRoute('facility-a', 'meter-grouping')).toEqual([
       '/v1',
       'workspace',
       'facility',
@@ -282,7 +282,7 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'meter-grouping'
     ]);
-    expect(service.facilityDataRoute('facility-a', 'custom-fuels')).toEqual([
+    expect(service.facilityDataToolRoute('facility-a', 'custom-fuels')).toEqual([
       '/v1',
       'workspace',
       'facility',
@@ -290,9 +290,7 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'custom-fuels'
     ]);
-    expect(service.facilityAnalysisRoute('facility-a')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'
-    ]);
+    expect(service.facilityInventoryLink('facility-a', 'analysis')).toEqual({ route: service.accountAnalysisRoute('account-a'), queryParams: { facility: 'facility-a' } });
     expect(service.facilityAnalysisWorkbenchRoute('facility-a', 'analysis-a')).toEqual([
       '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'setup'
     ]);
@@ -567,7 +565,7 @@ describe('WorkspaceNavigationService', () => {
     await service.openSection('imports');
     expect(router.navigate).toHaveBeenLastCalledWith(
       ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
-      { queryParams: { facilityGuid: 'facility-a', returnUrl: '/v1/workspace/facility/facility-a/data/meters' } }
+      { queryParams: { facilityGuid: 'facility-a' } }
     );
   });
 
@@ -813,14 +811,7 @@ describe('WorkspaceNavigationService', () => {
 
     await service.setContext('facility');
 
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters'
-    ]);
+    expect(router.navigate).toHaveBeenCalledWith(service.accountPortfolioRoute('account-a', 'meters'), { queryParams: { facility: 'facility-a' } });
 
     router.navigate.mockClear();
     router.events.next(new NavigationEnd(

@@ -5,7 +5,7 @@ import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.
 import { StandardPredictorActionsService } from './standard-predictor-actions.service';
 import { WeatherPredictorActionsService } from './weather-predictor-actions.service';
 
-/** Providers shared by the Predictor dashboard and every child workbench route. */
+/** Providers owned by each standard or weather workbench and its routed children. */
 export const FACILITY_PREDICTORS_WORKSPACE_PROVIDERS: Provider[] = [
   FacilityPredictorsWorkspaceService,
   PredictorWorkspaceActionsService,

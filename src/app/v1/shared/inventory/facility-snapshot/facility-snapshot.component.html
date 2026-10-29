@@ -28,7 +28,7 @@
             <app-ui-icon [name]="finding.severity === 'error' ? 'danger' : 'warning'" [size]="18"/>
             <div>
               <p [title]="finding.description"><span class="visually-hidden">{{ finding.severity === 'error' ? 'Error' : 'Warning' }}: </span>{{ finding.name }} · {{ finding.title }}</p>
-              @if (finding.action; as action) { <a [href]="finding.href" [attr.aria-label]="action.label + ' for ' + finding.name" (click)="open($event, action.route)">{{ action.label }}</a> }
+              @if (finding.action; as action) { <a [href]="finding.href" [attr.aria-label]="action.label + ' for ' + finding.name" (click)="open($event, action)">{{ action.label }}</a> }
               @else { <p class="facility-snapshot__unavailable">Fix workflow unavailable</p> }
             </div>
           </li>

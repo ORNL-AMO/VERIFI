@@ -11,7 +11,7 @@ import { updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData'
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
 import { of, startWith, switchMap } from 'rxjs';
 import {
   MeterSettingsFormService,
@@ -33,7 +33,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   private readonly formService = inject(MeterSettingsFormService);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly meterHandler = inject(MeterCommandHandler);
-  private readonly actions = inject(MetersDashboardActionsService);
+  private readonly actions = inject(MeterActionsService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
@@ -206,7 +206,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     try {
       await this.actions.deleteMeter(meter);
       this.hideDeleteModal();
-      await this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'meters'));
+      await this.navigation.openFacilityInventory(facility.guid, 'meters');
     } catch (error) {
       this.deleteError.set(error instanceof Error ? error.message : 'The meter could not be deleted.');
     } finally {

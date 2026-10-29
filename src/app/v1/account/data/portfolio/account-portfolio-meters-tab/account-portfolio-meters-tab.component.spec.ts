@@ -190,7 +190,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
         useValue: {
           inventoryFacilityGuid: signal<string | undefined>(undefined),
           facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }),
-          facilityDataRoute: (facilityGuid: string, detail: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
+          facilityDataToolRoute: (facilityGuid: string, detail: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
           facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [
             '/v1',

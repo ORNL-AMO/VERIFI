@@ -36,14 +36,10 @@ import { MeterGroupWorkbenchTableComponent } from '@app/v1/facility/data/meters/
 import { MeterGroupWorkbenchYearlyDataComponent } from '@app/v1/facility/data/meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
 import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter-group-workbench/meter-group-workbench.component';
 import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
-import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
-import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
-import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '@app/v1/facility/data/predictors/facility-predictors.providers';
 import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
 import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
 import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
-import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
 import { WeatherPredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
 import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
 import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
@@ -87,7 +83,6 @@ import { AccountAnalysisMonthlyChartComponent } from '@app/v1/account/analysis/a
 import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-details/account-analysis-facility-details.component';
 import { AccountAnalysisFacilityContributionsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-contributions/account-analysis-facility-contributions.component';
 import { AccountAnalysisUsedByComponent } from '@app/v1/account/analysis/account-analysis-workbench/used-by/account-analysis-used-by.component';
-import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
@@ -252,15 +247,10 @@ export const V1Routes: Routes = [
           {
             path: 'data',
             children: [
-              { path: '', pathMatch: 'full', redirectTo: 'meters' },
               {
-                path: 'meters',
+                path: 'meters/:meterGuid',
                 component: FacilityMetersComponent,
-                children: [
-                  { path: '', pathMatch: 'full', component: MetersDashboardComponent },
-                  {
-                    path: ':meterGuid',
-                    component: MeterWorkbenchComponent,
+                children: [{ path: '', component: MeterWorkbenchComponent,
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: MeterWorkbenchSettingsComponent, data: { meterTab: 'settings' } },
@@ -272,8 +262,7 @@ export const V1Routes: Routes = [
                       { path: 'quality', component: MeterWorkbenchQualityReportComponent, data: { meterTab: 'quality' } },
                       { path: '**', redirectTo: 'settings' }
                     ]
-                  }
-                ]
+                }]
               },
               {
                 path: 'meter-grouping',
@@ -297,13 +286,7 @@ export const V1Routes: Routes = [
                 ]
               },
               {
-                path: 'predictors',
-                component: FacilityPredictorsComponent,
-                providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS,
-                children: [
-                  { path: '', pathMatch: 'full', component: PredictorsDashboardComponent },
-                  {
-                    path: 'weather',
+                path: 'predictors/weather',
                     children: [
                       {
                         path: 'new',
@@ -348,9 +331,9 @@ export const V1Routes: Routes = [
                         ]
                       }
                     ]
-                  },
-                  {
-                    path: ':predictorGuid',
+              },
+              {
+                    path: 'predictors/:predictorGuid',
                     component: PredictorWorkbenchComponent,
                     canActivate: [predictorCanonicalRouteGuard],
                     children: [
@@ -364,14 +347,12 @@ export const V1Routes: Routes = [
                       },
                       { path: '**', redirectTo: 'settings' }
                     ]
-                  }
-                ]
               },
               { path: 'energy-uses', component: FacilityDataPlaceholderComponent, data: { title: 'Energy Uses' } },
               { path: 'custom-grid-factors', component: CustomGridFactorsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-fuels', component: CustomFuelsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-gwps', component: CustomGwpsComponent, canDeactivate: [unsavedChangesGuard] },
-              { path: '**', redirectTo: 'meters' }
+              { path: '**', redirectTo: '/v1' }
             ]
           },
           {
@@ -395,8 +376,6 @@ export const V1Routes: Routes = [
             path: 'analysis',
             canActivateChild: [singleFacilityAnalysisPairGuard],
             children: [
-              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: FacilityAnalysisDashboardComponent },
               {
                 path: 'workbench/:analysisGuid',
                 component: FacilityAnalysisWorkbenchComponent,
@@ -437,7 +416,7 @@ export const V1Routes: Routes = [
                   { path: '**', redirectTo: 'setup' }
                 ]
               },
-              { path: '**', redirectTo: 'dashboard' }
+              { path: '**', redirectTo: '/v1' }
             ]
           },
           { path: 'reports', children: FACILITY_REPORT_ROUTES },

@@ -122,7 +122,7 @@ export class MeterWorkbenchComponent {
   openMeters(): void {
     const facility = this.workspace.facility();
     if (facility) {
-      void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'meters'));
+      void this.navigation.openFacilityInventory(facility.guid, 'meters');
     }
   }
 

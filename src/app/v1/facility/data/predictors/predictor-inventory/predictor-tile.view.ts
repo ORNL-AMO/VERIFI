@@ -5,7 +5,7 @@ import { StatusEvaluationState } from '@app/v1/status/status.models';
 import { PredictorInventoryEntry } from './predictor-inventory.models';
 import { buildPredictorSnapshots } from './predictor-reading-snapshot.view';
 
-type Navigation = Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
+type Navigation = Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataToolRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 
 export function buildPredictorTiles(entries: readonly PredictorInventoryEntry[], nav: Navigation, readings: readonly IdbPredictorData[], state: StatusEvaluationState): InventoryTile[] {
   const snapshots = buildPredictorSnapshots(entries, readings, state, nav);

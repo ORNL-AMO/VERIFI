@@ -161,7 +161,7 @@ describe('facility analysis group setup behavior', () => {
       baselineYear: 2023, hasBanking: true, groups: [group]
     } as IdbAnalysisItem;
     const facade = {
-      navigation: { facilityDataRoute: () => ['/v1', 'facility-data'] },
+      navigation: { facilityDataToolRoute: () => ['/v1', 'facility-data'] },
       workbench: { facility: signal({ guid: 'facility-a' }) },
       group: signal(group), analysis: signal(analysis),
       dataAdjustmentDraft: signal({ amount: '' }), baselineAdjustmentDraft: signal({ amount: '' }),
@@ -297,7 +297,7 @@ function renderMethodSetup(method: 'absoluteEnergyConsumption' | 'energyIntensit
     groups: [group]
   } as IdbAnalysisItem;
   const facade = {
-    navigation: { facilityDataRoute: () => ['/v1', 'facility-data'] },
+    navigation: { facilityDataToolRoute: () => ['/v1', 'facility-data'] },
     workbench: { facility: signal({ guid: 'facility-a' }) },
     group: signal(group),
     analysis: signal(analysis),

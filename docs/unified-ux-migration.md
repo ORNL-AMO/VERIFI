@@ -459,3 +459,7 @@ Shared account/facility presentation lives under the v1 shared analysis-results 
 ### Phase 4 shared inventory routing
 
 Valid single-facility accounts now use unified Meters, Predictors, and Analysis inventories with implicit sole-facility scope. Reports retains combined account/facility content. Hidden analysis pairs and guarded workbench handoffs remain unchanged; zero/multiple-facility recovery never selects an arbitrary facility. Dashboard retirement and feature moves are tracked in the [scope roadmap](v1-global-facility-scope-plan.md#phase-4--dashboard-retirement-and-resource-based-folders).
+
+### Phase 4 dashboard retirement
+
+The unified inventories now replace facility Meters, Predictors, Analysis, and Reports dashboards. Obsolete v1 routes and transient dashboard state are removed without aliases; unknown paths recover through normal routing. Shared creation forms, projections, inspectors, and comparisons remain active. Reports uses one directly routed inventory. Meter workbenches and Meter Grouping retain scoped provider hosts; Predictor workflow providers belong to their owning workbench components. Historical dashboard workflow notes above are superseded by the [Phase 4 roadmap](v1-global-facility-scope-plan.md#phase-4--dashboard-retirement-and-resource-based-folders).

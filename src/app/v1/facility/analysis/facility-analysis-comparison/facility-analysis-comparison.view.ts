@@ -8,7 +8,7 @@ import {
   annualResultMarkers,
   orderedUniqueResultMarkers
 } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
-import { buildFacilityAnalysisGroupModelViews } from '../../group-model-roster/facility-analysis-group-model.view';
+import { buildFacilityAnalysisGroupModelViews } from '../group-model-roster/facility-analysis-group-model.view';
 import { FacilityAnalysisDashboardCard } from '../facility-analysis.models';
 
 export interface FacilityAnalysisComparisonField {

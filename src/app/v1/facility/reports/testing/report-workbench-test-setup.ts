@@ -1,5 +1,5 @@
 import { AccountReportActionsService } from '@app/v1/account/reports/account-report-actions.service';
-import { computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, provideRouter, Router } from '@angular/router';
@@ -18,6 +18,9 @@ import { FacilityReportActionsService } from '../facility-report-actions.service
 import { FacilityReportWorkbenchComponent } from '../facility-report-workbench/facility-report-workbench.component';
 import { reportFacility, reportFixture, reportSnapshot } from './report-test-fixtures';
 
+@Component({ standalone: true, template: '<h1>Reports inventory</h1>' })
+class ReportInventoryDestination {}
+
 export async function setupReportWorkbench(reports = [reportFixture(), reportFixture({ id: 20, guid: 'report-b', name: 'Overview', facilityReportType: 'overview' })]) {
   const store = new AccountWorkspaceStore();
   store.publish(reportSnapshot(reports), { facility: reportFacility });
@@ -31,7 +34,7 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
     provideLocationMocks(),
     { provide: AccountReportActionsService, useValue: {} },
     { provide: WorkbenchLayoutService, useFactory: () => { const factsExpanded = signal(true); return { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) }; } },
-    provideRouter([{ path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES }, { path: 'elsewhere', component: FacilityReportWorkbenchComponent }]),
+    provideRouter([{ path: 'v1/workspace/account/:accountGuid/reports/dashboard', component: ReportInventoryDestination }, { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES }, { path: 'elsewhere', component: FacilityReportWorkbenchComponent }]),
     { provide: AccountWorkspaceStore, useValue: store },
     { provide: WorkspaceStatusService, useValue: status },
     { provide: FacilityReportActionsService, useValue: { updateName } },
@@ -43,7 +46,7 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
         facilityInventoryLink: (guid: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'reports', 'dashboard'], queryParams: { facility: guid } }),
         inventoryFacilityGuid: () => undefined, routeState, activeReportGuid: computed(() => routeState().reportGuid),
         accountReportsRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'reports', 'dashboard'],
-        facilityReportsRoute: (guid: string) => ['/v1', 'workspace', 'facility', guid, 'reports', 'dashboard'],
+
         facilityReportWorkbenchRoute: (facility: string, report: string, stage = 'setup') => ['/v1', 'workspace', 'facility', facility, 'reports', 'workbench', report, stage]
       };
     } }

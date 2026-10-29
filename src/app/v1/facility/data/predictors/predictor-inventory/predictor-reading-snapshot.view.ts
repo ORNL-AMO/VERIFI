@@ -7,7 +7,7 @@ import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models'
 import { InventoryReadingSnapshot, InventoryRecentReading, InventoryTileFact, InventoryTileLink } from '@app/v1/shared/inventory/inventory.models';
 import { inventoryFindingAction } from '@app/v1/shared/inventory/inventory-finding.view';
 
-type Navigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
+type Navigation = Pick<WorkspaceNavigationService, 'facilityInventoryLink' | 'facilityDataToolRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 /** Display saved monthly records without calendarization, weather generation or aggregation. */

@@ -1,8 +1,5 @@
 import { WorkspaceBottomSheetComponent } from '@app/v1/shared/workspace-bottom-sheet/workspace-bottom-sheet.component';
 import { PortalModule } from '@angular/cdk/portal';
-import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
-import { FacilityAnalysisWorkspaceService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-workspace.service';
-import { FacilityAnalysisDashboardResultsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard-results.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -19,7 +16,7 @@ import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.
 import { flushPendingChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
-import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-actions.service';
+import { FacilityAnalysisActionsService } from '@app/v1/facility/analysis/facility-analysis-actions.service';
 import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/account/data/portfolio/portfolio-browser-test.helpers';
 import { AccountAnalysisDashboardComponent } from './account-analysis-dashboard.component';
 import { AccountAnalysisWorkspaceService } from './account-analysis-workspace.service';
@@ -30,7 +27,7 @@ import { accountEntry, facilityEntry, inventoryAccount, inventoryFacility, inven
 const dashboardUrl = '/v1/workspace/account/account-a/analysis/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, NavigationMotionDirective, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div [appNavigationMotion]="navigation.routeMotion()" [navigationMotionKey]="navigation.routeMotionKey()"><router-outlet/></div><ng-template [cdkPortalOutlet]="portal.activePortal()"/></main>' })
 class AnalysisBrowserHost { readonly portal = inject(ModalPortalService); readonly navigation = inject(WorkspaceNavigationService); }
-@Component({ standalone: true, imports: [RouterLink], template: '<h1>Facility analysis workbench</h1>@if (navigation.account(); as account) { <a [routerLink]="navigation.accountAnalysisRoute(account.guid)">Account Analysis</a> } @if (navigation.facility(); as facility) { <a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Facility Analysis</a> }' })
+@Component({ standalone: true, imports: [RouterLink], template: '<h1>Facility analysis workbench</h1>@if (navigation.account(); as account) { <a [routerLink]="navigation.accountAnalysisRoute(account.guid)">Account Analysis</a> } @if (navigation.facility(); as facility) { <a [routerLink]="navigation.facilityInventoryLink(facility.guid, &quot;analysis&quot;).route" [queryParams]="navigation.facilityInventoryLink(facility.guid, &quot;analysis&quot;).queryParams">Facility Analysis</a> }' })
 class FacilityDestination { readonly navigation = inject(WorkspaceNavigationService); }
 @Component({ standalone: true, template: '<h1>Account analysis workbench</h1>' })
 class AccountDestination {}
@@ -50,22 +47,16 @@ function setup(count = 35) {
       { path: 'analysis/dashboard', component: AccountAnalysisDashboardComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
       { path: 'analysis/workbench/:analysisGuid/setup', component: AccountDestination, canActivate: [flushPendingChangesGuard] }
     ] },
-    { path: 'v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid/setup', component: FacilityDestination, canActivate: [() => canEnter()], canDeactivate: [() => canLeave()] },
-    { path: 'v1/workspace/facility/:facilityGuid/analysis/dashboard', component: FacilityAnalysisDashboardComponent }
+    { path: 'v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid/setup', component: FacilityDestination, canActivate: [() => canEnter()], canDeactivate: [() => canLeave()] }
   ]),
     { provide: AccountWorkspaceStore, useValue: { account, facilities, selectedFacility, status: () => 'ready', hasPending: () => false } },
     { provide: AccountWorkspaceService, useValue: {} }, { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [inventoryAccount] } },
     { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
     { provide: AccountAnalysisWorkspaceService, useValue: { account, entries, categories, facilities, workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), statusItems: signal([]), facilityInputs: signal({ meterGroups: [], meters: [], meterData: [], predictorData: [] }), facilityAnalyses: signal([]) } },
-    { provide: FacilityAnalysisWorkspaceService, useValue: { account, facility: selectedFacility, categories,
-      cards: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card] : [])),
-      analyses: computed(() => entries().flatMap(entry => entry.scope === 'facility' && entry.facility.guid === selectedFacility().guid ? [entry.card.analysis] : [])),
-      workspaceState: status, workspaceError: signal(undefined), statusState: status, canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]) } },
     { provide: AccountAnalysisActionsService, useValue: accountActions },
     { provide: FacilityAnalysisActionsService, useValue: facilityActions },
     { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }
   ] }).overrideComponent(AccountAnalysisDashboardComponent, { set: { providers: [{ provide: AccountAnalysisDashboardResultsService, useValue: results }] } });
-  TestBed.overrideComponent(FacilityAnalysisDashboardComponent, { set: { providers: [{ provide: FacilityAnalysisDashboardResultsService, useValue: { setDemand: vi.fn(), states: computed(() => Object.fromEntries(entries().filter(entry => entry.scope === 'facility').map(entry => [entry.card.analysis.guid, inventoryOutcome()]))) } }] } });
   const fixture = TestBed.createComponent(AnalysisBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router); router.setUpLocationChangeListener();
   const host = () => fixture.debugElement.query(By.directive(AccountAnalysisDashboardComponent)).componentInstance as AccountAnalysisDashboardComponent;
@@ -157,8 +148,8 @@ describe('account Analysis inventory browser journeys', () => {
   it('supports the facility action menu, narrow layouts, reduced motion, deleted selections, and backdrop dismissal', async () => {
     await page.viewport(390, 800);
     await (cdp() as any).send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
-    const view = setup(3); await view.router.navigateByUrl('/v1/workspace/facility/facility-a/analysis/dashboard'); await settle(view.fixture);
-    const host = view.fixture.debugElement.query(By.directive(FacilityAnalysisDashboardComponent)).componentInstance as FacilityAnalysisDashboardComponent;
+    const view = setup(3); await view.router.navigateByUrl(dashboardUrl + '?facility=facility-a'); await settle(view.fixture);
+    const host = view.fixture.debugElement.query(By.directive(AccountAnalysisDashboardComponent)).componentInstance as AccountAnalysisDashboardComponent;
     const menu = view.root.querySelector<HTMLButtonElement>('button[aria-label^="Options for"]')!;
     await page.elementLocator(menu).click(); await settle(view.fixture);
     await page.getByRole('menuitem', { name: 'Compare', exact: true }).click(); await settle(view.fixture);
@@ -167,11 +158,11 @@ describe('account Analysis inventory browser journeys', () => {
     const seeded = host.comparison.selection().first!;
     const second = host.comparison.secondOptions()[0].key;
     await page.getByRole('combobox', { name: 'Analysis 2', exact: true }).selectOptions(second); await settle(view.fixture);
-    expect(host.comparisonCards()).toHaveLength(2); expect(dialog.textContent).toContain('Group modeling setup');
+    expect(host.comparison.selection()).toEqual({ first: seeded, second }); expect(dialog.textContent).toContain('Group modeling setup');
     view.entries.update(entries => entries.filter(entry => entry.key !== seeded)); await settle(view.fixture);
     expect(host.comparison.selection()).toEqual({ first: null, second }); expect(dialog.textContent).toContain('no longer available');
     await page.getByRole('button', { name: 'Dismiss comparison', exact: true }).click({ position: { x: 2, y: 2 } }); await settle(view.fixture);
-    expect(host.comparison.opened()).toBe(false); expect(host.comparisonGuids()).toEqual([]);
+    expect(host.comparison.opened()).toBe(false); expect(host.comparison.selection()).toEqual({ first: null, second: null });
     expect(document.activeElement?.getAttribute('aria-controls')).toBe('analysis-comparison-sheet');
     await page.getByRole('button', { name: 'Compare', exact: true }).click(); await settle(view.fixture);
     expect(host.comparison.selection()).toEqual({ first: null, second: null });
@@ -271,13 +262,13 @@ describe('account Analysis inventory browser journeys', () => {
     view.fixture.destroy();
   });
 
-  it('restores facility dashboard controls, originating-card visibility and focus on breadcrumb return and Back', async () => {
+  it('restores scoped inventory controls, originating-card visibility and focus on breadcrumb return and Back', async () => {
     await page.viewport(1200, 900);
     const view = setup(); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
-    await view.router.navigateByUrl('/v1/workspace/facility/facility-a/analysis/dashboard'); await settle(view.fixture);
-    const dashboard = () => view.fixture.debugElement.query(By.directive(FacilityAnalysisDashboardComponent)).componentInstance as FacilityAnalysisDashboardComponent;
+    await view.router.navigateByUrl(dashboardUrl + '?facility=facility-a'); await settle(view.fixture);
+    const dashboard = () => view.fixture.debugElement.query(By.directive(AccountAnalysisDashboardComponent)).componentInstance as AccountAnalysisDashboardComponent;
     const facilityUrl = view.router.url;
-    expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('drill-in');
+    expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('none');
     expect(view.root.querySelector('h1')?.textContent).toContain('Analysis');
     expect(view.root.querySelector('app-inventory-card-header .portfolio-tile__owner')).not.toBeNull();
     dashboard().filtersForm.controls.search.setValue('Analysis'); await settle(view.fixture);
@@ -302,14 +293,14 @@ describe('account Analysis inventory browser journeys', () => {
     origin().click(); await settle(view.fixture); TestBed.inject(Location).back(); await settle(view.fixture);
     await vi.waitFor(() => expect(view.router.url).toBe(facilityUrl)); await settle(view.fixture);
     expect(dashboard().inventory.page()).toBe(1);
-    view.root.querySelector<HTMLAnchorElement>('app-page-identity nav a')!.click(); await settle(view.fixture);
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     expect(view.router.url).toBe(dashboardUrl);
     view.fixture.destroy();
   });
 
   it('keeps canceled facility navigation in place and falls back to the dashboard heading after an origin is deleted', async () => {
     await page.viewport(1200, 900);
-    const view = setup(3); await view.router.navigateByUrl('/v1/workspace/facility/facility-a/analysis/dashboard'); await settle(view.fixture);
+    const view = setup(3); await view.router.navigateByUrl(dashboardUrl + '?facility=facility-a'); await settle(view.fixture);
     const link = () => view.root.querySelector<HTMLAnchorElement>('a.portfolio-tile__name')!;
     const id = link().dataset['browseId'];
     view.canEnter.set(false); link().focus(); link().click(); await settle(view.fixture);
@@ -319,7 +310,7 @@ describe('account Analysis inventory browser journeys', () => {
     expect(view.router.url).toContain('/analysis/workbench/');
     view.entries.update(entries => entries.filter(entry => entry.key !== id));
     view.canLeave.set(true); view.root.querySelectorAll<HTMLAnchorElement>('a')[1].click(); await settle(view.fixture);
-    await vi.waitFor(() => expect((document.activeElement as HTMLElement).id).toBe('v1-facility-analysis-title'));
+    await vi.waitFor(() => expect((document.activeElement as HTMLElement).id).toBe('v1-account-analysis-title'));
     expect(TestBed.inject(WorkspaceNavigationService).routeMotion()).toBe('drill-out');
     view.fixture.destroy();
   });

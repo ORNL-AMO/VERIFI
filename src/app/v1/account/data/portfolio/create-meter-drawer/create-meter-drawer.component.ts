@@ -3,18 +3,18 @@ import { FormControl, Validators } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { MeterDraft } from '@app/v1/facility/data/meters/models';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterActionsService } from '@app/v1/facility/data/meters/meter-actions.service';
 
 @Component({
   selector: 'app-create-portfolio-meter-drawer',
   templateUrl: './create-meter-drawer.component.html',
   styleUrls: ['./create-meter-drawer.component.css'],
   standalone: false,
-  providers: [MetersDashboardActionsService]
+  providers: [MeterActionsService]
 })
 export class CreateMeterDrawerComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
-  private readonly actions = inject(MetersDashboardActionsService);
+  private readonly actions = inject(MeterActionsService);
   private readonly accountGuid = this.workspace.account()?.guid;
   readonly initialFacilityGuid = input<string>();
   readonly closed = output<void>();

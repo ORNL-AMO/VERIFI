@@ -323,7 +323,7 @@ export class WorkspaceNavigationService {
       route = facilityGuid ? this.facilitySettingsRoute(facilityGuid, detail) : this.accountSettingsRoute(account.guid, detail);
       query = {};
     } else if (state.section === 'data' && state.detail === 'meter-grouping' && !state.meterGroupGuid && facilityGuid) {
-      route = this.facilityDataRoute(facilityGuid, 'meter-grouping'); query = {};
+      route = this.facilityDataToolRoute(facilityGuid, 'meter-grouping'); query = {};
     } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
     else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
     else if (state.portfolioTab === 'facilities' && facilityGuid) route = this.accountPortfolioRoute(account.guid, 'meters');
@@ -362,7 +362,8 @@ export class WorkspaceNavigationService {
     if (contextMode === 'facility') {
       const facilityGuid = this.facility()?.guid || this.facilities()[0]?.guid;
       if (facilityGuid) {
-        return this.navigateScopeDestination(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
+        const link = this.facilityDestination(facilityGuid, state.section, state.detail);
+        return this.navigateScopeDestination(link.route, link.queryParams);
       }
       return false;
     }
@@ -379,7 +380,8 @@ export class WorkspaceNavigationService {
     }
     if (this.facilities().some(facility => facility.guid === facilityGuid)) {
       const state = this.routeState();
-      return this.navigateScopeDestination(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
+      const link = this.facilityDestination(facilityGuid, state.section, state.detail);
+        return this.navigateScopeDestination(link.route, link.queryParams);
     }
     return false;
   }
@@ -395,6 +397,11 @@ export class WorkspaceNavigationService {
     return { route: resource === 'analysis' ? this.accountAnalysisRoute(accountGuid)
       : resource === 'reports' ? this.accountReportsRoute(accountGuid) : this.accountPortfolioRoute(accountGuid, resource),
       queryParams: this.isSingleSiteWorkspace() ? {} : { facility: facilityGuid } };
+  }
+
+  async openFacilityInventory(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): Promise<boolean> {
+    const link = this.facilityInventoryLink(facilityGuid, resource);
+    return this.navigateScopeDestination(link.route, link.queryParams);
   }
 
   readonly contextNavigationError = signal('');
@@ -469,10 +476,6 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'workbench', reportGuid, stage];
   }
 
-  facilityReportsRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'dashboard'];
-  }
-
   facilityReportWorkbenchRoute(facilityGuid: string, reportGuid: string, stage: 'setup' | 'data-checks' | 'report' = 'setup'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'workbench', reportGuid, stage];
   }
@@ -501,12 +504,8 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
   }
 
-  facilityDataRoute(facilityGuid: string, detail = 'meters'): Array<string> {
+  facilityDataToolRoute(facilityGuid: string, detail: string): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
-  }
-
-  facilityAnalysisRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
   }
 
   facilityAnalysisWorkbenchRoute(
@@ -597,28 +596,18 @@ export class WorkspaceNavigationService {
     return this.accountRoute(accountGuid);
   }
 
-  private facilityRouteForSection(facilityGuid: string, section: SectionId, detail: string): Array<string> {
-    if (section === 'settings') {
-      return this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail));
-    }
-    if (section === 'data') {
-      return this.facilityDataRoute(facilityGuid, this.resolveFacilityDataDetail(detail));
-    }
-    if (section === 'imports') {
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      return accountGuid ? this.accountImportsRoute(accountGuid) : this.facilityRoute(facilityGuid);
-    }
-    if (section === 'reports') return this.facilityReportsRoute(facilityGuid);
-    if (section === 'analysis') return this.facilityAnalysisRoute(facilityGuid);
-    return this.facilityRoute(facilityGuid);
+  private facilityDestination(facilityGuid: string, section: SectionId, detail: string): { route: string[]; queryParams?: Params } {
+    if (section === 'settings') return { route: this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail)) };
+    if (section === 'analysis' || section === 'reports') return this.facilityInventoryLink(facilityGuid, section);
+    if (section === 'data') return ['meter-grouping', 'energy-uses', 'custom-grid-factors', 'custom-fuels', 'custom-gwps'].includes(detail)
+      ? { route: this.facilityDataToolRoute(facilityGuid, detail) }
+      : this.facilityInventoryLink(facilityGuid, detail === 'predictors' ? 'predictors' : 'meters');
+    if (section === 'imports' && this.account()) return { route: this.accountImportsRoute(this.account()!.guid) };
+    return { route: this.facilityRoute(facilityGuid) };
   }
 
   private resolveAccountDataDetail(detail: string): string {
     return ACCOUNT_DATA_DETAILS.has(detail) ? detail : DEFAULT_DETAILS.data;
-  }
-
-  private resolveFacilityDataDetail(detail: string): string {
-    return FACILITY_DATA_DETAILS.has(detail) ? detail : DEFAULT_FACILITY_DETAILS.data;
   }
 
   private resolveAccountSettingsDetail(detail: string): string {

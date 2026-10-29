@@ -78,7 +78,7 @@ describe('AccountPortfolioComponent', () => {
             openFacility: vi.fn(async () => undefined),
             accountSettingsRoute: (accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', accountGuid, 'settings', detail],
             facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail],
-            facilityDataRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
+            facilityDataToolRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
             facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab]
           }
         },

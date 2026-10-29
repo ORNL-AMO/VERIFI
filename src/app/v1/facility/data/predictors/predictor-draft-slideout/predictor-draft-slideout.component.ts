@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
-import { PredictorDraft } from '../../models';
+import { PredictorDraft } from '../models';
 
 type PredictorDraftStep = 'choice' | 'standard';
 

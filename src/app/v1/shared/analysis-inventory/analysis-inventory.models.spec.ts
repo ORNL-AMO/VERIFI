@@ -11,7 +11,7 @@ const navigation = {
   accountAnalysisWorkbenchRoute: (account: string, guid: string) => ['/account', account, guid],
   accountAnalysisRoute: (account: string) => ['/account', account],
   facilityAnalysisWorkbenchRoute: (facility: string, guid: string) => ['/facility', facility, guid],
-  facilityAnalysisRoute: (facility: string) => ['/facility', facility]
+
 } as any;
 
 describe('analysis inventory projection', () => {

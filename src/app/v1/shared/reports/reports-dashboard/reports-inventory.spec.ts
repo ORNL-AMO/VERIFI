@@ -2,12 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { setupReportInventory } from '@app/v1/shared/reports/testing/report-inventory-test-setup';
 import { ReportsDashboardComponent } from '@app/v1/shared/reports/reports-dashboard/reports-dashboard.component';
-import { AccountReportsDashboardComponent } from './account-reports-dashboard.component';
 
-describe('AccountReportsDashboardComponent', () => {
+describe('ReportsDashboardComponent', () => {
   async function setup() {
-    const context = await setupReportInventory(); const fixture = TestBed.createComponent(AccountReportsDashboardComponent); fixture.detectChanges();
-    const dashboard: ReportsDashboardComponent = fixture.debugElement.query(By.directive(ReportsDashboardComponent)).componentInstance;
+    const context = await setupReportInventory(); const fixture = TestBed.createComponent(ReportsDashboardComponent); fixture.detectChanges();
+    const dashboard = fixture.componentInstance;
     return { ...context, fixture, dashboard, lifecycle: dashboard.lifecycle };
   }
   it('combines account and facility reports and defaults to simple, account-first cards', async () => {

@@ -111,7 +111,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   private nextDraftId = 0;
   private deleteModalOpen = false;
   private saveModalOpen = false;
-  private postSaveRoute: string[] | undefined;
+  private postSaveRoute: { route: string[]; queryParams?: import('@angular/router').Params } | undefined;
   @ViewChild('saveChangesConfirmModal') private readonly saveChangesConfirmModal?: TemplateRef<unknown>;
   @ViewChild('deleteStationConfirmModal') private readonly deleteStationConfirmModal?: TemplateRef<unknown>;
   private readonly unregisterUnsavedChanges = this.unsavedChanges.register(
@@ -255,8 +255,8 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       this.dirty.set(false);
       this.saveCompleted.set(true);
       this.postSaveRoute = preview.addPredictors.length + preview.updatePredictors.length === 0
-        ? this.navigation.facilityDataRoute(facility.guid, 'predictors')
-        : this.navigation.facilityWeatherPredictorRoute(facility.guid, `station:${preview.station.ID}`);
+        ? this.navigation.facilityInventoryLink(facility.guid, 'predictors')
+        : { route: this.navigation.facilityWeatherPredictorRoute(facility.guid, `station:${preview.station.ID}`) };
     } catch (error) {
       this.saveError.set(error instanceof Error ? error.message : 'The weather station changes could not be saved.');
     } finally {
@@ -273,7 +273,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     this.workflow.reset();
     if (route) {
       this.postSaveRoute = undefined;
-      void this.router.navigate(route);
+      void this.router.navigate(route.route, { queryParams: route.queryParams });
     }
   }
 
@@ -319,7 +319,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       await this.workflow.commitStationGroup(preview);
       this.dirty.set(false);
       this.hideDeleteModal();
-      await this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'predictors'));
+      await this.navigation.openFacilityInventory(facility.guid, 'predictors');
     } catch (error) {
       this.deleteError.set(error instanceof Error ? error.message : 'The weather station could not be deleted.');
     } finally {

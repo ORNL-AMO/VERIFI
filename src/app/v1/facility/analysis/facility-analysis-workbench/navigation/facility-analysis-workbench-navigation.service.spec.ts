@@ -62,7 +62,7 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
           provide: FacilityAnalysisAutosaveService,
           useValue: { state: signal('saved'), draft: signal(undefined), isBlocked: signal(false) }
         },
-        { provide: WorkspaceNavigationService, useValue: { facilityAnalysisRoute: vi.fn(() => ['/analyses']) } }
+        { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: vi.fn(async () => true) } }
       ]
     });
 
@@ -189,7 +189,7 @@ function configureReadyNavigation(
         provide: FacilityAnalysisAutosaveService,
         useValue: { state: signal('saved'), draft: signal(analysis), isBlocked: signal(false) }
       },
-      { provide: WorkspaceNavigationService, useValue: { facilityAnalysisRoute: vi.fn(() => ['/analyses']) } }
+      { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: vi.fn(async () => true) } }
     ]
   });
   return TestBed.inject(FacilityAnalysisWorkbenchNavigationService);

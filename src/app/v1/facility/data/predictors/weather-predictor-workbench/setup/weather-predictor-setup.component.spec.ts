@@ -241,7 +241,7 @@ describe('WeatherPredictorSetupComponent', () => {
       expect.objectContaining({ sourceGroupKey: group.routeKey, definitions: [] }), group.predictors, []
     );
     expect(commitStationGroup).toHaveBeenCalledWith(preview);
-    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/predictors']);
+    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], { queryParams: { facility: 'facility-a' } });
   });
 
   it('derives units and preserves a custom name when the type changes', () => {
@@ -317,7 +317,8 @@ function createFixture(options: {
       } },
       { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), confirmDiscard: vi.fn(() => true) } },
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
-      { provide: WorkspaceNavigationService, useValue: { facilityDataRoute: vi.fn(() => ['/predictors']), facilityWeatherPredictorRoute: vi.fn(() => ['/weather']) } },
+      { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
+          facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }), facilityDataToolRoute: vi.fn(() => ['/predictors']), facilityWeatherPredictorRoute: vi.fn(() => ['/weather']) } },
       { provide: Router, useValue: { navigate: vi.fn() } },
       { provide: WeatherStationLookupService, useValue: { getStation: vi.fn(), searchLocations: vi.fn(), findStations: vi.fn() } }
     ]

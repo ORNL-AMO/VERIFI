@@ -31,7 +31,7 @@ describe('MeterWorkbenchComponent', () => {
     const portfolio = fixture.componentInstance.breadcrumbs();
     singleSite.set(true);
     fixture.detectChanges();
-    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters'] }]);
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], queryParams: {} }]);
     expect(fixture.nativeElement.querySelector('app-page-identity')?.textContent).not.toContain('Account A');
     singleSite.set(false);
     fixture.detectChanges();
@@ -686,7 +686,8 @@ function setup(options: {
       {
         provide: WorkspaceNavigationService,
         useValue: {
-          facilityDataRoute: (facilityGuid: string, detail = 'meters') => [
+          openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
+          facilityDataToolRoute: (facilityGuid: string, detail = 'meters') => [
             '/v1',
             'workspace',
             'facility',
@@ -706,7 +707,7 @@ function setup(options: {
           ],
           isSingleSiteWorkspace: signal(false),
           facilityInventoryLink(facilityGuid: string, resource: string) {
-              return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+              return this.isSingleSiteWorkspace() ? { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: {} }
                 : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
             },
           accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'meters'],

@@ -29,15 +29,15 @@ export const inventoryNavigation = {
   uploadQuery: () => ({}),
   accountSettingsRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'account', guid, 'settings', detail],
   facilitySettingsRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'settings', detail],
-  facilityInventoryLink(facilityGuid: string, resource: string): { route: string[]; queryParams?: { facility: string } } {
-    return this.isSingleSiteWorkspace() ? { route: this.facilityDataRoute(facilityGuid, resource) }
+  facilityInventoryLink(facilityGuid: string, resource: string): { route: string[]; queryParams?: { facility?: string } } {
+    return this.isSingleSiteWorkspace() ? { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: {} }
       : { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: facilityGuid } };
   },
   inventoryFacilityGuid: () => undefined as string | undefined,
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab],
   isSingleSiteWorkspace: signal(false),
   accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'predictors'],
-  facilityDataRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'data', detail],
+  facilityDataToolRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'data', detail],
   facilityPredictorRoute: (facility: string, guid: string, tab: string) => ['/v1', 'workspace', 'facility', facility, 'data', 'predictors', guid, tab],
   facilityWeatherPredictorRoute: (facility: string, key: string, tab = 'setup') => ['/v1', 'workspace', 'facility', facility, 'data', 'predictors', 'weather', key, tab],
   facilityWeatherPredictorQualityRoute: (facility: string, key: string, guid: string) => ['/v1', 'workspace', 'facility', facility, 'data', 'predictors', 'weather', key, 'quality', guid],

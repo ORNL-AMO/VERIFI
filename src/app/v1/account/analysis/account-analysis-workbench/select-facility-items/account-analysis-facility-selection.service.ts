@@ -7,7 +7,7 @@ import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysi
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { buildFacilityAnalysisCards } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis.models';
+import { buildFacilityAnalysisCards } from '@app/v1/facility/analysis/facility-analysis.models';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
 import { AccountAnalysisAutosaveService } from '../editing/account-analysis-autosave.service';
 import {

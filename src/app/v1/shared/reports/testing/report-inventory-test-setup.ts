@@ -16,14 +16,14 @@ export async function setupReportInventory(scope: 'account' | 'facility' = 'acco
   const store = new AccountWorkspaceStore();
   const accountReport = { ...getNewIdbAccountReport(reportAccount, [reportFacility], []), id: 5, guid: 'account-report', name: 'Account saved report', reportType: 'analysis' as const, reportYear: 2024 };
   store.publish({ ...reportSnapshot(), accountReports: [accountReport] }, { facility: reportFacility });
-  const state = signal<any>(scope === 'facility' ? { facilityGuid: 'facility-a' } : { accountGuid: 'account-a' });
+  const state = signal<any>({ accountGuid: 'account-a' });
   const status = signal<'ready' | 'error' | 'idle' | 'evaluating'>('ready');
   const accountActions = { create: vi.fn(async () => ({ ...accountReport, guid: 'created-account' })), copy: vi.fn(async () => ({ ...accountReport, guid: 'copied-account' })), updateName: vi.fn(async () => accountReport), delete: vi.fn(async () => {}) };
   const facilityActions = { create: vi.fn(async () => reportFixture({ guid: 'created-facility' })), copy: vi.fn(async () => reportFixture({ guid: 'copied-facility' })), updateName: vi.fn(async () => reportFixture()), delete: vi.fn(async () => {}) };
-  const navigation = { inventoryFacilityGuid: signal<string | undefined>(undefined), headerFacility: () => undefined, routeState: state, activeReportGuid: computed(() => state().reportGuid),
+  const navigation = { inventoryFacilityGuid: signal<string | undefined>(scope === 'facility' ? 'facility-a' : undefined), headerFacility: () => undefined, routeState: state, activeReportGuid: computed(() => state().reportGuid),
     changeFacilityScope: vi.fn(), facilityInventoryLink: (guid: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'reports', 'dashboard'], queryParams: { facility: guid } }),
     accountReportsRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'reports', 'dashboard'],
-    facilityReportsRoute: (guid: string) => ['/v1', 'workspace', 'facility', guid, 'reports', 'dashboard'],
+
     accountReportWorkbenchRoute: (account: string, report: string) => ['/v1', 'workspace', 'account', account, 'reports', 'workbench', report, 'setup'],
     facilityReportWorkbenchRoute: (facility: string, report: string) => ['/v1', 'workspace', 'facility', facility, 'reports', 'workbench', report, 'setup'] };
   await TestBed.configureTestingModule({ imports: [ReportsModule, AccountReportsModule], providers: [provideRouter([]),

@@ -700,7 +700,7 @@ describe('ImportWizardStateService', () => {
     '/v1/workspace/account/account-1/reports/dashboard',
     '/v1/workspace/account/account-1/reports/workbench/report-a/setup',
     '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/results',
-    '/v1/workspace/facility/facility-a/reports/dashboard'
+    '/v1/workspace/account/account-1/reports/dashboard?facility=facility-a'
   ])('returns to its validated source with scope intact: %s', returnUrl => {
     workspaceFacilities.set([facility({ guid: 'facility-a', accountId: 'account-1' })]);
     TestBed.inject(ImportSessionService).begin({ facilityGuid: 'facility-a', returnUrl });

@@ -18,7 +18,7 @@ import { DEFAULT_INVENTORY_CHART_VIEW } from '@app/v1/shared/charts/inventory-ch
 import { buildInventoryMeterCharts, MeterChartGrouping } from '@app/v1/shared/charts/inventory-meter-charts/inventory-meter-charts';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
-import { buildPredictorCharts } from '@app/v1/facility/data/predictors/predictors-dashboard/predictor-chart.view';
+import { buildPredictorCharts } from '@app/v1/facility/data/predictors/predictor-chart.view';
 import { buildPredictorCards, buildWeatherStationGroups } from '@app/v1/facility/data/predictors/models';
 import { buildPredictorInventory } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.models';
 import { InventoryToolsStateService } from './inventory-tools-state.service';
