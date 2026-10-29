@@ -467,3 +467,7 @@ The unified inventories now replace facility Meters, Predictors, Analysis, and R
 ### Phase 4 Data feature organization
 
 Data now lives under `src/app/v1/data/{facilities,meters,predictors,energy-uses,custom-database}`. Data-only inventory composition lives in `data/inventory`; neutral view state and detail preferences live in `shared/inventory`. Resource NgModules own their inventories, workbenches, and forms. The old account/facility Data folders and inventory type-alias facade are removed. URL contracts and responsive workbench gutters remain unchanged.
+
+### Phase 4 Analysis feature organization
+
+The unified Analysis inventory and comparison flow live under `src/app/v1/analysis`, alongside account and facility workbenches, projections, actions, and inspectors. Generic inventory presentation and chart infrastructure remain shared. The feature keeps existing inventory/workbench URLs, Worker contracts, hidden pairs, guarded handoffs, and session browse state.

@@ -2,22 +2,22 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AccountAnalysisWorkspaceService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-workspace.service';
-import { AccountAnalysisDashboardResultsService } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard-results.service';
+import { AnalysisInventoryWorkspaceService } from '@app/v1/analysis/inventory/analysis-inventory-workspace.service';
+import { AnalysisInventoryResultsService } from '@app/v1/analysis/inventory/analysis-inventory-results.service';
 import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
-import { analysisInventoryStatusLabel } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
+import { analysisInventoryStatusLabel } from '@app/v1/analysis/inventory/analysis-inventory.models';
 import { REPORT_ANALYSIS_ORIGIN_QUERY } from '@app/v1/shared/reports/report-analysis-origin';
 import { AccountReportWorkbenchContext } from '../account-report-workbench-context.service';
 import { AccountReportAutosaveService } from '../account-report-autosave.service';
 
 @Component({ selector: 'app-account-report-setup', standalone: false,
   templateUrl: './account-report-setup.component.html', styleUrls: ['./account-report-setup.component.css'],
-  providers: [AccountAnalysisDashboardResultsService] })
+  providers: [AnalysisInventoryResultsService] })
 export class AccountReportSetupComponent {
   readonly context = inject(AccountReportWorkbenchContext);
   readonly editor = inject(AccountReportAutosaveService);
-  readonly analyses = inject(AccountAnalysisWorkspaceService);
-  private readonly results = inject(AccountAnalysisDashboardResultsService);
+  readonly analyses = inject(AnalysisInventoryWorkspaceService);
+  private readonly results = inject(AnalysisInventoryResultsService);
   private readonly router = inject(Router);
   readonly openingAnalysis = signal(false);
   readonly analysisFilters = new FormGroup({

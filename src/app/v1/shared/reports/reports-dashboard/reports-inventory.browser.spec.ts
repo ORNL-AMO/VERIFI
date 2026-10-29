@@ -36,8 +36,8 @@ import { IndexedDbAccessService } from '@data/indexedDB/indexed-db-access.servic
 import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { dbConfig } from '@data/indexedDB/_dbConfig';
-import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/single-facility-analysis-pair.guard';
-import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
+import { singleFacilityAnalysisPairGuard } from '@app/v1/analysis/single-facility-analysis-pair.guard';
+import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 import { getNewAnalysisGroup } from '@data/models/idbModels/analysisItem';

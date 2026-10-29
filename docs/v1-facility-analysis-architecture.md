@@ -4,48 +4,31 @@ This document is the implementation reference for the production v1 facility-ana
 
 ## Scope and boundaries
 
-The feature lives under [`src/app/v1/facility/analysis`](../src/app/v1/facility/analysis). It owns v1 routing, interaction state, draft editing, status presentation, and result presentation. It reuses version-neutral models, persistence commands, calculations, and Worker infrastructure from `data`, `domain`, `platform`, and `shared`.
+The feature lives under [`src/app/v1/analysis/facility`](../src/app/v1/analysis/facility). It owns v1 routing, interaction state, draft editing, status presentation, and result presentation. It reuses version-neutral models, persistence commands, calculations, and Worker infrastructure from `data`, `domain`, `platform`, and `shared`.
 
 Production v1 code must not import v0 presentation or services. A calculation helper belongs outside v1 only when it is deterministic and genuinely shared with another application surface. IndexedDB records remain the durable source of truth; view services and facades are route-scoped projections over those records.
 
 The feature is organized by workflow ownership:
 
 ```text
-facility/analysis/
-  analysis-details-slideout/         reusable inspector and result demand
-  facility-analysis-comparison/      facility comparison presentation
-  facility-analysis.models           inventory projections shared by unified Analysis
-  facility-analysis-actions.service  commands used by unified inventory and workbenches
-  facility-analysis-outcome-summary  shared annual/monthly outcome presentation projection
-  group-model-roster/                shared group method, model, and equation presentation
-  regression-number-format           shared significant-digit presentation formatting
-  facility-analysis-workbench/
-    header/                           analysis identity, facts, save state, and status presentation
-    navigation/                       route-stage state, prerequisites, and navigation commands
-    stage-navigation/                 sticky workflow and contextual tab presentation
-    footer/                           Back, Continue, and Finish presentation
-    editing/                          draft autosave lifecycle
-    analysis-setup/                   analysis-wide settings
-    banking/                          source compatibility and banking presentation projections
-    group/                            group context, setup, banking, regression, and group-scoped results
-    results/
-      calculation/                    request projection, fingerprinting, and Worker coordination
-      presentation/                   shared result views, display settings, status, and toolbar
-      facility/                       facility annual/monthly result routes
-    used-by/                          downstream dependency presentation
+analysis/
+  inventory/       unified inventory, result demand, creation
+  comparison/      comparison session and sheet
+  account/         account projections, inspectors, comparison, workbench
+  facility/        facility projections, inspectors, comparison, workbench
 ```
+
+See the [feature source](../src/app/v1/analysis) for current entry points.
 
 Keep specs beside the implementation they protect. Do not introduce broad feature-level `components`, `services`, `models`, or `specs` buckets; add code to the workflow that owns it. Each Angular component keeps its class, template, styles, and spec in its own component folder.
 
 ## Route and ownership model
 
-The unified account Analysis inventory lists the selected facility's analyses through the same Simple/Summary/Detailed inventory cards as the account dashboard. Shared tile projection, Analysis snapshots, and inventory layout live under `src/app/v1/shared/analysis-inventory/` and `src/app/v1/shared/inventory/`; feature services retain domain commands and calculation input ownership. Facility cards omit the repeated owning-facility link because the page breadcrumb supplies it. Summary shows annual/rolling improvement, baseline, energy basis, and modification date. Detailed adds a bounded Group Details roster, Used By, and Needs attention. Reporting badges and the Active filter replace a separate active-reporting strip.
+The unified account Analysis inventory lists the selected facility's analyses through the same Simple/Summary/Detailed inventory cards as the account dashboard. Shared tile projection, Analysis snapshots, and inventory layout live under `src/app/v1/analysis/inventory/` and `src/app/v1/shared/inventory/`; feature services retain domain commands and calculation input ownership. Facility cards show the owning facility in the shared card header; its link requests filtered inventory scope. Summary shows annual/rolling improvement, baseline, energy basis, and modification date. Detailed adds a bounded Group Details roster, Used By, and Needs attention. Reporting badges and the Active filter replace a separate active-reporting strip.
 
-Filtering and sorting precede 24-item pagination. Page clamping and override pruning wait for ready validation, so temporarily empty status filters cannot overwrite a saved page during pending checks or return navigation. Facility meters and saved analyses determine category visibility, so a retained water analysis remains discoverable after water meters are removed. The default is Summary with attention-first sorting; a saved detail choice takes precedence. Search uses the facility Data toolbar layout: a Showing count above the expanding input and compact adjacent filters. A separate per-account facility-analysis detail preference persists through the existing display-preference boundary; filters, page, individual detail overrides, scroll, and originating-card focus are session-only and keyed by account plus facility. Global detail changes clear current overrides while retaining the page. Printing renders all filtered cards.
+Filtering and sorting precede 24-item pagination. The unified inventory derives facility scope from navigation, including implicit sole-facility scope for valid single-facility accounts. Shared inventory state restores controls, page, detail, individual overrides, scroll, and focus per scope after validation and results settle. Printing includes all matching cards.
 
-The facility result coordinator calculates only current-page Summary/Detailed cards and records needed by open details/comparison. It shares the demand reconciler with the account coordinator, retains matching jobs, cancels obsolete work, and permits at most two Workers. Existing canonical calendarization, dependency closure, fingerprints, timeout, deterministic fallback, and compact dashboard Worker payload remain authoritative. Ready outcomes retain complete annual rows through the report year and the newest valid monthly row, with no group payloads; comparison reuses the annual history. The core calculation still evaluates the history required for rolling and banking equivalence. Opening an analysis creates one workbench component instance for `/v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid`.
-
-Dashboard and workbench headers use shared page identity. The account breadcrumb opens Account Analysis; the workbench's facility breadcrumb opens Facility Analysis, never Facility Home. Single-facility accounts show a non-linked account context to avoid redirect loops. Browse return waits for requested results and Angular rendering before restoring position and focus, with heading fallback and clamping after deletion. Existing page motion, guards, sidebar picker/account return, and explicit account-workbench return origins remain intact.
+The unified result coordinator retains matching card/detail/comparison jobs and permits at most two Workers. Existing calendarization, dependency closure, fingerprints, deterministic fallback, and Worker payloads remain authoritative. Opening `/v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid` creates a workbench-owned context. Account breadcrumbs open the unfiltered inventory; facility breadcrumbs open it filtered to the owner. Specialized account-analysis and report return origins remain intact.
 
 The workbench owns the services that must survive child-tab navigation:
 
