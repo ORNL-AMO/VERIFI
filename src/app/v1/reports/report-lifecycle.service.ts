@@ -1,3 +1,4 @@
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,7 +10,7 @@ import { FacilityReportActionsService } from '@app/v1/reports/facility/facility-
 import { FACILITY_REPORT_TYPES } from '@app/v1/reports/facility/facility-report.models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { ACCOUNT_REPORT_TYPES, ReportInventoryEntry, ReportScope } from './report-inventory.models';
+import { ACCOUNT_REPORT_TYPES, ReportInventoryEntry, ReportScope, reportTypeChoices } from './report-inventory.models';
 import { reportTypeAvailable } from './report-availability';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { isReportStatusItem, reportStatusNavigationState, resolveReportStatusItem } from '@app/v1/status/report-status-destination';
@@ -39,6 +40,10 @@ export class ReportLifecycleService {
     type: new FormControl<ReportDraft['type']>('betterPlants', { nonNullable: true }),
     facilityGuid: new FormControl('', { nonNullable: true })
   });
+  readonly singleFacility = this.navigation.isSingleSiteWorkspace;
+  readonly typeChoice = new FormControl('account:betterPlants', { nonNullable: true });
+  private readonly choiceValue = toSignal(this.typeChoice.valueChanges, { initialValue: this.typeChoice.value });
+  readonly choices = computed(() => reportTypeChoices(this.singleFacility(), this.workspace.account()?.displayEmissions));
   private readonly draft = signal<ReportDraft>(this.form.getRawValue());
   readonly types = computed(() => (this.draft().scope === 'account' ? ACCOUNT_REPORT_TYPES : FACILITY_REPORT_TYPES)
     .filter(option => reportTypeAvailable(option.value, this.workspace.account()?.displayEmissions)));
@@ -54,6 +59,7 @@ export class ReportLifecycleService {
   readonly availabilityError = computed(() => {
     if (!this.editor()) return undefined;
     const draft = this.draft(), fixedFacility = this.editor()?.fixedFacility;
+    if (this.singleFacility() && !this.editor()?.entry && !this.choices().some(choice => choice.value === this.choiceValue())) return 'Select an available report type.';
     if (fixedFacility && (draft.scope !== 'facility' || draft.facilityGuid !== fixedFacility)) return 'Choose a report owned by the selected facility.';
     if (!this.editor()?.entry && !this.types().some(option => option.value === draft.type)) return 'Select an available report type.';
     if (draft.scope === 'facility' && !this.facilities().some(facility => facility.guid === draft.facilityGuid)) return 'Select an available facility.';
@@ -68,10 +74,28 @@ export class ReportLifecycleService {
     const draftSubscription = this.form.valueChanges.subscribe(() => this.draft.set(this.form.getRawValue()));
     this.destroyRef.onDestroy(() => draftSubscription.unsubscribe());
     const subscription = this.form.controls.scope.valueChanges.subscribe(scope => {
-      if (this.editor()?.entry) return;
+      if (this.editor()?.entry || this.singleFacility()) return;
       this.form.controls.type.setValue(scope === 'account' ? 'betterPlants' : 'analysis');
     });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
+    const choiceSubscription = this.typeChoice.valueChanges.subscribe(value => {
+      if (!this.singleFacility() || this.editor()?.entry) return;
+      const choice = this.choices().find(option => option.value === value);
+      if (!choice) return;
+      const facilityGuid = choice.scope === 'facility' ? this.navigation.singleFacilityContext()?.guid ?? '' : '';
+      const draft = this.form.getRawValue();
+      if (draft.scope !== choice.scope || draft.type !== choice.type || draft.facilityGuid !== facilityGuid) {
+        this.form.patchValue({ scope: choice.scope, type: choice.type, facilityGuid });
+      }
+    });
+    this.destroyRef.onDestroy(() => choiceSubscription.unsubscribe());
+    effect(() => {
+      const draft = this.draft(), single = this.singleFacility();
+      if (single) untracked(() => {
+        const key = `${draft.scope}:${draft.type}`;
+        if (this.typeChoice.value !== key) this.typeChoice.setValue(key);
+      });
+    });
     let previous = this.contextKey();
     effect(() => {
       const current = this.contextKey();

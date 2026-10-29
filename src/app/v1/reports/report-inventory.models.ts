@@ -22,6 +22,36 @@ export const ACCOUNT_REPORT_TYPES: ReadonlyArray<{ value: ReportType; label: str
   { value: 'accountSavings', label: 'Savings' }
 ];
 export type ReportScope = 'account' | 'facility';
+export interface ReportTypeChoice {
+  readonly value: string;
+  readonly scope: ReportScope;
+  readonly type: ReportType | IdbFacilityReport['facilityReportType'];
+  readonly typeLabel: string;
+  readonly label: string;
+  readonly formatLabel?: string;
+}
+
+/** Presentation choices retain the existing scope-qualified inventory type keys. */
+export function reportTypeChoices(singleFacility: boolean, displayEmissions?: boolean): readonly ReportTypeChoice[] {
+  const types = [
+    ...ACCOUNT_REPORT_TYPES.map(option => ({ scope: 'account' as const, type: option.value, typeLabel: option.label })),
+    ...FACILITY_REPORT_TYPES.map(option => ({ scope: 'facility' as const, type: option.value, typeLabel: option.label }))
+  ].filter(option => reportTypeAvailable(option.type, displayEmissions));
+  const choices = types.map(option => {
+    const formatLabel = singleFacility && types.some(other => other.scope !== option.scope && other.typeLabel === option.typeLabel)
+      ? option.scope === 'account' ? 'Account format' : 'Facility format' : undefined;
+    return { ...option, value: `${option.scope}:${option.type}`, formatLabel,
+      label: singleFacility ? option.typeLabel + (formatLabel ? ` — ${formatLabel}` : '')
+        : `${option.scope === 'account' ? 'Account' : 'Facility'} · ${option.typeLabel}` };
+  });
+  return singleFacility ? choices.sort((a, b) => a.label.localeCompare(b.label)) : choices;
+}
+
+export function reportTypePresentation(scope: ReportScope, type: string, singleFacility: boolean): { label: string; formatLabel?: string } {
+  const choice = reportTypeChoices(singleFacility, true).find(option => option.value === `${scope}:${type}`);
+  return { label: singleFacility ? choice?.label ?? 'Report' : choice?.typeLabel ?? 'Report', formatLabel: choice?.formatLabel };
+}
+
 export type ReportInventoryEntry = ReportEntryView & (
   { readonly scope: 'account'; readonly report: IdbAccountReport } |
   { readonly scope: 'facility'; readonly facilityGuid: string; readonly report: IdbFacilityReport }
@@ -118,14 +148,15 @@ export function filterReportInventory(entries: readonly ReportInventoryEntry[], 
       return primary || (a.report.name || '').localeCompare(b.report.name || '') || a.key.localeCompare(b.key);
     });
 }
-export function reportInventoryTile(entry: ReportInventoryEntry, navigation: WorkspaceNavigationService): InventoryTile {
+export function reportInventoryTile(entry: ReportInventoryEntry, navigation: WorkspaceNavigationService, singleFacility = false): InventoryTile {
+  const presentation = reportTypePresentation(entry.scope, entry.scope === 'account' ? entry.report.reportType : entry.report.facilityReportType, singleFacility);
   return { guid: entry.key, name: entry.report.name || `Untitled ${entry.scope} report`, icon: reportIcon(entry.report),
     route: entry.scope === 'account' ? navigation.accountReportWorkbenchRoute(entry.report.accountId, entry.report.guid)
       : navigation.facilityReportWorkbenchRoute(entry.facilityGuid, entry.report.guid),
     owner: entry.scope === 'facility' ? { label: entry.ownerName, facilityGuid: entry.facilityGuid, ...navigation.facilityInventoryLink(entry.facilityGuid, 'reports') } : undefined,
     chip: entry.typeLabel,
     status: { label: entry.statusLabel, tone: entry.status === 'ready' ? 'success' : entry.status === 'error' ? 'danger' : entry.status === 'warning' ? 'warning' : 'neutral',
-      icon: entry.status === 'ready' ? 'success' : entry.status === 'checking' ? 'loading' : 'info' }, reportSnapshot: entry.snapshot };
+      icon: entry.status === 'ready' ? 'success' : entry.status === 'checking' ? 'loading' : 'info' }, reportSnapshot: { ...entry.snapshot, formatLabel: presentation.formatLabel } };
 }
 function accountReportPeriod(report: IdbAccountReport): string {
   const year = (value: number) => Number.isFinite(value) ? String(value) : 'Not set';

@@ -14,7 +14,7 @@ import { hasFacilityReportDataChecks } from './facility-report-workbench.models'
 export class FacilityReportWorkbenchComponent {
   readonly context = inject(FacilityReportWorkbenchContext);
   readonly editor = inject(FacilityReportAutosaveService);
-  readonly breadcrumbs = computed(() => [
+  readonly breadcrumbs = computed(() => this.context.navigation.isSingleSiteWorkspace() ? [{ label: 'Reports', icon: 'reports' as const, ...this.context.navigation.facilityInventoryLink(this.context.facility()?.guid ?? '', 'reports') }] : [
     { label: `${this.context.workspace.account()?.name || 'Account'} Reports`, route: this.context.navigation.accountReportsRoute(this.context.workspace.account()?.guid ?? '') },
     { label: `${this.context.facility()?.name || 'Facility'} Reports`, ...this.context.navigation.facilityInventoryLink(this.context.facility()?.guid ?? '', 'reports') },
     { label: this.context.report()?.name || 'Untitled facility report' }

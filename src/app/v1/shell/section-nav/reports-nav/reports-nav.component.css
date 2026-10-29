@@ -10,3 +10,7 @@
   padding-top: .45rem;
   border-top: 1px solid var(--v1-divider);
 }
+
+.report-nav-label { display: grid; min-width: 0; }
+.report-nav-label > span { overflow: hidden; text-overflow: ellipsis; }
+.report-nav-label small { color: var(--v1-muted); font-size: .72rem; font-weight: 500; }

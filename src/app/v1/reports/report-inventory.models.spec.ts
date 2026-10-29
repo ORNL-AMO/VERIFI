@@ -1,7 +1,7 @@
 import { getNewIdbAccountReport, IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { StatusItem } from '@app/v1/status/status.models';
 import { reportAccount, reportFacility, reportFixture, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
-import { ACCOUNT_REPORT_TYPES, DEFAULT_REPORT_FILTERS, buildReportInventory, filterReportInventory } from './report-inventory.models';
+import { ACCOUNT_REPORT_TYPES, reportTypeChoices, reportTypePresentation, DEFAULT_REPORT_FILTERS, buildReportInventory, filterReportInventory } from './report-inventory.models';
 import { FACILITY_REPORT_TYPES } from '@app/v1/reports/facility/facility-report.models';
 import { makeFinding } from '@app/v1/status/status.models';
 import { presentFinding } from '@app/v1/status/status.catalog';
@@ -91,5 +91,25 @@ describe('report inventory projections', () => {
     expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, search: 'facility a' }).map(entry => entry.scope)).toEqual(['facility']);
     expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, type: 'facility:analysis', status: 'error' })).toHaveLength(1);
     expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, scope: 'account', status: 'error' })).toEqual([]);
+  });
+});
+
+describe('single-facility report choices', () => {
+  it('retains every qualified command type and distinguishes overlapping formats', () => {
+    const choices = reportTypeChoices(true, true);
+    expect(new Set(choices.map(item => item.value))).toEqual(new Set([
+      ...ACCOUNT_REPORT_TYPES.map(item => `account:${item.value}`),
+      ...FACILITY_REPORT_TYPES.map(item => `facility:${item.value}`)
+    ]));
+    for (const type of ['Analysis', 'Data Overview', 'Emission Factors', 'Savings']) {
+      const formats = choices.filter(item => item.typeLabel === type);
+      expect(formats.map(item => item.formatLabel).sort()).toEqual(['Account format', 'Facility format']);
+      expect(formats.every(item => item.label === `${type} — ${item.formatLabel}`)).toBe(true);
+    }
+    expect(choices.find(item => item.type === 'betterPlants')?.label).toBe('Better Plants');
+    expect(choices.find(item => item.type === 'modeling')?.formatLabel).toBeUndefined();
+    expect(reportTypePresentation('facility', 'overview', true).label).toBe('Data Overview — Facility format');
+    expect(reportTypePresentation('account', 'analysis', false).label).toBe('Analysis');
+    expect(reportTypeChoices(true, false).some(item => ['betterClimate', 'accountEmissionFactors', 'emissionFactors'].includes(item.type))).toBe(false);
   });
 });

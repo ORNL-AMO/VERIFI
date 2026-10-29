@@ -43,7 +43,7 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
       const router = inject(Router);
       const url = toSignal(router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd), map(event => event.urlAfterRedirects)), { initialValue: router.url });
       const routeState = computed(() => parseWorkspaceRoute(url()));
-      return { inventoryFacilityGuid: () => undefined, routeState, activeReportGuid: computed(() => routeState().reportGuid),
+      return { isSingleSiteWorkspace: computed(() => store.account()?.isSingleFacilityCompany === true && store.facilities().length === 1), inventoryFacilityGuid: () => undefined, routeState, activeReportGuid: computed(() => routeState().reportGuid),
         accountAnalysisWorkbenchRoute: (account: string, analysis: string) => ['/v1', 'workspace', 'account', account, 'analysis', 'workbench', analysis, 'setup'],
         facilityAnalysisWorkbenchRoute: (facility: string, analysis: string) => ['/v1', 'workspace', 'facility', facility, 'analysis', 'workbench', analysis, 'setup'],
         accountReportsRoute: (account: string) => ['/v1', 'workspace', 'account', account, 'reports', 'dashboard'],

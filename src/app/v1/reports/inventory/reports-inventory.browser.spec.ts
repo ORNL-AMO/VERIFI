@@ -92,6 +92,24 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
   fixture.detectChanges();
 }
 describe('report inventory browser journeys and presentation', () => {
+  it('presents combined single-facility formats through a guarded workbench and browser Back', async () => {
+    const view = setup(2);
+    view.store.publish({ ...view.store.snapshot()!, account: { ...view.store.account()!, isSingleFacilityCompany: true } });
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    expect(view.dashboard().filteredEntries()).toHaveLength(3);
+    expect(view.root.querySelector('[formControlName="scope"]')).toBeNull();
+    expect(view.root.querySelector('.portfolio-tile__header-owner')).toBeNull();
+    expect(view.root.textContent).toContain('Account format'); expect(view.root.textContent).toContain('Facility format');
+    const link = view.root.querySelector<HTMLAnchorElement>('a[href*="account/account-a/reports/workbench"]')!;
+    expect(link).not.toBeNull(); link.click(); await settle(view.fixture);
+    expect(view.root.textContent).toContain('Account format');
+    // The resource breadcrumb is an ancestor; it does not repeat account/facility identity.
+    expect(view.root.querySelector('[aria-label="Breadcrumb"]')?.textContent ?? view.root.querySelector('nav')?.textContent).toContain('Reports');
+    TestBed.inject(Location).back(); await settle(view.fixture);
+    expect(view.router.url).toBe(dashboardUrl);
+    expect(view.dashboard().filteredEntries()).toHaveLength(3);
+    view.fixture.destroy();
+  });
   it('filters the unified Reports inventory when a card facility header is selected', async () => {
     const view = setup(3); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     const link = view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__header-owner')!;
@@ -212,7 +230,7 @@ describe('report inventory browser journeys and presentation', () => {
   });
   it.each(['account', 'facility'] as const)('opens a %s finding from saved data and restores browse state without navigation writes', async scope => {
     await page.viewport(1200, 900);
-    const snapshot = accountReportSnapshot(true);
+    const snapshot = accountReportSnapshot(false);
     snapshot.accountReports = Array.from({ length: 30 }, (_, index) => ({ ...snapshot.accountReports[0], id: 500 + index, guid: `account-report-${index}`, name: '', reportYear: undefined }));
     snapshot.facilityReports = Array.from({ length: 30 }, (_, index) => reportFixture({ id: 100 + index, guid: `facility-report-${index}`, name: '' }));
     const store = new AccountWorkspaceStore(); store.publish(snapshot, { facility: snapshot.facilities[0] });

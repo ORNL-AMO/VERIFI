@@ -1,5 +1,5 @@
 import { getNewIdbAccountReport } from '@data/models/idbModels/accountReport';
-import { reportAccount, reportFacility, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
+import { reportAccount, reportFacility, reportFixture, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -27,7 +27,7 @@ describe('ReportsNavComponent', () => {
         ])
       } }, { provide: WorkspaceNavigationService, useValue: {
         contextFacility: () => ({ guid: 'facility-a' }), contextAnalyses: () => [], facilityInventoryLink: () => ({ route: ['/reports/dashboard'] }), inventoryScopeQuery: () => ({}), account: signal({ guid: 'account-a' }), routeState: signal({ facilityGuid: 'facility-a' }), activeReportGuid: active,
-        contextMode: signal('facility'), isSingleSiteWorkspace: signal(true), accountReportsRoute: () => ['/account/reports/dashboard'],
+        contextMode: signal('facility'), isSingleSiteWorkspace: signal(false), accountReportsRoute: () => ['/account/reports/dashboard'],
 
         facilityReportWorkbenchRoute: (_facility: string, guid: string) => ['/reports/workbench', guid, 'setup']
       } }
@@ -80,7 +80,7 @@ describe('ReportsNavComponent', () => {
       { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]) } },
       { provide: WorkspaceNavigationService, useValue: {
         contextFacility: () => undefined, inventoryScopeQuery: () => ({}), account: store.account, routeState: signal({ accountGuid: 'account-a' }), contextMode: signal('account'), activeReportGuid: active,
-        accountReportsRoute: () => ['/account/reports/dashboard'],
+        isSingleSiteWorkspace: () => false, accountReportsRoute: () => ['/account/reports/dashboard'],
         accountReportWorkbenchRoute: (_account: string, guid: string) => ['/account/reports/workbench', guid, 'setup']
       } }
     ] }).compileComponents();
@@ -92,6 +92,38 @@ describe('ReportsNavComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(0);
     expect(fixture.nativeElement.textContent).not.toContain('Hidden factors'); expect(fixture.nativeElement.textContent).not.toContain('Wrong account');
     active.set(undefined); fixture.detectChanges(); expect(fixture.nativeElement.querySelector('a[aria-current="page"]').textContent).toContain('Dashboard');
+  });
+
+  it('lists both formats under one type, disambiguates matching GUIDs and hides Recents for a single facility', async () => {
+    const store = new AccountWorkspaceStore();
+    const base = getNewIdbAccountReport(reportAccount, [reportFacility], []);
+    store.publish({ ...reportSnapshot(), account: { ...reportAccount, isSingleFacilityCompany: true },
+      accountReports: [{ ...base, guid: 'shared', name: 'Account analysis', reportType: 'analysis' }],
+      facilityReports: [reportFixture({ guid: 'shared', name: 'Facility analysis' })] });
+    const mode = signal('account');
+    const state = signal<any>({ accountGuid: 'account-a', reportGuid: 'shared' });
+    await TestBed.configureTestingModule({ imports: [SectionNavModule], providers: [provideRouter([]),
+      { provide: AccountWorkspaceStore, useValue: store },
+      { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]) } },
+      { provide: WorkspaceNavigationService, useValue: {
+        contextFacility: () => undefined, inventoryScopeQuery: () => ({}), account: store.account, routeState: state,
+        contextMode: mode, activeReportGuid: () => 'shared', isSingleSiteWorkspace: () => true,
+        singleFacilityContext: () => reportFacility, contextAnalyses: () => [],
+        accountReportsRoute: () => ['/account/reports/dashboard'],
+        accountReportWorkbenchRoute: (_account: string, guid: string) => ['/account/reports/workbench', guid, 'setup'],
+        facilityReportWorkbenchRoute: (_facility: string, guid: string) => ['/facility/reports/workbench', guid, 'setup']
+      } }
+    ] }).compileComponents();
+    const fixture = TestBed.createComponent(ReportsNavComponent); fixture.detectChanges();
+    const groups = fixture.componentInstance.reportGroups();
+    expect(groups).toHaveLength(1); expect(groups[0].label).toBe('Analysis');
+    expect(groups[0].reports.map(report => report.formatLabel)).toEqual(['Account format', 'Facility format']);
+    expect(new Set(groups[0].reports.map(report => report.key)).size).toBe(2);
+    expect(groups[0].reports.filter(report => report.active).map(report => report.scope)).toEqual(['account']);
+    expect(fixture.nativeElement.querySelector('app-recent-items-nav')).toBeNull();
+    mode.set('facility'); state.set({ facilityGuid: 'facility-a', reportGuid: 'shared', reportStage: 'setup' }); fixture.detectChanges();
+    expect(fixture.componentInstance.reportGroups()[0].reports.filter(report => report.active).map(report => report.scope)).toEqual(['facility']);
+    expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(1);
   });
 
 });

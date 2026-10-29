@@ -111,6 +111,7 @@ export function isInventoryDetailLevel(value: unknown): value is InventoryDetail
 }
 
 export interface InventoryReportSnapshot {
+  readonly formatLabel?: string;
   readonly scope: 'account' | 'facility';
   readonly typeLabel: string;
   /** Defaults to pending when unspecified. */

@@ -8,6 +8,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 export class ReportSnapshotComponent {
   private readonly router = inject(Router);
   readonly snapshot = input.required<InventoryReportSnapshot>();
+  readonly showOwnership = input(true);
   readonly detailed = input(false);
   readonly resourceName = input('report');
   readonly navigationRequested = output<readonly string[]>();

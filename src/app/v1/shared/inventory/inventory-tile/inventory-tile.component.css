@@ -84,3 +84,5 @@
 .portfolio-tile--scoped { --analysis-menu-size: 1.75rem; }
 .portfolio-tile--scoped.portfolio-tile--selecting app-inventory-card-header { padding-inline-start: 2.5rem; }
 @media (pointer: coarse) { .portfolio-tile--scoped { --analysis-menu-size: 2.75rem; } }
+
+.portfolio-tile__report-format { margin: 0; color: var(--v1-muted); font-size: .8rem; }

@@ -7,10 +7,8 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { InventoryTileActionRequest, InventoryTileMenuAction } from '@app/v1/shared/inventory/inventory.models';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
-import { FACILITY_REPORT_TYPES } from '@app/v1/reports/facility/facility-report.models';
 import { ReportLifecycleService } from '../report-lifecycle.service';
-import { ACCOUNT_REPORT_TYPES, DEFAULT_REPORT_FILTERS, ReportInventoryFilters, buildReportInventory, filterReportInventory, reportInventoryTile } from '../report-inventory.models';
-import { reportTypeAvailable } from '../report-availability';
+import { DEFAULT_REPORT_FILTERS, ReportInventoryFilters, reportTypeChoices, buildReportInventory, filterReportInventory, reportInventoryTile } from '../report-inventory.models';
 
 @Component({ selector: 'app-reports-inventory', standalone: false, host: { class: 'v1-inventory-dashboard-host' }, providers: [ReportLifecycleService],
   templateUrl: './reports-inventory.component.html', styleUrls: ['./reports-inventory.component.css'] })
@@ -34,11 +32,13 @@ export class ReportsInventoryComponent {
   });
   private readonly rememberedFilters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly scopedFacilityGuid = computed(() => this.navigation.inventoryFacilityGuid());
+  readonly singleFacility = this.navigation.isSingleSiteWorkspace;
   readonly facilityOnly = computed(() => !!this.scopedFacilityGuid());
   readonly effectiveSort = new FormControl<ReportInventoryFilters['sort']>('account-first', { nonNullable: true });
   readonly filters = computed(() => {
     const filters = this.rememberedFilters();
-    return { ...filters, ...(this.facilityOnly() ? { scope: 'facility' as const, sort: filters.sort === 'account-first' ? 'attention' as const : filters.sort } : {}) };
+    return { ...filters, ...(this.singleFacility() ? { scope: 'all' as const, sort: filters.sort === 'account-first' ? 'attention' as const : filters.sort }
+        : this.facilityOnly() ? { scope: 'facility' as const, sort: filters.sort === 'account-first' ? 'attention' as const : filters.sort } : {}) };
   });
   readonly entries = computed(() => {
     const snapshot = this.workspace.snapshot();
@@ -46,7 +46,7 @@ export class ReportsInventoryComponent {
     return this.facilityOnly() ? entries.filter(entry => entry.scope === 'facility' && entry.facilityGuid === this.scopedFacilityGuid()) : entries;
   });
   readonly filteredEntries = computed(() => filterReportInventory(this.entries(), this.filters()));
-  readonly tiles = computed(() => this.filteredEntries().map(entry => reportInventoryTile(entry, this.navigation)));
+  readonly tiles = computed(() => this.filteredEntries().map(entry => reportInventoryTile(entry, this.navigation, this.singleFacility())));
   private readonly setupSettled = computed(() => this.status.state() === 'ready' || this.status.state() === 'error');
   private readonly inventoryReady = computed(() => this.workspace.canWrite() && this.setupSettled());
   readonly inventory = new InventoryViewState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.key)), computed(() => ({ ...this.filters(), facility: this.scopedFacilityGuid() })), this.inventoryReady);
@@ -57,12 +57,11 @@ export class ReportsInventoryComponent {
     { id: 'copy', label: 'Copy report', icon: 'copy', disabled: !this.canAct() },
     { id: 'delete', label: 'Delete report', icon: 'delete', disabled: !this.canAct() }
   ]);
-  readonly typeOptions = computed(() => [
-    ...(!this.facilityOnly() ? ACCOUNT_REPORT_TYPES.map(option => ({ value: `account:${option.value}`, label: `Account · ${option.label}`, type: option.value })) : []),
-    ...FACILITY_REPORT_TYPES.map(option => ({ value: `facility:${option.value}`, label: !this.facilityOnly() ? `Facility · ${option.label}` : option.label, type: option.value }))
-  ].filter(option => reportTypeAvailable(option.type, this.workspace.account()?.displayEmissions)));
+  readonly typeOptions = computed(() => reportTypeChoices(this.singleFacility(), this.workspace.account()?.displayEmissions)
+    .filter(option => !this.facilityOnly() || option.scope === 'facility')
+    .map(option => ({ value: option.value, label: this.facilityOnly() ? option.typeLabel : option.label })));
   readonly title = 'Reports';
-  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', this.workspace.facilities().find(item => item.guid === this.scopedFacilityGuid())?.name));
+  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', this.workspace.facilities().find(item => item.guid === this.scopedFacilityGuid())?.name, this.singleFacility()));
   readonly countLabel = computed(() => `${this.filteredEntries().length} of ${this.entries().length} reports`);
   readonly unavailable = computed(() => !this.workspace.account() || this.navigation.routeState().accountGuid !== this.workspace.account()?.guid);
 
@@ -79,7 +78,7 @@ export class ReportsInventoryComponent {
       });
     });
   }
-  clearFilters(): void { this.filtersForm.reset({ ...DEFAULT_REPORT_FILTERS, sort: this.facilityOnly() ? 'attention' : 'account-first' }); }
+  clearFilters(): void { this.filtersForm.reset({ ...DEFAULT_REPORT_FILTERS, sort: this.facilityOnly() || this.singleFacility() ? 'attention' : 'account-first' }); }
   openCreate(): void { if (this.canAct()) this.lifecycle.openCreate(this.scopedFacilityGuid()); }
   requestAction(request: InventoryTileActionRequest): void {
     if (!this.canAct()) return;

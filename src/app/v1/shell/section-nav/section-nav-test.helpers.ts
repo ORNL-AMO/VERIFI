@@ -100,6 +100,7 @@ export function setupSectionNavTest() {
             facility: selectedFacility,
             account,
             isSingleSiteWorkspace,
+            singleFacilityContext: () => isSingleSiteWorkspace() ? facilities()[0] : undefined,
             hasSingleSiteRecovery,
             singleSiteWorkspaceState,
             activeSection,

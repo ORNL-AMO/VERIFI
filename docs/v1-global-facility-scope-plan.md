@@ -284,7 +284,9 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 
 - Shared presentation derives one owned facility only from a ready committed single-facility workspace. The shell shows that facility once; inventory ownership strips and duplicate context breadcrumbs are hidden while workbench resource returns remain available.
 - Meter/Predictor creation receives its explicit facility without a redundant picker; fixed-facility Analysis creation hides ownership selectors. Portfolio presentation remains the default, including portfolios with only one facility.
-- The first group passes 158 focused tests and 10 Chromium checks covering header keyboard/narrow/print behavior and preserved Meter/Predictor gutters. Reports and unified Settings/Backup follow in separate commits.
+- The first group passes 158 focused tests and 10 Chromium checks covering header keyboard/narrow/print behavior and preserved Meter/Predictor gutters. The combined Reports group follows in its own commit; unified Settings/Backup remains pending.
+
+- Combined Reports lists both owners by report type, qualifies overlapping formats, hides level/ownership controls and Recents, and maps all 14 creation choices to the original commands. Better Plants remains the default. Focused Reports coverage passes 279 tests plus the three sidebar cases; 15 Chromium journeys cover combined presentation, guarded exits, hidden pairs, history, themes, and narrow layouts.
 
 ### Acceptance and validation
 

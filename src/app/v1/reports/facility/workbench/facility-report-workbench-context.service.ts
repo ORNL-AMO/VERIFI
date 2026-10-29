@@ -1,3 +1,4 @@
+import { reportTypePresentation } from '@app/v1/reports/report-inventory.models';
 import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
@@ -28,6 +29,10 @@ export class FacilityReportWorkbenchContext {
     .slice().sort((a, b) => (a.name || 'Untitled facility report').localeCompare(b.name || 'Untitled facility report') || a.guid.localeCompare(b.guid)));
   readonly report = computed(() => this.reports().find(report => report.guid === this.guid()));
   readonly key = computed(() => `${this.workspace.account()?.guid}:${this.navigation.routeState().facilityGuid}:${this.guid()}`);
+  readonly typeLabel = computed(() => {
+    const report = this.report();
+    return report ? reportTypePresentation('facility', report.facilityReportType, this.navigation.isSingleSiteWorkspace()).label : 'Report';
+  });
   readonly stage = computed(() => facilityReportStage(this.navigation.routeState().reportStage));
   readonly stages = computed(() => {
     const report = this.report();

@@ -4,7 +4,7 @@
   <div><dt>Updated</dt><dd>{{ view.modified }}</dd></div>
 </dl>
 @if (detailed()) {
-  <section class="report-snapshot__scope"><h2>Saved scope</h2><p>{{ view.scopeLabel }}</p></section>
+  @if (showOwnership()) { <section class="report-snapshot__scope"><h2>Saved scope</h2><p>{{ view.scopeLabel }}</p></section> }
   @if (view.findings.length) {
     <section class="inventory-attention" aria-label="Report setup findings"><h2>Needs attention</h2>
       <ul>@for (finding of visibleFindings(); track finding.id) {

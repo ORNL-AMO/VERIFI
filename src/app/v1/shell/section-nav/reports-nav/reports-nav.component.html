@@ -3,17 +3,17 @@
 @let facilityGuid = navigation.contextFacility()?.guid;
 @let active = navigation.activeReportGuid();
 <section class="v1-nav__group" aria-labelledby="reports-nav-title">
-  <span id="reports-nav-title" class="v1-nav__label">{{ facilityGuid ? 'Facility Reports' : 'Reports' }}</span>
+  <span id="reports-nav-title" class="v1-nav__label">{{ navigation.isSingleSiteWorkspace() ? 'Reports' : facilityGuid ? 'Facility Reports' : 'Reports' }}</span>
   @if (account) {
     <a class="v1-nav__link" [class.active]="!active" [attr.aria-current]="!active ? 'page' : null" [routerLink]="inventory.route" [queryParams]="inventory.queryParams"><app-ui-icon name="reports"></app-ui-icon>Dashboard</a>
-    @if (!facilityGuid && recent.reports().length) { <app-recent-items-nav section="reports" [items]="recent.reports()"/> }
+    @if (!navigation.isSingleSiteWorkspace() && !facilityGuid && recent.reports().length) { <app-recent-items-nav section="reports" [items]="recent.reports()"/> }
     @for (group of reportGroups(); track group.id) {
       <section class="v1-nav__report-section" [attr.aria-labelledby]="'reports-nav-' + group.id + '-title'">
         <span class="v1-nav__sublabel" [id]="'reports-nav-' + group.id + '-title'">{{ group.label }}</span>
-        @for (report of group.reports; track report.guid) {
+        @for (report of group.reports; track report.key) {
           <div class="v1-nav__report-entry">
-            <a class="v1-nav__link" [class.active]="active === report.guid" [attr.aria-expanded]="facilityGuid ? active === report.guid : null" [attr.aria-current]="!facilityGuid && active === report.guid ? 'page' : null" [routerLink]="report.route" [title]="report.name"><app-ui-icon [name]="report.icon"></app-ui-icon><span class="v1-nav__item-label">{{ report.name }}</span></a>
-            @if (active === report.guid && activeStages().length) {
+            <a class="v1-nav__link" [class.active]="report.active" [attr.aria-expanded]="report.scope === 'facility' ? report.active : null" [attr.aria-current]="report.scope === 'account' && report.active ? 'page' : null" [routerLink]="report.route" [title]="report.name"><app-ui-icon [name]="report.icon"></app-ui-icon><span class="v1-nav__item-label report-nav-label"><span>{{ report.name }}</span>@if (report.formatLabel) { <small>{{ report.formatLabel }}</small> }</span></a>
+            @if (report.active && activeStages().length) {
               <app-analysis-stage-navigation class="v1-nav__report-workflow" [stages]="activeStages()" [ariaLabel]="'Report stages for ' + report.name"></app-analysis-stage-navigation>
             }
           </div>

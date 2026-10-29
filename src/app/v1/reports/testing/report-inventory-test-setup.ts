@@ -20,7 +20,7 @@ export async function setupReportInventory(scope: 'account' | 'facility' = 'acco
   const status = signal<'ready' | 'error' | 'idle' | 'evaluating'>('ready');
   const accountActions = { create: vi.fn(async () => ({ ...accountReport, guid: 'created-account' })), copy: vi.fn(async () => ({ ...accountReport, guid: 'copied-account' })), updateName: vi.fn(async () => accountReport), delete: vi.fn(async () => {}) };
   const facilityActions = { create: vi.fn(async () => reportFixture({ guid: 'created-facility' })), copy: vi.fn(async () => reportFixture({ guid: 'copied-facility' })), updateName: vi.fn(async () => reportFixture()), delete: vi.fn(async () => {}) };
-  const navigation = { inventoryFacilityGuid: signal<string | undefined>(scope === 'facility' ? 'facility-a' : undefined), headerFacility: () => undefined, routeState: state, activeReportGuid: computed(() => state().reportGuid),
+  const navigation = { isSingleSiteWorkspace: computed(() => store.status() === 'ready' && store.account()?.isSingleFacilityCompany === true && store.facilities().length === 1), singleFacilityContext: computed(() => store.account()?.isSingleFacilityCompany === true && store.facilities().length === 1 ? store.facilities()[0] : undefined), inventoryFacilityGuid: signal<string | undefined>(scope === 'facility' ? 'facility-a' : undefined), headerFacility: () => undefined, routeState: state, activeReportGuid: computed(() => state().reportGuid),
     changeFacilityScope: vi.fn(), facilityInventoryLink: (guid: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'reports', 'dashboard'], queryParams: { facility: guid } }),
     accountReportsRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'reports', 'dashboard'],
 

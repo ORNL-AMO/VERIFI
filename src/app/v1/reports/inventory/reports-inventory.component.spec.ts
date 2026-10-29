@@ -1,3 +1,4 @@
+import { reportTypeChoices } from '../report-inventory.models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { TestBed } from '@angular/core/testing';
 import { reportFacility, reportFixture } from '@app/v1/reports/facility/testing/report-test-fixtures';
@@ -174,5 +175,66 @@ describe('report browse state', () => {
     store.publish({ ...saved, account: { ...saved.account, displayEmissions: false } }); fixture.detectChanges();
     expect(fixture.componentInstance.filtersForm.controls.type.value).toBe('all'); expect(store.accountReports()).toHaveLength(1);
     expect(fixture.componentInstance.entries().every(entry => entry.scope === 'facility')).toBe(true);
+  });
+});
+
+describe('single-facility combined reports', () => {
+  it('ignores remembered level filters, hides ownership and retains both formats', async () => {
+    const { store } = await setupReportInventory();
+    store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: true } });
+    const fixture = TestBed.createComponent(ReportsInventoryComponent); fixture.detectChanges();
+    const host = fixture.componentInstance;
+    host.filtersForm.controls.scope.setValue('facility'); fixture.detectChanges();
+    expect(host.filteredEntries().map(item => item.scope).sort()).toEqual(['account', 'facility']);
+    expect(host.filters().sort).toBe('attention');
+    expect(host.breadcrumbs()).toEqual([]);
+    expect(fixture.nativeElement.querySelector('[formControlName="scope"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.portfolio-tile__scope-header')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Account format');
+    expect(fixture.nativeElement.textContent).toContain('Facility format');
+    expect(host.typeOptions().filter(item => item.label.startsWith('Analysis')).map(item => item.value).sort()).toEqual(['account:analysis', 'facility:analysis']);
+    expect(store.committedRevision()).toBeUndefined();
+    store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: false } }); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[formControlName="scope"]')).not.toBeNull();
+    expect(host.breadcrumbs().length).toBeGreaterThan(0);
+  });
+  it.each(reportTypeChoices(true, true))('maps $value to its existing owner and command', async choice => {
+    const { store, accountActions, facilityActions, navigate } = await setupReportInventory();
+    store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: true } });
+    const fixture = TestBed.createComponent(ReportsInventoryComponent); fixture.detectChanges();
+    const host = fixture.componentInstance;
+    host.openCreate(); fixture.detectChanges();
+    expect(host.lifecycle.typeChoice.value).toBe('account:betterPlants');
+    expect(fixture.nativeElement.querySelector('#report-scope')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#report-facility')).toBeNull();
+    host.lifecycle.typeChoice.setValue(choice.value); fixture.detectChanges();
+    expect(host.lifecycle.form.getRawValue()).toEqual({ name: 'New Report', scope: choice.scope, type: choice.type, facilityGuid: choice.scope === 'facility' ? 'facility-a' : '' });
+    expect(host.lifecycle.canSave()).toBe(true);
+    await host.lifecycle.submit();
+    if (choice.scope === 'account') {
+      expect(accountActions.create).toHaveBeenCalledWith('New Report', choice.type);
+      expect(facilityActions.create).not.toHaveBeenCalled();
+    } else {
+      expect(facilityActions.create).toHaveBeenCalledWith('facility-a', 'New Report', choice.type);
+      expect(accountActions.create).not.toHaveBeenCalled();
+    }
+    expect(navigate).toHaveBeenCalled();
+  });
+  it('blocks unavailable choices and retains a failed creation draft for retry', async () => {
+    const { store, facilityActions } = await setupReportInventory();
+    store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: true } });
+    const fixture = TestBed.createComponent(ReportsInventoryComponent); fixture.detectChanges();
+    const lifecycle = fixture.componentInstance.lifecycle;
+    lifecycle.openCreate(); fixture.detectChanges();
+    lifecycle.typeChoice.setValue('facility:unknown'); fixture.detectChanges();
+    expect(lifecycle.canSave()).toBe(false);
+    lifecycle.typeChoice.setValue('facility:analysis'); fixture.detectChanges();
+    facilityActions.create.mockRejectedValueOnce(new Error('Save failed'));
+    await lifecycle.submit(); fixture.detectChanges();
+    expect(lifecycle.error()).toBe('Save failed');
+    expect(lifecycle.form.controls.facilityGuid.value).toBe('facility-a');
+    expect(lifecycle.navigationBlocked()).toBe(true);
+    lifecycle.requestClose(); expect(lifecycle.confirmation()).toBe('discard');
+    lifecycle.discardEditor(); expect(lifecycle.editor()).toBeUndefined();
   });
 });

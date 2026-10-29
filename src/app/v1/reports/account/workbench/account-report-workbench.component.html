@@ -9,7 +9,7 @@
   <app-data-empty-state icon="report" context="account" title="Report unavailable" description="This report may have been deleted, belong to another account, or be hidden by the account’s Other Impacts setting."/>
   <a class="v1-btn v1-btn--secondary" [routerLink]="context.dashboardRoute()">Return to account reports</a>
 } @else {
-  <app-report-workbench-header [editor]="editor" [breadcrumbs]="context.breadcrumbs()" [resources]="context.resources()" [selectedId]="report.guid" [name]="report.name || 'Untitled account report'" [typeLabel]="entry.typeLabel" [status]="entry.status" [statusLabel]="entry.statusLabel" [facts]="entry.snapshot.facts" [stages]="stages()" [checksStatus]="checksWorkflow()" (reportSelected)="switchReport($event)"/>
+  <app-report-workbench-header [editor]="editor" [breadcrumbs]="context.breadcrumbs()" [resources]="context.resources()" [selectedId]="report.guid" [name]="report.name || 'Untitled account report'" [typeLabel]="context.typeLabel()" [status]="entry.status" [statusLabel]="entry.statusLabel" [facts]="entry.snapshot.facts" [stages]="stages()" [checksStatus]="checksWorkflow()" (reportSelected)="switchReport($event)"/>
   <main class="report-workbench-content" aria-labelledby="account-report-workbench-title"><router-outlet/></main>
   <footer class="v1-wizard-actions" aria-label="Report workflow navigation">
     @if (previous(); as previousStage) {
