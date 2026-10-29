@@ -1,3 +1,4 @@
+import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Params, Router } from '@angular/router';
@@ -166,10 +167,7 @@ export class WorkspaceNavigationService {
   readonly facility = computed(() => this.resolveFacility());
   readonly singleSiteWorkspaceState = computed(() => this.resolveSingleSiteWorkspaceState());
   readonly singleFacilityContext = computed<IdbFacility | undefined>(() => {
-    const account = this.workspace.account();
-    if (this.workspace.status() !== 'ready' || account?.isSingleFacilityCompany !== true) return undefined;
-    const facilities = this.facilities().filter(facility => facility.accountId === account.guid);
-    return facilities.length === 1 ? facilities[0] : undefined;
+    return singleFacilityPresentation(this.workspace.account(), this.facilities(), this.workspace.status() === 'ready');
   });
   readonly isSingleSiteWorkspace = computed(() => !!this.singleFacilityContext());
   readonly hasSingleSiteRecovery = computed(() => {
@@ -578,6 +576,7 @@ export class WorkspaceNavigationService {
   }
 
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
+    if (detail === 'backup' && this.singleFacilityContext()?.guid === facilityGuid) return this.accountSettingsRoute(this.workspace.account()!.guid, 'backup');
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
   }
 

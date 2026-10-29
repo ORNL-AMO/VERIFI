@@ -1,3 +1,4 @@
+import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { Injectable } from '@angular/core';
 import { FACILITY_DELETION_CHILD_STORES, FACILITY_DELETION_PARTICIPANT_STORES } from '@data/indexedDB/facility-deletion.config';
 import { removeFacilityFromAccountAnalysis, removeFacilityFromAccountReport } from '@data/indexedDB/facility-deletion-references';
@@ -295,9 +296,7 @@ export class BackupImportCommandService {
         accountReport.dataOverviewReportSetup.includedFacilities.forEach(facility => {
           facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
         });
-        if (accountReport.reportType == 'betterPlants') {
-          accountReport.betterPlantsReportSetup.analysisItemId = this.getNewId(accountReport.betterPlantsReportSetup.analysisItemId, accountAnalysisGUIDs);
-        } else {
+        if (accountReport.reportType !== 'betterPlants') {
           accountReport.betterPlantsReportSetup = {
             analysisItemId: undefined,
             includeFacilityNames: undefined,
@@ -315,8 +314,9 @@ export class BackupImportCommandService {
           });
         }
 
-        if (accountReport.reportType == 'performance') {
-          accountReport.performanceReportSetup.analysisItemId = this.getNewId(accountReport.performanceReportSetup.analysisItemId, accountAnalysisGUIDs);
+        const analysisSetupKey = accountReportAnalysisSetupKey(accountReport.reportType);
+        if (analysisSetupKey && accountReport[analysisSetupKey]) {
+          accountReport[analysisSetupKey].analysisItemId = this.getNewId(accountReport[analysisSetupKey].analysisItemId, accountAnalysisGUIDs);
         }
         await this.addRecord(transaction, 'accountReports', accountReport);
       }

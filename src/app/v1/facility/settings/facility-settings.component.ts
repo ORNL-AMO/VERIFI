@@ -16,5 +16,5 @@ export class FacilitySettingsComponent {
   readonly facility = this.workspace.selectedFacility;
   readonly navigation = inject(WorkspaceNavigationService);
   readonly canWrite = this.workspace.canWrite;
-  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', this.facility()?.name));
+  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', this.facility()?.name, this.navigation.isSingleSiteWorkspace()));
 }

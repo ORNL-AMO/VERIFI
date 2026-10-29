@@ -192,6 +192,7 @@ describe('single-facility combined reports', () => {
     expect(fixture.nativeElement.querySelector('.portfolio-tile__scope-header')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Account format');
     expect(fixture.nativeElement.textContent).toContain('Facility format');
+    expect([...fixture.nativeElement.querySelectorAll('.portfolio-tile__name')].map((link: HTMLAnchorElement) => link.getAttribute('aria-label'))).toEqual(expect.arrayContaining([expect.stringContaining('Account format'), expect.stringContaining('Facility format')]));
     expect(host.typeOptions().filter(item => item.label.startsWith('Analysis')).map(item => item.value).sort()).toEqual(['account:analysis', 'facility:analysis']);
     expect(store.committedRevision()).toBeUndefined();
     store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: false } }); fixture.detectChanges();

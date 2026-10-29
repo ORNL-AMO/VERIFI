@@ -12,7 +12,7 @@ This document records the agreed target experience and implementation roadmap. I
 | 2 | Contextual navigation and workbench journeys | Complete |
 | 3 | Shared inventory charts, selection, and creation | Complete |
 | 4 | Dashboard retirement and resource-based folders | Complete |
-| 5 | Single-facility presentation | In progress |
+| 5 | Single-facility presentation | Complete |
 
 ### Greenfield policy
 
@@ -268,11 +268,13 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 - Meter workbenches retain their existing responsive host gutter. Standard and weather Predictor workbenches own the same gutter directly. Chromium checks verify wide/narrow padding, keyboard access, themes, reduced motion, and print alongside existing chart, selection, comparison, lifecycle, and return journeys.
 - Final `npm run test:all:ci` passed: **444 fast files / 2,535 tests** and **53 Chromium files / 252 tests**. An earlier run concurrent with the production build hit three five-second test timeouts; the isolated full rerun passed without raising timeouts or weakening tests.
 - `npm run validate:agent -- --mode plan`, `npx tsc -p tsconfig.app.json --noEmit`, `npm run build-prod`, documentation checks (**229 local links across eight changed Markdown documents**), and whitespace checks passed. Source scans found no imports to former feature folders or retired dashboard components.
-- Shared records, GUID relationships, calculations, import/backup formats, v0 contracts, and Electron boundaries are preserved. No schema migration or Electron testing was needed. Phase 5 remains **Not started**.
+- Shared records, GUID relationships, calculations, import/backup formats, v0 contracts, and Electron boundaries are preserved. No schema migration or Electron testing was needed. At Phase 4 completion, Phase 5 was **Not started**; its delivery is recorded below.
 
 ## Phase 5 — Single-facility presentation
 
-**Status: In progress**
+**Status: Complete**
+
+Completed 2026-10-29 in the three agreed commit groups.
 
 ### Changes
 
@@ -284,15 +286,26 @@ The narrow-window check caught chart canvas overflow; the shared chart grid now 
 
 - Shared presentation derives one owned facility only from a ready committed single-facility workspace. The shell shows that facility once; inventory ownership strips and duplicate context breadcrumbs are hidden while workbench resource returns remain available.
 - Meter/Predictor creation receives its explicit facility without a redundant picker; fixed-facility Analysis creation hides ownership selectors. Portfolio presentation remains the default, including portfolios with only one facility.
-- The first group passes 158 focused tests and 10 Chromium checks covering header keyboard/narrow/print behavior and preserved Meter/Predictor gutters. The combined Reports group follows in its own commit; unified Settings/Backup remains pending.
+- The first group passes 158 focused tests and 10 Chromium checks covering header keyboard/narrow/print behavior and preserved Meter/Predictor gutters. Combined Reports and unified Settings/Backup are delivered in the next two reviewable groups.
 
 - Combined Reports lists both owners by report type, qualifies overlapping formats, hides level/ownership controls and Recents, and maps all 14 creation choices to the original commands. Better Plants remains the default. Focused Reports coverage passes 279 tests plus the three sidebar cases; 15 Chromium journeys cover combined presentation, guarded exits, hidden pairs, history, themes, and narrow layouts.
+
+- Settings now uses one list and the existing facility editors/mirrored saves. Account-copy and inheritance controls are hidden in a ready single-facility workspace; effective values remain editable, including older staleness records without an inheritance flag. Opening a screen does not reconcile differing stored values.
+- Complete Backup uses the existing account screen, reminders, and restore flow. The facility-only disclosure supplies its explicit owner to both export and replacement import. Direct sole-facility Backup entry canonicalizes once to account Backup; portfolio and invalid-state routing remain available. Convert to portfolio and Delete account retain their existing commands.
+- Acceptance exposed a pre-existing restore omission: Analysis and Savings report analysis GUIDs were not remapped. Coordinated restore now uses the existing setup-key contract for all four analysis-backed account report types. JSON/ZIP shape, schema version, calculations, and v0 contracts remain unchanged.
 
 ### Acceptance and validation
 
 - A valid single-facility account has no redundant scope choice or duplicate account workflow, while all supported settings, custom data, reports, and backups remain accessible.
 - Test hidden analysis pairing, account-backed reports, settings, direct item entry, invalid single-site states, and conversion to a portfolio.
 - Verify that conversion restores portfolio navigation without losing records or relationships; run focused and full validation appropriate to the changed boundaries.
+
+### Final validation evidence
+
+- `npm run test:all:ci` passed sequentially: **444 fast files / 2,565 tests** and **54 Chromium files / 256 tests**. Initial full runs exposed incomplete navigation test doubles, outdated breadcrumb expectations, and one architecture scan still pointing at the Phase 4 folder location; those were corrected without weakening behavior checks.
+- Chromium covers account/sole-facility entry, combined report formats and hidden pairs, guarded exits/history, charts/selection, explicit backup ownership, restore rollback/reopen, keyboard access, narrow layouts, themes, reduced motion, print, and preserved Meter/Predictor workbench gutters.
+- Real IndexedDB backup round trips retain Better Plants, Performance, Analysis, and Savings report references to their restored hidden analysis pair and owning facility analysis after reopening. Existing import preparation, facility replace/new choices, invalid-state recovery, and portfolio-conversion tests remain green.
+- Application type-check, the validation planner (covering the complete Phase 5 diff), production web build, documentation checks (**233 local links across eight changed Markdown documents**), and whitespace checks passed. The web build retains existing CSS budget and CommonJS dependency warnings. Final review found no remaining actionable findings. No schema migration, calculation or backup-format changes, v0 UI changes, or Electron boundary changes were required. Electron validation is excluded as requested.
 
 ## Validation and documentation policy
 

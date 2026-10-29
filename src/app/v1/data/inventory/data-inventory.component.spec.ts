@@ -73,7 +73,7 @@ describe('DataInventoryComponent', () => {
         },
         {
           provide: WorkspaceNavigationService,
-          useValue: {
+          useValue: { isSingleSiteWorkspace: () => false,
             activePortfolioTab, uploadQuery: () => ({}), inventoryFacilityGuid: signal<string | undefined>(undefined), changeFacilityScope: vi.fn(),
             openFacility: vi.fn(async () => undefined),
             accountSettingsRoute: (accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', accountGuid, 'settings', detail],

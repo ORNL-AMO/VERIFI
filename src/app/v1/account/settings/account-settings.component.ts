@@ -16,5 +16,5 @@ export class AccountSettingsComponent {
   readonly account = this.workspace.account;
   readonly navigation = inject(WorkspaceNavigationService);
   readonly canWrite = this.workspace.canWrite;
-  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account'));
+  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.workspace.account()?.name || 'Account', undefined, this.navigation.isSingleSiteWorkspace()));
 }

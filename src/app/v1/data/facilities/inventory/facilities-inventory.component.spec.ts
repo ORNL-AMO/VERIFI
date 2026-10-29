@@ -28,7 +28,7 @@ function setup() {
     } },
     { provide: WorkspaceStatusService, useValue: { state: statusState, items } },
     { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
-    { provide: WorkspaceNavigationService, useValue: {
+    { provide: WorkspaceNavigationService, useValue: { isSingleSiteWorkspace: () => false,
       changeFacilityScope: vi.fn(async () => false),
       facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }),
           inventoryFacilityGuid: signal<string | undefined>(undefined),

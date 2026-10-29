@@ -63,7 +63,7 @@ describe('unified inventory charts in Chromium',()=>{
       monthlyData({ year: 2025, monthNumValue: 1, energyUse: 15 + index * .35, energyCost: m.guid === 'ma' ? NaN : 2 }),
       monthlyData({ year: 2025, monthNumValue: 2, energyUse: 12 + index * .4, energyCost: m.guid === 'ma' ? NaN : 1 })
     ], { energyUnit: 'MMBtu', energyIsSource: false, showEnergyUse: true })) };
-    const navigation = { inventoryFacilityGuid: scope, account: store.account, facilities: store.facilities,
+    const navigation = { singleFacilityContext: () => undefined, inventoryFacilityGuid: scope, account: store.account, facilities: store.facilities,
       headerFacility: computed(() => store.facilities().find(f => f.guid === scope())),
       isWorkspaceRoute: () => true, isSingleSiteWorkspace: () => false, scopeChangePending: () => false,
       scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', isSupportPanelOpen: () => false,

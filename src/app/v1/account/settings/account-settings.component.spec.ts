@@ -1,5 +1,5 @@
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
@@ -62,6 +62,8 @@ describe('Account settings routed components', () => {
     inspectCurrentAccountFile: ReturnType<typeof vi.fn>;
   };
   let navigation: {
+    isSingleSiteWorkspace: () => boolean;
+    singleFacilityContext: () => IdbFacility | undefined;
     changeFacilityScope: ReturnType<typeof vi.fn>;
     openAccount: ReturnType<typeof vi.fn>;
     showWelcome: ReturnType<typeof vi.fn>;
@@ -108,6 +110,8 @@ describe('Account settings routed components', () => {
       inspectCurrentAccountFile: vi.fn(async () => undefined)
     };
     navigation = {
+      isSingleSiteWorkspace: computed(() => account()?.isSingleFacilityCompany === true && facilities().length === 1),
+      singleFacilityContext: computed(() => account()?.isSingleFacilityCompany === true && facilities().length === 1 ? facilities()[0] : undefined),
       changeFacilityScope: vi.fn(),
       openAccount: vi.fn(async () => undefined),
       showWelcome: vi.fn()
@@ -124,6 +128,7 @@ describe('Account settings routed components', () => {
           provide: AccountWorkspaceStore,
           useValue: {
             account,
+            status: () => 'ready',
             facilities,
             canWrite,
             hasPending,
@@ -150,6 +155,17 @@ describe('Account settings routed components', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it('presents complete backup first and embeds facility-only tools with an explicit owner', () => {
+    account.set({ ...account()!, isSingleFacilityCompany: true }); facilities.set([facilities()[0]]);
+    const fixture = createDetail(AccountSettingsBackupComponent);
+    expect(fixture.nativeElement.textContent).toContain('Complete backup');
+    expect(fixture.nativeElement.querySelector('details summary').textContent).toContain('Facility-only tools');
+    fixture.componentInstance.openBackupConfirm('json');
+    expect(fixture.componentInstance.backupRequest).toEqual({ scope: 'account', accountGuid: 'account-a', format: 'json' });
+    expect(fixture.componentInstance.backupName).toBe(facilities()[0].name);
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
   });
 
   it('keeps the parent settings shell focused on layout and routed detail outlet', () => {

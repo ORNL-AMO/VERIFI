@@ -30,5 +30,22 @@ describe('Data Validation account-copy confirmation', () => {
     expect(facility().expectedRangeSettings).toEqual({ enabled: false, useAccountSettings: true });
     expect(facility().dataStalenessSettings).toEqual({ enabled: true, thresholdMonths: 3, useAccountSettings: true });
     expect(portal.hide).toHaveBeenCalledTimes(2);
+  });  it.each([true, false, undefined])('edits effective single-facility values with stored inheritance %s and no writes on entry', async inherit => {
+    const { account, facility, execute, compoundUpdate } = configureDataValidationSettingsTest();
+    account.set({ ...account(), isSingleFacilityCompany: true, dataStalenessSettings: { enabled: true, thresholdMonths: 6 }, expectedRangeSettings: { enabled: false } });
+    facility.set({ ...facility(), dataStalenessSettings: { enabled: true, thresholdMonths: 12, useAccountSettings: inherit }, expectedRangeSettings: { enabled: true, useAccountSettings: inherit } });
+    const before = structuredClone(facility());
+    TestBed.configureTestingModule({ imports: [DataValidationSettingsPanelComponent] });
+    const editor = TestBed.inject(DataValidationSettingsEditor); editor.initialize(true);
+    const fixture = TestBed.createComponent(DataValidationSettingsPanelComponent);
+    fixture.componentRef.setInput('editor', editor); fixture.componentRef.setInput('facilityContext', true); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[formControlName="useAccountSettings"]')).toBeNull();
+    expect(editor.stalenessForm.controls.thresholdMonths.enabled).toBe(true);
+    expect(editor.stalenessForm.controls.thresholdMonths.value).toBe(inherit ? 6 : 12);
+    expect(editor.expectedRangeForm.controls.enabled.enabled).toBe(true);
+    expect(execute).not.toHaveBeenCalled(); expect(facility()).toEqual(before);
+    editor.stalenessForm.controls.thresholdMonths.setValue(3); await editor.save('staleness');
+    expect(compoundUpdate).toHaveBeenCalledWith(account(), facility(), { group: 'staleness', settings: { enabled: true, thresholdMonths: 3, useAccountSettings: inherit ?? true } }, 'account-a');
   });
+
 });

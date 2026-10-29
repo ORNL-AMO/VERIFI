@@ -1,3 +1,4 @@
+import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -26,23 +27,33 @@ export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route,
   const store = inject(AccountWorkspaceStore);
   const router = inject(Router);
   const account = store.account();
-  const facilities = store.facilities();
-  if (account?.isSingleFacilityCompany !== true || facilities.length !== 1) {
+  const facility = singleFacilityPresentation(account, store.facilities(), store.status() === 'ready');
+  if (!facility) {
     return true;
   }
 
   // Reports and Upload retain account scope even for a single-facility workspace.
-  const section = accountRouteParts(state)[3];
-  if (section === 'reports' || section === 'imports') return true;
+  const parts = accountRouteParts(state);
+  const section = parts[3];
+  if (section === 'reports' || section === 'imports' || (section === 'settings' && parts[4] === 'backup')) return true;
 
   await inject(SingleFacilityAnalysisPairService).ensurePairs();
 
   const commands = singleSiteRedirectCommands(
     state,
-    facilities[0].guid,
+    facility.guid,
     store.accountAnalyses()
   );
   return commands ? router.createUrlTree(commands) : true;
+};
+
+/** Single-site Backup is the complete account backup; portfolio facility tools retain their route. */
+export const singleFacilityBackupCanonicalGuard: CanActivateFn = route => {
+  const store = inject(AccountWorkspaceStore);
+  const facility = singleFacilityPresentation(store.account(), store.facilities(), store.status() === 'ready');
+  const facilityGuid = route.pathFromRoot.map(item => item.paramMap.get('facilityGuid')).find(Boolean);
+  return facility && facility.guid === facilityGuid
+    ? inject(Router).createUrlTree(['/v1', 'workspace', 'account', facility.accountId, 'settings', 'backup']) : true;
 };
 
 export function accountHomeCommands(accountGuid: string): Array<string> {
@@ -64,6 +75,7 @@ export function singleSiteRedirectCommands(
   const accountGuid = parts[2];
 
   if (section === 'settings') {
+    if (detail === 'backup') return undefined;
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail || 'profile'];
   }
   if (section === 'data') {

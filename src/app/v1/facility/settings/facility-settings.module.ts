@@ -6,8 +6,7 @@ import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
-import { ImportFacilityBackupComponent } from './backup/import-facility-backup.component';
-import { FacilitySettingsBackupComponent } from './backup/facility-settings-backup.component';
+import { FacilityBackupToolsModule } from './backup/facility-backup-tools.module';
 import { FacilitySettingsComponent } from './facility-settings.component';
 import { FacilitySettingsDeleteComponent } from './delete/facility-settings-delete.component';
 import { FacilitySettingsFinancialComponent } from './financial/facility-settings-financial.component';
@@ -25,7 +24,6 @@ import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.
     FacilitySettingsGoalsComponent,
     FacilitySettingsFinancialComponent,
     FacilitySettingsDataValidationComponent,
-    FacilitySettingsBackupComponent,
     PortfolioTransitionSettingsComponent,
     FacilitySettingsDeleteComponent
   ],
@@ -37,7 +35,7 @@ import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.
     IconsModule,
     ReactiveFormsModule,
     RouterModule,
-    ImportFacilityBackupComponent
+    FacilityBackupToolsModule
   ],
   exports: [FacilitySettingsComponent]
 })

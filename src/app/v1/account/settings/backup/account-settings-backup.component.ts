@@ -21,7 +21,7 @@ import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
   private readonly backupExportCoordinator = inject(BackupExportCoordinator);
   private readonly automaticBackups = inject(AutomaticBackupsService);
-  private readonly navigation = inject(WorkspaceNavigationService);
+  readonly navigation = inject(WorkspaceNavigationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
@@ -110,7 +110,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
     const account = this.account();
     if (!account || !this.backups.available()) return;
     this.backupRequest = { scope: 'account', accountGuid: account.guid, format };
-    this.backupName = account.name;
+    this.backupName = this.navigation.singleFacilityContext()?.name ?? account.name;
     this.backupOpener = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     this.showBackupConfirm = true;
     this.modalPortal.show(new TemplatePortal(this.backupConfirmModal, this.viewContainerRef));

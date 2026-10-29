@@ -37,7 +37,7 @@ describe('Unified account Analysis dashboard', () => {
       provideRouter([]), { provide: LocalStorageService, useValue: storage },
       { provide: AnalysisInventoryWorkspaceService, useValue: { account, entries, categories, facilities: signal([inventoryFacility(), inventoryFacility('facility-b')]), workspaceState: state, workspaceError: signal(undefined), statusState: signal('ready'), canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), statusItems: signal([]), facilityInputs: signal({ meterGroups: [], meters: [], meterData: [], predictorData: [] }), facilityAnalyses: signal(entries().flatMap(e => e.scope === 'facility' ? [e.card.analysis] : [])) } },
       { provide: AccountAnalysisActionsService, useValue: actions }, { provide: FacilityAnalysisActionsService, useValue: facilityActions },
-      { provide: WorkspaceNavigationService, useValue: { routeState: route, inventoryFacilityGuid: signal<string | undefined>(undefined), headerFacility: () => undefined,
+      { provide: WorkspaceNavigationService, useValue: { isSingleSiteWorkspace: () => false, routeState: route, inventoryFacilityGuid: signal<string | undefined>(undefined), headerFacility: () => undefined,
         changeFacilityScope: vi.fn(), facilityInventoryLink: (guid: string) => ({ route: ['/analyses'], queryParams: { facility: guid } }),
         accountAnalysisWorkbenchRoute: (_a: string, id: string) => ['/account-analysis', id], accountAnalysisRoute: () => ['/analyses'],
         facilityAnalysisWorkbenchRoute: (f: string, id: string) => ['/facility', f, 'analysis', id], facilityAnalysisRoute: (f: string) => ['/facility', f, 'analysis'] } },

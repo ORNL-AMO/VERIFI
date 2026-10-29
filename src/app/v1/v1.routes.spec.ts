@@ -514,7 +514,7 @@ describe('single-facility workspace route boundaries', () => {
         ...(route.children ? { children: route.children.map(stub) } : {}) };
     }
     TestBed.configureTestingModule({ providers: [
-      { provide: AccountWorkspaceStore, useValue: { account, facilities, accountAnalyses: signal([]) } },
+      { provide: AccountWorkspaceStore, useValue: { status: () => 'ready', account, facilities, accountAnalyses: signal([]) } },
       { provide: SingleFacilityAnalysisPairService, useValue: { ensurePairs: async () => false } },
       provideRouter([{ path: 'v1', children: [
         { ...stub(accountRoute), component: undefined, canActivateChild: accountRoute.canActivateChild },

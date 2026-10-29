@@ -16,7 +16,7 @@ describe('portfolio sticky browse layout', () => {
       imports: [DataModule],
       providers: [
         provideRouter([]),
-        { provide: WorkspaceNavigationService, useValue: { activePortfolioTab: signal('facilities'), uploadQuery: () => ({}), inventoryFacilityGuid: () => undefined } },
+        { provide: WorkspaceNavigationService, useValue: { isSingleSiteWorkspace: () => false, activePortfolioTab: signal('facilities'), uploadQuery: () => ({}), inventoryFacilityGuid: () => undefined } },
         { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         { provide: AccountWorkspaceStore, useValue: {
           account: signal({ guid: 'account-a', name: 'A very long account name with unusual lengths '.repeat(8) }), facilities: signal([{ guid: 'facility-a' }]),

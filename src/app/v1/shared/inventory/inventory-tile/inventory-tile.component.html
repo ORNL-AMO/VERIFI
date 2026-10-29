@@ -11,7 +11,7 @@
   }
   <div class="portfolio-tile__heading">
     <app-ui-icon [name]="tile.icon" [size]="level === 'simple' ? 32 : 24"/>
-    <a class="portfolio-tile__name" [href]="mainHref" [attr.data-browse-id]="print ? null : tile.guid" [title]="tile.name" (click)="openTile($event)">{{ tile.name }}</a>
+    <a class="portfolio-tile__name" [attr.aria-label]="!showOwnership && tile.reportSnapshot?.formatLabel ? tile.name + ', ' + tile.reportSnapshot?.formatLabel : null" [href]="mainHref" [attr.data-browse-id]="print ? null : tile.guid" [title]="tile.name" (click)="openTile($event)">{{ tile.name }}</a>
     @if (!print) {
       <button #menuButton type="button" class="v1-icon-btn portfolio-tile__menu-button" [attr.data-browse-id]="tile.guid" [cdkMenuTriggerFor]="detailMenu" (cdkMenuOpened)="menuOpened()" (cdkMenuClosed)="menuClosed()" [attr.aria-label]="'Options for ' + tileLabel" [title]="'Card options'">⋯</button>
     }
@@ -42,7 +42,7 @@
   </div>
   @if (tile.reportSnapshot; as report) {
     @if (report.contentPending !== false) { <p class="portfolio-tile__report-pending"><app-ui-icon name="info" [size]="18"/>Report content pending</p> }
-    @if (level !== 'simple') { <app-report-snapshot [showOwnership]="showOwnership" [snapshot]="report" [detailed]="level === 'detailed'" [resourceName]="tile.name" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
+    @if (level !== 'simple') { <app-report-snapshot [snapshot]="report" [detailed]="level === 'detailed'" [resourceName]="tile.name" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
   } @else if (tile.analysisSnapshot; as analysis) {
     @if (analysis.active) { <p class="portfolio-tile__analysis-active"><app-ui-icon name="target" [size]="18"/>Active for {{ analysis.scope }} reporting</p> }
     @if (level !== 'simple') { <app-analysis-snapshot [snapshot]="analysis" [detailed]="level === 'detailed'" [print]="print" (detailsRequested)="actionRequested.emit({guid: tile.guid, action: 'details'})"/> }

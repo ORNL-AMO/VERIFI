@@ -49,7 +49,7 @@ describe('SectionNavComponent', () => {
     activeSection.set('settings');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Facility Settings');
+    expect(fixture.nativeElement.textContent).toContain('Settings');
   });
 
   it('mounts only the selected section and preserves each disclosure across section changes', () => {

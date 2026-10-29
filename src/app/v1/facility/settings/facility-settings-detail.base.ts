@@ -1,4 +1,5 @@
-import { Directive, inject } from '@angular/core';
+import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
+import { Directive, computed, inject } from '@angular/core';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
@@ -35,6 +36,7 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
   protected readonly facilityHandler = inject(FacilityCommandHandler);
   protected readonly lifecycle = inject(ApplicationLifecycleService);
 
+  readonly singleFacilityPresentation = computed(() => !!singleFacilityPresentation(this.workspace.account(), this.workspace.facilities(), this.workspace.status() === 'ready'));
   readonly account = this.workspace.account;
   readonly facility = this.workspace.selectedFacility;
   readonly facilities = this.workspace.facilities;

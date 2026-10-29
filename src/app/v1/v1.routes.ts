@@ -54,7 +54,7 @@ import { PortfolioTransitionSettingsComponent } from '@app/v1/facility/settings/
 import { FacilitySettingsProfileComponent } from '@app/v1/facility/settings/profile/facility-settings-profile.component';
 import { FacilitySettingsDataValidationComponent } from '@app/v1/facility/settings/data-validation/facility-settings-data-validation.component';
 import { FacilitySettingsUnitsComponent } from '@app/v1/facility/settings/units/facility-settings-units.component';
-import { accountHomeCanonicalGuard, facilityHomeCanonicalGuard, singleSiteAccountRedirectGuard } from '@app/v1/routing/canonical-route.guards';
+import { accountHomeCanonicalGuard, facilityHomeCanonicalGuard, singleSiteAccountRedirectGuard, singleFacilityBackupCanonicalGuard } from '@app/v1/routing/canonical-route.guards';
 import { ShellComponent } from '@app/v1/shell/shell.component';
 import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
 import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
@@ -366,7 +366,7 @@ export const V1Routes: Routes = [
               { path: 'financial', component: FacilitySettingsFinancialComponent },
               { path: 'data-validation', component: FacilitySettingsDataValidationComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'staleness', redirectTo: 'data-validation', pathMatch: 'full' },
-              { path: 'backup', component: FacilitySettingsBackupComponent },
+              { path: 'backup', component: FacilitySettingsBackupComponent, canActivate: [singleFacilityBackupCanonicalGuard] },
               { path: 'portfolio', component: PortfolioTransitionSettingsComponent },
               { path: 'delete', component: FacilitySettingsDeleteComponent },
               { path: '**', redirectTo: 'profile' }

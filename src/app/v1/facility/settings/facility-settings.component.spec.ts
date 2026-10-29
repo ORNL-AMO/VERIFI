@@ -1,7 +1,7 @@
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { DataValidationSettingsCommandHandler } from '@data/account-workspace/handlers/data-validation-settings-command-handler.service';
 import { applyDataValidationSettings } from '@shared/settings-forms/data-validation-settings';
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
@@ -58,6 +58,8 @@ describe('Facility settings routed components', () => {
     replaceFacility: ReturnType<typeof vi.fn>;
   };
   let navigation: {
+    isSingleSiteWorkspace: () => boolean;
+    singleFacilityContext: () => IdbFacility | undefined;
     changeFacilityScope: ReturnType<typeof vi.fn>;
     accountRoute: ReturnType<typeof vi.fn>;
     openAccount: ReturnType<typeof vi.fn>;
@@ -101,6 +103,8 @@ describe('Facility settings routed components', () => {
       replaceFacility: vi.fn(async () => facilityFixture('replacement-facility'))
     };
     navigation = {
+      isSingleSiteWorkspace: computed(() => account()?.isSingleFacilityCompany === true && facilities().length === 1),
+      singleFacilityContext: computed(() => account()?.isSingleFacilityCompany === true && facilities().length === 1 ? facilities()[0] : undefined),
       changeFacilityScope: vi.fn(),
       accountRoute: vi.fn((accountGuid: string) => ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview']),
       openAccount: vi.fn(async () => undefined),
@@ -122,6 +126,7 @@ describe('Facility settings routed components', () => {
           provide: AccountWorkspaceStore,
           useValue: {
             account,
+            status: () => 'ready',
             selectedFacility,
             facilities,
             accountAnalyses: signal([]),
@@ -500,6 +505,38 @@ describe('Facility settings routed components', () => {
     fixture.detectChanges(false);
 
     expect(fixture.nativeElement.textContent).toContain('Import Facility Backup');
+  });
+
+  it('hides ownership breadcrumbs and copy controls without reconciling different stored settings', () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    selectedFacility.set({ ...selectedFacility()!, energyUnit: 'GJ', fiscalYear: 'nonCalendarYear', sustainabilityQuestions: { ...selectedFacility()!.sustainabilityQuestions, energyReductionPercent: 17 } });
+    facilities.set([selectedFacility()!]);
+    const savedAccount = structuredClone(account()), savedFacility = structuredClone(selectedFacility());
+    const shell = createDetail(FacilitySettingsComponent);
+    expect(shell.nativeElement.querySelector('.page-identity__crumb')).toBeNull();
+    const units = createDetail(FacilitySettingsUnitsComponent);
+    const goals = createDetail(FacilitySettingsGoalsComponent);
+    const financial = createDetail(FacilitySettingsFinancialComponent);
+    for (const fixture of [units, goals, financial]) expect(fixture.nativeElement.textContent).not.toContain('Update from account settings');
+    expect(units.componentInstance.form.controls['energyUnit'].value).toBe('GJ');
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(account()).toEqual(savedAccount); expect(selectedFacility()).toEqual(savedFacility);
+  });
+
+  it('passes explicit facility context to secondary backup and restore tools despite remembered selection', async () => {
+    const sole = { ...facilityFixture('sole'), name: 'Sole facility' };
+    const fixture = TestBed.createComponent(FacilitySettingsBackupComponent);
+    fixture.componentRef.setInput('facilityContext', sole); fixture.componentRef.setInput('embedded', true); fixture.detectChanges();
+    fixture.componentInstance.openBackupConfirm();
+    expect(fixture.componentInstance.backupRequest).toEqual({ scope: 'facility', accountGuid: 'account-a', facilityGuid: 'sole', format: 'json' });
+    fixture.componentInstance.cancelBackupConfirm(); fixture.componentInstance.openImportPanel(); fixture.changeDetectorRef.markForCheck(); fixture.detectChanges();
+    // The same explicit context is supplied when the replace panel mounts.
+    const panel = fixture.nativeElement.querySelector('app-import-facility-backup-panel'); expect(panel).not.toBeNull();
+    fixture.destroy();
+    const restore = TestBed.createComponent(ImportFacilityBackupComponent); restore.componentRef.setInput('facilityContext', sole); restore.detectChanges();
+    await restore.componentInstance.setImportFile(fileList(JSON.stringify(facilityBackupFile())));
+    await restore.componentInstance.importBackupFile();
+    expect(backupImportCoordinator.replaceFacility).toHaveBeenCalledWith(expect.anything(), account(), sole);
   });
 
   it('requires a facility name before converting a single-facility account', async () => {

@@ -12,14 +12,14 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { MeterGroupingComponent } from './meter-grouping.component';
 
 describe('MeterGroupingComponent', () => {
-  it('uses the facility as its single-site root and restores portfolio breadcrumbs after conversion', () => {
+  it('uses Meters as its single-site root and restores portfolio breadcrumbs after conversion', () => {
     const fixture = setup();
     const singleSite = TestBed.inject(WorkspaceNavigationService).isSingleSiteWorkspace as ReturnType<typeof signal<boolean>>;
     fixture.detectChanges();
     const portfolio = fixture.componentInstance.breadcrumbs();
     singleSite.set(true);
     fixture.detectChanges();
-    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Facility A' }]);
+    expect(fixture.componentInstance.breadcrumbs()).toEqual([{ label: 'Meters', icon: 'meter', route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], queryParams: {} }]);
     expect(fixture.nativeElement.querySelector('[aria-label="Meter grouping context"]')?.textContent).not.toContain('Account A');
     singleSite.set(false);
     fixture.detectChanges();
@@ -234,6 +234,9 @@ function setup(options: {
         provide: WorkspaceNavigationService,
         useValue: {
           isSingleSiteWorkspace: signal(false),
+          facilityInventoryLink(facilityGuid: string, resource: string) {
+            return { route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: this.isSingleSiteWorkspace() ? {} : { facility: facilityGuid } };
+          },
           accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
             '/v1',
             'workspace',

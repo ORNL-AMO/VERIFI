@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, Injector, afterNextRender, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { Component, DestroyRef, Injector, afterNextRender, TemplateRef, ViewChild, ViewContainerRef, computed, input, inject } from '@angular/core';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { ManualBackupDownloadService, ManualBackupRequest } from '@app/v1/shared/backup/manual-backup-download.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -13,6 +13,9 @@ import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
   standalone: false
 })
 export class FacilitySettingsBackupComponent extends FacilitySettingsDetailBase {
+  readonly facilityContext = input<IdbFacility | undefined>();
+  readonly embedded = input(false);
+  override readonly facility = computed(() => this.facilityContext() ?? this.workspace.selectedFacility());
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);

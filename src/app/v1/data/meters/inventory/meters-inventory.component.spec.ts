@@ -187,7 +187,7 @@ function setup(): ComponentFixture<MetersInventoryComponent> {
       { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([electricFinding]) } },
       {
         provide: WorkspaceNavigationService,
-        useValue: {
+        useValue: { isSingleSiteWorkspace: () => false,
           inventoryFacilityGuid: signal<string | undefined>(undefined),
           facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }),
           facilityDataToolRoute: (facilityGuid: string, detail: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],

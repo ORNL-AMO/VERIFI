@@ -415,7 +415,7 @@ describe('DataNavComponent', () => {
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
 
-    expect(element.textContent).toContain('Facility Data');
+    expect(element.textContent).toContain('Data');
     expect(element.textContent).toContain('Custom Database Items');
     expect(element.textContent).toContain('Fuels');
     expect(element.textContent).not.toContain('Grid Factors');
