@@ -5,7 +5,7 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { calculateRatedPowerWithUnitConversion, convertHeatCapacityUnits } from '@domain/calculations/energy-footprint/ratedPowerCalculation';
 import { getEnergyUseUnit } from '@domain/calculations/energy-footprint/energyFootprintCalculations';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
-import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
+import { getFuelTypeOptions, getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
 import { ChilledWaterUnitOptions, MassUnitOptions, PowerUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '@shared/unitOptions';
 
 @Component({
@@ -80,7 +80,12 @@ export class RatedPowerModalComponent {
   }
 
   loadMeterDefaults(meter: IdbUtilityMeter) {
-    if (this.energySource === 'Other Energy') {
+    const isMobileMeter = this.energySource === 'Other Fuels' && meter.scope === 2;
+    if (isMobileMeter) {
+      this.setPhase('Liquid', false);
+      this.fuelOptions = getMobileFuelTypes(meter.vehicleCategory, meter.vehicleType, [...this.accountWorkspaceStore.customFuels()]);
+      this.fuel = this.fuelOptions.some(option => option.value === meter.vehicleFuel) ? meter.vehicleFuel : '';
+    } else if (this.energySource === 'Other Energy') {
       this.fuel = this.fuelOptions.some(option => option.value === meter.fuel) ? meter.fuel : '';
       this.setOtherEnergyPhysicalUnitOptions();
     } else {
@@ -89,7 +94,7 @@ export class RatedPowerModalComponent {
       this.fuel = this.energySource === 'Natural Gas' ? 'Natural Gas' : (meter.fuel ?? '');
     }
 
-    const meterStartingUnit = this.normalizePhysicalUnit(meter.startingUnit);
+    const meterStartingUnit = this.normalizePhysicalUnit(isMobileMeter ? meter.vehicleCollectionUnit : meter.startingUnit);
     const meterUsesPhysicalUnit = this.physicalUnitOptions.some(option => option.value === meterStartingUnit);
     if (meterUsesPhysicalUnit) {
       this.physicalUnit = meterStartingUnit;
@@ -102,7 +107,9 @@ export class RatedPowerModalComponent {
     const hasLinkedHeatCapacity = linkedHeatCapacity !== null
       && linkedHeatCapacity !== undefined
       && Number.isFinite(Number(linkedHeatCapacity));
-    if (!hasLinkedHeatCapacity) {
+    const convertedHeatCapacity = hasLinkedHeatCapacity ? convertHeatCapacityUnits(Number(linkedHeatCapacity), meter.energyUnit, meterStartingUnit, meter.energyUnit, this.physicalUnit) : NaN;
+
+    if (!Number.isFinite(convertedHeatCapacity)) {
       this.setFuelHeatCapacity();
       return;
     }
