@@ -45,14 +45,12 @@ describe('SettingsFormService', () => {
 
     const unitsForm = service.getUnitsForm(olderAccount);
     const goalsForm = service.getSustainabilityQuestionsForm(olderAccount);
-    const stalenessForm = service.getStalenessForm(olderAccount.dataStalenessSettings);
 
     expect(unitsForm.controls['assessmentReportVersion']).toBeUndefined();
     expect(unitsForm.controls['displayEmissions']).toBeUndefined();
     expect(goalsForm.controls['assessmentReportVersion'].value).toBe('AR6');
     expect(goalsForm.controls['displayEmissions'].value).toBe(false);
-    expect(stalenessForm.controls['enabled'].value).toBe(true);
-    expect(stalenessForm.controls['thresholdMonths'].value).toBe(DEFAULT_DATA_STALENESS_MONTHS);
+    expect(service.normalizeDataStalenessSettings(undefined)).toEqual({ enabled: true, thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS });
   });
 
   it('sets unit presets and identifies custom unit selections', () => {
@@ -72,11 +70,10 @@ describe('SettingsFormService', () => {
     expect(form.controls['unitsOfMeasure'].value).toBe('Custom');
   });
 
-  it('writes sustainability, financial, and staleness fields back to account copies', () => {
+  it('writes sustainability and financial fields back to account copies', () => {
     const account = accountFixture();
     const goalsForm = service.getSustainabilityQuestionsForm(account);
     const financialForm = service.getFiscalYearForm(account);
-    const stalenessForm = service.getStalenessForm(account.dataStalenessSettings);
 
     goalsForm.patchValue({
       displayEmissions: true,
@@ -90,17 +87,10 @@ describe('SettingsFormService', () => {
       fiscalYearMonth: 6,
       fiscalYearCalendarEnd: false
     });
-    stalenessForm.patchValue({
-      enabled: false,
-      thresholdMonths: 18
-    });
 
-    const updated = service.updateAccountFromStalenessForm(
-      stalenessForm,
-      service.updateAccountFromFiscalForm(
-        financialForm,
-        service.updateAccountFromSustainabilityQuestionsForm(goalsForm, { ...account })
-      )
+    const updated = service.updateAccountFromFiscalForm(
+      financialForm,
+      service.updateAccountFromSustainabilityQuestionsForm(goalsForm, { ...account })
     );
 
     expect(updated.displayEmissions).toBe(true);
@@ -111,12 +101,11 @@ describe('SettingsFormService', () => {
     expect(updated.fiscalYear).toBe('nonCalendarYear');
     expect(updated.fiscalYearMonth).toBe(6);
     expect(updated.fiscalYearCalendarEnd).toBe(false);
-    expect(updated.dataStalenessSettings).toEqual({ enabled: false, thresholdMonths: 18 });
   });
 
   it('maps facility profile fields without changing identifiers', () => {
     const facility = facilityFixture();
-    const form = service.getGeneralInformationForm(facility);
+    const form = service.getFacilityGeneralInformationForm(facility);
 
     form.patchValue({
       name: ' Updated Facility ',
@@ -168,10 +157,8 @@ describe('SettingsFormService', () => {
 
     service.setAccountSustainabilityQuestions(form, account);
     const updatedFacility = service.updateFacilityFromSustainabilityQuestionsForm(form, { ...facility });
-    const updatedAccount = service.updateAccountFromSustainabilityQuestionsForm(form, { ...account });
 
     expect(updatedFacility.sustainabilityQuestions.energyReductionPercent).toBe(25);
-    expect(updatedAccount.displayEmissions).toBe(false);
     expect(service.areAccountAndFacilitySustainabilityQuestionsDifferent(account, updatedFacility)).toBe(false);
   });
 
@@ -190,26 +177,26 @@ describe('SettingsFormService', () => {
     expect(service.areAccountAndFacilityFinancialReportingDifferent(account, updated)).toBe(false);
   });
 
-  it('normalizes and copies facility staleness settings', () => {
-    const account = {
-      ...accountFixture(),
-      dataStalenessSettings: { enabled: false, thresholdMonths: 12 as const }
-    };
-    const facility = {
-      ...facilityFixture(),
-      dataStalenessSettings: undefined
-    } as IdbFacility;
-    const form = service.getFacilityStalenessForm(facility.dataStalenessSettings, account.dataStalenessSettings);
+  it('preserves explicit staleness values without mutating the source settings', () => {
+    const settings = { enabled: false, thresholdMonths: 12 as const, useAccountSettings: true };
+    expect(service.normalizeDataStalenessSettings(settings)).toEqual({ enabled: false, thresholdMonths: 12 });
+    expect(settings).toEqual({ enabled: false, thresholdMonths: 12, useAccountSettings: true });
+  });
 
-    expect(form.controls['enabled'].value).toBe(false);
-    expect(form.controls['thresholdMonths'].value).toBe(12);
-    expect(form.controls['useAccountSettings'].value).toBe(true);
-
-    service.setAccountStaleness(form, account);
-    const updated = service.updateFacilityFromStalenessForm(form, { ...facility });
-
-    expect(updated.dataStalenessSettings).toEqual({ enabled: false, thresholdMonths: 12, useAccountSettings: true });
-    expect(service.areAccountAndFacilityStalenessDifferent(account, updated)).toBe(false);
+  it('maps disabled and cleared optional facility values through the typed profile and units forms', () => {
+    const facility = facilityFixture();
+    const profile = service.getFacilityGeneralInformationForm(facility);
+    profile.controls.classification.setValue('Office');
+    profile.controls.size.setValue(null);
+    profile.controls.classification.disable();
+    const saved = service.updateFacilityFromGeneralInformationForm(profile, { ...facility });
+    expect(saved.classification).toBe('Office');
+    expect(saved.size).toBeUndefined();
+    const units = service.getUnitsForm(facility);
+    units.controls.eGridSubregion.setValue(null);
+    units.controls.energyUnit.setValue('GJ');
+    units.controls.energyUnit.disable();
+    expect(service.updateFacilityFromUnitsForm(units, saved)).toMatchObject({ energyUnit: 'GJ', eGridSubregion: undefined });
   });
 });
 

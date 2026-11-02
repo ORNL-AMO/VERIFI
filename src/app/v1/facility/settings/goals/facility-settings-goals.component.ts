@@ -1,6 +1,8 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import {
+  FacilityGoalsForm, GoalBaselineControl, GoalKind, GoalTargetControl
+} from '@shared/settings-forms/settings-form.models';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -24,7 +26,7 @@ export class FacilitySettingsGoalsComponent extends FacilitySettingsDetailBase {
     return !!account && !!facility && this.settingsForms.areAccountAndFacilitySustainabilityQuestionsDifferent(account, facility);
   });
   readonly displayGreenhouseGoals = computed(() => !!this.account()?.displayEmissions);
-  form: FormGroup;
+  form: FacilityGoalsForm;
   showAccountUpdateConfirm = false;
 
   @ViewChild('accountUpdateConfirmModal') private readonly accountUpdateConfirmModal!: TemplateRef<unknown>;
@@ -68,7 +70,7 @@ export class FacilitySettingsGoalsComponent extends FacilitySettingsDetailBase {
     );
   }
 
-  async changeBaselineYear(baselineControl: string, targetControl: string): Promise<void> {
+  async changeBaselineYear(baselineControl: GoalBaselineControl, targetControl: GoalTargetControl): Promise<void> {
     const baseline = Number(this.form.controls[baselineControl].value);
     this.form.controls[targetControl].patchValue(Math.min(baseline + 10, 2050));
     await this.saveGoals();
@@ -116,7 +118,7 @@ export class FacilitySettingsGoalsComponent extends FacilitySettingsDetailBase {
     );
   }
 
-  private setGoalControlsEnabled(goal: 'energy' | 'water' | 'greenhouse', enabled: boolean): void {
+  private setGoalControlsEnabled(goal: GoalKind, enabled: boolean): void {
     this.setControlsEnabled(this.form, [
       `${goal}ReductionPercent`,
       `${goal}ReductionBaselineYear`,

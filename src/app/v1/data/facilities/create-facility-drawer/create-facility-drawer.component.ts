@@ -1,5 +1,6 @@
 import { Component, DestroyRef, EventEmitter, Output, inject, output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Validators } from '@angular/forms';
+import { FacilityProfileForm } from '@shared/settings-forms/settings-form.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { FacilityClassifications } from '@data/models/constantsAndTypes';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
@@ -109,11 +110,10 @@ export class CreateFacilityDrawerComponent {
     } finally { if (!this.destroyRef.destroyed) this.isCreating = false; }
   }
 
-  private buildForm(): FormGroup {
+  private buildForm(): FacilityProfileForm {
     const account = this.navigation.account();
     const facility = account ? getNewIdbFacility(account) : getNewIdbFacility({ guid: '' } as any);
-    const form = this.settingsForms.getGeneralInformationForm(facility);
-    form.addControl('classification', new FormControl(facility.classification || 'Manufacturing'));
+    const form = this.settingsForms.getFacilityGeneralInformationForm(facility);
     form.controls['name'].setValue('');
     form.controls['name'].addValidators([Validators.required, Validators.maxLength(42)]);
     return form;

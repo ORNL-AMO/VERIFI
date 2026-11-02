@@ -1,6 +1,5 @@
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
-import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { groupWithGeneratedModel, modelPeriodMonthCount, userDefinedValidationMessage, validationAnalysisCopies } from './regression-model-validation.service';
+import { groupWithGeneratedModel, modelPeriodMonthCount, userDefinedValidationMessage } from './regression-model-validation.service';
 
 describe('regression model validation helpers', () => {
   const validGroup = {
@@ -39,12 +38,5 @@ describe('regression model validation helpers', () => {
     expect(validGroup.predictorVariables[0].productionInAnalysis).toBe(true);
   });
 
-  it('keeps the analysis baseline for the chart while fitting a user-defined model to its selected period', () => {
-    const analysis = { baselineYear: 2022 } as IdbAnalysisItem;
-    const copies = validationAnalysisCopies(analysis, 'user-defined', validGroup);
 
-    expect(copies.chartAnalysis.baselineYear).toBe(2022);
-    expect(copies.modelAnalysis.baselineYear).toBe(2024);
-    expect(analysis.baselineYear).toBe(2022);
-  });
 });

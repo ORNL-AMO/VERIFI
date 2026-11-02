@@ -7,7 +7,6 @@ import {
   bankingYearOptions,
   evaluateBankedGroupConfiguration,
   evaluateBankingSource,
-  getBankedAnalysisGroup,
   isCompatibleBankingSource
 } from '@shared/shared-analysis/banking-configuration';
 
@@ -89,16 +88,6 @@ export function selectedBankingSource(
 ): IdbAnalysisItem | undefined {
   const evaluation = evaluateBankingSource(analysis, analyses);
   return evaluation.issue ? undefined : evaluation.source;
-}
-
-export function usableBankedGroup(
-  analysis: IdbAnalysisItem | undefined,
-  group: AnalysisGroup | undefined,
-  analyses: readonly IdbAnalysisItem[]
-): AnalysisGroup | undefined {
-  const source = selectedBankingSource(analysis, analyses);
-  const sourceGroup = getBankedAnalysisGroup(analysis, group, source);
-  return sourceGroup && !isSkippedGroup(sourceGroup) ? sourceGroup : undefined;
 }
 
 export function bankingTabAvailable(

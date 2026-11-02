@@ -2,6 +2,7 @@ import { Component, DestroyRef, Injector, afterNextRender, TemplateRef, ViewChil
 import { FormControl, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { BackupSettingsForm } from '@shared/settings-forms/settings-form.models';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
@@ -34,7 +35,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
 
   @ViewChild('backupConfirmModal') private readonly backupConfirmModal!: TemplateRef<unknown>;
 
-  form: FormGroup;
+  form: BackupSettingsForm;
   showBackupConfirm = false;
   showImportPanel = false;
   readonly backups = inject(ManualBackupDownloadService);

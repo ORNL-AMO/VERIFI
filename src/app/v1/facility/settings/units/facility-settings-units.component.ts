@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UnitsForm } from '@shared/settings-forms/settings-form.models';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
@@ -30,7 +30,7 @@ export class FacilitySettingsUnitsComponent extends FacilitySettingsDetailBase {
     const facility = this.facility();
     return !!account && !!facility && this.settingsForms.areAccountAndFacilityUnitsDifferent(account, facility);
   });
-  form: FormGroup;
+  form: UnitsForm;
   showAccountUpdateConfirm = false;
 
   @ViewChild('accountUpdateConfirmModal') private readonly accountUpdateConfirmModal!: TemplateRef<unknown>;

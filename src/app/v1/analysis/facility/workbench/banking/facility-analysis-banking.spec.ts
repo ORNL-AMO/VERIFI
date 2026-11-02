@@ -7,8 +7,7 @@ import {
   bankingPreviewReportYear,
   bankingSourceOptions,
   bankingTabAvailable,
-  bankingYearOptions,
-  usableBankedGroup
+  bankingYearOptions
 } from './facility-analysis-banking';
 
 describe('facility analysis banking presentation', () => {
@@ -47,18 +46,7 @@ describe('facility analysis banking presentation', () => {
     expect(bankingYearOptions(2025, 2024, { source: 2024, consumer: 2024 }).appliedYears).toEqual([]);
   });
 
-  it('exposes a usable matching source group before banking is applied', () => {
-    const currentGroup = group({ applyBanking: false });
-    const current = analysis('current', {
-      hasBanking: true,
-      bankedAnalysisItemId: 'source',
-      groups: [currentGroup]
-    });
-    const sourceGroup = group();
-    const source = analysis('source', { groups: [sourceGroup] });
 
-    expect(usableBankedGroup(current, currentGroup, [current, source])).toBe(sourceGroup);
-  });
 
   it('exposes the Banking tab only for a complete, usable, unblocked source configuration', () => {
     const currentGroup = group({

@@ -93,4 +93,20 @@ describe('analysis inventory projection', () => {
     expect(filterAnalysisInventory(entries, { ...filters, sort: 'name' }).slice(0, 2).map(entry => entry.card.analysis.name)).toEqual(['aaa', 'aaa']);
   });
 
+  it('searches linked analysis details and orders finite baselines before unset years', () => {
+    const entries = [
+      ['unset-z', 'Zulu', undefined], ['newer', 'Newer', 2023],
+      ['older', 'Older', 2021], ['unset-a', 'Alpha', undefined]
+    ].map(([guid, name, baselineYear]) => {
+      const entry = accountEntry(String(guid));
+      if (entry.scope !== 'account') throw new Error('Expected account entry');
+      return { ...entry, card: { ...entry.card, analysis: { ...entry.card.analysis, name: String(name), baselineYear: baselineYear as number }, searchText: `linked facility ${name}`.toLowerCase() } };
+    });
+    expect(filterAnalysisInventory(entries, { ...filters, sort: 'baseline' }).map(entry => entry.card.analysis.guid))
+      .toEqual(['older', 'newer', 'unset-a', 'unset-z']);
+    expect(filterAnalysisInventory(entries, { ...filters, search: ' LINKED FACILITY OLDER ' }).map(entry => entry.card.analysis.guid))
+      .toEqual(['older']);
+    expect(entries[0].card.analysis.guid).toBe('unset-z');
+  });
+
 });
