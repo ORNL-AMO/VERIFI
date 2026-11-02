@@ -1,5 +1,5 @@
-@let card = context.card();
-@if (card) {
+@let presentation = context.presentation();
+@if (presentation) {
   <section class="report-section report-setup" aria-label="Report setup">
     <div class="report-setup-panel" aria-labelledby="report-details-heading">
       <h2 id="report-details-heading">Report details</h2>
@@ -13,7 +13,7 @@
     </div>
     <div class="report-setup-panel" aria-labelledby="report-settings-heading">
       <h2 id="report-settings-heading">Report-specific settings</h2>
-      <p class="report-setup-help">{{ card.view.chips?.[0]?.label }} settings are pending migration. Your saved settings are preserved.</p>
+      <p class="report-setup-help">{{ presentation.typeLabel }} settings are pending migration. Your saved settings are preserved.</p>
     </div>
   </section>
   @if (context.findings().length) {

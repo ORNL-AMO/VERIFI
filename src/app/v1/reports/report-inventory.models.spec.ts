@@ -48,11 +48,21 @@ describe('report inventory projections', () => {
     expect(entry.snapshot.modified).toBeDefined();
     expect(entry.snapshot).not.toHaveProperty('outcomes');
   });
-  it.each(FACILITY_REPORT_TYPES)('projects saved facility $value metadata', ({ value }) => {
+  it.each(FACILITY_REPORT_TYPES)('projects saved facility $value metadata', ({ value, label }) => {
     const data = reportSnapshot([reportFixture({ facilityReportType: value })]);
     const entry = buildReportInventory(data, [], 'ready')[0];
-    expect(entry.scope).toBe('facility'); expect(entry.typeLabel).not.toBe('Unknown report type');
+    expect(entry.scope).toBe('facility'); expect(entry.typeLabel).toBe(label);
     expect(entry.snapshot.contentPending).toBe(true);
+  });
+  it('keeps missing legacy facility settings and invalid modification dates explicit in the inventory', () => {
+    const report = reportFixture({ facilityReportType: 'overview', dataOverviewReportSettings: undefined, modifiedDate: new Date('invalid') });
+    const entry = buildReportInventory(reportSnapshot([report]), [], 'ready')[0];
+    expect(entry.modified).toBe(0);
+    expect(entry.snapshot.modified).toBe('Date unavailable');
+    expect(entry.snapshot.facts).toEqual([{ label: 'Reporting period', value: 'Not set – Not set' }]);
+    expect(filterReportInventory([entry], { ...DEFAULT_REPORT_FILTERS, search: 'not set' })).toEqual([entry]);
+    expect(report.dataOverviewReportSettings).toBeUndefined();
+    expect(Number.isNaN(report.modifiedDate.getTime())).toBe(true);
   });
   it('shows missing dates and analyses explicitly and distinguishes unavailable checks from readiness', () => {
     const data = snapshot(); data.accountReports[0].reportYear = undefined;

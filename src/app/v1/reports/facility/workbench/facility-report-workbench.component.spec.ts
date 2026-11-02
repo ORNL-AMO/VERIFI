@@ -8,23 +8,40 @@ import { filter, firstValueFrom } from 'rxjs';
 import { FACILITY_REPORT_TYPES } from '../facility-report.models';
 import { reportFacility, reportFixture, reportSnapshot } from '../testing/report-test-fixtures';
 import { setupReportWorkbench } from '../testing/report-workbench-test-setup';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 
 describe('facility report workbench navigation', () => {
-  it.each(FACILITY_REPORT_TYPES)('opens $label with the correct stages and footer destinations without writing', async ({ value }) => {
+  it.each(FACILITY_REPORT_TYPES)('opens $label with the correct stages and footer destinations without writing', async ({ value, label }) => {
     const { harness, open, updateName, store } = await setupReportWorkbench([reportFixture({ facilityReportType: value })]);
     const workbench = await open();
     expect(workbench.context.stages().map(stage => stage.label)).toEqual(['analysis', 'savings', 'costSavings'].includes(value)
-      ? ['Setup', 'Data Checks', `${workbench.context.card()!.view.chips![0].label} Report`] : ['Setup', `${workbench.context.card()!.view.chips![0].label} Report`]);
+      ? ['Setup', 'Data Checks', `${label} Report`] : ['Setup', `${label} Report`]);
     const footer: HTMLElement = harness.routeNativeElement!.querySelector('footer')!;
     expect(footer.querySelector('a')?.getAttribute('href')).toContain('/reports/dashboard');
     expect(footer.querySelectorAll('a')[1].getAttribute('href')).toContain(workbench.next()!.id);
     expect(harness.routeNativeElement!.textContent).toContain('Report-specific settings');
+    expect(harness.routeNativeElement!.querySelector('app-facility-report-setup')?.textContent).toContain(`${label} settings are pending migration`);
     await open('report-a', 'report');
+    expect(harness.routeNativeElement!.querySelector('app-facility-report-preview h2')?.textContent?.trim()).toBe(`${label} Report`);
     expect(harness.routeNativeElement!.querySelector('footer')?.textContent).toContain('Back to reports');
     expect(harness.routeNativeElement!.querySelector('footer a')?.getAttribute('href')).toContain(['analysis', 'savings', 'costSavings'].includes(value) ? '/data-checks' : '/setup');
     expect(harness.routeNativeElement!.textContent).toContain('preview is pending migration');
     expect(updateName).not.toHaveBeenCalled();
     expect(store.committedRevision()).toBeUndefined();
+  });
+
+  it('qualifies the single-facility header format while retaining plain report-type labels in its stages', async () => {
+    const { open, harness } = await setupReportWorkbench();
+    vi.spyOn(TestBed.inject(WorkspaceNavigationService), 'isSingleSiteWorkspace').mockReturnValue(true);
+    const workbench = await open();
+    expect(workbench.context.typeLabel()).toBe('Analysis — Facility format');
+    const setup = harness.routeNativeElement!.querySelector('app-facility-report-setup')!;
+    expect(setup.textContent).toContain('Analysis settings are pending migration');
+    expect(setup.textContent).not.toContain('Facility format');
+    await open('report-a', 'data-checks');
+    expect(harness.routeNativeElement!.querySelector('app-facility-report-data-checks')?.textContent).toContain('Analysis report');
+    await open('report-a', 'report');
+    expect(harness.routeNativeElement!.querySelector('app-facility-report-preview h2')?.textContent?.trim()).toBe('Analysis Report');
   });
 
   it('uses report context, linked breadcrumbs, collapsible facts, and validation badges', async () => {

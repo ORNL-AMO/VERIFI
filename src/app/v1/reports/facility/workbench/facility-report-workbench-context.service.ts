@@ -7,7 +7,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { reportTypeAvailable } from '@app/v1/reports/report-availability';
 import { reportIcon } from '@app/v1/reports/report-icons';
-import { buildFacilityReportCard } from '../facility-report.models';
+import { buildFacilityReportPresentation } from '../facility-report.models';
 import { buildFacilityReportStages, facilityReportStage } from './facility-report-workbench.models';
 
 @Injectable()
@@ -36,11 +36,11 @@ export class FacilityReportWorkbenchContext {
   readonly stage = computed(() => facilityReportStage(this.navigation.routeState().reportStage));
   readonly stages = computed(() => {
     const report = this.report();
-    return report ? buildFacilityReportStages(report, this.stage(), this.card()?.status) : [];
+    return report ? buildFacilityReportStages(report, this.stage(), this.presentation()?.status) : [];
   });
-  readonly card = computed(() => {
+  readonly presentation = computed(() => {
     const report = this.report();
-    return report ? buildFacilityReportCard(report, this.workspace.selectedFacilityAnalyses(), this.status.items(), this.status.state()) : undefined;
+    return report ? buildFacilityReportPresentation(report, this.workspace.selectedFacilityAnalyses(), this.status.items(), this.status.state()) : undefined;
   });
   readonly findings = computed(() => this.status.items().filter(item => item.entity.kind === 'facility-report'
     && item.entity.guid === this.guid() && item.entity.facilityGuid === this.facility()?.guid

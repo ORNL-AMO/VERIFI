@@ -7,7 +7,7 @@ import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
 import { InventoryReportSnapshot, InventoryTile } from '@app/v1/shared/inventory/inventory.models';
-import { FACILITY_REPORT_TYPES, ReportConfigurationStatus, buildFacilityReportCard } from '@app/v1/reports/facility/facility-report.models';
+import { FACILITY_REPORT_TYPES, ReportConfigurationStatus, buildFacilityReportPresentation } from '@app/v1/reports/facility/facility-report.models';
 import { reportTypeAvailable } from './report-availability';
 import { reportIcon } from './report-icons';
 import { statusDestinationRoute } from '@app/v1/status/status-destination-route';
@@ -107,15 +107,13 @@ export function buildReportInventory(snapshot: AccountWorkspaceSnapshot, finding
   const facilityEntries = snapshot.facilityReports.filter(report => report.accountId === account.guid && reportTypeAvailable(report.facilityReportType, account.displayEmissions)).flatMap(report => {
     const facility = snapshot.facilities.find(item => item.guid === report.facilityId && item.accountId === account.guid);
     if (!facility) return [];
-    const card = buildFacilityReportCard(report, snapshot.facilityAnalyses, findings, evaluation);
-    const typeLabel = FACILITY_REPORT_TYPES.find(type => type.value === report.facilityReportType)?.label ?? 'Unknown report type';
-    const facts = card.view.factSections.flatMap(section => section.facts.map(fact => ({ label: fact.label, value: fact.valueLabel })));
+    const presentation = buildFacilityReportPresentation(report, snapshot.facilityAnalyses, findings, evaluation);
     const items = findings.filter(item => item.entity.kind === 'facility-report' && item.entity.accountGuid === account.guid && item.entity.facilityGuid === facility.guid && item.entity.guid === report.guid);
     const scope = report.facilityReportType === 'overview'
       ? `${report.dataOverviewReportSettings?.includedGroups?.filter(item => item.include).length ?? 0} saved meter group selection(s)`
       : `Facility: ${facility.name || 'Unnamed facility'}`;
     return [{ scope: 'facility' as const, facilityGuid: facility.guid, report,
-      ...entryView('facility', report, facility.name || 'Unnamed facility', typeLabel, report.facilityReportType, card.status, facts, scope, items) }];
+      ...entryView('facility', report, facility.name || 'Unnamed facility', presentation.typeLabel, report.facilityReportType, presentation.status, presentation.facts, scope, items) }];
   });
   return [...accountEntries, ...facilityEntries];
 }

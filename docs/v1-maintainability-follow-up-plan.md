@@ -46,7 +46,7 @@ Focused checks passed: 14 fast files / 136 tests and 2 Chromium files / 15 tests
 
 ## 3. Report presentation contracts
 
-**Status: Not started**
+**Status: Complete**
 
 **Original review evidence:** [Report inventory projection](../src/app/v1/reports/report-inventory.models.ts) builds a facility `ResourceBrowseCardView` only to flatten its facts. [Facility Setup](../src/app/v1/reports/facility/workbench/setup/facility-report-setup.component.html) obtains the report type label from `card.view.chips?.[0]?.label`. These consumers couple report meaning to a retired card layout.
 
@@ -55,6 +55,12 @@ Focused checks passed: 14 fast files / 136 tests and 2 Chromium files / 15 tests
 **Dependencies:** Phase 6 removed the unused card component and obsolete filter while retaining models/builders still serving these consumers. This package otherwise has no dependency on navigation or inventory-controller extraction.
 
 **Acceptance:** Cover every supported facility report type, missing analysis/period values, unavailable validation, and unknown-type fallback. Assert report-type labels and facts through inventory and workbench output without depending on chip order. Preserve single-facility combined Reports, owner-qualified keys, saved settings, and report-to-analysis navigation. A reference scan confirms no remaining consumer needs the retired layout contract before deleting it.
+
+### Implementation and evidence
+
+`buildFacilityReportPresentation` now exposes only explicit type labels, configuration status, and readonly saved-report facts. Inventory, sidebar stages, workbench context/header, Setup, Data Checks, and Preview consume those meanings directly. The header keeps its single-facility format-qualified label; stage labels remain unqualified. The last resource-card layout models and orphaned host styling were removed after all callers moved. Icons, dates, searching, validation/lifecycle commands, calculations, and pending-stage messages retain their previous owners.
+
+Focused validation passed (4 fast files, 74 tests), including every supported facility report type, legacy/missing settings, analysis availability/ownership, Data Quality modes, findings/status precedence, unknown fallback, and qualified header versus plain stage labels. Application TypeScript, full fast/Chromium suites (55 browser files, 282 tests), and retired-reference/whitespace scans passed. Existing native Reports checks preserve combined inventories, qualified keys, autosave/history/returns, themes, keyboard use, narrow layouts, and print behavior. The production web build, validation planner, and documentation link/anchor checks also passed; a generated dark-theme report inspector screenshot was inspected. Existing CSS-budget/CommonJS warnings remain. Electron boundaries were unchanged and manual desktop checks were not run.
 
 ## 4. Inherited maintenance debt
 

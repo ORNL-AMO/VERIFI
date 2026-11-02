@@ -5,7 +5,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { reportTypeAvailable } from '@app/v1/reports/report-availability';
 import { reportIcon } from '@app/v1/reports/report-icons';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { buildFacilityReportCard } from '@app/v1/reports/facility/facility-report.models';
+import { buildFacilityReportPresentation } from '@app/v1/reports/facility/facility-report.models';
 import { buildFacilityReportStages } from '@app/v1/reports/facility/workbench/facility-report-workbench.models';
 import { RecentItemsService } from '../recent-items.service';
 
@@ -26,7 +26,7 @@ export class ReportsNavComponent {
       && item.facilityId === state.facilityGuid && item.accountId === this.workspace.account()?.guid
       && reportTypeAvailable(item.facilityReportType, this.workspace.account()?.displayEmissions));
     return report ? buildFacilityReportStages(report, state.reportStage ?? 'setup',
-      buildFacilityReportCard(report, this.navigation.contextAnalyses(), this.status.items(), this.status.state()).status) : [];
+      buildFacilityReportPresentation(report, this.navigation.contextAnalyses(), this.status.items(), this.status.state()).status) : [];
   });
   readonly inventoryLink = computed(() => {
     const facility = this.navigation.contextFacility();
