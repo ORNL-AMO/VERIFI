@@ -104,6 +104,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run tests
         run: npm run test:all:ci
+      - name: Check analytics build configurations
+        run: node --test .github/scripts/analytics-build.test.cjs
 
   qa:
     needs: test
@@ -122,6 +124,7 @@ jobs:
       # Keep the web artifact distinct from the QA artifact during manual runs.
       artifact-name: web-dist
       artifact-path: dist/verifi/browser
+      build-configuration: ${{ github.ref_name == 'master' && 'production' || 'dev-srv' }}
 
   desktop:
     needs: [release_policy, test]

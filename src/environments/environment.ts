@@ -3,6 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 import packageInfo from '../../package.json';
 export const environment = {
+  analyticsEnabled: false,
   production: false,
   version: packageInfo.version,
   measurUtilitiesApi: 'http://127.0.0.1:3000/',

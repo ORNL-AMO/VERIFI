@@ -1,170 +1,282 @@
-import { Injectable } from '@angular/core';
-import { catchError, firstValueFrom } from 'rxjs';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { NavigationCancel, NavigationCancellationCode, NavigationEnd, NavigationError, NavigationSkipped, NavigationStart, Router } from '@angular/router';
+import { catchError, firstValueFrom, Subscription } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { v4 as uuidv4 } from 'uuid';
 import { AnalyticsDataDbService } from '@data/indexedDB/analytics-data-db.service';
 import { environment } from 'src/environments/environment';
 import { ElectronService } from '@platform/electron/electron.service';
-declare let gtag: Function;
+import { analyticsRoutePath, isAnalyticsRouteAllowed } from './analytics-policy';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AnalyticsService {
+const MEASUREMENT_ID = 'G-YG1QD02XSE';
+const DISABLE_KEY = `ga-disable-${MEASUREMENT_ID}`;
+type AnalyticsWindow = Window & {
+  dataLayer?: unknown[];
+  gtag?: (...args: unknown[]) => void;
+};
 
+@Injectable({ providedIn: 'root' })
+export class AnalyticsService implements OnDestroy {
   private clientId: string;
-  analyticsSessionId: string;
-  httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-    })
+  private clientInitialization: Promise<void>;
+  private routeSubscription: Subscription;
+  private committedPath: string;
+  private pendingNavigationId: number;
+  private navigationRevision = 0;
+  private applicationOpened = false;
+  private tagInitialized = false;
+  private pageReferrer: string;
+  readonly analyticsSessionId = uuidv4();
+  readonly httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
 
-  constructor(private httpClient: HttpClient,
+  constructor(
+    private httpClient: HttpClient,
     private analyticsDataDbService: AnalyticsDataDbService,
-    private electronService: ElectronService) {
-    this.analyticsSessionId = uuidv4();
+    private electronService: ElectronService,
+    private router: Router,
+    @Inject(DOCUMENT) private document: Document
+  ) {
+    this.pageReferrer = this.getReferrerWithoutId(document.referrer);
   }
 
-  async setClientAnalyticsId() {
-    let appAnalyticsData: Array<AppAnalyticsData> = await firstValueFrom(this.analyticsDataDbService.getAppAnalyticsData());
-    let clientId: string;
-    if (appAnalyticsData.length == 0) {
-      clientId = uuidv4();
-      await firstValueFrom(this.analyticsDataDbService.addWithObservable({
-        clientId: clientId,
-        modifiedDate: new Date()
-      }));
-    } else {
-      clientId = appAnalyticsData[0].clientId;
+  /** Start before initial navigation; no collection is allowed until it commits. */
+  initialize(): void {
+    if (this.routeSubscription) {
+      return;
     }
-    this.setClientId(clientId);
-  }
-
-  async initAnalyticsSession(path: string) {
-    await this.setClientAnalyticsId();
-    let measurOpenEvent: GAEvent = {
-      name: 'verifi_app_open',
-      params: {
-        verifi_platform: 'verifi-desktop',
-        session_id: this.analyticsSessionId,
-        // engagement_time_msec required to begin an analytics session but not used again
-        engagement_time_msec: '100',
+    this.updateBrowserCollection();
+    this.routeSubscription = this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.pendingNavigationId = event.id;
+        this.navigationRevision++;
+        this.updateBrowserCollection();
+      } else if (event instanceof NavigationEnd) {
+        if (this.pendingNavigationId !== undefined && event.id !== this.pendingNavigationId) {
+          return;
+        }
+        this.pendingNavigationId = undefined;
+        if (this.committedPath !== undefined) {
+          this.pageReferrer = isAnalyticsRouteAllowed(this.committedPath)
+            ? 'https://verifi.ornl.gov' + this.getPageWithoutId(this.committedPath) : '';
+        }
+        this.committedPath = event.urlAfterRedirects;
+        this.navigationRevision++;
+        this.updateBrowserCollection();
+        if (this.canCollect()) {
+          if (!this.applicationOpened) {
+            this.sendEvent('verifi_app_open');
+          }
+          this.sendEvent('page_view', this.getPageWithoutId(this.committedPath));
+        }
+      } else if (event instanceof NavigationSkipped) {
+        // A redirect back to the current URL can be skipped without a NavigationStart.
+        if (this.pendingNavigationId !== undefined && event.id < this.pendingNavigationId) {
+          return;
+        }
+        this.pendingNavigationId = undefined;
+        this.navigationRevision++;
+        this.updateBrowserCollection();
+      } else if (event instanceof NavigationCancel || event instanceof NavigationError) {
+        if (event.id !== this.pendingNavigationId) {
+          return;
+        }
+        // Redirects and superseded navigations must stay blocked until their successor commits.
+        if (event instanceof NavigationCancel &&
+          (event.code === NavigationCancellationCode.Redirect || event.code === NavigationCancellationCode.SupersededByNewNavigation)) {
+          return;
+        }
+        this.pendingNavigationId = undefined;
+        this.navigationRevision++;
+        this.updateBrowserCollection();
       }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSubscription?.unsubscribe();
+    this.committedPath = undefined;
+    this.updateBrowserCollection();
+  }
+
+  private canCollect(path?: string): boolean {
+    const location = this.document.defaultView?.location;
+    return environment.analyticsEnabled &&
+      (this.electronService.isElectron ||
+        (location?.hostname === 'verifi.ornl.gov' && location.protocol === 'https:')) &&
+      this.pendingNavigationId === undefined &&
+      this.committedPath !== undefined && isAnalyticsRouteAllowed(this.committedPath) &&
+      (!path || isAnalyticsRouteAllowed(path));
+  }
+
+  private updateBrowserCollection(): void {
+    const browser = this.document.defaultView as AnalyticsWindow;
+    if (!browser) {
+      return;
+    }
+    const enabled = !this.electronService.isElectron && this.canCollect();
+    if (!enabled) {
+      browser[DISABLE_KEY] = true;
+      return;
+    }
+    const pageParameters = {
+      page_location: 'https://verifi.ornl.gov' + this.getPageWithoutId(this.committedPath),
+      page_referrer: this.pageReferrer
     };
-    this.postEventToMeasurementProtocol(measurOpenEvent);
-    if (path) {
-      this.sendAnalyticsPageView(path);
+    if (this.tagInitialized) {
+      browser.gtag?.('set', pageParameters);
+      browser[DISABLE_KEY] = false;
+      return;
+    }
+    browser[DISABLE_KEY] = false;
+    this.tagInitialized = true;
+    browser.dataLayer = browser.dataLayer || [];
+    browser.gtag = function () { browser.dataLayer.push(arguments); };
+    browser.gtag('js', new Date());
+    // Global defaults can be refreshed on navigation; config-scoped values would override them.
+    browser.gtag('set', pageParameters);
+    browser.gtag('config', MEASUREMENT_ID, { send_page_view: false });
+    const script = this.document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`;
+    this.document.head.appendChild(script);
+  }
+
+  async setClientAnalyticsId(): Promise<void> {
+    const data: AppAnalyticsData[] = await firstValueFrom(this.analyticsDataDbService.getAppAnalyticsData());
+    if (data.length) {
+      this.setClientId(data[0].clientId);
+    } else {
+      const clientId = uuidv4();
+      await firstValueFrom(this.analyticsDataDbService.addWithObservable({ clientId, modifiedDate: new Date() }));
+      this.setClientId(clientId);
     }
   }
 
-  async sendAnalyticsPageView(path: string) {
+  async initAnalyticsSession(path?: string): Promise<void> {
+    if (!this.canCollect(path)) {
+      return;
+    }
+    const revision = this.navigationRevision;
+    await this.sendAnalyticsEvent('verifi_app_open', { session_id: this.analyticsSessionId });
+    if (path && revision === this.navigationRevision) {
+      await this.sendAnalyticsPageView(path);
+    }
+  }
+
+  async sendAnalyticsPageView(path: string): Promise<void> {
+    await this.sendAnalyticsEvent('page_view', {
+      page_path: path,
+      session_id: this.analyticsSessionId
+    });
+  }
+
+  async sendAnalyticsEvent(eventName: AnalyticsEventString, eventParams: EventParameters): Promise<void> {
+    if (!this.electronService.isElectron || !this.canCollect(eventParams.page_path) || !this.canCollect(eventParams.page_location)) {
+      return;
+    }
+    const revision = this.navigationRevision;
     if (!this.clientId) {
-      await this.initAnalyticsSession(path);
-    } else {
-      let pageViewEvent: GAEvent = {
-        name: 'page_view',
+      this.clientInitialization ??= this.setClientAnalyticsId().finally(() => {
+        this.clientInitialization = undefined;
+      });
+      await this.clientInitialization;
+    }
+    // Never replay an event against a different route after storage initialization.
+    if (revision !== this.navigationRevision || !this.canCollect(eventParams.page_path) || !this.canCollect(eventParams.page_location)) {
+      return;
+    }
+    if (!this.applicationOpened) {
+      this.postEventToMeasurementProtocol({
+        name: 'verifi_app_open',
         params: {
           verifi_platform: 'verifi-desktop',
-          page_path: path,
-          session_id: this.analyticsSessionId
+          session_id: this.analyticsSessionId,
+          engagement_time_msec: '100'
         }
-      }
-      this.postEventToMeasurementProtocol(pageViewEvent)
+      });
+      this.applicationOpened = true;
     }
-  }
-
-  async sendAnalyticsEvent(eventName: AnalyticsEventString, eventParams: EventParameters) {
-    if (!this.clientId) {
-      await this.initAnalyticsSession(undefined);
-    } else {
-      eventParams.session_id = this.analyticsSessionId;
-      let pageViewEvent: GAEvent = {
+    if (eventName !== 'verifi_app_open') {
+      this.postEventToMeasurementProtocol({
         name: eventName,
-        params: eventParams
-      }
-      this.postEventToMeasurementProtocol(pageViewEvent)
+        params: { ...eventParams, verifi_platform: 'verifi-desktop', session_id: this.analyticsSessionId }
+      });
     }
   }
 
-  postEventToMeasurementProtocol(gaEvent: GAEvent) {
-    if (gaEvent.name === 'page_view') {
+  postEventToMeasurementProtocol(gaEvent: GAEvent): void {
+    if (!this.electronService.isElectron || !this.canCollect(gaEvent.params.page_path) || !this.canCollect(gaEvent.params.page_location)) {
+      return;
+    }
+    if (gaEvent.name === 'page_view' || gaEvent.params.page_path || gaEvent.params.page_location) {
       this.setPageViewEventUrl(gaEvent);
     }
-
-    let callDebuggingEndpoint = environment.production ? false : true;
-    let postBody = {
-      isDebugging: callDebuggingEndpoint,
+    this.httpClient.post(environment.measurUtilitiesApi + 'gamp', {
+      isDebugging: false,
       isVerifi: true,
       analyticsPayload: {
         client_id: this.clientId,
         non_personalized_ads: true,
-        events: [
-          gaEvent
-        ]
+        events: [gaEvent]
       }
-    }
-
-    let url: string = environment.measurUtilitiesApi + 'gamp';
-    if (environment.production) {
-      this.httpClient.post<any>(url, postBody, this.httpOptions)
-        .pipe(catchError(error => [])).subscribe({
-          next: (resp) => {
-            // GA Debugging endpoint returns response
-            // GA prod endpoint returns null on success
-          },
-          error: (error: AnalyticsHttpError) => {
-            // for now all errors fail silently
-          }
-        });
-    }
+    }, this.httpOptions).pipe(catchError(() => [])).subscribe();
   }
 
-  setClientId(uuid: string) {
+  setClientId(uuid: string): void {
     this.clientId = uuid;
   }
 
-  setPageViewEventUrl(pageViewEvent: GAEvent) {
-    pageViewEvent.params.page_path = this.getPageWithoutId(pageViewEvent.params.page_path);
-    // Never send real paths while in dev
-    if (!environment.production) {
-      pageViewEvent.params.page_path = '/testing';
-    }
-    // Derive page_location from the already-sanitized page_path so IDs are never sent
+  setPageViewEventUrl(pageViewEvent: GAEvent): void {
+    pageViewEvent.params.page_path = this.getPageWithoutId(pageViewEvent.params.page_path || pageViewEvent.params.page_location || this.committedPath);
     pageViewEvent.params.page_location = 'https://verifi.ornl.gov' + pageViewEvent.params.page_path;
   }
 
-  getPageWithoutId(pagePath: string) {
-    // Replace segments that match the custom ID pattern: 9 chars, lowercase letters and digits, with ':id'
-    return pagePath
-      .split('/')
+  getPageWithoutId(pagePath: string): string {
+    // Replace custom GUIDs; query strings and fragments are not analytics routes.
+    return analyticsRoutePath(pagePath).split('/')
       .map(segment => /^[a-z0-9]{9}$/.test(segment) ? ':id' : segment)
       .join('/') || '/';
   }
 
-  sendEvent(eventName: AnalyticsEventString, path?: string) {
-    if (environment.production) {
-      if (!this.electronService.isElectron) {
-        let eventParams: EventParameters = {
-          page_path: path,
-          page_location: window.location.href,
-          verifi_platform: 'verifi-web',
-          session_id: undefined
-        }
-        gtag('event', eventName, eventParams);
-      } else if (path) {
-        this.sendAnalyticsPageView(path)
-      } else {
-        let eventParams: EventParameters = {
-          page_path: path,
-          verifi_platform: 'verifi-desktop',
-          session_id: undefined
-        }
-        this.sendAnalyticsEvent(eventName, eventParams);
+  private getReferrerWithoutId(referrer: string): string {
+    if (!referrer || !isAnalyticsRouteAllowed(referrer)) {
+      return '';
+    }
+    const url = new URL(referrer);
+    return ['http:', 'https:'].includes(url.protocol)
+      ? url.origin + this.getPageWithoutId(referrer) : '';
+  }
+
+  sendEvent(eventName: AnalyticsEventString, path?: string): void {
+    if (!this.canCollect(path)) {
+      return;
+    }
+    if (this.electronService.isElectron) {
+      void this.sendAnalyticsEvent(eventName, {
+        page_path: path,
+        session_id: this.analyticsSessionId
+      }).catch(() => undefined);
+    } else {
+      if (eventName === 'verifi_app_open' && this.applicationOpened) {
+        return;
+      }
+      const pagePath = this.getPageWithoutId(path || this.committedPath);
+      const browser = this.document.defaultView as AnalyticsWindow;
+      browser.gtag?.('event', eventName, {
+        page_path: pagePath,
+        page_location: 'https://verifi.ornl.gov' + pagePath,
+        // Do not attach an excluded route as the referrer after returning to legacy UI.
+        page_referrer: this.pageReferrer,
+        verifi_platform: 'verifi-web'
+      });
+      if (eventName === 'verifi_app_open') {
+        this.applicationOpened = true;
       }
     }
   }
-
 }
 
 export class AnalyticsHttpError extends Error { }
