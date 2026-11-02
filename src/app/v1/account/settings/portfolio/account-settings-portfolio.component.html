@@ -9,20 +9,25 @@
         <p>Portfolio</p>
         <h2>Facility actions</h2>
       </div>
-      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
-        @if (isApplying || isDeleting || saveState === 'saving') {
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error' || facilityOrderService.error()">
+        @if (isApplying || isDeleting || saveState === 'saving' || facilityOrderService.saving()) {
           <app-ui-icon name="loading" spin></app-ui-icon>
           Working
-        } @else if (saveState === 'saved') {
-          <app-ui-icon name="check"></app-ui-icon>
-          Saved
-        } @else if (saveState === 'error') {
+        } @else if (saveState === 'error' || facilityOrderService.error()) {
           <app-ui-icon name="warning"></app-ui-icon>
           Not saved
+        } @else if (saveState === 'saved' || facilityOrderService.saved()) {
+          <app-ui-icon name="check"></app-ui-icon>
+          Saved
         }
       </span>
     </div>
 
+    @if (facilityOrderService.error()) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span>Facility order could not be saved.</span>
+      </div>
+    }
     @if (saveError) {
       <div class="v1-alert v1-alert--danger" role="alert">
         <app-ui-icon name="warning"></app-ui-icon>
@@ -30,7 +35,7 @@
       </div>
     }
 
-    @if (!canWrite() || hasPending()) {
+    @if (!canWrite() || (hasPending() && !facilityOrderService.saving())) {
       <div class="v1-alert v1-alert--warning" role="status">
         <app-ui-icon name="lock"></app-ui-icon>
         <span>Portfolio actions are unavailable while the workspace is loading, switching, or saving.</span>
@@ -65,9 +70,18 @@
           <span>Select all facilities</span>
         </label>
 
-        <div class="v1-portfolio-settings__list" role="list">
-          @for (facility of facilitiesList; track facility.guid) {
-            <article class="v1-portfolio-settings__facility" role="listitem">
+        <div class="v1-portfolio-settings__list" role="list" cdkDropList cdkDropListLockAxis="y"
+          [cdkDropListData]="facilitiesList" [cdkDropListDisabled]="facilitiesList.length === 1"
+          [cdkDropListAutoScrollStep]="24" (cdkDropListDropped)="dropFacility($event)">
+          @for (facility of facilitiesList; track facility.guid; let index = $index) {
+            <article class="v1-portfolio-settings__facility" role="listitem" cdkDrag cdkDragPreviewContainer="parent"
+              [attr.data-facility-guid]="facility.guid" [attr.aria-posinset]="index + 1" [attr.aria-setsize]="facilitiesList.length"
+              [cdkDragData]="facility" [cdkDragDisabled]="facilitiesList.length === 1">
+              <button type="button" class="v1-icon-btn v1-portfolio-settings__drag" cdkDragHandle
+                [disabled]="facilitiesList.length === 1" [attr.aria-label]="'Drag ' + facility.name"
+                title="Drag facility">
+                <app-ui-icon name="drag"></app-ui-icon>
+              </button>
               <label class="v1-settings-choice">
                 <input #facilitySelected type="checkbox" [checked]="isSelected(facility.guid)" [disabled]="actionsDisabled"
                   (change)="toggleFacility(facility.guid, facilitySelected.checked)">

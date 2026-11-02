@@ -1,9 +1,11 @@
 import { TemplatePortal } from '@angular/cdk/portal';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { PortfolioFacilityService } from '@app/v1/account/data/portfolio/portfolio-facility.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
+import { PortfolioFacilityOrderService } from './portfolio-facility-order.service';
 
 type PortfolioSettingsAction = 'apply' | 'delete';
 
@@ -22,7 +24,8 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
   @ViewChild('portfolioActionModal') private readonly portfolioActionModal!: TemplateRef<unknown>;
 
-  readonly facilities = this.workspace.facilities;
+  readonly facilityOrderService = inject(PortfolioFacilityOrderService);
+  readonly facilities = this.facilityOrderService.facilities;
   readonly hasPending = this.workspace.hasPending;
   readonly selectedFacilityGuids = signal<readonly string[]>([]);
   readonly selectedFacilities = computed(() => {
@@ -50,6 +53,12 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.modalPortal.hide();
+  }
+
+  dropFacility(event: CdkDragDrop<readonly IdbFacility[]>): void {
+    if (event.previousContainer !== event.container || !event.isPointerOverContainer)
+      return;
+    this.facilityOrderService.move(event.item.data.guid, event.currentIndex);
   }
 
   isSelected(facilityGuid: string): boolean {
