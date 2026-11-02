@@ -49,6 +49,12 @@ Manual dispatch runs QA after the test gate. When dispatched from `develop` or `
 
 The [build template](../.github/workflows/template_build.yml) creates `web-dist` for the release web deployment and `dist` for QA. The deployment workflow only consumes the appropriate artifact; it never rebuilds the application.
 
+Build callers explicitly supply `build-configuration`: the release web flow uses `production` for `master` and `dev-srv` for `develop`; QA always uses `dev-srv`, even when manually dispatched from `master`. `dev-srv` keeps production Angular optimizations but sets `analyticsEnabled: false`, so neither the develop site nor the QA site loads the Google tag or sends analytics events. Production browser collection also requires HTTPS on `verifi.ornl.gov`; `/v1` and `/p1` route segments are excluded in every runtime. Released Electron analytics remain enabled on eligible routes.
+
+CI checks the build selection with `node --test .github/scripts/analytics-build.test.cjs`, exercising the reusable build step with a recording substitute for npm so these checks do not publish or compile artifacts.
+
+When rolling out this policy, publish the updated build to both the develop and unified-ux QA destinations. In the GA4 web stream's Enhanced Measurement settings, disable **Page changes based on browser history events**, because the application sends page views manually; `send_page_view: false` alone does not disable history tracking ([Google's page-view guide](https://developers.google.com/analytics/devguides/collection/ga4/views#disable_page_changes_based_on_browser_history_events)). Confirm in the browser Network panel that direct loads, refreshes, and navigation on both nonproduction sites produce no Google tag or GA collection requests, and that production tracks only eligible routes. Previously collected QA events are not removed by this change.
+
 The desktop workflow owns its renderer and installer artifacts. Refer to its upload steps for the current platform outputs rather than copying that changing inventory into documentation.
 
 Artifacts expire according to the `retention-days` values on their upload steps. When retrying a deployment, first confirm its required artifacts are still available in the workflow run. If they have expired, rerun the full workflow so deployment cannot consume output from a different commit.

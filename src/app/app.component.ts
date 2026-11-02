@@ -1,11 +1,10 @@
 import { Component, Signal } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
 import { AppStartupState } from './application-lifecycle/application-lifecycle.models';
 import { WorkspaceStatus } from '@data/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -25,29 +24,11 @@ export class AppComponent {
   ) {
     this.startupState = this.lifecycle.state;
     this.workspaceStatus = this.workspace.status;
-    if (environment.production) {
-      try {
-        this.analyticsService.sendEvent('verifi_app_open', undefined);
-      } catch (error) {
-        console.warn('Application-open analytics could not be sent.', error);
-      }
-    }
+    this.analyticsService.initialize();
   }
 
   ngOnInit(): void {
     void this.lifecycle.initialize();
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        if (environment.production) {
-          try {
-            const pagePath = this.analyticsService.getPageWithoutId(event.urlAfterRedirects);
-            this.analyticsService.sendEvent('page_view', pagePath);
-          } catch (error) {
-            console.warn('Page-view analytics could not be sent.', error);
-          }
-        }
-      }
-    });
   }
 
   retryStartup(): void {

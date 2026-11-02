@@ -1,5 +1,6 @@
 import packageInfo from '../../package.json';
 export const environment = {
+  analyticsEnabled: true,
   production: true,
   version: packageInfo.version,
   measurUtilitiesApi: 'https://ir-utilities.ornl.gov/',

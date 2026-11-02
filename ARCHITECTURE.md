@@ -152,6 +152,8 @@ Environment replacement is configured in [`angular.json`](angular.json):
 - Development-server and production builds use deployed service URLs.
 - Electron uses production services and hash-based routing suitable for `file://` URLs.
 
+Analytics collection is controlled by `analyticsEnabled`, independently of Angular's `production` flag. Local and `dev-srv` builds disable collection; production web and released Electron builds enable it. Browser collection additionally requires HTTPS on `verifi.ornl.gov`. [`AnalyticsService`](src/app/platform/analytics/analytics.service.ts) owns Google tag initialization, route tracking, and both analytics transports. It waits for a committed route, blocks collection during navigation and on `/v1` and `/p1` route segments, and restores the committed route's policy after canceled navigation. Eligible legacy navigation resumes collection. Asynchronous desktop initialization must not replay events after navigation. The HTML entrypoint does not load Google Analytics.
+
 [`ElectronService`](src/app/platform/electron/electron.service.ts) detects `window.electronAPI` and guards renderer calls when the bridge is unavailable. `preload.js` allowlists renderer-to-main and main-to-renderer channels. `main.js` owns desktop windows, filesystem access, dialogs, external links, and updates.
 
 Preserve these invariants:

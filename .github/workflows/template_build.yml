@@ -3,6 +3,9 @@ name: "Template: Build"
 on:
   workflow_call:
     inputs:
+      build-configuration:
+        required: true
+        type: string
       artifact-name:
         required: true
         type: string
@@ -37,12 +40,14 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build
+        env:
+          BUILD_CONFIGURATION: ${{ inputs.build-configuration }}
         run: |
-          if [[ "${{ github.ref_name }}" == "master" ]]; then
-            npm run build-prod
-          else
-            npm run build-dev-srv
-          fi
+          case "$BUILD_CONFIGURATION" in
+            production) npm run build-prod ;;
+            dev-srv) npm run build-dev-srv ;;
+            *) echo "Unsupported build configuration: $BUILD_CONFIGURATION"; exit 1 ;;
+          esac
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
