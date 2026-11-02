@@ -82,6 +82,16 @@
                 title="Drag facility">
                 <app-ui-icon name="drag"></app-ui-icon>
               </button>
+              @let orderControl = orderControls.controls[facility.guid];
+              @if (orderControl) {
+                <label class="v1-portfolio-settings__order">
+                  <select class="v1-select" [formControl]="orderControl" [attr.aria-label]="'Order for ' + facility.name">
+                    @for (position of orderOptions(); track position) {
+                      <option [ngValue]="position">{{ position }}</option>
+                    }
+                  </select>
+                </label>
+              }
               <label class="v1-settings-choice">
                 <input #facilitySelected type="checkbox" [checked]="isSelected(facility.guid)" [disabled]="actionsDisabled"
                   (change)="toggleFacility(facility.guid, facilitySelected.checked)">

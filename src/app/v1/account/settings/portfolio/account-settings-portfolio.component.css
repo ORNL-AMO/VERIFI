@@ -26,7 +26,7 @@
   border-radius: var(--v1-radius);
   display: grid;
   gap: .75rem;
-  grid-template-columns: auto minmax(10rem, 1.2fr) minmax(8rem, 1fr) auto;
+  grid-template-columns: auto auto minmax(10rem, 1.2fr) minmax(8rem, 1fr) auto;
   min-width: 0;
   padding: .7rem .8rem;
 }
@@ -35,6 +35,16 @@
 .v1-portfolio-settings__facility small {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.v1-portfolio-settings__order {
+  display: grid;
+  gap: .2rem;
+  font-size: .78rem;
+}
+
+.v1-portfolio-settings__order select {
+  min-width: 4.5rem;
 }
 
 .v1-portfolio-settings__facility > span,
@@ -59,7 +69,8 @@
   }
 
   .v1-portfolio-settings__facility > span,
-  .v1-portfolio-settings__facility > small { grid-column: 2; }
+  .v1-portfolio-settings__facility > small,
+  .v1-portfolio-settings__facility > .v1-settings-choice { grid-column: 2; }
 
 }
 
