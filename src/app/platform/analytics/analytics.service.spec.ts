@@ -100,7 +100,7 @@ describe('analytics collection', () => {
     expect(dom.querySelector('script')).toBeNull();
   });
 
-  it.each(['/v1', '/v1/data?tab=meters#details', '/p1', '/p1/settings', 'file:///app/index.html#/v1'])('blocks initial loads and refreshes of %s, including custom events without a path', async path => {
+  it.each(['/v1', '/v1/data?tab=meters#details', '/p1', '/p1/settings', '/v1#/welcome', '/p1#/welcome', 'file:///app/index.html#/v1'])('blocks initial loads and refreshes of %s, including custom events without a path', async path => {
     navigate(path, '/');
     service.sendEvent('import_backup_file');
     expect(dom.querySelector('script')).toBeNull();
@@ -251,6 +251,74 @@ describe('analytics collection', () => {
     await service.sendAnalyticsEvent('create_account', { session_id: 'test' });
     post.mockClear();
     await service.initAnalyticsSession('/v1');
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['abc123def', 'xyz987stu'],
+    ['9a8b7c6d5', '1z2y3x4w5']
+  ])('uses the same browser analytics URLs for account %s and facility %s', (accountId, facilityId) => {
+    navigate(`/data-evaluation/account/${accountId}/facility/${facilityId}?account=${accountId}#/details`);
+    service.sendEvent('create_account');
+    const expected = '/data-evaluation/account/:id/facility/:id';
+    for (const command of collectedEvents()) {
+      expect(command[2].page_path).toBe(expected);
+      expect(command[2].page_location).toBe('https://verifi.ornl.gov' + expected);
+    }
+    navigate('/welcome');
+    expect(collectedEvents().at(-1)[2].page_referrer).toBe('https://verifi.ornl.gov' + expected);
+  });
+
+  it.each([
+    ['https://verifi.ornl.gov/data-evaluation/account/abc123def?account=abc123def#/details', 'https://verifi.ornl.gov/data-evaluation/account/:id'],
+    ['https://example.org/account/abc123def?account=abc123def#details', 'https://example.org/account/:id'],
+    ['https://verifi.ornl.gov/v1#/welcome', ''],
+    ['https://verifi.ornl.gov/p1#/welcome', '']
+  ])('sanitizes the initial document referrer %s', (referrer, expected) => {
+    service.ngOnDestroy();
+    Object.defineProperty(dom, 'referrer', { value: referrer });
+    service = new AnalyticsService(
+      { post } as unknown as HttpClient,
+      storage as unknown as AnalyticsDataDbService,
+      electron as ElectronService,
+      { events } as unknown as Router,
+      dom
+    );
+    service.initialize();
+    navigate('/welcome');
+    expect(collectedEvents().at(-1)[2].page_referrer).toBe(expected);
+    expect(commands().filter(command => command[0] === 'set').at(-1)[1].page_referrer).toBe(expected);
+  });
+
+  it.each(['page_view', 'create_account'] as const)('strips desktop URL IDs for %s events', async name => {
+    electron.isElectron = true;
+    navigate('/welcome');
+    await service.sendAnalyticsEvent(name, { page_path: '/data-evaluation/account/abc123def?account=abc123def#/details', session_id: 'test' });
+    const event = (post.mock.calls.at(-1) as any[])[1].analyticsPayload.events[0];
+    expect(event.params.page_path).toBe('/data-evaluation/account/:id');
+    expect(event.params.page_location).toBe('https://verifi.ornl.gov/data-evaluation/account/:id');
+  });
+
+  it('sanitizes an explicit desktop page location without a separate page path', async () => {
+    electron.isElectron = true;
+    navigate('/welcome');
+    await service.sendAnalyticsEvent('create_account', {
+      page_location: 'https://verifi.ornl.gov/data-evaluation/account/abc123def?account=abc123def#/details',
+      session_id: 'test'
+    });
+    const event = (post.mock.calls.at(-1) as any[])[1].analyticsPayload.events[0];
+    expect(event.params.page_path).toBe('/data-evaluation/account/:id');
+    expect(event.params.page_location).toBe('https://verifi.ornl.gov/data-evaluation/account/:id');
+  });
+
+  it('rejects excluded desktop page locations even when their page path is allowed', async () => {
+    electron.isElectron = true;
+    navigate('/welcome');
+    await service.sendAnalyticsEvent('create_account', { session_id: 'test' });
+    post.mockClear();
+    const params = { page_path: '/welcome', page_location: 'https://verifi.ornl.gov/v1#/welcome', session_id: 'test' };
+    await service.sendAnalyticsEvent('create_account', params);
+    service.postEventToMeasurementProtocol({ name: 'create_account', params });
     expect(post).not.toHaveBeenCalled();
   });
 });

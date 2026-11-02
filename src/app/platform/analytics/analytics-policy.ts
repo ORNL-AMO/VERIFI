@@ -1,7 +1,8 @@
-/** Normalize both browser paths and Electron file URLs with hash routing. */
+/** Browser URLs use their pathname; only Electron and explicit #/ inputs use hash routing. */
 export function analyticsRoutePath(path: string): string {
   const url = new URL(path, 'https://verifi.ornl.gov');
-  return (url.hash.startsWith('#/') ? url.hash.slice(1) : url.pathname)
+  const usesHashRouting = (url.protocol === 'file:' || path.startsWith('#/')) && url.hash.startsWith('#/');
+  return (usesHashRouting ? url.hash.slice(1) : url.pathname)
     .split(/[?#]/)[0];
 }
 

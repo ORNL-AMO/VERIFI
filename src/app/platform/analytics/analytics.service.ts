@@ -39,7 +39,7 @@ export class AnalyticsService implements OnDestroy {
     private router: Router,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.pageReferrer = isAnalyticsRouteAllowed(document.referrer) ? document.referrer : '';
+    this.pageReferrer = this.getReferrerWithoutId(document.referrer);
   }
 
   /** Start before initial navigation; no collection is allowed until it commits. */
@@ -174,7 +174,7 @@ export class AnalyticsService implements OnDestroy {
   }
 
   async sendAnalyticsEvent(eventName: AnalyticsEventString, eventParams: EventParameters): Promise<void> {
-    if (!this.electronService.isElectron || !this.canCollect(eventParams.page_path)) {
+    if (!this.electronService.isElectron || !this.canCollect(eventParams.page_path) || !this.canCollect(eventParams.page_location)) {
       return;
     }
     const revision = this.navigationRevision;
@@ -185,7 +185,7 @@ export class AnalyticsService implements OnDestroy {
       await this.clientInitialization;
     }
     // Never replay an event against a different route after storage initialization.
-    if (revision !== this.navigationRevision || !this.canCollect(eventParams.page_path)) {
+    if (revision !== this.navigationRevision || !this.canCollect(eventParams.page_path) || !this.canCollect(eventParams.page_location)) {
       return;
     }
     if (!this.applicationOpened) {
@@ -208,10 +208,10 @@ export class AnalyticsService implements OnDestroy {
   }
 
   postEventToMeasurementProtocol(gaEvent: GAEvent): void {
-    if (!this.electronService.isElectron || !this.canCollect(gaEvent.params.page_path)) {
+    if (!this.electronService.isElectron || !this.canCollect(gaEvent.params.page_path) || !this.canCollect(gaEvent.params.page_location)) {
       return;
     }
-    if (gaEvent.name === 'page_view') {
+    if (gaEvent.name === 'page_view' || gaEvent.params.page_path || gaEvent.params.page_location) {
       this.setPageViewEventUrl(gaEvent);
     }
     this.httpClient.post(environment.measurUtilitiesApi + 'gamp', {
@@ -230,7 +230,7 @@ export class AnalyticsService implements OnDestroy {
   }
 
   setPageViewEventUrl(pageViewEvent: GAEvent): void {
-    pageViewEvent.params.page_path = this.getPageWithoutId(pageViewEvent.params.page_path);
+    pageViewEvent.params.page_path = this.getPageWithoutId(pageViewEvent.params.page_path || pageViewEvent.params.page_location || this.committedPath);
     pageViewEvent.params.page_location = 'https://verifi.ornl.gov' + pageViewEvent.params.page_path;
   }
 
@@ -239,6 +239,15 @@ export class AnalyticsService implements OnDestroy {
     return analyticsRoutePath(pagePath).split('/')
       .map(segment => /^[a-z0-9]{9}$/.test(segment) ? ':id' : segment)
       .join('/') || '/';
+  }
+
+  private getReferrerWithoutId(referrer: string): string {
+    if (!referrer || !isAnalyticsRouteAllowed(referrer)) {
+      return '';
+    }
+    const url = new URL(referrer);
+    return ['http:', 'https:'].includes(url.protocol)
+      ? url.origin + this.getPageWithoutId(referrer) : '';
   }
 
   sendEvent(eventName: AnalyticsEventString, path?: string): void {
