@@ -19,8 +19,8 @@ export class FacilityReportWorkbenchComponent {
     { label: `${this.context.facility()?.name || 'Facility'} Reports`, ...this.context.navigation.facilityInventoryLink(this.context.facility()?.guid ?? '', 'reports') },
     { label: this.context.report()?.name || 'Untitled facility report' }
   ]);
-  readonly facts = computed(() => this.context.card()?.view.factSections.flatMap(section => section.facts.map(fact => ({ label: fact.label, value: fact.valueLabel }))) ?? []);
-  readonly statusLabel = computed(() => ({ ready: 'No Issues', error: 'Needs attention', warning: 'Needs review', checking: 'Checking setup', unavailable: 'Setup status unavailable' })[this.context.card()?.status ?? 'checking']);
+  readonly facts = computed(() => this.context.presentation()?.facts ?? []);
+  readonly statusLabel = computed(() => ({ ready: 'No Issues', error: 'Needs attention', warning: 'Needs review', checking: 'Checking setup', unavailable: 'Setup status unavailable' })[this.context.presentation()?.status ?? 'checking']);
   private readonly router = inject(Router);
   readonly previous = computed(() => {
     const stages = this.context.stages();

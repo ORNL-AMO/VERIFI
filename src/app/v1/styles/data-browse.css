@@ -77,12 +77,6 @@
   align-items: stretch;
 }
 
-.v1-root .v1-resource-browse-card-host {
-  display: block;
-  min-width: 0;
-  height: 100%;
-}
-
 @media (max-width: 60rem) {
   .v1-root .v1-data-browse-toolbar--four { grid-template-columns: 1fr 1fr; }
 }
