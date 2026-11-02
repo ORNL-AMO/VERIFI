@@ -2,6 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed
 import { FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 
 @Component({
   selector: 'app-facility-picker',
@@ -14,6 +15,8 @@ export class FacilityPickerComponent {
   private themeObserver?: MutationObserver;
   private readonly injector = inject(Injector);
   menuWidth = 240;
+  private readonly facilityOrderState = signal<readonly string[] | undefined>(undefined);
+  @Input() set facilityOrder(value: readonly string[] | undefined) { this.facilityOrderState.set(value); }
   private readonly facilitiesState = signal<readonly IdbFacility[]>([]);
   @Input() set facilities(value: readonly IdbFacility[]) { this.facilitiesState.set(value); }
   get facilities(): readonly IdbFacility[] { return this.facilitiesState(); }
@@ -27,7 +30,7 @@ export class FacilityPickerComponent {
   private readonly query = toSignal(this.search.valueChanges, { initialValue: '' });
   readonly filteredFacilities = computed(() => {
     const query = this.query().trim().toLowerCase();
-    return this.facilitiesState().map(facility => ({
+    return orderFacilities(this.facilitiesState(), this.facilityOrderState()).map(facility => ({
       ...facility, location: [facility.city, facility.state].filter(Boolean).join(', ')
     })).filter(facility => !query || facility.name.toLowerCase().includes(query) || facility.location.toLowerCase().includes(query));
   });

@@ -1,3 +1,4 @@
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -42,8 +43,7 @@ export class ReportLifecycleService {
   private readonly draft = signal<ReportDraft>(this.form.getRawValue());
   readonly types = computed(() => (this.draft().scope === 'account' ? ACCOUNT_REPORT_TYPES : FACILITY_REPORT_TYPES)
     .filter(option => reportTypeAvailable(option.value, this.workspace.account()?.displayEmissions)));
-  readonly facilities = computed(() => this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid)
-    .slice().sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid)));
+  readonly facilities = computed(() => orderFacilities(this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid), this.workspace.account()?.portfolioFacilityOrder));
   readonly contextKey = computed(() => {
     const route = this.navigation.routeState();
     return JSON.stringify([this.workspace.account()?.guid, route.accountGuid, route.facilityGuid, route.reportGuid]);

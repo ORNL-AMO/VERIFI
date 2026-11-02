@@ -1,3 +1,4 @@
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -37,7 +38,7 @@ export class AccountPortfolioMetersTabComponent {
     facilities: this.workspace.facilities(), meters: this.workspace.meters(), readings: this.workspace.meterData(),
     groups: this.workspace.meterGroups(), findings: this.status.items(), statusState: this.status.state()
   }));
-  readonly facilities = computed(() => [...this.workspace.facilities()].sort((a,b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
+  readonly facilities = computed(() => orderFacilities(this.workspace.facilities(), this.workspace.account()?.portfolioFacilityOrder));
   readonly filteredMeters = computed(() => orderPortfolioMeters(filterPortfolioMeters(this.meters(), this.filters().search, this.filters().status)
     .filter(item => !this.filters().facilityGuid || item.facility.guid === this.filters().facilityGuid), this.filters().sort));
   readonly tiles = computed(() => meterTiles(this.filteredMeters(), this.navigation, this.workspace.meterData()));

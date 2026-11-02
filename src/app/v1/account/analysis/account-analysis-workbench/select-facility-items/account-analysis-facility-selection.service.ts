@@ -1,3 +1,4 @@
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -56,7 +57,7 @@ export class AccountAnalysisFacilitySelectionService {
     const analysis = this.analysis();
     return analysis ? buildFacilitySelectionItems(
       analysis,
-      this.context.facilities(),
+      orderFacilities(this.context.facilities(), this.context.account()?.portfolioFacilityOrder),
       this.context.facilityAnalyses(),
       this.allFindings(),
       this.context.status.state()

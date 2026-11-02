@@ -12,7 +12,7 @@
   <div class="v1-nav__account-name" [title]="account.name"><app-ui-icon [name]="singleSite ? 'facility' : 'account'"/><span>{{ account.name }}</span></div>
 }
 @if (!singleSite) {
-  <app-facility-picker [facilities]="facilities" [selectedFacility]="contextMode === 'facility' ? selectedFacility : undefined"
+  <app-facility-picker [facilities]="facilities" [facilityOrder]="facilityOrder()" [selectedFacility]="contextMode === 'facility' ? selectedFacility : undefined"
     (facilitySelected)="navigation.setFacility($event)"/>
 }
 

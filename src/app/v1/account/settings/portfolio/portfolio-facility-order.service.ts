@@ -4,7 +4,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { orderFacilities } from './facility-order';
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 
 interface OrderDraft {
   readonly accountGuid: string;

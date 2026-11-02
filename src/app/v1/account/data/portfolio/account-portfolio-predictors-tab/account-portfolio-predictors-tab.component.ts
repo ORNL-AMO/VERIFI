@@ -1,3 +1,4 @@
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { buildPredictorTiles } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-tile.view';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -35,7 +36,7 @@ export class AccountPortfolioPredictorsTabComponent {
     return buildPredictorInventory(buildPredictorCards(predictors, readings, this.status.items(), this.status.state() === 'ready'),
       buildWeatherStationGroups(predictors, readings, this.status.items(), this.status.state() === 'ready'), facility, this.status.state());
   }));
-  readonly facilities = computed(() => [...this.workspace.facilities()].sort((a,b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
+  readonly facilities = computed(() => orderFacilities(this.workspace.facilities(), this.workspace.account()?.portfolioFacilityOrder));
   readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters())
     .filter(item => !this.filters().facilityGuid || item.facility.guid === this.filters().facilityGuid), this.filters().sort));
   readonly tiles = computed(() => buildPredictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
