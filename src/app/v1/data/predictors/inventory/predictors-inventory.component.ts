@@ -1,5 +1,5 @@
 import { buildPredictorTiles } from './predictor-tile.view';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -10,12 +10,14 @@ import { orderPortfolioPredictors } from '@app/v1/data/inventory/data-inventory-
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
-import { InventoryToolsComponent } from '@app/v1/data/inventory/inventory-tools/inventory-tools.component';
+import { InventoryHeaderActionsRegistry } from '@app/v1/data/inventory/inventory-header-actions.service';
+import { InventorySelectionController } from '@app/v1/data/inventory/selection/inventory-selection.controller';
+import { InventoryChartController } from '@app/v1/data/inventory/charts/inventory-chart.controller';
+import { InventoryToolsSource } from '@app/v1/data/inventory/inventory-tools.models';
 
 @Component({ selector: 'app-predictors-inventory', standalone: false,
   templateUrl: './predictors-inventory.component.html', styleUrls: ['./predictors-inventory.component.css'] })
 export class PredictorsInventoryComponent {
-  readonly tools = viewChild(InventoryToolsComponent);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
@@ -44,6 +46,21 @@ export class PredictorsInventoryComponent {
   readonly scopeGuids = computed(() => this.entries().map(item => item.guid));
   readonly toolsFiltersKey = computed(() => JSON.stringify(this.filters()));
   readonly browseIds = this.inventory.visibleIds;
+  readonly toolsSource: InventoryToolsSource = {
+    context: computed(() => ({ accountGuid: this.workspace.account()?.guid,
+      facilityGuid: this.navigation.inventoryFacilityGuid(), resource: 'predictors' as const })),
+    matchingGuids: this.matchingGuids, scopeGuids: this.scopeGuids, filtersKey: this.toolsFiltersKey
+  };
+  readonly selection = new InventorySelectionController(this.toolsSource);
+  readonly chart = new InventoryChartController(this.toolsSource);
+
+  constructor() {
+    const unregister = inject(InventoryHeaderActionsRegistry).register({
+      resource: 'predictors', selecting: this.selection.selecting, canToggle: this.selection.canToggle,
+      toggleSelection: () => this.selection.toggleSelection()
+    });
+    inject(DestroyRef).onDestroy(unregister);
+  }
   clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', type: 'all', sort: 'attention' }); }
   navigateRoute(route: readonly string[]): void { this.navigate([...route]); }
   private navigate(route: string[]): void {

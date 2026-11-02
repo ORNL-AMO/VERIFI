@@ -18,6 +18,7 @@ import { DataModule } from '@app/v1/data/data.module';
 import { DataInventoryComponent } from './data-inventory.component';
 import { FacilityActionsService } from '@app/v1/data/facilities/facility-actions.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { InventoryHeaderActionsRegistry } from './inventory-header-actions.service';
 
 describe('DataInventoryComponent', () => {
   let fixture: ComponentFixture<DataInventoryComponent>;
@@ -100,6 +101,25 @@ describe('DataInventoryComponent', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('delegates the header toggle through the current typed registration and ignores other resource owners', () => {
+    activePortfolioTab.set('meters'); fixture.detectChanges();
+    const registry = fixture.debugElement.injector.get(InventoryHeaderActionsRegistry);
+    const selecting = signal(false), available = signal(true);
+    const toggle = vi.fn(() => selecting.update(value => !value));
+    const unregister = registry.register({ resource: 'meters', selecting: selecting.asReadonly(), canToggle: available.asReadonly(), toggleSelection: toggle });
+    fixture.detectChanges();
+    const button = buttonByText('Select meters');
+    expect(button.disabled).toBe(false);
+    button.click(); fixture.detectChanges();
+    expect(toggle).toHaveBeenCalledOnce(); expect(button.getAttribute('aria-pressed')).toBe('true');
+    available.set(false); fixture.detectChanges(); expect(button.disabled).toBe(true);
+    available.set(true); activePortfolioTab.set('predictors'); fixture.detectChanges();
+    expect(buttonByText('Select predictors').disabled).toBe(true);
+    unregister(); fixture.detectChanges(); expect(fixture.componentInstance.selectionActions()).toBeUndefined();
+    activePortfolioTab.set('facilities'); fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Select facilities');
   });
 
   it('shows account and selected-facility breadcrumbs and clears scope through the account action', () => {

@@ -1,5 +1,5 @@
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -8,7 +8,10 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { buildMeterInventory, filterMeterInventory, MeterInventorySort, MeterInventoryStatusFilter } from './meter-inventory.view';
 import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
 import { meterTiles, orderPortfolioMeters } from '@app/v1/data/inventory/data-inventory-tiles.view';
-import { InventoryToolsComponent } from '@app/v1/data/inventory/inventory-tools/inventory-tools.component';
+import { InventoryHeaderActionsRegistry } from '@app/v1/data/inventory/inventory-header-actions.service';
+import { InventorySelectionController } from '@app/v1/data/inventory/selection/inventory-selection.controller';
+import { InventoryChartController } from '@app/v1/data/inventory/charts/inventory-chart.controller';
+import { InventoryToolsSource } from '@app/v1/data/inventory/inventory-tools.models';
 
 @Component({
   selector: 'app-meters-inventory',
@@ -17,7 +20,6 @@ import { InventoryToolsComponent } from '@app/v1/data/inventory/inventory-tools/
   standalone: false
 })
 export class MetersInventoryComponent {
-  readonly tools = viewChild(InventoryToolsComponent);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
@@ -50,6 +52,21 @@ export class MetersInventoryComponent {
   readonly scopeGuids = computed(() => this.meters().map(item => item.meter.guid));
   readonly toolsFiltersKey = computed(() => JSON.stringify(this.filters()));
   readonly browseIds = this.inventory.visibleIds;
+  readonly toolsSource: InventoryToolsSource = {
+    context: computed(() => ({ accountGuid: this.workspace.account()?.guid,
+      facilityGuid: this.navigation.inventoryFacilityGuid(), resource: 'meters' as const })),
+    matchingGuids: this.matchingGuids, scopeGuids: this.scopeGuids, filtersKey: this.toolsFiltersKey
+  };
+  readonly selection = new InventorySelectionController(this.toolsSource);
+  readonly chart = new InventoryChartController(this.toolsSource);
+
+  constructor() {
+    const unregister = inject(InventoryHeaderActionsRegistry).register({
+      resource: 'meters', selecting: this.selection.selecting, canToggle: this.selection.canToggle,
+      toggleSelection: () => this.selection.toggleSelection()
+    });
+    inject(DestroyRef).onDestroy(unregister);
+  }
 
   clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', sort: 'attention' }); }
   async navigateRoute(route: readonly string[]): Promise<void> {
