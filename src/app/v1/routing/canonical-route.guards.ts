@@ -4,6 +4,7 @@ import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router, Rout
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
+import { accountRoute, facilityRoute } from './workspace-route';
 
 export const accountHomeCanonicalGuard: CanActivateFn = route => {
   const accountGuid = route.parent?.paramMap.get('accountGuid');
@@ -11,7 +12,7 @@ export const accountHomeCanonicalGuard: CanActivateFn = route => {
   if (route.paramMap.get('detail') === 'overview') {
     return true;
   }
-  return inject(Router).createUrlTree(accountHomeCommands(accountGuid));
+  return inject(Router).createUrlTree(accountRoute(accountGuid));
 };
 
 export const facilityHomeCanonicalGuard: CanActivateFn = route => {
@@ -20,7 +21,7 @@ export const facilityHomeCanonicalGuard: CanActivateFn = route => {
   if (route.paramMap.get('detail') === 'overview') {
     return true;
   }
-  return inject(Router).createUrlTree(facilityHomeCommands(facilityGuid));
+  return inject(Router).createUrlTree(facilityRoute(facilityGuid));
 };
 
 export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route, state) => {
@@ -55,14 +56,6 @@ export const singleFacilityBackupCanonicalGuard: CanActivateFn = route => {
   return facility && facility.guid === facilityGuid
     ? inject(Router).createUrlTree(['/v1', 'workspace', 'account', facility.accountId, 'settings', 'backup']) : true;
 };
-
-export function accountHomeCommands(accountGuid: string): Array<string> {
-  return ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview'];
-}
-
-export function facilityHomeCommands(facilityGuid: string): Array<string> {
-  return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
-}
 
 export function singleSiteRedirectCommands(
   state: RouterStateSnapshot,

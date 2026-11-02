@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ACCOUNT_CUSTOM_DATA_ITEMS, buildResourceNavGroups } from '../models';
-import { AccountPortfolioTab } from '@app/v1/shell/workspace-navigation.service';
+import { AccountPortfolioTab } from '@app/v1/routing/workspace-route';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 
 const PORTFOLIO_LINKS: ReadonlyArray<{ id: AccountPortfolioTab; label: string; icon: IconName }> = [

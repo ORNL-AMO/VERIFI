@@ -10,7 +10,8 @@ import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layou
 import type { StatusItem } from '@app/v1/status/status.models';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { WorkspaceNavigationService, parseWorkspaceRoute } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FACILITY_REPORT_ROUTES } from '../facility-reports.routes';
 import { FacilityReportsModule } from '../facility-reports.module';

@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed, signal, inject, Injector, afterNextRender } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ALL_FACILITIES, FacilityScope } from '../../facility-scope.models';
+import { ALL_FACILITIES, FacilityScope } from '@app/v1/routing/workspace-route';
 import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({

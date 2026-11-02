@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateChildFn, Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { parseWorkspaceRoute } from './workspace-navigation.service';
+import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 
 /** Query-only scope changes reuse inventory components, so they must explicitly guard their editors. */
 export const inventoryScopeChangeGuard: CanActivateChildFn = async (_route, next) => {
