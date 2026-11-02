@@ -1,5 +1,5 @@
 import { Component, effect, inject, untracked } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FacilityProfileForm } from '@shared/settings-forms/settings-form.models';
 import { FacilityClassifications } from '@data/models/constantsAndTypes';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { Countries } from '@shared/form-data/countries';
@@ -20,7 +20,7 @@ export class FacilitySettingsProfileComponent extends FacilitySettingsDetailBase
   readonly countries = Countries;
   readonly firstNaicsList = FirstNaicsList;
   readonly facilityClassifications = FacilityClassifications;
-  form: FormGroup;
+  form: FacilityProfileForm;
 
   constructor() {
     super();
@@ -61,11 +61,7 @@ export class FacilitySettingsProfileComponent extends FacilitySettingsDetailBase
     await this.saveFacility(
       'Saving facility profile',
       'profile',
-      facility => {
-        const updated = this.settingsForms.updateFacilityFromGeneralInformationForm(this.form, facility);
-        updated.classification = this.form.controls['classification'].value;
-        return updated;
-      }
+      facility => this.settingsForms.updateFacilityFromGeneralInformationForm(this.form, facility)
     );
   }
 
@@ -92,8 +88,7 @@ export class FacilitySettingsProfileComponent extends FacilitySettingsDetailBase
   }
 
   private buildForm(facility: IdbFacility): void {
-    this.form = this.settingsForms.getGeneralInformationForm(facility);
-    this.form.addControl('classification', new FormControl(facility.classification || 'Manufacturing'));
+    this.form = this.settingsForms.getFacilityGeneralInformationForm(facility);
     this.applyFormAvailability(untracked(() => this.canWrite()));
     this.trackSettingsForm(this.form, facility.guid, () => this.saveProfile());
   }

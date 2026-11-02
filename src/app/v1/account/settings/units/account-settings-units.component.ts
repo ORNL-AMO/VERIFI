@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UnitsForm } from '@shared/settings-forms/settings-form.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
@@ -22,7 +22,7 @@ export class AccountSettingsUnitsComponent extends AccountSettingsDetailBase {
   readonly volumeGasOptions = VolumeGasOptions;
   readonly massUnitOptions = MassUnitOptions;
   readonly subregionOptions = computed(() => this.getSubregionOptions(this.account()?.zip));
-  form: FormGroup;
+  form: UnitsForm;
 
   constructor() {
     super();

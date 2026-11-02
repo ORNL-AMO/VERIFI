@@ -14,7 +14,6 @@ import {
 
 export type AccountAnalysisCardStatus = 'evaluating' | 'ready' | 'warning' | 'error';
 export type AccountAnalysisSelectionState = 'included' | 'skipped' | 'missing' | 'invalid';
-export type AccountAnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 
 export interface AccountAnalysisFacilitySelectionView {
   readonly facility?: IdbFacility;
@@ -74,13 +73,6 @@ export interface BuildAccountAnalysisCardsInput {
   readonly reports: readonly IdbAccountReport[];
   readonly statusItems: readonly StatusItem[];
   readonly statusState: StatusEvaluationState;
-}
-
-export interface AccountAnalysisCardFilters {
-  readonly search: string;
-  readonly category: 'all' | AnalysisCategory;
-  readonly status: 'all' | 'ready' | 'warning' | 'error' | 'active';
-  readonly sort: AccountAnalysisSort;
 }
 
 export function buildAccountAnalysisCards(input: BuildAccountAnalysisCardsInput): AccountAnalysisCard[] {
@@ -178,29 +170,6 @@ export function buildAccountAnalysisFacilitySelections(
       return selectionView(facilityGuid, facility, selected, 'invalid', 'Selection does not match this facility and category');
     }
     return selectionView(facilityGuid, facility, selected, 'included', 'Included in account results');
-  });
-}
-
-export function filterAndSortAccountAnalysisCards<T extends AccountAnalysisCard>(
-  cards: readonly T[],
-  filters: AccountAnalysisCardFilters
-): T[] {
-  const search = filters.search.trim().toLocaleLowerCase();
-  return cards.filter(card =>
-    (!search || card.searchText.includes(search))
-    && (filters.category === 'all' || card.category === filters.category)
-    && (filters.status === 'all'
-      || (filters.status === 'active' ? card.isActiveForReporting : card.status === filters.status))
-  ).sort((first, second) => {
-    if (filters.sort === 'modified') return second.modifiedSortValue - first.modifiedSortValue;
-    if (filters.sort === 'name') return first.analysis.name.localeCompare(second.analysis.name);
-    if (filters.sort === 'baseline') {
-      return (first.analysis.baselineYear ?? Infinity) - (second.analysis.baselineYear ?? Infinity)
-        || first.analysis.name.localeCompare(second.analysis.name);
-    }
-    return first.attentionRank - second.attentionRank
-      || Number(second.isActiveForReporting) - Number(first.isActiveForReporting)
-      || first.analysis.name.localeCompare(second.analysis.name);
   });
 }
 

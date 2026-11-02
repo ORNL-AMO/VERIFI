@@ -5,8 +5,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import {
   buildAccountAnalysisCards,
-  buildAccountAnalysisFacilitySelections,
-  filterAndSortAccountAnalysisCards
+  buildAccountAnalysisFacilitySelections
 } from './account-analysis.models';
 
 describe('account analysis dashboard models', () => {
@@ -90,7 +89,7 @@ describe('account analysis dashboard models', () => {
     expect(card.linkedReports).toEqual([]);
   });
 
-  it('filters searchable facility facts and applies stable attention ordering', () => {
+  it('includes linked facility facts in searchable projections', () => {
     const completeAnalysis = {
       ...analysis,
       facilityAnalysisItems: [
@@ -112,9 +111,8 @@ describe('account analysis dashboard models', () => {
       } as any],
       statusState: 'ready'
     });
-    expect(filterAndSortAccountAnalysisCards(cards, {
-      search: 'alpha energy', category: 'all', status: 'all', sort: 'attention'
-    }).map(card => card.analysis.guid)).toEqual(['warning', 'account-analysis-a']);
+    expect(cards.every(card => card.searchText.includes('alpha energy'))).toBe(true);
+    expect(cards.find(card => card.analysis.guid === 'warning')?.status).toBe('warning');
   });
 
   it('marks an analysis as an error when a current facility has no selection entry', () => {
@@ -136,24 +134,5 @@ describe('account analysis dashboard models', () => {
     expect(card.statusLabel).toBe('Error');
   });
 
-  it('sorts finite baseline years first and leaves unset baselines at the end', () => {
-    const cards = buildAccountAnalysisCards({
-      account,
-      analyses: [
-        { ...analysis, guid: 'unset-z', name: 'Zulu', baselineYear: undefined },
-        { ...analysis, guid: 'newer', name: 'Newer', baselineYear: 2023 },
-        { ...analysis, guid: 'older', name: 'Older', baselineYear: 2021 },
-        { ...analysis, guid: 'unset-a', name: 'Alpha', baselineYear: undefined }
-      ] as IdbAccountAnalysisItem[],
-      facilities,
-      facilityAnalyses,
-      reports: [],
-      statusItems: [],
-      statusState: 'ready'
-    });
 
-    expect(filterAndSortAccountAnalysisCards(cards, {
-      search: '', category: 'all', status: 'all', sort: 'baseline'
-    }).map(card => card.analysis.guid)).toEqual(['older', 'newer', 'unset-a', 'unset-z']);
-  });
 });

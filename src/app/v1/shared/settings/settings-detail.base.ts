@@ -15,7 +15,7 @@ export abstract class SettingsDetailBase implements OnDestroy {
   protected skipNextWorkspaceRefresh = false;
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
   private idleTimer: ReturnType<typeof setTimeout> | undefined;
-  private editor?: { form: FormGroup; scopeGuid: string; savedValue: unknown; save: () => Promise<void> };
+  private editor?: { form: AbstractControl<unknown>; scopeGuid: string; savedValue: unknown; save: () => Promise<void> };
   private readonly pendingSaves = new Set<Promise<void>>();
   private readonly unregisterDraft = inject(UnsavedChangesService).register(
     () => this.hasUnsavedChanges(),
@@ -30,7 +30,7 @@ export abstract class SettingsDetailBase implements OnDestroy {
     this.clearIdleTimer();
   }
 
-  protected trackSettingsForm(form: FormGroup, scopeGuid: string, save: () => Promise<void>): void {
+  protected trackSettingsForm(form: AbstractControl<unknown>, scopeGuid: string, save: () => Promise<void>): void {
     this.editor = { form, scopeGuid, savedValue: structuredClone(form.getRawValue()), save };
   }
 
@@ -123,7 +123,7 @@ export abstract class SettingsDetailBase implements OnDestroy {
     }
   }
 
-  protected setFormEnabled(form: FormGroup | undefined, enabled: boolean): void {
+  protected setFormEnabled(form: AbstractControl<unknown> | undefined, enabled: boolean): void {
     if (!form) {
       return;
     }
@@ -145,8 +145,12 @@ export abstract class SettingsDetailBase implements OnDestroy {
     }
   }
 
-  protected setControlsEnabled(form: FormGroup | undefined, controlNames: string[], enabled: boolean): void {
-    controlNames.forEach(controlName => this.setControlEnabled(form?.controls[controlName], enabled));
+  protected setControlsEnabled<T extends { [Key in keyof T]: AbstractControl }>(
+    form: FormGroup<T> | undefined,
+    controlNames: readonly (keyof T)[],
+    enabled: boolean
+  ): void {
+    controlNames.forEach(controlName => this.setControlEnabled(form?.get(String(controlName)), enabled));
   }
 
   private clearDebounce(): void {

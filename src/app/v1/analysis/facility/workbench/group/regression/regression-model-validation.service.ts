@@ -1,6 +1,5 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@data/models/analysis';
-import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { calculateRegressionValidation } from '@domain/calculations/analysis-calculations/regression-validation-calculation';
 import {
   RegressionValidationSource,
@@ -183,17 +182,6 @@ export function modelPeriodMonthCount(group: AnalysisGroup): number {
     .every(value => Number.isFinite(value))) return 0;
   return (group.regressionEndYear - group.regressionStartYear) * 12
     + group.regressionModelEndMonth - group.regressionModelStartMonth + 1;
-}
-
-export function validationAnalysisCopies(
-  analysis: IdbAnalysisItem,
-  source: RegressionValidationSource,
-  group: AnalysisGroup
-): { chartAnalysis: IdbAnalysisItem; modelAnalysis: IdbAnalysisItem } {
-  const chartAnalysis = structuredClone(analysis);
-  const modelAnalysis = structuredClone(analysis);
-  if (source === 'user-defined') modelAnalysis.baselineYear = group.regressionStartYear;
-  return { chartAnalysis, modelAnalysis };
 }
 
 export function groupWithGeneratedModel(group: AnalysisGroup, model: JStatRegressionModel): AnalysisGroup {

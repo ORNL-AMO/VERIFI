@@ -1,5 +1,7 @@
 import { Component, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import {
+  AccountGoalsForm, GoalBaselineControl, GoalKind, GoalTargetControl
+} from '@shared/settings-forms/settings-form.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
@@ -16,7 +18,7 @@ export class AccountSettingsGoalsComponent extends AccountSettingsDetailBase {
 
   readonly years = Array.from({ length: 50 }, (_, index) => 2050 - index);
   readonly assessmentReportVersions = ['AR4', 'AR5', 'AR6'];
-  form: FormGroup;
+  form: AccountGoalsForm;
 
   constructor() {
     super();
@@ -50,7 +52,7 @@ export class AccountSettingsGoalsComponent extends AccountSettingsDetailBase {
     );
   }
 
-  async changeBaselineYear(baselineControl: string, targetControl: string): Promise<void> {
+  async changeBaselineYear(baselineControl: GoalBaselineControl, targetControl: GoalTargetControl): Promise<void> {
     const baseline = Number(this.form.controls[baselineControl].value);
     this.form.controls[targetControl].patchValue(Math.min(baseline + 10, 2050));
     await this.saveGoals();
@@ -76,7 +78,7 @@ export class AccountSettingsGoalsComponent extends AccountSettingsDetailBase {
     );
   }
 
-  private setGoalControlsEnabled(goal: 'energy' | 'water' | 'greenhouse', enabled: boolean): void {
+  private setGoalControlsEnabled(goal: GoalKind, enabled: boolean): void {
     this.setControlsEnabled(this.form, [
       `${goal}ReductionPercent`,
       `${goal}ReductionBaselineYear`,

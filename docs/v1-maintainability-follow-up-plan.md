@@ -1,10 +1,10 @@
 # V1 Maintainability Follow-up Plan
 
-**Status: In progress**
+**Status: Complete**
 
 ## Purpose and boundaries
 
-This plan records maintenance work identified by the review of `unified-ux...ca76a88a1` after global facility scope Phase 5. The immediate navigation, Settings atomicity, and dashboard-retirement cleanup were completed in [Phase 6 of the scope roadmap](v1-global-facility-scope-plan.md#phase-6--review-fixes-and-scoped-cleanup). The packages below remain separate follow-ups, not additional requirements for that PR or authorization to implement them together.
+This plan records maintenance work identified by the review of `unified-ux...ca76a88a1` after global facility scope Phase 5. The immediate navigation, Settings atomicity, and dashboard-retirement cleanup were completed in [Phase 6 of the scope roadmap](v1-global-facility-scope-plan.md#phase-6--review-fixes-and-scoped-cleanup). The five packages below have now been implemented and validated separately after that PR. Their original review evidence and acceptance results are recorded here; PR publication follows the repository review checkpoint.
 
 Preserve the [UI architecture](../ARCHITECTURE.md#ui-architecture), NgModule-based feature organization, existing URLs and guarded journeys, committed workspace ownership, GUID relationships, calculations, imports/backups, v0, and Electron boundaries. No broad Angular migration, new design system, generic CRUD framework, persisted schema, or format migration is proposed. Recheck consumers before extraction or deletion; a test-only reference is not evidence that production behavior needs the obsolete abstraction.
 
@@ -64,20 +64,28 @@ Focused validation passed (4 fast files, 74 tests), including every supported fa
 
 ## 4. Inherited maintenance debt
 
-**Status: Not started**
+**Status: Complete**
 
 **Original review evidence:** [Settings form helpers](../src/app/shared/settings-forms/settings-form.service.ts) use a broad control-record type while feature editors declare unparameterized `FormGroup`s. [AccountSettingsModule](../src/app/v1/account/settings/account-settings.module.ts) imports the broad Data module. The review also found source already unused at the comparison base:
 
-- [Account Analysis scaffold](../src/app/v1/analysis/account/workbench/scaffold-page/account-analysis-scaffold-page.component.ts) and [Analysis results toolbar](../src/app/v1/analysis/facility/workbench/results/presentation/toolbar/analysis-result-toolbar.component.ts), including their component file sets.
+- `AccountAnalysisScaffoldPageComponent` and `AnalysisResultToolbarComponent`, including their component file sets.
 - `filterAndSortAccountAnalysisCards` and its filter/sort types in [account Analysis models](../src/app/v1/analysis/account/account-analysis.models.ts).
 - `usableBankedGroup` in [banking helpers](../src/app/v1/analysis/facility/workbench/banking/facility-analysis-banking.ts) and `validationAnalysisCopies` in [regression validation](../src/app/v1/analysis/facility/workbench/group/regression/regression-model-validation.service.ts).
-- The unused Meter workbench placeholder [template](../src/app/v1/data/meters/meter-workbench/meter-workbench-tab-placeholder.component.html) and [stylesheet](../src/app/v1/data/meters/meter-workbench/meter-workbench-tab-placeholder.component.css).
+- The unused Meter workbench placeholder `meter-workbench-tab-placeholder.component.html` and `meter-workbench-tab-placeholder.component.css`.
 
 **Changes and interfaces:** Type Settings forms by editor/control shape and translate form values into typed changes at the command boundary, preserving optional-value normalization and existing field semantics. Narrow Settings imports to the feature modules its templates actually consume; remove unused imports. Delete the listed inherited artifacts only after repeating class, selector, import, and function-reference scans; remove tests of dead paths while preserving tests for live domain rules.
 
 **Dependencies:** Build Settings typing on Phase 6's atomic-save interface. Module narrowing and independently verified deletions can ship as separate changes. Do not expand this package into unrelated Home, Imports, or Settings folder reorganization.
 
 **Acceptance:** Type-check the form/command boundary and run affected editor, module, and routing specs. Verify hydration does not save, optional/disabled fields map correctly, failed drafts survive, and single-facility mirroring/portfolio behavior remains intact. Re-run relevant domain tests for removed helpers and scan for dead imports/selectors; production web compilation validates narrowed module imports.
+
+### Implementation and evidence
+
+Account/facility Profile, Units, Goals, Financial, and account Backup editors now use explicit typed control shapes and typed builders/mappers. The facility profile factory creates size/classification controls for both Settings and creation. Nullable optional inputs map to durable optional values; disabled controls retain their values. Draft snapshots stay opaque in the shared lifecycle. Existing normalization, hydration, autosave, failure/retry behavior, atomic mirroring, and portfolio save paths remain intact. The typed Data Validation editor was retained. Account Settings now imports Facilities directly instead of Data.
+
+Verified unused aliases, retired staleness-form wrappers, the Analysis scaffold/toolbar, old account filtering contracts, banking/regression wrappers, and orphaned Meter assets were removed. Useful search/baseline assertions now target the live mixed Analysis inventory, while live normalization, banking, generated-model, and Worker coverage remains. Reference scans found no production callers for the deleted paths. No schema, backup-format, calculation, IPC, or v0 contract changes were made.
+
+Acceptance passed: focused fast coverage (13 files, 128 tests), application TypeScript check, full fast and Chromium suites (55 browser files, 282 tests), production web build, validation planner, documentation links/anchors, retired-reference scans, and whitespace check. Existing native Settings coverage protects ownership/conversion rejection, both-write rollback and reopen/retry, retained drafts, and committed publication. Independent source review found no actionable issues. Initial restricted focused execution aborted; the retry passed. Existing CSS-budget/CommonJS warnings remain; Electron boundaries were unchanged and desktop checks were not run.
 
 ## 5. Chart runtime investigation
 
@@ -103,4 +111,4 @@ Focused coverage also exercises native hidden-to-visible recovery, controller-ow
 
 Deliver one package per PR in this order: chart investigation (5), navigation ownership (1), inventory ownership (2), report presentation (3), and inherited maintenance debt (4). Keep each package separately reviewable and update its status/evidence when delivered. Use the [risk-based testing policy](testing.md#what-a-change-requires) and [validation workflow](../.agents/skills/validate-web-and-electron/SKILL.md): focused behavior tests first, then `npm run validate:agent -- --mode plan` and its required parent checks. Add browser tests for routing/history, native chart layout, or IndexedDB behavior; add Electron checks only when its runtime boundary changes.
 
-This document introduces no runtime changes. Validate its local links and source references; implementation tests, type-checks, and builds belong to the package that changes their affected behavior.
+All five implementation packages have passed their acceptance checks. The original plan introduced no runtime changes; the implementation and validation evidence above belongs to each delivered package. Historical Phase 6 results remain unchanged. Each package remains separately reviewable and uses the repository PR review checkpoint for publication.

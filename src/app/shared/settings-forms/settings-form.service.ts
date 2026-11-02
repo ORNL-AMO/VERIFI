@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { DEFAULT_DATA_STALENESS_MONTHS, DataStalenessMonths } from '@domain/calculations/status-check-calculations/statusCheckModels';
+import { DEFAULT_DATA_STALENESS_MONTHS } from '@domain/calculations/status-check-calculations/statusCheckModels';
 import { AccountAndFacility, DataStalenessSettings } from '@data/models/idbModels/accountAndFacility';
-import { AssessmentReportVersion, IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SustainabilityQuestions } from '@data/models/sustainabilityQuestions';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '@shared/unitOptions';
-
-export type SettingsForm = FormGroup<Record<string, FormControl<unknown>>>;
+import {
+  AccountGoalsForm, AccountProfileForm, FacilityGoalsForm, FacilityProfileForm,
+  FinancialForm, SustainabilityQuestionControls, UnitsForm
+} from './settings-form.models';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsFormService {
   constructor(private readonly formBuilder: FormBuilder) { }
 
-  getGeneralInformationForm(generalInformation: AccountAndFacility): FormGroup {
+  getGeneralInformationForm(generalInformation: AccountAndFacility): AccountProfileForm {
     return this.formBuilder.group({
       name: [generalInformation.name, [Validators.required]],
       country: [generalInformation.country],
@@ -24,7 +26,6 @@ export class SettingsFormService {
       naics1: [generalInformation.naics1],
       naics2: [generalInformation.naics2],
       naics3: [generalInformation.naics3],
-      size: [generalInformation.size],
       notes: [generalInformation.notes],
       color: [generalInformation.color],
       contactName: [generalInformation.contactName],
@@ -33,7 +34,15 @@ export class SettingsFormService {
     });
   }
 
-  updateAccountFromGeneralInformationForm(form: FormGroup, account: IdbAccount): IdbAccount {
+  getFacilityGeneralInformationForm(facility: IdbFacility): FacilityProfileForm {
+    return new FormGroup({
+      ...this.getGeneralInformationForm(facility).controls,
+      size: new FormControl(facility.size ?? null),
+      classification: new FormControl(facility.classification || 'Manufacturing')
+    });
+  }
+
+  updateAccountFromGeneralInformationForm(form: AccountProfileForm, account: IdbAccount): IdbAccount {
     account.name = String(form.controls['name'].value || '').trim();
     account.country = form.controls['country'].value;
     account.city = form.controls['city'].value;
@@ -51,7 +60,7 @@ export class SettingsFormService {
     return account;
   }
 
-  updateFacilityFromGeneralInformationForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+  updateFacilityFromGeneralInformationForm(form: FacilityProfileForm, facility: IdbFacility): IdbFacility {
     facility.name = String(form.controls['name'].value || '').trim();
     facility.country = form.controls['country'].value;
     facility.city = form.controls['city'].value;
@@ -66,11 +75,12 @@ export class SettingsFormService {
     facility.contactName = form.controls['contactName'].value;
     facility.contactEmail = form.controls['contactEmail'].value;
     facility.contactPhone = form.controls['contactPhone'].value;
-    facility.size = form.controls['size'].value;
+    facility.size = form.controls.size.value ?? undefined;
+    facility.classification = form.controls.classification.value;
     return facility;
   }
 
-  getUnitsForm(accountOrFacility: AccountAndFacility): FormGroup {
+  getUnitsForm(accountOrFacility: AccountAndFacility): UnitsForm {
     return this.formBuilder.group({
       unitsOfMeasure: [accountOrFacility.unitsOfMeasure, [Validators.required]],
       energyUnit: [accountOrFacility.energyUnit, [Validators.required]],
@@ -83,31 +93,31 @@ export class SettingsFormService {
     });
   }
 
-  updateAccountFromUnitsForm(form: FormGroup, account: IdbAccount): IdbAccount {
+  updateAccountFromUnitsForm(form: UnitsForm, account: IdbAccount): IdbAccount {
     account.unitsOfMeasure = form.controls['unitsOfMeasure'].value;
     account.energyUnit = form.controls['energyUnit'].value;
     account.massUnit = form.controls['massUnit'].value;
     account.volumeLiquidUnit = form.controls['volumeLiquidUnit'].value;
     account.volumeGasUnit = form.controls['volumeGasUnit'].value;
     account.energyIsSource = form.controls['energyIsSource'].value;
-    account.eGridSubregion = form.controls['eGridSubregion'].value;
+    account.eGridSubregion = form.controls.eGridSubregion.value ?? undefined;
     account.electricityUnit = form.controls['electricityUnit'].value;
     return account;
   }
 
-  updateFacilityFromUnitsForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+  updateFacilityFromUnitsForm(form: UnitsForm, facility: IdbFacility): IdbFacility {
     facility.unitsOfMeasure = form.controls['unitsOfMeasure'].value;
     facility.energyUnit = form.controls['energyUnit'].value;
     facility.massUnit = form.controls['massUnit'].value;
     facility.volumeLiquidUnit = form.controls['volumeLiquidUnit'].value;
     facility.volumeGasUnit = form.controls['volumeGasUnit'].value;
     facility.energyIsSource = form.controls['energyIsSource'].value;
-    facility.eGridSubregion = form.controls['eGridSubregion'].value;
+    facility.eGridSubregion = form.controls.eGridSubregion.value ?? undefined;
     facility.electricityUnit = form.controls['electricityUnit'].value;
     return facility;
   }
 
-  getFiscalYearForm(accountOrFacility: AccountAndFacility): FormGroup {
+  getFiscalYearForm(accountOrFacility: AccountAndFacility): FinancialForm {
     return this.formBuilder.group({
       fiscalYear: [accountOrFacility.fiscalYear || 'calendarYear'],
       fiscalYearMonth: [accountOrFacility.fiscalYearMonth ?? 0],
@@ -115,21 +125,21 @@ export class SettingsFormService {
     });
   }
 
-  updateAccountFromFiscalForm(form: FormGroup, account: IdbAccount): IdbAccount {
+  updateAccountFromFiscalForm(form: FinancialForm, account: IdbAccount): IdbAccount {
     account.fiscalYear = form.controls['fiscalYear'].value;
     account.fiscalYearMonth = form.controls['fiscalYearMonth'].value;
     account.fiscalYearCalendarEnd = form.controls['fiscalYearCalendarEnd'].value;
     return account;
   }
 
-  updateFacilityFromFiscalForm(form: FormGroup, facility: IdbFacility): IdbFacility {
+  updateFacilityFromFiscalForm(form: FinancialForm, facility: IdbFacility): IdbFacility {
     facility.fiscalYear = form.controls['fiscalYear'].value;
     facility.fiscalYearMonth = form.controls['fiscalYearMonth'].value;
     facility.fiscalYearCalendarEnd = form.controls['fiscalYearCalendarEnd'].value;
     return facility;
   }
 
-  getSustainabilityQuestionsForm(account: IdbAccount): FormGroup {
+  getSustainabilityQuestionsForm(account: IdbAccount): AccountGoalsForm {
     const questions = this.normalizeSustainabilityQuestions(account.sustainabilityQuestions);
     return this.formBuilder.group({
       displayEmissions: [!!account.displayEmissions],
@@ -139,7 +149,7 @@ export class SettingsFormService {
     });
   }
 
-  getFacilitySustainabilityQuestionsForm(facility: IdbFacility): FormGroup {
+  getFacilitySustainabilityQuestionsForm(facility: IdbFacility): FacilityGoalsForm {
     const questions = this.normalizeSustainabilityQuestions(facility.sustainabilityQuestions);
     return this.formBuilder.group({
       ...this.getSustainabilityQuestionControlConfig(questions),
@@ -147,64 +157,21 @@ export class SettingsFormService {
     });
   }
 
-  updateAccountFromSustainabilityQuestionsForm(form: FormGroup, account: IdbAccount): IdbAccount {
-    if (form.controls['displayEmissions']) {
-      account.displayEmissions = !!form.controls['displayEmissions'].value;
-    }
-    if (form.controls['assessmentReportVersion']) {
-      account.assessmentReportVersion = (form.controls['assessmentReportVersion'].value || 'AR6') as AssessmentReportVersion;
-    }
-    account.sustainabilityQuestions = this.getSustainabilityQuestionsFromForm(form);
-    if (form.controls['isBetterPlantsPartner']) {
-      account.isBetterPlantsPartner = !!form.controls['isBetterPlantsPartner'].value;
-    }
+  updateAccountFromSustainabilityQuestionsForm(form: AccountGoalsForm, account: IdbAccount): IdbAccount {
+    account.displayEmissions = !!form.controls.displayEmissions.value;
+    account.assessmentReportVersion = form.controls.assessmentReportVersion.value || 'AR6';
+    account.sustainabilityQuestions = this.getSustainabilityQuestionsFromForm(form.controls);
+    account.isBetterPlantsPartner = !!form.controls.isBetterPlantsPartner.value;
     return account;
   }
 
-  updateFacilityFromSustainabilityQuestionsForm(form: FormGroup, facility: IdbFacility): IdbFacility {
-    facility.sustainabilityQuestions = this.getSustainabilityQuestionsFromForm(form);
+  updateFacilityFromSustainabilityQuestionsForm(form: FacilityGoalsForm, facility: IdbFacility): IdbFacility {
+    facility.sustainabilityQuestions = this.getSustainabilityQuestionsFromForm(form.controls);
     facility.isNewFacility = !!form.controls['isNewFacility']?.value;
     return facility;
   }
 
-  getStalenessForm(settings: DataStalenessSettings | undefined): FormGroup {
-    const current = this.normalizeDataStalenessSettings(settings);
-    return this.formBuilder.group({
-      enabled: [current.enabled],
-      thresholdMonths: [current.thresholdMonths]
-    });
-  }
-
-  getFacilityStalenessForm(
-    facilitySettings: DataStalenessSettings | undefined,
-    accountSettings?: DataStalenessSettings
-  ): FormGroup {
-    const current = this.normalizeFacilityDataStalenessSettings(facilitySettings, accountSettings);
-    return this.formBuilder.group({
-      enabled: [current.enabled],
-      thresholdMonths: [current.thresholdMonths],
-      useAccountSettings: [!!current.useAccountSettings]
-    });
-  }
-
-  updateAccountFromStalenessForm(form: FormGroup, account: IdbAccount): IdbAccount {
-    account.dataStalenessSettings = {
-      enabled: !!form.controls['enabled'].value,
-      thresholdMonths: form.controls['thresholdMonths'].value as DataStalenessMonths
-    };
-    return account;
-  }
-
-  updateFacilityFromStalenessForm(form: FormGroup, facility: IdbFacility): IdbFacility {
-    facility.dataStalenessSettings = {
-      enabled: !!form.controls['enabled'].value,
-      thresholdMonths: form.controls['thresholdMonths'].value as DataStalenessMonths,
-      useAccountSettings: !!form.controls['useAccountSettings']?.value
-    };
-    return facility;
-  }
-
-  setUnitsOfMeasure(form: FormGroup): FormGroup {
+  setUnitsOfMeasure(form: UnitsForm): UnitsForm {
     if (form.controls['unitsOfMeasure'].value === 'Imperial') {
       form.controls['energyUnit'].setValue('kWh');
       form.controls['volumeLiquidUnit'].setValue('ft3');
@@ -219,7 +186,7 @@ export class SettingsFormService {
     return form;
   }
 
-  checkCustom(form: FormGroup): FormGroup {
+  checkCustom(form: UnitsForm): UnitsForm {
     const selectedEnergyOption = EnergyUnitOptions.find(option => option.value === form.controls['energyUnit'].value);
     const selectedVolumeGasOption = VolumeGasOptions.find(option => option.value === form.controls['volumeGasUnit'].value);
     const selectedVolumeLiquidOption = VolumeLiquidOptions.find(option => option.value === form.controls['volumeLiquidUnit'].value);
@@ -230,7 +197,7 @@ export class SettingsFormService {
     return form;
   }
 
-  setAccountUnits(form: FormGroup, account: IdbAccount): FormGroup {
+  setAccountUnits(form: UnitsForm, account: IdbAccount): UnitsForm {
     form.patchValue({
       energyUnit: account.energyUnit,
       volumeLiquidUnit: account.volumeLiquidUnit,
@@ -244,7 +211,7 @@ export class SettingsFormService {
     return form;
   }
 
-  setAccountSustainabilityQuestions(form: FormGroup, account: IdbAccount): FormGroup {
+  setAccountSustainabilityQuestions(form: FacilityGoalsForm, account: IdbAccount): FacilityGoalsForm {
     const questions = this.normalizeSustainabilityQuestions(account.sustainabilityQuestions);
     form.patchValue({
       energyReductionGoal: questions.energyReductionGoal,
@@ -266,25 +233,12 @@ export class SettingsFormService {
     return form;
   }
 
-  setAccountFinancialReporting(form: FormGroup, account: IdbAccount): FormGroup {
+  setAccountFinancialReporting(form: FinancialForm, account: IdbAccount): FinancialForm {
     form.patchValue({
       fiscalYear: account.fiscalYear || 'calendarYear',
       fiscalYearMonth: account.fiscalYearMonth ?? 0,
       fiscalYearCalendarEnd: account.fiscalYearCalendarEnd ?? true
     });
-    return form;
-  }
-
-  setAccountStaleness(form: FormGroup, account: IdbAccount): FormGroup {
-    const accountSettings = this.normalizeDataStalenessSettings(account.dataStalenessSettings);
-    const accountValues: Record<string, unknown> = {
-      enabled: accountSettings.enabled,
-      thresholdMonths: accountSettings.thresholdMonths
-    };
-    if (form.controls['useAccountSettings']) {
-      accountValues['useAccountSettings'] = true;
-    }
-    form.patchValue(accountValues);
     return form;
   }
 
@@ -313,39 +267,10 @@ export class SettingsFormService {
       || (account.fiscalYearCalendarEnd ?? true) !== (facility.fiscalYearCalendarEnd ?? true);
   }
 
-  areAccountAndFacilityStalenessDifferent(account: IdbAccount, facility: IdbFacility): boolean {
-    const facilitySettings = facility.dataStalenessSettings;
-    if (facilitySettings?.useAccountSettings) {
-      return false;
-    }
-    const accountSettings = this.normalizeDataStalenessSettings(account.dataStalenessSettings);
-    const normalizedFacilitySettings = this.normalizeDataStalenessSettings(facilitySettings);
-    return accountSettings.enabled !== normalizedFacilitySettings.enabled
-      || accountSettings.thresholdMonths !== normalizedFacilitySettings.thresholdMonths;
-  }
-
   normalizeDataStalenessSettings(settings: DataStalenessSettings | undefined): DataStalenessSettings {
     return {
       enabled: settings?.enabled ?? true,
       thresholdMonths: settings?.thresholdMonths ?? DEFAULT_DATA_STALENESS_MONTHS
-    };
-  }
-
-  normalizeFacilityDataStalenessSettings(
-    facilitySettings: DataStalenessSettings | undefined,
-    accountSettings?: DataStalenessSettings
-  ): DataStalenessSettings {
-    const useAccountSettings = facilitySettings?.useAccountSettings ?? true;
-    if (useAccountSettings && accountSettings) {
-      const normalizedAccountSettings = this.normalizeDataStalenessSettings(accountSettings);
-      return {
-        ...normalizedAccountSettings,
-        useAccountSettings: true
-      };
-    }
-    return {
-      ...this.normalizeDataStalenessSettings(facilitySettings),
-      useAccountSettings
     };
   }
 
@@ -390,28 +315,28 @@ export class SettingsFormService {
     };
   }
 
-  private getSustainabilityQuestionsFromForm(form: FormGroup): SustainabilityQuestions {
+  private getSustainabilityQuestionsFromForm(controls: SustainabilityQuestionControls): SustainabilityQuestions {
     return {
-      energyReductionGoal: !!form.controls['energyReductionGoal'].value,
-      energyReductionPercent: Number(form.controls['energyReductionPercent'].value || 0),
-      energyReductionBaselineYear: Number(form.controls['energyReductionBaselineYear'].value || this.currentYear()),
-      energyReductionTargetYear: Number(form.controls['energyReductionTargetYear'].value || this.currentYear() + 10),
-      energyIsAbsolute: !!form.controls['energyIsAbsolute'].value,
-      greenhouseReductionGoal: !!form.controls['greenhouseReductionGoal'].value,
-      greenhouseReductionPercent: Number(form.controls['greenhouseReductionPercent'].value || 0),
-      greenhouseReductionBaselineYear: Number(form.controls['greenhouseReductionBaselineYear'].value || this.currentYear()),
-      greenhouseReductionTargetYear: Number(form.controls['greenhouseReductionTargetYear'].value || this.currentYear() + 10),
-      greenhouseIsAbsolute: !!form.controls['greenhouseIsAbsolute'].value,
-      waterReductionGoal: !!form.controls['waterReductionGoal'].value,
-      waterReductionPercent: Number(form.controls['waterReductionPercent'].value || 0),
-      waterReductionBaselineYear: Number(form.controls['waterReductionBaselineYear'].value || this.currentYear()),
-      waterReductionTargetYear: Number(form.controls['waterReductionTargetYear'].value || this.currentYear() + 10),
-      waterIsAbsolute: !!form.controls['waterIsAbsolute'].value
+      energyReductionGoal: !!controls['energyReductionGoal'].value,
+      energyReductionPercent: Number(controls['energyReductionPercent'].value || 0),
+      energyReductionBaselineYear: Number(controls['energyReductionBaselineYear'].value || this.currentYear()),
+      energyReductionTargetYear: Number(controls['energyReductionTargetYear'].value || this.currentYear() + 10),
+      energyIsAbsolute: !!controls['energyIsAbsolute'].value,
+      greenhouseReductionGoal: !!controls['greenhouseReductionGoal'].value,
+      greenhouseReductionPercent: Number(controls['greenhouseReductionPercent'].value || 0),
+      greenhouseReductionBaselineYear: Number(controls['greenhouseReductionBaselineYear'].value || this.currentYear()),
+      greenhouseReductionTargetYear: Number(controls['greenhouseReductionTargetYear'].value || this.currentYear() + 10),
+      greenhouseIsAbsolute: !!controls['greenhouseIsAbsolute'].value,
+      waterReductionGoal: !!controls['waterReductionGoal'].value,
+      waterReductionPercent: Number(controls['waterReductionPercent'].value || 0),
+      waterReductionBaselineYear: Number(controls['waterReductionBaselineYear'].value || this.currentYear()),
+      waterReductionTargetYear: Number(controls['waterReductionTargetYear'].value || this.currentYear() + 10),
+      waterIsAbsolute: !!controls['waterIsAbsolute'].value
     };
   }
 
   private patchUnitsOfMeasure(
-    form: FormGroup,
+    form: UnitsForm,
     selectedEnergyOption: UnitOption,
     selectedVolumeLiquidOption: UnitOption,
     selectedVolumeGasOption: UnitOption,

@@ -1,5 +1,5 @@
 import { Component, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { AccountProfileForm } from '@shared/settings-forms/settings-form.models';
 import { Countries } from '@shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from '@shared/form-data/naics-data';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
@@ -19,7 +19,7 @@ export class AccountSettingsProfileComponent extends AccountSettingsDetailBase {
 
   readonly countries = Countries;
   readonly firstNaicsList = FirstNaicsList;
-  form: FormGroup;
+  form: AccountProfileForm;
 
   constructor() {
     super();
