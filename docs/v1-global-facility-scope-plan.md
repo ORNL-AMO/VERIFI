@@ -13,6 +13,7 @@ This document records the agreed target experience and implementation roadmap. I
 | 3 | Shared inventory charts, selection, and creation | Complete |
 | 4 | Dashboard retirement and resource-based folders | Complete |
 | 5 | Single-facility presentation | Complete |
+| 6 | Review fixes and scoped cleanup | Complete |
 
 ### Greenfield policy
 
@@ -312,6 +313,67 @@ Completed 2026-10-29 in the three agreed commit groups.
 - Single-facility Home previously indexed the support-panel result rows. Removing its Facilities row shifted every displayed count and caused the Reports binding to throw. Both Home screens now use the shared named `contextCounts` projection, independent of panel row visibility.
 - The regression test first reproduced the exact template error through the real navigation service and router. Coverage includes Welcome entry, direct facility Home URLs, single-facility account-backed Reports, hidden analysis pairs, committed count changes, portfolio conversion, and a portfolio with one facility.
 - Focused Home/navigation checks pass: **five files / 91 tests**. Application type-check, production web build, validation planner, documentation links, and whitespace checks pass. The build retains CSS budget/CommonJS warnings. No data, calculation, backup, route destination, or Electron behavior changes are involved.
+
+## Phase 6 — Review fixes and scoped cleanup
+
+**Status: Complete**
+
+Completed 2026-11-02 as pre-PR follow-up. The 2026-10-29 review compared `unified-ux...ca76a88a1`, including surrounding consumers, ownership, Angular patterns, tests, and retired workflows. The four groups below retain the agreed scope and acceptance criteria; delivery and current validation are recorded after the historical review evidence. Broader structural suggestions are tracked separately in the [v1 maintainability follow-up plan](v1-maintainability-follow-up-plan.md).
+
+### Review findings addressed
+
+- **P2 — Inventory exits bypass navigation protection.** At review, the [scope guard](../src/app/v1/shell/inventory-scope-change.guard.ts) returned early when facility scope was unchanged, while Data inventory leaves and the Analysis inventory lacked deactivation protection. Browser history or sibling navigation could abandon active creation/deletion workflows. [Analysis action completion](../src/app/v1/analysis/inventory/analysis-inventory.component.ts) checked captured context without component destruction, allowing a late create/copy to reopen its workbench. The leave guard and lifecycle checks now protect these paths.
+- **P2 — Mirrored Settings saves can partially persist.** The [facility Settings save boundary](../src/app/v1/facility/settings/facility-settings-detail.base.ts) previously wrote the account and facility separately; a failed second write could leave durable records inconsistent. This predated the refactor and was included because Phase 5 reuses these editors. Mirrored edits now commit through one compound transaction.
+- **Scoped cleanup:** Dashboard retirement left unused filtering, grouping, chart modes, command entry points, and presentation artifacts. Remove these only after confirming both TypeScript and template consumers; tests alone do not justify retaining obsolete production paths.
+
+The resource organization, explicit ownership, committed workspace projections, typed inventory controls, and bulk transaction paths reviewed are generally sound. The review-baseline suites did not cover the two failure scenarios above; Phase 6 adds the corresponding regressions. Broader responsibility and presentation coupling belongs in the separate maintenance plan.
+
+### 6.1 — Close navigation and lifecycle gaps
+
+- Add one component-independent inventory leave guard backed by existing unsaved-change registrations and pending workspace commands. Attach it to Analysis `dashboard` and each Data inventory leaf: Facilities, Meters, Predictors, and Energy Uses. A guard only on the Data parent misses sibling transitions because that parent is reused.
+- Keep query-only transitions under the existing scope-change policy, including automatic removal of unavailable facility scope. Account for `paramsOrQueryParamsChange` rerunning deactivation checks on reused routes; unchanged-path query transitions must not acquire a conflicting leave policy. Retain Reports' existing leave protection.
+- Reject destroyed or stale Analysis and creation-drawer completions before navigation, emitted outputs, local error updates, or focus work. Do not cancel an already committed durable command merely because its presentation was destroyed.
+- Release blocking state after persistence and before intentional create/copy handoffs. Analysis copy must follow creation's release-before-navigation behavior. Facility creation emits a typed created facility to the Data parent, which closes the drawer before opening facility Settings; preserve Meter/Predictor close-before-navigation behavior and report navigation failures without offering to create a duplicate.
+
+### 6.2 — Make mirrored Settings writes atomic
+
+- Route single-facility profile, units, goals, and financial mirroring through one compound settings handler and one native read/write transaction over `accounts` and `facilities`, using the existing atomic Data Validation handler as the neighboring pattern. Keep Data Validation's existing command contract intact.
+- Pass typed edited-field changes and explicit account/facility identities. Validate GUID ownership and single-facility state, read current durable records within the transaction, and apply only the edited settings group so unrelated newer values survive. Preserve each editor's existing account/facility mapping, including facility-only fields.
+- Publish the account and facility together once after commit through `WorkspaceCommandBoundary`; refresh the account catalog after success. A failed participant write aborts both stores, retains the local draft, and publishes no successful change. Opening an editor must not reconcile differing saved settings.
+- Preserve portfolio facility-only saves, account/facility GUIDs, hidden analysis relationships, and backup compatibility. No schema, backup-format, calculation, IPC, or v0 contract changes are planned.
+
+### 6.3 — Remove code orphaned by dashboard retirement
+
+- Remove retired Predictor inventory grouping/order helpers, action/request types, and unused `canCopy`/`canDelete` fields. Preserve current unified filtering, resource sorting, and live action eligibility.
+- Remove the unused Meter `deleteMeters` facade and `deleteMetersWithData` handler entry point. Transfer valuable atomicity, stale-preview, and ownership assertions to the live `deleteMetersAcrossFacilities` path; retain supported single-meter deletion.
+- Simplify the inventory chart sheet to its live trace-browser modes. Remove unreachable chart/series searches, chart pagination, scrollable-tab handling, legacy paged legends, associated inputs/view fields/styles, and obsolete-mode tests. Preserve metric choice, single/multiple Predictor histories, trace visibility/drawer access, zoom, per-scope memory, and keyboard/focus behavior.
+- Remove the unused facility-report filter and its filter type, `WorkspaceNavigationService.contextScopeQuery`, and production vocabulary used only by test fixtures (`DataInventoryResource`). Replace useful assertions against retired helpers with coverage of the live inventory projections.
+- Remove the orphaned `ResourceBrowseCardComponent` class/template/styles/spec. Its model types and the facility-report builder still have consumers; keep those until the separate report-presentation package replaces them. Already-unused Analysis scaffolds, filters, helpers, and placeholder assets belong to the inherited-debt package rather than expanding this cleanup.
+
+### 6.4 — Documentation and acceptance
+
+- Correct current architecture/workflow statements that still describe Phases 4–5 as future work. Record known exceptions and pending work without claiming Phase 6 is implemented or rewriting historical validation evidence.
+- Add real-router regressions for same-scope sibling navigation and Back/Forward while create/copy/delete work or a creation/deletion review is active. Verify rejected navigation preserves the current context and successful handoffs proceed after commit; include portfolio, named-facility, and valid single-facility contexts.
+- Cover query-only scope changes, unavailable-scope normalization while UI is blocked, failed commands, and forced component destruction with no late navigation, output, or focus side effects.
+- Add native IndexedDB rollback tests for failure of either mirrored Settings write, then reopen persistence and confirm neither record changed. Cover successful mirroring/publication, ownership rejection, preservation of unrelated durable edits, failed-draft retention/retry, and unchanged portfolio saves.
+- Run focused behavior tests, the validation planner over the implementation diff, full fast/Chromium suites, application type-check, and production web build. Check keyboard/focus and narrow/theme behavior for changed drawer handoffs. Validate documentation links and scan for retired TypeScript/template references; add Electron checks only if a changed runtime boundary requires them.
+
+### Review-time validation evidence
+
+- At the reviewed commit, `npx tsc -p tsconfig.app.json --noEmit`, `npm run test:all:ci`, `npm run build-prod`, and the branch whitespace check passed. Chromium reported **54 files / 256 passing tests**. The validation planner was run with the full branch comparison because a clean working tree otherwise supplies no files.
+- Restricted test/build attempts aborted before actionable test or compiler results; retries with broader local permissions succeeded. The production build retains CSS-budget and CommonJS warnings. Passing inventory-chart browser tests emitted ResizeObserver warnings; the unchanged renderer callback is an investigation item in the maintenance plan, not a confirmed new rendering defect.
+- Electron and additional manual desktop checks were not performed. These results describe the review baseline, not Phase 6 acceptance; the final implementation evidence follows.
+- This planning-document update passed the documentation-only validation plan, **143 local link/anchor checks across four documents**, referenced npm script checks, and whitespace checks. Application suites and builds were not rerun for these documentation edits.
+
+### Phase 6 delivery and acceptance evidence
+
+- Delivered the four groups without a schema, backup-format, calculation, IPC, or v0 change. Inventory path exits consult live registrations and pending commands; query-only scope normalization and Reports guards retain their policies. Analysis and inventory deletion completions reject destroyed or stale presentation contexts.
+- Facility creation emits its typed result to both Data and Portfolio Settings parents, which close creation before routing. Navigation cancellation/rejection retains the created record. A first-facility single-site repair regression protects the legitimate committed transition from no implicit facility scope to the newly owned facility.
+- Mirrored Settings changes are allowlisted by group and merged into current durable records in one account/facility transaction. Native cases cover all four groups, failure of either write with reopen/retry, stale/missing/foreign identities, conversion races, repair-state mirroring, facility-only fields, and unrelated saved values. Editor coverage retains dirty drafts, hydration behavior, one publication patch, and catalog refresh.
+- Removed retired Predictor contracts, the obsolete Meter batch path, chart-sheet searches/pagination/tabs/legends, unused scope/fixture exports, facility-report filtering, and the orphaned card component. Useful tests now exercise live batch/filter/trace behavior; report models/builders and supported single-meter deletion remain.
+- Focused fast checks passed: **27 files / 388 tests**. Focused native transaction/history/layout checks passed: **nine Chromium files / 53 tests**. The real Analysis component browser suite then passed **14 tests**, including deferred create/copy/delete cases that reject native Back and direct same-scope exits before allowing committed handoffs.
+- `npm run test:all:ci` passed for the full fast and Chromium suites. After the additional real-Analysis history coverage, the full Chromium suite passed again: **55 files / 280 tests**. Application type-check, the implementation-diff validation planner, production web build, documentation/source-reference checks, and whitespace checks passed. Initial integration runs caught fixture/mock typing and an omitted Backup test dependency; those were corrected before the passing focused and full gates.
+- Chromium coverage checks affected keyboard/focus, guarded history, narrow layouts, themes, reduced-motion closing, printing, chart memory, and creation handoffs. The production build retains existing CSS-budget and CommonJS warnings; chart Chromium cases retain the inherited ResizeObserver warnings tracked in the maintenance plan. No Electron boundary changed, so no Electron build or manual desktop checks were added.
 
 ## Validation and documentation policy
 

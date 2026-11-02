@@ -6,6 +6,32 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { setupFacilityScopeNavigation } from './facility-scope-navigation.testing';
 
 describe('facility scope browser history', () => {
+  it('blocks Back and Forward between same-scope resources while an inventory workflow is active', async () => {
+    const { router, fixture } = await setupFacilityScopeNavigation();
+    router.setUpLocationChangeListener();
+    const location = TestBed.inject(Location);
+    const meters = '/v1/workspace/account/account-a/data/portfolio/meters';
+    const predictors = '/v1/workspace/account/account-a/data/portfolio/predictors';
+    let blocked = false;
+    const unregister = TestBed.inject(UnsavedChangesService).register(() => false, () => {}, () => blocked);
+    try {
+      await router.navigateByUrl(predictors);
+      blocked = true;
+      let cancelled = firstValueFrom(router.events.pipe(filter(event => event instanceof NavigationCancel)));
+      location.back(); await cancelled;
+      expect(router.url).toBe(predictors);
+      // A cancelled popstate may replace its history entry. Establish a fresh
+      // successful pair before independently checking the Forward guard.
+      blocked = false;
+      await router.navigateByUrl(meters);
+      await router.navigateByUrl(predictors);
+      location.back(); await vi.waitFor(() => expect(router.url).toBe(meters));
+      blocked = true;
+      cancelled = firstValueFrom(router.events.pipe(filter(event => event instanceof NavigationCancel)));
+      location.forward(); await cancelled;
+      expect(router.url).toBe(meters);
+    } finally { unregister(); fixture.destroy(); }
+  });
   it('returns to Facilities with Back after choosing a facility and preserves scope through the Data rail', async () => {
     const { navigation, router, fixture } = await setupFacilityScopeNavigation('/v1/workspace/account/account-a/data/portfolio/facilities');
     router.setUpLocationChangeListener();

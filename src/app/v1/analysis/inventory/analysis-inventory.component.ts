@@ -44,6 +44,7 @@ export class AnalysisInventoryComponent implements OnDestroy {
   @ViewChild('activeConfirmation', { static: true }) private activeConfirmation!: TemplateRef<unknown>;
   @ViewChild('deleteConfirmation', { static: true }) private deleteConfirmation!: TemplateRef<unknown>;
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly actions = inject(AccountAnalysisActionsService);
   private readonly facilityActions = inject(FacilityAnalysisActionsService);
   private readonly modalPortal = inject(ModalPortalService);
@@ -51,6 +52,7 @@ export class AnalysisInventoryComponent implements OnDestroy {
   private confirmationPortal?: TemplatePortal;
   private confirmationKind: 'active' | 'delete' | undefined;
   private dashboardAccountGuid: string | undefined;
+  private actionGeneration = 0;
   readonly workspace = inject(AnalysisInventoryWorkspaceService);
   readonly results = inject(AnalysisInventoryResultsService);
   readonly navigation = inject(WorkspaceNavigationService);
@@ -184,9 +186,13 @@ export class AnalysisInventoryComponent implements OnDestroy {
     return analysisInventoryTile(entry, this.results.states()[entry.key], this.workspace.meterGroups(), this.navigation, this.workspace.account()?.guid ?? '', this.workspace.statusState(), this.showCategory());
   }
   clearFilters(): void { this.filtersForm.reset({ search: '', scope: 'all', category: 'all', status: 'all', sort: 'account-first' }); }
-  async navigateRoute(route: readonly string[]): Promise<void> {
-    try { await this.router.navigate([...route]); }
-    catch { this.actionError.set('The analysis could not be opened. Please try again.'); }
+  async navigateRoute(route: readonly string[], isCurrent = () => !this.destroyRef.destroyed): Promise<void> {
+    try {
+      const opened = await this.router.navigate([...route]);
+      if (!opened && isCurrent()) this.actionError.set('The analysis could not be opened. Select it from the list to continue.');
+    } catch {
+      if (isCurrent()) this.actionError.set('The analysis could not be opened. Select it from the list to continue.');
+    }
   }
   open(entry: AnalysisInventoryEntry): void { void this.navigateRoute(this.tile(entry).route); }
   openCreate(): void { if (this.canAct()) { this.clearComparison(); this.detailsGuid.set(undefined); this.actionError.set(undefined); this.createOpen.set(true); } }
@@ -207,17 +213,23 @@ export class AnalysisInventoryComponent implements OnDestroy {
       this.saving.set(false);
       await this.navigateRoute(request.scope === 'account'
         ? this.navigation.accountAnalysisWorkbenchRoute(analysis.accountId, analysis.guid)
-        : this.navigation.facilityAnalysisWorkbenchRoute(request.facilityGuid, analysis.guid));
+        : this.navigation.facilityAnalysisWorkbenchRoute(request.facilityGuid, analysis.guid), isCurrent);
     });
   }
   async copy(entry: AnalysisInventoryEntry): Promise<void> {
     await this.runAction(async isCurrent => {
       if (entry.scope === 'account') {
         const copy = await this.actions.copyAnalysis(entry.card.analysis.guid);
-        if (isCurrent()) await this.navigateRoute(this.navigation.accountAnalysisWorkbenchRoute(copy.accountId, copy.guid));
+        if (isCurrent()) {
+          this.saving.set(false);
+          await this.navigateRoute(this.navigation.accountAnalysisWorkbenchRoute(copy.accountId, copy.guid), isCurrent);
+        }
       } else {
         const copy = await this.facilityActions.copyAnalysis(entry.card.analysis.guid, entry.facility.guid);
-        if (isCurrent()) await this.navigateRoute(this.navigation.facilityAnalysisWorkbenchRoute(entry.facility.guid, copy.guid));
+        if (isCurrent()) {
+          this.saving.set(false);
+          await this.navigateRoute(this.navigation.facilityAnalysisWorkbenchRoute(entry.facility.guid, copy.guid), isCurrent);
+        }
       }
     });
   }
@@ -239,10 +251,10 @@ export class AnalysisInventoryComponent implements OnDestroy {
   async confirmActive(): Promise<void> {
     const entry = this.activeCandidate();
     if (!entry || !this.activeEligibility()?.allowed) return;
-    await this.runAction(async () => {
+    await this.runAction(async isCurrent => {
       if (entry.scope === 'account') await this.actions.setActiveAnalysis(entry.card.analysis.guid);
       else await this.facilityActions.setActiveAnalysis(entry.card.analysis.guid, entry.facility.guid);
-      this.dismissActiveConfirmation();
+      if (isCurrent()) this.dismissActiveConfirmation();
     });
   }
   requestDelete(entry: AnalysisInventoryEntry): void {
@@ -254,10 +266,10 @@ export class AnalysisInventoryComponent implements OnDestroy {
   async confirmDelete(): Promise<void> {
     const entry = this.deleteCandidate();
     if (!entry || this.deleteBlockedReason()) return;
-    await this.runAction(async () => {
+    await this.runAction(async isCurrent => {
       if (entry.scope === 'account') await this.actions.deleteAnalysis(entry.card.analysis.guid);
       else await this.facilityActions.deleteAnalysis(entry.card.analysis.guid, entry.facility.guid);
-      this.dismissDeleteConfirmation(); this.detailsGuid.set(undefined);
+      if (isCurrent()) { this.dismissDeleteConfirmation(); this.detailsGuid.set(undefined); }
 
     });
   }
@@ -274,6 +286,7 @@ export class AnalysisInventoryComponent implements OnDestroy {
   private dismissDeleteConfirmation(): void { this.deleteKey.set(undefined); this.hideConfirmation('delete'); }
   private hideConfirmation(kind: 'active' | 'delete'): void { if (this.confirmationKind === kind) { this.confirmationKind = undefined; this.hideOwnedConfirmation(); } }
   private resetTransientState(): void {
+    this.actionGeneration++;
     this.detailsGuid.set(undefined); this.createOpen.set(false); this.actionError.set(undefined); this.activeKey.set(undefined); this.deleteKey.set(undefined); this.clearComparison();
     if (this.confirmationKind) { this.confirmationKind = undefined; this.hideOwnedConfirmation(); }
   }
@@ -286,11 +299,14 @@ export class AnalysisInventoryComponent implements OnDestroy {
     this.confirmationPortal = undefined;
   }
   private async runAction(action: (isCurrent: () => boolean) => Promise<void>): Promise<void> {
-    if (!this.canAct()) return;
-    const accountGuid = this.dashboardAccountGuid;
+    if (this.destroyRef.destroyed || !this.canAct()) return;
+    const generation = this.actionGeneration;
+    const context = JSON.stringify([this.browseKey()?.accountGuid, this.scopedFacilityGuid()]);
+    const isCurrent = () => !this.destroyRef.destroyed && generation === this.actionGeneration
+      && context === JSON.stringify([this.browseKey()?.accountGuid, this.scopedFacilityGuid()]);
     this.saving.set(true); this.actionError.set(undefined);
-    try { await action(() => accountGuid === this.dashboardAccountGuid); }
-    catch (error) { if (this.dashboardAccountGuid === accountGuid) this.actionError.set(error instanceof Error ? error.message : 'The analysis change could not be saved.'); }
-    finally { this.saving.set(false); }
+    try { await action(isCurrent); }
+    catch (error) { if (isCurrent()) this.actionError.set(error instanceof Error ? error.message : 'The analysis change could not be saved.'); }
+    finally { if (!this.destroyRef.destroyed) this.saving.set(false); }
   }
 }

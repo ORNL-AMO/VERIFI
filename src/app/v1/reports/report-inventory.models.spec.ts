@@ -1,4 +1,5 @@
 import { getNewIdbAccountReport, IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { StatusItem } from '@app/v1/status/status.models';
 import { reportAccount, reportFacility, reportFixture, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { ACCOUNT_REPORT_TYPES, reportTypeChoices, reportTypePresentation, DEFAULT_REPORT_FILTERS, buildReportInventory, filterReportInventory } from './report-inventory.models';
@@ -91,6 +92,40 @@ describe('report inventory projections', () => {
     expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, search: 'facility a' }).map(entry => entry.scope)).toEqual(['facility']);
     expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, type: 'facility:analysis', status: 'error' })).toHaveLength(1);
     expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, scope: 'account', status: 'error' })).toEqual([]);
+  });
+
+  it('filters saved facility report analysis, period, type and setup status through the unified inventory', () => {
+    const report = reportFixture({ analysisItemId: 'analysis-a' });
+    report.analysisReportSettings.reportYear = 2024;
+    const data = {
+      ...reportSnapshot([report]),
+      facilityAnalyses: [{ guid: 'analysis-a', accountId: report.accountId, facilityId: report.facilityId, name: 'Steam model' } as IdbAnalysisItem]
+    };
+    const finding = { id: 'warning', severity: 'warning', description: 'Review analysis', destination: { kind: 'unavailable' }, entity: {
+      kind: 'facility-report', guid: report.guid, facilityGuid: report.facilityId, accountGuid: report.accountId
+    } } as StatusItem;
+    const entries = buildReportInventory(data, [finding], 'ready');
+
+    for (const search of ['steam model', '2024', 'saved report']) {
+      expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, search })).toEqual(entries);
+    }
+    expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, type: 'facility:overview' })).toEqual([]);
+    expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, status: 'error' })).toEqual([]);
+    expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, type: 'facility:analysis', status: 'warning' })).toEqual(entries);
+  });
+
+  it('orders facility reports by attention, date or name with deterministic identity ties', () => {
+    const reports = [
+      reportFixture({ guid: 'a', name: 'Zebra' }),
+      reportFixture({ guid: 'c', name: 'Alpha' }),
+      reportFixture({ guid: 'b', name: 'Alpha', facilityReportType: 'unknown' as never, modifiedDate: new Date(2026, 0, 1) })
+    ];
+    const entries = buildReportInventory(reportSnapshot(reports), [], 'ready');
+
+    for (const sort of ['attention', 'name'] as const) {
+      expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, sort }).map(entry => entry.report.guid)).toEqual(['b', 'c', 'a']);
+    }
+    expect(filterReportInventory(entries, { ...DEFAULT_REPORT_FILTERS, sort: 'modified' })[0].report.guid).toBe('b');
   });
 });
 

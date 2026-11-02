@@ -22,13 +22,6 @@ export interface FacilityReportCard {
   readonly searchText: string;
   readonly modified: number;
 }
-export interface ReportFilters {
-  readonly search: string;
-  readonly type: 'all' | FacilityReportType;
-  readonly status: 'all' | 'ready' | 'warning' | 'error';
-  readonly sort: 'attention' | 'modified' | 'name';
-}
-
 export function facilityReportTypeLabel(type: FacilityReportType): string {
   return FACILITY_REPORT_TYPES.find(option => option.value === type)?.label ?? 'Unknown report type';
 }
@@ -87,19 +80,6 @@ export function buildFacilityReportCard(
         : 'Updated date unavailable', icon: 'info' }
     }
   };
-}
-
-export function filterFacilityReportCards(cards: readonly FacilityReportCard[], filters: ReportFilters): FacilityReportCard[] {
-  const search = filters.search.trim().toLocaleLowerCase();
-  const rank: Record<ReportConfigurationStatus, number> = { error: 0, warning: 1, unavailable: 2, checking: 3, ready: 4 };
-  return cards.filter(card => (!search || card.searchText.includes(search))
-    && (filters.type === 'all' || card.report.facilityReportType === filters.type)
-    && (filters.status === 'all' || card.status === filters.status))
-    .sort((first, second) => {
-      const primary = filters.sort === 'attention' ? rank[first.status] - rank[second.status]
-        : filters.sort === 'modified' ? second.modified - first.modified : 0;
-      return primary || first.view.title.localeCompare(second.view.title) || first.report.guid.localeCompare(second.report.guid);
-    });
 }
 
 function reportPeriod(report: IdbFacilityReport): string | undefined {

@@ -1,21 +1,19 @@
-<app-workspace-bottom-sheet [modal]="modal()" [showHeader]="showHeader()" [fillBody]="traceBrowser()" panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
-    <div class="inventory-chart-sheet__body" [class.inventory-chart-sheet__body--fill]="traceBrowser()"><ng-content/>
+<app-workspace-bottom-sheet [modal]="false" [showHeader]="false" [fillBody]="true" panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
+    <div class="inventory-chart-sheet__body inventory-chart-sheet__body--fill"><ng-content/>
       @if (!charts().length) {
         <p role="status">{{ state() === 'loading' || state() === 'idle' ? 'Preparing data' : state() === 'error' ? 'Unavailable. Chart data could not be loaded.' : 'No charts are available. Add saved readings to get started.' }}</p>
       }
-      @if (searchableCharts() && charts().length && !filteredCharts().length) { <p role="status">No predictor charts match this search.</p> }
-      @if (searchableCharts()) { <div class="inventory-chart-sheet__search"><label>Find predictor<input class="v1-input" type="search" [formControl]="chartSearch" aria-label="Find predictor chart"></label><button class="v1-btn" type="button" [disabled]="chartPage() === 0" (click)="changeChartPage(chartPage() - 1)">Previous</button><span role="status">{{ chartPage() + 1 }} of {{ chartPages() }}</span><button class="v1-btn" type="button" [disabled]="chartPage() + 1 >= chartPages()" (click)="changeChartPage(chartPage() + 1)">Next</button></div> }
-      <div class="inventory-chart-sheet__controls" [class.inventory-chart-sheet__controls--tabbed]="scrollableTabs()">
+      <div class="inventory-chart-sheet__controls">
         <div class="inventory-chart-sheet__modes">
-        @if (!singleTrace() && (scrollableTabs() || visibleCharts().length > 1)) {
-        <div class="inventory-chart-sheet__metrics" [class.inventory-chart-sheet__metrics--scrollable]="scrollableTabs()" [attr.role]="scrollableTabs() ? 'tablist' : 'group'" [attr.aria-label]="scrollableTabs() ? 'Predictor charts' : 'Chart metric'">@for (chart of visibleCharts(); track chart.id) {
-          <button type="button" class="v1-btn v1-btn--quiet" [id]="'inventory-chart-tab-' + chart.id" [title]="chart.title" [attr.role]="scrollableTabs() ? 'tab' : null" [attr.aria-controls]="scrollableTabs() ? 'inventory-chart-panel' : null" [attr.aria-selected]="scrollableTabs() ? activeChart()?.id === chart.id : null" [attr.tabindex]="scrollableTabs() && (activeTabVisible() ? activeChart()?.id !== chart.id : $index !== 0) ? -1 : 0" (keydown)="tabKey($event, chart.id)" [class.active]="activeChart()?.id === chart.id" [attr.aria-pressed]="activeChart()?.id === chart.id" (click)="chooseMetric(chart.id)">{{ chart.title }}</button>
+        @if (!singleTrace() && charts().length > 1) {
+        <div class="inventory-chart-sheet__metrics" role="group" aria-label="Chart metric">@for (chart of charts(); track chart.id) {
+          <button type="button" class="v1-btn v1-btn--quiet" [title]="chart.title" [class.active]="activeChart()?.id === chart.id" [attr.aria-pressed]="activeChart()?.id === chart.id" (click)="chooseMetric(chart.id)">{{ chart.title }}</button>
         }</div>
         }
         <ng-content select="[chartGrouping]"/>
         </div>
         <div class="inventory-chart-sheet__actions" role="group" aria-label="Chart actions">
-          @if (traceBrowser()) { <button #traceToggle type="button" class="v1-btn v1-btn--quiet inventory-chart-sheet__trace-toggle" [attr.aria-expanded]="tracePanelOpen()" aria-controls="chart-trace-browser" [disabled]="!traceChoices().length" (click)="toggleTracePanel()"><app-ui-icon name="settingsSliders"/>Traces <span>{{ traceVisibleCount() }}/{{ traceChoices().length }}</span></button> }
+          <button #traceToggle type="button" class="v1-btn v1-btn--quiet inventory-chart-sheet__trace-toggle" [attr.aria-expanded]="tracePanelOpen()" aria-controls="chart-trace-browser" [disabled]="!traceChoices().length" (click)="toggleTracePanel()"><app-ui-icon name="settingsSliders"/>Traces <span>{{ traceVisibleCount() }}/{{ traceChoices().length }}</span></button>
           <button type="button" class="v1-icon-btn" aria-label="Download chart" title="Download chart" [disabled]="!visibleMetrics().length || state() !== 'ready'" (click)="download()"><app-ui-icon name="download"/></button>
           <button type="button" class="v1-icon-btn" aria-label="Zoom in" (click)="zoom(.6)"><app-ui-icon name="zoomIn"/></button>
           <button type="button" class="v1-icon-btn" aria-label="Zoom out" (click)="zoom(1.6)"><app-ui-icon name="zoomOut"/></button>
@@ -24,13 +22,13 @@
       </div>
       <ng-content select="[chartNotice]"/>
       @if (activeChart(); as chart) {
-        <div id="inventory-chart-panel" class="inventory-chart-sheet__panel" [attr.aria-label]="scrollableTabs() && !activeTabVisible() ? chart.title : null" [attr.role]="scrollableTabs() ? 'tabpanel' : null" [attr.aria-labelledby]="scrollableTabs() && activeTabVisible() ? 'inventory-chart-tab-' + chart.id : null">
-        <div class="inventory-chart-sheet__plot-layout" [class.inventory-chart-sheet__plot-layout--browser]="traceBrowser()" [class.inventory-chart-sheet__plot-layout--with-traces]="traceBrowser() && tracePanelOpen() && !narrowTracePanel()">
+        <div id="inventory-chart-panel" class="inventory-chart-sheet__panel">
+        <div class="inventory-chart-sheet__plot-layout inventory-chart-sheet__plot-layout--browser" [class.inventory-chart-sheet__plot-layout--with-traces]="tracePanelOpen() && !narrowTracePanel()">
         <div class="inventory-chart-sheet__plot">
         <p class="inventory-chart-sheet__coverage">{{ chart.title }} {{ chart.unit }} · {{ state() === 'loading' || state() === 'idle' ? 'Preparing data' : state() === 'error' ? 'Unavailable' : chart.coverage }}</p>
-        <app-meter-results-chart [noVisibleSeriesTitle]="traceBrowser() ? 'No traces visible' : 'No ' + resource() + ' selected'" [noVisibleSeriesDescription]="traceBrowser() ? 'Use the Traces panel to show a trace.' : 'Select a ' + singular() + ' in the legend to show its data.'" [chartRows]="chart.rows" [metrics]="visibleMetrics()" [state]="state() === 'idle' ? 'loading' : state()" [showAllMetrics]="true" [showLegend]="false" [showSeriesControls]="false" [showChartActions]="false" [showPointSymbols]="showPointSymbols()" [smoothLines]="smoothLines()" [highlightedMetricId]="highlightedTrace()" [tooltipMaxRows]="8" [tooltipOverflowHint]="traceBrowser() ? 'Use the Traces panel to show fewer traces.' : 'Use the legend to show fewer ' + resource() + '.'" [allowNegativeValues]="true" [compactAxes]="true" [yAxisTitle]="''" [embedded]="true" [compact]="true" [zoomRange]="zoomRange()" (zoomRangeChanged)="zoomChanged.emit($event)" [ariaLabel]="chart.title + ' monthly data by ' + singular()" [emptyTitle]="!visibleMetrics().length && chart.metrics.length ? traceBrowser() ? 'No traces visible' : 'No ' + resource() + ' selected' : 'No monthly ' + chart.title.toLowerCase() + ' data'" [emptyDescription]="!visibleMetrics().length && chart.metrics.length ? traceBrowser() ? 'Use the Traces panel to show a trace.' : 'Select a ' + singular() + ' in the legend to show its data.' : 'No facility ' + resource() + ' have monthly data for this chart.'"/>
+        <app-meter-results-chart noVisibleSeriesTitle="No traces visible" noVisibleSeriesDescription="Use the Traces panel to show a trace." [chartRows]="chart.rows" [metrics]="visibleMetrics()" [state]="state() === 'idle' ? 'loading' : state()" [showAllMetrics]="true" [showLegend]="false" [showSeriesControls]="false" [showChartActions]="false" [showPointSymbols]="resource() === 'predictors'" [smoothLines]="false" [highlightedMetricId]="highlightedTrace()" [tooltipMaxRows]="8" tooltipOverflowHint="Use the Traces panel to show fewer traces." [allowNegativeValues]="true" [compactAxes]="true" [yAxisTitle]="''" [embedded]="true" [compact]="true" [zoomRange]="zoomRange()" (zoomRangeChanged)="zoomChanged.emit($event)" [ariaLabel]="chart.title + ' monthly data by ' + singular()" [emptyTitle]="!visibleMetrics().length && chart.metrics.length ? 'No traces visible' : 'No monthly ' + chart.title.toLowerCase() + ' data'" [emptyDescription]="!visibleMetrics().length && chart.metrics.length ? 'Use the Traces panel to show a trace.' : 'No facility ' + resource() + ' have monthly data for this chart.'"/>
         </div>
-        @if (traceBrowser() && tracePanelOpen()) {
+        @if (tracePanelOpen()) {
           @if (narrowTracePanel()) {
             <button type="button" class="inventory-chart-sheet__trace-backdrop" aria-label="Dismiss trace chooser" (click)="closeTracePanel()"></button>
             <section id="chart-trace-browser" class="inventory-chart-sheet__trace-panel inventory-chart-sheet__trace-panel--drawer" role="dialog" aria-modal="true" aria-label="Choose traces" appModalFocusTrap modalInitialFocus="[data-trace-close]" (escapePressed)="closeTracePanel()"><ng-container [ngTemplateOutlet]="tracePanelContent"/></section>
@@ -44,21 +42,6 @@
             <button tracePanelAction data-trace-close type="button" class="v1-icon-btn inventory-chart-sheet__trace-close" [attr.aria-label]="narrowTracePanel() ? 'Close trace chooser' : 'Hide traces'" (click)="closeTracePanel()"><app-ui-icon name="close"/></button>
           </app-chart-trace-panel>
         </ng-template>
-        @if (showTraceControls() && !traceBrowser()) {
-        @if (showSeriesSearch()) { <label>Find series<input class="v1-input" type="search" [formControl]="traceSearch" aria-label="Find chart series"></label> }
-        <div class="inventory-chart-sheet__legend" role="group" [attr.aria-label]="'Toggle ' + singular() + ' traces'">
-          @for (metric of legendEntries(); track metric.id) {
-            <button type="button" class="inventory-chart-sheet__chip" [attr.aria-pressed]="metric.visible" [title]="metric.label" (click)="toggleTrace(metric.id)"><svg width="22" height="14" aria-hidden="true"><line x1="1" x2="21" y1="7" y2="7" [attr.stroke]="metric.color" stroke-width="3" [attr.stroke-dasharray]="metric.dash"/></svg><span>{{ metric.label }}</span></button>
-          }
-          @if (legendPages() > 1) {
-            <div class="inventory-chart-sheet__legend-pages" role="group" aria-label="Legend pages">
-              <button type="button" class="v1-icon-btn" aria-label="Previous legend page" [disabled]="legendPage() === 0" (click)="updateView({ legendPage: legendPage() - 1 })"><app-ui-icon name="chevronLeft"/></button>
-              <span class="visually-hidden" aria-live="polite">Legend page {{ legendPage() + 1 }} of {{ legendPages() }}</span>
-              <button type="button" class="v1-icon-btn" aria-label="Next legend page" [disabled]="legendPage() + 1 === legendPages()" (click)="updateView({ legendPage: legendPage() + 1 })"><app-ui-icon name="chevronRight"/></button>
-            </div>
-          }
-        </div>
-        }
         </div>
       }
     </div>

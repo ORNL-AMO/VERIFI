@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Output, inject, output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { FacilityClassifications } from '@data/models/constantsAndTypes';
-import { getNewIdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
 import { Countries } from '@shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from '@shared/form-data/naics-data';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
@@ -18,10 +18,13 @@ import { formatUsPhoneNumber } from '@app/v1/shared/forms/phone-number';
 })
 export class CreateFacilityDrawerComponent {
   @Output() closed = new EventEmitter<void>();
+  readonly created = output<IdbFacility>();
 
   private readonly portfolioFacilities = inject(FacilityActionsService);
   private readonly navigation = inject(WorkspaceNavigationService);
-  private readonly router = inject(Router);
+  private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly accountGuid = this.workspace.account()?.guid;
   private readonly settingsForms = inject(SettingsFormService);
 
   readonly countries = Countries;
@@ -39,7 +42,9 @@ export class CreateFacilityDrawerComponent {
   }
 
   get canCreateFacility(): boolean {
-    return !this.isCreating && this.form.valid && String(this.form.controls['name'].value || '').trim().length > 0;
+    return !this.isCreating && this.workspace.account()?.guid === this.accountGuid
+      && this.workspace.canWrite() && !this.workspace.hasPending()
+      && this.form.valid && String(this.form.controls['name'].value || '').trim().length > 0;
   }
 
   close(): void {
@@ -80,7 +85,8 @@ export class CreateFacilityDrawerComponent {
   }
 
   async createFacility(): Promise<void> {
-    if (this.isCreating) {
+    if (this.destroyRef.destroyed || this.isCreating || this.workspace.account()?.guid !== this.accountGuid
+      || !this.workspace.canWrite() || this.workspace.hasPending()) {
       return;
     }
     this.createError = '';
@@ -93,13 +99,14 @@ export class CreateFacilityDrawerComponent {
     this.isCreating = true;
     try {
       const facility = await this.portfolioFacilities.createFacility(this.buildDraft());
-      await this.router.navigate(this.navigation.facilitySettingsRoute(facility.guid));
-      this.closed.emit();
+      if (this.destroyRef.destroyed || this.workspace.account()?.guid !== this.accountGuid || facility.accountId !== this.accountGuid) return;
+      this.isCreating = false;
+      this.created.emit(facility);
     } catch (error) {
+      if (this.destroyRef.destroyed || this.workspace.account()?.guid !== this.accountGuid) return;
       console.warn('v1 portfolio could not create a facility.', error);
       this.createError = 'Facility could not be created. Please try again.';
-      this.isCreating = false;
-    }
+    } finally { if (!this.destroyRef.destroyed) this.isCreating = false; }
   }
 
   private buildForm(): FormGroup {

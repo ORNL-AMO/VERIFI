@@ -5,6 +5,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
@@ -28,6 +29,14 @@ function setup() {
   fixture.componentRef.setInput('resource','meters'); fixture.componentRef.setInput('matchingGuids',['ma']); fixture.componentRef.setInput('scopeGuids',['ma','mb']); fixture.detectChanges();
   return { fixture, tools: fixture.componentInstance, scope, store, remove };
 }
+
+function deferredDeletion() {
+  let resolve!: (count: number) => void;
+  let reject!: (error: Error) => void;
+  const promise = new Promise<number>((resolvePromise, rejectPromise) => { resolve = resolvePromise; reject = rejectPromise; });
+  return { promise, resolve, reject };
+}
+
 describe('unified inventory tools', () => {
   it('keeps charts open across scopes, resets selection, and restores chart preferences independently', () => {
     const {fixture,tools,scope} = setup();
@@ -87,5 +96,52 @@ describe('unified inventory tools', () => {
     const {fixture,tools,store,remove}=setup();tools.select({guid:'ma',selected:true});tools.requestDelete();
     store.publish({ ...store.snapshot()!, meters: store.meters().map((m,index) => index ? m : {...m,name:'Changed'}) });fixture.detectChanges();
     await tools.confirmDelete();expect(remove).not.toHaveBeenCalled();expect(tools.error()).toContain('changed');
+  });
+  it.each(['success', 'failure'] as const)('suppresses late deletion %s after forced destruction without cancelling persistence', async outcome => {
+    const { fixture, tools, remove } = setup(), deletion = deferredDeletion();
+    remove.mockReturnValueOnce(deletion.promise);
+    tools.select({ guid: 'ma', selected: true }); tools.requestDelete(); fixture.detectChanges();
+    const reviewed = tools.review();
+    const pending = tools.confirmDelete();
+    expect(remove).toHaveBeenCalledOnce();
+    expect(tools.saving()).toBe(true);
+    fixture.destroy();
+    const hide = vi.spyOn(TestBed.inject(ModalPortalService), 'hide');
+
+    if (outcome === 'success') deletion.resolve(1); else deletion.reject(new Error('Old deletion failed'));
+    await pending;
+
+    expect(remove).toHaveBeenCalledOnce();
+    expect(tools.review()).toBe(reviewed);
+    expect(tools.selected()).toEqual(['ma']);
+    expect(tools.error()).toBe('');
+    expect(tools.saving()).toBe(true);
+    expect(hide).not.toHaveBeenCalled();
+  });
+  it.each(['success', 'failure'] as const)('keeps the next context deletion intact when an old deletion finishes with %s', async outcome => {
+    const { fixture, tools, remove, scope } = setup();
+    const oldDeletion = deferredDeletion(), currentDeletion = deferredDeletion();
+    remove.mockReturnValueOnce(oldDeletion.promise).mockReturnValueOnce(currentDeletion.promise);
+    tools.select({ guid: 'ma', selected: true }); tools.requestDelete(); fixture.detectChanges();
+    const oldPending = tools.confirmDelete();
+
+    scope.set('facility-b');
+    fixture.componentRef.setInput('matchingGuids', ['mb']); fixture.componentRef.setInput('scopeGuids', ['mb']); fixture.detectChanges();
+    expect(tools.saving()).toBe(false); expect(tools.review()).toBeUndefined(); expect(tools.error()).toBe('');
+    tools.select({ guid: 'mb', selected: true }); tools.requestDelete(); fixture.detectChanges();
+    const reviewed = tools.review(), currentPending = tools.confirmDelete();
+    const portal = TestBed.inject(ModalPortalService), currentPortal = portal.activePortal(), hide = vi.spyOn(portal, 'hide');
+
+    if (outcome === 'success') oldDeletion.resolve(1); else oldDeletion.reject(new Error('Old deletion failed'));
+    await oldPending; fixture.detectChanges();
+
+    expect(remove).toHaveBeenCalledTimes(2);
+    expect(tools.review()).toBe(reviewed); expect(tools.selected()).toEqual(['mb']);
+    expect(tools.saving()).toBe(true); expect(tools.error()).toBe('');
+    expect(portal.activePortal()).toBe(currentPortal); expect(hide).not.toHaveBeenCalled();
+
+    currentDeletion.resolve(1); await currentPending; fixture.detectChanges();
+    expect(tools.review()).toBeUndefined(); expect(tools.selected()).toEqual([]); expect(tools.saving()).toBe(false);
+    fixture.destroy();
   });
 });

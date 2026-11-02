@@ -5,6 +5,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { SingleFacilitySettingsCommandHandler } from '@data/account-workspace/handlers/single-facility-settings-command-handler.service';
+import { facilitySettingsChange, FacilitySettingsChange } from '@data/account-workspace/facility-settings.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsDetailBase, SettingsSaveState } from '@app/v1/shared/settings/settings-detail.base';
@@ -34,6 +36,7 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
   protected readonly commandBoundary = inject(WorkspaceCommandBoundary);
   protected readonly accountHandler = inject(AccountCommandHandler);
   protected readonly facilityHandler = inject(FacilityCommandHandler);
+  private readonly singleFacilitySettings = inject(SingleFacilitySettingsCommandHandler);
   protected readonly lifecycle = inject(ApplicationLifecycleService);
 
   readonly singleFacilityPresentation = computed(() => !!singleFacilityPresentation(this.workspace.account(), this.workspace.facilities(), this.workspace.status() === 'ready'));
@@ -44,8 +47,8 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
 
   protected async saveFacility(
     label: string,
-    buildFacility: (facility: IdbFacility) => IdbFacility,
-    buildAccount?: (account: IdbAccount) => IdbAccount
+    group: FacilitySettingsChange['group'],
+    buildFacility: (facility: IdbFacility) => IdbFacility
   ): Promise<void> {
     const account = this.account();
     const facility = this.facility();
@@ -54,16 +57,15 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
     }
 
     const updatedFacility = buildFacility(structuredClone(facility));
-    const updatedAccount = account.isSingleFacilityCompany && buildAccount
-      ? buildAccount(structuredClone(account))
-      : undefined;
+    const mirrorAccount = !!account.isSingleFacilityCompany;
+    const change = facilitySettingsChange(group, updatedFacility);
 
     await this.runSave(label, async () => {
       await this.commandBoundary.execute(
         {
-          entityKind: updatedAccount ? 'account' : 'facility',
+          entityKind: mirrorAccount ? 'account' : 'facility',
           changeKind: 'update',
-          entityGuid: updatedAccount?.guid ?? updatedFacility.guid,
+          entityGuid: mirrorAccount ? account.guid : updatedFacility.guid,
           label,
           notification: { suppressSuccessToast: true },
           publication: {
@@ -75,17 +77,19 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
           }
         },
         async (): Promise<FacilitySettingsSaveResult> => {
-          const savedAccount = updatedAccount
-            ? await this.accountHandler.update({ ...updatedAccount }, account.guid)
-            : undefined;
+          if (mirrorAccount) {
+            return this.singleFacilitySettings.update(
+              { id: account.id, guid: account.guid },
+              { id: facility.id, guid: facility.guid, accountId: facility.accountId },
+              change,
+              account.guid
+            );
+          }
           const savedFacility = await this.facilityHandler.update({ ...updatedFacility }, account.guid);
-          return {
-            account: savedAccount,
-            facility: savedFacility
-          };
+          return { facility: savedFacility };
         }
       );
-      if (updatedAccount) {
+      if (mirrorAccount) {
         await this.lifecycle.refreshAccountCatalog();
       }
     }, true);

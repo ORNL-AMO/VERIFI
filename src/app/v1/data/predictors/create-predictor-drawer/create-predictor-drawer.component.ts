@@ -42,12 +42,15 @@ export class CreatePredictorDrawerComponent {
   }
   openWeather(): void { if (this.canCreate()) this.weatherSelected.emit(this.facilityGuid()); }
   async create(draft: PredictorDraft): Promise<void> {
-    if (!this.canCreate()) return;
+    if (this.destroy.destroyed || !this.canCreate()) return;
+    const facilityGuid = this.facilityGuid();
+    const isCurrent = () => !this.destroy.destroyed && this.workspace.account()?.guid === this.accountGuid
+      && facilityGuid === this.selectedFacility()?.guid;
     this.saving.set(true); this.error.set('');
     try {
-      const predictor = await this.actions.createPredictor(draft, this.facilityGuid());
-      if (!this.destroy.destroyed && predictor.accountId === this.workspace.account()?.guid) this.created.emit(predictor);
-    } catch (error) { if (!this.destroy.destroyed) this.error.set(error instanceof Error ? error.message : 'The predictor could not be added.'); }
+      const predictor = await this.actions.createPredictor(draft, facilityGuid);
+      if (isCurrent() && predictor.accountId === this.accountGuid && predictor.facilityId === facilityGuid) this.created.emit(predictor);
+    } catch (error) { if (isCurrent()) this.error.set(error instanceof Error ? error.message : 'The predictor could not be added.'); }
     finally { if (!this.destroy.destroyed) this.saving.set(false); }
   }
 }

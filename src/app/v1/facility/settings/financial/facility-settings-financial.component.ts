@@ -55,8 +55,8 @@ export class FacilitySettingsFinancialComponent extends FacilitySettingsDetailBa
     this.applyFormAvailability(this.canWrite());
     await this.saveFacility(
       'Saving facility financial reporting',
-      facility => this.settingsForms.updateFacilityFromFiscalForm(this.form, facility),
-      account => this.settingsForms.updateAccountFromFiscalForm(this.form, account)
+      'financial',
+      facility => this.settingsForms.updateFacilityFromFiscalForm(this.form, facility)
     );
   }
 

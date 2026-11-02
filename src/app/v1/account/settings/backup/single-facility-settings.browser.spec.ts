@@ -11,6 +11,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { SingleFacilitySettingsCommandHandler } from '@data/account-workspace/handlers/single-facility-settings-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
@@ -44,6 +45,7 @@ async function setup() {
     { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [store.account()], refreshAccountCatalog: vi.fn() } },
     { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]), discardedItems: signal([]) } },
     { provide: AccountCommandHandler, useValue: { update: writes } }, { provide: FacilityCommandHandler, useValue: {} },
+    { provide: SingleFacilitySettingsCommandHandler, useValue: { update: writes } },
     { provide: WorkspaceCommandBoundary, useValue: { execute: writes } }, { provide: BackupExportCoordinator, useValue: {} },
     { provide: AutomaticBackupsService, useValue: { status: new BehaviorSubject('disabled'), saving: new BehaviorSubject(false) } },
     { provide: ElectronBackupFileGateway, useValue: { isAvailable: false } },

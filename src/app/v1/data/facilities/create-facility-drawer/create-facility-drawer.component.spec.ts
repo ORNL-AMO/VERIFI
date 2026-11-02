@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { DataModule } from '@app/v1/data/data.module';
@@ -15,28 +17,26 @@ describe('CreateFacilityDrawerComponent', () => {
   let portfolioFacilities: { createFacility: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let closed: ReturnType<typeof vi.fn>;
+  let created: ReturnType<typeof vi.fn<(facility: IdbFacility) => void>>;
+  let activeAccount: ReturnType<typeof signal<IdbAccount>>;
 
   beforeEach(() => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     portfolioFacilities = {
-      createFacility: vi.fn(async () => ({ guid: 'facility-new', name: 'New Facility' } as IdbFacility))
+      createFacility: vi.fn(async () => ({ guid: 'facility-new', accountId: 'account-a', name: 'New Facility' } as IdbFacility))
     };
+    activeAccount = signal({ ...getNewIdbAccount(), guid: 'account-a', name: 'Account A', city: 'Oak Ridge', state: 'TN' });
     router = { navigate: vi.fn(async () => true) };
     TestBed.configureTestingModule({
       imports: [DataModule],
       providers: [
         SettingsFormService,
         { provide: FacilityActionsService, useValue: portfolioFacilities },
+        { provide: AccountWorkspaceStore, useValue: { account: activeAccount, canWrite: () => true, hasPending: () => false } },
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            account: signal({
-              ...getNewIdbAccount(),
-              guid: 'account-a',
-              name: 'Account A',
-              city: 'Oak Ridge',
-              state: 'TN'
-            }),
+            account: activeAccount,
             facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => [
               '/v1',
               'workspace',
@@ -53,6 +53,7 @@ describe('CreateFacilityDrawerComponent', () => {
     fixture = TestBed.createComponent(CreateFacilityDrawerComponent);
     closed = vi.fn();
     fixture.componentInstance.closed.subscribe(closed);
+    created = vi.fn<(facility: IdbFacility) => void>(); fixture.componentInstance.created.subscribe(created);
     fixture.detectChanges();
   });
 
@@ -101,15 +102,9 @@ describe('CreateFacilityDrawerComponent', () => {
       name: 'New Plant',
       includeProfileDetails: false
     }));
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-new',
-      'settings',
-      'profile'
-    ]);
-    expect(closed).toHaveBeenCalled();
+    expect(created).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ guid: 'facility-new', accountId: 'account-a' }));
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(closed).not.toHaveBeenCalled();
   });
 
   it('passes optional profile details when expanded', async () => {
@@ -140,6 +135,35 @@ describe('CreateFacilityDrawerComponent', () => {
     expect(fixture.componentInstance.form.controls['name'].value).toBe('Unsaved Plant');
     expect(fixture.nativeElement.textContent).toContain('Facility could not be created');
     expect(closed).not.toHaveBeenCalled();
+    expect(created).not.toHaveBeenCalled();
+    await fixture.componentInstance.createFacility();
+    expect(created).toHaveBeenCalledOnce();
+  });
+
+  it.each(['destroyed', 'account-switched'] as const)('suppresses a completed facility output when the drawer is %s', async reason => {
+    let complete!: (facility: IdbFacility) => void;
+    portfolioFacilities.createFacility.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    fixture.componentInstance.form.controls['name'].setValue('Committed Plant');
+    const saving = fixture.componentInstance.createFacility();
+    await fixture.componentInstance.createFacility();
+    expect(portfolioFacilities.createFacility).toHaveBeenCalledOnce();
+    if (reason === 'destroyed') fixture.destroy();
+    else activeAccount.set({ ...activeAccount(), guid: 'account-b' });
+    complete({ guid: 'facility-new', accountId: 'account-a', name: 'Committed Plant' } as IdbFacility);
+    await saving;
+    expect(created).not.toHaveBeenCalled();
+    expect(closed).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not report a late persistence failure after destruction', async () => {
+    let fail!: (error: Error) => void;
+    portfolioFacilities.createFacility.mockImplementation(() => new Promise((_resolve, reject) => { fail = reject; }));
+    fixture.componentInstance.form.controls['name'].setValue('Committed Plant');
+    const saving = fixture.componentInstance.createFacility();
+    fixture.destroy(); fail(new Error('Late failure')); await saving;
+    expect(fixture.componentInstance.createError).toBe('');
+    expect(created).not.toHaveBeenCalled();
   });
 
   describe('drawer focus lifecycle', () => {

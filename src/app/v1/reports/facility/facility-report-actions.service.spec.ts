@@ -4,7 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { FacilityReportActionsService } from './facility-report-actions.service';
-import { FACILITY_REPORT_TYPES, buildFacilityReportCard, filterFacilityReportCards } from './facility-report.models';
+import { FACILITY_REPORT_TYPES, buildFacilityReportCard } from './facility-report.models';
 import { evaluateWorkspaceStatus } from '@app/v1/status/status.evaluator';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { reportFacility, reportFixture, reportSnapshot } from './testing/report-test-fixtures';
@@ -116,7 +116,6 @@ describe('FacilityReportActionsService', () => {
     const card = buildFacilityReportCard(created, [], presentFindings(evaluation.findings), 'ready');
     expect(card.status).toBe('error');
     expect(card.view.chips?.map(chip => chip.label)).toContain('Setup incomplete');
-    expect(filterFacilityReportCards([card], { search: '', type: 'all', status: 'ready', sort: 'attention' })).toEqual([]);
   });
 
   it('preserves saved Data Quality settings when copying an existing report', async () => {

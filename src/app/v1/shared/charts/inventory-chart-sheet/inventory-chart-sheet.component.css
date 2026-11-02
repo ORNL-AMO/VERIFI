@@ -7,31 +7,12 @@
 .inventory-chart-sheet__body--fill .inventory-chart-sheet__panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .inventory-chart-sheet__body--fill .inventory-chart-sheet__plot-layout { flex: 1; min-height: 0; grid-template-rows: minmax(0,1fr); }
 .inventory-chart-sheet__body--fill .inventory-chart-sheet__plot { min-height: 0; overflow: auto; }
-.inventory-chart-sheet__controls { display: flex; justify-content: flex-start; flex-wrap: wrap; align-items: center; gap: .75rem; }
-.inventory-chart-sheet__controls:not(.inventory-chart-sheet__controls--tabbed) { justify-content: flex-end; column-gap: 1rem; }
-.inventory-chart-sheet__controls:not(.inventory-chart-sheet__controls--tabbed) .inventory-chart-sheet__actions { flex-wrap: nowrap; flex-shrink: 0; padding-inline-start: 1rem; border-inline-start: 1px solid var(--v1-border); }
-.inventory-chart-sheet__modes { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; min-width: 0; }
-.inventory-chart-sheet__controls:not(.inventory-chart-sheet__controls--tabbed) .inventory-chart-sheet__modes { justify-content: flex-end; }
+.inventory-chart-sheet__controls { display: flex; justify-content: flex-end; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; }
+.inventory-chart-sheet__controls .inventory-chart-sheet__actions { flex-wrap: nowrap; flex-shrink: 0; padding-inline-start: 1rem; border-inline-start: 1px solid var(--v1-border); }
+.inventory-chart-sheet__modes { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 1rem; min-width: 0; }
 .inventory-chart-sheet__metrics .active { color: var(--v1-inverse-text); background: var(--v1-primary-strong); border-color: var(--v1-primary-strong); }
 .inventory-chart-sheet__coverage { margin-bottom: .5rem !important; }
-.inventory-chart-sheet__legend { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: .75rem; }
-.inventory-chart-sheet__chip { display: inline-flex; align-items: center; gap: .45rem; max-width: 100%; min-height: 2.4rem; padding: .4rem .65rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); color: var(--v1-text); background: var(--v1-content-block); font: inherit; font-size: max(.9rem,14px); text-align: start; overflow-wrap: anywhere; }
-.inventory-chart-sheet__chip svg { flex: 0 0 22px; }
-.inventory-chart-sheet__chip[aria-pressed='false'] { background: var(--v1-surface); color: var(--v1-muted); text-decoration: line-through; }
-.inventory-chart-sheet__chip[aria-pressed='false'] svg { opacity: .35; }
-.inventory-chart-sheet__chip:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: 3px; }
-@media (pointer: coarse) { .inventory-chart-sheet__chip { min-height: 44px; } }
-
-
-
-.inventory-chart-sheet__legend-pages { display: inline-flex; align-items: center; gap: .35rem; margin-left: auto; }
-
-.inventory-chart-sheet__controls--tabbed { display: grid; grid-template-columns: minmax(0,1fr) auto; }
-.inventory-chart-sheet__controls--tabbed .inventory-chart-sheet__modes { display: block; }
-.inventory-chart-sheet__metrics--scrollable { min-width: 0; overflow-x: auto; flex-wrap: nowrap; padding: .2rem .2rem .6rem; }
-.inventory-chart-sheet__metrics--scrollable button { flex: 0 0 auto; max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 40rem) { .inventory-chart-sheet__controls--tabbed { grid-template-columns: minmax(0,1fr); } .inventory-chart-sheet__controls--tabbed .inventory-chart-sheet__actions { justify-content: flex-end; } }
-@media (max-width: 40rem) { .inventory-chart-sheet__controls:not(.inventory-chart-sheet__controls--tabbed) .inventory-chart-sheet__actions { padding-inline-start: 0; border-inline-start: 0; } }
+@media (max-width: 40rem) { .inventory-chart-sheet__controls .inventory-chart-sheet__actions { padding-inline-start: 0; border-inline-start: 0; } }
 
 .inventory-chart-sheet__plot-layout { display: grid; grid-template-columns: minmax(0,1fr); gap: 1rem; margin-top: .5rem; }
 .inventory-chart-sheet__plot-layout--browser { min-height: var(--v1-metric-chart-height); }

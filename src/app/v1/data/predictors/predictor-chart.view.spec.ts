@@ -1,4 +1,4 @@
-import { buildPredictorInventory, orderPredictorInventory } from './inventory/predictor-inventory.models';
+import { buildPredictorInventory } from './inventory/predictor-inventory.models';
 import { inventoryReading, inventoryWorkspace } from './inventory/predictor-inventory.testing';
 import { buildPredictorCharts } from './predictor-chart.view';
 
@@ -36,7 +36,6 @@ describe('Predictor chart projection', () => {
     expect(buildPredictorCharts([...all].reverse(), []).map(chart => chart.title)).toEqual(charts.map(chart => chart.title));
     expect(charts.map(chart => chart.id)).toEqual(['p1', 'p2', 'p3']);
     expect(charts[1].metrics).toEqual([]);
-    expect(orderPredictorInventory([...all].reverse(), 'predictorName').map(entry => entry.guid)).toEqual(['p1', 'p2', 'p3']);
     expect(buildPredictorCharts(all, [])[0]).toMatchObject({ metrics: [], rows: [], coverage: 'No monthly data' });
     expect(buildPredictorCharts([], [])).toEqual([]);
   });

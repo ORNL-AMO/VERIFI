@@ -90,13 +90,13 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Workflow:** v1 composite single-facility setup, issue #2637.
 - **Existing v0 entry point:** Account setup and facility setup remain separate under the current Data Management routes.
 - **Decision:** Rebuild in v1 by routing valid single-facility accounts into the sole facility workspace and using the facility settings surface as the combined setup path.
-- **Parity:** Shared profile, location, units, goals, financial reporting, data staleness, backup, and delete behavior continue to save through existing account and facility command handlers.
+- **Parity:** Shared profile, location, units, goals, financial reporting, data staleness, backup, and delete behavior remain available. Mirrored profile/units/goals/financial edits use one native account/facility transaction through `SingleFacilitySettingsCommandHandler`, applying only the edited group to current durable records. The existing single-facility flag controls mirroring, including repair states; portfolio facility-only saves and the atomic Data Validation command retain their paths.
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, or Electron contract changes.
 - **Tests:** Focused v1 navigation, header, side-nav, route guard, welcome, and facility settings specs; production web build before handoff.
 
 ### Single-Facility Navigation
 
-- **Decision:** Valid single-facility companies (`isSingleFacilityCompany` with exactly one facility) use unified Meters, Predictors, and Analysis inventories with implicit sole-facility scope. No facility query parameter is required. The static header label and existing tailored workbench presentation remain until Phase 5.
+- **Decision:** Valid single-facility companies (`isSingleFacilityCompany` with exactly one facility) use unified Meters, Predictors, and Analysis inventories with implicit sole-facility scope. No facility query parameter is required. Phase 5 completed the shared single-facility presentation: the shell shows one static facility identity, inventories hide repeated ownership, and Settings uses one list with the existing editors. See [Phase 5 presentation](#phase-5-single-facility-presentation) and the [Phase 6 review fixes](v1-global-facility-scope-plan.md#phase-6--review-fixes-and-scoped-cleanup).
 - **Routes:** Unified account inventory URLs remain canonical. Facilities/default Portfolio entry opens Meters for valid single-facility accounts. Account-analysis workbench entry retains hidden-pair handoffs to the corresponding facility workbench. Facility-owned workbench, grouping, settings, and weather routes remain stable; retired dashboard paths use ordinary recovery.
 - **Exceptions:** Reports remains a combined inventory so account-backed reports stay accessible. Upload keeps its independent initial facility and validated return URL. Zero/multiple-facility states retain recovery without substituting a remembered or first facility; explicitly owned repair/inspection routes remain available. Portfolio conversion restores scope choices without changing records or GUID relationships.
 - **Shared contracts:** No persisted models, calculation inputs, file formats, or Electron boundaries change.
@@ -489,3 +489,11 @@ Backup acceptance exposed an existing restore omission for Analysis and Savings 
 Phase 5 acceptance is complete. The [roadmap evidence](v1-global-facility-scope-plan.md#final-validation-evidence) records the full fast/Chromium suites, complete backup/restore relationships, history and layout checks, type-check, production web build, and documentation validation. No Electron validation was required or run.
 
 Phase 5 Home follow-up: account/facility Home reads named contextual inventory counts rather than positional support-panel rows. Hiding Facilities in single-facility presentation no longer shifts resource values or causes the Reports count to throw. The real navigation regression covers Welcome entry, direct facility Home entry, portfolio conversion, committed count updates, and one-facility portfolios; account-backed reports remain included for single-facility companies and hidden analysis pairs remain excluded.
+
+### Phase 6 review hardening
+
+Data inventory leaves and Analysis now guard path exits through existing workflow registrations, including parent drawers with no active child outlet. Query-only scope changes retain their normalization policy, and Reports retains its own leave protection. Async inventory commands suppress late presentation effects after destruction or context changes; created resources close their parent drawer before navigation, including first-facility repair.
+
+Mirrored profile, units, goals, and financial Settings saves merge only their edited group into current durable account/facility records in one native transaction, then publish once. Portfolio saves and Data Validation keep their existing paths. Retired dashboard-only contracts, batch entry points, chart modes, and card presentation were removed while live report view models remain available.
+
+Phase 6 acceptance is complete; the [delivery evidence](v1-global-facility-scope-plan.md#phase-6-delivery-and-acceptance-evidence) records focused and full suites, native rollback/history checks, type-check, production web build, and remaining inherited warnings. Broader structural work remains in the separate maintenance plan.

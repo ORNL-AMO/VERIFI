@@ -10,12 +10,14 @@ import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { DataModule } from '@app/v1/data/data.module';
 import { DataInventoryComponent } from './data-inventory.component';
 import { FacilityActionsService } from '@app/v1/data/facilities/facility-actions.service';
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 describe('DataInventoryComponent', () => {
   let fixture: ComponentFixture<DataInventoryComponent>;
@@ -79,7 +81,9 @@ describe('DataInventoryComponent', () => {
             accountSettingsRoute: (accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', accountGuid, 'settings', detail],
             facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail],
             facilityDataToolRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
-            facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab]
+            facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab],
+            facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab],
+            facilityWeatherPredictorCreateRoute: (facilityGuid: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', 'weather', 'new']
           }
         },
         { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
@@ -188,14 +192,81 @@ describe('DataInventoryComponent', () => {
   });
 
   it('opens the created meter settings and reports navigation failure without another creation', async () => {
+    activePortfolioTab.set('meters'); fixture.detectChanges();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const meter = { guid: 'meter-new', facilityId: 'facility-b', accountId: 'account-a' } as any;
+    fixture.componentInstance.openCreateMeterDrawer();
     await fixture.componentInstance.openCreatedMeter(meter);
     expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-b', 'data', 'meters', 'meter-new', 'settings']);
     navigate.mockResolvedValue(false);
+    fixture.componentInstance.openCreateMeterDrawer();
     await fixture.componentInstance.openCreatedMeter(meter);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Meter added. Its settings could not be opened');
+  });
+
+  it('closes a completed facility drawer before opening Settings and releases its leave registration', async () => {
+    const parent = fixture.componentInstance;
+    const changes = TestBed.inject(UnsavedChangesService);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(async () => {
+      expect(parent.isCreateFacilityDrawerOpen()).toBe(false);
+      expect(changes.confirmDiscard()).toBe(true);
+      return true;
+    });
+    parent.openCreateFacilityDrawer();
+    expect(changes.confirmDiscard()).toBe(false);
+    await parent.openCreatedFacility(facilityFixture('facility-new', 'Created plant'));
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(['/v1', 'workspace', 'facility', 'facility-new', 'settings', 'profile']);
+    expect(parent.meterNavigationError()).toBe('');
+  });
+
+  it('hands off the first Facility after publication resolves a single-site account scope', async () => {
+    const parent = fixture.componentInstance;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const scope = TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>;
+    account.set({ ...account()!, isSingleFacilityCompany: true }); facilities.set([]); fixture.detectChanges();
+    parent.openCreateFacilityDrawer();
+    const created = facilityFixture('first-facility', 'First plant');
+    facilities.set([created]); scope.set(created.guid); fixture.detectChanges();
+    expect(parent.isCreateFacilityDrawerOpen()).toBe(true);
+    await parent.openCreatedFacility(created);
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(['/v1', 'workspace', 'facility', created.guid, 'settings', 'profile']);
+    expect(parent.isCreateFacilityDrawerOpen()).toBe(false);
+  });
+
+  it.each(['cancelled', 'rejected'] as const)('reports %s facility navigation after commit and keeps the creation drawer closed', async outcome => {
+    const parent = fixture.componentInstance;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+    if (outcome === 'cancelled') navigate.mockResolvedValue(false);
+    else navigate.mockRejectedValue(new Error('Router failed'));
+    parent.openCreateFacilityDrawer();
+    await parent.openCreatedFacility(facilityFixture('facility-new', 'Created plant'));
+    expect(parent.isCreateFacilityDrawerOpen()).toBe(false);
+    expect(parent.meterNavigationError()).toContain('Facility added.');
+    expect(portfolioFacilities.createFacility).not.toHaveBeenCalled();
+  });
+
+  it('ignores drawer results after their inventory scope changes, including before effects render', async () => {
+    activePortfolioTab.set('meters'); fixture.detectChanges();
+    const parent = fixture.componentInstance;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const scope = TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>;
+    parent.openCreateMeterDrawer();
+    scope.set('facility-b');
+    await parent.openCreatedMeter({ guid: 'created', accountId: 'account-a', facilityId: 'facility-a' } as IdbUtilityMeter);
+    expect(navigate).not.toHaveBeenCalled();
+    fixture.detectChanges();
+    expect(parent.isCreateMeterDrawerOpen()).toBe(false);
+  });
+
+  it('does not publish a late handoff error after its Data parent is destroyed', async () => {
+    const parent = fixture.componentInstance;
+    let fail!: (error: Error) => void;
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(() => new Promise((_resolve, reject) => { fail = reject; }));
+    parent.openCreateFacilityDrawer();
+    const opening = parent.openCreatedFacility(facilityFixture('facility-new', 'Created plant'));
+    fixture.destroy(); fail(new Error('Late route failure')); await opening;
+    expect(parent.meterNavigationError()).toBe('');
   });
 
   it('shows the empty Data portfolio when there are no facilities, even with saved analyses', () => {

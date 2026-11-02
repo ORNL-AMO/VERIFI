@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { LocalStorageService } from 'ngx-webstorage';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisActionsService } from '@app/v1/analysis/facility/facility-analysis-actions.service';
 import { AccountAnalysisActionsService } from '../account/account-analysis-actions.service';
@@ -247,6 +248,70 @@ describe('Unified account Analysis dashboard', () => {
     route.set({ accountGuid: 'account-b' }); account.set({ ...inventoryAccount, guid: 'account-b' }); state.set('ready'); fixture.detectChanges();
     complete({ accountId: 'account-a', facilityId: 'facility-b', guid: 'new' }); await pending;
     expect(navigate).not.toHaveBeenCalled(); expect(host.actionError()).toBeUndefined();
+  });
+  it.each(['account', 'facility'] as const)('releases the %s copy navigation lock only after persistence succeeds', async scope => {
+    const host = fixture.componentInstance;
+    const entry = scope === 'account' ? entries()[0] : entries()[3];
+    const action = scope === 'account' ? actions.copyAnalysis : facilityActions.copyAnalysis;
+    let complete!: (value: any) => void;
+    action.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    const changes = TestBed.inject(UnsavedChangesService);
+    navigate.mockImplementation(async () => changes.confirmDiscard());
+    const copying = host.copy(entry);
+    expect(changes.confirmDiscard()).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
+    complete({ accountId: 'account-a', facilityId: 'facility-a', guid: 'copied-analysis' });
+    await copying;
+    expect(navigate).toHaveBeenCalledOnce();
+    expect(host.actionError()).toBeUndefined();
+    expect(host.saving()).toBe(false);
+  });
+  it.each(['create', 'copy'] as const)('does not navigate after %s completes on a destroyed inventory', async operation => {
+    const host = fixture.componentInstance;
+    let complete!: (value: any) => void;
+    const action = operation === 'create' ? facilityActions.createAnalysis : facilityActions.copyAnalysis;
+    action.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    const pending = operation === 'create'
+      ? host.create({ scope: 'facility', category: 'energy', facilityGuid: 'facility-b' }) : host.copy(entries()[3]);
+    fixture.destroy();
+    complete({ accountId: 'account-a', facilityId: 'facility-b', guid: 'committed-analysis' });
+    await pending;
+    expect(action).toHaveBeenCalledOnce();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+  it('ignores a completed action after leaving and returning to the same inventory scope', async () => {
+    const host = fixture.componentInstance;
+    let complete!: (value: any) => void;
+    facilityActions.createAnalysis.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    const pending = host.create({ scope: 'facility', category: 'energy', facilityGuid: 'facility-b' });
+    const scope = host.navigation.inventoryFacilityGuid as WritableSignal<string | undefined>;
+    scope.set('facility-a'); fixture.detectChanges();
+    scope.set(undefined); fixture.detectChanges();
+    complete({ accountId: 'account-a', facilityId: 'facility-b', guid: 'committed-analysis' });
+    await pending;
+    expect(navigate).not.toHaveBeenCalled();
+    expect(host.actionError()).toBeUndefined();
+  });
+  it('ignores a rejected command after destruction', async () => {
+    const host = fixture.componentInstance;
+    let fail!: (error: Error) => void;
+    facilityActions.createAnalysis.mockImplementation(() => new Promise((_resolve, reject) => { fail = reject; }));
+    const pending = host.create({ scope: 'facility', category: 'energy', facilityGuid: 'facility-b' });
+    fixture.destroy(); fail(new Error('Late failure')); await pending;
+    expect(host.actionError()).toBeUndefined();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+  it.each(['cancelled', 'rejected'] as const)('reports %s create navigation after commit without reopening creation', async outcome => {
+    const host = fixture.componentInstance;
+    facilityActions.createAnalysis.mockResolvedValue({ accountId: 'account-a', facilityId: 'facility-b', guid: 'committed-analysis' });
+    if (outcome === 'cancelled') navigate.mockResolvedValue(false);
+    else navigate.mockRejectedValue(new Error('Router failed'));
+    host.openCreate();
+    await host.create({ scope: 'facility', category: 'energy', facilityGuid: 'facility-b' });
+    expect(host.createOpen()).toBe(false);
+    expect(host.saving()).toBe(false);
+    expect(host.actionError()).toContain('Select it from the list');
+    expect(facilityActions.createAnalysis).toHaveBeenCalledOnce();
   });
   it('preserves nonzero, blocked, and failed result labels rather than replacing them with zero', () => {
     results.states.set({ 'account:account-energy': { state: 'blocked', message: 'Setup incomplete' }, 'facility:alternate': { state: 'error', message: 'Calculation failed' } });

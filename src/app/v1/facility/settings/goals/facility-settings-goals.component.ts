@@ -63,8 +63,8 @@ export class FacilitySettingsGoalsComponent extends FacilitySettingsDetailBase {
     this.applyFormAvailability(this.canWrite());
     await this.saveFacility(
       'Saving facility goals',
-      facility => this.settingsForms.updateFacilityFromSustainabilityQuestionsForm(this.form, facility),
-      account => this.settingsForms.updateAccountFromSustainabilityQuestionsForm(this.form, account)
+      'goals',
+      facility => this.settingsForms.updateFacilityFromSustainabilityQuestionsForm(this.form, facility)
     );
   }
 

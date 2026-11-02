@@ -1,8 +1,10 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { FacilityActionsService } from '@app/v1/data/facilities/facility-actions.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 type PortfolioSettingsAction = 'apply' | 'delete';
@@ -18,6 +20,10 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   private readonly portfolioFacilities = inject(FacilityActionsService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly navigation = inject(WorkspaceNavigationService);
+  private readonly router = inject(Router);
+  private creationAccountGuid?: string;
 
   @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
   @ViewChild('portfolioActionModal') private readonly portfolioActionModal!: TemplateRef<unknown>;
@@ -74,6 +80,7 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
       return;
     }
     this.saveError = '';
+    this.creationAccountGuid = this.account()?.guid;
     this.isCreateFacilityDrawerOpen = true;
     this.modalPortal.show(new TemplatePortal(this.createFacilityDrawer, this.viewContainerRef));
   }
@@ -81,6 +88,19 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   closeCreateFacilityDrawer(): void {
     this.isCreateFacilityDrawerOpen = false;
     this.modalPortal.hide();
+  }
+
+  async openCreatedFacility(facility: IdbFacility): Promise<void> {
+    const accountGuid = this.creationAccountGuid;
+    const isCurrent = () => !this.destroyRef.destroyed && accountGuid === this.account()?.guid;
+    if (!isCurrent() || !this.isCreateFacilityDrawerOpen || facility.accountId !== accountGuid) return;
+    this.closeCreateFacilityDrawer();
+    try {
+      const opened = await this.router.navigate(this.navigation.facilitySettingsRoute(facility.guid));
+      if (!opened && isCurrent()) this.saveError = 'Facility added. Its settings could not be opened; select the facility from the list to continue.';
+    } catch {
+      if (isCurrent()) this.saveError = 'Facility added. Its settings could not be opened; select the facility from the list to continue.';
+    }
   }
 
   openApplyConfirm(): void {

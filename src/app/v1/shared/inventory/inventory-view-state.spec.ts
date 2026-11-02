@@ -4,14 +4,14 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BrowseFilters, BrowseKey, BrowseStateService, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { InventoryViewState } from './inventory-view-state';
-import type { DataInventoryResource } from '@app/v1/data/inventory/data-inventory.models';
-
 import { portfolioTile } from './inventory.testing';
+
+type InventoryTestResource = 'facilities' | 'meters' | 'predictors';
 
 @Component({ standalone: true, template: '' })
 class InventoryStateHost {
-  readonly account = signal('a'); readonly resource = signal<DataInventoryResource>('meters');
-  readonly key = computed<BrowseKey<DataInventoryResource>>(() => ({ accountGuid: this.account(), kind: this.resource() }));
+  readonly account = signal('a'); readonly resource = signal<InventoryTestResource>('meters');
+  readonly key = computed<BrowseKey<InventoryTestResource>>(() => ({ accountGuid: this.account(), kind: this.resource() }));
   readonly all = signal(Array.from({ length: 60 }, (_, index) => portfolioTile(String(index))));
   readonly filter = signal(''); readonly loaded = signal(true);
   readonly visible = computed(() => this.all().filter(item => !this.filter() || item.guid === this.filter()));

@@ -4,6 +4,20 @@ import { reportFacility } from '@app/v1/reports/facility/testing/report-test-fix
 import { setupFacilityScopeNavigation as setup } from './facility-scope-navigation.testing';
 
 describe('facility scope navigation', () => {
+  it.each([
+    ['/v1/workspace/account/account-a/data/portfolio/meters', '/v1/workspace/account/account-a/data/portfolio/predictors'],
+    ['/v1/workspace/account/account-a/data/portfolio/meters?facility=facility-b', '/v1/workspace/account/account-a/data/portfolio/predictors?facility=facility-b'],
+    ['/v1/workspace/account/account-a/analysis/dashboard', '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/setup']
+  ])('blocks same-scope exits from %s until the active workflow is closed', async (source, target) => {
+    const { navigation, router } = await setup(source);
+    const scope = navigation.headerScope();
+    const unregister = TestBed.inject(UnsavedChangesService).register(() => false, () => {}, () => true);
+    expect(await router.navigateByUrl(target)).toBe(false);
+    expect(router.url).toBe(source);
+    expect(navigation.headerScope()).toEqual(scope);
+    unregister();
+    expect(await router.navigateByUrl(target)).toBe(true);
+  });
 
   it('derives presentation from the ready owned facility rather than remembered selection', async () => {
     const view = await setup();

@@ -1,5 +1,8 @@
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { DataValidationSettingsCommandHandler } from '@data/account-workspace/handlers/data-validation-settings-command-handler.service';
+import { SingleFacilitySettingsCommandHandler } from '@data/account-workspace/handlers/single-facility-settings-command-handler.service';
+import { applyAccountSettingsChange, applyFacilitySettingsChange } from '@data/account-workspace/facility-settings.models';
+import { WorkspacePatch } from '@data/account-workspace/account-workspace.models';
 import { applyDataValidationSettings } from '@shared/settings-forms/data-validation-settings';
 import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -40,6 +43,8 @@ describe('Facility settings routed components', () => {
   let facilities: ReturnType<typeof signal<IdbFacility[]>>;
   let canWrite: ReturnType<typeof signal<boolean>>;
   let commandBoundary: { execute: ReturnType<typeof vi.fn> };
+  let publishedPatches: WorkspacePatch[];
+  let singleFacilitySettings: { update: ReturnType<typeof vi.fn> };
   let accountHandler: { update: ReturnType<typeof vi.fn> };
   let facilityHandler: {
     add: ReturnType<typeof vi.fn>;
@@ -74,9 +79,18 @@ describe('Facility settings routed components', () => {
     selectedFacility = signal(facilityFixture('facility-a'));
     facilities = signal([selectedFacility()!, facilityFixture('facility-b')]);
     canWrite = signal(true);
+    publishedPatches = [];
     commandBoundary = {
-      execute: vi.fn(async (_metadata, operation: () => Promise<unknown>) => ({ value: await operation(), change: {} }))
+      execute: vi.fn(async (metadata, operation: () => Promise<unknown>) => {
+        const value = await operation();
+        if (metadata.publication?.mode === 'patch') publishedPatches.push(metadata.publication.buildPatch(value));
+        return { value, change: {} };
+      })
     };
+    singleFacilitySettings = { update: vi.fn(async (_account, _facility, change) => ({
+      account: applyAccountSettingsChange(account()!, change),
+      facility: applyFacilitySettingsChange(selectedFacility()!, change)
+    })) };
     accountHandler = {
       update: vi.fn(async updated => updated)
     };
@@ -139,6 +153,7 @@ describe('Facility settings routed components', () => {
         { provide: WorkspaceCommandBoundary, useValue: commandBoundary },
         { provide: AccountCommandHandler, useValue: accountHandler },
         { provide: FacilityCommandHandler, useValue: facilityHandler },
+        { provide: SingleFacilitySettingsCommandHandler, useValue: singleFacilitySettings },
         { provide: DataValidationSettingsCommandHandler, useValue: { updateSingleFacility: vi.fn(async (a, f, change) => ({ account: applyDataValidationSettings(a, change, true), facility: applyDataValidationSettings(f, change) })) } },
         { provide: ApplicationLifecycleService, useValue: lifecycle },
         { provide: ManualBackupDownloadService, useValue: manualBackups },
@@ -289,24 +304,22 @@ describe('Facility settings routed components', () => {
       }),
       expect.any(Function)
     );
-    expect(accountHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Updated Site',
-        city: 'Oak Ridge',
-        state: 'TN',
-        zip: '37830',
-        address: '2 Main St'
-      }),
+    expect(singleFacilitySettings.update).toHaveBeenCalledExactlyOnceWith(
+      { id: account()!.id, guid: 'account-a' },
+      { id: selectedFacility()!.id, guid: 'facility-a', accountId: 'account-a' },
+      { group: 'profile', values: expect.objectContaining({
+        name: 'Updated Site', city: 'Oak Ridge', state: 'TN', zip: '37830', address: '2 Main St', size: 45000, classification: 'Manufacturing'
+      }) },
       'account-a'
     );
-    expect(facilityHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Updated Site',
-        city: 'Oak Ridge',
-        classification: 'Manufacturing'
-      }),
-      'account-a'
-    );
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(facilityHandler.update).not.toHaveBeenCalled();
+    expect(commandBoundary.execute).toHaveBeenCalledTimes(1);
+    expect(publishedPatches).toEqual([{
+      account: expect.objectContaining({ name: 'Updated Site', size: 0 }),
+      collections: [{ collection: 'facilities', upsert: [expect.objectContaining({ name: 'Updated Site', size: 45000, classification: 'Manufacturing' })] }]
+    }]);
+    expect(lifecycle.refreshAccountCatalog).toHaveBeenCalledTimes(1);
   });
 
   it('copies account units only after confirmation', async () => {
@@ -355,28 +368,21 @@ describe('Facility settings routed components', () => {
 
     await fixture.componentInstance.saveUnits();
 
-    expect(accountHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
+    expect(singleFacilitySettings.update).toHaveBeenCalledExactlyOnceWith(
+      { id: account()!.id, guid: 'account-a' },
+      { id: selectedFacility()!.id, guid: 'facility-a', accountId: 'account-a' },
+      { group: 'units', values: expect.objectContaining({
         unitsOfMeasure: 'Custom',
         energyUnit: 'GJ',
         volumeLiquidUnit: 'L',
         volumeGasUnit: 'm3',
         massUnit: 'kg',
         energyIsSource: false
-      }),
+      }) },
       'account-a'
     );
-    expect(facilityHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        unitsOfMeasure: 'Custom',
-        energyUnit: 'GJ',
-        volumeLiquidUnit: 'L',
-        volumeGasUnit: 'm3',
-        massUnit: 'kg',
-        energyIsSource: false
-      }),
-      'account-a'
-    );
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(facilityHandler.update).not.toHaveBeenCalled();
   });
 
   it('keeps greenhouse goals account-owned but shows facility goals when account emissions are enabled', () => {
@@ -426,18 +432,14 @@ describe('Facility settings routed components', () => {
 
     await fixture.componentInstance.saveGoals();
 
-    expect(accountHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sustainabilityQuestions: expect.objectContaining({ energyReductionPercent: 40 })
-      }),
+    expect(singleFacilitySettings.update).toHaveBeenCalledExactlyOnceWith(
+      { id: account()!.id, guid: 'account-a' },
+      { id: selectedFacility()!.id, guid: 'facility-a', accountId: 'account-a' },
+      { group: 'goals', values: { sustainabilityQuestions: expect.objectContaining({ energyReductionPercent: 40 }), isNewFacility: false } },
       'account-a'
     );
-    expect(facilityHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sustainabilityQuestions: expect.objectContaining({ energyReductionPercent: 40 })
-      }),
-      'account-a'
-    );
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(facilityHandler.update).not.toHaveBeenCalled();
   });
 
   it('mirrors matching financial fields to the account for single-facility accounts', async () => {
@@ -458,11 +460,63 @@ describe('Facility settings routed components', () => {
       }),
       expect.any(Function)
     );
-    expect(accountHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({ fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: false }),
+    expect(singleFacilitySettings.update).toHaveBeenCalledExactlyOnceWith(
+      { id: account()!.id, guid: 'account-a' },
+      { id: selectedFacility()!.id, guid: 'facility-a', accountId: 'account-a' },
+      { group: 'financial', values: { fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: false } },
       'account-a'
     );
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(facilityHandler.update).not.toHaveBeenCalled();
     expect(lifecycle.refreshAccountCatalog).toHaveBeenCalled();
+  });
+
+  it.each([
+    { group: 'profile', field: 'name', value: 'Unsaved site', create: () => {
+      const fixture = createDetail(FacilitySettingsProfileComponent);
+      return { fixture, save: () => fixture.componentInstance.saveProfile() };
+    } },
+    { group: 'units', field: 'energyUnit', value: 'GJ', create: () => {
+      const fixture = createDetail(FacilitySettingsUnitsComponent);
+      return { fixture, save: () => fixture.componentInstance.saveUnits() };
+    } },
+    { group: 'goals', field: 'energyReductionPercent', value: 40, create: () => {
+      const fixture = createDetail(FacilitySettingsGoalsComponent);
+      return { fixture, save: () => fixture.componentInstance.saveGoals() };
+    } },
+    { group: 'financial', field: 'fiscalYearMonth', value: 6, create: () => {
+      const fixture = createDetail(FacilitySettingsFinancialComponent);
+      return { fixture, save: () => fixture.componentInstance.saveFinancial() };
+    } }
+  ])('retains a failed mirrored $group draft through hydration and publishes only its successful retry', async editor => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const { fixture, save } = editor.create();
+    const form = fixture.componentInstance.form;
+    form.controls[editor.field].setValue(editor.value);
+    singleFacilitySettings.update.mockRejectedValueOnce(new Error('Transaction aborted'));
+
+    await save();
+    selectedFacility.set(structuredClone(selectedFacility()));
+    fixture.detectChanges(false);
+
+    expect(fixture.componentInstance.form).toBe(form);
+    expect(form.controls[editor.field].value).toBe(editor.value);
+    expect(fixture.componentInstance.saveState).toBe('error');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    expect(publishedPatches).toEqual([]);
+    expect(lifecycle.refreshAccountCatalog).not.toHaveBeenCalled();
+
+    await save();
+
+    expect(singleFacilitySettings.update).toHaveBeenCalledTimes(2);
+    expect(publishedPatches).toHaveLength(1);
+    expect(publishedPatches[0].account).toBeDefined();
+    expect(publishedPatches[0].collections).toEqual([{ collection: 'facilities', upsert: [expect.objectContaining({ guid: 'facility-a' })] }]);
+    expect(lifecycle.refreshAccountCatalog).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(facilityHandler.update).not.toHaveBeenCalled();
   });
 
   it('honors facility staleness inheritance and copies current account values', async () => {
@@ -514,12 +568,14 @@ describe('Facility settings routed components', () => {
     const savedAccount = structuredClone(account()), savedFacility = structuredClone(selectedFacility());
     const shell = createDetail(FacilitySettingsComponent);
     expect(shell.nativeElement.querySelector('.page-identity__crumb')).toBeNull();
+    const profile = createDetail(FacilitySettingsProfileComponent);
     const units = createDetail(FacilitySettingsUnitsComponent);
     const goals = createDetail(FacilitySettingsGoalsComponent);
     const financial = createDetail(FacilitySettingsFinancialComponent);
-    for (const fixture of [units, goals, financial]) expect(fixture.nativeElement.textContent).not.toContain('Update from account settings');
+    for (const fixture of [profile, units, goals, financial]) expect(fixture.nativeElement.textContent).not.toContain('Update from account settings');
     expect(units.componentInstance.form.controls['energyUnit'].value).toBe('GJ');
     expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(singleFacilitySettings.update).not.toHaveBeenCalled();
     expect(account()).toEqual(savedAccount); expect(selectedFacility()).toEqual(savedFacility);
   });
 
@@ -707,6 +763,7 @@ function fileList(text: string): FileList {
 
 function accountFixture(): IdbAccount {
   return {
+    id: 1,
     guid: 'account-a',
     name: 'Account A',
     country: 'US',
@@ -764,6 +821,7 @@ function accountFixture(): IdbAccount {
 function facilityFixture(guid: string): IdbFacility {
   return {
     ...accountFixture(),
+    id: guid === 'facility-a' ? 2 : 3,
     guid,
     accountId: 'account-a',
     name: guid === 'facility-a' ? 'Facility A' : 'Facility B',

@@ -19,8 +19,7 @@ export interface InventoryChartView {
 export interface InventoryChartSheetView {
   readonly metric: string;
   readonly hiddenGuids: readonly string[];
-  readonly legendPage: number;
   readonly tracePanelOpen?: boolean;
   readonly collapsedTraceFacilities?: readonly string[];
 }
-export const DEFAULT_INVENTORY_CHART_VIEW: InventoryChartSheetView = { metric: 'energy', hiddenGuids: [], legendPage: 0 };
+export const DEFAULT_INVENTORY_CHART_VIEW: InventoryChartSheetView = { metric: 'energy', hiddenGuids: [] };

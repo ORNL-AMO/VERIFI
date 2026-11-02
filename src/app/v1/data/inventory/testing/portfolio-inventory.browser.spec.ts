@@ -18,9 +18,9 @@ import { DataInventoryComponent } from '../data-inventory.component';
 import { FacilitiesInventoryComponent } from '@app/v1/data/facilities/inventory/facilities-inventory.component';
 import { MetersInventoryComponent } from '@app/v1/data/meters/inventory/meters-inventory.component';
 import { PredictorsInventoryComponent } from '@app/v1/data/predictors/inventory/predictors-inventory.component';
-import type { DataInventoryResource } from '../data-inventory.models';
-
 import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
+
+type InventoryTestResource = 'facilities' | 'meters' | 'predictors';
 
 @Component({ standalone: true, imports: [RouterOutlet], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div><router-outlet/></div></main>' })
 class InventoryBrowserHost { }
@@ -37,7 +37,7 @@ function setup(count = 260) {
     meterGroups: signal(facilities().map(item => group({ guid:'g', facilityId:item.guid }))), predictors, predictorData: signal(predictors().map(item => inventoryReading(item.guid, { accountId: account().guid, facilityId: item.facilityId }))),
     facilityAnalyses: signal([]), accountAnalyses: signal([]), facilityReports: signal([]), energyUseEquipment: signal([]), canWrite: signal(true), hasPending: signal(false) };
   const scope = signal<string | undefined>(undefined);
-  const active = signal<DataInventoryResource>('meters'); const stored = new Map<string,unknown>();
+  const active = signal<InventoryTestResource>('meters'); const stored = new Map<string,unknown>();
   const statusState = signal<StatusEvaluationState>('ready');
   const statusItems = signal(findings);
   const routes = [{ path: 'portfolio', component: DataInventoryComponent, children: [
@@ -60,7 +60,7 @@ function setup(count = 260) {
   ] });
   const fixture = TestBed.createComponent(InventoryBrowserHost); fixture.detectChanges();
   const router = TestBed.inject(Router), root = fixture.nativeElement.querySelector('main') as HTMLElement;
-  const open = async(resource:DataInventoryResource) => {
+  const open = async(resource:InventoryTestResource) => {
     if (resource === 'facilities') scope.set(undefined);
     active.set(resource); await router.navigateByUrl(`/portfolio/${resource}`); fixture.detectChanges(); await fixture.whenStable(); await settled(root);
     const type = resource === 'facilities' ? FacilitiesInventoryComponent : resource === 'meters' ? MetersInventoryComponent : PredictorsInventoryComponent;

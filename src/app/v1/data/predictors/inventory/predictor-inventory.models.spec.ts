@@ -1,5 +1,5 @@
 import { buildPredictorCards, buildWeatherStationGroups } from '../models';
-import { buildPredictorInventory, filterPredictorInventory, groupPredictorInventory, predictorStatusPresentation, PredictorInventoryFilters } from './predictor-inventory.models';
+import { buildPredictorInventory, filterPredictorInventory, predictorStatusPresentation, PredictorInventoryFilters } from './predictor-inventory.models';
 import { inventoryPredictor, inventoryWorkspace } from './predictor-inventory.testing';
 
 const filters: PredictorInventoryFilters = { search: '', type: 'all', status: 'all', sort: 'attention' };
@@ -10,7 +10,7 @@ describe('Predictor inventory projections', () => {
     expect(filterPredictorInventory(all, { ...filters, search: 'p2' }).map(item => item.guid)).toEqual(['p2']);
     expect(filterPredictorInventory(all, { ...filters, search: 'chicago', type: 'weather' }).map(item => item.guid)).toEqual(['p2', 'p5']);
     expect(filterPredictorInventory(all, { ...filters, search: 'p2', type: 'standard' })).toHaveLength(0);
-    expect(groupPredictorInventory(all, 'predictorName').find(item => item.station)?.entries).toHaveLength(2);
+    expect(all.filter(item => item.station?.stationId === 'KORD').map(item => item.guid)).toEqual(['p2', 'p5']);
   });
   it('keeps repair states searchable and needing attention without changing status rules', () => {
     const workspace = inventoryWorkspace(2), weather = inventoryPredictor('weather', { predictorType: 'Weather' });

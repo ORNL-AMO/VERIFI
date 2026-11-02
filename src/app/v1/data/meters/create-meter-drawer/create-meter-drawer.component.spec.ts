@@ -117,4 +117,29 @@ describe('CreateMeterDrawerComponent', () => {
     await component.createMeter(draft);
     expect(actions.createMeter).not.toHaveBeenCalled();
   });
+
+  it.each(['destroyed', 'account-switched', 'facility-changed'] as const)('suppresses a completed meter output after the drawer is %s', async reason => {
+    const { fixture, component, actions, activeAccount } = setup();
+    component.facilityControl.setValue('facility-b');
+    const created = vi.fn(); component.created.subscribe(created);
+    let complete!: (value: ReturnType<typeof meter>) => void;
+    actions.createMeter.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    const saving = component.createMeter(draft);
+    if (reason === 'destroyed') fixture.destroy();
+    else if (reason === 'account-switched') activeAccount.set(account({ guid: 'account-b' }));
+    else component.facilityControl.setValue('facility-a');
+    complete(meter({ guid: 'committed', facilityId: 'facility-b' })); await saving;
+    expect(created).not.toHaveBeenCalled();
+    expect(actions.createMeter).toHaveBeenCalledOnce();
+  });
+
+  it('does not update the drawer error after destruction', async () => {
+    const { fixture, component, actions } = setup();
+    component.facilityControl.setValue('facility-b');
+    let fail!: (error: Error) => void;
+    actions.createMeter.mockImplementation(() => new Promise((_resolve, reject) => { fail = reject; }));
+    const saving = component.createMeter(draft);
+    fixture.destroy(); fail(new Error('Late failure')); await saving;
+    expect(component.error()).toBe('');
+  });
 });

@@ -107,6 +107,8 @@ export class InventoryToolsComponent {
           this.grouping.set(saved?.grouping ?? 'groups'); this.multiplePredictors.set(saved?.multiplePredictors ?? false);
           this.view.set(saved?.view ?? { ...DEFAULT_INVENTORY_CHART_VIEW }); this.zoom.set(saved?.zoom ?? { start: 0, end: 100 });
           this.form.patchValue({ grouping: this.grouping(), multiplePredictors: this.multiplePredictors() }, { emitEvent: false });
+          this.error.set(''); this.saving.set(false);
+          if (this.review()) { this.review.set(undefined); this.hidePortal(false); }
           this.clearSelection();
         } else if (previousFilters !== filters) this.clearSelection();
         previousFilters = filters;
@@ -124,7 +126,7 @@ export class InventoryToolsComponent {
     });
     const subscription = this.form.valueChanges.subscribe(() => {
       const value = this.form.getRawValue();
-      if (value.grouping !== this.grouping()) this.view.set({ ...this.view(), hiddenGuids: [], legendPage: 0 });
+      if (value.grouping !== this.grouping()) this.view.set({ ...this.view(), hiddenGuids: [] });
       if (value.multiplePredictors !== this.multiplePredictors()) this.zoom.set({ start: 0, end: 100 });
       this.grouping.set(value.grouping); this.multiplePredictors.set(value.multiplePredictors);
     });
@@ -137,12 +139,15 @@ export class InventoryToolsComponent {
     this.activePortal = new TemplatePortal(template, this.container);
     this.portal.show(this.activePortal, { blockWorkspace: template === this.chartPanel });
   }
-  private hidePortal(): void {
+  private hidePortal(restoreFocus = true): void {
     if (this.activePortal && this.portal.activePortal() === this.activePortal) {
       this.portal.hide();
       const opener = this.opener;
-      if (opener?.isConnected && !this.destroyRef.destroyed) {
-        afterNextRender(() => { if (opener.isConnected) opener.focus(); }, { injector: this.injector });
+      if (restoreFocus && opener?.isConnected && !this.destroyRef.destroyed) {
+        const context = this.contextKey();
+        afterNextRender(() => {
+          if (!this.destroyRef.destroyed && this.contextKey() === context && !this.portal.activePortal() && opener.isConnected) opener.focus();
+        }, { injector: this.injector });
       }
     }
     this.activePortal = undefined;
@@ -177,14 +182,20 @@ export class InventoryToolsComponent {
   cancelDelete(): void { if (!this.saving()) { this.review.set(undefined); this.hidePortal(); } }
   async confirmDelete(): Promise<void> {
     const reviewed = this.review(); if (!reviewed || !this.canAct()) return;
+    const context = this.contextKey(), resource = this.resource();
+    const isCurrentReview = () => !this.destroyRef.destroyed && this.contextKey() === context && this.review() === reviewed;
     if (predictorDeletionSnapshot(reviewed) !== predictorDeletionSnapshot(this.snapshot())) { this.error.set('The selected records changed. Review the deletion again.'); this.cancelDelete(); return; }
     this.saving.set(true);
     try {
-      await this.injector.get(WorkspaceCommandBoundary).execute({ entityKind: this.resource() === 'meters' ? 'meter' : 'predictor', changeKind: 'bulk', entityGuid: reviewed.accountGuid, label: `Deleting ${this.resource()}`, publication: { mode: 'reload' } }, () => this.resource() === 'meters'
-        ? this.injector.get(MeterCommandHandler).deleteMetersAcrossFacilities(reviewed.meters, reviewed.accountGuid)
-        : this.injector.get(PredictorCommandHandler).deletePredictorsAcrossFacilities(reviewed.predictors, reviewed.accountGuid));
+      const meterHandler = resource === 'meters' ? this.injector.get(MeterCommandHandler) : undefined;
+      const predictorHandler = resource === 'predictors' ? this.injector.get(PredictorCommandHandler) : undefined;
+      await this.injector.get(WorkspaceCommandBoundary).execute({ entityKind: resource === 'meters' ? 'meter' : 'predictor', changeKind: 'bulk', entityGuid: reviewed.accountGuid, label: `Deleting ${resource}`, publication: { mode: 'reload' } }, () => meterHandler
+        ? meterHandler.deleteMetersAcrossFacilities(reviewed.meters, reviewed.accountGuid)
+        : predictorHandler!.deletePredictorsAcrossFacilities(reviewed.predictors, reviewed.accountGuid));
+      if (!isCurrentReview()) return;
+      this.saving.set(false);
       this.review.set(undefined); this.hidePortal(); this.clearSelection();
-    } catch (error) { this.error.set(error instanceof Error ? error.message : 'The deletion failed. No records were deleted.'); }
-    finally { this.saving.set(false); }
+    } catch (error) { if (isCurrentReview()) this.error.set(error instanceof Error ? error.message : 'The deletion failed. No records were deleted.'); }
+    finally { if (isCurrentReview()) this.saving.set(false); }
   }
 }

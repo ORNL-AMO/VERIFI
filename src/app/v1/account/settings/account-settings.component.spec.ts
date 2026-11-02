@@ -1,12 +1,13 @@
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { SingleFacilitySettingsCommandHandler } from '@data/account-workspace/handlers/single-facility-settings-command-handler.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
@@ -67,6 +68,7 @@ describe('Account settings routed components', () => {
     changeFacilityScope: ReturnType<typeof vi.fn>;
     openAccount: ReturnType<typeof vi.fn>;
     showWelcome: ReturnType<typeof vi.fn>;
+    facilitySettingsRoute: (facilityGuid: string) => string[];
   };
 
   beforeEach(() => {
@@ -114,7 +116,8 @@ describe('Account settings routed components', () => {
       singleFacilityContext: computed(() => account()?.isSingleFacilityCompany === true && facilities().length === 1 ? facilities()[0] : undefined),
       changeFacilityScope: vi.fn(),
       openAccount: vi.fn(async () => undefined),
-      showWelcome: vi.fn()
+      showWelcome: vi.fn(),
+      facilitySettingsRoute: facilityGuid => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', 'profile']
     };
 
     TestBed.configureTestingModule({
@@ -140,6 +143,7 @@ describe('Account settings routed components', () => {
         { provide: WorkspaceCommandBoundary, useValue: commandBoundary },
         { provide: AccountCommandHandler, useValue: accountHandler },
         { provide: FacilityCommandHandler, useValue: facilityHandler },
+        { provide: SingleFacilitySettingsCommandHandler, useValue: { update: vi.fn() } },
         { provide: ApplicationLifecycleService, useValue: lifecycle },
         { provide: ManualBackupDownloadService, useValue: manualBackups },
         { provide: BackupExportCoordinator, useValue: backupExportCoordinator },
@@ -347,6 +351,41 @@ describe('Account settings routed components', () => {
     fixture = createDetail(AccountSettingsBackupComponent);
 
     expect(buttonByText(fixture, 'Select backup file').disabled).toBe(false);
+  });
+
+  it('closes a created Facility drawer before opening Settings from Portfolio settings', async () => {
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+    const parent = fixture.componentInstance;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(async () => {
+      expect(parent.isCreateFacilityDrawerOpen).toBe(false);
+      return true;
+    });
+    parent.openCreateFacilityDrawer();
+    await parent.openCreatedFacility(facilityFixture('facility-new'));
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(['/v1', 'workspace', 'facility', 'facility-new', 'settings', 'profile']);
+    expect(parent.saveError).toBe('');
+  });
+
+  it.each(['cancelled', 'rejected'] as const)('keeps a committed Facility visible when its Settings navigation is %s', async outcome => {
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+    const parent = fixture.componentInstance;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+    if (outcome === 'cancelled') navigate.mockResolvedValue(false);
+    else navigate.mockRejectedValue(new Error('Router failed'));
+    parent.openCreateFacilityDrawer();
+    await parent.openCreatedFacility(facilityFixture('facility-new'));
+    expect(parent.isCreateFacilityDrawerOpen).toBe(false);
+    expect(parent.saveError).toContain('Facility added.');
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+  });
+
+  it('ignores a Facility creation result after Portfolio settings is destroyed', async () => {
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+    const parent = fixture.componentInstance;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    parent.openCreateFacilityDrawer(); fixture.destroy();
+    await parent.openCreatedFacility(facilityFixture('facility-new'));
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('applies account settings to selected portfolio facilities only', async () => {

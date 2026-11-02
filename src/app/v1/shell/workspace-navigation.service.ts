@@ -218,7 +218,6 @@ export class WorkspaceNavigationService {
     const scope = this.effectiveScope();
     return scope.kind === 'facility' ? this.facilities().find(facility => facility.guid === scope.facilityGuid) : undefined;
   });
-  readonly contextScopeQuery = computed(() => facilityScopeQuery(this.effectiveScope()));
   readonly contextMeters = computed(() => this.workspace.meters().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextMeterGroups = computed(() => this.workspace.meterGroups().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextPredictors = computed(() => this.workspace.predictors().filter(item => this.inContext(item.accountId, item.facilityId)));

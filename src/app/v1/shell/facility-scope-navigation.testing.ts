@@ -10,6 +10,7 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
 import { inventoryScopeChangeGuard } from './inventory-scope-change.guard';
+import { inventoryLeaveGuard } from './inventory-leave.guard';
 
 @Component({ standalone: true, imports: [RouterOutlet], template: '<router-outlet/>' })
 class ScopeHost {}
@@ -29,8 +30,8 @@ export async function setupFacilityScopeNavigation(url = '/v1/workspace/account/
       { path: 'v1', component: ScopeDestination },
       { path: 'v1/workspace/account/:accountGuid', canActivateChild: [inventoryScopeChangeGuard], children: [
         { path: 'data/portfolio', pathMatch: 'full', redirectTo: 'data/portfolio/facilities' },
-          { path: 'data/portfolio/:tab', component: ScopeDestination, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
-        { path: 'analysis/dashboard', component: ScopeDestination, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+          { path: 'data/portfolio/:tab', component: ScopeDestination, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+        { path: 'analysis/dashboard', component: ScopeDestination, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
         { path: 'reports/dashboard', component: ScopeDestination, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
         { path: 'analysis/workbench/:guid/setup', component: ScopeDestination, canDeactivate: [() => canLeave()] },
         { path: 'settings/:detail', component: ScopeDestination },

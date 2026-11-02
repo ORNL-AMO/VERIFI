@@ -3,8 +3,9 @@ import { PortalModule } from '@angular/cdk/portal';
 import { Component, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router, RouterLink, RouterOutlet, provideRouter } from '@angular/router';
+import { NavigationCancel, Router, RouterLink, RouterOutlet, provideRouter } from '@angular/router';
 import { Location } from '@angular/common';
+import { filter, firstValueFrom } from 'rxjs';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { LocalStorageService } from 'ngx-webstorage';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
@@ -13,6 +14,7 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
+import { inventoryLeaveGuard } from '@app/v1/shell/inventory-leave.guard';
 import { flushPendingChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
@@ -31,20 +33,23 @@ class AnalysisBrowserHost { readonly portal = inject(ModalPortalService); readon
 class FacilityDestination { readonly navigation = inject(WorkspaceNavigationService); }
 @Component({ standalone: true, template: '<h1>Account analysis workbench</h1>' })
 class AccountDestination {}
+@Component({ selector: 'app-analysis-test-data-destination', standalone: true, template: '<h1>Data inventory</h1>' })
+class DataDestination {}
 
 function setup(count = 35) {
   const entries = signal([accountEntry(), accountEntry('water', 'water'), ...Array.from({ length: count }, (_, i) => facilityEntry(`Analysis ${String(i).padStart(2,'0')}`))]);
   const account = signal(inventoryAccount), facilities = signal([inventoryFacility(), inventoryFacility('facility-b')]);
   const selectedFacility = signal(facilities()[0]);
   const facilityActions = { categoryAvailable: (category: string, guid: string) => guid === 'facility-b' ? category === 'water' : category === 'energy', createAnalysis: vi.fn() };
-  const accountActions = { categoryAvailable: () => true, createAnalysis: vi.fn() };
+  const accountActions = { categoryAvailable: () => true, createAnalysis: vi.fn(), copyAnalysis: vi.fn(), deleteAnalysis: vi.fn() };
   const status = signal('ready');
   const categories = signal<readonly ('energy' | 'water')[]>(['energy', 'water']);
   const results = { states: signal(Object.fromEntries(entries().map(entry => [entry.key, inventoryOutcome()]))), setDemand: vi.fn() };
   const canEnter = signal(true), canLeave = signal(true);
   TestBed.configureTestingModule({ imports: [AnalysisBrowserHost], providers: [provideRouter([
     { path: 'v1/workspace/account/:accountGuid', canActivateChild: [inventoryScopeChangeGuard], children: [
-      { path: 'analysis/dashboard', component: AnalysisInventoryComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+      { path: 'data/portfolio/meters', component: DataDestination, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+      { path: 'analysis/dashboard', component: AnalysisInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
       { path: 'analysis/workbench/:analysisGuid/setup', component: AccountDestination, canActivate: [flushPendingChangesGuard] }
     ] },
     { path: 'v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid/setup', component: FacilityDestination, canActivate: [() => canEnter()], canDeactivate: [() => canLeave()] }
@@ -69,6 +74,56 @@ async function settle(fixture: ReturnType<typeof setup>['fixture']): Promise<voi
 }
 
 describe('account Analysis inventory browser journeys', () => {
+  it.each(['create', 'copy', 'delete'] as const)('retains the actual Analysis inventory through Back and same-scope exits during deferred %s', async operation => {
+    const view = setup(1);
+    const dataUrl = '/v1/workspace/account/account-a/data/portfolio/meters';
+    try {
+      await view.router.navigateByUrl(dataUrl); await settle(view.fixture);
+      await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+      const dashboard = view.host();
+      const entry = view.entries()[0];
+      const committed = { ...entry.card.analysis, guid: `committed-${operation}` };
+      let complete!: (value?: unknown) => void;
+      const action = operation === 'create' ? view.accountActions.createAnalysis
+        : operation === 'copy' ? view.accountActions.copyAnalysis : view.accountActions.deleteAnalysis;
+      action.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+      let work: Promise<void>;
+      if (operation === 'create') {
+        dashboard.openCreate();
+        work = dashboard.create({ scope: 'account', category: 'energy' });
+      } else if (operation === 'copy') work = dashboard.copy(entry);
+      else {
+        dashboard.requestDelete(entry);
+        work = dashboard.confirmDelete();
+      }
+      view.fixture.detectChanges();
+      expect(action).toHaveBeenCalledOnce();
+      expect(dashboard.saving()).toBe(true);
+
+      const cancelled = firstValueFrom(view.router.events.pipe(filter(event => event instanceof NavigationCancel)));
+      TestBed.inject(Location).back(); await cancelled; await settle(view.fixture);
+      expect(view.router.url).toBe(dashboardUrl);
+      expect(view.host()).toBe(dashboard);
+      expect(await view.router.navigateByUrl(dataUrl)).toBe(false);
+      expect(view.host()).toBe(dashboard);
+      expect(dashboard.saving()).toBe(true);
+
+      if (operation === 'delete') view.entries.update(entries => entries.filter(item => item.key !== entry.key));
+      complete(operation === 'delete' ? undefined : committed);
+      await work; await settle(view.fixture);
+      if (operation === 'delete') {
+        expect(view.router.url).toBe(dashboardUrl);
+        expect(view.host()).toBe(dashboard);
+        expect(dashboard.entries().some(item => item.key === entry.key)).toBe(false);
+        expect(dashboard.saving()).toBe(false);
+        expect(view.root.querySelector('[role="dialog"]')).toBeNull();
+      } else {
+        expect(view.router.url).toBe(`/v1/workspace/account/account-a/analysis/workbench/${committed.guid}/setup`);
+        expect(view.root.textContent).toContain('Account analysis workbench');
+      }
+      expect(action).toHaveBeenCalledOnce();
+    } finally { view.fixture.destroy(); }
+  });
   it('filters the unified Analysis inventory when a card facility header is selected', async () => {
     const view = setup(3); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     const link = view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__header-owner')!;

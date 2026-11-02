@@ -102,6 +102,7 @@ import { FacilityAnalysisUsedByComponent } from '@app/v1/analysis/facility/workb
 import { singleFacilityAnalysisPairGuard } from '@app/v1/analysis/single-facility-analysis-pair.guard';
 
 import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
+import { inventoryLeaveGuard } from '@app/v1/shell/inventory-leave.guard';
 
 export const V1Routes: Routes = [
   {
@@ -134,10 +135,10 @@ export const V1Routes: Routes = [
                 component: DataInventoryComponent,
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'facilities' },
-                  { path: 'facilities', component: FacilitiesInventoryComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
-                  { path: 'meters', component: MetersInventoryComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
-                  { path: 'predictors', component: PredictorsInventoryComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
-                  { path: 'energy-uses', component: EnergyUsesInventoryComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'facilities', component: FacilitiesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'meters', component: MetersInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'predictors', component: PredictorsInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'energy-uses', component: EnergyUsesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },
@@ -195,7 +196,7 @@ export const V1Routes: Routes = [
             path: 'analysis',
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: AnalysisInventoryComponent, runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+              { path: 'dashboard', component: AnalysisInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
               {
                 path: 'workbench/:analysisGuid',
                 component: AccountAnalysisWorkbenchComponent,

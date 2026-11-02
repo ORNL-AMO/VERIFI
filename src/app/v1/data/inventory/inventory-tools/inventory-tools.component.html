@@ -15,7 +15,7 @@
 <app-inventory-chart-dock [attr.title]="scopeGuids().length ? 'Open charts' : 'Add or upload records to use charts'" [open]="chartsOpen()" [disabled]="!scopeGuids().length" (opened)="openCharts()"/>
 <ng-template #chartPanel>
   @if (chartsOpen()) {
-    <app-inventory-chart-sheet [modal]="false" [traceBrowser]="true" [singleTrace]="resource() === 'predictors' && !multiplePredictors()" [showHeader]="false" [showSeriesSearch]="false" [resource]="resource()" [contextKey]="contextKey()" [facilityName]="contextLabel()" [charts]="charts()" [state]="chartState()" [view]="view()" (viewChanged)="view.set($event)" [zoomRange]="zoom()" (zoomChanged)="zoom.set($event)" [showTraceControls]="true" [smoothLines]="false" [showPointSymbols]="resource() === 'predictors'" (closed)="closeCharts()">
+    <app-inventory-chart-sheet [singleTrace]="resource() === 'predictors' && !multiplePredictors()" [resource]="resource()" [contextKey]="contextKey()" [facilityName]="contextLabel()" [charts]="charts()" [state]="chartState()" [view]="view()" (viewChanged)="view.set($event)" [zoomRange]="zoom()" (zoomChanged)="zoom.set($event)" (closed)="closeCharts()">
       <ng-container ngProjectAs="[chartGrouping]">
       @if (resource() === 'meters') {
         <div class="inventory-tools__grouping" [class.inventory-tools__grouping--divided]="charts().length > 1" role="group" aria-label="Meter chart grouping">

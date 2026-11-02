@@ -9,6 +9,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { SingleFacilitySettingsCommandHandler } from '@data/account-workspace/handlers/single-facility-settings-command-handler.service';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { WorkspaceBackupSnapshotBuilder } from '@data/backup/backup-snapshot-builder.service';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
@@ -57,6 +58,7 @@ describe('header backup with live Settings drafts', () => {
         { provide: BackupExportCoordinator, useValue: exports },
         { provide: AccountCommandHandler, useValue: writes },
         { provide: FacilityCommandHandler, useValue: writes },
+        { provide: SingleFacilitySettingsCommandHandler, useValue: { update: vi.fn() } },
         { provide: WorkspaceCommandBoundary, useValue: {
           execute: vi.fn(async (options, persist) => {
             const value = await persist();

@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
 import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
+import { inventoryLeaveGuard } from '@app/v1/shell/inventory-leave.guard';
 import { singleSiteAccountRedirectGuard } from '@app/v1/routing/canonical-route.guards';
 import { provideRouter, Router, Route, RouterModule } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -82,6 +83,18 @@ import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/analysis/facility
 import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/analysis/facility/workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
 
 describe('V1Routes facility data meters routes', () => {
+  it('protects every Data inventory leaf and Analysis while retaining Reports leave protection', () => {
+    const data = accountPortfolioRoute().children ?? [];
+    for (const resource of ['facilities', 'meters', 'predictors', 'energy-uses']) {
+      expect(data.find(route => route.path === resource)).toMatchObject({
+        canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange'
+      });
+    }
+    expect(accountWorkspaceRoute().children?.find(route => route.path === 'analysis')?.children?.find(route => route.path === 'dashboard'))
+      .toMatchObject({ canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' });
+    expect(accountWorkspaceRoute().children?.find(route => route.path === 'reports')?.children?.find(route => route.path === 'dashboard')?.canDeactivate)
+      .toEqual([unsavedChangesGuard]);
+  });
   it.each(['account', 'facility'])('redirects legacy %s staleness links to Data Validation', scope => {
     const workspaceRoute = V1Routes[0].children?.find(route => route.path === `workspace/${scope}/:${scope}Guid`);
     const settingsRoutes = workspaceRoute?.children?.find(route => route.path === 'settings')?.children;

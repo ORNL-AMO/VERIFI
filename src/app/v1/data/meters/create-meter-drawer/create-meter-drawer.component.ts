@@ -16,6 +16,7 @@ export class CreateMeterDrawerComponent {
   readonly singleFacility = input(false);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly actions = inject(MeterActionsService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly accountGuid = this.workspace.account()?.guid;
   readonly initialFacilityGuid = input<string>();
   readonly closed = output<void>();
@@ -60,16 +61,19 @@ export class CreateMeterDrawerComponent {
   }
 
   async createMeter(draft: MeterDraft): Promise<void> {
-    if (!this.canCreate()) { return; }
+    if (this.destroyRef.destroyed || !this.canCreate()) { return; }
+    const facilityGuid = this.facilityGuid();
+    const isCurrent = () => !this.destroyRef.destroyed && this.workspace.account()?.guid === this.accountGuid
+      && facilityGuid === this.selectedFacility()?.guid;
     this.error.set('');
     this.saving.set(true);
     try {
-      const meter = await this.actions.createMeter(draft, this.facilityGuid());
-      this.created.emit(meter);
+      const meter = await this.actions.createMeter(draft, facilityGuid);
+      if (isCurrent() && meter.accountId === this.accountGuid && meter.facilityId === facilityGuid) this.created.emit(meter);
     } catch (error) {
-      this.error.set(error instanceof Error ? error.message : 'The meter could not be added. Please try again.');
+      if (isCurrent()) this.error.set(error instanceof Error ? error.message : 'The meter could not be added. Please try again.');
     } finally {
-      this.saving.set(false);
+      if (!this.destroyRef.destroyed) this.saving.set(false);
     }
   }
 }
