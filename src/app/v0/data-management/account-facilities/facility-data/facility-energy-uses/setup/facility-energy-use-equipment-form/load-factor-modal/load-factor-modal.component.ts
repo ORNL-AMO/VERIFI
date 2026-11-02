@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ConvertValue } from '@app/domain/calculations/conversions/convertValue';
 import { PowerUnitOptions, UnitOption } from '@shared/unitOptions';
 
@@ -11,9 +11,11 @@ export type LoadFactorCalculationMethod = 'voltageCurrent' | 'measuredPower';
   templateUrl: './load-factor-modal.component.html',
   styleUrl: './load-factor-modal.component.css',
 })
-export class LoadFactorModalComponent {
+export class LoadFactorModalComponent implements OnChanges {
   @Input()
   year: number;
+  @Input()
+  hasElectricityUtility: boolean = false;
 
   @Output()
   saveCalculatedLoadFactor = new EventEmitter<number>();
@@ -21,7 +23,7 @@ export class LoadFactorModalComponent {
   closeModal = new EventEmitter<void>();
 
   showCalculateLoadFactorModal: boolean = true;
-  calculationMethod: LoadFactorCalculationMethod = 'voltageCurrent';
+  calculationMethod: LoadFactorCalculationMethod = 'measuredPower';
   ratedPower: number | null = null;
   voltage: number | null = null;
   current: number | null = null;
@@ -32,6 +34,14 @@ export class LoadFactorModalComponent {
   measuredPowerUnit: string = 'kW';
   readonly phaseOptions: Array<LoadFactorPhaseCount> = [1, 2, 3];
   readonly powerUnitOptions: Array<UnitOption> = PowerUnitOptions;
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.hasElectricityUtility) {
+      this.setCalculationMethod(this.hasElectricityUtility ? 'voltageCurrent' : 'measuredPower');
+      this.ratedPowerUnit = this.hasElectricityUtility ? 'hp' : 'MMBtuhr';
+      this.measuredPowerUnit = this.hasElectricityUtility ? 'kW' : 'MMBtuhr';
+    }
+  }
 
   get ratedPowerKilowatts(): number | null {
     if (!Number.isFinite(this.ratedPower) || !this.ratedPowerUnit) {
@@ -84,7 +94,7 @@ export class LoadFactorModalComponent {
       return null;
     }
 
-    return Math.round(Math.min(loadFactorPercent, 100) * 10) / 10;
+    return Math.round(Math.min(loadFactorPercent, 115) * 10) / 10;
   }
 
   get displayedActualPowerKilowatts(): number {
@@ -100,7 +110,7 @@ export class LoadFactorModalComponent {
   }
 
   get showLoadFactorWarning(): boolean {
-    return this.loadFactorPercent != null && (this.loadFactorPercent < 40 || this.loadFactorPercent > 100);
+    return this.loadFactorPercent != null && this.loadFactorPercent > 100;
   }
 
   get isDisabled(): boolean {
@@ -108,6 +118,9 @@ export class LoadFactorModalComponent {
   }
 
   setCalculationMethod(calculationMethod: LoadFactorCalculationMethod) {
+    if (!this.hasElectricityUtility) {
+      calculationMethod = 'measuredPower';
+    }
     if (calculationMethod === this.calculationMethod) {
       return;
     }

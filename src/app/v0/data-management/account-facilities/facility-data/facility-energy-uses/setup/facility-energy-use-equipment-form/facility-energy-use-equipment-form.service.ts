@@ -135,7 +135,7 @@ export class FacilityEnergyUseEquipmentFormService {
       dutyFactor: [operatingConditionsData.dutyFactor, [Validators.required, Validators.min(0), Validators.max(100)]],
       efficiency: [operatingConditionsData.efficiency, [Validators.required, Validators.min(0), Validators.max(100)]],
       hoursOfOperation: [operatingConditionsData.hoursOfOperation, [Validators.required, Validators.min(0)]],
-      loadFactor: [operatingConditionsData.loadFactor, [Validators.required, Validators.min(0), Validators.max(100)]],
+      loadFactor: [operatingConditionsData.loadFactor, [Validators.required, Validators.min(0), Validators.max(115)]],
       hoursPerDay: [operatingConditionsData.hoursPerDay],
       daysPerWeek: [operatingConditionsData.daysPerWeek],
       weeksPerYear: [operatingConditionsData.weeksPerYear]
