@@ -93,6 +93,8 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
   private resizeObserver: ResizeObserver | undefined;
   private themeObserver: MutationObserver | undefined;
   private initialRenderFrame: number | undefined;
+  private resizeFrame: number | undefined;
+  private appliedSize: { width: number; height: number } | undefined;
   private hasRenderedOption = false;
 
   @Input('appV1ECharts') option: V1EChartsOption | undefined;
@@ -120,11 +122,12 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
   ngAfterViewInit(): void {
     this.zone.runOutsideAngular(() => {
       this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas' });
+      this.appliedSize = this.readContentSize();
       this.bindDataZoomEvent();
       this.bindPointClickEvent();
       this.observeThemeChanges();
       if (typeof ResizeObserver !== 'undefined') {
-        this.resizeObserver = new ResizeObserver(() => this.chart?.resize());
+        this.resizeObserver = new ResizeObserver(() => this.scheduleResize());
         this.resizeObserver.observe(this.elementRef.nativeElement);
       }
       this.applyOption();
@@ -141,9 +144,35 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     if (this.initialRenderFrame !== undefined && typeof cancelAnimationFrame !== 'undefined') {
       cancelAnimationFrame(this.initialRenderFrame);
     }
+    if (this.resizeFrame !== undefined) cancelAnimationFrame(this.resizeFrame);
     this.themeObserver?.disconnect();
     this.resizeObserver?.disconnect();
     this.chart?.dispose();
+    this.chart = undefined;
+  }
+
+  private scheduleResize(): void {
+    if (!this.chart) return;
+    if (this.resizeFrame !== undefined) return;
+    // Resizing during observer delivery can change layout and enqueue another delivery in the same frame.
+    this.resizeFrame = requestAnimationFrame(() => {
+      this.resizeFrame = undefined;
+      if (!this.chart) return;
+      const size = this.readContentSize();
+      if (size.width <= 0 || size.height <= 0
+        || (size.width === this.appliedSize?.width && size.height === this.appliedSize?.height)) return;
+      this.chart.resize();
+      this.appliedSize = size;
+    });
+  }
+
+  private readContentSize(): { width: number; height: number } {
+    const host = this.elementRef.nativeElement;
+    const style = getComputedStyle(host);
+    return {
+      width: Math.max(0, host.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0)),
+      height: Math.max(0, host.clientHeight - (parseFloat(style.paddingTop) || 0) - (parseFloat(style.paddingBottom) || 0))
+    };
   }
 
   private applyOption(): void {
