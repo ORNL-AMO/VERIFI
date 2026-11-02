@@ -1,6 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 @Component({
   selector: 'app-workspace-context',
   templateUrl: './workspace-context.component.html',
@@ -8,8 +7,6 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
   standalone: false
 })
 export class WorkspaceContextComponent {
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  readonly facilityOrder = computed(() => this.accountWorkspaceStore.account()?.portfolioFacilityOrder);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly hasSingleSiteRecovery = this.navigation.hasSingleSiteRecovery;
   readonly recoveryTitle = computed(() =>

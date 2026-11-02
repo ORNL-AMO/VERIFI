@@ -37,8 +37,7 @@ export class FacilityPickerComponent {
     const query = this.query().trim().toLowerCase();
     return orderFacilities(this.facilitiesState(), this.facilityOrderState()).map(facility => ({
       ...facility, location: [facility.city, facility.state].filter(Boolean).join(', ')
-    })).filter(facility => !query || (facility.name || '').toLowerCase().includes(query) || facility.location.toLowerCase().includes(query))
-      .sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid));
+    })).filter(facility => !query || (facility.name || '').toLowerCase().includes(query) || facility.location.toLowerCase().includes(query));
   });
 
   toggle(): void {

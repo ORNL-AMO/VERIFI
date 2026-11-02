@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, DestroyRef, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormRecord } from '@angular/forms';
 import { Subscription } from 'rxjs';

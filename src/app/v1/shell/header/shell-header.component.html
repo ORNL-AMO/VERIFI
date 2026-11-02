@@ -26,6 +26,7 @@
         </button>
         <span class="v1-workspace__context-divider" aria-hidden="true">/</span>
         <app-facility-picker #facilityPicker [facilities]="navigation.facilities()" [selectedFacility]="navigation.headerFacility()"
+          [facilityOrder]="facilityOrder()"
           [disabled]="navigation.scopeChangePending() || !!navigation.scopeAvailability()"
           [unavailableMessage]="navigation.scopeAvailability()" (opened)="closeAll()"
           (facilitySelected)="navigation.changeFacilityScope($event)"/>

@@ -1,4 +1,3 @@
-import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { buildPredictorTiles } from './predictor-tile.view';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -39,7 +38,6 @@ export class PredictorsInventoryComponent {
     return buildPredictorInventory(buildPredictorCards(predictors, readings, this.status.items(), this.status.state() === 'ready'),
       buildWeatherStationGroups(predictors, readings, this.status.items(), this.status.state() === 'ready'), facility, this.status.state());
   }));
-  readonly facilities = computed(() => orderFacilities(this.workspace.facilities(), this.workspace.account()?.portfolioFacilityOrder));
   readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters()), this.filters().sort));
   readonly tiles = computed(() => buildPredictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
   readonly inventory = new InventoryViewState(this.browseKey, this.tiles, computed(() => this.entries().map(item => item.guid)), computed(() => ({ ...this.filters(), facility: this.navigation.inventoryFacilityGuid() })), this.workspace.canWrite);

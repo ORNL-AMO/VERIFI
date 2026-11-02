@@ -1,5 +1,6 @@
 import { Component, HostListener, ViewChild, computed, inject } from '@angular/core';
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import {
   AppearanceService,
   BackgroundPattern,
@@ -35,6 +36,8 @@ interface PatternOption {
   standalone: false
 })
 export class ShellHeaderComponent {
+  private readonly workspace = inject(AccountWorkspaceStore);
+  readonly facilityOrder = computed(() => this.workspace.account()?.portfolioFacilityOrder);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly appearance = inject(AppearanceService);
   readonly backups = inject(ManualBackupDownloadService);
