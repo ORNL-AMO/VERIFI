@@ -1,6 +1,6 @@
 # V1 Maintainability Follow-up Plan
 
-**Status: Not started**
+**Status: In progress**
 
 ## Purpose and boundaries
 
@@ -63,7 +63,7 @@ Preserve the [UI architecture](../ARCHITECTURE.md#ui-architecture), NgModule-bas
 
 ## 5. Chart runtime investigation
 
-**Status: Not started**
+**Status: Complete**
 
 **Evidence:** The review's passing [inventory chart Chromium tests](../src/app/v1/data/inventory/inventory-tools/inventory-tools.component.browser.spec.ts) emitted `ResizeObserver loop completed with undelivered notifications.` The shared [ECharts directive](../src/app/v1/shared/charts/echarts-chart.directive.ts) synchronously calls `chart.resize()` from its observer callback; this behavior predates the refactor. The review did not establish an infinite loop or user-visible rendering failure.
 
@@ -73,8 +73,16 @@ Preserve the [UI architecture](../ARCHITECTURE.md#ui-architecture), NgModule-bas
 
 **Acceptance:** A focused native-browser case demonstrates stable dimensions and bounded resize work through the reproduction sequence, including destroy-before-callback cleanup. Preserve zoom, theme updates, tooltip/trace behavior, PNG export, and visible chart sizing. Existing passing tests and warning suppression alone do not establish that the cause is fixed.
 
+### Implementation and evidence
+
+The native inventory reproduction logged one ResizeObserver delivery warning during the Meter narrow-layout transition and two during the Predictor sequence. Host and canvas dimensions stabilized; this did not demonstrate an infinite loop or a visible rendering defect.
+
+The directive now coalesces observer deliveries into a separate animation frame, samples current content dimensions, skips unchanged or zero-sized hosts, and cancels pending work on destruction. Initial option scheduling and chart inputs/outputs remain separate. The same inventory sequence subsequently logged no observer errors: Meter dimensions were 940×456 with traces, 1168×456 with traces hidden, 370×392 in the narrow viewport, and 1168×456 after restoring the wide viewport. Scope and theme changes did not add resize work while dimensions stayed unchanged.
+
+Focused coverage also exercises native hidden-to-visible recovery, controller-owned zoom, current-size sampling, padding changes, coalescing, and destruction before a pending callback. Acceptance passed: the focused directive/inventory Chromium suite (2 files, 10 tests), application TypeScript check, full fast and Chromium suites (55 browser files, 282 tests), production web build, validation planner, and whitespace check. Native cases cover scope/history interactions, trace drawer focus and keyboard use, palette/contrast variants, narrow/wide layouts, reduced motion, printing, PNG output, and representative chart consumers. Wide and narrow screenshots were inspected. Existing CSS-budget and CommonJS build warnings remain. An initial restricted test attempt aborted before actionable results; the retry succeeded. Newly added fixture typing and zoom-ownership assertions were corrected before the passing run. Electron boundaries were unchanged and desktop checks were not run. Warnings were observed without suppression; these results establish the tested sequences, not every possible host layout.
+
 ## Delivery and validation
 
-Keep each package separately reviewable and update its status/evidence when delivered. Use the [risk-based testing policy](testing.md#what-a-change-requires) and [validation workflow](../.agents/skills/validate-web-and-electron/SKILL.md): focused behavior tests first, then `npm run validate:agent -- --mode plan` and its required parent checks. Add browser tests for routing/history, native chart layout, or IndexedDB behavior; add Electron checks only when its runtime boundary changes.
+Deliver one package per PR in this order: chart investigation (5), navigation ownership (1), inventory ownership (2), report presentation (3), and inherited maintenance debt (4). Keep each package separately reviewable and update its status/evidence when delivered. Use the [risk-based testing policy](testing.md#what-a-change-requires) and [validation workflow](../.agents/skills/validate-web-and-electron/SKILL.md): focused behavior tests first, then `npm run validate:agent -- --mode plan` and its required parent checks. Add browser tests for routing/history, native chart layout, or IndexedDB behavior; add Electron checks only when its runtime boundary changes.
 
 This document introduces no runtime changes. Validate its local links and source references; implementation tests, type-checks, and builds belong to the package that changes their affected behavior.

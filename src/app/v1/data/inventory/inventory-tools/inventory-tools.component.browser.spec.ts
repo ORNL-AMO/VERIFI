@@ -47,6 +47,46 @@ async function finishChartAnimation(root: HTMLElement): Promise<void> {
   await vi.waitFor(() => expect(echarts.getInstanceByDom(host)?.getZr().animation.isFinished()).toBe(true));
 }
 
+/** Native layout evidence; it observes errors without preventing their delivery. */
+function observeChartSizing(root: HTMLElement) {
+  const notifications: { width: number; height: number }[] = [];
+  const errors: string[] = [];
+  const resizes: { width: number; height: number }[] = [];
+  const element = root.querySelector<HTMLElement>('.v1-meter-results-chart__chart')!;
+  const chart = echarts.getInstanceByDom(element)!;
+  const observer = new ResizeObserver(entries => {
+    for (const entry of entries) notifications.push({ width: entry.contentRect.width, height: entry.contentRect.height });
+  });
+  observer.observe(element);
+  const resize = chart.resize.bind(chart);
+  const spy = vi.spyOn(chart, 'resize').mockImplementation(options => {
+    resizes.push({ width: element.clientWidth, height: element.clientHeight });
+    return resize(options);
+  });
+  const onError = (event: ErrorEvent) => {
+    if (event.message.includes('ResizeObserver')) errors.push(event.message);
+  };
+  window.addEventListener('error', onError);
+  return {
+    async stable(label: string) {
+      await finishChartAnimation(root);
+      let previous = '', unchanged = 0;
+      for (let frame = 0; frame < 60 && unchanged < 3; frame++) {
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        const dimensions = `${element.clientWidth}:${element.clientHeight}:${chart.getWidth()}:${chart.getHeight()}:${resizes.length}`;
+        unchanged = dimensions === previous ? unchanged + 1 : 0;
+        previous = dimensions;
+      }
+      expect(unchanged, `${label}: chart sizing must settle`).toBe(3);
+      expect(chart.getWidth(), label).toBe(element.clientWidth);
+      expect(chart.getHeight(), label).toBe(element.clientHeight);
+      expect(errors, `${label}: no observer delivery loop errors`).toEqual([]);
+      return { label, host: [element.clientWidth, element.clientHeight], notifications: notifications.length, resizes: resizes.length, errors: errors.length };
+    },
+    stop() { observer.disconnect(); spy.mockRestore(); window.removeEventListener('error', onError); }
+  };
+}
+
 describe('unified inventory charts in Chromium',()=>{
   it('keeps simplified straight-line charts right-aligned and scopes the backdrop beneath the real header', async () => {
     await page.viewport(1300, 950); scope.set(undefined);
@@ -78,6 +118,8 @@ describe('unified inventory charts in Chromium',()=>{
       { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of(base), project: (value, request) => projectWorkspaceCalendarization(value, snapshot, request) } }
     ] }).overrideComponent(ToolsHost, { set: { template: '<button class="v1-btn" type="button">Background action</button><app-inventory-tools resource="meters" [scopeGuids]="ids()" [matchingGuids]="matchingIds()" [filtersKey]="filterKey()"/>' } });
     const fixture = TestBed.createComponent(ShellComponent);
+    let sizing: ReturnType<typeof observeChartSizing> | undefined;
+    const measurements: unknown[] = [];
     try {
       await TestBed.inject(Router).navigateByUrl('/meters'); await settle(fixture);
       const root = fixture.nativeElement.querySelector('.v1-root') as HTMLElement;
@@ -87,6 +129,8 @@ describe('unified inventory charts in Chromium',()=>{
       const tools = fixture.debugElement.query(By.directive(InventoryToolsComponent)).componentInstance as InventoryToolsComponent;
       const opener = page.getByRole('button', { name: 'Charts', exact: true });
       await opener.click(); await settle(fixture);
+      sizing = observeChartSizing(root);
+      measurements.push(await sizing.stable('sheet open'));
       expect(stage.inert).toBe(true);
       expect(getComputedStyle(stage, '::after').content).not.toBe('none');
       expect(getComputedStyle(stage, '::after').backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
@@ -145,8 +189,10 @@ describe('unified inventory charts in Chromium',()=>{
       await finishChartAnimation(root);
       await page.screenshot({ element: root, path: '../../../../../../.angular/meter-traces-grouped-wide.png' });
       await page.getByRole('button', { name: 'Hide traces', exact: true }).click(); await settle(fixture);
+      measurements.push(await sizing.stable('traces hidden'));
       expect(root.querySelector('app-chart-trace-panel')).toBeNull();
       await page.getByRole('button', { name: /^Traces / }).click(); await settle(fixture);
+      measurements.push(await sizing.stable('traces restored'));
       expect(root.querySelector('#trace-facility-facility-a')?.hasAttribute('hidden')).toBe(true);
       await page.getByRole('button', { name: 'Cost', exact: true }).click(); await settle(fixture);
       route.matching.set(['ma']); await settle(fixture); expect(tools.charts()[0].metrics.map(metric => metric.id)).toEqual(['ma']);
@@ -161,6 +207,7 @@ describe('unified inventory charts in Chromium',()=>{
       expect(tools.chartsOpen()).toBe(true); expect(tools.charts()[0].unit).toBe('GJ'); expect(tools.charts()[0].metrics).toHaveLength(1); expect(stage.inert).toBe(true);
       await page.getByRole('button', { name: 'Individual meters', exact: true }).click(); await settle(fixture);
       expect(tools.charts()[0].metrics).toHaveLength(12);
+      measurements.push(await sizing.stable('facility scope and sources changed'));
       for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) {
         root.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`; await settle(fixture);
         expect(textContrast(page.getByRole('button', { name: 'Meter groups', exact: true }).element() as HTMLElement)).toBeGreaterThanOrEqual(4.5);
@@ -168,8 +215,10 @@ describe('unified inventory charts in Chromium',()=>{
         expect(textContrast(root.querySelector<HTMLElement>('.chart-traces__count')!, root.querySelector<HTMLElement>('app-chart-trace-panel')!)).toBeGreaterThanOrEqual(4.5);
       }
       root.className = 'v1-root';
+      measurements.push(await sizing.stable('themes changed'));
       await page.screenshot({ element: root, path: '../../../../../../.angular/meter-charts-toolbar-wide.png' });
       await page.viewport(390, 800); await settle(fixture);
+      measurements.push(await sizing.stable('narrow viewport'));
       const body = root.querySelector<HTMLElement>('.workspace-bottom-sheet__body')!;
       await vi.waitFor(() => expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth + 1));
       expect(stage.getBoundingClientRect().top).toBeCloseTo(header.getBoundingClientRect().bottom, 0);
@@ -184,6 +233,8 @@ describe('unified inventory charts in Chromium',()=>{
       await userEvent.keyboard('{Escape}'); await settle(fixture);
       expect(root.querySelector('[aria-label="Choose traces"]')).toBeNull();
       expect(tools.chartsOpen()).toBe(true); expect(document.activeElement).toBe(traceToggle.element());
+      await page.viewport(1300, 950); await settle(fixture);
+      measurements.push(await sizing.stable('wide viewport restored'));
       await (cdp() as any).send('Emulation.setEmulatedMedia', { media: 'print', features: [] }); await settle(fixture);
       expect(getComputedStyle(stage, '::after').display).toBe('none');
       await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '', features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] }); await settle(fixture);
@@ -191,6 +242,8 @@ describe('unified inventory charts in Chromium',()=>{
       expect(stage.inert).toBe(false); expect(tools.chartsOpen()).toBe(false);
       expect(document.activeElement).toBe(opener.element());
     } finally {
+      sizing?.stop();
+      console.info('Inventory chart resize measurements', JSON.stringify(measurements));
       fixture.destroy();
       await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '', features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
     }
