@@ -1,0 +1,30 @@
+@let facility = context.facility();
+@let analysis = context.analysis();
+
+@if (!facility) {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="accountIssue"></app-ui-icon>
+    <h1>No facility selected</h1>
+    <p>Select a facility before opening an analysis.</p>
+  </article>
+} @else if (!analysis) {
+  <article class="v1-empty-state" role="alert">
+    <app-ui-icon name="warning"></app-ui-icon>
+    <h1>Analysis not found</h1>
+    <p>This analysis is not available in {{ facility.name }}.</p>
+    <a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityInventoryLink(facility.guid, 'analysis').route" [queryParams]="navigation.facilityInventoryLink(facility.guid, 'analysis').queryParams">
+      <app-ui-icon name="arrowLeft"></app-ui-icon> Back to analyses
+    </a>
+  </article>
+} @else {
+  <div class="v1-data-workbench-sticky v1-analysis-workbench__sticky">
+    <app-facility-analysis-workbench-header></app-facility-analysis-workbench-header>
+    <app-facility-analysis-workbench-stage-navigation></app-facility-analysis-workbench-stage-navigation>
+  </div>
+
+  <main class="v1-analysis-workbench__content" aria-labelledby="v1-analysis-workbench-title">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-facility-analysis-workbench-footer></app-facility-analysis-workbench-footer>
+}

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { accountReportSnapshot } from '@app/v1/account/reports/testing/account-report-test-fixtures';
-import { reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
+import { reportFixture } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { analysisLinkedReport } from './analysis-linked-items.models';
 import { AnalysisLinkedItemsComponent } from './analysis-linked-items.component';
 

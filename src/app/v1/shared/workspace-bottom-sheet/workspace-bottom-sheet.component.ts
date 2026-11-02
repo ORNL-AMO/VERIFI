@@ -5,6 +5,9 @@ import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.di
 @Component({ selector: 'app-workspace-bottom-sheet', standalone: true, imports: [IconComponent, ModalFocusTrapDirective],
   templateUrl: './workspace-bottom-sheet.component.html', styleUrls: ['./workspace-bottom-sheet.component.css'] })
 export class WorkspaceBottomSheetComponent {
+  readonly modal = input(true);
+  readonly showHeader = input(true);
+  readonly fillBody = input(false);
   readonly panelId = input.required<string>();
   readonly title = input.required<string>();
   readonly closeLabel = input('Close panel');

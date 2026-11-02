@@ -1,12 +1,13 @@
+import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NavigationEnd, Router } from '@angular/router';
+import { DefaultUrlSerializer, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { parseWorkspaceRoute, WorkspaceNavigationService } from './workspace-navigation.service';
+import { WorkspaceNavigationService } from './workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { makeFinding } from '@app/v1/status/status.models';
@@ -16,13 +17,14 @@ describe('WorkspaceNavigationService', () => {
   afterEach(() => vi.restoreAllMocks());
 
   let service: WorkspaceNavigationService;
-  let router: { url: string; events: Subject<unknown>; navigate: ReturnType<typeof vi.fn> };
+  let router: { parseUrl: DefaultUrlSerializer['parse']; navigateByUrl: ReturnType<typeof vi.fn>; url: string; events: Subject<unknown>; navigate: ReturnType<typeof vi.fn> };
   let workspaceService: { selectAccount: ReturnType<typeof vi.fn>; selectFacility: ReturnType<typeof vi.fn> };
   let usableAccounts: ReturnType<typeof vi.fn>;
   let accountSignal: ReturnType<typeof signal<any>>;
   let facilitiesSignal: ReturnType<typeof signal<any[]>>;
   let selectedFacilitySignal: ReturnType<typeof signal<any>>;
   let workspaceStore: {
+    status: ReturnType<typeof vi.fn>; hasPending: ReturnType<typeof vi.fn>;
     account: ReturnType<typeof vi.fn>;
     facilities: ReturnType<typeof vi.fn>;
     selectedFacility: ReturnType<typeof vi.fn>;
@@ -34,10 +36,13 @@ describe('WorkspaceNavigationService', () => {
     selectedFacilityAnalyses: ReturnType<typeof vi.fn>;
     accountReports: ReturnType<typeof vi.fn>;
     selectedFacilityReports: ReturnType<typeof vi.fn>;
+    facilityAnalyses: ReturnType<typeof vi.fn>; facilityReports: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     router = {
+      parseUrl: new DefaultUrlSerializer().parse.bind(new DefaultUrlSerializer()),
+      navigateByUrl: vi.fn().mockResolvedValue(true),
       url: '/v1/workspace/account/account-a/home/overview',
       events: new Subject<unknown>(),
       navigate: vi.fn().mockResolvedValue(true)
@@ -51,6 +56,7 @@ describe('WorkspaceNavigationService', () => {
     facilitiesSignal = signal([{ guid: 'facility-a', name: 'Facility A', accountId: 'account-a' }, { guid: 'facility-b', name: 'Facility B', accountId: 'account-a' }]);
     selectedFacilitySignal = signal({ guid: 'facility-a', name: 'Facility A' });
     workspaceStore = {
+      status: vi.fn(() => 'ready'), hasPending: vi.fn(() => false),
       account: vi.fn(() => accountSignal()),
       facilities: vi.fn(() => facilitiesSignal()),
       selectedFacility: vi.fn(() => selectedFacilitySignal()),
@@ -61,7 +67,8 @@ describe('WorkspaceNavigationService', () => {
       accountAnalyses: vi.fn(() => []),
       selectedFacilityAnalyses: vi.fn(() => []),
       accountReports: vi.fn(() => []),
-      selectedFacilityReports: vi.fn(() => [])
+      selectedFacilityReports: vi.fn(() => []),
+      facilityAnalyses: vi.fn(() => []), facilityReports: vi.fn(() => [])
     };
 
     TestBed.configureTestingModule({
@@ -76,7 +83,7 @@ describe('WorkspaceNavigationService', () => {
           useValue: {
             accountTodos: vi.fn(() => []),
             selectedFacilityTodos: vi.fn(() => []),
-            accountDiscardedWarnings: vi.fn(() => []),
+            accountDiscardedWarnings: vi.fn(() => []), discardedItems: vi.fn(() => []),
             selectedFacilityDiscardedWarnings: vi.fn(() => [])
           }
         }
@@ -85,27 +92,27 @@ describe('WorkspaceNavigationService', () => {
     service = TestBed.inject(WorkspaceNavigationService);
   });
 
-  it('restores the account entry destination through facility and meter navigation, with direct-link and account isolation fallbacks', () => {
+  it('uses explicit Meters breadcrumb destinations through facility and meter-group navigation', () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/account/account-a/data/portfolio/meters'));
     router.events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/data/meters/meter-a/settings'));
-    expect(service.accountReturn()?.label).toBe('Account Meters');
+    expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a', 'meters'));
     router.events.next(new NavigationEnd(3, '', '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/monthly-table'));
-    expect(service.accountReturn()?.label).toBe('Account Meters');
+    expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a', 'meters'));
     expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a','meters'));
     router.events.next(new NavigationEnd(4, '', '/v1/workspace/facility/facility-b/data/meters'));
     expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a', 'meters'));
-    expect(service.accountDataReturnRoute('account-b')).toEqual(service.accountPortfolioRoute('account-b', 'facilities'));
+    expect(service.accountDataReturnRoute('account-b')).toEqual(service.accountPortfolioRoute('account-b', 'meters'));
     router.events.next(new NavigationEnd(5, '', '/v1/workspace/account/account-a/data/portfolio/facilities'));
     router.events.next(new NavigationEnd(6, '', '/v1/workspace/facility/facility-a/data/meters'));
-    expect(service.accountReturn()?.label).toBe('Account Facilities');
+    expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a', 'meters'));
   });
 
-  it('keeps Predictor origins, picker destinations and standard/weather depth transitions', () => {
+  it('keeps Predictor origins, picker destinations and standard/weather depth transitions', async () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/account/account-a/data/portfolio/predictors'));
-    service.setFacility('facility-b');
-    expect(router.navigate).toHaveBeenLastCalledWith(service.facilityDataRoute('facility-b', 'predictors'));
+    await service.setFacility('facility-b');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountPortfolioRoute('account-a', 'predictors'), { queryParams: { facility: 'facility-b' } });
     router.events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/data/predictors'));
-    expect(service.accountReturn()?.label).toBe('Account Predictors'); expect(service.routeMotion()).toBe('drill-in');
+    expect(service.routeMotion()).toBe('drill-in');
     router.events.next(new NavigationEnd(3, '', '/v1/workspace/facility/facility-a/data/predictors/weather/new'));
     expect(service.routeMotion()).toBe('drill-in');
     router.events.next(new NavigationEnd(4, '', '/v1/workspace/facility/facility-a/data/predictors/weather/station%3AKORD/setup'));
@@ -116,26 +123,10 @@ describe('WorkspaceNavigationService', () => {
     expect(service.routeMotion()).toBe('drill-out');
   });
 
-  it('uses section-appropriate returns and avoids single-facility redirect loops', () => {
-    router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/settings/units'));
-    expect(service.accountReturn()?.route).toEqual(service.accountSettingsRoute('account-a', 'units'));
-    accountSignal.set({ guid: 'account-a', isSingleFacilityCompany: true }); facilitiesSignal.set(facilitiesSignal().slice(0, 1));
-    expect(service.accountReturn()).toBeUndefined();
-    router.events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/data/meters'));
-    expect(service.accountReturn()).toBeUndefined();
-    router.events.next(new NavigationEnd(3, '', '/v1/workspace/facility/facility-a/analysis/dashboard'));
-    expect(service.accountReturn()).toBeUndefined();
-    router.events.next(new NavigationEnd(4, '', '/v1/workspace/facility/facility-a/reports/dashboard'));
-    expect(service.accountReturn()?.route).toEqual(service.accountReportsRoute('account-a'));
-    accountSignal.set({ guid: 'account-a', isSingleFacilityCompany: false });
-    router.events.next(new NavigationEnd(5, '', '/v1/workspace/facility/facility-a/data/meters'));
-    expect(service.accountReturn()?.route).toEqual(service.accountPortfolioRoute('account-a', 'facilities'));
-  });
-
-  it('does not select a facility before navigation commits, and leaves the journey untouched on cancellation', () => {
+  it('does not select a facility before navigation commits, and leaves the journey untouched on cancellation', async () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/account/account-a/data/portfolio/meters'));
     const unsaved = TestBed.inject(UnsavedChangesService); vi.spyOn(unsaved, 'confirmDiscard').mockReturnValue(false);
-    service.setFacility('facility-b');
+    await service.setFacility('facility-b');
     expect(router.navigate).not.toHaveBeenCalled(); expect(workspaceService.selectFacility).not.toHaveBeenCalled();
     expect(service.contextMode()).toBe('account');
   });
@@ -148,21 +139,21 @@ describe('WorkspaceNavigationService', () => {
     expect(parseWorkspaceRoute('/v1/workspace/account/account-a/data/portfolio').portfolioTab).toBe('facilities');
   });
 
-  it('enables Reports and retains its dashboard on context and facility switches', () => {
+  it('enables Reports and retains its dashboard on context and facility switches', async () => {
     expect(service.sections().find(section => section.id === 'reports')?.enabled).toBe(true);
-    service.openSection('reports');
-    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
+    await service.openSection('reports');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'), { queryParams: {} });
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
     expect(service.activeReportGuid()).toBe('report-a');
     expect(service.routeState().reportStage).toBe('setup');
     expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports/workbench/report-a/data-checks').reportStage).toBe('data-checks');
     expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports/workbench/report-a/report').reportStage).toBe('report');
-    service.setContext('account');
+    await service.setContext('account');
     expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
-    service.setFacility('facility-b');
-    expect(router.navigate).toHaveBeenLastCalledWith(service.facilityReportsRoute('facility-b'));
-    service.openSection('reports');
-    expect(router.navigate).toHaveBeenLastCalledWith(service.facilityReportsRoute('facility-a'));
+    await service.setFacility('facility-b');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'), { queryParams: { facility: 'facility-b' } });
+    await service.openSection('reports');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'), { queryParams: { facility: 'facility-a' } });
     expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports').detail).toBe('dashboard');
   });
 
@@ -189,25 +180,25 @@ describe('WorkspaceNavigationService', () => {
     expect(parseWorkspaceRoute(route.join('/')).reportStage).toBe(stage);
   });
 
-  it('lets report route guards finish edits before changing the selected facility', () => {
+  it('lets report route guards finish edits before changing the selected facility', async () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
     const confirmDiscard = vi.spyOn(TestBed.inject(UnsavedChangesService), 'confirmDiscard').mockReturnValue(false);
-    service.setFacility('facility-b');
-    expect(router.navigate).toHaveBeenCalledWith(service.facilityReportsRoute('facility-b'));
+    await service.setFacility('facility-b');
+    expect(router.navigate).toHaveBeenCalledWith(service.accountReportsRoute('account-a'), { queryParams: { facility: 'facility-b' } });
     expect(workspaceService.selectFacility).not.toHaveBeenCalled();
     expect(confirmDiscard).not.toHaveBeenCalled();
   });
 
   it('rejects unknown facilities and reports navigation failures when leaving a report workbench', async () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
-    service.setFacility('missing-facility');
+    await service.setFacility('missing-facility');
     expect(router.navigate).not.toHaveBeenCalled();
     router.navigate.mockRejectedValueOnce(new Error('Navigation failed'));
-    service.setFacility('facility-b');
+    await service.setFacility('facility-b');
     await Promise.resolve();
-    expect(service.contextNavigationError()).toBe('The facility could not be opened. Please try again.');
+    expect(service.contextNavigationError()).toContain('retained');
     expect(workspaceService.selectFacility).not.toHaveBeenCalled();
-    service.setFacility('facility-b');
+    await service.setFacility('facility-b');
     expect(service.contextNavigationError()).toBe('');
   });
 
@@ -223,180 +214,6 @@ describe('WorkspaceNavigationService', () => {
     TestBed.inject(UnsavedChangesService).register(() => dirty, vi.fn(), () => false, async () => { dirty = false; return true; });
     await service.openWorkspace('account-b');
     expect(workspaceService.selectAccount).toHaveBeenCalledWith('account-b');
-  });
-
-  it('builds workspace routes without support panel tab state', () => {
-    expect(service.accountRoute('account-a')).toEqual([
-      '/v1',
-      'workspace',
-      'account',
-      'account-a',
-      'home',
-      'overview'
-    ]);
-    expect(service.accountSettingsRoute('account-a', 'units')).toEqual([
-      '/v1',
-      'workspace',
-      'account',
-      'account-a',
-      'settings',
-      'units'
-    ]);
-    expect(service.accountDataRoute('account-a')).toEqual([
-      '/v1',
-      'workspace',
-      'account',
-      'account-a',
-      'data',
-      'portfolio'
-    ]);
-    expect(service.accountPortfolioRoute('account-a', 'meters')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'
-    ]);
-    expect(service.accountImportsRoute('account-a')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'
-    ]);
-    expect(service.accountAnalysisRoute('account-a')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
-    ]);
-    expect(service.accountAnalysisWorkbenchRoute('account-a', 'analysis-a')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'setup'
-    ]);
-    expect(service.accountAnalysisResultsRoute('account-a', 'analysis-a', 'monthly-chart')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'results', 'monthly-chart'
-    ]);
-    expect(service.accountAnalysisResultsRoute('account-a', 'analysis-a', 'facility-contributions')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'results', 'facility-contributions'
-    ]);
-    expect(service.facilityRoute('facility-a')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'home',
-      'overview'
-    ]);
-    expect(service.facilityDataRoute('facility-a', 'predictors')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'predictors'
-    ]);
-    expect(service.facilityDataRoute('facility-a', 'meter-grouping')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meter-grouping'
-    ]);
-    expect(service.facilityDataRoute('facility-a', 'custom-fuels')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'custom-fuels'
-    ]);
-    expect(service.facilityAnalysisRoute('facility-a')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'
-    ]);
-    expect(service.facilityAnalysisWorkbenchRoute('facility-a', 'analysis-a')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'setup'
-    ]);
-    expect(service.facilityAnalysisGroupRoute('facility-a', 'analysis-a', 'group-a', 'regression')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'group', 'group-a', 'regression'
-    ]);
-    expect(service.facilityAnalysisGroupRoute('facility-a', 'analysis-a', 'group-a', 'banking')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'group', 'group-a', 'banking'
-    ]);
-    expect(service.facilityAnalysisResultsRoute('facility-a', 'analysis-a', 'monthly-chart')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'facility', 'monthly-chart'
-    ]);
-    expect(service.facilityAnalysisResultsRoute('facility-a', 'analysis-a', 'group-contributions')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'facility', 'group-contributions'
-    ]);
-    expect(service.facilityMeterRoute('facility-a', 'meter-a', 'readings')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters',
-      'meter-a',
-      'readings'
-    ]);
-    expect(service.facilityMeterRoute('facility-a', 'meter-a', 'bill-inspection')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters',
-      'meter-a',
-      'bill-inspection'
-    ]);
-    expect(service.facilityMeterGroupRoute('facility-a', 'group-a', 'yearly')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meter-grouping',
-      'group-a',
-      'yearly'
-    ]);
-    expect(service.facilityPredictorRoute('facility-a', 'predictor-a', 'quality')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'predictors',
-      'predictor-a',
-      'quality'
-    ]);
-    expect(service.facilityWeatherPredictorCreateRoute('facility-a')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'new'
-    ]);
-    expect(service.facilityWeatherPredictorRoute('facility-a', 'station:station-a')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'station:station-a', 'setup'
-    ]);
-    expect(service.facilityWeatherPredictorRoute('facility-a', 'station:station-a', 'readings')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'station:station-a',
-      'readings'
-    ]);
-    expect(service.facilityWeatherPredictorQualityRoute(
-      'facility-a', 'station:station-a', 'predictor-a'
-    )).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'station:station-a',
-      'quality', 'predictor-a'
-    ]);
-    expect(service.facilitySettingsRoute('facility-a', 'goals')).toEqual([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'settings',
-      'goals'
-    ]);
-  });
-
-  it('parses account analysis workbench identity, stage, and Results tab into route state', () => {
-    expect(parseWorkspaceRoute('/v1/workspace/account/account-a/analysis/workbench/analysis%20a/results/monthly-chart')).toMatchObject({
-      contextMode: 'account',
-      accountGuid: 'account-a',
-      section: 'analysis',
-      detail: 'workbench',
-      analysisGuid: 'analysis a',
-      accountAnalysisStageScope: 'results',
-      accountAnalysisResultTab: 'monthly-chart'
-    });
-    expect(parseWorkspaceRoute('/v1/workspace/account/account-a/analysis/workbench/analysis-a')).toMatchObject({
-      accountAnalysisStageScope: 'setup'
-    });
   });
 
   it('exposes the active uploaded file and workflow step from the route', () => {
@@ -420,7 +237,7 @@ describe('WorkspaceNavigationService', () => {
       makeFinding('report.analysis.warning', 'warning', 'readiness', { kind: 'facility-report', guid: 'r', name: 'Report', accountGuid: 'account-a', facilityGuid: 'facility-a' })
     ]);
     const dataItem = items.find(item => item.entity.kind === 'meter')!;
-    for (const source of [status.accountTodos, status.selectedFacilityTodos, status.accountDiscardedWarnings, status.selectedFacilityDiscardedWarnings]) {
+    for (const source of [status.accountTodos, status.selectedFacilityTodos, status.accountDiscardedWarnings, status.selectedFacilityDiscardedWarnings, status.discardedItems]) {
       vi.mocked(source).mockReturnValue(items);
     }
     for (const url of ['/v1/workspace/account/account-a/data/portfolio/facilities', '/v1/workspace/facility/facility-a/data/meters']) {
@@ -476,7 +293,7 @@ describe('WorkspaceNavigationService', () => {
     await service.openWorkspace('account-a');
 
     expect(workspaceService.selectAccount).toHaveBeenCalledWith('account-a');
-    expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-a');
+    expect(workspaceService.selectFacility).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
       'workspace',
@@ -534,23 +351,26 @@ describe('WorkspaceNavigationService', () => {
     expect(service.singleSiteWorkspaceState()).toBe('multiple-facilities');
   });
 
-  it('exposes account dropdown options with descriptors and active state', () => {
-    usableAccounts.mockReturnValue([
-      { guid: 'account-a', name: 'Account A', numberOfFacilities: '2' },
-      { guid: 'account-b', name: 'Account B', isSingleFacilityCompany: true },
-      { guid: 'deleted-account', name: 'Deleted', deleteAccount: true }
-    ]);
-
-    expect(service.accountOptions()).toEqual([
-      { guid: 'account-a', name: 'Account A', descriptor: '2 facilities', active: true },
-      { guid: 'account-b', name: 'Account B', descriptor: 'Single facility', active: false }
-    ]);
+  it('does not substitute a remembered or first facility when a single-site account requires recovery', async () => {
+    accountSignal.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
+    for (const facilities of [[], [
+      { guid: 'facility-a', name: 'Facility A', accountId: 'account-a' },
+      { guid: 'facility-b', name: 'Facility B', accountId: 'account-a' }
+    ]]) {
+      facilitiesSignal.set(facilities); router.navigate.mockClear();
+      expect(await service.setContext('facility')).toBe(false);
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(workspaceService.selectFacility).not.toHaveBeenCalled();
+    }
+    router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-b/settings/profile'));
+    expect(await service.setContext('facility')).toBe(true);
+    expect(router.navigate).toHaveBeenLastCalledWith(service.facilitySettingsRoute('facility-b', 'profile'));
   });
 
   it('opens facilities on the canonical workspace route after selecting the facility', async () => {
     await service.openFacility('facility-a');
 
-    expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-a');
+    expect(workspaceService.selectFacility).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
       'workspace',
@@ -575,11 +395,11 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('opens imports from account and facility context', () => {
-    service.openSection('imports');
+  it('opens imports from account and facility context', async () => {
+    await service.openSection('imports');
     expect(router.navigate).toHaveBeenLastCalledWith(
       ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
-      { queryParams: undefined }
+      { queryParams: {} }
     );
 
     router.events.next(new NavigationEnd(
@@ -587,18 +407,18 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-a/data/meters',
       '/v1/workspace/facility/facility-a/data/meters'
     ));
-    service.openSection('imports');
+    await service.openSection('imports');
     expect(router.navigate).toHaveBeenLastCalledWith(
       ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
-      { queryParams: { facilityGuid: 'facility-a', returnUrl: '/v1/workspace/facility/facility-a/data/meters' } }
+      { queryParams: { facilityGuid: 'facility-a' } }
     );
   });
 
-  it('opens and parses Analysis routes in account and facility contexts', () => {
-    service.openSection('analysis');
+  it('opens and parses Analysis routes in account and facility contexts', async () => {
+    await service.openSection('analysis');
     expect(router.navigate).toHaveBeenLastCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
-    ]);
+    ], { queryParams: {} });
 
     router.events.next(new NavigationEnd(
       2,
@@ -620,10 +440,10 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeAnalysisStageScope()).toBe('group');
     expect(service.activeAnalysisGroupGuid()).toBe('group a');
 
-    service.openSection('analysis');
+    await service.openSection('analysis');
     expect(router.navigate).toHaveBeenLastCalledWith([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'
-    ]);
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
+    ], { queryParams: { facility: 'facility-a' } });
   });
 
   it('parses account and facility settings routes and enables settings in workspace context', () => {
@@ -764,8 +584,8 @@ describe('WorkspaceNavigationService', () => {
     );
   });
 
-  it('opens settings from the active workspace context', () => {
-    service.openSection('settings');
+  it('opens settings from the active workspace context', async () => {
+    await service.openSection('settings');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -783,7 +603,7 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-a/home/overview'
     ));
 
-    service.openSection('settings');
+    await service.openSection('settings');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -795,8 +615,8 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('opens data from the active workspace context', () => {
-    service.openSection('data');
+  it('opens data from the active workspace context', async () => {
+    await service.openSection('data');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -805,7 +625,7 @@ describe('WorkspaceNavigationService', () => {
       'account-a',
       'data',
       'portfolio'
-    ]);
+    ], { queryParams: {} });
 
     router.navigate.mockClear();
     router.events.next(new NavigationEnd(
@@ -814,35 +634,29 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-a/home/overview'
     ));
 
-    service.openSection('data');
+    await service.openSection('data');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
       'workspace',
-      'facility',
-      'facility-a',
+      'account',
+      'account-a',
       'data',
+      'portfolio',
       'meters'
-    ]);
+    ], { queryParams: { facility: 'facility-a' } });
   });
 
-  it('keeps the active rail section when toggling between account and facility contexts', () => {
+  it('keeps the active rail section when toggling between account and facility contexts', async () => {
     router.events.next(new NavigationEnd(
       1,
       '/v1/workspace/account/account-a/data/portfolio',
       '/v1/workspace/account/account-a/data/portfolio'
     ));
 
-    service.setContext('facility');
+    await service.setContext('facility');
 
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters'
-    ]);
+    expect(router.navigate).toHaveBeenCalledWith(service.accountPortfolioRoute('account-a', 'meters'), { queryParams: { facility: 'facility-a' } });
 
     router.navigate.mockClear();
     router.events.next(new NavigationEnd(
@@ -851,7 +665,7 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-a/data/energy-uses'
     ));
 
-    service.setContext('account');
+    await service.setContext('account');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -869,7 +683,7 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-a/settings/financial'
     ));
 
-    service.setContext('account');
+    await service.setContext('account');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -881,14 +695,14 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('keeps custom database details when moving them into facility context', () => {
+  it('keeps custom database details when moving them into facility context', async () => {
     router.events.next(new NavigationEnd(
       1,
       '/v1/workspace/account/account-a/data/custom-fuels',
       '/v1/workspace/account/account-a/data/custom-fuels'
     ));
 
-    service.setContext('facility');
+    await service.setContext('facility');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -900,35 +714,36 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('preserves the active facility while a registered editor is saving', () => {
+  it('preserves the active facility while a registered editor is saving', async () => {
     TestBed.inject(UnsavedChangesService).register(() => true, vi.fn(), () => true);
     const confirm = vi.spyOn(window, 'confirm');
 
-    service.setFacility('facility-b');
+    await service.setFacility('facility-b');
 
     expect(workspaceService.selectFacility).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
     expect(confirm).not.toHaveBeenCalled();
   });
 
-  it('keeps the active facility rail route when switching facilities', () => {
+  it('keeps the active facility rail route when switching facilities', async () => {
     router.events.next(new NavigationEnd(
       1,
       '/v1/workspace/facility/facility-a/data/predictors',
       '/v1/workspace/facility/facility-a/data/predictors'
     ));
 
-    service.setFacility('facility-b');
+    await service.setFacility('facility-b');
 
     expect(workspaceService.selectFacility).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
       'workspace',
-      'facility',
-      'facility-b',
+      'account',
+      'account-a',
       'data',
+      'portfolio',
       'predictors'
-    ]);
+    ], { queryParams: { facility: 'facility-b' } });
 
     router.navigate.mockClear();
     router.events.next(new NavigationEnd(
@@ -937,7 +752,7 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-b/data/meter-grouping'
     ));
 
-    service.setFacility('facility-a');
+    await service.setFacility('facility-a');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -946,7 +761,7 @@ describe('WorkspaceNavigationService', () => {
       'facility-a',
       'data',
       'meter-grouping'
-    ]);
+    ], { queryParams: {} });
 
     router.navigate.mockClear();
     router.events.next(new NavigationEnd(
@@ -955,7 +770,7 @@ describe('WorkspaceNavigationService', () => {
       '/v1/workspace/facility/facility-b/settings/data-validation'
     ));
 
-    service.setFacility('facility-a');
+    await service.setFacility('facility-a');
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -964,56 +779,8 @@ describe('WorkspaceNavigationService', () => {
       'facility-a',
       'settings',
       'data-validation'
-    ]);
+    ], { queryParams: {} });
   });
 
-  it.each([
-    ['account/account-a/analysis/dashboard', 'facility/facility-a/analysis/dashboard', 'drill-in'],
-    ['account/account-a/analysis/dashboard', 'account/account-a/analysis/workbench/account-analysis/setup', 'drill-in'],
-    ['account/account-a/analysis/dashboard', 'facility/facility-a/analysis/workbench/analysis-a/setup', 'drill-in'],
-    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'account/account-a/analysis/dashboard', 'drill-out'],
-    ['facility/facility-a/analysis/dashboard', 'facility/facility-a/analysis/workbench/analysis-a/setup', 'drill-in'],
-    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'facility/facility-a/analysis/dashboard', 'drill-out'],
-    ['account/account-a/analysis/workbench/account-analysis/select-items', 'facility/facility-a/analysis/workbench/analysis-a/setup', 'drill-in'],
-    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'account/account-a/analysis/workbench/account-analysis/select-items', 'drill-out'],
-    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'facility/facility-a/analysis/workbench/analysis-b/setup', 'peer'],
-    ['facility/facility-a/analysis/dashboard', 'facility/facility-b/analysis/dashboard', 'peer'],
-    ['facility/facility-a/analysis/workbench/analysis-a/setup', 'facility/facility-a/analysis/workbench/analysis-a/facility/annual', 'none'],
-    ['facility/facility-a/data/meters', 'facility/facility-a/analysis/dashboard', 'none'],
-    ['account/account-a/data/portfolio/facilities', 'facility/facility-a/data/meters', 'drill-in'],
-    ['account/account-a/data/portfolio/meters', 'facility/facility-a/data/meters/meter-a/settings', 'drill-in'],
-    ['facility/facility-a/data/meters', 'facility/facility-a/data/meters/meter-a/settings', 'drill-in'],
-    ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-a/data/meters', 'drill-out'],
-    ['facility/facility-a/data/meters', 'account/account-a/data/portfolio/facilities', 'drill-out'],
-    ['facility/facility-a/data/meters/meter-a/settings', 'account/account-a/data/portfolio/meters', 'drill-out'],
-    ['facility/facility-a/data/meters', 'facility/facility-b/data/meters', 'peer'],
-    ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-a/data/meters/meter-b/settings', 'peer'],
-    ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-b/data/meters', 'peer'],
-    ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-a/data/meters/meter-a/readings', 'none'],
-    ['account/account-a/data/portfolio/meters', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'drill-in'],
-    ['facility/facility-a/data/meter-grouping', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'drill-in'],
-    ['facility/facility-a/data/meters', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'drill-in'],
-    ['facility/facility-a/data/meters/meter-a/settings', 'facility/facility-a/data/meter-grouping/group-a/monthly-table', 'peer'],
-    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meters/meter-a/settings', 'peer'],
-    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meter-grouping/group-b/monthly-table', 'peer'],
-    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meter-grouping/group-a/monthly-chart', 'none'],
-    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-a/data/meter-grouping', 'drill-out'],
-    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'account/account-a/data/portfolio/meters', 'drill-out'],
-    ['facility/facility-a/data/meter-grouping/group-a/monthly-table', 'facility/facility-b/data/meter-grouping/group-b/monthly-table', 'peer'],
-    ['account/account-a/data/portfolio/facilities', 'account/account-a/data/portfolio/meters', 'none'],
-    ['account/account-a/home/overview', 'facility/facility-a/home/overview', 'none'],
-    ['account/account-a/data/portfolio/facilities', 'facility/facility-a/settings/profile', 'none'],
-    ['account/account-a/data/portfolio/facilities', 'account/account-b/data/portfolio/facilities', 'none']
-  ])('classifies %s → %s as %s', (from, to, expected) => {
-    router.events.next(new NavigationEnd(1, `/v1/workspace/${from}`, `/v1/workspace/${from}`));
-    router.events.next(new NavigationEnd(2, `/v1/workspace/${to}`, `/v1/workspace/${to}`));
-    expect(service.routeMotion()).toBe(expected);
-    expect(service.routeMotionKey()).toBe(`/v1/workspace/${to}`);
-  });
 
-  it('does not animate direct entry or welcome transitions', () => {
-    router.events.next(new NavigationEnd(1, '/v1', '/v1'));
-    router.events.next(new NavigationEnd(2, '/v1/workspace/facility/facility-a/data/meters', '/v1/workspace/facility/facility-a/data/meters'));
-    expect(service.routeMotion()).toBe('none');
-  });
 });

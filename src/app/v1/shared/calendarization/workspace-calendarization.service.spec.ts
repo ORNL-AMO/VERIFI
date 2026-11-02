@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, facility, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { Subscription } from 'rxjs';
 import { WorkspaceCalendarizationBaseResult } from './workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from './workspace-calendarization.service';

@@ -3,7 +3,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
 import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
-import { account, calendarizedMeter, facility, group, meter, monthlyData, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, calendarizedMeter, facility, group, meter, monthlyData, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { evaluateWorkspaceStatus } from './status.evaluator';
 
 describe('v0-to-v1 status comparison fixtures', () => {

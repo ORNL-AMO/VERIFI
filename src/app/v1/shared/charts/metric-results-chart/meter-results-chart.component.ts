@@ -60,6 +60,7 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() tooltipMaxRows?: number;
   @Input() tooltipOverflowHint = 'Use the legend to show fewer series.';
   @Input() smoothLines = true;
+  @Input() highlightedMetricId?: string;
   @Input() showPointSymbols = true;
   @Input() showChartActions = true;
   @Input() zoomRange?: V1EChartsDataZoomRange;
@@ -160,6 +161,7 @@ export class MeterResultsChartComponent implements OnChanges {
 
     if (this.allMetricsEnabled()) {
       const metrics = this.visibleMetrics();
+      const highlighted = metrics.some(metric => metric.id === this.highlightedMetricId) ? this.highlightedMetricId : undefined;
       if (metrics.length) {
         yAxis.push(metricAxis(metrics[0], this.yAxisTitle, this.allowNegativeValues, this.compactAxes));
       }
@@ -177,14 +179,14 @@ export class MeterResultsChartComponent implements OnChanges {
           name: metric.label,
           type: display,
           yAxisIndex: 0,
-          data: rows.map(row => chartValue(row, metric.id)),
+          ...metricSeriesData(rows, metric.id),
           connectNulls: false,
           smooth: this.smoothLines && display === 'line' && rows.length > 2 && !comparisonBand,
           showSymbol: display === 'line' && this.showPointSymbols,
           symbolSize: display === 'line' ? 7 : undefined,
           stack: display === 'bar' && this.allMetricSeriesStacked() ? 'results' : undefined,
-          itemStyle: { color: metric.color ?? chartSeriesColor(index) },
-          lineStyle: { color: metric.color ?? chartSeriesColor(index), type: metric.lineStyle ?? 'solid', width: 3 },
+          itemStyle: { color: metric.color ?? chartSeriesColor(index), opacity: highlighted && metric.id !== highlighted ? .2 : 1 },
+          lineStyle: { color: metric.color ?? chartSeriesColor(index), type: metric.lineStyle ?? 'solid', width: metric.id === highlighted ? 4 : 3, opacity: highlighted && metric.id !== highlighted ? .2 : 1 },
           z: 2,
           ...seriesValueLabel(this.showValueLabels, metric, this.compactValueLabels)
         });
@@ -469,6 +471,7 @@ function formatChartValueLabel(
   metric: MeterResultsChartMetric,
   compact: boolean
 ): string {
+  if (Array.isArray(value)) value = value[1];
   if (value === null || value === undefined) return '';
   const numericValue = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(numericValue)) return '';
@@ -549,6 +552,18 @@ function chartValue(row: MeterResultsChartRow, metricId: string): number | null 
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
+function metricSeriesData(rows: readonly MeterResultsChartRow[], metricId: string): Record<string, unknown> {
+  if (!rows.some(row => row.paddingMetricIds?.includes(metricId))) {
+    return { data: rows.map(row => chartValue(row, metricId)) };
+  }
+  // Explicit category indices let independent histories omit padding without connecting real null gaps.
+  const data: [number, number | null][] = [];
+  rows.forEach((row, index) => {
+    if (!row.paddingMetricIds?.includes(metricId)) data.push([index, chartValue(row, metricId)]);
+  });
+  return { data, encode: { x: 0, y: 1 } };
+}
+
 function metricLifetimeTotal(rows: readonly MeterResultsChartRow[], metricId: string): number {
   return rows.reduce((total, row) => total + (chartValue(row, metricId) ?? 0), 0);
 }
@@ -590,6 +605,7 @@ function formatChartTooltip(
 }
 
 function formatChartTooltipValue(value: unknown, currency = false, unit?: string): string {
+  if (Array.isArray(value)) value = value[1];
   if (value === null || value === undefined) return '—';
   const numericValue = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(numericValue)) {

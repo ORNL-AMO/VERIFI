@@ -17,7 +17,7 @@
           @else if (state === 'error') { <app-ui-icon name="warning"></app-ui-icon> Not saved }
         </span>
       </div>
-      @if (facilityContext) {
+      @if (facilityContext && !editor.singleFacilityPresentation()) {
         @if (editor.stalenessDiffer()) {
           <div class="v1-alert v1-alert--info">
             <span>Facility staleness settings differ from {{ account.name }}.</span>
@@ -44,7 +44,7 @@
     </form>
     <form class="v1-settings-panel" [class.v1-settings-panel--facility]="facilityContext" [formGroup]="editor.expectedRangeForm" aria-label="Expected-range warnings">
       <div class="v1-settings-panel__heading"><div><p>Data Validation</p><h2>Expected-range warnings</h2></div></div>
-      @if (facilityContext) {
+      @if (facilityContext && !editor.singleFacilityPresentation()) {
         @if (editor.expectedRangeDiffer()) {
           <div class="v1-alert v1-alert--info">
             <span>Facility expected-range settings differ from {{ account.name }}.</span>

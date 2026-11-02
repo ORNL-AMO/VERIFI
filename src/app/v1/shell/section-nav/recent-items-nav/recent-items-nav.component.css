@@ -1,0 +1,6 @@
+:host { display: block; min-width: 0; }
+.recent-items__identity { display: grid; gap: .15rem; min-width: 0; }
+.recent-items__name { color: var(--v1-text); font-weight: 600; }
+.recent-items__facility { display: flex; align-items: center; gap: .3rem; min-width: 0; color: var(--v1-muted); font-size: max(.8rem,13px); font-weight: 400; line-height: 1.25; }
+.recent-items__facility app-ui-icon { flex: 0 0 auto; }
+.recent-items__facility span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -21,7 +21,7 @@
       </span>
     </div>
 
-    @if (financialDiffer()) {
+    @if (!singleFacilityPresentation() && financialDiffer()) {
       <div class="v1-alert v1-alert--info">
         <app-ui-icon name="info"></app-ui-icon>
         <span>Facility fiscal-year settings differ from {{ currentAccount.name }}.</span>
@@ -47,7 +47,7 @@
       <div class="v1-settings-grid v1-settings-grid--2">
         <label>
           <span>Start month</span>
-          <select formControlName="fiscalYearMonth" (change)="saveFinancial()">
+          <select class="v1-select" formControlName="fiscalYearMonth" (change)="saveFinancial()">
             @for (month of months; track month.monthNumValue) {
               <option [ngValue]="month.monthNumValue">{{ month.name }}</option>
             }

@@ -1,3 +1,4 @@
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { TestBed } from '@angular/core/testing';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
@@ -7,6 +8,26 @@ import { setupSectionNavTest, activeLinks, meterChildLinks, groupChildLinks, pre
 describe('DataNavComponent', () => {
   let state: ReturnType<typeof setupSectionNavTest>;
   beforeEach(() => { state = setupSectionNavTest(); });
+
+  it('omits Facilities in facility context while preserving its scoped resource links', () => {
+    state.activeSection.set('data'); state.activeDetail.set('meter-grouping');
+    state.contextMode.set('facility'); state.selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    const fixture = TestBed.createComponent(DataNavComponent); fixture.detectChanges();
+    const links = [...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('a')];
+    expect(links.some(link => link.textContent?.trim() === 'Facilities')).toBe(false);
+    expect(links.find(link => link.textContent?.trim() === 'Meters')?.getAttribute('href')).toContain('facility=facility-a');
+  });
+
+  it('clears facility scope on the Facilities link while retaining it for resource inventories', () => {
+    const navigation = TestBed.inject(WorkspaceNavigationService);
+    vi.spyOn(navigation, 'inventoryScopeQuery').mockReturnValue({ facility: 'facility-b' });
+    state.activeSection.set('data'); state.activeDetail.set('portfolio');
+    const fixture = TestBed.createComponent(DataNavComponent); fixture.detectChanges();
+    const links = [...fixture.nativeElement.querySelectorAll('.v1-nav__link')] as HTMLAnchorElement[];
+    const facilities = links.find(link => link.textContent?.trim() === 'Facilities')!;
+    expect(facilities.getAttribute('href')).not.toContain('facility=');
+    expect(links.find(link => link.textContent?.trim() === 'Meters')!.getAttribute('href')).toContain('facility=facility-b');
+  });
 
   it('shows account portfolio and fuels custom data navigation when the Data rail section is active', () => {
     const { activeSection, account, activeDetail } = state;
@@ -394,7 +415,7 @@ describe('DataNavComponent', () => {
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
 
-    expect(element.textContent).toContain('Facility Data');
+    expect(element.textContent).toContain('Data');
     expect(element.textContent).toContain('Custom Database Items');
     expect(element.textContent).toContain('Fuels');
     expect(element.textContent).not.toContain('Grid Factors');

@@ -2,6 +2,7 @@ import { Component, DestroyRef, Injector, afterNextRender, TemplateRef, ViewChil
 import { FormControl, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { BackupSettingsForm } from '@shared/settings-forms/settings-form.models';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
@@ -21,7 +22,7 @@ import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
   private readonly backupExportCoordinator = inject(BackupExportCoordinator);
   private readonly automaticBackups = inject(AutomaticBackupsService);
-  private readonly navigation = inject(WorkspaceNavigationService);
+  readonly navigation = inject(WorkspaceNavigationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
@@ -34,7 +35,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
 
   @ViewChild('backupConfirmModal') private readonly backupConfirmModal!: TemplateRef<unknown>;
 
-  form: FormGroup;
+  form: BackupSettingsForm;
   showBackupConfirm = false;
   showImportPanel = false;
   readonly backups = inject(ManualBackupDownloadService);
@@ -110,7 +111,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
     const account = this.account();
     if (!account || !this.backups.available()) return;
     this.backupRequest = { scope: 'account', accountGuid: account.guid, format };
-    this.backupName = account.name;
+    this.backupName = this.navigation.singleFacilityContext()?.name ?? account.name;
     this.backupOpener = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     this.showBackupConfirm = true;
     this.modalPortal.show(new TemplatePortal(this.backupConfirmModal, this.viewContainerRef));

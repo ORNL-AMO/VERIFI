@@ -43,7 +43,7 @@ describe('AppComponent shell state', () => {
         },
         {
           provide: AnalyticsService,
-          useValue: { sendEvent: () => undefined, getPageWithoutId: (url: string) => url }
+          useValue: { initialize: () => undefined, sendEvent: () => undefined, getPageWithoutId: (url: string) => url }
         }
       ]
     });

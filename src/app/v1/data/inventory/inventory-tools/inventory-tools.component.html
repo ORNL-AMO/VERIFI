@@ -1,0 +1,46 @@
+@let selectionState = selection();
+@let chartState = chart();
+
+@if (showSelectionToggle() || selectionState.selecting()) {
+<div class="inventory-tools" [class.inventory-tools--selecting]="selectionState.selecting()" [id]="selectionState.resource() + '-selection-actions'" role="group" [attr.aria-label]="selectionState.resource() + ' actions'">
+  @if (showSelectionToggle()) {
+    <button class="v1-btn v1-btn--quiet" type="button" [disabled]="!selectionState.canAct() || !selectionState.source.matchingGuids().length" [attr.aria-pressed]="selectionState.selecting()" [title]="!selectionState.canAct() ? 'Wait for pending changes' : !selectionState.source.matchingGuids().length ? 'No matching items to select' : 'Select items across all matching pages'" (click)="selectionState.toggleSelection()">Select {{ selectionState.resource() }}</button>
+  }
+  @if (selectionState.selecting()) {
+    <span role="status">{{ selectionState.selected().length }} selected</span>
+    <button class="v1-btn v1-btn--quiet" type="button" [disabled]="!selectionState.canAct()" title="Select eligible items across all matching pages" (click)="selectionState.selectAll()">Select all</button>
+    <button class="v1-btn v1-btn--danger" type="button" [disabled]="!selectionState.canAct() || !selectionState.selected().length" (click)="requestDelete()">Delete selected</button>
+    <button class="v1-btn v1-btn--quiet" type="button" [disabled]="selectionState.saving()" (click)="selectionState.clearSelection()">Cancel selection</button>
+  }
+</div>
+}
+@if (selectionState.error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ selectionState.error() }}</p> }
+<app-inventory-chart-dock [attr.title]="selectionState.source.scopeGuids().length ? 'Open charts' : 'Add or upload records to use charts'" [open]="chartState.open()" [disabled]="!selectionState.source.scopeGuids().length" (opened)="openCharts()"/>
+<ng-template #chartPanel>
+  @if (chartState.open()) {
+    <app-inventory-chart-sheet [singleTrace]="selectionState.resource() === 'predictors' && !chartState.multiplePredictors()" [resource]="selectionState.resource()" [contextKey]="chartState.contextKey()" [facilityName]="chartState.contextLabel()" [charts]="chartState.charts()" [state]="chartState.state()" [view]="chartState.view()" (viewChanged)="chartState.view.set($event)" [zoomRange]="chartState.zoom()" (zoomChanged)="chartState.zoom.set($event)" (closed)="closeCharts()">
+      <ng-container ngProjectAs="[chartGrouping]">
+      @if (selectionState.resource() === 'meters') {
+        <div class="inventory-tools__grouping" [class.inventory-tools__grouping--divided]="chartState.charts().length > 1" role="group" aria-label="Meter chart grouping">
+          <button type="button" class="v1-btn v1-btn--quiet" [class.active]="chartState.grouping() === 'groups'" [attr.aria-pressed]="chartState.grouping() === 'groups'" (click)="chartState.form.controls.grouping.setValue('groups')">Meter groups</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [class.active]="chartState.grouping() === 'facilities'" [attr.aria-pressed]="chartState.grouping() === 'facilities'" title="Group meters matching the current filters by facility" (click)="chartState.form.controls.grouping.setValue('facilities')">Facility totals</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [class.active]="chartState.grouping() === 'meters'" [attr.aria-pressed]="chartState.grouping() === 'meters'" (click)="chartState.form.controls.grouping.setValue('meters')">Individual meters</button>
+        </div>
+      } @else {
+        <label class="inventory-tools__multiple"><input type="checkbox" role="switch" [formControl]="chartState.form.controls.multiplePredictors" aria-describedby="predictor-chart-mode-help">Multiple predictors</label>
+      }
+      </ng-container>
+      @if (selectionState.resource() === 'predictors') {
+        <p ngProjectAs="[chartNotice]" id="predictor-chart-mode-help" class="inventory-tools__mode-help" [class.visually-hidden]="!chartState.multiplePredictors()" role="status">{{ chartState.multiplePredictors() ? 'Units ignored · Original values share one scale; no conversion or normalization.' : 'Choose one predictor to view its saved history and units.' }}</p>
+      }
+
+    </app-inventory-chart-sheet>
+  }
+</ng-template>
+<ng-template #confirmation>
+  <app-confirmation-dialog [title]="'Delete selected ' + selectionState.resource() + '?'" titleId="inventory-bulk-delete-title" cancelAriaLabel="Cancel deletion" confirmLabel="Delete selected" confirmIcon="delete" [busy]="selectionState.saving()" [disabled]="!selectionState.canAct()" (confirmed)="confirmDelete()" (cancelled)="cancelDelete()">
+    <p>These records and their readings will be permanently deleted.@if (selectionState.resource() === 'predictors') { Predictor references will be removed from affected analyses; regression models may require regeneration. }</p>
+    <ul>@for (group of selectionState.reviewGroups(); track group.guid) { <li>{{ group.name }}: {{ group.count }} {{ selectionState.resource() }}, {{ group.readings }} readings@if (group.analyses) { , {{ group.analyses }} analyses reviewed }</li> }</ul>
+    @if (selectionState.error()) { <p role="alert">{{ selectionState.error() }}</p> }
+  </app-confirmation-dialog>
+</ng-template>

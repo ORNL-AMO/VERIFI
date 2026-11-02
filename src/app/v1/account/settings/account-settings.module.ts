@@ -1,3 +1,5 @@
+import { FacilityBackupToolsModule } from '@app/v1/facility/settings/backup/facility-backup-tools.module';
+import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { DataValidationSettingsPanelComponent } from '@app/v1/shared/settings/data-validation-settings-panel/data-validation-settings-panel.component';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { CommonModule } from '@angular/common';
@@ -16,7 +18,7 @@ import { AccountSettingsPortfolioComponent } from './portfolio/account-settings-
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
 import { AccountSettingsDataValidationComponent } from './data-validation/account-settings-data-validation.component';
 import { AccountSettingsUnitsComponent } from './units/account-settings-units.component';
-import { AccountDataModule } from '@app/v1/account/data/account-data.module';
+import { FacilitiesModule } from '@app/v1/data/facilities/facilities.module';
 
 @NgModule({
   declarations: [
@@ -31,6 +33,7 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
     AccountSettingsDeleteComponent
   ],
   imports: [
+    PageIdentityComponent,
     CommonModule,
     DragDropModule,
     ConfirmationDialogComponent,
@@ -38,8 +41,9 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
     IconsModule,
     ReactiveFormsModule,
     RouterModule,
-    AccountDataModule,
-    ImportAccountBackupComponent
+    FacilitiesModule,
+    ImportAccountBackupComponent,
+    FacilityBackupToolsModule
   ],
   exports: [AccountSettingsComponent]
 })

@@ -5,15 +5,15 @@ import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-worksp
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { account, facility } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, facility } from '@app/v1/data/meters/facility-meters.testing';
 import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceStatusService } from './workspace-status.service';
 import { presentFinding } from './status.catalog';
 import { makeFinding } from './status.models';
-import { accountReportSnapshot } from '@app/v1/account/reports/testing/account-report-test-fixtures';
-import { reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
+import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
+import { reportFixture } from '@app/v1/reports/facility/testing/report-test-fixtures';
 
 describe('WorkspaceStatusService', () => {
   it('shares report actions between items, Todos and entity findings, and rechecks stale actions before navigation', () => {
@@ -162,7 +162,7 @@ describe('WorkspaceStatusService', () => {
     service.navigateTo(presentFinding(makeFinding('facility.predictors.missing', 'error', 'readiness', facilityEntity)));
     service.navigateTo(presentFinding(makeFinding('predictor.quality.outlier', 'warning', 'quality', predictorEntity, { count: 1, periods: ['2026-01'] })));
 
-    expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors']);
+    expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'predictors'], { queryParams: { facility: 'facility-a' } });
     expect(router.navigate).toHaveBeenNthCalledWith(2, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'predictor-a', 'quality']);
   });
 

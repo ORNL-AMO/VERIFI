@@ -1,6 +1,6 @@
 import { InventoryTileComponent } from '../inventory-tile/inventory-tile.component';
 import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
-import { InventoryDetailLevel, InventoryTile, InventoryTileDetailChange, InventoryTileMenuAction, InventoryTileActionRequest, INVENTORY_DETAIL_LEVELS } from '../inventory.models';
+import { FacilityInventoryDestination, InventoryDetailLevel, InventoryTile, InventoryTileDetailChange, InventoryTileMenuAction, InventoryTileActionRequest, INVENTORY_DETAIL_LEVELS } from '../inventory.models';
 
 @Component({ selector: 'app-inventory-grid', standalone: true, imports: [InventoryTileComponent],
   templateUrl: './inventory-grid.component.html', styleUrls: ['./inventory-grid.component.css'] })
@@ -15,6 +15,7 @@ export class InventoryGridComponent {
   @Input() set overrides(value: Readonly<Record<string, InventoryDetailLevel>>) { this.overrideState.set(value); }
   @Input() actionsByGuid: Readonly<Record<string, readonly InventoryTileMenuAction[]>> = {};
   @Input() actions: readonly InventoryTileMenuAction[] = [];
+  @Input() showOwnership = true;
   @Input() selecting = false;
   @Input() selected: readonly string[] = [];
   @Input() canSelect = true;
@@ -29,6 +30,8 @@ export class InventoryGridComponent {
   @Output() readonly detailChanged = new EventEmitter<InventoryTileDetailChange>();
   @Output() readonly pageSelected = new EventEmitter<number>();
   @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
+  @Output() readonly facilityScopeRequested = new EventEmitter<string>();
+  @Output() readonly facilityInventoryRequested = new EventEmitter<FacilityInventoryDestination>();
   readonly level = this.detailState.asReadonly();
   readonly entries = computed(() => this.prepare(this.tileState()));
   readonly printed = computed(() => this.prepare(this.printState()));

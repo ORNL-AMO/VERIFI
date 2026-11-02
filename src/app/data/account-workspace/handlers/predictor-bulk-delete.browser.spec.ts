@@ -16,6 +16,27 @@ describe('mixed Predictor bulk deletion in Chromium', () => {
   const preview = (guids = ['p1', 'p2']): PredictorDeletionPreview => structuredClone({ facilityGuid: 'facility', predictors: predictors.filter(item => guids.includes(item.guid)), predictorData: readings.filter(item => guids.includes(item.predictorId)), facilityAnalyses: analyses.filter(item => item.facilityId === 'facility') });
   beforeEach(async () => { harness = await IndexedDbTestHarness.create('predictor-bulk-delete'); await harness.seed({ predictor: predictors.map(item => ({ ...item })), predictorData: readings.map(item => ({ ...item })), analysisItems: analyses.map(item => ({ ...item })) }); });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
+  async function crossFacilityPreviews(): Promise<PredictorDeletionPreview[]> {
+    await harness.seed({facilities:[{id:1,guid:'facility',accountId:'account'},{id:2,guid:'other-facility',accountId:'account'}]});
+    return [preview(), structuredClone({facilityGuid:'other-facility',predictors:predictors.filter(p=>p.guid==='p4'),predictorData:readings.filter(r=>r.predictorId==='p4'),facilityAnalyses:analyses.filter(a=>a.facilityId==='other-facility')})];
+  }
+  it('atomically deletes across facilities and updates the corresponding analyses after reopening', async () => {
+    const selected=await crossFacilityPreviews();expect(await TestBed.inject(PredictorCommandHandler).deletePredictorsAcrossFacilities(selected,'account')).toBe(3);
+    await harness.reopen();expect((await harness.getAll('predictor')).map(p=>p.guid)).toEqual(['p3','p5']);
+    const saved=await harness.getAll<IdbAnalysisItem & IndexedDbTestRecord>('analysisItems');
+    expect(saved[0].groups[0].predictorVariables.map(p=>p.id)).toEqual(['p3']);expect(saved[1]).toEqual(analyses[1]);
+  });
+  it('rolls back every facility when a later facility has a stale analysis snapshot', async () => {
+    const selected=await crossFacilityPreviews();selected[1]={...selected[1],facilityAnalyses:[]};
+    await expect(TestBed.inject(PredictorCommandHandler).deletePredictorsAcrossFacilities(selected,'account')).rejects.toThrow();
+    await harness.reopen();expect(await harness.getAll('predictor')).toEqual(predictors);expect(await harness.getAll('predictorData')).toEqual(readings);expect(await harness.getAll('analysisItems')).toEqual(analyses);
+  });
+  it('rejects foreign facility ownership and duplicate facility previews', async () => {
+    const selected=await crossFacilityPreviews(),handler=TestBed.inject(PredictorCommandHandler);
+    await expect(handler.deletePredictorsAcrossFacilities([selected[0],selected[0]],'account')).rejects.toThrow();
+    await firstValueFrom(harness.dbService.update('facilities',{id:2,guid:'other-facility',accountId:'foreign'}));
+    await expect(handler.deletePredictorsAcrossFacilities(selected,'account')).rejects.toThrow();expect(await harness.getAll('predictor')).toEqual(predictors);
+  });
   it('atomically deletes mixed predictors, cleans references once and preserves weather siblings after reopening', async () => {
     expect(await TestBed.inject(PredictorCommandHandler).deletePredictorsWithData(preview(), 'account')).toBe(2);
     await harness.reopen(); expect(await harness.getAll('predictor')).toEqual(predictors.slice(2)); expect(await harness.getAll('predictorData')).toEqual(readings.slice(2));

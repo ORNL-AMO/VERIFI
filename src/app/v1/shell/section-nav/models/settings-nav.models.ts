@@ -20,7 +20,7 @@ const FACILITY_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'backup', label: 'Backup', icon: 'fileDownload' }
 ];
 
-const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Portfolio', icon: 'portfolio' };
+const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Convert to portfolio', icon: 'portfolio' };
 
 
 export function settingsNavItems(facilityContext: boolean, singleFacility: boolean): readonly SettingsNavItem[] {

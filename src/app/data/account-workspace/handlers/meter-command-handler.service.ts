@@ -128,17 +128,17 @@ export class MeterCommandHandler {
     });
   }
 
-  async deleteMetersWithData(changes: readonly MeterDeletionChanges[], activeAccountGuid: string): Promise<number> {
+  async deleteMetersAcrossFacilities(changes: readonly MeterDeletionChanges[], activeAccountGuid: string): Promise<number> {
     if (!changes.length) return 0;
-    const facilityGuid = changes[0].meter.facilityId;
     const meterGuids = new Set<string>();
     const meterIds = new Set<number>();
     const readingIds = new Set<number>();
     for (const { meter, meterData } of changes) {
+      const facilityGuid = meter.facilityId;
       this.assertOwnership(meter.accountId, activeAccountGuid, 'meter');
-      if (meter.accountId !== activeAccountGuid || !facilityGuid || meter.facilityId !== facilityGuid
+      if (meter.accountId !== activeAccountGuid || !facilityGuid
         || meter.id === undefined || meterGuids.has(meter.guid) || meterIds.has(meter.id)) {
-        throw new WorkspaceWriteError('validation-failed', 'Select distinct meters from the same facility.');
+        throw new WorkspaceWriteError('validation-failed', 'Select distinct meters from this account.');
       }
       meterGuids.add(meter.guid);
       meterIds.add(meter.id);
@@ -151,17 +151,24 @@ export class MeterCommandHandler {
         readingIds.add(entry.id);
       }
     }
-    return this.transactions.runTransaction(['utilityMeter', 'utilityMeterData'], 'readwrite', async transaction => {
+    return this.transactions.runTransaction(['facilities', 'utilityMeter', 'utilityMeterData'], 'readwrite', async transaction => {
+      for (const guid of new Set(changes.map(change => change.meter.facilityId))) {
+        const owners = await transaction.getAllByIndex<IdbFacility>('facilities', 'guid', guid);
+        if (owners.length !== 1 || owners[0].accountId !== activeAccountGuid) throw new WorkspaceWriteError('validation-failed', 'A selected facility changed or belongs to another account.');
+      }
       // Recheck stored identities and the complete reading set before deleting anything.
       for (const { meter, meterData } of changes) {
+        const facilityGuid = meter.facilityId;
         const stored = await transaction.get<IdbUtilityMeter>('utilityMeter', meter.id!);
-        if (!stored || stored.guid !== meter.guid || stored.accountId !== activeAccountGuid || stored.facilityId !== facilityGuid) {
+        if (!stored || stored.guid !== meter.guid || stored.accountId !== activeAccountGuid || stored.facilityId !== facilityGuid
+          || meterDeletionSnapshot(stored) !== meterDeletionSnapshot(meter)) {
           throw new WorkspaceWriteError('validation-failed', 'The selected meters changed. Refresh and try again.');
         }
         const readings = await transaction.getAllByIndex<IdbUtilityMeterData>('utilityMeterData', 'meterId', meter.guid);
         const expected = new Map(meterData.map(entry => [entry.id, entry.guid]));
         if (readings.length !== meterData.length || readings.some(entry => entry.accountId !== activeAccountGuid
-          || entry.facilityId !== facilityGuid || expected.get(entry.id) !== entry.guid)) {
+          || entry.facilityId !== facilityGuid || expected.get(entry.id) !== entry.guid)
+          || meterDeletionSnapshot([...readings].sort((a,b) => a.guid.localeCompare(b.guid))) !== meterDeletionSnapshot([...meterData].sort((a,b) => a.guid.localeCompare(b.guid)))) {
           throw new WorkspaceWriteError('validation-failed', 'The selected readings changed. Refresh and try again.');
         }
       }
@@ -223,4 +230,9 @@ export class MeterCommandHandler {
       );
     }
   }
+}
+
+function meterDeletionSnapshot(value: unknown): string {
+  return JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
+    ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
 }

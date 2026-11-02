@@ -1,0 +1,73 @@
+@let currentAccount = account();
+
+<section [appBrowseHeader]="portfolioSticky" [browseMarker]="scrollMarker" browseOffsetProperty="--portfolio-sticky-height" class="v1-account-portfolio" [class.v1-account-portfolio--scrolled]="headerGapCollapsed()" aria-labelledby="v1-account-portfolio-title">
+    <span #scrollMarker class="v1-account-portfolio__scroll-marker" aria-hidden="true"></span>
+    <div #portfolioSticky class="v1-data-workbench-sticky v1-account-portfolio__sticky">
+    <header class="v1-section-header v1-account-portfolio__header v1-page-header">
+      <app-page-identity class="v1-account-portfolio__heading" [breadcrumbs]="breadcrumbs()" (breadcrumbSelected)="navigation.changeFacilityScope({ kind: 'all' })" [title]="title()" [icon]="headerIcon()" headingId="v1-account-portfolio-title"/>
+      <div class="v1-account-portfolio__header-actions">
+        @if (isMeters() || isPredictors()) {
+          @let tools = selectionActions();
+          <button type="button" class="v1-btn v1-btn--quiet" [class.v1-account-portfolio__select--active]="tools?.selecting()" [disabled]="!canSelectItems()" [attr.aria-pressed]="tools?.selecting() ?? false" [attr.aria-controls]="tools?.selecting() ? activeContent() + '-selection-actions' : null" (click)="tools?.toggleSelection()"><app-ui-icon [name]="tools?.selecting() ? 'check' : 'square'" [size]="18"/>Select {{ activeContent() }}</button>
+        }
+        <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="navigation.uploadQuery()"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
+        @if (isMeters()) {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreateMeterDrawer()"><app-ui-icon name="add"></app-ui-icon>Add meter</button>
+          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="dataValidationRoute()"><app-ui-icon name="settings"></app-ui-icon>Data Validation</a>
+        }
+        @if (isPredictors()) {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreatePredictorDrawer()"><app-ui-icon name="add"/>Add predictor</button>
+          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="dataValidationRoute()"><app-ui-icon name="settings"/>Data Validation</a>
+        }
+        @if (isFacilities()) {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openCreateFacilityDrawer()"><app-ui-icon name="add"></app-ui-icon>Add facility</button>
+          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'settings', 'portfolio']"><app-ui-icon name="settings"></app-ui-icon>Manage Portfolio</a>
+        }
+      </div>
+    </header>
+
+    </div>
+
+    @if (meterNavigationError()) {
+      <div class="v1-alert v1-alert--warning" role="alert">{{ meterNavigationError() }}</div>
+    }
+    @if (!canWrite()) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <app-ui-icon name="lock"></app-ui-icon>
+        <span>Portfolio actions are unavailable while the workspace is loading or switching.</span>
+      </div>
+    }
+
+    @if (totals().facilities === 0) {
+      <app-data-empty-state
+        icon="facility"
+        title="No facilities"
+        description="Add your first facility to start building this portfolio.">
+        <button
+          type="button"
+          class="v1-btn v1-btn--action"
+          [disabled]="!canWrite() || hasPending()"
+          (click)="openCreateFacilityDrawer()">
+          <app-ui-icon name="add"></app-ui-icon>
+          Add facility
+        </button>
+      </app-data-empty-state>
+    } @else {
+      <router-outlet></router-outlet>
+    }
+
+</section>
+
+<ng-template #createFacilityDrawer>
+  @if (isCreateFacilityDrawerOpen()) {
+    <app-create-portfolio-facility-drawer (created)="openCreatedFacility($event)" (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
+  }
+</ng-template>
+
+<ng-template #createMeterDrawer>
+  @if (isCreateMeterDrawerOpen()) {
+    <app-create-portfolio-meter-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreatedMeter($event)" (closed)="closeCreateMeterDrawer()"></app-create-portfolio-meter-drawer>
+  }
+</ng-template>
+
+<ng-template #createPredictorDrawer>@if (isCreatePredictorDrawerOpen()) { <app-create-portfolio-predictor-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreatedPredictor($event)" (weatherSelected)="openNewWeatherPredictors($event)" (closed)="closeCreatePredictorDrawer()"/> }</ng-template>

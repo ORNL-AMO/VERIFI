@@ -1,8 +1,10 @@
+import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
+import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
+import { accountRoute, facilityRoute } from './workspace-route';
 
 export const accountHomeCanonicalGuard: CanActivateFn = route => {
   const accountGuid = route.parent?.paramMap.get('accountGuid');
@@ -10,7 +12,7 @@ export const accountHomeCanonicalGuard: CanActivateFn = route => {
   if (route.paramMap.get('detail') === 'overview') {
     return true;
   }
-  return inject(Router).createUrlTree(accountHomeCommands(accountGuid));
+  return inject(Router).createUrlTree(accountRoute(accountGuid));
 };
 
 export const facilityHomeCanonicalGuard: CanActivateFn = route => {
@@ -19,61 +21,67 @@ export const facilityHomeCanonicalGuard: CanActivateFn = route => {
   if (route.paramMap.get('detail') === 'overview') {
     return true;
   }
-  return inject(Router).createUrlTree(facilityHomeCommands(facilityGuid));
+  return inject(Router).createUrlTree(facilityRoute(facilityGuid));
 };
 
 export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route, state) => {
   const store = inject(AccountWorkspaceStore);
   const router = inject(Router);
   const account = store.account();
-  const facilities = store.facilities();
-  if (account?.isSingleFacilityCompany !== true || facilities.length !== 1) {
+  const facility = singleFacilityPresentation(account, store.facilities(), store.status() === 'ready');
+  if (!facility) {
     return true;
   }
 
   // Reports and Upload retain account scope even for a single-facility workspace.
-  const section = accountRouteParts(state)[3];
-  if (section === 'reports' || section === 'imports') return true;
+  const parts = accountRouteParts(state);
+  const section = parts[3];
+  if (section === 'reports' || section === 'imports' || (section === 'settings' && parts[4] === 'backup')) return true;
 
   await inject(SingleFacilityAnalysisPairService).ensurePairs();
 
   const commands = singleSiteRedirectCommands(
     state,
-    facilities[0].guid,
+    facility.guid,
     store.accountAnalyses()
   );
-  return router.createUrlTree(commands);
+  return commands ? router.createUrlTree(commands) : true;
 };
 
-export function accountHomeCommands(accountGuid: string): Array<string> {
-  return ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview'];
-}
-
-export function facilityHomeCommands(facilityGuid: string): Array<string> {
-  return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
-}
+/** Single-site Backup is the complete account backup; portfolio facility tools retain their route. */
+export const singleFacilityBackupCanonicalGuard: CanActivateFn = route => {
+  const store = inject(AccountWorkspaceStore);
+  const facility = singleFacilityPresentation(store.account(), store.facilities(), store.status() === 'ready');
+  const facilityGuid = route.pathFromRoot.map(item => item.paramMap.get('facilityGuid')).find(Boolean);
+  return facility && facility.guid === facilityGuid
+    ? inject(Router).createUrlTree(['/v1', 'workspace', 'account', facility.accountId, 'settings', 'backup']) : true;
+};
 
 export function singleSiteRedirectCommands(
   state: RouterStateSnapshot,
   facilityGuid: string,
   accountAnalyses: readonly IdbAccountAnalysisItem[] = []
-): Array<string> {
+): Array<string> | undefined {
   const parts = accountRouteParts(state);
   const section = parts[3];
   const detail = parts[4];
+  const accountGuid = parts[2];
 
   if (section === 'settings') {
+    if (detail === 'backup') return undefined;
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail || 'profile'];
   }
   if (section === 'data') {
     const tab = detail === 'portfolio' ? parts[5] : undefined;
-    const facilityDetail = isCustomDataDetail(detail) ? detail
-      : tab === 'predictors' || tab === 'energy-uses' ? tab : 'meters';
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', facilityDetail];
+    if (detail === 'portfolio' && (tab === 'meters' || tab === 'predictors')) return undefined;
+    if (isCustomDataDetail(detail) || tab === 'energy-uses') {
+      return ['/v1', 'workspace', 'facility', facilityGuid, 'data', tab === 'energy-uses' ? tab : detail];
+    }
+    return ['/v1', 'workspace', 'account', accountGuid, 'data', 'portfolio', 'meters'];
   }
   if (section === 'analysis') {
     if (detail !== 'workbench') {
-      return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
+      return detail === 'dashboard' ? undefined : ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
     }
     const pair = accountAnalyses.find(item => item.guid === parts[5]);
     const facilityAnalysisGuid = pair?.facilityAnalysisItems?.length === 1
@@ -81,7 +89,7 @@ export function singleSiteRedirectCommands(
         ? pair.facilityAnalysisItems[0].analysisItemId
         : undefined;
     if (!facilityAnalysisGuid) {
-      return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
+      return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
     }
     return facilityAnalysisWorkbenchCommands(parts, facilityGuid, facilityAnalysisGuid);
   }

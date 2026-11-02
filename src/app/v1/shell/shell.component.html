@@ -26,6 +26,8 @@
   <app-shell-header></app-shell-header>
   <div
     class="v1-route-stage"
+    [class.v1-route-stage--blocked]="modalPortal.workspaceBlocked()"
+    [attr.inert]="modalPortal.workspaceBlocked() ? '' : null"
     [@v1RouteMotion]="routeMotion()"
     [@.disabled]="prefersReducedMotion()">
     <router-outlet></router-outlet>

@@ -5,7 +5,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { calendarizedMeter, facility, group, meter, monthlyData, reading, account } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { calendarizedMeter, facility, group, meter, monthlyData, reading, account } from '@app/v1/data/meters/facility-meters.testing';
 import { evaluateWorkspaceStatus, isOlderThanThreshold } from './status.evaluator';
 import { StatusRuleCode } from './status.models';
 

@@ -1,5 +1,5 @@
 import { Component, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FinancialForm } from '@shared/settings-forms/settings-form.models';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { Months } from '@shared/form-data/months';
@@ -19,7 +19,7 @@ export class AccountSettingsFinancialComponent extends AccountSettingsDetailBase
 
   readonly facilities = this.workspace.facilities;
   readonly months = Months;
-  form: FormGroup;
+  form: FinancialForm;
 
   constructor() {
     super();

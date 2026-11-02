@@ -2,6 +2,7 @@
 
 @if (currentFacility) {
   <section class="v1-settings-panel v1-backup-settings v1-settings-panel--facility" aria-label="Facility backup and import">
+    @if (!embedded()) {
     <div class="v1-settings-panel__heading">
       <div>
         <p>Backup</p>
@@ -21,6 +22,7 @@
       </span>
     </div>
 
+    }
     <div class="v1-settings-grid v1-settings-grid--2">
       <article class="v1-settings-card">
         <div class="v1-backup-settings__heading">
@@ -68,6 +70,7 @@
 @if (showImportPanel) {
   <app-import-facility-backup-panel
     (closed)="closeImportPanel()"
-    (completed)="openImportedFacility($any($event))">
+    [facilityContext]="currentFacility"
+    (completed)="openImportedFacility($event)">
   </app-import-facility-backup-panel>
 }

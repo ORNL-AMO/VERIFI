@@ -1,9 +1,9 @@
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { FacilityReportType, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/shared/reports/report-inventory.models';
-import { facilityReportTypeLabel } from '@app/v1/facility/reports/facility-report.models';
-import { reportIcon } from '@app/v1/shared/reports/report-icons';
+import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
+import { facilityReportTypeLabel } from '@app/v1/reports/facility/facility-report.models';
+import { reportIcon } from '@app/v1/reports/report-icons';
 
 export interface AnalysisLinkedItem {
   readonly key: string;

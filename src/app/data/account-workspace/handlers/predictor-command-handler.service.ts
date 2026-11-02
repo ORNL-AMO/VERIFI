@@ -1,3 +1,4 @@
+import { IdbFacility } from '@data/models/idbModels/facility';
 /**
  * Persistence-only handler for predictor and predictor-data commands.
  *
@@ -172,48 +173,71 @@ export class PredictorCommandHandler {
   }
 
   async deletePredictorsWithData(preview: PredictorDeletionPreview, activeAccountGuid: string): Promise<number> {
-    if (!preview.predictors.length) return 0;
-    const invalid = () => new WorkspaceWriteError('stale-workspace', 'Predictors, readings, or analyses changed. Review the deletion again.');
-    const guids = new Set<string>(), ids = new Set<number>();
-    for (const predictor of preview.predictors) {
-      this.assertOwnership(predictor.accountId, activeAccountGuid, 'predictor');
-      if (!activeAccountGuid || predictor.accountId !== activeAccountGuid || !preview.facilityGuid || predictor.facilityId !== preview.facilityGuid
-        || (!isStandardPredictor(predictor) && predictor.predictorType !== 'Weather') || !predictor.guid
-        || !Number.isInteger(predictor.id) || predictor.id! <= 0 || guids.has(predictor.guid) || ids.has(predictor.id!)) throw invalid();
-      guids.add(predictor.guid); ids.add(predictor.id!);
+    return this.deletePredictorBatch([preview], activeAccountGuid, false);
+  }
+
+  async deletePredictorsAcrossFacilities(previews: readonly PredictorDeletionPreview[], activeAccountGuid: string): Promise<number> {
+    return this.deletePredictorBatch(previews, activeAccountGuid, true);
+  }
+
+  private async deletePredictorBatch(previews: readonly PredictorDeletionPreview[], activeAccountGuid: string, acrossFacilities: boolean): Promise<number> {
+    const active = previews.filter(preview => preview.predictors.length);
+    if (!active.length) return 0;
+    if (new Set(active.map(preview => preview.facilityGuid)).size !== active.length
+      || new Set(active.flatMap(preview => preview.predictors.map(item => item.guid))).size !== active.reduce((n,p) => n + p.predictors.length, 0)) {
+      throw new WorkspaceWriteError('validation-failed', 'Review distinct predictors from facilities in this account.');
     }
-    const readingIds = new Set<number>();
-    for (const reading of preview.predictorData) {
-      this.assertOwnership(reading.accountId, activeAccountGuid, 'predictor data');
-      if (reading.accountId !== activeAccountGuid || !reading.guid || reading.facilityId !== preview.facilityGuid || !guids.has(reading.predictorId)
-        || !Number.isInteger(reading.id) || reading.id! <= 0 || readingIds.has(reading.id!)) throw invalid();
-      readingIds.add(reading.id!);
-    }
-    this.assertPersistableAnalyses(preview.facilityAnalyses, activeAccountGuid);
-    this.assertAnalysisFacility(preview.facilityAnalyses, preview.facilityGuid);
-    if (preview.facilityAnalyses.some(item => item.accountId !== activeAccountGuid || !Number.isInteger(item.id) || item.id! <= 0)) throw invalid();
-    const ordered = <T extends { guid: string }>(records: readonly T[]) => [...records].sort((a, b) => a.guid.localeCompare(b.guid));
-    return this.transactions.runTransaction(['predictor', 'predictorData', 'analysisItems'], 'readwrite', async transaction => {
+    for (const preview of active) {
+      const invalid = () => new WorkspaceWriteError('stale-workspace', 'Predictors, readings, or analyses changed. Review the deletion again.');
+      const guids = new Set<string>(), ids = new Set<number>();
       for (const predictor of preview.predictors) {
-        const stored = await transaction.get<IdbPredictor>('predictor', predictor.id!);
-        if (!stored || predictorDeletionSnapshot(stored) !== predictorDeletionSnapshot(predictor)) throw invalid();
-        const readings = await transaction.getAllByIndex<IdbPredictorData>('predictorData', 'predictorId', predictor.guid);
-        const expected = preview.predictorData.filter(reading => reading.predictorId === predictor.guid);
-        if (predictorDeletionSnapshot(ordered(readings)) !== predictorDeletionSnapshot(ordered(expected))) throw invalid();
+        this.assertOwnership(predictor.accountId, activeAccountGuid, 'predictor');
+        if (!activeAccountGuid || predictor.accountId !== activeAccountGuid || !preview.facilityGuid || predictor.facilityId !== preview.facilityGuid
+          || (!isStandardPredictor(predictor) && predictor.predictorType !== 'Weather') || !predictor.guid
+          || !Number.isInteger(predictor.id) || predictor.id! <= 0 || guids.has(predictor.guid) || ids.has(predictor.id!)) throw invalid();
+        guids.add(predictor.guid); ids.add(predictor.id!);
       }
-      const analyses = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'facilityId', preview.facilityGuid);
-      if (analyses.some(analysis => analysis.accountId !== activeAccountGuid)
-        || predictorDeletionSnapshot(ordered(analyses)) !== predictorDeletionSnapshot(ordered(preview.facilityAnalyses))) throw invalid();
-      // Clean the complete GUID set once so edits for different predictors cannot overwrite one another.
-      const updated = buildFacilityAnalysesWithoutPredictors(analyses, guids);
-      for (const reading of preview.predictorData) await transaction.deleteByKey('predictorData', reading.id!);
-      for (const predictor of preview.predictors) await transaction.deleteByKey('predictor', predictor.id!);
-      for (let index = 0; index < analyses.length; index++) {
-        if (predictorDeletionSnapshot(analyses[index]) !== predictorDeletionSnapshot(updated[index])) {
-          await transaction.put('analysisItems', { ...updated[index], modifiedDate: new Date() });
+      const readingIds = new Set<number>();
+      for (const reading of preview.predictorData) {
+        this.assertOwnership(reading.accountId, activeAccountGuid, 'predictor data');
+        if (reading.accountId !== activeAccountGuid || !reading.guid || reading.facilityId !== preview.facilityGuid || !guids.has(reading.predictorId)
+          || !Number.isInteger(reading.id) || reading.id! <= 0 || readingIds.has(reading.id!)) throw invalid();
+        readingIds.add(reading.id!);
+      }
+      this.assertPersistableAnalyses(preview.facilityAnalyses, activeAccountGuid);
+      this.assertAnalysisFacility(preview.facilityAnalyses, preview.facilityGuid);
+      if (preview.facilityAnalyses.some(item => item.accountId !== activeAccountGuid || !Number.isInteger(item.id) || item.id! <= 0)) throw invalid();
+    }
+    const invalid = () => new WorkspaceWriteError('stale-workspace', 'Predictors, readings, or analyses changed. Review the deletion again.');
+    const ordered = <T extends { guid: string }>(records: readonly T[]) => [...records].sort((a,b) => a.guid.localeCompare(b.guid));
+    return this.transactions.runTransaction(acrossFacilities ? ['facilities', 'predictor', 'predictorData', 'analysisItems'] : ['predictor', 'predictorData', 'analysisItems'], 'readwrite', async transaction => {
+      if (acrossFacilities) for (const preview of active) {
+        const owners = await transaction.getAllByIndex<IdbFacility>('facilities', 'guid', preview.facilityGuid);
+        if (owners.length !== 1 || owners[0].accountId !== activeAccountGuid) throw invalid();
+      }
+      for (const preview of active) {
+        const guids = new Set(preview.predictors.map(item => item.guid));
+        for (const predictor of preview.predictors) {
+          const stored = await transaction.get<IdbPredictor>('predictor', predictor.id!);
+          if (!stored || predictorDeletionSnapshot(stored) !== predictorDeletionSnapshot(predictor)) throw invalid();
+          const readings = await transaction.getAllByIndex<IdbPredictorData>('predictorData', 'predictorId', predictor.guid);
+          const expected = preview.predictorData.filter(reading => reading.predictorId === predictor.guid);
+          if (predictorDeletionSnapshot(ordered(readings)) !== predictorDeletionSnapshot(ordered(expected))) throw invalid();
+        }
+        const analyses = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'facilityId', preview.facilityGuid);
+        if (analyses.some(analysis => analysis.accountId !== activeAccountGuid)
+          || predictorDeletionSnapshot(ordered(analyses)) !== predictorDeletionSnapshot(ordered(preview.facilityAnalyses))) throw invalid();
+        // Clean the complete GUID set once so edits for different predictors cannot overwrite one another.
+        const updated = buildFacilityAnalysesWithoutPredictors(analyses, guids);
+        for (const reading of preview.predictorData) await transaction.deleteByKey('predictorData', reading.id!);
+        for (const predictor of preview.predictors) await transaction.deleteByKey('predictor', predictor.id!);
+        for (let index = 0; index < analyses.length; index++) {
+          if (predictorDeletionSnapshot(analyses[index]) !== predictorDeletionSnapshot(updated[index])) {
+            await transaction.put('analysisItems', { ...updated[index], modifiedDate: new Date() });
+          }
         }
       }
-      return preview.predictors.length;
+      return active.reduce((count, preview) => count + preview.predictors.length, 0);
     });
   }
 

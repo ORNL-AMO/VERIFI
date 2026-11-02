@@ -1,7 +1,7 @@
-import { accountReportSnapshot } from '@app/v1/account/reports/testing/account-report-test-fixtures';
-import { reportFixture } from '@app/v1/facility/reports/testing/report-test-fixtures';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/shared/reports/report-inventory.models';
-import { FACILITY_REPORT_TYPES } from '@app/v1/facility/reports/facility-report.models';
+import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
+import { reportFixture } from '@app/v1/reports/facility/testing/report-test-fixtures';
+import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
+import { FACILITY_REPORT_TYPES } from '@app/v1/reports/facility/facility-report.models';
 import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { StatusRuleCode, makeFinding } from './status.models';

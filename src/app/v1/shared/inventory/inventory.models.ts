@@ -1,10 +1,21 @@
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { StatusEvaluationState } from '@app/v1/status/status.models';
+import type { Params } from '@angular/router';
 
 export type InventoryDetailLevel = 'simple' | 'summary' | 'detailed';
 export interface InventoryTileFact { readonly label: string; readonly value: string; }
-export interface InventoryTileLink { readonly label: string; readonly route: readonly string[]; }
+export interface InventoryTileLink { readonly label: string; readonly route: readonly string[]; readonly queryParams?: Params; readonly facilityInventory?: FacilityInventoryDestination; }
+export interface InventoryFacilityLink extends InventoryTileLink {
+  readonly facilityGuid: string;
+  readonly queryParams?: Params;
+}
+export interface FacilityInventoryDestination {
+  readonly facilityGuid: string;
+  readonly resource: 'meters' | 'predictors';
+}
 export interface InventoryResourceSummary {
+  readonly facilityGuid: string;
+  readonly queryParams?: Params;
   readonly kind: 'meters' | 'predictors';
   readonly label: string;
   readonly icon: IconName;
@@ -61,7 +72,9 @@ export interface InventoryTile {
   readonly name: string;
   readonly icon: IconName;
   readonly route: readonly string[];
-  readonly owner?: InventoryTileLink;
+  readonly queryParams?: Params;
+  readonly facilityInventory?: FacilityInventoryDestination;
+  readonly owner?: InventoryFacilityLink;
   readonly analysisSnapshot?: InventoryAnalysisSnapshot;
   readonly reportSnapshot?: InventoryReportSnapshot;
   readonly location?: string;
@@ -98,6 +111,7 @@ export function isInventoryDetailLevel(value: unknown): value is InventoryDetail
 }
 
 export interface InventoryReportSnapshot {
+  readonly formatLabel?: string;
   readonly scope: 'account' | 'facility';
   readonly typeLabel: string;
   /** Defaults to pending when unspecified. */
@@ -107,3 +121,5 @@ export interface InventoryReportSnapshot {
   readonly scopeLabel: string;
   readonly findings: readonly (Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity' | 'action'> & { readonly unavailableReason?: string })[];
 }
+
+export interface InventoryView { readonly page: number; readonly detail?: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; }

@@ -5,8 +5,8 @@ import { FacilitySnapshotComponent } from './facility-snapshot.component';
 
 const snapshot: InventoryFacilitySnapshot = {
   evaluation:'ready', address:'100 Industrial Drive, 00501', remainingFindings:3,
-  resources:[{kind:'meters',label:'Meters',icon:'meter',route:['/facility','meters'],total:12,errorCount:1,warningCount:1,validCount:10},
-    {kind:'predictors',label:'Predictors',icon:'predictor',route:['/facility','predictors'],total:0,errorCount:0,warningCount:0,validCount:0}],
+  resources:[{kind:'meters',facilityGuid:'facility-a',queryParams:{facility:'facility-a'},label:'Meters',icon:'meter',route:['/facility','meters'],total:12,errorCount:1,warningCount:1,validCount:10},
+    {kind:'predictors',facilityGuid:'facility-a',queryParams:{facility:'facility-a'},label:'Predictors',icon:'predictor',route:['/facility','predictors'],total:0,errorCount:0,warningCount:0,validCount:0}],
   findings:[{id:'issue',name:'Boiler gas',title:'Add meter readings',description:'No readings have been entered.',severity:'error',action:{label:'Review readings',route:['/meter','readings']}}]
 };
 function setup(detailed = false) {
@@ -16,14 +16,25 @@ function setup(detailed = false) {
   fixture.detectChanges(); return fixture;
 }
 describe('facility snapshot detail presentation', () => {
+  it('preserves scope in finding links and uses the guarded inventory request on activation', () => {
+    const fixture = setup(true), requested = vi.fn();
+    fixture.componentInstance.facilityInventoryRequested.subscribe(requested);
+    fixture.componentRef.setInput('snapshot', { ...snapshot, findings: [{ ...snapshot.findings[0], action: {
+      label: 'Open predictors', route: ['/account', 'predictors'], queryParams: { facility: 'facility-a' },
+      facilityInventory: { facilityGuid: 'facility-a', resource: 'predictors' }
+    } }] }); fixture.detectChanges();
+    const link = fixture.nativeElement.querySelector('.facility-snapshot__attention a') as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('/account/predictors?facility=facility-a');
+    link.click(); expect(requested).toHaveBeenCalledExactlyOnceWith({ facilityGuid: 'facility-a', resource: 'predictors' });
+  });
   it('shows compact linked inventory in Summary and adds distributions and targeted findings in Detailed', () => {
-    const fixture=setup(), root=fixture.nativeElement as HTMLElement, navigate=vi.fn();
-    fixture.componentInstance.navigationRequested.subscribe(navigate);
+    const fixture=setup(), root=fixture.nativeElement as HTMLElement, navigate=vi.fn(), inventory=vi.fn();
+    fixture.componentInstance.navigationRequested.subscribe(navigate); fixture.componentInstance.facilityInventoryRequested.subscribe(inventory);
     const link=root.querySelector<HTMLAnchorElement>('.facility-snapshot__resource')!;
-    expect(link.getAttribute('href')).toBe('/facility/meters');
+    expect(link.getAttribute('href')).toBe('/facility/meters?facility=facility-a');
     expect(link.textContent).toContain('12'); expect(root.textContent).not.toContain('100 Industrial');
     expect(root.querySelector('.facility-snapshot__attention')).toBeNull();
-    link.click(); expect(navigate).toHaveBeenCalledWith(['/facility','meters']);
+    link.click(); expect(inventory).toHaveBeenCalledExactlyOnceWith({facilityGuid:'facility-a',resource:'meters'}); expect(navigate).not.toHaveBeenCalled();
     fixture.componentRef.setInput('detailed',true); fixture.detectChanges();
     expect(root.textContent).toContain('2 need attention'); expect(root.textContent).toContain('No predictors yet');
     expect(root.textContent).toContain('Boiler gas'); expect(root.textContent).not.toContain('100 Industrial Drive');

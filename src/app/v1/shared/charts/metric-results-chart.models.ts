@@ -22,4 +22,6 @@ export interface MeterResultsChartRow {
   readonly periodLabel: string;
   readonly sortValue: number;
   readonly values: Readonly<Record<string, number | null>>;
+  /** Metrics with no observation at this alignment slot; omit the slot rather than drawing a gap. */
+  readonly paddingMetricIds?: readonly string[];
 }

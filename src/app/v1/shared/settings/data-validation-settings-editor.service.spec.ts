@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { configureDataValidationSettingsTest } from './data-validation-settings.testing';
 import { DataValidationSettingsEditor } from './data-validation-settings-editor.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { vi } from 'vitest';
 import { applyDataValidationSettings, DataValidationSettingsGroup } from '@shared/settings-forms/data-validation-settings';
 

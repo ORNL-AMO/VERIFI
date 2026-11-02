@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { analysisInventoryStatusLabel } from '@app/v1/shared/analysis-inventory/analysis-inventory.models';
+import { analysisInventoryStatusLabel } from '@app/v1/analysis/inventory/analysis-inventory.models';
 import { AnalysisStatusNotesComponent } from '../status-notes/analysis-status-notes.component';
 
 @Component({

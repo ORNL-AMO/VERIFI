@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterStateSnapshot } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
-import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
+import { HasUnsavedChanges } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ImportSessionService } from '../import-session.service';

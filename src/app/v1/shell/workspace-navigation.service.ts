@@ -1,149 +1,31 @@
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Params, Router } from '@angular/router';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { IdbAccount } from '@data/models/idbModels/account';
-import { IdbFacility } from '@data/models/idbModels/facility';
-import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
-import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
-import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
-import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import type { ReportStageId } from '@app/v1/shared/reports/report-workbench.models';
-
-export type ContextMode = 'account' | 'facility';
-export type WorkspaceRouteMotion = NavigationMotion;
-export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
-export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
-export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
-export type FacilityPredictorRouteTab = 'settings' | 'readings' | 'quality';
-export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
-export type FacilityAnalysisRouteTab = 'setup' | 'used-by';
-export type FacilityAnalysisGroupRouteTab = 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
-export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
-export type AccountAnalysisRouteTab = 'setup' | 'select-items' | 'used-by';
-export type AccountAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details' | 'facility-contributions';
-export type AccountAnalysisStageScope = 'setup' | 'select-items' | 'results' | 'used-by';
-export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses';
-export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
-export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
-export type FacilityAnalysisStageScope = 'analysis' | 'group' | 'facility' | 'used-by';
-
-export interface SectionDefinition {
-  readonly id: SectionId;
-  readonly label: string;
-  readonly shortLabel: string;
-  readonly icon: IconName;
-  readonly enabled: boolean;
-}
-
-export interface PanelTab {
-  readonly id: PanelTabId;
-  readonly label: string;
-  readonly icon: IconName;
-}
-
-export interface PanelContent {
-  readonly help: ReadonlyArray<string>;
-  readonly todos: ReadonlyArray<StatusItem>;
-  readonly discardedWarnings: ReadonlyArray<StatusItem>;
-  readonly results: ReadonlyArray<{ label: string; value: string; tone: StatusTone }>;
-  readonly details: ReadonlyArray<{ label: string; value: string }>;
-}
-
-export type SingleSiteWorkspaceState = 'portfolio' | 'valid' | 'missing-facility' | 'multiple-facilities';
-
-export interface AccountDropdownOption {
-  readonly guid: string;
-  readonly name: string;
-  readonly descriptor: string;
-  readonly active: boolean;
-}
-
-export interface RouteState {
-  readonly portfolioTab?: AccountPortfolioTab;
-  readonly view: 'welcome' | 'workspace';
-  readonly contextMode: ContextMode;
-  readonly accountGuid?: string;
-  readonly facilityGuid?: string;
-  readonly meterGuid?: string;
-  readonly meterGroupGuid?: string;
-  readonly predictorGuid?: string;
-  readonly weatherPredictorGroupKey?: string;
-  readonly reportGuid?: string;
-  readonly reportStage?: 'setup' | 'data-checks' | 'report';
-  readonly analysisGuid?: string;
-  readonly analysisGroupGuid?: string;
-  readonly analysisStageScope?: FacilityAnalysisStageScope;
-  readonly accountAnalysisStageScope?: AccountAnalysisStageScope;
-  readonly accountAnalysisResultTab?: AccountAnalysisResultRouteTab;
-  readonly importFileId?: string;
-  readonly importStep?: string;
-  readonly section: SectionId;
-  readonly detail: string;
-}
-
-export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
-  { id: 'home', label: 'Home', shortLabel: 'Home', icon: 'home', enabled: true },
-  { id: 'data', label: 'Data', shortLabel: 'Data', icon: 'database', enabled: false },
-  { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'dataVisualization', enabled: false },
-  { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'analysis', enabled: false },
-  { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'reports', enabled: false },
-  { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'settings', enabled: true },
-  { id: 'imports', label: 'Upload', shortLabel: 'Upload', icon: 'uploadData', enabled: true }
-];
-
-export const SUPPORT_PANEL_TABS: ReadonlyArray<PanelTab> = [
-  { id: 'help', label: 'Help', icon: 'help' },
-  { id: 'todos', label: 'Todos', icon: 'checklist' },
-  { id: 'results', label: 'Results', icon: 'meter' },
-  { id: 'details', label: 'Details', icon: 'table' }
-];
+import { isWorkspaceDataDestination } from '@app/v1/shared/navigation/workspace-data-destination';
+import { FacilityScope, ContextMode, SectionId, facilityScopeQuery } from '@app/v1/routing/workspace-route';
+import * as routes from '@app/v1/routing/workspace-route';
+import { WorkspaceContextService } from './workspace-context.service';
+import { WORKSPACE_SECTIONS } from './primary-rail/workspace-sections';
+import { PanelTabId, SUPPORT_PANEL_TABS, buildWorkspacePanelContent } from './support-panel/workspace-support-panel.view';
 
 const DEFAULT_PANEL_TAB: PanelTabId = 'help';
-const VALID_SECTION_IDS: ReadonlyArray<SectionId> = ['home', 'data', 'visualization', 'analysis', 'reports', 'settings', 'imports'];
-const DEFAULT_DETAILS: Record<SectionId, string> = {
-  home: 'overview',
-  data: 'portfolio',
-  visualization: 'time-series',
-  analysis: 'dashboard',
-  reports: 'dashboard',
-  settings: 'profile',
-  imports: 'upload'
-};
-const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
-  ...DEFAULT_DETAILS,
-  data: 'meters'
-};
 const ACCOUNT_DATA_DETAILS = new Set(['portfolio', 'custom-grid-factors', 'custom-fuels', 'custom-gwps']);
-const FACILITY_DATA_DETAILS = new Set([
-  'meters',
-  'meter-grouping',
-  'predictors',
-  'energy-uses',
-  'custom-grid-factors',
-  'custom-fuels',
-  'custom-gwps'
-]);
 const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'portfolio', 'delete']);
 const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'delete']);
 
+/** Guarded navigation commands and the stable shell-facing facade. */
 @Injectable({ providedIn: 'root' })
 export class WorkspaceNavigationService {
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly lifecycle = inject(ApplicationLifecycleService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly status = inject(WorkspaceStatusService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
-  private readonly browseState = inject(BrowseStateService);
-  private readonly currentUrl = signal(this.router.url);
-  private readonly previousUrl = signal(this.router.url);
+  private readonly context = inject(WorkspaceContextService);
+  private readonly currentUrl = this.context.currentUrl;
   private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
 
   readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
@@ -156,55 +38,76 @@ export class WorkspaceNavigationService {
   readonly isSupportPanelOpen = signal(true);
   readonly activePanelTab = this.activePanelTabState.asReadonly();
 
-  readonly routeState = computed(() => parseWorkspaceRoute(this.currentUrl()));
-  readonly routeMotion = computed(() => this.resolveRouteMotion());
-  readonly routeMotionKey = this.currentUrl.asReadonly();
-  readonly isWorkspaceRoute = computed(() => this.routeState().view === 'workspace');
-  readonly contextMode = computed(() => this.routeState().contextMode);
-  readonly activeSection = computed(() => this.routeState().section);
-  readonly activeDetail = computed(() => this.routeState().detail);
-  readonly activePortfolioTab = computed(() => this.routeState().portfolioTab);
-  readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
-  readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
-  readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
-  readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
-  readonly activeReportGuid = computed(() => this.routeState().reportGuid);
-  readonly activeAnalysisGuid = computed(() => this.routeState().analysisGuid);
-  readonly activeAnalysisGroupGuid = computed(() => this.routeState().analysisGroupGuid);
-  readonly activeAnalysisStageScope = computed(() => this.routeState().analysisStageScope);
-  readonly activeAccountAnalysisStageScope = computed(() => this.routeState().accountAnalysisStageScope);
-  readonly activeAccountAnalysisResultTab = computed(() => this.routeState().accountAnalysisResultTab);
-  readonly activeImportFileId = computed(() => this.routeState().importFileId);
-  readonly activeImportStep = computed(() => this.routeState().importStep);
-  readonly account = computed(() => this.resolveAccount());
-  readonly facilities = computed(() => this.workspace.facilities());
-  readonly facility = computed(() => this.resolveFacility());
-  readonly singleSiteWorkspaceState = computed(() => this.resolveSingleSiteWorkspaceState());
-  readonly isSingleSiteWorkspace = computed(() => this.singleSiteWorkspaceState() === 'valid');
-  readonly hasSingleSiteRecovery = computed(() => {
-    const state = this.singleSiteWorkspaceState();
-    return state === 'missing-facility' || state === 'multiple-facilities';
-  });
-  readonly accountOptions = computed(() => this.buildAccountOptions());
-  readonly panelContent = computed(() => this.buildPanelContent());
+  readonly routeState = this.context.routeState;
+  readonly routeMotion = this.context.routeMotion;
+  readonly routeMotionKey = this.context.routeMotionKey;
+  readonly isWorkspaceRoute = this.context.isWorkspaceRoute;
+  readonly contextMode = this.context.contextMode;
+  readonly activeSection = this.context.activeSection;
+  readonly activeDetail = this.context.activeDetail;
+  readonly activePortfolioTab = this.context.activePortfolioTab;
+  readonly activeMeterGuid = this.context.activeMeterGuid;
+  readonly activeMeterGroupGuid = this.context.activeMeterGroupGuid;
+  readonly activePredictorGuid = this.context.activePredictorGuid;
+  readonly activeWeatherPredictorGroupKey = this.context.activeWeatherPredictorGroupKey;
+  readonly activeReportGuid = this.context.activeReportGuid;
+  readonly activeAnalysisGuid = this.context.activeAnalysisGuid;
+  readonly activeAnalysisGroupGuid = this.context.activeAnalysisGroupGuid;
+  readonly activeAnalysisStageScope = this.context.activeAnalysisStageScope;
+  readonly activeAccountAnalysisStageScope = this.context.activeAccountAnalysisStageScope;
+  readonly activeAccountAnalysisResultTab = this.context.activeAccountAnalysisResultTab;
+  readonly activeImportFileId = this.context.activeImportFileId;
+  readonly activeImportStep = this.context.activeImportStep;
+  readonly account = this.context.account;
+  readonly facilities = this.context.facilities;
+  readonly facility = this.context.facility;
+  readonly singleSiteWorkspaceState = this.context.singleSiteWorkspaceState;
+  readonly singleFacilityContext = this.context.singleFacilityContext;
+  readonly isSingleSiteWorkspace = this.context.isSingleSiteWorkspace;
+  readonly hasSingleSiteRecovery = this.context.hasSingleSiteRecovery;
+  readonly scopeAvailability = this.context.scopeAvailability;
+  readonly inventoryScope = this.context.inventoryScope;
+  readonly inventoryFacilityGuid = this.context.inventoryFacilityGuid;
+  readonly headerScope = this.context.headerScope;
+  readonly headerFacility = this.context.headerFacility;
+  readonly inventoryScopeQuery = this.context.inventoryScopeQuery;
+  readonly effectiveScope = this.context.effectiveScope;
+  readonly contextFacility = this.context.contextFacility;
+  readonly contextMeters = this.context.contextMeters;
+  readonly contextMeterGroups = this.context.contextMeterGroups;
+  readonly contextPredictors = this.context.contextPredictors;
+  readonly contextPredictorData = this.context.contextPredictorData;
+  readonly contextAnalyses = this.context.contextAnalyses;
+  readonly contextReports = this.context.contextReports;
+  readonly contextCounts = this.context.contextCounts;
+
+  readonly scopeChangePending = signal(false);
+  readonly scopeNotice = signal('');
+  readonly uploadQuery = computed(() => ({ ...(isWorkspaceDataDestination(this.routeState()) ? { returnUrl: this.currentUrl() } : {}),
+    ...(this.contextFacility() ? { facilityGuid: this.contextFacility()!.guid } : {}) }));
+  readonly panelContent = computed(() => buildWorkspacePanelContent({
+    account: this.account(), facility: this.contextFacility(), singleFacility: this.singleFacilityContext(),
+    counts: this.contextCounts(), route: this.routeState(), activePanelTab: this.activePanelTab(),
+    accountTodos: this.status.accountTodos(), discardedItems: this.status.discardedItems()
+  }));
 
   constructor() {
-    this.router.events
-      .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(event => {
-        const previous = parseWorkspaceRoute(this.currentUrl());
-        const next = parseWorkspaceRoute(event.urlAfterRedirects);
-        if (previous.accountGuid && previous.section === 'data' && next.contextMode === 'facility'
-          && (previous.portfolioTab === 'facilities' || previous.portfolioTab === 'meters' || previous.portfolioTab === 'predictors')
-          && this.workspace.facilities().some(facility => facility.guid === next.facilityGuid && facility.accountId === previous.accountGuid)) {
-          this.browseState.setOrigin(previous.accountGuid, previous.portfolioTab);
-        }
-        this.previousUrl.set(this.currentUrl());
-        this.currentUrl.set(event.urlAfterRedirects);
+    effect(() => {
+      const state = this.routeState();
+      const ready = this.workspace.status() === 'ready';
+      const accountGuid = this.workspace.account()?.guid;
+      const facilities = this.facilities();
+      const url = this.currentUrl();
+      if (!ready || state.accountGuid !== accountGuid || !this.isAccountInventory(state)) return;
+      const tree = this.router.parseUrl(url);
+      const guid = tree.queryParamMap.get('facility');
+      if (guid === null || facilities.some(facility => facility.guid === guid && facility.accountId === accountGuid)) return;
+      untracked(() => {
+        this.scopeNotice.set('The selected facility is unavailable. Showing All facilities.');
+        delete tree.queryParams['facility'];
+        void this.router.navigateByUrl(tree, { replaceUrl: true }).catch(() => this.contextNavigationError.set('The facility filter could not be updated. Please try again.'));
       });
+    });
   }
 
   async openAccount(accountGuid: string): Promise<void> {
@@ -227,7 +130,6 @@ export class WorkspaceNavigationService {
     const account = this.workspace.account();
     const facilities = this.workspace.facilities();
     if (account?.isSingleFacilityCompany === true && facilities.length === 1) {
-      this.workspaceService.selectFacility(facilities[0].guid);
       await this.router.navigate(this.facilityRoute(facilities[0].guid));
       return;
     }
@@ -236,8 +138,7 @@ export class WorkspaceNavigationService {
   }
 
   async openFacility(facilityGuid: string): Promise<void> {
-    this.workspaceService.selectFacility(facilityGuid);
-    await this.router.navigate(this.facilityRoute(facilityGuid));
+    await this.navigateScopeDestination(this.facilityRoute(facilityGuid));
   }
 
   async openAccountData(accountGuid: string): Promise<void> {
@@ -248,56 +149,112 @@ export class WorkspaceNavigationService {
     }
   }
 
-  showWelcome(): void {
-    void this.router.navigate(['/v1']);
+  async showWelcome(): Promise<void> {
+    await this.navigateScopeDestination(['/v1']);
   }
 
-  setContext(contextMode: ContextMode): void {
+  readonly isAccountInventory = routes.isAccountInventory;
+
+  async changeFacilityScope(scope: FacilityScope, dataInventory?: 'meters' | 'predictors'): Promise<boolean> {
+    if (this.scopeChangePending() || this.workspace.status() !== 'ready' || this.workspace.hasPending()) return false;
+    const account = this.workspace.account();
+    if (!account || this.isSingleSiteWorkspace()) return false;
+    if (scope.kind === 'facility' && !this.facilities().some(item => item.guid === scope.facilityGuid && item.accountId === account.guid)) return false;
+    const state = this.routeState();
+    const facilityGuid = scope.kind === 'facility' ? scope.facilityGuid : undefined;
+    let route: string[];
+    let query = facilityScopeQuery(scope);
+    if (dataInventory) {
+      route = this.accountPortfolioRoute(account.guid, dataInventory);
+    } else if (state.section === 'settings') {
+      const detail = facilityGuid ? FACILITY_SETTINGS_DETAILS.has(state.detail) ? state.detail : 'profile'
+        : ACCOUNT_SETTINGS_DETAILS.has(state.detail) ? state.detail : 'profile';
+      route = facilityGuid ? this.facilitySettingsRoute(facilityGuid, detail) : this.accountSettingsRoute(account.guid, detail);
+      query = {};
+    } else if (state.section === 'data' && state.detail === 'meter-grouping' && !state.meterGroupGuid && facilityGuid) {
+      route = this.facilityDataToolRoute(facilityGuid, 'meter-grouping'); query = {};
+    } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
+    else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
+    else if (state.portfolioTab === 'facilities' && facilityGuid) route = this.accountPortfolioRoute(account.guid, 'meters');
+    else {
+      const tab = state.portfolioTab ?? (state.detail === 'predictors' ? 'predictors'
+        : state.detail === 'meters' || state.detail === 'meter-grouping' ? 'meters' : 'facilities');
+      route = this.accountPortfolioRoute(account.guid, tab);
+    }
+    return this.navigateScopeDestination(route, query);
+  }
+
+  private async navigateScopeDestination(route: string[], queryParams?: Params): Promise<boolean> {
+    if (this.scopeChangePending() || this.workspace.hasPending()) return false;
+    this.scopeChangePending.set(true);
+    this.contextNavigationError.set('');
+    try {
+      // Report leave guards own their save/discard UI; other editors flush before their ordinary leave guard.
+      if (!(this.activeSection() === 'reports' && this.activeDetail() === 'workbench')
+        && !await this.unsavedChanges.flushPendingChanges()) return false;
+      // Query-only transitions can reuse the component without running its leave guard.
+      if (this.activeDetail() !== 'workbench' && !this.activeMeterGuid() && !this.activePredictorGuid()
+        && !this.activeWeatherPredictorGroupKey() && !this.activeMeterGroupGuid()) {
+        if (!this.unsavedChanges.confirmDiscard()) return false;
+      }
+      const opened = await (queryParams ? this.router.navigate(route, { queryParams }) : this.router.navigate(route));
+      if (opened) this.scopeNotice.set('');
+      return opened;
+    } catch {
+      this.contextNavigationError.set('The destination could not be opened. Your current context has been retained.');
+      return false;
+    } finally { this.scopeChangePending.set(false); }
+  }
+
+  async setContext(contextMode: ContextMode): Promise<boolean> {
     const state = this.routeState();
     if (contextMode === 'facility') {
+      if (this.hasSingleSiteRecovery() && !this.facilities().some(facility => facility.guid === state.facilityGuid)) return false;
       const facilityGuid = this.facility()?.guid || this.facilities()[0]?.guid;
       if (facilityGuid) {
-        void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
+        const link = this.facilityDestination(facilityGuid, state.section, state.detail);
+        return this.navigateScopeDestination(link.route, link.queryParams);
       }
-      return;
+      return false;
     }
     const accountGuid = this.account()?.guid || state.accountGuid;
     if (accountGuid) {
-      void this.router.navigate(this.accountRouteForSection(accountGuid, state.section, state.detail));
+      return this.navigateScopeDestination(this.accountRouteForSection(accountGuid, state.section, state.detail));
     }
+    return false;
   }
 
-  setFacility(facilityGuid: string): void {
-    if (!this.facilities().some(facility => facility.guid === facilityGuid)) return;
-    const state = this.routeState();
-    const reportWorkbench = state.section === 'reports' && state.detail === 'workbench';
-    // Report guards flush or retain the draft before readiness guards select another facility.
-    if (!reportWorkbench && !this.unsavedChanges.confirmDiscard()) return;
-    this.contextNavigationError.set('');
-    const route = reportWorkbench ? this.facilityReportsRoute(facilityGuid)
-      : this.facilityRouteForSection(facilityGuid, state.section, state.contextMode === 'account' && state.portfolioTab === 'predictors' ? 'predictors' : state.detail);
-    void this.router.navigate(route)
-      .catch(() => this.contextNavigationError.set('The facility could not be opened. Please try again.'));
+  async setFacility(facilityGuid: string): Promise<boolean> {
+    if (!this.isSingleSiteWorkspace()) {
+      return this.changeFacilityScope({ kind: 'facility', facilityGuid });
+    }
+    if (this.facilities().some(facility => facility.guid === facilityGuid)) {
+      const state = this.routeState();
+      const link = this.facilityDestination(facilityGuid, state.section, state.detail);
+      return this.navigateScopeDestination(link.route, link.queryParams);
+    }
+    return false;
   }
 
   accountDataReturnRoute(accountGuid: string): string[] {
-    return this.accountPortfolioRoute(accountGuid, this.browseState.origin(accountGuid));
+    const detail = this.activeDetail();
+    return this.accountPortfolioRoute(accountGuid, detail === 'predictors' ? 'predictors'
+      : detail === 'meters' || detail === 'meter-grouping' ? 'meters' : 'facilities');
+  }
+
+  facilityInventoryLink(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): { route: string[]; queryParams?: Params } {
+    const accountGuid = this.workspace.account()?.guid ?? '';
+    return { route: resource === 'analysis' ? this.accountAnalysisRoute(accountGuid)
+      : resource === 'reports' ? this.accountReportsRoute(accountGuid) : this.accountPortfolioRoute(accountGuid, resource),
+      queryParams: this.isSingleSiteWorkspace() ? {} : { facility: facilityGuid } };
+  }
+
+  async openFacilityInventory(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): Promise<boolean> {
+    const link = this.facilityInventoryLink(facilityGuid, resource);
+    return this.navigateScopeDestination(link.route, link.queryParams);
   }
 
   readonly contextNavigationError = signal('');
-
-  readonly accountReturn = computed(() => {
-    const account = this.account();
-    if (!account || this.contextMode() !== 'facility') return undefined;
-    const section = this.activeSection();
-    if (this.isSingleSiteWorkspace() && section !== 'reports') return undefined;
-    if (section === 'data') {
-      const origin = this.browseState.origin(account.guid);
-      return { label: origin === 'predictors' ? 'Account Predictors' : origin === 'meters' ? 'Account Meters' : 'Account Facilities', route: this.accountDataReturnRoute(account.guid) };
-    }
-    return { label: section === 'home' ? 'Account overview' : `Account ${section === 'analysis' ? 'analyses' : section}`,
-      route: this.accountRouteForSection(account.guid, section, this.activeDetail()) };
-  });
 
   setPanelTab(panelTab: PanelTabId): void {
     this.activePanelTabState.set(panelTab);
@@ -312,215 +269,61 @@ export class WorkspaceNavigationService {
     this.isSupportPanelOpen.set(false);
   }
 
-  openSection(sectionId: SectionId): void {
+  async openSection(sectionId: SectionId): Promise<void> {
+    const account = this.account();
+    if (account && sectionId === 'imports') {
+      await this.navigateScopeDestination(this.accountImportsRoute(account.guid), this.uploadQuery());
+      return;
+    }
+    if (account && sectionId === 'settings') {
+      const facility = this.contextFacility();
+      const detail = this.activeSection() === 'settings' ? this.activeDetail() : 'profile';
+      await this.navigateScopeDestination(facility ? this.facilitySettingsRoute(facility.guid, detail) : this.accountSettingsRoute(account.guid, detail));
+      return;
+    }
+    if (['data', 'analysis', 'reports'].includes(sectionId)) {
+      const account = this.account();
+      if (account) {
+        const scope = this.headerScope();
+        const route = sectionId === 'data' ? scope.kind === 'facility' ? this.accountPortfolioRoute(account.guid, 'meters') : this.accountDataRoute(account.guid)
+          : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : this.accountReportsRoute(account.guid);
+        await this.navigateScopeDestination(route, this.isSingleSiteWorkspace() ? {} : facilityScopeQuery(scope));
+      }
+      return;
+    }
     const contextMode = this.contextMode();
     if (sectionId === 'home') {
-      this.setContext(contextMode);
+      await this.setContext(contextMode);
       return;
     }
-    if (sectionId === 'settings' && contextMode === 'account') {
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        void this.router.navigate(this.accountSettingsRoute(accountGuid));
-      }
-      return;
-    }
-    if (sectionId === 'data') {
-      if (contextMode === 'facility') {
-        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-        if (facilityGuid) {
-          void this.router.navigate(this.facilityDataRoute(facilityGuid));
-        }
-        return;
-      }
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        void this.router.navigate(this.accountDataRoute(accountGuid));
-      }
-      return;
-    }
-    if (sectionId === 'reports') {
-      const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (contextMode === 'facility' && facilityGuid) void this.router.navigate(this.facilityReportsRoute(facilityGuid));
-      else if (accountGuid) void this.router.navigate(this.accountReportsRoute(accountGuid));
-      return;
-    }
-    if (sectionId === 'analysis') {
-      if (contextMode === 'facility') {
-        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-        if (facilityGuid) {
-          void this.router.navigate(this.facilityAnalysisRoute(facilityGuid));
-        }
-        return;
-      }
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        void this.router.navigate(this.accountAnalysisRoute(accountGuid));
-      }
-      return;
-    }
-    if (sectionId === 'imports') {
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        const facilityGuid = contextMode === 'facility'
-          ? this.facility()?.guid || this.routeState().facilityGuid
-          : undefined;
-        void this.router.navigate(this.accountImportsRoute(accountGuid), {
-          queryParams: facilityGuid ? { facilityGuid, returnUrl: this.currentUrl() } : undefined
-        });
-      }
-      return;
-    }
-    if (sectionId === 'settings' && contextMode === 'facility') {
-      const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-      if (facilityGuid) {
-        void this.router.navigate(this.facilitySettingsRoute(facilityGuid));
-      }
-    }
   }
 
-  accountRoute(accountGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview'];
-  }
-
-  accountSettingsRoute(accountGuid: string, detail = 'profile'): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'settings', detail];
-  }
-
-  accountDataRoute(accountGuid: string, detail = 'portfolio'): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'data', detail];
-  }
-
-  accountPortfolioRoute(accountGuid: string, tab: AccountPortfolioTab = 'facilities'): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'data', 'portfolio', tab];
-  }
-
-  accountImportsRoute(accountGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'imports', 'upload'];
-  }
-
-  accountReportsRoute(accountGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'dashboard'];
-  }
-
-  accountReportWorkbenchRoute(accountGuid: string, reportGuid: string, stage: ReportStageId = 'setup'): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'workbench', reportGuid, stage];
-  }
-
-  facilityReportsRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'dashboard'];
-  }
-
-  facilityReportWorkbenchRoute(facilityGuid: string, reportGuid: string, stage: 'setup' | 'data-checks' | 'report' = 'setup'): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'workbench', reportGuid, stage];
-  }
-
-  accountAnalysisRoute(accountGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
-  }
-
-  accountAnalysisWorkbenchRoute(
-    accountGuid: string,
-    analysisGuid: string,
-    tab: AccountAnalysisRouteTab = 'setup'
-  ): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'workbench', analysisGuid, tab];
-  }
-
-  accountAnalysisResultsRoute(
-    accountGuid: string,
-    analysisGuid: string,
-    tab: AccountAnalysisResultRouteTab = 'annual'
-  ): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'workbench', analysisGuid, 'results', tab];
-  }
-
-  facilityRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
-  }
-
-  facilityDataRoute(facilityGuid: string, detail = 'meters'): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
-  }
-
-  facilityAnalysisRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
-  }
-
-  facilityAnalysisWorkbenchRoute(
-    facilityGuid: string,
-    analysisGuid: string,
-    tab: FacilityAnalysisRouteTab = 'setup'
-  ): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', analysisGuid, tab];
-  }
-
-  facilityAnalysisGroupRoute(
-    facilityGuid: string,
-    analysisGuid: string,
-    groupGuid: string,
-    tab: FacilityAnalysisGroupRouteTab = 'setup'
-  ): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', analysisGuid, 'group', groupGuid, tab];
-  }
-
-  facilityAnalysisResultsRoute(
-    facilityGuid: string,
-    analysisGuid: string,
-    tab: FacilityAnalysisResultRouteTab = 'annual'
-  ): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', analysisGuid, 'facility', tab];
-  }
-
-  facilityMeterRoute(facilityGuid: string, meterGuid: string, tab: FacilityMeterRouteTab = 'settings'): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab];
-  }
-
-  facilityMeterGroupRoute(
-    facilityGuid: string,
-    groupGuid: string,
-    tab: FacilityMeterGroupRouteTab = 'monthly-table'
-  ): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab];
-  }
-
-  facilityPredictorRoute(
-    facilityGuid: string,
-    predictorGuid: string,
-    tab: FacilityPredictorRouteTab = 'settings'
-  ): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab];
-  }
-
-  facilityWeatherPredictorCreateRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', 'weather', 'new'];
-  }
-
-  facilityWeatherPredictorRoute(
-    facilityGuid: string,
-    groupKey: string,
-    tab: FacilityWeatherPredictorRouteTab = 'setup'
-  ): Array<string> {
-    return [
-      '/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors',
-      'weather', groupKey, tab
-    ];
-  }
-
-  facilityWeatherPredictorQualityRoute(
-    facilityGuid: string,
-    groupKey: string,
-    predictorGuid: string
-  ): Array<string> {
-    return [
-      ...this.facilityWeatherPredictorRoute(facilityGuid, groupKey, 'quality'),
-      predictorGuid
-    ];
-  }
+  readonly accountRoute = routes.accountRoute;
+  readonly accountSettingsRoute = routes.accountSettingsRoute;
+  readonly accountDataRoute = routes.accountDataRoute;
+  readonly accountPortfolioRoute = routes.accountPortfolioRoute;
+  readonly accountImportsRoute = routes.accountImportsRoute;
+  readonly accountReportsRoute = routes.accountReportsRoute;
+  readonly accountReportWorkbenchRoute = routes.accountReportWorkbenchRoute;
+  readonly facilityReportWorkbenchRoute = routes.facilityReportWorkbenchRoute;
+  readonly accountAnalysisRoute = routes.accountAnalysisRoute;
+  readonly accountAnalysisWorkbenchRoute = routes.accountAnalysisWorkbenchRoute;
+  readonly accountAnalysisResultsRoute = routes.accountAnalysisResultsRoute;
+  readonly facilityRoute = routes.facilityRoute;
+  readonly facilityDataToolRoute = routes.facilityDataToolRoute;
+  readonly facilityAnalysisWorkbenchRoute = routes.facilityAnalysisWorkbenchRoute;
+  readonly facilityAnalysisGroupRoute = routes.facilityAnalysisGroupRoute;
+  readonly facilityAnalysisResultsRoute = routes.facilityAnalysisResultsRoute;
+  readonly facilityMeterRoute = routes.facilityMeterRoute;
+  readonly facilityMeterGroupRoute = routes.facilityMeterGroupRoute;
+  readonly facilityPredictorRoute = routes.facilityPredictorRoute;
+  readonly facilityWeatherPredictorCreateRoute = routes.facilityWeatherPredictorCreateRoute;
+  readonly facilityWeatherPredictorRoute = routes.facilityWeatherPredictorRoute;
+  readonly facilityWeatherPredictorQualityRoute = routes.facilityWeatherPredictorQualityRoute;
 
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
+    if (detail === 'backup' && this.singleFacilityContext()?.guid === facilityGuid) return this.accountSettingsRoute(this.workspace.account()!.guid, 'backup');
+    return routes.facilitySettingsRoute(facilityGuid, detail);
   }
 
   private accountRouteForSection(accountGuid: string, section: SectionId, detail: string): Array<string> {
@@ -536,299 +339,32 @@ export class WorkspaceNavigationService {
     return this.accountRoute(accountGuid);
   }
 
-  private facilityRouteForSection(facilityGuid: string, section: SectionId, detail: string): Array<string> {
-    if (section === 'settings') {
-      return this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail));
-    }
-    if (section === 'data') {
-      return this.facilityDataRoute(facilityGuid, this.resolveFacilityDataDetail(detail));
-    }
-    if (section === 'imports') {
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      return accountGuid ? this.accountImportsRoute(accountGuid) : this.facilityRoute(facilityGuid);
-    }
-    if (section === 'reports') return this.facilityReportsRoute(facilityGuid);
-    if (section === 'analysis') return this.facilityAnalysisRoute(facilityGuid);
-    return this.facilityRoute(facilityGuid);
+  private facilityDestination(facilityGuid: string, section: SectionId, detail: string): { route: string[]; queryParams?: Params } {
+    if (section === 'settings') return { route: this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail)) };
+    if (section === 'analysis' || section === 'reports') return this.facilityInventoryLink(facilityGuid, section);
+    if (section === 'data') return ['meter-grouping', 'energy-uses', 'custom-grid-factors', 'custom-fuels', 'custom-gwps'].includes(detail)
+      ? { route: this.facilityDataToolRoute(facilityGuid, detail) }
+      : this.facilityInventoryLink(facilityGuid, detail === 'predictors' ? 'predictors' : 'meters');
+    if (section === 'imports' && this.account()) return { route: this.accountImportsRoute(this.account()!.guid) };
+    return { route: this.facilityRoute(facilityGuid) };
   }
 
   private resolveAccountDataDetail(detail: string): string {
-    return ACCOUNT_DATA_DETAILS.has(detail) ? detail : DEFAULT_DETAILS.data;
-  }
-
-  private resolveFacilityDataDetail(detail: string): string {
-    return FACILITY_DATA_DETAILS.has(detail) ? detail : DEFAULT_FACILITY_DETAILS.data;
+    return ACCOUNT_DATA_DETAILS.has(detail) ? detail : 'portfolio';
   }
 
   private resolveAccountSettingsDetail(detail: string): string {
     if (detail === 'staleness') return 'data-validation';
-    return ACCOUNT_SETTINGS_DETAILS.has(detail) ? detail : DEFAULT_DETAILS.settings;
+    return ACCOUNT_SETTINGS_DETAILS.has(detail) ? detail : 'profile';
   }
 
   private resolveFacilitySettingsDetail(detail: string): string {
     if (detail === 'staleness') return 'data-validation';
-    return FACILITY_SETTINGS_DETAILS.has(detail) ? detail : DEFAULT_FACILITY_DETAILS.settings;
+    return FACILITY_SETTINGS_DETAILS.has(detail) ? detail : 'profile';
   }
 
   legacyFacilityManagementRoute(accountGuid?: string): Array<string> {
     const guid = accountGuid || this.account()?.guid || this.routeState().accountGuid;
-    return guid ? ['/data-management', guid, 'facilities'] : ['/manage-accounts'];
+    return routes.legacyFacilityManagementRoute(guid);
   }
-
-  private resolveAccount(): IdbAccount | undefined {
-    const state = this.routeState();
-    return this.lifecycle.usableAccounts().find(account => account.guid === state.accountGuid)
-      || this.workspace.account()
-      || this.lifecycle.usableAccounts()[0];
-  }
-
-  private resolveFacility(): IdbFacility | undefined {
-    const state = this.routeState();
-    if (state.facilityGuid) {
-      return this.facilities().find(facility => facility.guid === state.facilityGuid)
-        || this.workspace.selectedFacility();
-    }
-    return this.workspace.selectedFacility() || this.facilities()[0];
-  }
-
-  private resolveSingleSiteWorkspaceState(): SingleSiteWorkspaceState {
-    const account = this.workspace.account() || this.account();
-    if (account?.isSingleFacilityCompany !== true) {
-      return 'portfolio';
-    }
-    const facilityCount = this.facilities().length;
-    if (facilityCount === 1) {
-      return 'valid';
-    }
-    return facilityCount === 0 ? 'missing-facility' : 'multiple-facilities';
-  }
-
-  private buildAccountOptions(): Array<AccountDropdownOption> {
-    const activeAccountGuid = this.workspace.account()?.guid || this.routeState().accountGuid;
-    return this.lifecycle.usableAccounts()
-      .filter(account => !account.deleteAccount)
-      .map(account => ({
-        guid: account.guid,
-        name: account.name || 'Untitled account',
-        descriptor: accountDescriptor(account),
-        active: account.guid === activeAccountGuid
-      }));
-  }
-
-  private buildPanelContent(): PanelContent {
-    const context = this.contextMode();
-    const account = this.account();
-    const facility = this.facility();
-    const isFacility = context === 'facility';
-    const name = isFacility ? facility?.name : account?.name;
-    const meterCount = isFacility ? this.workspace.facilityMeters().length : this.workspace.meters().length;
-    const predictorCount = isFacility ? this.workspace.facilityPredictors().length : this.workspace.predictors().length;
-    const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
-    const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
-    const isData = this.activeSection() === 'data';
-    const todos = isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos();
-    const discardedWarnings = isFacility ? this.status.selectedFacilityDiscardedWarnings() : this.status.accountDiscardedWarnings();
-    const help = this.activeSection() === 'reports'
-      ? ['Use Reports to browse, create, copy, rename, and delete saved reports. Account Reports includes reports from every facility.', 'Open a report name to view its saved configuration. Report-specific settings and previews are coming in later migrations.']
-      : isFacility && this.activeSection() === 'data'
-      ? this.buildFacilityDataHelp()
-      : [
-        `This v1 Home page is the production shell starter for ${name || 'the selected workspace'}.`,
-        'Use the rail and context controls to confirm account and facility navigation before workflow pages are migrated.'
-      ];
-
-    return {
-      help,
-      todos: isData ? todos.filter(isDataFinding) : todos,
-      discardedWarnings: isData ? discardedWarnings.filter(isDataFinding) : discardedWarnings,
-      results: [
-        { label: 'Facilities', value: String(this.facilities().length), tone: 'info' },
-        { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },
-        { label: 'Predictors', value: String(predictorCount), tone: predictorCount > 0 ? 'success' : 'neutral' },
-        ...(!isData ? [
-          { label: 'Analyses', value: String(analysisCount), tone: analysisCount > 0 ? 'success' as const : 'neutral' as const },
-          { label: 'Reports', value: String(reportCount), tone: reportCount > 0 ? 'success' as const : 'neutral' as const }
-        ] : [])
-      ],
-      details: [
-        { label: 'Context', value: isFacility ? 'Facility workspace' : 'Account workspace' },
-        { label: 'Active section', value: `${this.activeSection()} / ${this.activeDetail()}` },
-        { label: 'Support tab', value: this.activePanelTab() }
-      ]
-    };
-  }
-
-  private resolveRouteMotion(): WorkspaceRouteMotion {
-    const previous = parseWorkspaceRoute(this.previousUrl());
-    const current = this.routeState();
-
-    const depth = (route: RouteState, url: string): number | undefined => {
-      if (route.view !== 'workspace') return undefined;
-      if (route.section === 'reports') return route.contextMode === 'account' ? route.reportGuid ? 1 : 0 : route.reportGuid ? 2 : 1;
-      if (route.section === 'analysis') return route.contextMode === 'account' ? route.analysisGuid ? 1 : 0 : route.analysisGuid ? 2 : 1;
-      if (route.section !== 'data') return undefined;
-      if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' || route.portfolioTab === 'predictors' ? 0 : undefined;
-      if (route.detail === 'predictors') return route.predictorGuid || route.weatherPredictorGroupKey || url.includes('/predictors/weather/new') ? 2 : 1;
-      if (route.detail === 'meter-grouping') return route.meterGroupGuid ? 2 : 1;
-      return route.detail === 'meters' ? route.meterGuid ? 2 : 1 : undefined;
-    };
-    const before = depth(previous, this.previousUrl());
-    const after = depth(current, this.currentUrl());
-    if (before === undefined || after === undefined || previous.section !== current.section) return 'none';
-    const accountFor = (route: RouteState) => route.accountGuid || this.facilities().find(facility => facility.guid === route.facilityGuid)?.accountId;
-    const accountGuid = accountFor(current);
-    if (!accountGuid || accountGuid !== accountFor(previous)) return 'none';
-    if (previous.facilityGuid && current.facilityGuid && previous.facilityGuid !== current.facilityGuid) return 'peer';
-    if (after !== before) return after > before ? 'drill-in' : 'drill-out';
-    if (previous.reportGuid !== current.reportGuid || previous.analysisGuid !== current.analysisGuid || previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
-    return 'none';
-  }
-
-  private buildFacilityDataHelp(): ReadonlyArray<string> {
-    if (this.activeDetail() === 'meters') {
-      return [
-        'Use Meters to search facility meters and compare their available monthly energy, water, and cost data.',
-        'Open a meter name for its workbench. Use the actions menu for readings, copy, and delete, or Select meters to delete several together.'
-      ];
-    }
-    if (this.activeDetail() === 'meter-grouping') {
-      return [
-      'Use Meter Grouping to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.',
-        'Open a group to review monthly and yearly result tables or charts. Open a meter card from a group to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
-      ];
-    }
-    return [
-      'Facility Data pages organize setup records used by meter analysis, visualization, and reporting workflows.',
-      'Use the sidebar to move between meters, meter grouping, predictors, and energy-use setup.'
-    ];
-  }
-}
-
-export function parseWorkspaceRoute(url: string): RouteState {
-  const parts = url.split(/[?#]/, 1)[0].split('/').filter(Boolean);
-  const v1Index = parts.indexOf('v1');
-  const routeParts = v1Index >= 0 ? parts.slice(v1Index + 1) : parts;
-  if (routeParts[0] !== 'workspace') {
-    return {
-      view: 'welcome',
-      contextMode: 'account',
-      section: 'home',
-      detail: 'overview'
-    };
-  }
-  if (routeParts[1] === 'facility') {
-    const section = normalizeSection(routeParts[3]);
-    const detail = routeParts[4] || DEFAULT_FACILITY_DETAILS[section];
-    const isWeatherPredictorRoute = section === 'data'
-      && detail === 'predictors'
-      && routeParts[5] === 'weather';
-    const isAnalysisWorkbenchRoute = section === 'analysis'
-      && detail === 'workbench'
-      && !!routeParts[5];
-    const analysisRouteSegment = isAnalysisWorkbenchRoute ? routeParts[6] : undefined;
-    const analysisStageScope: FacilityAnalysisStageScope | undefined = analysisRouteSegment === 'group'
-      ? 'group'
-      : analysisRouteSegment === 'facility'
-        ? 'facility'
-        : analysisRouteSegment === 'used-by'
-          ? 'used-by'
-          : isAnalysisWorkbenchRoute
-            ? 'analysis'
-            : undefined;
-    return {
-      view: 'workspace',
-      contextMode: 'facility',
-      facilityGuid: routeParts[2],
-      section,
-      detail,
-      reportGuid: section === 'reports' && detail === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
-      reportStage: section === 'reports' && detail === 'workbench' && routeParts[5]
-        ? routeParts[6] === 'data-checks' || routeParts[6] === 'report' ? routeParts[6] : 'setup' : undefined,
-      meterGuid: section === 'data' && detail === 'meters' && routeParts[5]
-        ? safeDecodeRoutePart(routeParts[5])
-        : undefined,
-      meterGroupGuid: section === 'data' && detail === 'meter-grouping' && routeParts[5]
-        ? safeDecodeRoutePart(routeParts[5])
-        : undefined,
-      predictorGuid: section === 'data' && detail === 'predictors' && routeParts[5] && !isWeatherPredictorRoute
-        ? safeDecodeRoutePart(routeParts[5])
-        : undefined,
-      weatherPredictorGroupKey: isWeatherPredictorRoute && routeParts[6] && routeParts[6] !== 'new'
-        ? safeDecodeRoutePart(routeParts[6])
-        : undefined,
-      analysisGuid: section === 'analysis' && detail === 'workbench' && routeParts[5]
-        ? safeDecodeRoutePart(routeParts[5])
-        : undefined,
-      analysisGroupGuid: analysisStageScope === 'group' && routeParts[7]
-        ? safeDecodeRoutePart(routeParts[7])
-        : undefined,
-      analysisStageScope
-    };
-  }
-  const section = normalizeSection(routeParts[3]);
-  const isImportFileRoute = section === 'imports' && routeParts[4] === 'file';
-  const isAccountAnalysisWorkbenchRoute = section === 'analysis'
-    && routeParts[4] === 'workbench'
-    && !!routeParts[5];
-  const accountAnalysisStageSegment = isAccountAnalysisWorkbenchRoute ? routeParts[6] : undefined;
-  const accountAnalysisStageScope: AccountAnalysisStageScope | undefined = accountAnalysisStageSegment === 'select-items'
-    ? 'select-items'
-    : accountAnalysisStageSegment === 'results'
-      ? 'results'
-      : accountAnalysisStageSegment === 'used-by'
-        ? 'used-by'
-        : isAccountAnalysisWorkbenchRoute
-          ? 'setup'
-          : undefined;
-  const accountAnalysisResultTab = accountAnalysisStageScope === 'results'
-    && ['annual', 'monthly-table', 'monthly-chart', 'facility-details', 'facility-contributions'].includes(routeParts[7])
-      ? routeParts[7] as AccountAnalysisResultRouteTab
-      : undefined;
-  return {
-    view: 'workspace',
-    contextMode: 'account',
-    accountGuid: routeParts[2],
-    portfolioTab: section === 'data' && routeParts[4] === 'portfolio'
-      ? (['facilities', 'meters', 'predictors', 'energy-uses'].includes(routeParts[5]) ? routeParts[5] as AccountPortfolioTab : 'facilities')
-      : undefined,
-    section,
-    detail: routeParts[4] || DEFAULT_DETAILS[section],
-    reportGuid: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
-    reportStage: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5]
-      ? routeParts[6] === 'data-checks' || routeParts[6] === 'report' ? routeParts[6] : 'setup' : undefined,
-    analysisGuid: isAccountAnalysisWorkbenchRoute
-      ? safeDecodeRoutePart(routeParts[5])
-      : undefined,
-    accountAnalysisStageScope,
-    accountAnalysisResultTab,
-    importFileId: isImportFileRoute && routeParts[5]
-      ? safeDecodeRoutePart(routeParts[5])
-      : undefined,
-    importStep: isImportFileRoute && routeParts[6]
-      ? safeDecodeRoutePart(routeParts[6])
-      : undefined
-  };
-}
-
-function normalizeSection(section: string | undefined): SectionId {
-  return VALID_SECTION_IDS.includes(section as SectionId) ? section as SectionId : 'home';
-}
-
-function safeDecodeRoutePart(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-function accountDescriptor(account: IdbAccount): string {
-  if (account.isSingleFacilityCompany === true) {
-    return 'Single facility';
-  }
-  const facilityCount = Number(account.numberOfFacilities);
-  if (Number.isFinite(facilityCount)) {
-    return `${facilityCount} ${facilityCount === 1 ? 'facility' : 'facilities'}`;
-  }
-  return 'Portfolio';
 }

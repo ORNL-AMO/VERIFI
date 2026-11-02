@@ -16,7 +16,9 @@ import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-e
 import { StatusFindingActionComponent } from '@app/v1/shared/status/status-finding-action/status-finding-action.component';
 import { PrimaryRailComponent } from '../primary-rail/primary-rail.component';
 import { SupportPanelComponent } from '../support-panel/support-panel.component';
-import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } from '../workspace-navigation.service';
+import { WorkspaceNavigationService } from '../workspace-navigation.service';
+import { WORKSPACE_SECTIONS } from '../primary-rail/workspace-sections';
+import { SUPPORT_PANEL_TABS } from '@app/v1/shell/support-panel/workspace-support-panel.view';
 import { WorkspaceShellComponent } from './workspace-shell.component';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
@@ -59,7 +61,7 @@ describe('WorkspaceShellComponent', () => {
         details: [{ label: 'Context', value: 'Account workspace' }]
       })),
       showWelcome: vi.fn(),
-      setContext: vi.fn(), accountReturn: signal(undefined), contextNavigationError: signal(''),
+      setContext: vi.fn(), contextNavigationError: signal(''),
       setFacility: vi.fn(),
       setPanelTab: vi.fn(),
       hideSupportPanel: vi.fn(),

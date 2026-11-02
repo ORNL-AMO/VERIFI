@@ -36,20 +36,21 @@ describe('SettingsNavComponent', () => {
   });
 
   it('shows account deletion label for single-facility facility settings', () => {
-    const { activeSection, contextMode, selectedFacility, account } = state;
+    const { activeSection, contextMode, selectedFacility, account, isSingleSiteWorkspace, facilities } = state;
     contextMode.set('facility');
     selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
     account.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
+    isSingleSiteWorkspace.set(true); facilities.set([selectedFacility()!]);
     activeSection.set('settings');
     const fixture = TestBed.createComponent(SettingsNavComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Facility Settings');
-    expect(fixture.nativeElement.textContent).toContain('Portfolio');
+    expect(fixture.nativeElement.textContent).toContain('Settings');
+    expect(fixture.nativeElement.textContent).toContain('Convert to portfolio');
     expect(fixture.nativeElement.textContent).toContain('Delete account');
 
     account.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: false });
-    fixture.detectChanges();
+    isSingleSiteWorkspace.set(false); fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).not.toContain('Portfolio');
   });

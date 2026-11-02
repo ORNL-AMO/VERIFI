@@ -21,7 +21,7 @@
       </span>
     </div>
 
-    @if (goalsDiffer()) {
+    @if (!singleFacilityPresentation() && goalsDiffer()) {
       <div class="v1-alert v1-alert--info">
         <app-ui-icon name="info"></app-ui-icon>
         <span>Facility goals differ from {{ currentAccount.name }}.</span>
@@ -52,7 +52,7 @@
           </label>
           <label>
             <span>Baseline year</span>
-            <select formControlName="energyReductionBaselineYear"
+            <select class="v1-select" formControlName="energyReductionBaselineYear"
               (change)="changeBaselineYear('energyReductionBaselineYear', 'energyReductionTargetYear')">
               @for (year of years; track year) {
                 <option [ngValue]="year">{{ year }}</option>
@@ -61,7 +61,7 @@
           </label>
           <label>
             <span>Target year</span>
-            <select formControlName="energyReductionTargetYear" (change)="saveGoals()">
+            <select class="v1-select" formControlName="energyReductionTargetYear" (change)="saveGoals()">
               @for (year of years; track year) {
                 <option [ngValue]="year">{{ year }}</option>
               }
@@ -93,7 +93,7 @@
           </label>
           <label>
             <span>Baseline year</span>
-            <select formControlName="waterReductionBaselineYear"
+            <select class="v1-select" formControlName="waterReductionBaselineYear"
               (change)="changeBaselineYear('waterReductionBaselineYear', 'waterReductionTargetYear')">
               @for (year of years; track year) {
                 <option [ngValue]="year">{{ year }}</option>
@@ -102,7 +102,7 @@
           </label>
           <label>
             <span>Target year</span>
-            <select formControlName="waterReductionTargetYear" (change)="saveGoals()">
+            <select class="v1-select" formControlName="waterReductionTargetYear" (change)="saveGoals()">
               @for (year of years; track year) {
                 <option [ngValue]="year">{{ year }}</option>
               }
@@ -135,7 +135,7 @@
             </label>
             <label>
               <span>Baseline year</span>
-              <select formControlName="greenhouseReductionBaselineYear"
+              <select class="v1-select" formControlName="greenhouseReductionBaselineYear"
                 (change)="changeBaselineYear('greenhouseReductionBaselineYear', 'greenhouseReductionTargetYear')">
                 @for (year of years; track year) {
                   <option [ngValue]="year">{{ year }}</option>
@@ -144,7 +144,7 @@
             </label>
             <label>
               <span>Target year</span>
-              <select formControlName="greenhouseReductionTargetYear" (change)="saveGoals()">
+              <select class="v1-select" formControlName="greenhouseReductionTargetYear" (change)="saveGoals()">
                 @for (year of years; track year) {
                   <option [ngValue]="year">{{ year }}</option>
                 }

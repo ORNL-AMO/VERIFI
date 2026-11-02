@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FinancialForm } from '@shared/settings-forms/settings-form.models';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { Months } from '@shared/form-data/months';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
@@ -24,7 +24,7 @@ export class FacilitySettingsFinancialComponent extends FacilitySettingsDetailBa
     const facility = this.facility();
     return !!account && !!facility && this.settingsForms.areAccountAndFacilityFinancialReportingDifferent(account, facility);
   });
-  form: FormGroup;
+  form: FinancialForm;
   showAccountUpdateConfirm = false;
 
   @ViewChild('accountUpdateConfirmModal') private readonly accountUpdateConfirmModal!: TemplateRef<unknown>;
@@ -55,8 +55,8 @@ export class FacilitySettingsFinancialComponent extends FacilitySettingsDetailBa
     this.applyFormAvailability(this.canWrite());
     await this.saveFacility(
       'Saving facility financial reporting',
-      facility => this.settingsForms.updateFacilityFromFiscalForm(this.form, facility),
-      account => this.settingsForms.updateAccountFromFiscalForm(this.form, account)
+      'financial',
+      facility => this.settingsForms.updateFacilityFromFiscalForm(this.form, facility)
     );
   }
 

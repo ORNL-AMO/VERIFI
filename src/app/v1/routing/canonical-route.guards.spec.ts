@@ -3,19 +3,20 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, convertToParamMap, Router } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
+import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
 import {
-  accountHomeCommands,
   accountHomeCanonicalGuard,
-  facilityHomeCommands,
   facilityHomeCanonicalGuard,
+  singleFacilityBackupCanonicalGuard,
   singleSiteAccountRedirectGuard,
   singleSiteRedirectCommands
 } from './canonical-route.guards';
+import { accountRoute, facilityRoute } from './workspace-route';
 
 describe('v1 canonical route guards', () => {
   let router: { createUrlTree: ReturnType<typeof vi.fn> };
   let workspace: {
+    status: () => string;
     account: ReturnType<typeof vi.fn>;
     facilities: ReturnType<typeof vi.fn>;
     accountAnalyses: ReturnType<typeof vi.fn>;
@@ -26,6 +27,7 @@ describe('v1 canonical route guards', () => {
     ensurePairs.mockClear();
     router = { createUrlTree: vi.fn(commands => ({ commands })) };
     workspace = {
+      status: () => 'ready',
       account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
       facilities: vi.fn(() => []),
       accountAnalyses: vi.fn(() => [])
@@ -48,17 +50,31 @@ describe('v1 canonical route guards', () => {
 
   it('redirects invalid account and facility home routes to canonical defaults', () => {
     expect(invoke(accountHomeCanonicalGuard, route({ detail: 'todo-list' }, route({ accountGuid: 'account-a' }))))
-      .toEqual({ commands: accountHomeCommands('account-a') });
+      .toEqual({ commands: accountRoute('account-a') });
     expect(invoke(facilityHomeCanonicalGuard, route({ detail: 'unknown' }, route({ facilityGuid: 'facility-a' }))))
-      .toEqual({ commands: facilityHomeCommands('facility-a') });
+      .toEqual({ commands: facilityRoute('facility-a') });
   });
 
-  it.each(['reports/dashboard', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {
+  it.each(['settings/backup', 'reports/dashboard', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {
     workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
     await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
       { url: `/v1/workspace/account/account-a/${path}` })).resolves.toBe(true);
     expect(ensurePairs).not.toHaveBeenCalled();
+  });
+
+  it('canonicalizes sole-facility Backup once, leaving portfolio and repair entry alone', async () => {
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
+    const backup = Object.assign(route({}), { pathFromRoot: [route({ facilityGuid: 'facility-a' }), route({})] });
+    expect(invoke(singleFacilityBackupCanonicalGuard, backup)).toEqual({ commands: ['/v1', 'workspace', 'account', 'account-a', 'settings', 'backup'] });
+    await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }), { url: '/v1/workspace/account/account-a/settings/backup' })).resolves.toBe(true);
+    expect(ensurePairs).not.toHaveBeenCalled();
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }, { guid: 'facility-b', accountId: 'account-a' }]);
+    expect(invoke(singleFacilityBackupCanonicalGuard, backup)).toBe(true);
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: false });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
+    expect(invoke(singleFacilityBackupCanonicalGuard, backup)).toBe(true);
   });
 
   it('redirects valid single-site account routes to the sole facility route', async () => {
@@ -93,21 +109,26 @@ describe('v1 canonical route guards', () => {
     )).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'custom-grid-factors']);
   });
 
-  it.each([
-    ['data', 'meters'], ['data/portfolio', 'meters'], ['data/portfolio/facilities', 'meters'],
-    ['data/portfolio/meters', 'meters'], ['data/portfolio/predictors', 'predictors'],
-    ['data/portfolio/energy-uses', 'energy-uses'], ['data/custom-fuels', 'custom-fuels'],
-    ['data/custom-grid-factors', 'custom-grid-factors'], ['data/custom-gwps', 'custom-gwps']
-  ])('redirects single-site account %s to facility %s', async (path, detail) => {
-    workspace.account.mockReturnValue({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
-    workspace.facilities.mockReturnValue([{ guid: 'facility-a', name: 'Site A', accountId: 'account-a' }]);
-
-    await expect(invoke(
-      singleSiteAccountRedirectGuard,
-      route({ accountGuid: 'account-a' }),
-      { url: `/v1/workspace/account/account-a/${path}` }
-    )).resolves.toEqual({ commands: ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail] });
+  it.each(['data/portfolio/meters', 'data/portfolio/predictors', 'analysis/dashboard'])('keeps single-site %s on its shared inventory', async path => {
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
+    await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
+      { url: `/v1/workspace/account/account-a/${path}` })).resolves.toBe(true);
     expect(ensurePairs).toHaveBeenCalledOnce();
+  });
+
+  it.each(['data', 'data/portfolio', 'data/portfolio/facilities', 'data/not-supported'])('opens shared Meters for the single-site Data entry %s', async path => {
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
+    await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
+      { url: `/v1/workspace/account/account-a/${path}` })).resolves.toEqual({ commands: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'] });
+  });
+
+  it('keeps unfinished single-site Energy Uses on its facility tool route', async () => {
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
+    await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
+      { url: '/v1/workspace/account/account-a/data/portfolio/energy-uses' })).resolves.toEqual({ commands: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses'] });
   });
 
   it('does not redirect portfolio or invalid single-site account states', async () => {
@@ -150,7 +171,7 @@ describe('v1 canonical route guards', () => {
       { url: '/v1/workspace/account/account-a/analysis/dashboard' } as any,
       'facility-a',
       [pair]
-    )).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard']);
+    )).toBeUndefined();
     expect(singleSiteRedirectCommands(
       { url: '/v1/workspace/account/account-a/analysis/workbench/account-analysis-a/results/monthly-table' } as any,
       'facility-a',
