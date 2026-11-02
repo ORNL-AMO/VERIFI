@@ -1,17 +1,17 @@
-import { FACILITY_REPORT_ROUTES } from '@app/v1/facility/reports/facility-reports.routes';
-import { ACCOUNT_REPORT_ROUTES } from '@app/v1/account/reports/account-reports.routes';
+import { FACILITY_REPORT_ROUTES } from '@app/v1/reports/facility/facility-reports.routes';
+import { ACCOUNT_REPORT_ROUTES } from '@app/v1/reports/account/account-reports.routes';
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
-import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
-import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
-import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
-import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { CustomGridFactorsComponent } from '@app/v1/data/custom-database/custom-grid-factors/custom-grid-factors.component';
+import { CustomFuelsComponent } from '@app/v1/data/custom-database/custom-fuels/custom-fuels.component';
+import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/custom-gwps.component';
+import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
-import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
-import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
-import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
-import { AccountPortfolioMetersTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
-import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
+import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
+import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
+import { FacilitiesInventoryComponent } from '@app/v1/data/facilities/inventory/facilities-inventory.component';
+import { MetersInventoryComponent } from '@app/v1/data/meters/inventory/meters-inventory.component';
+import { PredictorsInventoryComponent } from '@app/v1/data/predictors/inventory/predictors-inventory.component';
 import { AccountSettingsComponent } from '@app/v1/account/settings/account-settings.component';
 import { AccountSettingsBackupComponent } from '@app/v1/account/settings/backup/account-settings-backup.component';
 import { AccountSettingsDeleteComponent } from '@app/v1/account/settings/delete/account-settings-delete.component';
@@ -21,33 +21,29 @@ import { AccountSettingsPortfolioComponent } from '@app/v1/account/settings/port
 import { AccountSettingsProfileComponent } from '@app/v1/account/settings/profile/account-settings-profile.component';
 import { AccountSettingsDataValidationComponent } from '@app/v1/account/settings/data-validation/account-settings-data-validation.component';
 import { AccountSettingsUnitsComponent } from '@app/v1/account/settings/units/account-settings-units.component';
-import { FacilityDataPlaceholderComponent } from '@app/v1/facility/data/facility-data-placeholder.component';
-import { FacilityMetersComponent } from '@app/v1/facility/data/meters/facility-meters.component';
-import { MeterWorkbenchBillInspectionComponent } from '@app/v1/facility/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
-import { MeterWorkbenchMonthlyChartComponent } from '@app/v1/facility/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
-import { MeterWorkbenchMonthlyDataComponent } from '@app/v1/facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
-import { MeterWorkbenchQualityReportComponent } from '@app/v1/facility/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
-import { MeterWorkbenchReadingsComponent } from '@app/v1/facility/data/meters/meter-workbench/readings/meter-workbench-readings.component';
-import { MeterWorkbenchSettingsComponent } from '@app/v1/facility/data/meters/meter-workbench/settings/meter-workbench-settings.component';
-import { MeterWorkbenchComponent } from '@app/v1/facility/data/meters/meter-workbench/meter-workbench.component';
-import { MeterWorkbenchYearlyDataComponent } from '@app/v1/facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
-import { MeterGroupWorkbenchGraphComponent } from '@app/v1/facility/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
-import { MeterGroupWorkbenchTableComponent } from '@app/v1/facility/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
-import { MeterGroupWorkbenchYearlyDataComponent } from '@app/v1/facility/data/meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
-import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter-group-workbench/meter-group-workbench.component';
-import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
-import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
-import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
-import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '@app/v1/facility/data/predictors/facility-predictors.providers';
-import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
-import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
-import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
-import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
-import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
-import { WeatherPredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
-import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
-import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
-import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
+import { EnergyUsesPlaceholderComponent } from '@app/v1/data/energy-uses/energy-uses-placeholder/energy-uses-placeholder.component';
+import { MeterWorkspaceComponent } from '@app/v1/data/meters/meter-workspace/meter-workspace.component';
+import { MeterWorkbenchBillInspectionComponent } from '@app/v1/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
+import { MeterWorkbenchMonthlyChartComponent } from '@app/v1/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
+import { MeterWorkbenchMonthlyDataComponent } from '@app/v1/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
+import { MeterWorkbenchQualityReportComponent } from '@app/v1/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
+import { MeterWorkbenchReadingsComponent } from '@app/v1/data/meters/meter-workbench/readings/meter-workbench-readings.component';
+import { MeterWorkbenchSettingsComponent } from '@app/v1/data/meters/meter-workbench/settings/meter-workbench-settings.component';
+import { MeterWorkbenchComponent } from '@app/v1/data/meters/meter-workbench/meter-workbench.component';
+import { MeterWorkbenchYearlyDataComponent } from '@app/v1/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { MeterGroupWorkbenchGraphComponent } from '@app/v1/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
+import { MeterGroupWorkbenchTableComponent } from '@app/v1/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchYearlyDataComponent } from '@app/v1/data/meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
+import { MeterGroupWorkbenchComponent } from '@app/v1/data/meters/meter-group-workbench/meter-group-workbench.component';
+import { MeterGroupingComponent } from '@app/v1/data/meters/meter-grouping/meter-grouping.component';
+import { PredictorWorkbenchComponent } from '@app/v1/data/predictors/predictor-workbench/predictor-workbench.component';
+import { PredictorWorkbenchQualityReportComponent } from '@app/v1/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
+import { PredictorWorkbenchReadingsComponent } from '@app/v1/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
+import { PredictorWorkbenchSettingsComponent } from '@app/v1/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
+import { WeatherPredictorWorkbenchComponent } from '@app/v1/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
+import { WeatherPredictorSetupComponent } from '@app/v1/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
+import { WeatherPredictorReadingsComponent } from '@app/v1/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
+import { WeatherPredictorQualityComponent } from '@app/v1/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
 import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
 import { FacilitySettingsComponent } from '@app/v1/facility/settings/facility-settings.component';
 import { FacilitySettingsBackupComponent } from '@app/v1/facility/settings/backup/facility-settings-backup.component';
@@ -58,11 +54,11 @@ import { PortfolioTransitionSettingsComponent } from '@app/v1/facility/settings/
 import { FacilitySettingsProfileComponent } from '@app/v1/facility/settings/profile/facility-settings-profile.component';
 import { FacilitySettingsDataValidationComponent } from '@app/v1/facility/settings/data-validation/facility-settings-data-validation.component';
 import { FacilitySettingsUnitsComponent } from '@app/v1/facility/settings/units/facility-settings-units.component';
-import { accountHomeCanonicalGuard, facilityHomeCanonicalGuard, singleSiteAccountRedirectGuard } from '@app/v1/routing/canonical-route.guards';
+import { accountHomeCanonicalGuard, facilityHomeCanonicalGuard, singleSiteAccountRedirectGuard, singleFacilityBackupCanonicalGuard } from '@app/v1/routing/canonical-route.guards';
 import { ShellComponent } from '@app/v1/shell/shell.component';
 import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
 import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
-import { predictorCanonicalRouteGuard } from '@app/v1/facility/data/predictors/predictor-canonical-route.guard';
+import { predictorCanonicalRouteGuard } from '@app/v1/data/predictors/predictor-canonical-route.guard';
 import { ImportUploadComponent } from '@app/v1/account/imports/import-upload/import-upload.component';
 import { ImportWizardComponent } from '@app/v1/account/imports/import-wizard/import-wizard.component';
 import { ImportColumnsStepComponent } from '@app/v1/account/imports/import-wizard/steps/columns/import-columns-step.component';
@@ -76,35 +72,37 @@ import { ImportPredictorReadingsStepComponent } from '@app/v1/account/imports/im
 import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictors/import-predictors-step.component';
 import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
 import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
-import { AccountAnalysisDashboardComponent } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard.component';
-import { AccountAnalysisWorkbenchComponent } from '@app/v1/account/analysis/account-analysis-workbench/account-analysis-workbench.component';
-import { AccountAnalysisSetupComponent } from '@app/v1/account/analysis/account-analysis-workbench/setup/account-analysis-setup.component';
-import { AccountAnalysisSelectFacilityItemsComponent } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-select-facility-items.component';
-import { AccountAnalysisResultsShellComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/shell/account-analysis-results-shell.component';
-import { AccountAnalysisAnnualComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/annual/account-analysis-annual.component';
-import { AccountAnalysisMonthlyTableComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-table/account-analysis-monthly-table.component';
-import { AccountAnalysisMonthlyChartComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-chart/account-analysis-monthly-chart.component';
-import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-details/account-analysis-facility-details.component';
-import { AccountAnalysisFacilityContributionsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-contributions/account-analysis-facility-contributions.component';
-import { AccountAnalysisUsedByComponent } from '@app/v1/account/analysis/account-analysis-workbench/used-by/account-analysis-used-by.component';
-import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
-import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
-import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
-import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
-import { GroupVisualizationComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/visualization/group-visualization.component';
-import { FacilityAnalysisGroupSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/setup/facility-analysis-group-setup.component';
-import { FacilityAnalysisBankingComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/banking/facility-analysis-banking.component';
-import { FacilityAnalysisRegressionComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/regression/facility-analysis-regression.component';
-import { FacilityAnalysisGroupAnnualComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/annual/facility-analysis-group-annual.component';
-import { FacilityAnalysisGroupMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-table/facility-analysis-group-monthly-table.component';
-import { FacilityAnalysisGroupMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-chart/facility-analysis-group-monthly-chart.component';
-import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/shell/facility-analysis-results-shell.component';
-import { FacilityAnalysisAnnualComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/annual/facility-analysis-annual.component';
-import { FacilityAnalysisMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-table/facility-analysis-monthly-table.component';
-import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-chart/facility-analysis-monthly-chart.component';
-import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
-import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/used-by/facility-analysis-used-by.component';
-import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/single-facility-analysis-pair.guard';
+import { AnalysisInventoryComponent } from '@app/v1/analysis/inventory/analysis-inventory.component';
+import { AccountAnalysisWorkbenchComponent } from '@app/v1/analysis/account/workbench/account-analysis-workbench.component';
+import { AccountAnalysisSetupComponent } from '@app/v1/analysis/account/workbench/setup/account-analysis-setup.component';
+import { AccountAnalysisSelectFacilityItemsComponent } from '@app/v1/analysis/account/workbench/select-facility-items/account-analysis-select-facility-items.component';
+import { AccountAnalysisResultsShellComponent } from '@app/v1/analysis/account/workbench/results/shell/account-analysis-results-shell.component';
+import { AccountAnalysisAnnualComponent } from '@app/v1/analysis/account/workbench/results/annual/account-analysis-annual.component';
+import { AccountAnalysisMonthlyTableComponent } from '@app/v1/analysis/account/workbench/results/monthly-table/account-analysis-monthly-table.component';
+import { AccountAnalysisMonthlyChartComponent } from '@app/v1/analysis/account/workbench/results/monthly-chart/account-analysis-monthly-chart.component';
+import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/analysis/account/workbench/results/facility-details/account-analysis-facility-details.component';
+import { AccountAnalysisFacilityContributionsComponent } from '@app/v1/analysis/account/workbench/results/facility-contributions/account-analysis-facility-contributions.component';
+import { AccountAnalysisUsedByComponent } from '@app/v1/analysis/account/workbench/used-by/account-analysis-used-by.component';
+import { FacilityAnalysisWorkbenchComponent } from '@app/v1/analysis/facility/workbench/facility-analysis-workbench.component';
+import { FacilityAnalysisSetupComponent } from '@app/v1/analysis/facility/workbench/analysis-setup/facility-analysis-setup.component';
+import { FacilityAnalysisGroupShellComponent } from '@app/v1/analysis/facility/workbench/group/shell/facility-analysis-group-shell.component';
+import { GroupVisualizationComponent } from '@app/v1/analysis/facility/workbench/group/visualization/group-visualization.component';
+import { FacilityAnalysisGroupSetupComponent } from '@app/v1/analysis/facility/workbench/group/setup/facility-analysis-group-setup.component';
+import { FacilityAnalysisBankingComponent } from '@app/v1/analysis/facility/workbench/group/banking/facility-analysis-banking.component';
+import { FacilityAnalysisRegressionComponent } from '@app/v1/analysis/facility/workbench/group/regression/facility-analysis-regression.component';
+import { FacilityAnalysisGroupAnnualComponent } from '@app/v1/analysis/facility/workbench/group/results/annual/facility-analysis-group-annual.component';
+import { FacilityAnalysisGroupMonthlyTableComponent } from '@app/v1/analysis/facility/workbench/group/results/monthly-table/facility-analysis-group-monthly-table.component';
+import { FacilityAnalysisGroupMonthlyChartComponent } from '@app/v1/analysis/facility/workbench/group/results/monthly-chart/facility-analysis-group-monthly-chart.component';
+import { FacilityAnalysisResultsShellComponent } from '@app/v1/analysis/facility/workbench/results/facility/shell/facility-analysis-results-shell.component';
+import { FacilityAnalysisAnnualComponent } from '@app/v1/analysis/facility/workbench/results/facility/annual/facility-analysis-annual.component';
+import { FacilityAnalysisMonthlyTableComponent } from '@app/v1/analysis/facility/workbench/results/facility/monthly-table/facility-analysis-monthly-table.component';
+import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/analysis/facility/workbench/results/facility/monthly-chart/facility-analysis-monthly-chart.component';
+import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/analysis/facility/workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
+import { FacilityAnalysisUsedByComponent } from '@app/v1/analysis/facility/workbench/used-by/facility-analysis-used-by.component';
+import { singleFacilityAnalysisPairGuard } from '@app/v1/analysis/single-facility-analysis-pair.guard';
+
+import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
+import { inventoryLeaveGuard } from '@app/v1/shell/inventory-leave.guard';
 
 export const V1Routes: Routes = [
   {
@@ -117,7 +115,7 @@ export const V1Routes: Routes = [
         path: 'workspace/account/:accountGuid',
         component: WorkspaceShellComponent,
         canActivate: [accountGuidReadyGuard],
-        canActivateChild: [singleSiteAccountRedirectGuard],
+        canActivateChild: [singleSiteAccountRedirectGuard, inventoryScopeChangeGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
@@ -134,13 +132,13 @@ export const V1Routes: Routes = [
               { path: '', pathMatch: 'full', redirectTo: 'portfolio' },
               {
                 path: 'portfolio',
-                component: AccountPortfolioComponent,
+                component: DataInventoryComponent,
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'facilities' },
-                  { path: 'facilities', component: AccountPortfolioFacilitiesTabComponent },
-                  { path: 'meters', component: AccountPortfolioMetersTabComponent },
-                  { path: 'predictors', component: AccountPortfolioPredictorsTabComponent },
-                  { path: 'energy-uses', component: AccountPortfolioEnergyUsesTabComponent },
+                  { path: 'facilities', component: FacilitiesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'meters', component: MetersInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'predictors', component: PredictorsInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'energy-uses', component: EnergyUsesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },
@@ -198,7 +196,7 @@ export const V1Routes: Routes = [
             path: 'analysis',
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: AccountAnalysisDashboardComponent },
+              { path: 'dashboard', component: AnalysisInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
               {
                 path: 'workbench/:analysisGuid',
                 component: AccountAnalysisWorkbenchComponent,
@@ -250,15 +248,10 @@ export const V1Routes: Routes = [
           {
             path: 'data',
             children: [
-              { path: '', pathMatch: 'full', redirectTo: 'meters' },
               {
-                path: 'meters',
-                component: FacilityMetersComponent,
-                children: [
-                  { path: '', pathMatch: 'full', component: MetersDashboardComponent },
-                  {
-                    path: ':meterGuid',
-                    component: MeterWorkbenchComponent,
+                path: 'meters/:meterGuid',
+                component: MeterWorkspaceComponent,
+                children: [{ path: '', component: MeterWorkbenchComponent,
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: MeterWorkbenchSettingsComponent, data: { meterTab: 'settings' } },
@@ -270,12 +263,11 @@ export const V1Routes: Routes = [
                       { path: 'quality', component: MeterWorkbenchQualityReportComponent, data: { meterTab: 'quality' } },
                       { path: '**', redirectTo: 'settings' }
                     ]
-                  }
-                ]
+                }]
               },
               {
                 path: 'meter-grouping',
-                component: FacilityMetersComponent,
+                component: MeterWorkspaceComponent,
                 children: [
                   { path: '', pathMatch: 'full', component: MeterGroupingComponent },
                   {
@@ -295,13 +287,7 @@ export const V1Routes: Routes = [
                 ]
               },
               {
-                path: 'predictors',
-                component: FacilityPredictorsComponent,
-                providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS,
-                children: [
-                  { path: '', pathMatch: 'full', component: PredictorsDashboardComponent },
-                  {
-                    path: 'weather',
+                path: 'predictors/weather',
                     children: [
                       {
                         path: 'new',
@@ -346,9 +332,9 @@ export const V1Routes: Routes = [
                         ]
                       }
                     ]
-                  },
-                  {
-                    path: ':predictorGuid',
+              },
+              {
+                    path: 'predictors/:predictorGuid',
                     component: PredictorWorkbenchComponent,
                     canActivate: [predictorCanonicalRouteGuard],
                     children: [
@@ -362,14 +348,12 @@ export const V1Routes: Routes = [
                       },
                       { path: '**', redirectTo: 'settings' }
                     ]
-                  }
-                ]
               },
-              { path: 'energy-uses', component: FacilityDataPlaceholderComponent, data: { title: 'Energy Uses' } },
+              { path: 'energy-uses', component: EnergyUsesPlaceholderComponent, data: { title: 'Energy Uses' } },
               { path: 'custom-grid-factors', component: CustomGridFactorsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-fuels', component: CustomFuelsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-gwps', component: CustomGwpsComponent, canDeactivate: [unsavedChangesGuard] },
-              { path: '**', redirectTo: 'meters' }
+              { path: '**', redirectTo: '/v1' }
             ]
           },
           {
@@ -383,7 +367,7 @@ export const V1Routes: Routes = [
               { path: 'financial', component: FacilitySettingsFinancialComponent },
               { path: 'data-validation', component: FacilitySettingsDataValidationComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'staleness', redirectTo: 'data-validation', pathMatch: 'full' },
-              { path: 'backup', component: FacilitySettingsBackupComponent },
+              { path: 'backup', component: FacilitySettingsBackupComponent, canActivate: [singleFacilityBackupCanonicalGuard] },
               { path: 'portfolio', component: PortfolioTransitionSettingsComponent },
               { path: 'delete', component: FacilitySettingsDeleteComponent },
               { path: '**', redirectTo: 'profile' }
@@ -393,8 +377,6 @@ export const V1Routes: Routes = [
             path: 'analysis',
             canActivateChild: [singleFacilityAnalysisPairGuard],
             children: [
-              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: FacilityAnalysisDashboardComponent },
               {
                 path: 'workbench/:analysisGuid',
                 component: FacilityAnalysisWorkbenchComponent,
@@ -435,7 +417,7 @@ export const V1Routes: Routes = [
                   { path: '**', redirectTo: 'setup' }
                 ]
               },
-              { path: '**', redirectTo: 'dashboard' }
+              { path: '**', redirectTo: '/v1' }
             ]
           },
           { path: 'reports', children: FACILITY_REPORT_ROUTES },

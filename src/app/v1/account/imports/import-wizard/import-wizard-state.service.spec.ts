@@ -10,7 +10,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { facility, group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { ImportSessionService } from '../import-session.service';
 import { ImportMeterReviewStateService } from './import-meter-review-state.service';
 import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';
@@ -692,20 +692,20 @@ describe('ImportWizardStateService', () => {
     expect(service.error()).toBe('write failed');
   });
 
-  it('returns to a valid workspace origin after completion', () => {
-    const selectedFacility = facility({ guid: 'facility-a', accountId: 'account-1' });
-    workspaceFacilities.set([selectedFacility]);
-    TestBed.inject(ImportSessionService).begin({
-      facilityGuid: selectedFacility.guid,
-      returnUrl: '/v1/workspace/facility/facility-a/data/predictors?tab=monthly'
-    });
-    service.initialize(templateDraft());
-
-    service.viewImportedData();
-
-    expect(router.navigateByUrl).toHaveBeenCalledWith(
-      '/v1/workspace/facility/facility-a/data/predictors?tab=monthly'
-    );
+  it.each([
+    '/v1/workspace/account/account-1/data/portfolio/meters',
+    '/v1/workspace/account/account-1/data/portfolio/predictors?facility=facility-a',
+    '/v1/workspace/facility/facility-a/data/meters/meter-a/readings',
+    '/v1/workspace/account/account-1/analysis/dashboard?facility=facility-a',
+    '/v1/workspace/account/account-1/reports/dashboard',
+    '/v1/workspace/account/account-1/reports/workbench/report-a/setup',
+    '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/results',
+    '/v1/workspace/account/account-1/reports/dashboard?facility=facility-a'
+  ])('returns to its validated source with scope intact: %s', returnUrl => {
+    workspaceFacilities.set([facility({ guid: 'facility-a', accountId: 'account-1' })]);
+    TestBed.inject(ImportSessionService).begin({ facilityGuid: 'facility-a', returnUrl });
+    service.initialize(templateDraft()); service.viewImportedData();
+    expect(router.navigateByUrl).toHaveBeenCalledWith(returnUrl);
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
@@ -721,6 +721,16 @@ describe('ImportWizardStateService', () => {
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1/workspace/account', 'account-1', 'data', 'portfolio', 'facilities'
     ]);
+  });
+
+  it.each([
+    'home/overview', 'settings/data-validation', 'data/custom-fuels',
+    'imports/upload', 'imports/file/previous-import/complete'
+  ])('uses the data fallback instead of returning to %s', source => {
+    TestBed.inject(ImportSessionService).begin({ returnUrl: `/v1/workspace/account/account-1/${source}` });
+    service.initialize(templateDraft()); service.viewImportedData();
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/v1/workspace/account', 'account-1', 'data', 'portfolio', 'facilities']);
   });
 
   it('prepares the facility review from included records and current reading decisions', () => {

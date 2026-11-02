@@ -70,8 +70,8 @@ export class FacilitySettingsUnitsComponent extends FacilitySettingsDetailBase {
     this.applyFormAvailability(this.canWrite());
     await this.saveFacility(
       'Saving facility units',
-      facility => this.settingsForms.updateFacilityFromUnitsForm(this.form, facility),
-      account => this.settingsForms.updateAccountFromUnitsForm(this.form, account)
+      'units',
+      facility => this.settingsForms.updateFacilityFromUnitsForm(this.form, facility)
     );
   }
 

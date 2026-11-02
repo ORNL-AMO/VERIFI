@@ -21,7 +21,7 @@
       </span>
     </div>
 
-    @if (unitsDiffer()) {
+    @if (!singleFacilityPresentation() && unitsDiffer()) {
       <div class="v1-alert v1-alert--info">
         <app-ui-icon name="info"></app-ui-icon>
         <span>This facility has unit settings that differ from {{ currentAccount.name }}.</span>
@@ -34,7 +34,7 @@
     <div class="v1-settings-grid v1-settings-grid--2">
       <label>
         <span>Units of measure</span>
-        <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+        <select class="v1-select" formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
           <option [ngValue]="'Imperial'">Imperial</option>
           <option [ngValue]="'Metric'">Metric</option>
           <option [ngValue]="'Custom'">Custom</option>
@@ -53,7 +53,7 @@
       </fieldset>
       <label>
         <span>Result energy unit</span>
-        <select formControlName="energyUnit" (change)="saveUnits()">
+        <select class="v1-select" formControlName="energyUnit" (change)="saveUnits()">
           @for (option of energyUnitOptions; track option.value) {
             <option [ngValue]="option.value" [innerHTML]="option.display"></option>
           }
@@ -61,7 +61,7 @@
       </label>
       <label>
         <span>Electricity unit</span>
-        <select formControlName="electricityUnit" (change)="saveUnits()">
+        <select class="v1-select" formControlName="electricityUnit" (change)="saveUnits()">
           @for (option of energyUnitOptions; track option.value) {
             <option [ngValue]="option.value" [innerHTML]="option.display"></option>
           }
@@ -69,7 +69,7 @@
       </label>
       <label>
         <span>Liquid volume unit</span>
-        <select formControlName="volumeLiquidUnit" (change)="saveUnits()">
+        <select class="v1-select" formControlName="volumeLiquidUnit" (change)="saveUnits()">
           @for (option of volumeLiquidOptions; track option.value) {
             <option [ngValue]="option.value" [innerHTML]="option.display"></option>
           }
@@ -77,7 +77,7 @@
       </label>
       <label>
         <span>Gas volume unit</span>
-        <select formControlName="volumeGasUnit" (change)="saveUnits()">
+        <select class="v1-select" formControlName="volumeGasUnit" (change)="saveUnits()">
           @for (option of volumeGasOptions; track option.value) {
             <option [ngValue]="option.value" [innerHTML]="option.display"></option>
           }
@@ -85,7 +85,7 @@
       </label>
       <label>
         <span>Mass unit</span>
-        <select formControlName="massUnit" (change)="saveUnits()">
+        <select class="v1-select" formControlName="massUnit" (change)="saveUnits()">
           @for (option of massUnitOptions; track option.value) {
             <option [ngValue]="option.value" [innerHTML]="option.display"></option>
           }
@@ -93,7 +93,7 @@
       </label>
       <label>
         <span>eGRID subregion</span>
-        <select formControlName="eGridSubregion" (change)="saveUnits()">
+        <select class="v1-select" formControlName="eGridSubregion" (change)="saveUnits()">
           @for (subregion of subregionOptions(); track subregion) {
             <option [ngValue]="subregion">{{ subregion }}</option>
           }

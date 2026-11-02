@@ -1,3 +1,8 @@
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { facility } from '@app/v1/data/meters/facility-meters.testing';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ShellHeaderTestModule } from './shell-header.testing';
 import { signal } from '@angular/core';
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { CommonModule } from '@angular/common';
@@ -9,6 +14,21 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { ShellHeaderComponent } from './shell-header.component';
 
 describe('ShellHeaderComponent', () => {
+  it('shows one static facility identity and restores account scope controls after conversion', () => {
+    const { fixture, navigation } = setup(true);
+    navigation.singleFacilityContext.set(facility({ name: 'Plant identity' })); fixture.detectChanges();
+    const identity = fixture.nativeElement.querySelector('.v1-workspace__single-identity');
+    expect(identity.textContent).toContain('Plant identity');
+    expect(identity.querySelector('app-ui-icon')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-facility-picker')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-workspace__account-link')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-header-backup')).not.toBeNull();
+    fixture.nativeElement.querySelector('.v1-workspace__brand').click(); expect(navigation.showWelcome).toHaveBeenCalledOnce();
+    navigation.singleFacilityContext.set(undefined); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-facility-picker')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-workspace__account-link').textContent).toContain('Account A');
+  });
+
   it('downloads the whole account immediately, including in facility context', () => {
     const { fixture, backups, navigation } = setup(true);
     navigation.contextMode.mockReturnValue('facility');
@@ -68,60 +88,36 @@ describe('ShellHeaderComponent', () => {
     expect(appearance.setBackgroundPattern).toHaveBeenCalledWith('skyline-rocket-night');
   });
 
-  it('shows the account dropdown and support panel control on workspace routes', () => {
+  it('shows an account scope reset and a facility chooser without account switching', () => {
     const { fixture, navigation } = setup(true);
-
-    expect(fixture.nativeElement.querySelector('.v1-account-switcher__button')?.textContent).toContain('Account A');
-    expect(fixture.nativeElement.querySelector('select[aria-label="Select facility"]')).toBeNull();
-
-    const accountButton: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-account-switcher__button');
-    accountButton.click();
-    fixture.detectChanges();
-
-    const menu = fixture.nativeElement.querySelector('.v1-account-switcher__dropdown');
-    expect(menu?.textContent).toContain('Account A');
-    expect(menu?.textContent).toContain('Single facility');
-    expect(menu?.textContent).toContain('Account B');
-    expect(menu?.textContent).toContain('Portfolio');
-    expect(menu?.textContent).toContain('Add new account');
-    expect(menu?.textContent).toContain('Import backup');
-    expect(menu?.textContent).toContain('Manage accounts');
-    expect(menu.querySelectorAll('button:disabled').length).toBe(3);
-
-    const accountItems: Array<HTMLButtonElement> = Array.from(menu.querySelectorAll('.v1-account-switcher__item:not(:disabled)'));
-    expect(accountItems[0].classList.contains('active')).toBe(true);
-    accountItems[1].click();
-    fixture.detectChanges();
-
-    expect(navigation.openWorkspace).toHaveBeenCalledWith('account-b');
-    expect(fixture.componentInstance.accountMenuOpen).toBe(false);
-
-    const panelButton: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Toggle support panel"]');
-    panelButton.click();
-
+    expect(fixture.nativeElement.querySelector('.v1-account-switcher__button')).toBeNull();
+    const home = fixture.nativeElement.querySelector('.v1-workspace__account-link') as HTMLButtonElement;
+    expect(home.textContent).toContain('Account A');
+    home.click();
+    expect(navigation.changeFacilityScope).toHaveBeenCalledWith({ kind: 'all' });
+    expect(navigation.showWelcome).not.toHaveBeenCalled();
+    expect(home.querySelector('app-ui-icon')?.getAttribute('name')).toBe('account');
+    const picker = fixture.nativeElement.querySelector('.v1-facility-picker__toggle') as HTMLButtonElement;
+    expect(picker.textContent).toContain('All facilities');
+    picker.click(); fixture.detectChanges();
+    document.querySelector<HTMLButtonElement>('.v1-facility-picker__list button')!.click(); fixture.detectChanges();
+    expect(navigation.changeFacilityScope).toHaveBeenCalledWith({ kind: 'facility', facilityGuid: 'facility-a' });
+    fixture.nativeElement.querySelector('[aria-label="Toggle support panel"]').click();
     expect(navigation.toggleSupportPanel).toHaveBeenCalled();
   });
 
-  it('closes open header menus from the backdrop and Escape key', () => {
+  it('keeps only one header popover open and dismisses appearance settings on Escape', () => {
     const { fixture } = setup(true);
-    const accountButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('.v1-account-switcher__button');
-
-    accountButton().click();
-    fixture.detectChanges();
-
-    const backdrop: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-workspace__backdrop');
-    backdrop.click();
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.accountMenuOpen).toBe(false);
-
-    accountButton().click();
-    fixture.detectChanges();
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.accountMenuOpen).toBe(false);
+    const settings = fixture.nativeElement.querySelector('[aria-label="Appearance settings"]') as HTMLButtonElement;
+    settings.click(); fixture.detectChanges();
+    fixture.nativeElement.querySelector('.v1-facility-picker__toggle').click(); fixture.detectChanges();
+    expect(fixture.componentInstance.isSettingsOpen).toBe(false);
+    settings.click(); fixture.detectChanges();
+    expect(document.querySelector('.v1-facility-picker__menu')).toBeNull();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); fixture.detectChanges();
+    expect(fixture.componentInstance.isSettingsOpen).toBe(false);
   });
+
 });
 
 function setup(isWorkspaceRoute: boolean): {
@@ -150,10 +146,9 @@ function setup(isWorkspaceRoute: boolean): {
     isSupportPanelOpen: vi.fn(() => true),
     contextMode: vi.fn(() => 'account'),
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
-    accountOptions: vi.fn(() => [
-      { guid: 'account-a', name: 'Account A', descriptor: 'Single facility', active: true },
-      { guid: 'account-b', name: 'Account B', descriptor: 'Portfolio', active: false }
-    ]),
+    headerFacility: () => undefined, singleFacilityContext: signal<IdbFacility | undefined>(undefined), isSingleSiteWorkspace: () => false,
+    scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '',
+    changeFacilityScope: vi.fn(),
     facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),
     facility: vi.fn(() => ({ guid: 'facility-a', name: 'Facility A' })),
     showWelcome: vi.fn(),
@@ -169,8 +164,7 @@ function setup(isWorkspaceRoute: boolean): {
     download: vi.fn(async () => undefined)
   };
   TestBed.configureTestingModule({
-    imports: [CommonModule, IconComponent],
-    declarations: [ShellHeaderComponent],
+    imports: [ShellHeaderTestModule, OverlayModule, ReactiveFormsModule, CommonModule, IconComponent],
     providers: [
       { provide: ManualBackupDownloadService, useValue: backups },
       { provide: AppearanceService, useValue: appearance },

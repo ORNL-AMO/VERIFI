@@ -1,0 +1,11 @@
+@if (items().length) {
+  <section class="v1-nav__subgroup" [attr.aria-labelledby]="'recent-' + section() + '-title'">
+    <span class="v1-nav__sublabel" [id]="'recent-' + section() + '-title'">Recents</span>
+    @for (item of items(); track item.guid) {
+      <a class="v1-nav__link" [routerLink]="item.route" [title]="item.label" [attr.aria-label]="item.label">
+        <app-ui-icon [name]="item.icon"/>
+        <span class="recent-items__identity"><span class="v1-nav__item-label recent-items__name">{{ item.name }}</span><span class="recent-items__facility"><app-ui-icon name="facility" [size]="12"/><span>{{ item.facilityName }}</span></span></span>
+      </a>
+    }
+  </section>
+}

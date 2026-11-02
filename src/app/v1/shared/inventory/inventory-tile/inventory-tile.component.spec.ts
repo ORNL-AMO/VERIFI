@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { portfolioTile } from '@app/v1/account/data/portfolio/portfolio-inventory.testing';
+import { portfolioTile } from '../inventory.testing';
 import { InventoryTileComponent } from './inventory-tile.component';
 
 describe('portfolio tile interactions and additive details', () => {
   function setup() {
     TestBed.configureTestingModule({ imports: [InventoryTileComponent], providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(InventoryTileComponent);
-    fixture.componentRef.setInput('tile', portfolioTile('m1', { location: 'Oak Ridge, TN', owner: { label: 'Plant', route: ['/plant'] },
+    fixture.componentRef.setInput('tile', portfolioTile('m1', { location: 'Oak Ridge, TN', owner: { facilityGuid: 'facility-a', label: 'Plant', route: ['/plant'] },
       chip: 'Electricity', station: 'Station', meterSnapshot: {
         readingCount: 120, rangeLabel: 'Jan 2026', invalidDateCount: 0,
         readingsLink: { label: 'Open readings', route: ['/readings'] },
@@ -17,10 +17,19 @@ describe('portfolio tile interactions and additive details', () => {
       } }));
     fixture.detectChanges(); return fixture;
   }
+  it('removes repeated ownership while keeping title and card actions for a single facility', () => {
+    const fixture = setup(); fixture.componentRef.setInput('showOwnership', false); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-inventory-card-header')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.portfolio-tile__name')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.portfolio-tile__menu-button')).not.toBeNull();
+    fixture.componentRef.setInput('print', true); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-inventory-card-header')).toBeNull();
+  });
+
   it('shows identity, location, facility icon, and status in Simple; facts accumulate at higher levels', () => {
     const fixture = setup(), root = fixture.nativeElement as HTMLElement;
     expect(root.querySelector('.portfolio-tile__location')?.textContent).toBe('Oak Ridge, TN');
-    expect(root.querySelector('.portfolio-tile__owner svg')).not.toBeNull();
+    expect(root.querySelector('app-inventory-card-header svg')).not.toBeNull();
     expect(root.textContent).toContain('All data valid'); expect(root.querySelector('dl')).toBeNull();
     fixture.componentRef.setInput('level', 'summary'); fixture.detectChanges();
     expect(root.textContent).toContain('120'); expect(root.textContent).not.toContain('kWh');
@@ -28,9 +37,27 @@ describe('portfolio tile interactions and additive details', () => {
     expect(root.textContent).toContain('120'); expect(root.textContent).toContain('kWh'); expect(root.textContent).toContain('Missing readings');
     expect(root.querySelector('.reading-snapshot__attention a')?.getAttribute('href')).toBe('/quality');
   });
+  it.each(['meter', 'predictor', 'analysis', 'report'] as const)('shows the facility name once in the %s header at every detail level', resource => {
+    const fixture = setup(), root = fixture.nativeElement as HTMLElement;
+    const base = portfolioTile('owned', { owner: { facilityGuid: 'facility-a', label: 'North plant', route: ['/north'] } });
+    const tile = resource === 'analysis' ? { ...base, analysisSnapshot: { scope: 'facility' as const, active: false, outcomes: [], facts: [], rosterTitle: '', roster: [], findings: [], modified: 'Today' } }
+      : resource === 'report' ? { ...base, reportSnapshot: { scope: 'facility' as const, typeLabel: 'Analysis', facts: [], modified: 'Today', scopeLabel: 'North plant', findings: [] } }
+      : { ...base, ...(resource === 'meter' ? { meterSnapshot: fixture.componentInstance.tile.meterSnapshot } : { predictorSnapshot: fixture.componentInstance.tile.meterSnapshot }) };
+    fixture.componentRef.setInput('tile', tile);
+    for (const level of ['simple', 'summary', 'detailed'] as const) {
+      fixture.componentRef.setInput('level', level); fixture.detectChanges();
+      const header = root.querySelector('app-inventory-card-header')!;
+      expect(header.textContent?.trim()).toBe('North plant');
+      expect(header.getAttribute('data-scope')).toBe('facility');
+      expect(header.querySelector('svg')).not.toBeNull();
+      expect(header.querySelector('a')?.getAttribute('href')).toBe('/north');
+      expect(root.querySelectorAll('.portfolio-tile__owner')).toHaveLength(1);
+      expect(root.querySelector('.portfolio-tile__metadata .portfolio-tile__owner')).toBeNull();
+    }
+  });
   it('emits typed navigation only for unmodified link clicks and leaves native link context menus intact', () => {
     const fixture = setup(), component = fixture.componentInstance;
-    const navigate = vi.fn(); component.navigationRequested.subscribe(navigate);
+    const navigate = vi.fn(), filter = vi.fn(); component.navigationRequested.subscribe(navigate); component.facilityScopeRequested.subscribe(filter);
     const link = fixture.nativeElement.querySelector('.portfolio-tile__name') as HTMLAnchorElement;
     link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
     expect(navigate).not.toHaveBeenCalled();
@@ -38,7 +65,10 @@ describe('portfolio tile interactions and additive details', () => {
     const context = new MouseEvent('contextmenu', { bubbles: true, cancelable: true }); link.dispatchEvent(context);
     expect(context.defaultPrevented).toBe(false);
     const owner = fixture.nativeElement.querySelector('.portfolio-tile__owner') as HTMLAnchorElement;
-    owner.click(); expect(navigate).toHaveBeenLastCalledWith(['/plant']);
+    owner.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
+    expect(filter).not.toHaveBeenCalled();
+    owner.click(); expect(filter).toHaveBeenCalledExactlyOnceWith('facility-a');
+    expect(navigate).toHaveBeenCalledTimes(1);
   });
   it('keeps Simple weather identity compact while retaining station repair warnings and expanded details', () => {
     const fixture=setup(),root=fixture.nativeElement as HTMLElement;
@@ -102,12 +132,12 @@ describe('portfolio tile interactions and additive details', () => {
     const fixture = setup(); fixture.componentRef.setInput('selecting', true); fixture.componentRef.setInput('print', true); fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('button,input')).toBeNull();
   });
-  it('places the detailed meter group beside facility ownership and preserves native group links', () => {
+  it('keeps the detailed meter group in metadata below facility ownership and preserves native group links', () => {
     const fixture=setup(),root=fixture.nativeElement as HTMLElement,navigate=vi.fn();
     const meterSnapshot={readingCount:0,rangeLabel:'No readings yet',invalidDateCount:0,
       readingsLink:{label:'Open readings',route:['/meter','readings']},recentReadings:[],facts:[],findings:[],remainingFindings:0,
       group:{label:'Meter group',value:'Main building',route:['/facility','meter-grouping','g','monthly-table']}};
-    fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{label:'Plant',route:['/plant']},meterSnapshot}));
+    fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{facilityGuid:'facility-a',label:'Plant',route:['/plant']},meterSnapshot}));
     fixture.componentRef.setInput('level','summary');fixture.detectChanges();
     expect(root.querySelector('.portfolio-tile__group')).toBeNull();
     fixture.componentRef.setInput('level','detailed');fixture.detectChanges();
@@ -118,7 +148,7 @@ describe('portfolio tile interactions and additive details', () => {
     fixture.componentInstance.navigationRequested.subscribe(navigate);
     group.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,metaKey:true}));expect(navigate).not.toHaveBeenCalled();
     group.click();expect(navigate).toHaveBeenCalledWith(meterSnapshot.group.route);
-    fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{label:'Plant',route:['/plant']},
+    fixture.componentRef.setInput('tile',portfolioTile('m1',{owner:{facilityGuid:'facility-a',label:'Plant',route:['/plant']},
       meterSnapshot:{...meterSnapshot,group:{label:'Meter group',value:'Not assigned'}}}));fixture.detectChanges();
     expect(root.querySelector('.portfolio-tile__group')?.textContent).toContain('Not assigned');
     expect(root.querySelector('.portfolio-tile__group a')).toBeNull();

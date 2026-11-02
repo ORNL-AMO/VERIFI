@@ -1,4 +1,4 @@
-import { Component, HostListener, computed, inject } from '@angular/core';
+import { Component, HostListener, ViewChild, computed, inject } from '@angular/core';
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import {
   AppearanceService,
@@ -8,6 +8,8 @@ import {
 } from '@app/v1/appearance/appearance.service';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
+
+import { FacilityPickerComponent } from './facility-picker/facility-picker.component';
 
 interface PaletteOption {
   readonly id: Palette;
@@ -76,34 +78,21 @@ export class ShellHeaderComponent {
   ];
 
   isSettingsOpen = false;
-  accountMenuOpen = false;
+  @ViewChild('facilityPicker') private facilityPicker?: FacilityPickerComponent;
 
   get hasBackdrop(): boolean {
-    return this.isSettingsOpen || this.accountMenuOpen;
+    return this.isSettingsOpen;
   }
 
   @HostListener('document:keydown.escape')
   closeOnEscape(): void {
     this.closeAll();
+    this.facilityPicker?.close();
   }
 
   toggleSettings(): void {
     this.isSettingsOpen = !this.isSettingsOpen;
-    if (this.isSettingsOpen) {
-      this.accountMenuOpen = false;
-    }
-  }
-
-  toggleAccountMenu(): void {
-    this.accountMenuOpen = !this.accountMenuOpen;
-    if (this.accountMenuOpen) {
-      this.isSettingsOpen = false;
-    }
-  }
-
-  selectAccount(accountGuid: string): void {
-    this.closeAll();
-    void this.navigation.openWorkspace(accountGuid);
+    if (this.isSettingsOpen) this.facilityPicker?.close();
   }
 
   setBackgroundPattern(value: string): void {
@@ -115,6 +104,5 @@ export class ShellHeaderComponent {
   closeAll(): void {
     this.backupTooltipOpen = false;
     this.isSettingsOpen = false;
-    this.accountMenuOpen = false;
   }
 }

@@ -9,7 +9,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, inject, 
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { InventoryTileMenuAction, InventoryTileActionRequest, InventoryDetailLevel, InventoryTile, InventoryTileDetailChange } from '../inventory.models';
+import { FacilityInventoryDestination, InventoryTileMenuAction, InventoryTileActionRequest, InventoryDetailLevel, InventoryTile, InventoryTileDetailChange } from '../inventory.models';
 
 @Component({ selector: 'app-inventory-tile', standalone: true, imports: [IconComponent, CdkMenuModule, ReactiveFormsModule, FacilitySnapshotComponent, ReadingSnapshotComponent, AnalysisSnapshotComponent, InventoryCardHeaderComponent, ReportSnapshotComponent],
   templateUrl: './inventory-tile.component.html', styleUrls: ['./inventory-tile.component.css'] })
@@ -20,6 +20,7 @@ export class InventoryTileComponent {
   @Input() level: InventoryDetailLevel = 'simple';
   @Input() print = false;
   @Input() actions: readonly InventoryTileMenuAction[] = [];
+  @Input() showOwnership = true;
   @Input() selecting = false;
   @Input() selected = false;
   @Input() canSelect = true;
@@ -28,6 +29,8 @@ export class InventoryTileComponent {
   readonly selectionControl = new FormControl(false, { nonNullable: true });
   @Output() readonly detailChanged = new EventEmitter<InventoryTileDetailChange>();
   @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
+  @Output() readonly facilityScopeRequested = new EventEmitter<string>();
+  @Output() readonly facilityInventoryRequested = new EventEmitter<FacilityInventoryDestination>();
   @ViewChild(CdkMenuTrigger) private trigger?: CdkMenuTrigger;
   @ViewChild('menuButton') private menuButton?: ElementRef<HTMLButtonElement>;
   readonly menuClasses = signal('v1-root portfolio-tile-menu');
@@ -44,12 +47,12 @@ export class InventoryTileComponent {
     this.selectionControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(selected => this.selectionChanged.emit({ guid: this.tile.guid, selected }));
   }
   ngOnChanges(): void {
-    this.tileLabel = this.tile.reportSnapshot ? `${this.tile.reportSnapshot.scope} report: ${this.tile.name}${this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.analysisSnapshot ? `${this.tile.analysisSnapshot.scope} analysis: ${this.tile.name}${this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.name;
+    this.tileLabel = this.tile.reportSnapshot ? `${this.showOwnership ? this.tile.reportSnapshot.scope + ' ' : ''}report: ${this.tile.name}${!this.showOwnership && this.tile.reportSnapshot.formatLabel ? `, ${this.tile.reportSnapshot.formatLabel}` : ''}${this.showOwnership && this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.analysisSnapshot ? `${this.showOwnership ? this.tile.analysisSnapshot.scope + ' ' : ''}analysis: ${this.tile.name}${this.showOwnership && this.tile.owner ? `, ${this.tile.owner.label}` : ''}` : this.tile.name;
     this.selectionControl.setValue(this.selected, { emitEvent: false });
     if (this.canSelect) this.selectionControl.enable({ emitEvent: false }); else this.selectionControl.disable({ emitEvent: false });
     const href = (route: readonly string[]) => this.router.serializeUrl(this.router.createUrlTree([...route]));
-    this.mainHref = href(this.tile.route);
-    this.ownerHref = this.tile.owner ? href(this.tile.owner.route) : '';
+    this.mainHref = this.router.serializeUrl(this.router.createUrlTree([...this.tile.route], { queryParams: this.tile.queryParams }));
+    this.ownerHref = this.tile.owner ? this.router.serializeUrl(this.router.createUrlTree([...this.tile.owner.route], { queryParams: this.tile.owner.queryParams })) : '';
     this.stationHref = this.tile.stationLink ? href(this.tile.stationLink.route) : '';
     this.groupHref = this.tile.meterSnapshot?.group.route ? href(this.tile.meterSnapshot.group.route) : '';
     this.chipLabel = (this.level === 'simple' ? this.tile.simpleChip ?? this.tile.chip : this.tile.chip) ?? '';
@@ -60,6 +63,16 @@ export class InventoryTileComponent {
   open(event: MouseEvent, route: readonly string[]): void {
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); this.navigationRequested.emit(route);
+  }
+  openTile(event: MouseEvent): void {
+    if (!this.tile.facilityInventory) { this.open(event, this.tile.route); return; }
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); this.facilityInventoryRequested.emit(this.tile.facilityInventory);
+  }
+  filterFacility(event: MouseEvent): void {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (this.tile.owner) this.facilityScopeRequested.emit(this.tile.owner.facilityGuid);
   }
   contextMenu(event: MouseEvent): void {
     if (this.print || (event.composedPath()[0] as HTMLElement)?.closest('a,button,input,select,textarea')) return;

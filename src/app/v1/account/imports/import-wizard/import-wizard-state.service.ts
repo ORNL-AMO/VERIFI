@@ -1,5 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { parseWorkspaceRoute } from '@app/v1/shell/workspace-navigation.service';
+import { isWorkspaceDataDestination } from '@app/v1/shared/navigation/workspace-data-destination';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SpreadsheetImportCommandService } from '@data/import/spreadsheet-import-command.service';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
@@ -422,7 +424,7 @@ export class ImportWizardStateService {
       void this.router.navigate(['/v1/workspace/facility', draft.selectedFacilityId, 'data', 'energy-uses']);
     } else if (affected.length === 1) {
       const detail = draft.predictors.length && !draft.meters.length ? 'predictors' : 'meters';
-      void this.router.navigate(['/v1/workspace/facility', affected[0], 'data', detail]);
+      void this.router.navigate(['/v1/workspace/account', accountGuid, 'data', 'portfolio', detail], { queryParams: this.workspace.account()?.isSingleFacilityCompany === true ? {} : { facility: affected[0] } });
     } else {
       void this.router.navigate(['/v1/workspace/account', accountGuid, 'data', 'portfolio', 'facilities']);
     }
@@ -551,6 +553,7 @@ function allowedWorkspaceReturnUrl(
 ): string | undefined {
   if (!returnUrl?.startsWith('/') || returnUrl.startsWith('//')) return undefined;
   try {
+    if (!isWorkspaceDataDestination(parseWorkspaceRoute(returnUrl))) return undefined;
     const segments = returnUrl.split(/[?#]/, 1)[0]
       .split('/')
       .filter(Boolean)

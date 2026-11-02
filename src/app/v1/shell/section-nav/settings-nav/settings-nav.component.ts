@@ -9,16 +9,16 @@ import { settingsNavItems } from '../models';
 })
 export class SettingsNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly settingsTitle = computed(() => this.navigation.contextMode() === 'facility' ? 'Facility Settings' : 'Account Settings');
+  readonly settingsTitle = computed(() => this.navigation.isSingleSiteWorkspace() ? 'Settings' : this.navigation.contextFacility() ? 'Facility Settings' : 'Account Settings');
   readonly settingsItems = computed(() => settingsNavItems(
-    this.navigation.contextMode() === 'facility', !!this.navigation.account()?.isSingleFacilityCompany
+    !!this.navigation.singleFacilityContext() || !!this.navigation.contextFacility(), !!this.navigation.account()?.isSingleFacilityCompany
   ).map(item => {
-    const facility = this.navigation.facility();
+    const facility = this.navigation.singleFacilityContext() ?? this.navigation.contextFacility();
     const account = this.navigation.account();
     return {
       ...item,
       active: this.navigation.activeDetail() === item.id,
-      route: this.navigation.contextMode() === 'facility' && facility
+      route: facility
         ? this.navigation.facilitySettingsRoute(facility.guid, item.id)
         : account ? this.navigation.accountSettingsRoute(account.guid, item.id) : []
     };

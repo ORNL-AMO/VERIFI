@@ -60,12 +60,12 @@ export class FacilitySettingsProfileComponent extends FacilitySettingsDetailBase
     }
     await this.saveFacility(
       'Saving facility profile',
+      'profile',
       facility => {
         const updated = this.settingsForms.updateFacilityFromGeneralInformationForm(this.form, facility);
         updated.classification = this.form.controls['classification'].value;
         return updated;
-      },
-      account => this.settingsForms.updateAccountFromGeneralInformationForm(this.form, account)
+      }
     );
   }
 

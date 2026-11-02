@@ -1,0 +1,267 @@
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
+import { account, facility, group, meter, reading } from './facility-meters.testing';
+import { MeterActionsService } from './meter-actions.service';
+
+describe('MeterActionsService', () => {
+  it('creates a meter from factory defaults plus draft values', async () => {
+    const energyGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy' });
+    const { service, commandBoundary, meterHandler } = setup({ groups: [energyGroup] });
+
+    const created = await service.createMeter({
+      name: ' Main Electric ',
+      source: 'Electricity',
+      groupId: energyGroup.guid
+    });
+
+    expect(created).toMatchObject({
+      name: 'Main Electric',
+      source: 'Electricity',
+      groupId: 'group-energy',
+      facilityId: 'facility-a',
+      accountId: 'account-a'
+    });
+    expect(meterHandler.addMeter).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Main Electric',
+      source: 'Electricity'
+    }), 'account-a');
+    expect(commandBoundary.execute).toHaveBeenCalledWith(expect.objectContaining({
+      entityKind: 'meter',
+      changeKind: 'add',
+      label: 'Adding meter'
+    }), expect.any(Function));
+  });
+
+  it('creates for an explicitly chosen facility without changing the selected facility', async () => {
+    const { service, meterHandler } = setup();
+    const created = await service.createMeter({ name: 'Boiler', source: 'Natural Gas' }, 'facility-b');
+    expect(created).toMatchObject({ facilityId: 'facility-b', accountId: 'account-a', energyUnit: 'MMBtu' });
+    expect(meterHandler.addMeter).toHaveBeenCalledOnce();
+  });
+
+  it('rejects missing facilities and groups owned by another facility before saving', async () => {
+    const { service, meterHandler } = setup({ groups: [group({ guid: 'group-a' })] });
+    await expect(service.createMeter({ name: 'Main', source: 'Electricity' }, 'deleted'))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(service.createMeter({ name: 'Main', source: 'Electricity', groupId: 'group-a' }, 'facility-b'))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    expect(meterHandler.addMeter).not.toHaveBeenCalled();
+  });
+
+  it('creates, updates, and deletes groups through atomic meter group commands', async () => {
+    const existingGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy', id: 4 });
+    const groupedMeter = meter({ guid: 'meter-electric', name: 'Main', groupId: existingGroup.guid });
+    const { service, meterHandler, meterGroupHandler } = setup({
+      meters: [groupedMeter],
+      groups: [existingGroup]
+    });
+
+    await service.createGroup({ name: ' Water ', groupType: 'Water', description: ' Incoming ' });
+    await service.updateGroup(existingGroup, { name: 'Purchased Electricity', groupType: 'Energy' });
+    await service.deleteGroup(existingGroup);
+
+    expect(meterGroupHandler.createMeterGroup).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Water',
+      groupType: 'Water',
+      description: 'Incoming'
+    }), 'account-a');
+    expect(meterGroupHandler.updateMeterGroupAtomic).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Purchased Electricity' }),
+      false,
+      'Energy',
+      [],
+      [],
+      'account-a'
+    );
+    expect(meterGroupHandler.deleteMeterGroupAtomic).toHaveBeenCalledWith(
+      expect.objectContaining({ guid: existingGroup.guid }),
+      [expect.objectContaining({ guid: groupedMeter.guid, groupId: existingGroup.guid })],
+      'account-a'
+    );
+    expect(groupedMeter.groupId).toBe(existingGroup.guid);
+  });
+
+  it('uses the same reassignment command for drag and move actions without mutating workspace records', async () => {
+    const energyGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy' });
+    const ungroupedMeter = meter({ guid: 'meter-electric', name: 'Main', groupId: undefined, source: 'Electricity' });
+    const { service, meterHandler } = setup({
+      meters: [ungroupedMeter],
+      groups: [energyGroup]
+    });
+
+    await service.reassignMeter(ungroupedMeter, { id: energyGroup.guid, label: energyGroup.name, group: energyGroup });
+
+    expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.objectContaining({
+      guid: ungroupedMeter.guid,
+      groupId: energyGroup.guid
+    }), 'account-a');
+    expect(ungroupedMeter.groupId).toBeUndefined();
+  });
+
+  it('copies a meter without reusing meter or charge identities', async () => {
+    const sourceMeter = meter({
+      guid: 'meter-electric',
+      name: 'Main',
+      id: 7,
+      charges: [
+        {
+          guid: 'charge-a',
+          name: 'Demand',
+          chargeType: 'demand',
+          displayUsageInTable: true,
+          displayChargeInTable: true
+        }
+      ]
+    });
+    const { service, meterHandler } = setup({ meters: [sourceMeter] });
+
+    const copied = await service.copyMeter(sourceMeter);
+
+    expect(copied.name).toBe('Main (copy)');
+    expect(copied.guid).not.toBe(sourceMeter.guid);
+    expect(copied.id).toBe(10);
+    expect(copied.charges?.[0].guid).not.toBe('charge-a');
+    expect(sourceMeter.name).toBe('Main');
+    expect(sourceMeter.charges?.[0].guid).toBe('charge-a');
+    const persistedCopy = meterHandler.addMeter.mock.calls[0][0];
+    expect(persistedCopy.name).toBe('Main (copy)');
+    expect(persistedCopy.id).toBeUndefined();
+    expect(meterHandler.addMeter).toHaveBeenCalledWith(persistedCopy, 'account-a');
+  });
+
+  it('deletes a meter and its readings through one command', async () => {
+    const sourceMeter = meter({ guid: 'meter-electric', name: 'Main', id: 7 });
+    const meterData = [
+      reading({ guid: 'reading-a', meterId: sourceMeter.guid, id: 11 }),
+      reading({ guid: 'reading-b', meterId: sourceMeter.guid, id: 12 }),
+      reading({ guid: 'reading-other', meterId: 'meter-other', id: 13 })
+    ];
+    const { service, commandBoundary, meterHandler } = setup({
+      meters: [sourceMeter],
+      meterData
+    });
+
+    await service.deleteMeter(sourceMeter);
+
+    expect(commandBoundary.execute).toHaveBeenCalledWith(expect.objectContaining({
+      entityKind: 'meter',
+      changeKind: 'delete',
+      entityGuid: sourceMeter.guid,
+      publication: { mode: 'reload' }
+    }), expect.any(Function));
+    expect(meterHandler.deleteMeterWithData).toHaveBeenCalledWith({
+      meter: sourceMeter,
+      meterData: [meterData[0], meterData[1]]
+    }, 'account-a');
+  });
+
+  it('copies and deletes account meters outside the selected facility', async () => {
+    const selectedFacilityMeter = meter({ guid: 'meter-selected', facilityId: 'facility-a' });
+    const portfolioMeter = meter({ guid: 'meter-portfolio', facilityId: 'facility-b', name: 'Portfolio Meter', id: 21 });
+    const portfolioReading = reading({ guid: 'reading-portfolio', facilityId: 'facility-b', meterId: portfolioMeter.guid, id: 31 });
+    const { service, meterHandler } = setup({
+      meters: [selectedFacilityMeter, portfolioMeter],
+      selectedFacilityMeters: [selectedFacilityMeter],
+      meterData: [portfolioReading],
+      selectedFacilityMeterData: []
+    });
+
+    await service.copyMeter(portfolioMeter);
+    await service.deleteMeter(portfolioMeter);
+
+    expect(meterHandler.addMeter).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Portfolio Meter (copy)',
+      facilityId: 'facility-b'
+    }), 'account-a');
+    expect(meterHandler.deleteMeterWithData).toHaveBeenCalledWith({
+      meter: portfolioMeter,
+      meterData: [portfolioReading]
+    }, 'account-a');
+  });
+
+  it('blocks invalid source to group assignments before persistence', async () => {
+    const waterGroup = group({ guid: 'group-water', name: 'Water', groupType: 'Water' });
+    const electricMeter = meter({ guid: 'meter-electric', name: 'Main', groupId: undefined, source: 'Electricity' });
+    const { service, commandBoundary, meterHandler } = setup({
+      meters: [electricMeter],
+      groups: [waterGroup]
+    });
+
+    await expect(service.reassignMeter(electricMeter, { id: waterGroup.guid, label: waterGroup.name, group: waterGroup }))
+      .rejects.toMatchObject({ code: 'validation-failed' } satisfies Partial<WorkspaceWriteError>);
+    await expect(service.createMeter({ name: 'Electric', source: 'Electricity', groupId: waterGroup.guid }))
+      .rejects.toMatchObject({ code: 'validation-failed' } satisfies Partial<WorkspaceWriteError>);
+
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(meterHandler.updateMeter).not.toHaveBeenCalled();
+  });
+});
+
+function setup(options: {
+  meters?: ReturnType<typeof meter>[];
+  meterData?: ReturnType<typeof reading>[];
+  selectedFacilityMeters?: ReturnType<typeof meter>[];
+  selectedFacilityMeterData?: ReturnType<typeof reading>[];
+  groups?: ReturnType<typeof group>[];
+} = {}) {
+  const meterHandler = {
+    addMeter: vi.fn().mockImplementation(async item => ({ ...item, id: 10 })),
+    updateMeter: vi.fn().mockImplementation(async item => item),
+    deleteMeterWithData: vi.fn().mockResolvedValue(undefined),
+    deleteMeter: vi.fn().mockResolvedValue(1),
+    deleteMeterData: vi.fn().mockResolvedValue(1),
+    addMeterGroup: vi.fn().mockImplementation(async item => ({ ...item, id: 20 })),
+    updateMeterGroup: vi.fn().mockImplementation(async item => item),
+    deleteMeterGroup: vi.fn().mockResolvedValue(1)
+  };
+  const meterGroupHandler = {
+    createMeterGroup: vi.fn().mockImplementation(async item => ({ ...item, id: 20 })),
+    updateMeterGroupAtomic: vi.fn().mockResolvedValue(undefined),
+    deleteMeterGroupAtomic: vi.fn().mockResolvedValue(undefined),
+    addGroup: vi.fn().mockResolvedValue(undefined),
+    saveMeterGroup: vi.fn().mockResolvedValue(undefined),
+    deleteGroup: vi.fn().mockResolvedValue(undefined)
+  };
+  const commandBoundary = {
+    execute: vi.fn().mockImplementation(async (_options, persist) => ({
+      value: await persist(),
+      change: { entityKind: 'meter', changeKind: 'update', accountGuid: 'account-a' }
+    }))
+  };
+  const store = {
+    account: signal(account()),
+    selectedFacility: signal(facility()),
+    facilities: signal([facility(), facility({ guid: 'facility-b', energyUnit: 'MMBtu' })]),
+    meterGroups: signal(options.groups ?? []),
+    canWrite: signal(true),
+    hasPending: signal(false),
+    meters: signal(options.meters ?? []),
+    meterData: signal(options.meterData ?? []),
+    facilityMeters: signal(options.selectedFacilityMeters ?? options.meters ?? []),
+    facilityMeterData: signal(options.selectedFacilityMeterData ?? options.meterData ?? []),
+    facilityMeterGroups: signal(options.groups ?? [])
+  };
+
+  TestBed.configureTestingModule({
+    providers: [
+      MeterActionsService,
+      { provide: AccountWorkspaceStore, useValue: store },
+      { provide: WorkspaceCommandBoundary, useValue: commandBoundary },
+      { provide: MeterCommandHandler, useValue: meterHandler },
+      { provide: MeterGroupCommandHandler, useValue: meterGroupHandler }
+    ]
+  });
+
+  return {
+    service: TestBed.inject(MeterActionsService),
+    commandBoundary,
+    meterHandler,
+    meterGroupHandler
+  };
+}

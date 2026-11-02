@@ -8,6 +8,6 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
   templateUrl: './inventory-card-header.component.html', styleUrls: ['./inventory-card-header.component.css']
 })
 export class InventoryCardHeaderComponent {
-  readonly resource = input<'analysis' | 'report'>('analysis');
+  readonly resource = input<'analysis' | 'report' | undefined>('analysis');
   readonly scope = input.required<'account' | 'facility'>();
 }

@@ -2,10 +2,8 @@
 
 <section class="v1-account-settings" aria-labelledby="v1-account-settings-title">
   <header class="v1-section-header">
-    <div>
-      <p class="v1-eyebrow">Account settings</p>
-      <h1 id="v1-account-settings-title">{{ currentAccount?.name || 'Account settings' }}</h1>
-    </div>
+    <app-page-identity [breadcrumbs]="breadcrumbs()" (breadcrumbSelected)="navigation.changeFacilityScope({ kind: 'all' })"
+      title="Settings" icon="settings" headingId="v1-account-settings-title" breadcrumbLabel="Settings context"/>
   </header>
 
   @if (!currentAccount) {

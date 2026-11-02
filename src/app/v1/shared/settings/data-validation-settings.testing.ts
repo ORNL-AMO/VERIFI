@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
@@ -22,7 +22,7 @@ export function configureDataValidationSettingsTest() {
     const execute = vi.fn(async (_metadata, persist) => ({ value: await persist() }));
     TestBed.configureTestingModule({ providers: [
       DataValidationSettingsEditor,
-      { provide: AccountWorkspaceStore, useValue: { account, selectedFacility: facility, canWrite } },
+      { provide: AccountWorkspaceStore, useValue: { account, selectedFacility: facility, facilities: computed(() => [facility()]), status: () => 'ready', canWrite } },
       { provide: WorkspaceCommandBoundary, useValue: { execute } },
       { provide: AccountCommandHandler, useValue: { update: accountUpdate } },
       { provide: FacilityCommandHandler, useValue: { update: facilityUpdate } },

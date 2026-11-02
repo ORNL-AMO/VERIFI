@@ -1,8 +1,8 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { accountReportAnalysisGuid, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/shared/reports/report-inventory.models';
-import { FACILITY_REPORT_TYPES } from '@app/v1/facility/reports/facility-report.models';
-import { reportTypeAvailable } from '@app/v1/shared/reports/report-availability';
+import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
+import { FACILITY_REPORT_TYPES } from '@app/v1/reports/facility/facility-report.models';
+import { reportTypeAvailable } from '@app/v1/reports/report-availability';
 import { StatusDestination, StatusEntityRef, StatusItem } from './status.models';
 
 export function isReportStatusItem(item: StatusItem): boolean {

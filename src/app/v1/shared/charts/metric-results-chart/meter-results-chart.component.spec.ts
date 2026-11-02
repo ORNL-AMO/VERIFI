@@ -5,11 +5,46 @@ import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '
 import { MeterResultsChartComponent } from './meter-results-chart.component';
 
 describe('MeterResultsChartComponent', () => {
+  it('skips alignment padding at its category position while retaining real gaps, labels and tooltips', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('showAllMetrics', true); fixture.componentRef.setInput('showValueLabels', true);
+    fixture.componentRef.setInput('chartRows', [
+      { periodKey: 'jan-0', periodLabel: 'Jan 2026', sortValue: 0, values: { utility: 10, cost: 1 } },
+      { periodKey: 'jan-1', periodLabel: 'Jan 2026', sortValue: 0, values: { utility: null, cost: 2 }, paddingMetricIds: ['utility'] },
+      { periodKey: 'feb', periodLabel: 'Feb 2026', sortValue: 1, values: { utility: 20, cost: 3 } },
+      { periodKey: 'mar', periodLabel: 'Mar 2026', sortValue: 2, values: { utility: null, cost: null } },
+      { periodKey: 'apr', periodLabel: 'Apr 2026', sortValue: 3, values: { utility: 30, cost: 4 } }
+    ]); fixture.detectChanges();
+    const option = fixture.componentInstance.chartOption() as any;
+    const utility = option.series.find((series: any) => series.id === 'utility');
+    expect(utility.data).toEqual([[0, 10], [2, 20], [3, null], [4, 30]]);
+    expect(utility.encode).toEqual({ x: 0, y: 1 }); expect(utility.connectNulls).toBe(false);
+    expect(option.series.find((series: any) => series.id === 'cost').data).toEqual([1, 2, 3, null, 4]);
+    expect(utility.label.formatter({ value: [2, 20] })).toBe('20');
+    expect(option.tooltip.formatter([{ seriesId: 'utility', seriesName: 'Total Energy', value: [2, 20], axisValueLabel: 'Feb 2026' }])).toContain('Total Energy: 20');
+    expect(option.tooltip.formatter([{ seriesId: 'utility', seriesName: 'Total Energy', value: [3, null] }])).toContain('—');
+    fixture.destroy();
+  });
   it('can plot unsmoothed raw monthly readings without changing the default', () => {
     const fixture = setup(); fixture.componentRef.setInput('showAllMetrics', true); fixture.detectChanges();
     expect((fixture.componentInstance.chartOption() as any).series[0].smooth).toBe(true);
     fixture.componentRef.setInput('smoothLines', false); fixture.detectChanges();
     expect((fixture.componentInstance.chartOption() as any).series[0].smooth).toBe(false);
+  });
+
+  it('highlights a visible trace without changing its values, zoom, or hidden trace membership', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('showAllMetrics', true); fixture.componentRef.setInput('zoomRange', { start: 20, end: 80 }); fixture.detectChanges();
+    const original = fixture.componentInstance.chartOption() as any;
+    fixture.componentRef.setInput('highlightedMetricId', 'utility'); fixture.detectChanges();
+    const highlighted = fixture.componentInstance.chartOption() as any;
+    expect(highlighted.series[0].lineStyle).toMatchObject({ width: 4, opacity: 1 });
+    expect(highlighted.series[1].lineStyle.opacity).toBe(.2);
+    expect(highlighted.series.map((series: any) => series.data)).toEqual(original.series.map((series: any) => series.data));
+    expect(highlighted.dataZoom[0]).toMatchObject({ start: 20, end: 80 });
+    fixture.componentRef.setInput('highlightedMetricId', 'not-visible'); fixture.detectChanges();
+    expect((fixture.componentInstance.chartOption() as any).series.every((series: any) => series.lineStyle.opacity === 1)).toBe(true);
+    fixture.destroy();
   });
 
   it('uses compact dashboard gutters and tick labels while preserving exact tooltip and table values', () => {

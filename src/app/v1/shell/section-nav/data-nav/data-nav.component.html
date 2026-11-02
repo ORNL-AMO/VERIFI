@@ -12,7 +12,7 @@
       </a>
     } @else {
       @for (item of portfolioLinks(); track item.id) {
-        <a class="v1-nav__link" [class.active]="item.active" [routerLink]="item.route" [attr.aria-current]="item.active ? 'page' : null">
+        <a class="v1-nav__link" [class.active]="item.active" [routerLink]="item.route" [queryParams]="item.id === 'facilities' ? {} : navigation.inventoryScopeQuery()" [attr.aria-current]="item.active ? 'page' : null">
           <app-ui-icon [name]="item.icon"></app-ui-icon>{{ item.label }}
         </a>
       }

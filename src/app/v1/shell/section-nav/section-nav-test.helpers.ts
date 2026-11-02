@@ -87,11 +87,20 @@ export function setupSectionNavTest() {
         {
           provide: WorkspaceNavigationService,
           useValue: {
+            inventoryScopeQuery: () => ({}),
             contextMode,
+            contextFacility: () => contextMode() === 'facility' ? selectedFacility() : undefined,
+            contextMeters: facilityMeters, contextMeterGroups: facilityMeterGroups,
+            contextPredictors: facilityPredictors, contextPredictorData: facilityPredictorData,
+            contextAnalyses: selectedFacilityAnalyses,
+            facilityInventoryLink: (guid: string, resource: string) => isSingleSiteWorkspace()
+              ? { route: ['/v1', 'workspace', 'facility', guid, ...(resource === 'analysis' || resource === 'reports' ? [resource, 'dashboard'] : ['data', resource])], queryParams: {} }
+              : { route: ['/v1', 'workspace', 'account', 'account-a', ...(resource === 'analysis' || resource === 'reports' ? [resource, 'dashboard'] : ['data', 'portfolio', resource])], queryParams: { facility: guid } },
             facilities,
             facility: selectedFacility,
             account,
             isSingleSiteWorkspace,
+            singleFacilityContext: () => isSingleSiteWorkspace() ? facilities()[0] : undefined,
             hasSingleSiteRecovery,
             singleSiteWorkspaceState,
             activeSection,
@@ -112,7 +121,7 @@ export function setupSectionNavTest() {
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
             accountImportsRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
-            facilityDataRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
+            facilityDataToolRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
             facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
@@ -120,19 +129,21 @@ export function setupSectionNavTest() {
             accountAnalysisRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'],
             accountAnalysisWorkbenchRoute: (_accountGuid: string, analysisGuid: string, tab = 'setup') =>
               ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', analysisGuid, tab],
-            facilityAnalysisRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'],
+
             facilityAnalysisWorkbenchRoute: (_facilityGuid: string, analysisGuid: string, tab = 'setup') =>
               ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', analysisGuid, tab],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
-            setContext: () => undefined, accountReturn: signal(undefined), contextNavigationError: signal(''),
+            setContext: () => undefined, contextNavigationError: signal(''),
             setFacility
           }
         },
         {
           provide: AccountWorkspaceStore,
           useValue: {
+            account,
+            status: statusState,
             meters: facilityMeters,
             facilityMeters,
             facilityMeterGroups,

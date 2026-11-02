@@ -26,15 +26,7 @@ function createNavigation() {
   return {
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
     facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),
-    panelContent: vi.fn(() => ({
-      results: [
-        { value: '1' },
-        { value: '4' },
-        { value: '2' },
-        { value: '3' },
-        { value: '1' }
-      ]
-    }))
+    contextCounts: vi.fn(() => ({ facilities: 1, meters: 4, predictors: 2, analyses: 3, reports: 1 }))
   };
 }
 

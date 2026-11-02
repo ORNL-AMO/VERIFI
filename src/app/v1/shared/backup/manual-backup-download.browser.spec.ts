@@ -1,3 +1,4 @@
+import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
 import { DestroyableInjector, Injector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import JSZip from 'jszip';
@@ -127,6 +128,33 @@ describe('manual backup downloads in Chromium', () => {
     const reopened = await harness.getAll<any>('accounts');
     expect(reopened.find(item => item.guid === 'account-a').lastBackup).toEqual(stored[0].lastBackup);
     expect(reopened.find(item => item.guid === 'account-b').lastBackup).toBeUndefined();
+  });
+
+  it('keeps account-backed reports and hidden analysis pairs in a complete single-facility backup and restore', async () => {
+    const single = accountReportSnapshot(true);
+    single.accountReports = (['analysis', 'accountSavings', 'betterPlants', 'performance'] as const).map((type, index) => ({
+      ...single.accountReports[0], id: 40 + index, guid: `report-${type}`, reportType: type,
+      betterPlantsReportSetup: { ...single.accountReports[0].betterPlantsReportSetup, analysisItemId: 'account-analysis' },
+      performanceReportSetup: { ...single.accountReports[0].performanceReportSetup, analysisItemId: 'account-analysis' },
+      accountSavingsReportSetup: { ...single.accountReports[0].accountSavingsReportSetup, analysisItemId: 'account-analysis' }
+    })); store.publish(single);
+    await service.download({ scope: 'account', accountGuid: single.account.guid, format: 'json' });
+    const backup = JSON.parse(decodeURIComponent(links[0].href.split(',')[1])) as BackupFile;
+    expect(backup.accountReports.map(item => item.guid)).toEqual(single.accountReports.map(item => item.guid));
+    expect(backup.accountAnalysisItems.map(item => item.guid)).toEqual(['account-analysis']);
+    const prepared = new BackupPreparationService().prepare(backup);
+    const restore = new BackupImportCommandService(TestBed.inject(IndexedDbTransactionService), { setCurrentLoadingIndex: vi.fn(), setLoadingMessage: vi.fn() } as any);
+    const restored = await restore.importAccountBackupFile(prepared, 0);
+    const pairs = (await harness.getAll<any>('accountAnalysisItems')).filter(item => item.accountId === restored.guid);
+    const reports = (await harness.getAll<any>('accountReports')).filter(item => item.accountId === restored.guid);
+    const analyses = (await harness.getAll<any>('analysisItems')).filter(item => item.accountId === restored.guid);
+    expect(restored.isSingleFacilityCompany).toBe(true); expect(pairs).toHaveLength(1); expect(reports).toHaveLength(4);
+    const setupKeys = { analysis: 'analysisReportSetup', accountSavings: 'accountSavingsReportSetup', betterPlants: 'betterPlantsReportSetup', performance: 'performanceReportSetup' };
+    for (const report of reports) expect(report[setupKeys[report.reportType]].analysisItemId).toBe(pairs[0].guid);
+    expect(pairs[0].facilityAnalysisItems[0].analysisItemId).toBe(analyses[0].guid);
+    expect(pairs[0].facilityAnalysisItems[0].facilityId).toBe(analyses[0].facilityId);
+    injector.destroy(); injector = undefined; await harness.reopen();
+    expect((await harness.getAll<any>('accountReports')).filter(item => item.accountId === restored.guid)).toHaveLength(4);
   });
 
   it('delivers only the requested facility without recording an account backup', async () => {

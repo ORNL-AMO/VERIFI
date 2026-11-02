@@ -1,0 +1,43 @@
+@if (showSelectionToggle() || selecting()) {
+<div class="inventory-tools" [class.inventory-tools--selecting]="selecting()" [id]="resource() + '-selection-actions'" role="group" [attr.aria-label]="resource() + ' actions'">
+  @if (showSelectionToggle()) {
+    <button class="v1-btn v1-btn--quiet" type="button" [disabled]="!canAct() || !matchingGuids().length" [attr.aria-pressed]="selecting()" [title]="!canAct() ? 'Wait for pending changes' : !matchingGuids().length ? 'No matching items to select' : 'Select items across all matching pages'" (click)="toggleSelection()">Select {{ resource() }}</button>
+  }
+  @if (selecting()) {
+    <span role="status">{{ selected().length }} selected</span>
+    <button class="v1-btn v1-btn--quiet" type="button" [disabled]="!canAct()" title="Select eligible items across all matching pages" (click)="selectAll()">Select all</button>
+    <button class="v1-btn v1-btn--danger" type="button" [disabled]="!canAct() || !selected().length" (click)="requestDelete()">Delete selected</button>
+    <button class="v1-btn v1-btn--quiet" type="button" [disabled]="saving()" (click)="clearSelection()">Cancel selection</button>
+  }
+</div>
+}
+@if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+<app-inventory-chart-dock [attr.title]="scopeGuids().length ? 'Open charts' : 'Add or upload records to use charts'" [open]="chartsOpen()" [disabled]="!scopeGuids().length" (opened)="openCharts()"/>
+<ng-template #chartPanel>
+  @if (chartsOpen()) {
+    <app-inventory-chart-sheet [singleTrace]="resource() === 'predictors' && !multiplePredictors()" [resource]="resource()" [contextKey]="contextKey()" [facilityName]="contextLabel()" [charts]="charts()" [state]="chartState()" [view]="view()" (viewChanged)="view.set($event)" [zoomRange]="zoom()" (zoomChanged)="zoom.set($event)" (closed)="closeCharts()">
+      <ng-container ngProjectAs="[chartGrouping]">
+      @if (resource() === 'meters') {
+        <div class="inventory-tools__grouping" [class.inventory-tools__grouping--divided]="charts().length > 1" role="group" aria-label="Meter chart grouping">
+          <button type="button" class="v1-btn v1-btn--quiet" [class.active]="grouping() === 'groups'" [attr.aria-pressed]="grouping() === 'groups'" (click)="form.controls.grouping.setValue('groups')">Meter groups</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [class.active]="grouping() === 'facilities'" [attr.aria-pressed]="grouping() === 'facilities'" title="Group meters matching the current filters by facility" (click)="form.controls.grouping.setValue('facilities')">Facility totals</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [class.active]="grouping() === 'meters'" [attr.aria-pressed]="grouping() === 'meters'" (click)="form.controls.grouping.setValue('meters')">Individual meters</button>
+        </div>
+      } @else {
+        <label class="inventory-tools__multiple"><input type="checkbox" role="switch" [formControl]="form.controls.multiplePredictors" aria-describedby="predictor-chart-mode-help">Multiple predictors</label>
+      }
+      </ng-container>
+      @if (resource() === 'predictors') {
+        <p ngProjectAs="[chartNotice]" id="predictor-chart-mode-help" class="inventory-tools__mode-help" [class.visually-hidden]="!multiplePredictors()" role="status">{{ multiplePredictors() ? 'Units ignored · Original values share one scale; no conversion or normalization.' : 'Choose one predictor to view its saved history and units.' }}</p>
+      }
+
+    </app-inventory-chart-sheet>
+  }
+</ng-template>
+<ng-template #confirmation>
+  <app-confirmation-dialog [title]="'Delete selected ' + resource() + '?'" titleId="inventory-bulk-delete-title" cancelAriaLabel="Cancel deletion" confirmLabel="Delete selected" confirmIcon="delete" [busy]="saving()" [disabled]="!canAct()" (confirmed)="confirmDelete()" (cancelled)="cancelDelete()">
+    <p>These records and their readings will be permanently deleted.@if (resource() === 'predictors') { Predictor references will be removed from affected analyses; regression models may require regeneration. }</p>
+    <ul>@for (group of reviewGroups(); track group.guid) { <li>{{ group.name }}: {{ group.count }} {{ resource() }}, {{ group.readings }} readings@if (group.analyses) { , {{ group.analyses }} analyses reviewed }</li> }</ul>
+    @if (error()) { <p role="alert">{{ error() }}</p> }
+  </app-confirmation-dialog>
+</ng-template>

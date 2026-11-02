@@ -1,3 +1,4 @@
+import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
 import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -11,7 +12,7 @@ import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.
 import { AccountAndFacility } from '@data/models/idbModels/accountAndFacility';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { DataStalenessMonths } from '@app/v1/status/status.settings';
-import { applyDataValidationSettings, DataValidationSettingsChange, DataValidationSettingsGroup, effectiveExpectedRangeSettings, normalizeStalenessSettings } from '@shared/settings-forms/data-validation-settings';
+import { applyDataValidationSettings, DataValidationSettingsChange, DataValidationSettingsGroup, effectiveExpectedRangeSettings, effectiveStalenessSettings, normalizeStalenessSettings } from '@shared/settings-forms/data-validation-settings';
 import { SettingsSaveState } from './settings-detail.base';
 
 /** Component-scoped editor: hydrate quietly, retain failed drafts, and serialize group edits. */
@@ -33,6 +34,7 @@ export class DataValidationSettingsEditor {
   private draining?: Promise<void>;
   private destroyed = false;
 
+  readonly singleFacilityPresentation = computed(() => !!singleFacilityPresentation(this.workspace.account(), this.workspace.facilities(), this.workspace.status() === 'ready'));
   readonly account = this.workspace.account;
   readonly facility = this.workspace.selectedFacility;
   readonly canWrite = this.workspace.canWrite;
@@ -129,7 +131,7 @@ export class DataValidationSettingsEditor {
 
   save(group: DataValidationSettingsGroup): Promise<void> {
     if (!this.canWrite() || !this.scopeKey || this.destroyed) return Promise.resolve();
-    if (this.facilityContext()) {
+    if (this.facilityContext() && !this.singleFacilityPresentation()) {
       const form = group === 'staleness' ? this.stalenessForm : this.expectedRangeForm;
       if (form.controls.useAccountSettings.value) {
         const account = this.account()!;
@@ -168,7 +170,8 @@ export class DataValidationSettingsEditor {
     const inheritedStaleness = facility?.dataStalenessSettings?.useAccountSettings ?? true;
     if (!this.dirty.has('staleness')) {
       this.stalenessForm.patchValue({
-        ...normalizeStalenessSettings(facility && !inheritedStaleness ? facility.dataStalenessSettings : account.dataStalenessSettings),
+        ...(this.singleFacilityPresentation() && facility ? effectiveStalenessSettings(account, facility)
+          : normalizeStalenessSettings(facility && !inheritedStaleness ? facility.dataStalenessSettings : account.dataStalenessSettings)),
         useAccountSettings: inheritedStaleness
       }, { emitEvent: false });
       this.saved.set('staleness', this.signature(this.change('staleness')));
@@ -250,12 +253,12 @@ export class DataValidationSettingsEditor {
     for (const form of [this.stalenessForm, this.expectedRangeForm]) {
       if (writable) form.enable({ emitEvent: false });
       else form.disable({ emitEvent: false });
-      if (writable && this.facilityContext() && form.controls.useAccountSettings.value) {
+      if (writable && this.facilityContext() && !this.singleFacilityPresentation() && form.controls.useAccountSettings.value) {
         form.controls.enabled.disable({ emitEvent: false });
       }
     }
     if (!writable || !this.stalenessForm.controls.enabled.value
-      || (this.facilityContext() && this.stalenessForm.controls.useAccountSettings.value)) {
+      || (this.facilityContext() && !this.singleFacilityPresentation() && this.stalenessForm.controls.useAccountSettings.value)) {
       this.stalenessForm.controls.thresholdMonths.disable({ emitEvent: false });
     }
   }

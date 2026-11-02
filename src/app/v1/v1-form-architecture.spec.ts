@@ -8,7 +8,7 @@ import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, relative } from 'path';
 
 const V1_ROOT = __dirname;
-const ANALYSIS_ROOT = join(V1_ROOT, 'facility', 'analysis');
+const ANALYSIS_ROOT = join(V1_ROOT, 'analysis', 'facility');
 const TEMPLATE_DRIVEN_ALLOWLIST = new Set([
   'account/imports/import-wizard/steps/footprint-facility/import-footprint-facility-step.component.html',
   'account/imports/import-wizard/steps/mapping/import-mapping-step.component.html',

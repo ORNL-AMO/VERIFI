@@ -1,8 +1,17 @@
-import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
-import { Component, computed, signal } from '@angular/core';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { CommonModule, Location } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { By } from '@angular/platform-browser';
+import { LocalStorageService } from 'ngx-webstorage';
+import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
+import { portfolioTile } from '@app/v1/shared/inventory/inventory.testing';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { FacilityPickerTestModule } from '@app/v1/shell/header/facility-picker/facility-picker.testing';
+import { FacilityScope } from '@app/v1/shell/facility-scope.models';
+import { Component, NgModule, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterOutlet, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet, provideRouter } from '@angular/router';
 import { page, userEvent } from 'vitest/browser';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { BrowsePositionDirective } from './browse-position.directive';
@@ -17,10 +26,22 @@ class BrowsePage {
   readonly form = new FormGroup({ search: new FormControl('', { nonNullable: true }), status: new FormControl<BrowseFilters['facilities']['status']>('all', { nonNullable: true }), sort: new FormControl<BrowseFilters['facilities']['sort']>('facilityName', { nonNullable: true }) });
   readonly filters = rememberBrowseForm(this.key, this.form);
 }
-@Component({ standalone: true, imports: [SectionNavModule], template: `<div class="v1-root v1-theme-dark" style="height:180px;min-height:0;width:220px;overflow:auto"><app-facility-picker [facilities]="facilities" (facilitySelected)="selected.set($event)"/></div>` })
+
+@Component({ standalone: true, imports: [BrowsePositionDirective, ReactiveFormsModule],
+  template: `<section [appBrowsePosition]="key()" [browsePositionReady]="inventory.ready()" [browseVisibleIds]="inventory.visibleIds()"><h1 tabindex="-1">Meters</h1><select aria-label="Detail" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select>@for (tile of inventory.visibleTiles(); track tile.guid) { <button [attr.data-browse-id]="tile.guid" style="display:block;height:45px">{{ tile.name }}</button> }</section>` })
+class ScopedBrowsePage {
+  private readonly params = toSignal(inject(ActivatedRoute).queryParamMap, { requireSync: true });
+  readonly key = computed<BrowseKey<'meters'>>(() => ({ kind: 'meters', accountGuid: 'a', facilityGuid: this.params().get('facility') ?? undefined }));
+  readonly form = new FormGroup({ search: new FormControl('', { nonNullable: true }),
+    status: new FormControl<BrowseFilters['meters']['status']>('all', { nonNullable: true }), sort: new FormControl<BrowseFilters['meters']['sort']>('attention', { nonNullable: true }) });
+  readonly filters = rememberBrowseForm(this.key, this.form);
+  readonly tiles = signal(Array.from({ length: 60 }, (_, index) => portfolioTile(String(index))));
+  readonly inventory = new InventoryViewState(this.key, this.tiles, computed(() => this.tiles().map(tile => tile.guid)), this.filters, signal(true));
+}
+@Component({ standalone: true, imports: [FacilityPickerTestModule], template: `<div class="v1-root v1-theme-dark" style="height:180px;min-height:0;width:220px;overflow:auto"><app-facility-picker [facilities]="facilities" (facilitySelected)="selected.set($event)"/></div>` })
 class PickerHost {
   readonly facilities = Array.from({ length: 64 }, (_, index) => ({ guid: `f-${index}`, name: `Plant ${index}`, city: index === 63 ? 'Memphis' : 'Knoxville', state: 'TN' } as IdbFacility));
-  readonly selected = signal<string | undefined>(undefined);
+  readonly selected = signal<FacilityScope>({ kind: 'all' });
 }
 
 @Component({ standalone: true, imports: [RouterOutlet], template: '<main style="height:400px;overflow:auto"><router-outlet/></main>' })
@@ -29,6 +50,35 @@ class RoutedBrowseHost { }
 class MeterPage { }
 
 describe('drill-down browser behavior', () => {
+  it('restores per-scope pages, detail, scroll and item focus across query-only navigation and browser history', async () => {
+    TestBed.configureTestingModule({ imports: [RoutedBrowseHost], providers: [provideRouter([{ path: 'meters', component: ScopedBrowsePage }]),
+      { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } }] });
+    const fixture = TestBed.createComponent(RoutedBrowseHost); fixture.detectChanges();
+    const router = TestBed.inject(Router); router.setUpLocationChangeListener();
+    await router.navigateByUrl('/meters'); fixture.detectChanges(); await fixture.whenStable();
+    const host = fixture.debugElement.query(By.directive(ScopedBrowsePage)).componentInstance as ScopedBrowsePage;
+    const root = fixture.nativeElement.querySelector('main') as HTMLElement;
+    host.inventory.detailControl.setValue('summary'); host.inventory.selectPage(1); fixture.detectChanges();
+    const target = root.querySelector<HTMLButtonElement>('[data-browse-id="30"]')!;
+    target.focus(); root.scrollTop = 250;
+    await router.navigateByUrl('/meters?facility=facility-a'); fixture.detectChanges(); await fixture.whenStable();
+    expect(host.inventory.page()).toBe(0);
+    host.inventory.detailControl.setValue('detailed'); fixture.detectChanges();
+    root.querySelector<HTMLButtonElement>('[data-browse-id="5"]')!.focus(); root.scrollTop = 100;
+    TestBed.inject(Location).back();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(router.url).toBe('/meters'); expect(host.inventory.page()).toBe(1); expect(host.inventory.detail()).toBe('summary');
+      expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('30'); expect(root.scrollTop).toBe(250);
+    });
+    TestBed.inject(Location).forward();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(host.inventory.detail()).toBe('detailed'); expect(host.inventory.page()).toBe(0);
+      expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('5'); expect(root.scrollTop).toBe(100);
+    });
+    fixture.destroy();
+  });
   it('restores position and item focus after real router deactivation and return', async () => {
     TestBed.configureTestingModule({ imports: [RoutedBrowseHost], providers: [provideRouter([
       { path: 'facilities', component: BrowsePage }, { path: 'meter', component: MeterPage }
@@ -77,8 +127,8 @@ describe('drill-down browser behavior', () => {
     const fixture = TestBed.createComponent(PickerHost); fixture.detectChanges();
     await page.getByRole('button', { name: /Choose facility/ }).click(); fixture.detectChanges();
     const search = page.getByRole('searchbox', { name: 'Search facilities' }); await search.fill('Memphis'); fixture.detectChanges();
-    await userEvent.keyboard('{ArrowDown}{Enter}'); fixture.detectChanges();
-    expect(fixture.componentInstance.selected()).toBe('f-63');
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}'); fixture.detectChanges();
+    expect(fixture.componentInstance.selected()).toEqual({ kind: 'facility', facilityGuid: 'f-63' });
     expect(document.querySelector('.v1-facility-picker__menu')).toBeNull();
     await page.getByRole('button', { name: /Choose facility/ }).click(); fixture.detectChanges();
     const menu = document.querySelector<HTMLElement>('.v1-facility-picker__menu')!;

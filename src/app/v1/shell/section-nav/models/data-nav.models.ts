@@ -1,10 +1,11 @@
+import type { Params } from '@angular/router';
 import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import type { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import type { IdbPredictor } from '@data/models/idbModels/predictor';
 import type { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
-import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
-import { buildWeatherStationGroups, predictorIcon } from '@app/v1/facility/data/predictors/models';
+import { meterSourceIcon } from '@app/v1/data/meters/models';
+import { buildWeatherStationGroups, predictorIcon } from '@app/v1/data/predictors/models';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 export type ResourceNavGroupId = 'meters' | 'meter-grouping' | 'predictors';
@@ -14,6 +15,7 @@ export interface NavigationLink {
   readonly label: string;
   readonly icon: IconName;
   readonly route: readonly string[];
+  readonly queryParams?: Params;
   readonly active: boolean;
   readonly attention?: StatusAttentionSummary;
   readonly outputs?: readonly { readonly guid: string; readonly label: string; readonly icon: IconName }[];
@@ -35,7 +37,8 @@ export const ACCOUNT_CUSTOM_DATA_ITEMS: readonly { id: string; label: string; ic
 ];
 
 export interface ResourceNavRoutes {
-  facilityDataRoute: (facilityGuid: string, detail: string) => readonly string[];
+  facilityInventoryLink: (facilityGuid: string, resource: 'meters' | 'predictors') => { route: readonly string[]; queryParams?: Params };
+  facilityDataToolRoute: (facilityGuid: string, detail: string) => readonly string[];
   facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab: 'settings') => readonly string[];
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: 'monthly-table') => readonly string[];
   facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab: 'settings') => readonly string[];
@@ -92,18 +95,18 @@ export function buildResourceNavGroups(input: ResourceNavInput, routes: Resource
   }));
   return [
     {
-      id: 'meters', label: 'Meters', icon: 'meter', route: routes.facilityDataRoute(facilityGuid, 'meters'),
+      id: 'meters', label: 'Meters', icon: 'meter', ...routes.facilityInventoryLink(facilityGuid, 'meters'),
       active: input.detail === 'meters' && !input.activeMeterGuid, routeActive: input.detail === 'meters', facilityGuid,
       childrenId: `v1-meter-nav-items-${facilityGuid}`, childrenLabel: 'Meter links', children: sorted(meterChildren),
       attention: parentAttention('meter-tab', 'meters')
     },
     {
-      id: 'meter-grouping', label: 'Meter Grouping', icon: 'meterGroup', route: routes.facilityDataRoute(facilityGuid, 'meter-grouping'),
+      id: 'meter-grouping', label: 'Meter Grouping', icon: 'meterGroup', route: routes.facilityDataToolRoute(facilityGuid, 'meter-grouping'),
       active: input.detail === 'meter-grouping' && !input.activeGroupGuid, routeActive: input.detail === 'meter-grouping', facilityGuid,
       childrenId: `v1-meter-group-nav-items-${facilityGuid}`, childrenLabel: 'Meter group links', children: sorted(groupChildren)
     },
     {
-      id: 'predictors', label: 'Predictors', icon: 'predictor', route: routes.facilityDataRoute(facilityGuid, 'predictors'),
+      id: 'predictors', label: 'Predictors', icon: 'predictor', ...routes.facilityInventoryLink(facilityGuid, 'predictors'),
       active: input.detail === 'predictors' && !input.activePredictorGuid && !input.activeWeatherKey, routeActive: input.detail === 'predictors', facilityGuid,
       childrenId: `v1-predictor-nav-items-${facilityGuid}`, childrenLabel: 'Predictor links', children: sorted([...standardChildren, ...weatherChildren]),
       attention: parentAttention('predictor-tab', 'predictors')

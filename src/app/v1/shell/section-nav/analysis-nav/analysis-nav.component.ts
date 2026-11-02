@@ -1,22 +1,19 @@
 import { Component, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import {
-  buildAnalysisWorkbenchStageAttention,
-  buildAnalysisWorkbenchStageNavigation,
-  buildAnalysisWorkbenchStages,
-} from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
+import { buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages } from '@app/v1/analysis/facility/workbench/facility-analysis-workbench.models';
 import {
   accountAnalysisWorkbenchReadiness,
   buildAccountAnalysisWorkbenchStageNavigation,
   buildAccountAnalysisWorkbenchStages
-} from '@app/v1/account/analysis/account-analysis-workbench/account-analysis-workbench.models';
-import { buildFacilitySelectionItems } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-facility-selection.models';
+} from '@app/v1/analysis/account/workbench/account-analysis-workbench.models';
+import { buildFacilitySelectionItems } from '@app/v1/analysis/account/workbench/select-facility-items/account-analysis-facility-selection.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceNavigationService } from '../../workspace-navigation.service';
 import { analysisCategories } from '@app/v1/shared/analysis-category/analysis-category-presentation';
 
 import type { AnalysisNavigationStage } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';
 import { buildAnalysisNavGroups } from '../models';
+import { RecentItemsService } from '../recent-items.service';
 interface AnalysisNavigation { readonly guid: string; readonly name: string; readonly steps: readonly AnalysisNavigationStage[]; }
 
 @Component({
@@ -26,16 +23,17 @@ interface AnalysisNavigation { readonly guid: string; readonly name: string; rea
   standalone: false
 })
 export class AnalysisNavComponent {
+  readonly recent = inject(RecentItemsService);
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   readonly status = inject(WorkspaceStatusService);
   readonly activeAnalysisNavigation = computed<AnalysisNavigation | undefined>(() => {
-    const facility = this.navigation.facility();
+    const facility = this.navigation.contextFacility();
     const analysisGuid = this.navigation.activeAnalysisGuid();
     if (!facility || !analysisGuid) return undefined;
-    const analysis = this.workspace.selectedFacilityAnalyses().find(item => item.guid === analysisGuid);
+    const analysis = this.navigation.contextAnalyses().find(item => item.guid === analysisGuid);
     if (!analysis) return undefined;
-    const stages = buildAnalysisWorkbenchStages(facility.guid, analysis, this.workspace.facilityMeterGroups());
+    const stages = buildAnalysisWorkbenchStages(facility.guid, analysis, this.navigation.contextMeterGroups());
     const scope = this.navigation.activeAnalysisStageScope();
     const groupGuid = this.navigation.activeAnalysisGroupGuid();
     const currentStageId = scope === 'group' && groupGuid ? `group:${groupGuid}` : scope ?? 'analysis';
@@ -93,12 +91,17 @@ export class AnalysisNavComponent {
     };
   });
 
+  readonly inventoryLink = computed(() => {
+    const facility = this.navigation.contextFacility();
+    return facility ? this.navigation.facilityInventoryLink(facility.guid, 'analysis')
+      : { route: this.navigation.accountAnalysisRoute(this.navigation.account()?.guid ?? ''), queryParams: {} };
+  });
   readonly analysisGroups = computed(() => {
-    const facility = this.navigation.facility();
+    const facility = this.navigation.contextFacility();
     const account = this.navigation.account();
     const active = this.navigation.activeAnalysisGuid();
-    if (this.navigation.contextMode() === 'facility') {
-      return facility ? buildAnalysisNavGroups(this.workspace.selectedFacilityAnalyses(), facility, active,
+    if (facility) {
+      return facility ? buildAnalysisNavGroups(this.navigation.contextAnalyses(), facility, active,
         guid => this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, guid)) : [];
     }
     const showCategory = analysisCategories(this.workspace.meters(), [...this.workspace.accountAnalyses(), ...this.workspace.facilityAnalyses()]).length > 1;

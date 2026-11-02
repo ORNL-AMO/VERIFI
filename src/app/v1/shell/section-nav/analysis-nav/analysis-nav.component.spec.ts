@@ -129,7 +129,7 @@ describe('AnalysisNavComponent', () => {
     fixture.detectChanges();
 
     let element: HTMLElement = fixture.nativeElement;
-    let dashboardLink = element.querySelector<HTMLAnchorElement>('a[href$="/analysis/dashboard"]');
+    let dashboardLink = element.querySelector<HTMLAnchorElement>('a.v1-nav__link');
     expect(element.textContent).toContain('Account Analysis');
     expect(dashboardLink?.getAttribute('aria-current')).toBe('page');
     expect(dashboardLink?.getAttribute('href')).toBe('/v1/workspace/account/account-a/analysis/dashboard');
@@ -139,9 +139,9 @@ describe('AnalysisNavComponent', () => {
     fixture.detectChanges();
 
     element = fixture.nativeElement;
-    dashboardLink = element.querySelector<HTMLAnchorElement>('a[href$="/analysis/dashboard"]');
+    dashboardLink = element.querySelector<HTMLAnchorElement>('a.v1-nav__link');
     expect(element.textContent).toContain('Facility Analysis');
-    expect(dashboardLink?.getAttribute('href')).toBe('/v1/workspace/facility/facility-a/analysis/dashboard');
+    expect(dashboardLink?.getAttribute('href')).toBe('/v1/workspace/account/account-a/analysis/dashboard?facility=facility-a');
 
     activeDetail.set('workbench');
     fixture.detectChanges();

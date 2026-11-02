@@ -1,6 +1,7 @@
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
+import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Params, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -11,9 +12,11 @@ import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
 import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
-import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import type { ReportStageId } from '@app/v1/shared/reports/report-workbench.models';
+import { isWorkspaceDataDestination } from '@app/v1/shared/navigation/workspace-data-destination';
+import type { ReportStageId } from '@app/v1/reports/report-workbench.models';
+
+import { ALL_FACILITIES, FacilityScope, facilityScopeQuery } from './facility-scope.models';
 
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = NavigationMotion;
@@ -47,6 +50,14 @@ export interface PanelTab {
   readonly icon: IconName;
 }
 
+export interface WorkspaceInventoryCounts {
+  readonly facilities: number;
+  readonly meters: number;
+  readonly predictors: number;
+  readonly analyses: number;
+  readonly reports: number;
+}
+
 export interface PanelContent {
   readonly help: ReadonlyArray<string>;
   readonly todos: ReadonlyArray<StatusItem>;
@@ -56,13 +67,6 @@ export interface PanelContent {
 }
 
 export type SingleSiteWorkspaceState = 'portfolio' | 'valid' | 'missing-facility' | 'multiple-facilities';
-
-export interface AccountDropdownOption {
-  readonly guid: string;
-  readonly name: string;
-  readonly descriptor: string;
-  readonly active: boolean;
-}
 
 export interface RouteState {
   readonly portfolioTab?: AccountPortfolioTab;
@@ -120,15 +124,6 @@ const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
   data: 'meters'
 };
 const ACCOUNT_DATA_DETAILS = new Set(['portfolio', 'custom-grid-factors', 'custom-fuels', 'custom-gwps']);
-const FACILITY_DATA_DETAILS = new Set([
-  'meters',
-  'meter-grouping',
-  'predictors',
-  'energy-uses',
-  'custom-grid-factors',
-  'custom-fuels',
-  'custom-gwps'
-]);
 const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'portfolio', 'delete']);
 const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'delete']);
 
@@ -141,7 +136,6 @@ export class WorkspaceNavigationService {
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly status = inject(WorkspaceStatusService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
-  private readonly browseState = inject(BrowseStateService);
   private readonly currentUrl = signal(this.router.url);
   private readonly previousUrl = signal(this.router.url);
   private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
@@ -180,28 +174,98 @@ export class WorkspaceNavigationService {
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
   readonly singleSiteWorkspaceState = computed(() => this.resolveSingleSiteWorkspaceState());
-  readonly isSingleSiteWorkspace = computed(() => this.singleSiteWorkspaceState() === 'valid');
+  readonly singleFacilityContext = computed<IdbFacility | undefined>(() => {
+    return singleFacilityPresentation(this.workspace.account(), this.facilities(), this.workspace.status() === 'ready');
+  });
+  readonly isSingleSiteWorkspace = computed(() => !!this.singleFacilityContext());
   readonly hasSingleSiteRecovery = computed(() => {
     const state = this.singleSiteWorkspaceState();
     return state === 'missing-facility' || state === 'multiple-facilities';
   });
-  readonly accountOptions = computed(() => this.buildAccountOptions());
+  readonly scopeChangePending = signal(false);
+  readonly scopeNotice = signal('');
+  readonly scopeAvailability = computed(() => this.workspace.status() === 'ready'
+    ? this.facilities().length ? '' : 'No facilities are available in this account.'
+    : this.workspace.status() === 'error' ? 'Facilities are unavailable. Retry loading the account.' : 'Loading facilities…');
+  readonly inventoryScope = computed<FacilityScope>(() => {
+    const state = this.routeState();
+    if (!this.isAccountInventory(state) || this.workspace.status() !== 'ready' || state.accountGuid !== this.workspace.account()?.guid) return ALL_FACILITIES;
+    if (this.isSingleSiteWorkspace()) return state.section === 'reports' ? ALL_FACILITIES
+      : { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
+    const guid = this.router.parseUrl(this.currentUrl()).queryParamMap.get('facility');
+    return guid && this.facilities().some(facility => facility.guid === guid && facility.accountId === state.accountGuid)
+      ? { kind: 'facility', facilityGuid: guid } : ALL_FACILITIES;
+  });
+  readonly inventoryFacilityGuid = computed(() => {
+    const scope = this.inventoryScope();
+    return scope.kind === 'facility' ? scope.facilityGuid : undefined;
+  });
+  readonly headerScope = computed<FacilityScope>(() => {
+    const state = this.routeState();
+    const facility = this.facilities().find(item => item.guid === state.facilityGuid && item.accountId === this.workspace.account()?.guid);
+    if (facility) return { kind: 'facility', facilityGuid: facility.guid };
+    if (this.isSingleSiteWorkspace()) return { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
+    return this.inventoryScope();
+  });
+  readonly headerFacility = computed(() => {
+    const scope = this.headerScope();
+    return scope.kind === 'facility' ? this.facilities().find(facility => facility.guid === scope.facilityGuid) : undefined;
+  });
+  readonly inventoryScopeQuery = computed(() => facilityScopeQuery(this.inventoryScope()));
+  readonly effectiveScope = computed<FacilityScope>(() => this.isSingleSiteWorkspace() && this.contextMode() === 'account' && this.activeSection() === 'reports'
+    ? ALL_FACILITIES : this.headerScope());
+  readonly contextFacility = computed(() => {
+    const scope = this.effectiveScope();
+    return scope.kind === 'facility' ? this.facilities().find(facility => facility.guid === scope.facilityGuid) : undefined;
+  });
+  readonly contextMeters = computed(() => this.workspace.meters().filter(item => this.inContext(item.accountId, item.facilityId)));
+  readonly contextMeterGroups = computed(() => this.workspace.meterGroups().filter(item => this.inContext(item.accountId, item.facilityId)));
+  readonly contextPredictors = computed(() => this.workspace.predictors().filter(item => this.inContext(item.accountId, item.facilityId)));
+  readonly contextPredictorData = computed(() => this.workspace.predictorData().filter(item => this.inContext(item.accountId, item.facilityId)));
+  readonly contextAnalyses = computed(() => this.workspace.facilityAnalyses().filter(item => this.inContext(item.accountId, item.facilityId)));
+  readonly contextReports = computed(() => this.workspace.facilityReports().filter(item => this.inContext(item.accountId, item.facilityId)));
+  /** Named counts are independent of which summary rows the support panel displays. */
+  readonly contextCounts = computed<WorkspaceInventoryCounts>(() => {
+    const facility = this.contextFacility(), single = this.singleFacilityContext();
+    return {
+      facilities: facility ? 1 : this.facilities().length,
+      meters: this.contextMeters().length,
+      predictors: this.contextPredictors().length,
+      analyses: this.contextAnalyses().length + (facility || single ? 0 : this.workspace.accountAnalyses().length),
+      reports: this.contextReports().length + (facility && !single ? 0 : this.workspace.accountReports().length)
+    };
+  });
+  readonly uploadQuery = computed(() => ({ ...(isWorkspaceDataDestination(this.routeState()) ? { returnUrl: this.currentUrl() } : {}),
+    ...(this.contextFacility() ? { facilityGuid: this.contextFacility()!.guid } : {}) }));
   readonly panelContent = computed(() => this.buildPanelContent());
 
+  private inContext(accountGuid: string, facilityGuid: string): boolean {
+    return accountGuid === this.workspace.account()?.guid && (!this.contextFacility() || facilityGuid === this.contextFacility()?.guid);
+  }
+
   constructor() {
+    effect(() => {
+      const state = this.routeState();
+      const ready = this.workspace.status() === 'ready';
+      const accountGuid = this.workspace.account()?.guid;
+      const facilities = this.facilities();
+      const url = this.currentUrl();
+      if (!ready || state.accountGuid !== accountGuid || !this.isAccountInventory(state)) return;
+      const tree = this.router.parseUrl(url);
+      const guid = tree.queryParamMap.get('facility');
+      if (guid === null || facilities.some(facility => facility.guid === guid && facility.accountId === accountGuid)) return;
+      untracked(() => {
+        this.scopeNotice.set('The selected facility is unavailable. Showing All facilities.');
+        delete tree.queryParams['facility'];
+        void this.router.navigateByUrl(tree, { replaceUrl: true }).catch(() => this.contextNavigationError.set('The facility filter could not be updated. Please try again.'));
+      });
+    });
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(event => {
-        const previous = parseWorkspaceRoute(this.currentUrl());
-        const next = parseWorkspaceRoute(event.urlAfterRedirects);
-        if (previous.accountGuid && previous.section === 'data' && next.contextMode === 'facility'
-          && (previous.portfolioTab === 'facilities' || previous.portfolioTab === 'meters' || previous.portfolioTab === 'predictors')
-          && this.workspace.facilities().some(facility => facility.guid === next.facilityGuid && facility.accountId === previous.accountGuid)) {
-          this.browseState.setOrigin(previous.accountGuid, previous.portfolioTab);
-        }
         this.previousUrl.set(this.currentUrl());
         this.currentUrl.set(event.urlAfterRedirects);
       });
@@ -227,7 +291,6 @@ export class WorkspaceNavigationService {
     const account = this.workspace.account();
     const facilities = this.workspace.facilities();
     if (account?.isSingleFacilityCompany === true && facilities.length === 1) {
-      this.workspaceService.selectFacility(facilities[0].guid);
       await this.router.navigate(this.facilityRoute(facilities[0].guid));
       return;
     }
@@ -236,8 +299,7 @@ export class WorkspaceNavigationService {
   }
 
   async openFacility(facilityGuid: string): Promise<void> {
-    this.workspaceService.selectFacility(facilityGuid);
-    await this.router.navigate(this.facilityRoute(facilityGuid));
+    await this.navigateScopeDestination(this.facilityRoute(facilityGuid));
   }
 
   async openAccountData(accountGuid: string): Promise<void> {
@@ -248,56 +310,115 @@ export class WorkspaceNavigationService {
     }
   }
 
-  showWelcome(): void {
-    void this.router.navigate(['/v1']);
+  async showWelcome(): Promise<void> {
+    await this.navigateScopeDestination(['/v1']);
   }
 
-  setContext(contextMode: ContextMode): void {
+  isAccountInventory(state: RouteState): boolean {
+    return state.contextMode === 'account' && ((state.section === 'data' && state.detail === 'portfolio')
+      || ((state.section === 'analysis' || state.section === 'reports') && state.detail === 'dashboard'));
+  }
+
+  async changeFacilityScope(scope: FacilityScope, dataInventory?: 'meters' | 'predictors'): Promise<boolean> {
+    if (this.scopeChangePending() || this.workspace.status() !== 'ready' || this.workspace.hasPending()) return false;
+    const account = this.workspace.account();
+    if (!account || this.isSingleSiteWorkspace()) return false;
+    if (scope.kind === 'facility' && !this.facilities().some(item => item.guid === scope.facilityGuid && item.accountId === account.guid)) return false;
+    const state = this.routeState();
+    const facilityGuid = scope.kind === 'facility' ? scope.facilityGuid : undefined;
+    let route: string[];
+    let query = facilityScopeQuery(scope);
+    if (dataInventory) {
+      route = this.accountPortfolioRoute(account.guid, dataInventory);
+    } else if (state.section === 'settings') {
+      const detail = facilityGuid ? FACILITY_SETTINGS_DETAILS.has(state.detail) ? state.detail : 'profile'
+        : ACCOUNT_SETTINGS_DETAILS.has(state.detail) ? state.detail : 'profile';
+      route = facilityGuid ? this.facilitySettingsRoute(facilityGuid, detail) : this.accountSettingsRoute(account.guid, detail);
+      query = {};
+    } else if (state.section === 'data' && state.detail === 'meter-grouping' && !state.meterGroupGuid && facilityGuid) {
+      route = this.facilityDataToolRoute(facilityGuid, 'meter-grouping'); query = {};
+    } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
+    else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
+    else if (state.portfolioTab === 'facilities' && facilityGuid) route = this.accountPortfolioRoute(account.guid, 'meters');
+    else {
+      const tab = state.portfolioTab ?? (state.detail === 'predictors' ? 'predictors'
+        : state.detail === 'meters' || state.detail === 'meter-grouping' ? 'meters' : 'facilities');
+      route = this.accountPortfolioRoute(account.guid, tab);
+    }
+    return this.navigateScopeDestination(route, query);
+  }
+
+  private async navigateScopeDestination(route: string[], queryParams?: Params): Promise<boolean> {
+    if (this.scopeChangePending() || this.workspace.hasPending()) return false;
+    this.scopeChangePending.set(true);
+    this.contextNavigationError.set('');
+    try {
+      // Report leave guards own their save/discard UI; other editors flush before their ordinary leave guard.
+      if (!(this.activeSection() === 'reports' && this.activeDetail() === 'workbench')
+        && !await this.unsavedChanges.flushPendingChanges()) return false;
+      // Query-only transitions can reuse the component without running its leave guard.
+      if (this.activeDetail() !== 'workbench' && !this.activeMeterGuid() && !this.activePredictorGuid()
+        && !this.activeWeatherPredictorGroupKey() && !this.activeMeterGroupGuid()) {
+        if (!this.unsavedChanges.confirmDiscard()) return false;
+      }
+      const opened = await (queryParams ? this.router.navigate(route, { queryParams }) : this.router.navigate(route));
+      if (opened) this.scopeNotice.set('');
+      return opened;
+    } catch {
+      this.contextNavigationError.set('The destination could not be opened. Your current context has been retained.');
+      return false;
+    } finally { this.scopeChangePending.set(false); }
+  }
+
+  async setContext(contextMode: ContextMode): Promise<boolean> {
     const state = this.routeState();
     if (contextMode === 'facility') {
+      if (this.hasSingleSiteRecovery() && !this.facilities().some(facility => facility.guid === state.facilityGuid)) return false;
       const facilityGuid = this.facility()?.guid || this.facilities()[0]?.guid;
       if (facilityGuid) {
-        void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
+        const link = this.facilityDestination(facilityGuid, state.section, state.detail);
+        return this.navigateScopeDestination(link.route, link.queryParams);
       }
-      return;
+      return false;
     }
     const accountGuid = this.account()?.guid || state.accountGuid;
     if (accountGuid) {
-      void this.router.navigate(this.accountRouteForSection(accountGuid, state.section, state.detail));
+      return this.navigateScopeDestination(this.accountRouteForSection(accountGuid, state.section, state.detail));
     }
+    return false;
   }
 
-  setFacility(facilityGuid: string): void {
-    if (!this.facilities().some(facility => facility.guid === facilityGuid)) return;
-    const state = this.routeState();
-    const reportWorkbench = state.section === 'reports' && state.detail === 'workbench';
-    // Report guards flush or retain the draft before readiness guards select another facility.
-    if (!reportWorkbench && !this.unsavedChanges.confirmDiscard()) return;
-    this.contextNavigationError.set('');
-    const route = reportWorkbench ? this.facilityReportsRoute(facilityGuid)
-      : this.facilityRouteForSection(facilityGuid, state.section, state.contextMode === 'account' && state.portfolioTab === 'predictors' ? 'predictors' : state.detail);
-    void this.router.navigate(route)
-      .catch(() => this.contextNavigationError.set('The facility could not be opened. Please try again.'));
+  async setFacility(facilityGuid: string): Promise<boolean> {
+    if (!this.isSingleSiteWorkspace()) {
+      return this.changeFacilityScope({ kind: 'facility', facilityGuid });
+    }
+    if (this.facilities().some(facility => facility.guid === facilityGuid)) {
+      const state = this.routeState();
+      const link = this.facilityDestination(facilityGuid, state.section, state.detail);
+      return this.navigateScopeDestination(link.route, link.queryParams);
+    }
+    return false;
   }
 
   accountDataReturnRoute(accountGuid: string): string[] {
-    return this.accountPortfolioRoute(accountGuid, this.browseState.origin(accountGuid));
+    const detail = this.activeDetail();
+    return this.accountPortfolioRoute(accountGuid, detail === 'predictors' ? 'predictors'
+      : detail === 'meters' || detail === 'meter-grouping' ? 'meters' : 'facilities');
+  }
+
+  facilityInventoryLink(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): { route: string[]; queryParams?: Params } {
+    const accountGuid = this.workspace.account()?.guid ?? '';
+    return { route: resource === 'analysis' ? this.accountAnalysisRoute(accountGuid)
+      : resource === 'reports' ? this.accountReportsRoute(accountGuid) : this.accountPortfolioRoute(accountGuid, resource),
+      queryParams: this.isSingleSiteWorkspace() ? {} : { facility: facilityGuid } };
+  }
+
+  async openFacilityInventory(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): Promise<boolean> {
+    const link = this.facilityInventoryLink(facilityGuid, resource);
+    return this.navigateScopeDestination(link.route, link.queryParams);
   }
 
   readonly contextNavigationError = signal('');
-
-  readonly accountReturn = computed(() => {
-    const account = this.account();
-    if (!account || this.contextMode() !== 'facility') return undefined;
-    const section = this.activeSection();
-    if (this.isSingleSiteWorkspace() && section !== 'reports') return undefined;
-    if (section === 'data') {
-      const origin = this.browseState.origin(account.guid);
-      return { label: origin === 'predictors' ? 'Account Predictors' : origin === 'meters' ? 'Account Meters' : 'Account Facilities', route: this.accountDataReturnRoute(account.guid) };
-    }
-    return { label: section === 'home' ? 'Account overview' : `Account ${section === 'analysis' ? 'analyses' : section}`,
-      route: this.accountRouteForSection(account.guid, section, this.activeDetail()) };
-  });
 
   setPanelTab(panelTab: PanelTabId): void {
     this.activePanelTabState.set(panelTab);
@@ -312,71 +433,32 @@ export class WorkspaceNavigationService {
     this.isSupportPanelOpen.set(false);
   }
 
-  openSection(sectionId: SectionId): void {
+  async openSection(sectionId: SectionId): Promise<void> {
+    const account = this.account();
+    if (account && sectionId === 'imports') {
+      await this.navigateScopeDestination(this.accountImportsRoute(account.guid), this.uploadQuery());
+      return;
+    }
+    if (account && sectionId === 'settings') {
+      const facility = this.contextFacility();
+      const detail = this.activeSection() === 'settings' ? this.activeDetail() : 'profile';
+      await this.navigateScopeDestination(facility ? this.facilitySettingsRoute(facility.guid, detail) : this.accountSettingsRoute(account.guid, detail));
+      return;
+    }
+    if (['data', 'analysis', 'reports'].includes(sectionId)) {
+      const account = this.account();
+      if (account) {
+        const scope = this.headerScope();
+        const route = sectionId === 'data' ? scope.kind === 'facility' ? this.accountPortfolioRoute(account.guid, 'meters') : this.accountDataRoute(account.guid)
+          : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : this.accountReportsRoute(account.guid);
+        await this.navigateScopeDestination(route, this.isSingleSiteWorkspace() ? {} : facilityScopeQuery(scope));
+      }
+      return;
+    }
     const contextMode = this.contextMode();
     if (sectionId === 'home') {
-      this.setContext(contextMode);
+      await this.setContext(contextMode);
       return;
-    }
-    if (sectionId === 'settings' && contextMode === 'account') {
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        void this.router.navigate(this.accountSettingsRoute(accountGuid));
-      }
-      return;
-    }
-    if (sectionId === 'data') {
-      if (contextMode === 'facility') {
-        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-        if (facilityGuid) {
-          void this.router.navigate(this.facilityDataRoute(facilityGuid));
-        }
-        return;
-      }
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        void this.router.navigate(this.accountDataRoute(accountGuid));
-      }
-      return;
-    }
-    if (sectionId === 'reports') {
-      const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (contextMode === 'facility' && facilityGuid) void this.router.navigate(this.facilityReportsRoute(facilityGuid));
-      else if (accountGuid) void this.router.navigate(this.accountReportsRoute(accountGuid));
-      return;
-    }
-    if (sectionId === 'analysis') {
-      if (contextMode === 'facility') {
-        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-        if (facilityGuid) {
-          void this.router.navigate(this.facilityAnalysisRoute(facilityGuid));
-        }
-        return;
-      }
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        void this.router.navigate(this.accountAnalysisRoute(accountGuid));
-      }
-      return;
-    }
-    if (sectionId === 'imports') {
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      if (accountGuid) {
-        const facilityGuid = contextMode === 'facility'
-          ? this.facility()?.guid || this.routeState().facilityGuid
-          : undefined;
-        void this.router.navigate(this.accountImportsRoute(accountGuid), {
-          queryParams: facilityGuid ? { facilityGuid, returnUrl: this.currentUrl() } : undefined
-        });
-      }
-      return;
-    }
-    if (sectionId === 'settings' && contextMode === 'facility') {
-      const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
-      if (facilityGuid) {
-        void this.router.navigate(this.facilitySettingsRoute(facilityGuid));
-      }
     }
   }
 
@@ -408,10 +490,6 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'workbench', reportGuid, stage];
   }
 
-  facilityReportsRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'dashboard'];
-  }
-
   facilityReportWorkbenchRoute(facilityGuid: string, reportGuid: string, stage: 'setup' | 'data-checks' | 'report' = 'setup'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'workbench', reportGuid, stage];
   }
@@ -440,12 +518,8 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
   }
 
-  facilityDataRoute(facilityGuid: string, detail = 'meters'): Array<string> {
+  facilityDataToolRoute(facilityGuid: string, detail: string): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
-  }
-
-  facilityAnalysisRoute(facilityGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
   }
 
   facilityAnalysisWorkbenchRoute(
@@ -520,6 +594,7 @@ export class WorkspaceNavigationService {
   }
 
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
+    if (detail === 'backup' && this.singleFacilityContext()?.guid === facilityGuid) return this.accountSettingsRoute(this.workspace.account()!.guid, 'backup');
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
   }
 
@@ -536,28 +611,18 @@ export class WorkspaceNavigationService {
     return this.accountRoute(accountGuid);
   }
 
-  private facilityRouteForSection(facilityGuid: string, section: SectionId, detail: string): Array<string> {
-    if (section === 'settings') {
-      return this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail));
-    }
-    if (section === 'data') {
-      return this.facilityDataRoute(facilityGuid, this.resolveFacilityDataDetail(detail));
-    }
-    if (section === 'imports') {
-      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
-      return accountGuid ? this.accountImportsRoute(accountGuid) : this.facilityRoute(facilityGuid);
-    }
-    if (section === 'reports') return this.facilityReportsRoute(facilityGuid);
-    if (section === 'analysis') return this.facilityAnalysisRoute(facilityGuid);
-    return this.facilityRoute(facilityGuid);
+  private facilityDestination(facilityGuid: string, section: SectionId, detail: string): { route: string[]; queryParams?: Params } {
+    if (section === 'settings') return { route: this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail)) };
+    if (section === 'analysis' || section === 'reports') return this.facilityInventoryLink(facilityGuid, section);
+    if (section === 'data') return ['meter-grouping', 'energy-uses', 'custom-grid-factors', 'custom-fuels', 'custom-gwps'].includes(detail)
+      ? { route: this.facilityDataToolRoute(facilityGuid, detail) }
+      : this.facilityInventoryLink(facilityGuid, detail === 'predictors' ? 'predictors' : 'meters');
+    if (section === 'imports' && this.account()) return { route: this.accountImportsRoute(this.account()!.guid) };
+    return { route: this.facilityRoute(facilityGuid) };
   }
 
   private resolveAccountDataDetail(detail: string): string {
     return ACCOUNT_DATA_DETAILS.has(detail) ? detail : DEFAULT_DETAILS.data;
-  }
-
-  private resolveFacilityDataDetail(detail: string): string {
-    return FACILITY_DATA_DETAILS.has(detail) ? detail : DEFAULT_FACILITY_DETAILS.data;
   }
 
   private resolveAccountSettingsDetail(detail: string): string {
@@ -596,45 +661,32 @@ export class WorkspaceNavigationService {
     if (account?.isSingleFacilityCompany !== true) {
       return 'portfolio';
     }
-    const facilityCount = this.facilities().length;
+    const facilityCount = this.facilities().filter(facility => facility.accountId === account.guid).length;
     if (facilityCount === 1) {
       return 'valid';
     }
     return facilityCount === 0 ? 'missing-facility' : 'multiple-facilities';
   }
 
-  private buildAccountOptions(): Array<AccountDropdownOption> {
-    const activeAccountGuid = this.workspace.account()?.guid || this.routeState().accountGuid;
-    return this.lifecycle.usableAccounts()
-      .filter(account => !account.deleteAccount)
-      .map(account => ({
-        guid: account.guid,
-        name: account.name || 'Untitled account',
-        descriptor: accountDescriptor(account),
-        active: account.guid === activeAccountGuid
-      }));
-  }
-
   private buildPanelContent(): PanelContent {
-    const context = this.contextMode();
     const account = this.account();
-    const facility = this.facility();
-    const isFacility = context === 'facility';
-    const name = isFacility ? facility?.name : account?.name;
-    const meterCount = isFacility ? this.workspace.facilityMeters().length : this.workspace.meters().length;
-    const predictorCount = isFacility ? this.workspace.facilityPredictors().length : this.workspace.predictors().length;
-    const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
-    const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
+    const facility = this.contextFacility();
+    const single = this.singleFacilityContext();
+    const isFacility = !!facility;
+    const name = single?.name ?? (isFacility ? facility?.name : account?.name);
+    const counts = this.contextCounts();
     const isData = this.activeSection() === 'data';
-    const todos = isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos();
-    const discardedWarnings = isFacility ? this.status.selectedFacilityDiscardedWarnings() : this.status.accountDiscardedWarnings();
-    const help = this.activeSection() === 'reports'
+    const todos = this.status.accountTodos().filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
+    const discardedWarnings = this.status.discardedItems().filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
+    const help = single
+      ? [`Browse data, analyses, and reports for ${single.name}.`, 'Open an item to work with its saved data and settings.']
+      : this.activeSection() === 'reports'
       ? ['Use Reports to browse, create, copy, rename, and delete saved reports. Account Reports includes reports from every facility.', 'Open a report name to view its saved configuration. Report-specific settings and previews are coming in later migrations.']
       : isFacility && this.activeSection() === 'data'
       ? this.buildFacilityDataHelp()
       : [
-        `This v1 Home page is the production shell starter for ${name || 'the selected workspace'}.`,
-        'Use the rail and context controls to confirm account and facility navigation before workflow pages are migrated.'
+        `Browse data, analyses, and reports for ${name || 'the selected account'}.`,
+        'Choose a facility in the header to focus inventories and navigation on its records.'
       ];
 
     return {
@@ -642,16 +694,16 @@ export class WorkspaceNavigationService {
       todos: isData ? todos.filter(isDataFinding) : todos,
       discardedWarnings: isData ? discardedWarnings.filter(isDataFinding) : discardedWarnings,
       results: [
-        { label: 'Facilities', value: String(this.facilities().length), tone: 'info' },
-        { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },
-        { label: 'Predictors', value: String(predictorCount), tone: predictorCount > 0 ? 'success' : 'neutral' },
+        ...(!single ? [{ label: 'Facilities', value: String(counts.facilities), tone: 'info' as const }] : []),
+        { label: 'Meters', value: String(counts.meters), tone: counts.meters > 0 ? 'success' : 'neutral' },
+        { label: 'Predictors', value: String(counts.predictors), tone: counts.predictors > 0 ? 'success' : 'neutral' },
         ...(!isData ? [
-          { label: 'Analyses', value: String(analysisCount), tone: analysisCount > 0 ? 'success' as const : 'neutral' as const },
-          { label: 'Reports', value: String(reportCount), tone: reportCount > 0 ? 'success' as const : 'neutral' as const }
+          { label: 'Analyses', value: String(counts.analyses), tone: counts.analyses > 0 ? 'success' as const : 'neutral' as const },
+          { label: 'Reports', value: String(counts.reports), tone: counts.reports > 0 ? 'success' as const : 'neutral' as const }
         ] : [])
       ],
       details: [
-        { label: 'Context', value: isFacility ? 'Facility workspace' : 'Account workspace' },
+        { label: 'Context', value: single ? 'Single-facility workspace' : isFacility ? 'Facility workspace' : 'Account workspace' },
         { label: 'Active section', value: `${this.activeSection()} / ${this.activeDetail()}` },
         { label: 'Support tab', value: this.activePanelTab() }
       ]
@@ -820,15 +872,4 @@ function safeDecodeRoutePart(value: string): string {
   } catch {
     return value;
   }
-}
-
-function accountDescriptor(account: IdbAccount): string {
-  if (account.isSingleFacilityCompany === true) {
-    return 'Single facility';
-  }
-  const facilityCount = Number(account.numberOfFacilities);
-  if (Number.isFinite(facilityCount)) {
-    return `${facilityCount} ${facilityCount === 1 ? 'facility' : 'facilities'}`;
-  }
-  return 'Portfolio';
 }

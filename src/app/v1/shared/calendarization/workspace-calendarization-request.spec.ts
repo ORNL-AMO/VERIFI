@@ -1,5 +1,5 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, facility, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import {
   CANONICAL_ENERGY_UNIT,
   CANONICAL_GAS_UNIT,

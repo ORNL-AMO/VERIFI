@@ -1,7 +1,7 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { getZeroEmissionsResults } from '@domain/calculations/emissions-calculations/emissions';
-import { account, facility, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, facility, meter } from '@app/v1/data/meters/facility-meters.testing';
 import { WorkspaceCalendarizationBaseResult } from './workspace-calendarization.models';
 import { projectWorkspaceCalendarization } from './workspace-calendarization-projection';
 

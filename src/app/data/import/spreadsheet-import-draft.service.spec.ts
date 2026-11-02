@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import { getEmptyFileReference, ImportFileDraft } from './spreadsheet-import.models';
-import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { SpreadsheetImportDraftService } from './spreadsheet-import-draft.service';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';

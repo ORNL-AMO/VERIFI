@@ -25,9 +25,9 @@
       <article class="v1-settings-card">
         <div class="v1-backup-settings__heading">
           <app-ui-icon name="fileDownload"></app-ui-icon>
-          <h3>Manual account backup</h3>
+          <h3>{{ navigation.singleFacilityContext() ? 'Complete backup' : 'Manual account backup' }}</h3>
         </div>
-        <p>Download all account data as JSON or ZIP.</p>
+        <p>{{ navigation.singleFacilityContext() ? 'Download the complete workspace, including all reports and analyses, as JSON or ZIP.' : 'Download all account data as JSON or ZIP.' }}</p>
         <p class="v1-backup-settings__note" [title]="backups.reminder().detail">{{ backups.reminder().label }} · Back up at least weekly.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--primary" [disabled]="!backups.available()" (click)="openBackupConfirm('json')">
@@ -58,7 +58,7 @@
     <article class="v1-settings-card">
       <div class="v1-backup-settings__heading">
           <app-ui-icon name="refresh"></app-ui-icon>
-          <h3>Automatic account backup</h3>
+          <h3>{{ navigation.singleFacilityContext() ? 'Automatic backup' : 'Automatic account backup' }}</h3>
         </div>
       <p>{{ automaticBackupLabel }}</p>
       @if (currentAccount.dataBackupFilePath) {
@@ -129,4 +129,12 @@
     (closed)="closeImportPanel()"
     (completed)="openImportedAccount($any($event))">
   </app-import-account-backup-panel>
+}
+
+@if (navigation.singleFacilityContext(); as soleFacility) {
+  <details class="v1-settings-panel">
+    <summary>Facility-only tools</summary>
+    <p>Use a complete backup above to include every report and analysis. These tools transfer only the facility records.</p>
+    <app-facility-settings-backup [facilityContext]="soleFacility" [embedded]="true"></app-facility-settings-backup>
+  </details>
 }
