@@ -109,7 +109,7 @@ describe('uniform account inventories in Chromium', () => {
         const upload = [...root.querySelectorAll<HTMLAnchorElement>('header a')].find(link => link.textContent.trim() === 'Upload data')!;
         const tabType = resource === 'meters' ? MetersInventoryComponent : PredictorsInventoryComponent;
         const tab = fixture.debugElement.query(By.directive(tabType)).componentInstance as MetersInventoryComponent | PredictorsInventoryComponent;
-        const tools = tab.tools()!;
+        const tools = tab.selection;
         expect(toggle.disabled).toBe(false);
         expect(toggle.classList.contains('v1-btn--quiet')).toBe(true);
         expect(toggle.compareDocumentPosition(upload) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

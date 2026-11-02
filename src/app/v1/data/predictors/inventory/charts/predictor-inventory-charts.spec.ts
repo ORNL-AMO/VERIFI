@@ -1,11 +1,26 @@
-import { combinePredictorCharts } from './inventory-predictor-charts';
-import { InventoryChartView } from '../inventory-chart-sheet/inventory-chart-sheet.models';
+import { buildPredictorInventoryCharts, combinePredictorCharts } from './predictor-inventory-charts';
+import { InventoryChartView } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.models';
+import { inventoryWorkspace, inventoryReading } from '../predictor-inventory.testing';
 
 function history(id: string, unit: string, samples: readonly [number, number | null][]): InventoryChartView {
   return { id, title: id, unit, coverage: '', metrics: [{ id, label: `Plant / ${id}`, shortLabel: id, facilityGuid: 'plant', facilityName: 'Plant', kind: 'predictor', unit }],
     rows: samples.map(([month, value], index) => ({ periodKey: `${id}-${index}`, periodLabel: '', sortValue: Date.UTC(2025, month), values: { [id]: value } })) };
 }
 describe('multiple saved predictor histories', () => {
+  it('prepares every matching saved history with explicit ownership and retains selectable empty histories', () => {
+    const workspace = inventoryWorkspace(3), facility = workspace.facility()!;
+    const readings = [inventoryReading('p1', { amount: 0 })];
+    const before = structuredClone(workspace.predictors());
+    const charts = buildPredictorInventoryCharts([facility], workspace.predictors(), readings, ['p1', 'p2']);
+    expect(charts.map(chart => chart.id)).toEqual(['p1', 'p2']);
+    expect(charts[0].rows[0].values['p1']).toBe(0);
+    expect(charts[0].metrics[0]).toMatchObject({ facilityGuid: facility.guid, facilityName: facility.name, kind: 'predictor' });
+    expect(charts[1]).toMatchObject({ rows: [], coverage: 'No monthly data' });
+    expect(charts[1].metrics).toHaveLength(1);
+    expect(charts[1].metrics[0].id).toBe('p2');
+    expect(charts[1].title).toContain(facility.name);
+    expect(workspace.predictors()).toEqual(before);
+  });
   it('marks alignment-only slots separately from a predictor’s real missing month', () => {
     const charts = [history('duplicates', 'tons', [[0, 1], [0, 2], [1, 3]]),
       history('complete', '°F', [[0, 10], [1, 20], [2, null], [3, 30]])];

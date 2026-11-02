@@ -1,3 +1,4 @@
+import { InventoryHeaderActionsRegistry } from '@app/v1/data/inventory/inventory-header-actions.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -13,7 +14,7 @@ describe('account Predictor inventory', () => {
     const workspace = inventoryWorkspace(5);
     const scope = signal<string | undefined>('other');
     workspace.predictors.update(items => items.map(item => item.guid === 'p1' ? { ...item, facilityId: 'other' } : item));
-    TestBed.configureTestingModule({ imports: [DataModule], providers: [provideRouter([]),
+    TestBed.configureTestingModule({ imports: [DataModule], providers: [InventoryHeaderActionsRegistry, provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: { ...workspace, facilities: signal([workspace.facility()!, { ...workspace.facility()!, guid: 'other', name: 'Other' }]), predictorData: workspace.predictorReadings } },
       { provide: WorkspaceStatusService, useValue: { items: signal([]), state: workspace.statusState } },
       { provide: WorkspaceNavigationService, useValue: { ...inventoryNavigation, inventoryFacilityGuid: scope } }
@@ -32,7 +33,7 @@ describe('account Predictor inventory', () => {
     const workspace = inventoryWorkspace(5);
     const facilities = signal([workspace.facility()!, { ...workspace.facility()!, guid: 'other', name: 'Other' }]);
     workspace.predictors.update(items => items.map(item => item.guid === 'p1' ? { ...item, facilityId: 'other' } : item));
-    TestBed.configureTestingModule({ imports: [DataModule], providers: [provideRouter([]),
+    TestBed.configureTestingModule({ imports: [DataModule], providers: [InventoryHeaderActionsRegistry, provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: { ...workspace, facilities, predictorData: workspace.predictorReadings } },
       { provide: WorkspaceStatusService, useValue: { items: signal([]), state: workspace.statusState } },
       { provide: WorkspaceNavigationService, useValue: inventoryNavigation }] });

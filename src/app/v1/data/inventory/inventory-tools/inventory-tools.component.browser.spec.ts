@@ -23,13 +23,16 @@ import { projectWorkspaceCalendarization } from '@app/v1/shared/calendarization/
 import { reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { calendarizedMeter, meter, monthlyData } from '@app/v1/data/meters/facility-meters.testing';
 import { InventoryToolsComponent } from './inventory-tools.component';
+import { InventorySelectionController } from '../selection/inventory-selection.controller';
+import { InventoryChartController } from '../charts/inventory-chart.controller';
+import { InventoryToolsSource } from '../inventory-tools.models';
 import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 
 @NgModule({ imports: [CommonModule, PortalModule, RouterModule, ShellHeaderTestModule, NoopAnimationsModule], declarations: [ShellComponent], exports: [ShellComponent] })
 class ChartShellTestModule {}
 
 const scope = signal<string | undefined>(undefined);
-@Component({ standalone:true,imports:[InventoryToolsComponent,PortalModule],template:`<main class="v1-root" style="height:700px;width:100%"><header style="position:relative;z-index:10;height:var(--v1-header-height)"><button class="v1-btn" type="button" (click)="chooseOther()">Choose other facility</button></header><app-inventory-tools [resource]="resource()" [scopeGuids]="ids()" [matchingGuids]="ids()"/><ng-template [cdkPortalOutlet]="portal.activePortal()"/></main>` })
+@Component({ standalone:true,imports:[InventoryToolsComponent,PortalModule],template:`<main class="v1-root" style="height:700px;width:100%"><header style="position:relative;z-index:10;height:var(--v1-header-height)"><button class="v1-btn" type="button" (click)="chooseOther()">Choose other facility</button></header><app-inventory-tools [selection]="selection" [chart]="chart"/><ng-template [cdkPortalOutlet]="portal.activePortal()"/></main>` })
 class ToolsHost {
   chooseOther(): void { scope.set('facility-b'); }
   readonly portal=inject(ModalPortalService);
@@ -39,6 +42,12 @@ class ToolsHost {
   readonly filterKey = computed(() => this.matchingIds().join(','));
   private readonly workspace=inject(AccountWorkspaceStore);
   readonly ids=computed(()=>this.resource() === 'predictors' ? this.workspace.predictors().filter(p => !scope() || p.facilityId === scope()).map(p => p.guid) : this.workspace.meters().filter(m => !scope() || m.facilityId === scope()).map(m => m.guid));
+  readonly source: InventoryToolsSource = {
+    context: computed(() => ({ accountGuid: this.workspace.account()?.guid, facilityGuid: scope(), resource: this.resource() })),
+    matchingGuids: this.matchingIds, scopeGuids: this.ids, filtersKey: this.filterKey
+  };
+  readonly selection = new InventorySelectionController(this.source);
+  readonly chart = new InventoryChartController(this.source);
 }
 async function settle(fixture: ComponentFixture<unknown>) { fixture.detectChanges();await fixture.whenStable();await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));fixture.detectChanges(); }
 
@@ -116,7 +125,7 @@ describe('unified inventory charts in Chromium',()=>{
       { provide: AppearanceService, useValue: { settings: () => ({ palette: 'default', mode: 'light', cornerStyle: 'soft', highContrast: false, backgroundPattern: 'skyline-green' }), isDark: () => false } },
       { provide: ManualBackupDownloadService, useValue: { reminder: () => ({ tone: 'none', label: 'Backup', detail: '' }), available: () => false, preparing: () => false } },
       { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of(base), project: (value, request) => projectWorkspaceCalendarization(value, snapshot, request) } }
-    ] }).overrideComponent(ToolsHost, { set: { template: '<button class="v1-btn" type="button">Background action</button><app-inventory-tools resource="meters" [scopeGuids]="ids()" [matchingGuids]="matchingIds()" [filtersKey]="filterKey()"/>' } });
+    ] }).overrideComponent(ToolsHost, { set: { template: '<button class="v1-btn" type="button">Background action</button><app-inventory-tools [selection]="selection" [chart]="chart"/>' } });
     const fixture = TestBed.createComponent(ShellComponent);
     let sizing: ReturnType<typeof observeChartSizing> | undefined;
     const measurements: unknown[] = [];
@@ -127,6 +136,7 @@ describe('unified inventory charts in Chromium',()=>{
       const header = root.querySelector<HTMLElement>('.v1-workspace__header')!;
       const route = fixture.debugElement.query(By.directive(ToolsHost)).componentInstance as ToolsHost;
       const tools = fixture.debugElement.query(By.directive(InventoryToolsComponent)).componentInstance as InventoryToolsComponent;
+      const chart = tools.chart();
       const opener = page.getByRole('button', { name: 'Charts', exact: true });
       await opener.click(); await settle(fixture);
       sizing = observeChartSizing(root);
@@ -148,14 +158,14 @@ describe('unified inventory charts in Chromium',()=>{
       expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(1);
       expect(Math.abs(actions.getBoundingClientRect().right - controls.getBoundingClientRect().right)).toBeLessThanOrEqual(1);
       expect(parseFloat(getComputedStyle(actions).borderInlineStartWidth)).toBeGreaterThan(0);
-      expect(tools.charts()[0].unit).toBe('MMBtu'); expect(tools.grouping()).toBe('groups');
+      expect(chart.charts()[0].unit).toBe('MMBtu'); expect(chart.grouping()).toBe('groups');
       const renderer = fixture.debugElement.query(By.directive(MeterResultsChartComponent)).componentInstance as MeterResultsChartComponent;
       expect(renderer.rows()).toHaveLength(3);
       expect((renderer.chartOption().series as { smooth: boolean }[]).every(series => series.smooth === false)).toBe(true);
-      await page.getByRole('button', { name: 'Facility totals', exact: true }).click(); await settle(fixture); expect(tools.grouping()).toBe('facilities');
-      await page.getByRole('button', { name: 'Individual meters', exact: true }).click(); await settle(fixture); expect(new Set(tools.charts()[0].metrics.map(metric => metric.id))).toEqual(new Set(snapshot.meters.map(m => m.guid)));
+      await page.getByRole('button', { name: 'Facility totals', exact: true }).click(); await settle(fixture); expect(chart.grouping()).toBe('facilities');
+      await page.getByRole('button', { name: 'Individual meters', exact: true }).click(); await settle(fixture); expect(new Set(chart.charts()[0].metrics.map(metric => metric.id))).toEqual(new Set(snapshot.meters.map(m => m.guid)));
       expect(root.querySelector('[aria-label="Chart metric"]')?.textContent).not.toContain('Water');
-      await page.getByRole('button', { name: 'Cost', exact: true }).click(); await settle(fixture); expect(tools.view().metric).toBe('cost');
+      await page.getByRole('button', { name: 'Cost', exact: true }).click(); await settle(fixture); expect(chart.view().metric).toBe('cost');
       await page.getByRole('button', { name: 'Energy', exact: true }).click(); await settle(fixture);
       const panel = root.querySelector<HTMLElement>('app-chart-trace-panel')!;
       expect(panel.querySelectorAll('.chart-traces__row')).toHaveLength(24);
@@ -172,20 +182,20 @@ describe('unified inventory charts in Chromium',()=>{
       expect(root.querySelector('.chart-traces__list')!.scrollHeight).toBeGreaterThan(root.querySelector('.chart-traces__list')!.clientHeight);
       const name = panel.querySelector<HTMLButtonElement>('[aria-label="Facility A / Meter A"]')!;
       await userEvent.dblClick(name); await settle(fixture);
-      expect(tools.view().hiddenGuids).toHaveLength(23); expect(renderer.visibleMetrics().map(metric => metric.id)).toEqual(['ma']);
-      await userEvent.dblClick(name); await settle(fixture); expect(tools.view().hiddenGuids).toEqual([]);
+      expect(chart.view().hiddenGuids).toHaveLength(23); expect(renderer.visibleMetrics().map(metric => metric.id)).toEqual(['ma']);
+      await userEvent.dblClick(name); await settle(fixture); expect(chart.view().hiddenGuids).toEqual([]);
       name.focus(); await userEvent.keyboard('{Enter}'); await settle(fixture); expect(renderer.visibleMetrics().map(metric => metric.id)).toEqual(['ma']);
-      await userEvent.keyboard('{Enter}'); await settle(fixture); expect(tools.view().hiddenGuids).toEqual([]);
+      await userEvent.keyboard('{Enter}'); await settle(fixture); expect(chart.view().hiddenGuids).toEqual([]);
       await userEvent.dblClick(panel.querySelector<HTMLButtonElement>('.chart-traces__group-name')!); await settle(fixture);
       expect(renderer.visibleMetrics()).toHaveLength(12);
-      await page.getByRole('checkbox', { name: 'All traces', exact: true }).click(); await settle(fixture); expect(tools.view().hiddenGuids).toEqual([]);
+      await page.getByRole('checkbox', { name: 'All traces', exact: true }).click(); await settle(fixture); expect(chart.view().hiddenGuids).toEqual([]);
       const row = name.closest<HTMLElement>('.chart-traces__row')!;
       row.dispatchEvent(new MouseEvent('mouseenter')); await settle(fixture);
       expect(renderer.highlightedMetricId).toBe('ma');
       expect((renderer.chartOption().series as { id: string; lineStyle: { opacity: number } }[]).find(series => series.id === 'mb')?.lineStyle.opacity).toBe(.2);
       row.dispatchEvent(new MouseEvent('mouseleave')); name.blur(); await settle(fixture);
       await page.getByRole('button', { name: 'Collapse Facility A', exact: true }).click(); await settle(fixture);
-      expect(tools.view().hiddenGuids).toEqual([]); expect(scope()).toBeUndefined();
+      expect(chart.view().hiddenGuids).toEqual([]); expect(scope()).toBeUndefined();
       await finishChartAnimation(root);
       await page.screenshot({ element: root, path: '../../../../../../.angular/meter-traces-grouped-wide.png' });
       await page.getByRole('button', { name: 'Hide traces', exact: true }).click(); await settle(fixture);
@@ -195,8 +205,8 @@ describe('unified inventory charts in Chromium',()=>{
       measurements.push(await sizing.stable('traces restored'));
       expect(root.querySelector('#trace-facility-facility-a')?.hasAttribute('hidden')).toBe(true);
       await page.getByRole('button', { name: 'Cost', exact: true }).click(); await settle(fixture);
-      route.matching.set(['ma']); await settle(fixture); expect(tools.charts()[0].metrics.map(metric => metric.id)).toEqual(['ma']);
-      expect(tools.charts().map(chart => chart.id)).toEqual(['energy']);
+      route.matching.set(['ma']); await settle(fixture); expect(chart.charts()[0].metrics.map(metric => metric.id)).toEqual(['ma']);
+      expect(chart.charts().map(chart => chart.id)).toEqual(['energy']);
       expect(root.querySelector('[aria-label="Chart metric"]')).toBeNull();
       expect(root.querySelector('.inventory-chart-sheet__coverage')?.textContent).toContain('Energy MMBtu');
       expect(getComputedStyle(grouping).borderInlineStartWidth).toBe('0px');
@@ -204,9 +214,9 @@ describe('unified inventory charts in Chromium',()=>{
       expect(root.querySelector('[aria-label="Chart metric"]')?.querySelectorAll('button')).toHaveLength(2);
       await page.getByRole('button', { name: 'Choose facility. All facilities', exact: true }).click(); await settle(fixture);
       await page.getByRole('dialog', { name: 'Choose facility', exact: true }).getByRole('button', { name: 'Other plant', exact: true }).click(); await settle(fixture);
-      expect(tools.chartsOpen()).toBe(true); expect(tools.charts()[0].unit).toBe('GJ'); expect(tools.charts()[0].metrics).toHaveLength(1); expect(stage.inert).toBe(true);
+      expect(chart.open()).toBe(true); expect(chart.charts()[0].unit).toBe('GJ'); expect(chart.charts()[0].metrics).toHaveLength(1); expect(stage.inert).toBe(true);
       await page.getByRole('button', { name: 'Individual meters', exact: true }).click(); await settle(fixture);
-      expect(tools.charts()[0].metrics).toHaveLength(12);
+      expect(chart.charts()[0].metrics).toHaveLength(12);
       measurements.push(await sizing.stable('facility scope and sources changed'));
       for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) {
         root.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`; await settle(fixture);
@@ -232,14 +242,14 @@ describe('unified inventory charts in Chromium',()=>{
       await page.screenshot({ element: root, path: '../../../../../../.angular/meter-traces-drawer-narrow.png' });
       await userEvent.keyboard('{Escape}'); await settle(fixture);
       expect(root.querySelector('[aria-label="Choose traces"]')).toBeNull();
-      expect(tools.chartsOpen()).toBe(true); expect(document.activeElement).toBe(traceToggle.element());
+      expect(chart.open()).toBe(true); expect(document.activeElement).toBe(traceToggle.element());
       await page.viewport(1300, 950); await settle(fixture);
       measurements.push(await sizing.stable('wide viewport restored'));
       await (cdp() as any).send('Emulation.setEmulatedMedia', { media: 'print', features: [] }); await settle(fixture);
       expect(getComputedStyle(stage, '::after').display).toBe('none');
       await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '', features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] }); await settle(fixture);
       await page.getByRole('button', { name: 'Close charts', exact: true }).click(); await settle(fixture);
-      expect(stage.inert).toBe(false); expect(tools.chartsOpen()).toBe(false);
+      expect(stage.inert).toBe(false); expect(chart.open()).toBe(false);
       expect(document.activeElement).toBe(opener.element());
     } finally {
       sizing?.stop();
@@ -265,6 +275,7 @@ describe('unified inventory charts in Chromium',()=>{
       await page.getByRole('button', { name: 'Charts', exact: true }).click(); await settle(fixture);
       const root = fixture.nativeElement.querySelector('.v1-root') as HTMLElement;
       const tools = fixture.debugElement.query(By.directive(InventoryToolsComponent)).componentInstance as InventoryToolsComponent;
+      const chart = tools.chart();
       const renderer = fixture.debugElement.query(By.directive(MeterResultsChartComponent)).componentInstance as MeterResultsChartComponent;
       expect(TestBed.inject(ModalPortalService).workspaceBlocked()).toBe(true);
       expect(root.querySelector('.workspace-bottom-sheet__header')).toBeNull();
@@ -272,10 +283,10 @@ describe('unified inventory charts in Chromium',()=>{
       expect(root.querySelector('[formControlName="source"]')).toBeNull();
       expect(root.querySelectorAll('input[type="radio"]')).toHaveLength(24);
       expect(renderer.visibleMetrics()).toHaveLength(1);
-      const target = tools.predictorCharts().find(chart => chart.id === 'p1')!;
+      const target = chart.predictorCharts().find(chart => chart.id === 'p1')!;
       expect(target.title).toBe(`${facilities[0].name} / Production 01`);
       await page.getByRole('radio', { name: `Show ${target.title}`, exact: true }).click(); await settle(fixture);
-      expect(tools.view().metric).toBe('p1'); expect(renderer.visibleMetrics()[0].unit).toBe('°F');
+      expect(chart.view().metric).toBe('p1'); expect(renderer.visibleMetrics()[0].unit).toBe('°F');
       expect(root.querySelector('.inventory-chart-sheet__coverage')?.textContent).toContain(`${facilities[0].name} / Production 01 °F`);
       expect(renderer.rows().map(row => row.values['p1'])).toEqual([0, null, 7]);
       const multiple = page.getByRole('switch', { name: 'Multiple predictors', exact: true });
@@ -284,14 +295,14 @@ describe('unified inventory charts in Chromium',()=>{
       expect(root.textContent).toContain('Units ignored'); expect(root.textContent).toContain('no conversion or normalization');
       expect(renderer.visibleMetrics().every(trace => trace.unit === undefined)).toBe(true);
       expect(renderer.visibleMetrics().find(trace => trace.id === 'p1')?.label).toContain('(°F)');
-      expect(tools.charts()[0].rows.map(row => row.values['p1'])).toEqual([0, null, 7]);
+      expect(chart.charts()[0].rows.map(row => row.values['p1'])).toEqual([0, null, 7]);
       const name = page.getByRole('button', { name: `${target.title} (°F)`, exact: true });
       await name.dblClick(); await settle(fixture); expect(renderer.visibleMetrics().map(trace => trace.id)).toEqual(['p1']);
       await name.dblClick(); await settle(fixture); expect(renderer.visibleMetrics()).toHaveLength(24);
       await page.getByRole('checkbox', { name: 'All traces', exact: true }).click(); await settle(fixture);
       expect(renderer.visibleMetrics()).toHaveLength(0); expect(root.textContent).toContain('No traces visible');
       expect(page.getByRole('button', { name: 'Download chart', exact: true }).element().hasAttribute('disabled')).toBe(true);
-      await multiple.click(); await settle(fixture); expect(tools.view().metric).toBe('p1'); expect(renderer.visibleMetrics()).toHaveLength(1);
+      await multiple.click(); await settle(fixture); expect(chart.view().metric).toBe('p1'); expect(renderer.visibleMetrics()).toHaveLength(1);
       await multiple.click(); await settle(fixture); expect(renderer.visibleMetrics()).toHaveLength(0);
       await page.getByRole('checkbox', { name: 'All traces', exact: true }).click(); await settle(fixture);
       for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) {
@@ -300,10 +311,10 @@ describe('unified inventory charts in Chromium',()=>{
       }
       root.className = 'v1-root'; await finishChartAnimation(root);
       await page.screenshot({ element: root, path: '../../../../../../.angular/predictor-traces-wide.png' });
-      scope.set('facility-b'); await settle(fixture); expect(tools.multiplePredictors()).toBe(false);
-      expect(root.querySelectorAll('input[type="radio"]')).toHaveLength(12); expect(tools.chartsOpen()).toBe(true);
-      scope.set(undefined); await settle(fixture); expect(tools.multiplePredictors()).toBe(true);
-      expect(tools.charts()[0].metrics).toHaveLength(24);
+      scope.set('facility-b'); await settle(fixture); expect(chart.multiplePredictors()).toBe(false);
+      expect(root.querySelectorAll('input[type="radio"]')).toHaveLength(12); expect(chart.open()).toBe(true);
+      scope.set(undefined); await settle(fixture); expect(chart.multiplePredictors()).toBe(true);
+      expect(chart.charts()[0].metrics).toHaveLength(24);
       await page.viewport(390, 844); await settle(fixture);
       const toggle = page.getByRole('button', { name: /^Traces / }); await toggle.click(); await settle(fixture);
       const drawer = root.querySelector<HTMLElement>('[role="dialog"][aria-label="Choose traces"]')!;

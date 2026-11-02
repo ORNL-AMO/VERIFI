@@ -28,7 +28,7 @@ Acceptance passed: application TypeScript check, full fast and Chromium suites (
 
 ## 2. Inventory ownership
 
-**Status: Not started**
+**Status: Complete**
 
 **Original review evidence:** [DataInventoryComponent](../src/app/v1/data/inventory/data-inventory.component.ts) recognizes concrete Meter/Predictor children with `instanceof` and reaches through them to nested tools. [InventoryToolsComponent](../src/app/v1/data/inventory/inventory-tools/inventory-tools.component.ts) combines calendarization demand, resource chart projections, session preferences, selection, deletion snapshots, persistence orchestration, portals, and focus.
 
@@ -37,6 +37,12 @@ Acceptance passed: application TypeScript check, full fast and Chromium suites (
 **Dependencies:** Build on Phase 6's simplified live chart modes. The header contract and controller split can be delivered separately, without waiting for navigation extraction.
 
 **Acceptance:** Header behavior tests cover selectable and non-selectable routed children, child replacement, empty results, pending commands, and disabled selection. Existing charts and deletion tests retain scope-keyed preferences, filter-before-pagination behavior, selection reset, command revalidation/rollback, one committed publication, and cleanup. Chromium checks protect the trace drawer, keyboard/focus, zoom, narrow layouts, themes, and print behavior. No generic base inventory or CRUD framework is needed.
+
+### Implementation and evidence
+
+The Data header now provides a scoped typed `InventoryHeaderActionsRegistry`; routed Meter/Predictor owners register readonly availability/selection signals and a toggle command, with identity-checked destruction cleanup. Concrete child inspection and nested tools access are gone. Each owner constructs `InventorySelectionController` and `InventoryChartController` from readonly context, scope, matching, and filter signals. Selection, reviewed command orchestration, and chart demand/session state follow the route owner; `InventoryToolsComponent` keeps portals and focus. Root-lived `InventoryChartSessionService` preserves cloned scope memory across route recreation. Meter/Predictor chart projections now live in their resource features. Existing durable handlers and leave/scope guards remain unchanged.
+
+Focused checks passed: 14 fast files / 136 tests and 2 Chromium files / 15 tests, including header replacement/isolation, controller/view recreation, lazy Meter demand, pending-delete destruction, scope memory, drawer keyboard/focus, themes, responsive layout, print, and the retained zero-error chart sizing reproduction. Application TypeScript and whitespace checks passed, and independent source review found no actionable lifecycle regressions. The first full fast run had one 5-second timeout in the unchanged ExcelJS template round-trip test; that test passed in isolation in 842 ms without changing its timeout, retries, test, or asset. The subsequent full fast/Chromium parent run passed (55 browser files, 282 tests). Its cause was not established; this remains an intermittent timing limitation. The production web build, validation planner, documentation link/anchor checks, retired-reference scans, and whitespace check also passed. Existing CSS-budget/CommonJS warnings remain. Electron boundaries were unchanged and manual desktop checks were not run.
 
 ## 3. Report presentation contracts
 

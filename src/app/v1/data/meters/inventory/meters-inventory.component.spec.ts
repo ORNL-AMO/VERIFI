@@ -1,3 +1,4 @@
+import { InventoryHeaderActionsRegistry } from '@app/v1/data/inventory/inventory-header-actions.service';
 import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
@@ -164,7 +165,7 @@ function setup(): ComponentFixture<MetersInventoryComponent> {
       RouterModule.forRoot([]),
       DataModule
     ],
-    providers: [
+    providers: [InventoryHeaderActionsRegistry,
       {
         provide: AccountWorkspaceStore,
         useValue: {

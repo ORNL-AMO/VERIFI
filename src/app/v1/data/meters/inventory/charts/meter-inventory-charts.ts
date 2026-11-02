@@ -1,8 +1,8 @@
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { InventoryChartTrace, InventoryChartView } from '../inventory-chart-sheet/inventory-chart-sheet.models';
-import { buildInventoryChartStyles } from '../inventory-chart-styles';
+import { InventoryChartTrace, InventoryChartView } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.models';
+import { buildInventoryChartStyles } from '@app/v1/shared/charts/inventory-chart-styles';
 
 export type MeterChartGrouping = 'facilities' | 'groups' | 'meters';
 export function buildInventoryMeterCharts(meters: readonly CalanderizedMeter[], facilities: readonly IdbFacility[],

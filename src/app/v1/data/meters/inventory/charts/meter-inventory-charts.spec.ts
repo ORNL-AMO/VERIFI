@@ -1,4 +1,4 @@
-import { buildInventoryMeterCharts } from './inventory-meter-charts';
+import { buildInventoryMeterCharts } from './meter-inventory-charts';
 import { calendarizedMeter, facility, group, meter, monthlyData } from '@app/v1/data/meters/facility-meters.testing';
 
 describe('scoped inventory meter chart projections', () => {

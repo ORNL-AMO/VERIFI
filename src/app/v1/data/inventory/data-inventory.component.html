@@ -7,7 +7,7 @@
       <app-page-identity class="v1-account-portfolio__heading" [breadcrumbs]="breadcrumbs()" (breadcrumbSelected)="navigation.changeFacilityScope({ kind: 'all' })" [title]="title()" [icon]="headerIcon()" headingId="v1-account-portfolio-title"/>
       <div class="v1-account-portfolio__header-actions">
         @if (isMeters() || isPredictors()) {
-          @let tools = selectionTools();
+          @let tools = selectionActions();
           <button type="button" class="v1-btn v1-btn--quiet" [class.v1-account-portfolio__select--active]="tools?.selecting()" [disabled]="!canSelectItems()" [attr.aria-pressed]="tools?.selecting() ?? false" [attr.aria-controls]="tools?.selecting() ? activeContent() + '-selection-actions' : null" (click)="tools?.toggleSelection()"><app-ui-icon [name]="tools?.selecting() ? 'check' : 'square'" [size]="18"/>Select {{ activeContent() }}</button>
         }
         <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="navigation.uploadQuery()"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
@@ -53,7 +53,7 @@
         </button>
       </app-data-empty-state>
     } @else {
-      <router-outlet (activate)="inventoryActivated($event)" (deactivate)="inventoryDeactivated($event)"></router-outlet>
+      <router-outlet></router-outlet>
     }
 
 </section>

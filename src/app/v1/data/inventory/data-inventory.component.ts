@@ -14,8 +14,7 @@ import { IconName } from '@app/v1/shared/icons/icon-registry';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 import { inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
-import { MetersInventoryComponent } from '@app/v1/data/meters/inventory/meters-inventory.component';
-import { PredictorsInventoryComponent } from '@app/v1/data/predictors/inventory/predictors-inventory.component';
+import { InventoryHeaderActionsRegistry } from './inventory-header-actions.service';
 
 interface PortfolioTotals {
   readonly facilities: number;
@@ -25,7 +24,8 @@ interface PortfolioTotals {
   selector: 'app-data-inventory',
   templateUrl: './data-inventory.component.html',
   styleUrls: ['./data-inventory.component.css'],
-  standalone: false
+  standalone: false,
+  providers: [InventoryHeaderActionsRegistry]
 })
 export class DataInventoryComponent implements OnDestroy {
   private readonly router = inject(Router);
@@ -54,12 +54,13 @@ export class DataInventoryComponent implements OnDestroy {
   readonly activeContent = computed(() => this.navigation.activePortfolioTab() || 'facilities');
   readonly isFacilities = computed(() => this.activeContent() === 'facilities');
   readonly isMeters = computed(() => this.activeContent() === 'meters');
-  private readonly selectionInventory = signal<MetersInventoryComponent | PredictorsInventoryComponent | undefined>(undefined);
-  readonly selectionTools = computed(() => this.selectionInventory()?.tools());
+  private readonly headerActions = inject(InventoryHeaderActionsRegistry);
+  readonly selectionActions = computed(() => {
+    const actions = this.headerActions.current();
+    return actions?.resource === this.activeContent() ? actions : undefined;
+  });
   readonly canSelectItems = computed(() => {
-    const inventory = this.selectionInventory(), tools = this.selectionTools();
-    if (!inventory || !tools) return false;
-    return tools.canAct() && (tools.selecting() || !!inventory.matchingGuids().length);
+    return this.selectionActions()?.canToggle() ?? false;
   });
   readonly dataValidationRoute = computed(() => {
     const facilityGuid = this.navigation.inventoryFacilityGuid();
@@ -104,14 +105,6 @@ export class DataInventoryComponent implements OnDestroy {
     effect(() => {
       if (this.isCreateFacilityDrawerOpen() && this.facilityCreationContext() !== this.facilityDrawerContext()) this.closeCreateFacilityDrawer();
     });
-  }
-
-  inventoryActivated(component: unknown): void {
-    this.selectionInventory.set(component instanceof MetersInventoryComponent || component instanceof PredictorsInventoryComponent ? component : undefined);
-  }
-
-  inventoryDeactivated(component: unknown): void {
-    if (this.selectionInventory() === component) this.selectionInventory.set(undefined);
   }
 
   openCreateMeterDrawer(): void {
