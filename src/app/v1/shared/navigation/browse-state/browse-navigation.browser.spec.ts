@@ -7,7 +7,7 @@ import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-stat
 import { portfolioTile } from '@app/v1/shared/inventory/inventory.testing';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityPickerTestModule } from '@app/v1/shell/header/facility-picker/facility-picker.testing';
-import { FacilityScope } from '@app/v1/shell/facility-scope.models';
+import { FacilityScope } from '@app/v1/routing/workspace-route';
 import { Component, NgModule, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';

@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { parseWorkspaceRoute } from '@app/v1/shell/workspace-navigation.service';
+import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { isWorkspaceDataDestination } from '@app/v1/shared/navigation/workspace-data-destination';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SpreadsheetImportCommandService } from '@data/import/spreadsheet-import-command.service';

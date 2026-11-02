@@ -1,4 +1,4 @@
-import type { RouteState } from '@app/v1/shell/workspace-navigation.service';
+import type { RouteState } from '@app/v1/routing/workspace-route';
 
 /** Upload returns only to surviving inventories, workbenches, and Data tools. */
 export function isWorkspaceDataDestination(route: RouteState): boolean {

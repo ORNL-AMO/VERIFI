@@ -4,7 +4,6 @@ import { Subject } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { reportFixture, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
-import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { RecentItemsService } from './recent-items.service';
 
 function setup(url = '/v1/workspace/account/account-a/analysis/dashboard', ready = true) {
@@ -15,11 +14,7 @@ function setup(url = '/v1/workspace/account/account-a/analysis/dashboard', ready
   if (ready) store.publish(snapshot);
   const events = new Subject<unknown>();
   TestBed.configureTestingModule({ providers: [
-    { provide: Router, useValue: { url, events } }, { provide: AccountWorkspaceStore, useValue: store },
-    { provide: WorkspaceNavigationService, useValue: {
-      facilityAnalysisWorkbenchRoute: (facility: string, guid: string) => ['/v1', 'workspace', 'facility', facility, 'analysis', 'workbench', guid, 'setup'],
-      facilityReportWorkbenchRoute: (facility: string, guid: string) => ['/v1', 'workspace', 'facility', facility, 'reports', 'workbench', guid, 'setup']
-    } }
+    { provide: Router, useValue: { url, events } }, { provide: AccountWorkspaceStore, useValue: store }
   ] });
   const service = TestBed.inject(RecentItemsService);
   const visit = (guid: string, section = 'analysis', facility = 'facility-a', stage = 'analysis') => {
@@ -48,6 +43,7 @@ describe('recent facility workspace items', () => {
     store.publish(snapshot); TestBed.tick();
     expect(service.analyses().map(item => item.guid)).toEqual(['a2']);
     expect(service.analyses()[0]).toMatchObject({ name: 'Analysis 2', facilityName: 'Facility A', label: 'Analysis 2, Facility A' });
+    expect(service.analyses()[0].route).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'a2', 'setup']);
   });
   it('does not record cancelled/failed navigation, dashboards, foreign ownership or account workbenches', () => {
     const { service, events, visit, dashboard, store, snapshot } = setup();

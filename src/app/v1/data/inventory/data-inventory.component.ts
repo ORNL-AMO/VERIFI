@@ -6,7 +6,8 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { AccountPortfolioTab, WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { AccountPortfolioTab } from '@app/v1/routing/workspace-route';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 

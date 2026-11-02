@@ -5,14 +5,13 @@ import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
 import {
-  accountHomeCommands,
   accountHomeCanonicalGuard,
-  facilityHomeCommands,
   facilityHomeCanonicalGuard,
   singleFacilityBackupCanonicalGuard,
   singleSiteAccountRedirectGuard,
   singleSiteRedirectCommands
 } from './canonical-route.guards';
+import { accountRoute, facilityRoute } from './workspace-route';
 
 describe('v1 canonical route guards', () => {
   let router: { createUrlTree: ReturnType<typeof vi.fn> };
@@ -51,9 +50,9 @@ describe('v1 canonical route guards', () => {
 
   it('redirects invalid account and facility home routes to canonical defaults', () => {
     expect(invoke(accountHomeCanonicalGuard, route({ detail: 'todo-list' }, route({ accountGuid: 'account-a' }))))
-      .toEqual({ commands: accountHomeCommands('account-a') });
+      .toEqual({ commands: accountRoute('account-a') });
     expect(invoke(facilityHomeCanonicalGuard, route({ detail: 'unknown' }, route({ facilityGuid: 'facility-a' }))))
-      .toEqual({ commands: facilityHomeCommands('facility-a') });
+      .toEqual({ commands: facilityRoute('facility-a') });
   });
 
   it.each(['settings/backup', 'reports/dashboard', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {

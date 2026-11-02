@@ -6,7 +6,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 import { reportTypeAvailable } from '@app/v1/reports/report-availability';
 import { reportIcon } from '@app/v1/reports/report-icons';
-import { WorkspaceNavigationService, parseWorkspaceRoute } from '../workspace-navigation.service';
+import { facilityAnalysisWorkbenchRoute, facilityReportWorkbenchRoute, parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 
 type RecentItemSection = 'analysis' | 'reports';
 interface RecentVisit { readonly guid: string; readonly facilityGuid: string; }
@@ -22,7 +22,6 @@ export interface RecentNavItem extends RecentVisit {
 @Injectable({ providedIn: 'root' })
 export class RecentItemsService {
   private readonly workspace = inject(AccountWorkspaceStore);
-  private readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
   private readonly currentUrl = signal(this.router.url);
   private readonly history = signal<ReadonlyMap<string, readonly RecentVisit[]>>(new Map());
@@ -71,8 +70,8 @@ export class RecentItemsService {
       const name = item.name || (section === 'analysis' ? 'Untitled analysis' : 'Untitled report');
       const icon: IconName = 'facilityReportType' in item ? reportIcon(item) : 'analysis';
       return [{ ...visit, name, facilityName: facility.name, label: `${name}, ${facility.name}`, icon,
-        route: section === 'analysis' ? this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, item.guid)
-          : this.navigation.facilityReportWorkbenchRoute(facility.guid, item.guid) }];
+        route: section === 'analysis' ? facilityAnalysisWorkbenchRoute(facility.guid, item.guid)
+          : facilityReportWorkbenchRoute(facility.guid, item.guid) }];
     });
   }
 }

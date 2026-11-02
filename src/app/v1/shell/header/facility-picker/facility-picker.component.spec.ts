@@ -107,7 +107,7 @@ describe('FacilityPickerComponent', () => {
     component.selectedFacility = component.facilities[0];
     fixture.detectChanges();
 
-    let emittedGuid: import('../../facility-scope.models').FacilityScope | undefined;
+    let emittedGuid: import('@app/v1/routing/workspace-route').FacilityScope | undefined;
     component.facilitySelected.subscribe(guid => (emittedGuid = guid));
 
     const element: HTMLElement = fixture.nativeElement;
