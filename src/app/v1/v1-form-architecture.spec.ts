@@ -9,6 +9,11 @@ import { join, relative } from 'path';
 
 const V1_ROOT = __dirname;
 const ANALYSIS_ROOT = join(V1_ROOT, 'analysis', 'facility');
+const DATA_FORM_ROOTS = [
+  join(V1_ROOT, 'shared', 'meter-settings'),
+  join(V1_ROOT, 'shared', 'predictor-settings'),
+  join(V1_ROOT, 'data', 'predictors', 'weather-predictor-workbench', 'setup')
+];
 const TEMPLATE_DRIVEN_ALLOWLIST = new Set([
   'account/imports/import-wizard/steps/footprint-facility/import-footprint-facility-step.component.html',
   'account/imports/import-wizard/steps/mapping/import-mapping-step.component.html',
@@ -62,6 +67,13 @@ describe('production v1 form architecture', () => {
     const manuallySynchronizedControl = /<(?:input|select|textarea)\b(?=[^>]*\[(?:value|checked|selected)\])(?=[^>]*\((?:input|change)\))[^>]*>/s;
     const violators = analysisTemplates.filter(path => manuallySynchronizedControl.test(source(path)));
     expect(violators, violationMessage(violators, 'Facility analysis controls must use reactive forms')).toHaveLength(0);
+  });
+
+  it('keeps migrated Data settings controls on reactive form bindings', () => {
+    const dataTemplates = DATA_FORM_ROOTS.flatMap(directory => collectFiles(directory, ['.html']));
+    const manuallySynchronizedControl = /<(?:input|select|textarea)\b(?=[^>]*\[(?:value|checked|selected)\])(?=[^>]*\((?:input|change)\))[^>]*>/s;
+    const violators = dataTemplates.filter(path => manuallySynchronizedControl.test(source(path)));
+    expect(violators, violationMessage(violators, 'Data settings controls must use reactive forms')).toHaveLength(0);
   });
 
   it('does not add template-driven forms outside the recorded debt allowlist', () => {

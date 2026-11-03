@@ -24,25 +24,21 @@
     <div class="weather-setup__range">
       <label>
         <span>Start month</span>
-        <input #startMonthInput
+        <input
           type="month"
           required
-          [value]="startMonth()"
-          [disabled]="!canEditSetup"
+          [formControl]="form.controls.startMonth"
           [attr.aria-invalid]="rangeError() ? 'true' : null"
-          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
-          (change)="setStartMonth(startMonthInput.value)">
+          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null">
       </label>
       <label>
         <span>End month</span>
-        <input #endMonthInput
+        <input
           type="month"
           required
-          [value]="endMonth()"
-          [disabled]="!canEditSetup"
+          [formControl]="form.controls.endMonth"
           [attr.aria-invalid]="rangeError() ? 'true' : null"
-          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
-          (change)="setEndMonth(endMonthInput.value)">
+          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null">
       </label>
     </div>
     @if (rangeError(); as error) {
@@ -65,19 +61,18 @@
       <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Saving with no predictors will remove this weather station workbench and all of its readings.</span></div>
     }
     <div class="weather-setup__definition-list">
-      @for (definition of definitions(); track definition.draftId) {
+      @for (definitionForm of form.controls.definitions.controls; track definitionForm.controls.draftId.value) {
+        @let definition = definitions()[$index];
         @let errors = definitionErrors().get(definition.draftId);
         <article class="weather-setup__definition">
           <div class="weather-setup__definition-grid">
             <label>
               <span>Weather type</span>
-              <select #definitionType
+              <select
                 class="v1-select"
-                [value]="definition.weatherDataType"
-                [disabled]="!canEditSetup"
-                (change)="setDefinitionType(definition.draftId, definitionType.value)">
+                [formControl]="definitionForm.controls.weatherDataType">
                 @for (option of weatherTypes; track option.value) {
-                  <option [attr.value]="option.value">
+                  <option [value]="option.value">
                     {{ option.label }}
                   </option>
                 }
@@ -85,15 +80,13 @@
             </label>
             <label>
               <span>Predictor name</span>
-              <input #definitionName
+              <input
                 type="text"
                 maxlength="100"
                 required
-                [value]="definition.name"
-                [disabled]="!canEditSetup"
+                [formControl]="definitionForm.controls.name"
                 [attr.aria-invalid]="errors?.name ? 'true' : null"
-                [attr.aria-describedby]="errors?.name ? definition.draftId + '-name-error' : null"
-                (input)="setDefinitionName(definition.draftId, definitionName.value)">
+                [attr.aria-describedby]="errors?.name ? definition.draftId + '-name-error' : null">
               @if (errors?.name) {
                 <small [id]="definition.draftId + '-name-error'" class="weather-setup__field-error">
                   Enter a predictor name of 100 characters or fewer.
@@ -103,14 +96,12 @@
             @if (definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD') {
               <label>
                 <span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span>
-                <input #definitionBase
+                <input
                   type="number"
                   required
-                  [value]="definition.baseTemperature"
-                  [disabled]="!canEditSetup"
+                  [formControl]="definitionForm.controls.baseTemperature"
                   [attr.aria-invalid]="errors?.base ? 'true' : null"
-                  [attr.aria-describedby]="errors?.base ? definition.draftId + '-base-error' : null"
-                  (change)="setDefinitionBase(definition.draftId, definitionBase.value)">
+                  [attr.aria-describedby]="errors?.base ? definition.draftId + '-base-error' : null">
                 @if (errors?.base) {
                   <small [id]="definition.draftId + '-base-error'" class="weather-setup__field-error">
                     Enter a base temperature.

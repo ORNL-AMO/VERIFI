@@ -107,7 +107,6 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     this.saveMessage.set('Changes save automatically.');
     const form = this.formService.buildMeterSettingsForm(meter);
     this.formSignal.set(form);
-    this.applyRuleChange('source');
     form.markAsPristine();
     untracked(() => this.applyFormEnabledState());
   });
