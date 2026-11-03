@@ -1,17 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router, RouterOutlet } from '@angular/router';
-import { of } from 'rxjs';
+import { RouterModule } from '@angular/router';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
 import { AppStartupState } from './application-lifecycle/application-lifecycle.models';
+import { DatabaseResetService } from './application-lifecycle/database-reset.service';
+import { MigrationRecoveryService } from './application-lifecycle/recovery/migration-recovery.service';
+import { StartupErrorComponent } from './application-lifecycle/startup-error/startup-error.component';
 import { AppComponent } from './app.component';
 
 @NgModule({
-  imports: [CommonModule, RouterOutlet],
-  declarations: [AppComponent],
+  imports: [CommonModule, RouterModule.forRoot([])],
+  declarations: [AppComponent, StartupErrorComponent],
   schemas: [NO_ERRORS_SCHEMA]
 })
 class AppComponentTestModule { }
@@ -19,17 +21,18 @@ class AppComponentTestModule { }
 describe('AppComponent shell state', () => {
   let fixture: ComponentFixture<AppComponent>;
   const workspaceStatus = signal<'ready' | 'switching'>('switching');
-  const startupState = signal<any>({ status: 'ready' });
+  const startupState = signal<AppStartupState>({ status: 'ready' });
   const lifecycle = {
     state: startupState,
     persistenceReady: signal(true),
     initialize: () => Promise.resolve({ status: 'ready' }),
-    retry: () => Promise.resolve({ status: 'ready' })
+    retry: vi.fn(async () => ({ status: 'ready' as const }))
   };
 
   beforeEach(() => {
     workspaceStatus.set('switching');
     startupState.set({ status: 'ready' });
+    lifecycle.retry.mockClear();
     TestBed.configureTestingModule({
       imports: [AppComponentTestModule],
       providers: [
@@ -38,10 +41,8 @@ describe('AppComponent shell state', () => {
           useValue: lifecycle
         },
         { provide: AccountWorkspaceStore, useValue: { status: workspaceStatus } },
-        {
-          provide: Router,
-          useValue: { url: '/data-evaluation/account', events: of() }
-        },
+        { provide: MigrationRecoveryService, useValue: {} },
+        { provide: DatabaseResetService, useValue: {} },
         {
           provide: AnalyticsService,
           useValue: { initialize: () => undefined, sendEvent: () => undefined, getPageWithoutId: (url: string) => url }
@@ -68,7 +69,8 @@ describe('AppComponent shell state', () => {
       status: 'error',
       error: {
         message: 'IndexedDB could not be opened.',
-        step: 'open-persistence'
+        step: 'database',
+        retryable: true
       }
     });
     fixture.detectChanges();
@@ -78,7 +80,13 @@ describe('AppComponent shell state', () => {
     expect(alert).not.toBeNull();
     expect(alert.textContent).toContain('Application data could not be initialized');
     expect(alert.textContent).toContain('IndexedDB could not be opened.');
-    expect(alert.textContent).toContain('open-persistence');
+    expect(alert.textContent).toContain('database');
+    expect(alert.querySelector('a[href="/feedback"]')).not.toBeNull();
+    expect(alert.querySelector('a[href="/privacy"]')).not.toBeNull();
+
+    alert.querySelector<HTMLButtonElement>('button').click();
+
+    expect(lifecycle.retry).toHaveBeenCalledOnce();
   });
 
   it('renders one full-viewport switching layer while the workspace changes', () => {

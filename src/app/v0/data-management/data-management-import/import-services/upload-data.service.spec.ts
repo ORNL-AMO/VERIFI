@@ -21,13 +21,13 @@ import { FacilityEnergyUseEquipmentDbService } from '@data/indexedDB/facility-en
 import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
-import { UploadDataV1Service } from './upload-data-v1.service';
-import { UploadDataV2Service } from './upload-data-v2.service';
-import { UploadDataV3Service } from './upload-data-v3.service';
-import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
-import { UploadDataFootprintToolService } from './upload-data-footprint-tool.service';
+import { UploadDataV1Service } from '@data/import/parsers/upload-data-v1.service';
+import { UploadDataV2Service } from '@data/import/parsers/upload-data-v2.service';
+import { UploadDataV3Service } from '@data/import/parsers/upload-data-v3.service';
+import { UploadDataEnergyTreasureHuntService } from '@data/import/parsers/upload-data-energy-treasure-hunt.service';
+import { UploadDataFootprintToolService } from '@data/import/parsers/upload-data-footprint-tool.service';
 import { UploadDataService } from './upload-data.service';
-import { getEmptyFileReference } from './upload-data-models';
+import { getEmptyFileReference } from '@data/import/spreadsheet-import.models';
 import { ProcessMeterReadingsComponent } from '../shared-process-file/process-meter-readings/process-meter-readings.component';
 
 @NgModule({ declarations: [ProcessMeterReadingsComponent], schemas: [CUSTOM_ELEMENTS_SCHEMA] })
