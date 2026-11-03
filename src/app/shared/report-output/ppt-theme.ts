@@ -33,11 +33,11 @@ export const PPT_THEME = {
     rightHalf: { x: 5.2, y: 1.3, w: 4.3, h: 4.1 },
   },
   chartPalette: [
-    '2E517F',   
-    '70AD47',   
-    'ED7D31',   
-    'FFC000',   
-    '4472C4',   
-    'C0392B',   
+    '2E517F',
+    '70AD47',
+    'ED7D31',
+    'FFC000',
+    '4472C4',
+    'C0392B',
   ],
 };

@@ -419,9 +419,9 @@ class PresentationRenderer {
     });
     if (noteText) {
       slide.addText(noteText, {
-        x: fullContent.x, 
-        y: fullContent.y + imageHeight + 0.05, 
-        w: fullContent.w, 
+        x: fullContent.x,
+        y: fullContent.y + imageHeight + 0.05,
+        w: fullContent.w,
         h: 0.25,
         fontSize: this.theme.sizes.caption,
         color: this.theme.colors.textLight,

@@ -68,4 +68,3 @@ export type V1EChartsOption = echarts.ComposeOption<
   | TooltipComponentOption
   | VisualMapComponentOption
 >;
-

@@ -59,4 +59,3 @@ export interface StyledText {
     align?: 'left' | 'center' | 'right';
     spaceAfter?: number;
 }
-
