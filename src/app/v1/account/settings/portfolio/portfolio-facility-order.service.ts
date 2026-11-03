@@ -44,6 +44,7 @@ export class PortfolioFacilityOrderService {
       () => { this.draft.set(undefined); this.errorAccount.set(undefined); },
       () => this.saving(),
       async () => {
+        this.startSave();
         do {
           await this.pending;
         } while (this.savingAccount());
@@ -54,6 +55,7 @@ export class PortfolioFacilityOrderService {
   }
 
   move(facilityGuid: string, destinationIndex: number): void {
+    if (!this.accountWorkspaceStore.canWrite()) return;
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const facilities = this.facilities();
     const sourceIndex = facilities.findIndex(facility => facility.guid === facilityGuid);

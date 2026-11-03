@@ -36,6 +36,7 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
 
   readonly facilityOrderService = inject(PortfolioFacilityOrderService);
   readonly facilities = this.facilityOrderService.facilities;
+  readonly orderingDisabled = computed(() => !this.canWrite() || this.facilities().length < 2);
   readonly orderOptions = computed(() => this.facilities().map((_, index) => index + 1));
   readonly orderControls = new FormRecord<FormControl<number>>({});
   private readonly orderSubscriptions = new Map<string, Subscription>();
@@ -59,6 +60,7 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
     super();
     effect(() => {
       const facilities = this.facilities();
+      const orderingDisabled = this.orderingDisabled();
       const guids = new Set(facilities.map(facility => facility.guid));
       for (const guid of Object.keys(this.orderControls.controls)) {
         if (!guids.has(guid)) {
@@ -77,7 +79,7 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
           }));
         }
         control.setValue(index + 1, { emitEvent: false });
-        if (facilities.length === 1) control.disable({ emitEvent: false });
+        if (orderingDisabled) control.disable({ emitEvent: false });
         else control.enable({ emitEvent: false });
       });
     });

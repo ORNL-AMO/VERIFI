@@ -1,4 +1,7 @@
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { By } from '@angular/platform-browser';
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
@@ -425,6 +428,49 @@ describe('Account settings routed components', () => {
     expect(fixture.componentInstance.selectedCount).toBe(0);
   });
 
+  it('disables portfolio ordering while writes are unavailable and for a single facility', () => {
+    canWrite.set(false);
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+    expectOrderingDisabled(fixture, true);
+    canWrite.set(true); fixture.detectChanges();
+    expectOrderingDisabled(fixture, false);
+    canWrite.set(false); fixture.detectChanges();
+    expectOrderingDisabled(fixture, true);
+    canWrite.set(true);
+    facilities.set([facilities()[0]]); fixture.detectChanges();
+    expectOrderingDisabled(fixture, true);
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+  });
+
+  it('keeps both ordering controls usable for successive moves during an order save', async () => {
+    let finish!: () => void;
+    let first = true;
+    accountHandler.update.mockImplementation(async updated => {
+      if (first) {
+        first = false;
+        await new Promise<void>(resolve => { finish = resolve; });
+      }
+      account.set(updated);
+      return updated;
+    });
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+    const component = fixture.componentInstance;
+    component.orderControls.controls['facility-b'].setValue(1);
+    hasPending.set(true); fixture.detectChanges();
+    expect(component.facilityOrderService.saving()).toBe(true);
+    expectOrderingDisabled(fixture, false);
+    component.orderControls.controls['facility-a'].setValue(1); fixture.detectChanges();
+    expect(component.facilities().map(item => item.guid)).toEqual(['facility-a', 'facility-b']);
+    expect(accountHandler.update).toHaveBeenCalledTimes(1);
+    finish();
+    expect(await TestBed.inject(UnsavedChangesService).flushPendingChanges()).toBe(true);
+    hasPending.set(false); fixture.detectChanges();
+    expect(accountHandler.update).toHaveBeenCalledTimes(2);
+    expect(account()?.portfolioFacilityOrder).toEqual(['facility-a', 'facility-b']);
+    expectOrderingDisabled(fixture, false);
+  });
+
   it('disables portfolio write actions when workspace writes are unavailable or pending', () => {
     const fixture = createDetail(AccountSettingsPortfolioComponent);
 
@@ -468,6 +514,15 @@ function createDetail<T>(component: new (...args: any[]) => T): ComponentFixture
   const fixture = TestBed.createComponent(component);
   fixture.detectChanges();
   return fixture;
+}
+
+function expectOrderingDisabled(fixture: ComponentFixture<AccountSettingsPortfolioComponent>, disabled: boolean): void {
+  const host = fixture.nativeElement as HTMLElement;
+  const controls = [...host.querySelectorAll<HTMLSelectElement | HTMLButtonElement>('.v1-portfolio-settings__order select, .v1-portfolio-settings__drag')];
+  expect(controls.length).toBeGreaterThan(0);
+  for (const control of controls) expect(control.disabled).toBe(disabled);
+  expect(fixture.debugElement.query(By.directive(CdkDropList)).injector.get(CdkDropList).disabled).toBe(disabled);
+  for (const drag of fixture.debugElement.queryAll(By.directive(CdkDrag))) expect(drag.injector.get(CdkDrag).disabled).toBe(disabled);
 }
 
 function buttonByText<T>(fixture: ComponentFixture<T>, text: string): HTMLButtonElement {
