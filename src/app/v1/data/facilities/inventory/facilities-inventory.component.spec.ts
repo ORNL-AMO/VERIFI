@@ -16,7 +16,7 @@ function facility(guid: string, name: string, city: string): IdbFacility {
 }
 
 function setup() {
-  const account = signal({ guid: 'account-a' });
+  const account = signal<{ guid: string; portfolioFacilityOrder?: readonly string[] }>({ guid: 'account-a' });
   const facilities = signal([facility('alpha', 'Alpha Plant', 'Oak Ridge'), facility('beta', 'Beta Works', 'Knoxville')]);
   const navigate = vi.fn(async () => true);
   const items = signal<readonly StatusItem[]>([]);
@@ -43,6 +43,51 @@ function setup() {
 }
 
 describe('FacilitiesInventoryComponent', () => {
+  it('defaults to defined order, follows committed preferences, and keeps explicit name sorting', () => {
+    const { fixture, account, facilities } = setup();
+    const component = fixture.componentInstance;
+    const sort = fixture.nativeElement.querySelector('select[formControlName="sort"]') as HTMLSelectElement;
+    expect(sort.value).toBe('defined');
+    expect(sort.options[0].text).toBe('Defined order');
+    const guids = () => component.filteredSummaries().map(item => item.facility.guid);
+    expect(guids()).toEqual(['alpha', 'beta']);
+    account.set({ guid: 'account-a', portfolioFacilityOrder: ['beta', 'deleted', 'beta', 'alpha'] }); fixture.detectChanges();
+    expect(guids()).toEqual(['beta', 'alpha']);
+    expect([...fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile__name')].map(item => item.textContent.trim())).toEqual(['Beta Works', 'Alpha Plant']);
+    sort.value = 'facilityName'; sort.dispatchEvent(new Event('change', { bubbles: true })); fixture.detectChanges();
+    expect(guids()).toEqual(['alpha', 'beta']);
+    component.clearFilters(); fixture.detectChanges();
+    expect(sort.value).toBe('defined');
+    expect(guids()).toEqual(['beta', 'alpha']);
+    account.set({ guid: 'account-a', portfolioFacilityOrder: ['alpha', 'beta'] }); fixture.detectChanges();
+    expect(guids()).toEqual(['alpha', 'beta']);
+    expect(facilities().map(item => item.guid)).toEqual(['alpha', 'beta']);
+  });
+
+  it('retains the chosen sort, search, and status filters on reopening', () => {
+    const { fixture, account } = setup();
+    account.set({ guid: 'account-a', portfolioFacilityOrder: ['beta', 'alpha'] });
+    fixture.componentInstance.filtersForm.setValue({ search: 'Works', status: 'noMeters', sort: 'facilityName' });
+    fixture.detectChanges(); fixture.destroy();
+    const reopened = TestBed.createComponent(FacilitiesInventoryComponent); reopened.detectChanges();
+    expect(reopened.componentInstance.filtersForm.getRawValue()).toEqual({ search: 'Works', status: 'noMeters', sort: 'facilityName' });
+    expect(reopened.componentInstance.filteredSummaries().map(item => item.facility.guid)).toEqual(['beta']);
+    reopened.componentInstance.clearFilters(); reopened.detectChanges();
+    expect(reopened.componentInstance.filteredSummaries().map(item => item.facility.guid)).toEqual(['beta', 'alpha']);
+  });
+
+  it('orders the whole inventory before pagination and prints every matching facility in defined order', () => {
+    const { fixture, account, facilities } = setup();
+    facilities.set(Array.from({ length: 25 }, (_, index) => facility(`f${index}`, `Facility ${index}`, 'Oak Ridge')));
+    const order = facilities().map(item => item.guid).reverse();
+    account.set({ guid: 'account-a', portfolioFacilityOrder: order }); fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(component.tiles().map(item => item.guid)).toEqual(order);
+    expect(component.inventory.visibleIds()).toEqual(order.slice(0, 24));
+    component.inventory.selectPage(1); fixture.detectChanges();
+    expect(component.inventory.visibleIds()).toEqual(order.slice(24));
+    expect([...fixture.nativeElement.querySelectorAll('.portfolio-inventory-print .portfolio-tile__name')].map(item => item.textContent.trim())).toEqual(facilities().map(item => item.name).reverse());
+  });
   it('shows only the selected facility card and keeps scope when clearing local filters', () => {
     const { fixture } = setup();
     const scope = TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>;

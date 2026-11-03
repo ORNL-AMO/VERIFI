@@ -39,11 +39,38 @@ describe('session browse state', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.filters().search).toBe('Saved'); expect(changes).not.toHaveBeenCalled();
     fixture.componentInstance.form.controls.search.setValue('Edited'); fixture.detectChanges();
+    fixture.componentInstance.form.controls.sort.setValue('attention'); fixture.detectChanges();
     fixture.componentInstance.account.set('b'); fixture.detectChanges();
     expect(fixture.componentInstance.filters().search).toBe('');
     fixture.componentInstance.account.set('a'); fixture.detectChanges();
     expect(fixture.componentInstance.filters().search).toBe('Edited');
+    expect(fixture.componentInstance.filters().sort).toBe('attention');
     fixture.destroy();
     expect(store.readFilters({ accountGuid: 'a', kind: 'facilities' })?.search).toBe('Edited');
+  });
+
+  it('restores remembered sort choices on synchronous projection, account changes, and reopening without emitting edits', () => {
+    TestBed.configureTestingModule({ imports: [FormHost] });
+    const store = TestBed.inject(BrowseStateService);
+    store.saveFilters({ accountGuid: 'a', kind: 'facilities' }, { search: 'Saved', status: 'warning', sort: 'attention' });
+    store.saveFilters({ accountGuid: 'b', kind: 'facilities' }, { search: 'Other', status: 'error', sort: 'modified' });
+    const fixture = TestBed.createComponent(FormHost);
+    const host = fixture.componentInstance;
+    const changes = vi.fn(); host.form.valueChanges.subscribe(changes);
+    expect(host.filters()).toEqual({ search: 'Saved', status: 'warning', sort: 'attention' });
+    fixture.detectChanges();
+    expect(host.form.getRawValue()).toEqual(host.filters());
+    expect(changes).not.toHaveBeenCalled();
+    host.form.controls.sort.setValue('modified');
+    expect(host.filters().sort).toBe('modified');
+    host.account.set('b');
+    expect(host.filters()).toEqual({ search: 'Other', status: 'error', sort: 'modified' });
+    fixture.detectChanges();
+    host.account.set('a'); fixture.detectChanges();
+    expect(host.filters()).toEqual({ search: 'Saved', status: 'warning', sort: 'modified' });
+    host.form.controls.sort.setValue('attention');
+    fixture.destroy();
+    const reopened = TestBed.createComponent(FormHost); reopened.detectChanges();
+    expect(reopened.componentInstance.form.getRawValue()).toEqual({ search: 'Saved', status: 'warning', sort: 'attention' });
   });
 });

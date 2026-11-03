@@ -3,7 +3,7 @@ import { IconName } from '@app/v1/shared/icons/icon-registry';
 import { StatusEvaluationState, StatusItem, isDataFinding, summarizeFindings } from '@app/v1/status/status.models';
 
 export type FacilityStatusFilter = 'all' | 'attention' | 'error' | 'warning' | 'noMeters' | 'noReadings';
-export type FacilitySort = 'attention' | 'facilityName' | 'modified';
+export type FacilitySort = 'defined' | 'attention' | 'facilityName' | 'modified';
 export type FacilityTone = 'danger' | 'warning' | 'success' | 'neutral';
 interface FacilityRecord { readonly facilityId: string; readonly modifiedDate?: Date | string; }
 interface FacilityResourceRecord extends FacilityRecord { readonly guid: string; }
@@ -79,7 +79,7 @@ export function buildFacilityInventory(input: FacilityInventoryInput): FacilityI
 
 export function filterFacilityInventory(facilities: readonly FacilityInventoryView[], search: string, status: FacilityStatusFilter, sort: FacilitySort): FacilityInventoryView[] {
   const query = search.trim().toLowerCase();
-  return facilities.filter(view => !query || view.searchText.includes(query)).filter(view => {
+  const filtered = facilities.filter(view => !query || view.searchText.includes(query)).filter(view => {
     switch (status) {
       case 'attention': return view.errorCount + view.warningCount > 0;
       case 'error': return view.errorCount > 0;
@@ -88,6 +88,8 @@ export function filterFacilityInventory(facilities: readonly FacilityInventoryVi
       case 'noReadings': return view.noReadings;
       default: return true;
     }
-  }).sort((a, b) => (sort === 'attention' ? a.statusRank - b.statusRank : sort === 'modified' ? b.modified - a.modified : 0)
+  });
+  if (sort === 'defined') return filtered;
+  return filtered.sort((a, b) => (sort === 'attention' ? a.statusRank - b.statusRank : sort === 'modified' ? b.modified - a.modified : 0)
     || a.facility.name.localeCompare(b.facility.name) || a.facility.guid.localeCompare(b.facility.guid));
 }

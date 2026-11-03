@@ -8,6 +8,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { FacilitySort, FacilityStatusFilter, buildFacilityInventory, filterFacilityInventory } from './facility-inventory.view';
 import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
 import { facilityTiles } from '@app/v1/data/inventory/data-inventory-tiles.view';
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 
 @Component({
   selector: 'app-facilities-inventory',
@@ -23,7 +24,7 @@ export class FacilitiesInventoryComponent {
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
     status: new FormControl<FacilityStatusFilter>('all', { nonNullable: true }),
-    sort: new FormControl<FacilitySort>('facilityName', { nonNullable: true })
+    sort: new FormControl<FacilitySort>('defined', { nonNullable: true })
   });
   readonly browseKey = computed<BrowseKey<'facilities'> | undefined>(() => {
     const account = this.workspace.account();
@@ -33,7 +34,7 @@ export class FacilitiesInventoryComponent {
   readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready());
   readonly navigationError = signal('');
   readonly facilityInput = computed(() => ({
-    facilities: this.workspace.facilities(), meters: this.workspace.meters(), meterData: this.workspace.meterData(),
+    facilities: orderFacilities(this.workspace.facilities(), this.workspace.account()?.portfolioFacilityOrder), meters: this.workspace.meters(), meterData: this.workspace.meterData(),
     predictors: this.workspace.predictors(), predictorData: this.workspace.predictorData(),
     equipment: this.workspace.energyUseEquipment(),
     findings: this.status.items(), statusState: this.status.state()
@@ -56,6 +57,6 @@ export class FacilitiesInventoryComponent {
     try { await this.router.navigate([...route]); } catch { this.navigationError.set('The facility could not be opened. Please try again.'); }
   }
 
-  clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', sort: 'facilityName' }); }
+  clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', sort: 'defined' }); }
 
 }

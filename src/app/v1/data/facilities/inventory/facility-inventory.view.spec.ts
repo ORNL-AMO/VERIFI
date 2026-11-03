@@ -15,6 +15,15 @@ function input(overrides: Partial<FacilityInventoryInput> = {}): FacilityInvento
 }
 
 describe('portfolio facility projections', () => {
+  it('preserves defined relative order through search and status filtering without mutating the input', () => {
+    const source = input({ facilities: [portfolioFacility('gamma', 'Gamma'), portfolioFacility('beta', 'Beta'), portfolioFacility('alpha', 'Alpha')], meters: [{ guid: 'm', facilityId: 'beta' }] });
+    const views = buildFacilityInventory(source);
+    expect(filterFacilityInventory(views, '', 'all', 'defined').map(view => view.facility.guid)).toEqual(['gamma', 'beta', 'alpha']);
+    expect(filterFacilityInventory(views, 'plant', 'all', 'defined')).toEqual([]);
+    expect(filterFacilityInventory(views, '37830', 'noMeters', 'defined').map(view => view.facility.guid)).toEqual(['gamma', 'alpha']);
+    expect(filterFacilityInventory(views, '', 'all', 'facilityName').map(view => view.facility.guid)).toEqual(['alpha', 'beta', 'gamma']);
+    expect(views.map(view => view.facility.guid)).toEqual(['gamma', 'beta', 'alpha']);
+  });
   it('excludes analysis and report issues from Data status, attention filters, counts and inline findings', () => {
     const findings = presentFindings([
       makeFinding('analysis.configuration.invalid', 'error', 'configuration', { kind: 'facility-analysis', guid: 'analysis', name: 'Analysis', accountGuid: 'account-a', facilityGuid: 'alpha' }),
