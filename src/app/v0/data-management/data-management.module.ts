@@ -58,6 +58,8 @@ import { MeterChargesCorrelationPlotComponent } from '@v0/data-management/accoun
 import { MeterChargesCorrelationsComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlations.component';
 import { UpdateWeatherPredictorsModalComponent } from '@v0/data-management/data-management-home/update-weather-predictors-modal/update-weather-predictors-modal.component';
 import { FacilityEnergyUseGroupManagementComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component';
+import { ExportEnergyUsesModalComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/export-energy-uses-modal/export-energy-uses-modal.component';
+import { ImportEnergyUsesModalComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/import-energy-uses-modal/import-energy-uses-modal.component';
 import { EnergyUseGroupCardComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/energy-use-group-card/energy-use-group-card.component';
 import { FacilityEnergyUseGroupComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
 import { FacilityEnergyUseEquipmentComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
@@ -155,6 +157,8 @@ import { RatedPowerModalComponent } from '@v0/data-management/account-facilities
     UpdateWeatherPredictorsModalComponent,
     FacilityEnergyUseGroupComponent,
     FacilityEnergyUseGroupManagementComponent,
+    ExportEnergyUsesModalComponent,
+    ImportEnergyUsesModalComponent,
     EnergyUseGroupCardComponent,
     FacilityEnergyUseEquipmentComponent,
     UtilityTypeOptionsPipe,
