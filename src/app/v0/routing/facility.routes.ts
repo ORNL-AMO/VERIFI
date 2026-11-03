@@ -242,8 +242,8 @@ export const FacilityRoutes: Route = {
                                 },
                                 {
                                     path: 'update-calculated-entries',
-                                    component: CalculatedPredictorDataUpdateComponent
-                                    // canDeactivate: [canDeactivateGuard]
+                                    component: CalculatedPredictorDataUpdateComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 },
                             ]
                         }

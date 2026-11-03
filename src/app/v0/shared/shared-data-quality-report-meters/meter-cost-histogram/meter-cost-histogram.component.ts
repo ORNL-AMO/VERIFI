@@ -2,6 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, View
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { isFiniteQualityNumber } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-meter-cost-histogram',
@@ -94,18 +95,6 @@ export class MeterCostHistogramComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.meterCostHistogram?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.meterCostHistogram.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.meterCostHistogram?.nativeElement);
   }
 }

@@ -183,11 +183,12 @@ export class UtilityMeterDataService {
   }
 
 
-  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean, source: MeterSource): FormGroup {
+  // canBeNegative applies to consumption; direct-energy validation retains its existing source-specific rules.
+  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean, source: MeterSource, canBeNegative: boolean = false): FormGroup {
     let dateString: string = getMeterDataDateString(meterData);
     let totalVolumeValidators: Array<ValidatorFn> = [];
     if (displayVolumeInput) {
-      totalVolumeValidators = [Validators.required, Validators.min(0)]
+      totalVolumeValidators = canBeNegative ? [Validators.required] : [Validators.required, Validators.min(0)];
     }
     let totalEnergyUseValidators: Array<ValidatorFn> = [];
     if (displayEnergyInput) {

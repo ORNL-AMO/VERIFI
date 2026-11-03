@@ -1,0 +1,92 @@
+<div class="popup" [class.open]="showRatedPowerModal">
+    <div class="popup-header">Calculate Rated Power
+        <button class="item-right" (click)="closeRatedPowerModal()">x</button>
+    </div>
+    <div class="popup-body">
+        @if (energySource !== 'Other Energy') {
+        <div class="form-group row mb-2">
+            <label class="col-5 col-form-label" for="ratedPowerPhase">Fuel Type</label>
+            <div class="col-7">
+                <select class="form-select" id="ratedPowerPhase" [ngModel]="phase"
+                    (ngModelChange)="changePhase($event)">
+                    @for (phaseOption of phaseOptions; track phaseOption) {
+                    <option [value]="phaseOption">{{phaseOption}}</option>
+                    }
+                </select>
+            </div>
+        </div>
+        }
+        <div class="form-group row mb-2">
+            <label class="col-5 col-form-label" for="ratedPowerFuel">
+                {{energySource === 'Other Energy' ? 'Energy Type' : 'Fuel'}}
+            </label>
+            <div class="col-7">
+                <select class="form-select" id="ratedPowerFuel" [ngModel]="fuel" (ngModelChange)="changeFuel($event)">
+                    <option value="">Select fuel</option>
+                    @for (fuelOption of fuelOptions; track fuelOption.value) {
+                    <option [value]="fuelOption.value">{{fuelOption.value}}</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row mb-2">
+            <label class="col-5 col-form-label" for="ratedPowerUnit">Rated Power Unit</label>
+            <div class="col-7">
+                <select class="form-select" id="ratedPowerUnit" [ngModel]="powerUnit"
+                    (ngModelChange)="changePowerUnit($event)">
+                    @for (unitOption of powerUnitOptions; track unitOption.value) {
+                    <option [value]="unitOption.value" [innerHTML]="unitOption.display"></option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row mb-2">
+            <label class="col-5 col-form-label" for="ratedPowerPhysicalUnit">Physical Unit</label>
+            <div class="col-7">
+                <select class="form-select" id="ratedPowerPhysicalUnit" [ngModel]="physicalUnit"
+                    (ngModelChange)="changePhysicalUnit($event)">
+                    @for (unitOption of physicalUnitOptions; track unitOption.value) {
+                    <option [value]="unitOption.value" [innerHTML]="unitOption.display"></option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row mb-2">
+            <label class="col-5 col-form-label" for="ratedPowerHeatCapacity">{{heatCapacityLabel}}</label>
+            <div class="col-7">
+                <div class="input-group">
+                    <input class="form-control" id="ratedPowerHeatCapacity" type="text" inputmode="decimal"
+                        [ngModel]="heatCapacityDisplay" (ngModelChange)="updateHeatCapacity($event)"
+                        (blur)="formatHeatCapacityDisplay()">
+                    <span class="input-group-text unit-suffix" [innerHTML]="heatCapacityUnitLabel"></span>
+                </div>
+                @if (heatCapacity != null && heatCapacity < 0) { <div class="text-danger">Heat capacity cannot be
+                    negative.
+            </div>
+            }
+        </div>
+    </div>
+    <div class="form-group row mb-2">
+        <label class="col-5 col-form-label" for="ratedPowerCapacity">Rated Capacity</label>
+        <div class="col-7">
+            <div class="input-group">
+                <input class="form-control" id="ratedPowerCapacity" type="number" min="0" [(ngModel)]="ratedCapacity">
+                <span class="input-group-text unit-suffix" [innerHTML]="ratedCapacityUnitLabel"></span>
+            </div>
+            @if (ratedCapacity != null && ratedCapacity < 0) { <div class="text-danger">Rated capacity cannot be
+                negative.
+        </div>
+        }
+    </div>
+</div>
+<div class="alert alert-info text-center mt-3 mb-0 py-3">
+    <span class="rated-power-value">Rated Power:</span>
+    <strong class="rated-power-value mx-1">{{isDisabled ? '-' : (calculatedRatedPower | number:'1.0-6')}}</strong>
+    <span class="rated-power-value" [innerHTML]="powerUnit | settingsLabel"></span>
+</div>
+</div>
+<div class="popup-footer text-end">
+    <button type="button" class="btn btn-secondary small me-2" (click)="closeRatedPowerModal()">Cancel</button>
+    <button type="button" class="btn btn-success small" [disabled]="isDisabled" (click)="save()">Apply</button>
+</div>
+</div>

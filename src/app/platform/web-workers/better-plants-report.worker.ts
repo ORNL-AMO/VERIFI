@@ -2,12 +2,13 @@
 
 import { BetterPlantsSummary } from "@data/models/overview-report";
 import { BetterPlantsReportClass } from "@domain/calculations/better-plants-calculations/betterPlantsReportClass";
+import { getBetterPlantsReportYears } from "@domain/calculations/better-plants-calculations/betterPlantsReportHelpers";
 
 addEventListener('message', ({ data }) => {
     try {
         let betterPlantsSummaries: Array<BetterPlantsSummary> = new Array();
-        let reportYear: number = data.reportYear;
-        while (reportYear > data.baselineYear) {
+        const reportYears = getBetterPlantsReportYears(data.baselineYear, data.reportYear, data.includeAllYears);
+        reportYears.forEach(reportYear => {
             let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
                 data.baselineYear,
                 reportYear,
@@ -22,12 +23,7 @@ addEventListener('message', ({ data }) => {
             );
             let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
             betterPlantsSummaries.push(betterPlantsSummary);
-            if (data.includeAllYears) {
-                reportYear--;
-            } else {
-                reportYear = data.baselineYear;
-            }
-        }
+        });
         postMessage({
             betterPlantsSummaries: betterPlantsSummaries,
             error: false

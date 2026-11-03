@@ -4,6 +4,8 @@ import { BetterClimateAnnualFacilitySummary, BetterClimateReport } from '@domain
 import * as _ from 'lodash';
 import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
 import { BetterClimateReportSetup } from '@data/models/overview-report';
+import type { BetterClimateChartDataOption } from '@v0/data-evaluation/account/account-reports/better-climate-report/better-climate-report.adapter';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-top-performers-chart',
@@ -15,7 +17,7 @@ export class TopPerformersChartComponent {
   @Input()
   betterClimateReport: BetterClimateReport;
   @Input()
-  chartDataOption: 'scope1PercentReductions' | 'scope1ReductionContributionRelative' | 'scope2MarketPercentReductions' | 'scope2MarketReductionContributionRelative' | 'scope2LocationPercentReductions' | 'scope2LocationReductionContributionRelative';
+  chartDataOption: BetterClimateChartDataOption;
   @Input()
   betterClimateReportSetup: BetterClimateReportSetup
 
@@ -153,5 +155,9 @@ export class TopPerformersChartComponent {
     } else if (this.chartDataOption == 'scope2LocationReductionContributionRelative') {
       return yearSummary.relativeContribution.scope2LocationEmissions;
     }
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    return chartToImage(this.plotlyService, this.performanceChart?.nativeElement);
   }
 }

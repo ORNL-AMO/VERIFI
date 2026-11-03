@@ -2,6 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, View
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-predictor-histogram-graph',
@@ -125,19 +126,7 @@ export class PredictorHistogramGraphComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.predictorHistogram?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.predictorHistogram.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.predictorHistogram?.nativeElement);
   }
 }
 
