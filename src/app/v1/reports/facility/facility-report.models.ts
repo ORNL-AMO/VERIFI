@@ -1,25 +1,15 @@
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityReportType, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
-
-export const FACILITY_REPORT_TYPES: ReadonlyArray<{ value: FacilityReportType; label: string }> = [
-  { value: 'analysis', label: 'Analysis' },
-  { value: 'overview', label: 'Data Overview' },
-  { value: 'emissionFactors', label: 'Emission Factors' },
-  { value: 'savings', label: 'Savings' },
-  { value: 'modeling', label: 'Modeling' },
-  { value: 'costSavings', label: 'Cost Savings' },
-  { value: 'dataQuality', label: 'Data Quality' }
-];
-
-export type ReportConfigurationStatus = 'ready' | 'warning' | 'error' | 'checking' | 'unavailable';
+import { reportDefinition } from '@app/v1/reports/catalog/report-catalog';
+import type { ReportConfigurationStatus } from '@app/v1/reports/shared/report.models';
 export interface FacilityReportPresentation {
   readonly typeLabel: string;
   readonly status: ReportConfigurationStatus;
   readonly facts: readonly { readonly label: string; readonly value: string }[];
 }
 export function facilityReportTypeLabel(type: FacilityReportType): string {
-  return FACILITY_REPORT_TYPES.find(option => option.value === type)?.label ?? 'Unknown report type';
+  return reportDefinition('facility', type)?.label ?? 'Unknown report type';
 }
 
 export function buildFacilityReportPresentation(
@@ -33,7 +23,7 @@ export function buildFacilityReportPresentation(
     && item.entity.facilityGuid === report.facilityId);
   const status: ReportConfigurationStatus = evaluation === 'error' ? 'unavailable'
     : evaluation !== 'ready' ? 'checking'
-    : !FACILITY_REPORT_TYPES.some(option => option.value === report.facilityReportType)
+    : !reportDefinition('facility', report.facilityReportType)
       || findings.some(item => item.severity === 'error') ? 'error'
     : findings.some(item => item.severity === 'warning') ? 'warning' : 'ready';
   const analysisGuid = report.facilityReportType === 'dataQuality'

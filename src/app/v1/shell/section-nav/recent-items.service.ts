@@ -4,8 +4,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
-import { reportTypeAvailable } from '@app/v1/reports/report-availability';
-import { reportIcon } from '@app/v1/reports/report-icons';
+import { reportTypeAvailable } from '@app/v1/reports/catalog/report-availability';
+import { reportIcon } from '@app/v1/reports/catalog/report-icons';
 import { facilityAnalysisWorkbenchRoute, facilityReportWorkbenchRoute, parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 
 type RecentItemSection = 'analysis' | 'reports';
@@ -66,7 +66,7 @@ export class RecentItemsService {
       if (!facility) return [];
       const entries = section === 'analysis' ? this.workspace.facilityAnalyses() : this.workspace.facilityReports();
       const item = entries.find(item => item.guid === visit.guid && item.facilityId === facility.guid && item.accountId === account.guid);
-      if (!item || ('facilityReportType' in item && !reportTypeAvailable(item.facilityReportType, account.displayEmissions))) return [];
+      if (!item || ('facilityReportType' in item && !reportTypeAvailable('facility', item.facilityReportType, account.displayEmissions))) return [];
       const name = item.name || (section === 'analysis' ? 'Untitled analysis' : 'Untitled report');
       const icon: IconName = 'facilityReportType' in item ? reportIcon(item) : 'analysis';
       return [{ ...visit, name, facilityName: facility.name, label: `${name}, ${facility.name}`, icon,

@@ -1,13 +1,1 @@
-const REGRESSION_SIGNIFICANT_DIGITS = 5;
-
-export function formatRegressionNumber(value: unknown, fallback = 'Unavailable'): string {
-  const numericValue = typeof value === 'number'
-    ? value
-    : typeof value === 'string' && value.trim().length
-      ? Number(value)
-      : Number.NaN;
-
-  return Number.isFinite(numericValue)
-    ? numericValue.toLocaleString(undefined, { maximumSignificantDigits: REGRESSION_SIGNIFICANT_DIGITS })
-    : fallback;
-}
+export { formatRegressionNumber } from '@app/v1/shared/analysis-results/number/regression-number-format';

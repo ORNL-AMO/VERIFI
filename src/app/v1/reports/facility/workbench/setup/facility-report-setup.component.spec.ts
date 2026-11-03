@@ -1,8 +1,9 @@
+import { reportFixture } from '../../testing/report-test-fixtures';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 
 describe('facility report Setup', () => {
   it('edits only the name and shows saved context separately from pending report settings', async () => {
-    const { open, harness, updateName } = await setupReportWorkbench();
+    const { open, harness, updateName } = await setupReportWorkbench([reportFixture({ facilityReportType: 'overview' })]);
     const workbench = await open();
     const content: HTMLElement = harness.routeNativeElement!.querySelector('app-facility-report-setup')!;
     expect(content.querySelector('label')?.getAttribute('for')).toBe('report-workbench-name');

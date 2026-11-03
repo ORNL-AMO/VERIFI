@@ -7,8 +7,9 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { InventoryTileActionRequest, InventoryTileMenuAction } from '@app/v1/shared/inventory/inventory.models';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
-import { ReportLifecycleService } from '../report-lifecycle.service';
-import { DEFAULT_REPORT_FILTERS, ReportInventoryFilters, reportTypeChoices, buildReportInventory, filterReportInventory, reportInventoryTile } from '../report-inventory.models';
+import { ReportLifecycleService } from './lifecycle/report-lifecycle.service';
+import { DEFAULT_REPORT_FILTERS, ReportInventoryFilters, buildReportInventory, filterReportInventory, reportInventoryTile } from './report-inventory.models';
+import { reportTypeChoices } from '@app/v1/reports/catalog/report-catalog';
 
 @Component({ selector: 'app-reports-inventory', standalone: false, host: { class: 'v1-inventory-dashboard-host' }, providers: [ReportLifecycleService],
   templateUrl: './reports-inventory.component.html', styleUrls: ['./reports-inventory.component.css'] })

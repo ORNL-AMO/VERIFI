@@ -393,6 +393,14 @@ function evaluateReports(
     const facility = snapshot.facilities.find(item => item.guid === report.facilityId);
     if (!facility) continue;
     const errors = getFacilityReportErrors(report, [...facilityAnalysisErrors.values()]);
+    if (report.facilityReportType === 'analysis') {
+      const linked = snapshot.facilityAnalyses.find(item => item.accountId === snapshot.account.guid
+        && item.facilityId === facility.guid && item.guid === report.analysisItemId);
+      errors.analysisHasErrors ||= !linked;
+      errors.baselineAfterReportYear = !!linked && validNumber(linked.baselineYear)
+        && validNumber(report.analysisReportSettings.reportYear) && report.analysisReportSettings.reportYear < linked.baselineYear;
+      errors.hasErrors ||= errors.analysisHasErrors || errors.baselineAfterReportYear;
+    }
     const validType = ['analysis', 'overview', 'emissionFactors', 'savings', 'modeling', 'costSavings', 'dataQuality'].includes(report.facilityReportType);
     const reportErrors = validType ? errors : { ...errors, hasErrors: true, missingReportType: true };
     const entity = facilityReportEntity(report, facility);

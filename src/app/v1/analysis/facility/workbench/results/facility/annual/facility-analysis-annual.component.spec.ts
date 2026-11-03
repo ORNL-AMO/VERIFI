@@ -52,7 +52,7 @@ describe('FacilityAnalysisAnnualComponent', () => {
     expect(text).toContain('Banked savings added');
     expect(text).not.toContain('99,999');
     expect(text).not.toContain('Model period');
-    expect(fixture.componentInstance.useChartRows()[0].values['calculated']).toBeNull();
-    expect(fixture.componentInstance.improvementChartRows()[0].values['annualImprovement']).toBeNull();
+    expect(fixture.componentInstance.charts().useRows[0].values['calculated']).toBeNull();
+    expect(fixture.componentInstance.charts().improvementRows[0].values['annualImprovement']).toBeNull();
   });
 });

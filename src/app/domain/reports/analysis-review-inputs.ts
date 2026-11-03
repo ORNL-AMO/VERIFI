@@ -1,9 +1,9 @@
 import { ANALYSIS_DATA_CHECKS_VERSION, AnalysisDataCheckReview } from '@data/models/analysis-review';
-import { AnalysisReportInputs } from './analysis-report-inputs';
+import { CheckedAnalysisReportInputs, analysisReportLinks } from './analysis-report-inputs';
 import { getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 /** Canonical content, also compared synchronously inside the acknowledgment transaction. */
-export function analysisReviewContent(inputs: AnalysisReportInputs, reportYear: number): string {
+export function analysisReviewContent(inputs: CheckedAnalysisReportInputs, reportYear: number): string {
   const analysis = inputs.analysis;
   const groupIds = new Set(inputs.facilityAnalyses.flatMap(item => item.groups)
     .filter(group => group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis').map(group => group.idbGroupId));
@@ -14,7 +14,7 @@ export function analysisReviewContent(inputs: AnalysisReportInputs, reportYear: 
     account: fiscalContext(inputs.account),
     analysis: { baselineYear: analysis.baselineYear, analysisCategory: analysis.analysisCategory,
       energyIsSource: analysis.energyIsSource, energyUnit: analysis.energyUnit, waterUnit: analysis.waterUnit,
-      hasBanking: analysis.hasBanking, facilityAnalysisItems: [...analysis.facilityAnalysisItems].sort((a, b) => a.facilityId.localeCompare(b.facilityId)) },
+      hasBanking: analysis.hasBanking, facilityAnalysisItems: [...analysisReportLinks(inputs)].sort((a, b) => a.facilityId.localeCompare(b.facilityId)) },
     facilities: byGuid(inputs.facilities).map(facility => ({ ...fiscalContext(facility), guid: facility.guid,
       isNewFacility: facility.isNewFacility })),
     facilityAnalyses: byGuid(inputs.facilityAnalyses).map(item => ({ ...item, groups: item.groups.map(group => ({ ...group,
@@ -25,7 +25,7 @@ export function analysisReviewContent(inputs: AnalysisReportInputs, reportYear: 
 }
 
 /** Report values also use additional intake meters and facility manufacturing classification. */
-export function analysisReportContent(inputs: AnalysisReportInputs, years: readonly number[]): string {
+export function analysisReportContent(inputs: CheckedAnalysisReportInputs, years: readonly number[]): string {
   return JSON.stringify(canonical({
     periods: years.map(year => analysisReviewContent(inputs, year)),
     meters: byGuid(inputs.meters), meterData: byGuid(inputs.meterData),
@@ -38,7 +38,7 @@ export function analysisReviewIsCurrent(reviews: readonly AnalysisDataCheckRevie
     && review.inputFingerprint === fingerprint && Number.isFinite(Date.parse(review.reviewedAt)));
 }
 
-function fiscalContext(value: AnalysisReportInputs['account'] | AnalysisReportInputs['facilities'][number]) {
+function fiscalContext(value: CheckedAnalysisReportInputs['account'] | CheckedAnalysisReportInputs['facilities'][number]) {
   return { fiscalYear: value.fiscalYear, fiscalYearMonth: value.fiscalYearMonth, fiscalYearCalendarEnd: value.fiscalYearCalendarEnd,
     energyUnit: value.energyUnit, energyIsSource: value.energyIsSource, volumeLiquidUnit: value.volumeLiquidUnit,
     assessmentReportVersion: 'assessmentReportVersion' in value ? value.assessmentReportVersion : undefined };

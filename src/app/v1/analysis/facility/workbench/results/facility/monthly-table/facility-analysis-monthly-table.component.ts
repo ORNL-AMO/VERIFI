@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { Component, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { AnalysisResultsTableComponent } from '@app/v1/shared/analysis-results/results-table/analysis-results-table.component';
+import { AnalysisResultsTableModule } from '@app/v1/shared/analysis-results/results-table/analysis-results-table.module';
+import { analysisResultsTableView } from '@app/v1/shared/analysis-results/results-table/analysis-results-table.view';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -9,11 +12,9 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
 import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
-import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { AnalysisResultColumnChooserComponent } from '@app/v1/shared/analysis-results/column-chooser/analysis-result-column-chooser.component';
 import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { AnalysisGroupPredictorVariable } from '@data/models/analysis';
-import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
 import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import {
   AnalysisResultMarker,
@@ -21,12 +22,10 @@ import {
   orderedUniqueResultMarkers
 } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 
-type AnalysisResultColumnSection = 'period' | 'use' | 'predictors' | 'improvement';
-
 @Component({
   selector: 'app-facility-analysis-monthly-table',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent],
+  imports: [AnalysisResultsTableModule, CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultMarkerLegendComponent],
   templateUrl: './facility-analysis-monthly-table.component.html',
   styleUrls: ['./facility-analysis-monthly-table.component.css']
 })
@@ -45,9 +44,6 @@ export class FacilityAnalysisMonthlyTableComponent {
   readonly rowViews = computed(() => this.rows().map((row, index, rows) => ({
     row,
     markers: this.facilityMonthlyMarkers(row.date),
-    predictors: Object.fromEntries(
-      (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
-    ) as Readonly<Record<string, number>>,
     isFiscalYearEnd: rows[index + 1]?.fiscalYear !== row.fiscalYear
   })));
   readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.rowViews().flatMap(view => view.markers)));
@@ -56,8 +52,6 @@ export class FacilityAnalysisMonthlyTableComponent {
   readonly pageSize = toSignal(this.pageSizeControl.valueChanges, { initialValue: this.pageSizeControl.value });
   readonly pageSizeOptions = [...TIME_PERIOD_PAGE_SIZE_OPTIONS];
   readonly copyingTable = signal(false);
-  readonly hoveredColumnId = signal<string | undefined>(undefined);
-  readonly hoveredSection = signal<AnalysisResultColumnSection | undefined>(undefined);
   readonly maxPage = computed(() => Math.max(1, Math.ceil(this.rowViews().length / this.pageSize())));
   readonly displayedRows = computed(() => {
     const start = (Math.min(this.currentPage(), this.maxPage()) - 1) * this.pageSize();
@@ -86,28 +80,8 @@ export class FacilityAnalysisMonthlyTableComponent {
     const visible = new Set(columns.predictors.filter(item => item.display).map(item => item.predictor.id));
     return this.availablePredictors().filter(variable => visible.has(variable.id));
   });
-  readonly useColumnCount = computed(() => {
-    const columns = this.columns();
-    return [
-      columns.actualEnergy,
-      columns.adjusted,
-      columns.baselineAdjustmentForNormalization,
-      columns.baselineAdjustmentForOther,
-      columns.baselineAdjustment
-    ].filter(Boolean).length;
-  });
-  readonly predictorColumnCount = computed(() => this.columns().productionVariables ? this.predictorColumns().length : 0);
-  readonly improvementColumnCount = computed(() => {
-    const columns = this.columns();
-    return [
-      columns.SEnPI,
-      this.hasBanking() && columns.bankedSavings,
-      this.hasBanking() && columns.savingsUnbanked,
-      columns.savings,
-      columns.rollingSavings,
-      columns.rolling12MonthImprovement
-    ].filter(Boolean).length;
-  });
+  readonly tableView = computed(() => analysisResultsTableView(this.displayedRows(), this.columns(),
+    this.predictorColumns(), 'monthly', this.hasBanking()));
   readonly unit = computed(() => this.context.analysis()?.analysisCategory === 'water'
     ? this.context.analysis()?.waterUnit
     : this.context.analysis()?.energyUnit);
@@ -122,19 +96,14 @@ export class FacilityAnalysisMonthlyTableComponent {
     }));
   }
 
-  @ViewChild('monthlyResultsTable', { static: false }) monthlyResultsTable?: ElementRef<HTMLTableElement>;
+  @ViewChild(AnalysisResultsTableComponent) monthlyResultsTable?: AnalysisResultsTableComponent;
 
   copyTable(): void {
-    if (!this.monthlyResultsTable) return;
+    if (!this.monthlyResultsTable?.table) return;
     this.copyingTable.set(true);
     setTimeout(() => {
-      this.copyTableService.copyTable(this.monthlyResultsTable!);
+      if (this.monthlyResultsTable?.table) this.copyTableService.copyTable(this.monthlyResultsTable.table);
       this.copyingTable.set(false);
     }, 200);
-  }
-
-  setColumnHover(columnId?: string, section?: AnalysisResultColumnSection): void {
-    this.hoveredColumnId.set(columnId);
-    this.hoveredSection.set(section);
   }
 }

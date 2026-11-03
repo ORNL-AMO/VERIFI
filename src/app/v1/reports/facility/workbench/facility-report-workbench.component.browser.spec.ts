@@ -10,7 +10,7 @@ describe('facility report workbench browser layout', () => {
   ] as const)('keeps connected content, themed controls, and usable navigation in %s', async (_theme, classes, width) => {
     await page.viewport(width, 800);
     const { open, harness } = await setupReportWorkbench([
-      reportFixture({ name: 'A long facility report name that should remain readable in a narrow desktop window without pushing navigation out of view' }),
+      reportFixture({ facilityReportType: 'overview', name: 'A long facility report name that should remain readable in a narrow desktop window without pushing navigation out of view' }),
       reportFixture({ id: 20, guid: 'report-b', name: 'Another report', facilityReportType: 'overview' })
     ]);
     await open();

@@ -1,0 +1,47 @@
+@let result = report.state();
+@let configuration = settings();
+@let selectedAnalysis = analysis();
+@let owner = facility();
+@let data = results();
+@let documentSections = sections();
+@if (result.state !== 'ready' || !data || !selectedAnalysis || !owner) {
+  <section class="report-section"><h2>Facility analysis report</h2><p [attr.role]="result.state === 'error' ? 'alert' : 'status'">{{ result.message || 'Preparing report…' }}</p>
+    @if (result.state === 'review-required') { <a class="v1-btn v1-btn--action" [routerLink]="report.checksRoute()">Review Data Checks</a> }
+    @if (result.state === 'error') { <a [routerLink]="report.setupRoute()">Review report setup</a><button type="button" class="v1-btn v1-btn--secondary" (click)="report.retry()">Retry report</button> }
+  </section>
+} @else if (!documentSections.length) {
+  <section class="report-section"><h2>{{ context.report()?.name }}</h2><p role="status">No report content is enabled.</p><a [routerLink]="report.setupRoute()">Choose report content in Setup</a></section>
+} @else {
+  @for (section of documentSections; track section.id; let first = $first) {
+    <article class="report-document" [id]="'analysis-report-' + section.id" [attr.aria-labelledby]="'analysis-report-' + section.id + '-heading'">
+      @if (first) {
+        <header class="document-title"><h2>{{ context.report()?.name }}</h2><p>{{ owner.name }} · {{ selectedAnalysis.name }} · {{ selectedAnalysis.analysisCategory === 'water' ? 'Water' : selectedAnalysis.energyIsSource ? 'Source energy' : 'Site energy' }} ({{ unit() }}) · {{ owner.fiscalYear === 'nonCalendarYear' ? 'Fiscal years' : 'Years' }} {{ selectedAnalysis.baselineYear }}–{{ data.reportYear }}</p></header>
+      }
+      <div class="document-section">
+        <h3 class="document-section-title" [id]="'analysis-report-' + section.id + '-heading'">{{ section.heading }}</h3>
+        @switch (section.kind) {
+          @case ('facility-annual') {
+            @if (configuration.facilityAnnualResultsTable) { <app-analysis-report-results-table [category]="selectedAnalysis.analysisCategory" [annual]="data.annualAnalysisSummaries" [columns]="configuration.analysisTableColumns" period="annual" caption="Facility annual results" [unit]="unit()" [facility]="owner" [banking]="selectedAnalysis.hasBanking" [groups]="data.groupSummaries"/> }
+            @if (configuration.facilityAnnualResultsGraphs) { <app-analysis-report-result-charts [groups]="data.groupSummaries" [annual]="data.annualAnalysisSummaries" period="annual" [unit]="unit()" [category]="selectedAnalysis.analysisCategory"/> }
+          }
+          @case ('facility-monthly') {
+            @for (period of section.periods; track period.year) { <app-analysis-report-results-table [category]="selectedAnalysis.analysisCategory" [monthly]="period.rows" [columns]="configuration.analysisTableColumns" period="monthly" [caption]="period.label" [unit]="unit()" [facility]="owner" [banking]="selectedAnalysis.hasBanking" [groups]="data.groupSummaries" [baseline]="period.baseline"/> }
+            @if (configuration.facilityMonthlyResultsGraphs) { <app-analysis-report-result-charts [groups]="data.groupSummaries" [monthly]="data.monthlyAnalysisSummaryData" period="monthly" [unit]="unit()" [category]="selectedAnalysis.analysisCategory"/> }
+          }
+          @case ('group-model') {
+            @if (section.checked; as checked) { <app-analysis-report-model-details [category]="selectedAnalysis.analysisCategory" [checked]="checked" [monthly]="section.result.monthlyAnalysisSummaryData" [unit]="unit()"/> }
+            @else { <p role="status">Model details are unavailable. <a [routerLink]="report.checksRoute()">Review Data Checks</a>.</p> }
+          }
+          @case ('group-annual') {
+            @if (configuration.groupAnnualResultsTable) { <app-analysis-report-results-table [category]="selectedAnalysis.analysisCategory" [annual]="section.result.annualAnalysisSummaryData" [columns]="configuration.analysisTableColumns" period="annual" caption="Group annual results" [unit]="unit()" [facility]="owner" [group]="section.result.group" [banking]="selectedAnalysis.hasBanking"/> }
+            @if (configuration.groupAnnualResultsGraphs) { <app-analysis-report-result-charts scope="group" [annual]="section.result.annualAnalysisSummaryData" period="annual" [unit]="unit()" [category]="selectedAnalysis.analysisCategory"/> }
+          }
+          @case ('group-monthly') {
+            @for (period of section.periods; track period.year) { <app-analysis-report-results-table [category]="selectedAnalysis.analysisCategory" [monthly]="period.rows" [columns]="configuration.analysisTableColumns" period="monthly" [caption]="period.label" [unit]="unit()" [facility]="owner" [group]="section.result.group" [banking]="selectedAnalysis.hasBanking" [baseline]="period.baseline"/> }
+            @if (configuration.groupMonthlyResultsGraphs) { <app-analysis-report-result-charts scope="group" [monthly]="section.result.monthlyAnalysisSummaryData" period="monthly" [unit]="unit()" [category]="selectedAnalysis.analysisCategory"/> }
+          }
+        }
+      </div>
+    </article>
+  }
+}

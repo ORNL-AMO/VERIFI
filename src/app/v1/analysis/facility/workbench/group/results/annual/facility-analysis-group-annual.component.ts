@@ -1,23 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
+import { AnalysisResultsTableModule } from '@app/v1/shared/analysis-results/results-table/analysis-results-table.module';
+import { analysisResultsTableView } from '@app/v1/shared/analysis-results/results-table/analysis-results-table.view';
+import { AnalysisChartsModule } from '@app/v1/shared/analysis-results/chart/analysis-charts.module';
 import { FacilityAnalysisGroupContext } from '../../facility-analysis-group-context.service';
 import { FacilityAnalysisGroupResultsService } from '../calculation/facility-analysis-group-results.service';
 import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
-import {
-  annualImprovementChartRows,
-  annualImprovementChartMetrics,
-  annualUseChartMetrics,
-  annualUseChartRows
-} from '../../../results/presentation/facility-analysis-result.view';
+import { annualResultChartsView } from '@app/v1/shared/analysis-results/chart/analysis-result-chart.view';
 import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
 import { AnalysisResultColumnChooserComponent } from '@app/v1/shared/analysis-results/column-chooser/analysis-result-column-chooser.component';
-import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
-import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
 import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import { annualResultMarkers, orderedUniqueResultMarkers } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 
-@Component({ selector: 'app-facility-analysis-group-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent], templateUrl: './facility-analysis-group-annual.component.html', styleUrls: ['./facility-analysis-group-annual.component.css'] })
+@Component({ selector: 'app-facility-analysis-group-annual', standalone: true, imports: [AnalysisResultsTableModule, CommonModule, AnalysisChartsModule, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultMarkerLegendComponent], templateUrl: './facility-analysis-group-annual.component.html', styleUrls: ['./facility-analysis-group-annual.component.css'] })
 export class FacilityAnalysisGroupAnnualComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly results = inject(FacilityAnalysisGroupResultsService);
@@ -29,10 +24,7 @@ export class FacilityAnalysisGroupAnnualComponent {
   });
   readonly rowViews = computed(() => this.rows().map(row => ({
     row,
-    markers: annualResultMarkers(row, this.groupContext.group(), this.groupContext.workbench.facility()),
-    predictors: Object.fromEntries(
-      (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
-    ) as Readonly<Record<string, number>>
+    markers: annualResultMarkers(row, this.groupContext.group(), this.groupContext.workbench.facility())
   })));
   readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.rowViews().flatMap(view => view.markers)));
   readonly predictorScopeId = computed(() => this.groupContext.group()?.idbGroupId ?? '');
@@ -45,45 +37,12 @@ export class FacilityAnalysisGroupAnnualComponent {
     const visible = new Set(columns.predictors.filter(item => item.display).map(item => item.predictor.id));
     return this.availablePredictors().filter(variable => visible.has(variable.id));
   });
-  readonly useChartRows = computed(() => annualUseChartRows(this.rows()));
-  readonly improvementChartRows = computed(() => annualImprovementChartRows(this.rows()));
-  readonly improvementChartMetrics = computed(() => annualImprovementChartMetrics(
-    this.groupContext.autosave.draft()?.analysisCategory
-  ));
   readonly hasBanking = computed(() => this.groupContext.autosave.draft()?.hasBanking === true);
-  readonly useColumnCount = computed(() => {
-    const columns = this.columns();
-    return [
-      columns.actualEnergy,
-      columns.adjusted,
-      columns.baselineAdjustmentForNormalization,
-      columns.baselineAdjustmentForOther,
-      columns.baselineAdjustment
-    ].filter(Boolean).length;
-  });
-  readonly predictorColumnCount = computed(() => this.columns().productionVariables ? this.predictorColumns().length : 0);
-  readonly improvementColumnCount = computed(() => {
-    const columns = this.columns();
-    return [
-      columns.SEnPI,
-      this.hasBanking() && columns.bankedSavings,
-      this.hasBanking() && columns.savingsUnbanked,
-      columns.savings,
-      columns.totalSavingsPercentImprovement,
-      columns.newSavings,
-      columns.annualSavingsPercentImprovement,
-      columns.cummulativeSavings
-    ].filter(Boolean).length;
-  });
+  readonly tableView = computed(() => analysisResultsTableView(this.rowViews(), this.columns(),
+    this.predictorColumns(), 'annual', this.hasBanking()));
   readonly unit = computed(() => {
     const analysis = this.groupContext.autosave.draft();
     return analysis?.analysisCategory === 'water' ? analysis.waterUnit : analysis?.energyUnit;
   });
-  readonly useChartMetrics = computed(() => annualUseChartMetrics(
-    this.groupContext.autosave.draft()?.analysisCategory,
-    this.unit()
-  ));
-  readonly useChartYAxisTitle = computed(() => this.groupContext.autosave.draft()?.analysisCategory === 'water'
-    ? `Consumption${this.unit() ? ` (${this.unit()})` : ''}`
-    : `Energy Use${this.unit() ? ` (${this.unit()})` : ''}`);
+  readonly charts = computed(() => annualResultChartsView(this.rows(), this.groupContext.autosave.draft()?.analysisCategory, this.unit()));
 }

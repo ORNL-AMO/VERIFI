@@ -1,5 +1,5 @@
 import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
-import type { ReportStageId } from '@app/v1/reports/report-workbench.models';
+import type { ReportStageId } from '@app/v1/reports/shared/workbench/report-workbench.models';
 
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = NavigationMotion;

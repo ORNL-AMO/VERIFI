@@ -96,8 +96,12 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
   private resizeFrame: number | undefined;
   private appliedSize: { width: number; height: number } | undefined;
   private hasRenderedOption = false;
+  private visibilityObserver: IntersectionObserver | undefined;
+  private viewInitialized = false;
+  private destroyed = false;
 
   @Input('appV1ECharts') option: V1EChartsOption | undefined;
+  @Input() deferUntilVisible = false;
   @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();
   @Output() chartPointClicked = new EventEmitter<V1EChartsPointClickEvent>();
 
@@ -120,27 +124,22 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
   }
 
   ngAfterViewInit(): void {
-    this.zone.runOutsideAngular(() => {
-      this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas' });
-      this.appliedSize = this.readContentSize();
-      this.bindDataZoomEvent();
-      this.bindPointClickEvent();
-      this.observeThemeChanges();
-      if (typeof ResizeObserver !== 'undefined') {
-        this.resizeObserver = new ResizeObserver(() => this.scheduleResize());
-        this.resizeObserver.observe(this.elementRef.nativeElement);
-      }
-      this.applyOption();
-    });
+    this.viewInitialized = true;
+    this.zone.runOutsideAngular(() => this.initializeWhenVisible());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['deferUntilVisible'] && this.viewInitialized && !this.chart) {
+      this.zone.runOutsideAngular(() => this.initializeWhenVisible());
+    }
     if (changes['option']) {
       this.applyOption();
     }
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.visibilityObserver?.disconnect();
     if (this.initialRenderFrame !== undefined && typeof cancelAnimationFrame !== 'undefined') {
       cancelAnimationFrame(this.initialRenderFrame);
     }
@@ -149,6 +148,36 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     this.resizeObserver?.disconnect();
     this.chart?.dispose();
     this.chart = undefined;
+  }
+
+  private initializeWhenVisible(): void {
+    this.visibilityObserver?.disconnect();
+    this.visibilityObserver = undefined;
+    if (this.chart || this.destroyed) return;
+    if (this.deferUntilVisible && typeof IntersectionObserver !== 'undefined') {
+      this.visibilityObserver = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.target === this.elementRef.nativeElement && entry.isIntersecting)) this.initializeChart();
+      });
+      this.visibilityObserver.observe(this.elementRef.nativeElement);
+    } else {
+      this.initializeChart();
+    }
+  }
+
+  private initializeChart(): void {
+    if (this.chart || this.destroyed) return;
+    this.visibilityObserver?.disconnect();
+    this.visibilityObserver = undefined;
+    this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas' });
+    this.appliedSize = this.readContentSize();
+    this.bindDataZoomEvent();
+    this.bindPointClickEvent();
+    this.observeThemeChanges();
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.scheduleResize());
+      this.resizeObserver.observe(this.elementRef.nativeElement);
+    }
+    this.applyOption();
   }
 
   private scheduleResize(): void {

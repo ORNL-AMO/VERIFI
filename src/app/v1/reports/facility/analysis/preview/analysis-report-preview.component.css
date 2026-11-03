@@ -1,0 +1,7 @@
+@import '../../../shared/workbench/report-workbench-stage.css';
+@import '../../../shared/document/report-document-surface.css';
+:host { display: block; min-width: 0; padding-block-start: 1.25rem; }
+.document-title p { overflow-wrap: anywhere; }
+.document-section { border-bottom: 0; }
+.document-section-title { margin: 0 0 1rem; font-size: 1.1rem; font-weight: 700; overflow-wrap: anywhere; }
+app-analysis-report-results-table + app-analysis-report-results-table { display: block; margin-block-start: 1.25rem; }

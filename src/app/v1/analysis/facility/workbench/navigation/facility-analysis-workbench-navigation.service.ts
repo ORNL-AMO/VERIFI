@@ -2,7 +2,7 @@ import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';

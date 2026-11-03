@@ -11,6 +11,8 @@ To add a custom icon:
    Use `currentColor` for themed strokes/fills. The existing renderer supports
    paths, circles, ellipses, rectangles, lines, polylines, and polygons; flatten
    transforms/groups in the source before registering an icon.
+   Custom icons preserve their declared element stroke widths by default; an
+   explicit `strokeWidth` input overrides all elements.
 3. Export a semantic entry through `CUSTOM_ICONS`. Its keys automatically join
    `IconName` alongside the Hugeicons registry entries.
 4. Test the rendered geometry against the asset and verify sizing, stroke width,
@@ -24,10 +26,13 @@ icons decorative.
 ## Report icons
 
 Register each custom report icon above, then add its semantic name to the account
-or facility mapping in [`report-icons.ts`](../reports/report-icons.ts). For example,
+or facility definition in the [report catalog](../../reports/catalog/report-catalog.ts). For example,
 the Better Plants account report uses `betterPlantsReport`, whose source is
 [`better-plants-report.svg`](../../../../assets/icons/better-plants-report.svg).
 Account and facility mappings are separate because some report type names overlap.
+The facility analysis report uses `facilityAnalysisReport`, combining that same
+page outline with the analysis microscope in
+[`facility-analysis-report.svg`](../../../../assets/icons/facility-analysis-report.svg).
 
 Use `reportIcon(report)` when preparing report cards, sidebar entries, switcher
 options, linked-report rows, or workflow stages. It returns the current `report`

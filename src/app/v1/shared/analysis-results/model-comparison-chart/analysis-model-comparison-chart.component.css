@@ -1,0 +1,4 @@
+:host { display: block; min-width: 0; }
+.model-comparison-chart { min-width: 0; overflow: hidden; }
+.model-comparison-chart__canvas { width: 100%; height: 24rem; }
+@media (max-width: 760px) { .model-comparison-chart__canvas { height: 20rem; } }

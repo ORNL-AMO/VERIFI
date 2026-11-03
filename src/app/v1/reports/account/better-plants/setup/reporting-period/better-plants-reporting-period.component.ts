@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountReportWorkbenchContext } from '../../../workbench/account-report-workbench-context.service';
-import { AccountReportAutosaveService } from '../../../workbench/account-report-autosave.service';
+import { BetterPlantsEditor } from '../../editing/better-plants-editor.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { getYearsWithFullDataAccount } from '@domain/calculations/shared-calculations/calculationsHelpers';
@@ -10,7 +10,7 @@ import { getYearsWithFullDataAccount } from '@domain/calculations/shared-calcula
   templateUrl: './better-plants-reporting-period.component.html', styleUrls: ['./better-plants-reporting-period.component.css'] })
 export class BetterPlantsReportingPeriodComponent {
   readonly context = inject(AccountReportWorkbenchContext);
-  readonly editor = inject(AccountReportAutosaveService);
+  readonly editor = inject(BetterPlantsEditor);
   readonly form = this.editor.form.controls.betterPlants;
   private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly base = toSignal(this.calendarization.calendarizeBase(), { initialValue: IDLE_WORKSPACE_CALENDARIZATION });

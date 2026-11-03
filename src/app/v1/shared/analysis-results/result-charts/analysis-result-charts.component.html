@@ -1,0 +1,28 @@
+@let charts = view();
+@let isAnnual = annual();
+<section class="analysis-result-charts" [class.analysis-result-charts--monthly]="!isAnnual" [attr.aria-label]="scopeLabel() + ' ' + charts.period + ' analysis charts'">
+  <div class="analysis-result-charts__chart">
+    <app-meter-results-chart
+      [chartRows]="charts.useRows" [metrics]="charts.useMetrics"
+      defaultLeftMetricId="actual" defaultRightMetricId="calculated"
+      [defaultLeftDisplay]="isAnnual ? 'bar' : 'line'" [defaultRightDisplay]="isAnnual ? 'bar' : 'line'"
+      [showAllMetrics]="!isAnnual" allMetricsDisplay="line"
+      [comparisonBand]="charts.comparisonBand"
+      [sharedYAxis]="true" [yAxisTitle]="useYAxisTitle()" [allowNegativeValues]="true"
+      [showSeriesControls]="false" [showChartActions]="showChartActions()"
+      [showValueLabels]="isAnnual" [compactValueLabels]="isAnnual"
+      [period]="isAnnual ? 'yearly' : 'monthly'" [ariaLabel]="useLabel()"
+      [downloadFileName]="scope() + '-' + charts.period + '-use'" [embedded]="true" [deferUntilVisible]="deferUntilVisible()"/>
+  </div>
+  <div class="analysis-result-charts__chart">
+    <app-meter-results-chart
+      [chartRows]="charts.improvementRows" [metrics]="charts.improvementMetrics"
+      defaultLeftMetricId="annualImprovement" defaultRightMetricId="totalImprovement"
+      [showAllMetrics]="!isAnnual" allMetricsDisplay="bar" [stackSeries]="!isAnnual"
+      [sharedYAxis]="true" [yAxisTitle]="isAnnual ? 'Percent Improvement' : 'Percent Savings'"
+      [allowNegativeValues]="true" [showSeriesControls]="false" [showChartActions]="showChartActions()" [showValueLabels]="isAnnual"
+      [period]="isAnnual ? 'yearly' : 'monthly'"
+      [ariaLabel]="scopeLabel() + (isAnnual ? ' annual and total improvement chart' : ' monthly rolling savings chart')"
+      [downloadFileName]="scope() + '-' + charts.period + (isAnnual ? '-improvement' : '-savings')" [embedded]="true" [deferUntilVisible]="deferUntilVisible()"/>
+  </div>
+</section>

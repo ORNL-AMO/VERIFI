@@ -1,62 +1,58 @@
 import { Injectable, Injector, computed, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { catchError, concat, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import { map } from 'rxjs';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisReviewCommandHandler } from '@data/account-workspace/handlers/analysis-review-command-handler.service';
 import { BetterPlantsSummary } from '@data/models/overview-report';
 import { assertAnalysisReportYears, buildAnalysisReportInputs, reportYears } from '@domain/reports/analysis-report-inputs';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { analysisReportContent } from '@domain/reports/analysis-review-inputs';
-import { AnalysisReportCalculationService } from '@app/v1/reports/analysis-report-calculation.service';
-import { AnalysisChecksController, AnalysisChecksRequest, AnalysisChecksResult } from '@app/v1/reports/analysis-checks-controller';
-import { ReportResultState } from '@app/v1/reports/report-result-state';
+import { AnalysisReportCalculationService } from '@app/v1/reports/shared/calculation/analysis-report-calculation.service';
+import { AnalysisChecksController, AnalysisChecksRequest, AnalysisChecksResult } from '@app/v1/reports/shared/analysis-checks/analysis-checks-controller';
+import { ReportResultState } from '@app/v1/reports/shared/calculation/report-result-state';
+import { ReportResultController, ReportResultRequest } from '@app/v1/reports/shared/calculation/report-result-controller';
 import { AccountReportWorkbenchContext } from '../workbench/account-report-workbench-context.service';
-import { AccountReportAutosaveService } from '../workbench/account-report-autosave.service';
+import { BetterPlantsEditor } from './editing/better-plants-editor.service';
 
 export interface BetterPlantsResult extends AnalysisChecksResult {
   readonly summaries?: readonly BetterPlantsSummary[];
+}
+interface BetterPlantsCalculationRequest {
+  readonly inputs: AnalysisChecksResult['inputs'];
+  readonly years: readonly number[];
 }
 
 @Injectable()
 export class BetterPlantsReportService {
   private readonly context = inject(AccountReportWorkbenchContext);
-  private readonly editor = inject(AccountReportAutosaveService);
+  private readonly editor = inject(BetterPlantsEditor);
   private readonly calculations = inject(AnalysisReportCalculationService);
   private readonly injector = inject(Injector);
-  private reportCache?: { readonly content: string; readonly value: readonly BetterPlantsSummary[] };
   private readonly input = computed<AnalysisChecksRequest>(() => this.buildInput());
   readonly checks = new AnalysisChecksController(this.input, value => this.persistReview(value));
-  private readonly reportRequest = computed(() => {
+  private readonly reportRequest = computed<ReportResultRequest<BetterPlantsResult, BetterPlantsCalculationRequest>>(() => {
     const checks = this.checks.state(), report = this.context.report(), input = this.input();
     const inputs = input.state === 'calculate' ? input.inputs : undefined;
     const years = checks.value && inputs && report && this.context.stage() === 'report'
       ? reportYears(inputs.analysis.baselineYear, report.reportYear, report.betterPlantsReportSetup.includeAllYears === true) : [];
     const content = inputs && years.length ? analysisReportContent(inputs, years) : undefined;
-    return { checks, inputs, years, content, key: JSON.stringify([checks.key, years, content]) };
+    const state: ReportResultState<BetterPlantsResult> = { ...checks, key: JSON.stringify([checks.key, years, content]) };
+    if (state.state !== 'ready' || !state.value || !inputs || !content || this.context.stage() !== 'report') return { state };
+    const value = { ...state.value, inputs };
+    if (!value.completed) return { state: { ...state, state: 'review-required',
+      message: value.blocked ? 'Resolve critical analysis issues before displaying this report.' : 'Review the current analysis checks and acknowledge the issues before displaying this report.' } };
+    return { state: { ...state, value }, calculation: { content, request: { inputs, years } } };
   });
-  private readonly result = toSignal(toObservable(this.reportRequest).pipe(
-    distinctUntilChanged((a, b) => a.checks === b.checks && a.key === b.key),
-    switchMap(request => {
-      const result = { ...request.checks, key: request.key };
-      if (result.state !== 'ready' || !result.value || !request.inputs || !request.content || this.context.stage() !== 'report') return of(result);
-      const value = { ...result.value, inputs: request.inputs };
-      if (!value.completed) return of<ReportResultState<BetterPlantsResult>>({ ...result, state: 'review-required',
-        message: value.blocked ? 'Resolve critical analysis issues before displaying this report.' : 'Review the current analysis checks and acknowledge the issues before displaying this report.' });
-      const content = request.content;
-      if (this.reportCache?.content === content) return of({ ...result, value: { ...value, summaries: this.reportCache.value } });
-      return concat(of<ReportResultState<BetterPlantsResult>>({ key: result.key, state: 'loading', message: 'Preparing the Better Plants report…' }),
-        this.calculations.execute({ operation: 'better-plants', inputs: value.inputs, years: request.years }).pipe(map(response => {
-          if (response.ok === false) throw new Error(response.message);
-          if (response.operation !== 'better-plants') throw new Error('Report processing returned an unexpected result.');
-          this.reportCache = { content, value: response.value };
-          return { ...result, value: { ...value, summaries: response.value } };
-        }), catchError(error => of<ReportResultState<BetterPlantsResult>>({ key: result.key, state: 'error', message: error instanceof Error ? error.message : 'Report processing failed. Try again.' }))));
-    })
-  ), { initialValue: { key: '', state: 'idle' } as ReportResultState<BetterPlantsResult> });
-  readonly state = computed<ReportResultState<BetterPlantsResult>>(() => {
-    const request = this.reportRequest(), result = this.result();
-    return result.key === request.key ? result : { key: request.key, state: request.checks.state === 'error' ? 'error' : 'waiting', message: request.checks.message ?? 'Checking the current analysis inputs…' };
+  private readonly results = new ReportResultController({
+    request: this.reportRequest,
+    loadingMessage: 'Preparing the Better Plants report…', waitingMessage: 'Checking the current analysis inputs…',
+    execute: request => this.calculations.execute({ operation: 'better-plants', ...request }).pipe(map(response => {
+      if (response.ok === false) throw new Error(response.message);
+      if (response.operation !== 'better-plants') throw new Error('Report processing returned an unexpected result.');
+      return response.value;
+    })),
+    project: (value, summaries) => ({ ...value, summaries })
   });
+  readonly state = this.results.state;
   readonly workflow = this.checks.workflow;
   readonly canConfirm = computed(() => this.workflow().canConfirm);
   readonly reviewError = computed(() => this.workflow().error);
@@ -67,7 +63,7 @@ export class BetterPlantsReportService {
   });
   retry(): void {
     if (this.context.status.state() === 'error') this.injector.get(WorkspaceCalendarizationService).retry();
-    this.reportCache = undefined; this.checks.retry();
+    this.results.retry(); this.checks.retry();
   }
   confirmReview(): Promise<void> { return this.checks.confirmReview(); }
 

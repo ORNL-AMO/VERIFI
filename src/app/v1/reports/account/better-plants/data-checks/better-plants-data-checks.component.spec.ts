@@ -17,7 +17,8 @@ describe('Better Plants check composition', () => {
     const snapshot = analysisReportFixture(), workspace = new AccountWorkspaceStore(); workspace.publish(snapshot);
     const inputs = buildAnalysisReportInputs(snapshot, 'account-analysis'), confirmReview = vi.fn();
     await TestBed.configureTestingModule({ imports: [AccountReportsModule], providers: [provideRouter([]),
-      { provide: AccountReportWorkbenchContext, useValue: { workspace, findings: signal([]) } },
+      { provide: AccountReportWorkbenchContext, useValue: { workspace, findings: signal([]), report: () => snapshot.accountReports[0],
+        navigation: { accountReportWorkbenchRoute: () => ['/setup'] } } },
       { provide: BetterPlantsReportService, useValue: { state: signal({ state: 'ready', value: { checks: [calculateAnalysisDataChecks(inputs, 2023)], reviewed: false } }),
         confirmReview } }
     ] }).compileComponents();

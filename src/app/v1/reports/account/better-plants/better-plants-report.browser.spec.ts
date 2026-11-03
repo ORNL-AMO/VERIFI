@@ -15,7 +15,7 @@ import { getCalanderizedMeterData } from '@domain/calculations/calanderization/c
 import { analysisReviewFingerprint } from '@platform/reports/analysis-review-fingerprint';
 import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
 import { runWorker } from '@platform/web-workers/run-worker';
-import { AnalysisReportCalculationService } from '@app/v1/reports/analysis-report-calculation.service';
+import { AnalysisReportCalculationService } from '@app/v1/reports/shared/calculation/analysis-report-calculation.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { setupAccountReportWorkbench } from '../testing/account-report-workbench-test-setup';
 import { StatusItem } from '@app/v1/status/status.models';
@@ -60,14 +60,14 @@ describe('Better Plants review and display in Chromium', () => {
       }
       root.classList.remove('v1-corners-square');
     };
-    const coordinator = view.harness.routeDebugElement!.injector.get(BetterPlantsReportService);
+    let coordinator = component.workbench.session()!.injector.get(BetterPlantsReportService);
     const waitFor = async (predicate: (state: ReturnType<typeof coordinator.state>) => boolean) => {
       const waiting = firstValueFrom(toObservable(coordinator.state, { injector: TestBed.inject(Injector) }).pipe(filter(predicate), take(1), timeout(10000)));
       TestBed.tick(); await waiting; view.harness.detectChanges();
     };
     expect(view.store.committedRevision()).toBeUndefined();
     await page.viewport(1200, 900);
-    const setup = root.querySelector<HTMLElement>('app-account-report-setup')!;
+    const setup = root.querySelector<HTMLElement>('app-better-plants-setup-page')!;
     expectBottomCorners(setup.querySelector<HTMLElement>('.report-setup')!);
     const information = setup.querySelector<HTMLElement>('.report-setup-top h2')!.getBoundingClientRect();
     const period = setup.querySelector<HTMLElement>('app-better-plants-reporting-period h2')!.getBoundingClientRect();
@@ -127,6 +127,9 @@ describe('Better Plants review and display in Chromium', () => {
     await page.viewport(1200, 1100); root.className = 'v1-root v1-palette-blueprint';
     await page.screenshot({ element: setup, path: `./__screenshots__/better-plants-setup-${category}.png` });
     await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
+    const outputButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('footer app-report-output-actions button'));
+    expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Present']);
+    expect(outputButtons.every(button => button.disabled)).toBe(true);
     expect(coordinator.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
     expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).not.toBeNull();
     expect((await database.getAll('accountAnalysisItems'))[0]['dataCheckReviews']).toBeUndefined();
@@ -167,7 +170,7 @@ describe('Better Plants review and display in Chromium', () => {
     expect(document.activeElement?.textContent).toContain('Data Checks Completed');
     await userEvent.keyboard('{Tab}'); expect(document.activeElement?.textContent).toContain('Continue');
     expect(view.store.accountAnalyses()[0].isAnalysisVisited).toBe(false);
-    expect(component.context.stages().find(stage => stage.id === 'data-checks')?.completed).toBe(true);
+    expect(component.workbench.stages().find(stage => stage.id === 'data-checks')?.completed).toBe(true);
     await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
     expect(coordinator.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
     root.className = 'v1-root v1-palette-blueprint';
@@ -178,6 +181,12 @@ describe('Better Plants review and display in Chromium', () => {
       for (const width of [1024, 640, 390]) {
         await page.viewport(width, 900); view.harness.detectChanges();
         expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+        const footer = root.querySelector<HTMLElement>('footer')!.getBoundingClientRect();
+        for (const button of root.querySelectorAll<HTMLButtonElement>('footer app-report-output-actions button')) {
+          const bounds = button.getBoundingClientRect();
+          expect(bounds.left).toBeGreaterThanOrEqual(footer.left);
+          expect(bounds.right).toBeLessThanOrEqual(footer.right);
+        }
       }
     }
     await page.viewport(1100, 900); root.className = 'v1-root v1-palette-blueprint';
@@ -192,7 +201,7 @@ describe('Better Plants review and display in Chromium', () => {
       frame.classList.add('v1-theme-dark');
       await page.screenshot({ element: frame, path: `./__screenshots__/better-plants-${category}-dark.png` });
     } finally { frame.remove(); await page.viewport(1100, 900); }
-    await view.open('second-report', 'report'); await waitFor(state => !!state.value?.summaries);
+    await view.open('second-report', 'report'); coordinator = component.workbench.session()!.injector.get(BetterPlantsReportService); await waitFor(state => !!state.value?.summaries);
     const changed = { ...snapshot.meterData[0], totalEnergyUse: 5, totalVolume: 5 };
     await transactions.runTransaction(['utilityMeterData'], 'readwrite', tx => tx.put('utilityMeterData', changed));
     view.store.publishCommittedPatch({ collections: [{ collection: 'meterData', upsert: [changed] }] });

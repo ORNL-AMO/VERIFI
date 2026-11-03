@@ -1,0 +1,49 @@
+@let tableView = view();
+@let hover = activeHover();
+<div class="v1-table-scroll" tabindex="0" role="region" [attr.aria-label]="caption()">
+  <table #resultsTable class="v1-analysis-results-table" [class.v1-analysis-results-table--monthly]="period() === 'monthly'" [class.copying-table]="copying()" [attr.aria-label]="showCaption() ? null : caption()" (mouseleave)="hoveredColumn.set(undefined)">
+    @if (showCaption()) { <caption>{{ caption() }}</caption> }
+    <thead>
+      <tr class="v1-analysis-results-table__section-row">
+        <th [attr.colspan]="periodColumnCount()" aria-hidden="true"></th>
+        @for (section of sections(); track section.id) {
+          <th scope="colgroup" class="v1-analysis-results-table__section-heading" [class]="'v1-analysis-results-table__section-heading--' + section.id"
+            [class.v1-analysis-results-table__column-hover]="hover?.section === section.id" [attr.colspan]="section.count">
+            {{ section.label }}@if (section.id === 'use' && unit()) { <span> ({{ unit() }})</span> }
+          </th>
+        }
+      </tr>
+      <tr>
+        <th class="v1-analysis-results-table__group--period" scope="col" [class.v1-analysis-results-table__column-hover]="hover?.id === 'period'" (mouseenter)="hoveredColumn.set(periodColumn())">{{ periodColumn().label }}</th>
+        @for (column of tableView.headers; track column.id) {
+          <th [class]="'v1-analysis-results-table__group--' + column.section" scope="col"
+            [class.v1-analysis-results-table__column-hover]="hover?.id === column.id" (mouseenter)="hoveredColumn.set(column)">
+            {{ column.label }}@if (column.unit) { <small> ({{ column.unit }})</small> }
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of tableView.rows; track row.key) {
+        <tr [class.v1-analysis-results__missing]="row.missing" [class.v1-analysis-results__fiscal-year-end]="row.fiscalYearEnd">
+          <th class="v1-analysis-results-table__group--period" scope="row" [class.v1-analysis-results-table__column-hover]="hover?.id === 'period'" (mouseenter)="hoveredColumn.set(periodColumn())">
+            {{ row.label }}<app-analysis-result-markers [markers]="row.markers"/>
+          </th>
+          @for (cell of row.cells; track $index) {
+            @let column = tableView.headers[$index];
+            <td [class]="'v1-analysis-results-table__group--' + column.section"
+              [class.v1-analysis-results-table__column-hover]="hover?.id === column.id"
+              [class.negative]="emphasizeNegative() && cell.value !== null && cell.value < 0" (mouseenter)="hoveredColumn.set(column)">
+              @if (cell.text !== undefined) { {{ cell.text }} }
+              @else if (cell.percent && cell.value !== null) { {{ cell.value | number:'1.0-2' }}% }
+              @else { {{ cell.value | analysisResultNumber }} }
+              @if (cell.missing) { <span aria-label="Missing predictor data"> ⚠</span> }
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td [attr.colspan]="tableView.headers.length + 1">No results are available for this period.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

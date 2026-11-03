@@ -1,3 +1,4 @@
+import { dbConfig } from '@data/indexedDB/_dbConfig';
 import { Injector } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -28,7 +29,7 @@ describe('facility report lifecycle in Chromium IndexedDB', () => {
     const store = new AccountWorkspaceStore();
     store.publish(reportSnapshot([source]), { facility: reportFacility });
     const repository = new FacilityReportsDbService(harness.dbService, new IndexedDbAccessService(harness.dbService));
-    const handler = new ReportCommandHandler(repository, {} as AccountReportDbService, store, {} as IndexedDbTransactionService);
+    const handler = new ReportCommandHandler(repository, {} as AccountReportDbService, store, new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: harness.databaseName } }));
     const boundary = new WorkspaceCommandBoundary(store, {} as AccountWorkspaceService);
     const injector = Injector.create({ providers: [
       FacilityReportActionsService, { provide: AccountWorkspaceStore, useValue: store },
@@ -40,6 +41,7 @@ describe('facility report lifecycle in Chromium IndexedDB', () => {
     try {
       const created = await service.create('facility-a', 'New overview', 'overview');
       const quality = await service.create('facility-a', 'Data quality', 'dataQuality');
+      const analysis = await service.create('facility-a', 'Analysis', 'analysis');
       const copy = await service.copy('facility-a', source.guid);
       expect(copy.id).not.toBe(source.id);
       expect(copy.guid).not.toBe(source.guid);
@@ -47,8 +49,8 @@ describe('facility report lifecycle in Chromium IndexedDB', () => {
       expect(copy.costSavingsReportSettings).toEqual(source.costSavingsReportSettings);
       await service.updateName('facility-a', copy.guid, 'Saved copy');
       await service.delete('facility-a', source.guid);
-      expect(store.revision()).toBe(5);
-      expect(committed).toEqual(['add', 'add', 'add', 'update', 'delete']);
+      expect(store.revision()).toBe(6);
+      expect(committed).toEqual(['add', 'add', 'add', 'add', 'update', 'delete']);
       await harness.reopen();
       const reopened = new FacilityReportsDbService(harness.dbService, new IndexedDbAccessService(harness.dbService));
       const saved = await reopened.getStoredByGuid(copy.guid);
@@ -60,6 +62,10 @@ describe('facility report lifecycle in Chromium IndexedDB', () => {
       expect(await reopened.getStoredByGuid(source.guid)).toBeUndefined();
       expect(await reopened.getStoredByGuid(other.guid)).toEqual(other);
       expect((await reopened.getStoredByGuid(created.guid))?.facilityReportType).toBe('overview');
+      expect((await reopened.getStoredByGuid(analysis.guid))?.analysisReportSettings.analysisTableColumns).toMatchObject({
+        actualEnergy: true, modeledEnergy: true, adjusted: true,
+        baselineAdjustmentForNormalization: false, baselineAdjustmentForOther: false, baselineAdjustment: false
+      });
       const savedQuality = await reopened.getStoredByGuid(quality.guid);
       expect(savedQuality?.dataQualityReportSettings.missingSelection).toBe(true);
       expect(savedQuality?.dataQualityReportSettings.selectedAnalysisItemId).toBeUndefined();

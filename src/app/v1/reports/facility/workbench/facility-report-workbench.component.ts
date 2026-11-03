@@ -1,54 +1,41 @@
-import { Component, computed, effect, inject } from '@angular/core';
-import { CanDeactivateFn, Router } from '@angular/router';
+import { Component, computed, inject } from '@angular/core';
+import { ActivatedRoute, CanDeactivateFn } from '@angular/router';
+import { ReportHostAdapter, REPORT_HOST } from '@app/v1/reports/shared/workbench/report-runtime.models';
+import { ReportWorkbenchController } from '@app/v1/reports/shared/workbench/report-workbench.controller';
 import { FacilityReportWorkbenchContext } from './facility-report-workbench-context.service';
-import { FacilityReportAutosaveService } from './editing/facility-report-autosave.service';
-import { hasFacilityReportDataChecks } from './facility-report-workbench.models';
+import { FACILITY_REPORT_FEATURES, PENDING_FACILITY_REPORT } from '../facility-report.definitions';
 
-@Component({
-  selector: 'app-facility-report-workbench', standalone: false,
-  templateUrl: './facility-report-workbench.component.html',
-  styleUrls: ['./facility-report-workbench.component.css'],
-  providers: [FacilityReportWorkbenchContext, FacilityReportAutosaveService],
-  host: { '(window:beforeunload)': 'beforeUnload($event)' }
-})
-export class FacilityReportWorkbenchComponent {
-  readonly context = inject(FacilityReportWorkbenchContext);
-  readonly editor = inject(FacilityReportAutosaveService);
-  readonly breadcrumbs = computed(() => this.context.navigation.isSingleSiteWorkspace() ? [{ label: 'Reports', icon: 'reports' as const, ...this.context.navigation.facilityInventoryLink(this.context.facility()?.guid ?? '', 'reports') }] : [
-    { label: `${this.context.workspace.account()?.name || 'Account'} Reports`, route: this.context.navigation.accountReportsRoute(this.context.workspace.account()?.guid ?? '') },
-    { label: `${this.context.facility()?.name || 'Facility'} Reports`, ...this.context.navigation.facilityInventoryLink(this.context.facility()?.guid ?? '', 'reports') },
-    { label: this.context.report()?.name || 'Untitled facility report' }
-  ]);
-  readonly facts = computed(() => this.context.presentation()?.facts ?? []);
-  readonly statusLabel = computed(() => ({ ready: 'No Issues', error: 'Needs attention', warning: 'Needs review', checking: 'Checking setup', unavailable: 'Setup status unavailable' })[this.context.presentation()?.status ?? 'checking']);
-  private readonly router = inject(Router);
-  readonly previous = computed(() => {
-    const stages = this.context.stages();
-    return stages[stages.findIndex(stage => stage.current) - 1];
-  });
-  readonly next = computed(() => {
-    const stages = this.context.stages();
-    return stages[stages.findIndex(stage => stage.current) + 1];
-  });
-
-
-  constructor() {
-    effect(() => {
-      const report = this.context.report();
-      if (report && this.context.stage() === 'data-checks' && !hasFacilityReportDataChecks(report)) {
-        void this.router.navigate(this.context.navigation.facilityReportWorkbenchRoute(report.facilityId, report.guid), { replaceUrl: true });
-      }
-    });
-  }
-
-  switchReport(guid: string): void {
-    const report = this.context.reports().find(item => item.guid === guid);
-    if (report) void this.router.navigate(this.context.navigation.facilityReportWorkbenchRoute(report.facilityId, report.guid));
-  }
-
-  beforeUnload(event: BeforeUnloadEvent): void {
-    if (this.editor.needsProtection()) { event.preventDefault(); event.returnValue = ''; }
-  }
+function facilityReportHost(): ReportHostAdapter {
+  const context = inject(FacilityReportWorkbenchContext), route = inject(ActivatedRoute);
+  return {
+    identity: computed(() => { const report = context.report(); return report ? { scope: 'facility' as const, accountGuid: report.accountId, facilityGuid: report.facilityId, reportGuid: report.guid } : undefined; }),
+    stage: context.stage, stages: context.stages,
+    presentation: computed(() => {
+      const report = context.report(), presentation = context.presentation(), facility = context.facility();
+      if (!report || !presentation || !facility) return undefined;
+      const breadcrumbs = context.navigation.isSingleSiteWorkspace() ? [{ label: 'Reports', icon: 'reports' as const, ...context.inventoryLink() }] : [
+        { label: `${context.workspace.account()?.name || 'Account'} Reports`, route: context.navigation.accountReportsRoute(report.accountId) },
+        { label: `${facility.name || 'Facility'} Reports`, ...context.inventoryLink() }, { label: report.name || 'Untitled facility report' }
+      ];
+      return { name: report.name || 'Untitled facility report', typeLabel: context.typeLabel(), breadcrumbs,
+        breadcrumbLabel: 'Facility report breadcrumb', titleId: 'facility-report-workbench-title', resources: context.resources(), selectedId: report.guid,
+        status: presentation.status, statusLabel: ({ ready: 'No Issues', error: 'Needs attention', warning: 'Needs review', checking: 'Checking setup', unavailable: 'Setup status unavailable' })[presentation.status], facts: presentation.facts };
+    }),
+    state: computed(() => ['loading', 'switching'].includes(context.workspace.status()) ? 'loading' : context.workspace.status() === 'error' ? 'error' : context.report() ? 'ready' : 'unavailable'),
+    error: computed(() => context.workspace.error()?.message), returnLink: context.inventoryLink,
+    definitions: FACILITY_REPORT_FEATURES, fallback: PENDING_FACILITY_REPORT, type: () => context.report()?.facilityReportType,
+    providers: () => [FacilityReportWorkbenchContext, { provide: ActivatedRoute, useValue: route }],
+    reportLink: (guid, stage = 'setup') => ({ route: context.navigation.facilityReportWorkbenchRoute(context.facility()?.guid ?? '', guid, stage) })
+  };
 }
 
-export const facilityReportLeaveGuard: CanDeactivateFn<FacilityReportWorkbenchComponent> = component => component.editor.flush();
+@Component({ selector: 'app-facility-report-workbench', standalone: false,
+  templateUrl: './facility-report-workbench.component.html', styleUrls: ['./facility-report-workbench.component.css'],
+  providers: [FacilityReportWorkbenchContext, ReportWorkbenchController, { provide: REPORT_HOST, useFactory: facilityReportHost }] })
+export class FacilityReportWorkbenchComponent {
+  readonly context = inject(FacilityReportWorkbenchContext);
+  readonly workbench = inject(ReportWorkbenchController);
+  get editor() { return this.workbench.session()!.runtime.editor; }
+  switchReport(guid: string): void { this.workbench.switchReport(guid); }
+}
+export const facilityReportLeaveGuard: CanDeactivateFn<FacilityReportWorkbenchComponent> = component => component.workbench.flush();

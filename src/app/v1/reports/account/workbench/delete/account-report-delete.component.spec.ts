@@ -2,7 +2,7 @@ import { PortalModule } from '@angular/cdk/portal';
 import { Component, inject } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { REPORT_AUTOSAVE_DEBOUNCE_MS } from '@app/v1/reports/report-autosave-controller';
+import { REPORT_AUTOSAVE_DEBOUNCE_MS } from '@app/v1/reports/shared/editing/report-autosave-controller';
 import { setupAccountReportWorkbench } from '../../testing/account-report-workbench-test-setup';
 import { AccountReportDeleteService } from './account-report-delete.service';
 
@@ -59,7 +59,8 @@ describe('delete report from Setup', () => {
     expect(view.store.accountAnalyses()).toEqual(analyses); expect(view.store.facilityAnalyses()).toEqual(facilityAnalyses);
     expect(view.updateSetup).not.toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'reports', 'dashboard']);
-    expect(await view.workbench.editor.flush()).toBe(true);
+    expect(view.workbench.workbench.session()).toBeUndefined();
+    expect(await view.workbench.workbench.flush()).toBe(true);
   });
 
   it('disables duplicate confirmation while deletion is pending and blocks deletion for a stale report identity', async () => {
