@@ -8,6 +8,6 @@ import { FacilityReportSetupComponent } from './workbench/setup/facility-report-
 export const FACILITY_REPORT_FEATURES: readonly ReportFeatureDefinition[] = [FACILITY_ANALYSIS_REPORT];
 export const PENDING_FACILITY_REPORT: ReportFeatureDefinition = {
   type: 'pending', providers: [FacilityReportEditor,
-    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(FacilityReportEditor), gateSetup: false, showOutputActions: false }) }],
+    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(FacilityReportEditor), gateSetup: false }) }],
   stages: { setup: FacilityReportSetupComponent, 'data-checks': PendingReportStageComponent, report: PendingReportStageComponent }
 };

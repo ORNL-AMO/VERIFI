@@ -40,9 +40,10 @@
   grid-area: main;
   align-self: end;
   justify-self: end;
-  z-index: 4;
+  z-index: 6;
   width: min(24rem, calc(100% - 1.5rem));
   margin: clamp(.75rem, 2vw, 1.25rem);
+  margin-bottom: calc(clamp(.75rem, 2vw, 1.25rem) + var(--v1-workspace-footer-clearance, 0px));
   pointer-events: none;
 }
 
@@ -68,7 +69,7 @@
   .v1-workspace__notifications {
     position: absolute;
     right: .75rem;
-    bottom: .75rem;
+    bottom: calc(.75rem + var(--v1-workspace-footer-clearance, 0px));
     left: .75rem;
     width: auto;
     margin: 0;

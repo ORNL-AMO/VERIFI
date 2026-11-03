@@ -1,3 +1,8 @@
-<button type="button" class="v1-btn v1-btn--secondary" disabled><app-ui-icon name="pdf"/>PDF</button>
-<button type="button" class="v1-btn v1-btn--secondary" disabled><app-ui-icon name="powerpoint"/>PowerPoint</button>
-<button type="button" class="v1-btn v1-btn--action" disabled><app-ui-icon name="present"/>Present</button>
+@let exports = capability();
+@for (action of actions(); track action.format) {
+  <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!exports.available()"
+    [title]="exports.unavailableReason()" (click)="requested.emit(action.format)"><app-ui-icon [name]="action.icon"/>{{ action.label }}</button>
+}
+@if (exports.busy()) {
+  <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelled.emit()">Cancel generation</button>
+}

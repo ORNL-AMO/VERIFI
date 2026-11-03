@@ -27,7 +27,7 @@
       @if (workbench.next(); as next) {
         @if (workbench.canContinue()) { <a class="v1-btn v1-btn--action" [routerLink]="next.route">Continue<app-ui-icon name="chevronRight"/></a> }
         @else { <button type="button" class="v1-btn v1-btn--action" disabled>Continue<app-ui-icon name="chevronRight"/></button> }
-      } @else if (session.runtime.showOutputActions) { <app-report-output-actions/> }
+      } @else if (session.runtime.output; as output) { <app-report-output-actions [capability]="output" (requested)="output.generate($event)" (cancelled)="output.cancel()"/> }
       @else { <a class="v1-btn v1-btn--action" [routerLink]="returnLink.route" [queryParams]="returnLink.queryParams">Back to reports<app-ui-icon name="arrowLeft"/></a> }
     </div>
   </footer>

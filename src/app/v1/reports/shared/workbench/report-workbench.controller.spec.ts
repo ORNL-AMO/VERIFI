@@ -70,7 +70,6 @@ class TestReportEditor implements ReportEditor {
 class TestReportRuntime implements ReportRuntime {
   readonly editor = inject(TestReportEditor);
   readonly gateSetup = true;
-  readonly showOutputActions = true;
   readonly result = signal('loading');
 
   constructor() {

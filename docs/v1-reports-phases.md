@@ -95,6 +95,10 @@ Facility Analysis now implements typed setup, selected-year shared checks and re
 
 This covers the in-app workflow. Printing, PDF, PowerPoint, presentation mode, and final output verification remain with the separate output work; do not represent the original issue's output acceptance criteria as complete. Account Analysis and the other facility report types retain their pending content.
 
+## Report export foundation (#2791)
+
+The [export roadmap](v1-report-exports-plan.md) follows these in-app migrations. Better Plants adds direct official-form PDF and template-compatible Excel; facility Analysis adds PDF and PowerPoint. Their adapters share a session export lifecycle, neutral writers, and independent ECharts capture. Browser printing, presentation mode, other reports, and final cross-report verification remain separate. See [output architecture](v1-reports-architecture.md#file-output-and-extension-pattern).
+
 ## Boundaries and working rules
 
 - Complete and review one phase before starting the next.

@@ -31,7 +31,7 @@ describe('facility report workbench navigation', () => {
     if (value === 'analysis') {
       const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions')!;
       const buttons = Array.from(outputs.querySelectorAll<HTMLButtonElement>('button'));
-      expect(buttons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Present']);
+      expect(buttons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint']);
       expect(buttons.every(button => button.disabled && button.type === 'button')).toBe(true);
     } else expect(harness.routeNativeElement!.querySelector('footer')?.textContent).toContain('Back to reports');
     expect(harness.routeNativeElement!.querySelector('footer a')?.getAttribute('href')).toContain(['analysis', 'savings', 'costSavings'].includes(value) ? '/data-checks' : '/setup');

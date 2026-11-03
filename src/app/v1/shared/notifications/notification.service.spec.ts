@@ -65,4 +65,16 @@ describe('NotificationService', () => {
       dismissible: false
     });
   });
+
+  it('updates ongoing progress in place and restarts an explicitly changed dismiss timer', async () => {
+    const progress = service.info('Preparing report', { durationMs: 0 });
+    service.update(progress.id, { title: 'Rendering charts (1 / 3)' });
+    expect(service.notifications()).toHaveLength(1);
+    expect(service.notifications()[0]).toMatchObject({ id: progress.id, title: 'Rendering charts (1 / 3)', durationMs: 0 });
+    service.update(progress.id, { title: 'Download started', tone: 'success', durationMs: 1000 });
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(service.notifications()).toEqual([]);
+    service.update(progress.id, { title: 'Obsolete progress' });
+    expect(service.notifications()).toEqual([]);
+  });
 });

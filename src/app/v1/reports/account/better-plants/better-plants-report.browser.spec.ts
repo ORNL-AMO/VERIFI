@@ -13,6 +13,8 @@ import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-ha
 import { analysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { analysisReviewFingerprint } from '@platform/reports/analysis-review-fingerprint';
+import { ReportFileDeliveryService } from '@platform/reports/report-file-delivery.service';
+import { ReportArtifact } from '@shared/report-output/report-output.models';
 import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
 import { runWorker } from '@platform/web-workers/run-worker';
 import { AnalysisReportCalculationService } from '@app/v1/reports/shared/calculation/analysis-report-calculation.service';
@@ -20,6 +22,7 @@ import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/
 import { setupAccountReportWorkbench } from '../testing/account-report-workbench-test-setup';
 import { StatusItem } from '@app/v1/status/status.models';
 import { BetterPlantsReportService } from './better-plants-report.service';
+import { BetterPlantsOutputService } from './output/better-plants-output.service';
 
 describe('Better Plants review and display in Chromium', () => {
   let database: IndexedDbTestHarness;
@@ -40,12 +43,14 @@ describe('Better Plants review and display in Chromium', () => {
     expect((await fetch(workerUrl)).ok).toBe(true);
     const meters = getCalanderizedMeterData([...snapshot.meters], [...snapshot.meterData], snapshot.account, false,
       { energyIsSource: true, neededUnits: 'MMBtu' }, [], [], [...snapshot.facilities], snapshot.account.assessmentReportVersion, []);
+    const download = vi.fn<(artifact: ReportArtifact) => void>();
+    const execute = vi.fn((request: AnalysisReportWorkerRequest) => runWorker<AnalysisReportWorkerResponse>(new Worker(workerUrl, { type: 'module' }), request));
     const view = await setupAccountReportWorkbench(snapshot, [
+      { provide: ReportFileDeliveryService, useValue: { download } },
       { provide: WorkspaceCommandBoundary, useFactory: () => new WorkspaceCommandBoundary(inject(AccountWorkspaceStore), {} as AccountWorkspaceService) },
       { provide: AnalysisReviewCommandHandler, useValue: new AnalysisReviewCommandHandler(transactions) },
       { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of({ state: 'ready', meters }), project: () => ({ state: 'ready', meters }) } },
-      { provide: AnalysisReportCalculationService, useValue: { fingerprint: analysisReviewFingerprint,
-        execute: (request: AnalysisReportWorkerRequest) => runWorker<AnalysisReportWorkerResponse>(new Worker(workerUrl, { type: 'module' }), request) } }
+      { provide: AnalysisReportCalculationService, useValue: { fingerprint: analysisReviewFingerprint, execute } }
     ]);
     const root = view.harness.fixture.nativeElement as HTMLElement; root.className = 'v1-root v1-palette-blueprint';
     const component = await view.open('report'); view.harness.fixture.autoDetectChanges();
@@ -128,10 +133,19 @@ describe('Better Plants review and display in Chromium', () => {
     await page.screenshot({ element: setup, path: `./__screenshots__/better-plants-setup-${category}.png` });
     await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
     const outputButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('footer app-report-output-actions button'));
-    expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Present']);
-    expect(outputButtons.every(button => button.disabled)).toBe(true);
+    expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'Excel']);
+    expect(outputButtons.every(button => !button.disabled)).toBe(true);
     expect(coordinator.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
     expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).not.toBeNull();
+    const exports = component.workbench.session()!.injector.get(BetterPlantsOutputService).output;
+    const calculationCount = execute.mock.calls.length, revision = view.store.committedRevision();
+    await exports.generate('pdf'); await exports.generate('xlsx');
+    expect(download).toHaveBeenCalledTimes(2);
+    const [pdf, workbook] = download.mock.calls.map(call => call[0]);
+    expect((await pdf.blob.text()).startsWith('%PDF-')).toBe(true);
+    expect(Array.from(new Uint8Array(await workbook.blob.arrayBuffer()).slice(0, 4))).toEqual([0x50, 0x4b, 0x03, 0x04]);
+    expect(execute).toHaveBeenCalledTimes(calculationCount);
+    expect(view.store.committedRevision()).toBe(revision);
     expect((await database.getAll('accountAnalysisItems'))[0]['dataCheckReviews']).toBeUndefined();
     await view.open('report', 'data-checks'); await waitFor(state => state.state === 'ready' && !!state.value?.checks);
     expect(coordinator.state().value?.checks?.map(check => check.reportYear)).toEqual([2024]);

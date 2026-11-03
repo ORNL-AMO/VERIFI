@@ -62,6 +62,7 @@
 .v1-toast__content strong,
 .v1-toast__content p {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .v1-toast__content strong {

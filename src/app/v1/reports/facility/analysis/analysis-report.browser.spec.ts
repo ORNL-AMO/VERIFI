@@ -128,8 +128,8 @@ describe('facility analysis report journey in Chromium', () => {
     expect(charts(annual).every(chart => chart.showValueLabels && chart.deferUntilVisible)).toBe(true);
     expect(root.querySelector('button[aria-label="Download PNG"]')).toBeNull();
     const outputButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('footer app-report-output-actions button'));
-    expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Present']);
-    expect(outputButtons.every(button => button.disabled)).toBe(true);
+    expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint']);
+    expect(outputButtons.every(button => !button.disabled)).toBe(true);
     expect(monthly.querySelectorAll('app-analysis-report-results-table')).toHaveLength(2);
     expect(charts(monthly)[0].comparisonBand).toBeDefined();
     expect(charts(monthly)[1].allMetricSeriesStacked()).toBe(true);

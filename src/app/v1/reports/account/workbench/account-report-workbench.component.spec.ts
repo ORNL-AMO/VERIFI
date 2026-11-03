@@ -52,10 +52,12 @@ describe('account report workbench', () => {
     expect(harness.routeNativeElement!.querySelector('footer app-report-output-actions')).toBeNull();
     await open('account-report', 'report');
     expect(workbench.context.stage()).toBe('report');
-    const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions')!;
-    const outputButtons = Array.from(outputs.querySelectorAll<HTMLButtonElement>('button'));
-    expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Present']);
-    expect(outputButtons.every(button => button.disabled && button.type === 'button')).toBe(true);
+    const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions');
+    if (value === 'betterPlants') {
+      const outputButtons = Array.from(outputs!.querySelectorAll<HTMLButtonElement>('button'));
+      expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'Excel']);
+      expect(outputButtons.every(button => button.disabled && button.type === 'button')).toBe(true);
+    } else expect(outputs).toBeNull();
     if (value === 'betterPlants') {
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview')).not.toBeNull();
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();

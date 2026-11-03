@@ -458,6 +458,13 @@ Shared account/facility presentation lives under the v1 shared analysis-results 
 - **Results:** Reuse the existing facility-results Worker and pure calculations with explicit report year, report-bounded monthly history, and group summaries. One workbench coordinator shares results across views, cancels obsolete work, and reprojects display metadata without repeating calculations. Existing units, fiscal boundaries, rounding, banking, backups, and v0 output remain unchanged.
 - **Integration and verification:** Inventory content availability and status destinations distinguish the implemented facility Analysis report from pending types. Header, stage navigation, contextual sidebar, and footer share current workflow state. Focused unit and Chromium tests cover settings, review transactions, Worker demand, and the report journey. See [V1 report architecture](v1-reports-architecture.md). Printing and file/presentation output remain deferred to the output work.
 
+### Report PDF, PowerPoint, and Excel workflow (#2791)
+
+- **Workflow:** Better Plants offers direct PDF and Excel; facility Analysis offers PDF and PowerPoint. These implemented reports replace Data Overview as the infrastructure pilots. Browser printing and presentation mode remain deferred.
+- **Boundaries:** Feature-owned detached snapshots/composers use existing ready results and shared preview projections. Optional runtime capabilities drive the shared output actions and session lifecycle. Neutral writers produce files before a separate download boundary; v0 entrypoints remain wrappers with legacy defaults.
+- **Charts and layout:** Independent ECharts capture uses explicit dimensions, document colors, completion/abort/timeout handling, and cleanup. PowerPoint keeps editable text/tables and finite native chart series, using images for gaps and complex figures. PDF/PPT table continuations retain identifying columns and headers. Better Plants PDF retains form artwork and continued notes.
+- **Compatibility:** Source templates, workbook formulas/mappings, calculations, units, rounding, stored records, and review ownership remain unchanged. Excel yearly worksheet models are independent. Export never acknowledges checks or creates calculation demand. See [the roadmap](v1-report-exports-plan.md) and [output architecture](v1-reports-architecture.md#file-output-and-extension-pattern).
+
 ## Validation
 
 - For develop foundation changes, run `npx tsc -p tsconfig.app.json --noEmit` after each module or folder move.
