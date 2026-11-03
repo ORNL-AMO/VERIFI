@@ -17,11 +17,12 @@ describe('ReportsInventoryComponent', () => {
     dashboard.filtersForm.controls.scope.setValue('facility'); fixture.detectChanges(); expect(dashboard.filteredEntries()).toHaveLength(1);
     expect(dashboard.filteredEntries()[0].scope).toBe('facility');
   });
-  it('requires an explicit facility for creation without selecting it in the workspace', async () => {
+  it('uses the sole facility for creation without selecting it in the workspace', async () => {
     const { dashboard, lifecycle, store, facilityActions } = await setup();
-    const original = store.selectedFacility(); dashboard.openCreate(); lifecycle.form.controls.scope.setValue('facility');
-    expect(lifecycle.canSave()).toBe(false); lifecycle.form.controls.facilityGuid.setValue('facility-a'); expect(lifecycle.canSave()).toBe(true);
-    await lifecycle.submit(); expect(facilityActions.create).toHaveBeenCalledWith('facility-a', 'New Report', 'analysis'); expect(store.selectedFacility()).toBe(original);
+    const original = store.selectedFacility(); dashboard.openCreate(); lifecycle.selectScope('facility');
+    expect(lifecycle.canSave()).toBe(false);
+    lifecycle.selectType('analysis'); expect(lifecycle.canSave()).toBe(true);
+    await lifecycle.submit(); expect(facilityActions.create).toHaveBeenCalledWith('facility-a', 'Analysis report', 'analysis'); expect(store.selectedFacility()).toBe(original);
   });
   it('renames a facility report through its explicit owner and keeps owner/type fixed in the editor', async () => {
     const { dashboard, fixture, lifecycle, facilityActions } = await setup();

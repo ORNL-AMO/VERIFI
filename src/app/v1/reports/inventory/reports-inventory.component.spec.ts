@@ -127,7 +127,7 @@ describe('report browse state', () => {
     expect(component.filtersForm.controls.type.value).toBe('all');
   });
 
-  it('restores the facility report default after discarding and reopening an account draft', async () => {
+  it('requires a new explicit report type after discarding and reopening a draft', async () => {
     const { facilityActions } = await setupReportInventory();
     const fixture = TestBed.createComponent(ReportsInventoryComponent); fixture.detectChanges();
     const lifecycle = fixture.componentInstance.lifecycle;
@@ -140,13 +140,14 @@ describe('report browse state', () => {
     lifecycle.discardEditor();
 
     lifecycle.openCreate();
-    expect(lifecycle.form.controls.type.value).toBe('betterPlants');
+    expect(lifecycle.form.controls.type.value).toBeNull();
     lifecycle.form.controls.scope.setValue('facility');
     lifecycle.form.controls.facilityGuid.setValue('facility-a');
-    expect(lifecycle.form.controls.type.value).toBe('analysis');
+    expect(lifecycle.form.controls.type.value).toBeNull();
+    lifecycle.selectScope('facility'); lifecycle.selectType('analysis');
     expect(lifecycle.canSave()).toBe(true);
     await lifecycle.submit();
-    expect(facilityActions.create).toHaveBeenCalledWith('facility-a', 'New Report', 'analysis');
+    expect(facilityActions.create).toHaveBeenCalledWith('facility-a', 'Analysis report', 'analysis');
   });
 
   it('restores account controls and overrides independently of facility and Analysis preferences', async () => {
@@ -207,18 +208,20 @@ describe('single-facility combined reports', () => {
     const fixture = TestBed.createComponent(ReportsInventoryComponent); fixture.detectChanges();
     const host = fixture.componentInstance;
     host.openCreate(); fixture.detectChanges();
-    expect(host.lifecycle.typeChoice.value).toBe('account:betterPlants');
-    expect(fixture.nativeElement.querySelector('#report-scope')).toBeNull();
+    expect(host.lifecycle.form.controls.scope.value).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.report-choice')).toHaveLength(2);
     expect(fixture.nativeElement.querySelector('#report-facility')).toBeNull();
-    host.lifecycle.typeChoice.setValue(choice.value); fixture.detectChanges();
-    expect(host.lifecycle.form.getRawValue()).toEqual({ name: 'New Report', scope: choice.scope, type: choice.type, facilityGuid: choice.scope === 'facility' ? 'facility-a' : '' });
+    host.lifecycle.selectScope(choice.scope);
+    expect(host.lifecycle.step()).toBe('type');
+    host.lifecycle.selectType(choice.type); fixture.detectChanges();
+    expect(host.lifecycle.form.getRawValue()).toEqual({ name: `${choice.typeLabel} report`, scope: choice.scope, type: choice.type, facilityGuid: choice.scope === 'facility' ? 'facility-a' : '' });
     expect(host.lifecycle.canSave()).toBe(true);
     await host.lifecycle.submit();
     if (choice.scope === 'account') {
-      expect(accountActions.create).toHaveBeenCalledWith('New Report', choice.type);
+      expect(accountActions.create).toHaveBeenCalledWith(`${choice.typeLabel} report`, choice.type);
       expect(facilityActions.create).not.toHaveBeenCalled();
     } else {
-      expect(facilityActions.create).toHaveBeenCalledWith('facility-a', 'New Report', choice.type);
+      expect(facilityActions.create).toHaveBeenCalledWith('facility-a', `${choice.typeLabel} report`, choice.type);
       expect(accountActions.create).not.toHaveBeenCalled();
     }
     expect(navigate).toHaveBeenCalled();
@@ -229,9 +232,11 @@ describe('single-facility combined reports', () => {
     const fixture = TestBed.createComponent(ReportsInventoryComponent); fixture.detectChanges();
     const lifecycle = fixture.componentInstance.lifecycle;
     lifecycle.openCreate(); fixture.detectChanges();
-    lifecycle.typeChoice.setValue('facility:unknown'); fixture.detectChanges();
+    lifecycle.selectScope('facility'); lifecycle.selectType('analysis');
+    store.publish({ ...store.snapshot()!, facilities: [] }); fixture.detectChanges();
     expect(lifecycle.canSave()).toBe(false);
-    lifecycle.typeChoice.setValue('facility:analysis'); fixture.detectChanges();
+    store.publish({ ...store.snapshot()!, facilities: [reportFacility] });
+    fixture.detectChanges();
     facilityActions.create.mockRejectedValueOnce(new Error('Save failed'));
     await lifecycle.submit(); fixture.detectChanges();
     expect(lifecycle.error()).toBe('Save failed');
