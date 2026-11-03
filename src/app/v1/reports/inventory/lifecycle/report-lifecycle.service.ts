@@ -98,12 +98,16 @@ export class ReportLifecycleService {
     if (this.fixedFacilityError()) return 'Choose a report owned by the selected facility.';
     if (draft.scope === 'facility' && !this.facilities().length) return 'Add a facility before creating a facility report.';
     if (draft.facilityGuid && !this.ownerValid()) return 'This facility is no longer available. Select an available facility.';
-    if (draft.type && !this.selectedType()) return 'This report type is no longer available. Select an available report type.';
+    if (this.editor()?.entry) {
+      if (draft.scope && !reportTypeAvailable(draft.scope, draft.type, this.workspace.account()?.displayEmissions)) {
+        return 'Enable Other Impacts in Account Goals to access this report type.';
+      }
+    } else if (draft.type && !this.selectedType()) return 'This report type is no longer available. Select an available report type.';
     return undefined;
   });
   readonly canSave = computed(() => this.canAct() && !!this.editor() && !!this.draft().name.trim() &&
-    this.scopeValid() && this.ownerValid() && !!this.selectedType() && !this.availabilityError() &&
-    (!!this.editor()?.entry || this.step() === 'name'));
+    this.scopeValid() && this.ownerValid() && !this.availabilityError() &&
+    (!!this.editor()?.entry || (!!this.selectedType() && this.step() === 'name')));
 
   constructor() {
     const unregister = inject(UnsavedChangesService).register(() => this.draftChanged(), () => this.cancelEditor(), () => this.navigationBlocked());
