@@ -96,6 +96,44 @@ describe('facility analysis report coordinator', () => {
     await settle(); expect(executeFacility).toHaveBeenCalledOnce(); expect(execute).toHaveBeenCalledTimes(count);
     expect(service.state().value?.results).toBeDefined(); expect(store.facilityAnalyses()[0].dataCheckReviews).toBeUndefined();
   });
+  it('retains completed review and existing results when contribution content and report names change', async () => {
+    findings.set([{ severity: 'warning' }]); stage.set('data-checks'); await settle();
+    await service.confirmReview(); await settle(); stage.set('report'); await settle();
+    const checksCount = execute.mock.calls.length, outputCount = executeFacility.mock.calls.length;
+    const review = structuredClone(store.facilityAnalyses()[0].dataCheckReviews), results = service.state().value?.results;
+    for (const [enabled, table, chart] of [[true, true, true], [true, true, false], [true, false, true], [false, false, false]]) {
+      const report = store.facilityReports()[0];
+      const updatedReport = { ...report, name: 'Updated report title',
+        analysisReportSettings: { ...report.analysisReportSettings, facilityGroupContributions: enabled,
+          facilityGroupContributionsTable: table, facilityGroupContributionsGraphs: chart } };
+      store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [updatedReport] }] });
+      expect(service.workflow().completed).toBe(true);
+      expect(service.state().value?.results).toBe(results);
+      await settle();
+      expect(execute).toHaveBeenCalledTimes(checksCount);
+      expect(executeFacility).toHaveBeenCalledTimes(outputCount);
+      expect(store.facilityAnalyses()[0].dataCheckReviews).toEqual(review);
+    }
+    expect(confirmFacility).toHaveBeenCalledOnce();
+  });
+  it('keeps current output work when contribution visibility changes while the calculation is pending', async () => {
+    const pending = new Subject<{ ok: true; value: ReturnType<typeof calculateFacilityAnalysisResults> }>();
+    executeFacility.mockReturnValueOnce(pending);
+    stage.set('report'); await settle(); expect(pending.observed).toBe(true);
+    const report = store.facilityReports()[0], checksCount = execute.mock.calls.length;
+    const updatedReport = { ...report, name: 'Renamed while calculating',
+      analysisReportSettings: { ...report.analysisReportSettings, facilityGroupContributions: true,
+        facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: true } };
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [updatedReport] }] });
+    await settle();
+    expect(pending.observed).toBe(true); expect(executeFacility).toHaveBeenCalledOnce();
+    expect(execute).toHaveBeenCalledTimes(checksCount);
+    pending.next({ ok: true, value: calculateFacilityAnalysisResults(executeFacility.mock.calls[0][0]) }); pending.complete();
+    await settle();
+    expect(service.state().value?.results).toBeDefined();
+    expect(store.facilityAnalyses()[0].dataCheckReviews).toBeUndefined();
+    expect(confirmFacility).not.toHaveBeenCalled();
+  });
   it('cancels superseded Worker work, ignores late responses and retries failures', async () => {
     const pending = new Subject(); executeFacility.mockReturnValueOnce(pending);
     stage.set('report'); await settle(); expect(pending.observed).toBe(true);

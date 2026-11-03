@@ -11,7 +11,8 @@ describe('report result tables', () => {
     fixture.componentRef.setInput('columns', report.analysisReportSettings.analysisTableColumns);
     fixture.componentRef.setInput('unit', 'MMBtu'); fixture.componentRef.setInput('caption', 'Facility annual results'); fixture.componentRef.setInput('facility', facility);
     fixture.detectChanges(); const root = fixture.nativeElement as HTMLElement;
-    expect(root.querySelector('caption')?.textContent).toContain('Facility annual results');
+    expect(root.querySelector('caption')).toBeNull();
+    expect(root.querySelector('table')?.getAttribute('aria-label')).toBe('Facility annual results');
     expect(root.querySelector('app-analysis-results-table table')?.classList.contains('v1-analysis-results-table')).toBe(true);
     expect(root.querySelector('th[scope=colgroup]')?.textContent).toContain('Energy');
     expect(root.querySelectorAll('tbody th[scope=row]')).toHaveLength(2);

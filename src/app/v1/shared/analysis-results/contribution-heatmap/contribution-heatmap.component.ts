@@ -1,4 +1,5 @@
 import { Component, ViewChild, computed, input } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ContributionHeatmapView, contributionHeatmapOption } from './contribution-heatmap.view';
@@ -6,7 +7,7 @@ import { ContributionHeatmapView, contributionHeatmapOption } from './contributi
 @Component({
   selector: 'app-contribution-heatmap',
   standalone: true,
-  imports: [EChartsChartDirective, IconComponent],
+  imports: [EChartsChartDirective, IconComponent, DecimalPipe],
   templateUrl: './contribution-heatmap.component.html',
   styleUrls: ['./contribution-heatmap.component.css']
 })
@@ -15,6 +16,10 @@ export class ContributionHeatmapComponent {
   readonly scopeLabel = input.required<'Facility' | 'Group'>();
   readonly downloadFileName = input.required<string>();
   readonly compact = input(false);
+  readonly embedded = input(false);
+  readonly showTitle = input(true);
+  readonly showChartActions = input(true);
+  readonly deferUntilVisible = input(false);
   readonly title = computed(() => `${this.scopeLabel()} Contributions by Fiscal Year`);
   readonly regionLabel = computed(() => `Scrollable ${this.scopeLabel().toLowerCase()} contribution heatmap`);
   readonly chartLabel = computed(() => `${this.scopeLabel()} percent contribution heatmap by fiscal year. Green indicates savings and red indicates losses.`);

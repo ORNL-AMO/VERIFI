@@ -14,6 +14,9 @@ export const SECTION_OPTIONS: readonly { key: SectionKey; label: string; parent?
   { key: 'facilityMonthlyResultsTableBaselineYear', label: 'Baseline year', parent: 'facilityMonthlyResultsTable' },
   { key: 'facilityMonthlyResultsTableReportYear', label: 'Report year', parent: 'facilityMonthlyResultsTable' },
   { key: 'facilityMonthlyResultsGraphs', label: 'Monthly charts', parent: 'facilityMonthlyResults' },
+  { key: 'facilityGroupContributions', label: 'Facility group contributions' },
+  { key: 'facilityGroupContributionsTable', label: 'Contributions table', parent: 'facilityGroupContributions' },
+  { key: 'facilityGroupContributionsGraphs', label: 'Contributions heatmap', parent: 'facilityGroupContributions' },
   { key: 'groupReports', label: 'Group reports' },
   { key: 'groupModelDetails', label: 'Regression model details', parent: 'groupReports' },
   { key: 'groupAnnualResults', label: 'Group annual results', parent: 'groupReports' },
@@ -26,7 +29,7 @@ export const SECTION_OPTIONS: readonly { key: SectionKey; label: string; parent?
   { key: 'groupMonthlyResultsTableModelYear', label: 'Model year', parent: 'groupMonthlyResultsTable' },
   { key: 'groupMonthlyResultsGraphs', label: 'Monthly charts', parent: 'groupMonthlyResults' }
 ];
-export type SettingsDraft = Omit<AnalysisReportSettings, 'reportYear'> & { reportYear: number | null };
+export type SettingsDraft = Required<Omit<AnalysisReportSettings, 'reportYear'>> & { reportYear: number | null };
 export type SettingsControls = { [K in SectionKey]: FormControl<boolean> } & {
   reportYear: FormControl<number | null>;
   analysisTableColumns: FormGroup<{ [K in keyof AnalysisTableColumns]: FormControl<AnalysisTableColumns[K]> }>;
@@ -35,11 +38,14 @@ export function settingsDraft(settings?: AnalysisReportSettings): SettingsDraft 
   // Older saved records retain their original fallback behavior as well as explicit choices.
   const defaults = settings ? getAnalysisReportSettings() : getAnalysisReportDefaults();
   return structuredClone({ ...defaults, ...settings, reportYear: settings?.reportYear ?? null,
+    facilityGroupContributions: settings?.facilityGroupContributions ?? false,
+    facilityGroupContributionsTable: settings?.facilityGroupContributionsTable ?? true,
+    facilityGroupContributionsGraphs: settings?.facilityGroupContributionsGraphs ?? true,
     analysisTableColumns: { ...defaults.analysisTableColumns, ...settings?.analysisTableColumns, predictorGroupId: settings?.analysisTableColumns?.predictorGroupId ?? undefined } });
 }
 export function settingsForm(): FormGroup<SettingsControls> {
   const defaults = getAnalysisReportDefaults();
-  const controls = Object.fromEntries(SECTION_OPTIONS.map(item => [item.key, new FormControl(defaults[item.key], { nonNullable: true })])) as { [K in SectionKey]: FormControl<boolean> };
+  const controls = Object.fromEntries(SECTION_OPTIONS.map(item => [item.key, new FormControl<boolean>(defaults[item.key] ?? false, { nonNullable: true })])) as { [K in SectionKey]: FormControl<boolean> };
   const columns = Object.fromEntries(Object.entries(defaults.analysisTableColumns).map(([key, value]) => [key, new FormControl(value, { nonNullable: true })])) as { [K in keyof AnalysisTableColumns]: FormControl<AnalysisTableColumns[K]> };
   return new FormGroup({ ...controls, reportYear: new FormControl<number | null>(null),
     analysisTableColumns: new FormGroup(columns) } as SettingsControls);

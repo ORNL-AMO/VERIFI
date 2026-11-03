@@ -18,6 +18,7 @@ interface GroupReportSection extends ReportSection {
 export type FacilityAnalysisReportSection =
   | ReportSection & { readonly kind: 'facility-annual' }
   | ReportSection & { readonly kind: 'facility-monthly'; readonly periods: ReturnType<typeof monthlyReportPeriods> }
+  | ReportSection & { readonly kind: 'facility-group-contributions' }
   | GroupReportSection & { readonly kind: 'group-model'; readonly checked?: AnalysisDataCheckGroup }
   | GroupReportSection & { readonly kind: 'group-annual' }
   | GroupReportSection & { readonly kind: 'group-monthly'; readonly periods: ReturnType<typeof monthlyReportPeriods> };
@@ -34,6 +35,10 @@ export function analysisReportSections(settings: AnalysisReportSettings, analysi
   const periods = monthlyReportPeriods(results.monthlyAnalysisSummaryData, settings, analysis.baselineYear, reportYear);
   if (settings.facilityMonthlyResults && (periods.length || settings.facilityMonthlyResultsGraphs)) {
     sections.push({ id: 'facility-monthly', kind: 'facility-monthly', heading: 'Monthly facility analysis', periods });
+  }
+  if (settings.facilityGroupContributions
+    && (settings.facilityGroupContributionsTable !== false || settings.facilityGroupContributionsGraphs !== false)) {
+    sections.push({ id: 'facility-group-contributions', kind: 'facility-group-contributions', heading: 'Group contributions' });
   }
   if (!settings.groupReports) return sections;
   const resultsByGroup = new Map(results.groupSummaries.map(result => [result.group.idbGroupId, result]));

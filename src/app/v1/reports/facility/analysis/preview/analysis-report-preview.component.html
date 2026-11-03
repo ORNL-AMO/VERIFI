@@ -28,6 +28,11 @@
             @for (period of section.periods; track period.year) { <app-analysis-report-results-table [category]="selectedAnalysis.analysisCategory" [monthly]="period.rows" [columns]="configuration.analysisTableColumns" period="monthly" [caption]="period.label" [unit]="unit()" [facility]="owner" [banking]="selectedAnalysis.hasBanking" [groups]="data.groupSummaries" [baseline]="period.baseline"/> }
             @if (configuration.facilityMonthlyResultsGraphs) { <app-analysis-report-result-charts [groups]="data.groupSummaries" [monthly]="data.monthlyAnalysisSummaryData" period="monthly" [unit]="unit()" [category]="selectedAnalysis.analysisCategory"/> }
           }
+          @case ('facility-group-contributions') {
+            <app-group-contributions [view]="groupContributions()" [unit]="unit()"
+              [showTable]="configuration.facilityGroupContributionsTable" [showChart]="configuration.facilityGroupContributionsGraphs"
+              [embedded]="true" [showChartActions]="false" [deferUntilVisible]="true"/>
+          }
           @case ('group-model') {
             @if (section.checked; as checked) { <app-analysis-report-model-details [category]="selectedAnalysis.analysisCategory" [checked]="checked" [monthly]="section.result.monthlyAnalysisSummaryData" [unit]="unit()"/> }
             @else { <p role="status">Model details are unavailable. <a [routerLink]="report.checksRoute()">Review Data Checks</a>.</p> }

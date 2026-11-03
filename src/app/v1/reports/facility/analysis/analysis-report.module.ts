@@ -17,9 +17,10 @@ import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number
 import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import { AnalysisChartsModule } from '@app/v1/shared/analysis-results/chart/analysis-charts.module';
 import { AnalysisColumnOptionsComponent } from '@app/v1/shared/analysis-results/column-options/analysis-column-options.component';
+import { GroupContributionsModule } from '@app/v1/shared/analysis-results/group-contributions/group-contributions.module';
 
 @NgModule({ declarations: [AnalysisReportSetupComponent, AnalysisReportDataChecksComponent, AnalysisReportPreviewComponent,
     AnalysisReportResultsTableComponent, AnalysisReportResultChartsComponent, AnalysisReportModelDetailsComponent],
-  imports: [AnalysisResultsTableModule, ReportsSharedModule, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, DataEmptyStateComponent,
+  imports: [GroupContributionsModule, AnalysisResultsTableModule, ReportsSharedModule, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, DataEmptyStateComponent,
     AnalysisDetailsSlideoutComponent, AnalysisResultNumberPipe, AnalysisResultMarkerLegendComponent, AnalysisChartsModule, AnalysisColumnOptionsComponent] })
 export class AnalysisReportModule { }

@@ -35,7 +35,11 @@ export class AnalysisReportEditor {
       this.hydrated = draft ?? reportDraft();
       this.form.reset(this.hydrated, { emitEvent: false });
     },
-    setEnabled: enabled => enabled ? this.form.enable({ emitEvent: false }) : this.form.disable({ emitEvent: false }),
+    setEnabled: enabled => {
+      // Section controls own their disabled state while the report itself remains editable.
+      if (enabled && this.form.disabled) this.form.enable({ emitEvent: false });
+      else if (!enabled && this.form.enabled) this.form.disable({ emitEvent: false });
+    },
     persist: async draft => {
       const report = this.context.report()!, key = this.context.key(), before = this.read();
       const changes: { name?: string; analysisItemId?: string | null; analysisReportSettings?: FacilityReportSetupChanges['analysisReportSettings'] } = {};

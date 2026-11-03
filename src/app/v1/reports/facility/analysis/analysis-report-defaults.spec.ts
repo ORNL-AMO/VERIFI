@@ -21,4 +21,32 @@ describe('facility Analysis report column defaults', () => {
       baselineAdjustmentForNormalization: true, baselineAdjustmentForOther: true, baselineAdjustment: true
     });
   });
+  it('enables contributions only for explicitly created v1 settings and new forms', () => {
+    expect(getAnalysisReportSettings()).toMatchObject({
+      facilityGroupContributions: false, facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true
+    });
+    expect(getAnalysisReportDefaults()).toMatchObject({
+      facilityGroupContributions: true, facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true
+    });
+    expect(settingsForm().getRawValue()).toMatchObject({
+      facilityGroupContributions: true, facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true
+    });
+    expect(settingsDraft().facilityGroupContributions).toBe(false);
+    expect(settingsDraft(getAnalysisReportDefaults()).facilityGroupContributions).toBe(true);
+  });
+  it('normalizes missing contribution settings without mutating or enabling existing reports', () => {
+    const saved = getAnalysisReportSettings();
+    delete saved.facilityGroupContributions;
+    delete saved.facilityGroupContributionsTable;
+    delete saved.facilityGroupContributionsGraphs;
+    const before = structuredClone(saved);
+    expect(settingsDraft(saved)).toMatchObject({
+      facilityGroupContributions: false, facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true
+    });
+    expect(saved).toEqual(before);
+    expect(settingsDraft({ ...saved, facilityGroupContributions: true,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: false })).toMatchObject({
+      facilityGroupContributions: true, facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: false
+    });
+  });
 });

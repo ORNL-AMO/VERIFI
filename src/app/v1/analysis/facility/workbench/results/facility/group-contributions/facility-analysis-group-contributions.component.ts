@@ -1,21 +1,15 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { ContributionHeatmapComponent } from '@app/v1/shared/analysis-results/contribution-heatmap/contribution-heatmap.component';
-import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { GroupContributionsModule } from '@app/v1/shared/analysis-results/group-contributions/group-contributions.module';
 import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
-import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
-import { facilityGroupContributionsView } from '../../presentation/facility-analysis-result.view';
+import { facilityGroupContributionsView } from '@app/v1/shared/analysis-results/group-contributions/group-contributions.view';
 
 @Component({
   selector: 'app-facility-analysis-group-contributions',
   standalone: true,
   imports: [
-    CommonModule,
-    ContributionHeatmapComponent,
-    IconComponent,
-    AnalysisResultNumberPipe,
+    GroupContributionsModule,
     AnalysisResultStatusComponent
   ],
   templateUrl: './facility-analysis-group-contributions.component.html',
@@ -40,13 +34,4 @@ export class FacilityAnalysisGroupContributionsComponent {
   readonly unit = computed(() => this.context.analysis()?.analysisCategory === 'water'
     ? this.context.analysis()?.waterUnit
     : this.context.analysis()?.energyUnit);
-  readonly hasContributionData = computed(() => this.view().groups.length > 0 && this.view().years.length > 0);
-  readonly heatmapView = computed(() => ({
-    labels: this.view().groups.map(item => item.groupName),
-    years: this.view().years.map(year => ({
-      year: year.year,
-      totalContributionPercent: year.totalContributionPercent,
-      contributions: year.groups.map(item => item.contributionPercent)
-    }))
-  }));
 }

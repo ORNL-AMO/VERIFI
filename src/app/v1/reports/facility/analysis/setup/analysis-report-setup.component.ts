@@ -42,7 +42,7 @@ export class AnalysisReportSetupComponent {
   readonly hasIncludedTables = computed(() => {
     const settings = this.editor.draft().settings;
     return !!settings && this.contentGroups.some(group => (!group.key || settings[group.key])
-      && group.rows.some(row => settings[row.key] && !!row.table && settings[row.table]));
+      && group.rows.some(row => row.usesResultColumns && settings[row.key] && !!row.table && settings[row.table]));
   });
   readonly columnSections = [
     { key: 'use' as const, label: 'Consumption columns', control: this.editor.form.controls.settings.controls.analysisTableColumns.controls.energy },

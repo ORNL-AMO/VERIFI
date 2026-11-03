@@ -9,7 +9,18 @@ describe('facility report setup patches', () => {
     expect(merged.facilityAnnualResultsGraphs).toBe(false); expect(merged.analysisTableColumns.bankedSavings).toBe(true);
     expect(merged.analysisTableColumns.savings).toBe(true); expect(saved.analysisTableColumns.savings).toBe(false);
   });
-  it.each([{ reportYear: 2024.5 }, { groupReports: 'yes' }, { unknown: true }, { analysisTableColumns: { unknown: true } }, { analysisTableColumns: { predictors: [{ display: true }] } }])('rejects malformed persisted patches: %j', changes => {
+  it('merges contribution switches independently and preserves hidden format choices', () => {
+    const saved = getAnalysisReportSettings();
+    saved.facilityGroupContributions = true; saved.facilityGroupContributionsTable = false;
+    const merged = mergeFacilityAnalysisSettings(saved, { facilityGroupContributions: false, facilityGroupContributionsGraphs: false });
+    expect(merged).toMatchObject({ facilityGroupContributions: false,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: false });
+    expect(saved).toMatchObject({ facilityGroupContributions: true,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: true });
+  });
+  it.each([{ reportYear: 2024.5 }, { groupReports: 'yes' }, { unknown: true },
+    { facilityGroupContributions: 'yes' }, { facilityGroupContributionsTable: null }, { facilityGroupContributionsGraphs: 1 },
+    { analysisTableColumns: { unknown: true } }, { analysisTableColumns: { predictors: [{ display: true }] } }])('rejects malformed persisted patches: %j', changes => {
     expect(() => mergeFacilityAnalysisSettings(getAnalysisReportSettings(), changes as never)).toThrow('invalid');
   });
 });

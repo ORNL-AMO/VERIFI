@@ -8,3 +8,4 @@
 .v1-contribution-heatmap__scroll { max-width: 100%; overflow-x: auto; overflow-y: hidden; contain: paint; }
 .v1-contribution-heatmap__scroll:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: -3px; }
 .v1-contribution-heatmap__chart { width: 100%; background: var(--v1-surface); }
+.v1-contribution-heatmap--embedded { padding: 0; border: 0; background: transparent; }

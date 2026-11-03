@@ -10,7 +10,11 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { analysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
-import { getNewIdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { getNewIdbFacilityReport, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { WorkspaceBackupSnapshotBuilder } from '@data/backup/backup-snapshot-builder.service';
+import { BackupPreparationService } from '@data/backup/backup-preparation.service';
+import { BackupImportCommandService } from '@data/backup/backup-import-command.service';
 import { FacilityReportActionsService } from '../facility-report-actions.service';
 
 describe('facility analysis report setup transactions', () => {
@@ -35,18 +39,52 @@ describe('facility analysis report setup transactions', () => {
     const { snapshot, store, transactions, actions, boundary } = await setup();
     const report = snapshot.facilityReports[0];
     await transactions.runTransaction(['facilityReports'], 'readwrite', tx => tx.put('facilityReports', { ...report,
-      analysisReportSettings: { ...report.analysisReportSettings, groupReports: false,
+      analysisReportSettings: { ...report.analysisReportSettings, groupReports: false, facilityGroupContributionsTable: false,
         analysisTableColumns: { ...report.analysisReportSettings.analysisTableColumns, bankedSavings: true } } }));
     const committed = vi.fn(), subscription = boundary.committedChange$.subscribe(committed);
     const saved = await actions.updateSetup('facility', 'facility-report', { name: ' Facility results ', analysisItemId: 'facility-analysis',
-      analysisReportSettings: { reportYear: 2022, analysisTableColumns: { savings: true } } });
+      analysisReportSettings: { reportYear: 2022, facilityGroupContributions: true, facilityGroupContributionsGraphs: false,
+        analysisTableColumns: { savings: true } } });
     expect(saved.name).toBe('Facility results'); expect(saved.analysisReportSettings.groupReports).toBe(false);
     expect(saved.analysisReportSettings.analysisTableColumns).toMatchObject({ savings: true, bankedSavings: true });
+    expect(saved.analysisReportSettings).toMatchObject({ facilityGroupContributions: true,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: false });
     expect(store.accountAnalyses()).toEqual([]); expect(store.account()).toEqual(snapshot.account); expect(store.facilities()).toEqual(snapshot.facilities);
     expect(committed).toHaveBeenCalledOnce(); subscription.unsubscribe();
     const copy = await actions.copy('facility', saved.guid); await harness.reopen();
     expect((await harness.getAll('facilityReports')).find(item => item.guid === copy.guid)).toMatchObject({ analysisItemId: 'facility-analysis', analysisReportSettings: saved.analysisReportSettings });
     expect(await harness.getAll('accountAnalysisItems')).toEqual([]);
+  });
+  it.each(['account', 'facility'] as const)('preserves contribution settings through a %s backup restore and reopen', async scope => {
+    const { actions, store, transactions } = await setup();
+    const settings = { facilityGroupContributions: true, facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: true };
+    const saved = await actions.updateSetup('facility', 'facility-report', { analysisItemId: 'facility-analysis', analysisReportSettings: settings });
+    const copy = await actions.copy('facility', saved.guid);
+    await harness.reopen();
+    const stored = await harness.getAll<IdbFacilityReport & Record<string, unknown>>('facilityReports');
+    expect(stored.find(item => item.guid === saved.guid)?.analysisReportSettings).toMatchObject(settings);
+    expect(stored.find(item => item.guid === copy.guid)?.analysisReportSettings).toMatchObject(settings);
+    const snapshot = store.snapshot()!;
+    const group = { ...getNewIdbUtilityMeterGroup('Energy', 'Energy group', 'facility', 'account'), guid: snapshot.meters[0].groupId };
+    const builder = new WorkspaceBackupSnapshotBuilder();
+    const backupSnapshot = { ...snapshot, meterGroups: [group] };
+    const backup = scope === 'account' ? builder.buildAccountBackup(backupSnapshot) : builder.buildFacilityBackup(backupSnapshot, 'facility');
+    const prepared = new BackupPreparationService().prepare(JSON.parse(JSON.stringify(backup)));
+    expect(prepared.facilityReports.map(report => report.analysisReportSettings)).toEqual([saved.analysisReportSettings, copy.analysisReportSettings]);
+    const importer = new BackupImportCommandService(transactions, { setCurrentLoadingIndex: vi.fn(), setLoadingMessage: vi.fn() } as never);
+    const owner = scope === 'account' ? await importer.importAccountBackupFile(prepared, 0)
+      : (await importer.importFacilityBackupFile(prepared, 'account', 0)).facility;
+    await harness.reopen();
+    const reports = (await harness.getAll<IdbFacilityReport & Record<string, unknown>>('facilityReports')).filter(report =>
+      scope === 'account' ? report.accountId === owner.guid : report.facilityId === owner.guid);
+    expect(reports).toHaveLength(2);
+    for (const report of reports) {
+      expect(report.guid).not.toBe(saved.guid); expect(report.guid).not.toBe(copy.guid);
+      expect(report.analysisReportSettings).toEqual(saved.analysisReportSettings);
+      const analysis = (await harness.getAll('analysisItems')).find(item => item.guid === report.analysisItemId);
+      expect(analysis?.['facilityId']).toBe(report.facilityId);
+      expect(analysis?.['accountId']).toBe(report.accountId);
+    }
   });
   it('rolls back failed writes, rejects foreign selections, and preserves missing references on partial edits', async () => {
     const { actions, store, transactions, snapshot } = await setup();

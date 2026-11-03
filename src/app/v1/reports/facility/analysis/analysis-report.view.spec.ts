@@ -58,6 +58,27 @@ describe('facility report presentation', () => {
     settings.facilityAnnualResults = false; settings.facilityMonthlyResults = false; settings.groupReports = false;
     expect(analysisReportSections(settings, analysis, results, [], {})).toEqual([]);
   });
+  it('places enabled group contributions after facility monthly results and before individual group sections', () => {
+    const settings = getAnalysisReportSettings(), { results, analysis } = facilityReportResults();
+    Object.assign(settings, { facilityGroupContributions: true, facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true });
+    const sections = analysisReportSections(settings, analysis, results, [], {});
+    expect(sections.map(section => section.kind)).toEqual([
+      'facility-annual', 'facility-monthly', 'facility-group-contributions', 'group-annual', 'group-monthly'
+    ]);
+    expect(sections.find(section => section.kind === 'facility-group-contributions')).toMatchObject({
+      id: 'facility-group-contributions', heading: 'Group contributions'
+    });
+  });
+  it.each([[true, false], [false, true], [true, true], [false, false]] as const)(
+    'includes group contributions independently of individual group reports (table: %s, chart: %s)', (table, chart) => {
+      const settings = getAnalysisReportSettings(), { results, analysis } = facilityReportResults();
+      Object.assign(settings, { facilityAnnualResults: false, facilityMonthlyResults: false, groupReports: false,
+        facilityGroupContributions: true, facilityGroupContributionsTable: table, facilityGroupContributionsGraphs: chart });
+      const sections = analysisReportSections(settings, analysis, results, [], {});
+      expect(sections.map(section => section.kind)).toEqual(table || chart ? ['facility-group-contributions'] : []);
+      settings.facilityGroupContributions = false;
+      expect(analysisReportSections(settings, analysis, results, [], {})).toEqual([]);
+    });
   it('projects available columns, missing values, zeroes and banking transition markers', () => {
     const { results, facility } = facilityReportResults(); const columns = getAnalysisReportSettings().analysisTableColumns;
     columns.savings = true; columns.bankedSavings = true;

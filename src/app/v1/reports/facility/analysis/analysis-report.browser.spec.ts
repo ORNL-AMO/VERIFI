@@ -35,6 +35,8 @@ describe('facility analysis report journey in Chromium', () => {
     const original = regression ? regressionAnalysisReportFixture() : analysisReportFixture(category), analysis = { ...original.facilityAnalyses[0], energyIsSource: source };
     const report = { ...getNewIdbFacilityReport('facility', 'account', 'analysis', []), id: 70, guid: 'facility-report', analysisItemId: analysis.guid, name: 'Facility analysis report' };
     report.analysisReportSettings.reportYear = 2023;
+    Object.assign(report.analysisReportSettings, { facilityGroupContributions: true,
+      facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true });
     const snapshot = { ...original, accountAnalyses: [], facilityAnalyses: [analysis], facilityReports: [report] };
     database = await IndexedDbTestHarness.create('facility-analysis-report-journey');
     await database.seed({ accounts: [{ ...snapshot.account }], facilities: snapshot.facilities.map(item => ({ ...item })), analysisItems: [analysis],
@@ -44,7 +46,7 @@ describe('facility analysis report journey in Chromium', () => {
     const transactions = new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: database.databaseName } });
     const checksUrl = new URL('../../../../platform/web-workers/analysis-report.worker', import.meta.url);
     const resultsUrl = new URL('../../../../platform/web-workers/facility-analysis-results.worker', import.meta.url);
-    let calculations = 0;
+    let calculations = 0, checksCalculations = 0;
     const meters = getCalanderizedMeterData([...snapshot.meters], [...snapshot.meterData], snapshot.facilities[0], false,
       { energyIsSource: source, neededUnits: category === 'water' ? 'kgal' : 'MMBtu' }, [], [], [...snapshot.facilities], snapshot.account.assessmentReportVersion, []);
     const view = await setupReportWorkbench([report], [
@@ -52,7 +54,7 @@ describe('facility analysis report journey in Chromium', () => {
       { provide: AnalysisReviewCommandHandler, useValue: new AnalysisReviewCommandHandler(transactions) },
       { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of({ state: 'ready', meters }), project: () => ({ state: 'ready', meters }) } },
       { provide: AnalysisReportCalculationService, useValue: { fingerprint: analysisReviewFingerprint,
-        execute: (request: AnalysisReportWorkerRequest) => runWorker<AnalysisReportWorkerResponse>(new Worker(checksUrl, { type: 'module' }), request),
+        execute: (request: AnalysisReportWorkerRequest) => { checksCalculations++; return runWorker<AnalysisReportWorkerResponse>(new Worker(checksUrl, { type: 'module' }), request); },
         executeFacility: (request: FacilityAnalysisResultsWorkerRequest) => { calculations++; return runWorker<FacilityAnalysisResultsWorkerResponse>(new Worker(resultsUrl, { type: 'module' }), request); } } }
     ], snapshot);
     const workbench = await view.open('facility-report'); view.harness.fixture.autoDetectChanges();
@@ -107,9 +109,14 @@ describe('facility analysis report journey in Chromium', () => {
     const preview = root.querySelector<HTMLElement>('app-analysis-report-preview')!;
     expect(preview.querySelector('[role=tablist], [role=tabpanel], #report-group')).toBeNull();
     const papers = Array.from(preview.querySelectorAll<HTMLElement>('article.report-document'));
-    expect(papers).toHaveLength(regression ? 5 : 4);
+    expect(papers).toHaveLength(regression ? 6 : 5);
     const annual = preview.querySelector<HTMLElement>('#analysis-report-facility-annual')!;
     const monthly = preview.querySelector<HTMLElement>('#analysis-report-facility-monthly')!;
+    const contributions = preview.querySelector<HTMLElement>('#analysis-report-facility-group-contributions')!;
+    expect(papers[2]).toBe(contributions);
+    expect(contributions.querySelector('.document-section-title')?.textContent).toBe('Group contributions');
+    expect(contributions.querySelector('table.v1-analysis-contributions-table')).not.toBeNull();
+    expect(contributions.querySelector('app-contribution-heatmap')).not.toBeNull();
     const groupMonthly = papers[papers.length - 1];
     annual.scrollIntoView({ block: 'start' });
     await new Promise(requestAnimationFrame);
@@ -204,6 +211,19 @@ describe('facility analysis report journey in Chromium', () => {
     expect((await database.getAll('analysisItems'))[0]['isAnalysisVisited']).toBe(false);
     expect(await database.getAll('accountAnalysisItems')).toEqual([]);
     await view.open('facility-report', 'report'); await waitFor(state => !!state.value?.results);
+    const reviewBeforeContentChanges = structuredClone((await database.getAll('analysisItems'))[0]['dataCheckReviews']);
+    const checksBeforeContentChanges = checksCalculations;
+    await view.open('facility-report');
+    workbench.editor.name.setValue('Reviewed contribution report');
+    workbench.editor.form.controls.settings.patchValue({ facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: true });
+    await view.open('facility-report', 'report'); await waitFor(state => !!state.value?.results);
+    expect(root.querySelector('.document-title')?.textContent).toContain('Reviewed contribution report');
+    const chartOnly = root.querySelector<HTMLElement>('#analysis-report-facility-group-contributions')!;
+    expect(chartOnly.querySelector('table.v1-analysis-contributions-table')).toBeNull();
+    expect(chartOnly.querySelector('.v1-contribution-heatmap__accessible-data')).not.toBeNull();
+    expect(coordinator.workflow().completed).toBe(true);
+    expect(calculations).toBe(1); expect(checksCalculations).toBe(checksBeforeContentChanges);
+    expect((await database.getAll('analysisItems'))[0]['dataCheckReviews']).toEqual(reviewBeforeContentChanges);
     const reading = { ...view.store.meterData()[0], totalEnergyUse: 1, totalVolume: 1 };
     view.store.publishCommittedPatch({ collections: [{ collection: 'meterData', upsert: [reading] }] });
     expect(coordinator.state().value?.results).toBeUndefined();

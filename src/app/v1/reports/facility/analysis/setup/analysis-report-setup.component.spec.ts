@@ -51,7 +51,10 @@ describe('facility report setup controls', () => {
       selectPreset(root, label); view.harness.detectChanges();
       const settings = workbench.editor.form.controls.settings.getRawValue();
       expect(settings).toMatchObject({ reportYear: before.reportYear, facilityAnnualResults: annual, facilityMonthlyResults: monthly,
-        groupReports: groupAnnual, groupAnnualResults: groupAnnual, groupMonthlyResults: groupMonthly, groupModelDetails: modelDetails });
+        groupReports: groupAnnual, groupAnnualResults: groupAnnual, groupMonthlyResults: groupMonthly, groupModelDetails: modelDetails,
+        facilityGroupContributions: ['Full Analysis', 'Facility+Groups Annual Summary', 'Facility+Groups Detail'].includes(label) });
+      expect(settings.facilityGroupContributionsTable).toBe(true);
+      expect(settings.facilityGroupContributionsGraphs).toBe(true);
       expect(settings.analysisTableColumns).toEqual(before.analysisTableColumns);
       expect(workbench.editor.form.controls.analysis.value).toBe('facility-analysis');
       expect(root.querySelector('.content-preset[aria-pressed=true]')?.textContent).toContain(label);
@@ -143,7 +146,8 @@ describe('facility report setup controls', () => {
     selectPreset(root, 'Facility Detail'); view.harness.detectChanges();
     const settings = workbench.editor.form.controls.settings;
     const columns = structuredClone(settings.getRawValue().analysisTableColumns);
-    settings.patchValue({ facilityAnnualResultsTable: false, facilityMonthlyResultsTable: false }); view.harness.detectChanges();
+    settings.patchValue({ facilityAnnualResultsTable: false, facilityMonthlyResultsTable: false,
+      facilityGroupContributions: true, facilityGroupContributionsTable: true }); view.harness.detectChanges();
     expect(root.querySelector('.report-table-columns')).toBeNull();
     // Group table switches are retained, but their parent sections are excluded.
     expect(settings.getRawValue().groupAnnualResultsTable).toBe(true);
@@ -157,6 +161,28 @@ describe('facility report setup controls', () => {
     settings.patchValue({ facilityAnnualResultsTable: true }); view.harness.detectChanges();
     expect(root.querySelector('.report-table-columns')).not.toBeNull();
     expect(settings.getRawValue().analysisTableColumns).toEqual(columns);
+  });
+
+  it('preserves contribution formats when disabled or excluded by another preset', async () => {
+    const { root, view, workbench } = await openSetup();
+    const settings = workbench.editor.form.controls.settings;
+    const row = root.querySelector<HTMLElement>('[data-content-section=facilityGroupContributions]')!;
+    expect(row).not.toBeNull();
+    expect(row.previousElementSibling?.getAttribute('data-content-section')).toBe('facilityMonthlyResults');
+    expect([...row.querySelectorAll<HTMLInputElement>('td input')].every(input => input.disabled)).toBe(true);
+    settings.patchValue({ facilityGroupContributions: true, facilityGroupContributionsTable: false,
+      facilityGroupContributionsGraphs: true }); view.harness.detectChanges();
+    selectPreset(root, 'Facility Detail'); view.harness.detectChanges();
+    expect(settings.getRawValue()).toMatchObject({ facilityGroupContributions: false,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: true });
+    expect(await workbench.editor.flush()).toBe(true); view.harness.detectChanges();
+    expect([...row.querySelectorAll<HTMLInputElement>('td input')].every(input => input.disabled)).toBe(true);
+    row.querySelector<HTMLInputElement>('th input')!.click(); view.harness.detectChanges();
+    expect(settings.getRawValue()).toMatchObject({ facilityGroupContributions: true,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: true });
+    selectPreset(root, 'Full Analysis'); view.harness.detectChanges();
+    expect(settings.getRawValue()).toMatchObject({ facilityGroupContributions: true,
+      facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true });
   });
 });
 

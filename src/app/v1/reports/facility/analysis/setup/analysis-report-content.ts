@@ -5,21 +5,23 @@ interface ContentRow {
   readonly label: string;
   readonly table?: SectionKey;
   readonly charts?: SectionKey;
+  readonly usesResultColumns: boolean;
   readonly periods: readonly { key: SectionKey; label: string }[];
 }
 export const REPORT_CONTENT_GROUPS: readonly {
   id: string; label: string; key?: SectionKey; rows: readonly ContentRow[];
 }[] = [
   { id: 'facility', label: 'Facility results', rows: [
-    { key: 'facilityAnnualResults', label: 'Annual results', table: 'facilityAnnualResultsTable', charts: 'facilityAnnualResultsGraphs', periods: [] },
-    { key: 'facilityMonthlyResults', label: 'Monthly results', table: 'facilityMonthlyResultsTable', charts: 'facilityMonthlyResultsGraphs', periods: [
+    { key: 'facilityAnnualResults', label: 'Annual results', table: 'facilityAnnualResultsTable', charts: 'facilityAnnualResultsGraphs', usesResultColumns: true, periods: [] },
+    { key: 'facilityMonthlyResults', label: 'Monthly results', table: 'facilityMonthlyResultsTable', charts: 'facilityMonthlyResultsGraphs', usesResultColumns: true, periods: [
       { key: 'facilityMonthlyResultsTableBaselineYear', label: 'Baseline' }, { key: 'facilityMonthlyResultsTableReportYear', label: 'Report' }
-    ] }
+    ] },
+    { key: 'facilityGroupContributions', label: 'Group contributions', table: 'facilityGroupContributionsTable', charts: 'facilityGroupContributionsGraphs', usesResultColumns: false, periods: [] }
   ] },
   { id: 'groups', label: 'Group reports', key: 'groupReports', rows: [
-    { key: 'groupModelDetails', label: 'Regression model details', periods: [] },
-    { key: 'groupAnnualResults', label: 'Annual results', table: 'groupAnnualResultsTable', charts: 'groupAnnualResultsGraphs', periods: [] },
-    { key: 'groupMonthlyResults', label: 'Monthly results', table: 'groupMonthlyResultsTable', charts: 'groupMonthlyResultsGraphs', periods: [
+    { key: 'groupModelDetails', label: 'Regression model details', usesResultColumns: false, periods: [] },
+    { key: 'groupAnnualResults', label: 'Annual results', table: 'groupAnnualResultsTable', charts: 'groupAnnualResultsGraphs', usesResultColumns: true, periods: [] },
+    { key: 'groupMonthlyResults', label: 'Monthly results', table: 'groupMonthlyResultsTable', charts: 'groupMonthlyResultsGraphs', usesResultColumns: true, periods: [
       { key: 'groupMonthlyResultsTableBaselineYear', label: 'Baseline' }, { key: 'groupMonthlyResultsTableReportYear', label: 'Report' },
       { key: 'groupMonthlyResultsTableModelYear', label: 'Model' }
     ] }
@@ -28,9 +30,9 @@ export const REPORT_CONTENT_GROUPS: readonly {
 
 export const REPORT_CONTENT_PRESETS = [
   { id: 'annual', label: 'Facility Annual Summary', sections: ['facilityAnnualResults'] },
-  { id: 'annual-groups', label: 'Facility+Groups Annual Summary', sections: ['facilityAnnualResults', 'groupAnnualResults'] },
+  { id: 'annual-groups', label: 'Facility+Groups Annual Summary', sections: ['facilityAnnualResults', 'facilityGroupContributions', 'groupAnnualResults'] },
   { id: 'facility', label: 'Facility Detail', sections: ['facilityAnnualResults', 'facilityMonthlyResults'] },
-  { id: 'facility-groups', label: 'Facility+Groups Detail', sections: ['facilityAnnualResults', 'facilityMonthlyResults', 'groupAnnualResults', 'groupMonthlyResults'] },
+  { id: 'facility-groups', label: 'Facility+Groups Detail', sections: ['facilityAnnualResults', 'facilityMonthlyResults', 'facilityGroupContributions', 'groupAnnualResults', 'groupMonthlyResults'] },
   { id: 'full', label: 'Full Analysis', sections: REPORT_CONTENT_GROUPS.flatMap(group => group.rows.map(row => row.key)) }
 ] as const satisfies readonly { id: string; label: string; sections: readonly SectionKey[] }[];
 

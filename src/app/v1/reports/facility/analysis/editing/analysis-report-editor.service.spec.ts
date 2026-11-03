@@ -56,6 +56,28 @@ describe('AnalysisReportEditor', () => {
     expect(editor.setupValid()).toBe(false);
   });
 
+  it('hydrates absent contribution flags without writes and saves only explicitly edited switches', async () => {
+    const report = structuredClone(store.facilityReports()[0]);
+    delete report.analysisReportSettings.facilityGroupContributions;
+    delete report.analysisReportSettings.facilityGroupContributionsTable;
+    delete report.analysisReportSettings.facilityGroupContributionsGraphs;
+    store.publish({ ...store.snapshot()!, facilityReports: [report] }, { facility: reportFacility });
+    TestBed.tick();
+    expect(editor.form.controls.settings.getRawValue()).toMatchObject({ facilityGroupContributions: false,
+      facilityGroupContributionsTable: true, facilityGroupContributionsGraphs: true });
+    expect(await editor.flush()).toBe(true);
+    expect(updateSetup).not.toHaveBeenCalled();
+    expect(store.facilityReports()[0].analysisReportSettings.facilityGroupContributions).toBeUndefined();
+    editor.form.controls.settings.patchValue({ facilityGroupContributions: true,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: false });
+    expect(await editor.flush()).toBe(true);
+    expect(updateSetup).toHaveBeenCalledExactlyOnceWith('facility-a', 'report-a', { analysisReportSettings: {
+      facilityGroupContributions: true, facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: false
+    } });
+    expect(store.facilityReports()[0].analysisReportSettings).toMatchObject({ facilityGroupContributions: true,
+      facilityGroupContributionsTable: false, facilityGroupContributionsGraphs: false });
+  });
+
   it('retains newer settings during a save and merges concurrent untouched column edits', async () => {
     let complete!: (value: ReturnType<typeof reportFixture>) => void;
     updateSetup.mockImplementationOnce(() => new Promise(resolve => { complete = resolve; }));
