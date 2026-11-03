@@ -176,7 +176,9 @@ export class FacilityEnergyUseEquipmentFormService {
           let operatingConditions: FormGroup = annualOperatingConditionsDataForms.find(form => { return form.controls.year.value == year });
           if (operatingConditions && operatingConditions.valid) {
             //Example calculation (Electric Motor): Energy Use (kWh) = Size (kW) x Number of Motors x Load Factor x Duty Factor x Hours of Operation / Efficiency
-            let calculatedEnergyUse: number = calculateTotalEquipmentEnergyUse(operatingConditions.value, utilityDataFormObj.utilityDataForm.value, energyUseForm.controls.energyUseUnit.value);
+            let calculatedEnergyUse: number = calculateTotalEquipmentEnergyUse(operatingConditions.value,
+              { ...utilityDataFormObj.utilityDataForm.value, energySource: utilityDataFormObj.energySource },
+              energyUseForm.controls.energyUseUnit.value);
             energyUseForm.patchValue({
               energyUse: calculatedEnergyUse
             }, { emitEvent: false });

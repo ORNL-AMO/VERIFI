@@ -228,6 +228,23 @@ export class EnergyUsesExcelImportService {
         }
       }
       const incomingSources = [10, 16].map(column => EnergySources.find(value => normalizeEnergyUseName(value) === normalizeEnergyUseName(isText(cells[column]))));
+      for (const [slot, column] of [10, 16].entries()) {
+        const hasValues = cells.slice(column, column + 6).some(value => !isBlank(value));
+        if (!hasValues) {
+          continue;
+        }
+        if (isBlank(cells[column])) {
+          error(`Utility Type ${slot + 1} is empty.`);
+        } else if (!incomingSources[slot]) {
+          error(`Utility Type ${slot + 1} is not supported.`);
+        }
+      }
+      if (incomingSources[0] && incomingSources[0] === incomingSources[1]) {
+        error('The two utility types must have different sources.');
+      }
+      if (row.errors.length) {
+        return row;
+      }
       const includesElectricity = incomingSources.includes('Electricity');
       const annualConditions = (proposed.operatingConditionsData ?? []).filter(value => value.year === year);
       if (annualConditions.length > 1) {
@@ -255,13 +272,11 @@ export class EnergyUsesExcelImportService {
       if (!annualConditions.length) {
         proposed.operatingConditionsData.push(operating);
       }
-      const importedSources = new Set<string>();
       for (const [slot, column] of [10, 16].entries()) {
         const sourceType = incomingSources[slot];
-        if (!sourceType || importedSources.has(sourceType)) {
+        if (!sourceType) {
           continue;
         }
-        importedSources.add(sourceType);
         const current = proposed.utilityData.find(utility => utility.energySource === sourceType);
         const utility: EquipmentUtilityData = current ?? {
           energySource: sourceType as MeterSource, size: ENERGY_USES_IMPORT_DEFAULTS.capacity,
@@ -295,6 +310,9 @@ export class EnergyUsesExcelImportService {
         const energyUnit = isBlank(cells[column + 5]) ? isBlank(annual?.energyUseUnit) ? ENERGY_USES_IMPORT_DEFAULTS.energyUnit : annual.energyUseUnit : isText(cells[column + 5]);
         if (!ENERGY_UNITS.includes(energyUnit)) {
           error(`${sourceType}: energy unit is not supported.`);
+        } else if (annual?.energyUse != null && energyUnit !== annual.energyUseUnit && suppliedEnergy === undefined) {
+          error(`${sourceType}: changing the energy unit requires an energy total.`);
+          return row;
         }
         if (calculateMissingEnergy && !row.errors.length) {
           try {
@@ -314,6 +332,10 @@ export class EnergyUsesExcelImportService {
           }
         }
         if (!current) { proposed.utilityData.push(utility); }
+      }
+      if (proposed.utilityData.length > 2) {
+        error('Equipment cannot have more than two utility types.');
+        return row;
       }
       row.updatedEquipment = proposed;
       row.action = row.errors.length ? 'Error' : !existing ? 'Create' : JSON.stringify(existing) === JSON.stringify(proposed) ? 'Unchanged' : 'Update';
@@ -376,6 +398,12 @@ export class EnergyUsesExcelImportService {
     const sheet = book.Sheets[ENERGY_USES_SHEET];
     if (!sheet || !sheet['!ref']) {
       throw new Error('The workbook must contain an Energy Uses sheet.');
+    }
+    if (ENERGY_USES_HEADERS.some((header, column) => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: 0, c: column })];
+      return !cell || cell.f || cell.v !== header;
+    })) {
+      throw new Error('The Energy Uses sheet must have the 22 template headers in their original order.');
     }
     const range = XLSX.utils.decode_range(sheet['!ref']);
     const workbookData: EnergyUsesWorkbook = { filename, year: this.findYear(filename), rows: [] };

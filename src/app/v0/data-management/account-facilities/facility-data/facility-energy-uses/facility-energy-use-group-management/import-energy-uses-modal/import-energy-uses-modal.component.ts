@@ -11,6 +11,7 @@ export class ImportEnergyUsesModalComponent {
   private readonly toastNotificationsService = inject(ToastNotificationsService);
   @Output() closeModal = new EventEmitter<void>();
   readonly workbookData = signal<EnergyUsesWorkbook | null>(null);
+  readonly workbookError = signal<string | null>(null);
   readonly selectedImportYear = signal<number | null>(null);
   readonly importPreview = signal<EnergyUsesImportPreview | null>(null);
   readonly expandedDetailRows = signal<ReadonlySet<number>>(new Set());
@@ -25,6 +26,7 @@ export class ImportEnergyUsesModalComponent {
       return;
     }
     fileInput.value = '';
+    this.workbookError.set(null);
     this.workbookData.set(null);
     this.importPreview.set(null);
     this.selectedImportYear.set(null);
@@ -33,7 +35,7 @@ export class ImportEnergyUsesModalComponent {
       this.workbookData.set(workbookData);
       this.selectedImportYear.set(workbookData.year);
     } catch (error) {
-      this.showImportError(error);
+      this.workbookError.set(error instanceof Error ? error.message : 'The workbook could not be read. Please try again.');
     }
   }
 
