@@ -57,8 +57,8 @@ export interface EnergyUsesImportPreview {
   canImport: boolean;
 }
 
-function normalizeEnergyUseName(value: string): string { 
-  return value.trim().toLowerCase(); 
+function normalizeEnergyUseName(value: string): string {
+  return value.trim().toLowerCase();
 }
 const isBlank = (value: unknown): boolean => value == null || (typeof value === 'string' && !value.trim());
 const isText = (value: unknown): string => typeof value === 'string' ? value.trim() : '';
@@ -155,20 +155,35 @@ export class EnergyUsesExcelImportService {
       }
       const system = INDUSTRIAL_SYSTEMS.find(value => normalizeEnergyUseName(value) === normalizeEnergyUseName(row.industrialSystem));
       if (!system) { error('Industrial System is not supported.'); }
-      const facility = facilities.find(item => key(item.name) === key(row.facility));
+      const matchingFacilities = facilities.filter(item => key(item.name) === key(row.facility));
+      if (matchingFacilities.length > 1) {
+        error(`Multiple facilities named "${row.facility}" exist in this account.`);
+        return row;
+      }
+      const facility = matchingFacilities[0];
       if (!facility) {
         error('Facility does not exist in this account.');
         return row;
       }
       const groupKey = key(facility.guid, row.group);
-      let group: IdbFacilityEnergyUseGroup = groups.find(item => key(item.facilityId, item.name) === groupKey) ?? newGroups.get(groupKey);
+      const matchingGroups = groups.filter(item => key(item.facilityId, item.name) === groupKey);
+      if (matchingGroups.length > 1) {
+        error(`Multiple energy-use groups named "${row.group}" exist in this facility.`);
+        return row;
+      }
+      let group: IdbFacilityEnergyUseGroup = matchingGroups[0] ?? newGroups.get(groupKey);
       if (!group && row.group) {
         group = getNewIdbFacilityEnergyUseGroup(accountGuid, facility.guid);
         group.name = row.group;
         newGroups.set(groupKey, group);
       }
       if (!group || !system) { return row; }
-      const existing = equipment.find(item => key(item.facilityId, item.energyUseGroupId, item.name, item.equipmentType) === key(facility.guid, group.guid, row.equipment, system));
+      const matchingEquipment = equipment.filter(item => key(item.facilityId, item.energyUseGroupId, item.name, item.equipmentType) === key(facility.guid, group.guid, row.equipment, system));
+      if (matchingEquipment.length > 1) {
+        error(`Multiple equipment records match "${row.equipment}" and industrial system "${system}" in this group.`);
+        return row;
+      }
+      const existing = matchingEquipment[0];
       const proposed: IdbFacilityEnergyUseEquipment = existing ? structuredClone(existing) : getNewIdbFacilityEnergyUseEquipment(group, year);
       for (const utility of existing?.utilityData ?? []) {
         if ((utility.energyUse ?? []).filter(entry => entry.year === year).length > 1) {
@@ -189,7 +204,12 @@ export class EnergyUsesExcelImportService {
         try {
           const ids: string[] = [];
           for (const name of parseMeterGroupNames(String(cells[4]))) {
-            const found = meters.find(item => key(item.facilityId, item.name) === key(facility.guid, name));
+            const matchingMeterGroups = meters.filter(item => key(item.facilityId, item.name) === key(facility.guid, name));
+            if (matchingMeterGroups.length > 1) {
+              error(`Multiple utility meter groups named "${name}" exist in this facility.`);
+              return row;
+            }
+            const found = matchingMeterGroups[0];
             if (!found) {
               error(`Meter group "${name}" does not exist in this facility.`);
             }
@@ -210,8 +230,8 @@ export class EnergyUsesExcelImportService {
       const incomingSources = [10, 16].map(column => EnergySources.find(value => normalizeEnergyUseName(value) === normalizeEnergyUseName(isText(cells[column]))));
       const includesElectricity = incomingSources.includes('Electricity');
       const annualConditions = (proposed.operatingConditionsData ?? []).filter(value => value.year === year);
-      if (annualConditions.length > 1) { 
-        error(`Duplicate operating-condition records exist for ${year}.`); 
+      if (annualConditions.length > 1) {
+        error(`Duplicate operating-condition records exist for ${year}.`);
       }
       const operating: EnergyEquipmentOperatingConditionsData = annualConditions[0] ?? {
         year, hoursOfOperation: ENERGY_USES_IMPORT_DEFAULTS.hoursOfOperation, loadFactor: ENERGY_USES_IMPORT_DEFAULTS.loadFactor,
@@ -228,18 +248,18 @@ export class EnergyUsesExcelImportService {
       }
       if (includesElectricity) {
         const efficiency = numeric(9) ?? operating.efficiency ?? ENERGY_USES_IMPORT_DEFAULTS.efficiency;
-        if (efficiency !== undefined) { 
-          change('Efficiency (%)', annualConditions[0]?.efficiency, efficiency); operating.efficiency = efficiency; 
+        if (efficiency !== undefined) {
+          change('Efficiency (%)', annualConditions[0]?.efficiency, efficiency); operating.efficiency = efficiency;
         }
       }
-      if (!annualConditions.length) { 
-        proposed.operatingConditionsData.push(operating); 
+      if (!annualConditions.length) {
+        proposed.operatingConditionsData.push(operating);
       }
       const importedSources = new Set<string>();
       for (const [slot, column] of [10, 16].entries()) {
         const sourceType = incomingSources[slot];
-        if (!sourceType || importedSources.has(sourceType)) { 
-          continue; 
+        if (!sourceType || importedSources.has(sourceType)) {
+          continue;
         }
         importedSources.add(sourceType);
         const current = proposed.utilityData.find(utility => utility.energySource === sourceType);
@@ -251,29 +271,30 @@ export class EnergyUsesExcelImportService {
         const count = numeric(column + 3) ?? utility.numberOfEquipment ?? ENERGY_USES_IMPORT_DEFAULTS.count;
         const suppliedEnergy = numeric(column + 4);
         const unit = isBlank(cells[column + 2]) ? isBlank(utility.units) ? ENERGY_USES_IMPORT_DEFAULTS.capacityUnit : utility.units : capacityUnitFromExcel(isText(cells[column + 2]));
-        if (!CAPACITY_UNITS.includes(unit)) { 
-          error(`${sourceType}: a supported rated power/capacity unit is required.`); 
+        if (!CAPACITY_UNITS.includes(unit)) {
+          error(`${sourceType}: a supported rated power/capacity unit is required.`);
         }
-        if (capacity !== undefined) { 
-          change(`${sourceType} capacity`, utility.size, capacity); utility.size = capacity; 
+        if (capacity !== undefined) {
+          change(`${sourceType} capacity`, utility.size, capacity); utility.size = capacity;
         }
-        if (count !== undefined) { 
-          change(`${sourceType} count`, utility.numberOfEquipment, count); utility.numberOfEquipment = count; 
+        if (count !== undefined) {
+          change(`${sourceType} count`, utility.numberOfEquipment, count); utility.numberOfEquipment = count;
         }
         change(`${sourceType} capacity unit`, capacityUnitToExcel(utility.units), capacityUnitToExcel(unit));
         utility.units = unit;
-        if (!Number.isFinite(utility.size) || utility.size < 0) { 
-          error(`${sourceType}: capacity is required and must be zero or greater.`); }
+        if (!Number.isFinite(utility.size) || utility.size < 0) {
+          error(`${sourceType}: capacity is required and must be zero or greater.`);
+        }
         const annualEntries = (utility.energyUse ?? []).filter(entry => entry.year === year);
-        if (annualEntries.length > 1) { 
-          error(`Duplicate ${sourceType} energy records exist for ${year}.`); 
+        if (annualEntries.length > 1) {
+          error(`Duplicate ${sourceType} energy records exist for ${year}.`);
         }
         const annual = annualEntries[0];
         let energy = suppliedEnergy ?? annual?.energyUse;
         const calculateMissingEnergy = isBlank(cells[column + 4]) && annual?.energyUse == null;
         const energyUnit = isBlank(cells[column + 5]) ? isBlank(annual?.energyUseUnit) ? ENERGY_USES_IMPORT_DEFAULTS.energyUnit : annual.energyUseUnit : isText(cells[column + 5]);
-        if (!ENERGY_UNITS.includes(energyUnit)) { 
-          error(`${sourceType}: energy unit is not supported.`); 
+        if (!ENERGY_UNITS.includes(energyUnit)) {
+          error(`${sourceType}: energy unit is not supported.`);
         }
         if (calculateMissingEnergy && !row.errors.length) {
           try {
@@ -326,15 +347,15 @@ export class EnergyUsesExcelImportService {
             await transaction.add('facilityEnergyUseGroups', structuredClone(group));
           }
           for (const row of preview.rows) {
-            if (row.skipped || row.action !== 'Create' && row.action !== 'Update') { 
-              continue; 
+            if (row.skipped || row.action !== 'Create' && row.action !== 'Update') {
+              continue;
             }
             const record = structuredClone(row.updatedEquipment);
             record.modifiedDate = new Date();
-            if (row.action === 'Create') { 
-              await transaction.add('facilityEnergyUseEquipment', record); 
-            } else { 
-              await transaction.put('facilityEnergyUseEquipment', record); 
+            if (row.action === 'Create') {
+              await transaction.add('facilityEnergyUseEquipment', record);
+            } else {
+              await transaction.put('facilityEnergyUseEquipment', record);
             }
           }
         });
