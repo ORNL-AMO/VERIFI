@@ -1,72 +1,7 @@
 import { AfterViewInit, Directive, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, inject } from '@angular/core';
-import * as echarts from 'echarts/core';
-import {
-  BarChart,
-  BarSeriesOption,
-  CustomChart,
-  CustomSeriesOption,
-  HeatmapChart,
-  HeatmapSeriesOption,
-  LineChart,
-  LineSeriesOption,
-  ScatterChart,
-  ScatterSeriesOption
-} from 'echarts/charts';
-import {
-  DataZoomComponent,
-  DataZoomComponentOption,
-  DatasetComponent,
-  DatasetComponentOption,
-  GridComponent,
-  GridComponentOption,
-  LegendComponent,
-  LegendComponentOption,
-  MarkAreaComponent,
-  MarkAreaComponentOption,
-  ToolboxComponent,
-  ToolboxComponentOption,
-  TooltipComponent,
-  TooltipComponentOption,
-  TransformComponent,
-  VisualMapComponent,
-  VisualMapComponentOption
-} from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { echarts, V1EChartsOption } from './echarts';
 import type { ECharts } from 'echarts/core';
-
-echarts.use([
-  BarChart,
-  CustomChart,
-  HeatmapChart,
-  LineChart,
-  ScatterChart,
-  DataZoomComponent,
-  DatasetComponent,
-  GridComponent,
-  LegendComponent,
-  MarkAreaComponent,
-  ToolboxComponent,
-  TooltipComponent,
-  TransformComponent,
-  VisualMapComponent,
-  CanvasRenderer
-]);
-
-export type V1EChartsOption = echarts.ComposeOption<
-  | BarSeriesOption
-  | CustomSeriesOption
-  | HeatmapSeriesOption
-  | LineSeriesOption
-  | ScatterSeriesOption
-  | DataZoomComponentOption
-  | DatasetComponentOption
-  | GridComponentOption
-  | LegendComponentOption
-  | MarkAreaComponentOption
-  | ToolboxComponentOption
-  | TooltipComponentOption
-  | VisualMapComponentOption
->;
+export type { V1EChartsOption } from './echarts';
 
 export interface V1EChartsDataZoomRange {
   readonly start: number;

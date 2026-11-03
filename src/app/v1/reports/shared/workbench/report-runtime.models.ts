@@ -7,6 +7,7 @@ import { AnalysisChecksWorkflow } from '../analysis-checks/analysis-checks.model
 import { ReportWorkbenchEditor } from '../editing/report-autosave-controller';
 import { ReportConfigurationStatus, ReportIdentity } from '../report.models';
 import { ReportStageId, ReportWorkbenchStage } from './report-workbench.models';
+import { ReportOutputCapability } from '../output/report-output.models';
 
 export interface ReportEditor extends ReportWorkbenchEditor {
   readonly name: FormControl<string>;
@@ -21,7 +22,7 @@ export interface ReportRuntime {
   readonly checks?: { readonly workflow: Signal<AnalysisChecksWorkflow>; confirmReview(): Promise<void> };
   /** Pending facility formats retain their supported name-only editing. */
   readonly gateSetup: boolean;
-  readonly showOutputActions: boolean;
+  readonly output?: ReportOutputCapability;
 }
 
 export interface ReportFeatureDefinition {

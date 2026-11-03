@@ -2,8 +2,7 @@ import { analysisReportFixture } from '@domain/reports/testing/analysis-report-f
 import { getNewIdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { calculateFacilityAnalysisResults } from '@domain/calculations/analysis-calculations/facility-analysis-results-calculation';
-export function facilityAnalysisReportFixture() {
-  const snapshot = analysisReportFixture();
+export function facilityAnalysisReportFixture(snapshot = analysisReportFixture()) {
   const report = { ...getNewIdbFacilityReport('facility', 'account', 'analysis', []), id: 70, guid: 'facility-report', analysisItemId: 'facility-analysis', name: 'Plant analysis' };
   report.analysisReportSettings.reportYear = 2023;
   const facility = snapshot.facilities[0], analysis = snapshot.facilityAnalyses[0];

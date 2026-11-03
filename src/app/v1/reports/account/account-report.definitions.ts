@@ -9,6 +9,6 @@ export const ACCOUNT_REPORT_FEATURES: readonly ReportFeatureDefinition[] = [BETT
 export const PENDING_ACCOUNT_REPORT: ReportFeatureDefinition = {
   type: 'pending', providers: [AccountReportEditor,
     { provide: ACCOUNT_ANALYSIS_EDITOR, useExisting: AccountReportEditor },
-    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(AccountReportEditor), gateSetup: true, showOutputActions: true }) }],
+    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(AccountReportEditor), gateSetup: true }) }],
   stages: { setup: AccountReportSetupComponent, 'data-checks': PendingReportStageComponent, report: PendingReportStageComponent }
 };
