@@ -1,1 +1,1 @@
-:host { display: block; min-width: 0; min-height: 100%; }
+:host { display: flex; flex-direction: column; min-width: 0; min-height: 100%; }

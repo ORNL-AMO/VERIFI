@@ -122,6 +122,92 @@ describe('report inventory browser journeys and presentation', () => {
   });
   let database: IndexedDbTestHarness | undefined;
   afterEach(async () => { await database?.destroy(); database = undefined; });
+  it.each(['account', 'facility'] as const)('creates a durable %s report through cards and reopens it', async scope => {
+    await page.viewport(1280, 900);
+    const snapshot = accountReportSnapshot();
+    snapshot.facilities.push({ ...snapshot.facilities[0], id: 3, guid: 'facility-b', name: 'Second facility' });
+    database = await IndexedDbTestHarness.create(`report-wizard-${scope}`);
+    await database.seed({ accounts: [{ ...snapshot.account }], facilities: snapshot.facilities.map(item => ({ ...item })),
+      accountReports: snapshot.accountReports.map(item => ({ ...item })), facilityReports: snapshot.facilityReports.map(item => ({ ...item })) });
+    const store = new AccountWorkspaceStore(); store.publish(snapshot);
+    const access = new IndexedDbAccessService(database.dbService);
+    const transactions = new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: database.databaseName } });
+    const handler = new ReportCommandHandler(new FacilityReportsDbService(database.dbService, access), new AccountReportDbService(database.dbService, access), store, transactions);
+    const boundary = new WorkspaceCommandBoundary(store, {} as AccountWorkspaceService);
+    TestBed.resetTestingModule();
+    const view = setup(0, false, store, [{ provide: WorkspaceCommandBoundary, useValue: boundary },
+      { provide: ReportCommandHandler, useValue: handler }, { provide: AccountReportActionsService, useClass: AccountReportActionsService },
+      { provide: FacilityReportActionsService, useClass: FacilityReportActionsService }]);
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    await page.getByRole('button', { name: 'Add report', exact: true }).click(); await settle(view.fixture);
+    expect(document.activeElement?.textContent).toBe('Report scope');
+    await page.getByRole('button', { name: scope === 'account' ? 'Account Report' : 'Facility Report', exact: true }).click(); await settle(view.fixture);
+    if (scope === 'facility') {
+      await page.getByRole('button', { name: 'Second facility', exact: true }).click(); await settle(view.fixture);
+    }
+    expect(document.activeElement?.textContent).toBe('Report type');
+    await page.getByRole('button', { name: 'Data Overview Preview pending', exact: true }).click(); await settle(view.fixture);
+    expect((document.activeElement as HTMLElement)?.id).toBe('report-name');
+    await page.getByRole('textbox', { name: 'Report name', exact: false }).fill('Created through cards');
+    await page.getByRole('button', { name: 'Create report', exact: true }).click();
+    await vi.waitFor(() => expect(view.router.url).toContain('/workbench/')); await settle(view.fixture);
+    const created = scope === 'account' ? store.accountReports().find(item => item.name === 'Created through cards')!
+      : store.facilityReports().find(item => item.name === 'Created through cards')!;
+    expect(created).toBeDefined(); expect(created.accountId).toBe('account-a');
+    if (scope === 'facility') expect('facilityId' in created && created.facilityId).toBe('facility-b');
+    const url = view.router.url;
+    expect(url).toBe(`/v1/workspace/${scope === 'account' ? 'account/account-a' : 'facility/facility-b'}/reports/workbench/${created.guid}/setup`);
+    await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    await view.router.navigateByUrl(url); await settle(view.fixture);
+    expect(view.root.querySelector<HTMLInputElement>(scope === 'account' ? '#account-report-name' : '#report-workbench-name')!.value).toBe('Created through cards');
+    view.fixture.destroy();
+    await database.reopen();
+    const records = await database.getAll(scope === 'account' ? 'accountReports' : 'facilityReports');
+    expect(records.find(item => item.guid === created.guid)?.name).toBe('Created through cards');
+  });
+
+  it('keeps square choices keyboard accessible and selections pinned in narrow themed panels', async () => {
+    const view = setup(1); await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
+    view.store.publish({ ...view.store.snapshot()!, facilities: [{ ...view.store.facilities()[0], name: 'A facility with a deliberately long name for checking wrapping in narrow windows' }] });
+    for (const name of ['--v1-rail-width', '--v1-section-nav-width', '--v1-support-panel-width']) view.root.style.setProperty(name, '0px');
+    await page.getByRole('button', { name: 'Add report', exact: true }).click(); await settle(view.fixture);
+    const squares = [...view.root.querySelectorAll<HTMLElement>('.report-choices--scope .report-choice')];
+    expect(squares).toHaveLength(2);
+    for (const square of squares) expect(square.getBoundingClientRect().width).toBeCloseTo(square.getBoundingClientRect().height, 0);
+    expect(view.root.textContent).not.toContain('Continue');
+    await userEvent.keyboard('{Tab}{Tab}{Enter}'); await settle(view.fixture);
+    expect(view.dashboard().lifecycle.form.controls.scope.value).toBe('facility');
+    expect(view.dashboard().lifecycle.step()).toBe('type');
+    expect(document.activeElement?.textContent).toBe('Report type');
+    for (const [width, classes] of [[1280, ''], [760, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 800); view.root.className = `v1-root ${classes}`; await settle(view.fixture);
+      const panel = view.root.querySelector<HTMLElement>('.v1-workspace-slideout')!;
+      const body = panel.querySelector<HTMLElement>('.v1-workspace-slideout__body')!;
+      expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth + 1);
+      const card = panel.querySelector<HTMLElement>('.report-choice')!;
+      expect(textContrast(card.querySelector<HTMLElement>('strong')!, card)).toBeGreaterThanOrEqual(4.5);
+      expect(panel.querySelector<HTMLElement>('.v1-workspace-slideout__footer')!.getBoundingClientRect().bottom).toBeLessThanOrEqual(800);
+      const pinned = panel.querySelector<HTMLElement>('.report-selections')!;
+      const initialTop = pinned.getBoundingClientRect().top;
+      body.scrollTop = body.scrollHeight; await settle(view.fixture);
+      expect(pinned.getBoundingClientRect().top).toBeCloseTo(initialTop, 0);
+      expect(getComputedStyle(pinned).position).toBe('sticky');
+      expect(getComputedStyle(panel.querySelector('.report-choices')!).gridTemplateColumns.split(' ')).toHaveLength(2);
+      body.scrollTop = 0; await settle(view.fixture);
+      await page.screenshot({ element: panel, path: `../../../../../.angular/report-choices-${width}.png` });
+    }
+    await page.getByRole('button', { name: 'Analysis', exact: true }).click(); await settle(view.fixture);
+    expect((document.activeElement as HTMLElement).id).toBe('report-name');
+    await page.getByRole('button', { name: 'Change Facility Report', exact: true }).click(); await settle(view.fixture);
+    await page.getByRole('button', { name: 'Account Report', exact: true }).click(); await settle(view.fixture);
+    expect(view.root.querySelector('.report-selections')!.textContent).not.toContain('Facility Report');
+    expect(view.root.querySelector('#report-name')).toBeNull();
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view.fixture);
+    expect(page.getByRole('dialog', { name: 'Discard report edits?', exact: true }).element().textContent).toContain('Discard report edits?');
+    await page.getByRole('button', { name: 'Discard edits', exact: true }).click(); await settle(view.fixture);
+    expect((document.activeElement as HTMLElement).textContent).toContain('Add report');
+    view.fixture.destroy(); await page.viewport(1280, 900);
+  });
   it('confirms deletion from invalid Setup, returns to Reports, and preserves other reports and source analyses in IndexedDB', async () => {
     await page.viewport(1200, 900);
     const snapshot = accountReportSnapshot();

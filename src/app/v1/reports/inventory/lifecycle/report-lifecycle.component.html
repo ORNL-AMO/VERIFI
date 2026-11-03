@@ -1,30 +1,68 @@
 @let editor = lifecycle.editor();
 @if (editor) {
-  <app-workspace-slideout [title]="editor.entry ? 'Rename report' : 'Add report'" [saving]="lifecycle.saving()" [hasFooter]="true" (closed)="lifecycle.requestClose()">
+  @let step = lifecycle.step();
+  <app-workspace-slideout [title]="editor.entry ? 'Rename report' : 'Add report'" [saving]="lifecycle.saving()" [hasFooter]="true" [initialFocus]="editor.entry || step === 'name' ? '#report-name' : '#report-choice-heading'" (closed)="lifecycle.requestClose()">
+    @if (!editor.entry && lifecycle.selections().length) {
+      <div class="report-selections" aria-label="Report selections">
+        @for (selection of lifecycle.selections(); track selection.id) {
+          <button type="button" class="report-selection" [class.report-selection--active]="selection.active" [disabled]="!selection.editable || lifecycle.saving()" [attr.aria-label]="selection.editable ? 'Change ' + selection.label : selection.label" [attr.aria-expanded]="selection.editable ? selection.active : null" [title]="selection.label" (click)="lifecycle.editSelection(selection.id)">
+            <app-ui-icon [name]="selection.icon"/><span>{{ selection.label }}</span>@if (selection.editable) { <app-ui-icon name="edit"/> } @else { <app-ui-icon name="check"/> }
+          </button>
+        }
+      </div>
+    }
     <form id="report-draft" [formGroup]="lifecycle.form" (ngSubmit)="lifecycle.submit()">
       <fieldset [disabled]="lifecycle.saving()">
-        <label for="report-name">Report name</label><input id="report-name" class="form-control" formControlName="name" autocomplete="off" [readOnly]="lifecycle.saving()" aria-describedby="report-draft-help">
-        @if (lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched) { <p class="v1-alert v1-alert--danger" role="alert">Enter a report name.</p> }
-        @if (!editor.entry) {
-          @if (!editor.fixedFacility && !lifecycle.singleFacility()) {
-            <label for="report-level">Report level</label><select id="report-level" class="v1-select" formControlName="scope"><option value="account">Account</option><option value="facility" [disabled]="!lifecycle.facilities().length">Facility</option></select>
-            @if (lifecycle.form.controls.scope.value === 'facility') {
-              <label for="report-facility">Facility</label><select id="report-facility" class="v1-select" formControlName="facilityGuid"><option value="">Select a facility</option>@for (facility of lifecycle.facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name || 'Unnamed facility' }}</option> }</select>
+        @if (editor.entry) {
+          <label for="report-name">Report name</label>
+          <input #reportName id="report-name" class="form-control" formControlName="name" autocomplete="off" required [readOnly]="lifecycle.saving()" [attr.aria-invalid]="lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched" aria-describedby="report-draft-help report-name-error">
+          <p id="report-draft-help">{{ editor.entry.typeLabel }} · {{ editor.entry.ownerName }}</p>
+        } @else {
+          @switch (step) {
+            @case ('scope') {
+              <legend class="visually-hidden"><h3 id="report-choice-heading" #stepHeading tabindex="-1">Report scope</h3></legend>
+              <div class="report-choices report-choices--scope">
+                <button type="button" class="report-choice" [attr.aria-pressed]="lifecycle.form.controls.scope.value === 'account'" (click)="lifecycle.selectScope('account')"><app-ui-icon name="account" [size]="36"/><strong>Account Report</strong></button>
+                <button type="button" class="report-choice" [disabled]="!lifecycle.facilities().length" [attr.aria-pressed]="lifecycle.form.controls.scope.value === 'facility'" [attr.aria-describedby]="!lifecycle.facilities().length ? 'facility-scope-help' : null" (click)="lifecycle.selectScope('facility')"><app-ui-icon name="facility" [size]="36"/><strong>Facility Report</strong></button>
+              </div>
+              @if (!lifecycle.facilities().length) { <p id="facility-scope-help" class="report-choice-help">Add a facility first.</p> }
+            }
+            @case ('facility') {
+              <legend class="visually-hidden"><h3 id="report-choice-heading" #stepHeading tabindex="-1">Facility</h3></legend>
+              <label class="visually-hidden" for="report-facility-search">Find facility</label>
+              <input id="report-facility-search" class="form-control report-search" type="search" [formControl]="lifecycle.facilitySearch" placeholder="Find facility" autocomplete="off" [readOnly]="lifecycle.saving()">
+              <div class="report-choices">
+                @for (facility of lifecycle.matchingFacilities(); track facility.guid) {
+                  <button type="button" class="report-choice" [attr.aria-pressed]="lifecycle.form.controls.facilityGuid.value === facility.guid" (click)="lifecycle.selectFacility(facility.guid)"><app-ui-icon name="facility" [size]="28"/><strong>{{ facility.name || 'Unnamed facility' }}</strong></button>
+                } @empty {
+                  <div class="report-search-empty" role="status"><p>No matching facilities.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="lifecycle.facilitySearch.setValue('')">Clear search</button></div>
+                }
+              </div>
+            }
+            @case ('type') {
+              <legend class="visually-hidden"><h3 id="report-choice-heading" #stepHeading tabindex="-1">Report type</h3></legend>
+              <div class="report-choices">
+                @for (option of lifecycle.types(); track option.value) {
+                  <button type="button" class="report-choice" [attr.aria-pressed]="lifecycle.form.controls.type.value === option.value" (click)="lifecycle.selectType(option.value)"><app-ui-icon [name]="option.icon" [size]="28"/><strong>{{ option.label }}</strong>@if (!option.contentImplemented) { <span class="report-choice__pending">Preview pending</span> }</button>
+                }
+              </div>
+            }
+            @case ('name') {
+              <label for="report-name">Report name</label>
+              <input #reportName id="report-name" class="form-control" formControlName="name" autocomplete="off" required [readOnly]="lifecycle.saving()" [attr.aria-invalid]="lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched" aria-describedby="report-name-error">
             }
           }
-          @if (lifecycle.singleFacility()) {
-            <label for="report-choice">Report type</label><select id="report-choice" class="v1-select" [formControl]="lifecycle.typeChoice">@for (choice of lifecycle.choices(); track choice.value) { <option [value]="choice.value">{{ choice.label }}</option> }</select>
-          } @else {
-          <label for="report-type">Report type</label><select id="report-type" class="v1-select" formControlName="type">@for (option of lifecycle.types(); track option.value) { <option [value]="option.value">{{ option.label }}</option> }</select>
-          }
-        } @else { <p>{{ editor.entry.typeLabel }} · {{ editor.entry.ownerName }}</p> }
+        }
+        @if ((editor.entry || step === 'name') && lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched) { <p id="report-name-error" class="v1-alert v1-alert--danger" role="alert">Enter a report name.</p> }
       </fieldset>
-      <p id="report-draft-help">Report settings and preview will be added in later migrations. Save or cancel your edits before leaving this page.</p>
       @if (lifecycle.availabilityError(); as message) { <div class="v1-alert v1-alert--warning" role="status">{{ message }}</div> }
       @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
     </form>
-    <div slideoutFooter class="report-draft-actions"><button type="button" class="v1-btn v1-btn--secondary" [disabled]="lifecycle.saving()" (click)="lifecycle.requestClose()">Cancel</button>
-      <button type="submit" form="report-draft" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canSave()">@if (lifecycle.saving()) { <app-ui-icon name="loading" spin/> }{{ editor.entry ? 'Save name' : 'Create report' }}</button>
+    <div slideoutFooter class="report-draft-actions">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="lifecycle.saving()" (click)="lifecycle.requestClose()">Cancel</button>
+      @if (editor.entry || step === 'name') {
+        <button type="submit" form="report-draft" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canSave()">@if (lifecycle.saving()) { <app-ui-icon name="loading" spin/> }{{ lifecycle.saving() ? (editor.entry ? 'Saving…' : 'Creating…') : (editor.entry ? 'Save name' : 'Create report') }}</button>
+      }
     </div>
   </app-workspace-slideout>
 }
