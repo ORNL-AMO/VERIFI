@@ -35,12 +35,12 @@ describe('FacilityPickerComponent', () => {
     expect(select).toHaveBeenCalledWith({ kind: 'all' });
   });
 
-  it('sorts names and disables selection when there are no facilities', () => {
+  it('retains workspace order without a preference and disables selection when there are no facilities', () => {
     const { fixture, component } = createComponent(); fixture.detectChanges();
     expect((fixture.nativeElement.querySelector('button') as HTMLButtonElement).disabled).toBe(true);
     component.facilities = [facility('z', 'Zebra'), facility('a', 'Alpha')]; fixture.detectChanges();
     fixture.nativeElement.querySelector('button').click(); fixture.detectChanges();
-    expect([...document.querySelectorAll('.v1-facility-picker__list button')].map(item => item.textContent?.trim())).toEqual(['Alpha', 'Zebra']);
+    expect([...document.querySelectorAll('.v1-facility-picker__list button')].map(item => item.textContent?.trim())).toEqual(['Zebra', 'Alpha']);
   });
 
   it('moves from the search field to the last facility with ArrowUp', () => {
@@ -51,7 +51,7 @@ describe('FacilityPickerComponent', () => {
     fixture.detectChanges();
     const search = document.querySelector<HTMLInputElement>('.v1-facility-picker__search-input')!;
     search.focus(); search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
-    expect(document.activeElement?.textContent).toContain('Second');
+    expect(document.activeElement?.textContent).toContain('Last');
   });
 
   it('keeps All facilities and a chooser for portfolios with one facility', () => {

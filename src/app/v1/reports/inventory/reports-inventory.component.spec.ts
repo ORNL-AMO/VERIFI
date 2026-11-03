@@ -5,6 +5,7 @@ import { reportFacility, reportFixture } from '@app/v1/reports/facility/testing/
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { setupReportInventory } from '../testing/report-inventory-test-setup';
 import { ReportsInventoryComponent } from './reports-inventory.component';
+import { INVENTORY_PAGE_SIZE } from '@app/v1/shared/inventory/inventory.models';
 
 describe('report browse state', () => {
   it('excludes account reports under a facility and normalizes incompatible remembered controls', async () => {
@@ -67,12 +68,14 @@ describe('report browse state', () => {
     it.each(['idle', 'evaluating'] as const)(`preserves ${scope} browse state while checks are %s, then clamps settled changes`, async pending => {
       const { store, status } = await setupReportInventory(scope);
       const saved = store.snapshot()!;
+      // Keep both report owners, with just enough records for a second page in this scope.
       store.publish({ ...saved,
-        accountReports: Array.from({ length: 50 }, (_, i) => ({ ...saved.accountReports[0], guid: `account-${i}` })),
-        facilityReports: Array.from({ length: 50 }, (_, i) => reportFixture({ guid: `facility-${i}` }))
+        accountReports: [saved.accountReports[0]],
+        facilityReports: Array.from({ length: INVENTORY_PAGE_SIZE + (scope === 'facility' ? 1 : 0) }, (_, i) => reportFixture({ guid: `facility-${i}` }))
       });
       const first = TestBed.createComponent(ReportsInventoryComponent); first.detectChanges();
       first.componentInstance.filtersForm.controls.status.setValue('ready'); first.detectChanges();
+      expect(first.componentInstance.inventory.pages()).toBe(2);
       first.componentInstance.inventory.selectPage(1);
       const target = first.componentInstance.inventory.visibleIds()[0];
       first.componentInstance.inventory.setTileDetail({ guid: target, level: 'detailed' });

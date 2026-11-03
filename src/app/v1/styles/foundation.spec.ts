@@ -5,7 +5,7 @@ describe('v1 foundation styles', () => {
   const foundationEntry = readFileSync(join(__dirname, 'foundation.css'), 'utf8');
   const foundationCss = foundationEntry.replace(/@import\s+['"]\.\/([^'"]+)['"];\s*/g, (_import, file: string) =>
     `${readFileSync(join(__dirname, file), 'utf8')}\n`
-  );
+  ).replace(/\r\n?/g, '\n');
 
   it('uses action color only for action buttons and content-control color for navigation buttons', () => {
     expect(ruleFor('.v1-btn--action')).toContain('background: var(--v1-action)');
