@@ -14,13 +14,15 @@ export function setEnergyFootprintEnergyUse(energyUseEquipment: IdbFacilityEnerg
 }
 
 export function calculateTotalEquipmentEnergyUse(operatingConditions: EnergyEquipmentOperatingConditionsData, utilityData: EquipmentUtilityData, energyUseUnit: string): number {
-    //Basic calculation: Size * Number of Equipment * Hours of Operation * Load Factor * Duty Factor * Efficiency
+    const efficiencyFactor = utilityData.energySource === 'Electricity'
+        ? operatingConditions.efficiency / 100
+        : 1;
     let energyUse: number = utilityData.size
         * utilityData.numberOfEquipment
         * operatingConditions.hoursOfOperation
         * (operatingConditions.loadFactor / 100)
         * (operatingConditions.dutyFactor / 100)
-        / (operatingConditions.efficiency / 100);
+        / efficiencyFactor;
 
     //convert energy use to selected unit if needed
     let calculatedEnergUseUnit: string = getEnergyUseUnit(utilityData.units);

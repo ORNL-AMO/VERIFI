@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
+import { AppStartupState } from './application-lifecycle/application-lifecycle.models';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -96,4 +97,24 @@ describe('AppComponent shell state', () => {
 
     expect(fixture.nativeElement.querySelector('.workspace-switch-overlay')).toBeNull();
   });
+
+  it('delegates startup errors to the startup error component', () => {
+    setStartupError('database');
+    expect(fixture.nativeElement.querySelector('app-startup-error')).not.toBeNull();
+
+    startupState.set({ status: 'ready' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-startup-error')).toBeNull();
+  });
+
+  function setStartupError(step: 'database' | 'migrations'): void {
+    startupState.set({
+      status: 'error',
+      step,
+      message: 'Startup failed.',
+      error: { step, message: 'Startup failed.', retryable: true, cause: new Error('cause') }
+    });
+    fixture.detectChanges();
+  }
+
 });

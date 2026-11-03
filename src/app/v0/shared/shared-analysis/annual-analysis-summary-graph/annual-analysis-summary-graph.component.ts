@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { AnnualAnalysisSummary } from '@data/models/analysis';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-annual-analysis-summary-graph',
@@ -195,34 +196,10 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
   }
 
   async getEnergyIntensityChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.annualEnergyIntensityAnalysisGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.annualEnergyIntensityAnalysisGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.annualEnergyIntensityAnalysisGraph?.nativeElement);
   }
 
   async getPercentImprovementChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.percentImprovementAnalysisGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.percentImprovementAnalysisGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.percentImprovementAnalysisGraph?.nativeElement);
   }
 }

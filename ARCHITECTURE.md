@@ -33,6 +33,8 @@ Account creation and import flows activate their persisted account through the l
 
 [`AppComponent`](src/app/app.component.ts) triggers and renders that lifecycle but does not query repositories. Its shell exposes accessible initializing, error/retry, and switching states. Application-instance metadata is lifecycle-owned readonly state; its IndexedDB service is persistence-only.
 
+When startup fails during a record migration, the root shell exposes a recovery workflow before any workspace is published. The recovery service reads the application metadata and complete migration dataset in one readonly transaction, then saves an ordinary JSON support snapshot through the Electron file gateway or a browser Blob download. After a successful export, the user can confirm a reset through `DatabaseResetService`. Recovery snapshots are support artifacts and are never accepted by normal backup import.
+
 Top-level routing is composed by [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts), with the current production route tree owned by v0 under [`src/app/v0/routing/`](src/app/v0/routing/):
 
 - **v0 legacy experience** is lazy-loaded from [`src/app/v0/v0.module.ts`](src/app/v0/v0.module.ts). Its shell owns the current production header, legacy global modals, toast placement, and legacy route outlet while keeping existing public URLs stable.

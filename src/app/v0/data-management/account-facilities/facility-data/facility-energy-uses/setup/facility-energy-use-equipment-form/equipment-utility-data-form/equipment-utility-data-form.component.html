@@ -13,12 +13,26 @@
             </div>
         </div>
     </div>
+
+    @if (showMissingUtilityMeterWarning) {
+    <div class="alert alert-warning text-danger small p-2 mt-2 mb-2 utility-meter-warning">
+        <i class="fa fa-exclamation-triangle text-danger"></i>
+        No {{_energySource}} meter was found in the connected utility meter group.
+    </div>
+    }
     <div class="form-group row">
         <label class="col-5 col-form-label" for="size_{{_energySource}}">
             {{ equipmentDetailsForm().get('equipmentType').value | sizeLabel }}
         </label>
         <div class="col-7 ">
             <div class="input-group">
+                @if (showRatedCapacityCalculator) {
+                <span class="input-group-text">
+                    <button type="button" class="btn p-0 border-0 bg-transparent" (click)="openCalculateRatedPowerModal()">
+                        <i class="fa fa-calculator text-primary icon-style"></i>
+                    </button>
+                </span>
+                }
                 <input id="size_{{_energySource}}" class="form-control" type="number" formControlName="size"
                     onfocus="this.select();" min="0">
                 <select class="input-group-text" id="units_{{_energySource}}" name="units" formControlName="units">
@@ -40,3 +54,10 @@
         </div>
     </div>
 </form>
+
+<div [ngClass]="{'windowOverlay': showRatedPowerModal && showRatedCapacityCalculator}"></div>
+@if (showRatedPowerModal && showRatedCapacityCalculator) {
+<app-rated-power-modal [energySource]="_energySource" [linkedMeters]="linkedFuelMeters"
+    [initialPowerUnit]="utilityDataForm().controls.units.value" (applyRatedPower)="applyRatedPower($event)"
+    (closeModal)="closeCalculateRatedPowerModal()"></app-rated-power-modal>
+}

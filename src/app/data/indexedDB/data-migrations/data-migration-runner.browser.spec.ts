@@ -46,6 +46,32 @@ describe('data migration runner in Chromium', () => {
     expect((await harness.getAll('utilityMeterData'))[0]).toMatchObject({ id: 4, meterId: 'meter', year: 2024, month: 1, day: 31 });
   });
 
+  it('converts deprecated predictor rows using generated IndexedDB keys', async () => {
+    await harness.seed({
+      application: [{ id: 1, guid: 'application', appOpenCount: 0 }],
+      accounts: [{ id: 1, guid: 'account', name: 'Legacy' }],
+      facilities: [{ id: 2, guid: 'facility', accountId: 'account', name: 'Plant' }],
+      predictors: [{
+        id: 3,
+        guid: 'legacy-row',
+        accountId: 'account',
+        facilityId: 'facility',
+        date: new Date(2024, 2, 1),
+        predictors: [{ id: 'production', name: 'Production', amount: 10, predictorType: 'Standard' }]
+      }]
+    });
+
+    await runner.runMigrations();
+
+    expect(await harness.getAll('predictors')).toEqual([]);
+    expect(await harness.getAll('predictor')).toEqual([
+      expect.objectContaining({ id: expect.any(Number), guid: 'production', accountId: 'account', facilityId: 'facility' })
+    ]);
+    expect(await harness.getAll('predictorData')).toEqual([
+      expect.objectContaining({ id: expect.any(Number), predictorId: 'production', year: 2024, month: 3, amount: 10 })
+    ]);
+  });
+
   it('does not rewrite current-version domain records', async () => {
     const account = { id: 1, guid: 'account', name: 'Current', unknown: 'preserved' };
     await harness.seed({

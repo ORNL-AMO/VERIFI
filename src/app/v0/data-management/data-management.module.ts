@@ -58,6 +58,8 @@ import { MeterChargesCorrelationPlotComponent } from '@v0/data-management/accoun
 import { MeterChargesCorrelationsComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlations.component';
 import { UpdateWeatherPredictorsModalComponent } from '@v0/data-management/data-management-home/update-weather-predictors-modal/update-weather-predictors-modal.component';
 import { FacilityEnergyUseGroupManagementComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component';
+import { ExportEnergyUsesModalComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/export-energy-uses-modal/export-energy-uses-modal.component';
+import { ImportEnergyUsesModalComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/import-energy-uses-modal/import-energy-uses-modal.component';
 import { EnergyUseGroupCardComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/energy-use-group-card/energy-use-group-card.component';
 import { FacilityEnergyUseGroupComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
 import { FacilityEnergyUseEquipmentComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
@@ -104,6 +106,8 @@ import { ConfirmEnergyUsesUploadComponent } from '@v0/data-management/data-manag
 import { FacilityEnergyUsesSankeyComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-sankey/facility-energy-uses-sankey.component';
 import { FacilityEnergyUsesGroupSankeyComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-sankey/facility-energy-uses-group-sankey.component';
 import { OperatingHoursModalModule } from '@v0/shared/operating-hours-modal/operating-hours.module';
+import { LoadFactorModalComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/load-factor-modal/load-factor-modal.component';
+import { RatedPowerModalComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/rated-power-modal/rated-power-modal.component';
 
 
 @NgModule({
@@ -153,6 +157,8 @@ import { OperatingHoursModalModule } from '@v0/shared/operating-hours-modal/oper
     UpdateWeatherPredictorsModalComponent,
     FacilityEnergyUseGroupComponent,
     FacilityEnergyUseGroupManagementComponent,
+    ExportEnergyUsesModalComponent,
+    ImportEnergyUsesModalComponent,
     EnergyUseGroupCardComponent,
     FacilityEnergyUseEquipmentComponent,
     UtilityTypeOptionsPipe,
@@ -197,7 +203,9 @@ import { OperatingHoursModalModule } from '@v0/shared/operating-hours-modal/oper
     MapMeterGroupsToEquipmentComponent,
     ConfirmEnergyUsesUploadComponent,
     FacilityEnergyUsesSankeyComponent,
-    FacilityEnergyUsesGroupSankeyComponent
+    FacilityEnergyUsesGroupSankeyComponent,
+    LoadFactorModalComponent,
+    RatedPowerModalComponent
   ],
   imports: [
     CommonModule,

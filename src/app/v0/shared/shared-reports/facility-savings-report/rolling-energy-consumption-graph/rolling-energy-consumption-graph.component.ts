@@ -6,6 +6,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-rolling-energy-consumption-graph',
@@ -235,19 +236,7 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.rollingEnergyConsumptionGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.rollingEnergyConsumptionGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.rollingEnergyConsumptionGraph?.nativeElement);
   }
 }
 
