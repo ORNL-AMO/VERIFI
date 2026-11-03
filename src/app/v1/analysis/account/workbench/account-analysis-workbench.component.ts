@@ -11,7 +11,7 @@ import { AccountAnalysisAutosaveService } from './editing/account-analysis-autos
 import { AccountAnalysisFacilitySelectionService } from './select-facility-items/account-analysis-facility-selection.service';
 import { AccountAnalysisResultsService } from './results/calculation/account-analysis-results.service';
 import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
-import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 
 @Component({
   selector: 'app-account-analysis-workbench',

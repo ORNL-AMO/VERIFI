@@ -5,6 +5,13 @@ import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '
 import { MeterResultsChartComponent } from './meter-results-chart.component';
 
 describe('MeterResultsChartComponent', () => {
+  it('keeps immediate canvas initialization by default and forwards explicit viewport deferral', () => {
+    const fixture = setup();
+    const directive = fixture.componentInstance.chartDirective as unknown as EChartsStubDirective;
+    expect(directive.deferUntilVisible).toBe(false);
+    fixture.componentRef.setInput('deferUntilVisible', true); fixture.detectChanges();
+    expect(directive.deferUntilVisible).toBe(true);
+  });
   it('skips alignment padding at its category position while retaining real gaps, labels and tooltips', () => {
     const fixture = setup();
     fixture.componentRef.setInput('showAllMetrics', true); fixture.componentRef.setInput('showValueLabels', true);
@@ -416,6 +423,7 @@ describe('MeterResultsChartComponent', () => {
 })
 class EChartsStubDirective {
   @Input('appV1ECharts') option?: V1EChartsOption;
+  @Input() deferUntilVisible = false;
   @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();
   readonly downloadPng = vi.fn();
 }

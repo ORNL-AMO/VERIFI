@@ -2,7 +2,7 @@ import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { convertOrphanedGeneratedModelToUserDefined, getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { buildUserDefinedRegressionModel } from '@shared/shared-analysis/calculations/regression-models-calculation';
 import { RegressionModelsCalculator } from '@shared/shared-analysis/calculations/regression-models-calculator';
-import { AnalysisReportInputs, assertAnalysisReportYears } from './analysis-report-inputs';
+import { CheckedAnalysisReportInputs, analysisReportLinks, assertAnalysisReportYears } from './analysis-report-inputs';
 
 export interface AnalysisDataCheckGroup {
   readonly facilityGuid: string;
@@ -22,11 +22,11 @@ export interface AnalysisDataChecks {
 }
 
 /** Use the same model validation as v0, on detached inputs and at the requested year. */
-export function calculateAnalysisDataChecks(inputs: AnalysisReportInputs, reportYear: number): AnalysisDataChecks {
+export function calculateAnalysisDataChecks(inputs: CheckedAnalysisReportInputs, reportYear: number): AnalysisDataChecks {
   assertAnalysisReportYears(inputs, [reportYear]);
   const detached = structuredClone(inputs);
   const groups: AnalysisDataCheckGroup[] = [];
-  for (const link of detached.analysis.facilityAnalysisItems) {
+  for (const link of analysisReportLinks(detached)) {
     if (!link.analysisItemId || link.analysisItemId === 'skip') continue;
     const analysis = detached.facilityAnalyses.find(item => item.guid === link.analysisItemId && item.facilityId === link.facilityId)!;
     const facility = detached.facilities.find(item => item.guid === link.facilityId)!;

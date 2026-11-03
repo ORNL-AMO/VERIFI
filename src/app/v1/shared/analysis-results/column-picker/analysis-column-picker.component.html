@@ -1,0 +1,8 @@
+<app-workspace-slideout title="Choose columns" [description]="description()" [hasFooter]="true" (closed)="closed.emit()">
+  <app-analysis-column-options [sections]="sections()" [canEdit]="canEdit()" (showAllRequested)="showAllRequested.emit()"
+    (hideAllRequested)="hideAllRequested.emit()" (defaultsRequested)="defaultsRequested.emit()"/>
+  <ng-container slideoutFooter>
+    <button type="button" class="v1-btn v1-btn--quiet" (click)="closed.emit()">Cancel</button>
+    <button type="button" class="v1-btn v1-btn--primary" [disabled]="!canEdit()" (click)="applied.emit()"><app-ui-icon name="check"/>Apply</button>
+  </ng-container>
+</app-workspace-slideout>

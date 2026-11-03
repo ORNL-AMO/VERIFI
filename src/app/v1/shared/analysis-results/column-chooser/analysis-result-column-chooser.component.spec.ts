@@ -55,6 +55,25 @@ describe('AnalysisResultColumnChooserComponent', () => {
     expect(display.annualColumns().predictors[0].display).toBe(true);
   });
 
+  it('offers only columns applicable to the period, banking and modeled-result scope', () => {
+    const labels = () => Array.from(fixture.nativeElement.querySelectorAll('.analysis-result-columns__check') as NodeListOf<HTMLLabelElement>)
+      .map(label => label.textContent?.trim());
+    clickButton('Choose Columns');
+    expect(labels()).toContain('New savings');
+    expect(labels()).not.toContain('Modeled use');
+    expect(labels()).not.toContain('Banked savings');
+    fixture.componentRef.setInput('period', 'monthly');
+    fixture.componentRef.setInput('hasBanking', true);
+    fixture.detectChanges();
+    expect(labels()).toContain('Modeled use');
+    expect(labels()).toContain('Banked savings');
+    expect(labels()).toContain('Rolling 12-month improvement');
+    expect(labels()).not.toContain('New savings');
+    fixture.componentRef.setInput('showModeled', false);
+    fixture.detectChanges();
+    expect(labels()).not.toContain('Modeled use');
+  });
+
   function clickButton(label: string): void {
     const button = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>).find(item => item.textContent?.trim() === label);
     expect(button).toBeDefined(); button!.click(); fixture.detectChanges();

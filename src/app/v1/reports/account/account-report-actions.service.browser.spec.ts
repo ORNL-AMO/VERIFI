@@ -1,3 +1,4 @@
+import { dbConfig } from '@data/indexedDB/_dbConfig';
 import { Injector } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -30,7 +31,7 @@ describe('mixed report lifecycle in Chromium IndexedDB', () => {
     const access = new IndexedDbAccessService(harness.dbService);
     const accountRepository = new AccountReportDbService(harness.dbService, access);
     const facilityRepository = new FacilityReportsDbService(harness.dbService, access);
-    const handler = new ReportCommandHandler(facilityRepository, accountRepository, store, {} as IndexedDbTransactionService);
+    const handler = new ReportCommandHandler(facilityRepository, accountRepository, store, new IndexedDbTransactionService(indexedDB, { default: { ...dbConfig, name: harness.databaseName } }));
     const boundary = new WorkspaceCommandBoundary(store, {} as AccountWorkspaceService);
     const injector = Injector.create({ providers: [AccountReportActionsService, FacilityReportActionsService,
       { provide: AccountWorkspaceStore, useValue: store }, { provide: ReportCommandHandler, useValue: handler }, { provide: WorkspaceCommandBoundary, useValue: boundary }] });

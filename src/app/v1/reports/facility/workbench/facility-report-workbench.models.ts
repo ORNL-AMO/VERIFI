@@ -1,13 +1,15 @@
-import { facilityReportTypeLabel, type ReportConfigurationStatus } from '../facility-report.models';
+import { facilityReportTypeLabel } from '../facility-report.models';
+import type { ReportConfigurationStatus } from '@app/v1/reports/shared/report.models';
+import { reportDefinition } from '@app/v1/reports/catalog/report-catalog';
 import type { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { buildReportStages, reportStage, ReportStageId, ReportWorkbenchStage } from '@app/v1/reports/report-workbench.models';
-import { reportIcon } from '@app/v1/reports/report-icons';
+import { buildReportStages, reportStage, ReportStageId, ReportWorkbenchStage } from '@app/v1/reports/shared/workbench/report-workbench.models';
+import { reportIcon } from '@app/v1/reports/catalog/report-icons';
 
 export type FacilityReportStageId = ReportStageId;
 export type FacilityReportStage = ReportWorkbenchStage;
 
 export function hasFacilityReportDataChecks(report: IdbFacilityReport): boolean {
-  return ['analysis', 'savings', 'costSavings'].includes(report.facilityReportType);
+  return reportDefinition('facility', report.facilityReportType)?.hasDataChecks ?? false;
 }
 
 export function facilityReportStage(value?: string): FacilityReportStageId {

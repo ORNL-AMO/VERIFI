@@ -1,0 +1,15 @@
+@let result = state();
+@if (result.state === 'ready' && result.value; as value) {
+  <app-analysis-data-checks [checks]="value.checks ?? []" [findings]="findings()" [groupNames]="groupNames()" [facilityNames]="facilityNames()"/>
+} @else {
+  <section class="report-section">
+    <h2>Data Checks</h2>
+    @if (result.state === 'error') {
+      <div class="v1-alert v1-alert--danger" role="alert">{{ result.message }}</div>
+      <a [routerLink]="setupRoute()">Review report setup</a>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="retryRequested.emit()">Retry checks</button>
+    } @else {
+      <p role="status">{{ result.message }}</p>
+    }
+  </section>
+}

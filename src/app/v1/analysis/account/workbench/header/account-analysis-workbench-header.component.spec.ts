@@ -12,7 +12,7 @@ import { AccountAnalysisResultsService, AccountAnalysisResultState } from '../re
 import { analysisOutcomeDisplay, analysisOutcomeSummary } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { projectAccountAnalysisDashboardResults } from '@domain/calculations/analysis-calculations/account-analysis-results-calculation';
 import { AccountAnalysisSelectionCounts } from '../../account-analysis.models';
-import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 
 function readyState(): Extract<AccountAnalysisResultState, { state: 'ready' }> {
   return {

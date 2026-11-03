@@ -7,8 +7,8 @@
       <strong class="better-plants-baseline">{{ selectedAnalysis?.baselineYear ?? 'Choose an analysis' }}</strong>
     </div>
     <div class="report-setup-field">
-      <label for="better-plants-report-year">Report year</label>
-      <select id="better-plants-report-year" class="v1-select" formControlName="reportYear">
+      <label for="better-plants-report-year">Report year <span class="report-setup-required" aria-hidden="true">*</span></label>
+      <select id="better-plants-report-year" class="v1-select" formControlName="reportYear" required>
         <option [ngValue]="null">Not selected</option>
         @if (savedYearUnavailable()) { <option [ngValue]="form.controls.reportYear.value">{{ form.controls.reportYear.value }} — saved year unavailable</option> }
         @for (year of years(); track year) { <option [ngValue]="year">{{ fiscal() ? 'FY ' : '' }}{{ year }}</option> }

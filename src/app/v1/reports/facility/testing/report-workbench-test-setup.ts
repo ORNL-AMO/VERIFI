@@ -1,11 +1,14 @@
+import { AnalysisReportEditor } from '../analysis/editing/analysis-report-editor.service';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
+import { mergeFacilityAnalysisSettings } from '@data/account-workspace/facility-report-setup.models';
 import { AccountReportActionsService } from '@app/v1/reports/account/account-report-actions.service';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, Provider, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideLocationMocks } from '@angular/common/testing';
-import { filter, map } from 'rxjs';
+import { filter, map, of } from 'rxjs';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import type { StatusItem } from '@app/v1/status/status.models';
 import { vi } from 'vitest';
@@ -22,13 +25,20 @@ import { reportFacility, reportFixture, reportSnapshot } from './report-test-fix
 @Component({ standalone: true, template: '<h1>Reports inventory</h1>' })
 class ReportInventoryDestination {}
 
-export async function setupReportWorkbench(reports = [reportFixture(), reportFixture({ id: 20, guid: 'report-b', name: 'Overview', facilityReportType: 'overview' })]) {
+export async function setupReportWorkbench(reports = [reportFixture(), reportFixture({ id: 20, guid: 'report-b', name: 'Overview', facilityReportType: 'overview' })], extraProviders: Provider[] = [], snapshot = reportSnapshot(reports)) {
   const store = new AccountWorkspaceStore();
-  store.publish(reportSnapshot(reports), { facility: reportFacility });
+  store.publish(snapshot, { facility: snapshot.facilities[0] });
   const updateName = vi.fn(async (_facility: string, guid: string, name: string) => {
     const report = { ...store.facilityReports().find(item => item.guid === guid)!, name };
     store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [report] }] });
     return report;
+  });
+  const updateSetup = vi.fn(async (_facility, guid, changes) => {
+    const current = store.facilityReports().find(item => item.guid === guid)!;
+    const report = { ...current, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}),
+      ...(changes.analysisItemId !== undefined ? { analysisItemId: changes.analysisItemId ?? undefined } : {}),
+      ...(changes.analysisReportSettings ? { analysisReportSettings: mergeFacilityAnalysisSettings(current.analysisReportSettings, changes.analysisReportSettings) } : {}) };
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [report] }] }); return report;
   });
   const status = { state: signal<'ready' | 'evaluating' | 'error'>('ready'), items: signal<StatusItem[]>([]) };
   await TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [
@@ -38,7 +48,8 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
     provideRouter([{ path: 'v1/workspace/account/:accountGuid/reports/dashboard', component: ReportInventoryDestination }, { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES }, { path: 'elsewhere', component: FacilityReportWorkbenchComponent }]),
     { provide: AccountWorkspaceStore, useValue: store },
     { provide: WorkspaceStatusService, useValue: status },
-    { provide: FacilityReportActionsService, useValue: { updateName } },
+    { provide: FacilityReportActionsService, useValue: { updateName, updateSetup } },
+    { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of({ state: 'idle', meters: [] }), retry: vi.fn() } },
     { provide: WorkspaceNavigationService, useFactory: () => {
       const router = inject(Router);
       const url = toSignal(router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd), map(event => event.urlAfterRedirects)), { initialValue: router.url });
@@ -48,13 +59,14 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
         inventoryFacilityGuid: () => undefined, routeState, activeReportGuid: computed(() => routeState().reportGuid),
         accountReportsRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'reports', 'dashboard'],
 
+        facilityAnalysisWorkbenchRoute: (facility, analysis) => ['/v1', 'workspace', 'facility', facility, 'analysis', 'workbench', analysis, 'setup'],
         facilityReportWorkbenchRoute: (facility: string, report: string, stage = 'setup') => ['/v1', 'workspace', 'facility', facility, 'reports', 'workbench', report, stage]
       };
-    } }
+    } }, ...extraProviders
   ] }).compileComponents();
   const harness = await RouterTestingHarness.create();
   const router = TestBed.inject(Router);
   router.setUpLocationChangeListener();
-  const open = (report = 'report-a', stage = 'setup') => harness.navigateByUrl(`/v1/workspace/facility/facility-a/reports/workbench/${report}/${stage}`, FacilityReportWorkbenchComponent);
-  return { harness, router, store, updateName, status, open };
+  const open = async (report = 'report-a', stage = 'setup') => await harness.navigateByUrl(`/v1/workspace/facility/${snapshot.facilities[0].guid}/reports/workbench/${report}/${stage}`, FacilityReportWorkbenchComponent) as FacilityReportWorkbenchComponent & { readonly editor: AnalysisReportEditor };
+  return { harness, router, store, updateName, updateSetup, status, open };
 }

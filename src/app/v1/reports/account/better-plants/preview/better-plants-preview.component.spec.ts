@@ -7,7 +7,7 @@ import { calculateBetterPlantsReport } from '@domain/reports/better-plants-repor
 import { analysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
 import { AccountReportsModule } from '../../account-reports.module';
 import { AccountReportWorkbenchContext } from '../../workbench/account-report-workbench-context.service';
-import { ReportResultState } from '@app/v1/reports/report-result-state';
+import { ReportResultState } from '@app/v1/reports/shared/calculation/report-result-state';
 import { BetterPlantsResult } from '../better-plants-report.service';
 import { BetterPlantsReportService } from '../better-plants-report.service';
 import { BetterPlantsPreviewComponent } from './better-plants-preview.component';

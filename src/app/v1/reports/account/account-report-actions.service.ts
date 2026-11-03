@@ -6,8 +6,8 @@ import { ReportCommandHandler } from '@data/account-workspace/handlers/report-co
 import { getNewIdbAccountReport, IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { ReportType } from '@data/models/constantsAndTypes';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
-import { reportTypeAvailable } from '@app/v1/reports/report-availability';
+import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
+import { reportTypeAvailable } from '@app/v1/reports/catalog/report-availability';
 import { AccountReportSetupChanges } from '@data/account-workspace/account-report-setup.models';
 
 @Injectable({ providedIn: 'root' })
@@ -105,7 +105,7 @@ export class AccountReportActionsService {
     return report;
   }
   private requireAvailable(type: ReportType): void {
-    if (!reportTypeAvailable(type, this.workspace.account()?.displayEmissions)) throw new WorkspaceWriteError('validation-failed', 'Enable Other Impacts in Account Goals to access this report type.');
+    if (!reportTypeAvailable('account', type, this.workspace.account()?.displayEmissions)) throw new WorkspaceWriteError('validation-failed', 'Enable Other Impacts in Account Goals to access this report type.');
   }
   private requireName(name: string): string {
     if (!name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a report name.');

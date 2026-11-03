@@ -1,4 +1,6 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { reportTypePresentation } from '@app/v1/reports/catalog/report-catalog';
+import { Injectable, computed, inject } from '@angular/core';
+import { REPORT_SESSION_IDENTITY } from '@app/v1/reports/shared/workbench/report-runtime.models';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -6,10 +8,10 @@ import { accountReportAnalysisGuid, accountReportAnalysisIsEligible, accountRepo
 import { singleFacilityAnalysisPairIsCurrent } from '@data/account-workspace/single-facility-analysis-pairs';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { buildReportInventory, ReportInventoryEntry, reportTypePresentation } from '@app/v1/reports/report-inventory.models';
-import { reportTypeAvailable } from '@app/v1/reports/report-availability';
-import { reportIcon } from '@app/v1/reports/report-icons';
-import { buildReportStages, reportStage } from '@app/v1/reports/report-workbench.models';
+import { buildReportInventory, ReportInventoryEntry } from '@app/v1/reports/inventory/report-inventory.models';
+import { reportTypeAvailable } from '@app/v1/reports/catalog/report-availability';
+import { reportIcon } from '@app/v1/reports/catalog/report-icons';
+import { buildReportStages, reportStage } from '@app/v1/reports/shared/workbench/report-workbench.models';
 import { hasAccountReportDataChecks, reportAnalysisOptions, reportAnalysisToken, savedReportAnalysisChoice } from './account-report-workbench.models';
 
 @Injectable()
@@ -19,10 +21,12 @@ export class AccountReportWorkbenchContext {
   readonly status = inject(WorkspaceStatusService);
   private readonly route = inject(ActivatedRoute);
   private readonly params = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
-  readonly guid = computed(() => this.params().get('reportGuid') ?? '');
-  readonly key = computed(() => JSON.stringify([this.workspace.account()?.guid, this.navigation.routeState().accountGuid, this.guid()]));
-  readonly reports = computed(() => this.navigation.routeState().accountGuid === this.workspace.account()?.guid
-    ? this.workspace.accountReports().filter(report => report.accountId === this.workspace.account()?.guid && reportTypeAvailable(report.reportType, this.workspace.account()?.displayEmissions))
+  private readonly identity = inject(REPORT_SESSION_IDENTITY, { optional: true });
+  readonly accountGuid = computed(() => this.identity?.accountGuid ?? this.navigation.routeState().accountGuid);
+  readonly guid = computed(() => this.identity?.reportGuid ?? this.params().get('reportGuid') ?? '');
+  readonly key = computed(() => JSON.stringify([this.accountGuid(), this.guid()]));
+  readonly reports = computed(() => this.accountGuid() === this.workspace.account()?.guid
+    ? this.workspace.accountReports().filter(report => report.accountId === this.accountGuid() && reportTypeAvailable('account', report.reportType, this.workspace.account()?.displayEmissions))
       .slice().sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid)) : []);
   readonly report = computed(() => this.reports().find(item => item.guid === this.guid()));
   readonly findings = computed(() => this.status.items().filter(item => item.entity.kind === 'account-report'
@@ -36,12 +40,10 @@ export class AccountReportWorkbenchContext {
     return report ? reportTypePresentation('account', report.reportType, this.navigation.isSingleSiteWorkspace()).label : 'Report';
   });
   readonly stage = computed(() => reportStage(this.navigation.routeState().reportStage));
-  readonly checksBlocked = signal(false);
-  readonly checksCompleted = signal(false);
   readonly stages = computed(() => { const entry = this.entry(); return entry ? buildReportStages(
-    ['/v1', 'workspace', 'account', entry.report.accountId, 'reports', 'workbench', entry.report.guid], entry.typeLabel, this.stage(), hasAccountReportDataChecks(entry.report.reportType), entry.status, reportIcon(entry.report)).map(stage => stage.id === 'data-checks' && entry.report.reportType === 'betterPlants' ? { ...stage, completed: this.checksCompleted(), hasBlockingErrors: this.checksBlocked() } : stage) : []; });
+    ['/v1', 'workspace', 'account', entry.report.accountId, 'reports', 'workbench', entry.report.guid], entry.typeLabel, this.stage(), hasAccountReportDataChecks(entry.report.reportType), entry.status, reportIcon(entry.report)) : []; });
   readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled account report', icon: reportIcon(report) })));
-  readonly dashboardRoute = computed(() => this.navigation.accountReportsRoute(this.navigation.routeState().accountGuid ?? ''));
+  readonly dashboardRoute = computed(() => this.navigation.accountReportsRoute(this.accountGuid() ?? ''));
   readonly breadcrumbs = computed(() => this.navigation.isSingleSiteWorkspace() ? [{ label: 'Reports', icon: 'reports' as const, route: this.dashboardRoute() }] : [{ label: `${this.workspace.account()?.name || 'Account'} Reports`, route: this.dashboardRoute() }, { label: this.report()?.name || 'Report' }]);
   readonly usesAnalysis = computed(() => !!this.report() && !!accountReportAnalysisSetupKey(this.report()!.reportType));
   readonly analysisOptions = computed(() => { const snapshot = this.workspace.snapshot(), report = this.report(); return snapshot && report && this.usesAnalysis() ? reportAnalysisOptions(report, snapshot) : []; });

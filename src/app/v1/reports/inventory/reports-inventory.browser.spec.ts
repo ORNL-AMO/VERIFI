@@ -41,7 +41,7 @@ import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facil
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 import { getNewAnalysisGroup } from '@data/models/idbModels/analysisItem';
-import { ReportAnalysisReturnService } from '../report-analysis-return.service';
+import { ReportAnalysisReturnService } from '../shared/analysis-inspection/report-analysis-return.service';
 
 const dashboardUrl = '/v1/workspace/account/account-a/reports/dashboard';
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:600px;min-height:0;overflow:auto;width:100%"><div style="position:relative;isolation:isolate"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
@@ -73,7 +73,7 @@ function setup(count = 30, realStatus = false, existingStore?: AccountWorkspaceS
   ]), { provide: AccountWorkspaceStore, useValue: store }, { provide: AccountWorkspaceService, useValue: {} },
     { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [reportAccount] } },
     ...(realStatus ? [WorkspaceStatusService,
-      { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => coverage.asObservable(), currentInputFingerprint: () => 'reports-status' } },
+      { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => coverage.asObservable(), currentInputFingerprint: () => 'reports-status', project: () => ({ state: 'ready', meters: [] }), retry: vi.fn() } },
       { provide: AccountCommandHandler, useValue: {} }, { provide: WorkspaceCommandBoundary, useValue: {} }]
       : [{ provide: WorkspaceStatusService, useValue: { state: status, items: findingItems } }]),
     { provide: AccountReportActionsService, useValue: accountActions }, { provide: FacilityReportActionsService, useValue: {} },
@@ -257,15 +257,16 @@ describe('report inventory browser journeys and presentation', () => {
     view.dashboard().inventory.selectPage(1); await settle(view.fixture);
     const entry = view.dashboard().inventory.visibleTiles()[0];
     view.dashboard().inventory.setTileDetail({ guid: entry.guid, level: 'detailed' }); await settle(view.fixture);
-    const action = [...view.root.querySelectorAll<HTMLAnchorElement>('.portfolio-inventory app-report-snapshot a')].find(link => link.textContent === 'Review name')!;
-    expect(action.textContent).toContain('Review name'); action.focus(); view.root.scrollTop = 160;
+    const actionLabel = scope === 'facility' ? 'Review setup' : 'Review name';
+    const action = [...view.root.querySelectorAll<HTMLAnchorElement>('.portfolio-inventory app-report-snapshot a')].find(link => link.textContent === actionLabel)!;
+    expect(action.textContent).toContain(actionLabel); action.focus(); view.root.scrollTop = 160;
     let scroll = 0;
     view.router.events.pipe(filter(event => event instanceof NavigationStart), take(1)).subscribe(() => { scroll = view.root.scrollTop; });
     await userEvent.keyboard('{Enter}'); await settle(view.fixture);
     expect(scroll).toBeGreaterThan(0);
     expect(view.router.url).toContain(scope === 'account' ? '/account/account-a/reports/workbench/' : '/facility/facility-a/reports/workbench/');
     expect(view.root.querySelector<HTMLInputElement>(scope === 'account' ? '#account-report-name' : '#report-workbench-name')?.value).toBe('');
-    expect(view.root.textContent).toContain('Report-specific settings');
+    expect(view.root.textContent).toContain(scope === 'facility' ? 'Reporting period' : 'Report-specific settings');
     view.coverage.next({ state: 'evaluating', meters: [] });
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
     expect(view.dashboard().browseReady()).toBe(false);
@@ -341,7 +342,7 @@ describe('report inventory browser journeys and presentation', () => {
     expect(view.dashboard().inventory.overrides()[entry.guid]).toBe('detailed');
     await vi.waitFor(() => {
       expect((document.activeElement as HTMLElement)?.dataset['browseId']).toBe(entry.guid);
-      expect(view.root.scrollTop).toBeCloseTo(scroll, 0);
+      expect(view.root.scrollTop).toBeCloseTo(Math.min(scroll, view.root.scrollHeight - view.root.clientHeight), 0);
     });
     view.fixture.destroy();
   });
@@ -433,7 +434,8 @@ describe('report inventory browser journeys and presentation', () => {
         expect(scope.top).toBeCloseTo(bounds.top + parseFloat(getComputedStyle(tile).borderTopWidth), 0);
         expect(scope.left).toBeCloseTo(bounds.left + parseFloat(getComputedStyle(tile).borderLeftWidth), 0);
         expect(scope.right).toBeCloseTo(bounds.right - parseFloat(getComputedStyle(tile).borderRightWidth), 0);
-        expect(tile.textContent).toContain('Report content pending');
+        if (tile.dataset['reportScope'] === 'facility') expect(tile.textContent).not.toContain('Report content pending');
+        else expect(tile.textContent).toContain('Report content pending');
         if (tile.dataset['reportScope'] === 'facility') {
           expect(tile.querySelector('app-inventory-card-header .portfolio-tile__owner')).not.toBeNull();
           expect(tile.querySelector('.portfolio-tile__ownership .portfolio-tile__owner')).toBeNull();

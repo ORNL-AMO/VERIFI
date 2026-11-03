@@ -1,0 +1,34 @@
+@let host = workbench.host;
+@let view = host.presentation();
+@let session = workbench.session();
+@let returnLink = host.returnLink();
+@if (host.state() === 'loading') {
+  <p role="status">Loading report…</p>
+} @else if (host.state() === 'error') {
+  <div class="v1-alert v1-alert--danger" role="alert">{{ host.error() || 'The report workspace could not be loaded.' }}</div>
+  <a [routerLink]="returnLink.route" [queryParams]="returnLink.queryParams">Return to reports</a>
+} @else if (!view || !session) {
+  <app-data-empty-state icon="report" context="account" title="Report unavailable" description="This report may have been deleted, belong to another workspace, or be hidden by the account’s Other Impacts setting."/>
+  <a class="v1-btn v1-btn--secondary" [routerLink]="returnLink.route" [queryParams]="returnLink.queryParams">Return to reports</a>
+} @else {
+  <app-report-workbench-header [editor]="session.runtime.editor" [breadcrumbs]="view.breadcrumbs" [breadcrumbLabel]="view.breadcrumbLabel"
+    [titleId]="view.titleId" [resources]="view.resources" [selectedId]="view.selectedId" [name]="view.name" [typeLabel]="view.typeLabel"
+    [status]="view.status" [statusLabel]="view.statusLabel" [facts]="view.facts" [stages]="workbench.stages()"
+    [checksStatus]="workbench.workflow()" (reportSelected)="workbench.switchReport($event)"/>
+  <main class="report-workbench-content" [attr.aria-labelledby]="view.titleId"><ng-content/></main>
+  <footer class="v1-wizard-actions" aria-label="Report workflow navigation">
+    @if (workbench.previous(); as previous) {
+      <a class="v1-btn v1-btn--quiet" [routerLink]="previous.route"><app-ui-icon name="chevronLeft"/>Back</a>
+    } @else { <a class="v1-btn v1-btn--quiet" [routerLink]="returnLink.route" [queryParams]="returnLink.queryParams"><app-ui-icon name="chevronLeft"/>Back</a> }
+    <div class="v1-wizard-actions__next">
+      @if (host.stage() === 'data-checks') {
+        @if (workbench.workflow(); as checks) { <app-analysis-checks-acknowledgment [workflow]="checks" (acknowledged)="workbench.confirmReview()"/> }
+      }
+      @if (workbench.next(); as next) {
+        @if (workbench.canContinue()) { <a class="v1-btn v1-btn--action" [routerLink]="next.route">Continue<app-ui-icon name="chevronRight"/></a> }
+        @else { <button type="button" class="v1-btn v1-btn--action" disabled>Continue<app-ui-icon name="chevronRight"/></button> }
+      } @else if (session.runtime.showOutputActions) { <app-report-output-actions/> }
+      @else { <a class="v1-btn v1-btn--action" [routerLink]="returnLink.route" [queryParams]="returnLink.queryParams">Back to reports<app-ui-icon name="arrowLeft"/></a> }
+    </div>
+  </footer>
+}

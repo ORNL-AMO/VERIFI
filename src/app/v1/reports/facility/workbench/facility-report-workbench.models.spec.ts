@@ -1,4 +1,4 @@
-import { FACILITY_REPORT_TYPES } from '../facility-report.models';
+import { FACILITY_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
 import { reportFixture } from '../testing/report-test-fixtures';
 import { buildFacilityReportStages, facilityReportStage } from './facility-report-workbench.models';
 

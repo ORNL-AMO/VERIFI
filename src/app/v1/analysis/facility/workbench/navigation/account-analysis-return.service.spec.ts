@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { AccountAnalysisReturnService, readAccountAnalysisReturnOrigin } from './account-analysis-return.service';
-import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 
 describe('AccountAnalysisReturnService', () => {
   afterEach(() => TestBed.resetTestingModule());

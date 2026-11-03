@@ -5,7 +5,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { TestBed } from '@angular/core/testing';
 import { NavigationCancel, NavigationEnd } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
-import { FACILITY_REPORT_TYPES } from '../facility-report.models';
+import { FACILITY_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
 import { reportFacility, reportFixture, reportSnapshot } from '../testing/report-test-fixtures';
 import { setupReportWorkbench } from '../testing/report-workbench-test-setup';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -14,18 +14,28 @@ describe('facility report workbench navigation', () => {
   it.each(FACILITY_REPORT_TYPES)('opens $label with the correct stages and footer destinations without writing', async ({ value, label }) => {
     const { harness, open, updateName, store } = await setupReportWorkbench([reportFixture({ facilityReportType: value })]);
     const workbench = await open();
+    expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name)
+      .toBe(value === 'analysis' ? 'facilityAnalysisReport' : 'report');
     expect(workbench.context.stages().map(stage => stage.label)).toEqual(['analysis', 'savings', 'costSavings'].includes(value)
       ? ['Setup', 'Data Checks', `${label} Report`] : ['Setup', `${label} Report`]);
     const footer: HTMLElement = harness.routeNativeElement!.querySelector('footer')!;
+    expect(footer.querySelector('app-report-output-actions')).toBeNull();
     expect(footer.querySelector('a')?.getAttribute('href')).toContain('/reports/dashboard');
-    expect(footer.querySelectorAll('a')[1].getAttribute('href')).toContain(workbench.next()!.id);
-    expect(harness.routeNativeElement!.textContent).toContain('Report-specific settings');
-    expect(harness.routeNativeElement!.querySelector('app-facility-report-setup')?.textContent).toContain(`${label} settings are pending migration`);
+    if (value === 'analysis') expect(footer.querySelector<HTMLButtonElement>('button.v1-btn--action')?.disabled).toBe(true);
+    else expect(footer.querySelectorAll('a')[1].getAttribute('href')).toContain(workbench.workbench.next()!.id);
+    if (value !== 'analysis') expect(harness.routeNativeElement!.textContent).toContain('Report-specific settings');
+    if (value !== 'analysis') expect(harness.routeNativeElement!.querySelector('app-facility-report-setup')?.textContent).toContain(`${label} settings are pending migration`);
+    else expect(harness.routeNativeElement!.querySelector('app-analysis-report-setup')).not.toBeNull();
     await open('report-a', 'report');
-    expect(harness.routeNativeElement!.querySelector('app-facility-report-preview h2')?.textContent?.trim()).toBe(`${label} Report`);
-    expect(harness.routeNativeElement!.querySelector('footer')?.textContent).toContain('Back to reports');
+    expect(harness.routeNativeElement!.querySelector(value === 'analysis' ? 'app-analysis-report-preview h2' : 'app-pending-report-stage h2')?.textContent?.trim()).toBe(value === 'analysis' ? 'Facility analysis report' : `${label} Report`);
+    if (value === 'analysis') {
+      const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions')!;
+      const buttons = Array.from(outputs.querySelectorAll<HTMLButtonElement>('button'));
+      expect(buttons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Present']);
+      expect(buttons.every(button => button.disabled && button.type === 'button')).toBe(true);
+    } else expect(harness.routeNativeElement!.querySelector('footer')?.textContent).toContain('Back to reports');
     expect(harness.routeNativeElement!.querySelector('footer a')?.getAttribute('href')).toContain(['analysis', 'savings', 'costSavings'].includes(value) ? '/data-checks' : '/setup');
-    expect(harness.routeNativeElement!.textContent).toContain('preview is pending migration');
+    expect(harness.routeNativeElement!.textContent).toContain(value === 'analysis' ? 'Waiting for' : 'preview is pending migration');
     expect(updateName).not.toHaveBeenCalled();
     expect(store.committedRevision()).toBeUndefined();
   });
@@ -35,17 +45,17 @@ describe('facility report workbench navigation', () => {
     vi.spyOn(TestBed.inject(WorkspaceNavigationService), 'isSingleSiteWorkspace').mockReturnValue(true);
     const workbench = await open();
     expect(workbench.context.typeLabel()).toBe('Analysis — Facility format');
-    const setup = harness.routeNativeElement!.querySelector('app-facility-report-setup')!;
-    expect(setup.textContent).toContain('Analysis settings are pending migration');
+    const setup = harness.routeNativeElement!.querySelector('app-analysis-report-setup')!;
+    expect(setup).not.toBeNull();
     expect(setup.textContent).not.toContain('Facility format');
     await open('report-a', 'data-checks');
-    expect(harness.routeNativeElement!.querySelector('app-facility-report-data-checks')?.textContent).toContain('Analysis report');
+    expect(harness.routeNativeElement!.querySelector('app-analysis-report-data-checks')?.textContent).toContain('Data Checks');
     await open('report-a', 'report');
-    expect(harness.routeNativeElement!.querySelector('app-facility-report-preview h2')?.textContent?.trim()).toBe('Analysis Report');
+    expect(harness.routeNativeElement!.querySelector('app-analysis-report-preview h2')?.textContent?.trim()).toBe('Facility analysis report');
   });
 
   it('uses report context, linked breadcrumbs, collapsible facts, and validation badges', async () => {
-    const { open, harness, status } = await setupReportWorkbench();
+    const { open, harness, status } = await setupReportWorkbench([reportFixture({ facilityReportType: 'overview' })]);
     await open();
     const host = harness.routeNativeElement!;
     const stageIcons = () => harness.routeDebugElement!.query(By.css('app-analysis-stage-navigation')).queryAll(By.directive(IconComponent)).map(icon => (icon.componentInstance as IconComponent).name);
@@ -75,14 +85,14 @@ describe('facility report workbench navigation', () => {
     expect(host.querySelector('app-facility-report-setup')?.textContent).toContain('Select a reporting period.');
   });
 
-  it('keeps drafts across stages and flushes before same-component report switching or dashboard return', async () => {
+  it('saves before stage changes, same-component report switching and dashboard return', async () => {
     const { harness, open, router, updateName, store } = await setupReportWorkbench();
     const workbench = await open();
     workbench.editor.name.setValue('New name');
     await open('report-a', 'data-checks');
     expect(workbench.editor.name.value).toBe('New name');
-    expect(updateName).not.toHaveBeenCalled();
-    expect(harness.routeNativeElement!.textContent).toContain('does not complete checks');
+    expect(store.facilityReports().find(report => report.guid === 'report-a')?.name).toBe('New name');
+    expect(store.facilityAnalyses()).toEqual([]);
     workbench.switchReport('report-b');
     await harness.fixture.whenStable();
     expect(store.facilityReports().find(report => report.guid === 'report-a')?.name).toBe('New name');
@@ -96,6 +106,7 @@ describe('facility report workbench navigation', () => {
     const { open, router, updateName } = await setupReportWorkbench();
     const workbench = await open();
     workbench.editor.name.setValue(' ');
+    expect(await router.navigateByUrl('/v1/workspace/facility/facility-a/reports/workbench/report-a/data-checks')).toBe(false);
     expect(await router.navigateByUrl('/v1/workspace/facility/facility-a/reports/workbench/report-b/setup')).toBe(false);
     expect(await router.navigateByUrl('/v1/workspace/facility/facility-b/reports/workbench/report-a/setup')).toBe(false);
     expect(await router.navigateByUrl('/elsewhere')).toBe(false);
@@ -128,7 +139,7 @@ describe('facility report workbench navigation', () => {
     status.state.set('error');
     await open('report-a', 'report');
     expect(harness.routeNativeElement!.textContent).toContain('Setup status unavailable');
-    expect(harness.routeNativeElement!.textContent).toContain('preview is pending migration');
+    expect(harness.routeNativeElement!.querySelector('app-analysis-report-preview')).not.toBeNull();
   });
 
   it('protects report-to-report browser history navigation until invalid changes are discarded', async () => {

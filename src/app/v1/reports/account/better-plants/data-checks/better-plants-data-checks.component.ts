@@ -7,6 +7,10 @@ import { BetterPlantsReportService } from '../better-plants-report.service';
 export class BetterPlantsDataChecksComponent {
   readonly context = inject(AccountReportWorkbenchContext);
   readonly report = inject(BetterPlantsReportService);
+  readonly setupRoute = computed(() => {
+    const report = this.context.report();
+    return report ? this.context.navigation.accountReportWorkbenchRoute(report.accountId, report.guid) : this.context.dashboardRoute();
+  });
   readonly groupNames = computed(() => Object.fromEntries(this.context.workspace.meterGroups().map(item => [item.guid, item.name])));
   readonly facilityNames = computed(() => Object.fromEntries(this.context.workspace.facilities().map(item => [item.guid, item.name])));
 }

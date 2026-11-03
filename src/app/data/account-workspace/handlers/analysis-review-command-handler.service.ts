@@ -11,7 +11,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { ANALYSIS_DATA_CHECKS_VERSION, AnalysisDataCheckReview } from '@data/models/analysis-review';
-import { AnalysisReportInputs, buildAnalysisReportInputs, reportYears } from '@domain/reports/analysis-report-inputs';
+import { AnalysisReportInputs, CheckedAnalysisReportInputs, FacilityAnalysisReportInputs, buildAnalysisReportInputs, buildFacilityAnalysisReportInputs, assertAnalysisReportYears } from '@domain/reports/analysis-report-inputs';
 import { calculateAnalysisDataChecks } from '@domain/reports/analysis-data-checks';
 import { analysisReviewContent } from '@domain/reports/analysis-review-inputs';
 import { analysisReviewFingerprint } from '@platform/reports/analysis-review-fingerprint';
@@ -25,11 +25,24 @@ export class AnalysisReviewCommandHandler {
   constructor(private readonly transactions: IndexedDbTransactionService) { }
 
   async confirm(accountGuid: string, accountAnalysisGuid: string, displayed: AnalysisReportInputs, years: readonly number[]): Promise<AnalysisReviewWriteResult> {
+    return this.confirmInputs(accountGuid, displayed, years, snapshot => buildAnalysisReportInputs(snapshot, accountAnalysisGuid));
+  }
+
+  async confirmFacility(accountGuid: string, facilityGuid: string, analysisGuid: string, displayed: FacilityAnalysisReportInputs,
+    years: readonly number[]): Promise<AnalysisReviewWriteResult> {
+    if (displayed.kind !== 'facility' || displayed.analysis.guid !== analysisGuid || displayed.analysis.facilityId !== facilityGuid) {
+      throw new WorkspaceWriteError('validation-failed', 'The displayed facility review is unavailable. Run Data Checks again.');
+    }
+    return this.confirmInputs(accountGuid, displayed, years, snapshot => buildFacilityAnalysisReportInputs(snapshot, facilityGuid, analysisGuid));
+  }
+
+  private async confirmInputs(accountGuid: string, displayed: CheckedAnalysisReportInputs, years: readonly number[],
+    prepare: (snapshot: AccountWorkspaceSnapshot) => CheckedAnalysisReportInputs): Promise<AnalysisReviewWriteResult> {
     if (displayed.account.guid !== accountGuid || !years.length || new Set(years).size !== years.length) {
       throw new WorkspaceWriteError('validation-failed', 'The displayed analysis review is unavailable. Run Data Checks again.');
     }
     const contents = years.map(year => {
-      reportYears(displayed.analysis.baselineYear, year, false);
+      assertAnalysisReportYears(displayed, [year]);
       if (calculateAnalysisDataChecks(displayed, year).hasBlockingErrors) {
         throw new WorkspaceWriteError('validation-failed', 'Resolve blocking analysis issues before confirming review.');
       }
@@ -51,7 +64,7 @@ export class AnalysisReviewCommandHandler {
       ]);
       const snapshot: AccountWorkspaceSnapshot = { account, facilities, accountAnalyses, facilityAnalyses, meters, meterData, predictors, predictorData,
         meterGroups: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] };
-      const current = buildAnalysisReportInputs(snapshot, accountAnalysisGuid);
+      const current = prepare(snapshot);
       if (years.some((year, index) => analysisReviewContent(current, year) !== contents[index])) {
         throw new WorkspaceWriteError('validation-failed', 'Analysis inputs changed during review. Run Data Checks again before confirming.');
       }

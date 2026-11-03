@@ -6,7 +6,7 @@ import { reportStatusNavigationSource, resolveReportStatusItem } from '@app/v1/s
 import { statusDestinationRoute } from '@app/v1/status/status-destination-route';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
-import { readReportAnalysisOrigin, resolveReportAnalysisOrigin } from '@app/v1/reports/report-analysis-origin';
+import { readReportAnalysisOrigin, resolveReportAnalysisOrigin } from '@app/v1/reports/shared/analysis-inspection/report-analysis-origin';
 import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 
 export const singleFacilityAnalysisPairGuard: CanActivateChildFn = async (_route, state) => {
@@ -18,6 +18,7 @@ export const singleFacilityAnalysisPairGuard: CanActivateChildFn = async (_route
     const target = parseWorkspaceRoute(state.url);
     // A report can open an owned analysis without selecting it or repairing hidden pairs.
     return !!resolveReportAnalysisOrigin(requestedReport, snapshot)
+      && (requestedReport.scope !== 'facility' || requestedReport.facilityGuid === target.facilityGuid)
       && !!snapshot?.facilities.some(facility => facility.accountId === requestedReport.accountGuid && facility.guid === target.facilityGuid)
       && !!snapshot?.facilityAnalyses.some(analysis => analysis.accountId === requestedReport.accountGuid
         && analysis.facilityId === target.facilityGuid && analysis.guid === target.analysisGuid);

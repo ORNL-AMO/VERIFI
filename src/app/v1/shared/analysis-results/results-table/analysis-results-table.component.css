@@ -1,0 +1,2 @@
+@import './analysis-results-table.css';
+:host { display: block; min-width: 0; }

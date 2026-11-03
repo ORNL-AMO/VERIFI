@@ -1,48 +1,18 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@data/models/analysis';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
+import { AnalysisColumnPickerComponent } from '../column-picker/analysis-column-picker.component';
+import { AnalysisColumnSection } from '../column-options/analysis-column-options.component';
 import { AnalysisResultTablePeriod, AnalysisResultsDisplayService, DEFAULT_ANALYSIS_TABLE_COLUMNS } from '../display/analysis-results-display.service';
+import { analysisResultColumnsForPeriod } from '../columns/analysis-result-columns';
 
 export interface AnalysisResultColumnOption { readonly id: keyof AnalysisTableColumns; readonly label: string; }
 
-const ANNUAL_COLUMN_OPTIONS: readonly AnalysisResultColumnOption[] = [
-  { id: 'actualEnergy', label: 'Actual use' },
-  { id: 'adjusted', label: 'Adjusted' },
-  { id: 'baselineAdjustmentForNormalization', label: 'Baseline adjustment for normalization' },
-  { id: 'baselineAdjustmentForOther', label: 'Baseline adjustment for other' },
-  { id: 'baselineAdjustment', label: 'Total baseline adjustment' },
-  { id: 'SEnPI', label: 'SEnPI' },
-  { id: 'bankedSavings', label: 'Banked savings' },
-  { id: 'savingsUnbanked', label: 'Unbanked savings' },
-  { id: 'savings', label: 'Savings' },
-  { id: 'totalSavingsPercentImprovement', label: 'Total savings % improvement' },
-  { id: 'newSavings', label: 'New savings' },
-  { id: 'annualSavingsPercentImprovement', label: 'Annual savings % improvement' },
-  { id: 'cummulativeSavings', label: 'Cumulative savings' }
-];
-
-const MONTHLY_COLUMN_OPTIONS: readonly AnalysisResultColumnOption[] = [
-  { id: 'actualEnergy', label: 'Actual use' },
-  { id: 'modeledEnergy', label: 'Modeled use' },
-  { id: 'adjusted', label: 'Adjusted' },
-  { id: 'baselineAdjustmentForNormalization', label: 'Baseline adjustment for normalization' },
-  { id: 'baselineAdjustmentForOther', label: 'Baseline adjustment for other' },
-  { id: 'baselineAdjustment', label: 'Total baseline adjustment' },
-  { id: 'SEnPI', label: 'SEnPI' },
-  { id: 'bankedSavings', label: 'Banked savings' },
-  { id: 'savingsUnbanked', label: 'Unbanked savings' },
-  { id: 'savings', label: 'Savings' },
-  { id: 'rollingSavings', label: 'Rolling savings' },
-  { id: 'rolling12MonthImprovement', label: 'Rolling 12-month improvement' }
-];
-
 @Component({
   selector: 'app-analysis-result-column-chooser', standalone: true,
-  imports: [ReactiveFormsModule, IconComponent, WorkspaceSlideoutComponent],
-  templateUrl: './analysis-result-column-chooser.component.html',
-  styleUrls: ['./analysis-result-column-chooser.component.css']
+  imports: [IconComponent, AnalysisColumnPickerComponent],
+  templateUrl: './analysis-result-column-chooser.component.html'
 })
 export class AnalysisResultColumnChooserComponent {
   readonly period = input<AnalysisResultTablePeriod>('annual');
@@ -51,12 +21,20 @@ export class AnalysisResultColumnChooserComponent {
   readonly predictorScopeId = input('');
   readonly predictorVariables = input<readonly AnalysisGroupPredictorVariable[]>([]);
   readonly open = signal(false);
-  readonly annualOptions = computed(() => this.optionsForBanking(ANNUAL_COLUMN_OPTIONS));
-  readonly monthlyOptions = computed(() => this.optionsForBanking(MONTHLY_COLUMN_OPTIONS).filter(option => this.showModeled() || option.id !== 'modeledEnergy'));
+  readonly annualOptions = computed(() => this.optionsForPeriod('annual'));
+  readonly monthlyOptions = computed(() => this.optionsForPeriod('monthly').filter(option => this.showModeled() || option.id !== 'modeledEnergy'));
   readonly viewOptions = computed(() => this.period() === 'annual' ? this.annualOptions() : this.monthlyOptions());
   private readonly display = inject(AnalysisResultsDisplayService);
   private readonly controls = new Map<keyof AnalysisTableColumns, FormControl<boolean>>();
   private readonly predictorControls = new Map<string, FormControl<boolean>>();
+  readonly pickerSections = computed<readonly AnalysisColumnSection[]>(() => [
+    { id: 'results', label: this.period() === 'annual' ? 'Annual table' : 'Monthly table',
+      options: this.viewOptions().map(option => ({ ...option, control: this.control(option.id) })) },
+    ...(this.predictorVariables().length ? [{ id: 'predictors', label: 'Production variables',
+      hint: 'Variables used in the analysis are selected by default.',
+      options: this.predictorVariables().map(predictor => ({ id: predictor.id, label: predictor.name,
+        usedInAnalysis: predictor.productionInAnalysis, control: this.predictorControl(predictor.id) })) }] : [])
+  ]);
 
   openSlideout(): void {
     this.syncPredictors();
@@ -93,8 +71,8 @@ export class AnalysisResultColumnChooserComponent {
     if (!control) { control = new FormControl(false, { nonNullable: true }); this.predictorControls.set(predictorId, control); }
     return control;
   }
-  private optionsForBanking(options: readonly AnalysisResultColumnOption[]): readonly AnalysisResultColumnOption[] {
-    return this.hasBanking() ? options : options.filter(option => option.id !== 'bankedSavings' && option.id !== 'savingsUnbanked');
+  private optionsForPeriod(period: AnalysisResultTablePeriod): readonly AnalysisResultColumnOption[] {
+    return analysisResultColumnsForPeriod(period, this.hasBanking()).map(column => ({ id: column.id, label: column.selectionLabel ?? column.label }));
   }
   private setAll(visible: boolean): void {
     for (const option of this.viewOptions()) this.control(option.id).setValue(visible, { emitEvent: false });

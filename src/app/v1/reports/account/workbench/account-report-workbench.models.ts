@@ -2,6 +2,7 @@ import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-worksp
 import { ReportAnalysisSelection, accountReportAnalysisGuid, accountReportAnalysisIsEligible } from '@data/account-workspace/account-report-setup.models';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { ReportType } from '@data/models/constantsAndTypes';
+import { reportDefinition } from '@app/v1/reports/catalog/report-catalog';
 
 export interface ReportAnalysisOption {
   readonly value: string;
@@ -11,7 +12,7 @@ export interface ReportAnalysisOption {
 }
 export const reportAnalysisToken = (selection: ReportAnalysisSelection): string => selection.scope === 'account'
   ? JSON.stringify(['account', selection.analysisGuid]) : JSON.stringify(['facility', selection.facilityGuid, selection.analysisGuid]);
-export function hasAccountReportDataChecks(type: ReportType): boolean { return ['betterPlants', 'performance', 'accountSavings'].includes(type); }
+export function hasAccountReportDataChecks(type: ReportType): boolean { return reportDefinition('account', type)?.hasDataChecks ?? false; }
 export function savedReportAnalysisChoice(report: IdbAccountReport, snapshot: AccountWorkspaceSnapshot): ReportAnalysisSelection | null {
   const guid = accountReportAnalysisGuid(report);
   if (!guid) return null;

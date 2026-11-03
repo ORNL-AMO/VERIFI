@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { AnalysisModelComparisonChartComponent } from '@app/v1/shared/analysis-results/model-comparison-chart/analysis-model-comparison-chart.component';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { RegressionModelValidationComponent } from './regression-model-validation.component';
@@ -23,7 +25,9 @@ describe('RegressionModelValidationComponent', () => {
       }
     });
 
-    const series = (fixture.componentInstance.chartOption() as any).series;
+    fixture.detectChanges();
+    const chart = fixture.debugElement.query(By.directive(AnalysisModelComparisonChartComponent)).componentInstance as AnalysisModelComparisonChartComponent;
+    const series = (chart.option() as any).series;
     expect(series.map((item: any) => item.name)).toEqual([
       'Actual energy', 'Candidate modeled energy', 'Selected modeled energy'
     ]);

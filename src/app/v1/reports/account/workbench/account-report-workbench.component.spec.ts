@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NavigationCancel } from '@angular/router';
 import { firstValueFrom, filter } from 'rxjs';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
+import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
 import { accountReportSnapshot } from '../testing/account-report-test-fixtures';
 import { setupAccountReportWorkbench } from '../testing/account-report-workbench-test-setup';
 import { buildSingleFacilityAnalysisPair } from '@data/account-workspace/single-facility-analysis-pairs';
@@ -49,8 +49,13 @@ describe('account report workbench', () => {
     expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
     expect(!!harness.routeNativeElement!.querySelector('#account-report-analysis')).toBe(['betterPlants', 'performance', 'analysis', 'accountSavings'].includes(value));
     expect(harness.routeNativeElement!.querySelector('nav a')?.getAttribute('href')).toContain('/account-a/reports/dashboard');
+    expect(harness.routeNativeElement!.querySelector('footer app-report-output-actions')).toBeNull();
     await open('account-report', 'report');
     expect(workbench.context.stage()).toBe('report');
+    const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions')!;
+    const outputButtons = Array.from(outputs.querySelectorAll<HTMLButtonElement>('button'));
+    expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Present']);
+    expect(outputButtons.every(button => button.disabled && button.type === 'button')).toBe(true);
     if (value === 'betterPlants') {
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview')).not.toBeNull();
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();

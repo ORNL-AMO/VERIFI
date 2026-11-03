@@ -4,7 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { getNewIdbAccountReport } from '@data/models/idbModels/accountReport';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
+import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
 import { reportAccount, reportFacility, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { AccountReportActionsService } from './account-report-actions.service';
 

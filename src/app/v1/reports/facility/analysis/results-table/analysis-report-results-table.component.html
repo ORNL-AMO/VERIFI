@@ -1,0 +1,4 @@
+@let table = view();
+@if (table.missing) { <p class="v1-alert v1-alert--warning" role="status">Predictor data is missing in the highlighted periods. Review the source analysis and predictor entries.</p> }
+<app-analysis-results-table [view]="table" [period]="period()" [caption]="caption()" [unit]="unit()" [category]="category()" [showCaption]="period() === 'monthly'" [emphasizeNegative]="true"/>
+<app-analysis-result-marker-legend [markers]="table.markers"/>

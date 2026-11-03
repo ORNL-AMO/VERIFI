@@ -1,0 +1,6 @@
+@import '../../../../shared/analysis-results/results-table/analysis-results-table.css';
+:host { display: block; } .formula { white-space: normal; min-width: 14rem; }
+.failed { background: color-mix(in srgb, var(--v1-danger) 15%, var(--v1-surface)); }
+
+.v1-analysis-results-table--details { min-width: 0; }
+p { margin: 0; }

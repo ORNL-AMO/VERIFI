@@ -62,6 +62,6 @@ describe('FacilityAnalysisGroupAnnualComponent', () => {
     expect(text).toContain('Model period');
     expect(text).toContain('Transition period');
     expect(text).not.toContain('99,999');
-    expect(fixture.componentInstance.useChartRows()[1].values['calculated']).toBeNull();
+    expect(fixture.componentInstance.charts().useRows[1].values['calculated']).toBeNull();
   });
 });

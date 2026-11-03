@@ -89,6 +89,12 @@ Better Plants now owns its typed energy/water setup, explicit shared analysis-re
 
 Validation: `npm run test:all:ci`, app TypeScript checking, and the production web build passed. Additional focused backup/copy compatibility assertions passed after the full run. Native Chromium journeys cover energy/water Workers, explicit keyboard confirmation, shared reuse, dependency invalidation, and 1024/640/390 px light/dark/high-contrast layouts. Full form captures were visually inspected. Build warnings remain informational. No Electron runtime boundary changed; native Electron interaction and manual screen-reader checks were not performed. Known legacy performance-band and water-count presentation quirks remain documented in the architecture guide.
 
+## Facility Analysis in-app migration (#2793)
+
+Facility Analysis now implements typed setup, selected-year shared checks and review, and a continuous in-app document. Facility Annual and Monthly sections are followed by every group’s regression model details and annual/monthly results, with paper-style section spacing shared with Better Plants and viewport-delayed chart canvases. Site/source energy, water, baseline-only periods, existing visibility/column options, and saved GUID links are retained. See [V1 report architecture](v1-reports-architecture.md#facility-analysis-report) for the direct facility input and confirmation contracts.
+
+This covers the in-app workflow. Printing, PDF, PowerPoint, presentation mode, and final output verification remain with the separate output work; do not represent the original issue's output acceptance criteria as complete. Account Analysis and the other facility report types retain their pending content.
+
 ## Boundaries and working rules
 
 - Complete and review one phase before starting the next.
