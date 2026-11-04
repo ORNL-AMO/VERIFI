@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { maxDateValidator, minDateValidator } from '@shared/customFormValidators';
@@ -12,112 +12,127 @@ export interface MeterReadingFormContext {
   readonly displayHeatCapacity: boolean;
   readonly displayVehicleFuelEfficiency: boolean;
 }
+export interface MeterReadingChargeValues { chargeGuid: string; chargeAmount: number | null; chargeUsage: number | null; }
+export interface MeterReadingValues {
+  readDate: string;
+  totalVolume: number | null;
+  totalEnergyUse: number | null;
+  totalCost: number | null;
+  totalRealDemand: number | null;
+  totalBilledDemand: number | null;
+  powerFactor: number | null;
+  heatCapacity: number | null;
+  vehicleFuelEfficiency: number | null;
+  isEstimated: boolean;
+  chargesArray: MeterReadingChargeValues[];
+}
+export type MeterReadingChargeForm = FormGroup<{ [K in keyof MeterReadingChargeValues]: FormControl<MeterReadingChargeValues[K]> }>;
+export type MeterReadingForm = FormGroup<{
+  [K in Exclude<keyof MeterReadingValues, 'chargesArray'>]: FormControl<MeterReadingValues[K]>
+} & { chargesArray: FormArray<MeterReadingChargeForm> }>;
+const NUMERIC_FIELDS = ['totalVolume', 'totalEnergyUse', 'totalCost', 'totalRealDemand', 'totalBilledDemand', 'powerFactor', 'heatCapacity', 'vehicleFuelEfficiency'] as const;
+export function normalizeMeterReading(value: MeterReadingValues): MeterReadingValues {
+  return { ...value, ...Object.fromEntries(NUMERIC_FIELDS.map(key => [key, value[key] ?? null])),
+    chargesArray: value.chargesArray.map(charge => ({ chargeGuid: charge.chargeGuid, chargeAmount: charge.chargeAmount ?? null, chargeUsage: charge.chargeUsage ?? null })) };
+}
+export function readMeterReading(meter: IdbUtilityMeter, reading: IdbUtilityMeterData): MeterReadingValues {
+  return normalizeMeterReading({
+    readDate: getMeterDataDateString(reading), totalVolume: reading.totalVolume ?? null,
+    totalEnergyUse: reading.totalEnergyUse ?? null, totalCost: reading.totalCost ?? null,
+    totalRealDemand: reading.totalRealDemand ?? null, totalBilledDemand: reading.totalBilledDemand ?? null,
+    powerFactor: reading.powerFactor ?? null, heatCapacity: reading.heatCapacity ?? meter.heatCapacity ?? null,
+    vehicleFuelEfficiency: reading.vehicleFuelEfficiency ?? meter.vehicleFuelEfficiency ?? null,
+    isEstimated: reading.isEstimated ?? false,
+    chargesArray: (reading.charges ?? []).map(charge => ({ chargeGuid: charge.chargeGuid, chargeAmount: charge.chargeAmount ?? null, chargeUsage: charge.chargeUsage ?? null }))
+  });
+}
+export function applyMeterReading(meter: IdbUtilityMeter, reading: IdbUtilityMeterData, value: MeterReadingValues): IdbUtilityMeterData {
+  const [year, month, day] = value.readDate.split('-').map(Number);
+  const updated = { ...structuredClone(reading), year, month, day, totalEnergyUse: value.totalEnergyUse ?? undefined,
+    totalCost: value.totalCost ?? undefined, isEstimated: value.isEstimated,
+    charges: value.chargesArray.map(charge => ({ chargeGuid: charge.chargeGuid, chargeAmount: charge.chargeAmount ?? undefined, chargeUsage: charge.chargeUsage ?? undefined })) };
+  if (meter.source === 'Electricity') {
+    updated.totalRealDemand = value.totalRealDemand ?? undefined;
+    updated.totalBilledDemand = value.totalBilledDemand ?? undefined;
+    updated.powerFactor = value.powerFactor ?? undefined;
+  } else {
+    updated.totalVolume = value.totalVolume ?? undefined;
+    updated.heatCapacity = value.heatCapacity ?? undefined;
+    updated.vehicleFuelEfficiency = value.vehicleFuelEfficiency ?? undefined;
+  }
+  return updated;
+}
 
 @Injectable({ providedIn: 'root' })
 export class MeterReadingFormService {
   constructor(private readonly formBuilder: FormBuilder) { }
-
-  buildForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, existingReadings: readonly IdbUtilityMeterData[] = []): FormGroup {
-    if (meter.source === 'Electricity') {
-      return this.buildElectricityForm(meter, meterData, existingReadings);
-    }
-    return this.buildGeneralForm(meter, meterData, this.contextForMeter(meter), existingReadings);
-  }
-
-  contextForMeter(meter: IdbUtilityMeter): MeterReadingFormContext {
-    return {
-      displayVolumeInput: meter.source === 'Other'
-        ? getIsEnergyUnit(meter.startingUnit) === false
-        : getIsEnergyUnit(meter.startingUnit) === false,
-      displayEnergyUse: meter.source === 'Other'
-        ? getIsEnergyUnit(meter.startingUnit) === true
-        : getIsEnergyMeter(meter.source),
-      displayHeatCapacity: checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope),
-      displayVehicleFuelEfficiency: meter.scope === 2 && meter.vehicleCategory === 2
-    };
-  }
-
-  updateReadingFromForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
-    const draft = structuredClone(meterData);
-    const dateData: string[] = form.controls['readDate'].value.split('-');
-    draft.year = parseInt(dateData[0], 10);
-    draft.month = parseInt(dateData[1], 10);
-    draft.day = parseInt(dateData[2], 10);
-    draft.totalEnergyUse = enabledControlValue(form, 'totalEnergyUse');
-    draft.totalCost = enabledControlValue(form, 'totalCost');
-    draft.isEstimated = form.controls['isEstimated'].value;
-
-    if (meter.source === 'Electricity') {
-      draft.totalRealDemand = enabledControlValue(form, 'totalRealDemand');
-      draft.totalBilledDemand = enabledControlValue(form, 'totalBilledDemand');
-      draft.powerFactor = enabledControlValue(form, 'powerFactor');
-    } else {
-      draft.totalVolume = enabledControlValue(form, 'totalVolume');
-      draft.heatCapacity = enabledControlValue(form, 'heatCapacity');
-      draft.vehicleFuelEfficiency = enabledControlValue(form, 'vehicleFuelEfficiency');
-    }
-
-    draft.charges = this.getChargesArray(form).controls.map(chargeGroup => ({
-      chargeGuid: chargeGroup.get('chargeGuid')?.value,
-      chargeAmount: chargeGroup.get('chargeAmount')?.value,
-      chargeUsage: chargeGroup.get('chargeUsage')?.value
-    }));
-    return draft;
-  }
-
-  private buildElectricityForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, existingReadings: readonly IdbUtilityMeterData[]): FormGroup {
-    return this.formBuilder.group({
-      readDate: [getMeterDataDateString(meterData), [Validators.required, maxDateValidator(), minDateValidator(), duplicateReadingDateValidator(meter, meterData, existingReadings)]],
-      totalEnergyUse: [meterData.totalEnergyUse, [Validators.required]],
-      totalCost: [meterData.totalCost, [Validators.min(0)]],
-      totalRealDemand: [meterData.totalRealDemand, [Validators.min(0)]],
-      totalBilledDemand: [meterData.totalBilledDemand, [Validators.min(0)]],
-      powerFactor: [meterData.powerFactor, [Validators.min(0), Validators.max(1)]],
-      isEstimated: [meterData.isEstimated || false],
-      chargesArray: this.buildChargesArray(meterData)
-    });
-  }
-
-  private buildGeneralForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, context: MeterReadingFormContext, existingReadings: readonly IdbUtilityMeterData[]): FormGroup {
-    const totalVolumeValidators: ValidatorFn[] = context.displayVolumeInput ? [Validators.required, Validators.min(0)] : [];
-    const totalEnergyUseValidators: ValidatorFn[] = context.displayEnergyUse
-      ? [Validators.required, ...((meter.source === 'Natural Gas' || meter.source === 'Other Energy' || meter.source === 'Other Fuels') ? [] : [Validators.min(0)])]
-      : [];
-    const heatCapacityValidators: ValidatorFn[] = context.displayHeatCapacity ? [Validators.required, Validators.min(0)] : [];
-    const fuelEfficiencyValidators: ValidatorFn[] = context.displayVehicleFuelEfficiency ? [Validators.required, Validators.min(0)] : [];
+  buildForm(meter: IdbUtilityMeter, reading: IdbUtilityMeterData, existingReadings: readonly IdbUtilityMeterData[] = []): MeterReadingForm {
+    const context = this.contextForMeter(meter);
+    const value = readMeterReading(meter, reading);
+    const energyValidators = context.displayEnergyUse ? [Validators.required,
+      ...(['Natural Gas', 'Other Energy', 'Other Fuels'].includes(meter.source) ? [] : [Validators.min(0)])] : [];
     const form = this.formBuilder.group({
-      readDate: [getMeterDataDateString(meterData), [Validators.required, maxDateValidator(), minDateValidator(), duplicateReadingDateValidator(meter, meterData, existingReadings)]],
-      totalVolume: [meterData.totalVolume, totalVolumeValidators],
-      totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
-      totalCost: [meterData.totalCost],
-      heatCapacity: [meterData.heatCapacity ?? meter.heatCapacity, heatCapacityValidators],
-      vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency ?? meter.vehicleFuelEfficiency, fuelEfficiencyValidators],
-      isEstimated: [meterData.isEstimated || false],
-      chargesArray: this.buildChargesArray(meterData)
+      readDate: this.formBuilder.nonNullable.control(value.readDate, [Validators.required, maxDateValidator(), minDateValidator(), duplicateReadingDateValidator(meter, reading, existingReadings)]),
+      totalVolume: this.formBuilder.control(value.totalVolume, context.displayVolumeInput ? [Validators.required, Validators.min(0)] : []),
+      totalEnergyUse: this.formBuilder.control(value.totalEnergyUse, meter.source === 'Electricity' ? [Validators.required] : energyValidators),
+      totalCost: this.formBuilder.control(value.totalCost, meter.source === 'Electricity' ? [Validators.min(0)] : []),
+      totalRealDemand: this.formBuilder.control(value.totalRealDemand, [Validators.min(0)]),
+      totalBilledDemand: this.formBuilder.control(value.totalBilledDemand, [Validators.min(0)]),
+      powerFactor: this.formBuilder.control(value.powerFactor, [Validators.min(0), Validators.max(1)]),
+      heatCapacity: this.formBuilder.control(value.heatCapacity, context.displayHeatCapacity ? [Validators.required, Validators.min(0)] : []),
+      vehicleFuelEfficiency: this.formBuilder.control(value.vehicleFuelEfficiency, context.displayVehicleFuelEfficiency ? [Validators.required, Validators.min(0)] : []),
+      isEstimated: this.formBuilder.nonNullable.control(value.isEstimated),
+      chargesArray: this.formBuilder.array(value.chargesArray.map(charge => this.formBuilder.group({
+        chargeGuid: this.formBuilder.nonNullable.control(charge.chargeGuid),
+        chargeAmount: this.formBuilder.control(charge.chargeAmount), chargeUsage: this.formBuilder.control(charge.chargeUsage)
+      })))
     });
-    if (context.displayVolumeInput) {
-      form.controls['totalEnergyUse'].disable();
-    }
-    form.controls['heatCapacity'].disable();
-    form.controls['vehicleFuelEfficiency'].disable();
+    this.setEnabled(form, meter, true);
     return form;
   }
-
-  private buildChargesArray(meterData: IdbUtilityMeterData): FormArray {
-    return this.formBuilder.array((meterData.charges ?? []).map(charge => this.formBuilder.group({
-      chargeGuid: [charge.chargeGuid],
-      chargeAmount: [charge.chargeAmount],
-      chargeUsage: [charge.chargeUsage]
-    })));
+  contextForMeter(meter: IdbUtilityMeter): MeterReadingFormContext {
+    return { displayVolumeInput: getIsEnergyUnit(meter.startingUnit) === false,
+      displayEnergyUse: meter.source === 'Other' ? getIsEnergyUnit(meter.startingUnit) === true : getIsEnergyMeter(meter.source),
+      displayHeatCapacity: checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope),
+      displayVehicleFuelEfficiency: meter.scope === 2 && meter.vehicleCategory === 2 };
   }
-
-  private getChargesArray(form: FormGroup): FormArray {
-    return form.get('chargesArray') as FormArray;
+  setEnabled(form: MeterReadingForm, meter: IdbUtilityMeter, enabled: boolean): void {
+    if (!enabled) { form.disable({ emitEvent: false }); return; }
+    form.enable({ emitEvent: false });
+    if (meter.source !== 'Electricity') {
+      if (this.contextForMeter(meter).displayVolumeInput) form.controls.totalEnergyUse.disable({ emitEvent: false });
+      form.controls.heatCapacity.disable({ emitEvent: false });
+      form.controls.vehicleFuelEfficiency.disable({ emitEvent: false });
+      for (const field of ['totalRealDemand', 'totalBilledDemand', 'powerFactor'] as const) form.controls[field].disable({ emitEvent: false });
+    }
   }
-}
-
-function enabledControlValue(form: FormGroup, controlName: string): any {
-  return form.getRawValue()[controlName];
+  refreshValidation(form: MeterReadingForm, meter: IdbUtilityMeter, reading: IdbUtilityMeterData, existing: readonly IdbUtilityMeterData[]): void {
+    const fresh = this.buildForm(meter, reading, existing);
+    for (const key of Object.keys(fresh.controls) as (keyof MeterReadingForm['controls'])[]) {
+      form.controls[key].setValidators(fresh.controls[key].validator);
+      form.controls[key].updateValueAndValidity({ emitEvent: false });
+    }
+  }
+  hydrate(form: MeterReadingForm, value: MeterReadingValues): void {
+    const { chargesArray, ...fields } = value;
+    form.patchValue(fields, { emitEvent: false });
+    const existing = new Map(form.controls.chargesArray.controls.map(control => [control.controls.chargeGuid.value, control]));
+    const controls = chargesArray.map(charge => {
+      const control = existing.get(charge.chargeGuid) ?? this.formBuilder.group({
+        chargeGuid: this.formBuilder.nonNullable.control(charge.chargeGuid),
+        chargeAmount: this.formBuilder.control(charge.chargeAmount), chargeUsage: this.formBuilder.control(charge.chargeUsage)
+      });
+      control.patchValue(charge, { emitEvent: false });
+      return control;
+    });
+    if (controls.length !== form.controls.chargesArray.length || controls.some((control, index) => form.controls.chargesArray.at(index) !== control)) {
+      form.controls.chargesArray.clear({ emitEvent: false });
+      for (const control of controls) form.controls.chargesArray.push(control, { emitEvent: false });
+    }
+  }
+  updateReadingFromForm(meter: IdbUtilityMeter, reading: IdbUtilityMeterData, form: MeterReadingForm): IdbUtilityMeterData {
+    return applyMeterReading(meter, reading, form.getRawValue());
+  }
 }
 
 function duplicateReadingDateValidator(

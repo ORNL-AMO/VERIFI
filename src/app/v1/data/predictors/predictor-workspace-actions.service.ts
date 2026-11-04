@@ -13,7 +13,7 @@ import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.
 import { getNewIdbPredictor, IdbPredictor, isStandardPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getGUID } from '@shared/sharedHelperFunctions';
-import { EditorConflictError } from '@app/v1/data/editing/draft-reconciliation';
+import { EditorConflictError, reconcileFields } from '@app/v1/data/editing/draft-reconciliation';
 import { applyStandardPredictorSettings, normalizeStandardPredictorSettings, reconcileStandardPredictorSettings,
   StandardPredictorSettings, StandardPredictorSettingsIdentity, standardPredictorSettings,
   validStandardPredictorSettings } from './models/standard-predictor-settings.models';
@@ -228,7 +228,11 @@ export class PredictorWorkspaceActionsService {
           notification: { successTitle: 'Predictor reading added' },
           publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('predictorData', [value]) }
         },
-        () => this.predictorHandler.addPredictorData(newReading, account.guid)
+        () => {
+          const latestPredictor = this.requirePredictor(newReading.predictorId);
+          this.assertCurrentReadingRequest(newReading, latestPredictor, account.guid);
+          return this.predictorHandler.addPredictorData(newReading, account.guid);
+        }
       );
       return result.value;
     });
@@ -241,6 +245,7 @@ export class PredictorWorkspaceActionsService {
       throw new WorkspaceWriteError('validation-failed', 'The predictor reading does not belong to the active facility.');
     }
     const updated = { ...structuredClone(reading), id: current.id };
+    const values = (item: IdbPredictorData) => ({ year: item.year, month: item.month, amount: item.amount, notes: item.notes ?? '' });
     return this.executeWithRecovery(async () => {
       const result = await this.commandBoundary.execute(
         {
@@ -249,7 +254,17 @@ export class PredictorWorkspaceActionsService {
           notification: { successTitle: 'Predictor reading saved' },
           publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('predictorData', [value]) }
         },
-        () => this.predictorHandler.updatePredictorData(updated, account.guid)
+        () => {
+          const latest = this.requireReading(updated.guid, updated.predictorId);
+          const latestPredictor = this.requirePredictor(updated.predictorId);
+          const merged = reconcileFields(values(current), values(updated), values(latest), {
+            groups: [{ id: 'month', label: 'Month', keys: ['year', 'month'] }]
+          });
+          if (merged.conflicts.length) throw new EditorConflictError(values(latest));
+          const mergedReading = { ...latest, ...merged.value };
+          this.assertCurrentReadingRequest(mergedReading, latestPredictor, account.guid);
+          return this.predictorHandler.updatePredictorData(mergedReading, account.guid);
+        }
       );
       return result.value;
     });
@@ -599,6 +614,20 @@ export class PredictorWorkspaceActionsService {
       .find(item => item.guid === guid && item.predictorId === predictorGuid);
     if (!reading) throw new WorkspaceWriteError('validation-failed', 'The predictor reading is no longer available.');
     return structuredClone(reading);
+  }
+
+  private assertCurrentReadingRequest(reading: IdbPredictorData, predictor: IdbPredictor, accountGuid: string): void {
+    if (this.workspace.account()?.guid !== accountGuid || predictor.accountId !== accountGuid
+      || !isStandardPredictor(predictor) || reading.accountId !== accountGuid || reading.facilityId !== predictor.facilityId
+      || !Number.isInteger(reading.year) || reading.year < 1 || !Number.isInteger(reading.month)
+      || reading.month < 1 || reading.month > 12 || !Number.isFinite(reading.amount)
+      || (!predictor.canBeNegative && reading.amount < 0)) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor reading is no longer valid in this workspace.');
+    }
+    if (this.workspace.facilityPredictorData().some(candidate => candidate.predictorId === predictor.guid
+      && candidate.guid !== reading.guid && candidate.year === reading.year && candidate.month === reading.month)) {
+      throw new WorkspaceWriteError('validation-failed', 'A predictor reading already exists for this month.');
+    }
   }
 
   private facilityAnalyses(facilityGuid: string) {

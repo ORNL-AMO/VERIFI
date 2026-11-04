@@ -120,6 +120,83 @@ describe('PredictorWorkspaceActionsService', () => {
     expect(predictorHandler.updateStandardPredictor).not.toHaveBeenCalled();
   });
 
+  it('retains unedited reading fields from the latest queued record', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const boundary = TestBed.inject(WorkspaceCommandBoundary);
+    let execute!: () => Promise<void>;
+    vi.mocked(boundary.execute).mockImplementationOnce((options: any, persist: () => Promise<any>) => new Promise(resolve => {
+      execute = async () => resolve({ value: await persist(), change: options });
+    }));
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+    readings.set([{ ...source, amount: 30, weatherDataChanged: true }]);
+    await execute(); await saving;
+    expect(predictorHandler.updatePredictorData).toHaveBeenCalledWith(expect.objectContaining({
+      amount: 30, notes: 'Local note', weatherDataChanged: true
+    }), 'account-a');
+  });
+
+  it.each([
+    { local: { year: 2027 }, saved: { month: 2 } },
+    { local: { month: 2 }, saved: { year: 2027 } }
+  ])('reviews concurrent period changes instead of combining $local with $saved', async ({ local, saved }) => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const execute = deferNextReadingCommand();
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, ...local, notes: 'Local note' });
+    const rejected = expect(saving).rejects.toBeInstanceOf(EditorConflictError);
+    readings.set([{ ...source, ...saved }]);
+
+    await execute(); await rejected;
+
+    expect(predictorHandler.updatePredictorData).not.toHaveBeenCalled();
+  });
+
+  it('validates the merged period against duplicate months in the latest queued workspace', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const execute = deferNextReadingCommand();
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+    const rejected = expect(saving).rejects.toMatchObject({
+      code: 'validation-failed', message: 'A predictor reading already exists for this month.'
+    });
+    readings.set([{ ...source, year: 2027, month: 2 }, reading('duplicate-month', 21, 2027, 2)]);
+
+    await execute(); await rejected;
+
+    expect(predictorHandler.updatePredictorData).not.toHaveBeenCalled();
+  });
+
+  it.each([{ year: 0, month: 1 }, { year: 2027, month: 13 }])(
+    'rejects a merged saved period outside the supported range: %j', async savedPeriod => {
+      const service = TestBed.inject(PredictorWorkspaceActionsService);
+      const execute = deferNextReadingCommand();
+      const source = readings()[0];
+      const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+      const rejected = expect(saving).rejects.toMatchObject({ code: 'validation-failed' });
+      readings.set([{ ...source, ...savedPeriod }]);
+
+      await execute(); await rejected;
+
+      expect(predictorHandler.updatePredictorData).not.toHaveBeenCalled();
+    }
+  );
+
+  it('merges independent reading edits into a valid saved period after its original month becomes occupied', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const execute = deferNextReadingCommand();
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+    readings.set([{ ...source, year: 2027, month: 2, amount: 30, weatherDataChanged: true },
+      reading('old-month', 21, source.year, source.month)]);
+
+    await execute(); await saving;
+
+    expect(predictorHandler.updatePredictorData).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      guid: source.guid, year: 2027, month: 2, amount: 30, notes: 'Local note', weatherDataChanged: true
+    }), 'account-a');
+  });
+
   it('copies settings into a new identity without copying readings', async () => {
     const copy = await TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing);
     expect(copy.guid).not.toBe(existing.guid);
@@ -331,6 +408,18 @@ describe('PredictorWorkspaceActionsService', () => {
     expect(boundary.execute).not.toHaveBeenCalled();
   });
 });
+
+function deferNextReadingCommand(): () => Promise<void> {
+  let execute!: () => Promise<void>;
+  vi.mocked(TestBed.inject(WorkspaceCommandBoundary).execute).mockImplementationOnce((options: any, persist: () => Promise<any>) =>
+    new Promise((resolve, reject) => {
+      execute = async () => {
+        try { resolve({ value: await persist(), change: options }); }
+        catch (error) { reject(error); }
+      };
+    }));
+  return () => execute();
+}
 
 function reading(guid: string, id: number, year: number, month: number): any {
   return {
