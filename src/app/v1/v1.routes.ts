@@ -8,7 +8,7 @@ import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/cu
 import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
 import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
-import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
+import { InventoryPlaceholderComponent } from '@app/v1/data/energy-uses/inventory-placeholder/inventory-placeholder.component';
 import { FacilitiesInventoryComponent } from '@app/v1/data/facilities/inventory/facilities-inventory.component';
 import { MetersInventoryComponent } from '@app/v1/data/meters/inventory/meters-inventory.component';
 import { PredictorsInventoryComponent } from '@app/v1/data/predictors/inventory/predictors-inventory.component';
@@ -138,7 +138,7 @@ export const V1Routes: Routes = [
                   { path: 'facilities', component: FacilitiesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: 'meters', component: MetersInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: 'predictors', component: PredictorsInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
-                  { path: 'energy-uses', component: EnergyUsesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'energy-uses', component: InventoryPlaceholderComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },

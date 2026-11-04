@@ -46,6 +46,8 @@
   } @else if (tile.analysisSnapshot; as analysis) {
     @if (analysis.active) { <p class="portfolio-tile__analysis-active"><app-ui-icon name="target" [size]="18"/>Active for {{ analysis.scope }} reporting</p> }
     @if (level !== 'simple') { <app-analysis-snapshot [snapshot]="analysis" [detailed]="level === 'detailed'" [print]="print" (detailsRequested)="actionRequested.emit({guid: tile.guid, action: 'details'})"/> }
+  } @else if (tile.energyUseSnapshot; as snapshot) {
+    @if (level !== 'simple') { <app-energy-use-snapshot [snapshot]="snapshot" [detailed]="level === 'detailed'"/> }
   } @else if (tile.facilitySnapshot; as snapshot) {
     @if (level !== 'simple') { <app-facility-snapshot [snapshot]="snapshot" [facilityName]="tile.name" [detailed]="level === 'detailed'" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)" (facilityInventoryRequested)="facilityInventoryRequested.emit($event)"/> }
   } @else if (tile.meterSnapshot || tile.predictorSnapshot; as snapshot) {

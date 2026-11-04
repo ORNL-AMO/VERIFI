@@ -46,6 +46,13 @@ When a workflow enters v1 planning or implementation, record only the decisions 
 
 If the workflow needs current-state detail, add a short current-state note using the template in the [current-state notes guide](unified-ux-current-state.md). Do not create a full application inventory as a prerequisite for v1 work.
 
+### Energy Uses Item Migration
+
+- **Workflow:** Facility energy-use setup and equipment estimation, currently owned by the [v0 Energy Uses feature](../src/app/v0/data-management/account-facilities/facility-data/facility-energy-uses/). See the [Energy Uses migration plan](v1-energy-uses-migration-plan.md) for phased delivery and acceptance criteria.
+- **Decision:** Planned rebuild as a flat Energy Uses inventory and item workbench for equipment, systems, and processes. Settings and Annual Data both autosave; source and year entry work independently of meter readings. Creation chooses an existing group or creates a named group. Broader grouping remains a separate planning effort.
+- **Parity and contracts:** The first release includes item management, estimation, calculators, charts/comparisons, bulk actions, retirement/reinstatement, and existing Excel export. Preserve stored records, group and meter GUID relationships, calculation behavior, imports, backups, workbook formats, and v0 behavior; use the shared command and Data editing boundaries.
+- **Tests:** Each planned phase owns focused behavior and compatibility coverage. Final acceptance includes native IndexedDB rollback/reopen, import/export and backup round trips, scoped navigation and autosave, accessibility/layout, and the production checks listed in the roadmap.
+
 ### Header Facility Scope — Phase 1
 
 - **Workflow:** Portfolio account inventory filtering and header facility selection; see the [phased roadmap](v1-global-facility-scope-plan.md).
