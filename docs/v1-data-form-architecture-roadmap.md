@@ -2,6 +2,8 @@
 
 This evaluation covers Meter Settings and bill editing, Standard Predictor Settings and readings, and Weather station Setup and readings. The initialization repair and the follow-up architecture work are separate: the repair preserves saved meter setup values and moves Weather Setup to typed reactive controls so saved output types render correctly. The work packages below remain planned, not implemented.
 
+The initialization repair also applies [source-specific meter defaults](../src/app/v1/shared/meter-settings/meter-source-defaults.ts) in `MeterActionsService.createMeter` before persistence. New records therefore reach Settings with the correct scope, collection unit, energy unit, heat capacity, and site-to-source factor. Saved hydration, copying, and import editing preserve their supplied values. Native creation-to-Settings regressions cover all seven sources, pristine rendering, no additional writes on opening or refresh, and database reopening.
+
 ## Current findings
 
 The existing boundaries are sound: committed workspace records are the durable source of truth; feature builders and mappers translate editable copies; commands own persistence; Weather changes retain their reviewed, atomic multi-record workflow. Keep those boundaries. The main inconsistency is how individual editors initialize, refresh, protect, and save their transient state.
