@@ -13,6 +13,10 @@ import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.
 import { getNewIdbPredictor, IdbPredictor, isStandardPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getGUID } from '@shared/sharedHelperFunctions';
+import { EditorConflictError } from '@app/v1/data/editing/draft-reconciliation';
+import { applyStandardPredictorSettings, normalizeStandardPredictorSettings, reconcileStandardPredictorSettings,
+  StandardPredictorSettings, StandardPredictorSettingsIdentity, standardPredictorSettings,
+  validStandardPredictorSettings } from './models/standard-predictor-settings.models';
 import {
   PredictorDraft,
   PredictorMissingMonth,
@@ -84,6 +88,45 @@ export class PredictorWorkspaceActionsService {
       );
       return result.value;
     });
+  }
+
+  /** Resolve the current record only when this queued settings command executes. */
+  async updateSettings(identity: StandardPredictorSettingsIdentity, value: StandardPredictorSettings,
+    base: StandardPredictorSettings, ownerId: string): Promise<StandardPredictorSettings> {
+    const submitted = normalizeStandardPredictorSettings(value);
+    const baseline = normalizeStandardPredictorSettings(base);
+    if (this.workspace.account()?.guid !== identity.accountGuid || !this.workspace.canWrite()) {
+      throw new WorkspaceWriteError('stale-workspace', 'This predictor workspace is no longer available.');
+    }
+    if (!validStandardPredictorSettings(submitted)) {
+      throw new WorkspaceWriteError('validation-failed', 'Resolve the predictor settings before saving.');
+    }
+    const result = await this.commandBoundary.execute({
+      entityKind: 'predictor', changeKind: 'update', entityGuid: identity.predictorGuid,
+      label: 'Saving predictor settings', ownerId,
+      notification: { suppressSuccessToast: true }, publication: { mode: 'reload' }
+    }, async () => {
+      if (this.workspace.account()?.guid !== identity.accountGuid
+        || this.workspace.selectedFacility()?.guid !== identity.facilityGuid
+        || !this.workspace.facilities().some(facility => facility.guid === identity.facilityGuid
+          && facility.accountId === identity.accountGuid)) {
+        throw new WorkspaceWriteError('stale-workspace', 'This predictor workspace is no longer available.');
+      }
+      const current = this.workspace.predictors().find(predictor => predictor.guid === identity.predictorGuid
+        && predictor.accountId === identity.accountGuid && predictor.facilityId === identity.facilityGuid);
+      if (!current || !isStandardPredictor(current)) {
+        throw new WorkspaceWriteError('stale-workspace', 'The Standard predictor is no longer available.');
+      }
+      const latest = standardPredictorSettings(current);
+      const merged = reconcileStandardPredictorSettings(baseline, submitted, latest);
+      if (merged.conflicts.length) throw new EditorConflictError(latest);
+      const updated = applyStandardPredictorSettings(current, merged.value);
+      const persisted = await this.predictorHandler.updateStandardPredictor({ predictor: updated,
+        facilityAnalyses: buildFacilityAnalysisPredictorUpdates(this.facilityAnalyses(identity.facilityGuid), updated)
+      }, identity.accountGuid);
+      return standardPredictorSettings(persisted);
+    });
+    return result.value;
   }
 
   async copyPredictor(predictor: IdbPredictor, facilityGuid?: string): Promise<IdbPredictor> {

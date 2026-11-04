@@ -4,7 +4,6 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { Injectable, inject } from '@angular/core';
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { getChargeTypes } from '@data/models/meter-charges-options';
 import { getFuelTypeOptions, getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
 import {
   EnergyUnitOptions,
@@ -32,7 +31,6 @@ export class MeterSettingsRulesService {
       form.patchValue({ energyUnit: defaults.energyUnit ?? null, scope: defaults.scope ?? null,
         fuel: defaults.fuel ?? null, startingUnit: defaults.startingUnit ?? null,
         heatCapacity: defaults.heatCapacity ?? null, siteToSource: defaults.siteToSource ?? null }, { emitEvent: false });
-      this.syncChargeTypes(form);
     } else if (kind === 'scope') {
       this.setFuelTypeOptions(form, context, true);
       this.setStartingUnitOptionsAndValue(form, context);
@@ -69,8 +67,6 @@ export class MeterSettingsRulesService {
       this.setVehicleFuelOptions(form, context);
     } else if (kind === 'vehicleCollectionUnit' || kind === 'vehicleFuel') {
       this.setVehicleHeatCapacity(form, context);
-    } else if (kind === 'chargeType') {
-      this.syncChargeTypes(form);
     }
 
     this.updateValidators(form);
@@ -198,18 +194,6 @@ export class MeterSettingsRulesService {
       form.controls.energyUnit.value,
       selectedFuelTypeOption
     ), { emitEvent: false });
-  }
-
-  private syncChargeTypes(form: MeterSettingsForm): void {
-    const chargeTypes = getChargeTypes(form.controls.source.value);
-    const chargesArray = form.controls.chargesArray;
-    chargesArray.controls.forEach(charge => {
-      const chargeType = charge.get('chargeType');
-      if (chargeType && !chargeTypes.some(type => type.value === chargeType.value)) {
-        chargeType.setValue(null, { emitEvent: false });
-        chargeType.updateValueAndValidity({ emitEvent: false });
-      }
-    });
   }
 
   updateValidators(form: MeterSettingsForm): void {

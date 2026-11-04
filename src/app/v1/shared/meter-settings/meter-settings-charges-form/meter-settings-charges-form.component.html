@@ -1,4 +1,5 @@
 <section id="meter-charges" class="meter-settings-section" [formGroup]="form">
+  @let chargeTypeIssues = viewModel.incompatibleChargeTypes;
   <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
     <h3 class="mb-0">Meter charges</h3>
     <button type="button" class="v1-btn v1-btn--action v1-btn--sm" [disabled]="form.disabled" (click)="addCharge()">
@@ -10,6 +11,7 @@
   <div formArrayName="chargesArray" class="meter-settings-charge-list">
     @if (chargesArray.length) {
       @for (chargeGroup of chargesArray.controls; track chargeGroup; let index = $index) {
+        @let incompatibleType = chargeTypeIssues[chargeGroup.controls.guid.value];
         <div class="meter-settings-charge" [formGroupName]="index">
           <label class="meter-settings-field">
             <span [class.visually-hidden]="index > 0">Name</span>
@@ -17,11 +19,21 @@
           </label>
           <label class="meter-settings-field">
             <span [class.visually-hidden]="index > 0">Charge Type</span>
-            <select class="v1-select" formControlName="chargeType" (change)="immediateChange.emit('chargeType')">
+            <select class="v1-select" formControlName="chargeType" (change)="immediateChange.emit('chargeType')"
+              [attr.aria-invalid]="incompatibleType ? 'true' : null"
+              [attr.aria-describedby]="incompatibleType ? 'meter-charge-type-error-' + chargeGroup.controls.guid.value : null">
+              @if (incompatibleType) {
+                <option [ngValue]="chargeGroup.controls.chargeType.value" disabled>{{ incompatibleType.label }} (incompatible)</option>
+              }
               @for (type of viewModel.chargeTypes; track type.value) {
                 <option [ngValue]="type.value">{{ type.label }}</option>
               }
             </select>
+            @if (incompatibleType) {
+              <small [id]="'meter-charge-type-error-' + chargeGroup.controls.guid.value" class="meter-settings-error" role="alert">
+                {{ incompatibleType.label }} is unavailable for {{ form.controls.source.value }} meters. Choose a compatible type or remove this charge.
+              </small>
+            }
           </label>
           <button type="button" class="v1-icon-btn" [disabled]="form.disabled" [attr.aria-label]="'Remove charge ' + (index + 1)"
             (click)="removeCharge(index)">

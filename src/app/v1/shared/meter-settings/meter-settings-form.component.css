@@ -35,7 +35,8 @@
   border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
 }
 
-.meter-settings__aside > app-meter-settings-charges-form {
+.meter-settings__aside > app-meter-settings-charges-form,
+.meter-settings__grouping + app-meter-settings-reading-form {
   padding-top: 1.25rem;
   border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
 }

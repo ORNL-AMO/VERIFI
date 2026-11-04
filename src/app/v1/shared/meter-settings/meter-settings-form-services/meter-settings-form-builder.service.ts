@@ -24,6 +24,7 @@ export class MeterSettingsFormBuilderService {
       supplier: [values.supplier],
       notes: [values.notes],
       source: [values.source, Validators.required],
+      groupId: [values.groupId],
       meterReadingDataApplication: [values.meterReadingDataApplication, Validators.required],
       fuel: [values.fuel, this.validation.getFuelValidation(meter.source, meter.scope)],
       startingUnit: [values.startingUnit, Validators.required],
@@ -51,7 +52,7 @@ export class MeterSettingsFormBuilderService {
       noLongerInUseYear: [values.noLongerInUseYear],
       canBeNegative: [values.canBeNegative],
       ignoreDateStatusChecks: [values.ignoreDateStatusChecks]
-    });
+    }, { validators: this.validation.getChargeTypesValidation() });
   }
 
   updateMeterFromSettingsForm(meter: IdbUtilityMeter, form: MeterSettingsForm): IdbUtilityMeter {
@@ -78,7 +79,7 @@ export class MeterSettingsFormBuilderService {
     chargesArray.push(this.buildChargeGroup({
       guid: getGUID(),
       name: 'New Charge',
-      chargeType: 'consumption',
+      chargeType: form.controls.source.value === 'Electricity' ? 'consumption' : 'usage',
       displayChargeInTable: true,
       displayUsageInTable: true
     }));

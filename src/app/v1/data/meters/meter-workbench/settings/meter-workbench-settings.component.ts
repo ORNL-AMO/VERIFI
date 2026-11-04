@@ -1,23 +1,25 @@
+import { injectSettingsEditSession, EditSaveMode } from '@app/v1/data/editing/settings-edit-session';
+import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
+import { HasUnsavedChanges } from '@app/v1/shared/navigation/unsaved-changes.guard';
+import { MeterSettingsForm, MeterSettingsValues, readMeterSettings, normalizeMeterSettings } from '@app/v1/shared/meter-settings/meter-settings-values';
+import { MeterSettingsActionsService } from '../../meter-settings-actions.service';
+import { reconcileMeterSettings } from '../../meter-settings-editing';
+import { canAssignSourceToGroup } from '../../models';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { MeterSettingsForm } from '@app/v1/shared/meter-settings/meter-settings-values';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
-import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { MeterReadingDataApplication } from '@data/models/idbModels/utilityMeter';
-import { updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { MeterActionsService } from '../../meter-actions.service';
-import { of, startWith, switchMap } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import {
   MeterSettingsFormService,
   MeterSettingsRuleChange,
   MeterSettingsRuleContext,
-  MeterSettingsSaveState,
+  MeterSettingsGroupingView,
   MeterSettingsViewModel
 } from '@app/v1/shared/meter-settings/meter-settings-form.service';
 
@@ -27,16 +29,14 @@ import {
   styleUrls: ['./meter-workbench-settings.component.css'],
   standalone: false
 })
-export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy {
+export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy, HasUnsavedChanges {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly meterWorkspace = inject(FacilityMetersWorkspaceService);
   private readonly formService = inject(MeterSettingsFormService);
-  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
-  private readonly meterHandler = inject(MeterCommandHandler);
+  private readonly settingsActions = inject(MeterSettingsActionsService);
   private readonly actions = inject(MeterActionsService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly navigation = inject(WorkspaceNavigationService);
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly viewContainerRef = inject(ViewContainerRef);
 
@@ -50,96 +50,84 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   readonly customFuels = this.workspace.customFuels;
   readonly customGWPs = this.workspace.customGWPs;
   readonly changingSetupValues = signal(false);
-  readonly saveState = signal<MeterSettingsSaveState>('idle');
-  readonly saveMessage = signal('Changes save automatically.');
+  private readonly edits = new Subject<EditSaveMode>();
+  private readonly formRevision = signal(0);
   readonly formSignal = signal<MeterSettingsForm | undefined>(undefined);
-  private readonly formValue = toSignal(
-    toObservable(this.formSignal).pipe(
-      switchMap(form => form
-        ? form.valueChanges.pipe(startWith(form.getRawValue()))
-        : of(undefined))
-    ),
-    { initialValue: undefined }
-  );
+  private formSubscription?: Subscription;
+  private pendingMode: EditSaveMode = 'debounced';
+  private queuedForm?: MeterSettingsForm;
+  private destroyed = false;
+  private currentMeterKey: string | undefined;
   readonly deleting = signal(false);
   readonly deleteError = signal<string | undefined>(undefined);
   readonly calendarizationHelpOpen = signal(false);
   readonly meterDataExists = computed(() => this.selectedMeterData().length > 0);
-  readonly savingOwnChanges = computed(() => this.saveState() === 'saving');
-  readonly canEditForm = computed(() => this.canWrite() || this.savingOwnChanges());
+  readonly grouping = computed(() => {
+    this.formRevision();
+    const form = this.formSignal();
+    return form ? this.groupingFor(form) : undefined;
+  });
+  readonly session = injectSettingsEditSession<MeterSettingsValues>({
+    key: computed(() => [this.account()?.guid, this.facility()?.guid, this.meterWorkspace.selectedMeterGuid()].join('/')),
+    saved: computed(() => { const meter = this.meter(); return meter ? readMeterSettings(meter) : undefined; }),
+    canWrite: this.canWrite,
+    pendingOwners: computed(() => this.workspace.pendingOperations().map(operation => operation.ownerId)),
+    changes: this.edits,
+    read: () => this.formSignal()?.getRawValue(),
+    hydrate: value => this.hydrate(value),
+    normalize: normalizeMeterSettings,
+    valid: () => { const form = this.formSignal(); form?.updateValueAndValidity({ emitEvent: false }); return !!form && form.valid; },
+    reconcile: reconcileMeterSettings,
+    persist: (value, baseline, ownerId) => this.settingsActions.updateSettings({ accountGuid: this.account().guid, facilityGuid: this.facility().guid, meterGuid: this.meter().guid }, value, baseline, ownerId),
+    setEnabled: enabled => this.applyFormEnabledState(enabled)
+  });
+  readonly saveState = this.session.state;
+  readonly saveMessage = computed(() => ({ idle: 'Changes save automatically.', dirty: 'Changes save automatically.', saving: 'Saving settings...', saved: 'Saved.', invalid: this.grouping()?.error ? 'Choose a compatible meter group to save.' : 'Resolve validation issues before these settings can be saved.', error: this.session.error() || 'Settings could not be saved. Try again.', conflict: 'Review changes to these settings before saving.' }[this.saveState()]));
+  readonly savingOwnChanges = this.session.saving;
+  readonly canEditForm = this.session.canEdit;
   readonly canDeleteMeter = computed(() => !!this.meter() && this.canWrite() && !this.hasPending() && !this.savingOwnChanges() && !this.deleting());
   readonly showReadOnlyNotice = computed(() => !this.canWrite() && !this.savingOwnChanges());
   readonly viewModel = computed((): MeterSettingsViewModel | undefined => {
     const form = this.formSignal();
-    this.formValue();
+    this.formRevision();
     const context = this.context();
     return form && context ? this.formService.buildMeterSettingsViewModel(form, context) : undefined;
   });
 
-  private debounceTimer: ReturnType<typeof setTimeout> | undefined;
-  private currentMeterGuid: string | undefined;
-  private skipNextWorkspaceRefresh = false;
   private deleteModalOpen = false;
 
   @ViewChild('deleteMeterConfirmModal') private readonly deleteMeterConfirmModal?: TemplateRef<unknown>;
+
+  constructor() {
+    registerDataDraft(signal(false), () => {}, this.deleting);
+  }
 
   ngAfterViewInit(): void {
     this.scrollToFragment(this.route.snapshot.fragment);
   }
 
-  private readonly rebuildEffect = effect(() => {
-    const meter = this.meter();
-    const guid = meter?.guid;
-    this.selectedMeterData();
-    if (!meter) {
-      this.currentMeterGuid = undefined;
-      this.formSignal.set(undefined);
-      return;
-    }
-    if (guid === this.currentMeterGuid && this.formSignal()) {
-      this.skipNextWorkspaceRefresh = false;
-      untracked(() => this.applyFormEnabledState());
-      return;
-    }
-    this.currentMeterGuid = guid;
-    this.changingSetupValues.set(false);
-    this.saveState.set('idle');
-    this.saveMessage.set('Changes save automatically.');
-    const form = this.formService.buildMeterSettingsForm(meter);
-    this.formSignal.set(form);
-    form.markAsPristine();
-    untracked(() => this.applyFormEnabledState());
-  });
   private readonly enabledStateEffect = effect(() => {
     this.canEditForm();
     this.savingOwnChanges();
     this.meterDataExists();
     this.changingSetupValues();
+    this.workspace.meterGroups();
     untracked(() => this.applyFormEnabledState());
   });
 
   ngOnDestroy(): void {
-    this.clearDebounce();
+    this.destroyed = true;
+    this.formSubscription?.unsubscribe();
     this.hideDeleteModal();
   }
 
-  onTextChange(): void {
-    this.formSignal()?.markAsDirty();
-    this.scheduleSave();
-  }
-
   onImmediateChange(kind?: MeterSettingsRuleChange): void {
-    if (kind) {
-      this.applyRuleChange(kind);
-    }
-    this.formSignal()?.markAsDirty();
-    void this.saveNow();
+    this.pendingMode = 'immediate';
+    if (kind) this.applyRuleChange(kind);
   }
 
   onRuleChange(kind: MeterSettingsRuleChange): void {
     this.applyRuleChange(kind);
-    this.formSignal()?.markAsDirty();
-    this.scheduleSave();
   }
 
   enableSetupChanges(): void {
@@ -173,7 +161,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     form.controls.meterReadingDataApplication.patchValue(method);
     form.controls.meterReadingDataApplication.markAsTouched();
     form.markAsDirty();
-    void this.saveNow();
+    this.pendingMode = 'immediate';
   }
 
   toggleNoLongerInUse(): void {
@@ -183,7 +171,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     }
     form.controls.noLongerInUse.patchValue(!form.controls.noLongerInUse.value);
     form.markAsDirty();
-    void this.saveNow();
+    this.pendingMode = 'immediate';
   }
 
   cancelDeleteMeter(): void {
@@ -201,10 +189,11 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     }
     this.deleting.set(true);
     this.deleteError.set(undefined);
-    this.clearDebounce();
     try {
       await this.actions.deleteMeter(meter);
+      this.session.discard();
       this.hideDeleteModal();
+      this.deleting.set(false);
       await this.navigation.openFacilityInventory(facility.guid, 'meters');
     } catch (error) {
       this.deleteError.set(error instanceof Error ? error.message : 'The meter could not be deleted.');
@@ -214,57 +203,67 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   }
 
   async saveNow(): Promise<void> {
-    this.clearDebounce();
-    const form = this.formSignal();
-    const account = this.account();
+    this.formSignal()?.markAllAsTouched();
+    await this.session.saveNow();
+  }
+
+  hasUnsavedChanges(): boolean { return this.session.dirty(); }
+  isNavigationBlocked(): boolean { return this.session.saving() || this.deleting(); }
+
+  private hydrate(values: MeterSettingsValues | undefined): void {
     const meter = this.meter();
-    if (!form || !account || !meter || !this.canEditForm() || form.pristine) {
-      return;
-    }
-    if (form.invalid) {
-      form.markAllAsTouched();
-      this.saveState.set('invalid');
-      this.saveMessage.set('Resolve validation issues before these settings can be saved.');
-      return;
-    }
-    const updatedMeter = this.formService.updateMeterFromSettingsForm(structuredClone(meter), form);
-    this.saveState.set('saving');
-    this.saveMessage.set('Saving settings...');
-    try {
-      const meterDataUpdates = updateMeterDataCharges(updatedMeter, structuredClone(this.selectedMeterData()));
-      await this.commandBoundary.execute(
-        {
-          entityKind: 'meter',
-          changeKind: 'update',
-          entityGuid: updatedMeter.guid,
-          label: 'Saving meter settings',
-          notification: { suppressSuccessToast: true },
-          publication: { mode: 'reload' }
-        },
-        () => this.meterHandler.updateMeterWithData(updatedMeter, meterDataUpdates, account.guid)
-      );
-      this.skipNextWorkspaceRefresh = true;
-      form.markAsPristine();
-      this.saveState.set('saved');
-      this.saveMessage.set('Saved.');
-    } catch {
-      this.saveState.set('error');
-      this.saveMessage.set('Settings could not be saved. Try again.');
-    }
+    if (!values || !meter) { this.formSubscription?.unsubscribe(); this.formSignal.set(undefined); this.currentMeterKey = undefined; return; }
+    const key = [this.account()?.guid, this.facility()?.guid, meter.guid].join('/');
+    let form = this.formSignal();
+    if (!form || this.currentMeterKey !== key) {
+      this.currentMeterKey = key;
+      this.changingSetupValues.set(false);
+      form = this.formService.buildMeterSettingsForm(meter);
+      const activeForm = form;
+      form.addValidators(() => this.groupingFor(activeForm).error ? { meterGroupIncompatible: true } : null);
+      this.formService.hydrate(form, values);
+      this.formSubscription?.unsubscribe();
+      this.queuedForm = undefined; this.pendingMode = 'debounced';
+      this.formSignal.set(form);
+      this.formSubscription = form.valueChanges.subscribe(() => this.queueFormEdit(form));
+    } else this.formService.hydrate(form, values);
+    this.formRevision.update(value => value + 1);
   }
 
-  private scheduleSave(): void {
-    this.clearDebounce();
-    this.saveState.set('idle');
-    this.saveMessage.set('Changes save automatically.');
-    this.debounceTimer = setTimeout(() => void this.saveNow(), 650);
+  private queueFormEdit(form: MeterSettingsForm): void {
+    this.formRevision.update(value => value + 1);
+    if (this.queuedForm === form) return;
+    this.queuedForm = form;
+    queueMicrotask(() => {
+      if (this.queuedForm !== form) return;
+      this.queuedForm = undefined;
+      if (this.destroyed || this.formSignal() !== form) return;
+      const mode = this.pendingMode; this.pendingMode = 'debounced';
+      this.formRevision.update(value => value + 1);
+      this.edits.next(mode);
+    });
   }
 
-  private clearDebounce(): void {
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-      this.debounceTimer = undefined;
-    }
+  private groupingFor(form: MeterSettingsForm): MeterSettingsGroupingView {
+    const groups = this.workspace.meterGroups().filter(group => group.accountId === this.account()?.guid
+      && group.facilityId === this.facility()?.guid);
+    const source = form.controls.source.value;
+    const groupId = form.controls.groupId.value;
+    const selected = groups.find(group => group.guid === groupId);
+    const incompatible = !!groupId && (!selected || !canAssignSourceToGroup(source, selected));
+    const error = incompatible ? selected
+      ? `The “${selected.name}” ${selected.groupType.toLowerCase()} meter group cannot contain ${source} meters. Choose a compatible group or Ungrouped.`
+      : 'The assigned meter group is no longer available. Choose a compatible group or Ungrouped.' : undefined;
+    return {
+      options: [
+        ...(incompatible ? [{ value: groupId, label: `${selected?.name ?? 'Unavailable group'} (incompatible)`, disabled: true }] : []),
+        { value: null, label: 'Ungrouped' },
+        ...groups.filter(group => canAssignSourceToGroup(source, group))
+          .sort((first, second) => first.name.localeCompare(second.name))
+          .map(group => ({ value: group.guid, label: group.name }))
+      ],
+      error
+    };
   }
 
   private hideDeleteModal(): void {
@@ -308,12 +307,12 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     };
   }
 
-  private applyFormEnabledState(): void {
+  private applyFormEnabledState(enabled = this.canEditForm()): void {
     const form = this.formSignal();
     if (!form) {
       return;
     }
-    if (!this.canEditForm()) {
+    if (!enabled) {
       form.disable({ emitEvent: false });
       return;
     }

@@ -3,6 +3,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { PredictorDraft, PredictorMissingMonth } from './models';
 import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
+import { StandardPredictorSettings, StandardPredictorSettingsIdentity } from './models/standard-predictor-settings.models';
 
 /** Standard-predictor command surface used by dashboard, settings, and reading editors. */
 @Injectable()
@@ -13,8 +14,9 @@ export class StandardPredictorActionsService {
     return this.actions.createPredictor(draft);
   }
 
-  updatePredictor(predictor: IdbPredictor): Promise<IdbPredictor> {
-    return this.actions.updatePredictor(predictor);
+  updateSettings(identity: StandardPredictorSettingsIdentity, value: StandardPredictorSettings,
+    base: StandardPredictorSettings, ownerId: string): Promise<StandardPredictorSettings> {
+    return this.actions.updateSettings(identity, value, base, ownerId);
   }
 
   copyPredictor(predictor: IdbPredictor): Promise<IdbPredictor> {
