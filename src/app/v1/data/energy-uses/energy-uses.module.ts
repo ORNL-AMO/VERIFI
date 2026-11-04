@@ -1,3 +1,10 @@
+import { RouterModule } from '@angular/router';
+import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
+import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
+import { EnergyUseWorkbenchComponent } from './energy-use-workbench/energy-use-workbench.component';
+import { EnergyUseWorkbenchPanelComponent } from './energy-use-workbench/panel/energy-use-workbench-panel.component';
 import { NgModule } from '@angular/core';
 import { EnergyUsesInventoryComponent } from './inventory/energy-uses-inventory.component';
 import { InventoryPlaceholderComponent } from './inventory-placeholder/inventory-placeholder.component';
@@ -12,11 +19,18 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
 @NgModule({
   declarations: [
     EnergyUsesInventoryComponent,
+    EnergyUseWorkbenchComponent,
+    EnergyUseWorkbenchPanelComponent,
     InventoryPlaceholderComponent,
     EnergyUsesPlaceholderComponent
   ],
   imports: [
     CommonModule,
+    RouterModule,
+    PageIdentityComponent,
+    BrowseHeaderDirective,
+    DataWorkbenchTabsComponent,
+    DataWorkbenchResourceSwitcherComponent,
     ReactiveFormsModule,
     InventoryGridComponent,
     BrowsePositionDirective,
@@ -25,6 +39,8 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
   ],
   exports: [
     EnergyUsesInventoryComponent,
+    EnergyUseWorkbenchComponent,
+    EnergyUseWorkbenchPanelComponent,
     InventoryPlaceholderComponent,
     EnergyUsesPlaceholderComponent
   ],

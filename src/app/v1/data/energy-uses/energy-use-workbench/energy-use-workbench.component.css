@@ -1,0 +1,2 @@
+:host { display: block; position: relative; min-width: 0; padding: clamp(1rem, 3vw, 1.5rem); }
+.energy-use-workbench__marker { position: absolute; top: 0; left: 0; width: 1px; height: 1px; pointer-events: none; }

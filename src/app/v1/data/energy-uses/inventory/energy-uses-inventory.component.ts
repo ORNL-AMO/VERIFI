@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
 import { InventoryTile } from '@app/v1/shared/inventory/inventory.models';
 import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
@@ -36,7 +37,7 @@ export class EnergyUsesInventoryComponent {
   readonly filteredEntries = computed(() => filterAndSortEnergyUses(this.entries(), this.filters()));
   readonly tiles = computed<readonly InventoryTile[]>(() => this.filteredEntries().map(entry => ({
     guid: entry.guid, name: entry.name, icon: 'tools', chip: entry.category,
-    route: ['/v1', 'workspace', 'facility', entry.facility.guid, 'data', 'energy-uses', entry.guid, 'settings'],
+    route: facilityEnergyUseRoute(entry.facility.guid, entry.guid),
     owner: { facilityGuid: entry.facility.guid, label: entry.facility.name,
       route: this.navigation.accountPortfolioRoute(entry.facility.accountId, 'energy-uses'),
       queryParams: this.navigation.isSingleSiteWorkspace() ? {} : { facility: entry.facility.guid } },

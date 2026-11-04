@@ -1,3 +1,4 @@
+import { ENERGY_USE_WORKBENCH_ROUTES } from '@app/v1/data/energy-uses/energy-uses.routes';
 import { FACILITY_REPORT_ROUTES } from '@app/v1/reports/facility/facility-reports.routes';
 import { ACCOUNT_REPORT_ROUTES } from '@app/v1/reports/account/account-reports.routes';
 import { Routes } from '@angular/router';
@@ -349,6 +350,7 @@ export const V1Routes: Routes = [
                       { path: '**', redirectTo: 'settings' }
                     ]
               },
+              ...ENERGY_USE_WORKBENCH_ROUTES,
               { path: 'energy-uses', component: EnergyUsesPlaceholderComponent, data: { title: 'Energy Uses' } },
               { path: 'custom-grid-factors', component: CustomGridFactorsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-fuels', component: CustomFuelsComponent, canDeactivate: [unsavedChangesGuard] },

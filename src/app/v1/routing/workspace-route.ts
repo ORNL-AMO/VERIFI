@@ -6,6 +6,7 @@ export type WorkspaceRouteMotion = NavigationMotion;
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
 export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
+export type FacilityEnergyUseRouteTab = 'settings' | 'annual-data';
 export type FacilityPredictorRouteTab = 'settings' | 'readings' | 'quality';
 export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
 export type FacilityAnalysisRouteTab = 'setup' | 'used-by';
@@ -26,6 +27,7 @@ export interface RouteState {
   readonly meterGuid?: string;
   readonly meterGroupGuid?: string;
   readonly predictorGuid?: string;
+  readonly energyUseGuid?: string;
   readonly weatherPredictorGroupKey?: string;
   readonly reportGuid?: string;
   readonly reportStage?: 'setup' | 'data-checks' | 'report';
@@ -167,6 +169,10 @@ export function facilityMeterGroupRoute(
   return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab];
 }
 
+export function facilityEnergyUseRoute(facilityGuid: string, energyUseGuid: string, tab: FacilityEnergyUseRouteTab = 'settings'): Array<string> {
+  return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'energy-uses', energyUseGuid, tab];
+}
+
 export function facilityPredictorRoute(
   facilityGuid: string,
   predictorGuid: string,
@@ -255,6 +261,8 @@ export function parseWorkspaceRoute(url: string): RouteState {
       meterGroupGuid: section === 'data' && detail === 'meter-grouping' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,
+      energyUseGuid: section === 'data' && detail === 'energy-uses' && routeParts[5]
+        ? safeDecodeRoutePart(routeParts[5]) : undefined,
       predictorGuid: section === 'data' && detail === 'predictors' && routeParts[5] && !isWeatherPredictorRoute
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,

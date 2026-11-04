@@ -1,0 +1,4 @@
+:host { display: block; }
+section { padding: var(--v1-space-4); border: 1px solid var(--v1-border); border-radius: 0; background: var(--v1-surface); }
+h2 { font-size: 1.15rem; }
+p { margin-bottom: 0; }
