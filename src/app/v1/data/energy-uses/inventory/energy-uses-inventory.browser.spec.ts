@@ -79,6 +79,8 @@ describe('energy uses browser journeys', () => {
     const scroll = view.root.scrollTop;
     link.click(); await settle(view);
     expect(view.router.url).toContain(`/energy-uses/${guid}/settings`);
+    expect([...view.root.querySelectorAll('app-page-identity nav a')].map(link => link.textContent?.trim()))
+      .toEqual(['Example account', 'North plant']);
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(`${inventoryUrl}?facility=facility-a`)); await settle(view);
     expect(view.inventory().filters().search).toBe('pump'); expect(view.inventory().inventory.page()).toBe(1);
     expect(view.inventory().inventory.detail()).toBe('detailed');
