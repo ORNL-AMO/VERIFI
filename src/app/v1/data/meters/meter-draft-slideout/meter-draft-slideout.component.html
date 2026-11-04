@@ -25,7 +25,7 @@
     <label>
       <span>Group</span>
       <select class="v1-select" formControlName="groupId">
-        <option [ngValue]="undefined">Ungrouped</option>
+        <option [ngValue]="null">Ungrouped</option>
         @for (group of groups; track group.guid) {
           <option [value]="group.guid" [disabled]="!isGroupAllowed(group)">
             {{ group.name }} ({{ group.groupType }})

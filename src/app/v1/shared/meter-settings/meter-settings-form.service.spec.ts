@@ -89,6 +89,14 @@ describe('MeterSettingsFormService', () => {
     expect(updated.meterReadingDataApplication).toBe('fullYear');
   });
 
+  it('rejects whitespace-only meter and charge names before a settings command is scheduled', () => {
+    const form = service.buildMeterSettingsForm(meter({ name: '   ' }));
+    expect(form.controls.name.hasError('pattern')).toBe(true);
+    service.addCharge(form);
+    form.controls.chargesArray.at(0).controls.name.setValue('   ');
+    expect(form.controls.chargesArray.at(0).controls.name.hasError('pattern')).toBe(true);
+  });
+
 
   it('applies electricity agreement side effects and serializes multipliers and green purchase fraction', () => {
     const form = service.buildMeterSettingsForm(meter({

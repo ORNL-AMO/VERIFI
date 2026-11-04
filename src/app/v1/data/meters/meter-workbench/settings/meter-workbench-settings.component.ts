@@ -1,7 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormGroup } from '@angular/forms';
+import { MeterSettingsForm } from '@app/v1/shared/meter-settings/meter-settings-values';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
@@ -52,7 +52,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   readonly changingSetupValues = signal(false);
   readonly saveState = signal<MeterSettingsSaveState>('idle');
   readonly saveMessage = signal('Changes save automatically.');
-  readonly formSignal = signal<FormGroup | undefined>(undefined);
+  readonly formSignal = signal<MeterSettingsForm | undefined>(undefined);
   private readonly formValue = toSignal(
     toObservable(this.formSignal).pipe(
       switchMap(form => form

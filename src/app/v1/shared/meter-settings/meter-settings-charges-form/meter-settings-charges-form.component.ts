@@ -1,5 +1,5 @@
+import { MeterSettingsForm } from '../meter-settings-values';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormArray, FormGroup } from '@angular/forms';
 import { MeterSettingsFormService, MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settings-form.service';
 
 @Component({
@@ -9,15 +9,15 @@ import { MeterSettingsFormService, MeterSettingsRuleChange, MeterSettingsViewMod
   templateUrl: './meter-settings-charges-form.component.html'
 })
 export class MeterSettingsChargesFormComponent {
-  @Input({ required: true }) form: FormGroup;
+  @Input({ required: true }) form: MeterSettingsForm;
   @Input({ required: true }) viewModel: MeterSettingsViewModel;
   @Output() immediateChange = new EventEmitter<MeterSettingsRuleChange | undefined>();
   @Output() textChange = new EventEmitter<void>();
 
   constructor(private readonly formService: MeterSettingsFormService) { }
 
-  get chargesArray(): FormArray {
-    return this.form.get('chargesArray') as FormArray;
+  get chargesArray() {
+    return this.form.controls.chargesArray;
   }
 
   addCharge(): void {

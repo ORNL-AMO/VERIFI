@@ -1,5 +1,5 @@
+import { MeterSettingsForm } from '../meter-settings-values';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settings-form.service';
 
 @Component({
@@ -9,7 +9,7 @@ import { MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settin
   templateUrl: './meter-settings-electricity-form.component.html'
 })
 export class MeterSettingsElectricityFormComponent {
-  @Input({ required: true }) form: FormGroup;
+  @Input({ required: true }) form: MeterSettingsForm;
   @Input({ required: true }) viewModel: MeterSettingsViewModel;
   @Output() ruleChange = new EventEmitter<MeterSettingsRuleChange>();
   @Output() immediateChange = new EventEmitter<MeterSettingsRuleChange | undefined>();

@@ -18,7 +18,7 @@
     <label class="meter-settings-field">
       <span>Name <span class="meter-settings-required">*</span></span>
       <input class="form-control" type="text" formControlName="name" maxlength="100" (input)="textChange.emit()">
-      @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+      @if (form.controls.name.touched && (form.controls.name.hasError('required') || form.controls.name.hasError('pattern'))) {
         <small class="meter-settings-error">Meter name is required.</small>
       }
     </label>

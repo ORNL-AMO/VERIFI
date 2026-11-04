@@ -1,5 +1,5 @@
+import { MeterSettingsForm } from '../meter-settings-values';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-meter-settings-other-info',
@@ -8,6 +8,6 @@ import { FormGroup } from '@angular/forms';
   templateUrl: './meter-settings-other-info.component.html'
 })
 export class MeterSettingsOtherInfoComponent {
-  @Input({ required: true }) form: FormGroup;
+  @Input({ required: true }) form: MeterSettingsForm;
   @Output() textChange = new EventEmitter<void>();
 }
