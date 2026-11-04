@@ -11,20 +11,12 @@
           <span>{{ error }}</span>
         </div>
       }
-      @if (predictor.predictorType === 'Weather') {
-        <div class="v1-alert" [class.v1-alert--warning]="reading.weatherDataWarning" [class.v1-alert--info]="!reading.weatherDataWarning">
-          <app-ui-icon [name]="reading.weatherDataWarning ? 'cloudRain' : reading.weatherOverride ? 'edit' : 'info'"></app-ui-icon>
-          <span>
-            @if (reading.weatherDataWarning && isCalculatedWeather) {
-              This calculated value contains gaps or missing weather source data.
-            } @else if (form.controls.manualOverride.value) {
-              This is a manual weather override and will be preserved by future refreshes.
-            } @else {
-              This value was calculated from weather data.
-            }
-          </span>
-        </div>
+      @if (unavailable()) {
+        <div class="v1-alert v1-alert--warning" role="alert">This saved reading is no longer available. Your draft has been retained.</div>
       }
+
+      <app-editor-conflict-review [conflicts]="conflicts()" [disabled]="saving" (resolved)="resolveConflicts($event)">
+      </app-editor-conflict-review>
 
       <label class="v1-field">
         <span>Month</span>
@@ -57,16 +49,6 @@
         }
       </label>
 
-      @if (isCalculatedWeather) {
-        <div class="predictor-reading-editor__manual">
-          <p>The calculated month and value are locked. Set this entry manually to replace the calculated value.</p>
-          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="setManually()">
-            <app-ui-icon name="edit"></app-ui-icon>
-            Set Manually
-          </button>
-        </div>
-      }
-
       <label class="v1-field">
         <span>Notes</span>
         <textarea class="v1-input" rows="5" formControlName="notes" [readOnly]="saving"></textarea>
@@ -82,11 +64,11 @@
       <footer class="predictor-reading-editor__footer">
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
         @if (mode === 'add') {
-          <button type="button" class="v1-btn v1-btn--primary" [disabled]="saving || form.invalid" (click)="save(true)">
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="saving || !canEdit || unavailable() || conflicts().length > 0 || form.invalid" (click)="save(true)">
             Save and Add Another
           </button>
         }
-        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || form.invalid">
+        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !canEdit || unavailable() || conflicts().length > 0 || form.invalid">
           @if (saving) { <app-ui-icon name="loading" spin></app-ui-icon> }
           @else { <app-ui-icon name="check"></app-ui-icon> }
           Save

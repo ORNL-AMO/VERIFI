@@ -1,12 +1,19 @@
+import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
+import { EditorConflictError } from '@app/v1/data/editing/draft-reconciliation';
+import { HasUnsavedChanges } from '@app/v1/shared/navigation/unsaved-changes.guard';
+import { applyMeterReading, readMeterReading } from './meter-reading-form.service';
+import { meterReadingContext, meterReadingContextMatches, reconcileMeterReading } from './meter-reading-editing';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { FocusMonitor } from '@angular/cdk/a11y';
-import { Component, ElementRef, Injector, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, Injector, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbUtilityMeterData, getNewIdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { missingMeterMonths } from '@app/v1/status/status.evaluator';
 import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -17,13 +24,14 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { meterWorkbenchTab } from '../../models';
-import { MeterReadingBillSave } from './meter-reading-bill-slideout/meter-reading-bill-slideout.component';
+import { MeterReadingBillSlideoutComponent, MeterReadingBillSave } from './meter-reading-bill-slideout/meter-reading-bill-slideout.component';
 import { MeterReadingsTableService } from './meter-readings-table.service';
 import { MeterReadingColumnDraft, MeterReadingsConfirmation } from './meter-workbench-readings.models';
 
 interface BillPanelState {
   readonly mode: 'add' | 'edit';
   readonly reading: IdbUtilityMeterData;
+  readonly meter: IdbUtilityMeter;
 }
 
 @Component({
@@ -32,7 +40,7 @@ interface BillPanelState {
   styleUrls: ['./meter-workbench-readings.component.css'],
   standalone: false
 })
-export class MeterWorkbenchReadingsComponent implements OnDestroy {
+export class MeterWorkbenchReadingsComponent implements OnDestroy, HasUnsavedChanges {
   private readonly accountWorkspace = inject(AccountWorkspaceStore);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly meterHandler = inject(MeterCommandHandler);
@@ -64,7 +72,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly isElectron = this.electronService.isElectron;
-  readonly canAct = computed(() => this.canWrite() && !this.hasPending() && !this.saving());
+  readonly canAct = computed(() => !!this.meter() && this.canWrite() && !this.hasPending() && !this.saving());
   readonly selectedMeterFindings = computed(() => {
     const meter = this.meter();
     return meter ? this.status.meterFindings(meter.guid) : [];
@@ -84,7 +92,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   readonly isDataOutdated = computed(() => this.selectedMeterFindings().some(finding => finding.code === 'meter.currency.stale'));
   readonly hasBlockingConfiguration = computed(() => this.selectedMeterFindings().some(finding => finding.code === 'meter.configuration.invalid'));
 
-  private readonly selectedMeterGuid = computed(() => this.meter()?.guid);
+  private readonly selectedMeterGuid = this.workspace.selectedMeterGuid;
   private readonly resetOnMeterChange = effect(() => {
     this.selectedMeterGuid();
     this.columnsOpen.set(false);
@@ -92,6 +100,12 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     this.confirmation.set(undefined);
     this.hideConfirmModal();
   });
+
+  private readonly billEditor = viewChild(MeterReadingBillSlideoutComponent);
+  readonly dirty = computed(() => this.billEditor()?.dirty() ?? false);
+  constructor() { registerDataDraft(this.dirty, () => this.billPanel.set(undefined), this.saving); }
+  hasUnsavedChanges(): boolean { return this.dirty(); }
+  isNavigationBlocked(): boolean { return this.saving(); }
 
   @ViewChild('readingsConfirmModal') private readonly readingsConfirmModal?: TemplateRef<unknown>;
   @ViewChild('readingsRegion', { read: ElementRef }) private readonly readingsRegion?: ElementRef<HTMLElement>;
@@ -123,23 +137,30 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     }
   }
 
-  openAddBill(): void {
+  async openAddBill(): Promise<void> {
     const meter = this.meter();
-    if (!meter || !this.canAct()) {
+    if (!meter || !this.canAct()) return;
+    const editor = this.billEditor();
+    if (editor && !await editor.confirmDiscard('replace')) return;
+    if (!this.canAct() || this.meter()?.guid !== meter.guid) {
       return;
     }
     this.billPanel.set({
       mode: 'add',
+      meter: structuredClone(meter),
       reading: getNewIdbUtilityMeterData(meter, [...this.accountWorkspace.meterData()])
     });
     this.actionError.set(undefined);
   }
 
-  openEditBill(reading: IdbUtilityMeterData): void {
-    if (this.canAct()) {
-      this.billPanel.set({ mode: 'edit', reading: structuredClone(reading) });
-      this.actionError.set(undefined);
-    }
+  async openEditBill(reading: IdbUtilityMeterData): Promise<void> {
+    const meter = this.meter();
+    if (!meter || !this.canAct()) return;
+    const editor = this.billEditor();
+    if (editor && !await editor.confirmDiscard('replace')) return;
+    if (!this.canAct() || this.meter()?.guid !== meter.guid) return;
+    this.billPanel.set({ mode: 'edit', meter: structuredClone(meter), reading: structuredClone(reading) });
+    this.actionError.set(undefined);
   }
 
   closeBillPanel(): void {
@@ -240,6 +261,28 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
       this.toastNotifications.showToast('Meter Reading Update Failed', 'A reading already exists for this date.', undefined, false, 'alert-danger');
       return;
     }
+    const identity = { accountGuid: account.guid, facilityGuid: meter.facilityId, meterGuid: meter.guid, readingGuid: panel.reading.guid };
+    const baseline = save.baseline ?? readMeterReading(meter, panel.reading);
+    const submitted = readMeterReading(meter, save.reading);
+    const context = save.context ?? meterReadingContext(meter);
+    const isCurrentPanel = () => this.account()?.guid === identity.accountGuid && this.meter()?.guid === identity.meterGuid && this.billPanel() === panel;
+    const prepare = () => {
+      const currentMeter = this.accountWorkspace.meters().find(item => item.guid === identity.meterGuid && item.accountId === identity.accountGuid && item.facilityId === identity.facilityGuid);
+      if (!currentMeter || this.accountWorkspace.account()?.guid !== identity.accountGuid || !meterReadingContextMatches(context, currentMeter)) {
+        throw new WorkspaceWriteError('stale-workspace', 'Meter setup changed. Reopen the bill before saving.');
+      }
+      const currentReading = panel.mode === 'edit' ? this.accountWorkspace.meterData().find(item => item.guid === identity.readingGuid && item.meterId === identity.meterGuid && item.accountId === identity.accountGuid && item.facilityId === identity.facilityGuid) : save.reading;
+      if (!currentReading) throw new WorkspaceWriteError('stale-workspace', 'This reading is no longer available.');
+      const latest = readMeterReading(currentMeter, currentReading);
+      const merged = reconcileMeterReading(baseline, submitted, latest);
+      if (merged.conflicts.length) throw new EditorConflictError(latest);
+      const updated = applyMeterReading(currentMeter, currentReading, merged.value);
+      const duplicate = this.accountWorkspace.meterData().some(item => item.accountId === identity.accountGuid
+        && item.facilityId === identity.facilityGuid && item.meterId === identity.meterGuid && item.guid !== updated.guid
+        && item.year === updated.year && item.month === updated.month && item.day === updated.day);
+      if (duplicate) throw new WorkspaceWriteError('validation-failed', 'A reading already exists for this date.');
+      return updated;
+    };
     await this.runAction('Reading could not be saved.', async () => {
       if (panel.mode === 'edit') {
         await this.commandBoundary.execute(
@@ -250,27 +293,26 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
             label: 'Save Reading',
             publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('meterData', [value]) }
           },
-          () => this.meterHandler.updateMeterData(save.reading, account.guid)
+          () => this.meterHandler.updateMeterData(prepare(), account.guid)
         );
-        this.billPanel.set(undefined);
+        if (isCurrentPanel()) this.billPanel.set(undefined);
       } else {
-        const readingToSave = structuredClone(save.reading);
-        delete readingToSave.id;
         const result = await this.commandBoundary.execute(
           {
             entityKind: 'meterData',
             changeKind: 'add',
-            entityGuid: readingToSave.guid,
+            entityGuid: identity.readingGuid,
             label: 'Add Reading',
             publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('meterData', [value]) }
           },
-          () => this.meterHandler.addMeterData(readingToSave, account.guid)
+          () => { const updated = prepare(); delete updated.id; return this.meterHandler.addMeterData(updated, account.guid); }
         );
+        if (!isCurrentPanel()) return;
         if (save.addAnother) {
           const nextReading = getNewIdbUtilityMeterData(meter, [...this.accountWorkspace.meterData(), result.value]);
           const nextDate = getDateFromMeterData(result.value);
           nextDate.setMonth(nextDate.getMonth() + 1);
-          this.billPanel.set({ mode: 'add', reading: setMeterDataDateFromDate(nextReading, nextDate) });
+          this.billPanel.set({ mode: 'add', meter: structuredClone(meter), reading: setMeterDataDateFromDate(nextReading, nextDate) });
         } else {
           this.billPanel.set(undefined);
         }

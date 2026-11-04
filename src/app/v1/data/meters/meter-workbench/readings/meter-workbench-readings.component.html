@@ -3,6 +3,7 @@
 @let _table = tableView();
 @let _canAct = canAct();
 @let _billPanel = billPanel();
+@let billMeter = _meter ?? _billPanel?.meter;
 
 <section #readingsRegion class="meter-readings" aria-label="Meter readings" tabindex="-1">
 
@@ -61,9 +62,10 @@
   </app-meter-readings-columns-slideout>
 }
 
-@if (_billPanel && _meter) {
+@if (_billPanel && billMeter) {
   <app-meter-reading-bill-slideout
-    [meter]="_meter"
+    [meter]="billMeter"
+    [resourceAvailable]="!!_meter"
     [reading]="_billPanel.reading"
     [mode]="_billPanel.mode"
     [existingReadings]="selectedMeterData()"

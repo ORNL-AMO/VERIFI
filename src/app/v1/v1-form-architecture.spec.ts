@@ -13,6 +13,8 @@ const DATA_FORM_ROOTS = [
   join(V1_ROOT, 'shared', 'meter-settings'),
   join(V1_ROOT, 'shared', 'predictor-settings'),
   join(V1_ROOT, 'data', 'editing'),
+  join(V1_ROOT, 'data', 'meters', 'meter-workbench', 'readings', 'meter-reading-bill-slideout'),
+  join(V1_ROOT, 'data', 'predictors', 'predictor-workbench', 'readings', 'predictor-reading-editor'),
   join(V1_ROOT, 'data', 'predictors', 'weather-predictor-workbench', 'setup')
 ];
 const TEMPLATE_DRIVEN_ALLOWLIST = new Set([

@@ -2,6 +2,7 @@
 @let predictorFindings = findings();
 @let canEdit = canAct();
 @let panel = editorPanel();
+@let editorPredictor = predictor ?? panel?.predictor;
 
 <section #readingsRegion class="predictor-readings" aria-label="Predictor readings" tabindex="-1">
   <div class="visually-hidden" aria-live="polite">{{ actionStatus() }}</div>
@@ -105,13 +106,14 @@
   }
 </section>
 
-@if (panel && predictor) {
+@if (panel && editorPredictor) {
   <app-predictor-reading-editor
-    [predictor]="predictor"
+    [predictor]="editorPredictor"
     [reading]="panel.reading"
     [mode]="panel.mode"
     [existingReadings]="context.readings()"
     [saving]="saving()"
+    [canEdit]="canEdit"
     [error]="actionError()"
     (saved)="saveReading($event)"
     (cancelled)="requestCloseEditor()">

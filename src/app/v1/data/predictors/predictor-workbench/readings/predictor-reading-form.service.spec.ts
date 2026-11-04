@@ -16,19 +16,16 @@ describe('PredictorReadingFormService', () => {
     expect(form.controls.amount.hasError('negativeNotAllowed')).toBe(true);
   });
 
-  it('locks calculated Weather values until explicitly set manually', () => {
+  it('refreshes duplicate and negative validation without changing draft values or emitting edits', () => {
     const service = TestBed.inject(PredictorReadingFormService);
-    const weather = { ...standard, predictorType: 'Weather' };
-    const source = { ...reading('weather', 2026, 2, 12), weatherDataWarning: true };
-    const form = service.build(weather, source, [], 'edit');
-
-    expect(form.controls.month.disabled).toBe(true);
-    expect(form.controls.amount.disabled).toBe(true);
-
-    service.setManualOverride(form);
-    const updated = service.updateReading(source, weather, form);
-    expect(form.controls.month.enabled).toBe(true);
-    expect(updated).toEqual(expect.objectContaining({ weatherOverride: true, weatherDataWarning: false, weatherDataChanged: false }));
+    const form = service.build(standard, reading('new', 2026, 2, 12), [], 'add');
+    form.patchValue({ notes: 'local', amount: -2 });
+    const changes = vi.fn(); form.valueChanges.subscribe(changes);
+    service.refreshValidation(form, { ...standard, canBeNegative: true }, 'new', [reading('other', 2026, 2, 1)]);
+    expect(form.getRawValue()).toEqual({ month: '2026-02', amount: -2, notes: 'local' });
+    expect(form.controls.month.hasError('duplicateMonth')).toBe(true);
+    expect(form.controls.amount.hasError('negativeNotAllowed')).toBe(false);
+    expect(changes).not.toHaveBeenCalled();
   });
 });
 

@@ -90,9 +90,52 @@ describe('PredictorWorkbenchReadingsComponent', () => {
     fixture.detectChanges();
     const editor = fixture.debugElement.query(By.directive(PredictorReadingEditorComponent)).componentInstance as PredictorReadingEditorComponent;
     editor.form?.controls.notes.setValue('Changed');
-    editor.form?.markAsDirty();
 
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    expect(fixture.componentInstance.dirty()).toBe(true);
+    editor.form?.controls.notes.setValue('');
+    expect(fixture.componentInstance.dirty()).toBe(false);
+  });
+
+  it('requires discard confirmation before closing or replacing a dirty reading', () => {
+    const fixture = createFixture();
+    fixture.componentInstance.openAddReading(); fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(PredictorReadingEditorComponent)).componentInstance as PredictorReadingEditorComponent;
+    editor.form!.controls.notes.setValue('Keep this draft');
+    const panel = fixture.componentInstance.editorPanel();
+    const changes = TestBed.inject(UnsavedChangesService);
+    vi.mocked(changes.confirmDiscard).mockReturnValue(false);
+    fixture.componentInstance.openAddReading();
+    fixture.componentInstance.requestCloseEditor();
+    expect(fixture.componentInstance.editorPanel()).toBe(panel);
+    vi.mocked(changes.confirmDiscard).mockReturnValue(true);
+    fixture.componentInstance.requestCloseEditor();
+    expect(fixture.componentInstance.editorPanel()).toBeUndefined();
+  });
+
+  it('preserves the reading editor through a committed record refresh', () => {
+    const fixture = createFixture();
+    const source = { id: 20, guid: 'reading-a', accountId: 'account-a', facilityId: 'facility-a', predictorId: 'predictor-a',
+      year: 2026, month: 1, amount: 12, notes: '', weatherDataWarning: false, weatherOverride: false,
+      createdDate: new Date('2026-01-01'), modifiedDate: new Date('2026-01-01') };
+    fixture.selectedReadings.set([source]); fixture.detectChanges();
+    fixture.componentInstance.openEditReading(source); fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(PredictorReadingEditorComponent)).componentInstance as PredictorReadingEditorComponent;
+    editor.form!.controls.notes.setValue('Local note');
+    fixture.selectedReadings.set([{ ...source, amount: 22 }]); fixture.detectChanges();
+    expect(editor.form!.getRawValue()).toMatchObject({ amount: 22, notes: 'Local note' });
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+  });
+
+  it('rejects a stale or wrong editor save request', async () => {
+    const addPredictorReading = vi.fn();
+    const fixture = createFixture({}, { addPredictorReading });
+    fixture.componentInstance.openAddReading();
+    const reading = fixture.componentInstance.editorPanel()!.reading;
+    await fixture.componentInstance.saveReading({ reading: { ...reading, guid: 'another', amount: 12 }, addAnother: false });
+    expect(addPredictorReading).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.editorPanel()).toBeDefined();
+    expect(fixture.componentInstance.actionError()).toContain('no longer matches');
   });
 
   it('discards active Predictor warnings through workspace status', async () => {
@@ -140,6 +183,7 @@ function createFixture(
     imports: [PredictorWorkbenchReadingsComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
+        account: signal({ guid: 'account-a' }), facility: signal({ guid: 'facility-a' }),
         canWrite: signal(true), hasPending: signal(false),
         isLoading: signal(false), defaultWeatherRange: signal(undefined)
       } },
@@ -147,6 +191,7 @@ function createFixture(
         provide: PredictorWorkbenchContextService,
         useValue: {
           predictor: selectedPredictor,
+          predictorGuid: signal(predictor.guid),
           readings: selectedReadings,
           findings: signal(
             typeof statusOverrides['predictorFindings'] === 'function'
@@ -168,11 +213,11 @@ function createFixture(
         updatePredictorReading: vi.fn(async (value: any) => value), deletePredictorReading: vi.fn(),
         deletePredictorReadings: vi.fn(), fillMissingPredictorMonths: vi.fn(async () => []), ...actionOverrides
       } },
-      { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), confirmDiscard: vi.fn(() => true) } },
+      { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), protectBeforeUnload: vi.fn(() => vi.fn()), confirmDiscard: vi.fn(() => true) } },
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
     ]
   });
   const fixture = TestBed.createComponent(PredictorWorkbenchReadingsComponent);
   fixture.detectChanges();
-  return fixture;
+  return Object.assign(fixture, { selectedPredictor, selectedReadings });
 }
