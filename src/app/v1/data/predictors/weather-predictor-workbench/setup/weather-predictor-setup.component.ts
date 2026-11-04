@@ -1,6 +1,9 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { map } from 'rxjs';
 import { WeatherStation } from '@data/models/degreeDays';
 import { WeatherDataType } from '@data/models/idbModels/predictor';
 import { getWeatherSearchFromFacility } from '@shared/sharedHelperFunctions';
@@ -12,18 +15,19 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WeatherMonthRange } from '@platform/weather/hourly-weather-data.models';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import {
-  WEATHER_DATA_TYPE_OPTIONS,
+import { WEATHER_DATA_TYPE_OPTIONS, weatherPredictorUnit } from '../../models/predictor-settings.models';
+import { defaultWeatherPredictorName } from '../../models/weather-presentation.models';
+import type {
   WeatherStationGroupDefinition,
   WeatherStationGroupDraft,
-  WeatherStationGroupPreview,
-  defaultWeatherPredictorName,
+  WeatherStationGroupPreview
+} from '../../models/weather-reconciliation.models';
+import {
   validateWeatherMonthRange,
   weatherFutureMonthCount,
   weatherLastTwoYearsRange,
-  weatherPredictorUnit,
   weatherRangeForReadings
-} from '../../models';
+} from '../../models/weather-range.models';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { WeatherStationSelectorComponent } from '../../shared/weather-station-selector/weather-station-selector.component';
 import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
@@ -33,12 +37,21 @@ interface EditableWeatherDefinition extends WeatherStationGroupDefinition {
   readonly unit: string;
 }
 
+type WeatherDefinitionForm = FormGroup<{
+  draftId: FormControl<string>;
+  predictorGuid: FormControl<string | null>;
+  weatherDataType: FormControl<WeatherDataType>;
+  name: FormControl<string>;
+  baseTemperature: FormControl<number | null>;
+  production: FormControl<boolean>;
+}>;
+
 @Component({
   selector: 'app-weather-predictor-setup',
   templateUrl: './weather-predictor-setup.component.html',
   styleUrls: ['./weather-predictor-setup.component.css'],
   standalone: true,
-  imports: [ConfirmationDialogComponent, IconComponent, WeatherStationSelectorComponent]
+  imports: [ReactiveFormsModule, ConfirmationDialogComponent, IconComponent, WeatherStationSelectorComponent]
 })
 export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDestroy {
   private readonly router = inject(Router);
@@ -50,11 +63,24 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   readonly workflow = inject(PredictorWeatherWorkflowService);
   readonly navigation = inject(WorkspaceNavigationService);
 
-  readonly weatherTypes = WEATHER_DATA_TYPE_OPTIONS;
-  readonly station = signal<WeatherStation | undefined>(undefined);
-  readonly startMonth = signal('');
-  readonly endMonth = signal('');
-  readonly definitions = signal<readonly EditableWeatherDefinition[]>([]);
+  // Read after shared-module initialization rather than capturing a hoisted test-bundle alias.
+  get weatherTypes(): typeof WEATHER_DATA_TYPE_OPTIONS { return WEATHER_DATA_TYPE_OPTIONS; }
+  readonly form = new FormGroup({
+    station: new FormControl<WeatherStation | null>(null),
+    startMonth: new FormControl('', { nonNullable: true }),
+    endMonth: new FormControl('', { nonNullable: true }),
+    definitions: new FormArray<WeatherDefinitionForm>([])
+  });
+  private readonly formSnapshot = signal(this.form.getRawValue());
+  readonly station = computed(() => this.formSnapshot().station ?? undefined);
+  readonly startMonth = computed(() => this.formSnapshot().startMonth);
+  readonly endMonth = computed(() => this.formSnapshot().endMonth);
+  readonly definitions = computed<readonly EditableWeatherDefinition[]>(() => this.formSnapshot().definitions.map(value => ({
+    ...value,
+    predictorGuid: value.predictorGuid ?? undefined,
+    baseTemperature: value.baseTemperature ?? undefined,
+    unit: weatherPredictorUnit(value.weatherDataType)
+  })));
   readonly definitionErrors = computed(() => new Map(this.definitions().map(definition => [definition.draftId, {
     name: !definition.name.trim() || definition.name.trim().length > 100,
     base: isDegreeDay(definition.weatherDataType) && !Number.isFinite(definition.baseTemperature)
@@ -76,7 +102,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     return range ? validateWeatherMonthRange(range) : 'Enter a valid start and end month.';
   });
   readonly preview = signal<WeatherStationGroupPreview | undefined>(undefined);
-  readonly dirty = signal(false);
+  readonly dirty = computed(() => { this.formSnapshot(); return this.form.dirty; });
   readonly saveError = signal<string | undefined>(undefined);
   readonly committing = signal(false);
   readonly saveCompleted = signal(false);
@@ -128,6 +154,24 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     untracked(() => this.initialize(group, defaultRange));
     this.initializedContext = context;
   });
+  private readonly enabledEffect = effect(() => {
+    const canEdit = this.canEdit();
+    untracked(() => canEdit
+      ? this.form.enable({ emitEvent: false })
+      : this.form.disable({ emitEvent: false }));
+  });
+
+  constructor() {
+    this.form.valueChanges.pipe(
+      map(() => this.normalizeDefinitionChanges()),
+      takeUntilDestroyed()
+    ).subscribe(value => {
+      if (JSON.stringify(value) === JSON.stringify(this.formSnapshot())) return;
+      this.form.markAsDirty();
+      this.formSnapshot.set(value);
+      this.markChanged();
+    });
+  }
 
   ngOnDestroy(): void {
     this.unregisterUnsavedChanges();
@@ -146,73 +190,49 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     if (!this.canEdit()) return;
     const range = this.stationPreviewRange();
     if (!this.startMonth() && !this.endMonth() && range) {
-      this.startMonth.set(toMonthInput(range.start));
-      this.endMonth.set(toMonthInput(range.end));
+      this.form.patchValue({ startMonth: toMonthInput(range.start), endMonth: toMonthInput(range.end) }, { emitEvent: false });
     }
-    this.station.set(station);
-    this.markChanged();
+    this.form.controls.station.setValue(station);
   }
   setStartMonth(value: string): void {
     if (!this.canEdit()) return;
-    this.startMonth.set(value);
-    this.markChanged();
+    this.form.controls.startMonth.setValue(value);
   }
   setEndMonth(value: string): void {
     if (!this.canEdit()) return;
-    this.endMonth.set(value);
-    this.markChanged();
+    this.form.controls.endMonth.setValue(value);
   }
 
   addDefinition(type: WeatherDataType = 'HDD'): void {
     if (!this.canEdit()) return;
     const baseTemperature = isDegreeDay(type) ? 60 : undefined;
-    this.definitions.update(definitions => [...definitions, {
+    this.form.controls.definitions.push(this.buildDefinitionForm({
       draftId: this.newDraftId(),
       weatherDataType: type,
       name: defaultWeatherPredictorName(type, baseTemperature),
       unit: weatherPredictorUnit(type),
       baseTemperature,
       production: false
-    }]);
-    this.markChanged();
+    }));
   }
 
   removeDefinition(draftId: string): void {
     if (!this.canEdit()) return;
-    this.definitions.update(definitions => definitions.filter(definition => definition.draftId !== draftId));
-    this.markChanged();
+    const index = this.form.controls.definitions.controls.findIndex(form => form.controls.draftId.value === draftId);
+    if (index >= 0) this.form.controls.definitions.removeAt(index);
   }
 
-  setDefinitionType(draftId: string, value: string): void {
+  setDefinitionType(draftId: string, value: WeatherDataType): void {
     if (!this.canEdit()) return;
-    const type = value as WeatherDataType;
-    const current = this.definitions().find(definition => definition.draftId === draftId);
-    if (!current) return;
-    const previousDefault = defaultWeatherPredictorName(current.weatherDataType, current.baseTemperature);
-    const baseTemperature = isDegreeDay(type) ? 60 : undefined;
-    this.updateDefinition(draftId, {
-      weatherDataType: type,
-      baseTemperature,
-      unit: weatherPredictorUnit(type),
-      name: current.name === previousDefault ? defaultWeatherPredictorName(type, baseTemperature) : current.name
-    });
+    this.definitionForm(draftId)?.controls.weatherDataType.setValue(value);
   }
   setDefinitionName(draftId: string, name: string): void {
     if (!this.canEdit()) return;
-    this.updateDefinition(draftId, { name });
+    this.definitionForm(draftId)?.controls.name.setValue(name);
   }
   setDefinitionBase(draftId: string, value: string): void {
     if (!this.canEdit()) return;
-    const current = this.definitions().find(definition => definition.draftId === draftId);
-    if (!current) return;
-    const nextBase = value === '' ? undefined : Number(value);
-    const previousDefault = defaultWeatherPredictorName(current.weatherDataType, current.baseTemperature);
-    this.updateDefinition(draftId, {
-      baseTemperature: nextBase,
-      name: current.name === previousDefault
-        ? defaultWeatherPredictorName(current.weatherDataType, nextBase)
-        : current.name
-    });
+    this.definitionForm(draftId)?.controls.baseTemperature.setValue(value === '' ? null : Number(value));
   }
 
   async saveAndUpdateReadings(): Promise<void> {
@@ -252,7 +272,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     this.saveError.set(undefined);
     try {
       await this.workflow.commitStationGroup(preview);
-      this.dirty.set(false);
+      this.markPristine();
       this.saveCompleted.set(true);
       this.postSaveRoute = preview.addPredictors.length + preview.updatePredictors.length === 0
         ? this.navigation.facilityInventoryLink(facility.guid, 'predictors')
@@ -317,7 +337,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
         return;
       }
       await this.workflow.commitStationGroup(preview);
-      this.dirty.set(false);
+      this.markPristine();
       this.hideDeleteModal();
       await this.navigation.openFacilityInventory(facility.guid, 'predictors');
     } catch (error) {
@@ -333,10 +353,8 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       this.workspace.predictorReadings().filter(reading => groupIds.has(reading.predictorId))
     );
     const range = groupRange ?? defaultRange;
-    this.station.set(group?.stationId ? { ID: group.stationId, name: group.stationName } as WeatherStation : undefined);
-    this.startMonth.set(range ? toMonthInput(range.start) : '');
-    this.endMonth.set(range ? toMonthInput(range.end) : '');
-    this.definitions.set(group?.predictors.map(predictor => ({
+    this.form.controls.definitions.clear({ emitEvent: false });
+    const definitions: readonly EditableWeatherDefinition[] = group?.predictors.map(predictor => ({
       draftId: this.newDraftId(),
       predictorGuid: predictor.guid,
       weatherDataType: predictor.weatherDataType,
@@ -349,12 +367,21 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     })) ?? [{
       draftId: this.newDraftId(), weatherDataType: 'HDD', name: defaultWeatherPredictorName('HDD', 60),
       unit: weatherPredictorUnit('HDD'), baseTemperature: 60, production: false
-    }]);
+    }];
+    for (const definition of definitions) {
+      this.form.controls.definitions.push(this.buildDefinitionForm(definition), { emitEvent: false });
+    }
+    this.form.patchValue({
+      station: group?.stationId ? { ID: group.stationId, name: group.stationName } as WeatherStation : null,
+      startMonth: range ? toMonthInput(range.start) : '',
+      endMonth: range ? toMonthInput(range.end) : ''
+    }, { emitEvent: false });
     this.preview.set(undefined);
     this.saveCompleted.set(false);
     this.postSaveRoute = undefined;
     this.saveError.set(undefined);
-    this.dirty.set(false);
+    this.markPristine();
+    if (!this.canEdit()) this.form.disable({ emitEvent: false });
     this.workflow.reset();
   }
 
@@ -370,12 +397,46 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     };
   }
 
-  private updateDefinition(draftId: string, update: Partial<EditableWeatherDefinition>): void {
-    this.definitions.update(definitions => definitions.map(definition =>
-      definition.draftId === draftId ? { ...definition, ...update } : definition));
-    this.markChanged();
+  private buildDefinitionForm(definition: EditableWeatherDefinition): WeatherDefinitionForm {
+    return new FormGroup({
+      draftId: new FormControl(definition.draftId, { nonNullable: true }),
+      predictorGuid: new FormControl<string | null>(definition.predictorGuid ?? null),
+      weatherDataType: new FormControl(definition.weatherDataType, { nonNullable: true }),
+      name: new FormControl(definition.name, { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
+      baseTemperature: new FormControl<number | null>(definition.baseTemperature ?? null),
+      production: new FormControl(definition.production, { nonNullable: true })
+    });
   }
-  private markChanged(): void { this.dirty.set(true); this.preview.set(undefined); this.saveCompleted.set(false); this.workflow.reset(); }
+  private definitionForm(draftId: string): WeatherDefinitionForm | undefined {
+    return this.form.controls.definitions.controls.find(form => form.controls.draftId.value === draftId);
+  }
+  private normalizeDefinitionChanges(): ReturnType<typeof this.form.getRawValue> {
+    const previous = new Map(this.formSnapshot().definitions.map(definition => [definition.draftId, definition]));
+    for (const form of this.form.controls.definitions.controls) {
+      const current = form.getRawValue();
+      const prior = previous.get(current.draftId);
+      if (!prior) continue;
+      const typeChanged = current.weatherDataType !== prior.weatherDataType;
+      const baseChanged = current.baseTemperature !== prior.baseTemperature;
+      if (!typeChanged && !baseChanged) continue;
+      const baseTemperature = typeChanged
+        ? isDegreeDay(current.weatherDataType) ? 60 : null
+        : current.baseTemperature;
+      const previousDefault = defaultWeatherPredictorName(prior.weatherDataType, prior.baseTemperature ?? undefined);
+      form.patchValue({
+        baseTemperature,
+        name: current.name === previousDefault
+          ? defaultWeatherPredictorName(current.weatherDataType, baseTemperature ?? undefined)
+          : current.name
+      }, { emitEvent: false });
+    }
+    return this.form.getRawValue();
+  }
+  private markPristine(): void {
+    this.form.markAsPristine();
+    this.formSnapshot.set(this.form.getRawValue());
+  }
+  private markChanged(): void { this.preview.set(undefined); this.saveCompleted.set(false); this.workflow.reset(); }
   private hideSaveModal(): void {
     if (!this.saveModalOpen) return;
     this.saveModalOpen = false;

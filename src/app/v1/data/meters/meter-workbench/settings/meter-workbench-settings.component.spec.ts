@@ -87,6 +87,110 @@ describe('MeterWorkbenchSettingsComponent', () => {
     expect(text).not.toContain('Electricity agreement options');
   });
 
+  it.each([false, true])('hydrates saved dekatherms instead of the facility default when readings exist: %s', async withReading => {
+    vi.useFakeTimers();
+    const fixture = setup({
+      withReading,
+      meter: {
+        source: 'Natural Gas',
+        scope: 1,
+        startingUnit: 'DTherms',
+        energyUnit: 'DTherms',
+        siteToSource: 1.25
+      },
+      facility: { volumeGasUnit: 'SCF' }
+    });
+    const commandBoundary = TestBed.inject(WorkspaceCommandBoundary) as unknown as { execute: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const collectionUnit = query<HTMLSelectElement>(fixture, 'select[formControlName="startingUnit"]');
+    expect(collectionUnit.selectedOptions[0].textContent).toContain('Dekatherms');
+    expect(collectionUnit.disabled).toBe(withReading);
+    expect(fixture.componentInstance.formSignal()?.getRawValue()).toMatchObject({
+      source: 'Natural Gas',
+      scope: 1,
+      startingUnit: 'DTherms',
+      energyUnit: 'DTherms',
+      siteToSource: 1.25
+    });
+    expect(fixture.componentInstance.formSignal()?.pristine).toBe(true);
+    expect(fixture.componentInstance.viewModel()?.displayHeatCapacity).toBe(false);
+
+    await vi.advanceTimersByTimeAsync(700);
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+  });
+
+  it('preserves custom setup values when an unrelated name change autosaves', async () => {
+    vi.useFakeTimers();
+    const savedSetup = {
+      source: 'Natural Gas' as const,
+      scope: 1,
+      startingUnit: 'CCF',
+      energyUnit: 'GJ',
+      heatCapacity: 0.12,
+      siteToSource: 1.45
+    };
+    const fixture = setup({ meter: savedSetup, facility: { volumeGasUnit: 'SCF' } });
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    expect(fixture.componentInstance.formSignal()?.getRawValue()).toMatchObject(savedSetup);
+    expect(fixture.componentInstance.formSignal()?.controls.heatCapacity.hasValidator(Validators.required)).toBe(true);
+    expect(query<HTMLInputElement>(fixture, 'input[formControlName="heatCapacity"]').value).toBe('0.12');
+
+    const nameInput = query<HTMLInputElement>(fixture, 'input[formControlName="name"]');
+    nameInput.value = 'Gas meter renamed';
+    nameInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(700);
+    await fixture.whenStable();
+
+    expect(meterHandler.updateMeterWithData).toHaveBeenCalledWith(
+      expect.objectContaining({ ...savedSetup, name: 'Gas meter renamed' }),
+      [],
+      'account-a'
+    );
+  });
+
+  it('preserves a saved emissions scope and its validators during hydration', () => {
+    const fixture = setup({
+      meter: { source: 'Other', scope: 5, startingUnit: 'kg', globalWarmingPotentialOption: 101 }
+    });
+
+    fixture.detectChanges();
+
+    const form = fixture.componentInstance.formSignal();
+    expect(form?.controls.scope.value).toBe(5);
+    expect(form?.controls.startingUnit.value).toBe('kg');
+    expect(form?.controls.globalWarmingPotentialOption.value).toBe(101);
+    expect(form?.controls.globalWarmingPotentialOption.hasValidator(Validators.required)).toBe(true);
+    expect(fixture.componentInstance.viewModel()?.displayGlobalWarmingPotential).toBe(true);
+  });
+
+  it('applies facility defaults when the user changes the source', async () => {
+    vi.useFakeTimers();
+    const fixture = setup({ facility: { volumeGasUnit: 'SCF' } });
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    const sourceSelect = query<HTMLSelectElement>(fixture, 'select[formControlName="source"]');
+    sourceSelect.value = Array.from(sourceSelect.options)
+      .find(option => option.textContent?.trim() === 'Natural Gas')!.value;
+    sourceSelect.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(700);
+    await fixture.whenStable();
+
+    expect(meterHandler.updateMeterWithData).toHaveBeenCalledWith(
+      expect.objectContaining({ source: 'Natural Gas', scope: 1, startingUnit: 'SCF', energyUnit: 'MMBtu' }),
+      [],
+      'account-a'
+    );
+  });
+
   it('autosaves valid text changes through the workspace command boundary', async () => {
     vi.useFakeTimers();
     const fixture = setup();
@@ -444,6 +548,8 @@ function setup(options: {
   withReading?: boolean;
   readings?: ReturnType<typeof reading>[];
   source?: 'Electricity' | 'Natural Gas';
+  meter?: Partial<ReturnType<typeof meter>>;
+  facility?: Partial<ReturnType<typeof facility>>;
   fragment?: string;
   meterReadingDataApplication?: ReturnType<typeof meter>['meterReadingDataApplication'];
 } = {}): ComponentFixture<MeterWorkbenchSettingsComponent> {
@@ -455,7 +561,8 @@ function setup(options: {
     ...(Object.prototype.hasOwnProperty.call(options, 'meterReadingDataApplication')
       ? { meterReadingDataApplication: options.meterReadingDataApplication }
       : {}),
-    charges: []
+    charges: [],
+    ...options.meter
   }));
   const selectedMeterData = signal(options.readings ?? (options.withReading
     ? [reading({ id: 7, guid: 'reading-a', meterId: 'meter-a', charges: [] })]
@@ -473,7 +580,8 @@ function setup(options: {
     electricityUnit: 'kWh',
     volumeGasUnit: 'CCF',
     volumeLiquidUnit: 'gal',
-    massUnit: 'lb'
+    massUnit: 'lb',
+    ...options.facility
   }));
   const execute = vi.fn(async (_options, persist: () => Promise<unknown>) => {
     const value = await persist();

@@ -42,6 +42,7 @@ describe('portfolio meter creation in the shell portal', () => {
         { provide: AccountWorkspaceStore, useValue: {
           account: signal(account()), facilities: signal([facility(), facility({ guid: 'facility-b', name: 'Beta' })]),
           meterGroups: signal([group({ guid: 'beta-group', facilityId: 'facility-b', name: 'Beta group' })]),
+          customFuels: signal([]),
           accountAnalyses: signal([]), facilityAnalyses: signal([]), canWrite: signal(true), hasPending: signal(false)
         } }
       ]
