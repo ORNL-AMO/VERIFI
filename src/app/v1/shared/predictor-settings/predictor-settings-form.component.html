@@ -2,7 +2,7 @@
   <section class="predictor-settings__section">
     @if (showSaveStatus && saveMessage) {
       <div class="predictor-settings__heading predictor-settings__heading--save-state">
-        <p class="predictor-settings__save-state" aria-live="polite" [class.is-error]="saveState === 'error' || saveState === 'invalid'">
+        <p class="predictor-settings__save-state" aria-live="polite" [class.is-error]="saveState === 'error' || saveState === 'invalid' || saveState === 'conflict'">
           @if (saveState === 'saving') { <app-ui-icon name="loading" spin></app-ui-icon> }
           {{ saveMessage }}
           @if (saveState === 'error') {
@@ -46,6 +46,9 @@
         <label>
           <span>Stop month <small>Optional</small></span>
           <input type="month" formControlName="stopMonth" (change)="immediateChange.emit()">
+          @if (form.hasError('invalidStopMonth')) {
+            <small class="predictor-settings__error">Enter a valid stop month.</small>
+          }
         </label>
       }
       <label class="predictor-settings__check">

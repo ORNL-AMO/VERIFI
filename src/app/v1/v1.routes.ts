@@ -254,7 +254,7 @@ export const V1Routes: Routes = [
                 children: [{ path: '', component: MeterWorkbenchComponent,
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
-                      { path: 'settings', component: MeterWorkbenchSettingsComponent, data: { meterTab: 'settings' } },
+                      { path: 'settings', component: MeterWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { meterTab: 'settings' } },
                       { path: 'readings', component: MeterWorkbenchReadingsComponent, data: { meterTab: 'readings' } },
                       { path: 'bill-inspection', component: MeterWorkbenchBillInspectionComponent, data: { meterTab: 'bill-inspection' } },
                       { path: 'monthly', component: MeterWorkbenchMonthlyDataComponent, data: { meterTab: 'monthly' } },
@@ -339,7 +339,7 @@ export const V1Routes: Routes = [
                     canActivate: [predictorCanonicalRouteGuard],
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
-                      { path: 'settings', component: PredictorWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'settings' } },
+                      { path: 'settings', component: PredictorWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { predictorTab: 'settings' } },
                       { path: 'readings', component: PredictorWorkbenchReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'readings' } },
                       {
                         path: 'quality',

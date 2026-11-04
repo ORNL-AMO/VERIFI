@@ -47,6 +47,15 @@ export {
   weatherPredictorUnit
 } from './predictor-settings.models';
 
+export type { StandardPredictorSettings, StandardPredictorSettingsIdentity } from './standard-predictor-settings.models';
+export {
+  applyStandardPredictorSettings,
+  normalizeStandardPredictorSettings,
+  reconcileStandardPredictorSettings,
+  standardPredictorSettings,
+  validStandardPredictorSettings
+} from './standard-predictor-settings.models';
+
 export type {
   PredictorWorkbenchTab,
   PredictorWorkbenchTabAttention,

@@ -16,12 +16,13 @@ describe('Predictor settings connected borders in Chromium', () => {
     TestBed.configureTestingModule({ imports: [PredictorWorkbenchSettingsComponent], providers: [provideRouter([]),
       { provide: FacilityPredictorsWorkspaceService, useValue: workspace },
       { provide: PredictorWorkbenchContextService, useValue: {
+        predictorGuid: computed(() => workspace.predictors()[0]?.guid),
         predictor: computed(() => workspace.predictors()[0]), readings: computed(() => workspace.predictorReadings()),
         card: computed(() => workspace.predictorCards()[0])
       } },
       { provide: StandardPredictorActionsService, useValue: {} },
       { provide: WorkspaceNavigationService, useValue: inventoryNavigation },
-      { provide: UnsavedChangesService, useValue: { register: () => () => undefined } },
+      UnsavedChangesService,
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
     ] });
     const fixture = TestBed.createComponent(PredictorWorkbenchSettingsComponent);

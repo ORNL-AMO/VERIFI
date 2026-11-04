@@ -11,6 +11,8 @@ import { StandardPredictorActionsService } from '../../standard-predictor-action
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorWorkbenchSettingsComponent } from './predictor-workbench-settings.component';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { applyStandardPredictorSettings, standardPredictorSettings } from '../../models/standard-predictor-settings.models';
 
 describe('PredictorWorkbenchSettingsComponent', () => {
   afterEach(() => vi.useRealTimers());
@@ -39,7 +41,6 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     const fixture = createFixture({ updatePredictor });
     const form = fixture.componentInstance.form()!;
     form.controls.name.setValue('Updated production');
-    fixture.componentInstance.onTextChange();
     expect(updatePredictor).not.toHaveBeenCalled();
 
     await vi.advanceTimersByTimeAsync(650);
@@ -84,11 +85,109 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     expect(button.textContent).toContain('Return predictor to use');
   });
 
+  it('refreshes pristine values silently and merges committed changes into a dirty draft', async () => {
+    vi.useFakeTimers();
+    const updatePredictor = vi.fn(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    const form = fixture.componentInstance.form()!;
+    fixture.selectedPredictor.set({ ...fixture.selectedPredictor(), unit: 'kg' }); fixture.detectChanges();
+    expect(fixture.componentInstance.form()).toBe(form);
+    expect(form.controls.unit.value).toBe('kg');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+    form.controls.name.setValue('Local production');
+    fixture.selectedPredictor.set({ ...fixture.selectedPredictor(), description: 'Committed note' }); fixture.detectChanges();
+    expect(form.getRawValue()).toMatchObject({ name: 'Local production', description: 'Committed note' });
+    expect(fixture.componentInstance.editor.conflicts()).toEqual([]);
+    expect(updatePredictor).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(650);
+    expect(updatePredictor).toHaveBeenCalledWith(expect.objectContaining({ name: 'Local production', description: 'Committed note' }));
+  });
+
+  it('keeps later typing dirty until a serialized second save acknowledges it', async () => {
+    vi.useFakeTimers();
+    let finish!: () => void;
+    const first = new Promise<void>(resolve => { finish = resolve; });
+    const updatePredictor = vi.fn().mockImplementationOnce(async (value: any) => { await first; return value; })
+      .mockImplementation(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    const form = fixture.componentInstance.form()!;
+    form.controls.name.setValue('First change');
+    await vi.advanceTimersByTimeAsync(650); fixture.detectChanges();
+    expect(fixture.componentInstance.editor.saving()).toBe(true);
+    expect(form.enabled).toBe(true);
+    form.controls.name.setValue('Second change');
+    await vi.advanceTimersByTimeAsync(650);
+    expect(updatePredictor).toHaveBeenCalledTimes(1);
+    finish(); await first; await vi.advanceTimersByTimeAsync(0); fixture.detectChanges();
+    expect(updatePredictor).toHaveBeenCalledTimes(2);
+    expect(updatePredictor.mock.calls[1][0].name).toBe('Second change');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('retains failures, retries them, and discards without a navigation-time write', async () => {
+    vi.useFakeTimers();
+    const updatePredictor = vi.fn().mockRejectedValueOnce(new Error('save failed'))
+      .mockImplementation(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    fixture.componentInstance.form()!.controls.description.setValue('Draft note');
+    await vi.advanceTimersByTimeAsync(650);
+    expect(fixture.componentInstance.saveState()).toBe('error');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    await fixture.componentInstance.saveNow();
+    expect(fixture.componentInstance.saveState()).toBe('saved');
+    fixture.componentInstance.form()!.controls.name.setValue('Discard me');
+    fixture.componentInstance.discardChanges();
+    await vi.advanceTimersByTimeAsync(650);
+    expect(updatePredictor).toHaveBeenCalledTimes(2);
+    expect(fixture.componentInstance.form()!.controls.name.value).toBe('Production');
+    expect(fixture.componentInstance.form()!.controls.description.value).toBe('Draft note');
+  });
+
+  it('holds overlapping saved changes for an explicit choice', async () => {
+    vi.useFakeTimers();
+    const updatePredictor = vi.fn(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    fixture.componentInstance.form()!.controls.name.setValue('Local name');
+    fixture.selectedPredictor.set({ ...fixture.selectedPredictor(), name: 'Saved name' }); fixture.detectChanges();
+    expect(fixture.componentInstance.saveState()).toBe('conflict');
+    expect(fixture.componentInstance.editor.conflicts().map(conflict => conflict.id)).toEqual(['name']);
+    await vi.advanceTimersByTimeAsync(650);
+    expect(updatePredictor).not.toHaveBeenCalled();
+    fixture.componentInstance.resolveConflicts({ name: 'saved' }); fixture.detectChanges();
+    expect(fixture.componentInstance.form()!.controls.name.value).toBe('Saved name');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('retains a missing resource draft and blocks invalid settings', async () => {
+    vi.useFakeTimers();
+    const updatePredictor = vi.fn(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    fixture.componentInstance.form()!.controls.name.setValue(' ');
+    await vi.advanceTimersByTimeAsync(650);
+    expect(updatePredictor).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.saveState()).toBe('invalid');
+    fixture.selectedPredictor.set(undefined); fixture.detectChanges();
+    expect(fixture.componentInstance.form()!.controls.name.value).toBe(' ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Your draft has been retained');
+  });
+
 });
 
 function createFixture(options: { updatePredictor?: any; readings?: any[]; predictor?: any } = {}) {
   const selectedPredictor = signal(options.predictor ?? predictor());
   const selectedReadings = signal(options.readings ?? []);
+  const predictorGuid = signal(selectedPredictor()?.guid ?? 'predictor-a');
+  const pendingOperations = signal<readonly { ownerId?: string }[]>([]);
+  const updateSettings = vi.fn(async (_identity: any, value: any, _base: any, ownerId: string) => {
+    pendingOperations.set([{ ownerId }]);
+    try {
+      const updated = applyStandardPredictorSettings(selectedPredictor(), value);
+      const saved = await (options.updatePredictor ?? (async (item: any) => item))(updated);
+      selectedPredictor.set(saved);
+      return standardPredictorSettings(saved);
+    } finally { pendingOperations.set([]); }
+  });
   TestBed.configureTestingModule({
     imports: [PredictorWorkbenchSettingsComponent],
     providers: [
@@ -98,16 +197,17 @@ function createFixture(options: { updatePredictor?: any; readings?: any[]; predi
       } },
       {
         provide: PredictorWorkbenchContextService,
-        useValue: { predictor: selectedPredictor, readings: selectedReadings, card: signal(undefined) }
+        useValue: { predictorGuid, predictor: selectedPredictor, readings: selectedReadings, card: signal(undefined) }
       },
       { provide: StandardPredictorActionsService, useValue: {
-        updatePredictor: options.updatePredictor ?? vi.fn(async (value: any) => value), deletePredictor: vi.fn()
+        updateSettings, deletePredictor: vi.fn()
       } },
       { provide: PredictorWeatherWorkflowService, useValue: {
         state: signal({ status: 'idle', message: '' }), busy: signal(false), reset: vi.fn(), cancel: vi.fn(),
         previewSettingsChange: vi.fn(async () => undefined), commitSettings: vi.fn()
       } },
-      { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()) } },
+      UnsavedChangesService,
+      { provide: AccountWorkspaceStore, useValue: { pendingOperations } },
       { provide: WeatherStationLookupService, useValue: { getStation: vi.fn(async () => undefined), searchLocations: vi.fn(), findStations: vi.fn() } },
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
       { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
@@ -117,7 +217,7 @@ function createFixture(options: { updatePredictor?: any; readings?: any[]; predi
   });
   const fixture = TestBed.createComponent(PredictorWorkbenchSettingsComponent);
   fixture.detectChanges();
-  return fixture;
+  return Object.assign(fixture, { selectedPredictor, predictorGuid, pendingOperations, updateSettings });
 }
 
 function predictor(overrides: Record<string, unknown> = {}): any {

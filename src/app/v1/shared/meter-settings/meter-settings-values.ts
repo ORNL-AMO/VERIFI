@@ -3,7 +3,7 @@ import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMete
 
 export const METER_SETTINGS_FIELDS = [
   'meterNumber', 'accountNumber', 'phase', 'heatCapacity', 'siteToSource', 'name',
-  'location', 'supplier', 'notes', 'source', 'meterReadingDataApplication', 'fuel',
+  'location', 'supplier', 'notes', 'source', 'groupId', 'meterReadingDataApplication', 'fuel',
   'startingUnit', 'energyUnit', 'scope', 'agreementType', 'includeInEnergy',
   'retainRECs', 'directConnection', 'greenPurchaseFraction', 'waterIntakeType',
   'waterDischargeType', 'vehicleCategory', 'vehicleType', 'vehicleCollectionType',
@@ -27,6 +27,7 @@ const BOOLEAN_FIELDS = ['includeInEnergy', 'retainRECs', 'directConnection', 'no
 export function normalizeMeterSettings(values: MeterSettingsValues): MeterSettingsValues {
   const normalized = Object.fromEntries(METER_SETTINGS_FIELDS.map(key => [key, values[key] ?? null])) as ScalarValues;
   for (const key of BOOLEAN_FIELDS) normalized[key] = values[key] ?? false;
+  normalized.groupId = values.groupId || null;
   return { ...normalized, chargesArray: values.chargesArray.map(charge => ({
     guid: charge.guid, name: charge.name ?? '', chargeType: charge.chargeType ?? null,
     displayChargeInTable: charge.displayChargeInTable ?? false,

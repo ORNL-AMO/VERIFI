@@ -2,6 +2,7 @@ import { MeterSettingsForm } from './meter-settings-values';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
   MeterSettingsRuleChange,
+  MeterSettingsGroupingView,
   MeterSettingsSaveState,
   MeterSettingsViewModel
 } from './meter-settings-form.service';
@@ -25,6 +26,7 @@ export class MeterSettingsFormComponent {
   @Input() saveMessage = '';
   @Input() showCalendarizationHelp = true;
   @Input() layout: MeterSettingsFormLayout = 'two-column';
+  @Input() grouping?: MeterSettingsGroupingView;
 
   @Output() ruleChange = new EventEmitter<MeterSettingsRuleChange>();
   @Output() immediateChange = new EventEmitter<MeterSettingsRuleChange | undefined>();
