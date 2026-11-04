@@ -5,6 +5,8 @@ description: Review VERIFI code changes or pull requests for correctness, archit
 
 # Review code changes
 
+For responding to feedback already left on a PR, start with [`address-pr-review`](../address-pr-review/SKILL.md). Use this skill to assess the findings and review any resulting diff; it does not independently authorize implementing suggestions or posting replies.
+
 1. Read the [Reviewer](../../../docs/agents/personas.md#reviewer) mode and the matching row in the [task context index](../../../docs/agents/context-index.md). For a pull request, also read the [GitHub PR review guide](../../../docs/agents/github-pr-review.md). Load the affected architecture sections and subsystem skills before judging the implementation.
 2. Establish the complete comparison and the intended behavior. Read the changed tests, documentation, and validation evidence, then trace affected entry points, owners, consumers, shared contracts, and compatibility paths beyond the changed lines.
 3. Review in focused passes:

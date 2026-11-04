@@ -1,0 +1,4 @@
+interface:
+  display_name: "Address PR Review"
+  short_description: "Evaluate feedback, fix issues, and resolve PR threads"
+  default_prompt: "Use $address-pr-review to evaluate every comment in this PR review, implement warranted fixes, validate them, and reply to and resolve the addressed threads."
