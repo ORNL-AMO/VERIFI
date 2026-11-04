@@ -1,4 +1,4 @@
-<dl class="v1-data-workbench-facts">
+<dl class="energy-use-snapshot__facts">
   <div><dt>Sources</dt><dd>@for (source of snapshot.sources; track $index) { <span>{{ source }}{{ $last ? '' : ', ' }}</span> } @empty { Not configured }</dd></div>
   <div><dt>Energy-use group</dt><dd>{{ snapshot.group }}</dd></div>
   <div><dt>Lifecycle</dt><dd>{{ snapshot.lifecycle }}</dd></div>
