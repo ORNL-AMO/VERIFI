@@ -23,6 +23,8 @@ import { MeterReadingsColumnsSlideoutComponent } from './meter-readings-columns-
 import { MeterReadingsStatusComponent } from './meter-readings-status/meter-readings-status.component';
 import { MeterReadingsTableComponent } from './meter-readings-table/meter-readings-table.component';
 import { MeterWorkbenchReadingsComponent } from './meter-workbench-readings.component';
+import { meterReadingContext } from './meter-reading-editing';
+import { readMeterReading } from './meter-reading-form.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
@@ -207,6 +209,78 @@ describe('MeterWorkbenchReadingsComponent', () => {
     expect(component.actionError()).toBe('A reading already exists for this date.');
     expect(commandBoundary.execute).not.toHaveBeenCalled();
     expect(meterHandler.addMeterData).not.toHaveBeenCalled();
+  });
+
+  it('keeps unload protection when a refreshed bill disappears after an edit back to its opening value', async () => {
+    const current = reading({ guid: 'reading-a', meterId: 'meter-a', totalCost: 20 });
+    const { fixture, selectedMeterData } = setupHarness({ readings: [current] });
+    fixture.detectChanges();
+    await fixture.componentInstance.openEditBill(current); fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(MeterReadingBillSlideoutComponent)).componentInstance as MeterReadingBillSlideoutComponent;
+    selectedMeterData.set([{ ...current, totalCost: 30 }]); fixture.detectChanges();
+    editor.form!.controls.totalCost.setValue(20);
+    selectedMeterData.set([]); fixture.detectChanges(); TestBed.tick();
+
+    expect(editor.missingReading).toBe(true);
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    const unload = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(unload);
+    expect(unload.defaultPrevented).toBe(true);
+    fixture.destroy();
+  });
+
+  it.each(['edit', 'add'] as const)('rechecks existing charge types before a queued %s write', async mode => {
+    const meterValue = meter({ guid: 'meter-a', charges: [{ guid: 'charge-a', name: 'Energy charge', chargeType: 'consumption',
+      displayUsageInTable: true, displayChargeInTable: true }] });
+    const current = reading({ guid: 'reading-a', meterId: meterValue.guid,
+      charges: [{ chargeGuid: 'charge-a', chargeUsage: 10, chargeAmount: 20 }] });
+    const { fixture, commandBoundary, meterHandler, meterRecords } = setupHarness({ meterValue, readings: mode === 'edit' ? [current] : [] });
+    const component = fixture.componentInstance;
+    if (mode === 'edit') await component.openEditBill(current);
+    else await component.openAddBill();
+    const submitted = { ...component.billPanel()!.reading, charges: [{ chargeGuid: 'charge-a', chargeUsage: 99, chargeAmount: 20 }] };
+    let release!: () => void;
+    const queued = new Promise<void>(resolve => { release = resolve; });
+    commandBoundary.execute.mockImplementationOnce(async (_metadata, action) => {
+      await queued; return { value: await action() };
+    });
+    const saving = component.saveBill({ reading: submitted, baseline: readMeterReading(meterValue, component.billPanel()!.reading),
+      context: meterReadingContext(meterValue), addAnother: false });
+    expect(commandBoundary.execute).toHaveBeenCalledOnce();
+    meterRecords.set([{ ...meterValue, charges: [{ ...meterValue.charges![0], chargeType: 'demand' }] }]);
+    release(); await saving;
+
+    expect(meterHandler.updateMeterData).not.toHaveBeenCalled();
+    expect(meterHandler.addMeterData).not.toHaveBeenCalled();
+    expect(component.billPanel()).toBeDefined();
+    expect(component.actionError()).toContain('Meter setup changed');
+  });
+
+  it('allows queued saves after harmless charge definition additions and reordering', async () => {
+    const meterValue = meter({ guid: 'meter-a', charges: [{ guid: 'charge-a', name: 'Energy charge', chargeType: 'consumption',
+      displayUsageInTable: true, displayChargeInTable: true }] });
+    const current = reading({ guid: 'reading-a', meterId: meterValue.guid,
+      charges: [{ chargeGuid: 'charge-a', chargeUsage: 10, chargeAmount: 20 }] });
+    const { fixture, commandBoundary, meterHandler, meterRecords } = setupHarness({ meterValue, readings: [current] });
+    const component = fixture.componentInstance;
+    await component.openEditBill(current);
+    let release!: () => void;
+    const queued = new Promise<void>(resolve => { release = resolve; });
+    commandBoundary.execute.mockImplementationOnce(async (_metadata, action) => {
+      await queued; return { value: await action() };
+    });
+    const saving = component.saveBill({ reading: { ...current, charges: [{ ...current.charges![0], chargeUsage: 99 }] },
+      baseline: readMeterReading(meterValue, current), context: meterReadingContext(meterValue), addAnother: false });
+    meterRecords.set([{ ...meterValue, charges: [
+      { guid: 'charge-new', name: 'New charge', chargeType: 'other', displayUsageInTable: false, displayChargeInTable: true },
+      { ...meterValue.charges![0], name: 'Renamed charge' }
+    ] }]);
+    release(); await saving;
+
+    expect(meterHandler.updateMeterData).toHaveBeenCalledWith(expect.objectContaining({
+      charges: expect.arrayContaining([expect.objectContaining({ chargeGuid: 'charge-a', chargeUsage: 99 })])
+    }), 'account-a');
+    expect(component.billPanel()).toBeUndefined();
+    expect(component.actionError()).toBeUndefined();
   });
 
   it('blocks editing a bill onto another reading date while allowing the current reading date', async () => {
@@ -427,6 +501,7 @@ function setupHarness(options: SetupOptions = {}) {
     reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, totalEnergyUse: 10 })
   ];
   const selectedMeterData = signal(readings);
+  const meterRecords = signal([meterValue]);
   const commandBoundary = {
     execute: vi.fn(async (
       metadata: { publication?: { mode?: string; buildPatch?: (value: unknown) => unknown } },
@@ -490,7 +565,7 @@ function setupHarness(options: SetupOptions = {}) {
           account: signal(accountValue),
           selectedFacility: signal(facilityValue),
           meterData: signal(readings),
-          meters: signal([meterValue]),
+          meters: meterRecords,
           customFuels: signal([]),
           customGWPs: signal([])
         }
@@ -542,6 +617,7 @@ function setupHarness(options: SetupOptions = {}) {
   return {
     fixture: TestBed.createComponent(MeterWorkbenchReadingsComponent),
     selectedMeterData,
+    meterRecords,
     commandBoundary,
     meterHandler,
     modalPortal,

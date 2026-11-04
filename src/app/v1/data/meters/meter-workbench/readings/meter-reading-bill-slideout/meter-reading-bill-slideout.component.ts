@@ -3,7 +3,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { ConflictChoices, DraftConflict, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
 import { EditorConflictReviewComponent } from '@app/v1/data/editing/editor-conflict-review/editor-conflict-review.component';
-import { meterReadingContextKey, reconcileMeterReading } from '../meter-reading-editing';
+import { MeterReadingContext, meterReadingContext, meterReadingContextMatches, reconcileMeterReading } from '../meter-reading-editing';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -18,7 +18,7 @@ export interface MeterReadingBillSave {
   readonly reading: IdbUtilityMeterData;
   readonly addAnother: boolean;
   readonly baseline?: MeterReadingValues;
-  readonly contextKey?: string;
+  readonly context?: MeterReadingContext;
 }
 
 interface MeterReadingBillChargeView {
@@ -95,24 +95,27 @@ export class MeterReadingBillSlideoutComponent implements OnChanges, OnDestroy {
       this.knownPersistedReading = this.mode === 'edit' && this.existingReadings.some(item => item.guid === this.reading.guid);
     } else if (changes['meter'] || changes['reading'] || changes['existingReadings']) {
       if (this.mode === 'edit' && this.knownPersistedReading) this.missingReading = !this.existingReadings.some(item => item.guid === this.reading.guid);
-      const dirty = this.hasUnsavedChanges();
-      const contextChanged = meterReadingContextKey(this.meter) !== meterReadingContextKey(this.editorMeter);
-      if (dirty && contextChanged) this.contextChanged = true;
-      else if (!dirty && contextChanged) {
-        this.editorMeter = structuredClone(this.meter);
-        this.baseline = readMeterReading(this.editorMeter, current);
-        this.latestValues.set(this.baseline);
-        this.observeForm(this.formService.buildForm(this.editorMeter, current, this.existingReadings));
-      } else if (!this.contextChanged) {
-        const saved = readMeterReading(this.editorMeter, current);
-        const local = normalizeMeterReading(this.form.getRawValue());
-        const base = this.baseline!;
-        const merged = reconcileMeterReading(base, local, saved);
-        this.formService.hydrate(this.form, merged.value);
-        this.latestValues.set(saved);
-        this.baseline = merged.baseline ?? saved;
-        this.editorMeter = structuredClone(this.meter);
-        this.conflicts = this.labelConflicts(merged.conflicts);
+      // A missing record has no new saved snapshot to reconcile with the retained draft.
+      if (!this.missingReading) {
+        const dirty = this.hasUnsavedChanges();
+        const contextChanged = !meterReadingContextMatches(meterReadingContext(this.editorMeter), this.meter);
+        if (dirty && contextChanged) this.contextChanged = true;
+        else if (!dirty && contextChanged) {
+          this.editorMeter = structuredClone(this.meter);
+          this.baseline = readMeterReading(this.editorMeter, current);
+          this.latestValues.set(this.baseline);
+          this.observeForm(this.formService.buildForm(this.editorMeter, current, this.existingReadings));
+        } else if (!this.contextChanged) {
+          const saved = readMeterReading(this.editorMeter, current);
+          const local = normalizeMeterReading(this.form.getRawValue());
+          const base = this.baseline!;
+          const merged = reconcileMeterReading(base, local, saved);
+          this.formService.hydrate(this.form, merged.value);
+          this.latestValues.set(saved);
+          this.baseline = merged.baseline ?? saved;
+          this.editorMeter = structuredClone(this.meter);
+          this.conflicts = this.labelConflicts(merged.conflicts);
+        }
       }
       this.formService.refreshValidation(this.form, this.editorMeter, current, this.existingReadings);
     }
@@ -162,7 +165,7 @@ export class MeterReadingBillSlideoutComponent implements OnChanges, OnDestroy {
       this.form?.markAllAsTouched(); return;
     }
     this.saved.emit({ reading: this.formService.updateReadingFromForm(this.editorMeter, this.reading, this.form),
-      baseline: this.baseline, contextKey: meterReadingContextKey(this.editorMeter), addAnother });
+      baseline: this.baseline, context: meterReadingContext(this.editorMeter), addAnother });
   }
 
   async reloadSavedBill(): Promise<void> {
