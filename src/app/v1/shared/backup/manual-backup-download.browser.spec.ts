@@ -74,7 +74,7 @@ describe('manual backup downloads in Chromium', () => {
       { provide: BackupExportCoordinator, useValue: exports },
       { provide: AccountCommandHandler, useValue: TestBed.inject(AccountCommandHandler) },
       { provide: ApplicationLifecycleService, useValue: { refreshAccountCatalog: vi.fn(async () => []) } },
-      { provide: UnsavedChangesService, useValue: new UnsavedChangesService() },
+      UnsavedChangesService,
       { provide: NotificationService, useValue: { success: vi.fn(), warning: vi.fn(), danger: vi.fn() } }
     ] });
     service = injector.get(ManualBackupDownloadService);

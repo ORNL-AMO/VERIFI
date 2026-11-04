@@ -32,7 +32,7 @@
       @if (!hideCancel) {
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled" (click)="cancel()">Cancel</button>
       }
-      <button type="button" class="v1-btn {{ confirmClass }}" [disabled]="disabled" (click)="confirm()">
+      <button type="button" class="v1-btn {{ confirmClass }}" [disabled]="disabled || confirmDisabled" (click)="confirm()">
         @if (confirmIcon) {
           <app-ui-icon [name]="busy ? 'loading' : confirmIcon" [spin]="busy"></app-ui-icon>
         }

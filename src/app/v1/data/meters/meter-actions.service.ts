@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { applyMeterSourceDefaults } from '@app/v1/shared/meter-settings/meter-source-defaults';
 import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
@@ -47,12 +48,12 @@ export class MeterActionsService {
       throw new WorkspaceWriteError('validation-failed', `${draft.source} meters cannot be assigned to ${group?.groupType} groups.`);
     }
 
-    const meter = {
+    const meter = applyMeterSourceDefaults({
       ...getNewIdbUtilityMeter(facility.guid, account.guid, true, facility.energyUnit),
       name,
       source: draft.source,
       groupId: group?.guid
-    };
+    }, facility, this.workspace.customFuels());
 
     const result = await this.commandBoundary.execute(
       {

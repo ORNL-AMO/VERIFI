@@ -1,5 +1,5 @@
+import { MeterSettingsForm } from '../meter-settings-values';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { MeterSettingsFormService, MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settings-form.service';
 import type { MeterSettingsSaveState } from '../meter-settings-form-services/meter-settings-form.models';
 
@@ -10,7 +10,7 @@ import type { MeterSettingsSaveState } from '../meter-settings-form-services/met
   templateUrl: './meter-settings-core-form.component.html'
 })
 export class MeterSettingsCoreFormComponent {
-  @Input({ required: true }) form: FormGroup;
+  @Input({ required: true }) form: MeterSettingsForm;
   @Input({ required: true }) viewModel: MeterSettingsViewModel;
   @Input({ required: true }) saveState: MeterSettingsSaveState;
   @Input({ required: true }) saveMessage: string;

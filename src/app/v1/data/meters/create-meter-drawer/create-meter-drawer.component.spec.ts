@@ -58,7 +58,7 @@ describe('CreateMeterDrawerComponent', () => {
     component.facilityControl.setValue('facility-b');
     fixture.detectChanges();
     expect(form.groups.map(item => item.guid)).toEqual(['group-b']);
-    expect(form.form.controls.groupId.value).toBeUndefined();
+    expect(form.form.controls.groupId.value).toBeNull();
     expect(selector.classList.contains('v1-select')).toBe(true);
   });
 

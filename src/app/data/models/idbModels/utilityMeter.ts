@@ -12,7 +12,7 @@ export interface IdbUtilityMeter {
     groupId: string,
     //data
     meterNumber: string,
-    accountNumber: number,
+    accountNumber: number | string,
     phase?: MeterPhase,
     heatCapacity?: number,
     siteToSource: number,

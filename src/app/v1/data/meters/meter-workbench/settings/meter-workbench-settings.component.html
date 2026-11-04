@@ -3,6 +3,13 @@
 
 @if (form && vm) {
   <form class="v1-settings-panel meter-settings-workbench" [formGroup]="form" aria-label="Meter settings">
+    @if (!meter()) {
+      <div class="v1-alert v1-alert--warning" role="status">This meter is no longer available. Your draft is retained for review and cannot be saved.</div>
+    }
+    <app-editor-conflict-review [conflicts]="session.conflicts()" (resolved)="session.resolveConflicts($event)"></app-editor-conflict-review>
+    @if (saveState() === 'error' && meter()) {
+      <button type="button" class="v1-btn v1-btn--quiet" (click)="session.retry()">Retry saving settings</button>
+    }
     @if (showReadOnlyNotice()) {
       <div class="v1-alert v1-alert--info">
         <app-ui-icon name="lock"></app-ui-icon>
@@ -13,13 +20,13 @@
     <app-meter-settings-form
       [form]="form"
       [viewModel]="vm"
+      [grouping]="grouping()"
       [meterDataExists]="meterDataExists()"
       [setupValuesUnlocked]="changingSetupValues()"
       [canUnlockSetup]="canEditForm()"
       [saveState]="saveState()"
       [saveMessage]="saveMessage()"
       (ruleChange)="onRuleChange($event)"
-      (textChange)="onTextChange()"
       (immediateChange)="onImmediateChange($event)"
       (setupUnlockRequested)="enableSetupChanges()"
       (calendarizationHelpRequested)="openCalendarizationHelp()">

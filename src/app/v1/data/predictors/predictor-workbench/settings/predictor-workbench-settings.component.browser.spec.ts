@@ -1,6 +1,7 @@
 import { computed } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { page, userEvent } from 'vitest/browser';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
@@ -9,19 +10,70 @@ import { StandardPredictorActionsService } from '../../standard-predictor-action
 import { inventoryNavigation, inventoryWorkspace } from '../../inventory/predictor-inventory.testing';
 import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorWorkbenchSettingsComponent } from './predictor-workbench-settings.component';
+import { applyStandardPredictorSettings, StandardPredictorSettings, standardPredictorSettings } from '../../models/standard-predictor-settings.models';
 
 describe('Predictor settings connected borders in Chromium', () => {
+  it('keeps a newer typed space, focus and caret through save acknowledgement before the next word', async () => {
+    const workspace = inventoryWorkspace(1);
+    let finish!: () => void;
+    const first = new Promise<void>(resolve => { finish = resolve; });
+    let firstSave = true;
+    const updateSettings = vi.fn(async (_identity: unknown, value: StandardPredictorSettings) => {
+      if (firstSave) { firstSave = false; await first; }
+      const saved = applyStandardPredictorSettings(workspace.predictors()[0], value);
+      workspace.predictors.set([saved]);
+      return standardPredictorSettings(saved);
+    });
+    TestBed.configureTestingModule({ imports: [PredictorWorkbenchSettingsComponent], providers: [provideRouter([]),
+      { provide: FacilityPredictorsWorkspaceService, useValue: workspace },
+      { provide: PredictorWorkbenchContextService, useValue: {
+        predictorGuid: computed(() => workspace.predictors()[0]?.guid),
+        predictor: computed(() => workspace.predictors()[0]), readings: computed(() => workspace.predictorReadings()),
+        card: computed(() => workspace.predictorCards()[0])
+      } },
+      { provide: StandardPredictorActionsService, useValue: { updateSettings } },
+      { provide: WorkspaceNavigationService, useValue: inventoryNavigation },
+      UnsavedChangesService,
+      { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
+    ] });
+    const fixture = TestBed.createComponent(PredictorWorkbenchSettingsComponent);
+    const root = document.createElement('main'); root.className = 'v1-root';
+    document.body.append(root); root.append(fixture.nativeElement); fixture.detectChanges();
+    try {
+      const input = page.getByRole('textbox', { name: 'Name', exact: true });
+      const native = root.querySelector<HTMLInputElement>('input[formControlName="name"]')!;
+      await input.fill('First');
+      const saving = fixture.componentInstance.saveNow();
+      await vi.waitFor(() => expect(updateSettings).toHaveBeenCalledOnce());
+      await input.click(); await userEvent.keyboard('{End} '); fixture.detectChanges();
+      expect(native.value).toBe('First '); expect(native.selectionStart).toBe(6);
+
+      finish(); await first; await saving; fixture.detectChanges();
+
+      expect(native.value).toBe('First '); expect(document.activeElement).toBe(native);
+      expect(native.selectionStart).toBe(6); expect(native.selectionEnd).toBe(6);
+      expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+      expect(updateSettings).toHaveBeenCalledOnce();
+      await userEvent.keyboard('word'); fixture.detectChanges();
+      expect(native.value).toBe('First word');
+      await fixture.componentInstance.saveNow(); fixture.detectChanges();
+      expect(updateSettings).toHaveBeenCalledTimes(2);
+      expect(updateSettings.mock.calls[1][1].name).toBe('First word');
+    } finally { finish(); fixture.destroy(); root.remove(); }
+  });
+
   it('follows the shared corner radius at the bottom without rounding the connected top or overflowing on narrow screens', () => {
     const workspace = inventoryWorkspace();
     TestBed.configureTestingModule({ imports: [PredictorWorkbenchSettingsComponent], providers: [provideRouter([]),
       { provide: FacilityPredictorsWorkspaceService, useValue: workspace },
       { provide: PredictorWorkbenchContextService, useValue: {
+        predictorGuid: computed(() => workspace.predictors()[0]?.guid),
         predictor: computed(() => workspace.predictors()[0]), readings: computed(() => workspace.predictorReadings()),
         card: computed(() => workspace.predictorCards()[0])
       } },
       { provide: StandardPredictorActionsService, useValue: {} },
       { provide: WorkspaceNavigationService, useValue: inventoryNavigation },
-      { provide: UnsavedChangesService, useValue: { register: () => () => undefined } },
+      UnsavedChangesService,
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
     ] });
     const fixture = TestBed.createComponent(PredictorWorkbenchSettingsComponent);

@@ -8,8 +8,9 @@ export type PredictorReadingForm = FormGroup<{
   month: FormControl<string>;
   amount: FormControl<number | null>;
   notes: FormControl<string>;
-  manualOverride: FormControl<boolean>;
 }>;
+
+export type PredictorReadingValues = ReturnType<PredictorReadingForm['getRawValue']>;
 
 @Injectable({ providedIn: 'root' })
 export class PredictorReadingFormService {
@@ -21,28 +22,35 @@ export class PredictorReadingFormService {
     existingReadings: readonly IdbPredictorData[],
     mode: PredictorReadingEditorMode
   ): PredictorReadingForm {
-    const calculatedWeatherReading = predictor.predictorType === 'Weather'
-      && mode === 'edit'
-      && !reading.weatherOverride;
+    const value = this.values(reading);
     return this.formBuilder.group({
       month: this.formBuilder.nonNullable.control(
-        { value: validPredictorReadingDate(reading) ? predictorMonthKey(reading.year, reading.month) : '', disabled: calculatedWeatherReading },
+        value.month,
         [Validators.required, validMonthValidator(), uniqueMonthValidator(existingReadings, reading.guid)]
       ),
       amount: this.formBuilder.control<number | null>(
-        { value: Number.isFinite(reading.amount) ? reading.amount : null, disabled: calculatedWeatherReading },
+        value.amount,
         [Validators.required, finiteNumberValidator(), allowedNegativeValidator(predictor.canBeNegative)]
       ),
-      notes: this.formBuilder.nonNullable.control(reading.notes ?? ''),
-      manualOverride: this.formBuilder.nonNullable.control(!!reading.weatherOverride)
+      notes: this.formBuilder.nonNullable.control(value.notes)
     });
   }
 
-  setManualOverride(form: PredictorReadingForm): void {
-    form.controls.manualOverride.setValue(true);
-    form.controls.month.enable();
-    form.controls.amount.enable();
-    form.markAsDirty();
+  values(reading: IdbPredictorData): PredictorReadingValues {
+    return { month: validPredictorReadingDate(reading) ? predictorMonthKey(reading.year, reading.month) : '',
+      amount: Number.isFinite(reading.amount) ? reading.amount : null, notes: reading.notes ?? '' };
+  }
+
+  refreshValidation(form: PredictorReadingForm, predictor: IdbPredictor, readingGuid: string,
+    existingReadings: readonly IdbPredictorData[]): void {
+    form.controls.month.setValidators([Validators.required, validMonthValidator(), uniqueMonthValidator(existingReadings, readingGuid)]);
+    form.controls.amount.setValidators([Validators.required, finiteNumberValidator(), allowedNegativeValidator(predictor.canBeNegative)]);
+    form.controls.month.updateValueAndValidity({ emitEvent: false });
+    form.controls.amount.updateValueAndValidity({ emitEvent: false });
+  }
+
+  hydrate(form: PredictorReadingForm, value: PredictorReadingValues): void {
+    form.patchValue(value, { emitEvent: false });
   }
 
   updateReading(reading: IdbPredictorData, predictor: IdbPredictor, form: PredictorReadingForm): IdbPredictorData {
@@ -55,11 +63,6 @@ export class PredictorReadingFormService {
       amount: Number(value.amount),
       notes: value.notes
     };
-    if (predictor.predictorType === 'Weather' && value.manualOverride) {
-      updated.weatherOverride = true;
-      updated.weatherDataWarning = false;
-      updated.weatherDataChanged = false;
-    }
     return updated;
   }
 }

@@ -1,7 +1,8 @@
+import { MeterSettingsForm } from './meter-settings-values';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import {
   MeterSettingsRuleChange,
+  MeterSettingsGroupingView,
   MeterSettingsSaveState,
   MeterSettingsViewModel
 } from './meter-settings-form.service';
@@ -15,7 +16,7 @@ export type MeterSettingsFormLayout = 'two-column' | 'single-column';
   styleUrls: ['./meter-settings-form.component.css']
 })
 export class MeterSettingsFormComponent {
-  @Input({ required: true }) form: FormGroup;
+  @Input({ required: true }) form: MeterSettingsForm;
   @Input({ required: true }) viewModel: MeterSettingsViewModel;
   @Input() meterDataExists = false;
   @Input() setupValuesUnlocked = false;
@@ -25,6 +26,7 @@ export class MeterSettingsFormComponent {
   @Input() saveMessage = '';
   @Input() showCalendarizationHelp = true;
   @Input() layout: MeterSettingsFormLayout = 'two-column';
+  @Input() grouping?: MeterSettingsGroupingView;
 
   @Output() ruleChange = new EventEmitter<MeterSettingsRuleChange>();
   @Output() immediateChange = new EventEmitter<MeterSettingsRuleChange | undefined>();

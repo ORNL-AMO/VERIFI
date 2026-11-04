@@ -236,8 +236,9 @@ function setup(options: {
   };
   const store = {
     account: signal(account()),
+    customFuels: signal([]),
     selectedFacility: signal(facility()),
-    facilities: signal([facility(), facility({ guid: 'facility-b', energyUnit: 'MMBtu' })]),
+    facilities: signal([facility({ volumeGasUnit: 'SCF', volumeLiquidUnit: 'gal', massUnit: 'lb' }), facility({ guid: 'facility-b', energyUnit: 'MMBtu', volumeGasUnit: 'SCF', volumeLiquidUnit: 'gal', massUnit: 'lb' })]),
     meterGroups: signal(options.groups ?? []),
     canWrite: signal(true),
     hasPending: signal(false),

@@ -61,6 +61,27 @@
     </div>
 
     <aside class="meter-settings__aside">
+      @if (grouping) {
+        <section class="meter-settings-section meter-settings__grouping" [formGroup]="form" aria-labelledby="meter-settings-group-title">
+          <div class="meter-settings-section__heading">
+            <h3 id="meter-settings-group-title">Meter group</h3>
+          </div>
+          <label class="meter-settings-field">
+            <span class="visually-hidden">Meter group</span>
+            <select class="v1-select" formControlName="groupId" (change)="immediateChange.emit()"
+              [attr.aria-invalid]="grouping.error ? 'true' : null"
+              [attr.aria-describedby]="grouping.error ? 'meter-settings-group-error' : null">
+              @for (option of grouping.options; track option.value) {
+                <option [ngValue]="option.value" [disabled]="option.disabled">{{ option.label }}</option>
+              }
+            </select>
+            @if (grouping.error) {
+              <small id="meter-settings-group-error" class="meter-settings-error" role="alert">{{ grouping.error }}</small>
+            }
+          </label>
+        </section>
+      }
+
       <app-meter-settings-reading-form
         [form]="form"
         [viewModel]="viewModel"

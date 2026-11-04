@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, Validators } from '@angular/forms';
+import { MeterSettingsForm, MeterSettingsValues, MeterChargeForm, readMeterSettings, applyMeterSettings } from '../meter-settings-values';
 import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
 import { getGUID } from '@shared/sharedHelperFunctions';
 import { MeterSettingsValidationService } from './meter-settings-validation.service';
@@ -9,160 +10,94 @@ export class MeterSettingsFormBuilderService {
   private readonly formBuilder = inject(FormBuilder);
   private readonly validation = inject(MeterSettingsValidationService);
 
-  buildMeterSettingsForm(meter: IdbUtilityMeter): FormGroup {
+  buildMeterSettingsForm(meter: IdbUtilityMeter): MeterSettingsForm {
+    const values = readMeterSettings(meter);
     const chargesArray = this.formBuilder.array((meter.charges ?? []).map(charge => this.buildChargeGroup(charge)));
     return this.formBuilder.group({
-      meterNumber: [meter.meterNumber],
-      accountNumber: [meter.accountNumber],
-      phase: [meter.phase, this.validation.getPhaseValidation(meter.source, meter.scope)],
-      heatCapacity: [meter.heatCapacity, this.validation.getHeatCapacityValidation(meter.source, meter.startingUnit, meter.scope)],
-      siteToSource: [meter.siteToSource, this.validation.getSiteToSourceValidation(meter.source, meter.includeInEnergy, meter.scope)],
-      name: [meter.name, Validators.required],
-      location: [meter.location],
-      supplier: [meter.supplier],
-      notes: [meter.notes],
-      source: [meter.source, Validators.required],
-      meterReadingDataApplication: [meter.meterReadingDataApplication, Validators.required],
-      fuel: [meter.fuel, this.validation.getFuelValidation(meter.source, meter.scope)],
-      startingUnit: [meter.startingUnit, Validators.required],
-      energyUnit: [meter.energyUnit, Validators.required],
-      scope: [meter.scope],
-      agreementType: [meter.agreementType],
-      includeInEnergy: [meter.includeInEnergy],
-      retainRECs: [meter.retainRECs],
-      directConnection: [meter.directConnection],
-      greenPurchaseFraction: [(meter.greenPurchaseFraction ?? 0) * 100, [Validators.min(0), Validators.max(100)]],
-      waterIntakeType: [meter.waterIntakeType, this.validation.getWaterIntakeValidation(meter.source)],
-      waterDischargeType: [meter.waterDischargeType, this.validation.getWaterDischargeValidation(meter.source)],
-      vehicleCategory: [meter.vehicleCategory, this.validation.getBasicVehicleValidation(meter.scope)],
-      vehicleType: [meter.vehicleType, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
-      vehicleCollectionType: [meter.vehicleCollectionType, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
-      vehicleCollectionUnit: [meter.vehicleCollectionUnit, this.validation.getBasicVehicleValidation(meter.scope)],
-      vehicleFuel: [meter.vehicleFuel, this.validation.getBasicVehicleValidation(meter.scope)],
-      vehicleFuelEfficiency: [meter.vehicleFuelEfficiency, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
-      vehicleDistanceUnit: [meter.vehicleDistanceUnit, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
-      globalWarmingPotentialOption: [meter.globalWarmingPotentialOption, this.validation.getGlobalWarmingPotentialValidation(meter.scope)],
-      demandUnit: [meter.demandUnit],
+      meterNumber: [values.meterNumber],
+      accountNumber: [values.accountNumber],
+      phase: [values.phase, this.validation.getPhaseValidation(meter.source, meter.scope)],
+      heatCapacity: [values.heatCapacity, this.validation.getHeatCapacityValidation(meter.source, meter.startingUnit, meter.scope)],
+      siteToSource: [values.siteToSource, this.validation.getSiteToSourceValidation(meter.source, meter.includeInEnergy, meter.scope)],
+      name: [values.name, [Validators.required, Validators.pattern(/\S/)]],
+      location: [values.location],
+      supplier: [values.supplier],
+      notes: [values.notes],
+      source: [values.source, Validators.required],
+      groupId: [values.groupId],
+      meterReadingDataApplication: [values.meterReadingDataApplication, Validators.required],
+      fuel: [values.fuel, this.validation.getFuelValidation(meter.source, meter.scope)],
+      startingUnit: [values.startingUnit, Validators.required],
+      energyUnit: [values.energyUnit, Validators.required],
+      scope: [values.scope],
+      agreementType: [values.agreementType],
+      includeInEnergy: [values.includeInEnergy],
+      retainRECs: [values.retainRECs],
+      directConnection: [values.directConnection],
+      greenPurchaseFraction: [values.greenPurchaseFraction, [Validators.min(0), Validators.max(100)]],
+      waterIntakeType: [values.waterIntakeType, this.validation.getWaterIntakeValidation(meter.source)],
+      waterDischargeType: [values.waterDischargeType, this.validation.getWaterDischargeValidation(meter.source)],
+      vehicleCategory: [values.vehicleCategory, this.validation.getBasicVehicleValidation(meter.scope)],
+      vehicleType: [values.vehicleType, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
+      vehicleCollectionType: [values.vehicleCollectionType, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
+      vehicleCollectionUnit: [values.vehicleCollectionUnit, this.validation.getBasicVehicleValidation(meter.scope)],
+      vehicleFuel: [values.vehicleFuel, this.validation.getBasicVehicleValidation(meter.scope)],
+      vehicleFuelEfficiency: [values.vehicleFuelEfficiency, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
+      vehicleDistanceUnit: [values.vehicleDistanceUnit, this.validation.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)],
+      globalWarmingPotentialOption: [values.globalWarmingPotentialOption, this.validation.getGlobalWarmingPotentialValidation(meter.scope)],
+      demandUnit: [values.demandUnit],
       chargesArray,
-      noLongerInUse: [meter.noLongerInUse || false],
-      noLongerInUseMonth: [meter.noLongerInUseMonth],
-      noLongerInUseYear: [meter.noLongerInUseYear],
-      canBeNegative: [meter.canBeNegative || false],
-      ignoreDateStatusChecks: [meter.ignoreDateStatusChecks || false]
+      noLongerInUse: [values.noLongerInUse],
+      noLongerInUseMonth: [values.noLongerInUseMonth],
+      noLongerInUseYear: [values.noLongerInUseYear],
+      canBeNegative: [values.canBeNegative],
+      ignoreDateStatusChecks: [values.ignoreDateStatusChecks]
+    }, { validators: this.validation.getChargeTypesValidation() });
+  }
+
+  updateMeterFromSettingsForm(meter: IdbUtilityMeter, form: MeterSettingsForm): IdbUtilityMeter {
+    return applyMeterSettings(meter, form.getRawValue());
+  }
+
+  hydrate(form: MeterSettingsForm, values: MeterSettingsValues): void {
+    const { chargesArray, ...fields } = values;
+    form.patchValue(fields, { emitEvent: false });
+    const existing = new Map(form.controls.chargesArray.controls.map(control => [control.controls.guid.value, control]));
+    const controls = chargesArray.map(charge => {
+      const control = existing.get(charge.guid) ?? this.buildChargeGroup({ ...charge, chargeType: charge.chargeType ?? undefined });
+      control.patchValue(charge, { emitEvent: false });
+      return control;
     });
+    if (controls.some((control, index) => form.controls.chargesArray.at(index) !== control) || controls.length !== form.controls.chargesArray.length) {
+      form.controls.chargesArray.clear({ emitEvent: false });
+      for (const control of controls) form.controls.chargesArray.push(control, { emitEvent: false });
+    }
   }
 
-  updateMeterFromSettingsForm(meter: IdbUtilityMeter, form: FormGroup): IdbUtilityMeter {
-    meter.meterNumber = form.controls.meterNumber.value;
-    meter.accountNumber = form.controls.accountNumber.value;
-    meter.phase = form.controls.phase.value;
-    meter.heatCapacity = form.controls.heatCapacity.value;
-    meter.siteToSource = form.controls.siteToSource.value;
-    meter.name = form.controls.name.value;
-    meter.location = form.controls.location.value;
-    meter.supplier = form.controls.supplier.value;
-    meter.notes = form.controls.notes.value;
-    meter.source = form.controls.source.value;
-    meter.meterReadingDataApplication = form.controls.meterReadingDataApplication.value;
-    meter.fuel = form.controls.fuel.value;
-    meter.startingUnit = form.controls.startingUnit.value;
-    meter.energyUnit = form.controls.energyUnit.value;
-    meter.scope = form.controls.scope.value;
-    meter.agreementType = form.controls.agreementType.value;
-    meter.includeInEnergy = form.controls.includeInEnergy.value;
-    meter.retainRECs = form.controls.retainRECs.value;
-    meter.directConnection = form.controls.directConnection.value;
-    meter.greenPurchaseFraction = (form.controls.greenPurchaseFraction.value ?? 0) / 100;
-    meter.waterDischargeType = form.controls.waterDischargeType.value;
-    meter.waterIntakeType = form.controls.waterIntakeType.value;
-    meter.vehicleCategory = form.controls.vehicleCategory.value;
-    meter.vehicleType = form.controls.vehicleType.value;
-    meter.vehicleCollectionType = form.controls.vehicleCollectionType.value;
-    meter.vehicleCollectionUnit = form.controls.vehicleCollectionUnit.value;
-    meter.vehicleFuel = form.controls.vehicleFuel.value;
-    meter.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
-    meter.vehicleDistanceUnit = form.controls.vehicleDistanceUnit.value;
-    meter.globalWarmingPotentialOption = form.controls.globalWarmingPotentialOption.value;
-    meter.demandUnit = form.controls.demandUnit.value;
-    meter.noLongerInUse = form.controls.noLongerInUse.value;
-    meter.noLongerInUseMonth = form.controls.noLongerInUseMonth.value;
-    meter.noLongerInUseYear = form.controls.noLongerInUseYear.value;
-    meter.canBeNegative = form.controls.canBeNegative.value;
-    meter.ignoreDateStatusChecks = form.controls.ignoreDateStatusChecks.value;
-    meter = this.setMultipliers(meter);
-    const chargesArray = form.get('chargesArray') as FormArray;
-    meter.charges = chargesArray.controls.map(chargeGroup => ({
-      guid: chargeGroup.get('guid').value,
-      name: chargeGroup.get('name').value,
-      chargeType: chargeGroup.get('chargeType').value,
-      displayUsageInTable: chargeGroup.get('displayUsageInTable').value,
-      displayChargeInTable: chargeGroup.get('displayChargeInTable').value
-    }));
-    return meter;
-  }
-
-  addCharge(form: FormGroup): void {
-    const chargesArray = form.get('chargesArray') as FormArray;
+  addCharge(form: MeterSettingsForm): void {
+    const chargesArray = form.controls.chargesArray;
     chargesArray.push(this.buildChargeGroup({
       guid: getGUID(),
       name: 'New Charge',
-      chargeType: 'consumption',
+      chargeType: form.controls.source.value === 'Electricity' ? 'consumption' : 'usage',
       displayChargeInTable: true,
       displayUsageInTable: true
     }));
   }
 
-  removeCharge(form: FormGroup, index: number): void {
-    const chargesArray = form.get('chargesArray') as FormArray;
+  removeCharge(form: MeterSettingsForm, index: number): void {
+    const chargesArray = form.controls.chargesArray;
     chargesArray.removeAt(index);
   }
 
-  private buildChargeGroup(charge: MeterCharge): FormGroup {
+  private buildChargeGroup(charge: MeterCharge): MeterChargeForm {
     return this.formBuilder.group({
       guid: [charge.guid],
-      name: [charge.name, Validators.required],
+      name: [charge.name, [Validators.required, Validators.pattern(/\S/)]],
       chargeType: [charge.chargeType, Validators.required],
       displayUsageInTable: [charge.displayUsageInTable],
       displayChargeInTable: [charge.displayChargeInTable]
     });
   }
 
-  private setMultipliers(meter: IdbUtilityMeter): IdbUtilityMeter {
-    if (meter.source === 'Electricity') {
-      const greenPurchaseFraction = meter.agreementType === 5 ? meter.greenPurchaseFraction : undefined;
-      const multipliers = this.getMultipliers(meter.includeInEnergy, meter.retainRECs, meter.directConnection, greenPurchaseFraction);
-      meter.locationGHGMultiplier = multipliers.locationGHGMultiplier;
-      meter.marketGHGMultiplier = multipliers.marketGHGMultiplier;
-      meter.recsMultiplier = multipliers.recsMultiplier;
-    } else {
-      meter.locationGHGMultiplier = 1;
-      meter.marketGHGMultiplier = 1;
-      meter.recsMultiplier = 0;
-    }
-    return meter;
-  }
-
-  private getMultipliers(includeInEnergy: boolean, retainRECs: boolean, directConnection: boolean, greenPurchaseFraction?: number): {
-    recsMultiplier: number;
-    marketGHGMultiplier: number;
-    locationGHGMultiplier: number;
-  } {
-    let marketGHGMultiplier = 1;
-    let locationGHGMultiplier = 1;
-    let recsMultiplier = retainRECs ? 1 : 0;
-    if (greenPurchaseFraction !== undefined) {
-      recsMultiplier = greenPurchaseFraction;
-    }
-    if (includeInEnergy) {
-      locationGHGMultiplier = directConnection && retainRECs ? 0 : 1;
-    } else {
-      locationGHGMultiplier = retainRECs ? 0 : 1;
-    }
-    if (greenPurchaseFraction) {
-      marketGHGMultiplier = 1 - greenPurchaseFraction;
-    } else {
-      marketGHGMultiplier = retainRECs ? 0 : 1;
-    }
-    return { marketGHGMultiplier, locationGHGMultiplier, recsMultiplier };
-  }
 }

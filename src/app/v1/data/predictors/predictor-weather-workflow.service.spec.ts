@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { HourlyWeatherDataService } from '@platform/weather/hourly-weather-data.service';
@@ -111,6 +111,30 @@ describe('PredictorWeatherWorkflowService', () => {
 
     expect(preview).toBeUndefined();
     expect(service.state().error).toContain('already has a workbench');
+  });
+
+  it('cancels results from an outdated committed revision without assigning them a newer revision', async () => {
+    const response = new Subject<any[]>();
+    const service = createService(response);
+    const pending = service.previewStationSelection({ ID: 'station-a', name: 'Oak Ridge' } as any,
+      { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      [{ weatherDataType: 'HDD', name: 'Heating', baseTemperature: 60 }]);
+    (TestBed.inject(AccountWorkspaceStore).revision as WritableSignal<number>).set(8);
+    response.next([hourlyReading()]); response.complete();
+    await expect(pending).resolves.toBeUndefined();
+    expect(service.busy()).toBe(false); expect(service.state().status).toBe('cancelled');
+  });
+
+  it('ignores preview completion after the owning facility changes', async () => {
+    const response = new Subject<any[]>();
+    const service = createService(response);
+    const pending = service.previewStationSelection({ ID: 'station-a', name: 'Oak Ridge' } as any,
+      { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      [{ weatherDataType: 'HDD', name: 'Heating', baseTemperature: 60 }]);
+    (TestBed.inject(AccountWorkspaceStore).selectedFacility as WritableSignal<any>).set({ guid: 'facility-b' });
+    response.next([hourlyReading()]); response.complete();
+    await expect(pending).resolves.toBeUndefined();
+    expect(actions.applyWeatherStationGroup).not.toHaveBeenCalled();
   });
 });
 

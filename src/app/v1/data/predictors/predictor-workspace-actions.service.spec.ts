@@ -6,6 +6,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
+import { EditorConflictError } from '@app/v1/data/editing/draft-reconciliation';
+import { standardPredictorSettings } from './models/standard-predictor-settings.models';
 
 describe('PredictorWorkspaceActionsService', () => {
   const existing = {
@@ -69,6 +71,132 @@ describe('PredictorWorkspaceActionsService', () => {
     predictors.set([{ ...existing, accountId: 'other' }]);
     await expect(service.copyPredictor(existing, 'facility-a')).rejects.toThrow('selected facility');
   });
+
+  it('resolves settings and dependent analyses from the latest queued workspace', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const boundary = TestBed.inject(WorkspaceCommandBoundary);
+    const store = TestBed.inject(AccountWorkspaceStore);
+    let execute!: () => Promise<void>;
+    vi.mocked(boundary.execute).mockImplementationOnce((options: any, persist: () => Promise<any>) => new Promise(resolve => {
+      execute = async () => resolve({ value: await persist(), change: options });
+    }));
+    const base = standardPredictorSettings(existing);
+    const saving = service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: ' Edited production ' }, base, 'editor-owner');
+    predictors.set([{ ...existing, id: 99, description: 'Saved note', importWizardName: 'Keep import marker' }]);
+    (store.facilityAnalyses as any).set([{ id: 12, guid: 'analysis-a', accountId: 'account-a', facilityId: 'facility-a',
+      marker: 'latest', groups: [{ predictorVariables: [{ id: 'predictor-a', name: 'Old', unit: 'tons' }], models: [] }] }]);
+    await execute();
+    const committed = await saving;
+    expect(committed).toMatchObject({ name: 'Edited production', description: 'Saved note' });
+    expect(predictorHandler.updateStandardPredictor).toHaveBeenCalledWith(expect.objectContaining({
+      predictor: expect.objectContaining({ id: 99, name: 'Edited production', description: 'Saved note', importWizardName: 'Keep import marker' }),
+      facilityAnalyses: [expect.objectContaining({ marker: 'latest', groups: [expect.objectContaining({
+        predictorVariables: [expect.objectContaining({ name: 'Edited production' })]
+      })] })]
+    }), 'account-a');
+    expect(boundary.execute).toHaveBeenCalledWith(expect.objectContaining({ ownerId: 'editor-owner' }), expect.any(Function));
+  });
+
+  it('returns a typed conflict instead of overwriting an overlapping saved setting', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const base = standardPredictorSettings(existing);
+    predictors.set([{ ...existing, name: 'Committed name' }]);
+    await expect(service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: 'Local name' }, base, 'owner')).rejects.toBeInstanceOf(EditorConflictError);
+    expect(predictorHandler.updateStandardPredictor).not.toHaveBeenCalled();
+  });
+
+  it('revalidates facility ownership and predictor type before a settings write', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const base = standardPredictorSettings(existing);
+    predictors.set([{ ...existing, predictorType: 'Weather' }]);
+    await expect(service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: 'Edited' }, base, 'owner')).rejects.toThrow('Standard predictor');
+    predictors.set([existing]);
+    (TestBed.inject(AccountWorkspaceStore).selectedFacility as any).set({ guid: 'facility-b' });
+    await expect(service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: 'Edited' }, base, 'owner')).rejects.toThrow('no longer available');
+    expect(predictorHandler.updateStandardPredictor).not.toHaveBeenCalled();
+  });
+
+  it('retains unedited reading fields from the latest queued record', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const boundary = TestBed.inject(WorkspaceCommandBoundary);
+    let execute!: () => Promise<void>;
+    vi.mocked(boundary.execute).mockImplementationOnce((options: any, persist: () => Promise<any>) => new Promise(resolve => {
+      execute = async () => resolve({ value: await persist(), change: options });
+    }));
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+    readings.set([{ ...source, amount: 30, weatherDataChanged: true }]);
+    await execute(); await saving;
+    expect(predictorHandler.updatePredictorData).toHaveBeenCalledWith(expect.objectContaining({
+      amount: 30, notes: 'Local note', weatherDataChanged: true
+    }), 'account-a');
+  });
+
+  it.each([
+    { local: { year: 2027 }, saved: { month: 2 } },
+    { local: { month: 2 }, saved: { year: 2027 } }
+  ])('reviews concurrent period changes instead of combining $local with $saved', async ({ local, saved }) => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const execute = deferNextReadingCommand();
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, ...local, notes: 'Local note' });
+    const rejected = expect(saving).rejects.toBeInstanceOf(EditorConflictError);
+    readings.set([{ ...source, ...saved }]);
+
+    await execute(); await rejected;
+
+    expect(predictorHandler.updatePredictorData).not.toHaveBeenCalled();
+  });
+
+  it('validates the merged period against duplicate months in the latest queued workspace', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const execute = deferNextReadingCommand();
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+    const rejected = expect(saving).rejects.toMatchObject({
+      code: 'validation-failed', message: 'A predictor reading already exists for this month.'
+    });
+    readings.set([{ ...source, year: 2027, month: 2 }, reading('duplicate-month', 21, 2027, 2)]);
+
+    await execute(); await rejected;
+
+    expect(predictorHandler.updatePredictorData).not.toHaveBeenCalled();
+  });
+
+  it.each([{ year: 0, month: 1 }, { year: 2027, month: 13 }])(
+    'rejects a merged saved period outside the supported range: %j', async savedPeriod => {
+      const service = TestBed.inject(PredictorWorkspaceActionsService);
+      const execute = deferNextReadingCommand();
+      const source = readings()[0];
+      const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+      const rejected = expect(saving).rejects.toMatchObject({ code: 'validation-failed' });
+      readings.set([{ ...source, ...savedPeriod }]);
+
+      await execute(); await rejected;
+
+      expect(predictorHandler.updatePredictorData).not.toHaveBeenCalled();
+    }
+  );
+
+  it('merges independent reading edits into a valid saved period after its original month becomes occupied', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const execute = deferNextReadingCommand();
+    const source = readings()[0];
+    const saving = service.updatePredictorReading({ ...source, notes: 'Local note' });
+    readings.set([{ ...source, year: 2027, month: 2, amount: 30, weatherDataChanged: true },
+      reading('old-month', 21, source.year, source.month)]);
+
+    await execute(); await saving;
+
+    expect(predictorHandler.updatePredictorData).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      guid: source.guid, year: 2027, month: 2, amount: 30, notes: 'Local note', weatherDataChanged: true
+    }), 'account-a');
+  });
+
   it('copies settings into a new identity without copying readings', async () => {
     const copy = await TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing);
     expect(copy.guid).not.toBe(existing.guid);
@@ -279,7 +407,113 @@ describe('PredictorWorkspaceActionsService', () => {
     })).rejects.toMatchObject({ code: 'stale-workspace' });
     expect(boundary.execute).not.toHaveBeenCalled();
   });
+
+  it.each(['group', 'month'] as const)('rejects a queued weather %s after another command publishes a newer revision', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    (TestBed.inject(AccountWorkspaceStore).revision as any).set(5);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it.each(['group', 'month'] as const)('rejects a queued weather %s when the facility changes to another owner of the same station', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    const store = TestBed.inject(AccountWorkspaceStore);
+    (store.facilities as any).set([{ guid: 'facility-a', accountId: 'account-a' }, { guid: 'facility-b', accountId: 'account-a' }]);
+    (store.selectedFacility as any).set({ guid: 'facility-b' });
+    const moved = predictors().map(predictor => ({ ...predictor, facilityId: 'facility-b' }));
+    predictors.set(moved); facilityPredictors.set(moved);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it.each(['group', 'month'] as const)('rejects a queued weather %s after account ownership changes', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    (TestBed.inject(AccountWorkspaceStore).account as any).set({ guid: 'account-b' });
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it('rechecks the complete source group before a queued station setup write', async () => {
+    const { service, preview, release } = prepareQueuedWeatherCommand();
+    const saving = service.applyWeatherStationGroup(preview);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    const changed = [...predictors(), { ...predictors()[0], guid: 'unreviewed-output', id: 11 }];
+    predictors.set(changed); facilityPredictors.set(changed);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+  });
+
+  it('rechecks current reading identities before a queued station month write', async () => {
+    const { service, changes, release } = prepareQueuedWeatherCommand();
+    const saving = service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    readings.set([{ ...readings()[0], id: 99 }]);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it.each(['group', 'month'] as const)('persists the reviewed weather %s snapshot when its queue position remains current', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    preview.updatePredictors[0].name = 'Unreviewed later mutation';
+    changes.update[0].amount = 999;
+    await release(); await saving;
+    if (kind === 'group') {
+      expect(predictorHandler.applyWeatherStationGroup).toHaveBeenCalledWith(expect.objectContaining({
+        updatePredictors: [expect.objectContaining({ name: 'Production' })]
+      }), 'account-a');
+    } else {
+      expect(predictorHandler.applyWeatherStationMonth).toHaveBeenCalledWith(expect.objectContaining({
+        update: [expect.objectContaining({ amount: 2 })]
+      }), 'account-a');
+    }
+  });
+
+  function prepareQueuedWeatherCommand() {
+    const weather = { ...existing, predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Station A' };
+    predictors.set([weather]); facilityPredictors.set([weather]);
+    const preview = {
+      workspaceRevision: 4, sourceGroupKey: 'station:station-a', station: { ID: 'station-a', name: 'Station A' },
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      addPredictors: [], updatePredictors: [{ ...weather }], deletePredictors: [],
+      addReadings: [], updateReadings: [], deleteReadings: [], facilityAnalyses: [], warningMonths: []
+    } as any;
+    const changes = {
+      workspaceRevision: 4, groupKey: 'station:station-a', predictorGuids: ['predictor-a'],
+      year: 2026, month: 1, add: [], update: [{ ...readings()[0], amount: 2 }], delete: []
+    };
+    let release!: () => Promise<void>;
+    vi.mocked(TestBed.inject(WorkspaceCommandBoundary).execute).mockImplementationOnce((options: any, persist: () => Promise<any>) =>
+      new Promise((resolve, reject) => {
+        release = async () => {
+          try { resolve({ value: await persist(), change: options }); }
+          catch (error) { reject(error); }
+        };
+      }));
+    return { service: TestBed.inject(PredictorWorkspaceActionsService), preview, changes, release: () => release() };
+  }
 });
+
+function deferNextReadingCommand(): () => Promise<void> {
+  let execute!: () => Promise<void>;
+  vi.mocked(TestBed.inject(WorkspaceCommandBoundary).execute).mockImplementationOnce((options: any, persist: () => Promise<any>) =>
+    new Promise((resolve, reject) => {
+      execute = async () => {
+        try { resolve({ value: await persist(), change: options }); }
+        catch (error) { reject(error); }
+      };
+    }));
+  return () => execute();
+}
 
 function reading(guid: string, id: number, year: number, month: number): any {
   return {

@@ -79,7 +79,13 @@ export class WorkspaceWriteError extends Error {
   readonly code: WorkspaceWriteErrorCode;
   readonly cause?: unknown;
 
-  constructor(code: WorkspaceWriteErrorCode, message: string, cause?: unknown) {
+  constructor(
+    code: WorkspaceWriteErrorCode,
+    message: string,
+    cause?: unknown,
+    /** Persistence resolved successfully before this later command failure. */
+    readonly persistenceCommitted = false
+  ) {
     super(message);
     this.name = 'WorkspaceWriteError';
     this.code = code;
@@ -96,4 +102,5 @@ export interface WorkspacePendingOperation {
   readonly id: number;
   readonly entityKind: WorkspaceEntityKind;
   readonly changeKind: WorkspaceChangeKind;
+  readonly ownerId?: string;
 }

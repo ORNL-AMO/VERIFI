@@ -11,7 +11,7 @@ describe('WorkspaceCommandBoundary', () => {
 
     await expect(boundary.execute(makeOptions(), () => Promise.resolve('x'))).rejects.toThrow(WorkspaceWriteError);
     await expect(boundary.execute(makeOptions(), () => Promise.resolve('x'))).rejects.toMatchObject({
-      code: 'workspace-not-ready'
+      code: 'workspace-not-ready', persistenceCommitted: false
     });
   });
 
@@ -40,6 +40,18 @@ describe('WorkspaceCommandBoundary', () => {
     expect(store.hasPending()).toBe(false);
   });
 
+  it('keeps editor ownership on transient pending work without publishing it as entity data', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store); workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+    const committed = vi.fn(); boundary.committedChange$.subscribe(committed);
+    await boundary.execute({ ...makeOptions(), ownerId: 'settings-editor' }, async () => {
+      expect(store.pendingOperations()).toEqual([expect.objectContaining({ ownerId: 'settings-editor' })]);
+      return 'saved';
+    });
+    expect(store.pendingOperations()).toEqual([]);
+    expect(committed.mock.calls[0][0]).not.toHaveProperty('ownerId');
+  });
+
   it('clears pending and wraps the error when persistence fails', async () => {
     const { boundary, store } = createBoundary();
     publishReady(store);
@@ -47,7 +59,7 @@ describe('WorkspaceCommandBoundary', () => {
     const cause = new Error('db unavailable');
     await expect(
       boundary.execute(makeOptions(), () => Promise.reject(cause))
-    ).rejects.toMatchObject({ code: 'persistence-failed', cause });
+    ).rejects.toMatchObject({ code: 'persistence-failed', cause, persistenceCommitted: false });
 
     expect(store.hasPending()).toBe(false);
   });
@@ -61,6 +73,7 @@ describe('WorkspaceCommandBoundary', () => {
 
     expect(caught).toBe(original);
     expect(caught.code).toBe('validation-failed');
+    expect(caught.persistenceCommitted).toBe(false);
   });
 
   it('leaves workspace state unchanged when persistence fails', async () => {
@@ -73,6 +86,30 @@ describe('WorkspaceCommandBoundary', () => {
 
     expect(store.revision()).toBe(revisionBefore);
     expect(store.account()?.guid).toBe(accountBefore);
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it.each(['reload', 'patch'] as const)('distinguishes a committed write from a failed %s publication', async publication => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    const cause = new Error('reload unavailable');
+    workspaceService.reloadActiveWorkspace.mockRejectedValue(cause);
+    const persist = vi.fn().mockResolvedValue('saved');
+    const committed = vi.fn(); boundary.committedChange$.subscribe(committed);
+    const options = publication === 'patch'
+      ? { ...makeOptions(), publication: { mode: 'patch' as const, buildPatch: () => { throw new Error('invalid patch'); } } }
+      : { ...makeOptions(), publication: { mode: 'reload' as const } };
+
+    await expect(boundary.execute(options, persist)).rejects.toMatchObject({
+      code: 'persistence-failed',
+      message: 'Workspace reload failed after meter update.',
+      cause,
+      persistenceCommitted: true
+    });
+
+    expect(persist).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledExactlyOnceWith(true);
+    expect(committed).not.toHaveBeenCalled();
     expect(store.hasPending()).toBe(false);
   });
 
@@ -93,6 +130,143 @@ describe('WorkspaceCommandBoundary', () => {
       entityGuid: 'meter-guid-1',
       accountGuid: 'account-a'
     });
+  });
+
+  it('repairs a failed committed publication before the next queued callback reads the workspace', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    const original = publishReady(store);
+    store.publishCommitted(original, {});
+    const recovered = { ...original, account: { ...original.account, name: 'Durable B' } };
+    workspaceService.reloadActiveWorkspace.mockRejectedValueOnce(new Error('committed reload failed'));
+    workspaceService.reloadActiveWorkspace.mockImplementationOnce(async committed => {
+      expect(committed).toBe(true);
+      expect(store.pendingOperations()).toEqual([expect.objectContaining({ ownerId: 'retry-editor' })]);
+      store.publishCommitted(recovered, {});
+      return 'published';
+    });
+    const changes = vi.fn(); boundary.committedChange$.subscribe(changes);
+    const first = boundary.execute(makeOptions('account', 'update', 'first'), async () => 'Durable B').catch(error => error);
+    const next = boundary.execute({ ...makeOptions('account', 'update', 'next'), ownerId: 'retry-editor' }, async () => {
+      expect(store.pendingOperations()).toEqual([expect.objectContaining({ ownerId: 'retry-editor' })]);
+      return store.account()!.name;
+    });
+
+    expect(await first).toMatchObject({ persistenceCommitted: true });
+    expect((await next).value).toBe('Durable B');
+    expect(workspaceService.reloadActiveWorkspace.mock.calls).toEqual([[true], [true], [true]]);
+    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 2 });
+    expect(changes).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ entityGuid: 'next' }));
+    expect(store.hasPending()).toBe(false);
+
+    await boundary.execute(makeOptions(), async () => 'ordinary command');
+    expect(workspaceService.reloadActiveWorkspace.mock.calls).toEqual([[true], [true], [true], [true]]);
+    expect(changes).toHaveBeenCalledTimes(2);
+  });
+
+  it('blocks writes through repeated repair failures and repairs successfully before a later retry', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    const original = publishReady(store);
+    const cause = new Error('reload unavailable');
+    workspaceService.reloadActiveWorkspace.mockRejectedValue(cause);
+    const changes = vi.fn(); boundary.committedChange$.subscribe(changes);
+    await expect(boundary.execute(makeOptions(), async () => 'committed')).rejects.toMatchObject({ persistenceCommitted: true });
+    const persist = vi.fn(async () => store.account()!.name);
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await expect(boundary.execute({ ...makeOptions(), ownerId: 'retry-editor' }, persist)).rejects.toMatchObject({
+        code: 'persistence-failed', cause, persistenceCommitted: false
+      });
+      expect(store.hasPending()).toBe(false);
+    }
+    expect(persist).not.toHaveBeenCalled();
+    expect(changes).not.toHaveBeenCalled();
+    expect(workspaceService.reloadActiveWorkspace.mock.calls).toEqual([[true], [true], [true]]);
+
+    workspaceService.reloadActiveWorkspace.mockImplementationOnce(async committed => {
+      expect(committed).toBe(true);
+      store.publishCommitted({ ...original, account: { ...original.account, name: 'Recovered' } }, {});
+      return 'published';
+    }).mockResolvedValue('published');
+    expect((await boundary.execute(makeOptions(), persist)).value).toBe('Recovered');
+    expect(persist).toHaveBeenCalledOnce(); expect(changes).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace.mock.calls).toEqual([[true], [true], [true], [true], [true]]);
+  });
+
+  it.each(['published', 'superseded'] as const)('does not run an old-account callback when repair is %s after an account switch', async result => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockRejectedValueOnce(new Error('committed reload failed'));
+    await boundary.execute(makeOptions(), async () => 'committed').catch(() => undefined);
+    workspaceService.reloadActiveWorkspace.mockImplementationOnce(async () => {
+      store.publish(makeSnapshot('account-b'), {});
+      return result;
+    });
+    const persist = vi.fn().mockResolvedValue('old-account write');
+
+    await expect(boundary.execute({ ...makeOptions(), ownerId: 'old-editor' }, persist)).rejects.toMatchObject({
+      code: 'stale-workspace', persistenceCommitted: false
+    });
+
+    expect(persist).not.toHaveBeenCalled(); expect(store.account()?.guid).toBe('account-b');
+    expect(store.pendingOperations()).toEqual([]);
+    await expect(boundary.execute(makeOptions(), async () => 'new-account write')).resolves.toMatchObject({
+      value: 'new-account write', change: { accountGuid: 'account-b' }
+    });
+    expect(workspaceService.reloadActiveWorkspace.mock.calls).toEqual([[true], [true], [true]]);
+  });
+
+  it('repairs after an already marked committed failure without wrapping its original error', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    const original = new WorkspaceWriteError('persistence-failed', 'Already committed', undefined, true);
+    await expect(boundary.execute(makeOptions(), async () => { throw original; })).rejects.toBe(original);
+    workspaceService.reloadActiveWorkspace.mockRejectedValueOnce(original);
+    const blockedPersist = vi.fn().mockResolvedValue('must not write');
+    await expect(boundary.execute(makeOptions(), blockedPersist)).rejects.toMatchObject({
+      persistenceCommitted: false, cause: original
+    });
+    expect(blockedPersist).not.toHaveBeenCalled();
+    workspaceService.reloadActiveWorkspace.mockImplementationOnce(async committed => {
+      expect(committed).toBe(true);
+      store.publishCommitted(makeSnapshot('account-a'), {});
+      return 'published';
+    });
+
+    await boundary.execute(makeOptions(), async () => 'retry');
+
+    expect(workspaceService.reloadActiveWorkspace.mock.calls).toEqual([[true], [true], [true]]);
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it('retains the new account repair requirement when an old account command fails later', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    const started = deferred<void>(); const finish = deferred<void>();
+    const oldAccount = boundary.execute(makeOptions(), async () => {
+      started.resolve(undefined); await finish.promise;
+      return 'old account committed';
+    }).catch(error => error);
+    await started.promise;
+    store.publish(makeSnapshot('account-b'), {});
+    workspaceService.reloadActiveWorkspace.mockRejectedValueOnce(new Error('account-b committed reload failed'));
+    await expect(boundary.execute(makeOptions(), async () => 'account-b committed')).rejects.toMatchObject({
+      persistenceCommitted: true
+    });
+    finish.resolve(undefined);
+    expect(await oldAccount).toMatchObject({ code: 'stale-workspace', persistenceCommitted: true });
+    workspaceService.reloadActiveWorkspace.mockImplementationOnce(async committed => {
+      expect(committed).toBe(true);
+      const recovered = makeSnapshot('account-b');
+      store.publishCommitted({ ...recovered, account: { ...recovered.account, name: 'Recovered account B' } }, {});
+      return 'published';
+    });
+
+    const result = await boundary.execute(makeOptions(), async () => store.account()!.name);
+
+    expect(result.value).toBe('Recovered account B');
+    expect(result.change.accountGuid).toBe('account-b');
+    expect(workspaceService.reloadActiveWorkspace.mock.calls).toEqual([[true], [true], [true]]);
+    expect(store.hasPending()).toBe(false);
   });
 
   it('passes notification hints through committed-change events', async () => {
@@ -353,14 +527,37 @@ describe('WorkspaceCommandBoundary', () => {
 
     const d = deferred<string>();
     // Submit while account-a is active, but switch away before it executes.
-    const p = boundary.execute(makeOptions(), () => d.promise);
+    const persist = vi.fn(() => d.promise);
+    const p = boundary.execute(makeOptions(), persist);
 
     // Switch the workspace to a different account before resolving the first command.
     store.publish(makeSnapshot('account-b'), {});
 
     d.resolve('value');
-    await expect(p).rejects.toMatchObject({ code: 'stale-workspace' });
+    await expect(p).rejects.toMatchObject({ code: 'stale-workspace', persistenceCommitted: false });
+    expect(persist).not.toHaveBeenCalled();
     expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it('reports a committed write when the account changes during persistence', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    const committed = vi.fn(); boundary.committedChange$.subscribe(committed);
+    const persist = vi.fn(async () => {
+      store.publish(makeSnapshot('account-b'), {});
+      return 'saved';
+    });
+
+    await expect(boundary.execute(makeOptions(), persist)).rejects.toMatchObject({
+      code: 'stale-workspace',
+      message: 'Command was submitted for account account-a but the active account is now account-b after persistence.',
+      persistenceCommitted: true
+    });
+
+    expect(persist).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(committed).not.toHaveBeenCalled();
     expect(store.hasPending()).toBe(false);
   });
 
@@ -374,9 +571,29 @@ describe('WorkspaceCommandBoundary', () => {
 
     await expect(
       boundary.execute(makeOptions(), () => Promise.resolve('value'))
-    ).rejects.toMatchObject({ code: 'stale-workspace' });
+    ).rejects.toMatchObject({ code: 'stale-workspace', persistenceCommitted: true });
 
     expect(changes).toHaveLength(0);
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it('reports a committed write when a reload publishes a different account', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockImplementation(async () => {
+      store.publish(makeSnapshot('account-b'), {});
+      return 'published';
+    });
+    const committed = vi.fn(); boundary.committedChange$.subscribe(committed);
+
+    await expect(boundary.execute(makeOptions(), async () => 'saved')).rejects.toMatchObject({
+      code: 'stale-workspace',
+      message: 'Command was submitted for account account-a but the active account is now account-b after reload.',
+      persistenceCommitted: true
+    });
+
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledExactlyOnceWith(true);
+    expect(committed).not.toHaveBeenCalled();
     expect(store.hasPending()).toBe(false);
   });
 

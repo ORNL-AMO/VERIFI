@@ -2,9 +2,17 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { AccountWorkspaceLoaderService } from '@data/account-workspace/account-workspace-loader.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { WorkspaceSelectionStorageService } from '@data/account-workspace/workspace-selection-storage.service';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { BackupPreparationService } from '@data/backup/backup-preparation.service';
+import { WorkspaceBackupSnapshotBuilder } from '@data/backup/backup-snapshot-builder.service';
+import { JsonBackupSerializer } from '@data/backup/backup-serializer.service';
+import { BrowserBackupDownloadService } from '@data/backup/browser-backup-download.service';
+import { LocalStorageService } from 'ngx-webstorage';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { ElectronBackupsDbService } from '@data/indexedDB/electron-backups-db.service';
 import { AutomaticBackupsService } from './automatic-backups.service';
@@ -98,6 +106,55 @@ describe('AutomaticBackupsService', () => {
 
     expect(gateway.write).toHaveBeenCalledTimes(1);
     expect(exportCoordinator.buildActiveAccountBackup).toHaveBeenCalledTimes(1);
+    expect(service.status.value).toBe('ready');
+  });
+
+  it('backs up the latest committed value after publication repair without reusing the previously observed revision', async () => {
+    let durable = snapshot('account-a', { name: 'A' });
+    const load = vi.fn(async () => structuredClone(durable));
+    const loader = { load } as unknown as AccountWorkspaceLoaderService;
+    const hints = new WorkspaceSelectionStorageService({
+      retrieve: () => null, store: () => {}, clear: () => {}
+    } as unknown as LocalStorageService);
+    const workspace = new AccountWorkspaceService(loader, store, hints);
+    const boundary = new WorkspaceCommandBoundary(store, workspace);
+    const exporter = new BackupExportCoordinator(store, loader, new WorkspaceBackupSnapshotBuilder(),
+      new JsonBackupSerializer(), new BrowserBackupDownloadService());
+    exportCoordinator.buildActiveAccountBackup.mockImplementation(() => exporter.buildActiveAccountBackup());
+    store.publish(durable); service.subscribeData(); TestBed.tick(); await flushAsync();
+    store.publishCommitted(durable, {}); TestBed.tick();
+    await vi.advanceTimersByTimeAsync(3000); await flushAsync();
+    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
+    expect(gateway.write).toHaveBeenCalledOnce();
+    expect(gateway.write.mock.calls[0][1].account.name).toBe('A');
+    const changes = vi.fn(); boundary.committedChange$.subscribe(changes);
+    load.mockRejectedValueOnce(new Error('The committed B publication failed.'));
+    await expect(boundary.execute({ entityKind: 'account', changeKind: 'update', label: 'Saving B' }, async () => {
+      durable = snapshot('account-a', { name: 'B' });
+      return durable.account;
+    })).rejects.toMatchObject({ persistenceCommitted: true });
+    TestBed.tick();
+    expect(store.account()?.name).toBe('A'); expect(durable.account.name).toBe('B');
+    expect(store.revision()).toBe(1);
+
+    let repairedRevision: number | undefined;
+    await boundary.execute({ entityKind: 'account', changeKind: 'update', label: 'Saving C' }, async () => {
+      expect(store.account()?.name).toBe('B');
+      repairedRevision = store.revision();
+      durable = snapshot('account-a', { name: 'C' });
+      return durable.account;
+    });
+    TestBed.tick(); await flushAsync();
+
+    expect(repairedRevision).toBe(2);
+    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 3 });
+    expect(changes).toHaveBeenCalledOnce();
+    expect(store.pendingOperations()).toEqual([]);
+    await vi.advanceTimersByTimeAsync(2999); expect(gateway.write).toHaveBeenCalledOnce();
+    await vi.advanceTimersByTimeAsync(1); await flushAsync();
+    expect(gateway.write).toHaveBeenCalledTimes(2);
+    expect(gateway.write.mock.calls.map(call => call[1].account.name)).toEqual(['A', 'C']);
+    expect(service.latestBackupFile.value?.account?.name).toBe('C');
     expect(service.status.value).toBe('ready');
   });
 
