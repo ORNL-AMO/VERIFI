@@ -17,7 +17,7 @@ import { CustomFuelsComponent } from '@app/v1/data/custom-database/custom-fuels/
 import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/custom-gwps.component';
 import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
-import { InventoryPlaceholderComponent } from '@app/v1/data/energy-uses/inventory-placeholder/inventory-placeholder.component';
+import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
 import { FacilitiesInventoryComponent } from '@app/v1/data/facilities/inventory/facilities-inventory.component';
 import { MetersInventoryComponent } from '@app/v1/data/meters/inventory/meters-inventory.component';
 import { PredictorsInventoryComponent } from '@app/v1/data/predictors/inventory/predictors-inventory.component';
@@ -214,7 +214,7 @@ describe('V1Routes facility data meters routes', () => {
     expect(children.find(child => child.path === 'facilities')).toMatchObject({ component: FacilitiesInventoryComponent });
     expect(children.find(child => child.path === 'meters')).toMatchObject({ component: MetersInventoryComponent });
     expect(children.find(child => child.path === 'predictors')).toMatchObject({ component: PredictorsInventoryComponent });
-    expect(children.find(child => child.path === 'energy-uses')).toMatchObject({ component: InventoryPlaceholderComponent });
+    expect(children.find(child => child.path === 'energy-uses')).toMatchObject({ component: EnergyUsesInventoryComponent });
     expect(children.some(child => child.path === 'analyses' || child.path === 'reports')).toBe(false);
     expect(children.find(child => child.path === '**')).toMatchObject({
       path: '**',

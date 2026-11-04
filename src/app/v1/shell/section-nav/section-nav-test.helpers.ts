@@ -26,6 +26,8 @@ export function setupSectionNavTest() {
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
   const activePortfolioTab = signal('facilities');
+  const activeEnergyUseGuid = signal<string | undefined>(undefined);
+  const energyUses = signal<import('@data/models/idbModels/facilityEnergyUseEquipment').IdbFacilityEnergyUseEquipment[]>([]);
   let activeDetail: ReturnType<typeof signal<string>>;
   let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
   let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;
@@ -91,6 +93,7 @@ export function setupSectionNavTest() {
             contextMode,
             contextFacility: () => contextMode() === 'facility' ? selectedFacility() : undefined,
             contextMeters: facilityMeters, contextMeterGroups: facilityMeterGroups,
+            contextEnergyUses: energyUses, activeEnergyUseGuid,
             contextPredictors: facilityPredictors, contextPredictorData: facilityPredictorData,
             contextAnalyses: selectedFacilityAnalyses,
             facilityInventoryLink: (guid: string, resource: string) => isSingleSiteWorkspace()
@@ -124,6 +127,7 @@ export function setupSectionNavTest() {
             facilityDataToolRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
+            facilityEnergyUseRoute: (facilityGuid: string, guid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'energy-uses', guid, tab],
             facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
             facilityWeatherPredictorRoute: (_facilityGuid: string, groupKey: string, tab = 'setup') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', groupKey, tab],
             accountAnalysisRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'],
@@ -167,7 +171,7 @@ export function setupSectionNavTest() {
       ]
     });
 
-  return { activePortfolioTab, activeSection, contextMode, facilities, selectedFacility, account, isSingleSiteWorkspace, hasSingleSiteRecovery, singleSiteWorkspaceState, activeDetail, activeMeterGuid, activeMeterGroupGuid, activePredictorGuid, activeWeatherPredictorGroupKey, activeImportFileId, activeImportStep, activeAnalysisGuid, activeAnalysisGroupGuid, activeAnalysisStageScope, activeAccountAnalysisStageScope, facilityMeters, facilityMeterGroups, facilityPredictors, facilityPredictorData, selectedFacilityAnalyses, accountAnalyses, setFacility, statusState, statusItems };
+  return { activeEnergyUseGuid, energyUses, activePortfolioTab, activeSection, contextMode, facilities, selectedFacility, account, isSingleSiteWorkspace, hasSingleSiteRecovery, singleSiteWorkspaceState, activeDetail, activeMeterGuid, activeMeterGroupGuid, activePredictorGuid, activeWeatherPredictorGroupKey, activeImportFileId, activeImportStep, activeAnalysisGuid, activeAnalysisGroupGuid, activeAnalysisStageScope, activeAccountAnalysisStageScope, facilityMeters, facilityMeterGroups, facilityPredictors, facilityPredictorData, selectedFacilityAnalyses, accountAnalyses, setFacility, statusState, statusItems };
 }
 
 export function activeLinks(element: HTMLElement): HTMLAnchorElement[] {

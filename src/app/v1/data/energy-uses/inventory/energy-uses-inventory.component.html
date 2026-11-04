@@ -22,7 +22,7 @@
       <app-inventory-grid [showOwnership]="!navigation.isSingleSiteWorkspace()" [tiles]="inventory.visibleTiles()" [printTiles]="tiles()" [detail]="inventory.detail()" [overrides]="inventory.overrides()"
         [page]="inventory.page()" [pages]="inventory.pages()" [start]="inventory.start()" [end]="inventory.end()" [total]="filteredEntries().length"
         (detailChanged)="inventory.setTileDetail($event)" (pageSelected)="inventory.selectPage($event)" (navigationRequested)="navigateRoute($event)"
-        (facilityScopeRequested)="navigation.changeFacilityScope({ kind: 'facility', facilityGuid: $event })"/>
+        (facilityScopeRequested)="navigation.changeFacilityScope({ kind: 'facility', facilityGuid: $event }, 'energy-uses')"/>
     }
   }
 </section>

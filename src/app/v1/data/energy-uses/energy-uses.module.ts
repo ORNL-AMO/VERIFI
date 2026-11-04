@@ -7,8 +7,6 @@ import { EnergyUseWorkbenchComponent } from './energy-use-workbench/energy-use-w
 import { EnergyUseWorkbenchPanelComponent } from './energy-use-workbench/panel/energy-use-workbench-panel.component';
 import { NgModule } from '@angular/core';
 import { EnergyUsesInventoryComponent } from './inventory/energy-uses-inventory.component';
-import { InventoryPlaceholderComponent } from './inventory-placeholder/inventory-placeholder.component';
-import { EnergyUsesPlaceholderComponent } from './energy-uses-placeholder/energy-uses-placeholder.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { InventoryGridComponent } from '@app/v1/shared/inventory/inventory-grid/inventory-grid.component';
 import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
@@ -21,8 +19,6 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
     EnergyUsesInventoryComponent,
     EnergyUseWorkbenchComponent,
     EnergyUseWorkbenchPanelComponent,
-    InventoryPlaceholderComponent,
-    EnergyUsesPlaceholderComponent
   ],
   imports: [
     CommonModule,
@@ -41,8 +37,6 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
     EnergyUsesInventoryComponent,
     EnergyUseWorkbenchComponent,
     EnergyUseWorkbenchPanelComponent,
-    InventoryPlaceholderComponent,
-    EnergyUsesPlaceholderComponent
   ],
 })
 export class EnergyUsesModule {}

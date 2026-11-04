@@ -38,6 +38,9 @@ export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route,
   const section = parts[3];
   if (section === 'reports' || section === 'imports' || (section === 'settings' && parts[4] === 'backup')) return true;
 
+  // Energy Uses is read-only in phase 1; entering its inventory must not initialize analysis records.
+  if (section === 'data' && parts[4] === 'portfolio' && parts[5] === 'energy-uses') return true;
+
   await inject(SingleFacilityAnalysisPairService).ensurePairs();
 
   const commands = singleSiteRedirectCommands(
@@ -73,9 +76,9 @@ export function singleSiteRedirectCommands(
   }
   if (section === 'data') {
     const tab = detail === 'portfolio' ? parts[5] : undefined;
-    if (detail === 'portfolio' && (tab === 'meters' || tab === 'predictors')) return undefined;
-    if (isCustomDataDetail(detail) || tab === 'energy-uses') {
-      return ['/v1', 'workspace', 'facility', facilityGuid, 'data', tab === 'energy-uses' ? tab : detail];
+    if (detail === 'portfolio' && (tab === 'meters' || tab === 'predictors' || tab === 'energy-uses')) return undefined;
+    if (isCustomDataDetail(detail)) {
+      return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
     }
     return ['/v1', 'workspace', 'account', accountGuid, 'data', 'portfolio', 'meters'];
   }

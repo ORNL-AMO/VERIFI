@@ -52,6 +52,7 @@ export class WorkspaceNavigationService {
   readonly activePortfolioTab = this.context.activePortfolioTab;
   readonly activeMeterGuid = this.context.activeMeterGuid;
   readonly activeMeterGroupGuid = this.context.activeMeterGroupGuid;
+  readonly activeEnergyUseGuid = this.context.activeEnergyUseGuid;
   readonly activePredictorGuid = this.context.activePredictorGuid;
   readonly activeWeatherPredictorGroupKey = this.context.activeWeatherPredictorGroupKey;
   readonly activeReportGuid = this.context.activeReportGuid;
@@ -79,6 +80,7 @@ export class WorkspaceNavigationService {
   readonly contextFacility = this.context.contextFacility;
   readonly contextMeters = this.context.contextMeters;
   readonly contextMeterGroups = this.context.contextMeterGroups;
+  readonly contextEnergyUses = this.context.contextEnergyUses;
   readonly contextPredictors = this.context.contextPredictors;
   readonly contextPredictorData = this.context.contextPredictorData;
   readonly contextAnalyses = this.context.contextAnalyses;
@@ -159,7 +161,7 @@ export class WorkspaceNavigationService {
 
   readonly isAccountInventory = routes.isAccountInventory;
 
-  async changeFacilityScope(scope: FacilityScope, dataInventory?: 'meters' | 'predictors'): Promise<boolean> {
+  async changeFacilityScope(scope: FacilityScope, dataInventory?: 'meters' | 'predictors' | 'energy-uses'): Promise<boolean> {
     if (this.scopeChangePending() || this.workspace.status() !== 'ready' || this.workspace.hasPending()) return false;
     const account = this.workspace.account();
     if (!account || this.isSingleSiteWorkspace()) return false;
@@ -181,7 +183,7 @@ export class WorkspaceNavigationService {
     else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
     else if (state.portfolioTab === 'facilities' && facilityGuid) route = this.accountPortfolioRoute(account.guid, 'meters');
     else {
-      const tab = state.portfolioTab ?? (state.detail === 'predictors' ? 'predictors'
+      const tab = state.portfolioTab ?? (state.detail === 'energy-uses' ? 'energy-uses' : state.detail === 'predictors' ? 'predictors'
         : state.detail === 'meters' || state.detail === 'meter-grouping' ? 'meters' : 'facilities');
       route = this.accountPortfolioRoute(account.guid, tab);
     }
@@ -198,7 +200,7 @@ export class WorkspaceNavigationService {
         && !await this.unsavedChanges.flushPendingChanges()) return false;
       // Query-only transitions can reuse the component without running its leave guard.
       if (this.activeDetail() !== 'workbench' && !this.activeMeterGuid() && !this.activePredictorGuid()
-        && !this.activeWeatherPredictorGroupKey() && !this.activeMeterGroupGuid()) {
+        && !this.activeWeatherPredictorGroupKey() && !this.activeMeterGroupGuid() && !this.activeEnergyUseGuid()) {
         if (!this.unsavedChanges.confirmDiscard()) return false;
       }
       const opened = await (queryParams ? this.router.navigate(route, { queryParams }) : this.router.navigate(route));
@@ -242,18 +244,18 @@ export class WorkspaceNavigationService {
 
   accountDataReturnRoute(accountGuid: string): string[] {
     const detail = this.activeDetail();
-    return this.accountPortfolioRoute(accountGuid, detail === 'predictors' ? 'predictors'
+    return this.accountPortfolioRoute(accountGuid, detail === 'energy-uses' ? 'energy-uses' : detail === 'predictors' ? 'predictors'
       : detail === 'meters' || detail === 'meter-grouping' ? 'meters' : 'facilities');
   }
 
-  facilityInventoryLink(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): { route: string[]; queryParams?: Params } {
+  facilityInventoryLink(facilityGuid: string, resource: 'meters' | 'predictors' | 'energy-uses' | 'analysis' | 'reports'): { route: string[]; queryParams?: Params } {
     const accountGuid = this.workspace.account()?.guid ?? '';
     return { route: resource === 'analysis' ? this.accountAnalysisRoute(accountGuid)
       : resource === 'reports' ? this.accountReportsRoute(accountGuid) : this.accountPortfolioRoute(accountGuid, resource),
       queryParams: this.isSingleSiteWorkspace() ? {} : { facility: facilityGuid } };
   }
 
-  async openFacilityInventory(facilityGuid: string, resource: 'meters' | 'predictors' | 'analysis' | 'reports'): Promise<boolean> {
+  async openFacilityInventory(facilityGuid: string, resource: 'meters' | 'predictors' | 'energy-uses' | 'analysis' | 'reports'): Promise<boolean> {
     const link = this.facilityInventoryLink(facilityGuid, resource);
     return this.navigateScopeDestination(link.route, link.queryParams);
   }
@@ -335,6 +337,7 @@ export class WorkspaceNavigationService {
   readonly facilityAnalysisResultsRoute = routes.facilityAnalysisResultsRoute;
   readonly facilityMeterRoute = routes.facilityMeterRoute;
   readonly facilityMeterGroupRoute = routes.facilityMeterGroupRoute;
+  readonly facilityEnergyUseRoute = routes.facilityEnergyUseRoute;
   readonly facilityPredictorRoute = routes.facilityPredictorRoute;
   readonly facilityWeatherPredictorCreateRoute = routes.facilityWeatherPredictorCreateRoute;
   readonly facilityWeatherPredictorRoute = routes.facilityWeatherPredictorRoute;
@@ -350,6 +353,7 @@ export class WorkspaceNavigationService {
       return this.accountSettingsRoute(accountGuid, this.resolveAccountSettingsDetail(detail));
     }
     if (section === 'data') {
+      if (detail === 'energy-uses') return this.accountPortfolioRoute(accountGuid, 'energy-uses');
       return this.accountDataRoute(accountGuid, this.resolveAccountDataDetail(detail));
     }
     if (section === 'imports') return this.accountImportsRoute(accountGuid);
@@ -361,9 +365,9 @@ export class WorkspaceNavigationService {
   private facilityDestination(facilityGuid: string, section: SectionId, detail: string): { route: string[]; queryParams?: Params } {
     if (section === 'settings') return { route: this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail)) };
     if (section === 'analysis' || section === 'reports') return this.facilityInventoryLink(facilityGuid, section);
-    if (section === 'data') return ['meter-grouping', 'energy-uses', 'custom-grid-factors', 'custom-fuels', 'custom-gwps'].includes(detail)
+    if (section === 'data') return ['meter-grouping', 'custom-grid-factors', 'custom-fuels', 'custom-gwps'].includes(detail)
       ? { route: this.facilityDataToolRoute(facilityGuid, detail) }
-      : this.facilityInventoryLink(facilityGuid, detail === 'predictors' ? 'predictors' : 'meters');
+      : this.facilityInventoryLink(facilityGuid, detail === 'energy-uses' ? 'energy-uses' : detail === 'predictors' ? 'predictors' : 'meters');
     if (section === 'imports' && this.account()) return { route: this.accountImportsRoute(this.account()!.guid) };
     return { route: this.facilityRoute(facilityGuid) };
   }

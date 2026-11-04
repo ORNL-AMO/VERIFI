@@ -17,7 +17,7 @@ describe('energy uses inventory', () => {
       Array.from({ length: 26 }, (_, index) => energyUseItem({ guid: `energy-${index}`, name: `Pump ${String(25 - index).padStart(2, '0')}`, facilityId: index === 0 ? 'facility-b' : 'facility-a' })), [energyUseGroup()]));
     TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [provideRouter([]),
       { provide: WorkspaceNavigationService, useValue: { inventoryFacilityGuid: scope, isSingleSiteWorkspace: () => false,
-        accountPortfolioRoute: () => ['/inventory'], changeFacilityScope: vi.fn() } }] });
+        accountPortfolioRoute: () => ['/inventory'], facilityInventoryLink: (facility: string) => ({ route: ['/inventory'], queryParams: { facility } }), changeFacilityScope: vi.fn() } }] });
     TestBed.overrideComponent(EnergyUsesInventoryComponent, { set: { providers: [{ provide: EnergyUsesWorkspaceService, useValue: {
       account: signal({ guid: 'account-a' }), entries, state, loading: () => state() === 'loading', ready: () => state() === 'ready'
     } }] } });

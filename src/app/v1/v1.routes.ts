@@ -9,7 +9,7 @@ import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/cu
 import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
 import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
-import { InventoryPlaceholderComponent } from '@app/v1/data/energy-uses/inventory-placeholder/inventory-placeholder.component';
+import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
 import { FacilitiesInventoryComponent } from '@app/v1/data/facilities/inventory/facilities-inventory.component';
 import { MetersInventoryComponent } from '@app/v1/data/meters/inventory/meters-inventory.component';
 import { PredictorsInventoryComponent } from '@app/v1/data/predictors/inventory/predictors-inventory.component';
@@ -22,7 +22,7 @@ import { AccountSettingsPortfolioComponent } from '@app/v1/account/settings/port
 import { AccountSettingsProfileComponent } from '@app/v1/account/settings/profile/account-settings-profile.component';
 import { AccountSettingsDataValidationComponent } from '@app/v1/account/settings/data-validation/account-settings-data-validation.component';
 import { AccountSettingsUnitsComponent } from '@app/v1/account/settings/units/account-settings-units.component';
-import { EnergyUsesPlaceholderComponent } from '@app/v1/data/energy-uses/energy-uses-placeholder/energy-uses-placeholder.component';
+import { energyUseInventoryRedirectGuard } from '@app/v1/data/energy-uses/energy-use-inventory-redirect.guard';
 import { MeterWorkspaceComponent } from '@app/v1/data/meters/meter-workspace/meter-workspace.component';
 import { MeterWorkbenchBillInspectionComponent } from '@app/v1/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
 import { MeterWorkbenchMonthlyChartComponent } from '@app/v1/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
@@ -139,7 +139,7 @@ export const V1Routes: Routes = [
                   { path: 'facilities', component: FacilitiesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: 'meters', component: MetersInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: 'predictors', component: PredictorsInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
-                  { path: 'energy-uses', component: InventoryPlaceholderComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
+                  { path: 'energy-uses', component: EnergyUsesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' },
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },
@@ -351,7 +351,7 @@ export const V1Routes: Routes = [
                     ]
               },
               ...ENERGY_USE_WORKBENCH_ROUTES,
-              { path: 'energy-uses', component: EnergyUsesPlaceholderComponent, data: { title: 'Energy Uses' } },
+              { path: 'energy-uses', pathMatch: 'full', canActivate: [energyUseInventoryRedirectGuard], children: [] },
               { path: 'custom-grid-factors', component: CustomGridFactorsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-fuels', component: CustomFuelsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-gwps', component: CustomGwpsComponent, canDeactivate: [unsavedChangesGuard] },

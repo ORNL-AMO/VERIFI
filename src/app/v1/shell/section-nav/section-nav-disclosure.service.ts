@@ -9,7 +9,8 @@ export class SectionNavDisclosureService {
   private readonly slots = signal<Record<ResourceNavGroupId, Disclosure>>({
     meters: { collapsed: false },
     'meter-grouping': { collapsed: false },
-    predictors: { collapsed: false }
+    predictors: { collapsed: false },
+    'energy-uses': { collapsed: false }
   });
 
   isOpen(id: ResourceNavGroupId, facilityGuid: string): boolean {

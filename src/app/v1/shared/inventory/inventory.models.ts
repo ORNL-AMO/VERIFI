@@ -11,7 +11,7 @@ export interface InventoryFacilityLink extends InventoryTileLink {
 }
 export interface FacilityInventoryDestination {
   readonly facilityGuid: string;
-  readonly resource: 'meters' | 'predictors';
+  readonly resource: 'meters' | 'predictors' | 'energy-uses';
 }
 export interface InventoryResourceSummary {
   readonly facilityGuid: string;
