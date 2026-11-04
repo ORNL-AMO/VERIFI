@@ -2,3 +2,11 @@
 :host:empty { display: none; }
 .v1-alert { color: var(--v1-text); }
 .is-compact { padding: .45rem .55rem; font-size: .78rem; line-height: 1.35; }
+.compact-status {
+  display: flex;
+  align-items: center;
+  min-height: 1.5rem;
+  color: var(--v1-muted);
+  font-size: .78rem;
+  line-height: 1.35;
+}

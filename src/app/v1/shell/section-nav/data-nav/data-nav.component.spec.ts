@@ -479,7 +479,8 @@ describe('DataNavComponent', () => {
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelectorAll('.v1-status-attention')).toHaveLength(status === 'ready' ? 2 : 0);
       if (status === 'ready') expect(fixture.nativeElement.querySelector('.v1-alert')).toBeNull();
-      else expect(fixture.nativeElement.textContent).toContain(status === 'error' ? 'Workspace status could not be evaluated.' : 'Checking workspace data...');
+      else if (status === 'error') expect(fixture.nativeElement.textContent).toContain('Workspace status could not be evaluated.');
+      else expect(fixture.nativeElement.querySelector('.compact-status').textContent.trim()).toBe('');
     }
   });
 

@@ -1,4 +1,14 @@
-@if (state() === 'idle' || state() === 'evaluating') {
+@if (compact()) {
+  <div class="compact-status">
+    @if (state() === 'error') {
+      <div class="v1-alert v1-alert--danger is-compact" role="alert">Workspace status could not be evaluated. Try again after the workspace finishes loading.</div>
+    } @else {
+      <span role="status" aria-atomic="true">
+        @if (showChecking() && (state() === 'idle' || state() === 'evaluating')) { Checking data… }
+      </span>
+    }
+  </div>
+} @else if (state() === 'idle' || state() === 'evaluating') {
   <div class="v1-alert v1-alert--info" [class.is-compact]="compact()" role="status">Checking workspace data...</div>
 } @else if (state() === 'error') {
   <div class="v1-alert v1-alert--danger" [class.is-compact]="compact()" role="alert">Workspace status could not be evaluated. Try again after the workspace finishes loading.</div>
