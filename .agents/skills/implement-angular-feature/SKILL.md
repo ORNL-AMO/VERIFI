@@ -27,6 +27,7 @@ description: Implement or modify VERIFI Angular features, routes, components, se
 
 - Do not introduce a new design system or Angular architecture as part of a feature issue.
 - When adopting the shared Data editing primitives, construct Settings sessions with `injectSettingsEditSession(adapter)` in an Angular injection context. The host's `DestroyRef` owns cleanup; do not add manual session disposal. Keep feature rules and commands in the adapter, use `registerDataDraft` with dirty/blocked Signals for confirm-discard workflows, and keep navigation-time flushing an explicit feature policy. Register native unload protection through the existing navigation service rather than adding per-editor window listeners.
+- Distinguish a rejected write from a committed write whose workspace publication failed. Preserve later edit intent and draft protection until verified, and keep error-provided saved snapshots authoritative across conflict review and discard until a new publication arrives. Cover retry against the feature's reconciliation rules, rather than only asserting a dirty flag.
 - Do not assume a browser-only API is available in tests or Electron without checking the existing abstraction.
 - Do not add template-driven forms in production v1. Existing allowlisted migration debt may remain until its owning workflow is changed.
 - Do not change a persisted model, calculation contract, file format, or IPC channel silently; use the matching repository skill.
