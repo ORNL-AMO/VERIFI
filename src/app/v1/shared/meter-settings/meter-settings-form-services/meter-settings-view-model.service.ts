@@ -1,5 +1,5 @@
+import { MeterSettingsForm } from '../meter-settings-values';
 import { Injectable, inject } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { AllSources, MeterPhase, MeterSource, WaterDischargeTypes, WaterIntakeTypes } from '@data/models/constantsAndTypes';
 import { GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
 import { getChargeTypes } from '@data/models/meter-charges-options';
@@ -33,7 +33,7 @@ import { MeterSettingsRuleContext, MeterSettingsViewModel } from './meter-settin
 export class MeterSettingsViewModelService {
   private readonly energyUnitsHelperService = inject(EnergyUnitsHelperService);
 
-  buildMeterSettingsViewModel(form: FormGroup, context: MeterSettingsRuleContext): MeterSettingsViewModel {
+  buildMeterSettingsViewModel(form: MeterSettingsForm, context: MeterSettingsRuleContext): MeterSettingsViewModel {
     const source = form.controls.source.value as MeterSource;
     const scope = form.controls.scope.value as number;
     const phase = form.controls.phase.value as MeterPhase;
@@ -114,7 +114,7 @@ export class MeterSettingsViewModelService {
     };
   }
 
-  getStartingUnitOptions(form: FormGroup, meterDataExists: boolean): UnitOption[] {
+  getStartingUnitOptions(form: MeterSettingsForm, meterDataExists: boolean): UnitOption[] {
     if (!meterDataExists) {
       return getStartingUnitOptions(
         form.controls.source.value,

@@ -5,6 +5,17 @@ import { BackupPreparationService } from './backup-preparation.service';
 import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 
 describe('WorkspaceBackupSnapshotBuilder', () => {
+  it.each([12345, '00012345', 'UTIL-A42'])('preserves account identifier %s through account and facility backups', accountNumber => {
+    const original = createSnapshot();
+    const snapshot = { ...original, meters: original.meters.map(meter => ({ ...meter, accountNumber })) };
+    const builder = new WorkspaceBackupSnapshotBuilder(), preparation = new BackupPreparationService();
+    const account = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(snapshot))));
+    const facility = preparation.prepare(JSON.parse(JSON.stringify(builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    expect(account.meters[0].accountNumber).toBe(accountNumber);
+    expect(facility.meters[0].accountNumber).toBe(accountNumber);
+    expect(account.dataVersion).toBe(CURRENT_DATA_VERSION);
+  });
+
   it('preserves optional review receipts in current backups while older records remain unreviewed', () => {
     const original = createSnapshot();
     const review = { checksVersion: 1, reportYear: 2023, inputFingerprint: 'reviewed-inputs', reviewedAt: '2026-01-01T00:00:00Z' };

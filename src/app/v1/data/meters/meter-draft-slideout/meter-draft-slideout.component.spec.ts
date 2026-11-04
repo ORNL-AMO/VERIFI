@@ -27,7 +27,7 @@ describe('MeterDraftSlideoutComponent', () => {
     component.setSource('Water Intake');
     component.form.controls.groupId.setValue('water');
     component.setSource('Electricity');
-    expect(component.form.controls.groupId.value).toBeUndefined();
+    expect(component.form.controls.groupId.value).toBeNull();
     component.form.controls.name.setValue('   ');
     expect(component.isValid()).toBe(false);
     const submitted = vi.fn();

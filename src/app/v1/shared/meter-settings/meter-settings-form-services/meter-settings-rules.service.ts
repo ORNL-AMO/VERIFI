@@ -1,10 +1,11 @@
+import { MeterSettingsForm, applyMeterSettings } from '../meter-settings-values';
+import { applyMeterSourceDefaults, meterDefaultScope, meterDefaultStartingUnit } from '../meter-source-defaults';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { Injectable, inject } from '@angular/core';
-import { FormArray, FormGroup } from '@angular/forms';
-import { MeterPhase, MeterSource } from '@data/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getChargeTypes } from '@data/models/meter-charges-options';
 import { getFuelTypeOptions, getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
-import { StationaryOtherEnergyOptions } from '@shared/fuel-options/stationaryOtherEnergyOptions';
 import {
   EnergyUnitOptions,
   VolumeLiquidOptions
@@ -25,15 +26,12 @@ export class MeterSettingsRulesService {
   private readonly validation = inject(MeterSettingsValidationService);
   private readonly viewModel = inject(MeterSettingsViewModelService);
 
-  applyMeterSettingsRuleChange(kind: MeterSettingsRuleChange, form: FormGroup, context: MeterSettingsRuleContext): void {
+  applyMeterSettingsRuleChange(kind: MeterSettingsRuleChange, form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     if (kind === 'source') {
-      form.controls.energyUnit.patchValue(form.controls.source.value === 'Electricity' ? 'kWh' : context.facility.energyUnit, { emitEvent: false });
-      form.controls.scope.patchValue(this.getDefaultScope(form.controls.source.value), { emitEvent: false });
-      this.setFuelTypeOptions(form, context, false);
-      this.setStartingUnit(form, context.facility);
-      this.setUnitBooleans(form);
-      this.setHeatCapacity(form, context);
-      this.setSiteToSource(form, context);
+      const defaults = applyMeterSourceDefaults(applyMeterSettings({} as IdbUtilityMeter, form.getRawValue()), context.facility, context.customFuels);
+      form.patchValue({ energyUnit: defaults.energyUnit ?? null, scope: defaults.scope ?? null,
+        fuel: defaults.fuel ?? null, startingUnit: defaults.startingUnit ?? null,
+        heatCapacity: defaults.heatCapacity ?? null, siteToSource: defaults.siteToSource ?? null }, { emitEvent: false });
       this.syncChargeTypes(form);
     } else if (kind === 'scope') {
       this.setFuelTypeOptions(form, context, true);
@@ -79,57 +77,30 @@ export class MeterSettingsRulesService {
   }
 
   getDefaultScope(source: MeterSource): number | undefined {
-    if (source === 'Electricity') { return 3; }
-    if (source === 'Other Energy') { return 4; }
-    if (source === 'Natural Gas') { return 1; }
-    if (source === 'Other Fuels') { return 1; }
-    if (source === 'Other') { return 100; }
-    return undefined;
+    return meterDefaultScope(source);
   }
 
-  private setStartingUnitOptionsAndValue(form: FormGroup, context: MeterSettingsRuleContext): void {
+  private setStartingUnitOptionsAndValue(form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     const options = this.viewModel.getStartingUnitOptions(form, context.meterDataExists);
     if (!options.some(option => option.value === form.controls.startingUnit.value)) {
       this.setStartingUnit(form, context.facility);
     }
   }
 
-  private setStartingUnit(form: FormGroup, facility: IdbFacility): void {
-    const source = form.controls.source.value as MeterSource;
-    let facilityUnit = form.controls.startingUnit.value as string;
-    if (source === 'Electricity') {
-      facilityUnit = facility.electricityUnit;
-    } else if (source === 'Natural Gas') {
-      facilityUnit = facility.volumeGasUnit;
-    } else if (source === 'Other Fuels') {
-      const phase = form.controls.phase.value as MeterPhase;
-      if (phase === 'Gas') { facilityUnit = facility.volumeGasUnit; }
-      if (phase === 'Liquid') { facilityUnit = facility.volumeLiquidUnit; }
-      if (phase === 'Solid') { facilityUnit = facility.massUnit; }
-    } else if (source === 'Other Energy') {
-      const selectedEnergyOption = StationaryOtherEnergyOptions.find(option => option.value === form.controls.fuel.value);
-      if (selectedEnergyOption?.otherEnergyType === 'Steam') { facilityUnit = facility.massUnit; }
-      if (selectedEnergyOption?.otherEnergyType === 'Chilled Water' || selectedEnergyOption?.otherEnergyType === 'Hot Water') {
-        facilityUnit = facility.energyUnit;
-      }
-      if (selectedEnergyOption?.otherEnergyType === 'Compressed Air') { facilityUnit = facility.volumeGasUnit; }
-    } else if (source === 'Water Intake' || source === 'Water Discharge') {
-      facilityUnit = facility.volumeLiquidUnit;
-    } else if (source === 'Other') {
-      facilityUnit = facility.massUnit;
-    }
-    form.controls.startingUnit.patchValue(facilityUnit, { emitEvent: false });
+  private setStartingUnit(form: MeterSettingsForm, facility: IdbFacility): void {
+    form.controls.startingUnit.patchValue(meterDefaultStartingUnit({ source: form.controls.source.value,
+      phase: form.controls.phase.value, fuel: form.controls.fuel.value, startingUnit: form.controls.startingUnit.value }, facility), { emitEvent: false });
     form.controls.startingUnit.updateValueAndValidity({ emitEvent: false });
   }
 
-  private setUnitBooleans(form: FormGroup): void {
+  private setUnitBooleans(form: MeterSettingsForm): void {
     const selectedUnit = EnergyUnitOptions.find(option => option.value === form.controls.startingUnit.value);
     if (selectedUnit) {
       form.controls.energyUnit.patchValue(selectedUnit.value, { emitEvent: false });
     }
   }
 
-  private setFuelTypeOptions(form: FormGroup, context: MeterSettingsRuleContext, preserveCurrent: boolean): void {
+  private setFuelTypeOptions(form: MeterSettingsForm, context: MeterSettingsRuleContext, preserveCurrent: boolean): void {
     const options = getFuelTypeOptions(
       form.controls.source.value,
       form.controls.phase.value,
@@ -144,7 +115,7 @@ export class MeterSettingsRulesService {
     }
   }
 
-  private setHeatCapacity(form: FormGroup, context: MeterSettingsRuleContext): void {
+  private setHeatCapacity(form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     if (checkShowHeatCapacity(form.controls.source.value, form.controls.startingUnit.value, form.controls.scope.value)) {
       const options = getFuelTypeOptions(
         form.controls.source.value,
@@ -164,7 +135,7 @@ export class MeterSettingsRulesService {
     }
   }
 
-  private setSiteToSource(form: FormGroup, context: MeterSettingsRuleContext): void {
+  private setSiteToSource(form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     if (checkShowSiteToSource(form.controls.source.value, form.controls.includeInEnergy.value, form.controls.scope.value)) {
       const options = getFuelTypeOptions(
         form.controls.source.value,
@@ -185,14 +156,14 @@ export class MeterSettingsRulesService {
     }
   }
 
-  private applyAgreementTypeDefaults(form: FormGroup): void {
+  private applyAgreementTypeDefaults(form: MeterSettingsForm): void {
     const agreementType = form.controls.agreementType.value;
     form.controls.includeInEnergy.patchValue(agreementType !== 4 && agreementType !== 6, { emitEvent: false });
     form.controls.retainRECs.patchValue(agreementType !== 1, { emitEvent: false });
     form.controls.directConnection.patchValue(agreementType === 2, { emitEvent: false });
   }
 
-  private setVehicleTypes(form: FormGroup, context: MeterSettingsRuleContext): void {
+  private setVehicleTypes(form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     const vehicleTypes = VehicleTypes.filter(option => option.category === form.controls.vehicleCategory.value);
     if (vehicleTypes.length) {
       if (!vehicleTypes.some(option => option.value === form.controls.vehicleType.value)) {
@@ -210,7 +181,7 @@ export class MeterSettingsRulesService {
     this.setVehicleFuelOptions(form, context);
   }
 
-  private setVehicleFuelOptions(form: FormGroup, context: MeterSettingsRuleContext): void {
+  private setVehicleFuelOptions(form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     const options = getMobileFuelTypes(form.controls.vehicleCategory.value, form.controls.vehicleType.value, [...context.customFuels]);
     if (!options.some(option => option.value === form.controls.vehicleFuel.value)) {
       form.controls.vehicleFuel.patchValue(options[0]?.value, { emitEvent: false });
@@ -218,7 +189,7 @@ export class MeterSettingsRulesService {
     this.setVehicleHeatCapacity(form, context);
   }
 
-  private setVehicleHeatCapacity(form: FormGroup, context: MeterSettingsRuleContext): void {
+  private setVehicleHeatCapacity(form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     const fuelOptions = getMobileFuelTypes(form.controls.vehicleCategory.value, form.controls.vehicleType.value, [...context.customFuels]);
     const selectedFuelTypeOption = fuelOptions.find(option => option.value === form.controls.vehicleFuel.value);
     form.controls.heatCapacity.patchValue(getHeatingCapacity(
@@ -229,9 +200,9 @@ export class MeterSettingsRulesService {
     ), { emitEvent: false });
   }
 
-  private syncChargeTypes(form: FormGroup): void {
+  private syncChargeTypes(form: MeterSettingsForm): void {
     const chargeTypes = getChargeTypes(form.controls.source.value);
-    const chargesArray = form.get('chargesArray') as FormArray;
+    const chargesArray = form.controls.chargesArray;
     chargesArray.controls.forEach(charge => {
       const chargeType = charge.get('chargeType');
       if (chargeType && !chargeTypes.some(type => type.value === chargeType.value)) {
@@ -241,7 +212,7 @@ export class MeterSettingsRulesService {
     });
   }
 
-  private updateValidators(form: FormGroup): void {
+  updateValidators(form: MeterSettingsForm): void {
     form.controls.fuel.setValidators(this.validation.getFuelValidation(form.controls.source.value, form.controls.scope.value));
     form.controls.phase.setValidators(this.validation.getPhaseValidation(form.controls.source.value, form.controls.scope.value));
     form.controls.heatCapacity.setValidators(this.validation.getHeatCapacityValidation(
