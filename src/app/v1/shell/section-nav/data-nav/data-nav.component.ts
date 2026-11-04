@@ -39,6 +39,7 @@ export class DataNavComponent {
     return buildResourceNavGroups({
       facilityGuid: facility.guid, detail: this.navigation.activeSection() === 'data' ? this.navigation.activeDetail() : '',
       activeMeterGuid: this.navigation.activeMeterGuid(), activeGroupGuid: this.navigation.activeMeterGroupGuid(),
+      energyUses: this.navigation.contextEnergyUses(), activeEnergyUseGuid: this.navigation.activeEnergyUseGuid(),
       activePredictorGuid: this.navigation.activePredictorGuid(), activeWeatherKey: this.navigation.activeWeatherPredictorGroupKey(),
       meters: this.navigation.contextMeters(), groups: this.navigation.contextMeterGroups(),
       predictors: this.navigation.contextPredictors(), predictorData: this.navigation.contextPredictorData(),
@@ -50,13 +51,6 @@ export class DataNavComponent {
       routeActive: this.navigation.activeSection() === 'data' && this.navigation.activeDetail() === 'portfolio'
         ? this.navigation.activePortfolioTab() === group.id : group.routeActive
     });
-  });
-  readonly primaryLink = computed(() => {
-    const facility = this.navigation.contextFacility();
-    const account = this.navigation.account();
-    return this.facilityContext() && facility
-      ? { label: 'Energy Uses', icon: 'tools' as const, active: this.navigation.activeDetail() === 'energy-uses', route: this.navigation.facilityDataToolRoute(facility.guid, 'energy-uses') }
-      : { label: 'Portfolio', icon: 'portfolio' as const, active: this.navigation.activeDetail() === 'portfolio', route: account ? this.navigation.accountDataRoute(account.guid, 'portfolio') : [] };
   });
   readonly customLinks = computed(() => {
     const account = this.navigation.account();

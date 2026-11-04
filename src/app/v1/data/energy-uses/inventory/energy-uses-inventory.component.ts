@@ -33,14 +33,13 @@ export class EnergyUsesInventoryComponent {
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
   readonly entries = computed(() => this.workspace.entries().filter(entry => !this.navigation.inventoryFacilityGuid() || entry.facility.guid === this.navigation.inventoryFacilityGuid()));
-  readonly categories = computed(() => [...new Set(this.entries().map(entry => entry.category))].sort());
+  readonly categories = computed(() => [...new Set([...this.entries().map(entry => entry.category), ...(this.filters().category === 'all' ? [] : [this.filters().category])])].sort());
   readonly filteredEntries = computed(() => filterAndSortEnergyUses(this.entries(), this.filters()));
   readonly tiles = computed<readonly InventoryTile[]>(() => this.filteredEntries().map(entry => ({
     guid: entry.guid, name: entry.name, icon: 'tools', chip: entry.category,
     route: facilityEnergyUseRoute(entry.facility.guid, entry.guid),
     owner: { facilityGuid: entry.facility.guid, label: entry.facility.name,
-      route: this.navigation.accountPortfolioRoute(entry.facility.accountId, 'energy-uses'),
-      queryParams: this.navigation.isSingleSiteWorkspace() ? {} : { facility: entry.facility.guid } },
+      ...this.navigation.facilityInventoryLink(entry.facility.guid, 'energy-uses') },
     status: { tone: 'neutral', icon: 'info', label: entry.availability }, energyUseSnapshot: entry.snapshot
   })));
   readonly inventory = new InventoryViewState(this.browseKey, this.tiles,

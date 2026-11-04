@@ -1,3 +1,4 @@
+import type { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import type { Params } from '@angular/router';
 import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import type { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
@@ -8,7 +9,7 @@ import { meterSourceIcon } from '@app/v1/data/meters/models';
 import { buildWeatherStationGroups, predictorIcon } from '@app/v1/data/predictors/models';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
-export type ResourceNavGroupId = 'meters' | 'meter-grouping' | 'predictors';
+export type ResourceNavGroupId = 'meters' | 'meter-grouping' | 'predictors' | 'energy-uses';
 
 export interface NavigationLink {
   readonly id: string;
@@ -37,10 +38,11 @@ export const ACCOUNT_CUSTOM_DATA_ITEMS: readonly { id: string; label: string; ic
 ];
 
 export interface ResourceNavRoutes {
-  facilityInventoryLink: (facilityGuid: string, resource: 'meters' | 'predictors') => { route: readonly string[]; queryParams?: Params };
+  facilityInventoryLink: (facilityGuid: string, resource: 'meters' | 'predictors' | 'energy-uses') => { route: readonly string[]; queryParams?: Params };
   facilityDataToolRoute: (facilityGuid: string, detail: string) => readonly string[];
   facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab: 'settings') => readonly string[];
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: 'monthly-table') => readonly string[];
+  facilityEnergyUseRoute: (facilityGuid: string, energyUseGuid: string, tab: 'settings') => readonly string[];
   facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab: 'settings') => readonly string[];
   facilityWeatherPredictorRoute: (facilityGuid: string, key: string) => readonly string[];
 }
@@ -50,6 +52,8 @@ export interface ResourceNavInput {
   readonly detail: string;
   readonly activeMeterGuid?: string;
   readonly activeGroupGuid?: string;
+  readonly energyUses: readonly Readonly<IdbFacilityEnergyUseEquipment>[];
+  readonly activeEnergyUseGuid?: string;
   readonly activePredictorGuid?: string;
   readonly activeWeatherKey?: string;
   readonly meters: readonly IdbUtilityMeter[];
@@ -110,6 +114,13 @@ export function buildResourceNavGroups(input: ResourceNavInput, routes: Resource
       active: input.detail === 'predictors' && !input.activePredictorGuid && !input.activeWeatherKey, routeActive: input.detail === 'predictors', facilityGuid,
       childrenId: `v1-predictor-nav-items-${facilityGuid}`, childrenLabel: 'Predictor links', children: sorted([...standardChildren, ...weatherChildren]),
       attention: parentAttention('predictor-tab', 'predictors')
+    },
+    {
+      id: 'energy-uses', label: 'Energy Uses', icon: 'tools', ...routes.facilityInventoryLink(facilityGuid, 'energy-uses'),
+      active: input.detail === 'energy-uses' && !input.activeEnergyUseGuid, routeActive: input.detail === 'energy-uses', facilityGuid,
+      childrenId: `v1-energy-use-nav-items-${facilityGuid}`, childrenLabel: 'Energy use links',
+      children: sorted(input.energyUses.map(item => ({ id: item.guid, label: item.name?.trim() || 'Untitled energy use', icon: 'tools',
+        route: routes.facilityEnergyUseRoute(facilityGuid, item.guid, 'settings'), active: input.activeEnergyUseGuid === item.guid })))
     }
   ];
 }

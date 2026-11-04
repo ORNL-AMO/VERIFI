@@ -124,11 +124,12 @@ describe('v1 canonical route guards', () => {
       { url: `/v1/workspace/account/account-a/${path}` })).resolves.toEqual({ commands: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'] });
   });
 
-  it('keeps unfinished single-site Energy Uses on its facility tool route', async () => {
+  it('keeps single-site Energy Uses on its shared inventory route', async () => {
     workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
     await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
-      { url: '/v1/workspace/account/account-a/data/portfolio/energy-uses' })).resolves.toEqual({ commands: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses'] });
+      { url: '/v1/workspace/account/account-a/data/portfolio/energy-uses' })).resolves.toBe(true);
+    expect(ensurePairs).not.toHaveBeenCalled();
   });
 
   it('does not redirect portfolio or invalid single-site account states', async () => {

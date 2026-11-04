@@ -10,7 +10,7 @@ This roadmap records the agreed target experience, not shipped behavior. Work th
 
 | Phase | Deliverable | Status |
 | --- | --- | --- |
-| 1 | Inventory and workspace navigation | In progress |
+| 1 | Inventory and workspace navigation | Complete |
 | 2 | Creation, Settings, and safe commands | Planned |
 | 3 | Annual Data and estimation | Planned |
 | 4 | Complete item tools and charts | Planned |
@@ -108,7 +108,10 @@ Use `npm run validate:agent -- --mode plan` with the files changed in each phase
 - **Validation:** Focused inventory/card tests (8 passed), app TypeScript check, full fast suite (3,311 passed), full Chromium suite (338 passed), and production web build passed. Restricted test/build processes initially exited 134; unrestricted reruns passed. The web build retains existing browser-support, style-budget, and CommonJS warnings.
 - **Workbench branch:** Canonical Settings/Annual Data routes, route-scoped ownership and missing-item handling, shared resource switching, and lightweight guarded editor shells are implemented.
 - **Workbench validation:** Focused energy-use/route tests (58 passed), colocated editor-shell test (1 passed), app TypeScript check, full fast suite (3,315 passed), full Chromium suite (338 passed), and production web build passed.
-- **Remaining:** Workspace integration and final interaction checks.
+- **Integration branch:** Shared account/facility-scoped inventory, legacy route redirects, implicit single-facility scope, breadcrumbs, resource/sidebar switching, accepted route context, and browse restoration are complete. Settings and Annual Data remain intentionally minimal navigation shells.
+- **Final validation:** Focused inventory/navigation/sidebar/route tests (213 passed), full fast suite (3,318 passed), full Chromium suite (342 passed), app TypeScript check, and production web build passed. Four additional focused Chromium journeys passed after improving card typography and checking three-source wrapping.
+- **Interaction evidence:** Chromium verified browser Back/Forward scroll/focus restoration, rejected exits retaining context, old facility routes, implicit single-facility ownership, native select labels, keyboard progression, desktop/narrow light/dark/high-contrast layouts, readable source facts, and print-card omission of controls. Captured layouts were visually inspected. Browsing and tab switching preserve committed records and do not initialize analysis pairs.
+- **Boundaries:** No database, command, calculation, import/export, backup, v0, or Electron boundary changes. Electron-specific validation is not required for this phase. Existing browser-support, stylesheet-budget, and CommonJS build warnings remain.
 
 ## Defaults and deferred work
 

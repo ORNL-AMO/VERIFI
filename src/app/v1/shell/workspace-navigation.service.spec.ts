@@ -701,7 +701,8 @@ describe('WorkspaceNavigationService', () => {
       'account',
       'account-a',
       'data',
-      'portfolio'
+      'portfolio',
+      'energy-uses'
     ]);
 
     router.navigate.mockClear();

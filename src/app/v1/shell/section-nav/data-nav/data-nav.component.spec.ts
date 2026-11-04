@@ -1,3 +1,4 @@
+import { energyUseItem } from '@app/v1/data/energy-uses/energy-uses.testing';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { TestBed } from '@angular/core/testing';
 import { presentFindings } from '@app/v1/status/status.catalog';
@@ -8,6 +9,22 @@ import { setupSectionNavTest, activeLinks, meterChildLinks, groupChildLinks, pre
 describe('DataNavComponent', () => {
   let state: ReturnType<typeof setupSectionNavTest>;
   beforeEach(() => { state = setupSectionNavTest(); });
+
+  it('lists scoped energy uses with canonical destinations and active item highlighting without validation badges', () => {
+    state.contextMode.set('facility'); state.selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    state.activeSection.set('data'); state.activeDetail.set('energy-uses'); state.activeEnergyUseGuid.set('energy-a');
+    state.energyUses.set([energyUseItem(), energyUseItem({ guid: 'energy-b', name: 'Boiler B' })]);
+    const fixture = TestBed.createComponent(DataNavComponent); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const links = [...root.querySelectorAll<HTMLAnchorElement>('a')];
+    expect(links.filter(link => link.textContent?.trim() === 'Energy Uses')).toHaveLength(1);
+    expect(links.find(link => link.textContent?.trim() === 'Energy Uses')?.getAttribute('href')).toContain('/data/portfolio/energy-uses?facility=facility-a');
+    const item = links.find(link => link.textContent?.trim() === 'Pump A')!;
+    expect(item.getAttribute('href')).toContain('/facility/facility-a/data/energy-uses/energy-a/settings');
+    expect(item.getAttribute('aria-current')).toBe('page');
+    expect(root.querySelector('#v1-energy-use-nav-items-facility-a .v1-status-attention')).toBeNull();
+    expect(links.filter(link => link.classList.contains('v1-nav__child')).map(link => link.textContent?.trim())).toEqual(['Boiler B', 'Pump A']);
+  });
 
   it('omits Facilities in facility context while preserving its scoped resource links', () => {
     state.activeSection.set('data'); state.activeDetail.set('meter-grouping');
