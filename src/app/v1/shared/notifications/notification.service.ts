@@ -79,6 +79,20 @@ export class NotificationService implements OnDestroy {
     return this.show({ ...options, title, tone: 'info' });
   }
 
+  /** Update one ongoing operation without adding another toast or changing its identity. */
+  update(id: string, changes: Partial<NotificationRequest>): void {
+    let updated: NotificationToast | undefined;
+    this.writableNotifications.update(current => current.map(notification => {
+      if (notification.id !== id) return notification;
+      updated = { ...notification, ...changes };
+      return updated;
+    }));
+    if (updated) {
+      this.clearDismissTimer(id);
+      this.scheduleDismiss(updated);
+    }
+  }
+
   dismiss(id: string): void {
     this.clearDismissTimer(id);
     this.writableNotifications.update(current => current.filter(notification => notification.id !== id));

@@ -1,0 +1,19 @@
+.popup {
+    width: min(700px, calc(100vw - 2rem));
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+}
+
+.popup.open {
+    transform: translateX(-50%) scale(1);
+}
+
+.unit-suffix {
+    flex: 0 0 9rem;
+    justify-content: center;
+}
+
+.rated-power-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+}

@@ -5,14 +5,29 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
-import { FACILITY_REPORT_TYPES } from './facility-report.models';
-import { reportTypeAvailable } from '@app/v1/reports/report-availability';
+import { FACILITY_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
+import { reportTypeAvailable } from '@app/v1/reports/catalog/report-availability';
+import { FacilityReportSetupChanges } from '@data/account-workspace/facility-report-setup.models';
+import { getAnalysisReportDefaults } from './analysis/analysis-report-defaults';
 
 @Injectable({ providedIn: 'root' })
 export class FacilityReportActionsService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly boundary = inject(WorkspaceCommandBoundary);
   private readonly handler = inject(ReportCommandHandler);
+
+  async updateSetup(facilityGuid: string, reportGuid: string, changes: FacilityReportSetupChanges): Promise<IdbFacilityReport> {
+    const accountGuid = this.requireContext(facilityGuid);
+    this.requireReport(facilityGuid, reportGuid, accountGuid);
+    const result = await this.boundary.execute({ entityKind: 'facilityReport', changeKind: 'update', entityGuid: reportGuid,
+      label: 'Saving report settings', notification: { suppressSuccessToast: true },
+      publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }
+    }, () => {
+      this.requireReport(facilityGuid, reportGuid, accountGuid);
+      return this.handler.updateFacilityReportSetup(facilityGuid, reportGuid, changes, accountGuid);
+    });
+    return result.value;
+  }
 
   async create(facilityGuid: string, name: string, type: FacilityReportType): Promise<IdbFacilityReport> {
     const accountGuid = this.requireContext(facilityGuid);
@@ -25,6 +40,7 @@ export class FacilityReportActionsService {
       this.requireAvailable(type);
       const groups = this.workspace.meterGroups().filter(group => group.facilityId === facilityGuid);
       const report = getNewIdbFacilityReport(facilityGuid, accountGuid, type, groups);
+      if (type === 'analysis') report.analysisReportSettings = getAnalysisReportDefaults();
       if (type === 'dataQuality') report.dataQualityReportSettings.missingSelection = true;
       return this.handler.addFacilityReport({ ...report, name: trimmed }, accountGuid);
     });
@@ -44,6 +60,7 @@ export class FacilityReportActionsService {
     const trimmed = this.requireName(name);
     const report = this.requireReport(facilityGuid, reportGuid, accountGuid);
     if (trimmed === report.name) return report;
+    if (report.facilityReportType === 'analysis') return this.updateSetup(facilityGuid, reportGuid, { name: trimmed });
     const result = await this.boundary.execute({
       entityKind: 'facilityReport', changeKind: 'update', entityGuid: reportGuid, label: 'Saving report name',
       notification: { suppressSuccessToast: true },
@@ -98,7 +115,7 @@ export class FacilityReportActionsService {
   }
 
   private requireAvailable(type: FacilityReportType): void {
-    if (!reportTypeAvailable(type, this.workspace.account()?.displayEmissions)) {
+    if (!reportTypeAvailable('facility', type, this.workspace.account()?.displayEmissions)) {
       throw new WorkspaceWriteError('validation-failed', 'Enable Other Impacts in Account Goals to access this report type.');
     }
   }

@@ -1,5 +1,5 @@
+import { MeterSettingsForm } from '../meter-settings-values';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { METER_CALENDARIZATION_METHODS } from '../meter-calendarization-options';
 import { MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settings-form.service';
 
@@ -10,7 +10,7 @@ import { MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settin
   templateUrl: './meter-settings-reading-form.component.html'
 })
 export class MeterSettingsReadingFormComponent {
-  @Input({ required: true }) form: FormGroup;
+  @Input({ required: true }) form: MeterSettingsForm;
   @Input({ required: true }) viewModel: MeterSettingsViewModel;
   @Input() meterDataExists = false;
   @Input() showCalendarizationHelp = true;

@@ -1,0 +1,16 @@
+:host { display: block; min-width: 0; }
+.analysis-result-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--v1-space-4); }
+.analysis-result-charts__chart { min-width: 0; padding-right: var(--v1-space-4); }
+.analysis-result-charts__chart + .analysis-result-charts__chart { padding-right: 0; padding-left: var(--v1-space-4); border-left: 1px solid var(--v1-divider); }
+.analysis-result-charts--monthly { grid-template-columns: minmax(0, 1fr); }
+.analysis-result-charts--monthly .analysis-result-charts__chart { padding: 0 0 var(--v1-space-4); }
+.analysis-result-charts--monthly .analysis-result-charts__chart + .analysis-result-charts__chart {
+  padding: var(--v1-space-4) 0 0; border-top: 1px solid var(--v1-divider); border-left: 0;
+}
+@media (max-width: 900px) {
+  .analysis-result-charts { grid-template-columns: minmax(0, 1fr); }
+  .analysis-result-charts__chart { padding: 0 0 var(--v1-space-4); }
+  .analysis-result-charts__chart + .analysis-result-charts__chart {
+    padding: var(--v1-space-4) 0 0; border-top: 1px solid var(--v1-divider); border-left: 0;
+  }
+}

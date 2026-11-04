@@ -1,5 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { YearGroupData } from '@app/data/models/idbModels/facilityReport';
+import { chartToImage } from '@app/shared/chart-image-export';
 import { PlotlyService } from 'angular-plotly.js';
 
 @Component({
@@ -96,18 +97,6 @@ export class AnnualActualVsAdjustedCostsGraphComponent {
   }
 
   async getComparisonChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.comparisonGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.comparisonGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.comparisonGraph?.nativeElement);
   }
 }

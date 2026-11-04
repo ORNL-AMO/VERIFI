@@ -3,7 +3,7 @@ import { dbConfig } from '@data/indexedDB/_dbConfig';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { analysisReportFixture, regressionAnalysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
-import { buildAnalysisReportInputs } from '@domain/reports/analysis-report-inputs';
+import { buildAnalysisReportInputs, buildFacilityAnalysisReportInputs } from '@domain/reports/analysis-report-inputs';
 import { analysisReviewContent, analysisReviewIsCurrent } from '@domain/reports/analysis-review-inputs';
 import { analysisReviewFingerprint } from '@platform/reports/analysis-review-fingerprint';
 import { AnalysisReviewCommandHandler } from './analysis-review-command-handler.service';
@@ -33,6 +33,25 @@ describe('shared analysis review transactions', () => {
     const saved = (await harness.getAll(single ? 'analysisItems' : 'accountAnalysisItems'))[0];
     expect(saved['dataCheckReviews']).toHaveLength(2);
     expect(saved['isAnalysisVisited']).toBe(false);
+  });
+  it('confirms a direct facility baseline review without hidden pairs and rejects stale or failed writes', async () => {
+    const { handler, snapshot, tx } = await setup();
+    const inputs = buildFacilityAnalysisReportInputs({ ...snapshot, accountAnalyses: [] }, 'facility', 'facility-analysis');
+    const result = await handler.confirmFacility('account', 'facility', 'facility-analysis', inputs, [2022]);
+    expect(result.scope).toBe('facility'); expect(result.analysis.dataCheckReviews?.map(item => item.reportYear)).toEqual([2022]);
+    expect((await harness.getAll('accountAnalysisItems'))[0]['dataCheckReviews']).toBeUndefined();
+    await tx.runTransaction(['analysisItems'], 'readwrite', context => context.put('analysisItems', { ...snapshot.facilityAnalyses[0], name: 'Renamed' }));
+    const put = vi.spyOn(IndexedDbTransactionContext.prototype, 'put').mockRejectedValueOnce(new Error('Review write failed'));
+    await expect(handler.confirmFacility('account', 'facility', 'facility-analysis', inputs, [2023])).rejects.toThrow('Review write failed');
+    put.mockRestore();
+    expect((await harness.getAll('analysisItems'))[0]['dataCheckReviews']).toBeUndefined();
+    expect((await handler.confirmFacility('account', 'facility', 'facility-analysis', inputs, [2023])).analysis.name).toBe('Renamed');
+    await tx.runTransaction(['utilityMeterData'], 'readwrite', context => context.put('utilityMeterData', { ...snapshot.meterData[0], totalEnergyUse: 1 }));
+    await expect(handler.confirmFacility('account', 'facility', 'facility-analysis', inputs, [2024])).rejects.toThrow('changed during review');
+    await harness.reopen();
+    expect((await harness.getAll('analysisItems'))[0]['dataCheckReviews']).toHaveLength(1);
+    expect((await harness.getAll('analysisItems'))[0]['isAnalysisVisited']).toBe(false);
+    await expect(handler.confirmFacility('account', 'other', 'facility-analysis', inputs, [2023])).rejects.toThrow('unavailable');
   });
   it('rejects stale data without writing a confirmation', async () => {
     const { handler, inputs, snapshot, tx } = await setup();

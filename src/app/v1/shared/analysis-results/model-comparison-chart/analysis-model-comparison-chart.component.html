@@ -1,0 +1,12 @@
+@if (option(); as chart) {
+  <div class="model-comparison-chart" role="region" aria-label="Actual and modeled consumption chart">
+    <div class="model-comparison-chart__canvas" [appV1ECharts]="chart" [deferUntilVisible]="deferUntilVisible()" role="img" aria-label="Actual and modeled use with model-period shading"></div>
+  </div>
+  <table class="visually-hidden">
+    <caption>Model comparison data@if (data().unit) { ({{ data().unit }}) }</caption>
+    <thead><tr><th scope="col">Month</th><th scope="col">Actual</th><th scope="col">Modeled</th>@if (data().comparison) { <th scope="col">Selected modeled</th> }<th scope="col">Model period</th></tr></thead>
+    <tbody>@for (row of accessibleRows(); track row.key) {
+      <tr><th scope="row">{{ row.label }}</th><td>{{ row.actual }}</td><td>{{ row.modeled }}</td>@if (data().comparison) { <td>{{ row.selected }}</td> }<td>{{ row.model ? 'Yes' : 'No' }}</td></tr>
+    }</tbody>
+  </table>
+} @else { <p role="status">No model comparison data is available.</p> }

@@ -4,6 +4,7 @@ import { AnalysisGroupItem } from '@v0/data-evaluation/facility/analysis/analysi
 import { MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-regression-model-details',
@@ -157,18 +158,6 @@ export class RegressionModelDetailsComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.monthlyAnalysisGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.monthlyAnalysisGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.monthlyAnalysisGraph?.nativeElement);
   }
 }

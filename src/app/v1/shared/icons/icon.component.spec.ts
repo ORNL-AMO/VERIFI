@@ -19,6 +19,8 @@ import { join } from 'path';
     <app-ui-icon name="uploadData"></app-ui-icon>
     <app-ui-icon name="dataVisualization" [size]="24" [strokeWidth]="2" [decorative]="false" label="Visualization"></app-ui-icon>
     <app-ui-icon name="betterPlantsReport" [size]="16" [decorative]="false" label="Better Plants report"></app-ui-icon>
+    <app-ui-icon name="facilityAnalysisReport" [size]="24" [decorative]="false" label="Facility analysis report"></app-ui-icon>
+    <app-ui-icon name="facilityAnalysisReport" [size]="20" [strokeWidth]="2" [decorative]="false" label="Facility analysis report override"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -40,8 +42,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(6);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(6);
+    expect(icons.length).toBe(8);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(8);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -71,9 +73,15 @@ describe('IconComponent', () => {
     expect(ICON_REGISTRY.uploadData).toBe(Upload03Icon);
   });
 
+  it('retains the default stroke width for Hugeicons', () => {
+    expect(fixture.nativeElement.querySelector('app-ui-icon path').getAttribute('stroke-width')).toBe('1.75');
+  });
+
   it.each([
     { file: 'verifi-chart.svg', index: 4, label: 'Visualization', size: '24', stroke: '2' },
-    { file: 'better-plants-report.svg', index: 5, label: 'Better Plants report', size: '16', stroke: '1.75' }
+    { file: 'better-plants-report.svg', index: 5, label: 'Better Plants report', size: '16', stroke: '1.75' },
+    { file: 'facility-analysis-report.svg', index: 6, label: 'Facility analysis report', size: '24', stroke: undefined },
+    { file: 'facility-analysis-report.svg', index: 7, label: 'Facility analysis report override', size: '20', stroke: '2' }
   ])('renders $file through the same themed, accessible icon API', ({ file, index, label, size, stroke }) => {
     const source = readFileSync(join(process.cwd(), 'src/assets/icons', file), 'utf8');
     const document = new DOMParser().parseFromString(source, 'image/svg+xml');
@@ -84,7 +92,9 @@ describe('IconComponent', () => {
     expect(host.getAttribute('role')).toBe('img');
     expect(host.querySelector('svg')?.getAttribute('width')).toBe(size);
     expect(host.querySelector('path')?.getAttribute('stroke')).toBe('currentColor');
-    expect(host.querySelector('path')?.getAttribute('stroke-width')).toBe(stroke);
+    const sourcePaths = [...document.querySelectorAll('path')];
+    expect([...host.querySelectorAll('path')].map(path => path.getAttribute('stroke-width')))
+      .toEqual(sourcePaths.map(path => stroke ?? path.getAttribute('stroke-width') ?? document.documentElement.getAttribute('stroke-width')));
     expect(host.querySelector('path')?.getAttribute('stroke-linecap')).toBe('round');
   });
 

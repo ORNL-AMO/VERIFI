@@ -9,6 +9,9 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { SectionNavModule } from '../section-nav.module';
 import { ReportsNavComponent } from './reports-nav.component';
+import { ReportStageStateService } from '@app/v1/reports/shared/workbench/report-stage-state.service';
+import { buildReportStages } from '@app/v1/reports/shared/workbench/report-workbench.models';
+import { reportIdentityKey } from '@app/v1/reports/shared/workbench/report-runtime.models';
 
 describe('ReportsNavComponent', () => {
   it('groups owned reports by type, sorts their names, and highlights the selected report', async () => {
@@ -41,7 +44,7 @@ describe('ReportsNavComponent', () => {
     expect(sections.map(section => section.querySelector('.v1-nav__sublabel')?.textContent)).toEqual(['Analysis', 'Data Overview']);
     expect(sections.every(section => section.querySelector(`#${section.getAttribute('aria-labelledby')}`))).toBe(true);
     expect(fixture.debugElement.queryAll(By.css('.v1-nav__report-section:first-of-type .v1-nav__report-entry > a app-ui-icon'))
-      .map(icon => icon.componentInstance.name)).toEqual(['report', 'report']);
+      .map(icon => icon.componentInstance.name)).toEqual(['facilityAnalysisReport', 'facilityAnalysisReport']);
     expect(fixture.nativeElement.querySelector('a app-ui-icon[name="reports"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('a[aria-expanded="true"]').textContent).toContain('Zebra');
     expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(1);
@@ -94,7 +97,7 @@ describe('ReportsNavComponent', () => {
     active.set(undefined); fixture.detectChanges(); expect(fixture.nativeElement.querySelector('a[aria-current="page"]').textContent).toContain('Dashboard');
   });
 
-  it('lists both formats under one type, disambiguates matching GUIDs and hides Recents for a single facility', async () => {
+  it('disambiguates matching report GUIDs, hides single-facility Recents, and follows live stages for either scope', async () => {
     const store = new AccountWorkspaceStore();
     const base = getNewIdbAccountReport(reportAccount, [reportFacility], []);
     store.publish({ ...reportSnapshot(), account: { ...reportAccount, isSingleFacilityCompany: true },
@@ -121,9 +124,32 @@ describe('ReportsNavComponent', () => {
     expect(new Set(groups[0].reports.map(report => report.key)).size).toBe(2);
     expect(groups[0].reports.filter(report => report.active).map(report => report.scope)).toEqual(['account']);
     expect(fixture.nativeElement.querySelector('app-recent-items-nav')).toBeNull();
+    const published = TestBed.inject(ReportStageStateService);
+    const accountKey = reportIdentityKey({ scope: 'account', accountGuid: 'account-a', reportGuid: 'shared' });
+    const accountStages = buildReportStages(['/account/report'], 'Analysis', 'setup', false).map(stage => ({ ...stage,
+      canOpen: stage.id === 'setup', hasBlockingErrors: stage.id === 'setup' }));
+    published.publish(accountKey, accountStages); fixture.detectChanges();
+    expect(fixture.componentInstance.activeStages()).toBe(accountStages);
+    expect(fixture.nativeElement.querySelectorAll('.v1-analysis-stages__disabled')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.v1-analysis-stages__marker.has-blocking-errors')).not.toBeNull();
+    published.publish(reportIdentityKey({ scope: 'account', accountGuid: 'other-account', reportGuid: 'shared' }), accountStages);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.activeStages()).toEqual([]);
+    published.publish(accountKey, accountStages);
     mode.set('facility'); state.set({ facilityGuid: 'facility-a', reportGuid: 'shared', reportStage: 'setup' }); fixture.detectChanges();
     expect(fixture.componentInstance.reportGroups()[0].reports.filter(report => report.active).map(report => report.scope)).toEqual(['facility']);
     expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(1);
+    expect(fixture.componentInstance.activeStages().map(stage => stage.id)).toEqual(['setup', 'data-checks', 'report']);
+    const facilityStages = buildReportStages(['/facility/report'], 'Analysis', 'setup', true).map(stage => ({ ...stage,
+      completed: stage.id === 'setup' || stage.id === 'data-checks' }));
+    const facilityKey = reportIdentityKey({ scope: 'facility', accountGuid: 'account-a', facilityGuid: 'facility-a', reportGuid: 'shared' });
+    published.publish(facilityKey, facilityStages); fixture.detectChanges();
+    expect(fixture.componentInstance.activeStages()).toBe(facilityStages);
+    expect(fixture.nativeElement.querySelectorAll('.v1-analysis-stages__marker.is-complete')).toHaveLength(2);
+    published.clear(accountKey); fixture.detectChanges();
+    expect(fixture.componentInstance.activeStages()).toBe(facilityStages);
+    published.clear(facilityKey); fixture.detectChanges();
+    expect(fixture.componentInstance.activeStages()[1].completed).toBe(false);
   });
 
 });

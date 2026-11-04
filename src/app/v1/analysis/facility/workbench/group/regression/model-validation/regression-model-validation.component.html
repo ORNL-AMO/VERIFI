@@ -57,10 +57,8 @@
       <p class="v1-regression-validation__state">No predictor range validation is available for this model.</p>
     }
 
-    @if (chartOption(); as option) {
-      <div class="v1-regression-validation__chart-region" role="region" aria-label="Actual and modeled consumption chart">
-        <div class="v1-regression-validation__chart" [appV1ECharts]="option"></div>
-      </div>
+    @if (comparisonData(); as data) {
+      @if (data.monthly.length) { <app-analysis-model-comparison-chart [data]="data"/> }
     }
   }
 </section>

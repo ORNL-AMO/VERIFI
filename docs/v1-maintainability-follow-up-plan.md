@@ -48,7 +48,7 @@ Focused checks passed: 14 fast files / 136 tests and 2 Chromium files / 15 tests
 
 **Status: Complete**
 
-**Original review evidence:** [Report inventory projection](../src/app/v1/reports/report-inventory.models.ts) builds a facility `ResourceBrowseCardView` only to flatten its facts. [Facility Setup](../src/app/v1/reports/facility/workbench/setup/facility-report-setup.component.html) obtains the report type label from `card.view.chips?.[0]?.label`. These consumers couple report meaning to a retired card layout.
+**Original review evidence:** [Report inventory projection](../src/app/v1/reports/inventory/report-inventory.models.ts) builds a facility `ResourceBrowseCardView` only to flatten its facts. [Facility Setup](../src/app/v1/reports/facility/workbench/setup/facility-report-setup.component.html) obtains the report type label from `card.view.chips?.[0]?.label`. These consumers couple report meaning to a retired card layout.
 
 **Changes and interfaces:** Replace that dependency with a facility-report presentation projection exposing explicit `typeLabel`, configuration status, and saved-report facts. Inventory tiles and workbench contexts compose their own UI from those fields. Update every live consumer before removing unused card decorations and view types. Keep report availability, validation, lifecycle commands, pending-content semantics, and calculations with their existing owners.
 

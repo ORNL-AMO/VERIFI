@@ -1,13 +1,31 @@
-<section class="v1-contribution-heatmap" [class.v1-contribution-heatmap--compact]="compact()" [attr.aria-label]="title()">
+@let heatmap = view();
+<section class="v1-contribution-heatmap" [class.v1-contribution-heatmap--compact]="compact()" [class.v1-contribution-heatmap--embedded]="embedded()" [attr.aria-label]="title()">
+  @if (showTitle() || showChartActions()) {
   <div class="v1-contribution-heatmap__actions">
-    <h2>{{ title() }}</h2>
-    <button type="button" class="v1-icon-btn" title="Download PNG" [attr.aria-label]="downloadLabel()" (click)="download()">
-      <app-ui-icon name="download"></app-ui-icon>
-    </button>
+    @if (showTitle()) { <h2>{{ title() }}</h2> }
+    @if (showChartActions()) {
+      <button type="button" class="v1-icon-btn" title="Download PNG" [attr.aria-label]="downloadLabel()" (click)="download()">
+        <app-ui-icon name="download"></app-ui-icon>
+      </button>
+    }
   </div>
+  }
   <div class="v1-contribution-heatmap__scroll" tabindex="0" role="region" [attr.aria-label]="regionLabel()">
     <div class="v1-contribution-heatmap__chart" [style.height.px]="chartHeight()" [style.min-width.px]="chartWidth()"
-      [appV1ECharts]="chartOption()" role="img" [attr.aria-label]="chartLabel()">
+      [appV1ECharts]="chartOption()" [deferUntilVisible]="deferUntilVisible()" role="img" [attr.aria-label]="chartLabel()">
     </div>
+  </div>
+  <div class="v1-sr-only">
+  <table class="v1-contribution-heatmap__accessible-data">
+    <caption>{{ scopeLabel() }} contribution heatmap data</caption>
+    <thead><tr><th scope="col">Fiscal year</th><th scope="col">Total contribution</th>
+      @for (label of heatmap.labels; track $index) { <th scope="col">{{ label }}</th> }
+    </tr></thead>
+    <tbody>@for (year of heatmap.years; track year.year) {
+      <tr><th scope="row">{{ year.year }}</th><td>{{ year.totalContributionPercent | number:'1.0-3' }}%</td>
+        @for (contribution of year.contributions; track $index) { <td>{{ contribution | number:'1.0-3' }}%</td> }
+      </tr>
+    }</tbody>
+  </table>
   </div>
 </section>

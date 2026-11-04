@@ -1,5 +1,6 @@
+import { MeterSettingsForm, MeterSettingsValues } from './meter-settings-values';
 import { Injectable, inject } from '@angular/core';
-import { FormGroup, ValidatorFn } from '@angular/forms';
+import { ValidatorFn } from '@angular/forms';
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
@@ -16,6 +17,7 @@ import { MeterSettingsValidationService } from './meter-settings-form-services/m
 import { MeterSettingsViewModelService } from './meter-settings-form-services/meter-settings-view-model.service';
 
 export type {
+  MeterSettingsGroupingView,
   MeterSettingsRuleChange,
   MeterSettingsRuleContext,
   MeterSettingsSaveState,
@@ -30,27 +32,32 @@ export class MeterSettingsFormService {
   private readonly validation = inject(MeterSettingsValidationService);
   private readonly viewModel = inject(MeterSettingsViewModelService);
 
-  buildMeterSettingsForm(meter: IdbUtilityMeter): FormGroup {
+  buildMeterSettingsForm(meter: IdbUtilityMeter): MeterSettingsForm {
     return this.builder.buildMeterSettingsForm(meter);
   }
 
-  updateMeterFromSettingsForm(meter: IdbUtilityMeter, form: FormGroup): IdbUtilityMeter {
+  updateMeterFromSettingsForm(meter: IdbUtilityMeter, form: MeterSettingsForm): IdbUtilityMeter {
     return this.builder.updateMeterFromSettingsForm(meter, form);
   }
 
-  buildMeterSettingsViewModel(form: FormGroup, context: MeterSettingsRuleContext): MeterSettingsViewModel {
+  hydrate(form: MeterSettingsForm, values: MeterSettingsValues): void {
+    this.builder.hydrate(form, values);
+    this.rules.updateValidators(form);
+  }
+
+  buildMeterSettingsViewModel(form: MeterSettingsForm, context: MeterSettingsRuleContext): MeterSettingsViewModel {
     return this.viewModel.buildMeterSettingsViewModel(form, context);
   }
 
-  applyMeterSettingsRuleChange(kind: MeterSettingsRuleChange, form: FormGroup, context: MeterSettingsRuleContext): void {
+  applyMeterSettingsRuleChange(kind: MeterSettingsRuleChange, form: MeterSettingsForm, context: MeterSettingsRuleContext): void {
     this.rules.applyMeterSettingsRuleChange(kind, form, context);
   }
 
-  addCharge(form: FormGroup): void {
+  addCharge(form: MeterSettingsForm): void {
     this.builder.addCharge(form);
   }
 
-  removeCharge(form: FormGroup, index: number): void {
+  removeCharge(form: MeterSettingsForm, index: number): void {
     this.builder.removeCharge(form, index);
   }
 

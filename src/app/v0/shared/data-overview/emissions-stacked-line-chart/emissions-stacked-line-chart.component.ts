@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/models/eGridEmissions';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 
 @Component({
@@ -172,18 +173,6 @@ export class EmissionsStackedLineChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.stackedAreaChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.stackedAreaChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.stackedAreaChart?.nativeElement);
   }
 }

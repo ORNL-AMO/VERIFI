@@ -30,6 +30,21 @@ export interface BetterPlantsPage {
   readonly performance: readonly { readonly label: string; readonly count: number; readonly facilities: readonly string[] }[];
 }
 
+export interface BetterPlantsDocument {
+  readonly name: string;
+  readonly company: ReturnType<typeof betterPlantsCompany>;
+  readonly pages: readonly BetterPlantsPage[];
+  readonly includeFacilityNames: boolean;
+}
+
+/** One presentation projection serves the continuous preview and direct PDF composer. */
+export function buildBetterPlantsDocument(report: IdbAccountReport, account: IdbAccount, baselineYear: number,
+  category: 'energy' | 'water', summaries: readonly BetterPlantsSummary[], facilities: readonly IdbFacility[]): BetterPlantsDocument {
+  return { name: report.name, company: betterPlantsCompany(account),
+    pages: buildBetterPlantsPages(report, account, baselineYear, category, summaries, facilities),
+    includeFacilityNames: report.betterPlantsReportSetup.includeFacilityNames === true };
+}
+
 /** Presentation only: retain precision and share the result with later document adapters. */
 export function buildBetterPlantsPages(report: IdbAccountReport, account: IdbAccount, baselineYear: number,
   category: 'energy' | 'water', summaries: readonly BetterPlantsSummary[], facilities: readonly IdbFacility[]): readonly BetterPlantsPage[] {

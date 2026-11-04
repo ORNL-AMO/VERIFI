@@ -81,6 +81,19 @@ describe('FacilityAnalysisMonthlyTableComponent', () => {
     expect(text).toContain('—');
     expect(text).not.toContain('98,765');
   });
+
+  it('copies the rendered shared table without losing the current page', async () => {
+    fixture.componentInstance.currentPage.set(2);
+    fixture.detectChanges();
+    const table = fixture.nativeElement.querySelector('table');
+    expect(table.querySelector('caption')).toBeNull();
+    expect(table.getAttribute('aria-label')).toBe('Facility monthly analysis results');
+    const copyButton = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+      .find(button => button.textContent?.includes('Copy Table'))!;
+    copyButton.click();
+    await vi.waitFor(() => expect(TestBed.inject(CopyTableService).copyTable).toHaveBeenCalledWith(expect.objectContaining({ nativeElement: table })));
+    expect(fixture.componentInstance.currentPage()).toBe(2);
+  });
 });
 
 function selectPageSize(host: HTMLElement, value: number): void {

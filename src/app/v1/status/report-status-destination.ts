@@ -1,8 +1,7 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { accountReportAnalysisGuid, accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
-import { FACILITY_REPORT_TYPES } from '@app/v1/reports/facility/facility-report.models';
-import { reportTypeAvailable } from '@app/v1/reports/report-availability';
+import { reportDefinition } from '@app/v1/reports/catalog/report-catalog';
+import { reportTypeAvailable } from '@app/v1/reports/catalog/report-availability';
 import { StatusDestination, StatusEntityRef, StatusItem } from './status.models';
 
 export function isReportStatusItem(item: StatusItem): boolean {
@@ -34,12 +33,12 @@ export function resolveReportStatusItem(item: StatusItem, snapshot: AccountWorks
     ? snapshot.facilityReports.find(report => report.accountId === accountGuid && report.facilityId === item.entity.facilityGuid && report.guid === item.entity.guid) : undefined;
   const facility = facilityReport && snapshot.facilities.find(owner => owner.accountId === accountGuid && owner.guid === facilityReport.facilityId);
   if ((!accountReport && !facilityReport) || (facilityReport && !facility)) return unavailable('This report is no longer available in this workspace.');
-  if ((accountReport && !ACCOUNT_REPORT_TYPES.some(type => type.value === accountReport.reportType))
-    || (facilityReport && !FACILITY_REPORT_TYPES.some(type => type.value === facilityReport.facilityReportType))) {
+  if ((accountReport && !reportDefinition('account', accountReport.reportType))
+    || (facilityReport && !reportDefinition('facility', facilityReport.facilityReportType))) {
     return unavailable('This report type is not supported in v1.');
   }
   const type = accountReport?.reportType ?? facilityReport!.facilityReportType;
-  if (!reportTypeAvailable(type, snapshot.account.displayEmissions)) return unavailable('Enable Other Impacts in Account Goals to access this report.');
+  if (!reportTypeAvailable(accountReport ? 'account' : 'facility', type, snapshot.account.displayEmissions)) return unavailable('Enable Other Impacts in Account Goals to access this report.');
   const setup: StatusDestination = accountReport
     ? { kind: 'account-report-setup', accountGuid, reportGuid: accountReport.guid }
     : { kind: 'facility-report-setup', accountGuid, facilityGuid: facility!.guid, reportGuid: facilityReport!.guid };
@@ -47,7 +46,7 @@ export function resolveReportStatusItem(item: StatusItem, snapshot: AccountWorks
   switch (item.code) {
     case 'report.configuration.invalid': {
       const reasons = item.evidence['reasons'];
-      if (accountReport?.reportType === 'betterPlants' && Array.isArray(reasons) && reasons.every(reason => ['missingName', 'missingReportYear'].includes(reason))) return available(setup, 'Review setup');
+      if ((accountReport?.reportType === 'betterPlants' || facilityReport?.facilityReportType === 'analysis') && Array.isArray(reasons) && reasons.every(reason => ['missingName', 'missingReportYear'].includes(reason))) return available(setup, reasons.length === 1 && reasons[0] === 'missingName' ? 'Review name' : 'Review setup');
       if (Array.isArray(reasons) && reasons.includes('missingName')) {
         const result = available(setup, 'Review name');
         return reasons.some(reason => reason !== 'missingName') && !item.description.endsWith('Other report settings are pending migration.')
@@ -56,7 +55,7 @@ export function resolveReportStatusItem(item: StatusItem, snapshot: AccountWorks
       return unavailable('These report settings are pending migration.');
     }
     case 'report.analysis.invalid':
-      return accountReport && accountReportAnalysisSetupKey(accountReport.reportType)
+      return accountReport && accountReportAnalysisSetupKey(accountReport.reportType) || facilityReport?.facilityReportType === 'analysis'
         ? available(setup, 'Review analysis') : unavailable('Report analysis selection is pending migration.');
     case 'report.analysis.warning': {
       let destination: StatusDestination | undefined;
@@ -79,7 +78,7 @@ export function resolveReportStatusItem(item: StatusItem, snapshot: AccountWorks
       }
       return destination ? available(destination, 'Review linked analysis') : unavailable('The linked analysis is unavailable in this workspace.');
     }
-    case 'report.dates.invalid': return accountReport?.reportType === 'betterPlants' ? available(setup, 'Review reporting period') : unavailable('Report date settings are pending migration.');
+    case 'report.dates.invalid': return accountReport?.reportType === 'betterPlants' || facilityReport?.facilityReportType === 'analysis' ? available(setup, 'Review reporting period') : unavailable('Report date settings are pending migration.');
     case 'report.data.incomplete': return unavailable('Report data selection is pending migration.');
     default: return unavailable('Fix workflow not yet available in v1');
   }

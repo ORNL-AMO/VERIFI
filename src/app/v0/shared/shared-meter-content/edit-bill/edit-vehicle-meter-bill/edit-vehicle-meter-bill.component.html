@@ -42,7 +42,7 @@
       <div class="input-group mb-3">
         <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
           (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0"
-          onfocus="this.select();" min="0" max="999999999999999">
+          onfocus="this.select();" [min]="editMeter.canBeNegative ? null : 0" max="999999999999999">
         <span class="input-group-text" [innerHTML]="volumeUnit | settingsLabel"></span>
       </div>
       @if (meterDataForm.get('totalVolume').hasError('required')) {

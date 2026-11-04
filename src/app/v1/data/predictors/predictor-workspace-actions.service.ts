@@ -13,6 +13,10 @@ import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.
 import { getNewIdbPredictor, IdbPredictor, isStandardPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getGUID } from '@shared/sharedHelperFunctions';
+import { EditorConflictError, reconcileFields } from '@app/v1/data/editing/draft-reconciliation';
+import { applyStandardPredictorSettings, normalizeStandardPredictorSettings, reconcileStandardPredictorSettings,
+  StandardPredictorSettings, StandardPredictorSettingsIdentity, standardPredictorSettings,
+  validStandardPredictorSettings } from './models/standard-predictor-settings.models';
 import {
   PredictorDraft,
   PredictorMissingMonth,
@@ -84,6 +88,45 @@ export class PredictorWorkspaceActionsService {
       );
       return result.value;
     });
+  }
+
+  /** Resolve the current record only when this queued settings command executes. */
+  async updateSettings(identity: StandardPredictorSettingsIdentity, value: StandardPredictorSettings,
+    base: StandardPredictorSettings, ownerId: string): Promise<StandardPredictorSettings> {
+    const submitted = normalizeStandardPredictorSettings(value);
+    const baseline = normalizeStandardPredictorSettings(base);
+    if (this.workspace.account()?.guid !== identity.accountGuid || !this.workspace.canWrite()) {
+      throw new WorkspaceWriteError('stale-workspace', 'This predictor workspace is no longer available.');
+    }
+    if (!validStandardPredictorSettings(submitted)) {
+      throw new WorkspaceWriteError('validation-failed', 'Resolve the predictor settings before saving.');
+    }
+    const result = await this.commandBoundary.execute({
+      entityKind: 'predictor', changeKind: 'update', entityGuid: identity.predictorGuid,
+      label: 'Saving predictor settings', ownerId,
+      notification: { suppressSuccessToast: true }, publication: { mode: 'reload' }
+    }, async () => {
+      if (this.workspace.account()?.guid !== identity.accountGuid
+        || this.workspace.selectedFacility()?.guid !== identity.facilityGuid
+        || !this.workspace.facilities().some(facility => facility.guid === identity.facilityGuid
+          && facility.accountId === identity.accountGuid)) {
+        throw new WorkspaceWriteError('stale-workspace', 'This predictor workspace is no longer available.');
+      }
+      const current = this.workspace.predictors().find(predictor => predictor.guid === identity.predictorGuid
+        && predictor.accountId === identity.accountGuid && predictor.facilityId === identity.facilityGuid);
+      if (!current || !isStandardPredictor(current)) {
+        throw new WorkspaceWriteError('stale-workspace', 'The Standard predictor is no longer available.');
+      }
+      const latest = standardPredictorSettings(current);
+      const merged = reconcileStandardPredictorSettings(baseline, submitted, latest);
+      if (merged.conflicts.length) throw new EditorConflictError(latest);
+      const updated = applyStandardPredictorSettings(current, merged.value);
+      const persisted = await this.predictorHandler.updateStandardPredictor({ predictor: updated,
+        facilityAnalyses: buildFacilityAnalysisPredictorUpdates(this.facilityAnalyses(identity.facilityGuid), updated)
+      }, identity.accountGuid);
+      return standardPredictorSettings(persisted);
+    });
+    return result.value;
   }
 
   async copyPredictor(predictor: IdbPredictor, facilityGuid?: string): Promise<IdbPredictor> {
@@ -185,7 +228,11 @@ export class PredictorWorkspaceActionsService {
           notification: { successTitle: 'Predictor reading added' },
           publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('predictorData', [value]) }
         },
-        () => this.predictorHandler.addPredictorData(newReading, account.guid)
+        () => {
+          const latestPredictor = this.requirePredictor(newReading.predictorId);
+          this.assertCurrentReadingRequest(newReading, latestPredictor, account.guid);
+          return this.predictorHandler.addPredictorData(newReading, account.guid);
+        }
       );
       return result.value;
     });
@@ -198,6 +245,7 @@ export class PredictorWorkspaceActionsService {
       throw new WorkspaceWriteError('validation-failed', 'The predictor reading does not belong to the active facility.');
     }
     const updated = { ...structuredClone(reading), id: current.id };
+    const values = (item: IdbPredictorData) => ({ year: item.year, month: item.month, amount: item.amount, notes: item.notes ?? '' });
     return this.executeWithRecovery(async () => {
       const result = await this.commandBoundary.execute(
         {
@@ -206,7 +254,17 @@ export class PredictorWorkspaceActionsService {
           notification: { successTitle: 'Predictor reading saved' },
           publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('predictorData', [value]) }
         },
-        () => this.predictorHandler.updatePredictorData(updated, account.guid)
+        () => {
+          const latest = this.requireReading(updated.guid, updated.predictorId);
+          const latestPredictor = this.requirePredictor(updated.predictorId);
+          const merged = reconcileFields(values(current), values(updated), values(latest), {
+            groups: [{ id: 'month', label: 'Month', keys: ['year', 'month'] }]
+          });
+          if (merged.conflicts.length) throw new EditorConflictError(values(latest));
+          const mergedReading = { ...latest, ...merged.value };
+          this.assertCurrentReadingRequest(mergedReading, latestPredictor, account.guid);
+          return this.predictorHandler.updatePredictorData(mergedReading, account.guid);
+        }
       );
       return result.value;
     });
@@ -381,38 +439,8 @@ export class PredictorWorkspaceActionsService {
   async applyWeatherStationGroup(preview: WeatherStationGroupPreview): Promise<void> {
     const account = this.requireAccount();
     const facility = this.requireFacility();
-    this.requireCurrentRevision(preview.workspaceRevision);
-    const changedIds = new Set([
-      ...preview.updatePredictors.map(predictor => predictor.guid),
-      ...preview.deletePredictors.map(predictor => predictor.guid)
-    ]);
-    const sourceStationIds = new Set<string | undefined>();
-    for (const predictor of [...preview.updatePredictors, ...preview.deletePredictors]) {
-      const current = this.requirePredictor(predictor.guid);
-      if (current.facilityId !== facility.guid || current.predictorType !== 'Weather') {
-        throw new WorkspaceWriteError('validation-failed', 'The weather station group is no longer available.');
-      }
-      sourceStationIds.add(current.weatherStationId);
-    }
-    if (sourceStationIds.size > 1) {
-      throw new WorkspaceWriteError('validation-failed', 'The reviewed predictors do not share one source station.');
-    }
-    if (this.workspace.facilityPredictors().some(predictor => predictor.predictorType === 'Weather'
-      && predictor.weatherStationId === preview.station.ID && !changedIds.has(predictor.guid))) {
-      throw new WorkspaceWriteError(
-        'validation-failed',
-        'That weather station already has a workbench. Open the existing station instead.'
-      );
-    }
-    if ([...preview.addPredictors, ...preview.updatePredictors].some(predictor =>
-      predictor.accountId !== account.guid || predictor.facilityId !== facility.guid
-      || predictor.predictorType !== 'Weather' || predictor.weatherStationId !== preview.station.ID)) {
-      throw new WorkspaceWriteError('validation-failed', 'The reviewed weather predictors do not belong to this station.');
-    }
-
-    if (preview.facilityAnalyses.some(analysis => analysis.facilityId !== facility.guid)) {
-      throw new WorkspaceWriteError('validation-failed', 'The reviewed analysis changes do not belong to this facility.');
-    }
+    const submitted = structuredClone(preview);
+    this.validateWeatherStationGroup(submitted, account.guid, facility.guid);
 
     await this.executeWithRecovery(async () => {
       await this.commandBoundary.execute(
@@ -420,25 +448,28 @@ export class PredictorWorkspaceActionsService {
           entityKind: 'predictor', changeKind: 'bulk',
           label: 'Saving weather station predictors',
           notification: {
-            successTitle: preview.updatePredictors.length || preview.deletePredictors.length
+            successTitle: submitted.updatePredictors.length || submitted.deletePredictors.length
               ? 'Weather station updated' : 'Weather predictors created'
           },
           publication: { mode: 'reload' }
         },
-        () => this.predictorHandler.applyWeatherStationGroup({
-          facilityId: facility.guid,
-          weatherStationId: preview.station.ID,
-          sourceWeatherStationId: sourceStationIds.values().next().value,
-          addPredictors: preview.addPredictors,
-          updatePredictors: preview.updatePredictors,
-          deletePredictors: preview.deletePredictors,
-          predictorData: {
-            add: preview.addReadings,
-            update: preview.updateReadings,
-            delete: preview.deleteReadings
-          },
-          facilityAnalyses: preview.facilityAnalyses
-        }, account.guid)
+        () => {
+          const sourceWeatherStationId = this.validateWeatherStationGroup(submitted, account.guid, facility.guid);
+          return this.predictorHandler.applyWeatherStationGroup({
+            facilityId: facility.guid,
+            weatherStationId: submitted.station.ID,
+            sourceWeatherStationId,
+            addPredictors: submitted.addPredictors,
+            updatePredictors: submitted.updatePredictors,
+            deletePredictors: submitted.deletePredictors,
+            predictorData: {
+              add: submitted.addReadings,
+              update: submitted.updateReadings,
+              delete: submitted.deleteReadings
+            },
+            facilityAnalyses: submitted.facilityAnalyses
+          }, account.guid);
+        }
       );
     });
   }
@@ -446,30 +477,127 @@ export class PredictorWorkspaceActionsService {
   async applyWeatherStationMonth(changes: WeatherStationMonthChangeSet): Promise<void> {
     const account = this.requireAccount();
     const facility = this.requireFacility();
-    this.requireCurrentRevision(changes.workspaceRevision);
-    const groupPredictors = this.workspace.facilityPredictors().filter(predictor =>
-      predictor.predictorType === 'Weather'
+    const submitted = structuredClone(changes);
+    this.validateWeatherStationMonth(submitted, account.guid, facility.guid);
+
+    await this.commandBoundary.execute(
+      {
+        entityKind: 'predictorData', changeKind: 'bulk',
+        label: submitted.delete.length && !submitted.add.length && !submitted.update.length
+          ? 'Deleting weather station month' : 'Saving weather station month',
+        notification: { suppressSuccessToast: true },
+        publication: { mode: 'reload' }
+      },
+      () => {
+        this.validateWeatherStationMonth(submitted, account.guid, facility.guid);
+        return this.predictorHandler.applyWeatherStationMonth({
+          facilityId: facility.guid,
+          predictorGuids: submitted.predictorGuids,
+          year: submitted.year,
+          month: submitted.month,
+          add: submitted.add,
+          update: submitted.update,
+          delete: submitted.delete
+        }, account.guid);
+      }
+    );
+  }
+
+  private assertWeatherCommandScope(accountGuid: string, facilityGuid: string, revision: number): void {
+    this.requireCurrentRevision(revision);
+    if (!this.workspace.canWrite() || this.workspace.account()?.guid !== accountGuid
+      || this.workspace.selectedFacility()?.guid !== facilityGuid
+      || !this.workspace.facilities().some(facility => facility.guid === facilityGuid && facility.accountId === accountGuid)) {
+      throw new WorkspaceWriteError('stale-workspace', 'This weather predictor workspace is no longer available.');
+    }
+  }
+
+  private validateWeatherStationGroup(preview: WeatherStationGroupPreview, accountGuid: string,
+    facilityGuid: string): string | undefined {
+    this.assertWeatherCommandScope(accountGuid, facilityGuid, preview.workspaceRevision);
+    const currentPredictors = this.workspace.predictors().filter(predictor =>
+      predictor.accountId === accountGuid && predictor.facilityId === facilityGuid);
+    const changed = [...preview.updatePredictors, ...preview.deletePredictors];
+    const changedIds = new Set(changed.map(predictor => predictor.guid));
+    const sourceStationIds = new Set<string | undefined>();
+    const sourceGroupKeys = new Set<string>();
+    for (const predictor of changed) {
+      const current = currentPredictors.find(item => item.guid === predictor.guid);
+      if (!current || current.id !== predictor.id || current.predictorType !== 'Weather'
+        || predictor.accountId !== accountGuid || predictor.facilityId !== facilityGuid) {
+        throw new WorkspaceWriteError('stale-workspace', 'The weather station group is no longer available.');
+      }
+      sourceStationIds.add(current.weatherStationId);
+      sourceGroupKeys.add(weatherStationRouteKey(current));
+    }
+    const sourceGroupKey = preview.sourceGroupKey ?? sourceGroupKeys.values().next().value;
+    const sourcePredictors = currentPredictors.filter(predictor => predictor.predictorType === 'Weather'
+      && weatherStationRouteKey(predictor) === sourceGroupKey);
+    if (changedIds.size !== changed.length || sourceGroupKeys.size > 1
+      || (preview.sourceGroupKey && sourceGroupKeys.size && !sourceGroupKeys.has(preview.sourceGroupKey))
+      || (sourceGroupKey && (sourcePredictors.length !== changedIds.size
+        || sourcePredictors.some(predictor => !changedIds.has(predictor.guid))))) {
+      throw new WorkspaceWriteError('stale-workspace', 'The weather station predictors changed. Review the latest setup and try again.');
+    }
+    if (currentPredictors.some(predictor => predictor.predictorType === 'Weather'
+      && predictor.weatherStationId === preview.station.ID && !changedIds.has(predictor.guid))) {
+      throw new WorkspaceWriteError('validation-failed', 'That weather station already has a workbench. Open the existing station instead.');
+    }
+    if ([...preview.addPredictors, ...preview.updatePredictors].some(predictor =>
+      predictor.accountId !== accountGuid || predictor.facilityId !== facilityGuid
+      || predictor.predictorType !== 'Weather' || predictor.weatherStationId !== preview.station.ID)
+      || preview.addPredictors.some(predictor => this.workspace.predictors().some(current => current.guid === predictor.guid))) {
+      throw new WorkspaceWriteError('validation-failed', 'The reviewed weather predictors do not belong to this station.');
+    }
+    const groupIds = new Set([...changedIds, ...preview.addPredictors.map(predictor => predictor.guid)]);
+    const currentReadings = new Map(this.workspace.predictorData().map(reading => [reading.guid, reading]));
+    for (const reading of [...preview.updateReadings, ...preview.deleteReadings]) {
+      const current = currentReadings.get(reading.guid);
+      if (!current || current.id !== reading.id || current.predictorId !== reading.predictorId
+        || current.accountId !== accountGuid || current.facilityId !== facilityGuid
+        || reading.accountId !== accountGuid || reading.facilityId !== facilityGuid || !changedIds.has(reading.predictorId)) {
+        throw new WorkspaceWriteError('stale-workspace', 'The weather readings changed. Review the latest setup and try again.');
+      }
+    }
+    if (preview.addReadings.some(reading => reading.accountId !== accountGuid || reading.facilityId !== facilityGuid
+      || !groupIds.has(reading.predictorId) || currentReadings.has(reading.guid))) {
+      throw new WorkspaceWriteError('validation-failed', 'A new weather reading is outside this station group.');
+    }
+    if (preview.facilityAnalyses.some(analysis => analysis.accountId !== accountGuid || analysis.facilityId !== facilityGuid
+      || !this.workspace.facilityAnalyses().some(current => current.guid === analysis.guid && current.id === analysis.id
+        && current.accountId === accountGuid && current.facilityId === facilityGuid))) {
+      throw new WorkspaceWriteError('stale-workspace', 'The reviewed analysis changes are no longer available in this facility.');
+    }
+    return sourceStationIds.values().next().value;
+  }
+
+  private validateWeatherStationMonth(changes: WeatherStationMonthChangeSet, accountGuid: string, facilityGuid: string): void {
+    this.assertWeatherCommandScope(accountGuid, facilityGuid, changes.workspaceRevision);
+    const groupPredictors = this.workspace.predictors().filter(predictor => predictor.accountId === accountGuid
+      && predictor.facilityId === facilityGuid && predictor.predictorType === 'Weather'
       && weatherStationRouteKey(predictor) === changes.groupKey);
     const currentGuids = new Set(groupPredictors.map(predictor => predictor.guid));
-    if (currentGuids.size !== changes.predictorGuids.length
+    if (!currentGuids.size || currentGuids.size !== changes.predictorGuids.length
       || changes.predictorGuids.some(guid => !currentGuids.has(guid))) {
       throw new WorkspaceWriteError('stale-workspace', 'The weather station predictors changed. Review the latest readings and try again.');
     }
-    const currentRecords = new Map(this.workspace.facilityPredictorData().map(reading => [reading.guid, reading]));
-    const currentMonthRecords = this.workspace.facilityPredictorData().filter(reading =>
-      currentGuids.has(reading.predictorId) && reading.year === changes.year && reading.month === changes.month);
-    const assertCurrentRecord = (reading: IdbPredictorData): void => {
+    const currentRecords = new Map(this.workspace.predictorData().map(reading => [reading.guid, reading]));
+    const currentMonthRecords = this.workspace.predictorData().filter(reading => currentGuids.has(reading.predictorId)
+      && reading.accountId === accountGuid && reading.facilityId === facilityGuid
+      && reading.year === changes.year && reading.month === changes.month);
+    for (const reading of [...changes.update, ...changes.delete]) {
       const current = currentRecords.get(reading.guid);
       if (!current || current.id !== reading.id || current.predictorId !== reading.predictorId
-        || current.facilityId !== facility.guid || !currentGuids.has(reading.predictorId)) {
+        || current.accountId !== accountGuid || current.facilityId !== facilityGuid
+        || reading.accountId !== accountGuid || reading.facilityId !== facilityGuid
+        || current.year !== changes.year || current.month !== changes.month
+        || reading.year !== changes.year || reading.month !== changes.month || !currentGuids.has(reading.predictorId)) {
         throw new WorkspaceWriteError('stale-workspace', 'The weather readings changed. Review the latest month and try again.');
       }
-    };
-    changes.update.forEach(assertCurrentRecord);
-    changes.delete.forEach(assertCurrentRecord);
+    }
     const addedPredictorIds = new Set<string>();
     for (const reading of changes.add) {
-      if (reading.accountId !== account.guid || reading.facilityId !== facility.guid
+      if (reading.accountId !== accountGuid || reading.facilityId !== facilityGuid || currentRecords.has(reading.guid)
         || !currentGuids.has(reading.predictorId) || reading.year !== changes.year || reading.month !== changes.month
         || addedPredictorIds.has(reading.predictorId)
         || currentMonthRecords.some(current => current.predictorId === reading.predictorId)) {
@@ -477,25 +605,6 @@ export class PredictorWorkspaceActionsService {
       }
       addedPredictorIds.add(reading.predictorId);
     }
-
-    await this.commandBoundary.execute(
-      {
-        entityKind: 'predictorData', changeKind: 'bulk',
-        label: changes.delete.length && !changes.add.length && !changes.update.length
-          ? 'Deleting weather station month' : 'Saving weather station month',
-        notification: { suppressSuccessToast: true },
-        publication: { mode: 'reload' }
-      },
-      () => this.predictorHandler.applyWeatherStationMonth({
-        facilityId: facility.guid,
-        predictorGuids: changes.predictorGuids,
-        year: changes.year,
-        month: changes.month,
-        add: changes.add,
-        update: changes.update,
-        delete: changes.delete
-      }, account.guid)
-    );
   }
 
   private predictorFromDraft(draft: PredictorDraft, accountGuid: string, facilityGuid: string): IdbPredictor {
@@ -556,6 +665,20 @@ export class PredictorWorkspaceActionsService {
       .find(item => item.guid === guid && item.predictorId === predictorGuid);
     if (!reading) throw new WorkspaceWriteError('validation-failed', 'The predictor reading is no longer available.');
     return structuredClone(reading);
+  }
+
+  private assertCurrentReadingRequest(reading: IdbPredictorData, predictor: IdbPredictor, accountGuid: string): void {
+    if (this.workspace.account()?.guid !== accountGuid || predictor.accountId !== accountGuid
+      || !isStandardPredictor(predictor) || reading.accountId !== accountGuid || reading.facilityId !== predictor.facilityId
+      || !Number.isInteger(reading.year) || reading.year < 1 || !Number.isInteger(reading.month)
+      || reading.month < 1 || reading.month > 12 || !Number.isFinite(reading.amount)
+      || (!predictor.canBeNegative && reading.amount < 0)) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor reading is no longer valid in this workspace.');
+    }
+    if (this.workspace.facilityPredictorData().some(candidate => candidate.predictorId === predictor.guid
+      && candidate.guid !== reading.guid && candidate.year === reading.year && candidate.month === reading.month)) {
+      throw new WorkspaceWriteError('validation-failed', 'A predictor reading already exists for this month.');
+    }
   }
 
   private facilityAnalyses(facilityGuid: string) {

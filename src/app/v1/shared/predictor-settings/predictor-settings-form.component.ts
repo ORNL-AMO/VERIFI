@@ -3,7 +3,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { IconComponent } from '../icons/icon.component';
 import { PredictorSettingsForm } from './predictor-settings-form.service';
 
-export type PredictorSettingsSaveState = 'idle' | 'saving' | 'saved' | 'error' | 'invalid';
+export type PredictorSettingsSaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error' | 'invalid' | 'conflict';
 
 @Component({
   selector: 'app-predictor-settings-form',

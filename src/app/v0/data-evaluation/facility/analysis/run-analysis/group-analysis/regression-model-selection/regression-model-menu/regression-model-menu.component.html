@@ -3,6 +3,8 @@
 @let _generatedModels = generatedModels();
 @let _yearOptions = yearOptions();
 @let _generatingModels = generatingModels();
+@let _calendarYearOptions = calendarYearOptions();
+
 @if(_group && _groupStatusCheck) {
 @if (_groupStatusCheck.hasMeterSetupErrors) {
 <div class="alert alert-danger p-2 small">
@@ -259,7 +261,7 @@
       <div class="col-6">
         <select required class="form-select" id="regressionStartYear" formControlName="regressionStartYear"
           (change)="saveFormValue()">
-          @for (year of _yearOptions; track year) {
+          @for (year of _calendarYearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
         </select>
@@ -290,7 +292,7 @@
       <div class="col-6">
         <select required class="form-select" id="regressionEndYear" formControlName="regressionEndYear"
           (change)="saveFormValue()">
-          @for (year of _yearOptions; track year) {
+          @for (year of _calendarYearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
         </select>

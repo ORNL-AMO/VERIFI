@@ -1,4 +1,4 @@
-@import '../../../../report-setup.css';
+@import '../../../../shared/editing/report-setup.css';
 
 :host { display: block; min-width: 0; }
 .report-setup-section { padding: 0; border: 0; }

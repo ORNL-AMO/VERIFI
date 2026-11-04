@@ -12,6 +12,7 @@ describe('ContributionHeatmapComponent', () => {
     expect(region.getAttribute('aria-label')).toBe(`Scrollable ${scopeLabel.toLowerCase()} contribution heatmap`);
     expect(region.getAttribute('tabindex')).toBe('0');
     expect(fixture.nativeElement.querySelector('[role="img"]').getAttribute('aria-label')).toContain('Green indicates savings and red indicates losses.');
+    expect(fixture.nativeElement.querySelector('h2')?.textContent).toBe(`${scopeLabel} Contributions by Fiscal Year`);
     fixture.nativeElement.querySelector('button').click();
     const chart = fixture.debugElement.query(By.directive(EChartsStubDirective)).injector.get(EChartsStubDirective);
     expect(chart.downloadPng).toHaveBeenCalledWith('test-contributions');
@@ -27,6 +28,21 @@ describe('ContributionHeatmapComponent', () => {
     expect(chart.style.height).toBe('586px');
     expect(chart.style.minWidth).toBe('760px');
   });
+
+  it('embeds report charts without download actions and keeps accessible data available before deferred drawing', () => {
+    const fixture = setup('Group');
+    fixture.componentRef.setInput('embedded', true); fixture.componentRef.setInput('showTitle', false); fixture.componentRef.setInput('showChartActions', false);
+    fixture.componentRef.setInput('deferUntilVisible', true); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('button, h2, h4, .v1-contribution-heatmap__actions')).toBeNull();
+    const chart = fixture.debugElement.query(By.directive(EChartsStubDirective)).injector.get(EChartsStubDirective);
+    expect(chart.deferUntilVisible).toBe(true);
+    const accessible = fixture.nativeElement.querySelector('table.v1-contribution-heatmap__accessible-data') as HTMLTableElement;
+    expect(accessible.closest('.v1-sr-only')).not.toBeNull();
+    expect(accessible.closest('[aria-hidden=true], [hidden]')).toBeNull();
+    expect(accessible.querySelector('thead')?.textContent).toContain('North');
+    expect(accessible.querySelector('tbody')?.textContent).toContain('2024');
+    expect(accessible.querySelectorAll('tbody td')[1].textContent).toBe('1.25%');
+  });
 });
 
 @Directive({
@@ -36,6 +52,7 @@ describe('ContributionHeatmapComponent', () => {
 })
 class EChartsStubDirective {
   @Input('appV1ECharts') option?: V1EChartsOption;
+  @Input() deferUntilVisible = false;
   readonly downloadPng = vi.fn();
 }
 

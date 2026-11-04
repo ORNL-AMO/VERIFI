@@ -4,7 +4,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { FacilityReportActionsService } from './facility-report-actions.service';
-import { FACILITY_REPORT_TYPES, buildFacilityReportPresentation } from './facility-report.models';
+import { buildFacilityReportPresentation } from './facility-report.models';
+import { FACILITY_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
 import { evaluateWorkspaceStatus } from '@app/v1/status/status.evaluator';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { reportFacility, reportFixture, reportSnapshot } from './testing/report-test-fixtures';
@@ -12,7 +13,7 @@ import { reportFacility, reportFixture, reportSnapshot } from './testing/report-
 describe('FacilityReportActionsService', () => {
   let store: AccountWorkspaceStore;
   let service: FacilityReportActionsService;
-  let handler: { addFacilityReport: ReturnType<typeof vi.fn>; updateFacilityReport: ReturnType<typeof vi.fn>; deleteFacilityReport: ReturnType<typeof vi.fn> };
+  let handler: { addFacilityReport: ReturnType<typeof vi.fn>; updateFacilityReport: ReturnType<typeof vi.fn>; updateFacilityReportSetup: ReturnType<typeof vi.fn>; deleteFacilityReport: ReturnType<typeof vi.fn> };
   let boundary: { execute: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
@@ -21,6 +22,7 @@ describe('FacilityReportActionsService', () => {
     handler = {
       addFacilityReport: vi.fn(async report => ({ ...report, id: 11 })),
       updateFacilityReport: vi.fn(async report => report),
+      updateFacilityReportSetup: vi.fn(async (_facility, guid, changes) => ({ ...store.facilityReports().find(item => item.guid === guid)!, ...(changes.name !== undefined ? { name: changes.name } : {}) })),
       deleteFacilityReport: vi.fn(async report => report.id)
     };
     boundary = { execute: vi.fn(async (options, persist) => {
@@ -40,6 +42,10 @@ describe('FacilityReportActionsService', () => {
     expect(created.name).toBe('Annual report');
     expect(created.facilityReportType).toBe(value);
     expect(created.analysisItemId).toBeUndefined();
+    expect(created.analysisReportSettings.analysisTableColumns).toMatchObject({
+      actualEnergy: true, modeledEnergy: true, adjusted: true,
+      baselineAdjustmentForNormalization: value !== 'analysis', baselineAdjustmentForOther: value !== 'analysis', baselineAdjustment: value !== 'analysis'
+    });
     expect(created.modelingReportSettings.includeExecutiveSummary).toBe(true);
     expect(store.revision()).toBe(1);
     expect(store.facilityReports()).toContainEqual(created);
@@ -86,7 +92,7 @@ describe('FacilityReportActionsService', () => {
     const updated = await service.updateName('facility-a', source.guid, ' Revised name ');
     expect(updated).toEqual({ ...latest, name: 'Revised name' });
     expect(source.name).toBe('Saved report');
-    expect(handler.updateFacilityReport).toHaveBeenCalledTimes(1);
+    expect(handler.updateFacilityReportSetup).toHaveBeenCalledTimes(1);
     await expect(service.updateName('facility-a', source.guid, ' ')).rejects.toMatchObject({ code: 'validation-failed' });
     await expect(service.updateName('facility-b', source.guid, 'Wrong facility')).rejects.toMatchObject({ code: 'workspace-not-ready' });
   });

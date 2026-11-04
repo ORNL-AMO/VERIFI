@@ -10,11 +10,12 @@ import {
 } from './echarts-chart.directive';
 
 @Component({
-  template: `<div class="chart-host" [appV1ECharts]="option()"></div>`,
+  template: `<div class="chart-host" [appV1ECharts]="option()" [deferUntilVisible]="deferUntilVisible()"></div>`,
   standalone: true,
   imports: [EChartsChartDirective]
 })
 class EChartsDirectiveHostComponent {
+  readonly deferUntilVisible = signal(false);
   readonly zoom = signal<{ readonly start: number; readonly end: number } | undefined>(undefined);
   readonly pointClick = signal<V1EChartsPointClickEvent | undefined>(undefined);
   readonly option = signal<V1EChartsOption>({
@@ -31,6 +32,76 @@ class EChartsDirectiveHostComponent {
 }
 
 describe('EChartsChartDirective in Chromium', () => {
+  it('initializes a deferred canvas on native viewport entry with the latest option and retains it until exit', async () => {
+    TestBed.overrideComponent(EChartsDirectiveHostComponent, { set: { template: `
+      <div class="chart-scroll" style="position:fixed;top:20px;left:20px;width:360px;height:200px;overflow:auto">
+        <div style="height:700px"></div><div class="chart-host" style="width:360px;height:240px" [appV1ECharts]="option()" [deferUntilVisible]="deferUntilVisible()"></div>
+      </div>` } });
+    TestBed.configureTestingModule({ imports: [EChartsDirectiveHostComponent] });
+    const fixture = TestBed.createComponent(EChartsDirectiveHostComponent);
+    fixture.componentInstance.deferUntilVisible.set(true);
+    const host = fixture.nativeElement.querySelector('.chart-host') as HTMLElement;
+    const scroll = fixture.nativeElement.querySelector('.chart-scroll') as HTMLElement;
+    try {
+      fixture.detectChanges();
+      await nextAnimationFrame(); await nextAnimationFrame(); await nextAnimationFrame();
+      expect(echarts.getInstanceByDom(host)).toBeUndefined();
+      fixture.componentInstance.option.update(option => ({ ...option, series: [{ type: 'bar', data: [9, 8, 7, 6] }] }));
+      host.style.setProperty('--v1-text', '#123456');
+      fixture.detectChanges();
+      scroll.scrollTop = 700;
+      await vi.waitFor(() => expect(echarts.getInstanceByDom(host)).toBeDefined());
+      await nextAnimationFrame(); await nextAnimationFrame();
+      const chart = echarts.getInstanceByDom(host)!;
+      expect((chart.getOption() as any).series[0].data).toEqual([9, 8, 7, 6]);
+      expect((chart.getOption() as any).textStyle.color).toBe('#123456');
+      scroll.scrollTop = 0;
+      await nextAnimationFrame(); await nextAnimationFrame();
+      expect(echarts.getInstanceByDom(host)).toBe(chart);
+      scroll.scrollTop = 700;
+      await nextAnimationFrame();
+      expect(echarts.getInstanceByDom(host)).toBe(chart);
+      fixture.destroy();
+      expect(chart.isDisposed()).toBe(true);
+    } finally { fixture.destroy(); }
+  });
+
+  it('falls back to immediate initialization without viewport observation', async () => {
+    vi.stubGlobal('IntersectionObserver', undefined);
+    TestBed.configureTestingModule({ imports: [EChartsDirectiveHostComponent] });
+    const fixture = TestBed.createComponent(EChartsDirectiveHostComponent);
+    const host = fixture.nativeElement.querySelector('.chart-host') as HTMLElement;
+    host.style.width = '360px'; host.style.height = '240px';
+    fixture.componentInstance.deferUntilVisible.set(true);
+    try {
+      fixture.detectChanges(); await nextAnimationFrame();
+      expect(echarts.getInstanceByDom(host)).toBeDefined();
+    } finally { fixture.destroy(); vi.unstubAllGlobals(); }
+  });
+
+  it('disconnects a pending visibility observer and ignores late notifications after destruction', () => {
+    let notify!: IntersectionObserverCallback;
+    const disconnect = vi.fn();
+    vi.stubGlobal('IntersectionObserver', class {
+      constructor(callback: IntersectionObserverCallback) { notify = callback; }
+      observe(): void { }
+      disconnect = disconnect;
+    });
+    TestBed.configureTestingModule({ imports: [EChartsDirectiveHostComponent] });
+    const fixture = TestBed.createComponent(EChartsDirectiveHostComponent);
+    const host = fixture.nativeElement.querySelector('.chart-host') as HTMLElement;
+    fixture.componentInstance.deferUntilVisible.set(true);
+    try {
+      fixture.detectChanges();
+      expect(echarts.getInstanceByDom(host)).toBeUndefined();
+      fixture.destroy();
+      expect(disconnect).toHaveBeenCalledOnce();
+      notify([{ target: host, isIntersecting: true, intersectionRatio: 1, boundingClientRect: host.getBoundingClientRect(),
+        intersectionRect: host.getBoundingClientRect(), rootBounds: null, time: performance.now() }], {} as IntersectionObserver);
+      expect(echarts.getInstanceByDom(host)).toBeUndefined();
+    } finally { fixture.destroy(); vi.unstubAllGlobals(); }
+  });
+
   it('preserves existing PNG extensions when sanitizing chart filenames', () => {
     expect(v1ChartPngFileName('meter-chart.png')).toBe('meter-chart.png');
     expect(v1ChartPngFileName('meter chart.png')).toBe('meter-chart.png');

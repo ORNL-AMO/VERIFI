@@ -1,5 +1,5 @@
+import { MeterSettingsForm } from '../meter-settings-values';
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { MeterSettingsFormService, MeterSettingsViewModel } from '../meter-settings-form.service';
 
@@ -10,7 +10,7 @@ import { MeterSettingsFormService, MeterSettingsViewModel } from '../meter-setti
   templateUrl: './meter-settings-emissions-details.component.html'
 })
 export class MeterSettingsEmissionsDetailsComponent {
-  @Input({ required: true }) form: FormGroup;
+  @Input({ required: true }) form: MeterSettingsForm;
   @Input({ required: true }) viewModel: MeterSettingsViewModel;
 
   constructor(private readonly formService: MeterSettingsFormService) { }

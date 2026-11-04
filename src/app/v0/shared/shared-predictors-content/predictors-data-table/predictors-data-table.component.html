@@ -44,8 +44,8 @@
   </div>
   @if (_predictor.predictorType == 'Weather') {
   <div class="ps-1 pe-1 mb-2">
-    <button class="btn action-btn" (click)="showUpdateEntries()"><i class="fa fa-redo"></i> Bulk
-      Update</button>
+    <button class="btn action-btn" (click)="showUpdateEntries()"><i class="fa fa-redo"></i> Check for
+      Updates</button>
   </div>
   }
   @if (_predictorStatusCheck && (_predictorStatusCheck.hasWeatherDataWarning || _predictorStatusCheck.hasNegativeData))

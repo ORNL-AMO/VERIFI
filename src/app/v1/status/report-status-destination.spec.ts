@@ -1,7 +1,6 @@
 import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
 import { reportFixture } from '@app/v1/reports/facility/testing/report-test-fixtures';
-import { ACCOUNT_REPORT_TYPES } from '@app/v1/reports/report-inventory.models';
-import { FACILITY_REPORT_TYPES } from '@app/v1/reports/facility/facility-report.models';
+import { ACCOUNT_REPORT_TYPES, FACILITY_REPORT_TYPES } from '@app/v1/reports/catalog/report-catalog';
 import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { StatusRuleCode, makeFinding } from './status.models';
@@ -37,12 +36,15 @@ describe('report status destinations', () => {
     for (const [scope, code, reasons] of [
       ['account', 'report.configuration.invalid', ['missingReportYear']],
       ['facility', 'report.configuration.invalid', ['missingStartDate']],
-      ['account', 'report.dates.invalid', []], ['facility', 'report.data.incomplete', []],
-      ['facility', 'report.analysis.invalid', []]
+      ['account', 'report.dates.invalid', []], ['facility', 'report.data.incomplete', []]
     ] as const) {
       const resolved = resolveReportStatusItem(finding(scope, code, [...reasons]), snapshot);
       expect(resolved.destination.kind).toBe('unavailable'); expect(resolved.unavailableReason).toContain('pending migration');
     }
+  });
+  it('opens migrated facility analysis and period controls', () => {
+    const snapshot = accountReportSnapshot();
+    for (const code of ['report.analysis.invalid', 'report.dates.invalid'] as const) expect(resolveReportStatusItem(finding('facility', code), snapshot).destination.kind).toBe('facility-report-setup');
   });
   it.each(ACCOUNT_REPORT_TYPES)('opens existing common setup for $value and only applicable account analysis selectors', ({ value }) => {
     const snapshot = accountReportSnapshot(); snapshot.accountReports[0].reportType = value;

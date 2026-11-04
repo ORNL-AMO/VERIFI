@@ -7,6 +7,7 @@ import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { AllSources, EnergySources, MeterSource, WaterSources } from '@data/models/constantsAndTypes';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-meters-overview-stacked-line-chart',
@@ -172,18 +173,6 @@ export class MetersOverviewStackedLineChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.stackedAreaChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.stackedAreaChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.stackedAreaChart?.nativeElement);
   }
 }

@@ -7,6 +7,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import { FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-meter-usage-donut',
@@ -180,18 +181,6 @@ export class MeterUsageDonutComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.energyUseDonut?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.energyUseDonut.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.energyUseDonut?.nativeElement);
   }
 }

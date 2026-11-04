@@ -2,7 +2,7 @@ import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-worksp
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbFacilityReport, getNewIdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { calendarizedMeter, facility, group, meter, monthlyData, reading, account } from '@app/v1/data/meters/facility-meters.testing';
@@ -190,6 +190,18 @@ describe('v1 workspace status evaluator', () => {
     }));
 
     expect(entityCodes(result, 'predictor-a')).not.toContain('predictor.quality.outlier');
+  });
+
+  it('allows a facility report baseline year and rejects earlier years or a foreign-facility analysis', () => {
+    const analysis = facilityAnalysis('analysis-a', [], { baselineYear: 2022 });
+    const report = getNewIdbFacilityReport('facility-a', 'account-a', 'analysis', []);
+    report.analysisItemId = analysis.guid;
+    report.analysisReportSettings.reportYear = 2022;
+    expect(entityCodes(evaluate(snapshot({ facilityAnalyses: [analysis], facilityReports: [report] })), report.guid)).not.toContain('report.dates.invalid');
+    report.analysisReportSettings.reportYear = 2021;
+    expect(entityCodes(evaluate(snapshot({ facilityAnalyses: [analysis], facilityReports: [report] })), report.guid)).toContain('report.dates.invalid');
+    const foreign = { ...analysis, facilityId: 'other-facility' };
+    expect(entityCodes(evaluate(snapshot({ facilityAnalyses: [foreign], facilityReports: [report] })), report.guid)).toContain('report.analysis.invalid');
   });
 
   it('reports analysis, account-analysis, and report setup errors', () => {

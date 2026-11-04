@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { EditorConflictReviewComponent } from '@app/v1/data/editing/editor-conflict-review/editor-conflict-review.component';
 import { MeterWorkbenchComponent } from './meter-workbench/meter-workbench.component';
 import { MeterWorkbenchSettingsComponent } from './meter-workbench/settings/meter-workbench-settings.component';
 import { MeterWorkbenchReadingsComponent } from './meter-workbench/readings/meter-workbench-readings.component';
@@ -71,6 +72,7 @@ import { MeterActionsService } from './meter-actions.service';
     CreateMeterDrawerComponent
   ],
   imports: [
+    EditorConflictReviewComponent,
     PageIdentityComponent,
     BrowseHeaderDirective,
     BrowsePositionDirective,

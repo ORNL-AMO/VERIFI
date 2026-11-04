@@ -16,6 +16,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { buildSingleFacilityAnalysisPair, singleFacilityAnalysisPairCandidates, singleFacilityAnalysisPairIsCurrent } from '../single-facility-analysis-pairs';
+import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings } from '../facility-report-setup.models';
 
 @Injectable({ providedIn: 'root' })
 export class ReportCommandHandler {
@@ -38,6 +39,42 @@ export class ReportCommandHandler {
   async updateFacilityReport(report: IdbFacilityReport, activeAccountGuid: string): Promise<IdbFacilityReport> {
     this.assertOwnership(report.accountId, activeAccountGuid, 'facility report');
     return firstValueFrom(this.facilityReportDb.updateWithObservable({ ...report }));
+  }
+
+  async updateFacilityReportSetup(facilityGuid: string, reportGuid: string, changes: FacilityReportSetupChanges,
+    accountGuid: string): Promise<IdbFacilityReport> {
+    return this.transactions.runTransaction(['accounts', 'facilities', 'facilityReports', 'analysisItems'], 'readwrite', async tx => {
+      const account = (await tx.getAll<IdbAccount>('accounts')).find(item => item.guid === accountGuid);
+      const facility = (await tx.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid)).find(item => item.guid === facilityGuid);
+      const report = (await tx.getAllByIndex<IdbFacilityReport>('facilityReports', 'accountId', accountGuid))
+        .find(item => item.guid === reportGuid && item.facilityId === facilityGuid);
+      if (!account || !facility || !report || report.id === undefined) {
+        throw new WorkspaceWriteError('validation-failed', 'The report or its facility is no longer available.');
+      }
+      if (!account.displayEmissions && report.facilityReportType === 'emissionFactors') {
+        throw new WorkspaceWriteError('validation-failed', 'Enable Other Impacts to access this report.');
+      }
+      if (changes.name !== undefined && !changes.name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a nonblank report name.');
+      let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
+      if (changes.analysisItemId !== undefined || changes.analysisReportSettings !== undefined) {
+        if (report.facilityReportType !== 'analysis') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a facility Analysis report.');
+        if (changes.analysisItemId !== undefined) {
+          if (changes.analysisItemId !== null) {
+            const analysis = (await tx.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountGuid))
+              .find(item => item.guid === changes.analysisItemId && item.facilityId === facilityGuid && ['energy', 'water'].includes(item.analysisCategory));
+            if (!analysis) throw new WorkspaceWriteError('validation-failed', 'Choose an available analysis belonging to this facility.');
+          }
+          updated = { ...updated, analysisItemId: changes.analysisItemId ?? undefined };
+        }
+        if (changes.analysisReportSettings) updated = { ...updated,
+          analysisReportSettings: mergeFacilityAnalysisSettings(report.analysisReportSettings, changes.analysisReportSettings) };
+      }
+      if (JSON.stringify(updated) !== JSON.stringify(report)) {
+        updated = { ...updated, modifiedDate: new Date() };
+        await tx.put('facilityReports', updated);
+      }
+      return updated;
+    });
   }
 
   async deleteFacilityReport(report: IdbFacilityReport, activeAccountGuid: string): Promise<number> {

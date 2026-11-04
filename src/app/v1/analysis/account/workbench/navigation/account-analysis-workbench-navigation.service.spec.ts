@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
-import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
 import { buildAccountAnalysisWorkbenchStages } from '../account-analysis-workbench.models';

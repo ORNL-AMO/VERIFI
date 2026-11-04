@@ -23,7 +23,7 @@ export class MeterDraftSlideoutComponent {
     this.groupOptions.set(value);
     const groupId = this.form.controls.groupId.value;
     if (groupId && !value.some(group => group.guid === groupId)) {
-      this.form.controls.groupId.setValue(undefined);
+      this.form.controls.groupId.setValue(null);
     }
   }
   get groups(): readonly IdbUtilityMeterGroup[] { return this.groupOptions(); }
@@ -44,7 +44,7 @@ export class MeterDraftSlideoutComponent {
   readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     source: new FormControl<MeterSource>('Electricity', { nonNullable: true, validators: [Validators.required] }),
-    groupId: new FormControl<string | undefined>(undefined, { nonNullable: true })
+    groupId: new FormControl<string | null>(null)
   });
   readonly draft = toSignal(this.form.valueChanges.pipe(map(() => this.form.getRawValue())), { initialValue: this.form.getRawValue() });
   readonly selectedGroup = computed(() => this.groupOptions().find(group => group.guid === this.draft().groupId));
@@ -58,7 +58,7 @@ export class MeterDraftSlideoutComponent {
     this.form.controls.source.valueChanges.pipe(takeUntilDestroyed()).subscribe(source => {
       const group = this.groups.find(item => item.guid === this.form.controls.groupId.value);
       if (!canAssignSourceToGroup(source, group)) {
-        this.form.controls.groupId.setValue(undefined);
+        this.form.controls.groupId.setValue(null);
       }
     });
   }
@@ -71,7 +71,8 @@ export class MeterDraftSlideoutComponent {
 
   submit(): void {
     if (this.isValid() && this.canSubmit && !this.saving) {
-      this.submitted.emit(this.form.getRawValue());
+      const value = this.form.getRawValue();
+      this.submitted.emit({ ...value, groupId: value.groupId ?? undefined });
     }
   }
 }

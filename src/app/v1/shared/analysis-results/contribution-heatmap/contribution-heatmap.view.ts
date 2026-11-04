@@ -13,12 +13,13 @@ export interface ContributionHeatmapView {
 export function contributionHeatmapOption(
   view: ContributionHeatmapView,
   seriesName: string,
-  compact = false
+  compact = false,
+  scaleMagnitude?: number
 ): V1EChartsOption {
   const values = view.years.flatMap((year, yearIndex) =>
     year.contributions.map((contribution, rowIndex) => [yearIndex, rowIndex, contribution])
   );
-  const maxMagnitude = Math.max(1, ...values.map(value => Math.abs(value[2])));
+  const maxMagnitude = Math.max(1, scaleMagnitude ?? 0, ...values.map(value => Math.abs(value[2])));
   return {
     tooltip: { trigger: 'item', renderMode: 'richText', formatter: params => {
       const value = heatmapTuple(params);

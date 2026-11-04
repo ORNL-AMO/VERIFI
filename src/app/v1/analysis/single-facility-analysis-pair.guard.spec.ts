@@ -6,7 +6,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { accountReportSnapshot } from '@app/v1/reports/account/testing/account-report-test-fixtures';
 import { SingleFacilityAnalysisPairService } from './single-facility-analysis-pair.service';
 import { singleFacilityAnalysisPairGuard } from './single-facility-analysis-pair.guard';
-import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisWorkbenchNavigationService } from './facility/workbench/navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisWorkbenchContext } from './facility/workbench/facility-analysis-workbench-context.service';
@@ -42,6 +42,14 @@ describe('single-facility Analysis entry from report status', () => {
     const { store, snapshot, ensurePairs, open } = setup(origin);
     expect(await open()).toBe(true); expect(ensurePairs).not.toHaveBeenCalled();
     expect(store.snapshot()).toEqual(snapshot); expect(store.committedRevision()).toBeUndefined();
+  });
+  it('accepts owned facility-report inspection origins without pair repair and rejects different facilities', async () => {
+    const { ensurePairs, open, store } = setup();
+    const before = store.snapshot();
+    const query = '?returnReportAccountGuid=account-a&returnReportGuid=report-a&returnReportScope=facility&returnReportFacilityGuid=facility-a';
+    expect(await open('/v1/workspace/facility/facility-a/analysis/workbench/facility-analysis/setup' + query)).toBe(true);
+    expect(await open('/v1/workspace/facility/other-facility/analysis/workbench/facility-analysis/setup' + query)).toBe(false);
+    expect(ensurePairs).not.toHaveBeenCalled(); expect(store.snapshot()).toBe(before);
   });
   it('keeps normal Analysis entry reconciliation', async () => {
     const { ensurePairs, open } = setup(); expect(await open()).toBe(true); expect(ensurePairs).toHaveBeenCalledOnce();

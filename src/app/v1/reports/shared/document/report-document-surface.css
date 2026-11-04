@@ -1,0 +1,8 @@
+/* Shared on-screen document framing; print and export pagination remain separate. */
+.report-document { width: 100%; min-width: 0; max-width: 76rem; margin-inline: auto; border: 1px solid var(--v1-border); border-radius: 0; background: var(--v1-surface); color: var(--v1-text); }
+.document-section { padding: 1.25rem; border-bottom: 1px solid var(--v1-border); }
+.report-document + .report-document { margin-block-start: 2rem; }
+.document-title { padding: 1.25rem; text-align: center; }
+.document-title h2 { font-size: 1.4rem; margin: 0 0 .3rem; }
+.document-title p { margin: 0; color: var(--v1-muted); }
+@media (max-width: 640px) { .document-section { padding: .85rem; } }

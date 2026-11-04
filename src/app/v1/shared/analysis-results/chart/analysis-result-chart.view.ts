@@ -1,4 +1,5 @@
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { FacilityAnalysisGroupCalculationResult } from '@platform/web-workers/facility-analysis-results-worker.contract';
 import {
   MeterResultsChartComparisonBand,
   MeterResultsChartMetric,
@@ -15,6 +16,40 @@ export const MONTHLY_USE_COMPARISON_BAND: MeterResultsChartComparisonBand = {
 export interface MonthlySavingsChartView {
   readonly metrics: readonly MeterResultsChartMetric[];
   readonly rows: readonly MeterResultsChartRow[];
+}
+
+export interface AnalysisResultChartsView {
+  readonly period: 'annual' | 'monthly';
+  readonly category: 'energy' | 'water' | undefined;
+  readonly unit: string | undefined;
+  readonly useRows: readonly MeterResultsChartRow[];
+  readonly useMetrics: readonly MeterResultsChartMetric[];
+  readonly improvementRows: readonly MeterResultsChartRow[];
+  readonly improvementMetrics: readonly MeterResultsChartMetric[];
+  readonly comparisonBand?: MeterResultsChartComparisonBand;
+}
+
+export function annualResultChartsView(rows: readonly AnnualAnalysisSummary[], category: 'energy' | 'water' | undefined,
+  unit: string | undefined): AnalysisResultChartsView {
+  return { period: 'annual', category, unit, useRows: annualUseChartRows(rows), useMetrics: annualUseChartMetrics(category, unit),
+    improvementRows: annualImprovementChartRows(rows), improvementMetrics: annualImprovementChartMetrics(category) };
+}
+
+export function monthlyResultChartsView(useRows: readonly MonthlyAnalysisSummaryData[], savingsRows: readonly MonthlyAnalysisSummaryData[],
+  category: 'energy' | 'water' | undefined, unit: string | undefined, includeBanking: boolean): AnalysisResultChartsView {
+  const savings = monthlySavingsChartView(savingsRows, includeBanking);
+  return { period: 'monthly', category, unit, useRows: monthlyUseChartRows(useRows), useMetrics: monthlyUseChartMetrics(category, unit),
+    improvementRows: savings.rows, improvementMetrics: savings.metrics, comparisonBand: MONTHLY_USE_COMPARISON_BAND };
+}
+
+export function facilityAnnualChartRows(rows: readonly AnnualAnalysisSummary[], groups: readonly FacilityAnalysisGroupCalculationResult[]): readonly AnnualAnalysisSummary[] {
+  return rows.map(row => ({ ...row, isIntermediateBanked: groups.some(group =>
+    group.annualAnalysisSummaryData.find(candidate => candidate.year === row.year)?.isIntermediateBanked) }));
+}
+
+export function facilityMonthlyChartRows(rows: readonly MonthlyAnalysisSummaryData[], groups: readonly FacilityAnalysisGroupCalculationResult[]): readonly MonthlyAnalysisSummaryData[] {
+  return rows.map(row => ({ ...row, isIntermediateBanked: groups.some(group =>
+    group.monthlyAnalysisSummaryData.find(candidate => new Date(candidate.date).getTime() === new Date(row.date).getTime())?.isIntermediateBanked) }));
 }
 
 export function annualImprovementChartMetrics(category: 'energy' | 'water' | undefined): readonly MeterResultsChartMetric[] {

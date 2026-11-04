@@ -1,0 +1,25 @@
+<div class="analysis-result-columns" [class.analysis-result-columns--inline]="inline()">
+  <div class="analysis-result-columns__quick-actions">
+    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="!canEdit()" (click)="showAllRequested.emit()">Show All</button>
+    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="!canEdit()" (click)="hideAllRequested.emit()">Hide All</button>
+    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="!canEdit()" (click)="defaultsRequested.emit()">{{ defaultsLabel() }}</button>
+  </div>
+  <div class="analysis-result-columns__sections">
+    @for (section of sections(); track section.id) {
+      <section class="analysis-result-columns__section" [attr.aria-labelledby]="'column-options-' + section.id">
+        <div class="analysis-result-columns__section-heading">
+          <h3 [id]="'column-options-' + section.id">{{ section.label }}</h3>
+          @if (sectionActions()) {
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [attr.aria-label]="'Select all ' + section.label" [disabled]="!canEdit() || !section.options.length" (click)="sectionVisibilityRequested.emit({ id: section.id, visible: true })">All</button>
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [attr.aria-label]="'Clear ' + section.label" [disabled]="!canEdit() || !section.options.length" (click)="sectionVisibilityRequested.emit({ id: section.id, visible: false })">None</button>
+          }
+        </div>
+        @if (section.hint) { <p>{{ section.hint }}</p> }
+        @if (!section.options.length) { <p>No production variables are available for this analysis.</p> }
+        @for (option of section.options; track option.id) {
+          <label class="analysis-result-columns__check"><input type="checkbox" [formControl]="option.control"><span>{{ option.label }}@if (option.usedInAnalysis) { <span aria-label="Used in analysis"> *</span> }</span></label>
+        }
+      </section>
+    }
+  </div>
+</div>

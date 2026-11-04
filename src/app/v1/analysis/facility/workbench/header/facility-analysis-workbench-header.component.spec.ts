@@ -11,7 +11,7 @@ import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench
 import { FacilityAnalysisWorkbenchNavigationService } from '../navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisResultsService } from '../results/calculation/facility-analysis-results.service';
 import { AccountAnalysisReturnService } from '../navigation/account-analysis-return.service';
-import { ReportAnalysisReturnService } from '@app/v1/reports/report-analysis-return.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 import {
   FacilityAnalysisWorkbenchHeaderComponent,
   facilityAnalysisResultOutcome

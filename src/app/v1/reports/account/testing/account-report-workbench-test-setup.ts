@@ -1,3 +1,4 @@
+import { BetterPlantsEditor } from '../better-plants/editing/better-plants-editor.service';
 import { TestBed } from '@angular/core/testing';
 import { computed, inject, signal, Provider } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -52,6 +53,6 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
     } }, ...providers
   ] }).compileComponents();
   const harness = await RouterTestingHarness.create(); const router = TestBed.inject(Router); router.setUpLocationChangeListener();
-  const open = (report = 'account-report', stage = 'setup') => harness.navigateByUrl(`/v1/workspace/account/${snapshot.account.guid}/reports/workbench/${report}/${stage}`, AccountReportWorkbenchComponent);
+  const open = async (report = 'account-report', stage = 'setup') => await harness.navigateByUrl(`/v1/workspace/account/${snapshot.account.guid}/reports/workbench/${report}/${stage}`, AccountReportWorkbenchComponent) as AccountReportWorkbenchComponent & { readonly editor: BetterPlantsEditor };
   return { store, status, updateSetup, deleteReport, harness, router, open };
 }

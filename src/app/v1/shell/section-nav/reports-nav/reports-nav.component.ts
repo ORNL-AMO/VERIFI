@@ -1,13 +1,16 @@
-import { reportTypeChoices, ReportScope } from '@app/v1/reports/report-inventory.models';
+import { reportTypeChoices } from '@app/v1/reports/catalog/report-catalog';
+import type { ReportIdentity, ReportScope } from '@app/v1/reports/shared/report.models';
 import { Component, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { reportTypeAvailable } from '@app/v1/reports/report-availability';
-import { reportIcon } from '@app/v1/reports/report-icons';
+import { reportTypeAvailable } from '@app/v1/reports/catalog/report-availability';
+import { reportIcon } from '@app/v1/reports/catalog/report-icons';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildFacilityReportPresentation } from '@app/v1/reports/facility/facility-report.models';
 import { buildFacilityReportStages } from '@app/v1/reports/facility/workbench/facility-report-workbench.models';
 import { RecentItemsService } from '../recent-items.service';
+import { ReportStageStateService } from '@app/v1/reports/shared/workbench/report-stage-state.service';
+import { reportIdentityKey } from '@app/v1/reports/shared/workbench/report-runtime.models';
 
 @Component({
   selector: 'app-reports-nav', standalone: false,
@@ -19,12 +22,21 @@ export class ReportsNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
+  private readonly stages = inject(ReportStageStateService);
   readonly activeStages = computed(() => {
     const state = this.navigation.routeState();
-    if (!state.facilityGuid) return [];
+    const accountGuid = this.workspace.account()?.guid, reportGuid = this.navigation.activeReportGuid();
+    if (!accountGuid || !reportGuid) return [];
+    const scope = this.navigation.contextMode();
+    const identity: ReportIdentity | undefined = scope === 'facility' && state.facilityGuid
+      ? { scope, accountGuid, facilityGuid: state.facilityGuid, reportGuid }
+      : scope === 'account' ? { scope, accountGuid: state.accountGuid ?? accountGuid, reportGuid } : undefined;
+    const current = this.stages.current();
+    if (identity && current?.key === reportIdentityKey(identity)) return current.stages;
+    if (scope !== 'facility' || !state.facilityGuid) return [];
     const report = this.workspace.facilityReports().find(item => item.guid === this.navigation.activeReportGuid()
       && item.facilityId === state.facilityGuid && item.accountId === this.workspace.account()?.guid
-      && reportTypeAvailable(item.facilityReportType, this.workspace.account()?.displayEmissions));
+      && reportTypeAvailable('facility', item.facilityReportType, this.workspace.account()?.displayEmissions));
     return report ? buildFacilityReportStages(report, state.reportStage ?? 'setup',
       buildFacilityReportPresentation(report, this.navigation.contextAnalyses(), this.status.items(), this.status.state()).status) : [];
   });

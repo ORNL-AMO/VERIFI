@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { SourceTotal, SourceTotals } from '@domain/calculations/dashboard-calculations/sourceTotalsClass';
 import { UtilityColors } from '@shared/utilityColors';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-account-utility-usage-donut',
@@ -195,18 +196,6 @@ export class AccountUtilityUsageDonutComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.donutChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.donutChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.donutChart?.nativeElement);
   }
 }

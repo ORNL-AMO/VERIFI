@@ -1,0 +1,12 @@
+@if (host.presentation(); as view) {
+  <section class="report-section">
+    @if (host.stage() === 'data-checks') {
+      <h2>Data Checks</h2><p>{{ view.typeLabel }} report</p>
+      <p role="status">Data checks for this report are pending migration. Opening this stage does not complete checks or change the linked analysis.</p>
+    } @else {
+      <h2>{{ view.typeLabel }} Report</h2>
+      <p role="status">Report content pending. The report preview is pending migration. Saved configuration is preserved; preview and export content will be supplied by the owning report migration.</p>
+      <p>Setup readiness does not indicate that report content is available in v1.</p>
+    }
+  </section>
+}

@@ -1,13 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountReportWorkbenchContext } from '../../workbench/account-report-workbench-context.service';
-import { AccountReportAutosaveService } from '../../workbench/account-report-autosave.service';
+import { BetterPlantsEditor } from '../editing/better-plants-editor.service';
 
 @Component({ selector: 'app-better-plants-setup', standalone: false,
   templateUrl: './better-plants-setup.component.html', styleUrls: ['./better-plants-setup.component.css'] })
 export class BetterPlantsSetupComponent {
   readonly context = inject(AccountReportWorkbenchContext);
-  readonly editor = inject(AccountReportAutosaveService);
+  readonly editor = inject(BetterPlantsEditor);
   readonly form = this.editor.form.controls.betterPlants;
   private readonly draft = toSignal(this.editor.form.valueChanges, { initialValue: this.editor.form.getRawValue() });
   private readonly current = computed(() => { this.draft(); this.context.report(); return this.editor.form.getRawValue(); });

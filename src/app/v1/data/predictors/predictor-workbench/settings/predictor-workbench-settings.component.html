@@ -8,7 +8,7 @@
       <span>{{ predictor.predictorType }} predictors are preserved but cannot be edited in the standard predictor workbench.</span>
     </div>
   </section>
-} @else if (predictor && settingsForm) {
+} @else if (settingsForm) {
   <form class="v1-settings-panel predictor-settings" [formGroup]="settingsForm" aria-label="Predictor settings">
     @if (!workspace.canWrite()) {
       <div class="v1-alert v1-alert--info"><app-ui-icon name="lock"></app-ui-icon><span>This workspace is read-only. Predictor settings can be reviewed but not changed.</span></div>
@@ -19,10 +19,16 @@
       [embedded]="true"
       [saveState]="saveState()"
       [saveMessage]="saveMessage()"
-      (textChange)="onTextChange()"
-      (immediateChange)="onImmediateChange()"
       (retryRequested)="saveNow()">
     </app-predictor-settings-form>
+
+    <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()"
+      (resolved)="resolveConflicts($event)">
+    </app-editor-conflict-review>
+
+    @if (!predictor) {
+      <div class="v1-alert v1-alert--warning" role="alert">The saved predictor is no longer available. Your draft has been retained.</div>
+    }
 
     <footer class="predictor-settings__footer">
       <button

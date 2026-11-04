@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-monthly-utility-usage-line-chart',
@@ -207,18 +208,6 @@ export class MonthlyUtilityUsageLineChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.monthlyUsageChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.monthlyUsageChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.monthlyUsageChart?.nativeElement);
   }
 }

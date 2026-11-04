@@ -20,10 +20,7 @@
 .v1-regression-validation__number { text-align: right !important; font-variant-numeric: tabular-nums; }
 .v1-regression-validation__failed { font-weight: 750; }
 .v1-regression-validation__failed .v1-icon { margin-left: .25rem; }
-.v1-regression-validation__chart-region { min-width: 0; overflow: hidden; }
-.v1-regression-validation__chart { width: 100%; height: 24rem; }
 .v1-chip { display: inline-flex; align-items: center; gap: .3rem; }
 @media (max-width: 760px) {
   .v1-regression-validation__heading { flex-direction: column; }
-  .v1-regression-validation__chart { height: 20rem; }
 }

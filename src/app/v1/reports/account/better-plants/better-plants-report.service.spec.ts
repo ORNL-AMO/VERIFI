@@ -12,9 +12,9 @@ import { analysisReviewContent } from '@domain/reports/analysis-review-inputs';
 import { calculateAnalysisDataChecks } from '@domain/reports/analysis-data-checks';
 import { calculateBetterPlantsReport } from '@domain/reports/better-plants-report-calculation';
 import { analysisReportFixture, regressionAnalysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
-import { AnalysisReportCalculationService } from '@app/v1/reports/analysis-report-calculation.service';
+import { AnalysisReportCalculationService } from '@app/v1/reports/shared/calculation/analysis-report-calculation.service';
 import { AccountReportWorkbenchContext } from '../workbench/account-report-workbench-context.service';
-import { AccountReportAutosaveService } from '../workbench/account-report-autosave.service';
+import { BetterPlantsEditor } from './editing/better-plants-editor.service';
 import { BetterPlantsReportService } from './better-plants-report.service';
 import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
 import { getNewAnalysisGroup } from '@data/models/idbModels/analysisItem';
@@ -41,7 +41,7 @@ describe('Better Plants workflow coordinator', () => {
       { provide: AnalysisReportCalculationService, useValue: { execute, fingerprint: async (content: string) => content } },
       { provide: AnalysisReviewCommandHandler, useValue: { confirm } },
       { provide: WorkspaceCommandBoundary, useValue: new WorkspaceCommandBoundary(store, {} as AccountWorkspaceService) },
-      { provide: AccountReportAutosaveService, useValue: { state: signal('idle') } },
+      { provide: BetterPlantsEditor, useValue: { state: signal('idle') } },
       { provide: AccountReportWorkbenchContext, useValue: { workspace: store, stage,
         key: computed(() => store.accountReports()[0]?.guid ?? ''), report: computed(() => store.accountReports()[0]),
         status: { state: signal('ready') }, findings,

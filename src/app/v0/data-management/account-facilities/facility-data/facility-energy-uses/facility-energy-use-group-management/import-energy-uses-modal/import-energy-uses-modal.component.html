@@ -1,0 +1,149 @@
+@let previewData = importPreview();
+<div class="popup open" [class.review-popup]="!!previewData">
+    <div class="popup-header">
+        <h5 class="mb-0 fs-6 d-inline">{{!!previewData ? 'Review Energy Uses Import' : 'Import Energy Uses'}}</h5>
+        <button type="button" class="item-right" (click)="closeImportModal()">x</button>
+    </div>
+    <div class="popup-body">
+        @if(!previewData) {
+        <p class="text-muted">Import one year of equipment data across existing facilities in this account.</p>
+        <input id="energy-import-file" class="form-control" type="file" accept=".xlsx"
+            (change)="selectWorkbook($event)">
+        @if(workbookError(); as error) {
+        <div class="alert alert-danger mt-3 mb-0">{{error}}</div>
+        }
+        @if(workbookData(); as workbook) {
+        <p class="small text-break mt-2">{{workbook.filename}}</p>
+        <div class="d-flex align-items-center gap-3 my-3">
+            <label for="energy-import-year" class="form-label fw-bold mb-0">Year</label>
+            <input id="energy-import-year" type="number" step="1" class="form-control year-input"
+                [ngModel]="selectedImportYear()" (ngModelChange)="selectImportYear($event)">
+        </div>
+        }
+        } @else if(previewData) {
+        <div class="small text-secondary d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="text-break"><span class="fw-bold">Workbook:</span> {{previewData.filename}}<br></div>
+            <div class="badge rounded-pill bg-info-subtle text-info-emphasis fs-5 px-3 py-2">Year: {{previewData.year}}
+            </div>
+        </div>
+        <div class="row row-cols-2 row-cols-sm-5 g-2 mb-3 small">
+            <div class="col">
+                <div class="summary-card p-2 rounded h-100"><strong
+                        class="d-block fs-4">{{previewData.newGroups.length}}</strong> new groups</div>
+            </div>
+            <div class="col">
+                <div class="summary-card summary-new p-2 rounded h-100"><strong
+                        class="d-block fs-4">{{previewData.created}}</strong> new equipment</div>
+            </div>
+            <div class="col">
+                <div class="summary-card summary-updates p-2 rounded h-100"><strong
+                        class="d-block fs-4">{{previewData.updated}}</strong> updates</div>
+            </div>
+            <div class="col">
+                <div class="summary-card summary-errors p-2 rounded h-100"><strong
+                        class="d-block fs-4">{{previewData.errorRows}}</strong> rows with errors</div>
+            </div>
+            <div class="col">
+                <div class="summary-card summary-skipped p-2 rounded h-100"><strong
+                        class="d-block fs-4">{{skippedRowCount()}}</strong> skipped</div>
+            </div>
+        </div>
+        @if(previewData.errorRows) {
+        <div class="alert alert-danger text-center">Fix or skip every row with errors before importing.</div>
+        } @else if(!previewData.created && !previewData.updated) {
+        <div class="alert alert-info text-center">No changes to import.</div>
+        }
+        <div class="table-responsive preview-list border border-top-0 rounded">
+            <table class="table table-bordered table-sm align-middle preview-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Facility</th>
+                        <th scope="col">Group</th>
+                        <th scope="col">Equipment</th>
+                        <th scope="col">Status</th>
+                        @if(hasRowErrors()) {
+                        <th scope="col">Errors</th>
+                        }
+                        <th scope="col" class="skip-column">Skip</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(row of equipmentRows(); track row.importedRow) {
+                    <tr>
+                        <td>{{row.facility}}</td>
+                        <td>{{row.group}}</td>
+                        <td class="fw-semibold">{{row.equipment}}</td>
+                        <td>
+                            <span class="badge"
+                                [ngClass]="row.skipped ? 'text-bg-secondary' : row.action === 'Error' ? 'text-bg-danger' : row.action === 'Create' ? 'text-bg-success' : row.action === 'Update' ? 'text-bg-primary' : 'text-bg-secondary'">{{row.skipped
+                                ? 'Skipped' : row.action === 'Create' ? 'New' : row.action}}</span>
+                            @if(row.action === 'Update') {
+                            <button type="button"
+                                class="btn btn-link btn-sm text-info-emphasis text-nowrap d-block p-0 mt-1"
+                                (click)="toggleRowDetails(row.importedRow)">{{expandedDetailRows().has(row.importedRow)
+                                ? 'Hide details' : 'Show details'}}
+                            </button>
+                            }
+                        </td>
+                        @if(hasRowErrors()) {
+                        <td>
+                            @for(error of row.errors; track $index) {
+                            <div class="small text-danger">{{error}}</div>
+                            } @empty {
+                            <span class="text-muted">&mdash;</span>
+                            }
+                        </td>
+                        }
+                        <td class="skip-column">
+                            <input type="checkbox" class="form-check-input border border-2 border-secondary"
+                                [checked]="!!row.skipped" (change)="toggleSkipRow(row.importedRow, $event)">
+                        </td>
+                    </tr>
+                    @if(row.action === 'Update' && expandedDetailRows().has(row.importedRow)) {
+                    <tr class="details-row">
+                        <td [attr.colspan]="hasRowErrors() ? 6 : 5" class="p-3 bg-body-tertiary">
+                            <table class="table table-bordered table-hover table-sm change-details mb-2">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th scope="col">Field</th>
+                                        <th scope="col">Current value</th>
+                                        <th scope="col">Imported value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for(change of row.changes; track $index) {
+                                    <tr>
+                                        <th scope="row" class="fw-normal">{{change.field}}</th>
+                                        <td class="text-secondary">{{change.before}}</td>
+                                        <td class="fw-semibold">{{change.after}}</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    }
+                    } @empty {
+                    <tr>
+                        <td [attr.colspan]="hasRowErrors() ? 6 : 5" class="text-muted py-3">No equipment changes or
+                            errors to show.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+    <div class="popup-footer text-end">
+        <button type="button" class="btn btn-secondary" (click)="closeImportModal()">Cancel</button>
+        @if(!previewData) {
+        <button type="button" class="btn action-btn" [disabled]="!workbookData() || selectedImportYear() == null"
+            (click)="reviewImport()">Review Import</button>
+        } @else {
+        <button type="button" class="btn action-btn" [disabled]="!previewData?.canImport" (click)="importEnergyUses()">
+            Import
+        </button>
+        }
+    </div>
+</div>
