@@ -16,6 +16,12 @@
     @if (missingReading) {
       <div class="v1-alert v1-alert--warning" role="alert">This saved reading was removed. Your entries are retained for review; close this bill to continue.</div>
     }
+    @if (removedChargeGuids().length) {
+      <div class="v1-alert v1-alert--warning" role="alert">
+        Some detailed charges were removed from meter settings. Accept their removal to drop those bill values and keep your other edits.
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving || !resourceAvailable || missingReading" (click)="acceptSavedChargeRemovals()">Accept saved charge removals</button>
+      </div>
+    }
     <app-editor-conflict-review [conflicts]="conflicts" (resolved)="resolveConflicts($event)"></app-editor-conflict-review>
     <form class="meter-bill-form" [formGroup]="form" (submit)="$event.preventDefault(); save(false)">
       <label class="v1-field">
@@ -154,11 +160,11 @@
       <footer class="meter-bill-form__footer">
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="requestClose()">Cancel</button>
         @if (mode === 'add') {
-          <button type="button" class="v1-btn v1-btn--primary" [disabled]="saving || !resourceAvailable || form.invalid || contextChanged || missingReading || conflicts.length > 0" (click)="save(true)">
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="saving || !resourceAvailable || form.invalid || contextChanged || missingReading || conflicts.length > 0 || removedChargeGuids().length > 0" (click)="save(true)">
             Save + Add Another
           </button>
         }
-        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !resourceAvailable || form.invalid || contextChanged || missingReading || conflicts.length > 0">
+        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !resourceAvailable || form.invalid || contextChanged || missingReading || conflicts.length > 0 || removedChargeGuids().length > 0">
           @if (saving) {
             <app-ui-icon name="loading" spin></app-ui-icon>
           } @else {

@@ -6,14 +6,19 @@ import {
   Injector,
   Input,
   OnChanges,
+  OnDestroy,
   Output,
   SimpleChanges,
   ViewChild,
   afterNextRender,
   computed,
+  effect,
   inject,
-  signal
+  signal,
+  untracked
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { WeatherStation } from '@data/models/degreeDays';
 import { WeatherLocation } from '@platform/weather/weather-station-lookup.models';
@@ -49,18 +54,24 @@ interface WeatherPreviewSourceInspection {
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     EChartsChartDirective,
     IconComponent,
     WorkspaceSlideoutComponent,
     WeatherSourceReadingsSlideoutComponent
   ]
 })
-export class WeatherStationSelectorComponent implements OnChanges {
+export class WeatherStationSelectorComponent implements OnChanges, OnDestroy {
   private readonly stationLookup = inject(WeatherStationLookupService);
   private readonly focusMonitor = inject(FocusMonitor);
   private readonly injector = inject(Injector);
   readonly workflow = inject(PredictorWeatherWorkflowService);
   private lookupToken = 0;
+  private verificationToken = 0;
+  private destroyed = false;
+  private previewFingerprint = '';
+  private reviewedFingerprint: string | undefined;
+  private readonly disabledState = signal(false);
 
   @ViewChild('selectorToggle') private readonly selectorToggle?: ElementRef<HTMLButtonElement>;
   @ViewChild('previewChart') private readonly previewChart?: ElementRef<HTMLElement>;
@@ -68,12 +79,15 @@ export class WeatherStationSelectorComponent implements OnChanges {
   @Input() selectedStationId: string | undefined;
   @Input() selectedStationName: string | undefined;
   @Input() initialSearch = '';
+  @Input() contextKey = '';
   @Input() previewRange: WeatherMonthRange | undefined;
   @Input() previewDefinitions: readonly WeatherPredictorDefinition[] = [];
   @Input() disabled = false;
   @Output() stationSelected = new EventEmitter<WeatherStation>();
 
-  readonly query = signal('');
+  readonly queryControl = new FormControl('', { nonNullable: true });
+  private readonly querySnapshot = signal('');
+  readonly query = this.querySnapshot.asReadonly();
   readonly locations = signal<readonly WeatherLocation[]>([]);
   readonly stations = signal<readonly WeatherStation[]>([]);
   readonly selectedLocation = signal<WeatherLocation | undefined>(undefined);
@@ -87,6 +101,10 @@ export class WeatherStationSelectorComponent implements OnChanges {
   readonly candidateStation = signal<WeatherStation | undefined>(undefined);
   readonly stationPreview = signal<WeatherStationSelectionPreview | undefined>(undefined);
   readonly sourceInspection = signal<WeatherPreviewSourceInspection | undefined>(undefined);
+  private readonly queryEnabledEffect = effect(() => {
+    const disabled = this.disabledState() || this.searchingLocations() || this.searchingStations();
+    untracked(() => disabled ? this.queryControl.disable({ emitEvent: false }) : this.queryControl.enable({ emitEvent: false }));
+  });
   readonly previewChartOption = computed<V1EChartsOption | undefined>(() => {
     const preview = this.stationPreview();
     return preview ? buildStationPreviewChartOption(preview) : undefined;
@@ -112,18 +130,61 @@ export class WeatherStationSelectorComponent implements OnChanges {
     });
   });
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialSearch'] && !this.query()) this.query.set(this.initialSearch || '');
-    if (changes['selectedStationId']) void this.verifyCurrentStation();
+  constructor() {
+    this.queryControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => this.querySnapshot.set(value));
   }
 
-  setQuery(value: string): void { this.query.set(value); }
+  ngOnChanges(changes: SimpleChanges): void {
+    this.disabledState.set(this.disabled);
+    if (changes['contextKey'] && !changes['contextKey'].firstChange) {
+      this.resetSelector();
+      this.locations.set([]);
+      this.stations.set([]);
+      this.selectedLocation.set(undefined);
+      this.queryControl.reset(this.initialSearch || '', { emitEvent: false });
+      this.querySnapshot.set(this.queryControl.value);
+      this.verificationToken++;
+      this.checkingCurrentStation.set(false);
+      this.currentStationUnavailable.set(false);
+    } else if (changes['initialSearch'] && this.queryControl.pristine) {
+      this.queryControl.setValue(this.initialSearch || '', { emitEvent: false });
+      this.querySnapshot.set(this.queryControl.value);
+    }
+    const fingerprint = this.currentPreviewFingerprint();
+    if (fingerprint !== this.previewFingerprint) {
+      this.previewFingerprint = fingerprint;
+      if (this.candidateStation()) {
+        this.lookupToken++;
+        this.workflow.reset();
+        this.stationPreview.set(undefined);
+        this.sourceInspection.set(undefined);
+        this.reviewedFingerprint = undefined;
+      }
+    }
+    if (changes['selectedStationId'] || changes['contextKey']) void this.verifyCurrentStation();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    this.lookupToken++;
+    this.verificationToken++;
+    if (this.candidateStation()) this.workflow.reset();
+  }
+
+  setQuery(value: string): void { this.queryControl.setValue(value); this.queryControl.markAsDirty(); }
 
   openSelector(): void {
     if (!this.disabled) this.selectorOpen.set(true);
   }
 
   closeSelector(): void {
+    this.resetSelector();
+    afterNextRender(() => {
+      if (!this.destroyed && this.selectorToggle) this.focusMonitor.focusVia(this.selectorToggle, 'program');
+    }, { injector: this.injector });
+  }
+
+  private resetSelector(): void {
     this.lookupToken++;
     this.workflow.reset();
     this.searchingLocations.set(false);
@@ -131,10 +192,8 @@ export class WeatherStationSelectorComponent implements OnChanges {
     this.candidateStation.set(undefined);
     this.stationPreview.set(undefined);
     this.sourceInspection.set(undefined);
+    this.reviewedFingerprint = undefined;
     this.selectorOpen.set(false);
-    afterNextRender(() => {
-      if (this.selectorToggle) this.focusMonitor.focusVia(this.selectorToggle, 'program');
-    }, { injector: this.injector });
   }
 
   async search(): Promise<void> {
@@ -152,14 +211,14 @@ export class WeatherStationSelectorComponent implements OnChanges {
     this.workflow.reset();
     try {
       const locations = await this.stationLookup.searchLocations(query);
-      if (token === this.lookupToken) {
+      if (this.acceptLookup(token)) {
         this.locations.set(sortLocations(locations));
         this.locationSearchComplete.set(true);
       }
     } catch {
-      if (token === this.lookupToken) this.error.set('Locations could not be loaded. Check the search and try again.');
+      if (this.acceptLookup(token)) this.error.set('Locations could not be loaded. Check the search and try again.');
     } finally {
-      if (token === this.lookupToken) this.searchingLocations.set(false);
+      if (this.acceptLookup(token)) this.searchingLocations.set(false);
     }
   }
 
@@ -177,13 +236,13 @@ export class WeatherStationSelectorComponent implements OnChanges {
       const stations = await this.stationLookup.findStations({
         latitude: Number(location.lat), longitude: Number(location.lon)
       });
-      if (token === this.lookupToken) {
+      if (this.acceptLookup(token)) {
         this.stations.set([...stations].sort((first, second) => first.distanceFrom - second.distanceFrom));
       }
     } catch {
-      if (token === this.lookupToken) this.error.set('Weather stations could not be loaded. Try this location again.');
+      if (this.acceptLookup(token)) this.error.set('Weather stations could not be loaded. Try this location again.');
     } finally {
-      if (token === this.lookupToken) this.searchingStations.set(false);
+      if (this.acceptLookup(token)) this.searchingStations.set(false);
     }
   }
 
@@ -199,12 +258,19 @@ export class WeatherStationSelectorComponent implements OnChanges {
       return;
     }
     const token = ++this.lookupToken;
+    const fingerprint = this.currentPreviewFingerprint();
     this.error.set(undefined);
     this.candidateStation.set(station);
     this.stationPreview.set(undefined);
-    const preview = await this.workflow.previewStationSelection(station, range, this.previewDefinitions);
-    if (token === this.lookupToken && this.candidateStation()?.ID === station.ID && preview) {
-      this.stationPreview.set(preview);
+    try {
+      const preview = await this.workflow.previewStationSelection(station, range, this.previewDefinitions);
+      if (this.acceptLookup(token) && fingerprint === this.currentPreviewFingerprint()
+        && this.candidateStation()?.ID === station.ID && preview) {
+        this.stationPreview.set(preview);
+        this.reviewedFingerprint = fingerprint;
+      }
+    } catch {
+      if (this.acceptLookup(token)) this.error.set('The station preview could not be loaded. Try again.');
     }
   }
 
@@ -225,7 +291,8 @@ export class WeatherStationSelectorComponent implements OnChanges {
 
   confirmStation(): void {
     const station = this.candidateStation();
-    if (!station || !this.stationPreview() || this.disabled) return;
+    if (!station || !this.stationPreview() || this.disabled
+      || this.reviewedFingerprint !== this.currentPreviewFingerprint()) return;
     this.currentStationUnavailable.set(false);
     this.stationSelected.emit(station);
     this.closeSelector();
@@ -255,7 +322,7 @@ export class WeatherStationSelectorComponent implements OnChanges {
   closeSourceInspection(): void {
     this.sourceInspection.set(undefined);
     afterNextRender(() => {
-      if (this.previewChart) this.focusMonitor.focusVia(this.previewChart, 'program');
+      if (!this.destroyed && this.previewChart) this.focusMonitor.focusVia(this.previewChart, 'program');
     }, { injector: this.injector });
   }
 
@@ -274,16 +341,21 @@ export class WeatherStationSelectorComponent implements OnChanges {
     const stationId = this.selectedStationId;
     this.currentStationUnavailable.set(false);
     if (!stationId) return;
-    const token = ++this.lookupToken;
+    const token = ++this.verificationToken;
     this.checkingCurrentStation.set(true);
     try {
       const station = await this.stationLookup.getStation(stationId);
-      if (token === this.lookupToken) this.currentStationUnavailable.set(!station);
+      if (!this.destroyed && token === this.verificationToken) this.currentStationUnavailable.set(!station);
     } catch {
-      if (token === this.lookupToken) this.currentStationUnavailable.set(true);
+      if (!this.destroyed && token === this.verificationToken) this.currentStationUnavailable.set(true);
     } finally {
-      if (token === this.lookupToken) this.checkingCurrentStation.set(false);
+      if (!this.destroyed && token === this.verificationToken) this.checkingCurrentStation.set(false);
     }
+  }
+
+  private acceptLookup(token: number): boolean { return !this.destroyed && token === this.lookupToken; }
+  private currentPreviewFingerprint(): string {
+    return JSON.stringify([this.contextKey, this.previewRange, this.previewDefinitions]);
   }
 
   private openSourceInspection(seriesIndex: number, dataIndex: number): void {

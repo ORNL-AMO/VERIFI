@@ -85,7 +85,7 @@ export class MeterReadingFormService {
       chargesArray: this.formBuilder.array(value.chargesArray.map(charge => this.formBuilder.group({
         chargeGuid: this.formBuilder.nonNullable.control(charge.chargeGuid),
         chargeAmount: this.formBuilder.control(charge.chargeAmount), chargeUsage: this.formBuilder.control(charge.chargeUsage)
-      })))
+      })), meterChargeDefinitionsValidator(meter))
     });
     this.setEnabled(form, meter, true);
     return form;
@@ -133,6 +133,15 @@ export class MeterReadingFormService {
   updateReadingFromForm(meter: IdbUtilityMeter, reading: IdbUtilityMeterData, form: MeterReadingForm): IdbUtilityMeterData {
     return applyMeterReading(meter, reading, form.getRawValue());
   }
+}
+
+function meterChargeDefinitionsValidator(meter: IdbUtilityMeter): ValidatorFn {
+  const defined = new Set((meter.charges ?? []).map(charge => charge.guid));
+  return (control: AbstractControl): ValidationErrors | null => {
+    const charges = control.getRawValue() as MeterReadingChargeValues[];
+    const removed = charges.filter(charge => !defined.has(charge.chargeGuid)).map(charge => charge.chargeGuid);
+    return removed.length ? { removedMeterCharges: removed } : null;
+  };
 }
 
 function duplicateReadingDateValidator(

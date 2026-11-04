@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, WritableSignal, computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
@@ -15,8 +15,24 @@ import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflo
 import { WeatherPredictorReadingsComponent } from './weather-predictor-readings.component';
 import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
 import { WeatherSourceReadingsSlideoutComponent } from '../../shared/weather-source-readings/weather-source-readings-slideout.component';
+import { WeatherReadingMonthEditorComponent } from './weather-reading-month-editor/weather-reading-month-editor.component';
 
 describe('WeatherPredictorReadingsComponent', () => {
+  it('tracks range and child pristine events reactively without value edits or weather work', () => {
+    const fixture = setup([weatherPredictor()], [weatherReading(1)]);
+    const component = fixture.componentInstance;
+    const rangeChanges = vi.fn(); component.rangeForm.valueChanges.subscribe(rangeChanges);
+    component.rangeForm.markAsDirty(); expect(component.rangeDirty()).toBe(true); expect(component.hasDraftChanges()).toBe(true);
+    component.rangeForm.markAsPristine(); expect(component.rangeDirty()).toBe(false); expect(component.hasDraftChanges()).toBe(false);
+    component.openEdit(component.matrix().rows[0]); fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(WeatherReadingMonthEditorComponent)).componentInstance as WeatherReadingMonthEditorComponent;
+    editor.form.markAsDirty(); expect(component.hasDraftChanges()).toBe(true);
+    editor.form.markAsPristine(); expect(component.hasDraftChanges()).toBe(false);
+    expect(rangeChanges).not.toHaveBeenCalled();
+    expect(TestBed.inject(PredictorWeatherWorkflowService).previewStationGroup).not.toHaveBeenCalled();
+    expect(TestBed.inject(WeatherPredictorActionsService).applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
   it('renders dynamic predictor columns with status icons beside their values', () => {
     const predictors = [
       { guid: 'hdd', name: 'HDD 55', predictorType: 'Weather', weatherDataType: 'HDD', accountId: 'a', facilityId: 'f' },
@@ -76,8 +92,8 @@ describe('WeatherPredictorReadingsComponent', () => {
     expect(root.querySelector('ngb-pagination')).not.toBeNull();
 
     const pageSize = root.querySelector<HTMLSelectElement>('.weather-readings__control select')!;
-    expect(Array.from(pageSize.options).map(option => option.value)).toEqual(['12', '24', '36']);
-    pageSize.value = '24';
+    expect(Array.from(pageSize.options).map(option => option.textContent?.trim())).toEqual(['12', '24', '36']);
+    pageSize.value = pageSize.options[1].value;
     pageSize.dispatchEvent(new Event('change'));
     fixture.detectChanges();
 
@@ -93,7 +109,7 @@ describe('WeatherPredictorReadingsComponent', () => {
     }));
     const fixture = setup([weatherPredictor()], readings);
     const root = fixture.nativeElement as HTMLElement;
-    fixture.componentInstance.currentPage.set(2);
+    fixture.componentInstance.setCurrentPage(2);
     const filter = root.querySelectorAll<HTMLSelectElement>('.weather-readings__control select')[1];
 
     filter.value = 'attention';
@@ -253,6 +269,105 @@ describe('WeatherPredictorReadingsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('future months will be saved as 0');
     expect(fixture.componentInstance.canUpdateRange()).toBe(true);
   });
+
+  it('merges independent saved range endpoints while keeping view preferences outside draft dirtiness', () => {
+    const fixture = setup([weatherPredictor()], [weatherReading(1)]);
+    const component = fixture.componentInstance;
+    component.setPageSize('24'); component.setRowFilter('attention');
+    expect(component.rangeDirty()).toBe(false);
+    component.setEndMonth('2025-03');
+    const context = TestBed.inject(WeatherPredictorWorkbenchContextService);
+    (context.readings as WritableSignal<any[]>).set([{ ...weatherReading(12), year: 2024 }, weatherReading(1)]);
+    fixture.detectChanges();
+    expect(component.startMonth()).toBe('2024-12');
+    expect(component.endMonth()).toBe('2025-03');
+    expect(component.rangeConflicts()).toHaveLength(0);
+    expect(component.rangeDirty()).toBe(true);
+    expect(component.pageSize()).toBe(24);
+    expect(TestBed.inject(PredictorWeatherWorkflowService).previewStationGroup).not.toHaveBeenCalled();
+  });
+
+  it('reviews conflicting range endpoints and invalidates reviewed updates on committed revisions', async () => {
+    const preview = { workspaceRevision: 1, station: {}, addPredictors: [], updatePredictors: [], deletePredictors: [],
+      addReadings: [], updateReadings: [], deleteReadings: [], warningMonths: [] };
+    const fixture = setup([weatherPredictor()], [weatherReading(1)], vi.fn(), [], { previewStationGroup: vi.fn(async () => preview) });
+    const component = fixture.componentInstance;
+    component.setEndMonth('2025-03');
+    const context = TestBed.inject(WeatherPredictorWorkbenchContextService);
+    (context.readings as WritableSignal<any[]>).set([weatherReading(1), weatherReading(5)]); fixture.detectChanges();
+    expect(component.rangeConflicts()).toHaveLength(1);
+    component.resolveRangeConflicts({ [component.rangeConflicts()[0].id]: 'local' }); fixture.detectChanges();
+    expect(component.endMonth()).toBe('2025-03');
+    await component.reviewRangeUpdate();
+    expect(component.rangePreview()).toBe(preview);
+    (TestBed.inject(FacilityPredictorsWorkspaceService).revision as WritableSignal<number>).set(2); fixture.detectChanges();
+    expect(component.rangePreview()).toBeUndefined(); expect(component.rangeDirty()).toBe(true);
+  });
+
+  it('continues merging untouched saved range endpoints while another endpoint remains conflicted', () => {
+    const fixture = setup([weatherPredictor()], [weatherReading(1)]);
+    const component = fixture.componentInstance; component.setEndMonth('2025-03');
+    const readings = TestBed.inject(WeatherPredictorWorkbenchContextService).readings as WritableSignal<any[]>;
+    readings.set([{ ...weatherReading(12), year: 2024 }, weatherReading(5)]); fixture.detectChanges();
+    expect(component.rangeConflicts()).toHaveLength(1);
+    readings.set([{ ...weatherReading(11), year: 2024 }, weatherReading(5)]); fixture.detectChanges();
+    expect(component.rangeConflicts()).toHaveLength(1);
+    expect(component.startMonth()).toBe('2024-11'); expect(component.endMonth()).toBe('2025-03');
+    component.resolveRangeConflicts({ [component.rangeConflicts()[0].id]: 'local' });
+    expect(component.startMonth()).toBe('2024-11'); expect(component.endMonth()).toBe('2025-03');
+  });
+
+  it('keeps range edits when cancelling or confirming replacement of a dirty month', () => {
+    const fixture = setup([weatherPredictor()], [weatherReading(1)]);
+    const component = fixture.componentInstance;
+    component.setEndMonth('2025-03'); component.openEdit(component.matrix().rows[0]); fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(WeatherReadingMonthEditorComponent)).componentInstance as WeatherReadingMonthEditorComponent;
+    editor.setValue('hdd', '99');
+    component.openAdd();
+    expect(component.pendingReplacement()?.kind).toBe('add'); expect(component.editor()?.mode).toBe('edit');
+    component.cancelEditorReplacement(); expect(editor.values()['hdd']).toBe('99');
+    component.openAdd(); component.confirmEditorReplacement(); fixture.detectChanges();
+    expect(component.editor()?.mode).toBe('add'); expect(component.endMonth()).toBe('2025-03'); expect(component.rangeDirty()).toBe(true);
+    expect(fixture.debugElement.query(By.directive(WeatherReadingMonthEditorComponent)).componentInstance.month()).toBe('');
+  });
+
+  it('ignores late calculations when committed predictor definitions change', async () => {
+    let complete!: (values: any[]) => void;
+    const fixture = setup([weatherPredictor()], [], vi.fn(), [], {
+      calculateStationMonth: vi.fn(() => new Promise(resolve => { complete = resolve; }))
+    });
+    const component = fixture.componentInstance; component.openAdd();
+    const pending = component.calculateMonth({ year: 2026, month: 2 });
+    const context = TestBed.inject(WeatherPredictorWorkbenchContextService);
+    (context.predictors as WritableSignal<any[]>).set([{ ...weatherPredictor(), heatingBaseTemperature: 70 }]); fixture.detectChanges();
+    complete([{ predictorGuid: 'hdd', amount: 100, weatherDataWarning: false }]); await pending;
+    expect(component.calculatedValues()).toEqual([]); expect(component.calculating()).toBe(false);
+  });
+
+  it('retains an externally removed month draft and prevents save from recreating it', async () => {
+    const fixture = setup([weatherPredictor()], [weatherReading(1)]);
+    const component = fixture.componentInstance; component.openEdit(component.matrix().rows[0]); fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(WeatherReadingMonthEditorComponent)).componentInstance as WeatherReadingMonthEditorComponent;
+    editor.setValue('hdd', '99');
+    (TestBed.inject(WeatherPredictorWorkbenchContextService).readings as WritableSignal<any[]>).set([]); fixture.detectChanges();
+    expect(component.editorUnavailable()).toBe(true); expect(editor.values()['hdd']).toBe('99');
+    await component.saveMonth({ year: 2025, month: 1, values: [{ predictorGuid: 'hdd', amount: 99 }] });
+    expect(TestBed.inject(WeatherPredictorActionsService).applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it('resets old-owner save state and ignores a late month commit completion', async () => {
+    let complete!: () => void;
+    const fixture = setup([weatherPredictor()], [weatherReading(1)]);
+    vi.mocked(TestBed.inject(WeatherPredictorActionsService).applyWeatherStationMonth)
+      .mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    const component = fixture.componentInstance; component.openEdit(component.matrix().rows[0]); fixture.detectChanges();
+    const pending = component.saveMonth({ year: 2025, month: 1, values: [{ predictorGuid: 'hdd', amount: 99 }] });
+    expect(component.saving()).toBe(true);
+    (TestBed.inject(FacilityPredictorsWorkspaceService).facility as WritableSignal<any>).set({ guid: 'other-facility' }); fixture.detectChanges();
+    expect(component.saving()).toBe(false); expect(component.canAct()).toBe(true); expect(component.editor()).toBeUndefined();
+    complete(); await pending;
+    expect(component.saving()).toBe(false); expect(component.canAct()).toBe(true);
+  });
 });
 
 function setup(
@@ -270,6 +385,7 @@ function setup(
     imports: [WeatherPredictorReadingsComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
+        account: signal({ guid: 'a' }), facility: signal({ guid: 'f' }),
         canWrite: signal(workspaceOverrides.canWrite ?? true),
         hasPending: signal(workspaceOverrides.hasPending ?? false),
         revision: signal(1),
@@ -278,7 +394,7 @@ function setup(
       {
         provide: WeatherPredictorWorkbenchContextService,
         useValue: {
-          group, predictors: signal(predictors), readings: signal(readings),
+          group, groupKey: computed(() => group()?.routeKey ?? 'station:A'), predictors: signal(predictors), readings: signal(readings),
           creating: signal(false), notFound: signal(false)
         }
       },
@@ -288,7 +404,7 @@ function setup(
         cancel: vi.fn(), reset: vi.fn(), busy: signal(false), state: signal({ status: 'idle', message: '' }),
         ...workflowOverrides
       } },
-      { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), confirmDiscard: vi.fn() } },
+      { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), protectBeforeUnload: vi.fn(() => vi.fn()), confirmDiscard: vi.fn() } },
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
       { provide: CopyTableService, useValue: { copyTable } }
     ]

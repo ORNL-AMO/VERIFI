@@ -47,10 +47,13 @@ export class MeterReadingBillSlideoutComponent implements OnChanges, OnDestroy {
   private formSubscription?: Subscription;
   private readonly formValues = signal<MeterReadingValues | undefined>(undefined);
   private readonly latestValues = signal<MeterReadingValues | undefined>(undefined);
+  private readonly definedChargeGuids = signal<ReadonlySet<string>>(new Set());
   private readonly conflictValues = signal<readonly DraftConflict[]>([]);
   private readonly changedContext = signal(false);
   private readonly savingState = signal(false);
   readonly blocked = this.savingState.asReadonly();
+  readonly removedChargeGuids = computed(() => (this.formValues()?.chargesArray ?? [])
+    .filter(charge => !this.definedChargeGuids().has(charge.chargeGuid)).map(charge => charge.chargeGuid));
   readonly dirty = computed(() => {
     const value = this.formValues();
     return !!value && (this.conflictValues().length > 0 || this.changedContext() || !draftEqual(value, this.latestValues()));
@@ -83,6 +86,7 @@ export class MeterReadingBillSlideoutComponent implements OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     this.savingState.set(this.saving);
     if (!this.meter || !this.reading) return;
+    this.definedChargeGuids.set(new Set((this.meter.charges ?? []).map(charge => charge.guid)));
     const identity = [this.meter.accountId, this.meter.facilityId, this.meter.guid, this.reading.guid, this.mode].join('/');
     const current = this.mode === 'edit' ? this.existingReadings.find(item => item.guid === this.reading.guid) ?? this.reading : this.reading;
     if (identity !== this.identity || !this.form) {
@@ -161,11 +165,28 @@ export class MeterReadingBillSlideoutComponent implements OnChanges, OnDestroy {
     this.chargeViews = this.buildChargeViews();
   }
   save(addAnother: boolean): void {
-    if (!this.form || this.form.invalid || this.saving || !this.resourceAvailable || this.contextChanged || this.missingReading || this.conflicts.length) {
+    if (!this.form || this.form.invalid || this.saving || !this.resourceAvailable || this.contextChanged || this.missingReading || this.conflicts.length || this.removedChargeGuids().length) {
       this.form?.markAllAsTouched(); return;
     }
     this.saved.emit({ reading: this.formService.updateReadingFromForm(this.editorMeter, this.reading, this.form),
       baseline: this.baseline, context: meterReadingContext(this.editorMeter), addAnother });
+  }
+
+  acceptSavedChargeRemovals(): void {
+    if (!this.form || this.saving || !this.resourceAvailable || this.missingReading) return;
+    const removed = new Set(this.removedChargeGuids());
+    if (!removed.size) return;
+    const local = normalizeMeterReading(this.form.getRawValue());
+    this.formService.hydrate(this.form, { ...local, chargesArray: local.chargesArray.filter(charge => !removed.has(charge.chargeGuid)) });
+    this.conflicts = this.conflicts.filter(conflict => ![...removed].some(guid => conflict.id === `charges.${guid}` || conflict.id.startsWith(`charges.${guid}.`)));
+    this.editorMeter = { ...this.editorMeter, charges: this.editorMeter.charges?.filter(charge => !removed.has(charge.guid)) };
+    this.contextChanged = !meterReadingContextMatches(meterReadingContext(this.editorMeter), this.meter);
+    if (!this.contextChanged) this.editorMeter = structuredClone(this.meter);
+    this.formService.refreshValidation(this.form, this.editorMeter, this.reading, this.existingReadings);
+    this.formService.setEnabled(this.form, this.editorMeter, !this.contextChanged);
+    this.context = this.formService.contextForMeter(this.editorMeter);
+    this.formValues.set(normalizeMeterReading(this.form.getRawValue()));
+    this.chargeViews = this.buildChargeViews();
   }
 
   async reloadSavedBill(): Promise<void> {

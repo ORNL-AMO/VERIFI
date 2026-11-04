@@ -283,6 +283,24 @@ describe('MeterWorkbenchReadingsComponent', () => {
     expect(component.actionError()).toBeUndefined();
   });
 
+  it.each(['edit', 'add'] as const)('rejects a retained charge without a current definition in an %s bill', async mode => {
+    const meterValue = meter({ guid: 'meter-a', charges: [] });
+    const current = reading({ guid: 'reading-a', meterId: meterValue.guid, charges: [] });
+    const { fixture, meterHandler } = setupHarness({ meterValue, readings: mode === 'edit' ? [current] : [] });
+    const component = fixture.componentInstance;
+    if (mode === 'edit') await component.openEditBill(current);
+    else await component.openAddBill();
+    const original = component.billPanel()!.reading;
+    await component.saveBill({ reading: { ...original, totalCost: 99,
+      charges: [{ chargeGuid: 'removed-charge', chargeUsage: 34, chargeAmount: 88 }] },
+      baseline: readMeterReading(meterValue, original), context: meterReadingContext(meterValue), addAnother: false });
+
+    expect(meterHandler.updateMeterData).not.toHaveBeenCalled();
+    expect(meterHandler.addMeterData).not.toHaveBeenCalled();
+    expect(component.billPanel()).toBeDefined();
+    expect(component.actionError()).toContain('charge');
+  });
+
   it('blocks editing a bill onto another reading date while allowing the current reading date', async () => {
     const firstReading = reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, day: 1 });
     const secondReading = reading({ guid: 'reading-b', meterId: 'meter-a', month: 2, day: 1 });

@@ -1,8 +1,16 @@
 @let selectedStation = station();
 @let busy = workflow.busy() || committing() || deleting();
 @let canEditSetup = canEdit();
+@let rangeValidation = form.errors?.['weatherRange'];
 
 <section class="weather-setup" aria-label="Weather predictor setup">
+  <app-editor-conflict-review [conflicts]="conflicts()" [disabled]="committing() || deleting()" (resolved)="resolveConflicts($event)"></app-editor-conflict-review>
+  @if (missing()) {
+    <div class="v1-alert v1-alert--warning" role="alert">This saved weather station is no longer available. Your unsaved values are retained.</div>
+  }
+  @if (!missing() && removedPredictors().length > 0) {
+    <div class="v1-alert v1-alert--warning" role="alert">A predictor in this draft was removed. Use its saved deletion, or remove the retained row and explicitly add a new predictor before saving.</div>
+  }
   <div class="weather-setup__top-actions">
     <button type="button" class="v1-btn v1-btn--action" [disabled]="!canSubmit()" (click)="saveAndUpdateReadings()">
       <app-ui-icon [name]="busy ? 'loading' : 'refresh'" [spin]="busy"></app-ui-icon>
@@ -11,6 +19,7 @@
   </div>
 
   <app-weather-station-selector
+    [contextKey]="editIdentity() ?? ''"
     [selectedStationId]="selectedStation?.ID"
     [selectedStationName]="selectedStation?.name"
     [initialSearch]="initialStationSearch()"
@@ -26,22 +35,22 @@
         <span>Start month</span>
         <input
           type="month"
-          required
+          aria-required="true"
           [formControl]="form.controls.startMonth"
-          [attr.aria-invalid]="rangeError() ? 'true' : null"
-          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null">
+          [attr.aria-invalid]="rangeValidation ? 'true' : null"
+          [attr.aria-describedby]="rangeValidation ? 'weather-range-error' : null">
       </label>
       <label>
         <span>End month</span>
         <input
           type="month"
-          required
+          aria-required="true"
           [formControl]="form.controls.endMonth"
-          [attr.aria-invalid]="rangeError() ? 'true' : null"
-          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null">
+          [attr.aria-invalid]="rangeValidation ? 'true' : null"
+          [attr.aria-describedby]="rangeValidation ? 'weather-range-error' : null">
       </label>
     </div>
-    @if (rangeError(); as error) {
+    @if (rangeValidation; as error) {
       <p id="weather-range-error" class="weather-setup__field-error">{{ error }}</p>
     }
     @if (futureMonthCount() > 0) {
@@ -63,7 +72,8 @@
     <div class="weather-setup__definition-list">
       @for (definitionForm of form.controls.definitions.controls; track definitionForm.controls.draftId.value) {
         @let definition = definitions()[$index];
-        @let errors = definitionErrors().get(definition.draftId);
+        @let nameInvalid = definitionForm.controls.name.invalid;
+        @let baseInvalid = definitionForm.controls.baseTemperature.invalid || definitionForm.errors?.['weatherBaseRequired'];
         <article class="weather-setup__definition">
           <div class="weather-setup__definition-grid">
             <label>
@@ -83,11 +93,11 @@
               <input
                 type="text"
                 maxlength="100"
-                required
+                aria-required="true"
                 [formControl]="definitionForm.controls.name"
-                [attr.aria-invalid]="errors?.name ? 'true' : null"
-                [attr.aria-describedby]="errors?.name ? definition.draftId + '-name-error' : null">
-              @if (errors?.name) {
+                [attr.aria-invalid]="nameInvalid ? 'true' : null"
+                [attr.aria-describedby]="nameInvalid ? definition.draftId + '-name-error' : null">
+              @if (nameInvalid) {
                 <small [id]="definition.draftId + '-name-error'" class="weather-setup__field-error">
                   Enter a predictor name of 100 characters or fewer.
                 </small>
@@ -98,11 +108,11 @@
                 <span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span>
                 <input
                   type="number"
-                  required
+                  aria-required="true"
                   [formControl]="definitionForm.controls.baseTemperature"
-                  [attr.aria-invalid]="errors?.base ? 'true' : null"
-                  [attr.aria-describedby]="errors?.base ? definition.draftId + '-base-error' : null">
-                @if (errors?.base) {
+                  [attr.aria-invalid]="baseInvalid ? 'true' : null"
+                  [attr.aria-describedby]="baseInvalid ? definition.draftId + '-base-error' : null">
+                @if (baseInvalid) {
                   <small [id]="definition.draftId + '-base-error'" class="weather-setup__field-error">
                     Enter a base temperature.
                   </small>

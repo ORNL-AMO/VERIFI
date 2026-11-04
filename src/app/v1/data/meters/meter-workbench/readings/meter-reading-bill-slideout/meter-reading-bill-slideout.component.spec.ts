@@ -140,6 +140,75 @@ describe('MeterReadingBillSlideoutComponent', () => {
     component.save(false); expect(saved).toHaveBeenCalledOnce();
   });
 
+  it('accepts a saved charge deletion after keeping the local conflict choice without losing unrelated bill edits', () => {
+    const current = reading({ charges: [
+      { chargeGuid: 'charge-real-demand', chargeAmount: 12, chargeUsage: 34 },
+      { chargeGuid: 'charge-power-factor', chargeAmount: 56, chargeUsage: 78 }
+    ] });
+    const fixture = setup({ mode: 'edit', readingValue: current, existingReadings: [current] });
+    const component = fixture.componentInstance;
+    const form = component.form!;
+    form.controls.totalCost.setValue(99);
+    form.controls.chargesArray.at(0).controls.chargeAmount.setValue(88);
+    fixture.componentRef.setInput('existingReadings', [{ ...current, charges: [current.charges![1]] }]); fixture.detectChanges();
+    expect(component.conflicts.map(conflict => conflict.id)).toContain('charges.charge-real-demand');
+    component.resolveConflicts({ 'charges.charge-real-demand': 'local' }); fixture.detectChanges();
+    expect(component.conflicts).toEqual([]);
+    fixture.componentRef.setInput('meter', { ...component.meter,
+      charges: component.meter.charges!.filter(charge => charge.guid !== 'charge-real-demand') }); fixture.detectChanges();
+
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    component.save(false); expect(saved).not.toHaveBeenCalled();
+    const accept = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'))
+      .find(button => button.textContent?.includes('Accept saved charge removals'));
+    expect(accept).toBeDefined();
+    accept!.click(); fixture.detectChanges();
+
+    expect(component.form).toBe(form);
+    expect(component.contextChanged).toBe(false);
+    expect(form.enabled).toBe(true);
+    expect(form.controls.totalCost.value).toBe(99);
+    expect(form.controls.chargesArray.getRawValue()).toEqual([
+      { chargeGuid: 'charge-power-factor', chargeAmount: 56, chargeUsage: 78 }
+    ]);
+    component.save(false);
+    expect(saved).toHaveBeenCalledWith(expect.objectContaining({ reading: expect.objectContaining({
+      totalCost: 99, charges: [{ chargeGuid: 'charge-power-factor', chargeAmount: 56, chargeUsage: 78 }]
+    }) }));
+  });
+
+  it('retains dirty protection when accepting a definition removal also removes values still present on the saved bill', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('meter', { ...component.meter,
+      charges: component.meter.charges!.filter(charge => charge.guid !== 'charge-power-factor') }); fixture.detectChanges();
+    component.acceptSavedChargeRemovals(); fixture.detectChanges();
+
+    expect(component.form!.controls.chargesArray.getRawValue()).toEqual([
+      { chargeGuid: 'charge-real-demand', chargeAmount: 12, chargeUsage: 34 }
+    ]);
+    expect(component.form!.valid).toBe(true);
+    expect(component.dirty()).toBe(true);
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    component.save(false); expect(saved).toHaveBeenCalledOnce();
+  });
+
+  it('keeps an incompatible unit change blocked after accepting a separate removed charge', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    component.form!.controls.totalCost.setValue(99);
+    fixture.componentRef.setInput('meter', { ...component.meter, demandUnit: 'MW',
+      charges: component.meter.charges!.filter(charge => charge.guid !== 'charge-power-factor') }); fixture.detectChanges();
+    component.acceptSavedChargeRemovals(); fixture.detectChanges();
+
+    expect(component.contextChanged).toBe(true);
+    expect(component.form!.disabled).toBe(true);
+    expect(component.form!.controls.totalCost.value).toBe(99);
+    expect(renderedCharges(fixture)[0]).toMatchObject({ unit: 'kW' });
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    component.save(false); expect(saved).not.toHaveBeenCalled();
+  });
+
   it('preserves a dirty bill and refreshes duplicate-date validation when the reading list changes', () => {
     const current = reading({ guid: 'reading-a', meterId: 'meter-a' });
     const fixture = setup({ mode: 'edit', readingValue: current, existingReadings: [current] });

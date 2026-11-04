@@ -276,6 +276,10 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy, HasUnsavedCha
       const latest = readMeterReading(currentMeter, currentReading);
       const merged = reconcileMeterReading(baseline, submitted, latest);
       if (merged.conflicts.length) throw new EditorConflictError(latest);
+      const chargeGuids = new Set((currentMeter.charges ?? []).map(charge => charge.guid));
+      if (merged.value.chargesArray.some(charge => !chargeGuids.has(charge.chargeGuid))) {
+        throw new WorkspaceWriteError('validation-failed', 'A detailed charge is no longer defined for this meter. Accept the saved charge removals before saving.');
+      }
       const updated = applyMeterReading(currentMeter, currentReading, merged.value);
       const duplicate = this.accountWorkspace.meterData().some(item => item.accountId === identity.accountGuid
         && item.facilityId === identity.facilityGuid && item.meterId === identity.meterGuid && item.guid !== updated.guid
