@@ -1,8 +1,23 @@
 import { ConflictChoices, DraftMerge, reconcileFields, reconcileKeyedItems } from '@app/v1/data/editing/draft-reconciliation';
-import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
 import { MeterReadingValues } from './meter-reading-form.service';
 
-export function meterReadingContextKey(meter: IdbUtilityMeter): string {
+export interface MeterReadingContext {
+  readonly settingsKey: string;
+  readonly chargeTypes: readonly Readonly<Pick<MeterCharge, 'guid' | 'chargeType'>>[];
+}
+
+export function meterReadingContext(meter: IdbUtilityMeter): MeterReadingContext {
+  return { settingsKey: meterReadingContextKey(meter),
+    chargeTypes: (meter.charges ?? []).map(({ guid, chargeType }) => ({ guid, chargeType })) };
+}
+
+export function meterReadingContextMatches(context: MeterReadingContext, meter: IdbUtilityMeter): boolean {
+  return context.settingsKey === meterReadingContextKey(meter)
+    && context.chargeTypes.every(before => meter.charges?.some(current => current.guid === before.guid && current.chargeType === before.chargeType));
+}
+
+function meterReadingContextKey(meter: IdbUtilityMeter): string {
   return JSON.stringify([meter.source, meter.startingUnit, meter.energyUnit, meter.scope, meter.heatCapacity,
     meter.vehicleCategory, meter.vehicleCollectionUnit, meter.vehicleDistanceUnit, meter.vehicleFuelEfficiency, meter.demandUnit]);
 }

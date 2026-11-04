@@ -1,4 +1,5 @@
 import { injectSettingsEditSession, EditSaveMode } from '@app/v1/data/editing/settings-edit-session';
+import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
 import { HasUnsavedChanges } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { MeterSettingsForm, MeterSettingsValues, readMeterSettings, normalizeMeterSettings } from '@app/v1/shared/meter-settings/meter-settings-values';
 import { MeterSettingsActionsService } from '../../meter-settings-actions.service';
@@ -96,6 +97,10 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   private deleteModalOpen = false;
 
   @ViewChild('deleteMeterConfirmModal') private readonly deleteMeterConfirmModal?: TemplateRef<unknown>;
+
+  constructor() {
+    registerDataDraft(signal(false), () => {}, this.deleting);
+  }
 
   ngAfterViewInit(): void {
     this.scrollToFragment(this.route.snapshot.fragment);

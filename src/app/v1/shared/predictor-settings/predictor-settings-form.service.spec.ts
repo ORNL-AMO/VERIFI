@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { normalizeStandardPredictorSettings } from '@app/v1/data/predictors/models/standard-predictor-settings.models';
 import { PredictorSettingsFormService } from './predictor-settings-form.service';
 
 describe('PredictorSettingsFormService', () => {
@@ -46,6 +47,20 @@ describe('PredictorSettingsFormService', () => {
       noLongerInUseYear: 2026,
       noLongerInUseMonth: 2
     });
+  });
+
+  it.each(['reset', 'reconcile'] as const)('hydrates %s text silently while keeping persistence normalized', mode => {
+    const form = service.build(predictor());
+    form.patchValue({ name: ' Name ', unit: ' kg ', description: ' Note ' });
+    const changes = vi.fn(); form.valueChanges.subscribe(changes);
+
+    service.hydrate(form, normalizeStandardPredictorSettings(form.getRawValue()), mode);
+
+    expect(form.getRawValue()).toMatchObject(mode === 'reconcile'
+      ? { name: ' Name ', unit: ' kg ', description: ' Note ' }
+      : { name: 'Name', unit: 'kg', description: 'Note' });
+    expect(changes).not.toHaveBeenCalled();
+    expect(service.updatePredictor(predictor(), form)).toMatchObject({ name: 'Name', unit: 'kg', description: 'Note' });
   });
 });
 

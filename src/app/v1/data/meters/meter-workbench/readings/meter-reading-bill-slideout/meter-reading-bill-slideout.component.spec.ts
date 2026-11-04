@@ -96,6 +96,119 @@ describe('MeterReadingBillSlideoutComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('A reading already exists for this date.');
   });
 
+  it('retains edited usage in its original charge unit until the changed setup is explicitly reloaded', async () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const form = component.form!;
+    form.controls.chargesArray.at(0).controls.chargeUsage.setValue(99);
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    fixture.componentRef.setInput('meter', { ...component.meter, charges: component.meter.charges!.map(charge =>
+      charge.guid === 'charge-real-demand' ? { ...charge, chargeType: 'consumption' } : charge) });
+    fixture.detectChanges();
+
+    expect(component.contextChanged).toBe(true);
+    expect(component.form).toBe(form);
+    expect(form.disabled).toBe(true);
+    expect(renderedCharges(fixture)[0]).toMatchObject({ usage: '99', unit: 'kW' });
+    component.save(false); expect(saved).not.toHaveBeenCalled();
+    const cancelledReload = component.reloadSavedBill();
+    component.resolveDiscard(false); await cancelledReload;
+    expect(component.form).toBe(form);
+    const confirmedReload = component.reloadSavedBill();
+    component.resolveDiscard(true); await confirmedReload; fixture.detectChanges();
+    expect(component.contextChanged).toBe(false);
+    expect(renderedCharges(fixture)[0]).toMatchObject({ usage: '34', unit: 'kWh' });
+    component.save(false); expect(saved).toHaveBeenCalledOnce();
+  });
+
+  it('accepts definition additions, renames, and reordering without blocking an edited bill', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const form = component.form!;
+    form.controls.chargesArray.at(0).controls.chargeUsage.setValue(99);
+    fixture.componentRef.setInput('meter', { ...component.meter, charges: [
+      { guid: 'charge-new', name: 'New charge', chargeType: 'other', displayUsageInTable: false, displayChargeInTable: true },
+      ...[...component.meter.charges!].reverse().map(charge => ({ ...charge, name: 'Renamed charge' }))
+    ] });
+    fixture.detectChanges();
+
+    expect(component.contextChanged).toBe(false);
+    expect(component.form).toBe(form);
+    expect(form.enabled).toBe(true);
+    expect(renderedCharges(fixture)[0]).toMatchObject({ name: 'Renamed charge', usage: '99', unit: 'kW' });
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    component.save(false); expect(saved).toHaveBeenCalledOnce();
+  });
+
+  it('accepts a saved charge deletion after keeping the local conflict choice without losing unrelated bill edits', () => {
+    const current = reading({ charges: [
+      { chargeGuid: 'charge-real-demand', chargeAmount: 12, chargeUsage: 34 },
+      { chargeGuid: 'charge-power-factor', chargeAmount: 56, chargeUsage: 78 }
+    ] });
+    const fixture = setup({ mode: 'edit', readingValue: current, existingReadings: [current] });
+    const component = fixture.componentInstance;
+    const form = component.form!;
+    form.controls.totalCost.setValue(99);
+    form.controls.chargesArray.at(0).controls.chargeAmount.setValue(88);
+    fixture.componentRef.setInput('existingReadings', [{ ...current, charges: [current.charges![1]] }]); fixture.detectChanges();
+    expect(component.conflicts.map(conflict => conflict.id)).toContain('charges.charge-real-demand');
+    component.resolveConflicts({ 'charges.charge-real-demand': 'local' }); fixture.detectChanges();
+    expect(component.conflicts).toEqual([]);
+    fixture.componentRef.setInput('meter', { ...component.meter,
+      charges: component.meter.charges!.filter(charge => charge.guid !== 'charge-real-demand') }); fixture.detectChanges();
+
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    component.save(false); expect(saved).not.toHaveBeenCalled();
+    const accept = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'))
+      .find(button => button.textContent?.includes('Accept saved charge removals'));
+    expect(accept).toBeDefined();
+    accept!.click(); fixture.detectChanges();
+
+    expect(component.form).toBe(form);
+    expect(component.contextChanged).toBe(false);
+    expect(form.enabled).toBe(true);
+    expect(form.controls.totalCost.value).toBe(99);
+    expect(form.controls.chargesArray.getRawValue()).toEqual([
+      { chargeGuid: 'charge-power-factor', chargeAmount: 56, chargeUsage: 78 }
+    ]);
+    component.save(false);
+    expect(saved).toHaveBeenCalledWith(expect.objectContaining({ reading: expect.objectContaining({
+      totalCost: 99, charges: [{ chargeGuid: 'charge-power-factor', chargeAmount: 56, chargeUsage: 78 }]
+    }) }));
+  });
+
+  it('retains dirty protection when accepting a definition removal also removes values still present on the saved bill', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('meter', { ...component.meter,
+      charges: component.meter.charges!.filter(charge => charge.guid !== 'charge-power-factor') }); fixture.detectChanges();
+    component.acceptSavedChargeRemovals(); fixture.detectChanges();
+
+    expect(component.form!.controls.chargesArray.getRawValue()).toEqual([
+      { chargeGuid: 'charge-real-demand', chargeAmount: 12, chargeUsage: 34 }
+    ]);
+    expect(component.form!.valid).toBe(true);
+    expect(component.dirty()).toBe(true);
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    component.save(false); expect(saved).toHaveBeenCalledOnce();
+  });
+
+  it('keeps an incompatible unit change blocked after accepting a separate removed charge', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    component.form!.controls.totalCost.setValue(99);
+    fixture.componentRef.setInput('meter', { ...component.meter, demandUnit: 'MW',
+      charges: component.meter.charges!.filter(charge => charge.guid !== 'charge-power-factor') }); fixture.detectChanges();
+    component.acceptSavedChargeRemovals(); fixture.detectChanges();
+
+    expect(component.contextChanged).toBe(true);
+    expect(component.form!.disabled).toBe(true);
+    expect(component.form!.controls.totalCost.value).toBe(99);
+    expect(renderedCharges(fixture)[0]).toMatchObject({ unit: 'kW' });
+    const saved = vi.fn(); component.saved.subscribe(saved);
+    component.save(false); expect(saved).not.toHaveBeenCalled();
+  });
+
   it('preserves a dirty bill and refreshes duplicate-date validation when the reading list changes', () => {
     const current = reading({ guid: 'reading-a', meterId: 'meter-a' });
     const fixture = setup({ mode: 'edit', readingValue: current, existingReadings: [current] });
@@ -251,6 +364,35 @@ describe('MeterReadingBillSlideoutComponent', () => {
     expect(component.form!.controls.totalCost.value).toBe(30); expect(component.dirty()).toBe(false);
     fixture.componentRef.setInput('saving', true); fixture.detectChanges(); expect(component.blocked()).toBe(true);
     fixture.componentRef.setInput('saving', false); fixture.detectChanges(); expect(component.blocked()).toBe(false);
+  });
+
+  it('keeps the last real saved baseline and close protection when a refreshed bill disappears', async () => {
+    const current = reading({ guid: 'reading-a', meterId: 'meter-a', totalCost: 20 });
+    const fixture = setup({ mode: 'edit', readingValue: current, existingReadings: [current] });
+    const component = fixture.componentInstance;
+    const form = component.form!;
+    fixture.componentRef.setInput('existingReadings', [{ ...current, totalCost: 30 }]); fixture.detectChanges();
+    form.controls.totalCost.setValue(20);
+    expect(component.dirty()).toBe(true);
+    fixture.componentRef.setInput('existingReadings', []); fixture.detectChanges();
+
+    expect(component.missingReading).toBe(true);
+    expect(component.form).toBe(form);
+    expect(form.disabled).toBe(true);
+    expect(form.controls.totalCost.value).toBe(20);
+    expect(component.dirty()).toBe(true);
+    const cancelled = vi.fn(); component.cancelled.subscribe(cancelled);
+    const show = vi.spyOn(TestBed.inject(ModalPortalService), 'show');
+    const closing = component.requestClose();
+    expect(show).toHaveBeenCalledOnce();
+    component.resolveDiscard(false); await closing;
+    expect(cancelled).not.toHaveBeenCalled();
+    fixture.componentRef.setInput('existingReadings', [{ ...current, totalCost: 30 }]); fixture.detectChanges();
+    expect(component.missingReading).toBe(false);
+    expect(component.conflicts).toEqual([]);
+    expect(form.controls.totalCost.value).toBe(20);
+    expect(component.dirty()).toBe(true);
+    form.controls.totalCost.setValue(30); expect(component.dirty()).toBe(false);
   });
 });
 

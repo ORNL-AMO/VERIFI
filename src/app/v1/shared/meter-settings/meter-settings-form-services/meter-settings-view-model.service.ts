@@ -28,10 +28,12 @@ import {
   getStartingUnitOptions
 } from '@shared/sharedHelperFunctions';
 import { MeterSettingsRuleContext, MeterSettingsViewModel } from './meter-settings-form.models';
+import { MeterSettingsValidationService } from './meter-settings-validation.service';
 
 @Injectable({ providedIn: 'root' })
 export class MeterSettingsViewModelService {
   private readonly energyUnitsHelperService = inject(EnergyUnitsHelperService);
+  private readonly validation = inject(MeterSettingsValidationService);
 
   buildMeterSettingsViewModel(form: MeterSettingsForm, context: MeterSettingsRuleContext): MeterSettingsViewModel {
     const source = form.controls.source.value as MeterSource;
@@ -83,6 +85,7 @@ export class MeterSettingsViewModelService {
       selectedVehicleFuelOption,
       globalWarmingPotentials,
       chargeTypes: getChargeTypes(source),
+      incompatibleChargeTypes: this.validation.getIncompatibleChargeTypes(source, form.controls.chargesArray.getRawValue()),
       months: Months,
       noLongerInUseYearOptions: this.getNoLongerInUseYearOptions(),
       assessmentReportOption: context.account.assessmentReportVersion,

@@ -2,7 +2,7 @@ import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
 import { EditorConflictError } from '@app/v1/data/editing/draft-reconciliation';
 import { HasUnsavedChanges } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { applyMeterReading, readMeterReading } from './meter-reading-form.service';
-import { meterReadingContextKey, reconcileMeterReading } from './meter-reading-editing';
+import { meterReadingContext, meterReadingContextMatches, reconcileMeterReading } from './meter-reading-editing';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { FocusMonitor } from '@angular/cdk/a11y';
@@ -264,11 +264,11 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy, HasUnsavedCha
     const identity = { accountGuid: account.guid, facilityGuid: meter.facilityId, meterGuid: meter.guid, readingGuid: panel.reading.guid };
     const baseline = save.baseline ?? readMeterReading(meter, panel.reading);
     const submitted = readMeterReading(meter, save.reading);
-    const contextKey = save.contextKey ?? meterReadingContextKey(meter);
+    const context = save.context ?? meterReadingContext(meter);
     const isCurrentPanel = () => this.account()?.guid === identity.accountGuid && this.meter()?.guid === identity.meterGuid && this.billPanel() === panel;
     const prepare = () => {
       const currentMeter = this.accountWorkspace.meters().find(item => item.guid === identity.meterGuid && item.accountId === identity.accountGuid && item.facilityId === identity.facilityGuid);
-      if (!currentMeter || this.accountWorkspace.account()?.guid !== identity.accountGuid || meterReadingContextKey(currentMeter) !== contextKey) {
+      if (!currentMeter || this.accountWorkspace.account()?.guid !== identity.accountGuid || !meterReadingContextMatches(context, currentMeter)) {
         throw new WorkspaceWriteError('stale-workspace', 'Meter setup changed. Reopen the bill before saving.');
       }
       const currentReading = panel.mode === 'edit' ? this.accountWorkspace.meterData().find(item => item.guid === identity.readingGuid && item.meterId === identity.meterGuid && item.accountId === identity.accountGuid && item.facilityId === identity.facilityGuid) : save.reading;
@@ -276,6 +276,10 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy, HasUnsavedCha
       const latest = readMeterReading(currentMeter, currentReading);
       const merged = reconcileMeterReading(baseline, submitted, latest);
       if (merged.conflicts.length) throw new EditorConflictError(latest);
+      const chargeGuids = new Set((currentMeter.charges ?? []).map(charge => charge.guid));
+      if (merged.value.chargesArray.some(charge => !chargeGuids.has(charge.chargeGuid))) {
+        throw new WorkspaceWriteError('validation-failed', 'A detailed charge is no longer defined for this meter. Accept the saved charge removals before saving.');
+      }
       const updated = applyMeterReading(currentMeter, currentReading, merged.value);
       const duplicate = this.accountWorkspace.meterData().some(item => item.accountId === identity.accountGuid
         && item.facilityId === identity.facilityGuid && item.meterId === identity.meterGuid && item.guid !== updated.guid

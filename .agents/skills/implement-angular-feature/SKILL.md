@@ -36,6 +36,8 @@ For Meter, Standard Predictor, and Weather workbench changes, follow the [Data f
 ## Guardrails
 
 - Do not introduce a new design system or Angular architecture as part of a feature issue.
+- Distinguish a rejected write from a committed write whose workspace publication failed. Preserve later edit intent and draft protection until verified, and keep error-provided saved snapshots authoritative across conflict review and discard until a new publication arrives. Cover retry against the feature's reconciliation rules, rather than only asserting a dirty flag.
+- Distinguish reset from reconciliation hydration. Keep normalized-equivalent raw text during save acknowledgement and refresh, while reset, identity changes, and discard replace it. Apply cross-field validators to merged values without silently changing retained rows. Keep routed editors mounted when their saved target disappears, and register feature persistence such as deletion with shared blocked/unload protection.
 - Do not assume a browser-only API is available in tests or Electron without checking the existing abstraction.
 - Do not add template-driven forms in production v1. Existing allowlisted migration debt may remain until its owning workflow is changed.
 - Do not change a persisted model, calculation contract, file format, or IPC channel silently; use the matching repository skill.

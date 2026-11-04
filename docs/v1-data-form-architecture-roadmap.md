@@ -57,7 +57,7 @@ Protect this architecture with combined regression runs: normalized values and f
 
 The [native creation-to-Settings regression](../src/app/v1/data/meters/meter-workbench/settings/meter-creation-settings.browser.spec.ts) persists all seven meter sources through the real creation command, reloads their saved records into Settings, and verifies scope, units, site-to-source factors, pristine hydration, no additional writes, and database reopening. Creation defaults ship with the initialization repair so each stacked change remains safe independently.
 
-Use the [validation workflow](../.agents/skills/validate-web-and-electron/SKILL.md) to select checks. This implementation also requires the full test suite, app type-check, and both production builds because source defaults and shared persisted-value contracts are involved. No IndexedDB schema or data-version migration is introduced.
+Use the [validation workflow](../.agents/skills/validate-web-and-electron/SKILL.md) to select checks. The completed stack is verified with the full test suite, app type-check, and both production builds, including the inherited source defaults and shared value contracts. No IndexedDB schema or data-version migration is introduced.
 
 Validation completed for this implementation:
 
@@ -65,11 +65,23 @@ Validation completed for this implementation:
 | --- | --- |
 | `npm run validate:agent -- --mode plan` | Completed; selected focused specs, app type-check, browser suite, and production web build. Both production targets were also checked for the shared value/default changes. |
 | `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
-| `npm run test:all:ci` | Passed: 3,228 unit tests in 505 files and 330 Chromium tests in 70 files. |
+| `npm run test:all:ci` | Passed after syncing the merged stack and fixing retained charges: 3,295 unit tests in 507 files and 337 Chromium tests in 71 files. |
 | `npm run build-prod` | Passed. |
 | `npm run build-prod-electron` | Passed. |
 
 The regression set includes numeric/text account-number import, edit, export, and backup preservation; queued latest-record updates and native IndexedDB rollback/reopen; sequential saved publications during unresolved conflicts; accepted/cancelled route reuse and history navigation; keyboard focus, native dropdowns, and narrow layouts. The Angular lifecycle simplification adds conditional shared-listener ownership, independent registration cleanup, destroyed-host save cancellation and stale-completion protection, form-state transitions without value changes, and validator/readiness consistency. Source/group coverage includes changing gas in an Energy group to water, explicit reassignment or Ungrouped, preserved readings, filtered native options, current group revalidation, and persisted source/group values after reopening. Production builds retain warnings from unchanged stylesheet budgets, browser targets, and CommonJS dependencies. The earlier focused-test exit 134 did not recur with the required execution permissions.
+
+## Inherited stack review corrections
+
+Settings review corrections validate charge types against the merged source without replacing retained rows, register meter deletion with shared navigation/unload protection, and keep the Predictor outlet mounted after a saved record disappears. Hydration distinguishes reconciliation from reset so Standard Predictor typing retains normalized-equivalent raw text through acknowledgements and refreshes, while discard and identity changes replace it. Persisted shapes and GUID relationships remain unchanged.
+
+Review validation passes 162 focused unit tests, 21 focused Chromium checks, and the full suite of 3,211 unit tests and 334 Chromium tests. The app type-check and both production builds pass. Native checks cover typing/caret retention, disabled charge selections, explicit remapping, atomic rejection, and reopening; routed coverage verifies retained missing-record drafts and navigation protection.
+
+## Reading editor review corrections
+
+Meter bills retain their last actual saved snapshot when the reading disappears, preserving dirty state, discard confirmation, and unload protection. Charge context includes each existing definition's GUID and type: changed or removed definitions block edited bills and queued saves, while additions, renames, and reordering remain compatible. Affected drafts retain their original units until explicitly reloaded. The Predictor workbench outlet fix inherited from Settings also retains dirty reading editors when their predictor disappears; routed regression coverage verifies the disabled form and navigation/unload protection.
+
+The Weather stack sync retains those fixes. Bill editors also let users explicitly accept saved charge removals after a local conflict choice, dropping only those charge rows while preserving unrelated edits and any remaining unit-context block. Form validation and queued writes reject charge GUIDs without current meter definitions. This does not change persisted shapes or clean up historical records on opening.
 
 ## Deferred emissions catalog correction
 

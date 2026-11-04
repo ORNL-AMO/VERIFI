@@ -143,6 +143,64 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     expect(fixture.componentInstance.form()!.controls.description.value).toBe('Draft note');
   });
 
+  it.each(['name', 'unit', 'description'] as const)('preserves raw %s text typed during a save while persisting normalized values', async field => {
+    vi.useFakeTimers();
+    let finish!: () => void;
+    const first = new Promise<void>(resolve => { finish = resolve; });
+    const updatePredictor = vi.fn().mockImplementationOnce(async (value: any) => { await first; return value; })
+      .mockImplementation(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    const control = fixture.componentInstance.form()!.controls[field];
+    control.setValue('First');
+    await vi.advanceTimersByTimeAsync(650);
+    control.setValue('First ');
+
+    finish(); await first; await vi.advanceTimersByTimeAsync(0); fixture.detectChanges();
+
+    expect(control.value).toBe('First ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+    await vi.advanceTimersByTimeAsync(650);
+    expect(updatePredictor).toHaveBeenCalledOnce();
+    expect(updatePredictor.mock.calls[0][0][field]).toBe('First');
+    control.setValue(`${control.value}word`);
+    await vi.advanceTimersByTimeAsync(650);
+    expect(control.value).toBe('First word');
+    expect(updatePredictor.mock.calls[1][0][field]).toBe('First word');
+  });
+
+  it('preserves raw local text through remote conflicts while applying changed saved fields and explicit saved choices', async () => {
+    vi.useFakeTimers();
+    const updatePredictor = vi.fn(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    const form = fixture.componentInstance.form()!;
+    form.patchValue({ name: 'Local ', unit: 'tons ', description: 'My note ' });
+
+    fixture.selectedPredictor.set({ ...fixture.selectedPredictor(), unit: 'kg', description: 'Saved note' });
+    fixture.detectChanges();
+
+    expect(form.getRawValue()).toMatchObject({ name: 'Local ', unit: 'kg', description: 'My note ' });
+    expect(fixture.componentInstance.editor.conflicts().map(conflict => conflict.id)).toEqual(['description']);
+    fixture.componentInstance.resolveConflicts({ description: 'saved' });
+    await vi.advanceTimersByTimeAsync(0); fixture.detectChanges();
+    expect(form.getRawValue()).toMatchObject({ name: 'Local ', unit: 'kg', description: 'Saved note' });
+    expect(updatePredictor).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ name: 'Local', unit: 'kg', description: 'Saved note' }));
+  });
+
+  it('replaces raw text on explicit discard and resource identity changes', () => {
+    const fixture = createFixture();
+    const form = fixture.componentInstance.form()!;
+    form.patchValue({ name: ' Production ', unit: ' tons ', description: ' ' });
+    fixture.componentInstance.discardChanges();
+    expect(form.getRawValue()).toMatchObject({ name: 'Production', unit: 'tons', description: '' });
+
+    form.patchValue({ name: ' Production ', unit: ' tons ', description: ' ' });
+    fixture.selectedPredictor.set(predictor({ guid: 'predictor-b' }));
+    fixture.predictorGuid.set('predictor-b'); fixture.detectChanges();
+    expect(fixture.componentInstance.form()!.getRawValue()).toMatchObject({ name: 'Production', unit: 'tons', description: '' });
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+    expect(fixture.updateSettings).not.toHaveBeenCalled();
+  });
+
   it('holds overlapping saved changes for an explicit choice', async () => {
     vi.useFakeTimers();
     const updatePredictor = vi.fn(async (value: any) => value);

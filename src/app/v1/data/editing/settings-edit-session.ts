@@ -1,10 +1,12 @@
 import { DestroyRef, Injector, Signal, assertInInjectionContext, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { ConflictChoices, DraftConflict, DraftMerge, EditorConflictError, draftEqual } from './draft-reconciliation';
 import { registerDataDraft } from './register-data-draft';
 
 export type EditSaveMode = 'debounced' | 'immediate';
+export type SettingsHydrationMode = 'reset' | 'reconcile';
 export type SettingsEditState = 'idle' | 'dirty' | 'saving' | 'saved' | 'invalid' | 'error' | 'conflict';
 export interface SettingsEditAdapter<T> {
   readonly key: Signal<string>;
@@ -13,7 +15,8 @@ export interface SettingsEditAdapter<T> {
   readonly pendingOwners: Signal<readonly (string | undefined)[]>;
   readonly changes: Observable<EditSaveMode>;
   read(): T;
-  hydrate(value: T | undefined): void;
+  /** Reset replaces the draft; reconciliation may retain equivalent raw text. */
+  hydrate(value: T | undefined, mode?: SettingsHydrationMode): void;
   normalize(value: T): T;
   valid(value: T): boolean;
   reconcile(base: T, local: T, saved: T, choices?: ConflictChoices): DraftMerge<T>;
@@ -43,6 +46,9 @@ export class SettingsEditSession<T> {
   private readonly conflictValue = signal<readonly DraftConflict[]>([]);
   private baseline?: T;
   private latest?: T;
+  /** Source publication identity is separate from snapshots returned by a failed command. */
+  private observedSaved?: T;
+  private unverifiedCommit = false;
   private activeKey = '';
   private timer?: ReturnType<typeof setTimeout>;
   private dueAt?: number;
@@ -86,17 +92,17 @@ export class SettingsEditSession<T> {
   edited(mode: EditSaveMode = 'debounced'): void {
     if (this.destroyed() || !this.baseline || !this.latest) return;
     this.clearTimer(); this.errorValue.set(undefined);
+    this.dueAt = mode === 'immediate' ? Date.now() : Date.now() + SETTINGS_EDIT_DEBOUNCE_MS;
     const local = this.adapter.normalize(this.adapter.read());
     if (this.conflicts().length) {
       const merged = this.adapter.reconcile(this.baseline, local, this.latest);
       this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? this.baseline : this.latest));
       this.conflictValue.set(merged.conflicts);
+      this.adapter.hydrate(merged.value, 'reconcile');
       if (merged.conflicts.length) { this.dirtyValue.set(true); this.stateValue.set('conflict'); return; }
-      this.adapter.hydrate(merged.value);
     }
     this.refreshDirty();
     if (!this.dirty()) { this.dueAt = undefined; this.stateValue.set(this.saving() ? 'saving' : 'saved'); return; }
-    this.dueAt = mode === 'immediate' ? Date.now() : Date.now() + SETTINGS_EDIT_DEBOUNCE_MS;
     this.stateValue.set(this.saving() ? 'saving' : this.adapter.valid(this.adapter.read()) ? 'dirty' : 'invalid');
     this.scheduleDue();
   }
@@ -125,6 +131,8 @@ export class SettingsEditSession<T> {
 
   acceptCommitted(saved: T | undefined = this.adapter.saved()): void {
     if (this.destroyed() || this.saving()) return;
+    if (Object.is(saved, this.observedSaved)) return;
+    this.observedSaved = saved;
     if (!saved) {
       if (this.baseline) { this.targetMissing = true; this.clearTimer(); this.errorValue.set('This saved item is no longer available.'); this.stateValue.set('error'); }
       return;
@@ -132,26 +140,33 @@ export class SettingsEditSession<T> {
     const restored = this.targetMissing;
     if (restored) { this.targetMissing = false; this.errorValue.set(undefined); }
     const next = this.adapter.normalize(saved);
-    if (!this.baseline) { this.reset(this.activeKey, next); return; }
-    if (draftEqual(next, this.latest) && !restored) return;
+    if (!this.baseline) { this.reset(this.activeKey, saved); return; }
+    const wasConflict = this.conflicts().length > 0;
+    const wasUnverified = this.unverifiedCommit;
+    this.unverifiedCommit = false;
+    if (draftEqual(next, this.latest) && !restored && !wasUnverified) return;
     const merged = this.adapter.reconcile(this.baseline, this.adapter.normalize(this.adapter.read()), next);
     this.latest = structuredClone(next);
-    this.adapter.hydrate(merged.value);
+    this.adapter.hydrate(merged.value, 'reconcile');
     this.conflictValue.set(merged.conflicts);
     this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? this.baseline : next));
     this.refreshDirty();
     if (merged.conflicts.length) { this.clearTimer(); this.stateValue.set('conflict'); }
     else if (!this.dirty()) { this.clearTimer(); this.dueAt = undefined; this.stateValue.set('saved'); this.errorValue.set(undefined); }
-    else if (restored || this.state() !== 'error') this.stateValue.set(this.adapter.valid(this.adapter.read()) ? 'dirty' : 'invalid');
+    else if (restored || this.state() !== 'error') {
+      if (wasConflict && this.dueAt === undefined) this.dueAt = Date.now();
+      this.stateValue.set(this.adapter.valid(this.adapter.read()) ? 'dirty' : 'invalid');
+      this.scheduleDue();
+    }
   }
 
   resolveConflicts(choices: ConflictChoices): void {
     if (this.destroyed() || this.saving() || !this.baseline || !this.latest) return;
-    const currentSaved = this.adapter.saved();
-    if (!currentSaved) return;
-    if (!draftEqual(this.adapter.normalize(currentSaved), this.latest)) { this.acceptCommitted(currentSaved); return; }
+    const reviewed = this.latest;
+    this.acceptCommitted();
+    if (this.saving() || this.targetMissing || this.latest !== reviewed) return;
     const merged = this.adapter.reconcile(this.baseline, this.adapter.normalize(this.adapter.read()), this.latest, choices);
-    this.adapter.hydrate(merged.value); this.conflictValue.set(merged.conflicts);
+    this.adapter.hydrate(merged.value, 'reconcile'); this.conflictValue.set(merged.conflicts);
     this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? this.baseline : this.latest));
     if (merged.conflicts.length) return;
     this.refreshDirty();
@@ -162,25 +177,30 @@ export class SettingsEditSession<T> {
   discard(): void {
     if (this.destroyed() || this.saving()) return;
     this.clearTimer(); this.dueAt = undefined;
-    this.reset(this.adapter.key(), this.adapter.saved());
+    const key = this.adapter.key(), saved = this.adapter.saved();
+    const authoritative = key === this.activeKey && saved !== undefined && Object.is(saved, this.observedSaved)
+      ? this.latest : saved;
+    this.reset(key, authoritative, saved);
   }
 
   private cleanup(): void {
     this.destroyed.set(true); this.generation.update(value => value + 1);
     this.clearTimer(); this.dueAt = undefined; this.running = undefined; this.submitted = undefined;
+    this.observedSaved = undefined; this.unverifiedCommit = false;
     this.savingValue.set(false); this.dirtyValue.set(false); this.conflictValue.set([]); this.errorValue.set(undefined);
     this.stateValue.set('idle');
   }
 
-  private reset(key: string, saved: T | undefined): void {
+  private reset(key: string, saved: T | undefined, source: T | undefined = saved): void {
     this.clearTimer(); this.dueAt = undefined; this.activeKey = key;
     this.generation.update(value => value + 1); this.running = undefined;
     this.submitted = undefined;
+    this.observedSaved = source; this.unverifiedCommit = false;
     this.targetMissing = false;
     this.baseline = saved === undefined ? undefined : structuredClone(this.adapter.normalize(saved));
     this.latest = this.baseline === undefined ? undefined : structuredClone(this.baseline);
     this.dirtyValue.set(false); this.savingValue.set(false); this.conflictValue.set([]); this.errorValue.set(undefined);
-    this.stateValue.set('idle'); this.adapter.hydrate(saved);
+    this.stateValue.set('idle'); this.adapter.hydrate(saved, 'reset');
   }
 
   private async persist(generation: number): Promise<boolean> {
@@ -191,10 +211,11 @@ export class SettingsEditSession<T> {
     try {
       const committed = this.adapter.normalize(await this.adapter.persist(submitted, base, this.ownerId));
       if (this.destroyed() || generation !== this.generation()) return false;
+      this.unverifiedCommit = false;
       const merged = this.adapter.reconcile(submitted, this.adapter.normalize(this.adapter.read()), committed);
       this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? submitted : committed)); this.latest = structuredClone(committed);
       this.submitted = undefined;
-      this.adapter.hydrate(merged.value); this.conflictValue.set(merged.conflicts); this.refreshDirty();
+      this.adapter.hydrate(merged.value, 'reconcile'); this.conflictValue.set(merged.conflicts); this.refreshDirty();
       this.stateValue.set(merged.conflicts.length ? 'conflict' : this.dirty()
         ? this.adapter.valid(this.adapter.read()) ? 'dirty' : 'invalid' : 'saved');
       return !this.dirty();
@@ -204,12 +225,21 @@ export class SettingsEditSession<T> {
       this.submitted = undefined;
       const conflict = unwrapConflict(error);
       if (conflict) {
+        this.unverifiedCommit = false;
+        this.observedSaved = this.adapter.saved();
         this.latest = structuredClone(this.adapter.normalize(conflict.saved as T));
         const merged = this.adapter.reconcile(base, this.adapter.normalize(this.adapter.read()), this.latest);
         this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? base : this.latest));
-        this.adapter.hydrate(merged.value); this.conflictValue.set(merged.conflicts);
+        this.adapter.hydrate(merged.value, 'reconcile'); this.conflictValue.set(merged.conflicts);
         this.stateValue.set(merged.conflicts.length ? 'conflict' : 'dirty');
       } else {
+        if (persistenceCommitted(error)) {
+          // The write succeeded; a later reversion is relative to the submitted revision.
+          this.baseline = structuredClone(submitted); this.latest = structuredClone(submitted);
+          this.unverifiedCommit = true;
+          // Publications observed before the failure cannot verify this committed revision.
+          this.observedSaved = this.adapter.saved();
+        }
         this.dueAt = undefined; this.stateValue.set('error');
         this.errorValue.set(error instanceof Error ? error.message : 'Changes could not be saved. Try again.');
       }
@@ -223,7 +253,7 @@ export class SettingsEditSession<T> {
 
   private refreshDirty(): void {
     const local = this.adapter.normalize(this.adapter.read());
-    this.dirtyValue.set(!!this.baseline && (this.conflicts().length > 0
+    this.dirtyValue.set(!!this.baseline && (this.unverifiedCommit || this.conflicts().length > 0
       || (this.saving() && this.submitted !== undefined && !draftEqual(local, this.submitted))
       || !draftEqual(local, this.latest ?? this.baseline)));
   }
@@ -239,6 +269,15 @@ export class SettingsEditSession<T> {
   }
 
   private clearTimer(): void { if (this.timer !== undefined) { clearTimeout(this.timer); this.timer = undefined; } }
+}
+
+function persistenceCommitted(error: unknown): boolean {
+  const visited = new Set<unknown>();
+  while (error && typeof error === 'object' && !visited.has(error)) {
+    if (error instanceof WorkspaceWriteError) return error.persistenceCommitted;
+    visited.add(error); error = 'cause' in error ? error.cause : undefined;
+  }
+  return false;
 }
 
 function unwrapConflict(error: unknown): EditorConflictError | undefined {

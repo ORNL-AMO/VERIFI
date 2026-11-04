@@ -52,7 +52,7 @@ export class MeterSettingsFormBuilderService {
       noLongerInUseYear: [values.noLongerInUseYear],
       canBeNegative: [values.canBeNegative],
       ignoreDateStatusChecks: [values.ignoreDateStatusChecks]
-    });
+    }, { validators: this.validation.getChargeTypesValidation() });
   }
 
   updateMeterFromSettingsForm(meter: IdbUtilityMeter, form: MeterSettingsForm): IdbUtilityMeter {
@@ -79,7 +79,7 @@ export class MeterSettingsFormBuilderService {
     chargesArray.push(this.buildChargeGroup({
       guid: getGUID(),
       name: 'New Charge',
-      chargeType: 'consumption',
+      chargeType: form.controls.source.value === 'Electricity' ? 'consumption' : 'usage',
       displayChargeInTable: true,
       displayUsageInTable: true
     }));
