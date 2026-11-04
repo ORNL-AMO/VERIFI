@@ -8,6 +8,10 @@ Use `review-code-changes`. Read the pull request diff, changed files, tests prov
 
 For v1 UI migration work, include the [Angular template guidance](angular-template-guidance.md), [Unified UI/UX migration guide](../unified-ux-migration.md), and [P1 selected prototype baseline](p1-selected-prototype-baseline.md) when they are relevant to the changed files.
 
+## Responding to an existing review
+
+Use [`address-pr-review`](../../.agents/skills/address-pr-review/SKILL.md) when evaluating and addressing feedback already left on a PR. It covers complete comment/thread collection, evidence-based dispositions, warranted fixes and validation, replies, and verified resolution. A new code review remains under `review-code-changes`; an assessment-only request does not authorize edits or GitHub mutations. Preserve existing session authorization and the publication requirements in the [PR creation guide](github-pr-creation.md).
+
 ## What to prioritize
 
 Lead with actionable findings. Prioritize:
