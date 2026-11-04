@@ -111,6 +111,8 @@ export interface AccountWorkspaceState {
 export interface PendingOperation {
   readonly id: number;
   readonly label: string;
+  /** Transient editor ownership; never stored in IndexedDB or backups. */
+  readonly ownerId?: string;
 }
 
 export type WorkspaceLoadResult = 'published' | 'superseded';

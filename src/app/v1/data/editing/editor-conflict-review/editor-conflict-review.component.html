@@ -1,0 +1,30 @@
+@if (conflicts.length) {
+  <div class="v1-alert v1-alert--warning" role="alert">
+    <p>Saved values changed while you were editing. Review the conflicting changes before saving.</p>
+    <button type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled" (click)="open()">Review conflicting changes</button>
+  </div>
+}
+
+<ng-template #reviewDialog>
+  <app-confirmation-dialog title="Review conflicting changes" [titleId]="titleId"
+    cancelAriaLabel="Keep editing without resolving conflicts" confirmLabel="Apply choices"
+    confirmClass="v1-btn--action" size="wide" bodySpacing="spacious"
+    [disabled]="disabled" [confirmDisabled]="choices.invalid" (confirmed)="confirm()" (cancelled)="close()">
+    <p>Choose which value to keep for each conflict. Your other changes are preserved.</p>
+    @for (row of rows; track row.conflict.id) {
+      <fieldset class="conflict-choice">
+        <legend>{{ row.conflict.label }}</legend>
+        <p><strong>Your changes:</strong> {{ row.local }}</p>
+        <p><strong>Saved values:</strong> {{ row.saved }}</p>
+        <label>
+          <span>Keep</span>
+          <select class="v1-select" [formControl]="choices.controls[row.conflict.id]">
+            <option [ngValue]="null">Choose a value</option>
+            <option value="local">My changes</option>
+            <option value="saved">Saved values</option>
+          </select>
+        </label>
+      </fieldset>
+    }
+  </app-confirmation-dialog>
+</ng-template>

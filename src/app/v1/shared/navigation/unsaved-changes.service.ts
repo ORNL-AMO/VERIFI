@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Injectable, Signal, computed, effect, inject, signal } from '@angular/core';
 
 interface UnsavedChangesRegistration {
   readonly isDirty: () => boolean;
@@ -10,6 +11,30 @@ interface UnsavedChangesRegistration {
 @Injectable({ providedIn: 'root' })
 export class UnsavedChangesService {
   private readonly registrations = new Set<UnsavedChangesRegistration>();
+  private readonly window = inject(DOCUMENT).defaultView;
+  private readonly unloadSources = signal<readonly { readonly when: Signal<boolean> }[]>([]);
+  private readonly unloadProtected = computed(() => this.unloadSources().some(source => source.when()));
+
+  constructor() {
+    effect(onCleanup => {
+      const window = this.window;
+      if (!window || !this.unloadProtected()) return;
+      const beforeUnload = (event: BeforeUnloadEvent) => {
+        if (!this.unloadProtected()) return;
+        event.preventDefault();
+        event.returnValue = '';
+      };
+      window.addEventListener('beforeunload', beforeUnload);
+      onCleanup(() => window.removeEventListener('beforeunload', beforeUnload));
+    });
+  }
+
+  /** Opt-in browser protection; all active Data drafts share one conditional listener. */
+  protectBeforeUnload(when: Signal<boolean>): () => void {
+    const registration = { when };
+    this.unloadSources.update(sources => [...sources, registration]);
+    return () => this.unloadSources.update(sources => sources.filter(source => source !== registration));
+  }
 
   register(
     isDirty: () => boolean,

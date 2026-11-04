@@ -3,6 +3,21 @@ import { vi } from 'vitest';
 import { ConfirmationDialogComponent } from './confirmation-dialog.component';
 
 describe('ConfirmationDialogComponent', () => {
+  it('allows cancellation while only confirmation is unavailable', () => {
+    TestBed.configureTestingModule({ imports: [ConfirmationDialogComponent] });
+    const fixture = TestBed.createComponent(ConfirmationDialogComponent);
+    fixture.componentRef.setInput('confirmDisabled', true);
+    const cancelled = vi.fn(), confirmed = vi.fn();
+    fixture.componentInstance.cancelled.subscribe(cancelled);
+    fixture.componentInstance.confirmed.subscribe(confirmed);
+    fixture.detectChanges();
+    fixture.componentInstance.confirm(); fixture.componentInstance.cancel();
+    expect(confirmed).not.toHaveBeenCalled(); expect(cancelled).toHaveBeenCalledOnce();
+    const buttons = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('footer button'));
+    expect((buttons[0] as HTMLButtonElement).disabled).toBe(false);
+    expect((buttons[1] as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it('owns dialog semantics and Escape cancellation', async () => {
     TestBed.configureTestingModule({ imports: [ConfirmationDialogComponent] });
     const fixture = TestBed.createComponent(ConfirmationDialogComponent);

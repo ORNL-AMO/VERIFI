@@ -1,0 +1,4 @@
+.conflict-choice { border: 1px solid var(--v1-border); padding: 1rem; margin: 1rem 0; min-width: 0; }
+.conflict-choice legend { font-size: 1rem; font-weight: 600; float: none; width: auto; }
+.conflict-choice p { overflow-wrap: anywhere; }
+.conflict-choice label { display: grid; gap: .35rem; }
