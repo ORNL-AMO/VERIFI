@@ -478,9 +478,8 @@ describe('DataNavComponent', () => {
       statusState.set(status);
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelectorAll('.v1-status-attention')).toHaveLength(status === 'ready' ? 2 : 0);
-      if (status === 'ready') expect(fixture.nativeElement.querySelector('.v1-alert')).toBeNull();
-      else if (status === 'error') expect(fixture.nativeElement.textContent).toContain('Workspace status could not be evaluated.');
-      else expect(fixture.nativeElement.querySelector('.compact-status').textContent.trim()).toBe('');
+      expect(fixture.nativeElement.querySelector('app-status-evaluation-message, .compact-status, .v1-alert')).toBeNull();
+      expect(fixture.nativeElement.querySelector('#v1-data-nav-title').nextElementSibling.tagName).toBe('APP-RESOURCE-NAV-GROUP');
     }
   });
 

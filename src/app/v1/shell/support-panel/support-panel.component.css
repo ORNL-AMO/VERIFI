@@ -171,3 +171,17 @@ ul.v1-panel__list {
     display: none;
   }
 }
+
+/* Explicit requests remain reachable when the side-by-side support column is hidden. */
+@media (max-width: 1160px) {
+  :host(.is-requested) {
+    display: block;
+    position: absolute;
+    z-index: 7;
+    inset: 0 0 0 auto;
+    width: min(22rem, 100%);
+    box-shadow: -.5rem 0 1.5rem var(--v1-shadow);
+  }
+}
+
+@media print { :host, :host(.is-requested) { display: none; } }

@@ -1,0 +1,21 @@
+:host { position: relative; display: block; flex: 0 0 2rem; width: 2rem; height: 2rem; }
+.check-indicator { width: 2rem; height: 2rem; min-width: 0; min-height: 0; padding: 0; color: var(--v1-muted); }
+.check-indicator--error { color: var(--v1-warning); }
+.check-indicator__loading { animation: check-spin 1s linear infinite; }
+.check-indicator__tooltip {
+  position: absolute;
+  top: calc(100% + .5rem);
+  right: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: min(16rem, calc(100vw - 2rem));
+  padding: .55rem .65rem;
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-text);
+  color: var(--v1-surface);
+  font-size: .78rem;
+  line-height: 1.4;
+}
+@keyframes check-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .check-indicator__loading { animation: none; } }
+@media print { :host { display: none; } }

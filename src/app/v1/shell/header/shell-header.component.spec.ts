@@ -29,6 +29,37 @@ describe('ShellHeaderComponent', () => {
     expect(fixture.nativeElement.querySelector('.v1-workspace__account-link').textContent).toContain('Account A');
   });
 
+  it('opens To-dos from a failed check without changing the independent panel toggle', () => {
+    const { fixture, navigation } = setup(true);
+    navigation.dataCheckState.set('error');
+    navigation.activePanelTab.set('help'); fixture.detectChanges();
+    fixture.nativeElement.querySelector('[aria-label="Data checks unavailable. Open To-dos"]').click();
+    expect(navigation.openTodos).toHaveBeenCalledOnce();
+    expect(navigation.toggleSupportPanel).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('app-workspace-check-indicator [role=status]').textContent).toContain('unavailable');
+    navigation.activePanelTab.set('todos'); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-workspace-check-indicator [role=status]').textContent).toBe('');
+    navigation.isSupportPanelOpen.set(false); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-workspace-check-indicator [role=status]').textContent).toContain('unavailable');
+    navigation.isWorkspaceRoute.set(false); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-workspace-check-indicator')).toBeNull();
+  });
+
+  it('cancels the indicator delay on route exit and starts fresh when returning', async () => {
+    vi.useFakeTimers();
+    const { fixture, navigation } = setup(true);
+    navigation.dataCheckState.set('evaluating'); fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(700);
+    navigation.isWorkspaceRoute.set(false); fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(1000);
+    navigation.isWorkspaceRoute.set(true); fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(999); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-workspace-check-indicator button')).toBeNull();
+    await vi.advanceTimersByTimeAsync(1); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-workspace-check-indicator button')).not.toBeNull();
+    fixture.destroy(); vi.useRealTimers();
+  });
+
   it('downloads the whole account immediately, including in facility context', () => {
     const { fixture, backups, navigation } = setup(true);
     navigation.contextMode.mockReturnValue('facility');
@@ -142,8 +173,8 @@ function setup(isWorkspaceRoute: boolean): {
     setCornerStyle: vi.fn()
   };
   const navigation = {
-    isWorkspaceRoute: vi.fn(() => isWorkspaceRoute),
-    isSupportPanelOpen: vi.fn(() => true),
+    isWorkspaceRoute: signal(isWorkspaceRoute),
+    dataCheckState: signal('ready'), activePanelTab: signal('help'), openTodos: vi.fn(), isSupportPanelOpen: signal(true),
     contextMode: vi.fn(() => 'account'),
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
     headerFacility: () => undefined, singleFacilityContext: signal<IdbFacility | undefined>(undefined), isSingleSiteWorkspace: () => false,

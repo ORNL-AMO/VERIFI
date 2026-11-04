@@ -150,6 +150,12 @@
     @if (isWorkspaceRoute) {
       @let isSupportPanelOpen = navigation.isSupportPanelOpen();
 
+      @if (navigation.account(); as account) {
+        <app-workspace-check-indicator [state]="navigation.dataCheckState()" [accountGuid]="account.guid"
+          [announce]="!isSupportPanelOpen || navigation.activePanelTab() !== 'todos'"
+          (openTodos)="navigation.openTodos()"/>
+      }
+
       <button
         type="button"
         class="v1-icon-btn"

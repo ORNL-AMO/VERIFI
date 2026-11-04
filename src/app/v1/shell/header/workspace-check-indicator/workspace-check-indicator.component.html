@@ -1,0 +1,11 @@
+@if (indicator(); as indicatorState) {
+  <button type="button" class="v1-icon-btn check-indicator" [class.check-indicator--error]="indicatorState === 'error'"
+    [attr.aria-label]="label()" aria-describedby="workspace-check-tooltip"
+    (mouseenter)="tooltipOpen.set(true)" (mouseleave)="tooltipOpen.set(false)"
+    (focus)="tooltipOpen.set(true)" (blur)="tooltipOpen.set(false)" (click)="openTodos.emit()">
+    <app-ui-icon [name]="indicatorState === 'error' ? 'warning' : 'loading'"
+      [class.check-indicator__loading]="indicatorState === 'evaluating'"/>
+  </button>
+  <span id="workspace-check-tooltip" class="check-indicator__tooltip" role="tooltip" [hidden]="!tooltipOpen()">{{ label() }}</span>
+}
+<span class="visually-hidden" role="status" aria-atomic="true">{{ announcement() }}</span>
