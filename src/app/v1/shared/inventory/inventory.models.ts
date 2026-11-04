@@ -88,6 +88,14 @@ export interface InventoryTile {
   readonly facilitySnapshot?: InventoryFacilitySnapshot;
   readonly meterSnapshot?: InventoryMeterSnapshot;
   readonly predictorSnapshot?: InventoryReadingSnapshot;
+  readonly energyUseSnapshot?: InventoryEnergyUseSnapshot;
+}
+export interface InventoryEnergyUseSnapshot {
+  readonly sources: readonly string[];
+  readonly group: string;
+  readonly lifecycle: string;
+  readonly years: readonly number[];
+  readonly notes: string;
 }
 export interface InventoryTileDetailChange { readonly guid: string; readonly level: InventoryDetailLevel; }
 export interface InventoryAnalysisSnapshot {

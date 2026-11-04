@@ -1,4 +1,5 @@
 import type { ReportInventoryFilters } from '@app/v1/reports/inventory/report-inventory.models';
+import type { EnergyUseInventoryFilters } from '@app/v1/data/energy-uses/inventory/energy-use-inventory.models';
 import { DestroyRef, Injectable, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Observable } from 'rxjs';
 import type { PredictorInventoryFilters } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
@@ -7,6 +8,7 @@ import type { MeterInventorySort, MeterInventoryStatusFilter } from '@app/v1/dat
 import { InventoryView } from '@app/v1/shared/inventory/inventory.models';
 
 export interface BrowseFilters {
+  'energy-uses': EnergyUseInventoryFilters;
   reports: ReportInventoryFilters;
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };
   predictors: PredictorInventoryFilters;
@@ -16,7 +18,7 @@ export interface BrowseFilters {
 export type BrowseKind = keyof BrowseFilters;
 export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; }
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
-export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'analyses' | 'reports';
+export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
 
 /** UI-only journey state. Nothing is written to storage or domain records. */
 @Injectable({ providedIn: 'root' })

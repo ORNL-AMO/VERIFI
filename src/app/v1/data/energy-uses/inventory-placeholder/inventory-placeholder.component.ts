@@ -8,6 +8,6 @@ import type { IconName } from '@app/v1/shared/icons/icon-registry';
   standalone: false
 })
 export class InventoryPlaceholderComponent {
-  @Input({ required: true }) title!: string;
-  @Input({ required: true }) icon!: IconName;
+  @Input({ required: true }) title = 'Energy Uses';
+  @Input({ required: true }) icon: IconName = 'tools';
 }

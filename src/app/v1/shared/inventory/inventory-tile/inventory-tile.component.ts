@@ -1,4 +1,5 @@
 import { ReportSnapshotComponent } from '../report-snapshot/report-snapshot.component';
+import { EnergyUseSnapshotModule } from '../energy-use-snapshot/energy-use-snapshot.module';
 import { InventoryCardHeaderComponent } from '../inventory-card-header/inventory-card-header.component';
 import { AnalysisSnapshotComponent } from '../analysis-snapshot/analysis-snapshot.component';
 import { CdkMenuModule, CdkMenuTrigger } from '@angular/cdk/menu';
@@ -11,7 +12,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FacilityInventoryDestination, InventoryTileMenuAction, InventoryTileActionRequest, InventoryDetailLevel, InventoryTile, InventoryTileDetailChange } from '../inventory.models';
 
-@Component({ selector: 'app-inventory-tile', standalone: true, imports: [IconComponent, CdkMenuModule, ReactiveFormsModule, FacilitySnapshotComponent, ReadingSnapshotComponent, AnalysisSnapshotComponent, InventoryCardHeaderComponent, ReportSnapshotComponent],
+@Component({ selector: 'app-inventory-tile', standalone: true, imports: [IconComponent, CdkMenuModule, ReactiveFormsModule, FacilitySnapshotComponent, ReadingSnapshotComponent, AnalysisSnapshotComponent, InventoryCardHeaderComponent, ReportSnapshotComponent, EnergyUseSnapshotModule],
   templateUrl: './inventory-tile.component.html', styleUrls: ['./inventory-tile.component.css'] })
 export class InventoryTileComponent {
   private readonly router = inject(Router);
