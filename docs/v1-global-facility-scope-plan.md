@@ -27,7 +27,7 @@ This policy does not authorize discarding shared application data or changing v0
 
 - Use the GitHub-style account/resource hierarchy: **Account name / All facilities ▾** or **Account name / Facility name ▾**.
 - The account name includes its account icon and clears facility scope through guarded navigation. The VERIFI brand returns to the home screen, where users select, create, or import accounts. Remove the header account-switching dropdown. A dedicated account-management screen is outside this effort.
-- The facility chooser contains a search field, a permanent **All facilities** choice, and alphabetically ordered facilities with location subtitles and a checkmark on the current selection.
+- The facility chooser contains a search field, a permanent **All facilities** choice, and facilities in the committed Portfolio order with location subtitles and a checkmark on the current selection. It reads `portfolioFacilityOrder` from the live workspace account; without a saved preference it retains workspace order. Search results preserve that relative order.
 - Search matches name and location. Support keyboard navigation, Escape, outside-click dismissal, focus return, long names, and constrained browser/Electron windows. Distinguish no facilities from no search matches.
 
 ### Scope and inventories

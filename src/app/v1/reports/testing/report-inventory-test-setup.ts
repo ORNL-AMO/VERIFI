@@ -8,7 +8,6 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { AccountReportActionsService } from '@app/v1/reports/account/account-report-actions.service';
 import { FacilityReportActionsService } from '@app/v1/reports/facility/facility-report-actions.service';
-import { AccountReportsModule } from '@app/v1/reports/account/account-reports.module';
 import { reportAccount, reportFacility, reportFixture, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { ReportsInventoryModule } from '../inventory/reports-inventory.module';
 
@@ -26,7 +25,7 @@ export async function setupReportInventory(scope: 'account' | 'facility' = 'acco
 
     accountReportWorkbenchRoute: (account: string, report: string) => ['/v1', 'workspace', 'account', account, 'reports', 'workbench', report, 'setup'],
     facilityReportWorkbenchRoute: (facility: string, report: string) => ['/v1', 'workspace', 'facility', facility, 'reports', 'workbench', report, 'setup'] };
-  await TestBed.configureTestingModule({ imports: [ReportsInventoryModule, AccountReportsModule], providers: [provideRouter([]),
+  await TestBed.configureTestingModule({ imports: [ReportsInventoryModule], providers: [provideRouter([]),
     { provide: AccountWorkspaceStore, useValue: store }, { provide: WorkspaceNavigationService, useValue: navigation },
     { provide: WorkspaceStatusService, useValue: { state: status, items: signal([]) } },
     { provide: AccountReportActionsService, useValue: accountActions }, { provide: FacilityReportActionsService, useValue: facilityActions }

@@ -1,4 +1,5 @@
 import { toSignal } from '@angular/core/rxjs-interop';
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -55,8 +56,9 @@ export class ReportLifecycleService {
       .filter(option => reportTypeAvailable(scope, option.value, this.workspace.account()?.displayEmissions))
       .map(option => ({ ...option, ...reportDefinition(scope, option.value)! }));
   });
-  readonly facilities = computed(() => this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid)
-    .slice().sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid)));
+  readonly facilities = computed(() => orderFacilities(
+    this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid),
+    this.workspace.account()?.portfolioFacilityOrder));
   readonly matchingFacilities = computed(() => {
     const search = this.search().trim().toLocaleLowerCase();
     return this.facilities().filter(item => (item.name || 'Unnamed facility').toLocaleLowerCase().includes(search));

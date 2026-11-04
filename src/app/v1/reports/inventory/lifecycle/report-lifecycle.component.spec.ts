@@ -48,12 +48,29 @@ describe('progressive report creation', () => {
     const search = root.querySelector<HTMLInputElement>('#report-facility-search')!;
     search.value = 'NO MATCH'; search.dispatchEvent(new Event('input')); fixture.detectChanges();
     expect(root.querySelectorAll('.report-choice')).toHaveLength(0); expect(root.textContent).toContain('No matching facilities');
-    choose('Clear search'); expect([...root.querySelectorAll('.report-choice strong')].map(item => item.textContent)).toEqual(['Facility 1', 'Main facility']);
+    choose('Clear search'); expect([...root.querySelectorAll('.report-choice strong')].map(item => item.textContent)).toEqual(['Main facility', 'Facility 1']);
     choose('Main facility'); choose('Data OverviewPreview pending');
     expect(root.querySelector('.report-selections')!.textContent).toContain('Main facility');
     edit('Main facility'); choose('Facility 1');
     expect(lifecycle.form.controls.type.value).toBe('overview'); choose('Data OverviewPreview pending'); await lifecycle.submit();
     expect(facilityActions.create).toHaveBeenCalledWith('facility-1', 'Data Overview report', 'overview'); expect(store.selectedFacility()).toBe(original);
+  });
+
+  it('keeps portfolio order in the facility choices and filtered search results', async () => {
+    const { root, fixture, lifecycle, choose, store } = await setup('account', 3);
+    store.publish({ ...store.snapshot()!, account: { ...store.account()!,
+      portfolioFacilityOrder: ['facility-a', 'facility-2', 'facility-1'] } });
+    fixture.detectChanges();
+    choose('Facility Report');
+    const names = () => [...root.querySelectorAll('.report-choice strong')].map(item => item.textContent);
+    expect(names()).toEqual(['Main facility', 'Facility 2', 'Facility 1']);
+    lifecycle.facilitySearch.setValue('Facility 2'); fixture.detectChanges();
+    expect(names()).toEqual(['Facility 2']);
+    lifecycle.facilitySearch.setValue(''); fixture.detectChanges();
+    expect(names()).toEqual(['Main facility', 'Facility 2', 'Facility 1']);
+    choose('Facility 2');
+    expect(lifecycle.form.controls.facilityGuid.value).toBe('facility-2');
+    expect(lifecycle.step()).toBe('type');
   });
 
   it('pins fixed facility context and only offers facility report types', async () => {

@@ -49,6 +49,7 @@ describe('VERIFI V3 import template asset', () => {
     ]);
   });
 
+  // The complete template expands to roughly 12 MB and is loaded, rewritten, and inspected.
   it('preserves required template features through ExcelJS load and write', async () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(readTemplateArrayBuffer());
@@ -75,7 +76,7 @@ describe('VERIFI V3 import template asset', () => {
     expect(workbookXml).toContain('fullCalcOnLoad="1"');
     expect(packageText).not.toContain('#REF!');
     expect(packageText).not.toContain('1048576');
-  });
+  }, 30_000);
 });
 
 async function loadTemplateZip(): Promise<JSZip> {

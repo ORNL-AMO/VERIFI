@@ -6,6 +6,7 @@ import { StatusWarningDismissal } from "@data/models/status-warning-dismissal";
 
 
 export interface IdbAccount extends IdbEntry, AccountAndFacility {
+    portfolioFacilityOrder?: readonly string[],
     name: string,
     numberOfFacilities?: string,
     lastBackup?: Date,

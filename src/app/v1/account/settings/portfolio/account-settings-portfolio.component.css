@@ -26,7 +26,7 @@
   border-radius: var(--v1-radius);
   display: grid;
   gap: .75rem;
-  grid-template-columns: minmax(12rem, 1.2fr) minmax(12rem, 1fr) auto;
+  grid-template-columns: auto auto minmax(10rem, 1.2fr) minmax(8rem, 1fr) auto;
   min-width: 0;
   padding: .7rem .8rem;
 }
@@ -35,6 +35,16 @@
 .v1-portfolio-settings__facility small {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.v1-portfolio-settings__order {
+  display: grid;
+  gap: .2rem;
+  font-size: .78rem;
+}
+
+.v1-portfolio-settings__order select {
+  min-width: 4.5rem;
 }
 
 .v1-portfolio-settings__facility > span,
@@ -55,6 +65,23 @@
 @media (max-width: 44rem) {
   .v1-portfolio-settings__facility {
     align-items: start;
-    grid-template-columns: 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
   }
+
+  .v1-portfolio-settings__facility > span,
+  .v1-portfolio-settings__facility > small,
+  .v1-portfolio-settings__facility > .v1-settings-choice { grid-column: 2; }
+
+}
+
+.v1-portfolio-settings__drag { cursor: grab; touch-action: none; }
+.v1-portfolio-settings__drag:active { cursor: grabbing; }
+.v1-portfolio-settings__drag:disabled { cursor: default; }
+.v1-portfolio-settings__facility.cdk-drag-preview {
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--v1-text) 18%, transparent);
+}
+.v1-portfolio-settings__facility.cdk-drag-placeholder { opacity: .35; }
+@media (prefers-reduced-motion: no-preference) {
+  .v1-portfolio-settings__list.cdk-drop-list-dragging .v1-portfolio-settings__facility:not(.cdk-drag-placeholder),
+  .v1-portfolio-settings__facility.cdk-drag-animating { transition: transform 180ms ease; }
 }

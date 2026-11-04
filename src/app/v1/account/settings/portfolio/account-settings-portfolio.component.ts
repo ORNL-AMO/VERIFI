@@ -1,11 +1,15 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormControl, FormRecord } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { FacilityActionsService } from '@app/v1/data/facilities/facility-actions.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
+import { PortfolioFacilityOrderService } from './portfolio-facility-order.service';
 
 type PortfolioSettingsAction = 'apply' | 'delete';
 
@@ -24,11 +28,18 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
   private creationAccountGuid?: string;
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
   @ViewChild('portfolioActionModal') private readonly portfolioActionModal!: TemplateRef<unknown>;
 
-  readonly facilities = this.workspace.facilities;
+  readonly facilityOrderService = inject(PortfolioFacilityOrderService);
+  readonly facilities = this.facilityOrderService.facilities;
+  readonly orderingDisabled = computed(() => !this.canWrite() || this.facilities().length < 2);
+  readonly orderOptions = computed(() => this.facilities().map((_, index) => index + 1));
+  readonly orderControls = new FormRecord<FormControl<number>>({});
+  private readonly orderSubscriptions = new Map<string, Subscription>();
   readonly hasPending = this.workspace.hasPending;
   readonly selectedFacilityGuids = signal<readonly string[]>([]);
   readonly selectedFacilities = computed(() => {
@@ -45,6 +56,50 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   isApplying = false;
   isDeleting = false;
 
+  constructor() {
+    super();
+    effect(() => {
+      const facilities = this.facilities();
+      const orderingDisabled = this.orderingDisabled();
+      const guids = new Set(facilities.map(facility => facility.guid));
+      for (const guid of Object.keys(this.orderControls.controls)) {
+        if (!guids.has(guid)) {
+          this.orderSubscriptions.get(guid)?.unsubscribe();
+          this.orderSubscriptions.delete(guid);
+          this.orderControls.removeControl(guid, { emitEvent: false });
+        }
+      }
+      facilities.forEach((facility, index) => {
+        let control = this.orderControls.controls[facility.guid];
+        if (!control) {
+          control = new FormControl(index + 1, { nonNullable: true });
+          this.orderControls.addControl(facility.guid, control, { emitEvent: false });
+          this.orderSubscriptions.set(facility.guid, control.valueChanges.subscribe(position => {
+            this.setFacilityPosition(facility.guid, position);
+          }));
+        }
+        control.setValue(index + 1, { emitEvent: false });
+        if (orderingDisabled) control.disable({ emitEvent: false });
+        else control.enable({ emitEvent: false });
+      });
+    });
+    inject(DestroyRef).onDestroy(() => {
+      for (const subscription of this.orderSubscriptions.values()) subscription.unsubscribe();
+    });
+  }
+
+  private setFacilityPosition(facilityGuid: string, position: number): void {
+    const host = this.element.nativeElement;
+    const document = host.ownerDocument;
+    const focused = document.activeElement;
+    this.facilityOrderService.move(facilityGuid, position - 1);
+    if (focused instanceof HTMLSelectElement && host.contains(focused)) {
+      afterNextRender(() => {
+        if (focused.isConnected && document.activeElement === document.body) focused.focus({ preventScroll: true });
+      }, { injector: this.injector });
+    }
+  }
+
   get selectedCount(): number {
     return this.selectedFacilities().length;
   }
@@ -56,6 +111,12 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.modalPortal.hide();
+  }
+
+  dropFacility(event: CdkDragDrop<readonly IdbFacility[]>): void {
+    if (event.previousContainer !== event.container || !event.isPointerOverContainer)
+      return;
+    this.facilityOrderService.move(event.item.data.guid, event.currentIndex);
   }
 
   isSelected(facilityGuid: string): boolean {

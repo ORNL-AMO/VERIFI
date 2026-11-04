@@ -99,6 +99,32 @@ function expectResourceRows(tile: HTMLElement) {
 }
 
 describe('uniform account inventories in Chromium', () => {
+  it('uses the native Defined order sort, follows Portfolio saves, and remembers the chosen sort on return visits', async () => {
+    const { fixture, root, open, workspace } = setup(3);
+    workspace.account.update(value => ({ ...value, portfolioFacilityOrder: ['f2', 'f0', 'f1'] }));
+    await open('facilities');
+    const names = () => [...root.querySelectorAll('.portfolio-inventory .portfolio-tile__name')].map(item => item.textContent?.trim());
+    const sort = () => root.querySelector<HTMLSelectElement>('select[formControlName="sort"]')!;
+    expect(sort().value).toBe('defined');
+    expect(names()).toEqual(['Plant 02', 'Plant 00', 'Plant 01']);
+    await page.getByRole('combobox', { name: 'Sort', exact: true }).selectOptions('facilityName'); fixture.detectChanges();
+    expect(names()).toEqual(['Plant 00', 'Plant 01', 'Plant 02']);
+    await page.getByRole('combobox', { name: 'Sort', exact: true }).selectOptions('defined'); fixture.detectChanges();
+    workspace.account.update(value => ({ ...value, portfolioFacilityOrder: ['f1', 'f2', 'f0'] })); fixture.detectChanges();
+    expect(names()).toEqual(['Plant 01', 'Plant 02', 'Plant 00']);
+    await page.getByRole('searchbox', { name: 'Find facility, location, or type' }).fill('Plant'); fixture.detectChanges();
+    expect(names()).toEqual(['Plant 01', 'Plant 02', 'Plant 00']);
+    await page.getByRole('combobox', { name: 'Sort', exact: true }).selectOptions('facilityName'); fixture.detectChanges();
+    await open('meters'); await open('facilities');
+    expect(sort().value).toBe('facilityName');
+    expect(root.querySelector<HTMLInputElement>('input[type="search"]')!.value).toBe('Plant');
+    expect(names()).toEqual(['Plant 00', 'Plant 01', 'Plant 02']);
+    await page.getByRole('combobox', { name: 'Sort', exact: true }).selectOptions('defined'); fixture.detectChanges();
+    await open('meters'); await open('facilities');
+    expect(sort().value).toBe('defined');
+    expect(names()).toEqual(['Plant 01', 'Plant 02', 'Plant 00']);
+    expect(workspace.facilities().map(item => item.guid)).toEqual(['f0', 'f1', 'f2']);
+  });
   for (const resource of ['meters', 'predictors'] as const) {
     it(`toggles ${resource} selection from the quiet header before Upload and keeps centered actions usable across pages and narrow themes`, async () => {
       await page.viewport(1300, 950);

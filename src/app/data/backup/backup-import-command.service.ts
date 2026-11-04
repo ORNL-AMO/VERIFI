@@ -365,6 +365,11 @@ export class BackupImportCommandService {
         await this.addRecord(transaction, 'facilityEnergyUseEquipment', facilityEnergyUseEquipment);
       }
 
+      if (Array.isArray(newAccount.portfolioFacilityOrder)) {
+        const facilityMap = new Map(facilityGUIDs.map(pair => [pair.oldId, pair.newId]));
+        newAccount.portfolioFacilityOrder = [...new Set(newAccount.portfolioFacilityOrder)]
+          .flatMap(guid => facilityMap.has(guid) ? [facilityMap.get(guid)!] : []);
+      }
       newAccount.statusWarningDismissals = remapStatusWarningDismissals(
         newAccount.statusWarningDismissals,
         {

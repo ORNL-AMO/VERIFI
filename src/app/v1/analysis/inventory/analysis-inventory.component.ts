@@ -1,4 +1,5 @@
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { AnalysisComparisonState, AnalysisComparisonOption } from '@app/v1/analysis/comparison/analysis-comparison-state';
 import { AnalysisComparisonSheetComponent } from '@app/v1/analysis/comparison/analysis-comparison-sheet/analysis-comparison-sheet.component';
 import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
@@ -145,11 +146,13 @@ export class AnalysisInventoryComponent implements OnDestroy {
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving() && !!this.browseKey());
   readonly energyAvailable = computed(() => this.actions.categoryAvailable('energy'));
   readonly waterAvailable = computed(() => this.actions.categoryAvailable('water'));
-  readonly creationFacilities = computed<readonly AnalysisDraftFacility[]>(() => this.workspace.facilities().map(facility => ({
+  readonly creationFacilities = computed<readonly AnalysisDraftFacility[]>(() => orderFacilities(
+    this.workspace.facilities(), this.workspace.account()?.portfolioFacilityOrder
+  ).map(facility => ({
     guid: facility.guid, name: facility.name || 'Untitled facility',
     energyAvailable: this.facilityActions.categoryAvailable('energy', facility.guid),
     waterAvailable: this.facilityActions.categoryAvailable('water', facility.guid)
-  })).sort((first, second) => first.name.localeCompare(second.name) || first.guid.localeCompare(second.guid)));
+  })));
   readonly activeEligibility = computed(() => {
     const entry = this.activeCandidate();
     return !entry ? undefined : entry.scope === 'account' ? this.actions.activeEligibility(entry.card.analysis) : this.facilityActions.activeEligibility(entry.card.analysis, entry.facility.guid);

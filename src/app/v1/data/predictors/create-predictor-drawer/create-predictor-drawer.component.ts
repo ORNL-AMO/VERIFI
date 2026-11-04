@@ -1,3 +1,4 @@
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -21,7 +22,7 @@ export class CreatePredictorDrawerComponent {
   readonly weatherSelected = output<string>();
   readonly saving = signal(false);
   readonly error = signal('');
-  readonly facilities = computed(() => this.workspace.facilities().filter(item => item.accountId === this.accountGuid).slice().sort((a, b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
+  readonly facilities = computed(() => orderFacilities(this.workspace.facilities().filter(item => item.accountId === this.accountGuid), this.workspace.account()?.portfolioFacilityOrder));
   readonly facilityControl = new FormControl('', { nonNullable: true, validators: [Validators.required] });
   readonly facilityGuid = signal(this.facilityControl.value);
   readonly selectedFacility = computed(() => this.facilities().find(item => item.guid === this.facilityGuid()));

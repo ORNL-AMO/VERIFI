@@ -38,7 +38,6 @@ export class PredictorsInventoryComponent {
     return buildPredictorInventory(buildPredictorCards(predictors, readings, this.status.items(), this.status.state() === 'ready'),
       buildWeatherStationGroups(predictors, readings, this.status.items(), this.status.state() === 'ready'), facility, this.status.state());
   }));
-
   readonly filteredEntries = computed(() => orderPortfolioPredictors(filterPredictorInventory(this.entries(), this.filters()), this.filters().sort));
   readonly tiles = computed(() => buildPredictorTiles(this.filteredEntries(), this.navigation, this.workspace.predictorData(), this.status.state()));
   readonly inventory = new InventoryViewState(this.browseKey, this.tiles, computed(() => this.entries().map(item => item.guid)), computed(() => ({ ...this.filters(), facility: this.navigation.inventoryFacilityGuid() })), this.workspace.canWrite);

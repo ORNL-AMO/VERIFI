@@ -3,6 +3,7 @@ import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identit
 import { DataValidationSettingsPanelComponent } from '@app/v1/shared/settings/data-validation-settings-panel/data-validation-settings-panel.component';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { CommonModule } from '@angular/common';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -34,6 +35,7 @@ import { FacilitiesModule } from '@app/v1/data/facilities/facilities.module';
   imports: [
     PageIdentityComponent,
     CommonModule,
+    DragDropModule,
     ConfirmationDialogComponent,
     DataValidationSettingsPanelComponent,
     IconsModule,
