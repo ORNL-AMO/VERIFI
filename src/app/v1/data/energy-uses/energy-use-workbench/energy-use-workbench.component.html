@@ -1,0 +1,24 @@
+@let entry = context.entry();
+@if (context.workspace.loading()) {
+  <p class="v1-alert v1-alert--info" role="status">Loading energy use…</p>
+} @else if (context.workspace.state() === 'error') {
+  <p class="v1-alert v1-alert--danger" role="alert">The energy use could not be loaded. Retry loading the account.</p>
+} @else if (context.notFound()) {
+  <article class="v1-empty-state" role="status"><app-ui-icon name="tools"/><h1>Energy use unavailable</h1><p>This energy use is not available in this facility.</p>
+    <a class="v1-btn v1-btn--secondary" [routerLink]="context.inventoryLink().route" [queryParams]="context.inventoryLink().queryParams">Back to energy uses</a>
+  </article>
+} @else if (entry) {
+  <span #scrollMarker class="energy-use-workbench__marker" aria-hidden="true"></span>
+  <div #stickyHeader [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" class="v1-data-workbench-sticky">
+    <header class="v1-data-workbench-header v1-page-header">
+      <div class="v1-data-workbench-title-row"><div class="v1-data-workbench-title">
+        <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="entry.name" icon="tools" headingId="energy-use-workbench-title" [customTitle]="true">
+          <app-data-workbench-resource-switcher [resources]="context.resources()" [selectedId]="entry.guid" [currentLabel]="entry.name" ariaLabel="Switch energy use" (resourceSelected)="context.switchResource($event)"/>
+        </app-page-identity>
+      </div></div>
+    </header>
+    <app-data-workbench-tabs [tabs]="tabs" [activeTab]="context.activeTab()" ariaLabel="Energy use workbench sections" (tabSelected)="context.openTab($event)"/>
+  </div>
+}
+@if (context.navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ context.navigationError() }}</p> }
+<router-outlet/>
