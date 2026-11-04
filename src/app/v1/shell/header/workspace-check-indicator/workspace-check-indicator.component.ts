@@ -13,7 +13,12 @@ export class WorkspaceCheckIndicatorComponent {
   readonly announce = input(true);
   readonly openTodos = output<void>();
   private readonly delayedAccount = signal<string | undefined>(undefined);
-  readonly tooltipOpen = signal(false);
+  readonly focusReleased = output<void>();
+  private readonly focused = signal(false);
+  private readonly hovered = signal(false);
+  private readonly tooltipDismissed = signal(false);
+  readonly tooltipOpen = computed(() => !!this.indicator() && !this.tooltipDismissed()
+    && (this.focused() || this.hovered()));
   readonly indicator = computed(() => this.state() === 'error' ? 'error'
     : this.state() === 'evaluating' && this.delayedAccount() === this.accountGuid() ? 'evaluating' : undefined);
   readonly label = computed(() => this.indicator() === 'error'
@@ -26,16 +31,35 @@ export class WorkspaceCheckIndicatorComponent {
       const state = this.state();
       const accountGuid = this.accountGuid();
       this.delayedAccount.set(undefined);
-      this.tooltipOpen.set(false);
       if (state === 'evaluating') {
         const timeout = setTimeout(() => this.delayedAccount.set(accountGuid), 1000);
         onCleanup(() => clearTimeout(timeout));
       }
     });
+    effect(() => {
+      if (!this.indicator()) {
+        this.hovered.set(false);
+        this.tooltipDismissed.set(false);
+        if (this.focused()) {
+          this.focused.set(false);
+          this.focusReleased.emit();
+        }
+      }
+    });
+  }
+
+  setFocused(focused: boolean): void {
+    this.focused.set(focused);
+    if (focused) this.tooltipDismissed.set(false);
+  }
+
+  setHovered(hovered: boolean): void {
+    this.hovered.set(hovered);
+    if (hovered) this.tooltipDismissed.set(false);
   }
 
   @HostListener('document:keydown.escape')
   closeTooltip(): void {
-    this.tooltipOpen.set(false);
+    this.tooltipDismissed.set(true);
   }
 }

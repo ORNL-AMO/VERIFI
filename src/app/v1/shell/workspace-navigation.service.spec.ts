@@ -92,6 +92,16 @@ describe('WorkspaceNavigationService', () => {
     service = TestBed.inject(WorkspaceNavigationService);
   });
 
+  it.each([true, false])('toggles from effective visibility %s rather than the default open preference', visible => {
+    expect(service.isSupportPanelOpen()).toBe(true);
+    expect(service.supportPanelRequested()).toBe(false);
+    service.toggleSupportPanel(visible);
+    expect(service.isSupportPanelOpen()).toBe(!visible);
+    expect(service.supportPanelRequested()).toBe(!visible);
+    service.toggleSupportPanel(!visible);
+    expect(service.isSupportPanelOpen()).toBe(visible);
+  });
+
   it('opens To-dos with a consumable focus request and leaves the panel toggle independent', () => {
     service.hideSupportPanel(); service.openTodos();
     expect(service.activePanelTab()).toBe('todos');

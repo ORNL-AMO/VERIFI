@@ -57,15 +57,33 @@ describe('WorkspaceCheckIndicatorComponent', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it('provides focus and hover descriptions and suppresses duplicate announcements when To-dos is visible', () => {
+  it('requests stable focus only when a focused action disappears', async () => {
+    const release = vi.fn(); fixture.componentInstance.focusReleased.subscribe(release);
+    state('evaluating'); await advance(1000); button()!.dispatchEvent(new Event('focus'));
+    state('error'); expect(release).not.toHaveBeenCalled();
+    state('ready'); expect(release).toHaveBeenCalledOnce();
+    state('error'); state('ready'); expect(release).toHaveBeenCalledOnce();
+    state('error'); button()!.dispatchEvent(new Event('focus')); fixture.detectChanges();
+    button()!.dispatchEvent(new Event('blur')); state('ready'); expect(release).toHaveBeenCalledOnce();
+  });
+
+  it('keeps descriptions visible for focus or pointer hover and respects Escape dismissal', () => {
     state('error'); const control = button()!;
+    const target = fixture.nativeElement.querySelector('.check-indicator__target') as HTMLElement;
     const tooltip = () => fixture.nativeElement.querySelector('[role=tooltip]') as HTMLElement;
     expect(tooltip().hidden).toBe(true);
     control.dispatchEvent(new Event('focus')); fixture.detectChanges(); expect(tooltip().hidden).toBe(false);
     expect(control.getAttribute('aria-describedby')).toBe(tooltip().id);
+    target.dispatchEvent(new Event('mouseenter')); control.dispatchEvent(new Event('blur'));
+    fixture.detectChanges(); expect(tooltip().hidden).toBe(false);
+    target.dispatchEvent(new Event('mouseleave')); fixture.detectChanges(); expect(tooltip().hidden).toBe(true);
+    target.dispatchEvent(new Event('mouseenter')); fixture.detectChanges(); expect(tooltip().hidden).toBe(false);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); fixture.detectChanges(); expect(tooltip().hidden).toBe(true);
-    control.dispatchEvent(new Event('mouseenter')); fixture.detectChanges(); expect(tooltip().hidden).toBe(false);
-    control.dispatchEvent(new Event('mouseleave')); fixture.detectChanges(); expect(tooltip().hidden).toBe(true);
+    target.dispatchEvent(new Event('mouseleave')); control.dispatchEvent(new Event('focus'));
+    fixture.detectChanges(); expect(tooltip().hidden).toBe(false);
+    target.dispatchEvent(new Event('mouseenter')); target.dispatchEvent(new Event('mouseleave'));
+    fixture.detectChanges(); expect(tooltip().hidden).toBe(false);
+    control.dispatchEvent(new Event('blur')); fixture.detectChanges(); expect(tooltip().hidden).toBe(true);
     fixture.componentRef.setInput('announce', false); fixture.detectChanges();
     expect(button()).not.toBeNull(); expect(fixture.nativeElement.querySelector('[role=status]').textContent).toBe('');
   });

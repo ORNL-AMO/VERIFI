@@ -148,21 +148,21 @@
     </div>
 
     @if (isWorkspaceRoute) {
-      @let isSupportPanelOpen = navigation.isSupportPanelOpen();
+      @let isSupportPanelVisible = supportPanelVisible();
 
       @if (navigation.account(); as account) {
         <app-workspace-check-indicator [state]="navigation.dataCheckState()" [accountGuid]="account.guid"
-          [announce]="!isSupportPanelOpen || navigation.activePanelTab() !== 'todos'"
-          (openTodos)="navigation.openTodos()"/>
+          [announce]="!isSupportPanelVisible || navigation.activePanelTab() !== 'todos'"
+          (openTodos)="navigation.openTodos()" (focusReleased)="supportPanelToggle.focus()"/>
       }
 
-      <button
+      <button #supportPanelToggle
         type="button"
         class="v1-icon-btn"
-        (click)="navigation.toggleSupportPanel()"
-        [attr.aria-pressed]="isSupportPanelOpen"
+        (click)="navigation.toggleSupportPanel(isSupportPanelVisible)"
+        [attr.aria-pressed]="isSupportPanelVisible"
         aria-label="Toggle support panel">
-        <app-ui-icon [name]="isSupportPanelOpen ? 'chevronRight' : 'chevronLeft'"></app-ui-icon>
+        <app-ui-icon [name]="isSupportPanelVisible ? 'chevronRight' : 'chevronLeft'"></app-ui-icon>
       </button>
     }
   </div>

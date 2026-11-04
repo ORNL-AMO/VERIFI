@@ -1,3 +1,6 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { Component, HostListener, ViewChild, computed, inject } from '@angular/core';
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import {
@@ -36,6 +39,13 @@ interface PatternOption {
 })
 export class ShellHeaderComponent {
   readonly navigation = inject(WorkspaceNavigationService);
+  private readonly breakpoints = inject(BreakpointObserver);
+  private readonly narrowSupportPanel = toSignal(
+    this.breakpoints.observe('(max-width: 1160px)').pipe(map(state => state.matches)),
+    { initialValue: this.breakpoints.isMatched('(max-width: 1160px)') }
+  );
+  readonly supportPanelVisible = computed(() => this.navigation.isSupportPanelOpen()
+    && (!this.narrowSupportPanel() || this.navigation.supportPanelRequested()));
   readonly appearance = inject(AppearanceService);
   readonly backups = inject(ManualBackupDownloadService);
   readonly backupDescription = computed(() =>

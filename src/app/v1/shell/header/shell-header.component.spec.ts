@@ -174,7 +174,7 @@ function setup(isWorkspaceRoute: boolean): {
   };
   const navigation = {
     isWorkspaceRoute: signal(isWorkspaceRoute),
-    dataCheckState: signal('ready'), activePanelTab: signal('help'), openTodos: vi.fn(), isSupportPanelOpen: signal(true),
+    supportPanelRequested: () => false, dataCheckState: signal('ready'), activePanelTab: signal('help'), openTodos: vi.fn(), isSupportPanelOpen: signal(true),
     contextMode: vi.fn(() => 'account'),
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
     headerFacility: () => undefined, singleFacilityContext: signal<IdbFacility | undefined>(undefined), isSingleSiteWorkspace: () => false,

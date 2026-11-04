@@ -115,7 +115,7 @@ describe('unified inventory charts in Chromium',()=>{
     const navigation = { singleFacilityContext: () => undefined, inventoryFacilityGuid: scope, account: store.account, facilities: store.facilities,
       headerFacility: computed(() => store.facilities().find(f => f.guid === scope())),
       isWorkspaceRoute: () => true, isSingleSiteWorkspace: () => false, scopeChangePending: () => false,
-      scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', dataCheckState: () => 'ready', activePanelTab: () => 'help', openTodos: vi.fn(), isSupportPanelOpen: () => false,
+      scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', supportPanelRequested: () => false, dataCheckState: () => 'ready', activePanelTab: () => 'help', openTodos: vi.fn(), isSupportPanelOpen: () => false,
       showWelcome: vi.fn(), toggleSupportPanel: vi.fn(),
       changeFacilityScope: async (next: { kind: 'all' } | { kind: 'facility'; facilityGuid: string }) => { scope.set(next.kind === 'facility' ? next.facilityGuid : undefined); return true; }
     };

@@ -276,9 +276,9 @@ export class WorkspaceNavigationService {
     this.todosFocusRequest.set(false);
   }
 
-  toggleSupportPanel(): void {
+  toggleSupportPanel(visible = this.isSupportPanelOpen()): void {
     this.todosFocusRequest.set(false);
-    this.isSupportPanelOpen.update(open => !open);
+    this.isSupportPanelOpen.set(!visible);
     this.supportPanelRequested.set(this.isSupportPanelOpen());
   }
 

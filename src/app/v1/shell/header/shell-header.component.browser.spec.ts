@@ -16,7 +16,7 @@ describe('backup tooltip contrast', () => {
         { provide: AppearanceService, useValue: {} },
         { provide: WorkspaceNavigationService, useValue: {
           isWorkspaceRoute: () => true, account: () => ({ guid: 'account-a', name: 'Account A' }),
-          facilities: () => [], headerFacility: () => undefined, singleFacilityContext: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', dataCheckState: () => 'ready', activePanelTab: () => 'help', openTodos: vi.fn(), isSupportPanelOpen: () => false
+          facilities: () => [], headerFacility: () => undefined, singleFacilityContext: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', supportPanelRequested: () => false, dataCheckState: () => 'ready', activePanelTab: () => 'help', openTodos: vi.fn(), isSupportPanelOpen: () => false
         } },
         { provide: ManualBackupDownloadService, useValue: {
           available: signal(true), preparing: signal(false),
@@ -57,7 +57,7 @@ describe('header facility chooser presentation', () => {
     const navigation = {
       isWorkspaceRoute: () => true, account: () => account, facilities: () => [facility], headerFacility: selected, singleFacilityContext: signal<typeof facility | undefined>(undefined),
       isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '',
-      dataCheckState: () => 'ready', activePanelTab: () => 'help', openTodos: vi.fn(), isSupportPanelOpen: () => false, showWelcome: vi.fn(), toggleSupportPanel: vi.fn(),
+      supportPanelRequested: () => false, dataCheckState: () => 'ready', activePanelTab: () => 'help', openTodos: vi.fn(), isSupportPanelOpen: () => false, showWelcome: vi.fn(), toggleSupportPanel: vi.fn(),
       changeFacilityScope: vi.fn(scope => selected.set(scope.kind === 'facility' ? facility : undefined))
     };
     TestBed.configureTestingModule({ imports: [ShellHeaderTestModule], providers: [

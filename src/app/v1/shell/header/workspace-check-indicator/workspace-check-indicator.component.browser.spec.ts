@@ -43,7 +43,7 @@ describe('workspace data-check feedback in Chromium', () => {
       { provide: ManualBackupDownloadService, useValue: backups }
     ] });
     const navigation = TestBed.inject(WorkspaceNavigationService);
-    const open = signal(false);
+    const open = signal(true);
     const tab = signal('help');
     const revealed = signal(false);
     const requested = signal(false);
@@ -54,12 +54,14 @@ describe('workspace data-check feedback in Chromium', () => {
       completeTodosFocus: () => requested.set(false), panelTabs: () => SUPPORT_PANEL_TABS,
       panelContent: () => ({ help: [], todos: [], discardedWarnings: [], results: [], details: [] }),
       openTodos: () => { open.set(true); revealed.set(true); tab.set('todos'); requested.set(true); },
-      toggleSupportPanel: () => open.update(value => !value), hideSupportPanel: () => open.set(false)
+      toggleSupportPanel: vi.fn((visible: boolean) => { open.set(!visible); revealed.set(!visible); }),
+      hideSupportPanel: () => { open.set(false); revealed.set(false); }
     });
     // The base status mock supplies the same state to navigation and To-dos.
     Object.assign(TestBed.inject(WorkspaceStatusService), {
       warningActionError: () => undefined, canManageWarnings: () => true
     });
+    await page.viewport(390, 850);
     const fixture = TestBed.createComponent(CheckFeedbackHost);
     const root = fixture.nativeElement as HTMLElement;
     root.className = 'v1-root';
@@ -70,8 +72,16 @@ describe('workspace data-check feedback in Chromium', () => {
     const change = async (value: 'idle' | 'ready' | 'evaluating' | 'error') => { state.statusState.set(value); await settle(); };
     const client = cdp() as { send(method: string, parameters: Record<string, unknown>): Promise<void> };
     try {
-      await page.viewport(1200, 850);
       state.activeSection.set('data'); state.activeDetail.set('portfolio'); await settle();
+      expect(toggle().getAttribute('aria-pressed')).toBe('false');
+      expect(getComputedStyle(root.querySelector('app-support-panel')!).display).toBe('none');
+      toggle().click(); await settle();
+      expect(toggle().getAttribute('aria-pressed')).toBe('true');
+      expect(root.querySelector('app-support-panel')!.getBoundingClientRect().width).toBeGreaterThan(0);
+      toggle().click(); await settle(); expect(open()).toBe(false);
+      await page.viewport(1200, 850); open.set(true); revealed.set(false);
+      await vi.waitFor(() => { fixture.detectChanges(); expect(toggle().getAttribute('aria-pressed')).toBe('true'); });
+      toggle().click(); await settle(); expect(open()).toBe(false);
       for (const width of [1200, 390]) {
         await page.viewport(width, 850); await change('ready');
         const header = root.querySelector<HTMLElement>('header')!;
@@ -104,11 +114,21 @@ describe('workspace data-check feedback in Chromium', () => {
       for (const palette of PORTFOLIO_PALETTES) {
         for (const mode of ['', 'v1-theme-dark', 'v1-contrast-strong', 'v1-theme-dark v1-contrast-strong']) {
           root.className = `v1-root v1-palette-${palette} ${mode}`;
-          expect(textContrast(tooltip())).toBeGreaterThanOrEqual(4.5);
+          expect(textContrast(tooltip().querySelector<HTMLElement>('.check-indicator__description')!)).toBeGreaterThanOrEqual(4.5);
           expect(toggle().getBoundingClientRect().left).toBeCloseTo(left, 3);
         }
       }
       root.className = 'v1-root';
+      toggle().focus(); await settle();
+      await page.getByRole('button', { name: 'Updating data checks. Open To-dos' }).hover(); await settle();
+      await page.getByRole('tooltip').hover(); await settle(); expect(tooltip().hidden).toBe(false);
+      await page.getByRole('button', { name: 'Toggle support panel' }).hover(); await settle(); expect(tooltip().hidden).toBe(true);
+      indicator()!.focus(); await settle(); expect(tooltip().hidden).toBe(false);
+      await userEvent.keyboard('{Escape}'); await settle(); expect(tooltip().hidden).toBe(true);
+      await change('ready'); expect(indicator()).toBeNull();
+      expect(document.activeElement).toBe(toggle());
+      await change('evaluating');
+      await vi.waitFor(() => { fixture.detectChanges(); expect(indicator()).not.toBeNull(); }, { timeout: 2000, interval: 20 });
       await client.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
       expect(getComputedStyle(indicator()!.querySelector('app-ui-icon')!).animationName).toBe('none');
       await client.send('Emulation.setEmulatedMedia', { media: 'print' });
@@ -123,11 +143,13 @@ describe('workspace data-check feedback in Chromium', () => {
       expect(root.querySelector('app-support-panel [role=alert]')!.textContent).toContain('Data checks are unavailable.');
       expect(root.querySelector('app-support-panel')!.textContent).not.toContain('No data issues need attention.');
       toggle().click(); await settle(); expect(open()).toBe(false);
-      indicator()!.dispatchEvent(new MouseEvent('mouseenter')); await settle(); expect(tooltip().hidden).toBe(false);
+      root.querySelector('.check-indicator__target')!.dispatchEvent(new MouseEvent('mouseenter')); await settle(); expect(tooltip().hidden).toBe(false);
       indicator()!.focus(); await userEvent.keyboard(' '); await settle();
       expect(open()).toBe(true);
       await vi.waitFor(() => expect(document.activeElement).toBe(root.querySelector('[aria-labelledby="v1-todo-heading"]')));
+      const todoRegion = document.activeElement;
       await change('ready'); expect(indicator()).toBeNull();
+      expect(document.activeElement).toBe(todoRegion);
       expect(root.querySelector('app-support-panel')!.textContent).toContain('No data issues need attention.');
     } finally {
       await client.send('Emulation.setEmulatedMedia', { media: '', features: [] });
