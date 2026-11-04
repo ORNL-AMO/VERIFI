@@ -31,7 +31,12 @@ export type MeterSettingsRuleChange =
   | 'vehicleFuel'
   | 'chargeType';
 
-export type MeterSettingsSaveState = 'idle' | 'saving' | 'saved' | 'error' | 'invalid';
+export type MeterSettingsSaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error' | 'invalid' | 'conflict';
+
+export interface MeterSettingsGroupingView {
+  readonly options: readonly { readonly value: string | null; readonly label: string; readonly disabled?: boolean }[];
+  readonly error?: string;
+}
 
 export interface MeterSettingsRuleContext {
   readonly facility: IdbFacility;

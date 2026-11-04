@@ -24,6 +24,7 @@ export class MeterSettingsFormBuilderService {
       supplier: [values.supplier],
       notes: [values.notes],
       source: [values.source, Validators.required],
+      groupId: [values.groupId],
       meterReadingDataApplication: [values.meterReadingDataApplication, Validators.required],
       fuel: [values.fuel, this.validation.getFuelValidation(meter.source, meter.scope)],
       startingUnit: [values.startingUnit, Validators.required],

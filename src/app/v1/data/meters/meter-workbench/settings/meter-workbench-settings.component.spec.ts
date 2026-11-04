@@ -1,8 +1,10 @@
+import { EditorConflictReviewComponent } from '@app/v1/data/editing/editor-conflict-review/editor-conflict-review.component';
 import { CommonModule } from '@angular/common';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
+import { unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
@@ -11,7 +13,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { account, facility, meter, reading } from '../../facility-meters.testing';
+import { account, facility, group, meter, reading } from '../../facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { MeterActionsService } from '../../meter-actions.service';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
@@ -191,6 +193,53 @@ describe('MeterWorkbenchSettingsComponent', () => {
     );
   });
 
+  it.each([
+    { destination: 'Water group', expectedGroup: 'water-group', withReading: true },
+    { destination: 'Ungrouped', expectedGroup: undefined, withReading: false }
+  ])('guides an incompatible source change to $destination before saving', async ({ destination, expectedGroup, withReading }) => {
+    vi.useFakeTimers();
+    const fixture = setup({ source: 'Natural Gas', withReading,
+      meter: { groupId: 'energy-group', scope: 1, startingUnit: 'SCF', energyUnit: 'MMBtu', heatCapacity: .001,
+        waterIntakeType: 'Municipal (Non-potable)' },
+      groups: [group({ guid: 'energy-group', name: 'Energy group', groupType: 'Energy' }),
+        group({ guid: 'water-group', name: 'Water group', groupType: 'Water' }),
+        group({ guid: 'foreign-group', name: 'Foreign water group', facilityId: 'other-facility', groupType: 'Water' })]
+    });
+    const handler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const originalReadings = structuredClone(store.meterData());
+    fixture.detectChanges();
+    if (withReading) query<HTMLButtonElement>(fixture, '.meter-settings__setup-lock button').click();
+    selectOptionLabel(fixture, 'source', 'Water Intake'); fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(700); fixture.detectChanges();
+    expect(handler.updateMeterWithData).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.saveState()).toBe('invalid');
+    expect(fixture.componentInstance.formSignal()?.controls.groupId.value).toBe('energy-group');
+    expect(fixture.nativeElement.textContent).toContain('energy meter group cannot contain Water Intake meters');
+    expect(fixture.nativeElement.textContent).not.toContain('Settings could not be saved');
+    const groupSelect = query<HTMLSelectElement>(fixture, 'select[formControlName="groupId"]');
+    expect(groupSelect.selectedOptions[0].textContent).toContain('Energy group (incompatible)');
+    expect(groupSelect.selectedOptions[0].disabled).toBe(true);
+    expect([...groupSelect.options].some(option => option.textContent?.includes('Foreign'))).toBe(false);
+    selectOptionLabel(fixture, 'groupId', destination); fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(0); await fixture.whenStable(); fixture.detectChanges();
+    expect(handler.updateMeterWithData).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ source: 'Water Intake', groupId: expectedGroup, startingUnit: 'gal' }),
+      [], 'account-a');
+    expect(store.meterData()).toEqual(originalReadings);
+    expect(fixture.componentInstance.session.dirty()).toBe(false);
+  });
+
+  it('shows the actual save failure so the user can understand the problem', async () => {
+    vi.useFakeTimers(); const fixture = setup(); fixture.detectChanges();
+    const handler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+    handler.updateMeterWithData.mockRejectedValueOnce(new Error('The meter group is no longer available.'));
+    fixture.componentInstance.formSignal()!.controls.name.setValue('Renamed');
+    await vi.advanceTimersByTimeAsync(700); fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('The meter group is no longer available.');
+    expect(fixture.componentInstance.formSignal()!.controls.name.value).toBe('Renamed');
+  });
+
   it('autosaves valid text changes through the workspace command boundary', async () => {
     vi.useFakeTimers();
     const fixture = setup();
@@ -219,6 +268,41 @@ describe('MeterWorkbenchSettingsComponent', () => {
       [],
       'account-a'
     );
+  });
+
+  it('autosaves a direct typed control edit without a template event handler', async () => {
+    vi.useFakeTimers();
+    const fixture = setup(); fixture.detectChanges();
+    const handler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+    fixture.componentInstance.formSignal()!.controls.name.setValue('Direct control edit');
+    await vi.advanceTimersByTimeAsync(700);
+    expect(handler.updateMeterWithData).toHaveBeenCalledWith(expect.objectContaining({ name: 'Direct control edit' }), [], 'account-a');
+  });
+
+  it('does not write an edit reverted to the saved values before the debounce expires', async () => {
+    vi.useFakeTimers();
+    const fixture = setup(); fixture.detectChanges();
+    const boundary = TestBed.inject(WorkspaceCommandBoundary) as unknown as { execute: ReturnType<typeof vi.fn> };
+    const control = fixture.componentInstance.formSignal()!.controls.name;
+    const saved = control.value;
+    control.setValue('Temporary edit'); await Promise.resolve();
+    control.setValue(saved); await vi.advanceTimersByTimeAsync(700);
+    expect(boundary.execute).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('retains a dirty draft when the routed meter disappears', async () => {
+    vi.useFakeTimers();
+    const fixture = setup(); fixture.detectChanges();
+    const form = fixture.componentInstance.formSignal()!;
+    form.controls.name.setValue('Unsaved local name'); await Promise.resolve();
+    const selected = TestBed.inject(FacilityMetersWorkspaceService).selectedMeter as WritableSignal<ReturnType<typeof meter> | undefined>;
+    selected.set(undefined); fixture.detectChanges();
+    expect(fixture.componentInstance.formSignal()).toBe(form);
+    expect(form.controls.name.value).toBe('Unsaved local name');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    expect(form.disabled).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('draft is retained');
   });
 
   it('autosaves calendarization method changes through the meter settings path', async () => {
@@ -473,21 +557,27 @@ describe('MeterWorkbenchSettingsComponent', () => {
 
     const pendingFixture = setup({ hasPending: true });
     pendingFixture.detectChanges();
-    expect(query<HTMLInputElement>(pendingFixture, 'input[formControlName="name"]').disabled).toBe(false);
+    expect(query<HTMLInputElement>(pendingFixture, 'input[formControlName="name"]').disabled).toBe(true);
     expect((pendingFixture.nativeElement as HTMLElement).textContent).not.toContain('finishing');
   });
 
-  it('keeps the form stable while its own autosave reload is in progress', () => {
-    const fixture = setup({ canWrite: false });
-
+  it('keeps later edits dirty while its own save is pending', async () => {
+    const fixture = setup(); fixture.detectChanges();
+    const handler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+    let finish!: (value: ReturnType<typeof meter>) => void;
+    handler.updateMeterWithData.mockImplementationOnce(value => new Promise(resolve => { finish = () => resolve(value); }));
+    const form = fixture.componentInstance.formSignal()!;
+    form.controls.name.setValue('First edit');
+    const saving = fixture.componentInstance.saveNow();
+    await Promise.resolve();
     fixture.detectChanges();
-    fixture.componentInstance.saveState.set('saving');
-    fixture.componentInstance.saveMessage.set('Saving settings...');
-    fixture.detectChanges();
-
     expect(query<HTMLInputElement>(fixture, 'input[formControlName="name"]').disabled).toBe(false);
-    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('read-only');
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Saving settings');
+    form.controls.name.setValue('Later edit');
+    await Promise.resolve();
+    finish(meter({})); await saving;
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    expect(form.controls.name.value).toBe('Later edit');
+    fixture.destroy();
   });
 
   it('opens a delete confirmation from the form footer and deletes the meter', async () => {
@@ -508,6 +598,33 @@ describe('MeterWorkbenchSettingsComponent', () => {
     expect(actions.deleteMeter).toHaveBeenCalledWith(expect.objectContaining({ guid: 'meter-a' }));
     expect(modalPortal.hide).toHaveBeenCalledOnce();
     expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], { queryParams: { facility: 'facility-a' } });
+  });
+
+  it('blocks navigation during deletion and releases the guard before returning to inventory', async () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const actions = TestBed.inject(MeterActionsService) as unknown as { deleteMeter: ReturnType<typeof vi.fn> };
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    let finish!: () => void;
+    actions.deleteMeter.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    const canLeave = () => TestBed.runInInjectionContext(() => unsavedChangesGuard(component,
+      {} as ActivatedRouteSnapshot, {} as RouterStateSnapshot, {} as RouterStateSnapshot));
+    router.navigate.mockImplementationOnce(async () => {
+      expect(canLeave()).toBe(true);
+      return true;
+    });
+
+    const deleting = component.confirmDeleteMeter();
+    expect(canLeave()).toBe(false);
+    expect(router.navigate).not.toHaveBeenCalled();
+
+    finish();
+    await deleting;
+
+    expect(router.navigate).toHaveBeenCalledOnce();
+    expect(component.deleting()).toBe(false);
+    expect(component.deleteError()).toBeUndefined();
   });
 
   it('toggles no longer in use from the form footer and saves the meter', async () => {
@@ -550,6 +667,7 @@ function setup(options: {
   source?: 'Electricity' | 'Natural Gas';
   meter?: Partial<ReturnType<typeof meter>>;
   facility?: Partial<ReturnType<typeof facility>>;
+  groups?: ReturnType<typeof group>[];
   fragment?: string;
   meterReadingDataApplication?: ReturnType<typeof meter>['meterReadingDataApplication'];
 } = {}): ComponentFixture<MeterWorkbenchSettingsComponent> {
@@ -585,6 +703,9 @@ function setup(options: {
   }));
   const execute = vi.fn(async (_options, persist: () => Promise<unknown>) => {
     const value = await persist();
+    if (value && typeof value === 'object' && 'guid' in value && value.guid === selectedMeter()?.guid) {
+      selectedMeter.set(value as ReturnType<typeof meter>);
+    }
     return { value, change: { entityKind: 'meter', changeKind: 'update', accountGuid: 'account-a' } };
   });
   const updateMeterWithData = vi.fn(async savedMeter => savedMeter);
@@ -602,7 +723,7 @@ function setup(options: {
       MeterSettingsReadingFormComponent,
       MeterSettingsVehicleFormComponent
     ],
-    imports: [CommonModule, ReactiveFormsModule, IconsModule, IconComponent, ConfirmDeleteMeterModalComponent, MeterCalendarizationHelpSlideoutComponent, TooltipComponent],
+    imports: [EditorConflictReviewComponent, CommonModule, ReactiveFormsModule, IconsModule, IconComponent, ConfirmDeleteMeterModalComponent, MeterCalendarizationHelpSlideoutComponent, TooltipComponent],
     providers: [
       MeterSettingsFormService,
       {
@@ -611,6 +732,7 @@ function setup(options: {
           account: activeAccount,
           facility: selectedFacility,
           selectedMeter,
+          selectedMeterGuid: () => 'meter-a',
           selectedMeterCard,
           selectedMeterData,
           canWrite,
@@ -624,7 +746,12 @@ function setup(options: {
           facilities: () => [selectedFacility()],
           selectedFacility,
           customFuels: signal([]),
-          customGWPs: signal([])
+          customGWPs: signal([]),
+          meters: () => [selectedMeter()],
+          meterData: selectedMeterData,
+          meterGroups: signal(options.groups ?? []),
+          canWrite,
+          pendingOperations: signal(options.hasPending ? [{ id: 1, label: 'External operation' }] : [])
         }
       },
       {
@@ -675,6 +802,12 @@ function query<T extends Element>(fixture: ComponentFixture<unknown>, selector: 
   const element = (fixture.nativeElement as HTMLElement).querySelector<T>(selector);
   expect(element).not.toBeNull();
   return element as T;
+}
+
+function selectOptionLabel(fixture: ComponentFixture<unknown>, control: string, label: string): void {
+  const select = query<HTMLSelectElement>(fixture, `select[formControlName="${control}"]`);
+  select.value = [...select.options].find(option => option.textContent?.trim() === label)!.value;
+  select.dispatchEvent(new Event('change'));
 }
 
 function optionButton(fixture: ComponentFixture<unknown>, label: string): HTMLButtonElement {

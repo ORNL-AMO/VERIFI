@@ -17,6 +17,7 @@ import { MeterSettingsValidationService } from './meter-settings-form-services/m
 import { MeterSettingsViewModelService } from './meter-settings-form-services/meter-settings-view-model.service';
 
 export type {
+  MeterSettingsGroupingView,
   MeterSettingsRuleChange,
   MeterSettingsRuleContext,
   MeterSettingsSaveState,

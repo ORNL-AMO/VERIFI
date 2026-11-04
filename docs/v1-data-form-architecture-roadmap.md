@@ -76,3 +76,7 @@ Use focused pure or Angular TestBed specs for builders, lifecycle, templates, an
 - The focused Chromium check passes all seven saved Weather selections, real type/name edits, keyboard focus, and narrow layout.
 - The app type-check and production web build pass. Existing browser-support, stylesheet-budget, dependency-format, and duplicate GWP option warnings remain; no storage or Electron boundary changed.
 - The shared autosave, navigation, refresh, remaining typed-form, and GUID-mapping packages above remain follow-up work.
+
+## Settings lifecycle adoption
+
+Meter and Standard Predictor Settings now use the shared Data editing session for serialized autosave, submitted-value acknowledgement, nonconflicting committed refreshes, and explicit conflict review. Angular owns the session lifetime and shared navigation registration; Settings remain editable during their own saves, confirm draft discard, and block navigation while persistence runs. Meter source and group changes are validated together, with a compatible-group selector above Meter Reading Settings. Queued feature actions recheck current ownership and reconcile current records before existing atomic persistence. Reading and Weather lifecycle work remains in the following changes.

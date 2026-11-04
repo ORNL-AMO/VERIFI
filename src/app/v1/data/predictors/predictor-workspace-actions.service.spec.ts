@@ -6,6 +6,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
+import { EditorConflictError } from '@app/v1/data/editing/draft-reconciliation';
+import { standardPredictorSettings } from './models/standard-predictor-settings.models';
 
 describe('PredictorWorkspaceActionsService', () => {
   const existing = {
@@ -69,6 +71,55 @@ describe('PredictorWorkspaceActionsService', () => {
     predictors.set([{ ...existing, accountId: 'other' }]);
     await expect(service.copyPredictor(existing, 'facility-a')).rejects.toThrow('selected facility');
   });
+
+  it('resolves settings and dependent analyses from the latest queued workspace', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const boundary = TestBed.inject(WorkspaceCommandBoundary);
+    const store = TestBed.inject(AccountWorkspaceStore);
+    let execute!: () => Promise<void>;
+    vi.mocked(boundary.execute).mockImplementationOnce((options: any, persist: () => Promise<any>) => new Promise(resolve => {
+      execute = async () => resolve({ value: await persist(), change: options });
+    }));
+    const base = standardPredictorSettings(existing);
+    const saving = service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: ' Edited production ' }, base, 'editor-owner');
+    predictors.set([{ ...existing, id: 99, description: 'Saved note', importWizardName: 'Keep import marker' }]);
+    (store.facilityAnalyses as any).set([{ id: 12, guid: 'analysis-a', accountId: 'account-a', facilityId: 'facility-a',
+      marker: 'latest', groups: [{ predictorVariables: [{ id: 'predictor-a', name: 'Old', unit: 'tons' }], models: [] }] }]);
+    await execute();
+    const committed = await saving;
+    expect(committed).toMatchObject({ name: 'Edited production', description: 'Saved note' });
+    expect(predictorHandler.updateStandardPredictor).toHaveBeenCalledWith(expect.objectContaining({
+      predictor: expect.objectContaining({ id: 99, name: 'Edited production', description: 'Saved note', importWizardName: 'Keep import marker' }),
+      facilityAnalyses: [expect.objectContaining({ marker: 'latest', groups: [expect.objectContaining({
+        predictorVariables: [expect.objectContaining({ name: 'Edited production' })]
+      })] })]
+    }), 'account-a');
+    expect(boundary.execute).toHaveBeenCalledWith(expect.objectContaining({ ownerId: 'editor-owner' }), expect.any(Function));
+  });
+
+  it('returns a typed conflict instead of overwriting an overlapping saved setting', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const base = standardPredictorSettings(existing);
+    predictors.set([{ ...existing, name: 'Committed name' }]);
+    await expect(service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: 'Local name' }, base, 'owner')).rejects.toBeInstanceOf(EditorConflictError);
+    expect(predictorHandler.updateStandardPredictor).not.toHaveBeenCalled();
+  });
+
+  it('revalidates facility ownership and predictor type before a settings write', async () => {
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const base = standardPredictorSettings(existing);
+    predictors.set([{ ...existing, predictorType: 'Weather' }]);
+    await expect(service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: 'Edited' }, base, 'owner')).rejects.toThrow('Standard predictor');
+    predictors.set([existing]);
+    (TestBed.inject(AccountWorkspaceStore).selectedFacility as any).set({ guid: 'facility-b' });
+    await expect(service.updateSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', predictorGuid: 'predictor-a' },
+      { ...base, name: 'Edited' }, base, 'owner')).rejects.toThrow('no longer available');
+    expect(predictorHandler.updateStandardPredictor).not.toHaveBeenCalled();
+  });
+
   it('copies settings into a new identity without copying readings', async () => {
     const copy = await TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing);
     expect(copy.guid).not.toBe(existing.guid);

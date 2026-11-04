@@ -89,6 +89,19 @@ describe('MeterSettingsFormService', () => {
     expect(updated.meterReadingDataApplication).toBe('fullYear');
   });
 
+  it('retains group ownership on source changes until an explicit reassignment or Ungrouped choice', () => {
+    const saved = meter({ groupId: 'energy-group', source: 'Natural Gas', scope: 1 });
+    const form = service.buildMeterSettingsForm(saved);
+    form.controls.source.setValue('Water Intake');
+    service.applyMeterSettingsRuleChange('source', form, context);
+    expect(form.controls.groupId.value).toBe('energy-group');
+    form.controls.groupId.setValue('water-group');
+    expect(service.updateMeterFromSettingsForm(saved, form).groupId).toBe('water-group');
+    form.controls.groupId.setValue(null);
+    expect(service.updateMeterFromSettingsForm(saved, form).groupId).toBeUndefined();
+    expect(saved.groupId).toBe('energy-group');
+  });
+
   it('rejects whitespace-only meter and charge names before a settings command is scheduled', () => {
     const form = service.buildMeterSettingsForm(meter({ name: '   ' }));
     expect(form.controls.name.hasError('pattern')).toBe(true);
