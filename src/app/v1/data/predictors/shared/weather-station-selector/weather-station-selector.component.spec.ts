@@ -19,6 +19,60 @@ import {
 } from './weather-station-selector.component';
 
 describe('WeatherStationSelectorComponent', () => {
+  it('hydrates search silently and preserves a typed query when suggestions refresh', () => {
+    configureTestingModule({ imports: [WeatherStationSelectorComponent], providers: [
+      { provide: WeatherStationLookupService, useValue: { getStation: vi.fn(), searchLocations: vi.fn(), findStations: vi.fn() } }, workflowProvider()
+    ] });
+    const fixture = TestBed.createComponent(WeatherStationSelectorComponent);
+    fixture.componentRef.setInput('initialSearch', 'Oak Ridge'); fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(component.query()).toBe('Oak Ridge'); expect(component.queryControl.pristine).toBe(true);
+    component.setQuery('Knoxville');
+    fixture.componentRef.setInput('initialSearch', 'Nashville'); fixture.detectChanges();
+    expect(component.query()).toBe('Knoxville');
+    expect(TestBed.inject(WeatherStationLookupService).searchLocations).not.toHaveBeenCalled();
+  });
+
+  it('rejects a station preview when its definitions change before completion', async () => {
+    let complete!: (preview: any) => void;
+    const prepare = vi.fn(() => new Promise(resolve => { complete = resolve; }));
+    configureTestingModule({ imports: [WeatherStationSelectorComponent], providers: [
+      { provide: WeatherStationLookupService, useValue: { getStation: vi.fn(), searchLocations: vi.fn(), findStations: vi.fn() } }, workflowProvider(prepare)
+    ] });
+    const fixture = TestBed.createComponent(WeatherStationSelectorComponent);
+    fixture.componentRef.setInput('previewRange', { start: { year: 2026, month: 1 }, end: { year: 2026, month: 2 } });
+    fixture.componentRef.setInput('previewDefinitions', [{ weatherDataType: 'HDD', name: 'Heating', baseTemperature: 60 }]);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const selected = vi.fn(); component.stationSelected.subscribe(selected);
+    const station = { ID: 'station-a', name: 'Station A' } as any;
+    const pending = component.selectStation(station);
+    fixture.componentRef.setInput('previewDefinitions', [{ weatherDataType: 'CDD', name: 'Cooling', baseTemperature: 65 }]); fixture.detectChanges();
+    complete(stationPreview(station, 0)); await pending;
+    component.confirmStation();
+    expect(component.stationPreview()).toBeUndefined(); expect(selected).not.toHaveBeenCalled();
+  });
+
+  it('does not let station verification cancel a location search and ignores a response after destruction', async () => {
+    let verify!: (station: any) => void;
+    let locate!: (locations: any[]) => void;
+    configureTestingModule({ imports: [WeatherStationSelectorComponent], providers: [
+      { provide: WeatherStationLookupService, useValue: {
+        getStation: vi.fn(() => new Promise(resolve => { verify = resolve; })),
+        searchLocations: vi.fn(() => new Promise(resolve => { locate = resolve; })), findStations: vi.fn()
+      } }, workflowProvider()
+    ] });
+    const fixture = TestBed.createComponent(WeatherStationSelectorComponent);
+    fixture.componentRef.setInput('selectedStationId', 'station-a'); fixture.detectChanges();
+    const component = fixture.componentInstance; component.setQuery('Oak Ridge');
+    const searching = component.search(); verify({ ID: 'station-a' }); await Promise.resolve();
+    locate([{ place_id: 1, display_name: 'Oak Ridge' }]); await searching;
+    expect(component.locations()).toHaveLength(1);
+    component.setQuery('Knoxville'); const late = component.search(); fixture.destroy();
+    locate([{ place_id: 2, display_name: 'Knoxville' }]); await late;
+    expect(component.locations()).toHaveLength(0);
+  });
+
   it('opens station selection in a slideout and hides other locations after one is chosen', async () => {
     const location = { place_id: 1, display_name: 'Oak Ridge, TN, United States', addresstype: 'city', lat: '36', lon: '-84' };
     const secondLocation = { place_id: 2, display_name: 'Oak Ridge, NC, United States', addresstype: 'village', lat: '36.1', lon: '-80' };

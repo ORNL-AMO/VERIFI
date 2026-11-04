@@ -4,6 +4,7 @@
 @let checks = readingChecks();
 @let rangeBusy = updatingRange() || saving() || calculating() || workspace.hasPending() || !workspace.canWrite();
 <section #readingsRegion class="weather-readings" aria-label="Weather station readings" tabindex="-1">
+  <app-editor-conflict-review [conflicts]="rangeConflicts()" [disabled]="updatingRange()" (resolved)="resolveRangeConflicts($event)"></app-editor-conflict-review>
   @if (actionError() || (rangeError() && !rangePreview())) {
     <div class="v1-alert v1-alert--danger" role="alert">
       <app-ui-icon name="warning"></app-ui-icon>
@@ -42,15 +43,15 @@
         <div class="weather-readings__controls">
           <label class="weather-readings__control">
             <span>Rows</span>
-            <select #pageSizeSelect class="v1-select" [value]="pageSize()" (change)="setPageSize(pageSizeSelect.value)">
+            <select class="v1-select" [formControl]="viewForm.controls.pageSize">
               @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
-                <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
+                <option [ngValue]="pageSizeOption">{{ pageSizeOption }}</option>
               }
             </select>
           </label>
           <label class="weather-readings__control">
             <span>Show</span>
-            <select #rowFilterSelect class="v1-select" [value]="rowFilter()" (change)="setRowFilter(rowFilterSelect.value)">
+            <select class="v1-select" [formControl]="viewForm.controls.rowFilter">
               <option value="all">All months</option>
               <option value="attention">Needs attention</option>
             </select>
@@ -62,21 +63,17 @@
       <div class="weather-readings__range-actions">
         <label class="weather-readings__range-control">
           <span>Start month</span>
-          <input #startMonthInput
+          <input
             type="month"
             required
-            [value]="startMonth()"
-            [disabled]="rangeBusy"
-            (change)="setStartMonth(startMonthInput.value)">
+            [formControl]="rangeForm.controls.startMonth">
         </label>
         <label class="weather-readings__range-control">
           <span>End month</span>
-          <input #endMonthInput
+          <input
             type="month"
             required
-            [value]="endMonth()"
-            [disabled]="rangeBusy"
-            (change)="setEndMonth(endMonthInput.value)">
+            [formControl]="rangeForm.controls.endMonth">
         </label>
         <button
           type="button"
@@ -217,7 +214,7 @@
             [maxSize]="5"
             [ellipses]="false"
             [page]="currentPage()"
-            (pageChange)="currentPage.set($event)">
+            (pageChange)="setCurrentPage($event)">
           </ngb-pagination>
         }
       </footer>
@@ -271,11 +268,15 @@
 }
 @if (editor(); as panel) {
   <app-weather-reading-month-editor
+    [contextKey]="editIdentity() ?? ''"
+    [sessionKey]="panel.sessionKey"
     [mode]="panel.mode"
-    [row]="panel.row"
+    [row]="editorRow()"
+    [unavailable]="editorUnavailable()"
     [columns]="matrix().columns"
     [existingMonthKeys]="existingMonthKeys()"
     [calculatedValues]="calculatedValues()"
+    [calculatedMonth]="calculatedMonth()"
     [calculating]="calculating()"
     [calculationError]="calculationError()"
     [saving]="saving()"
@@ -285,6 +286,14 @@
     (cancelled)="requestCloseEditor()">
   </app-weather-reading-month-editor>
 }
+
+<ng-template #replaceWeatherMonthModal>
+  <app-confirmation-dialog title="Discard this month draft?" titleId="replace-weather-month-title"
+    cancelAriaLabel="Keep editing this month" confirmLabel="Discard month changes" confirmClass="v1-btn--danger"
+    (confirmed)="confirmEditorReplacement()" (cancelled)="cancelEditorReplacement()">
+    <p>The unsaved month values will be discarded. Your date-range edits will be kept.</p>
+  </app-confirmation-dialog>
+</ng-template>
 @if (sourceReadings(); as inspection) {
   <app-weather-source-readings-slideout
     [predictor]="inspection.predictor"

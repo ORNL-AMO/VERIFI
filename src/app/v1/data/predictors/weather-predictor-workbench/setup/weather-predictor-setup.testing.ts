@@ -1,4 +1,4 @@
-import { signal, WritableSignal } from '@angular/core';
+import { computed, signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
@@ -16,6 +16,9 @@ import { WeatherPredictorSetupComponent } from './weather-predictor-setup.compon
 export function createWeatherSetupFixture(options: {
   group?: any;
   groupSignal?: WritableSignal<any>;
+  facilitySignal?: WritableSignal<any>;
+  revisionSignal?: WritableSignal<number>;
+  readingsSignal?: WritableSignal<any[]>;
   creating?: boolean;
   previewStationGroup?: any;
   commitStationGroup?: any;
@@ -29,16 +32,18 @@ export function createWeatherSetupFixture(options: {
     imports: [WeatherPredictorSetupComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
+        account: signal({ guid: 'account-a' }), revision: options.revisionSignal ?? signal(1),
         defaultWeatherRange: signal('defaultRange' in options
           ? options.defaultRange
           : { start: { year: 2026, month: 1 }, end: { year: 2026, month: 3 } }),
-        facility: signal({ guid: 'facility-a', city: 'Oak Ridge', state: 'TN' }), predictorReadings: signal([]),
+        facility: options.facilitySignal ?? signal({ guid: 'facility-a', city: 'Oak Ridge', state: 'TN' }),
+        predictorReadings: options.readingsSignal ?? signal([]),
         canWrite: signal(options.canWrite ?? true), hasPending: signal(options.hasPending ?? false)
       } },
       {
         provide: WeatherPredictorWorkbenchContextService,
         useValue: {
-          group, creating: signal(options.creating ?? true),
+          group, groupKey: computed(() => group()?.routeKey ?? options.group?.routeKey ?? 'station:station-a'), creating: signal(options.creating ?? true),
           predictors: signal(options.group?.predictors ?? []), readings: signal([]), notFound: signal(false)
         }
       },
@@ -46,7 +51,7 @@ export function createWeatherSetupFixture(options: {
         state, busy: signal(false), reset: vi.fn(), previewStationSelection: vi.fn(), previewStationGroup: options.previewStationGroup ?? vi.fn(),
         commitStationGroup: options.commitStationGroup ?? vi.fn()
       } },
-      { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), confirmDiscard: vi.fn(() => true) } },
+      { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), protectBeforeUnload: vi.fn(() => vi.fn()), confirmDiscard: vi.fn(() => true) } },
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
       { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: (guid: string, resource: string) => TestBed.inject(Router).navigate(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], { queryParams: { facility: guid } }),
           facilityInventoryLink: (guid: string, resource: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', resource], queryParams: { facility: guid } }), facilityDataToolRoute: vi.fn(() => ['/predictors']), facilityWeatherPredictorRoute: vi.fn(() => ['/weather']) } },

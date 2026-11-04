@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, OnDestroy, computed, effect, inject, signal, untracked } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import {
   buildFacilityAnalysesWithoutPredictors,
@@ -34,7 +34,7 @@ import {
 import { WeatherPredictorActionsService } from './weather-predictor-actions.service';
 
 @Injectable()
-export class PredictorWeatherWorkflowService {
+export class PredictorWeatherWorkflowService implements OnDestroy {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly hourlyWeather = inject(HourlyWeatherDataService);
   private readonly actions = inject(WeatherPredictorActionsService);
@@ -44,6 +44,28 @@ export class PredictorWeatherWorkflowService {
 
   private requestToken = 0;
   private cancellation?: Subject<void>;
+  private destroyed = false;
+  private observedScope = this.scopeFingerprint();
+  private observedOwner = this.scopeFingerprint(false);
+  private readonly scopeEffect = effect(() => {
+    const scope = this.scopeFingerprint();
+    const owner = this.scopeFingerprint(false);
+    untracked(() => {
+      if (scope !== this.observedScope && this.cancellation) this.cancel();
+      if (owner !== this.observedOwner && this.state().status === 'committing') {
+        this.requestToken++;
+        this.state.set({ status: 'idle', message: '' });
+      }
+      this.observedScope = scope;
+      this.observedOwner = owner;
+    });
+  });
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    this.cancelActiveRequest();
+    this.requestToken++;
+  }
 
   async previewGeneration(
     draft: WeatherPredictorGenerationDraft
@@ -254,6 +276,7 @@ export class PredictorWeatherWorkflowService {
   ): Promise<T | undefined> {
     this.cancelActiveRequest();
     const token = ++this.requestToken;
+    const scope = this.scopeFingerprint();
     const cancellation = new Subject<void>();
     this.cancellation = cancellation;
     this.state.set({ status: 'loading', message: loadingMessage });
@@ -265,16 +288,16 @@ export class PredictorWeatherWorkflowService {
           { defaultValue: undefined }
         )
         : [];
-      if (token !== this.requestToken || !hourly) return undefined;
+      if (!this.acceptRequest(token, scope) || !hourly) return undefined;
       if (sourceRange && hourly.length === 0) throw new Error('No hourly weather data is available for the requested range.');
       this.state.set({ status: 'calculating', message: 'Calculating monthly weather values…' });
       await Promise.resolve();
       const preview = build(hourly);
-      if (token !== this.requestToken) return undefined;
+      if (!this.acceptRequest(token, scope)) return undefined;
       this.state.set({ status: 'preview-ready', message: 'Review the calculated changes before applying them.' });
       return preview;
     } catch (error) {
-      if (token !== this.requestToken) return undefined;
+      if (!this.acceptRequest(token, scope)) return undefined;
       this.fail(error instanceof Error ? error.message : 'Weather data could not be loaded.');
       return undefined;
     } finally {
@@ -284,13 +307,15 @@ export class PredictorWeatherWorkflowService {
   }
 
   private async commit<T>(message: string, operation: () => Promise<T>): Promise<T> {
+    const token = ++this.requestToken;
+    const owner = this.scopeFingerprint(false);
     this.state.set({ status: 'committing', message });
     try {
       const result = await operation();
-      this.state.set({ status: 'idle', message: 'Weather changes saved.' });
+      if (!this.destroyed && token === this.requestToken && owner === this.scopeFingerprint(false)) this.state.set({ status: 'idle', message: 'Weather changes saved.' });
       return result;
     } catch (error) {
-      this.fail(error instanceof Error ? error.message : 'Weather changes could not be saved.');
+      if (!this.destroyed && token === this.requestToken && owner === this.scopeFingerprint(false)) this.fail(error instanceof Error ? error.message : 'Weather changes could not be saved.');
       throw error;
     }
   }
@@ -324,5 +349,15 @@ export class PredictorWeatherWorkflowService {
 
   private fail(message: string): void {
     this.state.set({ status: 'error', message, error: message });
+  }
+
+  private scopeFingerprint(includeRevision = true): string {
+    return JSON.stringify([this.workspace.account()?.guid, this.workspace.selectedFacility()?.guid,
+      includeRevision ? this.workspace.revision() : undefined]);
+  }
+
+  private acceptRequest(token: number, scope: string): boolean {
+    if (!this.destroyed && token === this.requestToken && scope !== this.scopeFingerprint()) this.cancel();
+    return !this.destroyed && token === this.requestToken && scope === this.scopeFingerprint();
   }
 }

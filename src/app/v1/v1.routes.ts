@@ -293,7 +293,7 @@ export const V1Routes: Routes = [
                         path: 'new',
                         component: WeatherPredictorWorkbenchComponent,
                         children: [
-                          { path: '', pathMatch: 'full', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard] },
+                          { path: '', pathMatch: 'full', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange' },
                           { path: '**', redirectTo: '' }
                         ]
                       },
@@ -302,8 +302,8 @@ export const V1Routes: Routes = [
                         component: WeatherPredictorWorkbenchComponent,
                         children: [
                           { path: '', pathMatch: 'full', redirectTo: 'setup' },
-                          { path: 'setup', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'setup' } },
-                          { path: 'readings', component: WeatherPredictorReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'readings' } },
+                          { path: 'setup', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { weatherTab: 'setup' } },
+                          { path: 'readings', component: WeatherPredictorReadingsComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { weatherTab: 'readings' } },
                           {
                             path: 'quality/:predictorGuid',
                             component: WeatherPredictorQualityComponent,

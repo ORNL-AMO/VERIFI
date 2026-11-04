@@ -407,6 +407,100 @@ describe('PredictorWorkspaceActionsService', () => {
     })).rejects.toMatchObject({ code: 'stale-workspace' });
     expect(boundary.execute).not.toHaveBeenCalled();
   });
+
+  it.each(['group', 'month'] as const)('rejects a queued weather %s after another command publishes a newer revision', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    (TestBed.inject(AccountWorkspaceStore).revision as any).set(5);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it.each(['group', 'month'] as const)('rejects a queued weather %s when the facility changes to another owner of the same station', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    const store = TestBed.inject(AccountWorkspaceStore);
+    (store.facilities as any).set([{ guid: 'facility-a', accountId: 'account-a' }, { guid: 'facility-b', accountId: 'account-a' }]);
+    (store.selectedFacility as any).set({ guid: 'facility-b' });
+    const moved = predictors().map(predictor => ({ ...predictor, facilityId: 'facility-b' }));
+    predictors.set(moved); facilityPredictors.set(moved);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it.each(['group', 'month'] as const)('rejects a queued weather %s after account ownership changes', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    (TestBed.inject(AccountWorkspaceStore).account as any).set({ guid: 'account-b' });
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it('rechecks the complete source group before a queued station setup write', async () => {
+    const { service, preview, release } = prepareQueuedWeatherCommand();
+    const saving = service.applyWeatherStationGroup(preview);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    const changed = [...predictors(), { ...predictors()[0], guid: 'unreviewed-output', id: 11 }];
+    predictors.set(changed); facilityPredictors.set(changed);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationGroup).not.toHaveBeenCalled();
+  });
+
+  it('rechecks current reading identities before a queued station month write', async () => {
+    const { service, changes, release } = prepareQueuedWeatherCommand();
+    const saving = service.applyWeatherStationMonth(changes);
+    const rejected = expect(saving).rejects.toMatchObject({ code: 'stale-workspace' });
+    readings.set([{ ...readings()[0], id: 99 }]);
+    await release(); await rejected;
+    expect(predictorHandler.applyWeatherStationMonth).not.toHaveBeenCalled();
+  });
+
+  it.each(['group', 'month'] as const)('persists the reviewed weather %s snapshot when its queue position remains current', async kind => {
+    const { service, preview, changes, release } = prepareQueuedWeatherCommand();
+    const saving = kind === 'group' ? service.applyWeatherStationGroup(preview) : service.applyWeatherStationMonth(changes);
+    preview.updatePredictors[0].name = 'Unreviewed later mutation';
+    changes.update[0].amount = 999;
+    await release(); await saving;
+    if (kind === 'group') {
+      expect(predictorHandler.applyWeatherStationGroup).toHaveBeenCalledWith(expect.objectContaining({
+        updatePredictors: [expect.objectContaining({ name: 'Production' })]
+      }), 'account-a');
+    } else {
+      expect(predictorHandler.applyWeatherStationMonth).toHaveBeenCalledWith(expect.objectContaining({
+        update: [expect.objectContaining({ amount: 2 })]
+      }), 'account-a');
+    }
+  });
+
+  function prepareQueuedWeatherCommand() {
+    const weather = { ...existing, predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Station A' };
+    predictors.set([weather]); facilityPredictors.set([weather]);
+    const preview = {
+      workspaceRevision: 4, sourceGroupKey: 'station:station-a', station: { ID: 'station-a', name: 'Station A' },
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      addPredictors: [], updatePredictors: [{ ...weather }], deletePredictors: [],
+      addReadings: [], updateReadings: [], deleteReadings: [], facilityAnalyses: [], warningMonths: []
+    } as any;
+    const changes = {
+      workspaceRevision: 4, groupKey: 'station:station-a', predictorGuids: ['predictor-a'],
+      year: 2026, month: 1, add: [], update: [{ ...readings()[0], amount: 2 }], delete: []
+    };
+    let release!: () => Promise<void>;
+    vi.mocked(TestBed.inject(WorkspaceCommandBoundary).execute).mockImplementationOnce((options: any, persist: () => Promise<any>) =>
+      new Promise((resolve, reject) => {
+        release = async () => {
+          try { resolve({ value: await persist(), change: options }); }
+          catch (error) { reject(error); }
+        };
+      }));
+    return { service: TestBed.inject(PredictorWorkspaceActionsService), preview, changes, release: () => release() };
+  }
 });
 
 function deferNextReadingCommand(): () => Promise<void> {

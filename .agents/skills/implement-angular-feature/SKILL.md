@@ -15,6 +15,16 @@ description: Implement or modify VERIFI Angular features, routes, components, se
 8. Reuse Bootstrap, ng-bootstrap, Font Awesome, the appropriate shared layer, and existing style layers. Every native `<select>` in a production v1 template must include `v1-select`; add feature-specific classes alongside it rather than replacing it so themes, dark mode, focus, and disabled states stay consistent. Keep feature-specific styles with the component; add global styles only for a genuinely cross-feature rule.
 9. Add meaningful behavior tests. Replace or remove creation-only tests that do not verify the changed behavior.
 
+## Data workbench editing
+
+For Meter, Standard Predictor, and Weather workbench changes, follow the [Data form architecture](../../../docs/v1-data-form-architecture-roadmap.md).
+
+- Create Data Settings sessions through `injectSettingsEditSession` in an Angular injection context. The host owns effects, subscriptions, timers, and registration cleanup; feature adapters own typed values, normalization, dependent rules, reconciliation, and persistence mapping.
+- Key drafts by owner/resource/editor identity, hydrate silently, merge nonconflicting saved values, and review conflicting groups through the shared shell-portal component. Match dynamic records by GUID and retain dirty controls across metadata/validator refreshes.
+- Register Data drafts using reactive dirty/blocked signals without a navigation-flush callback. The navigation service owns conditional unload protection; feature editors do not install their own listeners. Use form-state events for pristine/dirty transitions and control/group validators as the field-validity authority. Confirm discard for unsaved values and block writes in progress.
+- Keep explicit bill/reading saves and Weather preview/review/atomic commits separate from Settings autosave. Source defaults belong to creation or actual source transitions, never saved hydration.
+- When changing defaults, shared value contracts, or queued command execution, include compatibility and real IndexedDB evidence using the matching subsystem skills.
+
 ## Validate
 
 - Use `validate-web-and-electron` and `npm run validate:agent -- --mode plan` to select the final risk-based matrix.
@@ -26,7 +36,6 @@ description: Implement or modify VERIFI Angular features, routes, components, se
 ## Guardrails
 
 - Do not introduce a new design system or Angular architecture as part of a feature issue.
-- When adopting the shared Data editing primitives, construct Settings sessions with `injectSettingsEditSession(adapter)` in an Angular injection context. The host's `DestroyRef` owns cleanup; do not add manual session disposal. Keep feature rules and commands in the adapter, use `registerDataDraft` with dirty/blocked Signals for confirm-discard workflows, and keep navigation-time flushing an explicit feature policy. Register native unload protection through the existing navigation service rather than adding per-editor window listeners.
 - Do not assume a browser-only API is available in tests or Electron without checking the existing abstraction.
 - Do not add template-driven forms in production v1. Existing allowlisted migration debt may remain until its owning workflow is changed.
 - Do not change a persisted model, calculation contract, file format, or IPC channel silently; use the matching repository skill.
