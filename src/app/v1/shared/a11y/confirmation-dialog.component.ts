@@ -22,6 +22,7 @@ export class ConfirmationDialogComponent {
   @Input() hideCancel = false;
   @Input() busy = false;
   @Input() disabled = false;
+  @Input() confirmDisabled = false;
   @Output() readonly confirmed = new EventEmitter<void>();
   @Output() readonly cancelled = new EventEmitter<void>();
 
@@ -30,6 +31,6 @@ export class ConfirmationDialogComponent {
   }
 
   confirm(): void {
-    if (!this.disabled) this.confirmed.emit();
+    if (!this.disabled && !this.confirmDisabled) this.confirmed.emit();
   }
 }

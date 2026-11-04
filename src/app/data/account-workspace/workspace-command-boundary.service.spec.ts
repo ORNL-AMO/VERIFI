@@ -40,6 +40,18 @@ describe('WorkspaceCommandBoundary', () => {
     expect(store.hasPending()).toBe(false);
   });
 
+  it('keeps editor ownership on transient pending work without publishing it as entity data', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store); workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+    const committed = vi.fn(); boundary.committedChange$.subscribe(committed);
+    await boundary.execute({ ...makeOptions(), ownerId: 'settings-editor' }, async () => {
+      expect(store.pendingOperations()).toEqual([expect.objectContaining({ ownerId: 'settings-editor' })]);
+      return 'saved';
+    });
+    expect(store.pendingOperations()).toEqual([]);
+    expect(committed.mock.calls[0][0]).not.toHaveProperty('ownerId');
+  });
+
   it('clears pending and wraps the error when persistence fails', async () => {
     const { boundary, store } = createBoundary();
     publishReady(store);

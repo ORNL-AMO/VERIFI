@@ -30,6 +30,8 @@ export interface WorkspaceCommandOptions {
   readonly entityKind: WorkspaceEntityKind;
   readonly changeKind: WorkspaceChangeKind;
   readonly entityGuid?: string;
+  /** Identifies an editor's own pending work without changing persisted records. */
+  readonly ownerId?: string;
   /** Human-readable label shown while the operation is in-flight. */
   readonly label: string;
   readonly notification?: WorkspaceCommandNotificationOptions;
@@ -123,7 +125,7 @@ export class WorkspaceCommandBoundary {
     this.assertCommandStillCurrent(submittedAccountGuid, 'before execution');
 
     const opId = ++nextOperationId;
-    this.store.setPending({ id: opId, label: options.label });
+    this.store.setPending({ id: opId, label: options.label, ...(options.ownerId ? { ownerId: options.ownerId } : {}) });
 
     let value: T;
     try {

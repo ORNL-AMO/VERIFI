@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { vi } from 'vitest';
 import { UnsavedChangesService } from './unsaved-changes.service';
 
@@ -10,7 +11,7 @@ describe('UnsavedChangesService', () => {
     service = TestBed.inject(UnsavedChangesService);
   });
 
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => { TestBed.resetTestingModule(); vi.restoreAllMocks(); });
 
   it('discards registered dirty editors after confirmation', () => {
     const discard = vi.fn();
@@ -69,5 +70,41 @@ describe('UnsavedChangesService', () => {
     service.register(() => true, vi.fn());
 
     await expect(service.flushPendingChanges()).resolves.toBe(true);
+  });
+
+  it('shares one browser listener and removes it when the final draft no longer needs protection', () => {
+    const add = vi.spyOn(window, 'addEventListener');
+    const remove = vi.spyOn(window, 'removeEventListener');
+    const first = signal(false), second = signal(false);
+    const releaseFirst = service.protectBeforeUnload(first);
+    const releaseSecond = service.protectBeforeUnload(second);
+    const added = () => add.mock.calls.filter(([name]) => name === 'beforeunload');
+    const removed = () => remove.mock.calls.filter(([name]) => name === 'beforeunload');
+    TestBed.tick(); expect(added()).toHaveLength(0);
+
+    first.set(true); TestBed.tick(); expect(added()).toHaveLength(1);
+    second.set(true); TestBed.tick(); expect(added()).toHaveLength(1);
+    first.set(false); TestBed.tick(); expect(removed()).toHaveLength(0);
+    const protectedEvent = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(protectedEvent);
+    expect(protectedEvent.defaultPrevented).toBe(true);
+
+    second.set(false); TestBed.tick(); expect(removed()).toHaveLength(1);
+    const pristineEvent = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(pristineEvent);
+    expect(pristineEvent.defaultPrevented).toBe(false);
+    releaseFirst(); releaseSecond(); TestBed.tick(); expect(removed()).toHaveLength(1);
+  });
+
+  it('releases browser protection on unregister and application destruction without invoking saves', () => {
+    const pending = signal(true), flush = vi.fn();
+    service.register(() => false, vi.fn(), pending, flush);
+    const release = service.protectBeforeUnload(pending); TestBed.tick();
+    const event = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true); expect(flush).not.toHaveBeenCalled();
+    release(); TestBed.tick();
+    const released = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(released);
+    expect(released.defaultPrevented).toBe(false);
+    service.protectBeforeUnload(pending); TestBed.tick(); TestBed.resetTestingModule();
+    const destroyed = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(destroyed);
+    expect(destroyed.defaultPrevented).toBe(false);
   });
 });

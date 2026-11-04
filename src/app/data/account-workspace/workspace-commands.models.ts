@@ -96,4 +96,5 @@ export interface WorkspacePendingOperation {
   readonly id: number;
   readonly entityKind: WorkspaceEntityKind;
   readonly changeKind: WorkspaceChangeKind;
+  readonly ownerId?: string;
 }
