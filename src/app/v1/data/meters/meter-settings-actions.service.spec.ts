@@ -33,6 +33,36 @@ describe('MeterSettingsActionsService', () => {
     expect(handler.updateMeterWithData).not.toHaveBeenCalled();
   });
 
+  it('rejects a locally added charge made incompatible by an earlier source change and accepts its explicit remap', async () => {
+    const { service, store, handler, beforePersist } = setup();
+    const baseline = readMeterSettings(store.meters()[0]);
+    const charge = { guid: 'local-demand', name: 'Custom demand rider', chargeType: 'demand' as const,
+      displayChargeInTable: true, displayUsageInTable: true };
+    const saved = meter({ id: 1, source: 'Natural Gas', scope: 1, startingUnit: 'SCF', energyUnit: 'MMBtu',
+      heatCapacity: .001029, siteToSource: 1, charges: [] });
+    beforePersist(() => store.meters.set([saved]));
+    await expect(service.updateSettings(identity, { ...baseline, chargesArray: [charge] }, baseline, 'editor'))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    expect(handler.updateMeterWithData).not.toHaveBeenCalled();
+    expect(store.meters()[0]).toEqual(saved);
+    const latest = readMeterSettings(saved);
+    await service.updateSettings(identity, { ...latest, chargesArray: [{ ...charge, chargeType: 'demandMDQ' }] }, latest, 'editor');
+    expect(handler.updateMeterWithData).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ source: 'Natural Gas',
+      charges: [{ ...charge, chargeType: 'demandMDQ' }] }), expect.any(Array), 'account-a');
+  });
+
+  it('preserves a compatible custom other charge through a concurrent source change', async () => {
+    const { service, store, handler, beforePersist } = setup();
+    const baseline = readMeterSettings(store.meters()[0]);
+    const charge = { guid: 'custom-fee', name: 'Custom service rider', chargeType: 'other' as const,
+      displayChargeInTable: false, displayUsageInTable: true };
+    beforePersist(() => store.meters.set([meter({ id: 1, source: 'Natural Gas', scope: 1, startingUnit: 'SCF',
+      energyUnit: 'MMBtu', heatCapacity: .001029, siteToSource: 1, charges: [] })]));
+    await service.updateSettings(identity, { ...baseline, chargesArray: [charge] }, baseline, 'editor');
+    expect(handler.updateMeterWithData).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ source: 'Natural Gas',
+      charges: [charge] }), expect.any(Array), 'account-a');
+  });
+
   it('rejects an account switch that occurs after submission', async () => {
     const { service, store, handler, beforePersist } = setup();
     const baseline = readMeterSettings(store.meters()[0]);

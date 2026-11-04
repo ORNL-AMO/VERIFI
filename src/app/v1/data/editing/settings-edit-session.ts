@@ -6,6 +6,7 @@ import { ConflictChoices, DraftConflict, DraftMerge, EditorConflictError, draftE
 import { registerDataDraft } from './register-data-draft';
 
 export type EditSaveMode = 'debounced' | 'immediate';
+export type SettingsHydrationMode = 'reset' | 'reconcile';
 export type SettingsEditState = 'idle' | 'dirty' | 'saving' | 'saved' | 'invalid' | 'error' | 'conflict';
 export interface SettingsEditAdapter<T> {
   readonly key: Signal<string>;
@@ -14,7 +15,8 @@ export interface SettingsEditAdapter<T> {
   readonly pendingOwners: Signal<readonly (string | undefined)[]>;
   readonly changes: Observable<EditSaveMode>;
   read(): T;
-  hydrate(value: T | undefined): void;
+  /** Reset replaces the draft; reconciliation may retain equivalent raw text. */
+  hydrate(value: T | undefined, mode?: SettingsHydrationMode): void;
   normalize(value: T): T;
   valid(value: T): boolean;
   reconcile(base: T, local: T, saved: T, choices?: ConflictChoices): DraftMerge<T>;
@@ -96,7 +98,7 @@ export class SettingsEditSession<T> {
       const merged = this.adapter.reconcile(this.baseline, local, this.latest);
       this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? this.baseline : this.latest));
       this.conflictValue.set(merged.conflicts);
-      this.adapter.hydrate(merged.value);
+      this.adapter.hydrate(merged.value, 'reconcile');
       if (merged.conflicts.length) { this.dirtyValue.set(true); this.stateValue.set('conflict'); return; }
     }
     this.refreshDirty();
@@ -145,7 +147,7 @@ export class SettingsEditSession<T> {
     if (draftEqual(next, this.latest) && !restored && !wasUnverified) return;
     const merged = this.adapter.reconcile(this.baseline, this.adapter.normalize(this.adapter.read()), next);
     this.latest = structuredClone(next);
-    this.adapter.hydrate(merged.value);
+    this.adapter.hydrate(merged.value, 'reconcile');
     this.conflictValue.set(merged.conflicts);
     this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? this.baseline : next));
     this.refreshDirty();
@@ -164,7 +166,7 @@ export class SettingsEditSession<T> {
     this.acceptCommitted();
     if (this.saving() || this.targetMissing || this.latest !== reviewed) return;
     const merged = this.adapter.reconcile(this.baseline, this.adapter.normalize(this.adapter.read()), this.latest, choices);
-    this.adapter.hydrate(merged.value); this.conflictValue.set(merged.conflicts);
+    this.adapter.hydrate(merged.value, 'reconcile'); this.conflictValue.set(merged.conflicts);
     this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? this.baseline : this.latest));
     if (merged.conflicts.length) return;
     this.refreshDirty();
@@ -198,7 +200,7 @@ export class SettingsEditSession<T> {
     this.baseline = saved === undefined ? undefined : structuredClone(this.adapter.normalize(saved));
     this.latest = this.baseline === undefined ? undefined : structuredClone(this.baseline);
     this.dirtyValue.set(false); this.savingValue.set(false); this.conflictValue.set([]); this.errorValue.set(undefined);
-    this.stateValue.set('idle'); this.adapter.hydrate(saved);
+    this.stateValue.set('idle'); this.adapter.hydrate(saved, 'reset');
   }
 
   private async persist(generation: number): Promise<boolean> {
@@ -213,7 +215,7 @@ export class SettingsEditSession<T> {
       const merged = this.adapter.reconcile(submitted, this.adapter.normalize(this.adapter.read()), committed);
       this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? submitted : committed)); this.latest = structuredClone(committed);
       this.submitted = undefined;
-      this.adapter.hydrate(merged.value); this.conflictValue.set(merged.conflicts); this.refreshDirty();
+      this.adapter.hydrate(merged.value, 'reconcile'); this.conflictValue.set(merged.conflicts); this.refreshDirty();
       this.stateValue.set(merged.conflicts.length ? 'conflict' : this.dirty()
         ? this.adapter.valid(this.adapter.read()) ? 'dirty' : 'invalid' : 'saved');
       return !this.dirty();
@@ -228,7 +230,7 @@ export class SettingsEditSession<T> {
         this.latest = structuredClone(this.adapter.normalize(conflict.saved as T));
         const merged = this.adapter.reconcile(base, this.adapter.normalize(this.adapter.read()), this.latest);
         this.baseline = structuredClone(merged.baseline ?? (merged.conflicts.length ? base : this.latest));
-        this.adapter.hydrate(merged.value); this.conflictValue.set(merged.conflicts);
+        this.adapter.hydrate(merged.value, 'reconcile'); this.conflictValue.set(merged.conflicts);
         this.stateValue.set(merged.conflicts.length ? 'conflict' : 'dirty');
       } else {
         if (persistenceCommitted(error)) {

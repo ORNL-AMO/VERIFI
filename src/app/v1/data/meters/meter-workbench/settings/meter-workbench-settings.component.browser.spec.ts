@@ -6,11 +6,12 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { MeterSettingsFormService } from '@app/v1/shared/meter-settings/meter-settings-form.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { account, facility, group, meter } from '../../facility-meters.testing';
+import { account, facility, group, meter, reading } from '../../facility-meters.testing';
 import { MeterActionsService } from '../../meter-actions.service';
 import { MetersModule } from '../../meters.module';
 import { MeterWorkbenchSettingsComponent } from './meter-workbench-settings.component';
@@ -99,16 +100,85 @@ describe('meter source and group settings in Chromium', () => {
       fixture.destroy(); root.remove(); await page.viewport(1100, 850);
     }
   });
+
+  it('retains an unsupported saved Demand charge through disabled states and explicitly remaps it without changing its identity or reading values', async () => {
+    const charge = { guid: 'saved-demand', name: 'Custom demand rider', chargeType: 'demand' as const,
+      displayChargeInTable: false, displayUsageInTable: true };
+    const readingCharge = { chargeGuid: charge.guid, chargeAmount: 42.75, chargeUsage: 17.5 };
+    const savedReading = reading({ id: 7, guid: 'reading-a', meterId: 'meter-a', totalVolume: 1000,
+      totalEnergyUse: 1, charges: [readingCharge] });
+    const { fixture, selectedMeter, readings, execute, updateMeterWithData, canWrite, pending } = setup({
+      meter: { charges: [charge] }, readings: [savedReading]
+    });
+    const root = document.createElement('main'); root.className = 'v1-root';
+    document.body.append(root); root.append(fixture.nativeElement);
+    fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+    const form = fixture.componentInstance.formSignal()!;
+    const type = root.querySelector<HTMLSelectElement>('select[formControlName="chargeType"]')!;
+    const errorId = `meter-charge-type-error-${charge.guid}`;
+    const expectRetainedCharge = (disabled: boolean) => {
+      expect(type.disabled).toBe(disabled);
+      expect(type.selectedOptions[0]?.textContent?.trim()).toBe('Demand (incompatible)');
+      expect(type.selectedOptions[0].disabled).toBe(true);
+      expect(type.getAttribute('aria-invalid')).toBe('true');
+      expect(type.getAttribute('aria-describedby')).toBe(errorId);
+      expect(root.querySelector(`#${errorId}`)?.textContent).toContain('Demand is unavailable for Natural Gas');
+      expect(form.controls.chargesArray.getRawValue()).toEqual([charge]);
+      expect(root.querySelectorAll('.meter-settings-charge')).toHaveLength(1);
+      expect(selectedMeter().charges).toEqual([charge]);
+      expect(execute).not.toHaveBeenCalled();
+      expect(updateMeterWithData).not.toHaveBeenCalled();
+    };
+    try {
+      expect(form.invalid).toBe(true);
+      expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+      expectRetainedCharge(false);
+
+      canWrite.set(false); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+      expectRetainedCharge(true);
+      canWrite.set(true); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+      expectRetainedCharge(false);
+      pending.set([{ id: 99, label: 'Unrelated workspace operation' }]);
+      fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+      expectRetainedCharge(true);
+      pending.set([]); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+      expectRetainedCharge(false);
+
+      const remapped = { ...charge, chargeType: 'demandMDQ' as const };
+      const mdq = [...type.options].find(option => option.textContent?.trim() === 'Demand/MDQ')!;
+      await page.getByRole('combobox', { name: /^Charge Type/ }).selectOptions(mdq.value);
+      fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+      await vi.waitFor(() => {
+        fixture.detectChanges();
+        expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+        expect(updateMeterWithData).toHaveBeenCalledOnce();
+      });
+
+      expect(form.valid).toBe(true);
+      expect(form.controls.chargesArray.getRawValue()).toEqual([remapped]);
+      expect(type.selectedOptions[0]?.textContent?.trim()).toBe('Demand/MDQ');
+      expect(type.getAttribute('aria-invalid')).toBeNull();
+      expect(type.getAttribute('aria-describedby')).toBeNull();
+      expect(root.querySelector(`#${errorId}`)).toBeNull();
+      expect(root.querySelectorAll('.meter-settings-charge')).toHaveLength(1);
+      expect(execute).toHaveBeenCalledOnce();
+      expect(updateMeterWithData).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+        guid: 'meter-a', source: 'Natural Gas', charges: [remapped]
+      }), [], 'account-a');
+      expect(selectedMeter().charges).toEqual([remapped]);
+      expect(readings()).toEqual([savedReading]);
+    } finally { fixture.destroy(); root.remove(); }
+  });
 });
 
-function setup() {
+function setup(options: { meter?: Partial<IdbUtilityMeter>; readings?: IdbUtilityMeterData[] } = {}) {
   const activeAccount = signal(account({ assessmentReportVersion: 'AR6' }));
   const selectedFacility = signal(facility({ energyUnit: 'MMBtu', electricityUnit: 'kWh', volumeGasUnit: 'SCF',
     volumeLiquidUnit: 'gal', massUnit: 'lb' }));
   const selectedMeter = signal(meter({ id: 1, name: 'Gas main', source: 'Natural Gas', scope: 1,
     startingUnit: 'SCF', energyUnit: 'MMBtu', heatCapacity: .001, siteToSource: 1.09, groupId: 'energy-group',
-    waterIntakeType: 'Municipal (Potable)', charges: [] }));
-  const readings = signal([]);
+    waterIntakeType: 'Municipal (Potable)', charges: [], ...options.meter }));
+  const readings = signal(options.readings ?? []);
   const canWrite = signal(true);
   const pending = signal<readonly { id: number; label: string; ownerId?: string }[]>([]);
   const hasPending = computed(() => pending().length > 0);
@@ -145,5 +215,5 @@ function setup() {
     { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
     { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: vi.fn() } }
   ] });
-  return { fixture: TestBed.createComponent(MeterWorkbenchSettingsComponent), selectedMeter, execute, updateMeterWithData };
+  return { fixture: TestBed.createComponent(MeterWorkbenchSettingsComponent), selectedMeter, readings, execute, updateMeterWithData, canWrite, pending };
 }

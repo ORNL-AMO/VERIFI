@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
@@ -76,7 +77,8 @@ describe('queued meter settings with native IndexedDB', () => {
 
   it('persists a source change and compatible group reassignment together through reopening', async () => {
     const gasMeter = { ...currentMeter, source: 'Natural Gas' as const, scope: 1, startingUnit: 'SCF',
-      energyUnit: 'MMBtu', heatCapacity: 1000, groupId: 'energy-group' };
+      energyUnit: 'MMBtu', heatCapacity: 1000, groupId: 'energy-group',
+      charges: currentMeter.charges!.map(charge => ({ ...charge, chargeType: 'usage' as const })) };
     await harness.seed({ utilityMeterGroups: [
       { ...group({ id: 5, guid: 'energy-group', groupType: 'Energy' }) },
       { ...group({ id: 6, guid: 'water-group', groupType: 'Water' }) }
@@ -96,5 +98,51 @@ describe('queued meter settings with native IndexedDB', () => {
       expect.objectContaining({ guid: 'water-group', groupType: 'Water' })
     ]));
     expect(await harness.getAll('utilityMeterData')).toEqual([expect.objectContaining({ guid: 'reading-a', meterId: 'meter-a' })]);
+  });
+
+  it('rejects a queued incompatible local charge without writes and saves an explicit remap with its GUID intact', async () => {
+    const boundary = TestBed.inject(WorkspaceCommandBoundary);
+    const settings = TestBed.inject(MeterSettingsActionsService);
+    const transactions = TestBed.inject(IndexedDbTransactionService);
+    const write = vi.spyOn(TestBed.inject(MeterCommandHandler), 'updateMeterWithData');
+    const gasMeter = { ...currentMeter, source: 'Natural Gas' as const, scope: 1, startingUnit: 'SCF', energyUnit: 'MMBtu',
+      heatCapacity: .001029, siteToSource: 1, charges: currentMeter.charges!.map(charge => ({ ...charge, chargeType: 'usage' as const })) };
+    const gasReading = { ...currentReading, totalVolume: 10, totalEnergyUse: .01029 };
+    let release!: () => void;
+    let started!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const firstStarted = new Promise<void>(resolve => { started = resolve; });
+    const previous = boundary.execute({ entityKind: 'meter', changeKind: 'update', entityGuid: currentMeter.guid,
+      label: 'Changing saved source', publication: { mode: 'reload' }
+    }, async () => {
+      started(); await gate;
+      await transactions.runTransaction(['utilityMeter', 'utilityMeterData'], 'readwrite', async transaction => {
+        await transaction.put('utilityMeter', gasMeter);
+        await transaction.put('utilityMeterData', gasReading);
+      });
+    });
+    await firstStarted;
+    const baseline = readMeterSettings(currentMeter);
+    const localCharge = { guid: 'custom-demand', name: 'Custom demand rider', chargeType: 'demand' as const,
+      displayChargeInTable: false, displayUsageInTable: true };
+    const pending = settings.updateSettings(identity, { ...baseline, chargesArray: [...baseline.chargesArray, localCharge] }, baseline, 'settings-editor');
+    const rejected = expect(pending).rejects.toMatchObject({ code: 'validation-failed' });
+    release(); await previous; await rejected;
+    expect(write).not.toHaveBeenCalled();
+    expect(await harness.getAll('utilityMeter')).toEqual([gasMeter]);
+    expect(await harness.getAll('utilityMeterData')).toEqual([gasReading]);
+
+    const latest = readMeterSettings(gasMeter);
+    await settings.updateSettings(identity, { ...latest, chargesArray: [...latest.chargesArray,
+      { ...localCharge, chargeType: 'demandMDQ' }
+    ] }, latest, 'settings-editor');
+    expect(write).toHaveBeenCalledOnce();
+    await harness.reopen();
+    expect(await harness.getAll('utilityMeter')).toEqual([expect.objectContaining({ source: 'Natural Gas', charges: [
+      gasMeter.charges[0], { ...localCharge, chargeType: 'demandMDQ' }
+    ] })]);
+    expect(await harness.getAll('utilityMeterData')).toEqual([expect.objectContaining({ totalCost: currentReading.totalCost, charges: [
+      currentReading.charges![0], { chargeGuid: localCharge.guid, chargeAmount: 0, chargeUsage: 0 }
+    ] })]);
   });
 });

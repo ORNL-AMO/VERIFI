@@ -1,9 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { FormArray } from '@angular/forms';
+import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AllSources } from '@data/models/constantsAndTypes';
 import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
 import { account, facility, meter } from '@app/v1/data/meters/facility-meters.testing';
 import { MeterSettingsFormService, MeterSettingsRuleContext } from './meter-settings-form.service';
+import { readMeterSettings } from './meter-settings-values';
+import { reconcileMeterSettings } from '@app/v1/data/meters/meter-settings-editing';
 
 describe('MeterSettingsFormService', () => {
   let service: MeterSettingsFormService;
@@ -40,7 +44,7 @@ describe('MeterSettingsFormService', () => {
     };
   });
 
-  it('applies source defaults, validators, and charge filtering', () => {
+  it('applies source defaults and validators while retaining charges that need explicit remapping', () => {
     const form = service.buildMeterSettingsForm(meter({
       source: 'Electricity',
       scope: 3,
@@ -61,7 +65,8 @@ describe('MeterSettingsFormService', () => {
     expect(form.controls.scope.value).toBe(1);
     expect(form.controls.energyUnit.value).toBe('MMBtu');
     expect(form.controls.startingUnit.value).toBe('CCF');
-    expect(((form.get('chargesArray') as FormArray).at(0) as any).controls.chargeType.value).toBeNull();
+    expect(((form.get('chargesArray') as FormArray).at(0) as any).controls.chargeType.value).toBe('demand');
+    expect(form.hasError('incompatibleChargeTypes')).toBe(true);
 
     form.controls.source.patchValue('Other Fuels');
     form.controls.scope.patchValue(1);
@@ -71,6 +76,73 @@ describe('MeterSettingsFormService', () => {
 
     expect(form.controls.phase.hasError('required')).toBe(true);
     expect(form.controls.fuel.hasError('required')).toBe(true);
+  });
+
+  it.each([
+    { source: 'Electricity' as const, expected: 'consumption' },
+    { source: 'Natural Gas' as const, expected: 'usage' },
+    { source: 'Other Fuels' as const, expected: 'usage' },
+    { source: 'Other Energy' as const, expected: 'usage' },
+    { source: 'Water Intake' as const, expected: 'usage' },
+    { source: 'Water Discharge' as const, expected: 'usage' },
+    { source: 'Other' as const, expected: 'usage' }
+  ])('adds a source-compatible default charge for $source', ({ source, expected }) => {
+    const form = service.buildMeterSettingsForm(meter({ source, charges: [] }));
+    service.addCharge(form);
+    expect(form.controls.chargesArray.at(0).controls.chargeType.value).toBe(expected);
+    expect(form.hasError('incompatibleChargeTypes')).toBe(false);
+  });
+
+  it('retains a local charge after a saved source merge but requires explicit compatible remapping', () => {
+    const opened = meter({ source: 'Electricity', charges: [] });
+    const baseline = readMeterSettings(opened);
+    const local = { ...baseline, chargesArray: [{ guid: 'demand-charge', name: 'Custom demand rider', chargeType: 'demand' as const,
+      displayChargeInTable: true, displayUsageInTable: true }] };
+    const saved = readMeterSettings(meter({ source: 'Natural Gas', scope: 1, startingUnit: 'SCF', energyUnit: 'MMBtu',
+      heatCapacity: .001029, siteToSource: 1, charges: [] }));
+    const merged = reconcileMeterSettings(baseline, local, saved);
+    expect(merged.conflicts).toEqual([]);
+    const form = service.buildMeterSettingsForm(opened);
+    const changes = vi.fn(); form.valueChanges.subscribe(changes);
+    service.hydrate(form, merged.value);
+
+    expect(form.invalid).toBe(true);
+    expect(form.getError('incompatibleChargeTypes')).toHaveProperty('demand-charge');
+    expect(form.controls.chargesArray.getRawValue()).toEqual(local.chargesArray);
+    expect(form.pristine).toBe(true);
+    expect(changes).not.toHaveBeenCalled();
+    const charge = form.controls.chargesArray.at(0);
+    charge.controls.chargeType.setValue('demandMDQ');
+    service.applyMeterSettingsRuleChange('chargeType', form, context);
+    expect(form.valid).toBe(true);
+    expect(charge.getRawValue()).toMatchObject({ guid: 'demand-charge', name: 'Custom demand rider', chargeType: 'demandMDQ' });
+  });
+
+  it('keeps saved unsupported charges intact on hydration and leaves compatible custom charges valid', () => {
+    const saved = meter({ source: 'Natural Gas', scope: 1, startingUnit: 'SCF', energyUnit: 'MMBtu', heatCapacity: .001029,
+      siteToSource: 1, charges: [{ guid: 'legacy-demand', name: 'Custom saved demand', chargeType: 'demand',
+        displayChargeInTable: false, displayUsageInTable: true }] });
+    const form = service.buildMeterSettingsForm(saved);
+    const initial = form.getRawValue();
+    service.hydrate(form, readMeterSettings(saved));
+    expect(form.invalid).toBe(true);
+    expect(form.getRawValue()).toEqual(initial);
+    expect(saved.charges![0].chargeType).toBe('demand');
+    form.controls.chargesArray.at(0).controls.chargeType.setValue('other');
+    expect(form.valid).toBe(true);
+    expect(service.updateMeterFromSettingsForm(saved, form).charges).toEqual([{
+      ...saved.charges![0], chargeType: 'other'
+    }]);
+  });
+
+  it.each(AllSources)('preserves compatible custom other charges for %s', source => {
+    const charge = { guid: 'custom-charge', name: 'Custom service rider', chargeType: 'other' as const,
+      displayChargeInTable: false, displayUsageInTable: true };
+    const saved = meter({ source, charges: [charge] });
+    const form = service.buildMeterSettingsForm(saved);
+    service.hydrate(form, readMeterSettings(saved));
+    expect(form.hasError('incompatibleChargeTypes')).toBe(false);
+    expect(form.controls.chargesArray.getRawValue()).toEqual([charge]);
   });
 
   it('builds, validates, and serializes the calendarization method', () => {

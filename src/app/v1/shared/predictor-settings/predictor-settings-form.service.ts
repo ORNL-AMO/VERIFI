@@ -2,7 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { applyStandardPredictorSettings, StandardPredictorSettings, standardPredictorSettings,
-  parsePredictorStopMonth } from '@app/v1/data/predictors/models/standard-predictor-settings.models';
+  normalizeStandardPredictorSettings, parsePredictorStopMonth } from '@app/v1/data/predictors/models/standard-predictor-settings.models';
+import { SettingsHydrationMode } from '@app/v1/data/editing/settings-edit-session';
 
 export interface PredictorSettingsFormControls {
   name: FormControl<string>;
@@ -40,8 +41,19 @@ export class PredictorSettingsFormService {
     return applyStandardPredictorSettings(predictor, form.getRawValue());
   }
 
-  hydrate(form: PredictorSettingsForm, value: StandardPredictorSettings): void {
-    form.patchValue(value, { emitEvent: false });
+  hydrate(form: PredictorSettingsForm, value: StandardPredictorSettings, mode: SettingsHydrationMode = 'reset'): void {
+    const current = form.getRawValue();
+    const normalizedCurrent = normalizeStandardPredictorSettings(current);
+    const normalizedIncoming = normalizeStandardPredictorSettings(value);
+    const textPatch: { name?: string; unit?: string; description?: string } = {};
+    for (const field of ['name', 'unit', 'description'] as const) {
+      const incoming = mode === 'reconcile' && normalizedCurrent[field] === normalizedIncoming[field]
+        ? current[field] : value[field];
+      if (incoming !== current[field]) textPatch[field] = incoming;
+    }
+    form.patchValue({ ...textPatch, production: value.production, noLongerInUse: value.noLongerInUse,
+      stopMonth: value.stopMonth, canBeNegative: value.canBeNegative,
+      ignoreDateStatusChecks: value.ignoreDateStatusChecks }, { emitEvent: false });
     form.updateValueAndValidity({ emitEvent: false });
   }
 }

@@ -66,6 +66,7 @@ export interface MeterSettingsViewModel {
   readonly selectedVehicleFuelOption?: FuelTypeOption;
   readonly globalWarmingPotentials: readonly GlobalWarmingPotential[];
   readonly chargeTypes: ReturnType<typeof getChargeTypes>;
+  readonly incompatibleChargeTypes: Readonly<Record<string, { readonly label: string }>>;
   readonly months: readonly Month[];
   readonly noLongerInUseYearOptions: readonly number[];
   readonly assessmentReportOption: AssessmentReportVersion;

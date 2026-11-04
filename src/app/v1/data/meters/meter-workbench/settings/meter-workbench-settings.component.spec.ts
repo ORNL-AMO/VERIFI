@@ -5,6 +5,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
@@ -600,31 +601,75 @@ describe('MeterWorkbenchSettingsComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'], { queryParams: { facility: 'facility-a' } });
   });
 
-  it('blocks navigation during deletion and releases the guard before returning to inventory', async () => {
+  it('protects a pristine deletion globally and releases protection before returning to inventory', async () => {
     const fixture = setup();
     fixture.detectChanges();
     const component = fixture.componentInstance;
     const actions = TestBed.inject(MeterActionsService) as unknown as { deleteMeter: ReturnType<typeof vi.fn> };
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const changes = TestBed.inject(UnsavedChangesService);
     let finish!: () => void;
     actions.deleteMeter.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
     const canLeave = () => TestBed.runInInjectionContext(() => unsavedChangesGuard(component,
       {} as ActivatedRouteSnapshot, {} as RouterStateSnapshot, {} as RouterStateSnapshot));
     router.navigate.mockImplementationOnce(async () => {
       expect(canLeave()).toBe(true);
+      expect(changes.confirmDiscard()).toBe(true);
       return true;
     });
 
+    expect(component.hasUnsavedChanges()).toBe(false);
     const deleting = component.confirmDeleteMeter();
+    fixture.detectChanges(); TestBed.tick();
     expect(canLeave()).toBe(false);
+    expect(changes.confirmDiscard()).toBe(false);
+    expect(unloadPrevented()).toBe(true);
     expect(router.navigate).not.toHaveBeenCalled();
 
     finish();
     await deleting;
+    fixture.detectChanges(); TestBed.tick();
 
     expect(router.navigate).toHaveBeenCalledOnce();
     expect(component.deleting()).toBe(false);
     expect(component.deleteError()).toBeUndefined();
+    expect(unloadPrevented()).toBe(false);
+  });
+
+  it('releases global deletion protection after a failed deletion', async () => {
+    const fixture = setup(); fixture.detectChanges();
+    const actions = TestBed.inject(MeterActionsService) as unknown as { deleteMeter: ReturnType<typeof vi.fn> };
+    const changes = TestBed.inject(UnsavedChangesService);
+    let reject!: (error: Error) => void;
+    actions.deleteMeter.mockImplementationOnce(() => new Promise<void>((_resolve, fail) => { reject = fail; }));
+    const deleting = fixture.componentInstance.confirmDeleteMeter();
+    fixture.detectChanges(); TestBed.tick();
+    expect(changes.confirmDiscard()).toBe(false);
+    expect(unloadPrevented()).toBe(true);
+
+    reject(new Error('Deletion failed.')); await deleting;
+    fixture.detectChanges(); TestBed.tick();
+    expect(fixture.componentInstance.deleteError()).toBe('Deletion failed.');
+    expect(changes.confirmDiscard()).toBe(true);
+    expect(unloadPrevented()).toBe(false);
+    expect(TestBed.inject(Router).navigate).not.toHaveBeenCalled();
+  });
+
+  it('removes global deletion protection when the editor is destroyed', async () => {
+    const fixture = setup(); fixture.detectChanges();
+    const actions = TestBed.inject(MeterActionsService) as unknown as { deleteMeter: ReturnType<typeof vi.fn> };
+    const changes = TestBed.inject(UnsavedChangesService);
+    let finish!: () => void;
+    actions.deleteMeter.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    const deleting = fixture.componentInstance.confirmDeleteMeter();
+    fixture.detectChanges(); TestBed.tick();
+    expect(changes.confirmDiscard()).toBe(false);
+    expect(unloadPrevented()).toBe(true);
+
+    fixture.destroy(); TestBed.tick();
+    expect(changes.confirmDiscard()).toBe(true);
+    expect(unloadPrevented()).toBe(false);
+    finish(); await deleting;
   });
 
   it('toggles no longer in use from the form footer and saves the meter', async () => {
@@ -802,6 +847,12 @@ function query<T extends Element>(fixture: ComponentFixture<unknown>, selector: 
   const element = (fixture.nativeElement as HTMLElement).querySelector<T>(selector);
   expect(element).not.toBeNull();
   return element as T;
+}
+
+function unloadPrevented(): boolean {
+  const event = new Event('beforeunload', { cancelable: true });
+  window.dispatchEvent(event);
+  return event.defaultPrevented;
 }
 
 function selectOptionLabel(fixture: ComponentFixture<unknown>, control: string, label: string): void {

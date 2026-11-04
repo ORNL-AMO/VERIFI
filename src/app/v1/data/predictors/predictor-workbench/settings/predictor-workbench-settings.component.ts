@@ -13,7 +13,7 @@ import { PredictorSettingsForm, PredictorSettingsFormService } from '@app/v1/sha
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { ConflictChoices, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
-import { EditSaveMode, injectSettingsEditSession } from '@app/v1/data/editing/settings-edit-session';
+import { EditSaveMode, injectSettingsEditSession, SettingsHydrationMode } from '@app/v1/data/editing/settings-edit-session';
 import { EditorConflictReviewComponent } from '@app/v1/data/editing/editor-conflict-review/editor-conflict-review.component';
 import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
 import { normalizeStandardPredictorSettings, reconcileStandardPredictorSettings, StandardPredictorSettings,
@@ -67,7 +67,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     normalize: normalizeStandardPredictorSettings,
     valid: validStandardPredictorSettings,
     reconcile: reconcileStandardPredictorSettings,
-    hydrate: value => this.hydrate(value),
+    hydrate: (value, mode) => this.hydrate(value, mode),
     persist: (value, base, ownerId) => this.actions.updateSettings(this.identity(), value, base, ownerId),
     setEnabled: enabled => {
       const form = this.form();
@@ -156,7 +156,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     } finally { this.deleting.set(false); }
   }
 
-  private hydrate(value: StandardPredictorSettings | undefined): void {
+  private hydrate(value: StandardPredictorSettings | undefined, mode: SettingsHydrationMode = 'reset'): void {
     if (!value) {
       this.formChanges?.unsubscribe();
       this.form.set(undefined);
@@ -179,7 +179,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
         this.editChanges.next(immediate ? 'immediate' : 'debounced');
       });
     }
-    this.formService.hydrate(form, value);
+    this.formService.hydrate(form, value, mode);
     this.lastFormValue = form.getRawValue();
     if (draftEqual(normalizeStandardPredictorSettings(this.lastFormValue), this.savedSettings())) form.markAsPristine();
     else form.markAsDirty();
