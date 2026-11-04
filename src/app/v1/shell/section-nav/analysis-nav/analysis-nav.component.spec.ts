@@ -9,6 +9,16 @@ describe('AnalysisNavComponent', () => {
   let state: ReturnType<typeof setupSectionNavTest>;
   beforeEach(() => { state = setupSectionNavTest(); });
 
+  it('keeps the title next to its links without reserving checking or error space', () => {
+    state.activeSection.set('analysis');
+    const fixture = TestBed.createComponent(AnalysisNavComponent);
+    for (const status of ['idle', 'evaluating', 'error', 'ready'] as const) {
+      state.statusState.set(status); fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('app-status-evaluation-message, .compact-status, .v1-alert')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.v1-nav__label').nextElementSibling.tagName).toBe('A');
+    }
+  });
+
   it('shows the active analysis name and ordered workbench stages in the Analysis sidebar', () => {
     const { activeSection, contextMode, selectedFacility, activeDetail, activeAnalysisGuid, activeAnalysisGroupGuid, activeAnalysisStageScope, facilityMeterGroups, selectedFacilityAnalyses } = state;
     activeSection.set('analysis');
@@ -268,7 +278,7 @@ describe('AnalysisNavComponent', () => {
       statusState.set(unavailable);
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelector('.v1-status-attention')).toBeNull();
-      expect(fixture.nativeElement.querySelector(unavailable === 'error' ? '[role="alert"]' : '[role="status"]')).not.toBeNull();
+      expect(fixture.nativeElement.querySelector('app-status-evaluation-message, .compact-status, .v1-alert')).toBeNull();
     }
     statusState.set('ready');
     fixture.detectChanges();

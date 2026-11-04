@@ -7,7 +7,6 @@ import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { ImportStepperComponent } from '@app/v1/account/imports/import-stepper/import-stepper.component';
 import { AnalysisStageNavigationComponent } from '@app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component';
 import { StatusAttentionComponent } from '@app/v1/shared/status/status-attention/status-attention.component';
-import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-evaluation-message/status-evaluation-message.component';
 import { SectionNavComponent } from './section-nav.component';
 import { WorkspaceContextComponent } from './workspace-context/workspace-context.component';
 import { SettingsNavComponent } from './settings-nav/settings-nav.component';
@@ -19,7 +18,7 @@ import { RecentItemsNavComponent } from './recent-items-nav/recent-items-nav.com
 
 @NgModule({
   declarations: [ReportsNavComponent, SectionNavComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent, RecentItemsNavComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent, StatusEvaluationMessageComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent],
   exports: [SectionNavComponent]
 })
 export class SectionNavModule { }

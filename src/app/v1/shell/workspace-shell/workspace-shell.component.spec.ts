@@ -51,6 +51,7 @@ describe('WorkspaceShellComponent', () => {
       facility: vi.fn(() => ({ guid: 'facility-a', name: 'Facility A' })),
       activeSection: vi.fn(() => 'home'),
       activePanelTab: vi.fn(() => 'help'),
+      todosFocusRequested: signal(false), completeTodosFocus: vi.fn(), supportPanelRequested: signal(false),
       panelContent: vi.fn(() => ({
         help: ['Help text'],
         todos: [presentFinding(makeFinding('account.facilities.missing', 'error', 'readiness', {
@@ -106,7 +107,7 @@ describe('WorkspaceShellComponent', () => {
   it('shows shared checking and failure messages instead of reporting unavailable status as valid', () => {
     navigation.activePanelTab.mockReturnValue('todos');
     navigation.panelContent.mockReturnValue({ help: [], todos: [], discardedWarnings: [], results: [], details: [] });
-    for (const state of ['evaluating', 'error', 'ready']) {
+    for (const state of ['idle', 'evaluating', 'error', 'ready']) {
       status.state.mockReturnValue(state);
       fixture.destroy();
       fixture = TestBed.createComponent(WorkspaceShellComponent);
@@ -115,9 +116,26 @@ describe('WorkspaceShellComponent', () => {
       if (state === 'ready') expect(content.textContent).toContain('No data issues need attention.');
       else {
         expect(content.textContent).not.toContain('No data issues need attention.');
-        expect(content.textContent).toContain(state === 'error' ? 'Workspace status could not be evaluated.' : 'Checking workspace data...');
+        expect(content.textContent).toContain(state === 'error' ? 'Data checks are unavailable.' : state === 'idle' ? 'Loading workspace…' : 'Updating data checks…');
       }
     }
+  });
+
+  it('focuses To-dos on an explicit request without replaying it on ordinary panel opening', async () => {
+    navigation.activePanelTab.mockReturnValue('todos');
+    navigation.completeTodosFocus.mockImplementation(() => navigation.todosFocusRequested.set(false));
+    const open = signal(false);
+    navigation.isSupportPanelOpen.mockImplementation(() => open());
+    fixture.destroy(); fixture = TestBed.createComponent(WorkspaceShellComponent); fixture.detectChanges();
+    navigation.todosFocusRequested.set(true);
+    open.set(true);
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[aria-labelledby="v1-todo-heading"]'));
+    expect(navigation.todosFocusRequested()).toBe(false);
+    open.set(false); fixture.detectChanges();
+    const outside = document.createElement('button'); document.body.append(outside); outside.focus();
+    open.set(true); fixture.detectChanges(); await fixture.whenStable();
+    expect(document.activeElement).toBe(outside); outside.remove();
   });
 
   it('presents spreadsheet imports as Upload with the upload icon', () => {

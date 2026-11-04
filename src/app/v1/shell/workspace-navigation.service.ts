@@ -36,7 +36,11 @@ export class WorkspaceNavigationService {
   })));
   readonly panelTabs = signal(SUPPORT_PANEL_TABS).asReadonly();
   readonly isSupportPanelOpen = signal(true);
+  readonly supportPanelRequested = signal(false);
   readonly activePanelTab = this.activePanelTabState.asReadonly();
+  readonly dataCheckState = this.status.state;
+  private readonly todosFocusRequest = signal(false);
+  readonly todosFocusRequested = this.todosFocusRequest.asReadonly();
 
   readonly routeState = this.context.routeState;
   readonly routeMotion = this.context.routeMotion;
@@ -257,16 +261,31 @@ export class WorkspaceNavigationService {
   readonly contextNavigationError = signal('');
 
   setPanelTab(panelTab: PanelTabId): void {
+    this.todosFocusRequest.set(false);
     this.activePanelTabState.set(panelTab);
     this.isSupportPanelOpen.set(true);
+    this.supportPanelRequested.set(true);
   }
 
-  toggleSupportPanel(): void {
-    this.isSupportPanelOpen.update(open => !open);
+  openTodos(): void {
+    this.setPanelTab('todos');
+    this.todosFocusRequest.set(true);
+  }
+
+  completeTodosFocus(): void {
+    this.todosFocusRequest.set(false);
+  }
+
+  toggleSupportPanel(visible = this.isSupportPanelOpen()): void {
+    this.todosFocusRequest.set(false);
+    this.isSupportPanelOpen.set(!visible);
+    this.supportPanelRequested.set(this.isSupportPanelOpen());
   }
 
   hideSupportPanel(): void {
+    this.todosFocusRequest.set(false);
     this.isSupportPanelOpen.set(false);
+    this.supportPanelRequested.set(false);
   }
 
   async openSection(sectionId: SectionId): Promise<void> {

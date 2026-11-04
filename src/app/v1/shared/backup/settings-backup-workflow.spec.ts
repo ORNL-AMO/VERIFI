@@ -69,7 +69,7 @@ describe('header backup with live Settings drafts', () => {
         { provide: ApplicationLifecycleService, useValue: { refreshAccountCatalog: vi.fn(async () => []) } },
         { provide: NotificationService, useValue: { success: vi.fn(), warning: vi.fn(), danger: vi.fn() } },
         { provide: WorkspaceNavigationService, useValue: {
-          singleFacilityContext: () => undefined, facilities: store.facilities, headerFacility: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', account: store.account, isWorkspaceRoute: () => true, isSupportPanelOpen: () => false
+          singleFacilityContext: () => undefined, facilities: store.facilities, headerFacility: () => undefined, isSingleSiteWorkspace: () => false, scopeChangePending: () => false, scopeAvailability: () => '', scopeNotice: () => '', contextNavigationError: () => '', account: store.account, isWorkspaceRoute: () => true, supportPanelRequested: () => false, dataCheckState: () => 'ready', activePanelTab: () => 'help', openTodos: vi.fn(), isSupportPanelOpen: () => false
         } },
         { provide: AppearanceService, useValue: {} }
       ]

@@ -1,7 +1,6 @@
 @if (navigation.account()) {
   <section class="v1-nav__group" aria-labelledby="v1-data-nav-title">
     <span id="v1-data-nav-title" class="v1-nav__label">{{ dataTitle() }}</span>
-    <app-status-evaluation-message [state]="status.state()" [compact]="true"></app-status-evaluation-message>
     @for (group of groups(); track group.id) {
       <app-resource-nav-group [group]="group"></app-resource-nav-group>
     }
