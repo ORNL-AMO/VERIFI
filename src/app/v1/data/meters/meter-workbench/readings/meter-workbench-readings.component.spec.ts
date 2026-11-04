@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
@@ -171,6 +172,25 @@ describe('MeterWorkbenchReadingsComponent', () => {
     );
     expect(commandBoundary.execute.mock.calls[0][0].publication.mode).toBe('patch');
     expect(component.billPanel()).toBeUndefined();
+  });
+
+  it('observes child draft signals for unload protection and releases protection after reversion or teardown', async () => {
+    const current = reading({ guid: 'reading-a', meterId: 'meter-a', totalCost: 20 });
+    const { fixture } = setupHarness({ readings: [current] });
+    fixture.detectChanges();
+    await fixture.componentInstance.openEditBill(current); fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(MeterReadingBillSlideoutComponent)).componentInstance as MeterReadingBillSlideoutComponent;
+    const unload = () => { const event = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(event); return event.defaultPrevented; };
+    TestBed.tick(); expect(unload()).toBe(false);
+    editor.form!.controls.totalCost.setValue(99);
+    expect(fixture.componentInstance.dirty()).toBe(true);
+    TestBed.tick(); expect(unload()).toBe(true);
+    editor.form!.controls.totalCost.setValue(20);
+    expect(fixture.componentInstance.dirty()).toBe(false);
+    TestBed.tick(); expect(unload()).toBe(false);
+    fixture.componentInstance.saving.set(true); fixture.detectChanges(); TestBed.tick();
+    expect(unload()).toBe(true);
+    fixture.destroy(); TestBed.tick(); expect(unload()).toBe(false);
   });
 
   it('blocks adding a bill on an existing reading date', async () => {
@@ -458,6 +478,7 @@ function setupHarness(options: SetupOptions = {}) {
           account: signal(accountValue),
           facility: signal(facilityValue),
           selectedMeter: signal(meterValue),
+          selectedMeterGuid: () => meterValue.guid,
           selectedMeterData,
           canWrite: signal(options.canWrite ?? true),
           hasPending: signal(options.hasPending ?? false)
@@ -469,6 +490,7 @@ function setupHarness(options: SetupOptions = {}) {
           account: signal(accountValue),
           selectedFacility: signal(facilityValue),
           meterData: signal(readings),
+          meters: signal([meterValue]),
           customFuels: signal([]),
           customGWPs: signal([])
         }

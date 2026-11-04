@@ -255,7 +255,7 @@ export const V1Routes: Routes = [
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: MeterWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { meterTab: 'settings' } },
-                      { path: 'readings', component: MeterWorkbenchReadingsComponent, data: { meterTab: 'readings' } },
+                      { path: 'readings', component: MeterWorkbenchReadingsComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { meterTab: 'readings' } },
                       { path: 'bill-inspection', component: MeterWorkbenchBillInspectionComponent, data: { meterTab: 'bill-inspection' } },
                       { path: 'monthly', component: MeterWorkbenchMonthlyDataComponent, data: { meterTab: 'monthly' } },
                       { path: 'monthly-chart', component: MeterWorkbenchMonthlyChartComponent, data: { meterTab: 'monthly-chart' } },
@@ -340,7 +340,7 @@ export const V1Routes: Routes = [
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: PredictorWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { predictorTab: 'settings' } },
-                      { path: 'readings', component: PredictorWorkbenchReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'readings' } },
+                      { path: 'readings', component: PredictorWorkbenchReadingsComponent, canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange', data: { predictorTab: 'readings' } },
                       {
                         path: 'quality',
                         component: PredictorWorkbenchQualityReportComponent,
