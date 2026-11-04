@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
@@ -19,19 +19,37 @@ class InventoryDestination {}
 describe('energy use workbench routes', () => {
   const path = (guid: string, tab = 'settings', facility = 'facility-a') => `/v1/workspace/facility/${facility}/data/energy-uses/${guid}/${tab}`;
   async function setup() {
+    const singleSite = signal(false);
     const store = new AccountWorkspaceStore();
     const snapshot = energyUsesSnapshot([energyUseItem(), energyUseItem({ guid: 'energy-b', name: 'Fan B' }), energyUseItem({ guid: 'energy-c', facilityId: 'facility-b' })]);
     store.publish(snapshot);
     const changes = { confirmDiscard: vi.fn(() => false) };
     TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [
       { provide: AccountWorkspaceStore, useValue: store },
-      { provide: WorkspaceNavigationService, useValue: { accountPortfolioRoute: () => ['/inventory'], isSingleSiteWorkspace: () => false } },
+      { provide: WorkspaceNavigationService, useValue: { accountPortfolioRoute: () => ['/inventory'], isSingleSiteWorkspace: singleSite } },
       { provide: UnsavedChangesService, useValue: changes },
       provideRouter([{ path: 'v1/workspace/facility/:facilityGuid/data', children: ENERGY_USE_WORKBENCH_ROUTES }, { path: 'inventory', component: InventoryDestination }])
     ] });
     const harness = await RouterTestingHarness.create();
-    return { store, snapshot, changes, harness, router: TestBed.inject(Router) };
+    return { store, snapshot, changes, harness, singleSite, router: TestBed.inject(Router) };
   }
+  it('matches meter and predictor breadcrumb rules in portfolio and single-facility modes', async () => {
+    const { harness, singleSite } = await setup();
+    const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
+    const portfolio = workbench.breadcrumbs();
+    expect(portfolio).toEqual([
+      { label: 'Example account', route: ['/inventory'] },
+      { label: 'North plant', route: ['/inventory'], queryParams: { facility: 'facility-a' } }
+    ]);
+    const breadcrumb = () => harness.routeNativeElement?.querySelector('app-page-identity nav');
+    expect(breadcrumb()?.textContent).not.toContain('Energy Uses');
+    expect(breadcrumb()?.querySelectorAll('a')).toHaveLength(2);
+    singleSite.set(true); harness.detectChanges();
+    expect(workbench.breadcrumbs()).toEqual([{ label: 'Energy Uses', icon: 'tools', route: ['/inventory'], queryParams: {} }]);
+    expect(breadcrumb()?.querySelectorAll('a')).toHaveLength(1);
+    singleSite.set(false); harness.detectChanges();
+    expect(workbench.breadcrumbs()).toEqual(portfolio);
+  });
   it('opens direct links, defaults invalid tabs, reuses item context and preserves the tab when switching', async () => {
     const { harness, router } = await setup();
     const workbench = await harness.navigateByUrl(path('energy-a', ''), EnergyUseWorkbenchComponent);
