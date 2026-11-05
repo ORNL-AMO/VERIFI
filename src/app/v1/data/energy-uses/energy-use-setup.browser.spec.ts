@@ -41,6 +41,20 @@ describe('Combined Energy Use setup persistence', () => {
       expect(saved.utilityData[0].energyUse[2].energyUse).toBe(10000);
     } finally { subscription.unsubscribe(); }
   });
+  it('atomically persists pending setup edits and their copied annual calculation before reopening', async () => {
+    const actions = TestBed.inject(EnergyUseActionsService), before = current(), base = energyUseSetup(before);
+    const pending = { ...base, sources: base.sources.map(row => ({ ...row, size: 10 })), conditions: base.conditions.map(row => ({ ...row, hoursOfOperation: 1000 })) };
+    const copied = addEnergyUseYear(pending, 2025, facility, { year: 2024, item: before });
+    const committed = vi.fn(), subscription = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      await actions.updateSetup(identity, copied, base, 'setup-test');
+      expect(committed).toHaveBeenCalledTimes(1);
+      const saved = structuredClone(current());
+      expect(saved.operatingConditionsData.map(row => row.hoursOfOperation)).toEqual([1000, 1000]);
+      expect(saved.utilityData[0].energyUse.map(row => row.energyUse)).toEqual([10000, 10000]);
+      await harness.reopen(); expect(await harness.getAll('facilityEnergyUseEquipment')).toStrictEqual([saved]);
+    } finally { subscription.unsubscribe(); }
+  });
   it('rolls back a failed complete year write without publishing and permits retry', async () => {
     const actions = TestBed.inject(EnergyUseActionsService), before = structuredClone(current()), base = energyUseSetup(before), value = addEnergyUseYear(base, 2025, facility);
     const original = IndexedDbTransactionContext.prototype.put;

@@ -269,13 +269,14 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([saved]);
   });
 
-  it('preserves imported extra sources, overrides, retirement, and group links through Settings and account/facility backup restoration', async () => {
+  it('saves combined annual edits and preserves imported history and relationships through account/facility backup restoration', async () => {
     const created = await TestBed.inject(EnergyUseActionsService).create({ initialYear: 2025, group: { kind: 'new', name: 'Imported equipment' },
       settings: { name: 'Imported', notes: '', equipmentType: 'Other', sources: [{ energySource: 'Electricity', size: 1, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
     const linked = getNewIdbUtilityMeterGroup('Energy', 'Associated group', facility.guid, account.guid);
     await harness.seed({ utilityMeterGroups: [{ ...linked }] });
     const imported: IdbFacilityEnergyUseEquipment = { ...structuredClone(created), noLongerInUse: { isNoLongerInUse: true, year: 2024 },
-      utilityMeterGroupIds: [linked.guid], utilityData: ['Electricity', 'Natural Gas', 'Other Energy'].map((source, index) => ({
+      utilityMeterGroupIds: [linked.guid], operatingConditionsData: created.operatingConditionsData.map(row => ({ ...row, hoursPerDay: 8, daysPerWeek: 5, weeksPerYear: 50 })),
+      utilityData: ['Electricity', 'Natural Gas', 'Other Energy'].map((source, index) => ({
         energySource: source as 'Electricity' | 'Natural Gas' | 'Other Energy', units: index === 2 ? 'legacy-unit' : 'kW', size: index, numberOfEquipment: 1,
         energyUse: [{ year: 2021, energyUse: 0, overrideEnergyUse: true, energyUseUnit: 'GJ' }, { year: 2025, energyUse: 123 + index, overrideEnergyUse: false, energyUseUnit: 'GJ' }]
       })) };
@@ -285,8 +286,19 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     expect(fixture.componentInstance.form()!.controls.settings.controls.sources.length).toBe(3);
     fixture.componentInstance.form()!.controls.settings.controls.name.setValue('Compatible imported item');
     expect(await fixture.componentInstance.editor.saveNow()).toBe(true); await settle(fixture);
-    const store = TestBed.inject(AccountWorkspaceStore), snapshot = store.snapshot()!;
+    const store = TestBed.inject(AccountWorkspaceStore);
     expect(store.energyUseEquipment()[0].utilityData).toEqual(imported.utilityData);
+    const form = fixture.componentInstance.form()!;
+    form.patchValue({ settings: { name: 'Combined imported setup' },
+      conditions: form.controls.conditions.getRawValue().map(row => ({ ...row, hoursOfOperation: 2000 })),
+      consumption: form.controls.consumption.getRawValue().map((source, index) => ({ ...source,
+        entries: source.entries.map(row => row.year === 2025 ? { ...row, overrideEnergyUse: true, energyUse: index * 10 } : row) })) });
+    expect(await fixture.componentInstance.editor.saveNow()).toBe(true); await settle(fixture);
+    const saved = structuredClone(store.energyUseEquipment()[0]), snapshot = store.snapshot()!;
+    expect(saved.name).toBe('Combined imported setup');
+    expect(saved.operatingConditionsData[0]).toMatchObject({ hoursOfOperation: 2000, hoursPerDay: 8, daysPerWeek: 5, weeksPerYear: 50 });
+    expect(saved.utilityData.map(source => source.energyUse[0])).toEqual(imported.utilityData.map(source => source.energyUse[0]));
+    expect(saved.utilityData.map(source => source.energyUse[1])).toEqual([0, 10, 20].map(energyUse => ({ year: 2025, energyUse, overrideEnergyUse: true, energyUseUnit: 'GJ' })));
     const builder = TestBed.inject(WorkspaceBackupSnapshotBuilder), serializer = TestBed.inject(JsonBackupSerializer), prepare = TestBed.inject(BackupPreparationService);
     const accountBackup = prepare.prepare(JSON.parse(serializer.serialize(builder.buildAccountBackup(snapshot))));
     const facilityBackup = prepare.prepare(JSON.parse(serializer.serialize(builder.buildFacilityBackup(snapshot, facility.guid))));
@@ -298,7 +310,8 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     const restored = items.filter(item => item.guid !== created.guid);
     expect(restored).toHaveLength(2); expect(restored.some(item => item.accountId === restoredAccount.guid)).toBe(true);
     for (const item of restored) {
-      expect(item.utilityData).toEqual(imported.utilityData); expect(item.noLongerInUse).toEqual(imported.noLongerInUse);
+      expect(item.name).toBe(saved.name); expect(item.operatingConditionsData).toEqual(saved.operatingConditionsData);
+      expect(item.utilityData).toEqual(saved.utilityData); expect(item.noLongerInUse).toEqual(imported.noLongerInUse);
       expect(item.utilityMeterGroupIds).toHaveLength(1);
       expect(groups.find(group => group.guid === item.energyUseGroupId)).toMatchObject({ accountId: item.accountId, facilityId: item.facilityId });
       expect(links.find(group => group.guid === item.utilityMeterGroupIds[0])).toMatchObject({ accountId: item.accountId, facilityId: item.facilityId });
