@@ -58,7 +58,6 @@ export class RegressionUserDefinedModelInspectionComponent {
       return null;
     }
     let analysisItemCopy: IdbAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
-    analysisItemCopy.baselineYear = selectedGroup.regressionStartYear;
     let reportYear: number = getLatestCompleteAnalysisYear([selectedGroup], calanderizedMeters, accountPredictorEntries, [selectedFacility]);
     return this.regressionsModelsService.getUserDefinedModel(selectedGroup, selectedFacility, analysisItemCopy, reportYear);
   });
@@ -107,7 +106,6 @@ export class RegressionUserDefinedModelInspectionComponent {
     this.worker?.terminate();
 
     const analysisItemCopy: IdbAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
-    analysisItemCopy.baselineYear = selectedGroup.regressionStartYear;
     const groupCopy: AnalysisGroup = JSON.parse(JSON.stringify(selectedGroup));
 
     this.calculating.set(true);
