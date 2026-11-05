@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input } from '@angular/core';
 import type { ResourceNavGroup } from '../models';
 import { SectionNavDisclosureService } from '../section-nav-disclosure.service';
 
@@ -15,6 +15,16 @@ export class ResourceNavGroupComponent {
   readonly open = computed(() => this.canToggle() && this.disclosure.isOpen(this.group().id, this.group().facilityGuid));
   readonly toggleLabel = computed(() => `${this.open() ? 'Hide' : 'Show'} ${this.group().childrenLabel.toLowerCase()}`);
 
+  readonly entries = computed(() => this.group().children.map(child => ({ ...child,
+    open: !!child.disclosureKey && this.disclosure.isNestedOpen(child.disclosureKey) })));
+  constructor() {
+    effect(() => {
+      if (this.group().id !== 'energy-uses') return;
+      const active = this.group().children.find(child => child.activeChildGuid);
+      this.disclosure.revealActive(active?.disclosureKey, active?.activeChildGuid, this.group().facilityGuid);
+    });
+  }
+  toggleNested(key: string): void { this.disclosure.toggleNested(key); }
   toggle(): void {
     if (!this.canToggle()) return;
     this.disclosure.toggle(this.group().id, this.group().facilityGuid);

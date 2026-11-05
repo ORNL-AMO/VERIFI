@@ -1,3 +1,8 @@
+import type { IdbFacility } from '@data/models/idbModels/facility';
+import type { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { buildEnergyUseGroups } from '@app/v1/data/energy-uses/inventory/energy-use-group.models';
+import { buildEnergyUseInventory } from '@app/v1/data/energy-uses/inventory/energy-use-inventory.models';
+import { facilityEnergyUseGroupRoute } from '@app/v1/routing/workspace-route';
 import type { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import type { Params } from '@angular/router';
 import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -19,6 +24,11 @@ export interface NavigationLink {
   readonly queryParams?: Params;
   readonly active: boolean;
   readonly attention?: StatusAttentionSummary;
+  readonly children?: readonly NavigationLink[];
+  readonly childrenId?: string;
+  readonly totalChildren?: number;
+  readonly disclosureKey?: string;
+  readonly activeChildGuid?: string;
   readonly outputs?: readonly { readonly guid: string; readonly label: string; readonly icon: IconName }[];
 }
 
@@ -48,6 +58,10 @@ export interface ResourceNavRoutes {
 }
 
 export interface ResourceNavInput {
+  readonly accountGuid: string;
+  readonly facility: Readonly<IdbFacility>;
+  readonly energyUseGroups: readonly Readonly<IdbFacilityEnergyUseGroup>[];
+  readonly activeEnergyUseGroupGuid?: string;
   readonly facilityGuid: string;
   readonly detail: string;
   readonly activeMeterGuid?: string;
@@ -97,6 +111,19 @@ export function buildResourceNavGroups(input: ResourceNavInput, routes: Resource
     attention: input.statusReady ? attention(group.statusFindings) : undefined,
     outputs: group.predictors.map(predictor => ({ guid: predictor.guid, label: predictor.name || 'Untitled predictor', icon: predictorIcon(predictor) }))
   }));
+  const energyUseEntries = buildEnergyUseInventory(input.accountGuid, [input.facility], input.energyUses, input.energyUseGroups);
+  const energyUseGroups: NavigationLink[] = buildEnergyUseGroups(input.accountGuid, [input.facility], input.energyUseGroups, energyUseEntries).map(group => {
+    const members = [...group.items].sort((a, b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid));
+    const activeItem = members.find(item => item.guid === input.activeEnergyUseGuid);
+    const preview = members.slice(0, 20);
+    if (activeItem && !preview.includes(activeItem)) preview[19] = activeItem;
+    return { id: group.guid, label: group.name, icon: 'energyUseGroup', route: facilityEnergyUseGroupRoute(facilityGuid, group.guid),
+      active: input.activeEnergyUseGroupGuid === group.guid,
+      activeChildGuid: activeItem?.guid, disclosureKey: JSON.stringify([input.accountGuid, facilityGuid, group.guid]),
+      childrenId: `energy-use-group-${encodeURIComponent(facilityGuid)}-${encodeURIComponent(group.guid)}`,
+      totalChildren: members.length, children: preview.map(item => ({ id: item.guid, label: item.name, icon: 'tools',
+        route: routes.facilityEnergyUseRoute(facilityGuid, item.guid, 'settings'), active: item.guid === input.activeEnergyUseGuid })) };
+  });
   return [
     {
       id: 'meters', label: 'Meters', icon: 'meter', ...routes.facilityInventoryLink(facilityGuid, 'meters'),
@@ -117,10 +144,9 @@ export function buildResourceNavGroups(input: ResourceNavInput, routes: Resource
     },
     {
       id: 'energy-uses', label: 'Energy Uses', icon: 'tools', ...routes.facilityInventoryLink(facilityGuid, 'energy-uses'),
-      active: input.detail === 'energy-uses' && !input.activeEnergyUseGuid, routeActive: input.detail === 'energy-uses', facilityGuid,
-      childrenId: `v1-energy-use-nav-items-${facilityGuid}`, childrenLabel: 'Energy use links',
-      children: sorted(input.energyUses.map(item => ({ id: item.guid, label: item.name?.trim() || 'Untitled energy use', icon: 'tools',
-        route: routes.facilityEnergyUseRoute(facilityGuid, item.guid, 'settings'), active: input.activeEnergyUseGuid === item.guid })))
+      active: input.detail === 'energy-uses' && !input.activeEnergyUseGuid && !input.activeEnergyUseGroupGuid, routeActive: input.detail === 'energy-uses', facilityGuid,
+      childrenId: `v1-energy-use-nav-items-${facilityGuid}`, childrenLabel: 'Energy use groups',
+      children: sorted(energyUseGroups)
     }
   ];
 }

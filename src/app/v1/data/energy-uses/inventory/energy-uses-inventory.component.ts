@@ -5,6 +5,7 @@ import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEn
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { InventoryHeaderActionsRegistry } from '@app/v1/data/inventory/inventory-header-actions.service';
 import { FormControl, FormGroup } from '@angular/forms';
+import { combineLatest, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -28,16 +29,16 @@ export class EnergyUsesInventoryComponent {
   readonly workspace = inject(EnergyUsesWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
-  private readonly restoreHistory = this.router.currentNavigation()?.trigger === 'popstate';
   private readonly route = inject(ActivatedRoute);
-  private readonly params = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
-  private readonly query = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
-  readonly groupGuid = computed(() => this.params().get('energyUseGroupGuid') ?? undefined);
+  private readonly routeInput = toSignal(combineLatest([this.route.paramMap, this.route.queryParamMap]).pipe(
+    map(([params, query]) => ({ params, query, history: this.router.currentNavigation()?.trigger === 'popstate' }))
+  ), { initialValue: { params: this.route.snapshot.paramMap, query: this.route.snapshot.queryParamMap, history: this.router.currentNavigation()?.trigger === 'popstate' } });
+  readonly groupGuid = computed(() => this.routeInput().params.get('energyUseGroupGuid') ?? undefined);
   readonly facilityGuid = computed(() => this.groupGuid()
     ? this.navigation.headerFacility()?.guid : this.navigation.inventoryFacilityGuid());
   readonly initialFilters = computed<Partial<EnergyUseInventoryFilters>>(() => {
-    if (!this.groupGuid() || this.restoreHistory) return {};
-    const params = this.query();
+    if (!this.groupGuid() || this.routeInput().history) return {};
+    const params = this.routeInput().query;
     if (!params.has('search')) return {};
     const lifecycle = params.get('lifecycle'), sort = params.get('sort');
     return { search: params.get('search') ?? '', category: params.get('category') || 'all',

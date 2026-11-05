@@ -305,3 +305,5 @@ Single-facility identity is gated by the shared `singleFacilityPresentation` rea
 ### Energy-use group browsing
 
 V1 Energy Uses projects committed energy-use group records into scoped inventory cards and their equipment members into paginated lists. Facility-owned group routes coexist with unchanged item Setup routes. A read-only unavailable-group bucket keeps orphaned equipment discoverable without repairing its stored relationship. Browse identity includes the energy-use group GUID; empty groups remain visible. Creation reuses the existing command flow with an optional preselected group. Group cards describe inventory metadata only and perform no consumption rollup or persistence on entry.
+
+Energy-use sidebar groups own bounded equipment previews (20 links including the active item) and a full-list destination. Nested disclosure state is navigation-local and keyed by account/facility/group; accepted routes reveal active members without overwriting manual collapse on ordinary workspace publication. Item breadcrumbs return through the group, and Setup switching uses only members of that group. Route motion distinguishes inventory, group, and item depth.

@@ -43,10 +43,11 @@ export class EnergyUseWorkbenchComponent {
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.context.workspace.account();
     const entry = this.context.entry();
-    return account && entry ? facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
+    const group = this.context.group();
+    return account && entry ? [...facilityContextBreadcrumbs(this.navigation.isSingleSiteWorkspace(),
       { label: account.name, route: this.navigation.accountPortfolioRoute(account.guid, 'energy-uses') },
       { label: entry.facility.name, ...this.context.inventoryLink() },
       { label: 'Energy Uses', icon: 'tools', ...this.context.inventoryLink() }
-    ) : [];
+    ), ...(group ? [{ label: group.name, icon: 'energyUseGroup' as const, ...this.context.groupLink() }] : [])] : [];
   });
 }

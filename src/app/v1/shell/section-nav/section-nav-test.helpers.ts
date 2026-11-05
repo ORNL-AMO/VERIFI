@@ -26,6 +26,8 @@ export function setupSectionNavTest() {
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
   const activePortfolioTab = signal('facilities');
+  const activeEnergyUseGroupGuid = signal<string | undefined>(undefined);
+  const energyUseGroups = signal<import('@data/models/idbModels/facilityEnergyUseGroups').IdbFacilityEnergyUseGroup[]>([]);
   const activeEnergyUseGuid = signal<string | undefined>(undefined);
   const energyUses = signal<import('@data/models/idbModels/facilityEnergyUseEquipment').IdbFacilityEnergyUseEquipment[]>([]);
   let activeDetail: ReturnType<typeof signal<string>>;
@@ -91,9 +93,9 @@ export function setupSectionNavTest() {
           useValue: {
             inventoryScopeQuery: () => ({}),
             contextMode,
-            contextFacility: () => contextMode() === 'facility' ? selectedFacility() : undefined,
+            contextFacility: () => contextMode() === 'facility' && selectedFacility() ? { ...selectedFacility(), accountId: account().guid } : undefined,
             contextMeters: facilityMeters, contextMeterGroups: facilityMeterGroups,
-            contextEnergyUses: energyUses, activeEnergyUseGuid,
+            contextEnergyUses: energyUses, contextEnergyUseGroups: energyUseGroups, activeEnergyUseGroupGuid, activeEnergyUseGuid,
             contextPredictors: facilityPredictors, contextPredictorData: facilityPredictorData,
             contextAnalyses: selectedFacilityAnalyses,
             facilityInventoryLink: (guid: string, resource: string) => isSingleSiteWorkspace()
@@ -171,7 +173,7 @@ export function setupSectionNavTest() {
       ]
     });
 
-  return { activeEnergyUseGuid, energyUses, activePortfolioTab, activeSection, contextMode, facilities, selectedFacility, account, isSingleSiteWorkspace, hasSingleSiteRecovery, singleSiteWorkspaceState, activeDetail, activeMeterGuid, activeMeterGroupGuid, activePredictorGuid, activeWeatherPredictorGroupKey, activeImportFileId, activeImportStep, activeAnalysisGuid, activeAnalysisGroupGuid, activeAnalysisStageScope, activeAccountAnalysisStageScope, facilityMeters, facilityMeterGroups, facilityPredictors, facilityPredictorData, selectedFacilityAnalyses, accountAnalyses, setFacility, statusState, statusItems };
+  return { activeEnergyUseGroupGuid, energyUseGroups, activeEnergyUseGuid, energyUses, activePortfolioTab, activeSection, contextMode, facilities, selectedFacility, account, isSingleSiteWorkspace, hasSingleSiteRecovery, singleSiteWorkspaceState, activeDetail, activeMeterGuid, activeMeterGroupGuid, activePredictorGuid, activeWeatherPredictorGroupKey, activeImportFileId, activeImportStep, activeAnalysisGuid, activeAnalysisGroupGuid, activeAnalysisStageScope, activeAccountAnalysisStageScope, facilityMeters, facilityMeterGroups, facilityPredictors, facilityPredictorData, selectedFacilityAnalyses, accountAnalyses, setFacility, statusState, statusItems };
 }
 
 export function activeLinks(element: HTMLElement): HTMLAnchorElement[] {

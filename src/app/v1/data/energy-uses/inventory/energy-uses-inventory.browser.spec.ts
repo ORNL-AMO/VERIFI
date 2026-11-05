@@ -1,3 +1,4 @@
+import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
 import { Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { PortalModule } from '@angular/cdk/portal';
@@ -27,8 +28,8 @@ import { energyUseGroup, energyUseItem, energyUseSource, energyUsesSnapshot } fr
 
 const inventoryUrl = '/v1/workspace/account/account-a/data/portfolio/energy-uses';
 const itemUrl = '/v1/workspace/facility/facility-a/data/energy-uses/energy-00/settings';
-@Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%"><router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
-class EnergyUsesBrowserHost { readonly modal = inject(ModalPortalService); }
+@Component({ standalone: true, imports: [RouterOutlet, PortalModule, SectionNavModule], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%">@if (showNav()) { <div style="width:16rem;max-width:100%"><app-section-nav/></div> }<router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
+class EnergyUsesBrowserHost { readonly showNav = signal(false); readonly modal = inject(ModalPortalService); }
 
 function setup(single = false) {
   const store = new AccountWorkspaceStore();
@@ -72,6 +73,39 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it('opens the active item beyond the sidebar preview and supports keyboard disclosure and group navigation', async () => {
+    const view = setup(); view.fixture.componentInstance.showNav.set(true);
+    view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup()], energyUseEquipment: view.snapshot.energyUseEquipment.map(item => ({ ...item, energyUseGroupId: 'group-a' })) });
+    const before = structuredClone(view.store.snapshot());
+    await view.router.navigateByUrl(itemUrl.replace('energy-00', 'energy-45')); await settle(view);
+    const sidebar = view.root.querySelector('app-section-nav')!;
+    expect(sidebar.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(21);
+    expect(sidebar.querySelector('[aria-current="page"]')?.textContent).toContain('Pump 45');
+    const toggle = page.getByRole('button', { name: 'Hide items in Production', exact: true });
+    (toggle.element() as HTMLElement).focus(); await userEvent.keyboard('{Enter}'); await settle(view);
+    expect(sidebar.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(0);
+    await userEvent.keyboard('{Enter}'); await settle(view);
+    expect(sidebar.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(21);
+    await page.screenshot({ element: sidebar, path: './__screenshots__/energy-use-group-sidebar.png' });
+    const viewAll = [...sidebar.querySelectorAll<HTMLAnchorElement>('a')].find(link => link.textContent?.includes('View all'))!;
+    viewAll.click(); await settle(view);
+    expect(view.navigation.activeEnergyUseGroupGuid()).toBe('group-a'); expect(view.root.querySelectorAll('tbody tr')).toHaveLength(24);
+    expect(view.store.snapshot()).toEqual(before); view.fixture.destroy();
+  });
+  it('restores independent group filters when browser history reuses the same group route component', async () => {
+    const view = setup();
+    const url = (group: string) => `/v1/workspace/facility/facility-a/data/energy-uses/groups/${group}?search=pump`;
+    await view.router.navigateByUrl(url('group-00')); await settle(view);
+    view.inventory().filtersForm.controls.search.setValue('changed first'); await settle(view);
+    await view.router.navigateByUrl(url('group-01')); await settle(view);
+    expect(view.inventory().filters().search).toBe('pump');
+    view.inventory().filtersForm.controls.search.setValue('changed second'); await settle(view);
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(url('group-00'))); await settle(view);
+    expect(view.inventory().filters().search).toBe('changed first');
+    TestBed.inject(Location).forward(); await vi.waitFor(() => expect(view.router.url).toBe(url('group-01'))); await settle(view);
+    expect(view.inventory().filters().search).toBe('changed second'); view.fixture.destroy();
+  });
+
   it.each(['utilities', 'meter-groups'] as const)('closes the %s selection on browser Back between items with identical setup', async kind => {
     const view = setup();
     const group = getNewIdbUtilityMeterGroup('Energy', 'Gas supply', 'facility-a', 'account-a');

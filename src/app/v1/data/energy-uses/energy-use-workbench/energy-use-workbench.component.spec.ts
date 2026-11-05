@@ -8,7 +8,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { EnergyUsesModule } from '../energy-uses.module';
 import { ENERGY_USE_WORKBENCH_ROUTES } from '../energy-uses.routes';
-import { energyUseItem, energyUsesSnapshot } from '../energy-uses.testing';
+import { energyUseGroup, energyUseItem, energyUsesSnapshot } from '../energy-uses.testing';
 import { EnergyUsesWorkspaceService } from '../energy-uses-workspace.service';
 import { EnergyUseWorkbenchComponent } from './energy-use-workbench.component';
 import { EnergyUseSettingsComponent } from './settings/energy-use-settings.component';
@@ -19,6 +19,17 @@ import { EnergyUseActionsService } from '../energy-use-actions.service';
 class InventoryDestination {}
 
 describe('energy use workbench routes', () => {
+  it('limits resource switching to the current group and keeps unavailable-group items reachable', async () => {
+    const { harness, store, snapshot } = await setup();
+    store.publish({ ...snapshot, energyUseGroups: [...snapshot.energyUseGroups, energyUseGroup({ guid: 'other' })], energyUseEquipment: [...snapshot.energyUseEquipment,
+      energyUseItem({ guid: 'other-item', energyUseGroupId: 'other' }), energyUseItem({ guid: 'orphan', energyUseGroupId: 'missing' })] });
+    const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
+    expect(workbench.context.resources().map(resource => resource.id)).toEqual(['energy-b', 'energy-a']);
+    await harness.navigateByUrl(path('orphan'));
+    expect(workbench.context.resources().map(resource => resource.id)).toEqual(['orphan']);
+    expect(workbench.context.groupLink().route.at(-1)).toBe('unavailable');
+  });
+
   const path = (guid: string, tab = 'settings', facility = 'facility-a') => `/v1/workspace/facility/${facility}/data/energy-uses/${guid}/${tab}`;
   async function setup() {
     const singleSite = signal(false);
@@ -43,14 +54,15 @@ describe('energy use workbench routes', () => {
     const portfolio = workbench.breadcrumbs();
     expect(portfolio).toEqual([
       { label: 'Example account', route: ['/inventory'] },
-      { label: 'North plant', route: ['/inventory'], queryParams: { facility: 'facility-a' } }
+      { label: 'North plant', route: ['/inventory'], queryParams: { facility: 'facility-a' } },
+      { label: 'Production', icon: 'energyUseGroup', route: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses', 'groups', 'group-a'] }
     ]);
     const breadcrumb = () => harness.routeNativeElement?.querySelector('app-page-identity nav');
     expect(breadcrumb()?.textContent).not.toContain('Energy Uses');
-    expect(breadcrumb()?.querySelectorAll('a')).toHaveLength(2);
+    expect(breadcrumb()?.querySelectorAll('a')).toHaveLength(3);
     singleSite.set(true); harness.detectChanges();
-    expect(workbench.breadcrumbs()).toEqual([{ label: 'Energy Uses', icon: 'tools', route: ['/inventory'], queryParams: {} }]);
-    expect(breadcrumb()?.querySelectorAll('a')).toHaveLength(1);
+    expect(workbench.breadcrumbs()).toEqual([{ label: 'Energy Uses', icon: 'tools', route: ['/inventory'], queryParams: {} }, portfolio[2]]);
+    expect(breadcrumb()?.querySelectorAll('a')).toHaveLength(2);
     singleSite.set(false); harness.detectChanges();
     expect(workbench.breadcrumbs()).toEqual(portfolio);
   });

@@ -31,6 +31,7 @@ export class WorkspaceContextService {
   readonly activePortfolioTab = computed(() => this.routeState().portfolioTab);
   readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
+  readonly activeEnergyUseGroupGuid = computed(() => this.routeState().energyUseGroupGuid);
   readonly activeEnergyUseGuid = computed(() => this.routeState().energyUseGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
   readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
@@ -90,6 +91,7 @@ export class WorkspaceContextService {
   });
   readonly contextMeters = computed(() => this.workspace.meters().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextMeterGroups = computed(() => this.workspace.meterGroups().filter(item => this.inContext(item.accountId, item.facilityId)));
+  readonly contextEnergyUseGroups = computed(() => this.workspace.energyUseGroups().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextEnergyUses = computed(() => this.workspace.energyUseEquipment().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextPredictors = computed(() => this.workspace.predictors().filter(item => this.inContext(item.accountId, item.facilityId)));
   readonly contextPredictorData = computed(() => this.workspace.predictorData().filter(item => this.inContext(item.accountId, item.facilityId)));
@@ -158,7 +160,7 @@ export class WorkspaceContextService {
       if (route.section === 'analysis') return route.contextMode === 'account' ? route.analysisGuid ? 1 : 0 : route.analysisGuid ? 2 : 1;
       if (route.section !== 'data') return undefined;
       if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' || route.portfolioTab === 'predictors' || route.portfolioTab === 'energy-uses' ? 0 : undefined;
-      if (route.detail === 'energy-uses') return route.energyUseGuid ? 2 : 1;
+      if (route.detail === 'energy-uses') return route.energyUseGuid ? 3 : route.energyUseGroupGuid ? 2 : 1;
       if (route.detail === 'predictors') return route.predictorGuid || route.weatherPredictorGroupKey || url.includes('/predictors/weather/new') ? 2 : 1;
       if (route.detail === 'meter-grouping') return route.meterGroupGuid ? 2 : 1;
       return route.detail === 'meters' ? route.meterGuid ? 2 : 1 : undefined;
@@ -171,7 +173,7 @@ export class WorkspaceContextService {
     if (!accountGuid || accountGuid !== accountFor(previous)) return 'none';
     if (previous.facilityGuid && current.facilityGuid && previous.facilityGuid !== current.facilityGuid) return 'peer';
     if (after !== before) return after > before ? 'drill-in' : 'drill-out';
-    if (previous.reportGuid !== current.reportGuid || previous.analysisGuid !== current.analysisGuid || previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.energyUseGuid !== current.energyUseGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
+    if (previous.reportGuid !== current.reportGuid || previous.analysisGuid !== current.analysisGuid || previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.energyUseGuid !== current.energyUseGuid || previous.energyUseGroupGuid !== current.energyUseGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
     return 'none';
   }
 }

@@ -5,3 +5,6 @@
 .v1-nav__weather-output { display: grid; grid-template-columns: 1rem minmax(0, 1fr); gap: .35rem; align-items: center; min-width: 0; min-height: 1.45rem; color: var(--v1-muted); font-size: .78rem; font-weight: 700; }
 .v1-nav__weather-output .v1-icon { width: 1rem; height: 1rem; }
 .v1-nav__weather-output span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.v1-nav__nested-items { margin-left: .75rem; border-left: 1px solid var(--v1-border); }
+.v1-nav__nested-items[hidden] { display: none; }

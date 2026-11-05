@@ -52,6 +52,7 @@ export class WorkspaceNavigationService {
   readonly activePortfolioTab = this.context.activePortfolioTab;
   readonly activeMeterGuid = this.context.activeMeterGuid;
   readonly activeMeterGroupGuid = this.context.activeMeterGroupGuid;
+  readonly activeEnergyUseGroupGuid = this.context.activeEnergyUseGroupGuid;
   readonly activeEnergyUseGuid = this.context.activeEnergyUseGuid;
   readonly activePredictorGuid = this.context.activePredictorGuid;
   readonly activeWeatherPredictorGroupKey = this.context.activeWeatherPredictorGroupKey;
@@ -80,6 +81,7 @@ export class WorkspaceNavigationService {
   readonly contextFacility = this.context.contextFacility;
   readonly contextMeters = this.context.contextMeters;
   readonly contextMeterGroups = this.context.contextMeterGroups;
+  readonly contextEnergyUseGroups = this.context.contextEnergyUseGroups;
   readonly contextEnergyUses = this.context.contextEnergyUses;
   readonly contextPredictors = this.context.contextPredictors;
   readonly contextPredictorData = this.context.contextPredictorData;
@@ -200,7 +202,7 @@ export class WorkspaceNavigationService {
         && !await this.unsavedChanges.flushPendingChanges()) return false;
       // Query-only transitions can reuse the component without running its leave guard.
       if (this.activeDetail() !== 'workbench' && !this.activeMeterGuid() && !this.activePredictorGuid()
-        && !this.activeWeatherPredictorGroupKey() && !this.activeMeterGroupGuid() && !this.activeEnergyUseGuid()) {
+        && !this.activeWeatherPredictorGroupKey() && !this.activeMeterGroupGuid() && !this.activeEnergyUseGuid() && !this.activeEnergyUseGroupGuid()) {
         if (!this.unsavedChanges.confirmDiscard()) return false;
       }
       const opened = await (queryParams ? this.router.navigate(route, { queryParams }) : this.router.navigate(route));
