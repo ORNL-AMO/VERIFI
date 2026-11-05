@@ -117,32 +117,27 @@ export class EnergyUsesExcelExportService {
 
   fillWorkbook(workbook: ExcelJS.Workbook, exportData: EnergyUsesExportData): void {
     const sheet = workbook.getWorksheet(ENERGY_USES_SHEET);
-    const styles = ENERGY_USES_HEADERS.map((_, index) => ({ ...sheet.getCell(2, index + 1).style }));
-    const validations = ENERGY_USES_HEADERS.map((_, index) => sheet.getCell(2, index + 1).dataValidation);
-    
-    sheet.removeTable('EnergyUses');
-    sheet.autoFilter = { from: 'A1', to: { row: exportData.rows.length + 1, column: ENERGY_USES_HEADERS.length } };
+    if (!sheet || ENERGY_USES_HEADERS.some((header, column) => sheet.getCell(1, column + 1).value !== header)) {
+      throw new Error('The Energy Uses export template must have the 22 original headers in their original order.');
+    }
+    const table = sheet.getTable('EnergyUses');
+    if (table) {
+      (table as ExcelJS.Table & {
+        model: { headerRow: boolean }
+      }).model.headerRow = true;
+    }
     exportData.rows.forEach((values, index) => {
-      const row = sheet.getRow(index + 2);
-      row.values = values;
-      row.height = 23;
-      ENERGY_USES_HEADERS.forEach((__, column) => {
-        const cell = row.getCell(column + 1);
-        cell.style = { ...styles[column] };
-      
-        if ([6, 7, 8, 9, 11, 14, 17, 20].includes(column)) {
-          cell.numFmt = 'General';
+      ENERGY_USES_HEADERS.forEach((_, column) => {
+        const value = values[column] ?? null;
+        if (typeof value === 'number' && !Number.isFinite(value)) {
+          throw new Error(`Cannot export a nonfinite number in row ${index + 2}, ${ENERGY_USES_HEADERS[column]}.`);
         }
-        if (validations[column]?.type) {
-          const validation = { ...validations[column] };
-          if (validation.type === 'custom') {
-            validation.formulae = validation.formulae.map(formula => String(formula).replace(/([JKQ])2\b/g, `$1${index + 2}`));
-          }
-          cell.dataValidation = validation;
+        if (value !== null && typeof value !== 'string' && typeof value !== 'number') {
+          throw new Error('Equipment export values must be ordinary text or finite numbers.');
         }
+        sheet.getCell(index + 2, column + 1).value = value;
       });
     });
-    workbook.views = [{ firstSheet: 1, activeTab: 1, visibility: 'visible', x: 0, y: 0, width: 12000, height: 9000 }];
   }
 
   download(blob: Blob, year: number): void {
