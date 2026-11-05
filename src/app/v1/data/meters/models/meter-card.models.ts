@@ -7,6 +7,8 @@ import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { ScopeOptions } from '@data/models/scopeOption';
 import { StatusItem } from '@app/v1/status/status.models';
 import { UtilityColors } from '@shared/utilityColors';
+import { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
+export { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
 
 type MeterCardStatusTone = 'success' | 'warning' | 'danger' | 'info';
 
@@ -58,25 +60,6 @@ export function buildMeterCards(
         statusActionSummaries: meterFindings.slice(0, 2).map(finding => finding.description)
       };
     });
-}
-
-export function meterSourceIcon(source: MeterSource): IconName {
-  switch (source) {
-    case 'Electricity':
-      return 'electricity';
-    case 'Natural Gas':
-      return 'naturalGas';
-    case 'Other Fuels':
-      return 'otherFuel';
-    case 'Other Energy':
-      return 'otherEnergy';
-    case 'Water Intake':
-      return 'waterIntake';
-    case 'Water Discharge':
-      return 'waterDischarge';
-    default:
-      return 'meter';
-  }
 }
 
 function sortMetersByName(first: IdbUtilityMeter, second: IdbUtilityMeter): number {

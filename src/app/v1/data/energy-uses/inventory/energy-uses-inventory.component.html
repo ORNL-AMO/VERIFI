@@ -15,7 +15,9 @@
       <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
     </form>
     @if (navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ navigationError() }}</p> }
-    @if (!entries().length) { <app-data-empty-state icon="tools" title="No energy uses" description="No saved energy uses are available in this scope."/> }
+    @if (!entries().length) { <app-data-empty-state icon="tools" title="No energy uses" description="No saved energy uses are available in this scope.">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="openCreation()"><app-ui-icon name="add"/>Add energy use</button>
+    </app-data-empty-state> }
     @else if (!filteredEntries().length) {
       <article class="v1-empty-state" role="status"><h2>No energy uses match these filters</h2><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></article>
     } @else {
@@ -26,3 +28,6 @@
     }
   }
 </section>
+<ng-template #creationDrawer>
+  @if (creating()) { <app-create-energy-use-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreated($event)" (closed)="closeCreation()"/> }
+</ng-template>

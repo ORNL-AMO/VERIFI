@@ -2,6 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 import { IconComponent } from '../icons/icon.component';
 
+let nextSlideoutId = 0;
+
 @Component({
   selector: 'app-workspace-slideout',
   templateUrl: './workspace-slideout.component.html',
@@ -10,6 +12,7 @@ import { IconComponent } from '../icons/icon.component';
   imports: [ModalFocusTrapDirective, IconComponent]
 })
 export class WorkspaceSlideoutComponent {
+  readonly titleId = `v1-workspace-slideout-title-${++nextSlideoutId}`;
   @Input({ required: true }) title = '';
   @Input() description = '';
   @Input() saving = false;

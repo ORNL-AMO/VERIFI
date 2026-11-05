@@ -1,0 +1,29 @@
+:host { display: block; min-width: 0; }
+.energy-use-fields { border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.energy-use-fields .v1-workbench-section { margin: 0; border: 0; border-bottom: 1px solid var(--v1-border); border-radius: 0; padding: 1rem; }
+.energy-use-fields .v1-workbench-section:last-child { border-bottom: 0; }
+.energy-use-fields h2 { font-size: 1rem; margin: 0 0 .8rem; }
+.energy-use-fields__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.energy-use-fields__source-row { display: grid; grid-template-columns: minmax(9rem, 1fr) minmax(0, 2fr) minmax(7rem, 1fr); gap: .8rem; align-items: end; }
+.energy-use-fields label { display: grid; gap: .35rem; min-width: 0; }
+.energy-use-fields label > span { font-size: .85rem; font-weight: 700; }
+.energy-use-fields small { font-weight: 400; color: var(--v1-muted); }
+.energy-use-fields input, .energy-use-fields textarea, .energy-use-fields select { width: 100%; min-width: 0; padding: .5rem .65rem; border: 1px solid var(--v1-control-border); background-color: var(--v1-control-surface); color: var(--v1-text); border-radius: var(--v1-radius-sm); }
+.energy-use-fields select:not([multiple]) { padding-right: 2.1rem; }
+.energy-use-fields__capacity { display: grid; gap: .35rem; min-width: 0; }
+.energy-use-fields__capacity .input-group { flex-wrap: nowrap; min-width: 0; }
+.energy-use-fields__capacity .input-group > .form-control { flex: 1 1 auto; width: 1%; border-radius: var(--v1-radius-sm) 0 0 var(--v1-radius-sm); }
+.energy-use-fields__capacity .input-group > .input-group-text { flex: 0 1 auto; width: auto; max-width: 60%; border-radius: 0 var(--v1-radius-sm) var(--v1-radius-sm) 0; background-color: var(--v1-control-addon-surface); }
+.energy-use-fields__wide { grid-column: 1 / -1; }
+.energy-use-fields__meter-groups { display: grid; gap: .5rem; }
+.energy-use-fields__meter-groups > span { font-size: .85rem; font-weight: 700; }
+.energy-use-fields__links { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.energy-use-fields__linked-group { padding: .35rem .6rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-addon-surface); }
+.energy-use-fields fieldset { min-width: 0; margin: 0; padding: 0 0 .5rem; border: 0; }
+.energy-use-fields__source-label { display: flex; align-items: center; gap: .5rem; min-height: var(--v1-control-height); min-width: 0; font-size: 1.15rem; font-weight: 700; }
+.energy-use-fields__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+@media (max-width: 42rem) {
+  .energy-use-fields__grid { grid-template-columns: 1fr; }
+  .energy-use-fields__source-row { grid-template-columns: minmax(0, 2fr) minmax(6rem, 1fr); }
+  .energy-use-fields__source-label { grid-column: 1 / -1; }
+}

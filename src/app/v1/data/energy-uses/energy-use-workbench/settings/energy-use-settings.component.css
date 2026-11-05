@@ -1,0 +1,5 @@
+:host { display: block; }
+.energy-use-settings > .v1-workbench-section { margin: 0; padding: 1rem; border: 1px solid var(--v1-border); border-bottom: 0; border-radius: 0; background: var(--v1-surface); }
+.energy-use-settings > .v1-workbench-section:last-of-type { border-bottom: 1px solid var(--v1-border); }
+.energy-use-settings__actions { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; }
+.energy-use-settings p { overflow-wrap: anywhere; }

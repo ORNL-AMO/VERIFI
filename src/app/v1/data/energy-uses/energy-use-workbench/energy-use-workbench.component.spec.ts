@@ -11,7 +11,8 @@ import { ENERGY_USE_WORKBENCH_ROUTES } from '../energy-uses.routes';
 import { energyUseItem, energyUsesSnapshot } from '../energy-uses.testing';
 import { EnergyUsesWorkspaceService } from '../energy-uses-workspace.service';
 import { EnergyUseWorkbenchComponent } from './energy-use-workbench.component';
-import { EnergyUseWorkbenchPanelComponent } from './panel/energy-use-workbench-panel.component';
+import { EnergyUseSettingsComponent } from './settings/energy-use-settings.component';
+import { EnergyUseActionsService } from '../energy-use-actions.service';
 
 @Component({ standalone: true, template: 'Inventory' })
 class InventoryDestination {}
@@ -23,9 +24,10 @@ describe('energy use workbench routes', () => {
     const store = new AccountWorkspaceStore();
     const snapshot = energyUsesSnapshot([energyUseItem(), energyUseItem({ guid: 'energy-b', name: 'Fan B' }), energyUseItem({ guid: 'energy-c', facilityId: 'facility-b' })]);
     store.publish(snapshot);
-    const changes = { confirmDiscard: vi.fn(() => false) };
+    const changes = { confirmDiscard: vi.fn(() => false), register: () => () => {}, protectBeforeUnload: () => () => {} };
     TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [
       { provide: AccountWorkspaceStore, useValue: store },
+      { provide: EnergyUseActionsService, useValue: {} },
       { provide: WorkspaceNavigationService, useValue: { accountPortfolioRoute: () => ['/inventory'], isSingleSiteWorkspace: singleSite } },
       { provide: UnsavedChangesService, useValue: changes },
       provideRouter([{ path: 'v1/workspace/facility/:facilityGuid/data', children: ENERGY_USE_WORKBENCH_ROUTES }, { path: 'inventory', component: InventoryDestination }])
@@ -86,7 +88,7 @@ describe('energy use workbench routes', () => {
     const { harness, router, changes } = await setup();
     const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
     const first = harness.routeDebugElement!.injector.get(EnergyUsesWorkspaceService);
-    const panel = harness.routeDebugElement!.query(By.directive(EnergyUseWorkbenchPanelComponent)).componentInstance as EnergyUseWorkbenchPanelComponent;
+    const panel = harness.routeDebugElement!.query(By.directive(EnergyUseSettingsComponent)).componentInstance as EnergyUseSettingsComponent;
     expect(panel.context).toBe(workbench.context);
     const dirty = vi.spyOn(panel, 'hasUnsavedChanges').mockReturnValue(true);
     expect(await router.navigateByUrl(path('energy-a', 'annual-data'))).toBe(false);

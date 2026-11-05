@@ -1,0 +1,7 @@
+:host { display: block; }
+.energy-use-creation { display: grid; gap: .85rem; }
+.energy-use-creation > label { display: grid; gap: .35rem; }
+.energy-use-creation > label > span { font-size: .85rem; font-weight: 700; }
+.energy-use-creation > label > input, .energy-use-creation > label > select { width: 100%; padding: .5rem .65rem; border: 1px solid var(--v1-control-border); background-color: var(--v1-control-surface); color: var(--v1-text); }
+.energy-use-creation > label > select { padding-right: 2.1rem; }
+.energy-use-creation footer { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; }

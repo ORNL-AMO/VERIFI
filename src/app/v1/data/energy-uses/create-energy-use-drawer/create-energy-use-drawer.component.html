@@ -1,0 +1,31 @@
+<app-workspace-slideout title="Add energy use" description="Create equipment, a system, or a process without requiring meter readings." size="large" [saving]="saving()" (closed)="requestClose()">
+  <form [formGroup]="contextForm" class="energy-use-creation" (ngSubmit)="submit()">
+    @if (!singleFacility()) {
+      <label><span>Facility</span><select class="v1-select" formControlName="facilityGuid" required><option value="" disabled>Select a facility</option>
+        @for (owner of facilities(); track owner.guid) { <option [value]="owner.guid">{{ owner.name }}</option> }
+      </select></label>
+    }
+    @if (facility(); as owner) {
+      <p>Owning facility: <strong>{{ owner.name }}</strong></p>
+      <label><span>Initial year</span><input type="number" min="1" max="9999" step="1" formControlName="initialYear" required></label>
+      <p class="v1-muted">The year uses this facility’s fiscal-year convention and does not depend on meter readings.</p>
+      <label><span>Energy-use group</span><select class="v1-select" formControlName="groupKind"><option value="new">Create a named group</option><option value="existing">Use an existing group</option></select></label>
+      @if (context().groupKind === 'existing') {
+        <label><span>Existing energy-use group</span><select class="v1-select" formControlName="groupGuid"><option value="" disabled>Select a group</option>
+          @for (group of groups(); track group.guid) { <option [value]="group.guid">{{ group.name }}</option> }
+        </select></label>
+      } @else { <label><span>New group name</span><input type="text" formControlName="groupName"></label> }
+      <app-energy-use-settings-fields [form]="form" [accountGuid]="owner.accountId" [facilityGuid]="owner.guid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="canCreate()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="confirmUtilities($event)" (meterGroupsConfirmed)="confirmMeterGroups($event)"/>
+    } @else { <p class="v1-alert v1-alert--info">Select an available facility to configure this energy use.</p> }
+    @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+    @if (discardOpen()) {
+      <div class="v1-alert v1-alert--warning" role="alert"><p>Discard this unfinished energy use?</p>
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="discardOpen.set(false)">Keep editing</button>
+        <button type="button" class="v1-btn v1-btn--danger" (click)="discard()">Discard energy use</button>
+      </div>
+    }
+    <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="requestClose()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="!canCreate()"><app-ui-icon [name]="saving() ? 'loading' : 'add'" [spin]="saving()"/>Add energy use</button>
+    </footer>
+  </form>
+</app-workspace-slideout>

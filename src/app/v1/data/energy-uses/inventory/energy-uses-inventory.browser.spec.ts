@@ -17,7 +17,8 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { V1Routes } from '@app/v1/v1.routes';
 import { EnergyUsesInventoryComponent } from './energy-uses-inventory.component';
-import { EnergyUseWorkbenchPanelComponent } from '../energy-use-workbench/panel/energy-use-workbench-panel.component';
+import { EnergyUseSettingsComponent } from '../energy-use-workbench/settings/energy-use-settings.component';
+import { EnergyUseActionsService } from '../energy-use-actions.service';
 import { energyUseItem, energyUseSource, energyUsesSnapshot } from '../energy-uses.testing';
 
 const inventoryUrl = '/v1/workspace/account/account-a/data/portfolio/energy-uses';
@@ -45,6 +46,7 @@ function setup(single = false) {
       { path: 'v1/workspace/facility/:facilityGuid', children: facility.children!.filter(route => route.path === 'data') }
     ]),
     { provide: AccountWorkspaceStore, useValue: store }, { provide: AccountWorkspaceService, useValue: workspaceService },
+    { provide: EnergyUseActionsService, useValue: {} },
     { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [snapshot.account] } },
     { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]), accountTodos: signal([]), discardedItems: signal([]) } },
     { provide: SingleFacilityAnalysisPairService, useValue: pairService },
@@ -95,7 +97,7 @@ describe('energy uses browser journeys', () => {
     await view.router.navigateByUrl('/v1/workspace/facility/facility-a/data/energy-uses'); await settle(view);
     expect(view.router.url).toBe(`${inventoryUrl}?facility=facility-a`);
     await view.router.navigateByUrl(itemUrl); await settle(view);
-    const panel = view.fixture.debugElement.query(By.directive(EnergyUseWorkbenchPanelComponent)).componentInstance as EnergyUseWorkbenchPanelComponent;
+    const panel = view.fixture.debugElement.query(By.directive(EnergyUseSettingsComponent)).componentInstance as EnergyUseSettingsComponent;
     const dirty = vi.spyOn(panel, 'hasUnsavedChanges').mockReturnValue(true);
     vi.spyOn(TestBed.inject(UnsavedChangesService), 'confirmDiscard').mockReturnValue(false);
     expect(await view.navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(false);
@@ -147,7 +149,7 @@ describe('energy uses browser journeys', () => {
     expect(print.querySelectorAll('button,input')).toHaveLength(0);
     await view.router.navigateByUrl(itemUrl); await settle(view);
     expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
-    const panel = view.root.querySelector<HTMLElement>('app-energy-use-workbench-panel section')!;
+    const panel = view.root.querySelector<HTMLElement>('app-energy-use-settings section')!;
     expect(getComputedStyle(panel).borderRadius).toBe('0px');
     await page.screenshot({ element: view.root, path: './__screenshots__/energy-use-workbench-narrow-contrast.png' });
     view.fixture.destroy();
