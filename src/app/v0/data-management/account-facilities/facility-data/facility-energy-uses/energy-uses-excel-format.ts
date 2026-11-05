@@ -45,6 +45,12 @@ export function energyUsesNumberError(column: number, value: number, year: numbe
   if (column === 6 && (value < 0 || value > energyUsesMaximumHours(year))) {
     return `Enter hours from 0 to ${energyUsesMaximumHours(year)} for ${year}.`;
   }
+  if (column === 7 && (value < 0 || value > 115)) {
+    return 'Enter a load factor from 0 to 115.';
+  }
+  if (column === 8 && (value < 0 || value > 100)) {
+    return 'Enter a duty factor from 0 to 100.';
+  }
   if (column === 9 && (value <= 0 || value > 100)) {
     return 'Enter an electricity efficiency greater than 0 and at most 100.';
   }
