@@ -19,6 +19,7 @@ import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { getNewIdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { EnergyUsesModule } from '../../energy-uses.module';
@@ -68,30 +69,33 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
   }
   async function settle(fixture: ComponentFixture<unknown>): Promise<void> { fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges(); }
 
-  it('keeps the creation draft mounted and restores focus after a nested utility selection', async () => {
+  it('keeps simple creation mounted and restores focus after discard review without saving a group early', async () => {
     const host = mount(EnergyUseCreationPortalHost); await settle(host); host.componentInstance.open(); await settle(host);
     const creation = page.getByRole('dialog', { name: 'Add energy use', exact: true });
-    await creation.getByRole('textbox', { name: 'Name', exact: true }).fill('Draft pump');
-    await creation.getByRole('button', { name: 'Select Utilities', exact: true }).click(); await settle(host);
-    const utilities = page.getByRole('dialog', { name: 'Select Utilities', exact: true });
+    await creation.getByRole('button', { name: 'Create energy-use group', exact: true }).click(); await settle(host);
+    await creation.getByRole('textbox', { name: 'Group name', exact: true }).fill('Roasting');
+    await creation.getByRole('button', { name: 'Use group', exact: true }).click(); await settle(host);
+    await creation.getByRole('textbox', { name: 'Energy use name', exact: true }).fill('Draft pump');
+    expect(await harness.getAll('facilityEnergyUseGroups')).toEqual([]);
+    expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([]);
+    expect(root.querySelector('app-energy-use-settings-fields')).toBeNull();
+    await userEvent.keyboard('{Escape}'); await settle(host);
+    const discard = page.getByRole('dialog', { name: 'Discard energy use?', exact: true });
     const dialogs = [...root.querySelectorAll('[role="dialog"]')];
     expect(dialogs).toHaveLength(2);
     expect(new Set(dialogs.map(dialog => dialog.getAttribute('aria-labelledby'))).size).toBe(2);
-    await utilities.getByRole('checkbox', { name: 'Natural Gas', exact: true }).click();
-    await utilities.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(host);
-    expect(document.activeElement?.textContent).toContain('Select Utilities');
-    expect((creation.getByRole('textbox', { name: 'Name', exact: true }).element() as HTMLInputElement).value).toBe('Draft pump');
-    expect(root.querySelectorAll('fieldset')).toHaveLength(1);
-    await creation.getByRole('button', { name: 'Select Utilities', exact: true }).click(); await settle(host);
-    await utilities.getByRole('checkbox', { name: 'Natural Gas', exact: true }).click();
-    await utilities.getByRole('button', { name: 'Confirm', exact: true }).click(); await settle(host);
-    expect(root.querySelectorAll('fieldset')).toHaveLength(2);
-    expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([]);
-    expect((creation.getByRole('textbox', { name: 'Name', exact: true }).element() as HTMLInputElement).value).toBe('Draft pump');
-    await creation.getByRole('button', { name: 'Select Utilities', exact: true }).click(); await settle(host);
+    await userEvent.keyboard('{Tab}{Shift>}{Tab}{/Shift}');
+    expect(discard.element().contains(document.activeElement)).toBe(true);
     await userEvent.keyboard('{Escape}'); await settle(host);
     expect(root.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-    expect(document.activeElement?.textContent).toContain('Select Utilities');
+    expect(document.activeElement?.id).toBe('energy-use-name');
+    expect((creation.getByRole('textbox', { name: 'Energy use name', exact: true }).element() as HTMLInputElement).value).toBe('Draft pump');
+    expect(root.querySelector('.creation-selections')?.textContent).toContain('Roasting');
+    expect(await harness.getAll('facilityEnergyUseGroups')).toEqual([]);
+    await creation.getByRole('button', { name: 'Create energy use', exact: true }).click(); await settle(host);
+    await vi.waitFor(() => expect(TestBed.inject(AccountWorkspaceStore).energyUseEquipment()).toHaveLength(1));
+    expect(TestBed.inject(AccountWorkspaceStore).energyUseEquipment()[0].name).toBe('Draft pump');
+    expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
   });
 
   it('derives utilities from confirmed meter groups and preserves saved history when review is cancelled', async () => {
@@ -140,14 +144,18 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
   });
 
   it('creates without readings, autosaves calculated values, copies full history, and deletes only the confirmed item', async () => {
+    const existingGroup = { ...getNewIdbFacilityEnergyUseGroup(account.guid, facility.guid), name: 'Production' };
+    await harness.seed({ facilityEnergyUseGroups: [existingGroup] });
+    await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace();
     const boundary = TestBed.inject(WorkspaceCommandBoundary), committed = vi.fn(); boundary.committedChange$.subscribe(committed);
     const drawer = mount(CreateEnergyUseDrawerComponent); drawer.componentRef.setInput('initialFacilityGuid', facility.guid); drawer.componentRef.setInput('singleFacility', true);
     await settle(drawer);
     let created!: IdbFacilityEnergyUseEquipment; drawer.componentInstance.created.subscribe(item => created = item);
-    await page.getByRole('textbox', { name: 'New group name', exact: true }).fill('Production');
-    await page.getByRole('textbox', { name: 'Name', exact: true }).fill('Pump');
-    await page.getByRole('button', { name: 'Add energy use', exact: true }).click(); await settle(drawer);
+    await page.getByRole('button', { name: 'Production', exact: true }).click(); await settle(drawer);
+    await page.getByRole('textbox', { name: 'Energy use name', exact: true }).fill('Pump');
+    await page.getByRole('button', { name: 'Create energy use', exact: true }).click(); await settle(drawer);
     await vi.waitFor(() => expect(created?.guid).toBeTruthy());
+    expect(created.energyUseGroupId).toBe(existingGroup.guid);
     expect(created.guid).toBeTruthy(); expect(committed).toHaveBeenCalledTimes(1);
     expect(await harness.getAll('utilityMeterData')).toEqual([]);
     const before = await harness.getAll('facilityEnergyUseEquipment');
