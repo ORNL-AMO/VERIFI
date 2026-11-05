@@ -11,7 +11,7 @@ This roadmap records the agreed target experience, not shipped behavior. Work th
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Inventory and workspace navigation | Complete |
-| 2 | Creation, Settings, and safe commands | Planned |
+| 2 | Creation, Settings, and safe commands | Implemented; approved for PR review |
 | 3 | Annual Data and estimation | Planned |
 | 4 | Complete item tools and charts | Planned |
 | 5 | Export, compatibility, and release acceptance | Planned |
@@ -43,8 +43,8 @@ Replace the account and facility placeholders with a flat inventory containing a
 Implement typed creation and Settings forms using existing field meanings and validation.
 
 - Cover name, notes, category, source configuration, rated capacity, units, quantity, and optional compatible meter-group links.
-- Creation requires an owning facility, an initial year, and either an existing energy-use group or a new group name. Creating a group and its first item is one transaction.
-- Show the existing energy-use group as metadata after creation. Group management and reassignment remain deferred.
+- Creation collects an owning facility (unless already scoped), an existing energy-use group or a new group name, and an item name. The prior completed fiscal year and equipment setup use existing defaults; detailed configuration belongs to Settings. Creating a group and its first item is one transaction.
+- Retain the existing facility and energy-use group ownership after creation. Group management and reassignment remain deferred.
 - Add copy and single-item deletion. Copies receive fresh identity and independent nested data; deleting an item leaves its group and linked meter groups intact.
 - Preserve all saved source data. Linking or unlinking meters must not silently create, replace, or remove annual history. Destructive source changes require explicit review.
 
@@ -113,9 +113,113 @@ Use `npm run validate:agent -- --mode plan` with the files changed in each phase
 - **Interaction evidence:** Chromium verified browser Back/Forward scroll/focus restoration, rejected exits retaining context, old facility routes, implicit single-facility ownership, native select labels, keyboard progression, desktop/narrow light/dark/high-contrast layouts, readable source facts, and print-card omission of controls. Captured layouts were visually inspected. Browsing and tab switching preserve committed records and do not initialize analysis pairs.
 - **Boundaries:** No database, command, calculation, import/export, backup, v0, or Electron boundary changes. Electron-specific validation is not required for this phase. Existing browser-support, stylesheet-budget, and CommonJS build warnings remain.
 
+## Phase 2 delivery evidence
+
+- Creation uses the shared inventory header registry and Reports-style progressive choices: facility (unless already scoped), existing energy-use group or name-only new group, then item name. Pinned selections, dirty-draft protection, and retry retain the draft. Existing defaults supply the prior completed fiscal year and equipment setup; configuration continues in Settings. No meter readings are required.
+- Settings uses the shared Data edit session for autosave, normalized acknowledgement, reconciliation, retry/discard, missing-target draft retention, and guarded route reuse. Source configuration and meter links reconcile together; metadata-only edits preserve stored history.
+- Capacity, quantity, and unit edits reuse the existing calculation for affected non-overridden annual values. Source removal reviews the current saved history through the shell portal. Extra-source and ambiguous imported records are preserved.
+- **UI iteration:** Meter-group selection is below Notes in a confirm/cancel slideout. Confirmed links determine the utility selection as in v0; groups with overlapping utility sources cannot be selected together. Group links and their utilities apply together after any required history-removal review. Manual utility selection remains available without linked groups. No existing record is rewritten on opening.
+- Full-item copy and reviewed deletion preserve energy-use groups and meter groups. Compound creation rolls back atomically; stable creation/copy identities prevent duplicate items after a committed write followed by a refresh failure.
+- Focused validation: 74 fast tests and 13 Chromium checks passed. Native checks cover creation without readings, autosave and calculated values, full-history copying, deletion, rollback, idempotent creation retry, ownership rejection, stale review, reopening, and account/facility backup restore with extra sources, zero overrides, retirement, and remapped links.
+- Visual/interaction evidence: Settings was inspected at desktop and narrow widths in light, dark, and high-contrast modes. Shared select indicators, connected sections, keyboard focus, Escape cancellation, and shell-portal confirmations are retained. Phase 1 inventory/history/scope checks continue to pass.
+- Phase 2 completed local form layout and UI/UX iteration and is approved for PR review. Annual Data editing and the later roadmap phases remain deferred. No database schema, data-version, backup-format, import-format, Worker, or Electron bridge changes are introduced.
+
+Final functional validation for the phase 2 baseline:
+
+| Check | Result |
+| --- | --- |
+| Validation planner over the complete phase 2 diff | Passed; focused specs, app type-check, and browser checks selected. Both production builds also ran for the persistence boundary. |
+| `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
+| `npm run test:all:ci` | Passed: 3,348 fast tests and 354 Chromium tests. |
+| `npm run build-prod` | Passed. |
+| `npm run build-prod-electron` | Passed. |
+
+Builds retain existing browser-support, stylesheet-budget, and CommonJS warnings. The initial restricted focused test process exited 134; the permitted rerun and final full suites passed. Early browser journey failures came from fixture mounting and asynchronous handoff timing; those fixtures now exercise actual controls and await committed results. Desktop OS integration checks are not needed because no Electron bridge or file-delivery behavior changed. At this baseline checkpoint, UI layout/UX review remained pending before PR publication.
+
+UI iteration batch validation (2026-11-04):
+
+| Check | Result |
+| --- | --- |
+| Validation planner and app TypeScript check | Passed. |
+| Focused Energy Uses, link contracts, Meter icons, shared slideout, and form architecture tests | Passed: 71 tests. |
+| `npm run test:all:ci` | Passed: 3,361 fast tests and 356 Chromium tests. |
+| `npm run build-prod` and `npm run build-prod-electron` | Passed; existing browser-support, stylesheet-budget, and CommonJS warnings remain. |
+| Settings and meter-group slideout layouts | Inspected at desktop and narrow widths in light, dark, and high-contrast modes; no horizontal overflow. |
+| Native interaction checks | Passed: nested creation slideouts preserve drafts and restore focus; checkboxes remain local until confirmation; conflicting groups are disabled; cancelled history review leaves storage unchanged; confirmed links and utilities publish once and survive reopening. |
+
+The batch adds regression coverage for short unit addons and the equipment-count label. An additional imported-data regression exposed a checklist restriction that prevented reselecting a saved third utility before confirmation; this is fixed without allowing new utilities beyond the two-source limit. Initial new browser-fixture compilation and database-store naming errors were corrected before the successful focused and full runs. Existing backup, override, retirement, copying, deletion, and navigation checks continue to pass. At this checkpoint, UI review remained open and no PRs had been opened.
+
+PR stack handoff validation (2026-11-04):
+
+Phase 1 (#2862) has merged. The reviewed phase 2 stack now targets `unified-ux` → `codex/energy-uses-commands` → `codex/energy-uses-settings` → `codex/energy-uses-phase2-acceptance`. Local correctness/data-safety, Angular/reuse, and validation reviews found no actionable findings; publication was approved after that checkpoint. The assembled Energy Uses source and tests match the UI iteration snapshot, and newer base-branch shell/workflow changes are retained. Screenshot artifacts remain local and outside the PR comparisons.
+
+| Check | Result |
+| --- | --- |
+| Commands slice | App type-check, 25 focused fast tests, and 6 native IndexedDB tests passed independently. |
+| Creation/Settings slice | App type-check, 66 focused fast tests, and 4 Chromium inventory/navigation journeys passed independently. |
+| Validation planner over the complete 54-file stack | Passed; screenshot artifacts excluded from the comparison. |
+| `npx tsc -p tsconfig.app.json --noEmit` | Passed on the assembled stack. |
+| `npm run test:all:ci` | Passed: 3,373 fast tests and 357 Chromium tests on the merged phase 1 base. |
+| `npm run build-prod` and `npm run build-prod-electron` | Passed; existing browser-support, stylesheet-budget, and CommonJS warnings remain. |
+
+No new application defects were found during restacking. Desktop OS integration was not rechecked because no Electron bridge, filesystem, or file-delivery behavior changed. Annual Data and the remaining roadmap phases are still planned.
+
+Review follow-up for [#2865](https://github.com/ORNL-AMO/VERIFI/pull/2865#pullrequestreview-5779652386) (2026-11-05):
+
+| Finding | Correction and regression evidence |
+| --- | --- |
+| [Settings can carry stale annual history](https://github.com/ORNL-AMO/VERIFI/pull/2865#discussion_r4476424186) | Normalize sources to their four Settings fields. Wider equipment rows cannot overwrite current annual history or overrides; metadata-only and capacity-change regressions both failed before the fix and pass afterward. |
+| [Creation retry ignores a changed group name](https://github.com/ORNL-AMO/VERIFI/pull/2865#discussion_r4476424253) | Revalidate the durable group's ownership and submitted new-group name before accepting a matching item retry. Native regressions reject changed names, missing groups, and foreign groups without altering saved records. |
+| [Copy accepts a changed or deleted source](https://github.com/ORNL-AMO/VERIFI/pull/2865#discussion_r4476424287) | Validate the owned source snapshot inside the same native transaction that inserts the copy. Native regressions reject changed annual history and deleted sources without publishing; valid copies and matching retries still succeed. |
+
+The fixes are in the owning command branch at `b4c1bc7e2` and propagate through the stack with merge commits. No history rewriting, persisted-shape changes, schema/version migration, or v0 method changes are needed. The initial native copy fixture needed its workspace storage provider configured before reproducing both copy defects.
+
+| Check | Result |
+| --- | --- |
+| Validation planner scoped to the six review-fix files | Passed. |
+| Owning-branch focused tests and app type-check | Passed: 27 fast tests, 12 native IndexedDB tests, and TypeScript check. |
+| Assembled-stack app type-check and `npm run test:all:ci` | Passed: 3,375 fast tests and 363 Chromium tests, including existing full-history copy and backup-restore journeys. |
+| `npm run build-prod` and `npm run build-prod-electron` | Passed; existing browser-support, stylesheet-budget, and CommonJS warnings remain. |
+
+UI layout and OS integration were not rechecked because this follow-up changes Settings projection and persistence validation without changing presentation, Electron IPC, or file-delivery paths.
+
+PR two [drawer-identity review follow-up](https://github.com/ORNL-AMO/VERIFI/pull/2866#discussion_r4481389691) (2026-11-05):
+
+The shared fields now require an editor identity and capture it when opening either selection drawer. Workbench item changes and creation-facility changes close the selection; confirmation checks the identity again before emitting. An unrelated metadata refresh within the same editor preserves the open selection. The fix belongs to PR #2866 at `64df1cef8` and is merged into the acceptance branch without rewriting published history.
+
+| Check | Result |
+| --- | --- |
+| Browser Back between reused item editors with identical setup | Both Utilities and Meter Groups cases failed on the reviewed head and pass after the fix; neither emits a Settings save or changes stored values. Reopening uses the current item's selection. |
+| Focused Energy Uses, slideout, and form-architecture tests | Passed: 65 tests, including stale confirmations before another render and both creation-facility changes retaining the draft. |
+| Owning-PR Chromium journeys | Passed: 6 inventory/navigation journeys. |
+| Assembled-stack Chromium journeys | Passed: 11 journeys, including nested creation focus, history review, copy/delete, and backup restoration. |
+| Owning/assembled app type-check and production web build | Passed; existing build warnings remain. |
+| Validation planner | Passed over the eight follow-up files. |
+
+The full suites, Electron build, and OS integration checks were not repeated for this UI-only follow-up: persistence, calculation, IPC, file formats, and layout rules are unchanged. The earlier full persistence validation remains recorded above. Local screenshot artifacts are preserved outside the PR changes.
+
+Simple creation redesign (2026-11-05):
+
+Creation now shares Reports' progressive choice-card, pinned-selection, and footer presentation. Choose a facility unless ownership is already scoped, choose an existing energy-use group or give a new group its name, then name the item and create. Naming a new group does not persist it early: the final action commits the group and item together. Creation supplies the existing default source/setup and prior completed fiscal year, then opens Settings for detailed configuration. No utility, meter-link, capacity, category, notes, or year-entry controls remain in creation.
+
+The cleanup sweep removed the previous Settings-form dependency, context/year controls, source-selection handlers, creation-only editor/refresh state, obsolete styles, and nested utility-panel rendering path. It also removed the unused direct Settings add-source handler superseded by the checklist. Settings' identity-scoped selectors and pending source-removal review remain active. Old creation-selector tests were replaced with the progressive workflow and discard-review checks. Reports and Energy Uses use one shared presentation stylesheet; feature state and commands remain separate. No persisted shape, factory defaults, schema, backup format, or calculation contract changed.
+
+| Check | Result |
+| --- | --- |
+| Validation planner and app TypeScript check | Passed for the redesign and final cleanup. |
+| Focused creation, Settings, Reports lifecycle, and form-architecture checks | Passed: 74 fast tests, repeated after cleanup. |
+| Creation and Reports browser checks | Passed: 21 Chromium tests. |
+| Full `npm run test:all:ci` | Passed: 3,382 fast tests and 368 Chromium tests before the final dead-code cleanup. |
+| Final creation, Settings, and inventory browser checks | Passed after cleanup: 14 Chromium tests, including new/existing groups, no early group writes, no-readings creation, discard focus restoration, selectors, guarded route reuse, copy/delete, and backup restoration. |
+| `npm run build-prod` | Passed for the redesign and final cleanup; existing browser-support, stylesheet-budget, and CommonJS warnings remain. |
+| Visual/keyboard checks | Inspected desktop light and narrow dark/high-contrast choices, pinned selections, and name entry; browser checks cover focus, Escape, keyboard submit, and no horizontal overflow. |
+| Local review and stale-code sweep | No actionable findings remain in the updated comparisons. Screenshot artifacts remain outside the commits. |
+
+The initial app check identified an incorrect icon-type import, corrected before the passing checks. Visual inspection also caught an unthemed input surface; both flows now use the shared theme-aware input class. Full suites were not repeated after deleting the unused handler and nested rendering branch; focused compilation, type-check, browser journeys, and the production build passed on that final code. Electron build and OS checks were not repeated for this renderer-only redesign; the earlier persistence-stack evidence remains above. Annual Data and later roadmap phases remain deferred.
+
 ## Defaults and deferred work
 
 - Retain **Energy Uses** and use **energy use** for an individual item; retain existing stored equipment terminology.
-- Preserve the established two-source creation limit while retaining existing/imported extra sources without truncation.
+- Simple creation uses the existing default source. Settings permits additions up to the established two-source limit while retaining existing/imported extra sources without truncation.
 - Existing retirement and missing-year propagation inconsistencies are documented separately from formula changes. This migration preserves history and avoids introducing retirement-adjusted item rollups.
 - A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility summaries, footprint balances, and Sankey views.
