@@ -183,6 +183,21 @@ The fixes are in the owning command branch at `b4c1bc7e2` and propagate through 
 
 UI layout and OS integration were not rechecked because this follow-up changes Settings projection and persistence validation without changing presentation, Electron IPC, or file-delivery paths.
 
+PR two [drawer-identity review follow-up](https://github.com/ORNL-AMO/VERIFI/pull/2866#discussion_r4481389691) (2026-11-05):
+
+The shared fields now require an editor identity and capture it when opening either selection drawer. Workbench item changes and creation-facility changes close the selection; confirmation checks the identity again before emitting. An unrelated metadata refresh within the same editor preserves the open selection. The fix belongs to PR #2866 at `64df1cef8` and is merged into the acceptance branch without rewriting published history.
+
+| Check | Result |
+| --- | --- |
+| Browser Back between reused item editors with identical setup | Both Utilities and Meter Groups cases failed on the reviewed head and pass after the fix; neither emits a Settings save or changes stored values. Reopening uses the current item's selection. |
+| Focused Energy Uses, slideout, and form-architecture tests | Passed: 65 tests, including stale confirmations before another render and both creation-facility changes retaining the draft. |
+| Owning-PR Chromium journeys | Passed: 6 inventory/navigation journeys. |
+| Assembled-stack Chromium journeys | Passed: 11 journeys, including nested creation focus, history review, copy/delete, and backup restoration. |
+| Owning/assembled app type-check and production web build | Passed; existing build warnings remain. |
+| Validation planner | Passed over the eight follow-up files. |
+
+The full suites, Electron build, and OS integration checks were not repeated for this UI-only follow-up: persistence, calculation, IPC, file formats, and layout rules are unchanged. The earlier full persistence validation remains recorded above. Local screenshot artifacts are preserved outside the PR changes.
+
 ## Defaults and deferred work
 
 - Retain **Energy Uses** and use **energy use** for an individual item; retain existing stored equipment terminology.
