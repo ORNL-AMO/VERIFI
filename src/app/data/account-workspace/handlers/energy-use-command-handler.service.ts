@@ -8,13 +8,94 @@ import { FacilityEnergyUseGroupsDbService } from '@data/indexedDB/facility-energ
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { WorkspaceWriteError } from '../workspace-commands.models';
+import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { EnergyUseCommandIdentity, EnergyUseOwner, energyUseMeterLinksError } from './energy-use-command.models';
 
 @Injectable({ providedIn: 'root' })
 export class EnergyUseCommandHandler {
   constructor(
     private readonly groupDb: FacilityEnergyUseGroupsDbService,
-    private readonly equipmentDb: FacilityEnergyUseEquipmentDbService
+    private readonly equipmentDb: FacilityEnergyUseEquipmentDbService,
+    private readonly transactions: IndexedDbTransactionService
   ) { }
+
+  /** Production v1 commands re-read durable owners and records in the same transaction. */
+  async createItem(owner: EnergyUseOwner, item: IdbFacilityEnergyUseEquipment,
+    newGroup?: IdbFacilityEnergyUseGroup, validateLinks = true): Promise<IdbFacilityEnergyUseEquipment> {
+    return this.transactions.runTransaction(['facilities', 'facilityEnergyUseGroups', 'facilityEnergyUseEquipment', 'utilityMeterGroups', 'utilityMeter'], 'readwrite', async tx => {
+      await this.requireFacility(tx, owner);
+      this.requireItemOwner(item, owner);
+      const existing = await tx.getAllByIndex<IdbFacilityEnergyUseEquipment>('facilityEnergyUseEquipment', 'guid', item.guid);
+      if (item.id !== undefined) this.reject('New energy uses cannot reuse an IndexedDB key.');
+      // A retry after committed persistence but failed publication must never create a duplicate.
+      if (existing.length) {
+        if (existing.length === 1 && JSON.stringify({ ...existing[0], id: undefined }) === JSON.stringify(item)) return existing[0];
+        this.reject('This energy use was already created. Open its saved settings from the inventory before making further changes.');
+      }
+      let group: IdbFacilityEnergyUseGroup;
+      if (newGroup) {
+        if (newGroup.id !== undefined || !newGroup.name.trim() || newGroup.guid !== item.energyUseGroupId
+          || newGroup.accountId !== owner.accountGuid || newGroup.facilityId !== owner.facilityGuid
+          || (await tx.getAllByIndex('facilityEnergyUseGroups', 'guid', newGroup.guid)).length) this.reject('The new energy-use group is invalid.');
+        group = newGroup;
+      } else {
+        const groups = await tx.getAllByIndex<IdbFacilityEnergyUseGroup>('facilityEnergyUseGroups', 'guid', item.energyUseGroupId);
+        if (groups.length !== 1) this.reject('The energy-use group is no longer available.');
+        group = groups[0];
+      }
+      if (group.accountId !== owner.accountGuid || group.facilityId !== owner.facilityGuid) this.reject('The energy-use group belongs to another facility.');
+      if (validateLinks) await this.requireLinks(tx, item);
+      if (newGroup) await tx.add('facilityEnergyUseGroups', structuredClone(newGroup));
+      const id = await tx.add('facilityEnergyUseEquipment', structuredClone(item));
+      return { ...item, id: Number(id) };
+    });
+  }
+
+  async saveItem(identity: EnergyUseCommandIdentity, before: IdbFacilityEnergyUseEquipment,
+    updated: IdbFacilityEnergyUseEquipment, validateLinks: boolean): Promise<IdbFacilityEnergyUseEquipment> {
+    return this.transactions.runTransaction(['facilities', 'facilityEnergyUseEquipment', 'utilityMeterGroups', 'utilityMeter'], 'readwrite', async tx => {
+      await this.requireFacility(tx, identity);
+      await this.requireCurrentItem(tx, identity, before);
+      this.requireItemOwner(updated, identity);
+      if (updated.id !== before.id || updated.guid !== before.guid || updated.energyUseGroupId !== before.energyUseGroupId) this.reject('Settings cannot change item identity or its energy-use group.');
+      if (validateLinks) await this.requireLinks(tx, updated);
+      const saved = { ...structuredClone(updated), modifiedDate: new Date() };
+      await tx.put('facilityEnergyUseEquipment', saved);
+      return saved;
+    });
+  }
+
+  async deleteItem(identity: EnergyUseCommandIdentity, reviewed: IdbFacilityEnergyUseEquipment): Promise<void> {
+    await this.transactions.runTransaction(['facilities', 'facilityEnergyUseEquipment'], 'readwrite', async tx => {
+      await this.requireFacility(tx, identity);
+      await this.requireCurrentItem(tx, identity, reviewed);
+      await tx.deleteByKey('facilityEnergyUseEquipment', reviewed.id!);
+    });
+  }
+
+  private async requireFacility(tx: IndexedDbTransactionContext, owner: EnergyUseOwner): Promise<void> {
+    const facilities = await tx.getAllByIndex<IdbFacility>('facilities', 'guid', owner.facilityGuid);
+    if (facilities.length !== 1 || facilities[0].accountId !== owner.accountGuid) this.reject('The owning facility is no longer available.');
+  }
+  private requireItemOwner(item: IdbFacilityEnergyUseEquipment, owner: EnergyUseOwner): void {
+    if (item.accountId !== owner.accountGuid || item.facilityId !== owner.facilityGuid) this.reject('This energy use belongs to another account or facility.');
+  }
+  private async requireCurrentItem(tx: IndexedDbTransactionContext, identity: EnergyUseCommandIdentity, reviewed: IdbFacilityEnergyUseEquipment): Promise<void> {
+    this.requireItemOwner(reviewed, identity);
+    const rows = await tx.getAllByIndex<IdbFacilityEnergyUseEquipment>('facilityEnergyUseEquipment', 'guid', identity.energyUseGuid);
+    if (rows.length !== 1 || reviewed.guid !== identity.energyUseGuid || reviewed.id === undefined
+      || JSON.stringify(rows[0]) !== JSON.stringify(reviewed)) this.reject('The saved energy use changed. Reload or review it again before continuing.');
+  }
+  private async requireLinks(tx: IndexedDbTransactionContext, item: IdbFacilityEnergyUseEquipment): Promise<void> {
+    const groups = await tx.getAllByIndex<IdbUtilityMeterGroup>('utilityMeterGroups', 'facilityId', item.facilityId);
+    const meters = await tx.getAllByIndex<IdbUtilityMeter>('utilityMeter', 'facilityId', item.facilityId);
+    const error = energyUseMeterLinksError(item, groups, meters);
+    if (error) this.reject(error);
+  }
+  private reject(message: string): never { throw new WorkspaceWriteError('validation-failed', message); }
 
   // ---------------------------------------------------------------------------
   // Energy-use groups
