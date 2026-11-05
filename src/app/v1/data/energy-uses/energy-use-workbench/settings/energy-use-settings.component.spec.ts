@@ -19,7 +19,7 @@ describe('Energy Use Settings lifecycle', () => {
   function setup() {
     const facility = { ...energyUseFacility(), energyUnit: 'kWh' };
     const item = energyUseItem({ id: 1, utilityMeterGroupIds: [], utilityData: [energyUseSource()], operatingConditionsData: [] });
-    const store = { account: signal({ guid: 'account-a' }), canWrite: signal(true), hasPending: signal(false), pendingOperations: signal([]),
+    const store = { account: signal({ guid: 'account-a' }), canWrite: signal(true), hasPending: signal(false), pendingOperations: signal<readonly { readonly ownerId?: string }[]>([]),
       energyUseEquipment: signal([item]), facilities: signal([facility]), energyUseGroups: signal([energyUseGroup()]), meterGroups: signal<IdbUtilityMeterGroup[]>([]), meters: signal<IdbUtilityMeter[]>([]) };
     const guid = signal('energy-a');
     const actions = { updateSetup: vi.fn(async (_identity, value, _base, _owner, approvals) => {
@@ -60,6 +60,52 @@ describe('Energy Use Settings lifecycle', () => {
       expect(actions.updateSetup).toHaveBeenCalledTimes(1);
       expect(store.energyUseEquipment()[0].utilityData[0].energyUse.map(row => row.energyUse)).toEqual([10000, 10000]);
       expect(component.editor.dirty()).toBe(false);
+    } finally { vi.useRealTimers(); }
+  });
+  it('disables year actions during its own save while retaining editable annual fields and later edits', async () => {
+    vi.useFakeTimers();
+    try {
+      const { fixture, component, store, actions } = setup();
+      store.energyUseEquipment.set([{ ...store.energyUseEquipment()[0], operatingConditionsData: [{ year: 2024, hoursOfOperation: 1000, loadFactor: 100, dutyFactor: 100, efficiency: 100 }] }]);
+      fixture.detectChanges();
+      const annual = fixture.nativeElement.querySelector('app-energy-use-annual-data-fields') as HTMLElement;
+      const buttons = [...annual.querySelectorAll<HTMLButtonElement>('.annual-data__heading button')];
+      expect(buttons).toHaveLength(3); expect(buttons.every(button => !button.disabled)).toBe(true);
+      let complete!: (value: ReturnType<typeof energyUseSetup>) => void;
+      actions.updateSetup.mockImplementationOnce(() => new Promise(resolve => { complete = resolve; }));
+      component.form()!.controls.settings.controls.name.setValue('Saving setup');
+      const saving = component.editor.saveNow();
+      const committed = applyEnergyUseSetup(store.energyUseEquipment()[0], actions.updateSetup.mock.calls[0][1], component.facility()!);
+      store.pendingOperations.set([{ ownerId: component.editor.ownerId }]); store.hasPending.set(true); store.canWrite.set(false);
+      fixture.detectChanges();
+      try {
+        expect(component.editor.canEdit()).toBe(true); expect(buttons.every(button => button.disabled)).toBe(true);
+        const hours = annual.querySelector<HTMLInputElement>('input[formcontrolname="hoursOfOperation"]')!;
+        expect(hours.matches(':disabled')).toBe(false);
+        component.form()!.controls.conditions.at(0).controls.hoursOfOperation.setValue(2000);
+        buttons.forEach(button => button.click());
+        expect(component.yearDrawer()).toBeUndefined(); expect(component.review()).toBeUndefined();
+        store.energyUseEquipment.set([committed]); store.canWrite.set(true); store.hasPending.set(false); store.pendingOperations.set([]);
+        complete(energyUseSetup(committed)); await saving; fixture.detectChanges();
+        expect(buttons.every(button => !button.disabled)).toBe(true);
+        await component.editor.saveNow(); fixture.detectChanges();
+        expect(store.energyUseEquipment()[0].operatingConditionsData[0].hoursOfOperation).toBe(2000);
+        expect(component.editor.dirty()).toBe(false);
+      } finally {
+        store.canWrite.set(true); store.hasPending.set(false); store.pendingOperations.set([]);
+        complete(energyUseSetup(committed)); await saving; fixture.destroy();
+      }
+    } finally { vi.useRealTimers(); }
+  });
+  it('defaults an empty history to the owning facility previous fiscal-year label', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(2026, 10, 5, 12));
+    try {
+      const { fixture, component, store, actions } = setup();
+      store.facilities.set([{ ...store.facilities()[0], fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: true }]);
+      store.energyUseEquipment.set([{ ...store.energyUseEquipment()[0], utilityData: store.energyUseEquipment()[0].utilityData.map(source => ({ ...source, energyUse: [] })) }]);
+      fixture.detectChanges(); component.openYearDrawer(); fixture.detectChanges();
+      expect(component.yearForm.controls.year.value).toBe(2026); expect(actions.updateSetup).not.toHaveBeenCalled();
+      component.closeYearDrawer(); fixture.destroy();
     } finally { vi.useRealTimers(); }
   });
   it('accepts a remote year deletion once while retaining unrelated local metadata', async () => {

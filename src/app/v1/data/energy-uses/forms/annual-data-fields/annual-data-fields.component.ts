@@ -11,6 +11,7 @@ export class AnnualDataFieldsComponent {
   readonly form = input.required<EnergyUseSetupForm>();
   readonly item = input<IdbFacilityEnergyUseEquipment>();
   readonly canEdit = input(false);
+  readonly canManageYears = input(false);
   readonly refreshKey = input(0);
   readonly addRequested = output<void>();
   readonly copyRequested = output<number>();

@@ -1,14 +1,14 @@
 <section class="v1-workbench-section annual-data__heading" aria-labelledby="annual-data-title">
   <div><h2 id="annual-data-title">Annual data</h2></div>
-  <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit()" (click)="addRequested.emit()"><app-ui-icon name="add"/>Add year</button>
+  <button type="button" class="v1-btn v1-btn--action" [disabled]="!canManageYears()" (click)="addRequested.emit()"><app-ui-icon name="add"/>Add year</button>
 </section>
 @for (year of years(); track year.year) {
   <section class="v1-workbench-section annual-data__year" [attr.aria-labelledby]="'annual-year-' + year.year">
     <header class="annual-data__heading">
       <h3 [id]="'annual-year-' + year.year">{{ year.year }}</h3>
       <div class="annual-data__actions">
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canEdit() || !year.complete || year.ambiguous" (click)="copyRequested.emit(year.year)">Copy year</button>
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canEdit() || year.ambiguous" (click)="removeRequested.emit(year.year)">Remove year</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canManageYears() || !year.complete || year.ambiguous" (click)="copyRequested.emit(year.year)">Copy year</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canManageYears() || year.ambiguous" (click)="removeRequested.emit(year.year)">Remove year</button>
       </div>
     </header>
     @if (year.ambiguous) { <p class="v1-alert v1-alert--warning">Repeated source or year entries are preserved. Affected annual data cannot be edited safely.</p> }

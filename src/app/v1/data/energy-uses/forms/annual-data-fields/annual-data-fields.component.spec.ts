@@ -11,7 +11,8 @@ describe('Annual Data inside Setup', () => {
     const item = energyUseItem({ operatingConditionsData: [{ year: 2024, hoursOfOperation: 1000, loadFactor: 50, dutyFactor: 80, efficiency: 80 }],
       utilityData: [energyUseSource({ energyUse: [{ year: 2024, energyUse: 123, overrideEnergyUse: false, energyUseUnit: 'kWh' }] })] });
     const form = TestBed.inject(EnergyUseSetupFormService).build(energyUseSetup(item)), fixture = TestBed.createComponent(AnnualDataFieldsComponent);
-    fixture.componentRef.setInput('form', form); fixture.componentRef.setInput('item', item); fixture.componentRef.setInput('canEdit', true); fixture.detectChanges();
+    fixture.componentRef.setInput('form', form); fixture.componentRef.setInput('item', item); fixture.componentRef.setInput('canEdit', true);
+    fixture.componentRef.setInput('canManageYears', true); fixture.detectChanges();
     return { fixture, form, component: fixture.componentInstance };
   }
   it('shows committed consumption until calculation inputs change without adding inline save messages', () => {
@@ -39,5 +40,17 @@ describe('Annual Data inside Setup', () => {
     component.toggleOverride(entry, 123); fixture.componentRef.setInput('refreshKey', 2); fixture.detectChanges();
     expect(component.years()[0].sources[0].amount).toBe(123);
     expect(entry.controls.overrideEnergyUse.value).toBe(false);
+  });
+  it('gates year actions separately from editable annual fields', () => {
+    const { fixture, component } = setup(), host = fixture.nativeElement as HTMLElement, added = vi.fn();
+    component.addRequested.subscribe(added);
+    fixture.componentRef.setInput('canManageYears', false); fixture.detectChanges();
+    const buttons = [...host.querySelectorAll<HTMLButtonElement>('.annual-data__heading button')];
+    expect(buttons.every(button => button.disabled)).toBe(true);
+    expect(host.querySelector('input[formcontrolname="hoursOfOperation"]')!.matches(':disabled')).toBe(false);
+    buttons[0].click(); expect(added).not.toHaveBeenCalled();
+    fixture.componentRef.setInput('canManageYears', true); fixture.detectChanges();
+    expect(buttons.every(button => !button.disabled)).toBe(true);
+    buttons[0].click(); expect(added).toHaveBeenCalledOnce();
   });
 });

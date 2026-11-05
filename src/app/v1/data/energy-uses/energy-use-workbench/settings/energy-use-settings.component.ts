@@ -17,7 +17,7 @@ import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
 import { EnergyUseActionsService } from '../../energy-use-actions.service';
 import { EnergyUseSetupForm, EnergyUseSetupFormService } from '../../forms/energy-use-setup-form.service';
 import { EnergyUseSetupValues, YearRemovalReview, addEnergyUseYear, energyUseSetup, energyUseSetupValidation, energyUseYears, normalizeEnergyUseSetup, reconcileEnergyUseSetup, removeEnergyUseYear, reviewEnergyUseYear } from '../../models/energy-use-setup.models';
-import { EnergyUseUtilitySelection, EnergyUseMeterGroupSelection, defaultEnergyUseSource } from '../../models/energy-use-settings.models';
+import { EnergyUseUtilitySelection, EnergyUseMeterGroupSelection, defaultEnergyUseSource, previousEnergyUseYear } from '../../models/energy-use-settings.models';
 import { EnergyUseWorkbenchHeaderService } from '../energy-use-workbench-header.service';
 import { EnergyUseWorkbenchContextService } from '../energy-use-workbench-context.service';
 
@@ -71,6 +71,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
     setEnabled: enabled => { const form = this.form(); if (form) enabled ? form.enable({ emitEvent: false }) : form.disable({ emitEvent: false }); }
   });
   readonly canCommand = computed(() => !!this.item() && this.workspace.canWrite() && !this.workspace.hasPending() && !this.editor.saving() && !this.busy());
+  readonly canManageYears = computed(() => this.canCommand() && this.editor.canEdit() && !!this.facility() && !this.review() && !this.yearDrawer());
   readonly showReadOnlyNotice = computed(() => !this.workspace.canWrite() && !this.editor.saving());
   readonly canCopy = computed(() => this.canCommand() && !this.editor.dirty() && !this.review());
   readonly removedSources = computed(() => {
@@ -147,9 +148,10 @@ export class EnergyUseSettingsComponent implements OnDestroy {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); void this.editor.saveNow(); }
   }
   openYearDrawer(copyFrom?: number): void {
-    if (!this.editor.canEdit() || !this.yearEditor || this.editor.saving()) return;
+    const facility = this.facility();
+    if (!this.canManageYears() || !this.yearEditor || !facility) return;
     const years = energyUseYears(this.forms.read(this.form()!));
-    this.yearForm.reset({ year: years.length ? Math.min(9999, Math.max(...years) + 1) : new Date().getFullYear() - 1 });
+    this.yearForm.reset({ year: years.length ? Math.min(9999, Math.max(...years) + 1) : previousEnergyUseYear(facility) });
     this.yearError.set(''); this.yearDrawer.set({ copyFrom });
     this.yearPortal = new TemplatePortal(this.yearEditor, this.view); this.modal.show(this.yearPortal);
   }
@@ -172,7 +174,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   }
   requestRemoveYear(year: number): void {
     const item = this.item(), form = this.form();
-    if (item && form && this.canCommand()) this.openReview({ kind: 'year', item: structuredClone(item), year, draft: normalizeEnergyUseSetup(this.forms.read(form)) });
+    if (item && form && this.canManageYears()) this.openReview({ kind: 'year', item: structuredClone(item), year, draft: normalizeEnergyUseSetup(this.forms.read(form)) });
   }
   requestUtilities(selection: EnergyUseUtilitySelection): void {
     const form = this.form(), item = this.item();
