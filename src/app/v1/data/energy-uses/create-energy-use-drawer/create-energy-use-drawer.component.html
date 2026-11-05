@@ -15,7 +15,7 @@
           @for (group of groups(); track group.guid) { <option [value]="group.guid">{{ group.name }}</option> }
         </select></label>
       } @else { <label><span>New group name</span><input type="text" formControlName="groupName"></label> }
-      <app-energy-use-settings-fields [form]="form" [accountGuid]="owner.accountId" [facilityGuid]="owner.guid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="canCreate()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="confirmUtilities($event)" (meterGroupsConfirmed)="confirmMeterGroups($event)"/>
+      <app-energy-use-settings-fields [form]="form" [editorKey]="editorKey()" [accountGuid]="owner.accountId" [facilityGuid]="owner.guid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="canCreate()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="confirmUtilities($event)" (meterGroupsConfirmed)="confirmMeterGroups($event)"/>
     } @else { <p class="v1-alert v1-alert--info">Select an available facility to configure this energy use.</p> }
     @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
     @if (discardOpen()) {

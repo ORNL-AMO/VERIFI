@@ -11,6 +11,7 @@ describe('Energy Use shared fields', () => {
     TestBed.configureTestingModule({ imports: [EnergyUsesModule] });
     const fixture = TestBed.createComponent(SettingsFieldsComponent), form = new EnergyUseSettingsFormService().build(energyUseSettings(energyUseItem({ utilityMeterGroupIds: [] })));
     fixture.componentRef.setInput('form', form); fixture.componentRef.setInput('accountGuid', 'account-a'); fixture.componentRef.setInput('facilityGuid', 'facility-a');
+    fixture.componentRef.setInput('editorKey', 'account-a:facility-a:energy-a');
     fixture.detectChanges(); fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('select:not(.v1-select)')).toHaveLength(0);
     const units = fixture.nativeElement.querySelector('select[formControlName="units"]') as HTMLSelectElement;
@@ -27,5 +28,27 @@ describe('Energy Use shared fields', () => {
     fixture.componentInstance.confirmUtilities(selection); expect(confirmed).toHaveBeenCalledWith(selection);
     expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
     expect(form.controls.sources.getRawValue()).toEqual(energyUseSettings(energyUseItem()).sources);
+  });
+  it.each(['utilities', 'meter-groups'] as const)('rejects an obsolete %s confirmation before the identity-change effect runs', kind => {
+    TestBed.configureTestingModule({ imports: [EnergyUsesModule] });
+    const fixture = TestBed.createComponent(SettingsFieldsComponent);
+    const form = new EnergyUseSettingsFormService().build(energyUseSettings(energyUseItem({ utilityMeterGroupIds: [] })));
+    for (const [name, value] of Object.entries({ form, editorKey: 'account-a:facility-a:energy-a', accountGuid: 'account-a', facilityGuid: 'facility-a' })) fixture.componentRef.setInput(name, value);
+    fixture.detectChanges();
+    const confirmed = vi.fn();
+    fixture.componentInstance.utilitiesConfirmed.subscribe(confirmed); fixture.componentInstance.meterGroupsConfirmed.subscribe(confirmed);
+    if (kind === 'utilities') fixture.componentInstance.openUtilities(); else fixture.componentInstance.openMeterGroups();
+    fixture.detectChanges();
+    form.controls.notes.setValue('Independent metadata change'); fixture.detectChanges();
+    expect(fixture.componentInstance.drawer()).toBe(kind);
+    const utilities = { baseline: form.controls.sources.getRawValue(), selected: ['Electricity', 'Natural Gas'] as const };
+    fixture.componentRef.setInput('editorKey', 'account-a:facility-a:energy-b');
+    // Reject immediately, without relying on another render to close the panel.
+    if (kind === 'utilities') fixture.componentInstance.confirmUtilities(utilities);
+    else fixture.componentInstance.confirmMeterGroups({ baseline: [], selected: [], utilities });
+    expect(confirmed).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.drawer()).toBeUndefined();
+    expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+    expect(form.controls.sources.length).toBe(1);
   });
 });

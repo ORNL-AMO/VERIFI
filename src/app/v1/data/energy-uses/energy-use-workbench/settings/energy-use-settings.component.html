@@ -15,7 +15,7 @@
       </section>
     }
     <form [formGroup]="settingsForm" aria-label="Energy use settings" (ngSubmit)="editor.saveNow()">
-      <app-energy-use-settings-fields [form]="settingsForm" [accountGuid]="identity().accountGuid" [facilityGuid]="identity().facilityGuid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="editor.canEdit()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="requestUtilities($event)" (meterGroupsConfirmed)="requestMeterGroups($event)"/>
+      <app-energy-use-settings-fields [form]="settingsForm" [editorKey]="key()" [accountGuid]="identity().accountGuid" [facilityGuid]="identity().facilityGuid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="editor.canEdit()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="requestUtilities($event)" (meterGroupsConfirmed)="requestMeterGroups($event)"/>
     </form>
     @if (removedSources().length) {
       <section class="v1-workbench-section" aria-label="Pending source removals">

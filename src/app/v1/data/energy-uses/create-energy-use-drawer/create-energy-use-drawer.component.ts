@@ -38,6 +38,7 @@ export class CreateEnergyUseDrawerComponent {
   readonly context = toSignal(this.contextForm.valueChanges, { initialValue: this.contextForm.getRawValue() });
   readonly facilities = computed(() => orderFacilities(this.workspace.facilities().filter(facility => facility.accountId === this.accountGuid), this.workspace.account()?.portfolioFacilityOrder));
   readonly facility = computed(() => this.facilities().find(facility => facility.guid === this.context().facilityGuid));
+  readonly editorKey = computed(() => `${this.accountGuid}:${this.facility()?.guid ?? ''}:${this.request.item.guid}`);
   readonly groups = computed(() => this.workspace.energyUseGroups().filter(group => group.accountId === this.accountGuid && group.facilityId === this.facility()?.guid));
   readonly canCreate = computed(() => !!this.facility() && this.workspace.account()?.guid === this.accountGuid && this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly blocked = computed(() => this.saving());

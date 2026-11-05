@@ -1,9 +1,12 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { EnergyUsesModule } from '../energy-uses.module';
 import { EnergyUseActionsService } from '../energy-use-actions.service';
+import { SettingsFieldsComponent } from '../forms/settings-fields/settings-fields.component';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { energyUseFacility, energyUseGroup, energyUseItem } from '../energy-uses.testing';
 import { CreateEnergyUseDrawerComponent } from './create-energy-use-drawer.component';
 
@@ -23,6 +26,21 @@ describe('Energy Use creation drawer', () => {
     component.contextForm.controls.facilityGuid.setValue('facility-a'); fixture.detectChanges(); fixture.detectChanges();
     expect(component.canCreate()).toBe(true); expect(component.contextForm.controls.initialYear.value).toBe(new Date().getFullYear() - 1);
     expect(fixture.nativeElement.textContent).toContain('Rated capacity');
+  });
+  it.each(['utilities', 'meter-groups'] as const)('closes the %s selection when the creation facility changes without losing the draft', kind => {
+    const { fixture, component, store, actions } = setup('facility-a');
+    store.facilities.set([...store.facilities(), { ...store.facilities()[0], guid: 'facility-b', name: 'South plant' }]);
+    component.form.controls.name.setValue('Draft equipment'); fixture.detectChanges();
+    const fields = fixture.debugElement.query(By.directive(SettingsFieldsComponent)).componentInstance as SettingsFieldsComponent;
+    const initialKey = fields.editorKey();
+    if (kind === 'utilities') fields.openUtilities(); else fields.openMeterGroups();
+    fixture.detectChanges(); expect(fields.drawer()).toBe(kind);
+    component.contextForm.controls.facilityGuid.setValue('facility-b'); fixture.detectChanges(); fixture.detectChanges();
+    expect(fields.editorKey()).not.toBe(initialKey);
+    expect(fields.drawer()).toBeUndefined();
+    expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+    expect(component.form.controls.name.value).toBe('Draft equipment');
+    expect(actions.create).not.toHaveBeenCalled();
   });
   it('submits one valid compound draft and retains errors and values after failure', async () => {
     const { fixture, component, actions } = setup('facility-a');

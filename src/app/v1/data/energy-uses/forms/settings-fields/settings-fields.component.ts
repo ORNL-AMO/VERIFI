@@ -1,4 +1,4 @@
-import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
@@ -15,11 +15,13 @@ export class SettingsFieldsComponent {
   private readonly modal = inject(ModalPortalService);
   private readonly view = inject(ViewContainerRef);
   private portal?: TemplatePortal;
+  private drawerKey?: string;
   @ViewChild('utilitiesDrawer') private readonly utilitiesDrawer?: TemplateRef<unknown>;
   @ViewChild('meterGroupsDrawer') private readonly meterGroupsDrawer?: TemplateRef<unknown>;
   readonly drawer = signal<'utilities' | 'meter-groups' | undefined>(undefined);
   readonly nestedDrawer = signal(false);
   readonly form = input.required<EnergyUseSettingsForm>();
+  readonly editorKey = input.required<string>();
   readonly accountGuid = input.required<string>();
   readonly facilityGuid = input.required<string>();
   readonly groups = input<readonly IdbUtilityMeterGroup[]>([]);
@@ -47,6 +49,10 @@ export class SettingsFieldsComponent {
   });
   constructor() {
     inject(DestroyRef).onDestroy(() => this.closeDrawer());
+    effect(() => {
+      const key = this.editorKey();
+      if (this.drawer() && this.drawerKey !== key) untracked(() => this.closeDrawer());
+    });
     effect(onCleanup => {
       this.refreshKey();
       const form = this.form(); this.values.set(form.getRawValue());
@@ -66,6 +72,7 @@ export class SettingsFieldsComponent {
     // Creation already lives in the shell portal. Keep that parent view mounted
     // while the shared slideout and focus stack present its nested utility panel.
     this.nestedDrawer.set(!!this.modal.activePortal());
+    this.drawerKey = this.editorKey();
     this.drawer.set(kind);
     if (!this.nestedDrawer()) {
       this.portal = new TemplatePortal(template, this.view);
@@ -76,13 +83,17 @@ export class SettingsFieldsComponent {
     this.drawer.set(undefined);
     if (this.portal && this.modal.activePortal() === this.portal) this.modal.hide();
     this.portal = undefined;
+    this.drawerKey = undefined;
+    this.nestedDrawer.set(false);
   }
   confirmUtilities(selection: EnergyUseUtilitySelection): void {
+    if (this.drawer() !== 'utilities' || this.drawerKey !== this.editorKey()) { this.closeDrawer(); return; }
     if (!this.canEdit() || this.duplicateSources() || this.linkedIds().length) return;
     this.closeDrawer();
     this.utilitiesConfirmed.emit(selection);
   }
   confirmMeterGroups(selection: EnergyUseMeterGroupSelection): void {
+    if (this.drawer() !== 'meter-groups' || this.drawerKey !== this.editorKey()) { this.closeDrawer(); return; }
     if (!this.canEdit()) return;
     this.closeDrawer();
     this.meterGroupsConfirmed.emit(selection);
