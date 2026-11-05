@@ -9,7 +9,7 @@ import { IdbEntry, getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { EditorConflictError, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
 import { EnergyUseSetupValues, SetupRemovalReviews, applyEnergyUseSetup, energyUseSetup, normalizeEnergyUseSetup, reconcileEnergyUseSetup } from './models/energy-use-setup.models';
-import { EnergyUseCreationDraft, EnergyUseIdentity, EnergyUseSettingsValues, SourceRemovalReview, applyEnergyUseSettings, energyUseSettings, normalizeEnergyUseSettings, reconcileEnergyUseSettings, createEnergyUse } from './models/energy-use-settings.models';
+import { EnergyUseCreationDraft, EnergyUseIdentity, createEnergyUse } from './models/energy-use-settings.models';
 
 @Injectable({ providedIn: 'root' })
 export class EnergyUseActionsService {
@@ -30,22 +30,6 @@ export class EnergyUseActionsService {
       const item = { ...this.validate(() => createEnergyUse(submitted, group, facility)), ...request.item, color: request.color };
       this.requireLinks(item);
       return this.handler.createItem({ accountGuid, facilityGuid }, item, newGroup);
-    });
-    return result.value;
-  }
-  async updateSettings(identity: EnergyUseIdentity, value: EnergyUseSettingsValues, base: EnergyUseSettingsValues,
-    ownerId: string, reviews: readonly SourceRemovalReview[] = []): Promise<EnergyUseSettingsValues> {
-    const submitted = normalizeEnergyUseSettings(value), baseline = normalizeEnergyUseSettings(base), approved = structuredClone(reviews);
-    const result = await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'update', entityGuid: identity.energyUseGuid,
-      label: 'Saving energy use settings', ownerId, notification: { suppressSuccessToast: true } }, async () => {
-      const facility = this.requireFacility(identity.accountGuid, identity.facilityGuid);
-      const current = this.requireItem(identity), latest = energyUseSettings(current);
-      const merged = reconcileEnergyUseSettings(baseline, submitted, latest);
-      if (merged.conflicts.length) throw new EditorConflictError(latest);
-      const updated = this.validate(() => applyEnergyUseSettings(current, merged.value, facility, approved));
-      const configurationChanged = !draftEqual(latest.sources, merged.value.sources) || !draftEqual(latest.utilityMeterGroupIds, merged.value.utilityMeterGroupIds);
-      if (configurationChanged) this.requireLinks(updated);
-      return energyUseSettings(await this.handler.saveItem(identity, current, updated, configurationChanged));
     });
     return result.value;
   }

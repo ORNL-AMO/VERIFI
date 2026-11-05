@@ -15,6 +15,7 @@ import BankIcon from '@hugeicons/core-free-icons/BankIcon';
 import BadgeAlertIcon from '@hugeicons/core-free-icons/BadgeAlertIcon';
 import BriefcaseBusinessIcon from '@hugeicons/core-free-icons/BriefcaseBusinessIcon';
 import Building03Icon from '@hugeicons/core-free-icons/Building03Icon';
+import Calculator01Icon from '@hugeicons/core-free-icons/Calculator01Icon';
 import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon';
 import CalendarCheckIcon from '@hugeicons/core-free-icons/CalendarCheckIcon';
 import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon';
@@ -125,6 +126,7 @@ export const ICON_REGISTRY = {
   bank: BankIcon,
   badgeAlert: BadgeAlertIcon,
   portfolio: BriefcaseBusinessIcon,
+  calculator: Calculator01Icon,
   calendar: Calendar03Icon,
   calendarCheck: CalendarCheckIcon,
   chartLine: ChartLineData01Icon,

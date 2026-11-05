@@ -11,6 +11,7 @@ import { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
 export class UtilitiesSlideoutComponent {
   readonly sources = input<readonly EnergyUseSourceValues[]>([]);
   readonly canEdit = input(true);
+  readonly hasLinkedGroups = input(false);
   readonly confirmed = output<EnergyUseUtilitySelection>();
   readonly closed = output<void>();
   readonly form = new FormRecord<FormControl<boolean>>({});

@@ -9,26 +9,33 @@
         @if (!categoryKnown()) { <option [value]="settingsForm.controls.equipmentType.value">{{ settingsForm.controls.equipmentType.value }} (saved)</option> }
         @for (category of categories(); track category) { <option [value]="category">{{ category }}</option> }
       </select></label>
-      <label class="energy-use-fields__wide"><span>Notes <small>Optional</small></span><textarea rows="3" formControlName="notes"></textarea></label>
-      <div class="energy-use-fields__wide energy-use-fields__meter-groups" role="group" aria-label="Utility meter groups">
-        <span>Utility meter groups <small>Optional</small></span>
-        <div class="energy-use-fields__links">
-          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canEdit() || duplicateSources()" (click)="openMeterGroups()"><app-ui-icon name="link"/>Select Meter Groups</button>
-          @for (group of linkedGroups(); track group.guid) { <span class="energy-use-fields__linked-group">{{ group.name }}</span> }
-        </div>
-      </div>
+      <label class="energy-use-fields__wide"><span>Notes</span><textarea rows="3" formControlName="notes"></textarea></label>
     </div>
   </section>
-  <section class="v1-workbench-section" formArrayName="sources">
+  <section class="v1-workbench-section" aria-labelledby="energy-use-linked-meter-groups-title">
+    <h2 id="energy-use-linked-meter-groups-title">Linked Utility Meter Groups</h2>
+    <div class="energy-use-fields__meter-groups">
+      @let linkedMeterGroups = linkedGroups();
+      @if (linkedMeterGroups.length) {
+        <ul class="energy-use-fields__links" aria-label="Linked meter groups">
+          @for (group of linkedMeterGroups; track group.guid) { <li class="energy-use-fields__linked-group"><app-ui-icon name="meterGroupItem"/><span>{{ group.name }}</span></li> }
+        </ul>
+      } @else { <p class="energy-use-fields__no-links">No linked meter groups</p> }
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit() || duplicateSources()" (click)="openMeterGroups()"><app-ui-icon name="link"/>Select Meter Groups</button>
+    </div>
+  </section>
+  <section class="v1-workbench-section" formArrayName="sources" aria-labelledby="energy-use-utility-data-title">
     <div class="energy-use-fields__actions">
-      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit() || duplicateSources() || linkedIds().length > 0" [attr.title]="linkedIds().length ? 'Utilities are determined by the linked meter groups.' : null" (click)="openUtilities()"><app-ui-icon name="checklist"/>Select Utilities</button>
+      <h2 id="energy-use-utility-data-title">Energy Uses Utility Data</h2>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit() || duplicateSources()" (click)="openUtilities()"><app-ui-icon name="checklist"/>Select Utilities</button>
     </div>
     @if (duplicateSources()) { <p class="v1-alert v1-alert--warning">Repeated saved source types are preserved. Their configuration cannot be edited safely here.</p> }
     @for (row of sourceRows(); track row.control) {
       <fieldset [formGroupName]="row.index" [disabled]="!canEdit() || duplicateSources()">
         <legend class="v1-sr-only">{{ row.source.energySource }}</legend>
         <div class="energy-use-fields__source-row">
-          <div class="energy-use-fields__source-label" aria-hidden="true"><app-ui-icon [name]="row.icon" [size]="24"/><span>{{ row.source.energySource }}</span></div>
+          <div class="energy-use-fields__source-label" aria-hidden="true"><app-ui-icon [name]="row.icon" [size]="20"/><span>{{ row.source.energySource }}</span></div>
+          <div class="energy-use-fields__source-controls">
           <div class="energy-use-fields__capacity">
             <label [for]="'energy-use-capacity-' + row.index"><span>Rated capacity</span></label>
             <div class="input-group">
@@ -39,7 +46,8 @@
               </select>
             </div>
           </div>
-          <label><span># of Equipment</span><input type="number" [attr.min]="1" step="any" formControlName="numberOfEquipment" aria-required="true"></label>
+          <label class="energy-use-fields__quantity"><span># of Equipment</span><input type="number" [attr.min]="1" step="any" formControlName="numberOfEquipment" aria-required="true"></label>
+          </div>
         </div>
       </fieldset>
     }
@@ -47,7 +55,7 @@
 </div>
 <ng-template #utilitiesDrawer>
   @if (drawer() === 'utilities') {
-    <app-energy-use-utilities-slideout [sources]="sources()" [canEdit]="canEdit()" (confirmed)="confirmUtilities($event)" (closed)="closeDrawer()"/>
+    <app-energy-use-utilities-slideout [sources]="sources()" [hasLinkedGroups]="linkedIds().length > 0" [canEdit]="canEdit()" (confirmed)="confirmUtilities($event)" (closed)="closeDrawer()"/>
   }
 </ng-template>
 <ng-template #meterGroupsDrawer>

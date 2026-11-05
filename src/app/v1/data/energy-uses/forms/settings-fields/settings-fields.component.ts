@@ -60,7 +60,7 @@ export class SettingsFieldsComponent {
     });
   }
   openUtilities(): void {
-    if (!this.canEdit() || this.duplicateSources() || this.linkedIds().length || !this.utilitiesDrawer) return;
+    if (!this.canEdit() || this.duplicateSources() || !this.utilitiesDrawer) return;
     this.openDrawer('utilities', this.utilitiesDrawer);
   }
   openMeterGroups(): void {
@@ -81,7 +81,7 @@ export class SettingsFieldsComponent {
   }
   confirmUtilities(selection: EnergyUseUtilitySelection): void {
     if (this.drawer() !== 'utilities' || this.drawerKey !== this.editorKey()) { this.closeDrawer(); return; }
-    if (!this.canEdit() || this.duplicateSources() || this.linkedIds().length) return;
+    if (!this.canEdit() || this.duplicateSources()) return;
     this.closeDrawer();
     this.utilitiesConfirmed.emit(selection);
   }
