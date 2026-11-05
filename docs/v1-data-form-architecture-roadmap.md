@@ -12,7 +12,7 @@ Meter and Predictor workbenches use typed editable copies of committed workspace
 
 ## Shared Settings lifecycle
 
-[`SettingsEditSession`](../src/app/v1/data/editing/settings-edit-session.ts) serves Meter and Standard Predictor Settings through typed feature adapters. It has no dependency on Report editing code.
+[`SettingsEditSession`](../src/app/v1/data/editing/settings-edit-session.ts) serves Meter, Standard Predictor, and Energy Use Settings through typed feature adapters. It has no dependency on Report editing code.
 
 - Construct the controller through `injectSettingsEditSession(adapter)` in an Angular injection context. Angular host destruction owns its effects, subscriptions, pending timers, and draft registration; callers do not manually dispose the controller.
 - A session is keyed by account, facility, resource, and generation. One deduplicated form-change stream applies dependent rules before final snapshot delivery.
@@ -41,6 +41,12 @@ Meter and Predictor workbenches use typed editable copies of committed workspace
 - Reading children own their controls and dirtiness. Routed owners expose only the capabilities needed for navigation and pending commands. Closing or replacing an editor protects that editor's draft without discarding unrelated range edits. Save and Add Another starts a fresh session.
 
 ## Reading and Weather forms
+
+Energy Use Settings maps editable setup into the latest committed equipment record. Metadata-only edits preserve annual history; capacity, quantity, and unit changes recalculate only affected non-overridden values with the existing footprint calculation. Confirmed meter-group selections determine utilities using the group's meter sources, with no overlapping utility sources across selected groups. Links and utility configuration update as one form change after any required saved-history review; retained sources keep their values and history. Manual utility selection is available without meter-group links. Source setup and meter links reconcile as one coupled group. Source rows have no persisted GUID, so unambiguous rows match by source type; repeated imported source types remain preserved and block ambiguous configuration edits. Removing a saved source requires current history review through the shared shell portal. Creation explicitly initializes one fiscal year without requiring readings and atomically creates a named group and its first item when needed. Hydration never applies group-derived changes.
+
+Utility and meter-group selection drawers belong to one Settings editor identity. Workbench item changes close their selections, even when the new form values are identical. Confirmation also checks the current identity before emitting a selection, so a stale event cannot update a different item. Metadata refreshes within the same editor retain the open selection.
+
+Energy Use creation follows the Reports progressive pattern: choose a facility unless ownership is fixed, select an owned energy-use group or name a new one, then name and create the item. Report and Energy Use flows share choice/selection presentation while keeping feature-owned state and commands. Creation supplies the previous completed fiscal year and default equipment setup automatically, then opens Settings for configuration. There are no utility, meter-link, capacity, or year-entry controls in creation. A new group and its first item are still one atomic command, with retained request identity and draft values for retry after failure.
 
 - Meter bills and Standard Predictor readings retain controls across same-identity publications, update contextual validators silently, and reconcile current saved fields. Deleted edit targets cannot be recreated by saving. Changes that alter the interpretation of entered bill amounts require explicit reload/discard.
 - Weather Setup keeps typed station/range controls and definition groups. Owner identity includes account and facility even when two facilities use the same station. Saved rows match predictor GUIDs; new local rows retain draft identity.

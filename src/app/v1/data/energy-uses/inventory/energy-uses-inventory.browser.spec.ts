@@ -1,5 +1,6 @@
 import { Location } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { PortalModule } from '@angular/cdk/portal';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NavigationCancel, Router, RouterOutlet, provideRouter } from '@angular/router';
@@ -12,18 +13,22 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
 import { DataModule } from '@app/v1/data/data.module';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { V1Routes } from '@app/v1/v1.routes';
 import { EnergyUsesInventoryComponent } from './energy-uses-inventory.component';
-import { EnergyUseWorkbenchPanelComponent } from '../energy-use-workbench/panel/energy-use-workbench-panel.component';
+import { EnergyUseSettingsComponent } from '../energy-use-workbench/settings/energy-use-settings.component';
+import { EnergyUseActionsService } from '../energy-use-actions.service';
 import { energyUseItem, energyUseSource, energyUsesSnapshot } from '../energy-uses.testing';
 
 const inventoryUrl = '/v1/workspace/account/account-a/data/portfolio/energy-uses';
 const itemUrl = '/v1/workspace/facility/facility-a/data/energy-uses/energy-00/settings';
-@Component({ standalone: true, imports: [RouterOutlet], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%"><router-outlet/></main>' })
-class EnergyUsesBrowserHost {}
+@Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%"><router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
+class EnergyUsesBrowserHost { readonly modal = inject(ModalPortalService); }
 
 function setup(single = false) {
   const store = new AccountWorkspaceStore();
@@ -37,6 +42,7 @@ function setup(single = false) {
   store.publish(snapshot);
   const pairService = { ensurePairs: vi.fn(async () => true) };
   const workspaceService = { selectAccount: vi.fn(), selectFacility: vi.fn() };
+  const actions = { updateSettings: vi.fn(async (_identity, value) => value) };
   const account = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
   const facility = V1Routes[0].children!.find(route => route.path === 'workspace/facility/:facilityGuid')!;
   TestBed.configureTestingModule({ imports: [DataModule, EnergyUsesBrowserHost], providers: [
@@ -45,6 +51,7 @@ function setup(single = false) {
       { path: 'v1/workspace/facility/:facilityGuid', children: facility.children!.filter(route => route.path === 'data') }
     ]),
     { provide: AccountWorkspaceStore, useValue: store }, { provide: AccountWorkspaceService, useValue: workspaceService },
+    { provide: EnergyUseActionsService, useValue: actions },
     { provide: ApplicationLifecycleService, useValue: { usableAccounts: () => [snapshot.account] } },
     { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]), accountTodos: signal([]), discardedItems: signal([]) } },
     { provide: SingleFacilityAnalysisPairService, useValue: pairService },
@@ -55,7 +62,7 @@ function setup(single = false) {
   const inventory = () => fixture.debugElement.query(By.directive(EnergyUsesInventoryComponent)).componentInstance as EnergyUsesInventoryComponent;
   const root = fixture.nativeElement.querySelector('main') as HTMLElement;
   for (const name of ['--v1-rail-width', '--v1-section-nav-width', '--v1-support-panel-width']) root.style.setProperty(name, '0px');
-  return { store, snapshot, fixture, root, router, inventory, pairService, navigation: TestBed.inject(WorkspaceNavigationService) };
+  return { store, snapshot, fixture, root, router, inventory, pairService, actions, navigation: TestBed.inject(WorkspaceNavigationService) };
 }
 async function settle(view: ReturnType<typeof setup>): Promise<void> {
   view.fixture.detectChanges(); await view.fixture.whenStable();
@@ -64,6 +71,38 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it.each(['utilities', 'meter-groups'] as const)('closes the %s selection on browser Back between items with identical setup', async kind => {
+    const view = setup();
+    const group = getNewIdbUtilityMeterGroup('Energy', 'Gas supply', 'facility-a', 'account-a');
+    const meter = { ...getNewIdbUtilityMeter('facility-a', 'account-a', true, 'kWh'), source: 'Natural Gas' as const, groupId: group.guid };
+    view.store.publish({ ...view.snapshot, meterGroups: [group], meters: [meter], energyUseEquipment: view.snapshot.energyUseEquipment.map(item =>
+      ['energy-01', 'energy-02'].includes(item.guid) ? { ...item, utilityMeterGroupIds: [] } : item) });
+    const before = structuredClone(view.store.snapshot());
+    const firstUrl = itemUrl.replace('energy-00', 'energy-01'), secondUrl = itemUrl.replace('energy-00', 'energy-02');
+    const panel = () => view.fixture.debugElement.query(By.directive(EnergyUseSettingsComponent)).componentInstance as EnergyUseSettingsComponent;
+    try {
+      await view.router.navigateByUrl(firstUrl); await settle(view);
+      await view.router.navigateByUrl(secondUrl); await settle(view);
+      const reusedEditor = panel();
+      const title = kind === 'utilities' ? 'Select Utilities' : 'Select Meter Groups';
+      const choice = kind === 'utilities' ? 'Natural Gas' : 'Gas supply';
+      await page.getByRole('button', { name: title, exact: true }).click(); await settle(view);
+      await page.getByRole('dialog', { name: title, exact: true }).getByRole('checkbox', { name: choice, exact: true }).click(); await settle(view);
+      expect(reusedEditor.editor.dirty()).toBe(false);
+      TestBed.inject(Location).back();
+      await vi.waitFor(() => expect(view.router.url).toBe(firstUrl)); await settle(view);
+      expect(panel()).toBe(reusedEditor);
+      expect(view.root.querySelector('[role="dialog"]')).toBeNull();
+      expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+      expect(view.actions.updateSettings).not.toHaveBeenCalled();
+      expect(view.store.snapshot()).toEqual(before);
+      await page.getByRole('button', { name: title, exact: true }).click(); await settle(view);
+      const fresh = page.getByRole('dialog', { name: title, exact: true });
+      expect(fresh.getByRole('checkbox', { name: choice, exact: true }).element()).toHaveProperty('checked', false);
+      await fresh.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view);
+      expect(view.actions.updateSettings).not.toHaveBeenCalled();
+    } finally { view.fixture.destroy(); }
+  });
   it('restores scope, filters, page, detail, scroll and focus through item drill-in and browser Back/Forward', async () => {
     await page.viewport(1100, 850);
     const view = setup();
@@ -95,7 +134,7 @@ describe('energy uses browser journeys', () => {
     await view.router.navigateByUrl('/v1/workspace/facility/facility-a/data/energy-uses'); await settle(view);
     expect(view.router.url).toBe(`${inventoryUrl}?facility=facility-a`);
     await view.router.navigateByUrl(itemUrl); await settle(view);
-    const panel = view.fixture.debugElement.query(By.directive(EnergyUseWorkbenchPanelComponent)).componentInstance as EnergyUseWorkbenchPanelComponent;
+    const panel = view.fixture.debugElement.query(By.directive(EnergyUseSettingsComponent)).componentInstance as EnergyUseSettingsComponent;
     const dirty = vi.spyOn(panel, 'hasUnsavedChanges').mockReturnValue(true);
     vi.spyOn(TestBed.inject(UnsavedChangesService), 'confirmDiscard').mockReturnValue(false);
     expect(await view.navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(false);
@@ -147,7 +186,7 @@ describe('energy uses browser journeys', () => {
     expect(print.querySelectorAll('button,input')).toHaveLength(0);
     await view.router.navigateByUrl(itemUrl); await settle(view);
     expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
-    const panel = view.root.querySelector<HTMLElement>('app-energy-use-workbench-panel section')!;
+    const panel = view.root.querySelector<HTMLElement>('app-energy-use-settings section')!;
     expect(getComputedStyle(panel).borderRadius).toBe('0px');
     await page.screenshot({ element: view.root, path: './__screenshots__/energy-use-workbench-narrow-contrast.png' });
     view.fixture.destroy();

@@ -58,6 +58,8 @@ Feature code reads account-scoped state only through workspace signals and chang
 
 See [Working with application data](docs/data-access-and-workspace.md) for developer-facing decision guidance and examples for reading, editing, selecting, persisting, refreshing, and testing account-scoped data.
 
+V1 Energy Uses retains the existing equipment and group record shapes. Feature-owned typed Settings mappings preserve annual history and apply the existing deterministic footprint calculation only to changed source setup, retaining manual overrides. The shared Data editing session owns autosave and conflict protection. Energy-use commands revalidate durable ownership and reviewed records in native transactions; creating a named group with its first item commits both stores together before one workspace publication. Confirmed meter-group selections determine the item's utilities, with at most one selected group per utility source. Links and utility configuration update together; removing saved utility history requires explicit review, and opening a record never reconciles or rewrites it. No schema or backup migration is introduced.
+
 V1 Data Validation settings persist independent staleness and expected-range preferences on account/facility records. Optional expected-range settings use read-time defaults for older data; JSON backups preserve explicit settings without a data-version increment. Single-facility data validation edits mirror the changed group to the account and facility in one native transaction through `DataValidationSettingsCommandHandler`. Expected-range preferences affect v1 status findings and report alerts while statistical Quality Report data remains unchanged; v0 checks continue to use their existing behavior.
 
 Ordinary single-store access uses `ngx-indexed-db`. Atomic operations spanning multiple stores use the internal native transaction adapter in [`indexed-db-transaction.service.ts`](src/app/data/indexedDB/indexed-db-transaction.service.ts). Transaction operations must use only the adapter's transaction-bound request context; calling an object-store service from inside the operation would open an unrelated transaction.
@@ -172,6 +174,8 @@ Preserve these invariants:
 - Electron-target builds are required for Electron boundary, Electron environment/config, desktop integration, or explicit desktop release validation. Routine web UI and routing changes normally use the production web build unless they touch one of those boundaries.
 
 ## UI architecture
+
+Reports and Energy Uses share progressive creation presentation in [`shared/creation-flow`](src/app/v1/shared/creation-flow/creation-flow.css): choice cards, pinned editable selections, and footer actions. Each feature retains its own typed draft, ownership validation, submission, and navigation. Energy Use creation collects facility, energy-use group (existing or name-only new group), and item name; detailed configuration belongs to Settings. Creation initializes the prior completed fiscal year and default equipment setup through the existing commands without requiring meter readings.
 
 The v1 support panel owns detailed workspace data-check feedback. The header presents delayed background activity and immediate check failures, with a focused action into To-dos. Explicit support requests reveal an overlay within narrow workspaces where the side-by-side panel is hidden; sidebar navigation contains only destinations and attention badges. These presentation states do not control persistence or evaluation timing.
 

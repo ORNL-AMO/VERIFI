@@ -55,6 +55,10 @@ export class DataInventoryComponent implements OnDestroy {
   readonly isFacilities = computed(() => this.activeContent() === 'facilities');
   readonly isMeters = computed(() => this.activeContent() === 'meters');
   private readonly headerActions = inject(InventoryHeaderActionsRegistry);
+  readonly creationAction = computed(() => {
+    const action = this.headerActions.creation();
+    return action?.resource === this.activeContent() ? action : undefined;
+  });
   readonly selectionActions = computed(() => {
     const actions = this.headerActions.current();
     return actions?.resource === this.activeContent() ? actions : undefined;

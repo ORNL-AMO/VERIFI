@@ -1,0 +1,6 @@
+:host { display: block; }
+.energy-use-utilities { display: grid; gap: .75rem; }
+.energy-use-utilities__choice { display: flex; align-items: center; gap: .65rem; padding: .85rem; border: 1px solid var(--v1-border); background: var(--v1-control-surface); color: var(--v1-text); }
+.energy-use-utilities__choice input { width: 1.1rem; height: 1.1rem; accent-color: var(--v1-action); }
+.energy-use-utilities__choice > span { font-size: 1.1rem; font-weight: 700; }
+.energy-use-utilities__choice:has(input:disabled) { color: var(--v1-disabled-control-text); }
