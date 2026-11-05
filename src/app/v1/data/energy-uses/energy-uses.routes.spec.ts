@@ -1,5 +1,8 @@
 import { facilityEnergyUseGroupRoute, facilityEnergyUseRoute, parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { ENERGY_USE_WORKBENCH_ROUTES } from './energy-uses.routes';
+import { inventoryLeaveGuard } from '@app/v1/shell/inventory-leave.guard';
+import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
+import { EnergyUsesInventoryComponent } from './inventory/energy-uses-inventory.component';
 import { unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 
 describe('energy use route contract', () => {
@@ -16,5 +19,6 @@ describe('energy use route contract', () => {
 it('recognizes group routes without treating groups as equipment identifiers', () => {
   const route = facilityEnergyUseGroupRoute('facility-a', 'group-a');
   expect(parseWorkspaceRoute(route.join('/'))).toMatchObject({ facilityGuid: 'facility-a', energyUseGroupGuid: 'group-a', energyUseGuid: undefined, detail: 'energy-uses' });
-  expect(ENERGY_USE_WORKBENCH_ROUTES[0].path).toBe('energy-uses/groups/:energyUseGroupGuid');
+  expect(ENERGY_USE_WORKBENCH_ROUTES[0]).toMatchObject({ path: 'energy-uses/groups/:energyUseGroupGuid', component: DataInventoryComponent,
+    children: [{ path: '', component: EnergyUsesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' }] });
 });

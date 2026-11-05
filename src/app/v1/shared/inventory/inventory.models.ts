@@ -91,20 +91,24 @@ export interface InventoryTile {
   readonly energyUseSnapshot?: InventoryEnergyUseSnapshot;
   readonly energyUseGroupSnapshot?: InventoryEnergyUseGroupSnapshot;
 }
+export interface InventoryMeterGroupLink {
+  readonly guid: string;
+  readonly label: string;
+  /** Unavailable/foreign links retain their identity without offering a destination. */
+  readonly route?: readonly string[];
+}
 export interface InventoryEnergyUseGroupSnapshot {
-  readonly total: number;
-  readonly matching: number;
-  readonly active: number;
-  readonly retired: number;
+  readonly meterGroups?: readonly InventoryMeterGroupLink[];
+  readonly equipmentTypes: readonly { readonly label: string; readonly icon: IconName }[];
+  readonly items: readonly { readonly guid: string; readonly name: string; readonly icon: IconName; readonly route: readonly string[] }[];
   readonly categories: readonly string[];
   readonly sources: readonly string[];
   readonly years: readonly number[];
-  readonly notes: string;
 }
 export interface InventoryEnergyUseSnapshot {
+  readonly meterGroups?: readonly InventoryMeterGroupLink[];
   readonly sources: readonly string[];
   readonly group: string;
-  readonly lifecycle: string;
   readonly years: readonly number[];
   readonly notes: string;
 }

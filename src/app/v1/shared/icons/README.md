@@ -47,7 +47,7 @@ upper unit, pressure gauge, and hose. Its source is
 Use `name="energyUseGroup"` for a collection of energy-use items. Its source is
 [`energy-use-group.svg`](../../../../assets/icons/energy-use-group.svg), with
 collection brackets surrounding a circle, flame, snowflake, and hexagonal
-equipment symbol to distinguish mixed membership from an individual item.
+equipment symbol to distinguish mixed membership from an individual item. Use it for existing/new group choices and pinned group selections in the Add energy use slideout.
 
 Use `name="motor"` for the cylinder motor with rounded end caps, cooling fins,
 and shaft. Its source is [`motor.svg`](../../../../assets/icons/motor.svg).
@@ -70,4 +70,4 @@ the report is unavailable. Workbench headers use the selected switcher option's
 icon. Keep report-icon selection in this shared lookup rather than adding local
 type switches or storing icon names on report records.
 
-Use `energyUseIcon(category)` from the Energy Uses models for item rows, sidebar links, workbench identity, and switcher options. HVAC, Lighting, and Mobile map to AirVentIcon, LampCeilingIcon, and ForkliftIcon; Other and unknown imported categories use ToolsIcon. Icons are derived presentation and are never saved onto equipment records.
+Use `energyUseIcon(category)` from the Energy Uses models for item cards, group type icons, sidebar links, workbench identity, and switcher options. HVAC, Lighting, and Mobile map to AirVentIcon, LampCeilingIcon, and ForkliftIcon; Other and unknown imported categories use UfoIcon. Icons are derived presentation and are never saved onto equipment records.

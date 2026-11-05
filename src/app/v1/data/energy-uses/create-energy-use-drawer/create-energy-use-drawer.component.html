@@ -32,9 +32,9 @@
           }
           <div class="creation-choices">
             @for (group of matchingGroups(); track group.guid) {
-              <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'existing' && form.controls.groupGuid.value === group.guid" (click)="selectGroup(group.guid)"><app-ui-icon name="tools" [size]="28"/><strong>{{ group.name || 'Unnamed energy-use group' }}</strong></button>
+              <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'existing' && form.controls.groupGuid.value === group.guid" (click)="selectGroup(group.guid)"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>{{ group.name || 'Unnamed energy-use group' }}</strong></button>
             }
-            <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'new'" (click)="startNewGroup()"><app-ui-icon name="add" [size]="28"/><strong>Create energy-use group</strong></button>
+            <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'new'" (click)="startNewGroup()"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>Create energy-use group</strong></button>
           </div>
           @if (groups().length && !matchingGroups().length) { <div class="creation-search-empty" role="status"><p>No matching energy-use groups.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="groupSearch.setValue('')">Clear search</button></div> }
         }

@@ -1,5 +1,6 @@
 import type { IconSvgObject } from './icon.types';
 import { CUSTOM_ICONS } from './custom-icons';
+import UfoIcon from '@hugeicons/core-free-icons/UfoIcon';
 import AirVentIcon from '@hugeicons/core-free-icons/AirVentIcon';
 import LampCeilingIcon from '@hugeicons/core-free-icons/LampCeilingIcon';
 import ForkliftIcon from '@hugeicons/core-free-icons/ForkliftIcon';
@@ -116,6 +117,7 @@ import ZoomOutIcon from '@hugeicons/core-free-icons/ZoomOutIcon';
 
 export const ICON_REGISTRY = {
   ...CUSTOM_ICONS,
+  otherEquipment: UfoIcon,
   hvac: AirVentIcon,
   lighting: LampCeilingIcon,
   mobile: ForkliftIcon,

@@ -1,0 +1,6 @@
+:host { display: block; min-width: 0; }
+ul { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+li { display: flex; align-items: flex-start; gap: .35rem; min-width: 0; }
+app-ui-icon { flex: 0 0 auto; margin-top: .1rem; }
+a { color: var(--v1-link); overflow-wrap: anywhere; }
+a:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: 2px; }

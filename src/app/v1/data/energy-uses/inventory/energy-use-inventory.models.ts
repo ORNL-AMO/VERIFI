@@ -1,3 +1,6 @@
+import type { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { facilityMeterGroupRoute } from '@app/v1/routing/workspace-route';
+import type { InventoryMeterGroupLink } from '@app/v1/shared/inventory/inventory.models';
 import { energyUseIcon } from '../models/energy-use-icons';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { IdbFacility } from '@data/models/idbModels/facility';
@@ -31,10 +34,12 @@ export function buildEnergyUseInventory(
   accountGuid: string,
   facilities: readonly Readonly<IdbFacility>[],
   items: readonly Readonly<IdbFacilityEnergyUseEquipment>[],
-  groups: readonly Readonly<IdbFacilityEnergyUseGroup>[]
+  groups: readonly Readonly<IdbFacilityEnergyUseGroup>[],
+  meterGroups: readonly Readonly<IdbUtilityMeterGroup>[] = []
 ): EnergyUseInventoryEntry[] {
   const owners = new Map(facilities.filter(facility => facility.accountId === accountGuid).map(facility => [facility.guid, facility]));
   const groupByOwner = new Map(groups.filter(group => group.accountId === accountGuid).map(group => [JSON.stringify([group.facilityId, group.guid]), group]));
+  const meterGroupsByOwner = new Map(meterGroups.filter(group => group.accountId === accountGuid).map(group => [JSON.stringify([group.facilityId, group.guid]), group]));
   return items.flatMap(item => {
     const facility = owners.get(item.facilityId);
     if (!facility || item.accountId !== accountGuid) return [];
@@ -49,12 +54,17 @@ export function buildEnergyUseInventory(
     const retirementYear = item.noLongerInUse?.year;
     const lifecycle = retired ? `Retired${Number.isInteger(retirementYear) && retirementYear > 0 ? ` in ${retirementYear}` : ''}` : 'Active';
     const availability = !sources.length ? 'No sources configured' : years.length ? 'Saved annual data' : 'No annual data';
-    const snapshot: InventoryEnergyUseSnapshot = {
-      sources, group: group?.name?.trim() || 'Group unavailable', lifecycle,
+    const linkedMeterGroups: InventoryMeterGroupLink[] = [...new Set(item.utilityMeterGroupIds ?? [])].map(guid => {
+      const linked = meterGroupsByOwner.get(JSON.stringify([facility.guid, guid]));
+      return linked ? { guid, label: linked.name?.trim() || 'Untitled meter group', route: facilityMeterGroupRoute(facility.guid, guid) }
+        : { guid, label: 'Meter group unavailable' };
+    }).sort((a, b) => a.label.localeCompare(b.label) || a.guid.localeCompare(b.guid));
+    const snapshot: InventoryEnergyUseSnapshot = { meterGroups: linkedMeterGroups,
+      sources, group: group?.name?.trim() || 'Group unavailable',
       years, notes: item.notes || ''
     };
     return [{ guid: item.guid, icon: energyUseIcon(category), item, facility, name, category, availability, snapshot,
-      searchText: [name, item.notes || '', facility.name, category, ...sources, snapshot.group, availability, lifecycle].join(' ').toLowerCase() }];
+      searchText: [name, item.notes || '', facility.name, category, ...sources, ...linkedMeterGroups.map(group => group.label), snapshot.group, availability, lifecycle].join(' ').toLowerCase() }];
   });
 }
 

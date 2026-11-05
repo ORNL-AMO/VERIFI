@@ -1,7 +1,15 @@
-<dl class="energy-use-snapshot__facts">
-  <div><dt>Lifecycle</dt><dd>{{ snapshot.active }} active, {{ snapshot.retired }} retired</dd></div>
-  <div><dt>Categories</dt><dd>{{ snapshot.categories.join(', ') || 'None' }}</dd></div>
-  <div><dt>Sources</dt><dd>{{ snapshot.sources.join(', ') || 'Not configured' }}</dd></div>
-  <div><dt>Saved annual years</dt><dd>{{ snapshot.years.join(', ') || 'None' }}</dd></div>
-  @if (detailed && snapshot.notes) { <div><dt>Notes</dt><dd>{{ snapshot.notes }}</dd></div> }
-</dl>
+@if (items.length) {
+  <ul class="energy-use-group-snapshot__items" [attr.tabindex]="print ? null : 0" [attr.aria-label]="'Energy uses in ' + groupName">
+    @for (item of items; track item.guid) {
+      <li><a [href]="item.href" [attr.data-browse-id]="print ? null : browseId" (click)="open($event, item.route)"><app-ui-icon [name]="item.icon" [size]="20"/><span>{{ item.name }}</span></a></li>
+    }
+  </ul>
+}
+@if (detailed) {
+  <dl class="energy-use-snapshot__facts">
+    <div><dt>Categories</dt><dd>{{ snapshot.categories.join(', ') || 'None' }}</dd></div>
+    <div><dt>Sources</dt><dd>{{ snapshot.sources.join(', ') || 'Not configured' }}</dd></div>
+    <div><dt>Saved annual years</dt><dd>{{ snapshot.years.join(', ') || 'None' }}</dd></div>
+    <div><dt>Meter groups</dt><dd><app-inventory-meter-group-links [groups]="snapshot.meterGroups" [browseId]="browseId" [print]="print" (navigationRequested)="navigationRequested.emit($event)"/></dd></div>
+  </dl>
+}

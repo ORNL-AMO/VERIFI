@@ -36,7 +36,7 @@ describe('energy uses inventory', () => {
     scope.set('facility-a'); fixture.detectChanges();
     expect(component.entries()).toHaveLength(25); expect(component.inventory.page()).toBe(0);
     component.filtersForm.controls.search.setValue('Pump 00'); fixture.detectChanges();
-    expect(component.filteredEntries()).toHaveLength(1);
+    expect(component.inventory.visibleTiles().map(tile => tile.name)).toEqual(['Pump 00']);
     scope.set(undefined); fixture.detectChanges();
     expect(component.filters().search).toBe(''); expect(component.inventory.page()).toBe(1); expect(component.inventory.detail()).toBe('summary');
     scope.set('facility-a'); fixture.detectChanges(); expect(component.filters().search).toBe('Pump 00');

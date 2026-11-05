@@ -16,6 +16,6 @@ export class EnergyUsesWorkspaceService {
   });
   readonly entries = computed(() => {
     const account = this.account();
-    return account ? buildEnergyUseInventory(account.guid, this.workspace.facilities(), this.workspace.energyUseEquipment(), this.workspace.energyUseGroups()) : [];
+    return account ? buildEnergyUseInventory(account.guid, this.workspace.facilities(), this.workspace.energyUseEquipment(), this.workspace.energyUseGroups(), this.workspace.meterGroups()) : [];
   });
 }

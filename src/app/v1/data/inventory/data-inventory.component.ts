@@ -13,7 +13,7 @@ import { IconName } from '@app/v1/shared/icons/icon-registry';
 
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
-import { inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
+import { inventoryScopeBreadcrumbs, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { InventoryHeaderActionsRegistry } from './inventory-header-actions.service';
 
 interface PortfolioTotals {
@@ -51,7 +51,11 @@ export class DataInventoryComponent implements OnDestroy {
   readonly account = this.workspace.account;
   readonly canWrite = this.workspace.canWrite;
   readonly hasPending = this.workspace.hasPending;
-  readonly activeContent = computed(() => this.navigation.activePortfolioTab() || 'facilities');
+  readonly isEnergyUseGroup = computed(() => !!this.navigation.activeEnergyUseGroupGuid());
+  readonly energyUseGroup = computed(() => this.isEnergyUseGroup() ? this.workspace.energyUseGroups().find(group =>
+    group.guid === this.navigation.activeEnergyUseGroupGuid() && group.accountId === this.account()?.guid
+    && group.facilityId === this.navigation.headerFacility()?.guid) : undefined);
+  readonly activeContent = computed(() => this.isEnergyUseGroup() ? 'energy-uses' : this.navigation.activePortfolioTab() || 'facilities');
   readonly isFacilities = computed(() => this.activeContent() === 'facilities');
   readonly isMeters = computed(() => this.activeContent() === 'meters');
   private readonly headerActions = inject(InventoryHeaderActionsRegistry);
@@ -72,18 +76,29 @@ export class DataInventoryComponent implements OnDestroy {
     return facilityGuid ? this.navigation.facilitySettingsRoute(facilityGuid, 'data-validation')
       : account ? this.navigation.accountSettingsRoute(account.guid, 'data-validation') : [];
   });
-  readonly title = computed(() => ({
+  readonly title = computed(() => this.isEnergyUseGroup()
+    ? this.navigation.activeEnergyUseGroupGuid() === 'unavailable' ? 'Group unavailable' : this.energyUseGroup()?.name?.trim() || 'Energy-use group'
+    : ({
     facilities: 'Facilities', meters: 'Meters', predictors: 'Predictors',
     'energy-uses': 'Energy Uses'
   })[this.activeContent()]);
-  readonly headerIcon = computed(() => ({
+  readonly headerIcon = computed<IconName>(() => this.isEnergyUseGroup() ? 'energyUseGroup' : ({
     facilities: 'facility', meters: 'meter', predictors: 'predictor',
     'energy-uses': 'tools'
   } satisfies Record<AccountPortfolioTab, IconName>)[this.activeContent()]);
   readonly isCreateMeterDrawerOpen = signal(false);
   readonly headerGapCollapsed = computed(() => this.sticky()?.collapsed() ?? false);
-  readonly breadcrumbs = computed(() => inventoryScopeBreadcrumbs(this.account()?.name ?? 'Account',
-    this.workspace.facilities().find(facility => facility.guid === this.navigation.inventoryFacilityGuid())?.name, this.navigation.isSingleSiteWorkspace()));
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
+    if (this.isEnergyUseGroup()) {
+      const facility = this.navigation.headerFacility();
+      const account = this.account();
+      if (!account || !facility) return [];
+      return [...inventoryScopeBreadcrumbs(account.name, facility.name, this.navigation.isSingleSiteWorkspace()),
+        { label: 'Energy Uses', icon: 'tools', ...this.navigation.facilityInventoryLink(facility.guid, 'energy-uses') }];
+    }
+    return inventoryScopeBreadcrumbs(this.account()?.name ?? 'Account',
+      this.workspace.facilities().find(facility => facility.guid === this.navigation.inventoryFacilityGuid())?.name, this.navigation.isSingleSiteWorkspace());
+  });
   readonly meterNavigationError = signal('');
   readonly isCreateFacilityDrawerOpen = signal(false);
   private readonly creationContext = computed(() => JSON.stringify([

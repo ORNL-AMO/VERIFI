@@ -67,7 +67,7 @@ export class CreateEnergyUseDrawerComponent {
     const values = this.values(), step = this.step();
     const selections: { id: 'facility' | 'group'; label: string; icon: IconName; editable: boolean; active: boolean }[] = [];
     if (values.facilityGuid) selections.push({ id: 'facility', label: this.facility()?.name || 'Facility unavailable', icon: 'facility', editable: !this.fixedFacilityGuid(), active: step === 'facility' });
-    if (values.groupKind) selections.push({ id: 'group', label: values.groupKind === 'new' ? values.groupName?.trim() || 'New energy-use group' : this.selectedGroup()?.name || 'Group unavailable', icon: 'tools', editable: true, active: step === 'group' || step === 'new-group' });
+    if (values.groupKind) selections.push({ id: 'group', label: values.groupKind === 'new' ? values.groupName?.trim() || 'New energy-use group' : this.selectedGroup()?.name || 'Group unavailable', icon: 'energyUseGroup', editable: true, active: step === 'group' || step === 'new-group' });
     return selections;
   });
   private readonly stepHeading = viewChild<ElementRef<HTMLElement>>('stepHeading');
