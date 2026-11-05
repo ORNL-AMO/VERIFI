@@ -4,6 +4,22 @@ import { portfolioTile } from '../inventory.testing';
 import { InventoryTileComponent } from './inventory-tile.component';
 
 describe('portfolio tile interactions and additive details', () => {
+  it('uses distinct type icons instead of count text for group cards and icon links in Summary', () => {
+    TestBed.configureTestingModule({ imports: [InventoryTileComponent], providers: [provideRouter([])] });
+    const fixture = TestBed.createComponent(InventoryTileComponent);
+    fixture.componentRef.setInput('tile', portfolioTile('group', { name: 'Production', status: { tone: 'neutral', icon: 'info', label: '2 of 2 energy uses' },
+      energyUseGroupSnapshot: { categories: ['Pump', 'Other'], sources: [], years: [],
+        equipmentTypes: [{ label: 'Pump', icon: 'pump' }, { label: 'Other', icon: 'otherEquipment' }],
+        items: [{ guid: 'pump', name: 'Pump A', icon: 'pump', route: ['/pump', 'settings'] }] } }));
+    fixture.detectChanges(); const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).not.toContain('2 of 2');
+    expect([...root.querySelectorAll('.portfolio-tile__equipment-types [role="img"]')].map(icon => icon.getAttribute('aria-label'))).toEqual(['Pump', 'Other']);
+    expect(root.querySelector('.energy-use-group-snapshot__items')).toBeNull();
+    fixture.componentRef.setInput('level', 'summary'); fixture.detectChanges();
+    expect(root.querySelector('.energy-use-group-snapshot__items a')?.getAttribute('href')).toBe('/pump/settings'); expect(root.querySelector('dl')).toBeNull();
+    fixture.componentRef.setInput('level', 'detailed'); fixture.detectChanges(); expect(root.textContent).not.toContain('Lifecycle'); fixture.destroy();
+  });
+
   function setup() {
     TestBed.configureTestingModule({ imports: [InventoryTileComponent], providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(InventoryTileComponent);

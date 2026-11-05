@@ -21,6 +21,20 @@ import { join } from 'path';
     <app-ui-icon name="betterPlantsReport" [size]="16" [decorative]="false" label="Better Plants report"></app-ui-icon>
     <app-ui-icon name="facilityAnalysisReport" [size]="24" [decorative]="false" label="Facility analysis report"></app-ui-icon>
     <app-ui-icon name="facilityAnalysisReport" [size]="20" [strokeWidth]="2" [decorative]="false" label="Facility analysis report override"></app-ui-icon>
+    <app-ui-icon name="pump" [size]="16" [decorative]="false" label="Pump"></app-ui-icon>
+    <app-ui-icon name="fan" [size]="24" [decorative]="false" label="Fan"></app-ui-icon>
+    <app-ui-icon name="fan" [size]="32" [strokeWidth]="2" [decorative]="false" label="Fan override"></app-ui-icon>
+    <app-ui-icon name="processHeating" [size]="16" [decorative]="false" label="Process heating"></app-ui-icon>
+    <app-ui-icon name="processCooling" [size]="24" [decorative]="false" label="Process cooling"></app-ui-icon>
+    <app-ui-icon name="processCooling" [size]="32" [strokeWidth]="2" [decorative]="false" label="Process cooling override"></app-ui-icon>
+    <app-ui-icon name="steam" [size]="24" [decorative]="false" label="Steam"></app-ui-icon>
+    <app-ui-icon name="steam" [size]="16" [strokeWidth]="2" [decorative]="false" label="Steam override"></app-ui-icon>
+    <app-ui-icon name="compressedAir" [size]="24" [decorative]="false" label="Compressed air"></app-ui-icon>
+    <app-ui-icon name="compressedAir" [size]="16" [strokeWidth]="2" [decorative]="false" label="Compressed air override"></app-ui-icon>
+    <app-ui-icon name="energyUseGroup" [size]="24" [decorative]="false" label="Energy-use group"></app-ui-icon>
+    <app-ui-icon name="energyUseGroup" [size]="16" [strokeWidth]="2" [decorative]="false" label="Energy-use group override"></app-ui-icon>
+    <app-ui-icon name="motor" [size]="24" [decorative]="false" label="Motor"></app-ui-icon>
+    <app-ui-icon name="motor" [size]="16" [strokeWidth]="2" [decorative]="false" label="Motor override"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -42,8 +56,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(8);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(8);
+    expect(icons.length).toBe(22);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(22);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -81,7 +95,21 @@ describe('IconComponent', () => {
     { file: 'verifi-chart.svg', index: 4, label: 'Visualization', size: '24', stroke: '2' },
     { file: 'better-plants-report.svg', index: 5, label: 'Better Plants report', size: '16', stroke: '1.75' },
     { file: 'facility-analysis-report.svg', index: 6, label: 'Facility analysis report', size: '24', stroke: undefined },
-    { file: 'facility-analysis-report.svg', index: 7, label: 'Facility analysis report override', size: '20', stroke: '2' }
+    { file: 'facility-analysis-report.svg', index: 7, label: 'Facility analysis report override', size: '20', stroke: '2' },
+    { file: 'pump.svg', index: 8, label: 'Pump', size: '16', stroke: undefined },
+    { file: 'fan.svg', index: 9, label: 'Fan', size: '24', stroke: undefined },
+    { file: 'fan.svg', index: 10, label: 'Fan override', size: '32', stroke: '2' },
+    { file: 'process-heating.svg', index: 11, label: 'Process heating', size: '16', stroke: undefined },
+    { file: 'process-cooling.svg', index: 12, label: 'Process cooling', size: '24', stroke: undefined },
+    { file: 'process-cooling.svg', index: 13, label: 'Process cooling override', size: '32', stroke: '2' },
+    { file: 'steam.svg', index: 14, label: 'Steam', size: '24', stroke: undefined },
+    { file: 'steam.svg', index: 15, label: 'Steam override', size: '16', stroke: '2' },
+    { file: 'compressed-air.svg', index: 16, label: 'Compressed air', size: '24', stroke: undefined },
+    { file: 'compressed-air.svg', index: 17, label: 'Compressed air override', size: '16', stroke: '2' },
+    { file: 'energy-use-group.svg', index: 18, label: 'Energy-use group', size: '24', stroke: undefined },
+    { file: 'energy-use-group.svg', index: 19, label: 'Energy-use group override', size: '16', stroke: '2' },
+    { file: 'motor.svg', index: 20, label: 'Motor', size: '24', stroke: undefined },
+    { file: 'motor.svg', index: 21, label: 'Motor override', size: '16', stroke: '2' }
   ])('renders $file through the same themed, accessible icon API', ({ file, index, label, size, stroke }) => {
     const source = readFileSync(join(process.cwd(), 'src/assets/icons', file), 'utf8');
     const document = new DOMParser().parseFromString(source, 'image/svg+xml');
@@ -96,6 +124,17 @@ describe('IconComponent', () => {
     expect([...host.querySelectorAll('path')].map(path => path.getAttribute('stroke-width')))
       .toEqual(sourcePaths.map(path => stroke ?? path.getAttribute('stroke-width') ?? document.documentElement.getAttribute('stroke-width')));
     expect(host.querySelector('path')?.getAttribute('stroke-linecap')).toBe('round');
+    const sourceShapes = [...document.querySelectorAll('circle, rect, ellipse')];
+    const renderedShapes = [...host.querySelectorAll('circle, rect, ellipse')];
+    const geometryAttributes = ['cx', 'cy', 'r', 'x', 'y', 'width', 'height', 'rx', 'ry'];
+    expect(renderedShapes.map(shape => [shape.tagName, ...geometryAttributes.map(attribute => shape.getAttribute(attribute))]))
+      .toEqual(sourceShapes.map(shape => [shape.tagName, ...geometryAttributes.map(attribute => shape.getAttribute(attribute))]));
+    expect(renderedShapes.map(shape => shape.getAttribute('stroke-width')))
+      .toEqual(sourceShapes.map(shape => stroke ?? shape.getAttribute('stroke-width') ?? document.documentElement.getAttribute('stroke-width')));
+    for (const shape of renderedShapes) {
+      expect(shape.getAttribute('stroke')).toBe('currentColor');
+      expect(shape.getAttribute('fill')).toBe('none');
+    }
   });
 
   it('maps the spreadsheet columns icon to LayoutTable01Icon', () => {

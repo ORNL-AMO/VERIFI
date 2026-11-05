@@ -11,14 +11,15 @@ describe('energy use cards', () => {
     const fixture = TestBed.createComponent(InventoryTileComponent);
     fixture.componentRef.setInput('tile', { guid: entry.guid, name: entry.name, icon: 'tools', chip: entry.category,
       route: ['/energy', entry.guid, 'settings'], owner: { facilityGuid: entry.facility.guid, label: entry.facility.name, route: ['/inventory'] },
-      status: { tone: 'neutral', icon: 'info', label: entry.availability }, energyUseSnapshot: entry.snapshot });
+      status: { tone: 'neutral', icon: 'info', label: '' }, energyUseSnapshot: entry.snapshot });
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('North plant'); expect(root.textContent).toContain('Saved annual data');
+    expect(root.textContent).toContain('North plant'); expect(root.textContent).not.toContain('Saved annual data');
+    expect(root.querySelector('.portfolio-tile__status')).toBeNull();
     expect(root.querySelector('.portfolio-tile__name')?.getAttribute('href')).toBe('/energy/energy-a/settings');
     expect(root.querySelector('dl')).toBeNull();
     fixture.componentRef.setInput('level', 'summary'); fixture.detectChanges();
-    expect(root.textContent).toContain('Production'); expect(root.textContent).toContain('Electricity'); expect(root.textContent).toContain('Active');
+    expect(root.textContent).toContain('Production'); expect(root.textContent).toContain('Electricity'); expect(root.textContent).not.toContain('Active'); expect(root.textContent).not.toContain('Lifecycle'); expect(root.textContent).toContain('Meter groups');
     expect(root.textContent).not.toContain('Saved notes');
     fixture.componentRef.setInput('level', 'detailed'); fixture.detectChanges();
     expect(root.textContent).toContain('2024'); expect(root.textContent).toContain('Saved notes');

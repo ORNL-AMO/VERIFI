@@ -35,6 +35,16 @@ function setup(url = metersUrl) {
 }
 
 describe('WorkspaceContextService', () => {
+  it('distinguishes group drill-in, item drill-in, peer groups, and canceled group navigation', () => {
+    const { context, accept, events } = setup('/v1/workspace/account/account-a/data/portfolio/energy-uses');
+    const group = '/v1/workspace/facility/facility-a/data/energy-uses/groups/group-a';
+    accept(group); expect(context.activeEnergyUseGroupGuid()).toBe('group-a'); expect(context.activeEnergyUseGuid()).toBeUndefined(); expect(context.routeMotion()).toBe('drill-in');
+    accept('/v1/workspace/facility/facility-a/data/energy-uses/energy-a/settings'); expect(context.routeMotion()).toBe('drill-in');
+    events.next(new NavigationCancel(3, group, 'Blocked')); expect(context.activeEnergyUseGuid()).toBe('energy-a');
+    accept(group); expect(context.routeMotion()).toBe('drill-out');
+    accept(group.replace('group-a', 'group-b')); expect(context.routeMotion()).toBe('peer');
+  });
+
   it('tracks energy-use ownership and drill motion only after accepted navigation', () => {
     const { context, store, snapshot, accept, events } = setup('/v1/workspace/account/account-a/data/portfolio/energy-uses');
     store.publish({ ...snapshot, energyUseEquipment: [energyUseItem(), energyUseItem({ guid: 'energy-b', facilityId: 'facility-b' })] });

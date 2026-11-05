@@ -2,17 +2,18 @@
 
 ## Purpose and delivery
 
-Migrate Energy Uses into the existing v1 Data workflow as an inventory of individual energy uses. An item may represent equipment, a system, or a process.
+Migrate Energy Uses into the existing v1 Data workflow as a group-first inventory of individual energy uses. An item may represent equipment, a system, or a process.
 
 Use the meter/predictor inventory and workbench patterns, with one **Setup** tab that autosaves equipment settings and annual data together. Support estimation independently of meter readings.
 
-This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Broader grouping remains a separate planning effort.
+This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 3A adds group browsing; broader group management remains a separate planning effort.
 
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Inventory and workspace navigation | Complete |
 | 2 | Creation, Settings, and safe commands | Merged into `unified-ux` |
-| 3 | Combined Setup, annual data, and estimation | Implemented and validated; PR review pending |
+| 3 | Combined Setup, annual data, and estimation | Merged |
+| 3A | Group browsing, nested navigation, and equipment icons | Implemented and validated locally; publication checkpoint pending |
 | 4 | Complete item tools and charts | Planned |
 | 5 | Export, compatibility, and release acceptance | Planned |
 
@@ -20,7 +21,7 @@ This roadmap records the agreed target experience, not shipped behavior. Work th
 
 - Keep production UI under [`src/app/v1/data/energy-uses/`](../src/app/v1/data/energy-uses/), using feature-owned inventory projections, a collection workspace service, and a route-scoped workbench context. Reuse shared inventory, workbench, navigation, chart, and modal presentation. Follow the [Data workbench architecture norms](unified-ux-migration.md#production-v1-data-workbench-architecture-norms).
 - Continue using the existing [equipment](../src/app/data/models/idbModels/facilityEnergyUseEquipment.ts) and [group](../src/app/data/models/idbModels/facilityEnergyUseGroups.ts) records. Keep their persisted names, GUID relationships, annual arrays, and backup formats. No database schema or data-version migration is planned.
-- Every item retains its required energy-use group relationship. Present items in a flat inventory without regrouping existing records. Energy-use grouping and optional utility meter-group links remain separate relationships.
+- Every item retains its required energy-use group relationship. Browse existing groups as cards and their members as paginated item cards, without regrouping or rewriting existing records. Energy-use grouping and optional utility meter-group links remain separate relationships.
 - Add typed Energy Use settings, annual-data, creation, and command contracts. The combined Setup editor uses one [shared Data editing session](v1-data-form-architecture-roadmap.md) for serialized autosave, reconciliation, failed drafts, and navigation protection.
 - Route writes through `WorkspaceCommandBoundary` and the existing [energy-use handler](../src/app/data/account-workspace/handlers/energy-use-command-handler.service.ts). Resolve current records inside queued commands; compound operations commit atomically and publish once. Follow the [workspace data workflow](data-access-and-workspace.md).
 - Reuse deterministic calculations from [`src/app/domain/calculations/energy-footprint/`](../src/app/domain/calculations/energy-footprint/). Rebuild legacy presentation and forms in v1; extract reusable helpers and file-writing logic into neutral layers where needed. Production v1 must not import v0 presentation or prototype code.
@@ -64,6 +65,19 @@ Extend the existing editor into one Setup tab, retaining `/settings` and removin
 - Opening a record never recalculates or rewrites saved values.
 
 **Completion:** A user can create an energy use, enter annual assumptions, override consumption, reopen it, and recover the same saved values.
+
+### Phase 3A — Group browsing and equipment icons
+
+Deliver one combined Phase 3A PR against `unified-ux` on the merged Phase 3 baseline. Browsing, navigation, icons, and the accepted UI refinements are reviewed and validated together; the original three local slices are retained as historical implementation evidence below.
+
+- Replace individual item cards with existing energy-use group cards, retaining empty groups, scope, search, sorting, detail levels, and pagination. Show one icon per equipment type instead of item-count status text. Summary is a list of matching items with their icons and direct workbench links; Detailed adds sources, saved years, and the deduplicated linked utility meter groups. V1 hides energy-use group notes; group and item cards omit lifecycle fields while lifecycle filtering remains available. Keep large member lists scrollable; consumption rollups remain deferred.
+- Open facility-owned groups at `data/energy-uses/groups/:energyUseGroupGuid`; keep existing item Setup URLs. Search group and item metadata consistently and carry dashboard filters into the group dashboard of individual energy-use cards, paginated at 24 cards. Reuse the same Data inventory header, breadcrumbs, search, detail levels, and grid at both levels. Restore filters, page, scroll, and focus separately at each level.
+- Keep orphaned items discoverable through a read-only `unavailable` group bucket. Add energy use preselects the current group and facility through the existing creation workflow. No group management or relationship repair is introduced.
+- Nest sidebar links as Energy Uses → group → items. Groups start collapsed; accepted item navigation opens its group. Cap each expanded preview at 20 items, retaining the current item, and provide View all. Keep disclosure state in memory. Add group breadcrumbs and scope Setup switching to the current group.
+- Apply reviewed custom equipment icons, including Motor, and Hugeicons AirVent, LampCeiling, and Forklift for HVAC, Lighting, and Mobile. Use Ufo for Other/unknown categories and the collection icon for groups, through one category lookup.
+- Review browsing, then navigation, then icons/layout. Cover 100 groups and 1,000 items, ownership, missing groups, empty groups, sparse history, extra sources, retirement, Back/Forward, guarded exits, keyboard/focus, responsive layouts, themes, and printing. Complete focused tests, app type-check, production web build, and pre-PR full suites; no Electron boundary is changed.
+
+**Completion:** Large inventories are navigable through group cards and nested item-card dashboards, with bounded sidebar previews and unchanged committed data. Phase 4 bulk actions and comparisons continue to target individual equipment GUIDs from the group item dashboards.
 
 ### Phase 4 — Complete item tools and charts
 
@@ -252,9 +266,80 @@ Stack assembly validation (2026-11-05):
 
 The isolated checkout excludes unrelated custom-icon edits, so its fast-test total differs from the iteration checkout above. Existing browser-support, stylesheet-budget, and CommonJS warnings remain. Native Electron OS integration was not exercised.
 
+## Phase 3A delivery evidence
+
+### Initial group-list iteration
+
+Initially implemented as three local dependent branches: `codex/energy-uses-group-browsing` → `codex/energy-uses-group-navigation` → `codex/energy-uses-group-icons-acceptance`. The stack was rebased cleanly onto Phase 3 acceptance head `fe6940b63` after its history-reconciliation review fixes arrived. Phase 3 was still WIP at this checkpoint; no Phase 3 branches or unrelated iteration-worktree files were changed.
+
+Group cards retain empty groups and describe committed inventory metadata. Facility-qualified identities keep equal group names separate; orphaned items remain accessible in the read-only unavailable bucket. Group lists page 24 items, transfer dashboard filters, preselect creation, and restore history independently. Sidebar groups expose at most 20 item links plus View all, retain the active item, preserve manual collapse during publication, and open after accepted item navigation. Setup switching and breadcrumbs follow group membership. Icons use the reviewed custom SVGs and selected Hugeicons through one category lookup.
+
+Validation on the refreshed stack (2026-11-05):
+
+| Check | Result |
+| --- | --- |
+| Exact-comparison validation planner, all three slices | Passed. |
+| `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
+| Group browsing slice | 32 focused fast tests and 7 Chromium journeys passed before the upstream refresh. |
+| Group navigation slice | 142 focused fast tests and 9 Chromium journeys passed before the upstream refresh. |
+| Equipment icons and feature checks | 209 focused fast tests passed, including SVG geometry, stroke widths, labels, and unknown-category fallback. |
+| `npm run test:all:ci`, refreshed Phase 3 base | Passed: 3,473 fast tests and 381 Chromium tests. |
+| Final focused Chromium journeys | 11 passed, including an additional cross-facility unavailable-group history probe added after the full-suite bundle compiled. |
+| `npm run build-prod` | Passed for each slice, including the final refreshed stack. |
+| Local comparison review and `git diff --check` | No actionable findings; whitespace checks passed. |
+| Visual and interaction evidence | Inspected desktop light and narrow dark/high-contrast cards and group lists, equipment icons, nested sidebar, keyboard disclosure, long labels, internal table scrolling, and Back/Forward focus restoration. Existing print-card controls remain covered. |
+
+The scale fixtures cover 100 groups and 1,000 items; the rendered 1,000-item group remains capped at 24 table rows and the active sidebar preview at 20 item links. Browsing and navigation preserve committed workspace snapshots. Visual review caught and corrected unreadable narrow columns and inherited nested-chevron rotation.
+
+Initial restricted Angular test/build processes exited 134; permitted reruns passed. Initial template and test-fixture compilation errors were corrected before the passing checks. Browser-support, stylesheet-budget, and CommonJS build warnings remain; the full browser suite also logs duplicate-key warnings from meter fixtures. Native print-dialog and Electron OS checks were not exercised. No Electron, schema, calculation, persistence-command, or file-format boundary changed. Screenshot artifacts remain local and excluded from the stack.
+
+At this historical checkpoint, publication was paused for local review and Phase 3 was still open. Phase 3 has since merged; the final delivery is one combined PR against `unified-ux`, as specified above.
+
+### Nested card-dashboard iteration
+
+The group drill-in now reuses the same Data inventory host and shared card grid as the group dashboard. Its header shows account/facility context, the Energy Uses breadcrumb, the current group title, Add energy use, and Upload data. Both levels retain search, filters, detail controls, 24-card pagination, and independent browse restoration. The group-specific table, header markup, and styles are removed. Other equipment and unknown imported categories use Hugeicons `UfoIcon` through the shared category lookup.
+
+Focused follow-up checks passed: 50 fast tests and 12 Chromium checks, including the 1,000-item card dashboard, desktop/narrow themes, shared sticky header behavior, creation preselection, orphan-group ownership, and Back/Forward restoration. Moving the routed child below the shared header exposed a history-trigger timing regression: the form retained its saved filters, but late route emissions reapplied the dashboard query. Falling back to the last accepted navigation trigger fixes hydration, and the regression journey now verifies the saved filters before navigating Back. The app TypeScript check passed. The production web build passed with existing browser-support, stylesheet-budget, and CommonJS warnings. The restricted focused test startup exited 134; its permitted rerun passed.
+
+The original full-stack evidence above predates this feedback iteration; full suites and Electron checks were not repeated for this focused renderer change. No persisted data or calculation contract changed. Screenshot artifacts remain local and excluded from commits.
+
+### Group-card summary iteration
+
+Group cards now replace count status text with one accessible icon per distinct saved equipment category, using the shared lookup and UFO fallback. Summary shows matching items as icon/name links to canonical Setup routes, without the group facts grid. Detailed retains the member links and saved group facts. Long member lists scroll within the card and expand normally for printing. Workbench links use the feature navigation boundary, preserve modifier-click behavior, and omit dashboard filter query parameters; group-title links still carry dashboard filters into the group dashboard.
+
+Focused validation: 29 fast tests and 13 Chromium checks passed, including icon deduplication, empty groups, filtered member links, direct keyboard navigation, Back restoration, responsive themes, and print presentation. App TypeScript and whitespace checks passed. Visual inspection confirmed the type strip and link-only Summary at desktop and narrow high-contrast sizes. The production web build passed with the existing browser-support, stylesheet-budget, and CommonJS warnings. Full suites were not repeated for this focused presentation change.
+
+### Card metadata and utility-link iteration
+
+V1 no longer displays energy-use group notes on group pages or cards. Group notes remain saved for compatibility and v0; individual equipment notes are unaffected. Both group and equipment cards omit Lifecycle. Equipment cards omit the redundant Saved annual data status note and show their linked utility meter groups, and group Detailed cards show the deduplicated union across all members. Summary group cards remain item-link lists. Group links use the existing meter-group workbench routes and icons; missing or foreign references retain a non-link unavailable label without revealing foreign names or changing saved relationships. Empty link lists show None linked.
+
+Focused follow-up validation passed: 33 fast tests and 17 Chromium checks cover ownership, missing references, deduplication, links, modifier clicks, printing, hidden group notes/lifecycle, responsive themes, and unchanged workspace snapshots. The app TypeScript and whitespace checks passed. Visual inspection confirmed group meter links and the simplified metadata at desktop and narrow high-contrast widths. The production web build passed with the existing browser-support, stylesheet-budget, and CommonJS warnings. V0, persisted models, commands, calculations, and file formats are unchanged; full suites were not repeated for this focused renderer change.
+
+
+### Final combined-PR review and cleanup
+
+After Phase 3 merged, delivery changed to one combined Phase 3A PR against `unified-ux`. The final implementation includes the nested card dashboards, linked item summaries, meter-group links, approved equipment icons, and creation-slideout group icons described above.
+
+The combined review found two browser-test navigation fixtures missing the group-context accessor used by the shared inventory header. Updating the shared inventory fixture and meter-creation fixture resolved all 14 failures. The dead-code sweep removed obsolete group-count/lifecycle/note presentation fields, a duplicate filtered-member projection, the unused flat-item dashboard filtering branch, and an unused import/export. Saved notes and retirement data, note searching, lifecycle filtering, v0 behavior, and the live combined Setup form helpers are preserved. The earlier group table markup and styles were already removed during UI iteration.
+
+Final validation (2026-11-05):
+
+| Check | Result |
+| --- | --- |
+| Validation planner over the complete 73-file comparison | Passed; local screenshot artifacts excluded. |
+| Focused card/group fast tests | 33 passed. |
+| Previously failing inventory/meter-creation Chromium suites | 14 passed. |
+| `npm run test:all:ci` | Passed: 3,483 fast tests and 384 Chromium tests. |
+| `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
+| `npm run build-prod` | Passed with the existing browser-support, stylesheet-budget, and CommonJS warnings. |
+| Final comparison review and `git diff --check` | No actionable findings; whitespace checks passed. |
+| Advisory unused-local scan | No diagnostics in changed files; repository-wide strict unused-local checking still reports existing diagnostics in unchanged files. |
+
+The first combined review full-suite run had 14 fixture failures; the focused repair and final full suite passed. An earlier review build generated bundles but returned a nonzero status without a compiler error; confirmation and final production builds passed. Existing scale, ownership, no-write browsing, Back/Forward, rejected-navigation, focus, theme, narrow-layout, and print-markup journeys passed in the final suite. Native print-dialog and Electron OS integration remain untested because no native boundary changed. Generated screenshots were deleted after validation; the earlier local branches remain outside the combined PR. Publication awaits the local review checkpoint required by the [PR creation guide](agents/github-pr-creation.md).
+
 ## Defaults and deferred work
 
 - Retain **Energy Uses** and use **energy use** for an individual item; retain existing stored equipment terminology.
 - Simple creation uses the existing default source. Settings permits additions up to the established two-source limit while retaining existing/imported extra sources without truncation.
 - Existing retirement and missing-year propagation inconsistencies are documented separately from formula changes. This migration preserves history and avoids introducing retirement-adjusted item rollups.
-- A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility summaries, footprint balances, and Sankey views.
+- Phase 3A introduces read-only group browsing. A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility consumption summaries, footprint balances, and Sankey views.

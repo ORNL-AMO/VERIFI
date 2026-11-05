@@ -1,3 +1,5 @@
+import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
+import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
 import { Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { PortalModule } from '@angular/cdk/portal';
@@ -23,20 +25,21 @@ import { V1Routes } from '@app/v1/v1.routes';
 import { EnergyUsesInventoryComponent } from './energy-uses-inventory.component';
 import { EnergyUseSettingsComponent } from '../energy-use-workbench/settings/energy-use-settings.component';
 import { EnergyUseActionsService } from '../energy-use-actions.service';
-import { energyUseItem, energyUseSource, energyUsesSnapshot } from '../energy-uses.testing';
+import { energyUseGroup, energyUseItem, energyUseSource, energyUsesSnapshot } from '../energy-uses.testing';
 
 const inventoryUrl = '/v1/workspace/account/account-a/data/portfolio/energy-uses';
 const itemUrl = '/v1/workspace/facility/facility-a/data/energy-uses/energy-00/settings';
-@Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%"><router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
-class EnergyUsesBrowserHost { readonly modal = inject(ModalPortalService); }
+@Component({ standalone: true, imports: [RouterOutlet, PortalModule, SectionNavModule], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%">@if (showNav()) { <div style="width:16rem;max-width:100%"><app-section-nav/></div> }<router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
+class EnergyUsesBrowserHost { readonly showNav = signal(false); readonly modal = inject(ModalPortalService); }
 
 function setup(single = false) {
   const store = new AccountWorkspaceStore();
-  const base = energyUsesSnapshot(Array.from({ length: 50 }, (_, index) => energyUseItem({
+  const initial = energyUsesSnapshot(Array.from({ length: 50 }, (_, index) => energyUseItem({
     guid: `energy-${String(index).padStart(2, '0')}`, name: `Pump ${String(index).padStart(2, '0')}`,
-    facilityId: index === 49 ? 'facility-b' : 'facility-a',
+    energyUseGroupId: `group-${String(index).padStart(2, '0')}`, facilityId: index === 49 ? 'facility-b' : 'facility-a',
     ...(index === 0 ? { utilityData: [energyUseSource(), energyUseSource({ energySource: 'Natural Gas' }), energyUseSource({ energySource: 'Other Energy' })] } : {})
   })));
+  const base = { ...initial, energyUseGroups: initial.energyUseEquipment.map(item => energyUseGroup({ guid: item.energyUseGroupId, facilityId: item.facilityId, name: item.name })) };
   const snapshot = single ? { ...base, account: { ...base.account, isSingleFacilityCompany: true }, facilities: [base.facilities[0]],
     energyUseEquipment: base.energyUseEquipment.filter(item => item.facilityId === 'facility-a') } : base;
   store.publish(snapshot);
@@ -71,6 +74,137 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it('hides saved group notes and card lifecycle fields while showing linked meter groups on group and item cards', async () => {
+    const view = setup();
+    const first = { ...getNewIdbUtilityMeterGroup('Energy', 'Electricity meters', 'facility-a', 'account-a'), guid: 'meter-group-a' };
+    const second = { ...first, guid: 'meter-group-b', name: 'Gas meters' };
+    view.store.publish({ ...view.snapshot, meterGroups: [first, second], energyUseGroups: [energyUseGroup({ notes: 'Stored group notes stay hidden' })], energyUseEquipment: [
+      energyUseItem({ utilityMeterGroupIds: ['meter-group-a', 'meter-group-b'], noLongerInUse: { isNoLongerInUse: true, year: 2024 } }), energyUseItem({ guid: 'fan', name: 'Fan B', equipmentType: 'Fan' })] });
+    const before = structuredClone(view.store.snapshot());
+    await view.router.navigateByUrl(inventoryUrl); await settle(view); view.inventory().inventory.detailControl.setValue('detailed'); await settle(view);
+    const groupCard = view.root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
+    expect(view.root.textContent).not.toContain('Stored group notes stay hidden'); expect(groupCard.textContent).not.toContain('Lifecycle');
+    const links = [...groupCard.querySelectorAll<HTMLAnchorElement>('app-inventory-meter-group-links a')];
+    expect(links.map(link => link.textContent)).toEqual(['Electricity meters', 'Gas meters']);
+    expect(links[0].getAttribute('href')).toBe('/v1/workspace/facility/facility-a/data/meter-grouping/meter-group-a/monthly-table');
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      await page.screenshot({ element: view.root, path: `./__screenshots__/energy-use-group-meter-links-${width}.png` });
+    }
+    groupCard.querySelector<HTMLAnchorElement>('.portfolio-tile__name')!.click(); await settle(view);
+    expect(view.root.textContent).not.toContain('Stored group notes stay hidden');
+    const pump = [...view.root.querySelectorAll<HTMLElement>('.portfolio-inventory .portfolio-tile')].find(card => card.querySelector('.portfolio-tile__name')?.textContent === 'Pump A')!;
+    expect(pump.textContent).not.toContain('Lifecycle'); expect(pump.textContent).not.toContain('Retired in 2024'); expect(pump.textContent).toContain('Saved notes');
+    expect(pump.textContent).not.toContain('Saved annual data'); expect(pump.querySelector('.portfolio-tile__status')).toBeNull();
+    expect(pump.querySelectorAll('app-inventory-meter-group-links a')).toHaveLength(2);
+    expect(view.store.snapshot()).toEqual(before); view.fixture.destroy();
+  });
+
+  it('shows distinct group type icons, makes Summary an item-link list, and opens a workbench directly', async () => {
+    const view = setup();
+    view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup(), energyUseGroup({ guid: 'empty', name: 'Unused group' })], energyUseEquipment: [
+      energyUseItem(), energyUseItem({ guid: 'pump-b', name: 'Pump B' }), energyUseItem({ guid: 'fan', name: 'Fan A', equipmentType: 'Fan' }), energyUseItem({ guid: 'other', name: 'Other A', equipmentType: 'Other' })] });
+    const before = structuredClone(view.store.snapshot());
+    await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    const card = () => view.root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
+    expect(card().querySelectorAll('.portfolio-tile__equipment-types li')).toHaveLength(3);
+    expect(card().querySelector('.portfolio-tile__status')).toBeNull();
+    expect(card().querySelector('.energy-use-group-snapshot__items')).toBeNull();
+    view.inventory().inventory.detailControl.setValue('summary'); await settle(view);
+    expect(card().querySelector('dl')).toBeNull();
+    const links = [...card().querySelectorAll<HTMLAnchorElement>('.energy-use-group-snapshot__items a')];
+    expect(links.map(link => link.textContent?.trim())).toEqual(['Fan A', 'Other A', 'Pump A', 'Pump B']);
+    expect(links.every(link => !!link.querySelector('app-ui-icon'))).toBe(true);
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(card().scrollWidth).toBeLessThanOrEqual(card().clientWidth + 1);
+      expect(textContrast(links[0], card())).toBeGreaterThanOrEqual(4.5);
+      await page.screenshot({ element: view.root, path: `./__screenshots__/energy-use-group-summary-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
+    }
+    const pump = links.find(link => link.textContent?.trim() === 'Pump A')!; pump.focus(); await userEvent.keyboard('{Enter}'); await settle(view);
+    expect(view.router.url).toBe('/v1/workspace/facility/facility-a/data/energy-uses/energy-a/settings');
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(inventoryUrl)); await settle(view);
+    expect(view.inventory().inventory.detail()).toBe('summary'); expect(view.store.snapshot()).toEqual(before); view.fixture.destroy();
+  });
+
+  it('uses the same dashboard header and paginated item cards inside a group across themes', async () => {
+    const view = setup();
+    const types = ['Other', 'Motor', 'HVAC', 'Lighting', 'Mobile', 'Pump', 'Fan'] as const;
+    view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup({ notes: 'Process equipment and shared systems' })],
+      energyUseEquipment: Array.from({ length: 1000 }, (_, index) => energyUseItem({ guid: `item-${index}`, name: `Equipment ${String(index).padStart(4, '0')} with a long process description`, equipmentType: types[index % types.length] })) });
+    const before = structuredClone(view.store.snapshot());
+    await view.router.navigateByUrl('/v1/workspace/facility/facility-a/data/energy-uses/groups/group-a'); await settle(view);
+    view.inventory().inventory.detailControl.setValue('detailed'); await settle(view);
+    expect(view.root.querySelectorAll('.v1-account-portfolio')).toHaveLength(1);
+    expect(view.root.querySelector('.v1-account-portfolio__header h1')?.textContent).toContain('Production');
+    expect(view.root.querySelector('.v1-account-portfolio__header nav')?.textContent).toContain('Energy Uses');
+    expect(view.root.querySelector('select[aria-label="Detail level"]')).not.toBeNull();
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(view.root.querySelectorAll('.portfolio-inventory > li')).toHaveLength(24);
+      expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      const tile = view.root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
+      const name = tile.querySelector<HTMLElement>('.portfolio-tile__name')!;
+      expect(textContrast(name, tile)).toBeGreaterThanOrEqual(4.5);
+      expect(tile.textContent).toContain('Saved annual years');
+      expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth + 1);
+      expect(view.root.querySelector('table')).toBeNull();
+      await page.screenshot({ element: view.root, path: `./__screenshots__/energy-use-group-items-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
+    }
+    await page.getByRole('button', { name: 'Next', exact: true }).click(); await settle(view);
+    expect(view.root.querySelectorAll('.portfolio-inventory > li')).toHaveLength(24); expect(view.inventory().inventory.page()).toBe(1);
+    expect(view.store.snapshot()).toEqual(before); view.fixture.destroy();
+  });
+
+  it('opens the active item beyond the sidebar preview and supports keyboard disclosure and group navigation', async () => {
+    const view = setup(); view.fixture.componentInstance.showNav.set(true);
+    view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup()], energyUseEquipment: view.snapshot.energyUseEquipment.map(item => ({ ...item, energyUseGroupId: 'group-a' })) });
+    const before = structuredClone(view.store.snapshot());
+    await view.router.navigateByUrl(itemUrl.replace('energy-00', 'energy-45')); await settle(view);
+    const sidebar = view.root.querySelector('app-section-nav')!;
+    expect(sidebar.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(21);
+    expect(sidebar.querySelector('[aria-current="page"]')?.textContent).toContain('Pump 45');
+    const toggle = page.getByRole('button', { name: 'Hide items in Production', exact: true });
+    (toggle.element() as HTMLElement).focus(); await userEvent.keyboard('{Enter}'); await settle(view);
+    expect(sidebar.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(0);
+    await userEvent.keyboard('{Enter}'); await settle(view);
+    expect(sidebar.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(21);
+    await page.screenshot({ element: sidebar, path: './__screenshots__/energy-use-group-sidebar.png' });
+    const viewAll = [...sidebar.querySelectorAll<HTMLAnchorElement>('a')].find(link => link.textContent?.includes('View all'))!;
+    viewAll.click(); await settle(view);
+    expect(view.navigation.activeEnergyUseGroupGuid()).toBe('group-a'); expect(view.root.querySelectorAll('.portfolio-inventory > li')).toHaveLength(24);
+    expect(view.store.snapshot()).toEqual(before); view.fixture.destroy();
+  });
+  it('keeps unavailable-group filters separate when switching facility ownership on the reused route', async () => {
+    const view = setup();
+    view.store.publish({ ...view.snapshot, energyUseGroups: [], energyUseEquipment: view.snapshot.energyUseEquipment.map(item => ({ ...item, energyUseGroupId: 'missing' })) });
+    const url = (facility: string) => `/v1/workspace/facility/${facility}/data/energy-uses/groups/unavailable?search=pump`;
+    await view.router.navigateByUrl(url('facility-a')); await settle(view);
+    view.inventory().filtersForm.controls.search.setValue('first facility'); await settle(view);
+    await view.router.navigateByUrl(url('facility-b')); await settle(view);
+    expect(view.inventory().group()?.facility.guid).toBe('facility-b');
+    expect(view.inventory().filters().search).toBe('pump');
+    view.inventory().filtersForm.controls.search.setValue('second facility'); await settle(view);
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(url('facility-a'))); await settle(view);
+    expect(view.inventory().group()?.facility.guid).toBe('facility-a');
+    expect(view.inventory().filters().search).toBe('first facility');
+    expect(view.root.querySelector('app-create-energy-use-drawer')).toBeNull(); view.fixture.destroy();
+  });
+  it('restores independent group filters when browser history reuses the same group route component', async () => {
+    const view = setup();
+    const url = (group: string) => `/v1/workspace/facility/facility-a/data/energy-uses/groups/${group}?search=pump`;
+    await view.router.navigateByUrl(url('group-00')); await settle(view);
+    view.inventory().filtersForm.controls.search.setValue('changed first'); await settle(view);
+    await view.router.navigateByUrl(url('group-01')); await settle(view);
+    expect(view.inventory().filters().search).toBe('pump');
+    view.inventory().filtersForm.controls.search.setValue('changed second'); await settle(view);
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(url('group-00'))); await settle(view);
+    expect(view.inventory().filters().search).toBe('changed first');
+    TestBed.inject(Location).forward(); await vi.waitFor(() => expect(view.router.url).toBe(url('group-01'))); await settle(view);
+    expect(view.inventory().filters().search).toBe('changed second'); view.fixture.destroy();
+  });
+
   it.each(['utilities', 'meter-groups'] as const)('closes the %s selection on browser Back between items with identical setup', async kind => {
     const view = setup();
     const group = getNewIdbUtilityMeterGroup('Energy', 'Gas supply', 'facility-a', 'account-a');
@@ -103,30 +237,48 @@ describe('energy uses browser journeys', () => {
       expect(view.actions.updateSetup).not.toHaveBeenCalled();
     } finally { view.fixture.destroy(); }
   });
-  it('restores scope, filters, page, detail, scroll and focus through item drill-in and browser Back/Forward', async () => {
+  it('restores dashboard and group filters, paging, scroll and focus through Back/Forward without writing records', async () => {
     await page.viewport(1100, 850);
     const view = setup();
-    await view.router.navigateByUrl(`${inventoryUrl}?facility=facility-a`); await settle(view);
+    // One large group plus enough empty groups to page the dashboard independently.
+    view.store.publish({ ...view.snapshot,
+      energyUseEquipment: view.snapshot.energyUseEquipment.filter(item => item.facilityId === 'facility-a').map(item => ({ ...item, energyUseGroupId: 'group-00' })),
+      energyUseGroups: view.snapshot.energyUseGroups.map(group => ({ ...group, name: group.guid === 'group-00' ? 'Z Production' : group.name })) });
     const before = structuredClone(view.store.snapshot());
-    view.inventory().filtersForm.controls.search.setValue('pump'); view.inventory().inventory.detailControl.setValue('detailed');
+    await view.router.navigateByUrl(`${inventoryUrl}?facility=facility-a`); await settle(view);
+    view.inventory().inventory.selectPage(2); await settle(view);
+    const groupLink = [...view.root.querySelectorAll<HTMLAnchorElement>('.portfolio-tile__name')].find(link => link.textContent === 'Z Production')!;
+    groupLink.focus(); groupLink.click(); await settle(view);
+    expect(view.router.url).toContain('/energy-uses/groups/group-00');
+    expect(view.root.querySelectorAll('.portfolio-inventory > li')).toHaveLength(24);
+    expect(view.inventory().filters().search).toBe('');
+    view.inventory().filtersForm.controls.search.setValue('pump'); await settle(view);
     view.inventory().inventory.selectPage(1); await settle(view);
-    // A criteria edit resets the page; choose it after the edit has rendered.
-    view.inventory().inventory.selectPage(1); await settle(view);
-    const link = view.root.querySelector<HTMLAnchorElement>('.portfolio-inventory .portfolio-tile__name')!;
-    const guid = link.dataset['browseId']!;
-    link.focus({ preventScroll: true }); view.root.scrollTop = 220;
-    const scroll = view.root.scrollTop;
-    link.click(); await settle(view);
+    const itemLink = view.root.querySelector<HTMLAnchorElement>('.portfolio-inventory .portfolio-tile__name')!;
+    const guid = itemLink.dataset['browseId']; itemLink.focus(); itemLink.click(); await settle(view);
     expect(view.router.url).toContain(`/energy-uses/${guid}/settings`);
-    expect([...view.root.querySelectorAll('app-page-identity nav a')].map(link => link.textContent?.trim()))
-      .toEqual(['Example account', 'North plant']);
-    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(`${inventoryUrl}?facility=facility-a`)); await settle(view);
+    expect(TestBed.inject(BrowseStateService).readFilters({ kind: 'energy-uses', accountGuid: 'account-a', facilityGuid: 'facility-a', energyUseGroupGuid: 'group-00' })?.search).toBe('pump');
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toContain('/groups/group-00')); await settle(view);
     expect(view.inventory().filters().search).toBe('pump'); expect(view.inventory().inventory.page()).toBe(1);
-    expect(view.inventory().inventory.detail()).toBe('detailed');
     expect(document.activeElement?.getAttribute('data-browse-id')).toBe(guid);
-    expect(view.root.scrollTop).toBeCloseTo(scroll, 0);
-    TestBed.inject(Location).forward(); await vi.waitFor(() => expect(view.router.url).toContain(`/energy-uses/${guid}/settings`)); await settle(view);
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(`${inventoryUrl}?facility=facility-a`)); await settle(view);
+    expect(view.inventory().inventory.page()).toBe(2);
+    TestBed.inject(Location).forward(); await vi.waitFor(() => expect(view.router.url).toContain('/groups/group-00')); await settle(view);
+    expect(view.inventory().filters().search).toBe('pump'); expect(view.inventory().inventory.page()).toBe(1);
     expect(view.store.snapshot()).toEqual(before); expect(view.pairService.ensurePairs).not.toHaveBeenCalled();
+    view.fixture.destroy();
+  });
+  it('carries item search into its group, preselects creation, and rejects foreign group ownership', async () => {
+    const view = setup(); await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    view.inventory().filtersForm.controls.search.setValue('Pump 00'); await settle(view);
+    view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__name')!.click(); await settle(view);
+    expect(view.inventory().filters().search).toBe('Pump 00'); expect(view.root.querySelectorAll('.portfolio-inventory > li')).toHaveLength(1);
+    await page.getByRole('button', { name: 'Add energy use', exact: true }).click(); await settle(view);
+    expect(view.root.querySelector('app-create-energy-use-drawer #energy-use-name')).not.toBeNull();
+    expect(view.root.querySelector('app-create-energy-use-drawer')?.textContent).toContain('Pump 00');
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view);
+    await view.router.navigateByUrl('/v1/workspace/facility/facility-b/data/energy-uses/groups/group-00'); await settle(view);
+    expect(view.root.textContent).toContain('Energy-use group unavailable'); expect(view.root.querySelector('.portfolio-inventory')).toBeNull();
     view.fixture.destroy();
   });
   it('normalizes legacy links, preserves Energy Uses on scope changes, and retains context after a canceled exit', async () => {
@@ -170,7 +322,7 @@ describe('energy uses browser journeys', () => {
       expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth + 1);
       const name = tile.querySelector<HTMLElement>('.portfolio-tile__name')!;
       expect(textContrast(name, tile)).toBeGreaterThanOrEqual(4.5);
-      const source = tile.querySelector<HTMLElement>('dd')!;
+      const source = [...tile.querySelectorAll('dt')].find(label => label.textContent === 'Sources')!.nextElementSibling as HTMLElement;
       expect(parseFloat(getComputedStyle(source).fontSize)).toBeGreaterThanOrEqual(14);
       expect(source.textContent).toContain('Other Energy');
       expect(source.scrollWidth).toBeLessThanOrEqual(source.clientWidth + 1);

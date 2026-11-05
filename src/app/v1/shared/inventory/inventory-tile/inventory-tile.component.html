@@ -36,7 +36,15 @@
   @if (stationLabel && (level === 'simple' || !tile.stationLink)) { <p class="portfolio-tile__station">{{ stationLabel }}</p> }
   <div class="portfolio-tile__context">
     @if (chipLabel) { <span class="portfolio-tile__chip">@if (tile.chipIcon) { <app-ui-icon [name]="tile.chipIcon"/> }{{ chipLabel }}</span> }
-    <p class="portfolio-tile__status"><app-ui-icon [name]="tile.status.icon" [size]="18"/>{{ tile.status.label }}</p>
+    @if (tile.energyUseGroupSnapshot; as group) {
+      @if (group.equipmentTypes.length) {
+        <ul class="portfolio-tile__equipment-types" aria-label="Equipment types in this group">
+          @for (type of group.equipmentTypes; track type.label) {
+            <li><app-ui-icon [name]="type.icon" [size]="22" [decorative]="false" [label]="type.label" [title]="type.label"/></li>
+          }
+        </ul>
+      } @else { <p class="portfolio-tile__status">No energy uses</p> }
+    } @else if (tile.status.label) { <p class="portfolio-tile__status"><app-ui-icon [name]="tile.status.icon" [size]="18"/>{{ tile.status.label }}</p> }
     @if (level !== 'simple' && tile.analysisSnapshot; as analysis) { <p class="portfolio-tile__analysis-modified">Updated {{ analysis.modified }}</p> }
   </div>
   </div>
@@ -46,8 +54,10 @@
   } @else if (tile.analysisSnapshot; as analysis) {
     @if (analysis.active) { <p class="portfolio-tile__analysis-active"><app-ui-icon name="target" [size]="18"/>Active for {{ analysis.scope }} reporting</p> }
     @if (level !== 'simple') { <app-analysis-snapshot [snapshot]="analysis" [detailed]="level === 'detailed'" [print]="print" (detailsRequested)="actionRequested.emit({guid: tile.guid, action: 'details'})"/> }
+  } @else if (tile.energyUseGroupSnapshot; as snapshot) {
+    @if (level !== 'simple') { <app-energy-use-group-snapshot [snapshot]="snapshot" [detailed]="level === 'detailed'" [groupName]="tile.name" [browseId]="tile.guid" [print]="print" (navigationRequested)="navigationRequested.emit($event)"/> }
   } @else if (tile.energyUseSnapshot; as snapshot) {
-    @if (level !== 'simple') { <app-energy-use-snapshot [snapshot]="snapshot" [detailed]="level === 'detailed'"/> }
+    @if (level !== 'simple') { <app-energy-use-snapshot [snapshot]="snapshot" [detailed]="level === 'detailed'" [browseId]="tile.guid" [print]="print" (navigationRequested)="navigationRequested.emit($event)"/> }
   } @else if (tile.facilitySnapshot; as snapshot) {
     @if (level !== 'simple') { <app-facility-snapshot [snapshot]="snapshot" [facilityName]="tile.name" [detailed]="level === 'detailed'" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)" (facilityInventoryRequested)="facilityInventoryRequested.emit($event)"/> }
   } @else if (tile.meterSnapshot || tile.predictorSnapshot; as snapshot) {

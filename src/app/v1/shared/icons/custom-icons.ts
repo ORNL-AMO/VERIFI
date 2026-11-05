@@ -22,4 +22,78 @@ export const FacilityAnalysisReportIcon = [
   ['path', { d: 'M17.89127 18.125L19.1 17.42551M14.91224 14.07209L14.33723 13.07378C13.95181 12.40463 14.18053 11.549 14.84812 11.16267C15.51565 10.77633 16.36925 11.0056 16.75469 11.67475L18.4295 14.58258C18.69042 15.03553 18.82088 15.26203 18.82088 15.48693C18.82088 15.63427 18.78216 15.77903 18.70868 15.90663C18.59647 16.10144 18.37054 16.23218 17.91866 16.4937C17.46677 16.75523 17.24084 16.88596 17.01644 16.88596C16.86948 16.88596 16.72505 16.84719 16.59772 16.77349C16.40341 16.66107 16.27295 16.43458 16.01208 15.9816L15.73169 15.49485', stroke: 'currentColor', strokeWidth: 1.265, strokeLinecap: 'round', strokeLinejoin: 'round' }]
 ] as const satisfies IconSvgObject;
 
-export const CUSTOM_ICONS = { dataVisualization: VerifiChartIcon, betterPlantsReport: BetterPlantsReportIcon, facilityAnalysisReport: FacilityAnalysisReportIcon };
+/** Design source: src/assets/icons/pump.svg. Keep geometry in sync. */
+export const PumpIcon = [
+  ['path', { d: 'M4 4.5V12.5C4 16.8 7.5 19.5 12.5 19.5C17.3 19.5 21 16.6 21 12.2C21 8 17.6 5 13.3 5C11 5 8.9 5.9 7.5 7.5V4.5', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M4 2v2.5m3.5-2.5v2.5m-5 0H9M9 19.1 8 22m8.5-3 1 3m-11 0H19', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 12.5, cy: 12.25, r: 2.75, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/fan.svg. Keep geometry in sync. */
+export const FanIcon = [
+  ['path', { d: 'M3.5 4v8.5C3.5 16.8 7 19.5 12 19.5C17 19.5 21 16.6 21 12.2C21 8 17.6 5 13.3 5H9V4', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M2.5 2h7.5v2H2.5zM8.5 19.1 7.5 22m9-3 1 3m-11 0H19', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 12, cy: 12.25, r: 2.5, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M16.200 12.250Q17.682 12.706 16.886 14.550 M14.100 15.887Q14.446 17.398 12.451 17.631 M9.900 15.887Q8.765 16.943 7.565 15.331 M7.800 12.250Q6.318 11.794 7.114 9.950 M9.900 8.613Q9.554 7.102 11.549 6.869 M14.100 8.613Q15.235 7.557 16.435 9.169', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/process-heating.svg. Keep geometry in sync. */
+export const ProcessHeatingIcon = [
+  ['path', { d: 'M 6.675 7 C 7.1 10.4 4.38 11.4 4.55 14.5 C 3.615 14.1 3.275 13.1 3.445 11.9 C 2.425 13.5 2 15 2 16.6 C 2 19.1 3.7 21 6.25 21 C 8.8 21 10.5 19 10.5 16.2 C 10.5 13.3 9.055 11.1 8.375 10.2 C 8.545 12 7.695 13.1 7.185 13.6 C 7.525 11.1 7.185 8.7 6.675 7 Z', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M4 3.5C9 1 15 6.5 22 3.5m-3-.8 3 .8-1.7 2.5M13 11.5c3.2 1 6 .7 9-.5m-2.7-1 2.7 1-1.6 2.4M13 18.5c3.2 1 6 .7 9-.5m-2.7-1 2.7 1-1.6 2.4', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/process-cooling.svg. Keep geometry in sync. */
+export const ProcessCoolingIcon = [
+  ['path', { d: 'M6.500 9.000L6.500 19.000 M2.170 11.500L10.830 16.500 M2.170 16.500L10.830 11.500 M9.711 17.239L9.271 15.600L10.911 15.161 M5.300 18.400L6.500 17.200L7.700 18.400 M2.089 15.161L3.729 15.600L3.289 17.239 M3.289 10.761L3.729 12.400L2.089 12.839 M7.700 9.600L6.500 10.800L5.300 9.600 M10.911 12.839L9.271 12.400L9.711 10.761', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M4 3.5C9 1 15 6.5 22 3.5m-3-.8 3 .8-1.7 2.5M13 11.5c3.2 1 6 .7 9-.5m-2.7-1 2.7 1-1.6 2.4M13 18.5c3.2 1 6 .7 9-.5m-2.7-1 2.7 1-1.6 2.4', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/steam.svg. Keep geometry in sync. */
+export const SteamIcon = [
+  ['path', { d: 'M9.5 7h5v3.5l6.1 2.8a2 2 0 0 1 1.15 1.82V20a2 2 0 0 1-2 2H4.25a2 2 0 0 1-2-2v-4.88a2 2 0 0 1 1.15-1.82l6.1-2.8V7', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M10.5 4.5c-1-1.2 1-2.1 0-3.3m3 3.3c-1-1.2 1-2.1 0-3.3', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M2.25 15.5q1.63-1.5 3.25 0t3.25 0 3.25 0 3.25 0 3.25 0 3.25 0', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M12.1 17c.2 1.4-1.8 1.5-1.8 2.8a1.7 1.7 0 0 0 3.4 0c0-1.2-.8-1.7-1.6-2.8Z', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/compressed-air.svg. Keep geometry in sync. */
+export const CompressedAirIcon = [
+  ['rect', { x: 2, y: 11, width: 18, height: 9, rx: 4.5, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 7, y: 3, width: 11, height: 4, rx: 2, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 3.5, cy: 7, r: 2.1, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M9 7v4m6-4v4m3-6h1.5A2.5 2.5 0 0 1 22 7.5v6a2.5 2.5 0 0 1-2.5 2.5M7 20v2m9-2v2', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M3.5 9.1v3m0-5.1.9-.9M6.5 11v9m9-9v9', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/energy-use-group.svg. Keep geometry in sync. */
+export const EnergyUseGroupIcon = [
+  ['path', { d: 'M7 2.5H5a2.5 2.5 0 0 0-2.5 2.5v2m14-4.5h2A2.5 2.5 0 0 1 21.5 5v2M2.5 17v2A2.5 2.5 0 0 0 5 21.5h2m10 0h2a2.5 2.5 0 0 0 2.5-2.5v-2', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 8, cy: 8, r: 2.35, stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M16.15 5c.2 1.9-2.2 2.3-2.2 4a2.15 2.15 0 0 0 4.3 0c0-1.2-.6-2.2-1.35-2.9.1.9-.35 1.4-.7 1.7.15-1.1.1-1.9-.05-2.8Z', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M8 13.6v5.1m-2.2-3.8 4.4 2.5m-4.4 0 4.4-2.5M7.1 14.1l.9.9.9-.9m-1.8 4.1.9-.9.9.9', stroke: 'currentColor', strokeWidth: 0.9, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M14.65 13.8h2.7l1.35 2.35-1.35 2.35h-2.7l-1.35-2.35 1.35-2.35Z', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 16, cy: 16.15, r: 0.8, stroke: 'currentColor', strokeWidth: 1, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/motor.svg. Keep geometry in sync. */
+export const MotorIcon = [
+  ['path', { d: 'M4 5.5h13c1.7 0 3 2.9 3 6.5s-1.3 6.5-3 6.5H4M20 10.5h3v3h-3', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['ellipse', { cx: 4, cy: 12, rx: 2, ry: 6.5, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M16.5 5.5c1.2 2 1.5 4.5 1.5 6.5s-.3 4.5-1.5 6.5', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M8 8.5h7m-7 3.5h7m-7 3.5h7', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+export const CUSTOM_ICONS = {
+  dataVisualization: VerifiChartIcon,
+  betterPlantsReport: BetterPlantsReportIcon,
+  facilityAnalysisReport: FacilityAnalysisReportIcon,
+  pump: PumpIcon,
+  fan: FanIcon,
+  processHeating: ProcessHeatingIcon,
+  processCooling: ProcessCoolingIcon,
+  steam: SteamIcon,
+  compressedAir: CompressedAirIcon,
+  energyUseGroup: EnergyUseGroupIcon,
+  motor: MotorIcon
+};

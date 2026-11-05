@@ -28,6 +28,7 @@ export interface RouteState {
   readonly meterGroupGuid?: string;
   readonly predictorGuid?: string;
   readonly energyUseGuid?: string;
+  readonly energyUseGroupGuid?: string;
   readonly weatherPredictorGroupKey?: string;
   readonly reportGuid?: string;
   readonly reportStage?: 'setup' | 'data-checks' | 'report';
@@ -169,6 +170,10 @@ export function facilityMeterGroupRoute(
   return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab];
 }
 
+export function facilityEnergyUseGroupRoute(facilityGuid: string, groupGuid: string): Array<string> {
+  return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'energy-uses', 'groups', groupGuid];
+}
+
 export function facilityEnergyUseRoute(facilityGuid: string, energyUseGuid: string, tab: FacilityEnergyUseRouteTab = 'settings'): Array<string> {
   return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'energy-uses', energyUseGuid, tab];
 }
@@ -261,7 +266,9 @@ export function parseWorkspaceRoute(url: string): RouteState {
       meterGroupGuid: section === 'data' && detail === 'meter-grouping' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,
-      energyUseGuid: section === 'data' && detail === 'energy-uses' && routeParts[5]
+      energyUseGroupGuid: section === 'data' && detail === 'energy-uses' && routeParts[5] === 'groups' && routeParts[6]
+        ? safeDecodeRoutePart(routeParts[6]) : undefined,
+      energyUseGuid: section === 'data' && detail === 'energy-uses' && routeParts[5] && routeParts[5] !== 'groups'
         ? safeDecodeRoutePart(routeParts[5]) : undefined,
       predictorGuid: section === 'data' && detail === 'predictors' && routeParts[5] && !isWeatherPredictorRoute
         ? safeDecodeRoutePart(routeParts[5])

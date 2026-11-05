@@ -26,6 +26,7 @@ export function inventoryWorkspace(count = 3) {
     weatherStationGroups: computed(() => buildWeatherStationGroups(predictors(), predictorReadings(), [], state() === 'ready')) };
 }
 export const inventoryNavigation = {
+  activeEnergyUseGroupGuid: () => undefined,
   uploadQuery: () => ({}),
   accountSettingsRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'account', guid, 'settings', detail],
   facilitySettingsRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'facility', guid, 'settings', detail],

@@ -37,6 +37,8 @@ export class DataNavComponent {
     const facility = this.navigation.contextFacility();
     if (!this.facilityContext() || !facility) return [];
     return buildResourceNavGroups({
+      accountGuid: this.navigation.account()!.guid, facility, energyUseGroups: this.navigation.contextEnergyUseGroups(),
+      activeEnergyUseGroupGuid: this.navigation.activeEnergyUseGroupGuid(),
       facilityGuid: facility.guid, detail: this.navigation.activeSection() === 'data' ? this.navigation.activeDetail() : '',
       activeMeterGuid: this.navigation.activeMeterGuid(), activeGroupGuid: this.navigation.activeMeterGroupGuid(),
       energyUses: this.navigation.contextEnergyUses(), activeEnergyUseGuid: this.navigation.activeEnergyUseGuid(),

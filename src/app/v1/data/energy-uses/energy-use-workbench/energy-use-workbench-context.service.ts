@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
-import { FacilityEnergyUseRouteTab, facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
+import { FacilityEnergyUseRouteTab, facilityEnergyUseGroupRoute, facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { EnergyUseWorkbenchHeaderService } from './energy-use-workbench-header.service';
 import { EnergyUsesWorkspaceService } from '../energy-uses-workspace.service';
@@ -28,9 +28,11 @@ export class EnergyUseWorkbenchContextService {
     return this.workspace.ready() || (this.workspace.state() === 'loading' && savingOwnChanges) ? entry : undefined;
   });
   readonly notFound = computed(() => this.workspace.ready() && !this.entry());
-  readonly resources = computed(() => this.workspace.ready() || (this.workspace.state() === 'loading' && !!this.entry()) ? this.workspace.entries().filter(entry => entry.facility.guid === this.facilityGuid())
+  readonly group = computed(() => this.workspace.groups().find(group => group.facility.guid === this.facilityGuid() && group.items.some(item => item.guid === this.energyUseGuid())));
+  readonly groupLink = computed(() => this.group() ? { route: facilityEnergyUseGroupRoute(this.facilityGuid()!, this.group()!.guid) } : this.inventoryLink());
+  readonly resources = computed(() => this.workspace.ready() || (this.workspace.state() === 'loading' && !!this.entry()) ? [...(this.group()?.items ?? [])]
     .sort((a, b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid))
-    .map(entry => ({ id: entry.guid, label: entry.name, icon: 'tools' as const })) : []);
+    .map(entry => ({ id: entry.guid, label: entry.name, icon: entry.icon })) : []);
   readonly activeTab = signal<FacilityEnergyUseRouteTab>('settings').asReadonly();
   readonly navigationError = signal('');
   readonly inventoryLink = computed(() => {

@@ -1,0 +1,10 @@
+@if (links.length) {
+  <ul aria-label="Linked utility meter groups">
+    @for (group of links; track group.guid) {
+      <li><app-ui-icon name="meterGroupItem" [size]="18"/>
+        @if (group.route; as route) { <a [href]="group.href" [attr.data-browse-id]="print ? null : browseId" (click)="open($event, route)">{{ group.label }}</a> }
+        @else { <span>{{ group.label }}</span> }
+      </li>
+    }
+  </ul>
+} @else { <span>None linked</span> }

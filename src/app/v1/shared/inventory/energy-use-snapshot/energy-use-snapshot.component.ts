@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import type { InventoryEnergyUseSnapshot } from '../inventory.models';
 
 @Component({
@@ -10,4 +10,7 @@ import type { InventoryEnergyUseSnapshot } from '../inventory.models';
 export class EnergyUseSnapshotComponent {
   @Input({ required: true }) snapshot!: InventoryEnergyUseSnapshot;
   @Input() detailed = false;
+  @Input() print = false;
+  @Input() browseId = '';
+  @Output() readonly navigationRequested = new EventEmitter<readonly string[]>();
 }

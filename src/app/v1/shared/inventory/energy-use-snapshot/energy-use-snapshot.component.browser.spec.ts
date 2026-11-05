@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { page } from 'vitest/browser';
 import { EnergyUseSnapshotComponent } from './energy-use-snapshot.component';
 import { EnergyUseSnapshotModule } from './energy-use-snapshot.module';
@@ -6,12 +7,13 @@ import { EnergyUseSnapshotModule } from './energy-use-snapshot.module';
 describe('energy use metadata wrapping', () => {
   it.each(['', 'v1-theme-dark', 'v1-theme-dark v1-contrast-strong'])('reveals long metadata instead of clipping it in theme %s', async theme => {
     await page.viewport(1000, 900);
-    TestBed.configureTestingModule({ imports: [EnergyUseSnapshotModule] });
+    TestBed.configureTestingModule({ imports: [EnergyUseSnapshotModule], providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(EnergyUseSnapshotComponent);
     fixture.componentRef.setInput('snapshot', {
       sources: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy', 'Water Intake', 'Water Discharge'],
       group: 'ProcessHeatingAndProductionEquipmentWithAnUnbrokenLongGroupName',
-      lifecycle: 'Retired in 2024', years: Array.from({ length: 24 }, (_, index) => 2001 + index),
+      meterGroups: [{ guid: 'meters', label: 'ProductionElectricityMetersWithAnUnbrokenLongName', route: ['/meter-grouping', 'meters', 'monthly-table'] }],
+      years: Array.from({ length: 24 }, (_, index) => 2001 + index),
       notes: 'Long saved notes must remain readable without truncation. '.repeat(5) + '\nA second saved line.'
     });
     fixture.componentRef.setInput('detailed', true);

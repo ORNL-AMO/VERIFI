@@ -89,7 +89,7 @@
   transition: transform .16s ease;
 }
 
-.v1-root .v1-nav .v1-nav__item--open .v1-nav__child-toggle .v1-icon {
+.v1-root .v1-nav .v1-nav__item--open > .v1-nav__item-row > .v1-nav__child-toggle .v1-icon {
   transform: rotate(90deg);
 }
 

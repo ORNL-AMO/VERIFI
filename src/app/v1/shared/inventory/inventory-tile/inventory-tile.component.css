@@ -86,3 +86,6 @@
 @media (pointer: coarse) { .portfolio-tile--scoped { --analysis-menu-size: 2.75rem; } }
 
 .portfolio-tile__report-format { margin: 0; color: var(--v1-muted); font-size: .8rem; }
+
+.portfolio-tile__equipment-types { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; margin: 0; padding: 0; list-style: none; color: var(--v1-muted); }
+.portfolio-tile__equipment-types li { display: flex; }

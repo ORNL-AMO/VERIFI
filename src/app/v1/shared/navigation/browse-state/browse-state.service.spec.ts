@@ -12,6 +12,16 @@ class FormHost {
 }
 
 describe('session browse state', () => {
+  it('isolates group lists from their dashboard and from other groups in the same facility', () => {
+    const store = new BrowseStateService();
+    const key = { accountGuid: 'a', facilityGuid: 'f', kind: 'energy-uses' as const };
+    store.savePosition({ ...key, energyUseGroupGuid: 'first' }, { scrollTop: 150, focusId: 'item' });
+    store.saveInventoryView({ ...key, energyUseGroupGuid: 'first' }, { page: 2, overrides: {} });
+    expect(store.readPosition(key)).toBeUndefined();
+    expect(store.readPosition({ ...key, energyUseGroupGuid: 'second' })).toBeUndefined();
+    expect(store.readInventoryView({ ...key, energyUseGroupGuid: 'first' })?.page).toBe(2);
+  });
+
   it('isolates lists, accounts and facilities', () => {
     const store = new BrowseStateService();
     store.saveFilters({ accountGuid: 'a', kind: 'facilities' }, { search: 'Plant', status: 'all', sort: 'attention' });
