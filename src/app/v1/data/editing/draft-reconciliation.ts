@@ -6,6 +6,8 @@ export interface DraftConflict {
   readonly label: string;
   readonly localValue: unknown;
   readonly savedValue: unknown;
+  /** Omit when either side can be retained. Destructive remote changes may permit only saved values. */
+  readonly allowedChoices?: readonly ConflictChoice[];
 }
 
 export interface DraftMerge<T> {

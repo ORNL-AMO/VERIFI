@@ -25,19 +25,21 @@ export class EditorConflictReviewComponent implements OnChanges, OnDestroy {
   @ViewChild('reviewDialog') private readonly reviewDialog?: TemplateRef<unknown>;
   readonly titleId = `data-conflict-review-${++nextReview}`;
   readonly choices = new FormRecord<FormControl<ConflictChoice | null>>({});
-  rows: readonly { readonly conflict: DraftConflict; readonly local: string; readonly saved: string }[] = [];
+  rows: readonly { readonly conflict: DraftConflict; readonly local: string; readonly saved: string; readonly canKeepLocal: boolean; readonly canKeepSaved: boolean }[] = [];
 
   ngOnChanges(): void {
     if (this.portal && !draftEqual(this.conflicts, this.reviewed)) this.close();
     this.rows = this.conflicts.map(conflict => ({ conflict,
-      local: formatConflictValue(conflict.localValue), saved: formatConflictValue(conflict.savedValue) }));
+      local: formatConflictValue(conflict.localValue), saved: formatConflictValue(conflict.savedValue),
+      canKeepLocal: !conflict.allowedChoices || conflict.allowedChoices.includes('local'), canKeepSaved: !conflict.allowedChoices || conflict.allowedChoices.includes('saved') }));
   }
 
   open(): void {
     if (this.disabled || !this.conflicts.length || !this.reviewDialog) return;
     Object.keys(this.choices.controls).forEach(key => this.choices.removeControl(key, { emitEvent: false }));
     this.conflicts.forEach(conflict => this.choices.addControl(conflict.id,
-      new FormControl<ConflictChoice | null>(null, Validators.required), { emitEvent: false }));
+      new FormControl<ConflictChoice | null>(null, [Validators.required, control =>
+        !conflict.allowedChoices || conflict.allowedChoices.includes(control.value) ? null : { unsupportedChoice: true }]), { emitEvent: false }));
     this.reviewed = structuredClone(this.conflicts);
     this.portal = new TemplatePortal(this.reviewDialog, this.view);
     this.modal.show(this.portal);

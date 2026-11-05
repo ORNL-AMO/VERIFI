@@ -86,7 +86,7 @@ export function reconcileEnergyUseSettings(base: EnergyUseSettingsValues, local:
 
 /** Maps only Settings changes; annual history is always taken from the latest item. */
 export function applyEnergyUseSettings(current: IdbFacilityEnergyUseEquipment, settings: EnergyUseSettingsValues,
-  facility: IdbFacility, reviews: readonly SourceRemovalReview[] = []): IdbFacilityEnergyUseEquipment {
+  facility: IdbFacility, reviews: readonly SourceRemovalReview[] = [], recalculate = true): IdbFacilityEnergyUseEquipment {
   const value = normalizeEnergyUseSettings(settings), base = energyUseSettings(current);
   const error = energyUseSettingsError(value, base);
   if (error) throw new Error(error);
@@ -106,6 +106,7 @@ export function applyEnergyUseSettings(current: IdbFacilityEnergyUseEquipment, s
     const before = base.sources.find(source => source.energySource === row.energySource);
     if (draftEqual(source, before)) continue;
     Object.assign(row, source);
+    if (!recalculate) continue;
     for (const annual of row.energyUse) {
       if (annual.overrideEnergyUse) continue;
       const conditions = current.operatingConditionsData.filter(value => value.year === annual.year);

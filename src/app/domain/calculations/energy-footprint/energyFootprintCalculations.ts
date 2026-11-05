@@ -1,3 +1,5 @@
+import { footprintEnergyUseUnits } from './energy-footprint-units';
+export { footprintEnergyUseUnits } from './energy-footprint-units';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from "@data/models/idbModels/facilityEnergyUseEquipment";
 import { ConvertValue } from "../conversions/convertValue";
 
@@ -73,7 +75,3 @@ export function getEnergyUseUnit(unitOptionValue: string): string {
     // (e.g., gal, m3, ft3, lb, kg, etc.)
     return unitOptionValue;
 }
-
-export const footprintEnergyUseUnits: Array<string> = [
-    'kWh', 'MWh', 'kJ', 'GJ', 'MJ', 'Therms', 'DTherms', 'MMBtu', 'kcal', 'hph', 'Wh', 'Btu'
-];
