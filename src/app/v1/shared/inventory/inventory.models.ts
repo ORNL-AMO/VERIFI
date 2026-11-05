@@ -89,6 +89,17 @@ export interface InventoryTile {
   readonly meterSnapshot?: InventoryMeterSnapshot;
   readonly predictorSnapshot?: InventoryReadingSnapshot;
   readonly energyUseSnapshot?: InventoryEnergyUseSnapshot;
+  readonly energyUseGroupSnapshot?: InventoryEnergyUseGroupSnapshot;
+}
+export interface InventoryEnergyUseGroupSnapshot {
+  readonly total: number;
+  readonly matching: number;
+  readonly active: number;
+  readonly retired: number;
+  readonly categories: readonly string[];
+  readonly sources: readonly string[];
+  readonly years: readonly number[];
+  readonly notes: string;
 }
 export interface InventoryEnergyUseSnapshot {
   readonly sources: readonly string[];

@@ -1,33 +1,63 @@
 <section aria-label="Energy uses inventory" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseRestoreStickyGap]="true" [browseVisibleIds]="inventory.visibleIds()">
+  @if (groupGuid()) {
+    <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="group()?.name || 'Energy-use group'" icon="energyUseGroup" headingId="energy-use-group-title"/>
+  }
   @if (workspace.loading()) {
     <p class="v1-alert v1-alert--info" role="status">Loading energy uses…</p>
   } @else if (workspace.state() === 'error') {
     <p class="v1-alert v1-alert--danger" role="alert">Energy uses could not be loaded. Retry loading the account.</p>
+  } @else if (groupGuid() && !group()) {
+    <article class="v1-empty-state" role="status"><h2>Energy-use group unavailable</h2><p>This group is not available in this facility.</p>
+      <a [routerLink]="inventoryLink().route" [queryParams]="inventoryLink().queryParams">Back to energy uses</a></article>
   } @else {
+    @if (group(); as selectedGroup) {
+      @if (selectedGroup.notes) { <p>{{ selectedGroup.notes }}</p> }
+      @if (selectedGroup.unavailable) { <p class="v1-alert v1-alert--info">These items reference groups that are unavailable. Browsing preserves their saved relationships.</p> }
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="openCreation()"><app-ui-icon name="add"/>Add energy use</button>
+    }
     <form class="v1-data-browse-toolbar portfolio-inventory-toolbar" aria-label="Energy use filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
       <div class="v1-portfolio-browse-search">
-        <p class="v1-portfolio-browse-count" role="status">Showing {{ filteredEntries().length }} of {{ entries().length }} energy uses</p>
+        <p class="v1-portfolio-browse-count" role="status">@if (groupGuid()) { Showing {{ filteredEntries().length }} of {{ entries().length }} energy uses } @else { Showing {{ filteredGroups().length }} of {{ groups().length }} groups }</p>
         <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"/></span><input type="search" formControlName="search" aria-label="Find energy use, facility, category, source, or group" placeholder="Find energy use, facility, category, source, or group"></div>
       </div>
       <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All categories</option>@for (category of categories(); track category) { <option [value]="category">{{ category }}</option> }</select></label>
       <label><span>Lifecycle</span><select class="v1-select" formControlName="lifecycle"><option value="all">All</option><option value="active">Active</option><option value="retired">Retired</option></select></label>
       <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="name">Name</option><option value="facilityName">Facility name</option><option value="modified">Recently modified</option></select></label>
-      <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label>
+      @if (!groupGuid()) { <label><span>Detail level</span><select class="v1-select" aria-label="Detail level" [formControl]="inventory.detailControl"><option value="simple">Simple</option><option value="summary">Summary</option><option value="detailed">Detailed</option></select></label> }
     </form>
     @if (navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ navigationError() }}</p> }
-    @if (!entries().length) { <app-data-empty-state icon="tools" title="No energy uses" description="No saved energy uses are available in this scope.">
+    @if (groupGuid()) {
+      @if (!entries().length) { <app-data-empty-state icon="energyUseGroup" title="No energy uses in this group" description="Add an energy use to begin configuring equipment, systems, or processes."/> }
+      @else if (!filteredEntries().length) { <p role="status">No energy uses match these filters. <button class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></p> }
+      @else {
+        <div class="energy-use-list" role="region" aria-label="Energy uses in this group" tabindex="0">
+          <table class="table"><caption class="visually-hidden">Energy uses in {{ group()?.name }}</caption>
+            <thead><tr><th scope="col">Energy use</th><th scope="col">Category</th><th scope="col">Sources</th><th scope="col">Saved annual years</th><th scope="col">Availability</th><th scope="col">Lifecycle</th></tr></thead>
+            <tbody>@for (entry of visibleItems(); track entry.guid) {
+              <tr><th scope="row"><app-ui-icon name="tools"/><a [routerLink]="entry.route" [attr.data-browse-id]="entry.guid">{{ entry.name }}</a></th>
+                <td>{{ entry.category }}</td><td>{{ entry.snapshot.sources.join(', ') || 'Not configured' }}</td><td>{{ entry.yearsLabel }}</td><td>{{ entry.availability }}</td><td>{{ entry.snapshot.lifecycle }}</td></tr>
+            }</tbody>
+          </table>
+        </div>
+        <nav class="energy-use-list__paging" aria-label="Energy use pages">
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="inventory.page() === 0" (click)="inventory.selectPage(inventory.page() - 1)">Previous</button>
+          <span role="status">{{ inventory.start() }}–{{ inventory.end() }} of {{ total() }}</span>
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="inventory.page() + 1 >= inventory.pages()" (click)="inventory.selectPage(inventory.page() + 1)">Next</button>
+        </nav>
+      }
+    } @else if (!groups().length) { <app-data-empty-state icon="energyUseGroup" title="No energy-use groups" description="Add an energy use to an existing or new group.">
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="openCreation()"><app-ui-icon name="add"/>Add energy use</button>
     </app-data-empty-state> }
-    @else if (!filteredEntries().length) {
-      <article class="v1-empty-state" role="status"><h2>No energy uses match these filters</h2><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></article>
+    @else if (!filteredGroups().length) {
+      <article class="v1-empty-state" role="status"><h2>No energy-use groups match these filters</h2><button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button></article>
     } @else {
       <app-inventory-grid [showOwnership]="!navigation.isSingleSiteWorkspace()" [tiles]="inventory.visibleTiles()" [printTiles]="tiles()" [detail]="inventory.detail()" [overrides]="inventory.overrides()"
-        [page]="inventory.page()" [pages]="inventory.pages()" [start]="inventory.start()" [end]="inventory.end()" [total]="filteredEntries().length"
+        [page]="inventory.page()" [pages]="inventory.pages()" [start]="inventory.start()" [end]="inventory.end()" [total]="total()"
         (detailChanged)="inventory.setTileDetail($event)" (pageSelected)="inventory.selectPage($event)" (navigationRequested)="navigateRoute($event)"
         (facilityScopeRequested)="navigation.changeFacilityScope({ kind: 'facility', facilityGuid: $event }, 'energy-uses')"/>
     }
   }
 </section>
 <ng-template #creationDrawer>
-  @if (creating()) { <app-create-energy-use-drawer [initialFacilityGuid]="navigation.inventoryFacilityGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreated($event)" (closed)="closeCreation()"/> }
+  @if (creating()) { <app-create-energy-use-drawer [initialFacilityGuid]="facilityGuid()" [initialGroupGuid]="group()?.unavailable ? undefined : groupGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreated($event)" (closed)="closeCreation()"/> }
 </ng-template>

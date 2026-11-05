@@ -31,6 +31,7 @@ export function buildEnergyUseInventory(
   groups: readonly Readonly<IdbFacilityEnergyUseGroup>[]
 ): EnergyUseInventoryEntry[] {
   const owners = new Map(facilities.filter(facility => facility.accountId === accountGuid).map(facility => [facility.guid, facility]));
+  const groupByOwner = new Map(groups.filter(group => group.accountId === accountGuid).map(group => [JSON.stringify([group.facilityId, group.guid]), group]));
   return items.flatMap(item => {
     const facility = owners.get(item.facilityId);
     if (!facility || item.accountId !== accountGuid) return [];
@@ -38,7 +39,7 @@ export function buildEnergyUseInventory(
     const years = [...new Set((item.utilityData ?? []).flatMap(source => (source.energyUse ?? [])
       .filter(entry => Number.isInteger(entry.year) && entry.year > 0 && Number.isFinite(entry.energyUse))
       .map(entry => entry.year)))].sort((a, b) => a - b);
-    const group = groups.find(group => group.guid === item.energyUseGroupId && group.accountId === accountGuid && group.facilityId === facility.guid);
+    const group = groupByOwner.get(JSON.stringify([facility.guid, item.energyUseGroupId]));
     const name = item.name?.trim() || 'Untitled energy use';
     const category = item.equipmentType || 'Other';
     const retired = item.noLongerInUse?.isNoLongerInUse === true;
@@ -50,7 +51,7 @@ export function buildEnergyUseInventory(
       years, notes: item.notes || ''
     };
     return [{ guid: item.guid, item, facility, name, category, availability, snapshot,
-      searchText: [name, facility.name, category, ...sources, snapshot.group, availability, lifecycle].join(' ').toLowerCase() }];
+      searchText: [name, item.notes || '', facility.name, category, ...sources, snapshot.group, availability, lifecycle].join(' ').toLowerCase() }];
   });
 }
 

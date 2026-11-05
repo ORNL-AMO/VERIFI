@@ -1,0 +1,7 @@
+<dl class="energy-use-snapshot__facts">
+  <div><dt>Lifecycle</dt><dd>{{ snapshot.active }} active, {{ snapshot.retired }} retired</dd></div>
+  <div><dt>Categories</dt><dd>{{ snapshot.categories.join(', ') || 'None' }}</dd></div>
+  <div><dt>Sources</dt><dd>{{ snapshot.sources.join(', ') || 'Not configured' }}</dd></div>
+  <div><dt>Saved annual years</dt><dd>{{ snapshot.years.join(', ') || 'None' }}</dd></div>
+  @if (detailed && snapshot.notes) { <div><dt>Notes</dt><dd>{{ snapshot.notes }}</dd></div> }
+</dl>

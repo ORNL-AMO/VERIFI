@@ -8,7 +8,7 @@ import { energyUseFacility, energyUseGroup, energyUseItem } from '../energy-uses
 import { previousEnergyUseYear } from '../models/energy-use-settings.models';
 import { CreateEnergyUseDrawerComponent } from './create-energy-use-drawer.component';
 
-function setup(initialFacility?: string, single = false) {
+function setup(initialFacility?: string, single = false, initialGroup?: string) {
   const north = { ...energyUseFacility(), fiscalYear: 'calendarYear' as const, energyUnit: 'kWh' };
   const south = { ...north, guid: 'facility-b', name: 'South plant' };
   const store = { account: signal({ guid: 'account-a', portfolioFacilityOrder: ['facility-b', 'facility-a'] }), canWrite: signal(true), hasPending: signal(false),
@@ -18,6 +18,7 @@ function setup(initialFacility?: string, single = false) {
   TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }, { provide: EnergyUseActionsService, useValue: actions }] });
   const fixture = TestBed.createComponent(CreateEnergyUseDrawerComponent);
   if (initialFacility) fixture.componentRef.setInput('initialFacilityGuid', initialFacility);
+  if (initialGroup) fixture.componentRef.setInput('initialGroupGuid', initialGroup);
   fixture.componentRef.setInput('singleFacility', single); fixture.detectChanges(); fixture.detectChanges();
   const component = fixture.componentInstance, root = fixture.nativeElement as HTMLElement;
   const choose = (name: string) => {
@@ -28,6 +29,16 @@ function setup(initialFacility?: string, single = false) {
 }
 
 describe('progressive Energy Use creation', () => {
+  it('preselects a valid group without creating a dirty draft and allows changing the pinned group', () => {
+    const { component, fixture } = setup('facility-a', false, 'group-a');
+    expect(component.step()).toBe('name'); expect(component.selectedGroup()?.guid).toBe('group-a'); expect(component.dirty()).toBe(false);
+    component.editSelection('group'); fixture.detectChanges(); expect(component.step()).toBe('group');
+  });
+  it('rejects creation preselection from another facility', () => {
+    const { component } = setup('facility-a', false, 'group-b');
+    expect(component.step()).toBe('group'); expect(component.selectedGroup()).toBeUndefined();
+  });
+
   it('starts with owned facility choices in portfolio order and reveals only the next choice', async () => {
     const { component, root, choose, actions, fixture } = setup();
     expect(component.step()).toBe('facility'); expect(component.dirty()).toBe(false);

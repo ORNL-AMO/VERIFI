@@ -5,13 +5,16 @@ import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEn
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { InventoryHeaderActionsRegistry } from '@app/v1/data/inventory/inventory-header-actions.service';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
+import { facilityEnergyUseGroupRoute, facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
 import { InventoryTile } from '@app/v1/shared/inventory/inventory.models';
 import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-state';
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { EnergyUsesWorkspaceService } from '../energy-uses-workspace.service';
+import { filterAndSortEnergyUseGroups, filterEnergyUseGroupItems, UNAVAILABLE_ENERGY_USE_GROUP } from './energy-use-group.models';
+import { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { ENERGY_USE_FILTER_DEFAULTS, EnergyUseInventoryFilters, EnergyUseInventorySort, filterAndSortEnergyUses } from './energy-use-inventory.models';
 
 @Component({
@@ -25,6 +28,30 @@ export class EnergyUsesInventoryComponent {
   readonly workspace = inject(EnergyUsesWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
+  private readonly restoreHistory = this.router.currentNavigation()?.trigger === 'popstate';
+  private readonly route = inject(ActivatedRoute);
+  private readonly params = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
+  private readonly query = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
+  readonly groupGuid = computed(() => this.params().get('energyUseGroupGuid') ?? undefined);
+  readonly facilityGuid = computed(() => this.groupGuid()
+    ? this.navigation.headerFacility()?.guid : this.navigation.inventoryFacilityGuid());
+  readonly initialFilters = computed<Partial<EnergyUseInventoryFilters>>(() => {
+    if (!this.groupGuid() || this.restoreHistory) return {};
+    const params = this.query();
+    if (!params.has('search')) return {};
+    const lifecycle = params.get('lifecycle'), sort = params.get('sort');
+    return { search: params.get('search') ?? '', category: params.get('category') || 'all',
+      lifecycle: lifecycle === 'active' || lifecycle === 'retired' ? lifecycle : 'all',
+      sort: sort === 'modified' || sort === 'facilityName' ? sort : 'name' };
+  });
+  readonly groups = computed(() => this.workspace.groups().filter(group => !this.facilityGuid() || group.facility.guid === this.facilityGuid()));
+  readonly group = computed(() => this.groups().find(group => group.guid === this.groupGuid() && group.facility.guid === this.facilityGuid()));
+  readonly inventoryLink = computed(() => {
+    const account = this.workspace.account();
+    return { route: account ? this.navigation.accountPortfolioRoute(account.guid, 'energy-uses') : ['/v1'],
+      queryParams: this.navigation.isSingleSiteWorkspace() || !this.facilityGuid() ? {} : { facility: this.facilityGuid() } };
+  });
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => [{ label: 'Energy Uses', icon: 'energyUseGroup', ...this.inventoryLink() }]);
   private readonly store = inject(AccountWorkspaceStore);
   private readonly modal = inject(ModalPortalService);
   private readonly view = inject(ViewContainerRef);
@@ -33,8 +60,8 @@ export class EnergyUsesInventoryComponent {
   @ViewChild('creationDrawer') private readonly creationDrawer?: TemplateRef<unknown>;
   readonly creating = signal(false);
   private creationIdentity?: string;
-  readonly creationKey = computed(() => JSON.stringify([this.workspace.account()?.guid, this.navigation.inventoryFacilityGuid()]));
-  readonly canCreate = computed(() => this.store.canWrite() && !this.store.hasPending() && this.store.facilities().some(facility => facility.accountId === this.workspace.account()?.guid));
+  readonly creationKey = computed(() => JSON.stringify([this.workspace.account()?.guid, this.facilityGuid(), this.groupGuid()]));
+  readonly canCreate = computed(() => (!this.groupGuid() || (!!this.group() && !this.group()?.unavailable)) && this.store.canWrite() && !this.store.hasPending() && this.store.facilities().some(facility => facility.accountId === this.workspace.account()?.guid));
   readonly navigationError = signal('');
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
@@ -44,21 +71,33 @@ export class EnergyUsesInventoryComponent {
   });
   readonly browseKey = computed<BrowseKey<'energy-uses'> | undefined>(() => {
     const account = this.workspace.account();
-    return account ? { kind: 'energy-uses', accountGuid: account.guid, facilityGuid: this.navigation.inventoryFacilityGuid() } : undefined;
+    return account ? { kind: 'energy-uses', accountGuid: account.guid, facilityGuid: this.facilityGuid(), energyUseGroupGuid: this.groupGuid() } : undefined;
   });
-  readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
-  readonly entries = computed(() => this.workspace.entries().filter(entry => !this.navigation.inventoryFacilityGuid() || entry.facility.guid === this.navigation.inventoryFacilityGuid()));
+  readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm, this.initialFilters);
+  readonly entries = computed(() => this.groupGuid() ? this.group()?.items ?? [] : this.workspace.entries().filter(entry => !this.facilityGuid() || entry.facility.guid === this.facilityGuid()));
   readonly categories = computed(() => [...new Set([...this.entries().map(entry => entry.category), ...(this.filters().category === 'all' ? [] : [this.filters().category])])].sort());
-  readonly filteredEntries = computed(() => filterAndSortEnergyUses(this.entries(), this.filters()));
-  readonly tiles = computed<readonly InventoryTile[]>(() => this.filteredEntries().map(entry => ({
+  readonly filteredEntries = computed(() => this.group() ? filterEnergyUseGroupItems(this.group()!, this.filters()) : filterAndSortEnergyUses(this.entries(), this.filters()));
+  readonly filteredGroups = computed(() => filterAndSortEnergyUseGroups(this.groups(), this.filters()));
+  readonly tiles = computed<readonly InventoryTile[]>(() => this.groupGuid() ? this.filteredEntries().map(entry => ({
     guid: entry.guid, name: entry.name, icon: 'tools', chip: entry.category,
     route: facilityEnergyUseRoute(entry.facility.guid, entry.guid),
-    owner: { facilityGuid: entry.facility.guid, label: entry.facility.name,
-      ...this.navigation.facilityInventoryLink(entry.facility.guid, 'energy-uses') },
     status: { tone: 'neutral', icon: 'info', label: entry.availability }, energyUseSnapshot: entry.snapshot
+  })) : this.filteredGroups().map(group => ({
+    guid: group.id, name: group.name, icon: 'energyUseGroup',
+    route: facilityEnergyUseGroupRoute(group.facility.guid, group.guid), queryParams: this.filters(),
+    owner: { facilityGuid: group.facility.guid, label: group.facility.name, ...this.navigation.facilityInventoryLink(group.facility.guid, 'energy-uses') },
+    status: { tone: 'neutral', icon: 'info', label: `${group.snapshot.matching} of ${group.snapshot.total} energy uses` },
+    energyUseGroupSnapshot: group.snapshot
   })));
+  readonly visibleItems = computed(() => {
+    const visible = new Set(this.inventory.visibleIds());
+    return this.filteredEntries().filter(entry => visible.has(entry.guid)).map(entry => ({ ...entry,
+      route: facilityEnergyUseRoute(entry.facility.guid, entry.guid), yearsLabel: entry.snapshot.years.join(', ') || 'None' }));
+  });
+  readonly total = computed(() => this.groupGuid() ? this.filteredEntries().length : this.filteredGroups().length);
+  readonly allIds = computed(() => this.groupGuid() ? this.entries().map(entry => entry.guid) : this.groups().map(group => group.id));
   readonly inventory = new InventoryViewState(this.browseKey, this.tiles,
-    computed(() => this.entries().map(entry => entry.guid)), this.filters, this.workspace.ready);
+    this.allIds, this.filters, this.workspace.ready);
   readonly browseReady = computed(() => this.workspace.ready() && this.inventory.ready());
   constructor() {
     const registry = inject(InventoryHeaderActionsRegistry, { optional: true });
@@ -87,7 +126,7 @@ export class EnergyUsesInventoryComponent {
   clearFilters(): void { this.filtersForm.reset(ENERGY_USE_FILTER_DEFAULTS); }
   navigateRoute(route: readonly string[]): void {
     this.navigationError.set('');
-    void this.router.navigate([...route]).then(opened => {
+    void this.router.navigate([...route], { queryParams: this.groupGuid() ? {} : this.filters() }).then(opened => {
       if (!opened) this.navigationError.set('The energy use could not be opened.');
     }).catch(() => this.navigationError.set('The energy use could not be opened. Please try again.'));
   }

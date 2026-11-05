@@ -18,6 +18,7 @@ type CreationStep = 'facility' | 'group' | 'new-group' | 'name';
   styleUrls: ['./create-energy-use-drawer.component.css', '../../../shared/creation-flow/creation-flow.css'], standalone: false })
 export class CreateEnergyUseDrawerComponent {
   readonly initialFacilityGuid = input<string>();
+  readonly initialGroupGuid = input<string>();
   readonly singleFacility = input(false);
   readonly created = output<IdbFacilityEnergyUseEquipment>();
   readonly closed = output<void>();
@@ -80,13 +81,16 @@ export class CreateEnergyUseDrawerComponent {
     this.destroy.onDestroy(() => subscription.unsubscribe());
     let initialized = false;
     effect(() => {
+      const initialGroup = this.initialGroupGuid();
       const guid = this.fixedFacilityGuid(), facility = this.facilities().find(facility => facility.guid === guid);
       if (!initialized && facility) {
         initialized = true;
         untracked(() => {
           this.form.controls.facilityGuid.setValue(facility.guid);
           this.initialYear = previousEnergyUseYear(facility);
-          this.step.set('group'); this.dirty.set(false);
+          const group = this.groups().find(group => group.guid === initialGroup);
+          if (group) this.form.patchValue({ groupKind: 'existing', groupGuid: group.guid });
+          this.step.set(group ? 'name' : 'group'); this.dirty.set(false);
         });
       }
     });

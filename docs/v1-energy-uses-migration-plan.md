@@ -2,17 +2,18 @@
 
 ## Purpose and delivery
 
-Migrate Energy Uses into the existing v1 Data workflow as an inventory of individual energy uses. An item may represent equipment, a system, or a process.
+Migrate Energy Uses into the existing v1 Data workflow as a group-first inventory of individual energy uses. An item may represent equipment, a system, or a process.
 
 Use the meter/predictor inventory and workbench patterns, with one **Setup** tab that autosaves equipment settings and annual data together. Support estimation independently of meter readings.
 
-This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Broader grouping remains a separate planning effort.
+This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 3A adds group browsing; broader group management remains a separate planning effort.
 
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Inventory and workspace navigation | Complete |
 | 2 | Creation, Settings, and safe commands | Merged into `unified-ux` |
 | 3 | Combined Setup, annual data, and estimation | Implemented and validated; PR review pending |
+| 3A | Group browsing, nested navigation, and equipment icons | In progress; three dependent PRs |
 | 4 | Complete item tools and charts | Planned |
 | 5 | Export, compatibility, and release acceptance | Planned |
 
@@ -20,7 +21,7 @@ This roadmap records the agreed target experience, not shipped behavior. Work th
 
 - Keep production UI under [`src/app/v1/data/energy-uses/`](../src/app/v1/data/energy-uses/), using feature-owned inventory projections, a collection workspace service, and a route-scoped workbench context. Reuse shared inventory, workbench, navigation, chart, and modal presentation. Follow the [Data workbench architecture norms](unified-ux-migration.md#production-v1-data-workbench-architecture-norms).
 - Continue using the existing [equipment](../src/app/data/models/idbModels/facilityEnergyUseEquipment.ts) and [group](../src/app/data/models/idbModels/facilityEnergyUseGroups.ts) records. Keep their persisted names, GUID relationships, annual arrays, and backup formats. No database schema or data-version migration is planned.
-- Every item retains its required energy-use group relationship. Present items in a flat inventory without regrouping existing records. Energy-use grouping and optional utility meter-group links remain separate relationships.
+- Every item retains its required energy-use group relationship. Browse existing groups as cards and their members as paginated lists, without regrouping or rewriting existing records. Energy-use grouping and optional utility meter-group links remain separate relationships.
 - Add typed Energy Use settings, annual-data, creation, and command contracts. The combined Setup editor uses one [shared Data editing session](v1-data-form-architecture-roadmap.md) for serialized autosave, reconciliation, failed drafts, and navigation protection.
 - Route writes through `WorkspaceCommandBoundary` and the existing [energy-use handler](../src/app/data/account-workspace/handlers/energy-use-command-handler.service.ts). Resolve current records inside queued commands; compound operations commit atomically and publish once. Follow the [workspace data workflow](data-access-and-workspace.md).
 - Reuse deterministic calculations from [`src/app/domain/calculations/energy-footprint/`](../src/app/domain/calculations/energy-footprint/). Rebuild legacy presentation and forms in v1; extract reusable helpers and file-writing logic into neutral layers where needed. Production v1 must not import v0 presentation or prototype code.
@@ -64,6 +65,19 @@ Extend the existing editor into one Setup tab, retaining `/settings` and removin
 - Opening a record never recalculates or rewrites saved values.
 
 **Completion:** A user can create an energy use, enter annual assumptions, override consumption, reopen it, and recover the same saved values.
+
+### Phase 3A — Group browsing and equipment icons
+
+Deliver three dependent slices after the Phase 3 acceptance branch: `codex/energy-uses-group-browsing` → `codex/energy-uses-group-navigation` → `codex/energy-uses-group-icons-acceptance`. Phase 3 remains a moving review stack; refresh and reconcile its acceptance head before publication, and retarget the first slice to `unified-ux` once Phase 3 merges.
+
+- Replace individual item cards with existing energy-use group cards, retaining empty groups, scope, search, sorting, detail levels, and pagination. Show matching/total item counts, categories, sources, lifecycle counts, saved years, and notes; consumption rollups remain deferred.
+- Open facility-owned groups at `data/energy-uses/groups/:energyUseGroupGuid`; keep existing item Setup URLs. Search group and item metadata consistently and carry dashboard filters into the paginated, 24-item group list. Restore filters, page, scroll, and focus separately at each level.
+- Keep orphaned items discoverable through a read-only `unavailable` group bucket. Add energy use preselects the current group and facility through the existing creation workflow. No group management or relationship repair is introduced.
+- Nest sidebar links as Energy Uses → group → items. Groups start collapsed; accepted item navigation opens its group. Cap each expanded preview at 20 items, retaining the current item, and provide View all. Keep disclosure state in memory. Add group breadcrumbs and scope Setup switching to the current group.
+- Apply reviewed custom equipment icons, including Motor, and Hugeicons AirVent, LampCeiling, and Forklift for HVAC, Lighting, and Mobile. Use Tools for Other/unknown categories and the collection icon for groups, through one category lookup.
+- Review browsing, then navigation, then icons/layout. Cover 100 groups and 1,000 items, ownership, missing groups, empty groups, sparse history, extra sources, retirement, Back/Forward, guarded exits, keyboard/focus, responsive layouts, themes, and printing. Complete focused tests, app type-check, production web build, and pre-PR full suites; no Electron boundary is changed.
+
+**Completion:** Large inventories are navigable through group cards and compact item lists, with bounded sidebar previews and unchanged committed data. Phase 4 bulk actions and comparisons continue to target individual equipment GUIDs from the group lists.
 
 ### Phase 4 — Complete item tools and charts
 
@@ -257,4 +271,4 @@ The isolated checkout excludes unrelated custom-icon edits, so its fast-test tot
 - Retain **Energy Uses** and use **energy use** for an individual item; retain existing stored equipment terminology.
 - Simple creation uses the existing default source. Settings permits additions up to the established two-source limit while retaining existing/imported extra sources without truncation.
 - Existing retirement and missing-year propagation inconsistencies are documented separately from formula changes. This migration preserves history and avoids introducing retirement-adjusted item rollups.
-- A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility summaries, footprint balances, and Sankey views.
+- Phase 3A introduces read-only group browsing. A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility summaries, footprint balances, and Sankey views.
