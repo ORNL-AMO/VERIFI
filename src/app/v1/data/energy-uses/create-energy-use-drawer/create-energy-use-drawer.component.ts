@@ -1,20 +1,21 @@
-import { Component, DestroyRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, ElementRef, afterRenderEffect, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
-import { MeterSource } from '@data/models/constantsAndTypes';
 import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { getRandomFlatHexColor } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
 import { EnergyUseActionsService } from '../energy-use-actions.service';
-import { EnergyUseSettingsFormService } from '../forms/energy-use-settings-form.service';
-import { EnergyUseUtilitySelection, EnergyUseMeterGroupSelection, defaultEnergyUseSource, energyUseSettingsError, previousEnergyUseYear } from '../models/energy-use-settings.models';
+import { defaultEnergyUseSource, previousEnergyUseYear } from '../models/energy-use-settings.models';
+
+type CreationStep = 'facility' | 'group' | 'new-group' | 'name';
 
 @Component({ selector: 'app-create-energy-use-drawer', templateUrl: './create-energy-use-drawer.component.html',
-  styleUrls: ['./create-energy-use-drawer.component.css'], standalone: false })
+  styleUrls: ['./create-energy-use-drawer.component.css', '../../../shared/creation-flow/creation-flow.css'], standalone: false })
 export class CreateEnergyUseDrawerComponent {
   readonly initialFacilityGuid = input<string>();
   readonly singleFacility = input(false);
@@ -22,95 +23,129 @@ export class CreateEnergyUseDrawerComponent {
   readonly closed = output<void>();
   readonly workspace = inject(AccountWorkspaceStore);
   private readonly actions = inject(EnergyUseActionsService);
-  private readonly forms = inject(EnergyUseSettingsFormService);
   private readonly destroy = inject(DestroyRef);
   private readonly accountGuid = this.workspace.account()?.guid ?? '';
   private readonly request = { item: getNewIdbEntry(), groupGuid: getNewIdbEntry().guid, color: getRandomFlatHexColor() };
+  private initialYear?: number;
   readonly saving = signal(false);
   readonly error = signal('');
   readonly dirty = signal(false);
   readonly discardOpen = signal(false);
-  readonly form = this.forms.build({ name: '', notes: '', equipmentType: 'Other', sources: [defaultEnergyUseSource()], utilityMeterGroupIds: [] });
-  readonly contextForm = new FormGroup({ facilityGuid: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    initialYear: new FormControl<number | null>(null, [Validators.required, Validators.min(1), Validators.max(9999)]),
-    groupKind: new FormControl<'existing' | 'new'>('new', { nonNullable: true }), groupGuid: new FormControl('', { nonNullable: true }),
-    groupName: new FormControl('', { nonNullable: true }) });
-  readonly context = toSignal(this.contextForm.valueChanges, { initialValue: this.contextForm.getRawValue() });
+  readonly step = signal<CreationStep>('facility');
+  readonly form = new FormGroup({
+    facilityGuid: new FormControl('', { nonNullable: true }),
+    groupKind: new FormControl<'existing' | 'new' | null>(null),
+    groupGuid: new FormControl('', { nonNullable: true }),
+    groupName: new FormControl('', { nonNullable: true }),
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] })
+  });
+  private readonly values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  readonly facilitySearch = new FormControl('', { nonNullable: true });
+  readonly groupSearch = new FormControl('', { nonNullable: true });
+  private readonly facilityTerm = toSignal(this.facilitySearch.valueChanges, { initialValue: '' });
+  private readonly groupTerm = toSignal(this.groupSearch.valueChanges, { initialValue: '' });
   readonly facilities = computed(() => orderFacilities(this.workspace.facilities().filter(facility => facility.accountId === this.accountGuid), this.workspace.account()?.portfolioFacilityOrder));
-  readonly facility = computed(() => this.facilities().find(facility => facility.guid === this.context().facilityGuid));
-  readonly editorKey = computed(() => `${this.accountGuid}:${this.facility()?.guid ?? ''}:${this.request.item.guid}`);
-  readonly groups = computed(() => this.workspace.energyUseGroups().filter(group => group.accountId === this.accountGuid && group.facilityId === this.facility()?.guid));
-  readonly canCreate = computed(() => !!this.facility() && this.workspace.account()?.guid === this.accountGuid && this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
+  readonly fixedFacilityGuid = computed(() => this.initialFacilityGuid() || (this.singleFacility() && this.facilities().length === 1 ? this.facilities()[0].guid : undefined));
+  readonly facility = computed(() => this.facilities().find(facility => facility.guid === this.values().facilityGuid));
+  readonly groups = computed(() => this.workspace.energyUseGroups().filter(group => group.accountId === this.accountGuid && group.facilityId === this.values().facilityGuid));
+  readonly matchingFacilities = computed(() => this.facilities().filter(facility => (facility.name || 'Unnamed facility').toLocaleLowerCase().includes(this.facilityTerm().trim().toLocaleLowerCase())));
+  readonly matchingGroups = computed(() => this.groups().filter(group => (group.name || 'Unnamed energy-use group').toLocaleLowerCase().includes(this.groupTerm().trim().toLocaleLowerCase())));
+  readonly selectedGroup = computed(() => this.groups().find(group => group.guid === this.values().groupGuid));
+  readonly canEdit = computed(() => this.workspace.account()?.guid === this.accountGuid && this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
+  readonly availabilityError = computed(() => {
+    const values = this.values();
+    if (values.facilityGuid && !this.facility()) return 'This facility is no longer available.';
+    if (values.groupKind === 'existing' && !this.selectedGroup()) return 'This energy-use group is no longer available. Choose another group.';
+    return '';
+  });
+  readonly canUseNewGroup = computed(() => this.canEdit() && !!this.facility() && !!this.values().groupName?.trim());
+  readonly canCreate = computed(() => this.canEdit() && this.step() === 'name' && !!this.facility() && !this.availabilityError()
+    && !!this.values().name?.trim() && (this.values().groupKind === 'existing' ? !!this.selectedGroup() : this.values().groupKind === 'new' && !!this.values().groupName?.trim()));
   readonly blocked = computed(() => this.saving());
-  readonly refreshKey = signal(0);
+  readonly selections = computed(() => {
+    const values = this.values(), step = this.step();
+    const selections: { id: 'facility' | 'group'; label: string; icon: IconName; editable: boolean; active: boolean }[] = [];
+    if (values.facilityGuid) selections.push({ id: 'facility', label: this.facility()?.name || 'Facility unavailable', icon: 'facility', editable: !this.fixedFacilityGuid(), active: step === 'facility' });
+    if (values.groupKind) selections.push({ id: 'group', label: values.groupKind === 'new' ? values.groupName?.trim() || 'New energy-use group' : this.selectedGroup()?.name || 'Group unavailable', icon: 'tools', editable: true, active: step === 'group' || step === 'new-group' });
+    return selections;
+  });
+  private readonly stepHeading = viewChild<ElementRef<HTMLElement>>('stepHeading');
+  private readonly itemName = viewChild<ElementRef<HTMLInputElement>>('itemName');
+  private readonly groupName = viewChild<ElementRef<HTMLInputElement>>('groupName');
+  private focusedStep?: CreationStep;
+
   constructor() {
-    this.forms.validate(this.form);
     registerDataDraft(this.dirty, () => this.discard(), this.blocked);
-    const markDirty = () => { this.dirty.set(true); this.error.set(''); };
-    const subscriptions = [this.form.valueChanges.subscribe(markDirty), this.contextForm.valueChanges.subscribe(markDirty)];
-    this.destroy.onDestroy(() => subscriptions.forEach(subscription => subscription.unsubscribe()));
+    const subscription = this.form.valueChanges.subscribe(() => { this.dirty.set(true); this.error.set(''); });
+    this.destroy.onDestroy(() => subscription.unsubscribe());
     let initialized = false;
     effect(() => {
-      const guid = this.initialFacilityGuid(), facilities = this.facilities();
-      if (!initialized && guid && facilities.some(facility => facility.guid === guid)) {
+      const guid = this.fixedFacilityGuid(), facility = this.facilities().find(facility => facility.guid === guid);
+      if (!initialized && facility) {
         initialized = true;
-        untracked(() => { this.contextForm.controls.facilityGuid.setValue(guid); this.dirty.set(false); });
+        untracked(() => {
+          this.form.controls.facilityGuid.setValue(facility.guid);
+          this.initialYear = previousEnergyUseYear(facility);
+          this.step.set('group'); this.dirty.set(false);
+        });
       }
     });
-    let previousFacility: string | undefined;
     effect(() => {
-      const facility = this.facility();
-      if (!facility || previousFacility === facility.guid) return;
-      const initial = previousFacility === undefined;
-      previousFacility = facility.guid;
-      untracked(() => {
-        this.contextForm.patchValue({ initialYear: previousEnergyUseYear(facility), groupGuid: '', groupKind: 'new' });
-        this.form.controls.utilityMeterGroupIds.setValue([]);
-        if (initial) this.dirty.set(false);
-      });
+      const enabled = this.canEdit();
+      untracked(() => enabled ? this.form.enable({ emitEvent: false }) : this.form.disable({ emitEvent: false }));
     });
-    effect(() => {
-      const enabled = !this.saving() && this.workspace.canWrite() && !this.workspace.hasPending();
-      untracked(() => {
-        for (const form of [this.form, this.contextForm]) enabled ? form.enable({ emitEvent: false }) : form.disable({ emitEvent: false });
-      });
+    afterRenderEffect(() => {
+      const step = this.step();
+      const target = step === 'name' ? this.itemName()?.nativeElement : step === 'new-group' ? this.groupName()?.nativeElement : this.stepHeading()?.nativeElement;
+      if (target && step !== this.focusedStep) { this.focusedStep = step; target.focus(); }
     });
   }
-  addSource(source: MeterSource): void {
-    if (!this.canCreate() || this.form.controls.sources.length >= 2 || this.form.controls.sources.getRawValue().some(row => row.energySource === source)) return;
-    this.form.controls.sources.push(this.forms.source(defaultEnergyUseSource(source)));
+  selectFacility(guid: string): void {
+    if (!this.canEdit() || this.fixedFacilityGuid()) return;
+    const facility = this.facilities().find(facility => facility.guid === guid);
+    if (!facility) return;
+    if (guid !== this.form.controls.facilityGuid.value) {
+      this.form.patchValue({ facilityGuid: guid, groupKind: null, groupGuid: '', groupName: '' });
+      this.initialYear = previousEnergyUseYear(facility);
+    }
+    this.groupSearch.setValue(''); this.step.set('group');
   }
-  removeSource(source: { energySource: MeterSource }): void {
-    if (!this.canCreate()) return;
-    const index = this.form.controls.sources.controls.findIndex(row => row.controls.energySource.value === source.energySource);
-    if (index >= 0) this.form.controls.sources.removeAt(index);
+  selectGroup(guid: string): void {
+    if (!this.canEdit() || !this.facility() || !this.groups().some(group => group.guid === guid)) return;
+    this.form.patchValue({ groupKind: 'existing', groupGuid: guid }); this.step.set('name');
   }
-  confirmUtilities(selection: EnergyUseUtilitySelection): void {
-    if (this.canCreate() && !this.form.controls.utilityMeterGroupIds.value.length) this.forms.applyUtilities(this.form, selection);
+  startNewGroup(): void {
+    if (!this.canEdit() || !this.facility()) return;
+    this.form.patchValue({ groupKind: 'new', groupGuid: '' }); this.step.set('new-group');
   }
-  confirmMeterGroups(selection: EnergyUseMeterGroupSelection): void {
-    if (this.canCreate()) this.forms.applyMeterGroups(this.form, selection);
+  useNewGroup(): void {
+    this.form.controls.groupName.markAsTouched();
+    if (this.canUseNewGroup()) this.step.set('name');
+  }
+  editSelection(selection: 'facility' | 'group'): void {
+    if (!this.canEdit() || (selection === 'facility' && this.fixedFacilityGuid())) return;
+    this.step.set(selection);
   }
   requestClose(): void {
     if (this.saving()) return;
+    // The parent shell portal stays mounted while the nested confirmation reviews this draft.
     if (this.dirty()) this.discardOpen.set(true); else this.closed.emit();
   }
-  discard(): void { if (!this.saving()) { this.dirty.set(false); this.closed.emit(); } }
+  discard(): void { if (!this.saving()) { this.discardOpen.set(false); this.dirty.set(false); this.closed.emit(); } }
   async submit(): Promise<void> {
-    this.form.markAllAsTouched(); this.contextForm.markAllAsTouched();
+    if (this.step() === 'new-group') { this.useNewGroup(); return; }
+    if (this.step() !== 'name') return;
+    this.form.controls.name.markAsTouched();
     if (!this.canCreate()) return;
-    const value = this.contextForm.getRawValue(), settings = this.form.getRawValue();
-    const error = energyUseSettingsError(settings);
-    if (error || !Number.isInteger(value.initialYear) || value.initialYear! < 1 || value.initialYear! > 9999
-      || (value.groupKind === 'new' ? !value.groupName.trim() : !this.groups().some(group => group.guid === value.groupGuid))) {
-      this.error.set(error || 'Enter an initial year and choose an energy-use group or enter a new group name.'); return;
-    }
-    const guid = this.facility()!.guid;
+    const value = this.form.getRawValue(), facility = this.facility()!;
     this.saving.set(true); this.error.set('');
     try {
-      const saved = await this.actions.create({ settings, initialYear: value.initialYear!,
-        group: value.groupKind === 'new' ? { kind: 'new', name: value.groupName } : { kind: 'existing', guid: value.groupGuid } }, this.accountGuid, guid, this.request);
-      if (!this.destroy.destroyed && this.workspace.account()?.guid === this.accountGuid && this.facility()?.guid === guid) {
+      const saved = await this.actions.create({
+        settings: { name: value.name, notes: '', equipmentType: 'Other', sources: [defaultEnergyUseSource()], utilityMeterGroupIds: [] },
+        initialYear: this.initialYear ?? previousEnergyUseYear(facility),
+        group: value.groupKind === 'new' ? { kind: 'new', name: value.groupName.trim() } : { kind: 'existing', guid: value.groupGuid }
+      }, this.accountGuid, facility.guid, this.request);
+      if (!this.destroy.destroyed && this.workspace.account()?.guid === this.accountGuid && this.facility()?.guid === facility.guid) {
         this.dirty.set(false); this.created.emit(saved);
       }
     } catch (error) {
