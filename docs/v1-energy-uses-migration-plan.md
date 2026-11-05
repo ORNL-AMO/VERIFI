@@ -4,15 +4,15 @@
 
 Migrate Energy Uses into the existing v1 Data workflow as an inventory of individual energy uses. An item may represent equipment, a system, or a process.
 
-Use the meter/predictor inventory and workbench patterns, with **Settings** and **Annual Data** tabs that both autosave. Support estimation independently of meter readings.
+Use the meter/predictor inventory and workbench patterns, with one **Setup** tab that autosaves equipment settings and annual data together. Support estimation independently of meter readings.
 
 This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Broader grouping remains a separate planning effort.
 
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Inventory and workspace navigation | Complete |
-| 2 | Creation, Settings, and safe commands | Implemented; approved for PR review |
-| 3 | Annual Data and estimation | Planned |
+| 2 | Creation, Settings, and safe commands | Merged into `unified-ux` |
+| 3 | Combined Setup, annual data, and estimation | Implemented and validated; PR review pending |
 | 4 | Complete item tools and charts | Planned |
 | 5 | Export, compatibility, and release acceptance | Planned |
 
@@ -21,7 +21,7 @@ This roadmap records the agreed target experience, not shipped behavior. Work th
 - Keep production UI under [`src/app/v1/data/energy-uses/`](../src/app/v1/data/energy-uses/), using feature-owned inventory projections, a collection workspace service, and a route-scoped workbench context. Reuse shared inventory, workbench, navigation, chart, and modal presentation. Follow the [Data workbench architecture norms](unified-ux-migration.md#production-v1-data-workbench-architecture-norms).
 - Continue using the existing [equipment](../src/app/data/models/idbModels/facilityEnergyUseEquipment.ts) and [group](../src/app/data/models/idbModels/facilityEnergyUseGroups.ts) records. Keep their persisted names, GUID relationships, annual arrays, and backup formats. No database schema or data-version migration is planned.
 - Every item retains its required energy-use group relationship. Present items in a flat inventory without regrouping existing records. Energy-use grouping and optional utility meter-group links remain separate relationships.
-- Add typed Energy Use settings, annual-data, creation, and command contracts. Both editors use the [shared Data editing session](v1-data-form-architecture-roadmap.md) for serialized autosave, reconciliation, failed drafts, and navigation protection.
+- Add typed Energy Use settings, annual-data, creation, and command contracts. The combined Setup editor uses one [shared Data editing session](v1-data-form-architecture-roadmap.md) for serialized autosave, reconciliation, failed drafts, and navigation protection.
 - Route writes through `WorkspaceCommandBoundary` and the existing [energy-use handler](../src/app/data/account-workspace/handlers/energy-use-command-handler.service.ts). Resolve current records inside queued commands; compound operations commit atomically and publish once. Follow the [workspace data workflow](data-access-and-workspace.md).
 - Reuse deterministic calculations from [`src/app/domain/calculations/energy-footprint/`](../src/app/domain/calculations/energy-footprint/). Rebuild legacy presentation and forms in v1; extract reusable helpers and file-writing logic into neutral layers where needed. Production v1 must not import v0 presentation or prototype code.
 
@@ -50,16 +50,17 @@ Implement typed creation and Settings forms using existing field meanings and va
 
 **Completion:** Users can create and manage energy uses without meter readings, with working autosave, conflict review, retry, and discard protection.
 
-### Phase 3 — Annual Data and estimation
+### Phase 3 — Combined Setup, annual data, and estimation
 
-Build an annual editor with a year selector, operating assumptions, and per-source calculated or overridden consumption.
+Extend the existing editor into one Setup tab, retaining `/settings` and removing the unshipped Annual Data route and shell without a compatibility alias. Display all fiscal years in ascending order, with operating assumptions and compact per-source consumption rows in each connected year section.
 
 - Allow explicit years using the facility's fiscal-year meaning; meter data does not constrain available years.
 - Cover operating hours, load factor, duty factor, electricity efficiency, consumption units, and manual overrides.
-- Show estimates immediately as edits are made, clearly distinguishing previews from saved values. Autosave valid changes through the shared editing lifecycle.
+- Update estimates immediately as edits are made. Keep save feedback and Setup validation chips in the sticky header; omit flashing inline preview labels, footer save reminders, and availability alerts during the editor's own save. Autosave valid changes through the shared editing lifecycle.
 - Preserve existing formulas, conversion precision, zero values, overrides, and stored history. Invalid inputs or non-finite calculated results block the affected save.
-- Add and copy years across operating conditions and every source consistently. Confirm year removal.
-- Separate Settings and Annual Data mappings because both touch nested source records. Merge annual entries by source/year, preserve unrelated edits, and surface conflicts when source changes invalidate an annual draft.
+- Add and copy years across operating conditions and every source consistently. Copy stored amounts, units, override flags, and optional calculator inputs independently; changing a manual value's units retains the entered number. Confirm year removal.
+- Present Linked Utility Meter Groups separately, with group icons, an empty state, and a right-aligned blue selection action. Keep Select Utilities available with linked groups; review any links that must be removed and apply utility/link changes together, preserving retained source history.
+- Keep equipment and annual projections distinct within one typed form and editing session. Merge annual entries by source/year, preserve unrelated edits, and surface conflicts when source changes invalidate an annual draft.
 - Opening a record never recalculates or rewrites saved values.
 
 **Completion:** A user can create an energy use, enter annual assumptions, override consumption, reopen it, and recover the same saved values.
@@ -216,6 +217,40 @@ The cleanup sweep removed the previous Settings-form dependency, context/year co
 | Local review and stale-code sweep | No actionable findings remain in the updated comparisons. Screenshot artifacts remain outside the commits. |
 
 The initial app check identified an incorrect icon-type import, corrected before the passing checks. Visual inspection also caught an unthemed input surface; both flows now use the shared theme-aware input class. Full suites were not repeated after deleting the unused handler and nested rendering branch; focused compilation, type-check, browser journeys, and the production build passed on that final code. Electron build and OS checks were not repeated for this renderer-only redesign; the earlier persistence-stack evidence remains above. Annual Data and later roadmap phases remain deferred.
+
+## Phase 3 local delivery evidence
+
+Combined Setup uses one typed form and Settings editing session for equipment settings and all annual rows, presented oldest first. Save feedback and validation remain in the workbench header. Year actions, utility changes, overrides, and source/history reviews preserve the existing record and backup shapes; no schema, formula, or v0 workflow changes are introduced.
+
+The local review fixes cover coherent copying before autosave, clearing removed optional calculator inputs during silent hydration, safe edits and independent reconciliation beside duplicate history, and supported conflict choices for remotely deleted sources/years. Complete affected drafts and their baselines remain mounted until saved deletion is explicitly accepted. The stale Settings-only command, tab-event subscription/metadata, and unused group/preview state are removed. The combined editor delegates validation to its form service, including current meter-link context.
+
+Validation on the iteration checkout (2026-11-05):
+
+| Check | Result |
+| --- | --- |
+| Validation planner and app TypeScript check | Passed. |
+| Focused Energy Uses and shared editing checks | Passed: 135 fast tests. |
+| Focused Chromium persistence, journeys, and backup compatibility | Passed: 19 tests, including copying pending inputs, native rollback/reopen, source/year reviews, navigation, and backup restoration. |
+| Full `npm run test:all:ci` | Passed: 3,430 fast tests and 373 Chromium tests. |
+| `npm run build-prod` | Passed; existing browser-support, stylesheet-budget, and CommonJS warnings remain. |
+| `npm run build-prod-electron` | Passed; existing browser-support, stylesheet-budget, and CommonJS warnings remain. |
+| Updated local review and `git diff --check` | No additional actionable findings; whitespace check passed. |
+
+Four supplemental review probes initially reproduced the defects and are now covered by permanent regression tests. Chromium also caught a normalization regression while consolidating validation: empty optional form controls made untouched imported history appear edited. Normalizing before delta validation fixed it; the focused checks and full suites above passed afterward.
+
+Desktop/narrow, theme, focus, keyboard, and print behavior are covered by the existing phase 3 browser journeys and local screenshot evidence. Native Electron OS integration was not exercised because no IPC, filesystem, or OS workflow changed. The stack targets `unified-ux` → `codex/energy-uses-annual-contracts` → `codex/energy-uses-setup` → `codex/energy-uses-phase3-acceptance`, in that merge order. Each exact comparison received a local review and validation plan; no actionable findings remain. Publication is approved, with initial GitHub CI verification performed after opening each PR. Screenshot artifacts and unrelated custom-icon work remain local and unstaged.
+
+Stack assembly validation (2026-11-05):
+
+| Comparison | Validation |
+| --- | --- |
+| `unified-ux` → annual contracts | 135 focused fast tests, 29 Chromium tests, app type-check, and production web build passed. The phase 2 UI remains functional. |
+| Annual contracts → combined Setup | 196 focused fast tests, 18 Chromium journeys, app type-check, and production web build passed. Application files match the approved iteration snapshot. |
+| Combined Setup → acceptance | Ten focused Chromium checks passed, including coherent pending-copy persistence and combined-edit backup restoration. The comparison contains acceptance tests and documentation only. |
+| Complete isolated stack | Full suite passed: 3,418 fast tests and 373 Chromium tests. App type-check and both production web and Electron renderer builds passed. |
+| Presentation and boundaries | Desktop light and narrow high-contrast screenshots inspected. Local artifacts preserved outside the comparisons; no schema, backup-format, formula, v0, IPC, or OS workflow changes. |
+
+The isolated checkout excludes unrelated custom-icon edits, so its fast-test total differs from the iteration checkout above. Existing browser-support, stylesheet-budget, and CommonJS warnings remain. Native Electron OS integration was not exercised.
 
 ## Defaults and deferred work
 
