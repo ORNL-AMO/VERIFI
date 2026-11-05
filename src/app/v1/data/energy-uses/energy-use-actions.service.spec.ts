@@ -15,7 +15,8 @@ describe('Energy Use actions', () => {
     const store = { account: signal({ guid: 'account-a' }), canWrite: signal(true), facilities: signal([{ ...energyUseFacility(), energyUnit: 'kWh' }]),
       energyUseEquipment: signal([energyUseItem({ id: 1, utilityMeterGroupIds: [] })]), energyUseGroups: signal([energyUseGroup()]),
       meterGroups: signal([]), meters: signal([]) };
-    const handler = { createItem: vi.fn(async (_owner, item) => item), saveItem: vi.fn(async (_identity, _before, updated) => updated), deleteItem: vi.fn(async () => {}) };
+    const handler = { createItem: vi.fn(async (_owner, item) => item), copyItem: vi.fn(async (_identity, _before, copy) => copy),
+      saveItem: vi.fn(async (_identity, _before, updated) => updated), deleteItem: vi.fn(async () => {}) };
     let prepare = () => {};
     const boundary = { execute: vi.fn(async (_options, persist) => { prepare(); return { value: await persist() }; }) };
     TestBed.configureTestingModule({ providers: [{ provide: AccountWorkspaceStore, useValue: store },
@@ -41,9 +42,11 @@ describe('Energy Use actions', () => {
     expect(handler.saveItem).not.toHaveBeenCalled();
   });
   it('copies the complete item with fresh identity and independent nested records', async () => {
-    const { service, store } = setup(), original = store.energyUseEquipment()[0];
+    const { service, store, handler } = setup(), original = store.energyUseEquipment()[0];
     original.noLongerInUse = { isNoLongerInUse: true, year: 2023 };
     const copy = await service.copy(identity);
+    expect(handler.copyItem).toHaveBeenCalledWith(identity, original, copy);
+    expect(handler.createItem).not.toHaveBeenCalled();
     expect(copy).toMatchObject({ name: 'Pump A (copy)', energyUseGroupId: original.energyUseGroupId, utilityData: original.utilityData, noLongerInUse: original.noLongerInUse });
     expect(copy.guid).not.toBe(original.guid); expect(copy.id).toBeUndefined();
     copy.utilityData[0].energyUse[0].energyUse = 99; copy.noLongerInUse.year = 2024;

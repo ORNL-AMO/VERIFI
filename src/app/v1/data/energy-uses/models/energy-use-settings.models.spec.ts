@@ -21,6 +21,18 @@ describe('Energy Use Settings mappings', () => {
     expect(result).toEqual({ ...current, name: 'New name' });
     expect(current.name).toBe('Pump A');
   });
+  it.each([false, true])('ignores annual history carried by a structurally wider source (capacity changed: %s)', changeCapacity => {
+    const current = item(), settings = energyUseSettings(current);
+    const staleSource = structuredClone(current.utilityData[0]);
+    staleSource.energyUse.forEach(annual => { annual.energyUse = 999; annual.overrideEnergyUse = true; });
+    if (changeCapacity) staleSource.size = 10;
+    const result = applyEnergyUseSettings(current, { ...settings, name: 'Updated', sources: [staleSource] }, facility);
+    expect(result.utilityData[0].energyUse).toEqual([
+      { year: 2024, energyUse: changeCapacity ? 1000 : 17, overrideEnergyUse: false, energyUseUnit: 'kWh' },
+      { year: 2023, energyUse: 0, overrideEnergyUse: true, energyUseUnit: 'GJ' }
+    ]);
+    expect(current.utilityData[0].energyUse[0].energyUse).toBe(17);
+  });
   it.each([['Electricity', 1000], ['Natural Gas', 500]] as const)('recalculates %s and retains overridden zeroes', (energySource, expected) => {
     const current = item(); current.utilityData[0].energySource = energySource;
     const settings = energyUseSettings(current);

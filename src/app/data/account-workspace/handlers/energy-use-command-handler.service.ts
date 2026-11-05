@@ -25,26 +25,40 @@ export class EnergyUseCommandHandler {
   /** Production v1 commands re-read durable owners and records in the same transaction. */
   async createItem(owner: EnergyUseOwner, item: IdbFacilityEnergyUseEquipment,
     newGroup?: IdbFacilityEnergyUseGroup, validateLinks = true): Promise<IdbFacilityEnergyUseEquipment> {
+    return this.insertItem(owner, item, newGroup, validateLinks);
+  }
+
+  async copyItem(identity: EnergyUseCommandIdentity, reviewed: IdbFacilityEnergyUseEquipment,
+    copy: IdbFacilityEnergyUseEquipment): Promise<IdbFacilityEnergyUseEquipment> {
+    return this.insertItem(identity, structuredClone(copy), undefined, false, { identity: { ...identity }, item: structuredClone(reviewed) });
+  }
+
+  private async insertItem(owner: EnergyUseOwner, item: IdbFacilityEnergyUseEquipment,
+    newGroup: IdbFacilityEnergyUseGroup | undefined, validateLinks: boolean,
+    source?: { readonly identity: EnergyUseCommandIdentity; readonly item: IdbFacilityEnergyUseEquipment }): Promise<IdbFacilityEnergyUseEquipment> {
     return this.transactions.runTransaction(['facilities', 'facilityEnergyUseGroups', 'facilityEnergyUseEquipment', 'utilityMeterGroups', 'utilityMeter'], 'readwrite', async tx => {
       await this.requireFacility(tx, owner);
       this.requireItemOwner(item, owner);
+      if (source) await this.requireCurrentItem(tx, source.identity, source.item);
+      if (newGroup && (newGroup.id !== undefined || !newGroup.name.trim() || newGroup.guid !== item.energyUseGroupId
+        || newGroup.accountId !== owner.accountGuid || newGroup.facilityId !== owner.facilityGuid)) this.reject('The new energy-use group is invalid.');
       const existing = await tx.getAllByIndex<IdbFacilityEnergyUseEquipment>('facilityEnergyUseEquipment', 'guid', item.guid);
       if (item.id !== undefined) this.reject('New energy uses cannot reuse an IndexedDB key.');
       // A retry after committed persistence but failed publication must never create a duplicate.
       if (existing.length) {
-        if (existing.length === 1 && JSON.stringify({ ...existing[0], id: undefined }) === JSON.stringify(item)) return existing[0];
+        if (existing.length === 1 && JSON.stringify({ ...existing[0], id: undefined }) === JSON.stringify(item)) {
+          const group = await this.requireGroup(tx, owner, item.energyUseGroupId);
+          if (newGroup && group.name !== newGroup.name) this.reject('This energy-use group was already created with different details. Open the saved energy use before changing its group.');
+          return existing[0];
+        }
         this.reject('This energy use was already created. Open its saved settings from the inventory before making further changes.');
       }
       let group: IdbFacilityEnergyUseGroup;
       if (newGroup) {
-        if (newGroup.id !== undefined || !newGroup.name.trim() || newGroup.guid !== item.energyUseGroupId
-          || newGroup.accountId !== owner.accountGuid || newGroup.facilityId !== owner.facilityGuid
-          || (await tx.getAllByIndex('facilityEnergyUseGroups', 'guid', newGroup.guid)).length) this.reject('The new energy-use group is invalid.');
+        if ((await tx.getAllByIndex('facilityEnergyUseGroups', 'guid', newGroup.guid)).length) this.reject('The new energy-use group is invalid.');
         group = newGroup;
       } else {
-        const groups = await tx.getAllByIndex<IdbFacilityEnergyUseGroup>('facilityEnergyUseGroups', 'guid', item.energyUseGroupId);
-        if (groups.length !== 1) this.reject('The energy-use group is no longer available.');
-        group = groups[0];
+        group = await this.requireGroup(tx, owner, item.energyUseGroupId);
       }
       if (group.accountId !== owner.accountGuid || group.facilityId !== owner.facilityGuid) this.reject('The energy-use group belongs to another facility.');
       if (validateLinks) await this.requireLinks(tx, item);
@@ -79,6 +93,13 @@ export class EnergyUseCommandHandler {
   private async requireFacility(tx: IndexedDbTransactionContext, owner: EnergyUseOwner): Promise<void> {
     const facilities = await tx.getAllByIndex<IdbFacility>('facilities', 'guid', owner.facilityGuid);
     if (facilities.length !== 1 || facilities[0].accountId !== owner.accountGuid) this.reject('The owning facility is no longer available.');
+  }
+  private async requireGroup(tx: IndexedDbTransactionContext, owner: EnergyUseOwner, guid: string): Promise<IdbFacilityEnergyUseGroup> {
+    const groups = await tx.getAllByIndex<IdbFacilityEnergyUseGroup>('facilityEnergyUseGroups', 'guid', guid);
+    if (groups.length !== 1) this.reject('The energy-use group is no longer available.');
+    const group = groups[0];
+    if (group.accountId !== owner.accountGuid || group.facilityId !== owner.facilityGuid) this.reject('The energy-use group belongs to another facility.');
+    return group;
   }
   private requireItemOwner(item: IdbFacilityEnergyUseEquipment, owner: EnergyUseOwner): void {
     if (item.accountId !== owner.accountGuid || item.facilityId !== owner.facilityGuid) this.reject('This energy use belongs to another account or facility.');

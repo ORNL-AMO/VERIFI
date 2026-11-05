@@ -56,7 +56,7 @@ export class EnergyUseActionsService {
       const current = this.requireItem(identity);
       const copy = { ...structuredClone(current), ...request, name: `${current.name || 'Untitled energy use'} (copy)`, selected: false };
       delete copy.id;
-      return this.handler.createItem(identity, copy, undefined, false);
+      return this.handler.copyItem(identity, current, copy);
     });
     return result.value;
   }

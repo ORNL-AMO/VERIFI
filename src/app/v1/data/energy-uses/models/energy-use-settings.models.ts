@@ -43,14 +43,17 @@ export const defaultEnergyUseSource = (energySource: MeterSource = 'Electricity'
 });
 export const previousEnergyUseYear = (facility: IdbFacility, now = new Date()): number => getFiscalYear(now, facility) - 1;
 
+function sourceSettings({ energySource, size, numberOfEquipment, units }: EnergyUseSourceValues): EnergyUseSourceValues {
+  return { energySource, size, numberOfEquipment, units };
+}
 export function energyUseSettings(item: IdbFacilityEnergyUseEquipment): EnergyUseSettingsValues {
   return normalizeEnergyUseSettings({ name: item.name ?? '', notes: item.notes ?? '', equipmentType: item.equipmentType,
-    sources: item.utilityData.map(({ energySource, size, numberOfEquipment, units }) => ({ energySource, size, numberOfEquipment, units })),
+    sources: item.utilityData.map(sourceSettings),
     utilityMeterGroupIds: [...(item.utilityMeterGroupIds ?? [])] });
 }
 export function normalizeEnergyUseSettings(value: EnergyUseSettingsValues): EnergyUseSettingsValues {
-  return { ...value, name: value.name.trim(), notes: value.notes,
-    sources: value.sources.map(row => ({ ...row })).sort((a, b) => a.energySource.localeCompare(b.energySource)),
+  return { name: value.name.trim(), notes: value.notes, equipmentType: value.equipmentType,
+    sources: value.sources.map(sourceSettings).sort((a, b) => a.energySource.localeCompare(b.energySource)),
     utilityMeterGroupIds: [...value.utilityMeterGroupIds].sort() };
 }
 export function validEnergyUseSource(row: EnergyUseSourceValues): boolean {
