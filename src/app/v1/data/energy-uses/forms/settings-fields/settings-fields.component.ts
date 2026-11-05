@@ -19,7 +19,6 @@ export class SettingsFieldsComponent {
   @ViewChild('utilitiesDrawer') private readonly utilitiesDrawer?: TemplateRef<unknown>;
   @ViewChild('meterGroupsDrawer') private readonly meterGroupsDrawer?: TemplateRef<unknown>;
   readonly drawer = signal<'utilities' | 'meter-groups' | undefined>(undefined);
-  readonly nestedDrawer = signal(false);
   readonly form = input.required<EnergyUseSettingsForm>();
   readonly editorKey = input.required<string>();
   readonly accountGuid = input.required<string>();
@@ -69,22 +68,16 @@ export class SettingsFieldsComponent {
     this.openDrawer('meter-groups', this.meterGroupsDrawer);
   }
   private openDrawer(kind: 'utilities' | 'meter-groups', template: TemplateRef<unknown>): void {
-    // Creation already lives in the shell portal. Keep that parent view mounted
-    // while the shared slideout and focus stack present its nested utility panel.
-    this.nestedDrawer.set(!!this.modal.activePortal());
     this.drawerKey = this.editorKey();
     this.drawer.set(kind);
-    if (!this.nestedDrawer()) {
-      this.portal = new TemplatePortal(template, this.view);
-      this.modal.show(this.portal);
-    }
+    this.portal = new TemplatePortal(template, this.view);
+    this.modal.show(this.portal);
   }
   closeDrawer(): void {
     this.drawer.set(undefined);
     if (this.portal && this.modal.activePortal() === this.portal) this.modal.hide();
     this.portal = undefined;
     this.drawerKey = undefined;
-    this.nestedDrawer.set(false);
   }
   confirmUtilities(selection: EnergyUseUtilitySelection): void {
     if (this.drawer() !== 'utilities' || this.drawerKey !== this.editorKey()) { this.closeDrawer(); return; }

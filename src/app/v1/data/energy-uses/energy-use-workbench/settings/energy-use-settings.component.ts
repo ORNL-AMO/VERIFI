@@ -115,11 +115,6 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   keyboardSave(event: KeyboardEvent): void {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); void this.editor.saveNow(); }
   }
-  addSource(source: MeterSource): void {
-    const form = this.form();
-    if (!form || !this.editor.canEdit() || form.controls.sources.length >= 2 || form.controls.sources.getRawValue().some(row => row.energySource === source)) return;
-    form.controls.sources.push(this.forms.source(defaultEnergyUseSource(source)));
-  }
   requestUtilities(selection: EnergyUseUtilitySelection): void {
     const form = this.form(), item = this.item();
     if (!form || !item || !this.editor.canEdit() || form.controls.utilityMeterGroupIds.value.length

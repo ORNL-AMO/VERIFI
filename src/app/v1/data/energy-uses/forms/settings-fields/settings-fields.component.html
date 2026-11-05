@@ -55,7 +55,3 @@
     <app-energy-use-meter-groups-slideout [accountGuid]="accountGuid()" [facilityGuid]="facilityGuid()" [groups]="groups()" [meters]="meters()" [sources]="sources()" [linkedIds]="linkedIds()" [canEdit]="canEdit()" (confirmed)="confirmMeterGroups($event)" (closed)="closeDrawer()"/>
   }
 </ng-template>
-@if (nestedDrawer()) {
-  @if (drawer() === 'utilities') { <ng-container [ngTemplateOutlet]="utilitiesDrawer"/> }
-  @if (drawer() === 'meter-groups') { <ng-container [ngTemplateOutlet]="meterGroupsDrawer"/> }
-}
