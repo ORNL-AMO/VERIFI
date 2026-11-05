@@ -4,7 +4,7 @@ import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/b
 import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { EnergyUseWorkbenchComponent } from './energy-use-workbench/energy-use-workbench.component';
-import { EnergyUseWorkbenchPanelComponent } from './energy-use-workbench/panel/energy-use-workbench-panel.component';
+import { AnnualDataFieldsComponent } from './forms/annual-data-fields/annual-data-fields.component';
 import { NgModule } from '@angular/core';
 import { SettingsFieldsComponent } from './forms/settings-fields/settings-fields.component';
 import { UtilitiesSlideoutComponent } from './forms/utilities-slideout/utilities-slideout.component';
@@ -26,7 +26,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
   declarations: [
     EnergyUsesInventoryComponent,
     EnergyUseWorkbenchComponent,
-    EnergyUseWorkbenchPanelComponent,
+    AnnualDataFieldsComponent,
     SettingsFieldsComponent, UtilitiesSlideoutComponent, MeterGroupsSlideoutComponent, CreateEnergyUseDrawerComponent, EnergyUseSettingsComponent,
   ],
   imports: [
@@ -46,7 +46,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
   exports: [
     EnergyUsesInventoryComponent,
     EnergyUseWorkbenchComponent,
-    EnergyUseWorkbenchPanelComponent,
+    AnnualDataFieldsComponent,
   ],
 })
 export class EnergyUsesModule {}

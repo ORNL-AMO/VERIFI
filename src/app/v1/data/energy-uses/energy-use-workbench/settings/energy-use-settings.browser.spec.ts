@@ -137,7 +137,26 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     expect(store.energyUseEquipment()[0].utilityData.map(source => source.energySource)).toEqual(['Natural Gas']);
     expect(store.energyUseEquipment()[0].operatingConditionsData).toEqual(created.operatingConditionsData);
     expect(committed).toHaveBeenCalledTimes(1);
-    expect(page.getByRole('button', { name: 'Select Utilities', exact: true }).element()).toHaveProperty('disabled', true);
+    expect(page.getByRole('button', { name: 'Select Utilities', exact: true }).element()).toHaveProperty('disabled', false);
+    const savedLinked = structuredClone(store.energyUseEquipment()[0]);
+    for (const confirm of [false, true]) {
+      await page.getByRole('button', { name: 'Select Utilities', exact: true }).click(); await settle(portal);
+      const utilities = page.getByRole('dialog', { name: 'Select Utilities', exact: true });
+      await utilities.getByRole('checkbox', { name: 'Electricity', exact: true }).click();
+      await utilities.getByRole('button', { name: 'Confirm', exact: true }).click(); await settle(settings); await settle(portal);
+      const review = page.getByRole('dialog', { name: 'Confirm utility changes?', exact: true });
+      expect(review.element().textContent).toContain('Gas main');
+      if (!confirm) {
+        await review.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(settings);
+        expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([savedLinked]);
+      } else {
+        await review.getByRole('button', { name: 'Confirm utility changes', exact: true }).click(); await settle(settings);
+        await vi.waitFor(() => expect(store.energyUseEquipment()[0].utilityMeterGroupIds).toEqual([]));
+        expect(store.energyUseEquipment()[0].utilityData.map(source => source.energySource).sort()).toEqual(['Electricity', 'Natural Gas']);
+        expect(store.energyUseEquipment()[0].utilityData.find(source => source.energySource === 'Natural Gas')?.energyUse).toEqual(savedLinked.utilityData[0].energyUse);
+        expect(await harness.getAll('utilityMeterGroups')).toHaveLength(3);
+      }
+    }
     expect(await harness.getAll('utilityMeterData')).toEqual([]);
     const saved = await harness.getAll('facilityEnergyUseEquipment'); await harness.reopen();
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(saved);
@@ -214,6 +233,42 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     await userEvent.keyboard('{Escape}'); await settle(portal); expect(root.querySelector('[role="dialog"]')).toBeNull();
   });
 
+  it('edits annual assumptions and manual zeroes, adds and copies complete years, and reviews removal through rendered controls', async () => {
+    const actions = TestBed.inject(EnergyUseActionsService);
+    const created = await actions.create({ initialYear: 2024, group: { kind: 'new', name: 'Production' }, settings: {
+      name: 'Annual test pump', notes: '', equipmentType: 'Pump', utilityMeterGroupIds: [],
+      sources: [{ energySource: 'Electricity', size: 5, units: 'kW', numberOfEquipment: 1 }] } }, account.guid, facility.guid);
+    guid.set(created.guid);
+    const fixture = mount(EnergyUseSettingsComponent), portal = mount(EnergyUsePortalHost); await settle(fixture); await settle(portal);
+    const store = TestBed.inject(AccountWorkspaceStore), current = () => store.energyUseEquipment().find(item => item.guid === created.guid)!;
+    await page.getByRole('spinbutton', { name: 'Operating hours for 2024', exact: true }).fill('1000');
+    await vi.waitFor(() => expect(current().operatingConditionsData[0].hoursOfOperation).toBe(1000));
+    await page.getByRole('button', { name: 'Use manual consumption for Electricity in 2024', exact: true }).click();
+    await vi.waitFor(() => expect(current().utilityData[0].energyUse[0].overrideEnergyUse).toBe(true));
+    await page.getByRole('spinbutton', { name: 'Electricity consumption for 2024', exact: true }).fill('0');
+    await vi.waitFor(() => expect(current().utilityData[0].energyUse[0].energyUse).toBe(0));
+    await page.getByRole('button', { name: 'Add year', exact: true }).click(); await settle(portal);
+    const add = page.getByRole('dialog', { name: 'Add fiscal year', exact: true });
+    await add.getByRole('spinbutton', { name: 'Fiscal year', exact: true }).fill('2025');
+    await add.getByRole('button', { name: 'Add year', exact: true }).click();
+    await vi.waitFor(() => expect(current().operatingConditionsData).toHaveLength(2)); await settle(fixture);
+    await page.getByRole('region', { name: '2024', exact: true }).getByRole('button', { name: 'Copy year', exact: true }).click(); await settle(portal);
+    const copy = page.getByRole('dialog', { name: 'Copy fiscal year', exact: true });
+    await copy.getByRole('spinbutton', { name: 'Fiscal year', exact: true }).fill('2026');
+    await copy.getByRole('button', { name: 'Copy year', exact: true }).click();
+    await vi.waitFor(() => expect(current().operatingConditionsData).toHaveLength(3)); await settle(fixture);
+    expect(current().utilityData[0].energyUse.find(row => row.year === 2026)).toMatchObject({ energyUse: 0, overrideEnergyUse: true, energyUseUnit: 'kWh' });
+    await page.getByRole('region', { name: '2025', exact: true }).getByRole('button', { name: 'Remove year', exact: true }).click(); await settle(portal);
+    await userEvent.keyboard('{Escape}'); await settle(portal); expect(current().operatingConditionsData).toHaveLength(3);
+    await page.getByRole('region', { name: '2025', exact: true }).getByRole('button', { name: 'Remove year', exact: true }).click(); await settle(portal);
+    await page.getByRole('dialog', { name: 'Remove fiscal year?', exact: true }).getByRole('button', { name: 'Remove year', exact: true }).click();
+    await vi.waitFor(() => expect(current().operatingConditionsData.map(row => row.year)).toEqual([2024, 2026]));
+    expect(current().utilityData[0].energyUse.map(row => row.year)).toEqual([2024, 2026]);
+    const saved = structuredClone(current());
+    fixtures.forEach(fixture => fixture.destroy()); fixtures = []; await harness.reopen();
+    expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([saved]);
+  });
+
   it('preserves imported extra sources, overrides, retirement, and group links through Settings and account/facility backup restoration', async () => {
     const created = await TestBed.inject(EnergyUseActionsService).create({ initialYear: 2025, group: { kind: 'new', name: 'Imported equipment' },
       settings: { name: 'Imported', notes: '', equipmentType: 'Other', sources: [{ energySource: 'Electricity', size: 1, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
@@ -227,8 +282,8 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     await TestBed.inject(EnergyUseCommandHandler).saveItem({ accountGuid: account.guid, facilityGuid: facility.guid, energyUseGuid: created.guid }, created, imported, false);
     await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace();
     guid.set(created.guid); const fixture = mount(EnergyUseSettingsComponent); await settle(fixture);
-    expect(fixture.componentInstance.form()!.controls.sources.length).toBe(3);
-    fixture.componentInstance.form()!.controls.name.setValue('Compatible imported item');
+    expect(fixture.componentInstance.form()!.controls.settings.controls.sources.length).toBe(3);
+    fixture.componentInstance.form()!.controls.settings.controls.name.setValue('Compatible imported item');
     expect(await fixture.componentInstance.editor.saveNow()).toBe(true); await settle(fixture);
     const store = TestBed.inject(AccountWorkspaceStore), snapshot = store.snapshot()!;
     expect(store.energyUseEquipment()[0].utilityData).toEqual(imported.utilityData);

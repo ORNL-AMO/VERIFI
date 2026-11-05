@@ -42,7 +42,7 @@ function setup(single = false) {
   store.publish(snapshot);
   const pairService = { ensurePairs: vi.fn(async () => true) };
   const workspaceService = { selectAccount: vi.fn(), selectFacility: vi.fn() };
-  const actions = { updateSettings: vi.fn(async (_identity, value) => value) };
+  const actions = { updateSetup: vi.fn(async (_identity, value) => value) };
   const account = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
   const facility = V1Routes[0].children!.find(route => route.path === 'workspace/facility/:facilityGuid')!;
   TestBed.configureTestingModule({ imports: [DataModule, EnergyUsesBrowserHost], providers: [
@@ -94,13 +94,13 @@ describe('energy uses browser journeys', () => {
       expect(panel()).toBe(reusedEditor);
       expect(view.root.querySelector('[role="dialog"]')).toBeNull();
       expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
-      expect(view.actions.updateSettings).not.toHaveBeenCalled();
+      expect(view.actions.updateSetup).not.toHaveBeenCalled();
       expect(view.store.snapshot()).toEqual(before);
       await page.getByRole('button', { name: title, exact: true }).click(); await settle(view);
       const fresh = page.getByRole('dialog', { name: title, exact: true });
       expect(fresh.getByRole('checkbox', { name: choice, exact: true }).element()).toHaveProperty('checked', false);
       await fresh.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view);
-      expect(view.actions.updateSettings).not.toHaveBeenCalled();
+      expect(view.actions.updateSetup).not.toHaveBeenCalled();
     } finally { view.fixture.destroy(); }
   });
   it('restores scope, filters, page, detail, scroll and focus through item drill-in and browser Back/Forward', async () => {

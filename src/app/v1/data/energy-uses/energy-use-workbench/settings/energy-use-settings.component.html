@@ -1,21 +1,15 @@
 @let settingsForm = form();
 @if (settingsForm) {
   <div class="energy-use-settings">
-    @let saveState = editor.state();
-    @let showSaveFeedback = saveState !== 'idle' && saveState !== 'dirty';
-    @if (!workspace.canWrite() || !item() || showSaveFeedback) {
-      <section class="v1-workbench-section" aria-label="Save status">
-        @if (!workspace.canWrite()) { <p class="v1-alert v1-alert--info">Settings are read-only while this workspace is unavailable.</p> }
+    @if (showReadOnlyNotice() || !item()) {
+      <section class="v1-workbench-section" aria-label="Workspace availability">
+        @if (showReadOnlyNotice()) { <p class="v1-alert v1-alert--info">Setup is read-only while this workspace is unavailable.</p> }
         @if (!item()) { <p class="v1-alert v1-alert--warning" role="alert">The saved energy use is no longer available. Your draft has been retained.</p> }
-        @if (showSaveFeedback) {
-          <p aria-live="polite">{{ saveMessage() }}
-            @if (saveState === 'error') { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="editor.saving()" (click)="editor.retry()">Retry</button> }
-          </p>
-        }
       </section>
     }
-    <form [formGroup]="settingsForm" aria-label="Energy use settings" (ngSubmit)="editor.saveNow()">
-      <app-energy-use-settings-fields [form]="settingsForm" [editorKey]="key()" [accountGuid]="identity().accountGuid" [facilityGuid]="identity().facilityGuid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="editor.canEdit()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="requestUtilities($event)" (meterGroupsConfirmed)="requestMeterGroups($event)"/>
+    <form [formGroup]="settingsForm" aria-label="Energy use setup" (ngSubmit)="editor.saveNow()">
+      <app-energy-use-settings-fields [form]="settingsForm.controls.settings" [editorKey]="key()" [accountGuid]="identity().accountGuid" [facilityGuid]="identity().facilityGuid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="editor.canEdit()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="requestUtilities($event)" (meterGroupsConfirmed)="requestMeterGroups($event)"/>
+      <app-energy-use-annual-data-fields [form]="settingsForm" [item]="item()" [canEdit]="editor.canEdit()" [refreshKey]="refreshKey()" (addRequested)="openYearDrawer()" (copyRequested)="openYearDrawer($event)" (removeRequested)="requestRemoveYear($event)"/>
     </form>
     @if (removedSources().length) {
       <section class="v1-workbench-section" aria-label="Pending source removals">
@@ -26,26 +20,46 @@
     <footer class="v1-workbench-section energy-use-settings__actions">
       <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canCopy()" (click)="copy()"><app-ui-icon name="copy"/>Copy energy use</button>
       <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canCommand()" (click)="requestDelete()"><app-ui-icon name="delete"/>Delete energy use</button>
-      @if (editor.dirty()) { <p class="v1-muted">Save settings before copying this item.</p> }
     </footer>
     @if (actionError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</p> }
   </div>
 }
 <ng-template #confirmation>
   @if (review(); as current) {
-    <app-confirmation-dialog [title]="current.kind === 'delete' ? 'Delete energy use?' : current.kind === 'utilities' ? 'Confirm utility changes?' : 'Remove energy source?'" titleId="energy-use-confirmation-title" cancelAriaLabel="Cancel energy use action" [confirmLabel]="current.kind === 'delete' ? 'Delete energy use' : current.kind === 'utilities' ? 'Confirm utility changes' : 'Remove source'" confirmIcon="delete" [disabled]="busy()" [busy]="busy()" [confirmDisabled]="reviewStale()" (confirmed)="confirmReview()" (cancelled)="cancelReview()">
-      @if (current.kind === 'delete') { <p>Delete <strong>{{ current.item.name }}</strong> and all its annual assumptions, consumption values, and manual overrides? Its energy-use group and linked meter groups will remain.</p>
-        @if (editor.dirty()) { <p>Your unsaved Settings draft will also be discarded after deletion succeeds.</p> }
+    <app-confirmation-dialog [title]="current.kind === 'year' ? 'Remove fiscal year?' : current.kind === 'delete' ? 'Delete energy use?' : current.kind === 'utilities' ? 'Confirm utility changes?' : 'Remove energy source?'" titleId="energy-use-confirmation-title" cancelAriaLabel="Cancel energy use action" [confirmLabel]="current.kind === 'year' ? 'Remove year' : current.kind === 'delete' ? 'Delete energy use' : current.kind === 'utilities' ? 'Confirm utility changes' : 'Remove source'" confirmIcon="delete" [disabled]="busy()" [busy]="busy()" [confirmDisabled]="reviewStale()" (confirmed)="confirmReview()" (cancelled)="cancelReview()">
+      @if (current.kind === 'year') { <p>Remove <strong>{{ current.year }}</strong> from <strong>{{ current.item.name }}</strong>?</p><p>Its operating assumptions and consumption for every source, including manual overrides and unsaved edits for this year, will be removed. Other years will remain.</p>
+      } @else if (current.kind === 'delete') { <p>Delete <strong>{{ current.item.name }}</strong> and all its annual assumptions, consumption values, and manual overrides? Its energy-use group and linked meter groups will remain.</p>
+        @if (editor.dirty()) { <p>Your unsaved Setup draft will also be discarded after deletion succeeds.</p> }
       } @else if (current.kind === 'source') { <p>Remove <strong>{{ current.source.energySource }}</strong> from <strong>{{ current.item.name }}</strong>?</p><p>Affected annual history: {{ removalYears() }}.</p><p>Saved consumption and overrides for this source will be removed. Other sources and annual operating assumptions will remain.</p>
       } @else {
         <p>Apply these utility changes to <strong>{{ current.item.name }}</strong>?</p>
         @if (current.meterGroups) { <p>Meter-group links and their utilities will update together after confirmation.</p> }
-        <p>Saved consumption and overrides will be removed for:</p>
-        <ul>@for (removal of utilityRemovalDetails(); track removal.source) { <li><strong>{{ removal.source }}</strong>: {{ removal.years }}</li> }</ul>
+        @if (unlinkedGroups().length) {
+          <p>These meter groups will be unlinked so the utility selection can change. The groups and their meter readings will remain:</p>
+          <ul>@for (group of unlinkedGroups(); track $index) { <li>{{ group }}</li> }</ul>
+        }
+        @if (utilityRemovalDetails().length) {
+          <p>Saved consumption and overrides will be removed for:</p>
+          <ul>@for (removal of utilityRemovalDetails(); track removal.source) { <li><strong>{{ removal.source }}</strong>: {{ removal.years }}</li> }</ul>
+        }
         <p>Annual operating assumptions and history for retained utilities will remain.</p>
       }
       @if (reviewStale()) { <p class="v1-alert v1-alert--warning" role="alert">Saved data changed. Cancel and review this action again.</p> }
       @if (actionError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</p> }
     </app-confirmation-dialog>
+  }
+</ng-template>
+
+<ng-template #yearEditor>
+  @if (yearDrawer(); as drawer) {
+    <app-workspace-slideout [title]="drawer.copyFrom === undefined ? 'Add fiscal year' : 'Copy fiscal year'" description="Use the owning facility's fiscal-year label. Meter readings are not required." initialFocus="#energy-use-new-year" [hasFooter]="true" (closed)="closeYearDrawer()">
+      <form [formGroup]="yearForm" (ngSubmit)="confirmYear()" id="energy-use-year-form">
+        @if (drawer.copyFrom !== undefined) { <p>Copy {{ drawer.copyFrom }} assumptions, consumption units, and saved values for every source. Manual overrides will also be copied.</p> }
+        <label class="energy-use-settings__year-input"><span>Fiscal year</span><input id="energy-use-new-year" type="number" min="1" max="9999" formControlName="year" required></label>
+        @if (yearForm.invalid && yearForm.touched) { <p class="v1-alert v1-alert--warning" role="alert">Enter a fiscal year from 1 to 9999.</p> }
+        @if (yearError()) { <p class="v1-alert v1-alert--warning" role="alert">{{ yearError() }}</p> }
+      </form>
+      <div slideoutFooter><button type="button" class="v1-btn v1-btn--secondary" (click)="closeYearDrawer()">Cancel</button><button type="submit" form="energy-use-year-form" class="v1-btn v1-btn--primary" [disabled]="workspace.hasPending() || !item()">{{ drawer.copyFrom === undefined ? 'Add year' : 'Copy year' }}</button></div>
+    </app-workspace-slideout>
   }
 </ng-template>

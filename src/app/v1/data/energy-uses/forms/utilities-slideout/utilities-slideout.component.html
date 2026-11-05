@@ -1,4 +1,5 @@
 <app-workspace-slideout title="Select Utilities" [hasFooter]="true" (closed)="closed.emit()">
+  @if (hasLinkedGroups()) { <p>Changes that require unlinking meter groups will be reviewed before they apply.</p> }
   <div class="energy-use-utilities" [formGroup]="form">
     @for (utility of choices(); track utility.source) {
       @if (form.controls[utility.source]; as control) {

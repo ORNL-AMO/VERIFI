@@ -1,3 +1,4 @@
+import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { TestBed } from '@angular/core/testing';
 import { EnergyUsesModule } from '../../energy-uses.module';
 import { SettingsFieldsComponent } from './settings-fields.component';
@@ -28,6 +29,28 @@ describe('Energy Use shared fields', () => {
     fixture.componentInstance.confirmUtilities(selection); expect(confirmed).toHaveBeenCalledWith(selection);
     expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
     expect(form.controls.sources.getRawValue()).toEqual(energyUseSettings(energyUseItem()).sources);
+  });
+  it('renders a separate linked-groups section with an empty state and listed group icons', () => {
+    TestBed.configureTestingModule({ imports: [EnergyUsesModule] });
+    const fixture = TestBed.createComponent(SettingsFieldsComponent);
+    const form = new EnergyUseSettingsFormService().build(energyUseSettings(energyUseItem({ utilityMeterGroupIds: [] })));
+    const group = { ...getNewIdbUtilityMeterGroup('Energy', 'Boiler meters', 'facility-a', 'account-a'), guid: 'meters-a' };
+    for (const [name, value] of Object.entries({ form, editorKey: 'account-a:facility-a:energy-a', accountGuid: 'account-a', facilityGuid: 'facility-a', groups: [group] })) fixture.componentRef.setInput(name, value);
+    fixture.detectChanges();
+    const section = fixture.nativeElement.querySelector('[aria-labelledby="energy-use-linked-meter-groups-title"]') as HTMLElement;
+    expect(section.textContent).toContain('No linked meter groups');
+    const button = section.querySelector('button')!;
+    expect(button.textContent).toContain('Select Meter Groups');
+    expect(button.classList.contains('v1-btn--action')).toBe(true);
+    form.controls.utilityMeterGroupIds.setValue([group.guid]); fixture.detectChanges();
+    expect(section.textContent).not.toContain('No linked meter groups');
+    expect(section.querySelector('li')?.textContent).toContain('Boiler meters');
+    expect(section.querySelector('li app-ui-icon')).not.toBeNull();
+    button.click(); fixture.detectChanges();
+    expect(fixture.componentInstance.drawer()).toBe('meter-groups');
+    fixture.componentInstance.closeDrawer(); fixture.detectChanges();
+    fixture.componentInstance.openUtilities(); fixture.detectChanges();
+    expect(fixture.componentInstance.drawer()).toBe('utilities');
   });
   it.each(['utilities', 'meter-groups'] as const)('rejects an obsolete %s confirmation before the identity-change effect runs', kind => {
     TestBed.configureTestingModule({ imports: [EnergyUsesModule] });
