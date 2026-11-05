@@ -1,5 +1,8 @@
 import type { IconSvgObject } from './icon.types';
 import { CUSTOM_ICONS } from './custom-icons';
+import AirVentIcon from '@hugeicons/core-free-icons/AirVentIcon';
+import LampCeilingIcon from '@hugeicons/core-free-icons/LampCeilingIcon';
+import ForkliftIcon from '@hugeicons/core-free-icons/ForkliftIcon';
 import Add01Icon from '@hugeicons/core-free-icons/Add01Icon';
 import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon';
 import ArrowDataTransferHorizontalIcon from '@hugeicons/core-free-icons/ArrowDataTransferHorizontalIcon';
@@ -113,6 +116,9 @@ import ZoomOutIcon from '@hugeicons/core-free-icons/ZoomOutIcon';
 
 export const ICON_REGISTRY = {
   ...CUSTOM_ICONS,
+  hvac: AirVentIcon,
+  lighting: LampCeilingIcon,
+  mobile: ForkliftIcon,
   account: Building03Icon,
   accountAnalysis: CrowdfundingIcon,
   accountIssue: Alert02Icon,

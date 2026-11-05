@@ -1,0 +1,2 @@
+/* Item and group snapshots share the same inventory fact layout. */
+@import '../energy-use-snapshot/energy-use-snapshot.component.css';

@@ -265,6 +265,13 @@ metadata and are not stored in report records.
 
 Shared modal surfaces delegate tabbable-element discovery and boundary containment to Angular CDK through `ModalFocusTrapDirective`. The adapter applies the existing initial-focus selector, Escape output, and workflow fallback contracts after rendering; it keeps busy dialogs focusable and restores only to a visible, enabled opener or fallback. `ModalFocusStackService` pauses underlying traps so only the active modal handles containment and restoration. Confirmation and slideout guards retain ownership of whether a close request is allowed. Native keyboard/focus behavior is covered in Chromium rather than synthetic Tab events in jsdom.
 
+### Energy-use group browsing
+
+V1 Energy Uses projects committed energy-use group records into scoped inventory cards and their equipment members into paginated lists. Facility-owned group routes coexist with unchanged item Setup routes. A read-only unavailable-group bucket keeps orphaned equipment discoverable without repairing its stored relationship. Browse identity includes the energy-use group GUID; empty groups remain visible. Creation reuses the existing command flow with an optional preselected group. Group cards describe inventory metadata only and perform no consumption rollup or persistence on entry.
+
+Energy-use sidebar groups own bounded equipment previews (20 links including the active item) and a full-list destination. Nested disclosure state is navigation-local and keyed by account/facility/group; accepted routes reveal active members without overwriting manual collapse on ordinary workspace publication. Item breadcrumbs return through the group, and Setup switching uses only members of that group. Route motion distinguishes inventory, group, and item depth.
+
+
 ## Tests, builds, and delivery
 
 Test targets are configured in `angular.json` and exposed through `package.json`:
@@ -301,9 +308,3 @@ The single-facility presentation uses `WorkspaceNavigationService.singleFacility
 Single-facility report presentation combines both saved owners without changing persistence or workbench routes. Scope-qualified report type keys select existing lifecycle commands; overlapping names receive format labels in choices, cards, sidebar links, and workbench headers. Level filters and ownership chrome are hidden only for a ready sole-facility workspace.
 
 Single-facility identity is gated by the shared `singleFacilityPresentation` readiness/owned-count rule. Settings uses facility editors and existing mirrored save contracts, with inheritance/copy presentation hidden and effective Data Validation values editable. Entry does not rewrite differing stored values. Single-facility Backup canonicalizes to account Settings Backup; reusable facility-only tools receive the sole facility explicitly for export and replacement imports. Complete backups retain account reports and hidden analysis pairs. Restore remaps all four analysis-backed account report types through their existing setup keys; schema and backup formats are unchanged.
-
-### Energy-use group browsing
-
-V1 Energy Uses projects committed energy-use group records into scoped inventory cards and their equipment members into paginated lists. Facility-owned group routes coexist with unchanged item Setup routes. A read-only unavailable-group bucket keeps orphaned equipment discoverable without repairing its stored relationship. Browse identity includes the energy-use group GUID; empty groups remain visible. Creation reuses the existing command flow with an optional preselected group. Group cards describe inventory metadata only and perform no consumption rollup or persistence on entry.
-
-Energy-use sidebar groups own bounded equipment previews (20 links including the active item) and a full-list destination. Nested disclosure state is navigation-local and keyed by account/facility/group; accepted routes reveal active members without overwriting manual collapse on ordinary workspace publication. Item breadcrumbs return through the group, and Setup switching uses only members of that group. Route motion distinguishes inventory, group, and item depth.

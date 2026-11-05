@@ -1,6 +1,9 @@
 <section aria-label="Energy uses inventory" [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseRestoreStickyGap]="true" [browseVisibleIds]="inventory.visibleIds()">
   @if (groupGuid()) {
-    <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="group()?.name || 'Energy-use group'" icon="energyUseGroup" headingId="energy-use-group-title"/>
+    <header class="v1-page-header energy-use-group-header">
+      <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="group()?.name || 'Energy-use group'" icon="energyUseGroup" headingId="energy-use-group-title"/>
+      @if (group()) { <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="openCreation()"><app-ui-icon name="add"/>Add energy use</button> }
+    </header>
   }
   @if (workspace.loading()) {
     <p class="v1-alert v1-alert--info" role="status">Loading energy uses…</p>
@@ -13,7 +16,6 @@
     @if (group(); as selectedGroup) {
       @if (selectedGroup.notes) { <p>{{ selectedGroup.notes }}</p> }
       @if (selectedGroup.unavailable) { <p class="v1-alert v1-alert--info">These items reference groups that are unavailable. Browsing preserves their saved relationships.</p> }
-      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="openCreation()"><app-ui-icon name="add"/>Add energy use</button>
     }
     <form class="v1-data-browse-toolbar portfolio-inventory-toolbar" aria-label="Energy use filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
       <div class="v1-portfolio-browse-search">
@@ -34,7 +36,7 @@
           <table class="table"><caption class="visually-hidden">Energy uses in {{ group()?.name }}</caption>
             <thead><tr><th scope="col">Energy use</th><th scope="col">Category</th><th scope="col">Sources</th><th scope="col">Saved annual years</th><th scope="col">Availability</th><th scope="col">Lifecycle</th></tr></thead>
             <tbody>@for (entry of visibleItems(); track entry.guid) {
-              <tr><th scope="row"><app-ui-icon name="tools"/><a [routerLink]="entry.route" [attr.data-browse-id]="entry.guid">{{ entry.name }}</a></th>
+              <tr><th scope="row"><app-ui-icon [name]="entry.icon"/><a [routerLink]="entry.route" [attr.data-browse-id]="entry.guid">{{ entry.name }}</a></th>
                 <td>{{ entry.category }}</td><td>{{ entry.snapshot.sources.join(', ') || 'Not configured' }}</td><td>{{ entry.yearsLabel }}</td><td>{{ entry.availability }}</td><td>{{ entry.snapshot.lifecycle }}</td></tr>
             }</tbody>
           </table>

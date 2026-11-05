@@ -32,7 +32,7 @@ export class EnergyUseWorkbenchContextService {
   readonly groupLink = computed(() => this.group() ? { route: facilityEnergyUseGroupRoute(this.facilityGuid()!, this.group()!.guid) } : this.inventoryLink());
   readonly resources = computed(() => this.workspace.ready() || (this.workspace.state() === 'loading' && !!this.entry()) ? [...(this.group()?.items ?? [])]
     .sort((a, b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid))
-    .map(entry => ({ id: entry.guid, label: entry.name, icon: 'tools' as const })) : []);
+    .map(entry => ({ id: entry.guid, label: entry.name, icon: entry.icon })) : []);
   readonly activeTab = signal<FacilityEnergyUseRouteTab>('settings').asReadonly();
   readonly navigationError = signal('');
   readonly inventoryLink = computed(() => {

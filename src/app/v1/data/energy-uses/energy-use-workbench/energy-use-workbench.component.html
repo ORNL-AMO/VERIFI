@@ -12,7 +12,7 @@
   <div #stickyHeader [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" class="v1-data-workbench-sticky">
     <header class="v1-data-workbench-header v1-page-header">
       <div class="v1-data-workbench-title-row"><div class="v1-data-workbench-title">
-        <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="entry.name" icon="tools" headingId="energy-use-workbench-title" [customTitle]="true">
+        <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="entry.name" [icon]="entry.icon" headingId="energy-use-workbench-title" [customTitle]="true">
           <app-data-workbench-resource-switcher [resources]="context.resources()" [selectedId]="entry.guid" [currentLabel]="entry.name" ariaLabel="Switch energy use" (resourceSelected)="context.switchResource($event)"/>
         </app-page-identity>
       </div>

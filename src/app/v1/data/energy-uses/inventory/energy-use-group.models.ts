@@ -25,6 +25,7 @@ export function buildEnergyUseGroups(accountGuid: string, facilities: readonly R
   groups: readonly Readonly<IdbFacilityEnergyUseGroup>[], entries: readonly EnergyUseInventoryEntry[]): EnergyUseGroupEntry[] {
   const owners = new Map(facilities.filter(facility => facility.accountId === accountGuid).map(facility => [facility.guid, facility]));
   const result = new Map<string, EnergyUseGroupEntry>();
+  const members = new Map<string, EnergyUseInventoryEntry[]>();
   const key = (facility: string, guid: string) => JSON.stringify([facility, guid]);
   const modified = (date: Date | string) => new Date(date).getTime() || 0;
   for (const group of groups) {
@@ -42,9 +43,11 @@ export function buildEnergyUseGroups(accountGuid: string, facilities: readonly R
     const group = result.get(id) ?? { id, guid: UNAVAILABLE_ENERGY_USE_GROUP, facility: entry.facility,
       name: 'Group unavailable', notes: '', unavailable: true, items: [], modified: 0,
       searchText: `group unavailable ${entry.facility.name}`.toLowerCase() };
-    result.set(id, { ...group, items: [...group.items, entry], modified: Math.max(group.modified, modified(entry.item.modifiedDate)) });
+    const bucket = members.get(id) ?? [];
+    bucket.push(entry); members.set(id, bucket);
+    result.set(id, { ...group, modified: Math.max(group.modified, modified(entry.item.modifiedDate)) });
   }
-  return [...result.values()];
+  return [...result.values()].map(group => ({ ...group, items: members.get(group.id) ?? [] }));
 }
 export function filterEnergyUseGroupItems(group: EnergyUseGroupEntry, filters: EnergyUseInventoryFilters): EnergyUseInventoryEntry[] {
   const search = group.searchText.includes(filters.search.trim().toLowerCase()) ? '' : filters.search;

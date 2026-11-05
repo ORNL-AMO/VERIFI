@@ -2,10 +2,13 @@
 section { display: grid; gap: .85rem; min-width: 0; }
 
 .energy-use-list { overflow-x: auto; border: 1px solid var(--v1-border); }
-.energy-use-list table { margin: 0; color: var(--v1-text); }
+.energy-use-group-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.energy-use-group-header app-page-identity { flex: 1 1 15rem; }
+.energy-use-list table { min-width: 56rem; margin: 0; color: var(--v1-text); }
 .energy-use-list th, .energy-use-list td { background: var(--v1-surface); color: inherit; border-color: var(--v1-border); vertical-align: middle; overflow-wrap: anywhere; }
+.energy-use-list th:not(:first-child), .energy-use-list td { min-width: 7rem; }
 .energy-use-list th[scope="row"] { min-width: 12rem; }
 .energy-use-list th app-ui-icon { display: inline-block; margin-right: .4rem; }
 .energy-use-list a { color: var(--v1-link); }
 .energy-use-list__paging { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
-@media print { .energy-use-list { overflow: visible; } .energy-use-list__paging, form, section > button { display: none; } }
+@media print { .energy-use-list th:not(:first-child), .energy-use-list td { min-width: 0; } .energy-use-list { overflow: visible; } .energy-use-list table { min-width: 0; } .energy-use-list th[scope="row"] { min-width: 0; } .energy-use-list__paging, form, .energy-use-group-header button { display: none; } }

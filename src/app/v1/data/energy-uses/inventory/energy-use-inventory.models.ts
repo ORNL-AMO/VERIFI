@@ -1,3 +1,5 @@
+import { energyUseIcon } from '../models/energy-use-icons';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { IdbFacility } from '@data/models/idbModels/facility';
 import type { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import type { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
@@ -14,6 +16,7 @@ export const ENERGY_USE_FILTER_DEFAULTS: EnergyUseInventoryFilters = { search: '
 
 export interface EnergyUseInventoryEntry {
   readonly guid: string;
+  readonly icon: IconName;
   readonly item: Readonly<IdbFacilityEnergyUseEquipment>;
   readonly facility: Readonly<IdbFacility>;
   readonly name: string;
@@ -50,7 +53,7 @@ export function buildEnergyUseInventory(
       sources, group: group?.name?.trim() || 'Group unavailable', lifecycle,
       years, notes: item.notes || ''
     };
-    return [{ guid: item.guid, item, facility, name, category, availability, snapshot,
+    return [{ guid: item.guid, icon: energyUseIcon(category), item, facility, name, category, availability, snapshot,
       searchText: [name, item.notes || '', facility.name, category, ...sources, snapshot.group, availability, lifecycle].join(' ').toLowerCase() }];
   });
 }

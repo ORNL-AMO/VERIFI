@@ -80,7 +80,7 @@ export class EnergyUsesInventoryComponent {
   readonly filteredEntries = computed(() => this.group() ? filterEnergyUseGroupItems(this.group()!, this.filters()) : filterAndSortEnergyUses(this.entries(), this.filters()));
   readonly filteredGroups = computed(() => filterAndSortEnergyUseGroups(this.groups(), this.filters()));
   readonly tiles = computed<readonly InventoryTile[]>(() => this.groupGuid() ? this.filteredEntries().map(entry => ({
-    guid: entry.guid, name: entry.name, icon: 'tools', chip: entry.category,
+    guid: entry.guid, name: entry.name, icon: entry.icon, chip: entry.category,
     route: facilityEnergyUseRoute(entry.facility.guid, entry.guid),
     status: { tone: 'neutral', icon: 'info', label: entry.availability }, energyUseSnapshot: entry.snapshot
   })) : this.filteredGroups().map(group => ({

@@ -73,6 +73,28 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it('keeps group item lists bounded and readable across themes with equipment icons and long names', async () => {
+    const view = setup();
+    const types = ['Motor', 'HVAC', 'Lighting', 'Mobile', 'Pump', 'Fan'] as const;
+    view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup({ notes: 'Process equipment and shared systems' })],
+      energyUseEquipment: Array.from({ length: 1000 }, (_, index) => energyUseItem({ guid: `item-${index}`, name: `Equipment ${String(index).padStart(4, '0')} with a long process description`, equipmentType: types[index % types.length] })) });
+    const before = structuredClone(view.store.snapshot());
+    await view.router.navigateByUrl('/v1/workspace/facility/facility-a/data/energy-uses/groups/group-a'); await settle(view);
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(view.root.querySelectorAll('tbody tr')).toHaveLength(24);
+      expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      const region = view.root.querySelector<HTMLElement>('.energy-use-list')!;
+      if (width === 390) expect(region.scrollWidth).toBeGreaterThan(region.clientWidth);
+      const cell = view.root.querySelector<HTMLElement>('tbody td')!;
+      expect(textContrast(cell, cell)).toBeGreaterThanOrEqual(4.5);
+      await page.screenshot({ element: view.root, path: `./__screenshots__/energy-use-group-items-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
+    }
+    await page.getByRole('button', { name: 'Next', exact: true }).click(); await settle(view);
+    expect(view.root.querySelectorAll('tbody tr')).toHaveLength(24); expect(view.inventory().inventory.page()).toBe(1);
+    expect(view.store.snapshot()).toEqual(before); view.fixture.destroy();
+  });
+
   it('opens the active item beyond the sidebar preview and supports keyboard disclosure and group navigation', async () => {
     const view = setup(); view.fixture.componentInstance.showNav.set(true);
     view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup()], energyUseEquipment: view.snapshot.energyUseEquipment.map(item => ({ ...item, energyUseGroupId: 'group-a' })) });

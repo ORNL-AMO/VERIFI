@@ -86,7 +86,7 @@ function attention(findings: readonly StatusItem[]): StatusAttentionSummary | un
 export function buildResourceNavGroups(input: ResourceNavInput, routes: ResourceNavRoutes): readonly ResourceNavGroup[] {
   const { facilityGuid } = input;
   const findings = input.statusReady ? input.findings : [];
-  const sorted = (items: readonly NavigationLink[]) => [...items].sort((first, second) => first.label.localeCompare(second.label));
+  const sorted = (items: readonly NavigationLink[]) => [...items].sort((first, second) => first.label.localeCompare(second.label) || first.id.localeCompare(second.id));
   const parentAttention = (kind: 'meter-tab' | 'predictor-tab', detail: string) => attention(findings.filter(item =>
     (item.destination.kind === kind && item.destination.facilityGuid === facilityGuid)
     || (item.destination.kind === 'facility-data' && item.destination.facilityGuid === facilityGuid && item.destination.detail === detail)
@@ -121,7 +121,7 @@ export function buildResourceNavGroups(input: ResourceNavInput, routes: Resource
       active: input.activeEnergyUseGroupGuid === group.guid,
       activeChildGuid: activeItem?.guid, disclosureKey: JSON.stringify([input.accountGuid, facilityGuid, group.guid]),
       childrenId: `energy-use-group-${encodeURIComponent(facilityGuid)}-${encodeURIComponent(group.guid)}`,
-      totalChildren: members.length, children: preview.map(item => ({ id: item.guid, label: item.name, icon: 'tools',
+      totalChildren: members.length, children: preview.map(item => ({ id: item.guid, label: item.name, icon: item.icon,
         route: routes.facilityEnergyUseRoute(facilityGuid, item.guid, 'settings'), active: item.guid === input.activeEnergyUseGuid })) };
   });
   return [
