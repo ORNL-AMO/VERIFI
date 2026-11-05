@@ -8,7 +8,7 @@ import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-ha
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { EnergyUseActionsService } from './energy-use-actions.service';
-import { addEnergyUseYear, energyUseSetup, removeEnergyUseYear, reviewEnergyUseYear } from './models/energy-use-setup.models';
+import { addEnergyUseYear, energyUseSetup, reconcileEnergyUseSetup, removeEnergyUseYear, reviewEnergyUseYear } from './models/energy-use-setup.models';
 
 describe('Combined Energy Use setup persistence', () => {
   let harness: IndexedDbTestHarness;
@@ -63,5 +63,45 @@ describe('Combined Energy Use setup persistence', () => {
     const latest = energyUseSetup(current()), saved = structuredClone(current());
     await expect(actions.updateSetup(identity, removeEnergyUseYear(latest, 2024), latest, 'setup-test', { years: [reviewed] })).rejects.toThrow('changed');
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([saved]);
+  });
+  it.each(['conditions', 'consumption'] as const)('rejects a stale partial %s deletion without publishing or changing durable history', async field => {
+    const actions = TestBed.inject(EnergyUseActionsService), initial = energyUseSetup(current());
+    await actions.updateSetup(identity, { ...initial, consumption: initial.consumption.map(source => ({ ...source,
+      entries: source.entries.map(row => ({ ...row, overrideEnergyUse: true, energyUse: 17 })) })) }, initial, 'setup-test');
+    const base = energyUseSetup(current()), stale = reviewEnergyUseYear(current(), 2024);
+    await actions.updateSetup(identity, { ...base, conditions: base.conditions.map(row => ({ ...row, hoursOfOperation: 1234 })) }, base, 'other-editor');
+    const latest = energyUseSetup(current()), saved = structuredClone(current());
+    const partial = field === 'conditions' ? { ...latest, conditions: [] } : { ...latest, consumption: latest.consumption.map(source => ({ ...source, entries: [] })) };
+    const committed = vi.fn(), subscription = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      await expect(actions.updateSetup(identity, partial, latest, 'setup-test', { years: [stale] })).rejects.toThrow('Review its removal again');
+      expect(committed).not.toHaveBeenCalled(); await harness.reopen();
+      expect(await harness.getAll('facilityEnergyUseEquipment')).toStrictEqual([saved]);
+    } finally { subscription.unsubscribe(); }
+  });
+  it.each(['year', 'source'] as const)('retains complete saved history after a queued %s-removal conflict is resolved', async kind => {
+    const actions = TestBed.inject(EnergyUseActionsService), initial = energyUseSetup(current());
+    await actions.updateSetup(identity, { ...initial, consumption: initial.consumption.map(source => ({ ...source,
+      entries: source.entries.map(row => ({ ...row, overrideEnergyUse: true, energyUse: 17 })) })) }, initial, 'setup-test');
+    const before = current(), base = energyUseSetup(before), local = { ...(kind === 'year' ? removeEnergyUseYear(base, 2024)
+      : { ...base, sources: [], consumption: [] }), name: 'Independent local name' };
+    const remote = kind === 'year' ? { ...base, conditions: base.conditions.map(row => ({ ...row, hoursOfOperation: 1234 })) }
+      : { ...base, consumption: base.consumption.map(source => ({ ...source, entries: source.entries.map(row => ({ ...row, energyUse: 42 })) })) };
+    await actions.updateSetup(identity, remote, base, 'other-editor');
+    const saved = structuredClone(current()), latest = energyUseSetup(saved);
+    const committed = vi.fn(), subscription = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      await expect(actions.updateSetup(identity, local, base, 'setup-test', { years: [reviewEnergyUseYear(before, 2024)], sources: before.utilityData })).rejects.toThrow();
+      expect(committed).not.toHaveBeenCalled();
+      const pending = reconcileEnergyUseSetup(base, local, latest), choices = Object.fromEntries(pending.conflicts.map(conflict => [conflict.id, 'saved' as const]));
+      const resolved = reconcileEnergyUseSetup(pending.baseline!, pending.value, latest, choices);
+      expect(resolved.conflicts).toEqual([]);
+      await actions.updateSetup(identity, resolved.value, latest, 'setup-test');
+      expect(committed).toHaveBeenCalledTimes(1);
+      const retained = structuredClone(current());
+      expect(retained.name).toBe('Independent local name'); expect(retained.utilityData).toStrictEqual(saved.utilityData);
+      expect(retained.operatingConditionsData).toStrictEqual(saved.operatingConditionsData);
+      await harness.reopen(); expect(await harness.getAll('facilityEnergyUseEquipment')).toStrictEqual([retained]);
+    } finally { subscription.unsubscribe(); }
   });
 });

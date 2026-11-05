@@ -191,4 +191,98 @@ describe('Energy Use combined setup', () => {
     const invalid = { ...value, consumption: value.consumption.map(row => ({ ...row, entries: row.entries.map(entry => ({ ...entry, overrideEnergyUse: true, energyUse: NaN })) })) };
     expect(energyUseSetupError(invalid, base)).toContain('finite');
   });
+  it.each(['conditions', 'consumption'] as const)('retains the entire saved year when a local removal races with saved %s edits', field => {
+    const current = item(), base = energyUseSetup(current), local = removeEnergyUseYear(base, 2024);
+    const saved = field === 'conditions' ? { ...base, conditions: base.conditions.map(row => ({ ...row, hoursOfOperation: 2000 })) }
+      : { ...base, consumption: base.consumption.map(source => source.energySource === 'Natural Gas' ? { ...source, entries: source.entries.map(row => ({ ...row, energyUse: 42 })) } : source) };
+    const pending = reconcileEnergyUseSetup(base, local, saved);
+    const choices = Object.fromEntries(pending.conflicts.map(conflict => [conflict.id, 'saved' as const]));
+    const resolved = reconcileEnergyUseSetup(pending.baseline!, pending.value, saved, choices);
+    expect(resolved.conflicts).toEqual([]); expect(resolved.value.conditions).toEqual(saved.conditions);
+    expect(resolved.value.consumption).toEqual(saved.consumption);
+  });
+  it.each(['conditions', 'consumption'] as const)('requires current year review for partial %s removal even if the year remains present', field => {
+    const current = item(); current.utilityData.forEach(source => source.energyUse[0].overrideEnergyUse = true);
+    const stale = reviewEnergyUseYear(current, 2024); current.operatingConditionsData[0].hoursOfOperation = 2000;
+    const base = energyUseSetup(current), partial = field === 'conditions' ? { ...base, conditions: [] }
+      : { ...base, consumption: base.consumption.map(source => source.energySource === 'Natural Gas' ? { ...source, entries: [] } : source) };
+    expect(() => applyEnergyUseSetup(current, partial, facility)).toThrow('Review its removal again');
+    expect(() => applyEnergyUseSetup(current, partial, facility, { years: [stale] })).toThrow('Review its removal again');
+    expect(() => applyEnergyUseSetup(current, partial, facility, { years: [reviewEnergyUseYear(current, 2024)] })).not.toThrow();
+  });
+  it.each([0, 17, NaN])('preserves untouched manual legacy consumption %s while other results recalculate', amount => {
+    const current = item(); current.utilityData[1].energyUse[0] = { year: 2024, energyUse: amount, overrideEnergyUse: true, energyUseUnit: 'historical-unit' };
+    const base = energyUseSetup(current), value = { ...base, sources: base.sources.map(row => ({ ...row, size: 10 })),
+      conditions: base.conditions.map(row => ({ ...row, hoursOfOperation: 2000 })) };
+    const saved = applyEnergyUseSetup(current, value, facility);
+    expect(saved.utilityData[1].energyUse).toStrictEqual(current.utilityData[1].energyUse);
+    expect(saved.utilityData[0].energyUse[0].energyUse).toBe(10000);
+    const edited = { ...value, consumption: value.consumption.map(source => source.energySource === 'Natural Gas'
+      ? { ...source, entries: source.entries.map(row => ({ ...row, energyUse: 42 })) } : source) };
+    expect(energyUseSetupError(edited, base)).toContain('Natural Gas');
+  });
+  it('acknowledges copied rows without conflicting with later override edits', () => {
+    const current = item(), submitted = addEnergyUseYear(energyUseSetup(current), 2025, facility, { year: 2024, item: current });
+    const committed = applyEnergyUseSetup(current, submitted, facility), saved = energyUseSetup(committed);
+    const later = { ...submitted, consumption: submitted.consumption.map(source => source.energySource === 'Electricity'
+      ? { ...source, entries: source.entries.map(row => row.year === 2025 ? { ...row, overrideEnergyUse: true, energyUse: 42 } : row) } : source) };
+    const acknowledged = reconcileEnergyUseSetup(submitted, later, saved);
+    expect(acknowledged.conflicts).toEqual([]);
+    expect(acknowledged.value.consumption[0].entries[1]).toMatchObject({ energyUse: 42, overrideEnergyUse: true, copy: undefined });
+    expect(applyEnergyUseSetup(committed, acknowledged.value, facility).utilityData[0].energyUse[1]).toMatchObject({ energyUse: 42, overrideEnergyUse: true });
+  });
+  it('retains source configuration and complete history together after a conflicting local removal', () => {
+    const base = energyUseSetup(item()), local = { ...base, sources: base.sources.filter(row => row.energySource !== 'Natural Gas'),
+      consumption: base.consumption.filter(row => row.energySource !== 'Natural Gas') };
+    const saved = { ...base, consumption: base.consumption.map(source => source.energySource === 'Natural Gas'
+      ? { ...source, entries: source.entries.map(row => ({ ...row, energyUse: 42 })) } : source) };
+    const pending = reconcileEnergyUseSetup(base, local, saved), choices = Object.fromEntries(pending.conflicts.map(conflict => [conflict.id, 'saved' as const]));
+    const resolved = reconcileEnergyUseSetup(pending.baseline!, pending.value, saved, choices);
+    expect(resolved.conflicts).toEqual([]); expect(resolved.value.sources).toEqual(saved.sources);
+    expect(resolved.value.consumption).toEqual(saved.consumption); expect(energyUseSetupError(resolved.value, saved)).toBeUndefined();
+  });
+  it('discards newly added annual membership when accepting saved source configuration', () => {
+    const current = item(); current.utilityData = current.utilityData.slice(0, 1);
+    const base = energyUseSetup(current), local = { ...base, sources: [...base.sources, { energySource: 'Natural Gas' as const, size: 5, units: 'kW', numberOfEquipment: 1 }],
+      consumption: [...base.consumption, { energySource: 'Natural Gas' as const, entries: [{ year: 2024, overrideEnergyUse: true, energyUse: 0, energyUseUnit: 'kWh' }] }] };
+    const saved = { ...base, sources: base.sources.map(row => ({ ...row, size: 10 })) };
+    const pending = reconcileEnergyUseSetup(base, local, saved), choices = Object.fromEntries(pending.conflicts.map(conflict => [conflict.id, 'saved' as const]));
+    const resolved = reconcileEnergyUseSetup(pending.baseline!, pending.value, saved, choices);
+    expect(resolved.conflicts).toEqual([]); expect(resolved.value.sources).toEqual(saved.sources);
+    expect(resolved.value.consumption).toEqual(saved.consumption); expect(energyUseSetupError(resolved.value, saved)).toBeUndefined();
+  });
+  it('restores an overlapping source/year removal together across subsequent saved publications', () => {
+    const base = energyUseSetup(item()), removedYear = removeEnergyUseYear(base, 2024), local = { ...removedYear, name: 'Mine',
+      sources: removedYear.sources.filter(row => row.energySource !== 'Natural Gas'), consumption: removedYear.consumption.filter(row => row.energySource !== 'Natural Gas') };
+    const saved = { ...base, consumption: base.consumption.map(source => source.energySource === 'Natural Gas'
+      ? { ...source, entries: source.entries.map(row => ({ ...row, energyUse: 42 })) } : source) };
+    const first = reconcileEnergyUseSetup(base, local, saved), nextSaved = { ...saved, notes: 'Elsewhere' };
+    const next = reconcileEnergyUseSetup(first.baseline!, first.value, nextSaved);
+    expect(next.conflicts).toEqual(first.conflicts); expect(next.conflicts).toHaveLength(1);
+    const resolved = reconcileEnergyUseSetup(next.baseline!, next.value, nextSaved, { [next.conflicts[0].id]: 'saved' });
+    expect(resolved.conflicts).toEqual([]); expect(resolved.value).toMatchObject({ name: 'Mine', notes: 'Elsewhere' });
+    expect(resolved.value.sources).toEqual(saved.sources); expect(resolved.value.conditions).toEqual(saved.conditions);
+    expect(resolved.value.consumption).toEqual(saved.consumption);
+  });
+  it('preserves an independent reviewed year removal when accepting updated source history', () => {
+    const original = item(), current = applyEnergyUseSetup(original, addEnergyUseYear(energyUseSetup(original), 2025, facility), facility);
+    const base = energyUseSetup(current), removedYear = removeEnergyUseYear(base, 2025), local = { ...removedYear,
+      sources: removedYear.sources.filter(row => row.energySource !== 'Natural Gas'), consumption: removedYear.consumption.filter(row => row.energySource !== 'Natural Gas') };
+    const savedValue = { ...base, consumption: base.consumption.map(source => source.energySource === 'Natural Gas'
+      ? { ...source, entries: source.entries.map(row => row.year === 2024 ? { ...row, energyUse: 42 } : row) } : source) };
+    const savedItem = applyEnergyUseSetup(current, savedValue, facility), saved = energyUseSetup(savedItem);
+    const pending = reconcileEnergyUseSetup(base, local, saved), resolved = reconcileEnergyUseSetup(pending.baseline!, pending.value, saved, { 'removed-sources': 'saved' });
+    expect(resolved.conflicts).toEqual([]); expect(resolved.value.conditions.map(row => row.year)).toEqual([2024]);
+    expect(resolved.value.consumption.every(source => source.entries.length === 1 && source.entries[0].year === 2024)).toBe(true);
+    const result = applyEnergyUseSetup(savedItem, resolved.value, facility, { years: [reviewEnergyUseYear(current, 2025)] });
+    expect(result.utilityData[1].energyUse[0].energyUse).toBe(42);
+  });
+  it('reattaches saved history when saved configuration wins without an annual conflict', () => {
+    const base = energyUseSetup(item()), local = { ...base, sources: base.sources.filter(row => row.energySource !== 'Natural Gas'),
+      consumption: base.consumption.filter(row => row.energySource !== 'Natural Gas') };
+    const saved = { ...base, sources: base.sources.map(row => row.energySource === 'Electricity' ? { ...row, size: 10 } : row), utilityMeterGroupIds: ['saved-group'] };
+    const result = reconcileEnergyUseSetup(base, local, saved, { configuration: 'saved' });
+    expect(result.conflicts).toEqual([]); expect(result.value.utilityMeterGroupIds).toEqual(['saved-group']);
+    expect(result.value.sources).toEqual(saved.sources); expect(result.value.consumption).toEqual(saved.consumption);
+  });
 });

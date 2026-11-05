@@ -184,6 +184,7 @@ function validateAnnualChanges(value: EnergyUseSetupValues, base: EnergyUseSetup
       const beforeRows = old?.entries.filter(saved => saved.year === row.year) ?? [];
       const ambiguous = source.entries.filter(saved => saved.year === row.year).length > 1 || beforeRows.length > 1;
       const before = beforeRows[0];
+      if (row.overrideEnergyUse && draftEqual(row, before)) continue;
       const calculationChanged = !draftEqual(value.sources.filter(saved => saved.energySource === source.energySource), base.sources.filter(saved => saved.energySource === source.energySource))
         || !draftEqual(value.conditions.filter(saved => saved.year === row.year), base.conditions.filter(saved => saved.year === row.year));
       if ((ambiguous || draftEqual(row, before)) && !calculationChanged) continue;
@@ -240,6 +241,33 @@ function retainYear(target: EnergyUseSetupValues, snapshot: EnergyUseSetupValues
   return { ...target, conditions: replaceMatching(target.conditions, snapshot.conditions.filter(row => row.year === year), row => row.year === year), consumption };
 }
 function underPath(id: string, prefix: string): boolean { return id === prefix || id.startsWith(`${prefix}.`); }
+function withoutYear(value: EnergyUseSetupValues, year: number): EnergyUseSetupValues {
+  return { ...value, conditions: value.conditions.filter(row => row.year !== year),
+    consumption: value.consumption.map(source => ({ ...source, entries: source.entries.filter(row => row.year !== year) })) };
+}
+function yearData(value: EnergyUseSetupValues, year: number) {
+  return { conditions: value.conditions.filter(row => row.year === year), consumption: value.consumption
+    .map(source => ({ energySource: source.energySource, entries: source.entries.filter(row => row.year === year) })).filter(source => source.entries.length) };
+}
+function retainSources(value: EnergyUseSetupValues, snapshot: EnergyUseSetupValues, sources: readonly MeterSource[], excludedYears: readonly number[] = []): EnergyUseSetupValues {
+  let consumption = value.consumption;
+  for (const source of sources) {
+    const replacement = snapshot.consumption.filter(row => row.energySource === source)
+      .map(row => ({ ...row, entries: row.entries.filter(entry => !excludedYears.includes(entry.year)) }));
+    consumption = replaceMatching(consumption, replacement, row => row.energySource === source);
+  }
+  return { ...value, consumption };
+}
+/** Resolved configuration membership owns its annual rows; independent year removals still apply. */
+function matchSourceMembership(value: EnergyUseSetupValues, local: EnergyUseSetupValues, saved: EnergyUseSetupValues,
+  localRemovedYears: readonly number[], savedRemovedYears: readonly number[]): EnergyUseSetupValues {
+  const restoredSaved = value.sources.filter(source => saved.sources.some(row => row.energySource === source.energySource)
+    && !local.sources.some(row => row.energySource === source.energySource)).map(source => source.energySource);
+  const restoredLocal = value.sources.filter(source => local.sources.some(row => row.energySource === source.energySource)
+    && !saved.sources.some(row => row.energySource === source.energySource)).map(source => source.energySource);
+  value = retainSources(retainSources(value, saved, restoredSaved, localRemovedYears), local, restoredLocal, savedRemovedYears);
+  return { ...value, consumption: value.consumption.filter(source => value.sources.some(row => row.energySource === source.energySource)) };
+}
 export function reconcileEnergyUseSetup(base: EnergyUseSetupValues, local: EnergyUseSetupValues, saved: EnergyUseSetupValues, choices: ConflictChoices = {}): DraftMerge<EnergyUseSetupValues> {
   base = normalizeEnergyUseSetup(base); local = normalizeEnergyUseSetup(local); saved = normalizeEnergyUseSetup(saved);
   const settings = reconcileEnergyUseSettings(base, local, saved, choices);
@@ -247,44 +275,62 @@ export function reconcileEnergyUseSetup(base: EnergyUseSetupValues, local: Energ
     (b, l, s, prefix) => reconcileFields(b, l, s, { choices, prefix }), choices, 'years');
   const consumption = mergeRows(base.consumption, local.consumption, saved.consumption, row => row.energySource, (b, l, s, prefix) => {
     const entries = mergeRows(b.entries, l.entries, s.entries, row => String(row.year), (before, mine, theirs, path) => reconcileFields(before, mine, theirs,
-      { choices, prefix: path, groups: [{ id: 'consumption', label: `${s.energySource}: consumption, override, and units`, keys: ['energyUse', 'overrideEnergyUse', 'energyUseUnit', 'copy'] }] }), choices, prefix);
+      { choices, prefix: path, groups: [{ id: 'consumption', label: `${s.energySource}: consumption, override, and units`, keys: ['energyUse', 'overrideEnergyUse', 'energyUseUnit'] }] }), choices, prefix);
     return { value: { energySource: s.energySource, entries: entries.value }, baseline: { energySource: s.energySource, entries: entries.baseline! }, conflicts: entries.conflicts };
   }, choices, 'sources');
   let value = { ...settings.value, conditions: conditions.value, consumption: consumption.value };
   let baseline = { ...settings.baseline!, conditions: conditions.baseline!, consumption: consumption.baseline! };
   let conflicts = [...settings.conflicts, ...conditions.conflicts, ...consumption.conflicts];
-  // Cross-collection deletion must not silently discard a locally edited year or source.
+  // Structural choices span conditions, consumption, and (for sources) configuration and links.
+  const baseYears = energyUseYears(base), localYears = energyUseYears(local), savedYears = energyUseYears(saved);
+  const localRemovedYears = baseYears.filter(year => !localYears.includes(year)), savedRemovedYears = baseYears.filter(year => !savedYears.includes(year));
+  const removedYears = baseYears.filter(year => (localRemovedYears.includes(year) && savedYears.includes(year) && !draftEqual(yearData(base, year), yearData(saved, year)))
+    || (savedRemovedYears.includes(year) && localYears.includes(year) && !draftEqual(yearData(base, year), yearData(local, year))));
   const removedSources = [...new Set(base.sources.map(row => row.energySource))].filter(source =>
-    !saved.sources.some(row => row.energySource === source) && local.sources.some(row => row.energySource === source)
-    && !draftEqual(base.consumption.filter(row => row.energySource === source), local.consumption.filter(row => row.energySource === source)));
-  if (removedSources.length) {
-    const id = 'removed-sources';
-    conflicts = conflicts.filter(conflict => conflict.id !== 'configuration' && !removedSources.some(source => underPath(conflict.id, `sources.${source}`)));
-    const accepted = choices[id] === 'saved', selected = accepted ? saved : local;
-    value = { ...value, sources: selected.sources, utilityMeterGroupIds: selected.utilityMeterGroupIds };
-    baseline = { ...baseline, sources: accepted ? saved.sources : base.sources, utilityMeterGroupIds: accepted ? saved.utilityMeterGroupIds : base.utilityMeterGroupIds };
-    for (const source of removedSources) {
-      value.consumption = replaceMatching(value.consumption, accepted ? [] : local.consumption.filter(row => row.energySource === source), row => row.energySource === source);
-      baseline.consumption = replaceMatching(baseline.consumption, accepted ? [] : base.consumption.filter(row => row.energySource === source), row => row.energySource === source);
+    (!saved.sources.some(row => row.energySource === source) && local.sources.some(row => row.energySource === source)
+      && !draftEqual(base.consumption.filter(row => row.energySource === source), local.consumption.filter(row => row.energySource === source)))
+    || (!local.sources.some(row => row.energySource === source) && saved.sources.some(row => row.energySource === source)
+      && !draftEqual(base.consumption.filter(row => row.energySource === source), saved.consumption.filter(row => row.energySource === source))));
+  // Overlapping year and source-membership conflicts require one coherent choice.
+  if (removedYears.length && settings.conflicts.some(conflict => conflict.id === 'configuration')) {
+    for (const source of [...local.sources, ...saved.sources]) {
+      if (local.sources.some(row => row.energySource === source.energySource) !== saved.sources.some(row => row.energySource === source.energySource)
+        && !removedSources.includes(source.energySource)) removedSources.push(source.energySource);
     }
-    if (!accepted) conflicts.push({ id, label: `${removedSources.join(', ')} was removed; accept saved source configuration and meter links to discard its annual drafts`,
-      localValue: { sources: local.sources, utilityMeterGroupIds: local.utilityMeterGroupIds, consumption: local.consumption.filter(row => removedSources.includes(row.energySource)) },
-      savedValue: { sources: saved.sources, utilityMeterGroupIds: saved.utilityMeterGroupIds }, allowedChoices: ['saved'] });
   }
-  for (const year of energyUseYears(base)) {
-    const yearData = (draft: EnergyUseSetupValues) => ({ conditions: draft.conditions.filter(row => row.year === year), consumption: draft.consumption.map(source => ({ energySource: source.energySource, entries: source.entries.filter(row => row.year === year) })) });
-    if (!energyUseYears(saved).includes(year) && !draftEqual(yearData(base), yearData(local)) && energyUseYears(local).includes(year)) {
-      const id = `removed-year.${year}`;
-      conflicts = conflicts.filter(conflict => !underPath(conflict.id, `years.${year}`)
-        && !base.consumption.some(source => underPath(conflict.id, `sources.${source.energySource}.${year}`)));
-      if (choices[id] === 'saved') {
-        const withoutYear = (draft: EnergyUseSetupValues) => ({ ...draft, conditions: draft.conditions.filter(row => row.year !== year),
-          consumption: draft.consumption.map(source => ({ ...source, entries: source.entries.filter(row => row.year !== year) })) });
-        value = withoutYear(value); baseline = withoutYear(baseline);
+  const membershipId = removedSources.length ? 'removed-sources' : removedYears.length === 1 ? `removed-year.${removedYears[0]}` : 'history-membership';
+  const structuralConflict = !!(removedSources.length || removedYears.length), accepted = choices[membershipId] === 'saved';
+  if (structuralConflict) {
+    conflicts = conflicts.filter(conflict => !(removedSources.length && conflict.id === 'configuration')
+      && !removedSources.some(source => underPath(conflict.id, `sources.${source}`))
+      && !removedYears.some(year => underPath(conflict.id, `years.${year}`) || [...base.consumption, ...local.consumption, ...saved.consumption]
+        .some(source => underPath(conflict.id, `sources.${source.energySource}.${year}`))));
+    if (removedSources.length) {
+      const selected = accepted ? saved : local, before = accepted ? saved : base;
+      value = { ...value, sources: selected.sources, utilityMeterGroupIds: selected.utilityMeterGroupIds };
+      baseline = { ...baseline, sources: before.sources, utilityMeterGroupIds: before.utilityMeterGroupIds };
+      value = retainSources(value, selected, removedSources, accepted ? localRemovedYears : []);
+      baseline = retainSources(baseline, before, removedSources);
+    }
+    if (!accepted) {
+      for (const year of removedYears) {
+        value = localYears.includes(year) ? retainYear(value, local, year) : withoutYear(value, year);
+        baseline = retainYear(baseline, base, year);
       }
-      else {
-        value = retainYear(value, local, year); baseline = retainYear(baseline, base, year);
-        conflicts.push({ id, label: `${year} was removed from saved history; use saved values to discard this year`, localValue: yearData(local), savedValue: undefined, allowedChoices: ['saved'] });
+      const snapshot = (draft: EnergyUseSetupValues) => ({ ...(removedSources.length ? { sources: draft.sources, utilityMeterGroupIds: draft.utilityMeterGroupIds,
+        consumption: draft.consumption.filter(source => removedSources.includes(source.energySource)) } : {}), years: removedYears.map(year => yearData(draft, year)) });
+      conflicts.push({ id: membershipId, label: `Saved history changed for ${[...removedSources, ...removedYears].join(', ')}. Keep saved history, then review any removal again.`,
+        localValue: snapshot(local), savedValue: snapshot(saved), allowedChoices: ['saved'] });
+      return { value, baseline, conflicts };
+    }
+  }
+  if (!conflicts.some(conflict => conflict.id === 'configuration')) value = matchSourceMembership(value, local, saved, localRemovedYears, savedRemovedYears);
+  if (structuralConflict && accepted) {
+    for (const year of removedYears) {
+      if (savedYears.includes(year)) {
+        value = retainYear(value, saved, year); baseline = retainYear(baseline, saved, year);
+      } else {
+        value = withoutYear(value, year); baseline = withoutYear(baseline, year);
       }
     }
   }
@@ -323,11 +369,12 @@ export function applyEnergyUseSetup(current: IdbFacilityEnergyUseEquipment, valu
   value = normalizeEnergyUseSetup(value);
   const base = energyUseSetup(current), error = energyUseSetupError(value, base);
   if (error) throw new Error(error);
-  for (const year of energyUseYears(base).filter(year => !energyUseYears(value).includes(year))) {
-    const retainedHistory = base.conditions.some(row => row.year === year) || current.utilityData.some(source =>
-      value.sources.some(retained => retained.energySource === source.energySource) && source.energyUse.some(row => row.year === year));
+  for (const year of energyUseYears(base)) {
+    const removedConditions = base.conditions.filter(row => row.year === year).length > value.conditions.filter(row => row.year === year).length;
+    const removedConsumption = value.sources.some(source => base.consumption.filter(row => row.energySource === source.energySource).flatMap(row => row.entries).filter(row => row.year === year).length
+      > value.consumption.filter(row => row.energySource === source.energySource).flatMap(row => row.entries).filter(row => row.year === year).length);
     // A reviewed source removal already authorizes its own history, including orphan years.
-    if (!retainedHistory) continue;
+    if (!removedConditions && !removedConsumption) continue;
     if (!reviews.years?.some(review => draftEqual(review, reviewEnergyUseYear(current, year)))) throw new Error(`Saved history for ${year} changed. Review its removal again.`);
   }
   const updated = applyEnergyUseSettings(current, value, facility, reviews.sources, false);
@@ -360,7 +407,7 @@ export function applyEnergyUseSetup(current: IdbFacilityEnergyUseEquipment, valu
       const condition = value.conditions.find(saved => saved.year === row.year);
       const changed = !before || !draftEqual(oldInput, newInput) || !draftEqual(beforeValue, row)
         || !draftEqual(base.conditions.filter(saved => saved.year === row.year), value.conditions.filter(saved => saved.year === row.year));
-      if (!changed) return structuredClone(before);
+      if (!changed || (row.overrideEnergyUse && draftEqual(beforeValue, row))) return structuredClone(before);
       const amount = row.overrideEnergyUse ? row.energyUse! : !before && copiedAmountMatches(row, condition, newInput)
         ? row.copy!.amount : estimateEnergyUse(value, source.energySource, row.year, row.energyUseUnit);
       if (!Number.isFinite(amount) || amount < 0) throw new Error(`Check consumption for ${source.energySource} in ${row.year}.`);
