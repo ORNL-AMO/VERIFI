@@ -8,8 +8,8 @@ import { getNewIdbFacilityEnergyUseGroup, getRandomFlatHexColor } from '@data/mo
 import { IdbEntry, getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { EditorConflictError, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
-import { EnergyUseCreationDraft, EnergyUseIdentity, EnergyUseSettingsValues, SourceRemovalReview,
-  applyEnergyUseSettings, createEnergyUse, energyUseSettings, normalizeEnergyUseSettings, reconcileEnergyUseSettings } from './models/energy-use-settings.models';
+import { EnergyUseSetupValues, SetupRemovalReviews, applyEnergyUseSetup, energyUseSetup, normalizeEnergyUseSetup, reconcileEnergyUseSetup } from './models/energy-use-setup.models';
+import { EnergyUseCreationDraft, EnergyUseIdentity, EnergyUseSettingsValues, SourceRemovalReview, applyEnergyUseSettings, energyUseSettings, normalizeEnergyUseSettings, reconcileEnergyUseSettings, createEnergyUse } from './models/energy-use-settings.models';
 
 @Injectable({ providedIn: 'root' })
 export class EnergyUseActionsService {
@@ -46,6 +46,22 @@ export class EnergyUseActionsService {
       const configurationChanged = !draftEqual(latest.sources, merged.value.sources) || !draftEqual(latest.utilityMeterGroupIds, merged.value.utilityMeterGroupIds);
       if (configurationChanged) this.requireLinks(updated);
       return energyUseSettings(await this.handler.saveItem(identity, current, updated, configurationChanged));
+    });
+    return result.value;
+  }
+  async updateSetup(identity: EnergyUseIdentity, value: EnergyUseSetupValues, base: EnergyUseSetupValues,
+    ownerId: string, reviews: SetupRemovalReviews = {}): Promise<EnergyUseSetupValues> {
+    const submitted = normalizeEnergyUseSetup(value), baseline = normalizeEnergyUseSetup(base), approved = structuredClone(reviews);
+    const result = await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'update', entityGuid: identity.energyUseGuid,
+      label: 'Saving energy use setup', ownerId, notification: { suppressSuccessToast: true } }, async () => {
+      const facility = this.requireFacility(identity.accountGuid, identity.facilityGuid);
+      const current = this.requireItem(identity), latest = energyUseSetup(current);
+      const merged = reconcileEnergyUseSetup(baseline, submitted, latest);
+      if (merged.conflicts.length) throw new EditorConflictError(latest);
+      const updated = this.validate(() => applyEnergyUseSetup(current, merged.value, facility, approved));
+      const configurationChanged = !draftEqual(latest.sources, merged.value.sources) || !draftEqual(latest.utilityMeterGroupIds, merged.value.utilityMeterGroupIds);
+      if (configurationChanged) this.requireLinks(updated);
+      return energyUseSetup(await this.handler.saveItem(identity, current, updated, configurationChanged));
     });
     return result.value;
   }

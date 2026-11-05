@@ -6,7 +6,7 @@ import { EnergyUseCommandHandler } from '@data/account-workspace/handlers/energy
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { EditorConflictError } from '@app/v1/data/editing/draft-reconciliation';
 import { energyUseFacility, energyUseGroup, energyUseItem } from './energy-uses.testing';
-import { energyUseSettings } from './models/energy-use-settings.models';
+import { energyUseSetup } from './models/energy-use-setup.models';
 import { EnergyUseActionsService } from './energy-use-actions.service';
 
 describe('Energy Use actions', () => {
@@ -24,21 +24,21 @@ describe('Energy Use actions', () => {
     return { service: TestBed.inject(EnergyUseActionsService), store, handler, boundary, beforePersist: (callback: () => void) => prepare = callback };
   }
   it('merges into the queued latest record and retains its new annual values', async () => {
-    const { service, store, handler, beforePersist } = setup(), base = energyUseSettings(store.energyUseEquipment()[0]);
+    const { service, store, handler, beforePersist } = setup(), base = energyUseSetup(store.energyUseEquipment()[0]);
     beforePersist(() => { const item = structuredClone(store.energyUseEquipment()[0]); item.utilityData[0].energyUse[0].energyUse = 456; item.notes = 'Elsewhere'; store.energyUseEquipment.set([item]); });
-    await service.updateSettings(identity, { ...base, name: 'New' }, base, 'editor-a');
+    await service.updateSetup(identity, { ...base, name: 'New' }, base, 'editor-a');
     expect(handler.saveItem.mock.calls[0][2]).toMatchObject({ name: 'New', notes: 'Elsewhere', utilityData: [expect.objectContaining({ energyUse: [expect.objectContaining({ energyUse: 456 })] })] });
   });
   it('rejects overlapping metadata changes without writing', async () => {
-    const { service, store, handler, beforePersist } = setup(), base = energyUseSettings(store.energyUseEquipment()[0]);
+    const { service, store, handler, beforePersist } = setup(), base = energyUseSetup(store.energyUseEquipment()[0]);
     beforePersist(() => store.energyUseEquipment.set([{ ...store.energyUseEquipment()[0], name: 'Saved' }]));
-    await expect(service.updateSettings(identity, { ...base, name: 'Local' }, base, 'editor-a')).rejects.toBeInstanceOf(EditorConflictError);
+    await expect(service.updateSetup(identity, { ...base, name: 'Local' }, base, 'editor-a')).rejects.toBeInstanceOf(EditorConflictError);
     expect(handler.saveItem).not.toHaveBeenCalled();
   });
   it('rejects account switches and missing targets inside queued commands', async () => {
-    const { service, store, handler, beforePersist } = setup(), base = energyUseSettings(store.energyUseEquipment()[0]);
+    const { service, store, handler, beforePersist } = setup(), base = energyUseSetup(store.energyUseEquipment()[0]);
     beforePersist(() => store.account.set({ guid: 'account-b' }));
-    await expect(service.updateSettings(identity, { ...base, name: 'Local' }, base, 'editor-a')).rejects.toThrow('no longer available');
+    await expect(service.updateSetup(identity, { ...base, name: 'Local' }, base, 'editor-a')).rejects.toThrow('no longer available');
     expect(handler.saveItem).not.toHaveBeenCalled();
   });
   it('copies the complete item with fresh identity and independent nested records', async () => {
