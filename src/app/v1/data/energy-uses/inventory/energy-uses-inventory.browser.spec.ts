@@ -114,6 +114,21 @@ describe('energy uses browser journeys', () => {
     expect(view.navigation.activeEnergyUseGroupGuid()).toBe('group-a'); expect(view.root.querySelectorAll('tbody tr')).toHaveLength(24);
     expect(view.store.snapshot()).toEqual(before); view.fixture.destroy();
   });
+  it('keeps unavailable-group filters separate when switching facility ownership on the reused route', async () => {
+    const view = setup();
+    view.store.publish({ ...view.snapshot, energyUseGroups: [], energyUseEquipment: view.snapshot.energyUseEquipment.map(item => ({ ...item, energyUseGroupId: 'missing' })) });
+    const url = (facility: string) => `/v1/workspace/facility/${facility}/data/energy-uses/groups/unavailable?search=pump`;
+    await view.router.navigateByUrl(url('facility-a')); await settle(view);
+    view.inventory().filtersForm.controls.search.setValue('first facility'); await settle(view);
+    await view.router.navigateByUrl(url('facility-b')); await settle(view);
+    expect(view.inventory().group()?.facility.guid).toBe('facility-b');
+    expect(view.inventory().filters().search).toBe('pump');
+    view.inventory().filtersForm.controls.search.setValue('second facility'); await settle(view);
+    TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(url('facility-a'))); await settle(view);
+    expect(view.inventory().group()?.facility.guid).toBe('facility-a');
+    expect(view.inventory().filters().search).toBe('first facility');
+    expect(view.root.querySelector('app-create-energy-use-drawer')).toBeNull(); view.fixture.destroy();
+  });
   it('restores independent group filters when browser history reuses the same group route component', async () => {
     const view = setup();
     const url = (group: string) => `/v1/workspace/facility/facility-a/data/energy-uses/groups/${group}?search=pump`;

@@ -27,7 +27,7 @@
             }
             </div>
             @if (child.disclosureKey) {
-              <div class="v1-nav__nested-items" [id]="child.childrenId" [hidden]="!child.open" [attr.aria-label]="'Energy uses in ' + child.label">
+              <div role="group" class="v1-nav__nested-items" [id]="child.childrenId" [hidden]="!child.open" [attr.aria-label]="'Energy uses in ' + child.label">
                 @if (child.open) {
                   @for (entry of child.children; track entry.id) {
                     <a class="v1-nav__link v1-nav__child" [class.active]="entry.active" [routerLink]="entry.route" [attr.aria-current]="entry.active ? 'page' : null" [title]="entry.label"><app-ui-icon [name]="entry.icon"/><span class="v1-nav__item-label">{{ entry.label }}</span></a>

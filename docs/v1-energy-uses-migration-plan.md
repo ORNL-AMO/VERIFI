@@ -13,7 +13,7 @@ This roadmap records the agreed target experience, not shipped behavior. Work th
 | 1 | Inventory and workspace navigation | Complete |
 | 2 | Creation, Settings, and safe commands | Merged into `unified-ux` |
 | 3 | Combined Setup, annual data, and estimation | Implemented and validated; PR review pending |
-| 3A | Group browsing, nested navigation, and equipment icons | In progress; three dependent PRs |
+| 3A | Group browsing, nested navigation, and equipment icons | Implemented and validated locally; publication checkpoint pending |
 | 4 | Complete item tools and charts | Planned |
 | 5 | Export, compatibility, and release acceptance | Planned |
 
@@ -266,9 +266,36 @@ Stack assembly validation (2026-11-05):
 
 The isolated checkout excludes unrelated custom-icon edits, so its fast-test total differs from the iteration checkout above. Existing browser-support, stylesheet-budget, and CommonJS warnings remain. Native Electron OS integration was not exercised.
 
+## Phase 3A delivery evidence
+
+Implemented as three local dependent branches: `codex/energy-uses-group-browsing` → `codex/energy-uses-group-navigation` → `codex/energy-uses-group-icons-acceptance`. The stack was rebased cleanly onto Phase 3 acceptance head `fe6940b63` after its history-reconciliation review fixes arrived. Phase 3 remains WIP; no Phase 3 branches or unrelated iteration-worktree files were changed.
+
+Group cards retain empty groups and describe committed inventory metadata. Facility-qualified identities keep equal group names separate; orphaned items remain accessible in the read-only unavailable bucket. Group lists page 24 items, transfer dashboard filters, preselect creation, and restore history independently. Sidebar groups expose at most 20 item links plus View all, retain the active item, preserve manual collapse during publication, and open after accepted item navigation. Setup switching and breadcrumbs follow group membership. Icons use the reviewed custom SVGs and selected Hugeicons through one category lookup.
+
+Validation on the refreshed stack (2026-11-05):
+
+| Check | Result |
+| --- | --- |
+| Exact-comparison validation planner, all three slices | Passed. |
+| `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
+| Group browsing slice | 32 focused fast tests and 7 Chromium journeys passed before the upstream refresh. |
+| Group navigation slice | 142 focused fast tests and 9 Chromium journeys passed before the upstream refresh. |
+| Equipment icons and feature checks | 209 focused fast tests passed, including SVG geometry, stroke widths, labels, and unknown-category fallback. |
+| `npm run test:all:ci`, refreshed Phase 3 base | Passed: 3,473 fast tests and 381 Chromium tests. |
+| Final focused Chromium journeys | 11 passed, including an additional cross-facility unavailable-group history probe added after the full-suite bundle compiled. |
+| `npm run build-prod` | Passed for each slice, including the final refreshed stack. |
+| Local comparison review and `git diff --check` | No actionable findings; whitespace checks passed. |
+| Visual and interaction evidence | Inspected desktop light and narrow dark/high-contrast cards and group lists, equipment icons, nested sidebar, keyboard disclosure, long labels, internal table scrolling, and Back/Forward focus restoration. Existing print-card controls remain covered. |
+
+The scale fixtures cover 100 groups and 1,000 items; the rendered 1,000-item group remains capped at 24 table rows and the active sidebar preview at 20 item links. Browsing and navigation preserve committed workspace snapshots. Visual review caught and corrected unreadable narrow columns and inherited nested-chevron rotation.
+
+Initial restricted Angular test/build processes exited 134; permitted reruns passed. Initial template and test-fixture compilation errors were corrected before the passing checks. Browser-support, stylesheet-budget, and CommonJS build warnings remain; the full browser suite also logs duplicate-key warnings from meter fixtures. Native print-dialog and Electron OS checks were not exercised. No Electron, schema, calculation, persistence-command, or file-format boundary changed. Screenshot artifacts remain local and excluded from the stack.
+
+Publication remains at the local review checkpoint required by the [PR creation guide](agents/github-pr-creation.md); no Phase 3A branches have been pushed or PRs opened yet. Once Phase 3 merges, retarget the first Phase 3A PR to `unified-ux`.
+
 ## Defaults and deferred work
 
 - Retain **Energy Uses** and use **energy use** for an individual item; retain existing stored equipment terminology.
 - Simple creation uses the existing default source. Settings permits additions up to the established two-source limit while retaining existing/imported extra sources without truncation.
 - Existing retirement and missing-year propagation inconsistencies are documented separately from formula changes. This migration preserves history and avoids introducing retirement-adjusted item rollups.
-- Phase 3A introduces read-only group browsing. A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility summaries, footprint balances, and Sankey views.
+- Phase 3A introduces read-only group browsing. A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility consumption summaries, footprint balances, and Sankey views.
