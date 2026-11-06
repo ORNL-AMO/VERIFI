@@ -153,6 +153,14 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** The optional creation draft collection unit maps to the existing `startingUnit` field. Source defaults and dependent energy-unit/heat-capacity calculations use the selected unit before the existing meter command persists it. Existing callers without a unit retain facility defaults; stored shapes, backups, and v0 remain unchanged.
 - **Tests:** Drawer transitions, validation and retry specs; Chromium keyboard/focus and narrow themed layouts; real IndexedDB creation, Settings hydration without extra writes, and reopening with default and selected units.
 
+### Predictor creation selection workflow
+
+- **Workflow:** Add predictor from the unified Predictors inventory.
+- **Decision:** Use the same facility choice cards and pinned selections as meter/report creation, followed by Standard/Weather choice cards. Explicit facility scope skips and locks the facility step. Standard asks for name and Is production; optional units remain editable in Settings. Weather offers checkboxes for all supported weather types, with Heating degree days initially selected, and requires at least one choice.
+- **Weather handoff:** Continue to setup opens the existing new Weather workbench with the checked types and automatically opens Choose weather station once. Allowlisted query parameters preserve the initial choices on refresh; Setup captures them per creation identity so query-only navigation and workspace publications do not overwrite edits. Names, degree-day bases, range, station review, and the final save stay in the workbench. Predictors and readings are persisted together by the existing reviewed command after station selection.
+- **Shared contracts:** Meter and Predictor drawers share creation-choice styles. Standard creation, Weather calculation/command contracts, stored shapes, backups, and v0 remain unchanged.
+- **Tests:** Facility/type/checkbox transitions, production, invalid/empty/disabled and retry states; scoped navigation and query parsing; Weather seed retention and one-time station opening; Chromium keyboard/focus and narrow themed layouts for both drawers and the Weather handoff.
+
 ### Facility Meters Workspace Navigation Workflow
 
 - **Workflow:** v1 Facility Data > Meters workspace, issues #2644 and #2645.

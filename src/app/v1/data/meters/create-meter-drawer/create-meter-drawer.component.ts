@@ -22,7 +22,7 @@ interface MeterSelection {
 @Component({
   selector: 'app-create-portfolio-meter-drawer',
   templateUrl: './create-meter-drawer.component.html',
-  styleUrls: ['./create-meter-drawer.component.css'],
+  styleUrls: ['./create-meter-drawer.component.css', '../../../shared/creation-flow/creation-flow.css'],
   standalone: false,
   providers: [MeterActionsService]
 })

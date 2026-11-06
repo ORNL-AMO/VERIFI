@@ -24,7 +24,7 @@ describe('CreateMeterDrawerComponent', () => {
     fixture.detectChanges();
     const component = fixture.componentInstance;
     const choose = (text: string) => {
-      const button = [...fixture.nativeElement.querySelectorAll('.meter-choice')] as HTMLButtonElement[];
+      const button = [...fixture.nativeElement.querySelectorAll('.creation-choice')] as HTMLButtonElement[];
       button.find(item => item.textContent?.trim() === text)!.click(); fixture.detectChanges();
     };
     const ready = () => {
@@ -61,7 +61,7 @@ describe('CreateMeterDrawerComponent', () => {
     const { fixture, component } = setup('facility-b', single);
     expect(component.step()).toBe('source');
     expect(fixture.nativeElement.querySelector('#meter-facility-search')).toBeNull();
-    const selection = fixture.nativeElement.querySelector('.meter-selection') as HTMLButtonElement;
+    const selection = fixture.nativeElement.querySelector('.creation-selection') as HTMLButtonElement;
     expect(selection.textContent).toContain('Beta'); expect(selection.disabled).toBe(true);
     component.selectFacility('facility-a'); expect(component.facilityGuid()).toBe('facility-b');
   });
@@ -70,7 +70,7 @@ describe('CreateMeterDrawerComponent', () => {
     const { fixture, component, ready } = setup();
     component.facilitySearch.setValue('missing'); fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No matching facilities');
-    (fixture.nativeElement.querySelector('.meter-search-empty button') as HTMLButtonElement).click(); fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.creation-search-empty button') as HTMLButtonElement).click(); fixture.detectChanges();
     ready();
     component.editSelection('source'); component.selectSource('Natural Gas'); fixture.detectChanges();
     expect(component.form.controls.startingUnit.value).toBe('');
@@ -117,7 +117,7 @@ describe('CreateMeterDrawerComponent', () => {
   it('shows an empty facility state without offering source selection', () => {
     const { fixture, facilities } = setup(); facilities.set([]); fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Add a facility before adding a meter');
-    expect(fixture.nativeElement.querySelector('.meter-choice')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.creation-choice')).toBeNull();
   });
 
   it.each(['destroyed', 'account-switched', 'facility-changed'] as const)('suppresses a completed output after %s', async reason => {

@@ -1,4 +1,8 @@
-:host { display: contents; }
-.predictor-facility { display: grid; gap: .35rem; margin-bottom: 1rem; }
-.predictor-facility > span { font-weight: 800; font-size: .85rem; }
-select { width: 100%; }
+:host { display: block; }
+.predictor-details .predictor-production { display: flex; align-items: center; gap: .65rem; margin: 1rem 0 0; }
+.predictor-weather-options { display: grid; gap: .5rem; }
+.predictor-weather-options .predictor-weather-option { display: flex; align-items: center; gap: .65rem; min-height: var(--v1-control-height); margin: 0; padding: .7rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); cursor: pointer; }
+.predictor-weather-option:has(input:checked) { border-color: var(--v1-action); background: var(--v1-surface-muted); }
+.predictor-weather-option:focus-within { outline: 2px solid var(--v1-focus); outline-offset: 2px; }
+.predictor-weather-option input, .predictor-production input { width: 1rem; height: 1rem; flex: 0 0 auto; accent-color: var(--v1-action); }
+legend h3 { margin: 0 0 .75rem; font-size: 1rem; font-weight: 650; }

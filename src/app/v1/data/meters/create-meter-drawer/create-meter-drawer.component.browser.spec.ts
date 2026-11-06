@@ -61,8 +61,8 @@ describe('portfolio meter creation in the shell portal', () => {
         const body = panel.querySelector<HTMLElement>('.v1-workspace-slideout__body')!;
         expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth + 1);
         expect(panel.querySelector('.v1-workspace-slideout__footer')!.getBoundingClientRect().bottom).toBeLessThanOrEqual(740);
-        if (step !== 'name') expect(getComputedStyle(panel.querySelector('.meter-choices')!).gridTemplateColumns.split(' ')).toHaveLength(2);
-        const selections = panel.querySelector<HTMLElement>('.meter-selections')!;
+        if (step !== 'name') expect(getComputedStyle(panel.querySelector('.creation-choices')!).gridTemplateColumns.split(' ')).toHaveLength(2);
+        const selections = panel.querySelector<HTMLElement>('.creation-selections')!;
         expect(getComputedStyle(selections).position).toBe('sticky');
         const top = selections.getBoundingClientRect().top;
         body.scrollTop = body.scrollHeight; await fixture.whenStable();
@@ -95,8 +95,8 @@ describe('portfolio meter creation in the shell portal', () => {
     await checkChoices('name');
     await page.getByRole('textbox', { name: 'Meter name', exact: true }).fill('Main Electric');
     fixture.detectChanges();
-    expect(host.querySelector('.meter-selections')?.textContent).toContain('Beta');
-    expect(host.querySelector('.meter-selections')?.textContent).toContain('MWh');
+    expect(host.querySelector('.creation-selections')?.textContent).toContain('Beta');
+    expect(host.querySelector('.creation-selections')?.textContent).toContain('MWh');
     expect(host.querySelector('[formControlName="groupId"]')).toBeNull();
     const submit = host.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     expect(submit.disabled).toBe(false);
