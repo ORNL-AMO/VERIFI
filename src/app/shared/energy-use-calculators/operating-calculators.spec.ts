@@ -1,4 +1,4 @@
-import { calculateLoadFactor, calculateOperatingHours, LoadFactorInputs } from './operating-calculators';
+import { calculateLoadFactor, calculateLoadFactorPowers, calculateOperatingHours, LoadFactorInputs } from './operating-calculators';
 import { RatedPowerCalculator } from './rated-power-calculator';
 
 describe('Energy use calculators', () => {
@@ -10,6 +10,13 @@ describe('Energy use calculators', () => {
   });
   const load: LoadFactorInputs = { method: 'measuredPower', ratedPower: 10, ratedPowerUnit: 'kW', measuredPower: 5,
     measuredPowerUnit: 'kW', voltage: 1000, current: 5, phases: 1, powerFactor: 1 };
+  it('provides independent converted power values for the result breakdown', () => {
+    expect(calculateLoadFactorPowers(load)).toEqual({ rated: 10, actual: 5 });
+    expect(calculateLoadFactorPowers({ ...load, measuredPower: null })).toEqual({ rated: 10, actual: null });
+    expect(calculateLoadFactorPowers({ ...load, ratedPower: null })).toEqual({ rated: null, actual: 5 });
+    expect(calculateLoadFactorPowers({ ...load, method: 'voltageCurrent' })).toEqual({ rated: 10, actual: 5 });
+    expect(calculateLoadFactorPowers({ ...load, ratedPower: 1, ratedPowerUnit: 'hp' }).rated).toBeCloseTo(0.7457, 4);
+  });
   it('calculates either load-factor method, converts units and caps at 115%', () => {
     expect(calculateLoadFactor(load)).toEqual({ percent: 50, applied: 50 });
     expect(calculateLoadFactor({ ...load, method: 'voltageCurrent' })).toEqual({ percent: 50, applied: 50 });

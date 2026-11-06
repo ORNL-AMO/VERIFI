@@ -19,6 +19,7 @@
     <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()" (resolved)="resolveConflicts($event)"/>
     <footer class="v1-workbench-section energy-use-settings__actions">
       <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canCopy()" (click)="copy()"><app-ui-icon name="copy"/>Copy energy use</button>
+      <app-energy-use-lifecycle-actions [item]="item()" [canAct]="canLifecycle()"/>
       <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canCommand()" (click)="requestDelete()"><app-ui-icon name="delete"/>Delete energy use</button>
     </footer>
     @if (actionError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</p> }
@@ -27,7 +28,7 @@
 <ng-template #confirmation>
   @if (review(); as current) {
     <app-confirmation-dialog [title]="current.kind === 'year' ? 'Remove fiscal year?' : current.kind === 'delete' ? 'Delete energy use?' : current.kind === 'utilities' ? 'Confirm utility changes?' : 'Remove energy source?'" titleId="energy-use-confirmation-title" cancelAriaLabel="Cancel energy use action" [confirmLabel]="current.kind === 'year' ? 'Remove year' : current.kind === 'delete' ? 'Delete energy use' : current.kind === 'utilities' ? 'Confirm utility changes' : 'Remove source'" confirmIcon="delete" [disabled]="busy()" [busy]="busy()" [confirmDisabled]="reviewStale()" (confirmed)="confirmReview()" (cancelled)="cancelReview()">
-      @if (current.kind === 'year') { <p>Remove <strong>{{ current.year }}</strong> from <strong>{{ current.item.name }}</strong>?</p><p>Its operating assumptions and consumption for every source, including manual overrides and unsaved edits for this year, will be removed. Other years will remain.</p>
+      @if (current.kind === 'year') { <p>Remove <strong>{{ current.year }}</strong> from <strong>{{ current.item.name }}</strong>?</p><p>Its operating assumptions and consumption for every source, including manual overrides and unsaved edits for this year, will be removed. Other years will remain. Removing an explicit entry may cause an earlier value to carry forward again.</p>
       } @else if (current.kind === 'delete') { <p>Delete <strong>{{ current.item.name }}</strong> and all its annual assumptions, consumption values, and manual overrides? Its energy-use group and linked meter groups will remain.</p>
         @if (editor.dirty()) { <p>Your unsaved Setup draft will also be discarded after deletion succeeds.</p> }
       } @else if (current.kind === 'source') { <p>Remove <strong>{{ current.source.energySource }}</strong> from <strong>{{ current.item.name }}</strong>?</p><p>Affected annual history: {{ removalYears() }}.</p><p>Saved consumption and overrides for this source will be removed. Other sources and annual operating assumptions will remain.</p>
@@ -55,11 +56,11 @@
     <app-workspace-slideout [title]="drawer.copyFrom === undefined ? 'Add fiscal year' : 'Copy fiscal year'" description="Use the owning facility's fiscal-year label. Meter readings are not required." initialFocus="#energy-use-new-year" [hasFooter]="true" (closed)="closeYearDrawer()">
       <form [formGroup]="yearForm" (ngSubmit)="confirmYear()" id="energy-use-year-form">
         @if (drawer.copyFrom !== undefined) { <p>Copy {{ drawer.copyFrom }} assumptions, consumption units, and saved values for every source. Manual overrides will also be copied.</p> }
-        <label class="energy-use-settings__year-input"><span>Fiscal year</span><input id="energy-use-new-year" type="number" min="1" max="9999" formControlName="year" required></label>
+        <label class="v1-field energy-use-settings__year-input"><span>Fiscal year</span><input id="energy-use-new-year" class="v1-input" type="number" min="1" max="9999" formControlName="year" required></label>
         @if (yearForm.invalid && yearForm.touched) { <p class="v1-alert v1-alert--warning" role="alert">Enter a fiscal year from 1 to 9999.</p> }
         @if (yearError()) { <p class="v1-alert v1-alert--warning" role="alert">{{ yearError() }}</p> }
       </form>
-      <div slideoutFooter><button type="button" class="v1-btn v1-btn--secondary" (click)="closeYearDrawer()">Cancel</button><button type="submit" form="energy-use-year-form" class="v1-btn v1-btn--primary" [disabled]="workspace.hasPending() || !item()">{{ drawer.copyFrom === undefined ? 'Add year' : 'Copy year' }}</button></div>
+      <div slideoutFooter><button type="button" class="v1-btn v1-btn--quiet" (click)="closeYearDrawer()">Cancel</button><button type="submit" form="energy-use-year-form" class="v1-btn v1-btn--primary" [disabled]="workspace.hasPending() || !item()">{{ drawer.copyFrom === undefined ? 'Add year' : 'Copy year' }}</button></div>
     </app-workspace-slideout>
   }
 </ng-template>

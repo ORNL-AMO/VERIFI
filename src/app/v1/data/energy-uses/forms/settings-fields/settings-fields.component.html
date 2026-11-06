@@ -39,6 +39,10 @@
           <div class="energy-use-fields__capacity">
             <label [for]="'energy-use-capacity-' + row.index"><span>Rated capacity</span></label>
             <div class="input-group">
+              @if (row.source.energySource !== 'Electricity') {
+                <button appSetupCalculator kind="power" [source]="row.control" [editorKey]="editorKey()"
+                  [linkedMeters]="compatibleMeters()" [canEdit]="canEdit() && !duplicateSources()"></button>
+              }
               <input [id]="'energy-use-capacity-' + row.index" class="form-control" type="number" [attr.min]="0" formControlName="size" aria-required="true">
               <select class="input-group-text v1-select" formControlName="units" aria-label="Capacity units" aria-required="true">
                 @if (!row.knownUnit) { <option [value]="row.source.units">{{ row.source.units || 'Choose units' }} (saved)</option> }
@@ -46,9 +50,6 @@
               </select>
             </div>
           </div>
-          @if (row.source.energySource !== 'Electricity') {
-            <app-setup-calculator kind="power" [source]="row.control" [editorKey]="editorKey()" [linkedMeters]="compatibleMeters()" [canEdit]="canEdit() && !duplicateSources()"/>
-          }
           <label class="energy-use-fields__quantity"><span># of Equipment</span><input type="number" [attr.min]="1" step="any" formControlName="numberOfEquipment" aria-required="true"></label>
           </div>
         </div>

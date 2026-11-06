@@ -1,4 +1,5 @@
-<app-workspace-bottom-sheet [modal]="false" [showHeader]="false" [fillBody]="true" panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
+<app-workspace-bottom-sheet [modal]="false" [showHeader]="false" [fillBody]="true" panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="customTitle() || facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
+    @if (content(); as custom) { <ng-container [ngTemplateOutlet]="custom"/> } @else {
     <div class="inventory-chart-sheet__body inventory-chart-sheet__body--fill"><ng-content/>
       @if (!charts().length) {
         <p role="status">{{ state() === 'loading' || state() === 'idle' ? 'Preparing data' : state() === 'error' ? 'Unavailable. Chart data could not be loaded.' : 'No charts are available. Add saved readings to get started.' }}</p>
@@ -45,4 +46,5 @@
         </div>
       }
     </div>
+    }
 </app-workspace-bottom-sheet>

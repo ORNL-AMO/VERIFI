@@ -1,0 +1,10 @@
+:host { display: contents; }
+.energy-use-charts { overflow: auto; padding: .75rem; min-height: 0; flex: 1; color: var(--v1-text); }
+header { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+h2 { font-size: 1.1rem; margin: 0; }
+label { display: flex; align-items: center; gap: .5rem; }
+.energy-use-charts__plot { width: 100%; height: clamp(16rem, 43dvh, 36rem); }
+ul { padding-inline-start: 1.25rem; } li { margin-block: .4rem; }
+.energy-use-charts__table { overflow: auto; } table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid var(--v1-border); padding: .5rem; text-align: start; vertical-align: top; }
+@media print { .energy-use-charts { overflow: visible; } header button, nav button { display: none; } }

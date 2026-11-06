@@ -87,6 +87,18 @@ export class WorkspaceCommandBoundary {
     return this.enqueue(accountGuid, () => this.run(accountGuid, options, persist));
   }
 
+  /** Retry only publication of a committed write, without invoking its persistence callback again. */
+  recoverCommittedPublication(accountGuid: string): Promise<void> {
+    return this.enqueue(accountGuid, async () => {
+      if (this.store.account()?.guid !== accountGuid) throw new WorkspaceWriteError('stale-workspace', 'The active account changed before refresh.');
+      if (this.publicationRepairAccountGuid !== accountGuid) return;
+      const opId = ++nextOperationId;
+      this.store.setPending({ id: opId, label: 'Refreshing saved changes' });
+      try { await this.repairPublication(accountGuid, { entityKind: 'account', changeKind: 'update', label: 'Refreshing saved changes' }); }
+      finally { this.store.clearPending(opId); }
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------

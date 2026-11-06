@@ -3,12 +3,13 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { EnergyUseCommandHandler } from '@data/account-workspace/handlers/energy-use-command-handler.service';
-import { energyUseMeterLinksError } from '@data/account-workspace/handlers/energy-use-command.models';
+import { EnergyUseBatchChange, EnergyUseGroupIdentity, EnergyUseGroupSettings, energyUseMeterLinksError } from '@data/account-workspace/handlers/energy-use-command.models';
 import { getNewIdbFacilityEnergyUseGroup, getRandomFlatHexColor } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { IdbEntry, getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { EditorConflictError, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
 import { EnergyUseSetupValues, SetupRemovalReviews, applyEnergyUseSetup, energyUseSetup, normalizeEnergyUseSetup, reconcileEnergyUseSetup } from './models/energy-use-setup.models';
+import { groupSettings, normalizeGroupSettings, reconcileGroupSettings } from './models/energy-use-group-settings.models';
 import { EnergyUseCreationDraft, EnergyUseIdentity, createEnergyUse } from './models/energy-use-settings.models';
 
 @Injectable({ providedIn: 'root' })
@@ -49,6 +50,22 @@ export class EnergyUseActionsService {
     });
     return result.value;
   }
+  async updateGroupSettings(identity: EnergyUseGroupIdentity, value: EnergyUseGroupSettings, base: EnergyUseGroupSettings,
+    ownerId: string): Promise<EnergyUseGroupSettings> {
+    const submitted = normalizeGroupSettings(value), baseline = normalizeGroupSettings(base);
+    const result = await this.boundary.execute({ entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: identity.energyUseGroupGuid,
+      label: 'Saving energy-use group', ownerId, notification: { suppressSuccessToast: true } }, async () => {
+      this.requireFacility(identity.accountGuid, identity.facilityGuid);
+      const current = this.workspace.energyUseGroups().find(group => group.guid === identity.energyUseGroupGuid
+        && group.accountId === identity.accountGuid && group.facilityId === identity.facilityGuid);
+      if (!current) this.reject('This saved energy-use group is no longer available.');
+      const latest = groupSettings(current), merged = reconcileGroupSettings(baseline, submitted, latest);
+      if (merged.conflicts.length) throw new EditorConflictError(latest);
+      if (!merged.value.name) this.reject('Enter an energy-use group name.');
+      return groupSettings(await this.handler.saveGroupSettings(identity, current, merged.value));
+    });
+    return result.value;
+  }
   async copy(identity: EnergyUseIdentity, request: IdbEntry = getNewIdbEntry()): Promise<IdbFacilityEnergyUseEquipment> {
     const result = await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'add', label: 'Copying energy use',
       notification: { successTitle: 'Energy use copied' } }, async () => {
@@ -70,6 +87,26 @@ export class EnergyUseActionsService {
       await this.handler.deleteItem(identity, current);
     });
   }
+  async setLifecycle(identity: EnergyUseIdentity, reviewed: IdbFacilityEnergyUseEquipment, year: number | null): Promise<void> {
+    const before = structuredClone(reviewed);
+    if (year !== null && (!Number.isInteger(year) || year < 1 || year > 9999)) this.reject('Enter a fiscal year from 1 to 9999.');
+    await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'update', entityGuid: identity.energyUseGuid,
+      label: year === null ? 'Reinstating energy use' : 'Retiring energy use' }, async () => {
+      this.requireFacility(identity.accountGuid, identity.facilityGuid);
+      const current = this.requireItem(identity);
+      if (!draftEqual(current, before)) this.reject('The saved energy use changed. Review its lifecycle again.');
+      await this.handler.saveItem(identity, current, { ...structuredClone(current), noLongerInUse: { isNoLongerInUse: year !== null, year } }, false);
+    });
+  }
+  async applyBatch(accountGuid: string, changes: readonly EnergyUseBatchChange[]): Promise<void> {
+    const reviewed = structuredClone(changes);
+    await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'bulk', entityGuid: accountGuid,
+      label: 'Updating selected energy uses', publication: { mode: 'reload' } }, async () => {
+      for (const row of reviewed) this.requireFacility(accountGuid, row.facility.guid);
+      await this.handler.applyBatch(accountGuid, reviewed);
+    });
+  }
+  recoverPublication(accountGuid: string): Promise<void> { return this.boundary.recoverCommittedPublication(accountGuid); }
   private requireFacility(accountGuid: string, facilityGuid: string) {
     if (this.workspace.account()?.guid !== accountGuid || !this.workspace.canWrite()) this.reject('This energy use workspace is no longer available.');
     const facility = this.workspace.facilities().find(facility => facility.guid === facilityGuid && facility.accountId === accountGuid);

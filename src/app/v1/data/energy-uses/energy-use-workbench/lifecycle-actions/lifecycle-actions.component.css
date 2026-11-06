@@ -1,0 +1,5 @@
+:host { display: contents; }
+p { margin: 0; }
+label { display: grid; gap: .35rem; }
+
+.energy-use-lifecycle__status { flex-basis: 100%; order: -1; }

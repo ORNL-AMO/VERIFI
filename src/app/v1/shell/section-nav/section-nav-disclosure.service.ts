@@ -6,17 +6,6 @@ interface Disclosure { readonly facilityGuid?: string; readonly collapsed: boole
 /** Navigation-local state survives section view destruction, never workspace persistence. */
 @Injectable()
 export class SectionNavDisclosureService {
-  private readonly nested = signal<Readonly<Record<string, boolean>>>({});
-  private activeItem = '';
-  isNestedOpen(key: string): boolean { return this.nested()[key] ?? false; }
-  toggleNested(key: string): void { this.nested.update(state => ({ ...state, [key]: !this.isNestedOpen(key) })); }
-  revealActive(key?: string, itemGuid?: string, facilityGuid?: string): void {
-    const identity = key && itemGuid ? JSON.stringify([key, itemGuid]) : '';
-    if (identity === this.activeItem) return;
-    this.activeItem = identity;
-    if (key && itemGuid && facilityGuid) this.slots.update(state => ({ ...state, 'energy-uses': { facilityGuid, collapsed: false } }));
-    if (key && itemGuid) this.nested.update(state => ({ ...state, [key]: true }));
-  }
   private readonly slots = signal<Record<ResourceNavGroupId, Disclosure>>({
     meters: { collapsed: false },
     'meter-grouping': { collapsed: false },

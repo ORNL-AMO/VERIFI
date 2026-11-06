@@ -1,0 +1,73 @@
+@let annual = year();
+  <section class="v1-workbench-section annual-data__year" [attr.aria-labelledby]="'annual-year-' + annual.year">
+    <header class="annual-data__heading">
+      <h3 [id]="'annual-year-' + annual.year">{{ annual.year }}</h3>
+      @if (showManagement()) { <div class="annual-data__actions">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canManageYears() || !annual.complete || annual.ambiguous" (click)="copyRequested.emit(annual.year)">Copy year</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canManageYears() || annual.ambiguous" (click)="removeRequested.emit(annual.year)">Remove year</button>
+      </div> }
+    </header>
+    @if (annual.ambiguous) { <p class="v1-alert v1-alert--warning">Repeated source or year entries are preserved. Affected annual data cannot be edited safely.</p> }
+    @for (conditions of annual.conditions; track $index; let conditionIndex = $index) {
+      <fieldset class="annual-data__assumptions" [formGroup]="conditions" [disabled]="!canEdit() || annual.ambiguous">
+        <legend class="v1-sr-only">Operating assumptions for {{ annual.year }}</legend>
+        <div class="annual-data__assumption">
+          <label [for]="'annual-hoursOfOperation-' + annual.year + '-' + conditionIndex">Operating hours</label>
+          <div class="input-group">
+            <button appSetupCalculator kind="hours" [conditions]="conditions"
+              [embedded]="embeddedCalculators()" (viewRequested)="calculatorRequested.emit($event)" [editorKey]="editorKey()" [canEdit]="canEdit() && !annual.ambiguous"></button>
+            <input [id]="'annual-hoursOfOperation-' + annual.year + '-' + conditionIndex" class="form-control" type="number" [attr.min]="0" formControlName="hoursOfOperation" [attr.aria-label]="'Operating hours for ' + annual.year" [attr.aria-describedby]="'annual-hoursOfOperation-unit-' + annual.year + '-' + conditionIndex">
+            <span class="input-group-text" [id]="'annual-hoursOfOperation-unit-' + annual.year + '-' + conditionIndex">hrs/yr</span>
+          </div>
+        </div>
+        <div class="annual-data__assumption">
+          <label [for]="'annual-loadFactor-' + annual.year + '-' + conditionIndex">Load factor</label>
+          <div class="input-group">
+            <button appSetupCalculator kind="load" [conditions]="conditions" [electricity]="annual.hasElectricity"
+              [embedded]="embeddedCalculators()" (viewRequested)="calculatorRequested.emit($event)" [editorKey]="editorKey()" [canEdit]="canEdit() && !annual.ambiguous"></button>
+            <input [id]="'annual-loadFactor-' + annual.year + '-' + conditionIndex" class="form-control" type="number" [attr.min]="0" [attr.max]="115" formControlName="loadFactor" [attr.aria-label]="'Load factor for ' + annual.year" [attr.aria-describedby]="'annual-loadFactor-unit-' + annual.year + '-' + conditionIndex">
+            <span class="input-group-text" [id]="'annual-loadFactor-unit-' + annual.year + '-' + conditionIndex">%</span>
+          </div>
+        </div>
+        <label><span>Duty factor</span>
+          <span class="input-group">
+            <input class="form-control" type="number" [attr.min]="0" [attr.max]="100" formControlName="dutyFactor" [attr.aria-label]="'Duty factor for ' + annual.year" [attr.aria-describedby]="'annual-dutyFactor-unit-' + annual.year + '-' + conditionIndex">
+            <span class="input-group-text" [id]="'annual-dutyFactor-unit-' + annual.year + '-' + conditionIndex">%</span>
+          </span>
+        </label>
+        @if (annual.hasElectricity) {
+        <label><span>Efficiency</span>
+          <span class="input-group">
+            <input class="form-control" type="number" [attr.min]="0" [attr.max]="100" formControlName="efficiency" [attr.aria-label]="'Efficiency for ' + annual.year" [attr.aria-describedby]="'annual-efficiency-unit-' + annual.year + '-' + conditionIndex">
+            <span class="input-group-text" [id]="'annual-efficiency-unit-' + annual.year + '-' + conditionIndex">%</span>
+          </span>
+        </label>
+        }
+      </fieldset>
+    } @empty { <p class="v1-alert v1-alert--warning">No saved operating assumptions for this annual. Existing consumption is preserved.</p> }
+    @for (source of annual.sources; track source.key) {
+      <fieldset class="annual-data__source" [formGroup]="source.entry" [disabled]="!canEdit() || source.ambiguous">
+        <legend class="v1-sr-only">{{ source.source }} consumption for {{ annual.year }}</legend>
+        <div class="annual-data__consumption">
+          <div class="annual-data__source-label" aria-hidden="true"><app-ui-icon [name]="source.icon" [size]="20"/><span>{{ source.source }}</span></div>
+          <div class="annual-data__amount">
+            <label [for]="'annual-consumption-' + annual.year + '-' + source.key">
+              <span>Consumption</span>
+            </label>
+            <div class="input-group">
+              <button type="button" class="input-group-text annual-data__mode" [attr.aria-pressed]="source.manual" [attr.aria-label]="source.modeLabel" [title]="source.modeLabel" (click)="toggleOverride(source.entry, source.amount)"><app-ui-icon [name]="source.manual ? 'calculator' : 'edit'" [size]="18"/></button>
+              @if (source.manual) { <input [id]="'annual-consumption-' + annual.year + '-' + source.key" class="form-control" type="number" [attr.min]="0" formControlName="energyUse" [attr.aria-label]="source.source + ' consumption for ' + annual.year"> }
+              @else { <output [id]="'annual-consumption-' + annual.year + '-' + source.key" class="form-control" [attr.aria-label]="source.source + ' consumption for ' + annual.year">{{ source.amount === null ? 'Unavailable' : (source.amount | number:'1.0-6') }}</output> }
+              <select class="input-group-text v1-select" formControlName="energyUseUnit" [attr.aria-label]="source.source + ' consumption units for ' + annual.year" [attr.title]="source.manual ? 'Changing units keeps the entered number.' : null">
+                @if (!source.knownUnit) { <option [value]="source.entry.controls.energyUseUnit.value">{{ source.entry.controls.energyUseUnit.value }} (saved)</option> }
+                @for (unit of units; track unit) { <option [value]="unit">{{ unit }}</option> }
+              </select>
+            </div>
+          </div>
+        </div>
+        @if (source.error) { <p class="v1-alert v1-alert--warning" role="alert">{{ source.error }}</p> }
+      </fieldset>
+    }
+    @for (source of annual.missingSources; track source) { <p class="v1-muted">{{ source }}: no saved consumption for this annual.</p> }
+    @if (!annual.sources.length && !annual.missingSources.length) { <p class="v1-muted">Select a utility above to estimate consumption.</p> }
+  </section>

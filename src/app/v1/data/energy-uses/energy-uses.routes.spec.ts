@@ -1,24 +1,20 @@
 import { facilityEnergyUseGroupRoute, facilityEnergyUseRoute, parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { ENERGY_USE_WORKBENCH_ROUTES } from './energy-uses.routes';
-import { inventoryLeaveGuard } from '@app/v1/shell/inventory-leave.guard';
-import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
-import { EnergyUsesInventoryComponent } from './inventory/energy-uses-inventory.component';
+import { EnergyUseWorkbenchComponent } from './energy-use-workbench/energy-use-workbench.component';
 import { unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 
-describe('energy use route contract', () => {
-  it('builds and parses canonical ownership and protects the combined setup destination', () => {
-    const route = facilityEnergyUseRoute('facility-a', 'energy-a', 'settings');
-    expect(route).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses', 'energy-a', 'settings']);
-    expect(ENERGY_USE_WORKBENCH_ROUTES.find(route => route.path === 'energy-uses/:energyUseGuid')!.children?.some(child => child.path === 'annual-data')).toBe(false);
-    expect(parseWorkspaceRoute(route.join('/'))).toMatchObject({ facilityGuid: 'facility-a', energyUseGuid: 'energy-a', section: 'data', detail: 'energy-uses' });
-    for (const tab of ['settings']) expect(ENERGY_USE_WORKBENCH_ROUTES.find(route => route.path === 'energy-uses/:energyUseGuid')!.children?.find(child => child.path === tab))
+describe('energy use group route contract', () => {
+  it('builds and parses group and item ownership and protects item transitions', () => {
+    const route = facilityEnergyUseRoute('facility-a', 'group-a', 'energy-a');
+    expect(route).toEqual([...facilityEnergyUseGroupRoute('facility-a', 'group-a'), 'items', 'energy-a']);
+    expect(parseWorkspaceRoute(route.join('/'))).toMatchObject({ facilityGuid: 'facility-a', energyUseGroupGuid: 'group-a', energyUseGuid: 'energy-a', section: 'data', detail: 'energy-uses' });
+    expect(ENERGY_USE_WORKBENCH_ROUTES[0]).toMatchObject({ component: EnergyUseWorkbenchComponent, canDeactivate: [unsavedChangesGuard] });
+    expect(ENERGY_USE_WORKBENCH_ROUTES[0].children?.find(child => child.path === 'items/:energyUseGuid'))
       .toMatchObject({ canDeactivate: [unsavedChangesGuard], runGuardsAndResolvers: 'paramsChange' });
   });
-});
-
-it('recognizes group routes without treating groups as equipment identifiers', () => {
-  const route = facilityEnergyUseGroupRoute('facility-a', 'group-a');
-  expect(parseWorkspaceRoute(route.join('/'))).toMatchObject({ facilityGuid: 'facility-a', energyUseGroupGuid: 'group-a', energyUseGuid: undefined, detail: 'energy-uses' });
-  expect(ENERGY_USE_WORKBENCH_ROUTES[0]).toMatchObject({ path: 'energy-uses/groups/:energyUseGroupGuid', component: DataInventoryComponent,
-    children: [{ path: '', component: EnergyUsesInventoryComponent, canDeactivate: [inventoryLeaveGuard], runGuardsAndResolvers: 'paramsOrQueryParamsChange' }] });
+  it('does not parse removed item URLs as workbench identities', () => {
+    expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/data/energy-uses/energy-a/settings').energyUseGuid).toBeUndefined();
+    expect(ENERGY_USE_WORKBENCH_ROUTES).toHaveLength(1);
+    expect(ENERGY_USE_WORKBENCH_ROUTES[0].children?.some(child => child.path === 'history')).toBe(false);
+  });
 });

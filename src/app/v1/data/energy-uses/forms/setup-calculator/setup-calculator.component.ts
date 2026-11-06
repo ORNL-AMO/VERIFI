@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -7,14 +7,30 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { MeterPhase } from '@data/models/constantsAndTypes';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { PowerUnitOptions } from '@shared/unitOptions';
-import { calculateLoadFactor, calculateOperatingHours, LoadFactorInputs } from '@shared/energy-use-calculators/operating-calculators';
+import { calculateLoadFactor, calculateLoadFactorPowers, calculateOperatingHours, LoadFactorInputs } from '@shared/energy-use-calculators/operating-calculators';
 import { RatedPowerCalculator } from '@shared/energy-use-calculators/rated-power-calculator';
 import { AnnualConditionsForm } from '../energy-use-setup-form.service';
 import { EnergyUseSourceForm } from '../energy-use-settings-form.service';
 
-@Component({ selector: 'app-setup-calculator', standalone: false, templateUrl: './setup-calculator.component.html',
-  styleUrls: ['./setup-calculator.component.css'] })
+@Component({
+  selector: 'button[appSetupCalculator]',
+  standalone: false,
+  templateUrl: './setup-calculator.component.html',
+  styleUrls: ['./setup-calculator.component.css'],
+  host: {
+    type: 'button',
+    class: 'input-group-text',
+    'aria-haspopup': 'dialog',
+    '[disabled]': '!canEdit()',
+    '[attr.aria-label]': 'title()',
+    '[attr.title]': 'title()',
+    '[attr.aria-expanded]': 'opened()',
+    '(click)': 'open()'
+  }
+})
 export class SetupCalculatorComponent {
+  readonly embedded = input(false);
+  readonly viewRequested = output<TemplateRef<unknown> | null>();
   readonly kind = input.required<'hours' | 'load' | 'power'>();
   readonly conditions = input<AnnualConditionsForm>();
   readonly source = input<EnergyUseSourceForm>();
@@ -31,7 +47,9 @@ export class SetupCalculatorComponent {
   private target?: AnnualConditionsForm | EnergyUseSourceForm;
   readonly opened = signal(false);
   readonly title = computed(() => this.kind() === 'hours' ? 'Calculate operating hours' : this.kind() === 'load' ? 'Calculate load factor' : 'Calculate rated power');
-  readonly units = PowerUnitOptions;
+  readonly units = PowerUnitOptions.map(unit => ({
+    ...unit, shortLabel: /\(([^)]+)\)$/.exec(unit.display)?.[1] ?? unit.value
+  }));
   readonly form = new FormGroup({
     hours: new FormControl<number | null>(24), days: new FormControl<number | null>(7), weeks: new FormControl<number | null>(52),
     method: new FormControl<LoadFactorInputs['method']>('measuredPower', { nonNullable: true }),
@@ -46,15 +64,23 @@ export class SetupCalculatorComponent {
   private readonly values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
   readonly fuelCalculator = signal<RatedPowerCalculator | undefined>(undefined);
   readonly fuelVersion = signal(0);
+  readonly loadPowers = computed(() => {
+    this.values();
+    return calculateLoadFactorPowers(this.form.getRawValue());
+  });
+  readonly loadFactor = computed(() => {
+    this.values();
+    return this.kind() === 'load' ? calculateLoadFactor(this.form.getRawValue()) : null;
+  });
   readonly result = computed(() => {
     this.values(); this.fuelVersion(); const value = this.form.getRawValue();
     if (this.kind() === 'hours') return calculateOperatingHours(value.hours, value.days, value.weeks);
-    if (this.kind() === 'load') return calculateLoadFactor(value)?.applied ?? null;
+    if (this.kind() === 'load') return this.loadFactor()?.applied ?? null;
     const calculator = this.fuelCalculator();
     if (!calculator || calculator.isDisabled) return null;
     return Number(calculator.calculatedRatedPower.toFixed(6));
   });
-  readonly loadWarning = computed(() => { this.values(); return this.kind() === 'load' && (calculateLoadFactor(this.form.getRawValue())?.percent ?? 0) > 100; });
+  readonly loadWarning = computed(() => (this.loadFactor()?.percent ?? 0) > 100);
   constructor() {
     inject(DestroyRef).onDestroy(() => this.close());
     effect(() => { const active = this.modal.activePortal();
@@ -96,10 +122,13 @@ export class SetupCalculatorComponent {
         powerUnit: calculator.powerUnit, heatCapacity: Number.isFinite(calculator.heatCapacity) ? calculator.heatCapacity : null }, { emitEvent: false });
       this.fuelVersion.update(value => value + 1);
     }
-    this.opened.set(true); this.portal = new TemplatePortal(this.calculator, this.view); this.modal.show(this.portal);
+    this.opened.set(true);
+    if (this.embedded()) { this.viewRequested.emit(this.calculator); return; }
+    this.portal = new TemplatePortal(this.calculator, this.view); this.modal.show(this.portal);
   }
   close(): void {
     if (this.portal && this.modal.activePortal() === this.portal) this.modal.hide();
+    if (this.embedded() && this.opened()) this.viewRequested.emit(null);
     this.portal = undefined; this.opened.set(false);
   }
   apply(): void {

@@ -1,0 +1,19 @@
+@if (initialized()) {
+  <section class="v1-workbench-section" aria-label="Group settings">
+    @if (!group()) { <p class="v1-alert v1-alert--warning" role="alert">The saved group is no longer available. Your draft has been retained.</p> }
+    <form [formGroup]="form" (ngSubmit)="editor.saveNow()" aria-label="Energy-use group setup">
+      <label class="v1-field"><span>Group name</span><input class="v1-input" type="text" formControlName="name" required [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.dirty ? 'true' : null" [attr.aria-describedby]="form.controls.name.invalid && form.controls.name.dirty ? 'energy-use-group-name-error' : null"></label>
+      @if (form.controls.name.invalid && form.controls.name.dirty) { <p id="energy-use-group-name-error" class="v1-alert v1-alert--warning" role="alert">Enter an energy-use group name.</p> }
+      <label class="v1-field"><span>Group notes</span><textarea class="v1-input" rows="4" formControlName="notes"></textarea></label>
+    </form>
+    <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()" (resolved)="resolveConflicts($event)"/>
+  </section>
+} @else if (context.group()?.unavailable) {
+  <section class="v1-workbench-section"><p class="v1-alert v1-alert--info">This group is unavailable. Its name and notes cannot be edited. Existing items remain accessible.</p></section>
+}
+@if (context.group()) {
+  <section class="v1-workbench-section" aria-labelledby="energy-use-manage-title">
+    <h2 id="energy-use-manage-title">Energy Use Equipment</h2>
+    <app-energy-use-bulk-actions [canOpen]="canManage()" [canCreate]="creation()?.canCreate() ?? false" (createRequested)="creation()?.create()"/>
+  </section>
+}

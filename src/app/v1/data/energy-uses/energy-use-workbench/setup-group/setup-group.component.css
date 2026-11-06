@@ -1,0 +1,9 @@
+:host { display: block; min-width: 0; }
+.v1-workbench-section { margin: 0; padding: 1rem; border: 1px solid var(--v1-border); border-bottom: 0; border-radius: 0; background: var(--v1-surface); }
+.v1-workbench-section:first-child { border-top: 0; }
+.v1-workbench-section:last-child { border-bottom: 1px solid var(--v1-border); }
+form { display: grid; gap: var(--v1-space-3); }
+.v1-field { margin: 0; min-width: 0; }
+.v1-field > span { font-size: .82rem; font-weight: 800; line-height: 1.3; }
+input, textarea { width: 100%; min-width: 0; font-size: 1rem; }
+h2 { font-size: 1rem; font-weight: 800; line-height: 1.2; margin: 0 0 var(--v1-space-3); }

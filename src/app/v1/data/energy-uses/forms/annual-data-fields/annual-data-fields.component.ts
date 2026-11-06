@@ -1,9 +1,9 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, TemplateRef, computed, input, output } from '@angular/core';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { footprintEnergyUseUnits } from '@domain/calculations/energy-footprint/energy-footprint-units';
 import { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
 import { energyUseConsumptionAmount, energyUseYears, normalizeEnergyUseSetup } from '../../models/energy-use-setup.models';
-import { AnnualConsumptionForm, EnergyUseSetupForm } from '../energy-use-setup-form.service';
+import { EnergyUseSetupForm } from '../energy-use-setup-form.service';
 
 @Component({ selector: 'app-energy-use-annual-data-fields', standalone: false,
   templateUrl: './annual-data-fields.component.html', styleUrls: ['./annual-data-fields.component.css'] })
@@ -13,6 +13,10 @@ export class AnnualDataFieldsComponent {
   readonly editorKey = input('');
   readonly canEdit = input(false);
   readonly canManageYears = input(false);
+  readonly showManagement = input(true);
+  readonly yearFilter = input<number>();
+  readonly embeddedCalculators = input(false);
+  readonly calculatorRequested = output<TemplateRef<unknown> | null>();
   readonly refreshKey = input(0);
   readonly addRequested = output<void>();
   readonly copyRequested = output<number>();
@@ -21,7 +25,7 @@ export class AnnualDataFieldsComponent {
   readonly years = computed(() => {
     this.refreshKey();
     const form = this.form(), value = normalizeEnergyUseSetup({ ...form.controls.settings.getRawValue(), conditions: form.controls.conditions.getRawValue(), consumption: form.controls.consumption.getRawValue() }), item = this.item();
-    return energyUseYears(value).map(year => {
+    return energyUseYears(value).filter(year => this.yearFilter() === undefined || year === this.yearFilter()).map(year => {
       const conditions = form.controls.conditions.controls.filter(row => row.controls.year.value === year);
       const sourceRows = form.controls.consumption.controls.flatMap((source, sourceIndex) => source.controls.entries.controls
         .filter(entry => entry.controls.year.value === year).map((entry, entryIndex) => {
@@ -42,10 +46,4 @@ export class AnnualDataFieldsComponent {
         missingSources: value.sources.filter(source => !sourceRows.some(row => row.source === source.energySource)).map(row => row.energySource) };
     });
   });
-  toggleOverride(form: AnnualConsumptionForm, amount: number | null): void {
-    if (!this.canEdit()) return;
-    const manual = !form.controls.overrideEnergyUse.value;
-    form.patchValue({ overrideEnergyUse: manual, energyUse: manual ? amount : null });
-    form.markAsDirty();
-  }
 }

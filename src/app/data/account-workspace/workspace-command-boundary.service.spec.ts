@@ -15,6 +15,17 @@ describe('WorkspaceCommandBoundary', () => {
     });
   });
 
+  it('recovers committed publication without repeating persistence', async () => {
+    const { boundary, store, workspaceService } = createBoundary(); publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockRejectedValueOnce(new Error('refresh failed')).mockResolvedValue('published');
+    const persist = vi.fn(async () => 'saved');
+    await expect(boundary.execute(makeOptions(), persist)).rejects.toMatchObject({ persistenceCommitted: true });
+    await boundary.recoverCommittedPublication(store.account()!.guid);
+    expect(persist).toHaveBeenCalledTimes(1); expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledTimes(2);
+    expect(store.hasPending()).toBe(false);
+    await boundary.recoverCommittedPublication(store.account()!.guid); expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledTimes(2);
+  });
+
   it('rejects a command when the workspace is loading', async () => {
     const { boundary, store } = createBoundary();
     store.beginLoad(false);
