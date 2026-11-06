@@ -15,6 +15,7 @@ import { SettingsFormService } from '@shared/settings-forms/settings-form.servic
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { DataModule } from '@app/v1/data/data.module';
+import { energyUseGroup } from '@app/v1/data/energy-uses/energy-uses.testing';
 import { DataInventoryComponent } from './data-inventory.component';
 import { FacilityActionsService } from '@app/v1/data/facilities/facility-actions.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
@@ -28,10 +29,11 @@ describe('DataInventoryComponent', () => {
   let hasPending: ReturnType<typeof signal<boolean>>;
   let portfolioFacilities: { deleteFacility: ReturnType<typeof vi.fn>; createFacility: ReturnType<typeof vi.fn> };
   const activePortfolioTab = signal('facilities');
+  const activeEnergyUseGroupGuid = signal<string | undefined>(undefined);
   let modalPortal: { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    activePortfolioTab.set('facilities');
+    activePortfolioTab.set('facilities'); activeEnergyUseGroupGuid.set(undefined);
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     account = signal(accountFixture());
     facilities = signal([facilityFixture('facility-a', 'Alpha Plant'), facilityFixture('facility-b', 'Beta Works')]);
@@ -69,6 +71,7 @@ describe('DataInventoryComponent', () => {
             facilityAnalyses: signal([{ guid: 'analysis-a', facilityId: 'facility-a' }]),
             accountAnalyses: signal([{ guid: 'account-analysis-a' }]),
             facilityReports: signal([{ guid: 'report-a', facilityId: 'facility-a' }]),
+            energyUseGroups: signal([energyUseGroup()]),
             energyUseEquipment: signal([{ guid: 'equipment-a', facilityId: 'facility-a' }]),
             canWrite,
             hasPending
@@ -77,6 +80,8 @@ describe('DataInventoryComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: { isSingleSiteWorkspace: () => false,
+            activeEnergyUseGroupGuid, headerFacility: () => facilities()[0],
+            facilityInventoryLink: (guid: string) => ({ route: ['/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'energy-uses'], queryParams: { facility: guid } }),
             activePortfolioTab, uploadQuery: () => ({}), inventoryFacilityGuid: signal<string | undefined>(undefined), changeFacilityScope: vi.fn(),
             openFacility: vi.fn(async () => undefined),
             accountSettingsRoute: (accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', accountGuid, 'settings', detail],
@@ -103,6 +108,22 @@ describe('DataInventoryComponent', () => {
     vi.restoreAllMocks();
   });
 
+  it('uses the inventory header, group identity, breadcrumbs and registered creation on group drill-in', () => {
+    activeEnergyUseGroupGuid.set('group-a');
+    const create = vi.fn();
+    fixture.debugElement.injector.get(InventoryHeaderActionsRegistry).registerCreation({ resource: 'energy-uses', label: 'Add energy use', canCreate: signal(true), create });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.activeContent()).toBe('energy-uses');
+    expect(fixture.nativeElement.querySelector('.v1-account-portfolio__header h1').textContent).toContain('Production');
+    expect(fixture.componentInstance.breadcrumbs().at(-1)).toMatchObject({ label: 'Energy Uses', icon: 'tools', queryParams: { facility: 'facility-a' } });
+    buttonByText('Add energy use').click(); expect(create).toHaveBeenCalledOnce();
+    expect(buttonByText('Add facility')).toBeUndefined();
+    activeEnergyUseGroupGuid.set('missing'); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Energy-use group');
+    activeEnergyUseGroupGuid.set('unavailable'); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Group unavailable');
+  });
+
   it('delegates the header toggle through the current typed registration and ignores other resource owners', () => {
     activePortfolioTab.set('meters'); fixture.detectChanges();
     const registry = fixture.debugElement.injector.get(InventoryHeaderActionsRegistry);
@@ -118,7 +139,7 @@ describe('DataInventoryComponent', () => {
     available.set(true); activePortfolioTab.set('predictors'); fixture.detectChanges();
     expect(buttonByText('Select predictors').disabled).toBe(true);
     unregister(); fixture.detectChanges(); expect(fixture.componentInstance.selectionActions()).toBeUndefined();
-    activePortfolioTab.set('facilities'); fixture.detectChanges();
+    activePortfolioTab.set('facilities'); activeEnergyUseGroupGuid.set(undefined); fixture.detectChanges();
     expect(fixture.nativeElement.textContent).not.toContain('Select facilities');
   });
 

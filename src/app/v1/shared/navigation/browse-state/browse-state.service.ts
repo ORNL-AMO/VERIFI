@@ -1,4 +1,5 @@
 import type { ReportInventoryFilters } from '@app/v1/reports/inventory/report-inventory.models';
+import type { EnergyUseInventoryFilters } from '@app/v1/data/energy-uses/inventory/energy-use-inventory.models';
 import { DestroyRef, Injectable, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Observable } from 'rxjs';
 import type { PredictorInventoryFilters } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
@@ -7,6 +8,7 @@ import type { MeterInventorySort, MeterInventoryStatusFilter } from '@app/v1/dat
 import { InventoryView } from '@app/v1/shared/inventory/inventory.models';
 
 export interface BrowseFilters {
+  'energy-uses': EnergyUseInventoryFilters;
   reports: ReportInventoryFilters;
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };
   predictors: PredictorInventoryFilters;
@@ -14,9 +16,9 @@ export interface BrowseFilters {
   meters: { search: string; status: MeterInventoryStatusFilter; sort: MeterInventorySort };
 }
 export type BrowseKind = keyof BrowseFilters;
-export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; }
+export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; readonly energyUseGroupGuid?: string; }
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
-export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'analyses' | 'reports';
+export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
 
 /** UI-only journey state. Nothing is written to storage or domain records. */
 @Injectable({ providedIn: 'root' })
@@ -35,7 +37,7 @@ export class BrowseStateService {
   saveInventoryView(key: BrowseKey<InventoryBrowseKind>, value: InventoryView): void {
     this.inventoryViews.set(this.id(key), { ...value, overrides: { ...value.overrides } });
   }
-  private id(key: BrowseKey): string { return JSON.stringify([key.accountGuid, key.kind, key.facilityGuid ?? '']); }
+  private id(key: BrowseKey): string { return JSON.stringify([key.accountGuid, key.kind, key.facilityGuid ?? '', ...(key.energyUseGroupGuid ? [key.energyUseGroupGuid] : [])]); }
 }
 
 interface BrowseForm<K extends BrowseKind> {
@@ -45,20 +47,23 @@ interface BrowseForm<K extends BrowseKind> {
 }
 
 /** Hydration does not emit form edits; the returned signal includes both edits and hydration. */
-export function rememberBrowseForm<K extends BrowseKind>(key: Signal<BrowseKey<K> | undefined>, form: BrowseForm<K>): Signal<BrowseFilters[K]> {
+export function rememberBrowseForm<K extends BrowseKind>(key: Signal<BrowseKey<K> | undefined>, form: BrowseForm<K>, initialFilters?: Signal<Partial<BrowseFilters[K]>>): Signal<BrowseFilters[K]> {
   const store = inject(BrowseStateService);
   const destroy = inject(DestroyRef);
   const defaults = form.getRawValue();
   const value = signal(defaults);
   let previous: BrowseKey<K> | undefined;
+  let previousInitial = '';
+  const restore = (next: BrowseKey<K> | undefined) => ({ ...defaults, ...(next ? store.readFilters(next) : {}), ...initialFilters?.() });
   const subscription = form.valueChanges.subscribe(() => value.set(form.getRawValue()));
   effect(() => {
     const next = key();
+    const initial = JSON.stringify(initialFilters?.());
     untracked(() => {
-      if (JSON.stringify(previous) === JSON.stringify(next)) return;
+      if (JSON.stringify(previous) === JSON.stringify(next) && previousInitial === initial) return;
       if (previous) store.saveFilters(previous, value());
-      previous = next;
-      const restored = next ? { ...defaults, ...store.readFilters(next) } : defaults;
+      previous = next; previousInitial = initial;
+      const restored = restore(next);
       form.patchValue(restored, { emitEvent: false });
       value.set(restored);
     });
@@ -69,7 +74,6 @@ export function rememberBrowseForm<K extends BrowseKind>(key: Signal<BrowseKey<K
   return computed(() => {
     const current = value();
     const next = key();
-    return JSON.stringify(previous) === JSON.stringify(next) ? current
-      : next ? { ...defaults, ...store.readFilters(next) } : defaults;
+    return JSON.stringify(previous) === JSON.stringify(next) && previousInitial === JSON.stringify(initialFilters?.()) ? current : restore(next);
   });
 }

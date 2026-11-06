@@ -20,8 +20,8 @@
           <span>Keep</span>
           <select class="v1-select" [formControl]="choices.controls[row.conflict.id]">
             <option [ngValue]="null">Choose a value</option>
-            <option value="local">My changes</option>
-            <option value="saved">Saved values</option>
+            @if (row.canKeepLocal) { <option value="local">My changes</option> }
+            @if (row.canKeepSaved) { <option value="saved">Saved values</option> }
           </select>
         </label>
       </fieldset>

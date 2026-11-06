@@ -1,0 +1,5 @@
+:host { container-type: inline-size; display: block; min-width: 0; font-size: max(.875rem, 14px); line-height: 1.5; }
+.energy-use-snapshot__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem 1rem; margin: .8rem 0 0; padding-top: .8rem; border-top: 1px solid var(--portfolio-tile-divider, var(--v1-border)); }
+dt { color: color-mix(in srgb, var(--v1-muted) 75%, var(--v1-text)); font-weight: 400; }
+dd { margin: .25rem 0 0; overflow-wrap: anywhere; white-space: pre-line; }
+@container (max-width: 16rem) { .energy-use-snapshot__facts { grid-template-columns: 1fr; } }

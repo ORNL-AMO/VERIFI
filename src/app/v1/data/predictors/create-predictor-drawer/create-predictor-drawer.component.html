@@ -33,8 +33,8 @@
         @case ('type') {
           <legend class="visually-hidden"><h3 id="predictor-choice-heading" #stepHeading tabindex="-1">Predictor type</h3></legend>
           <div class="creation-choices">
-            <button type="button" class="creation-choice" [disabled]="!selectedFacility()" [attr.aria-pressed]="predictorType() === 'Standard'" (click)="selectType('Standard')"><app-ui-icon name="predictor" [size]="28"/><strong>Standard predictor</strong><span>Enter monthly values directly.</span></button>
-            <button type="button" class="creation-choice" [disabled]="!selectedFacility()" [attr.aria-pressed]="predictorType() === 'Weather'" (click)="selectType('Weather')"><app-ui-icon name="cloudRain" [size]="28"/><strong>Weather predictors</strong><span>Calculate values from weather data.</span></button>
+            <button type="button" class="creation-choice" [disabled]="!selectedFacility()" [attr.aria-pressed]="predictorType() === 'Standard'" (click)="selectType('Standard')"><app-ui-icon name="predictor" [size]="28"/><strong>Standard predictor</strong><span class="creation-choice__description">Enter monthly values directly.</span></button>
+            <button type="button" class="creation-choice" [disabled]="!selectedFacility()" [attr.aria-pressed]="predictorType() === 'Weather'" (click)="selectType('Weather')"><app-ui-icon name="cloudRain" [size]="28"/><strong>Weather predictors</strong><span class="creation-choice__description">Calculate values from weather data.</span></button>
           </div>
         }
         @case ('standard') {

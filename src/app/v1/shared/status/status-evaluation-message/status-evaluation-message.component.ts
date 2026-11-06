@@ -9,5 +9,4 @@ import type { StatusEvaluationState } from '@app/v1/status/status.models';
 })
 export class StatusEvaluationMessageComponent {
   readonly state = input.required<StatusEvaluationState>();
-  readonly compact = input(false);
 }

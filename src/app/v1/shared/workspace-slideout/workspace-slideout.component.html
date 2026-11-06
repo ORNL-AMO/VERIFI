@@ -12,13 +12,13 @@
     [class.v1-workspace-slideout--with-footer]="hasFooter"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="v1-workspace-slideout-title"
+    [attr.aria-labelledby]="titleId"
     appModalFocusTrap
     [modalInitialFocus]="initialFocus"
     (escapePressed)="requestClose()">
     <header class="v1-workspace-slideout__header">
       <div>
-        <h2 id="v1-workspace-slideout-title">{{ title }}</h2>
+        <h2 [id]="titleId">{{ title }}</h2>
         @if (description) {
           <p>{{ description }}</p>
         }

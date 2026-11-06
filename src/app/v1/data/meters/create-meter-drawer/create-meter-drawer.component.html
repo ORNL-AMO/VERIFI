@@ -48,7 +48,7 @@
           <div class="creation-choices">
             @for (unit of units(); track unit.display) {
               <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.startingUnit.value === unit.value" (click)="selectUnit(unit.value)">
-                <strong>{{ unit.value }}</strong><span [innerHTML]="unit.display"></span>
+                <strong>{{ unit.value }}</strong><span class="creation-choice__description" [innerHTML]="unit.display"></span>
               </button>
             }
           </div>

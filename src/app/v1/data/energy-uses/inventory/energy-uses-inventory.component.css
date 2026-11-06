@@ -1,0 +1,2 @@
+:host { display: block; min-width: 0; }
+section { display: grid; gap: .85rem; min-width: 0; }

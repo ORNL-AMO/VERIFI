@@ -1,0 +1,64 @@
+@let currentStep = step();
+<app-workspace-slideout title="Add energy use" [saving]="saving()" [hasFooter]="true" [initialFocus]="currentStep === 'name' ? '#energy-use-name' : currentStep === 'new-group' ? '#energy-use-group-name' : '#energy-use-choice-heading'" (closed)="requestClose()">
+  @if (selections().length) {
+    <div class="creation-selections" role="group" aria-label="Energy use selections">
+      @for (selection of selections(); track selection.id) {
+        <button type="button" class="creation-selection" [class.creation-selection--active]="selection.active" [disabled]="!selection.editable || !canEdit()" [attr.aria-label]="selection.editable ? 'Change ' + (selection.id === 'facility' ? 'facility: ' : 'energy-use group: ') + selection.label : selection.label" [attr.aria-expanded]="selection.editable ? selection.active : null" [title]="selection.label" (click)="editSelection(selection.id)">
+          <app-ui-icon [name]="selection.icon"/><span>{{ selection.label }}</span>@if (selection.editable) { <app-ui-icon name="edit"/> } @else { <app-ui-icon name="check"/> }
+        </button>
+      }
+    </div>
+  }
+  <form id="energy-use-draft" [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset [disabled]="!canEdit()">
+      @switch (currentStep) {
+        @case ('facility') {
+          <legend class="visually-hidden"><h3 id="energy-use-choice-heading" #stepHeading tabindex="-1">Facility</h3></legend>
+          <label class="visually-hidden" for="energy-use-facility-search">Find facility</label>
+          <input id="energy-use-facility-search" class="form-control v1-input creation-search" type="search" [formControl]="facilitySearch" placeholder="Find facility" autocomplete="off">
+          <div class="creation-choices">
+            @for (owner of matchingFacilities(); track owner.guid) {
+              <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.facilityGuid.value === owner.guid" (click)="selectFacility(owner.guid)"><app-ui-icon name="facility" [size]="28"/><strong>{{ owner.name || 'Unnamed facility' }}</strong></button>
+            } @empty {
+              <div class="creation-search-empty" role="status"><p>{{ facilities().length ? 'No matching facilities.' : 'Add a facility first.' }}</p>@if (facilities().length) { <button type="button" class="v1-btn v1-btn--quiet" (click)="facilitySearch.setValue('')">Clear search</button> }</div>
+            }
+          </div>
+        }
+        @case ('group') {
+          <legend class="visually-hidden"><h3 id="energy-use-choice-heading" #stepHeading tabindex="-1">Energy-use group</h3></legend>
+          @if (groups().length) {
+            <label class="visually-hidden" for="energy-use-group-search">Find energy-use group</label>
+            <input id="energy-use-group-search" class="form-control v1-input creation-search" type="search" [formControl]="groupSearch" placeholder="Find energy-use group" autocomplete="off">
+          }
+          <div class="creation-choices">
+            @for (group of matchingGroups(); track group.guid) {
+              <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'existing' && form.controls.groupGuid.value === group.guid" (click)="selectGroup(group.guid)"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>{{ group.name || 'Unnamed energy-use group' }}</strong></button>
+            }
+            <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'new'" (click)="startNewGroup()"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>Create energy-use group</strong></button>
+          </div>
+          @if (groups().length && !matchingGroups().length) { <div class="creation-search-empty" role="status"><p>No matching energy-use groups.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="groupSearch.setValue('')">Clear search</button></div> }
+        }
+        @case ('new-group') {
+          <label for="energy-use-group-name">Group name</label>
+          <input #groupName id="energy-use-group-name" class="form-control v1-input" formControlName="groupName" autocomplete="off" required aria-describedby="energy-use-group-error" [attr.aria-invalid]="form.controls.groupName.touched && !form.controls.groupName.value.trim()">
+          @if (form.controls.groupName.touched && !form.controls.groupName.value.trim()) { <p id="energy-use-group-error" class="v1-alert v1-alert--danger" role="alert">Enter a group name.</p> }
+        }
+        @case ('name') {
+          <label for="energy-use-name">Energy use name</label>
+          <input #itemName id="energy-use-name" class="form-control v1-input" formControlName="name" autocomplete="off" required aria-describedby="energy-use-name-error" [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched">
+          @if (form.controls.name.invalid && form.controls.name.touched) { <p id="energy-use-name-error" class="v1-alert v1-alert--danger" role="alert">Enter an energy use name.</p> }
+        }
+      }
+    </fieldset>
+    @if (availabilityError(); as message) { <p class="v1-alert v1-alert--warning" role="alert">{{ message }}</p> }
+    @if (error(); as message) { <p class="v1-alert v1-alert--danger" role="alert">{{ message }}</p> }
+  </form>
+  <div slideoutFooter class="creation-draft-actions">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="requestClose()">Cancel</button>
+    @if (currentStep === 'new-group') { <button type="submit" form="energy-use-draft" class="v1-btn v1-btn--action" [disabled]="!canUseNewGroup()">Use group</button> }
+    @if (currentStep === 'name') { <button type="submit" form="energy-use-draft" class="v1-btn v1-btn--action" [disabled]="!canCreate()">@if (saving()) { <app-ui-icon name="loading" spin/> }{{ saving() ? 'Creating…' : 'Create energy use' }}</button> }
+  </div>
+  @if (discardOpen()) {
+    <app-confirmation-dialog title="Discard energy use?" titleId="discard-energy-use-title" cancelAriaLabel="Keep editing energy use" confirmLabel="Discard draft" (confirmed)="discard()" (cancelled)="discardOpen.set(false)"><p>Your unfinished energy use will be discarded.</p></app-confirmation-dialog>
+  }
+</app-workspace-slideout>

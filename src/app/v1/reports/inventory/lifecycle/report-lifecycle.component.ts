@@ -5,7 +5,7 @@ import { ReportLifecycleService } from './report-lifecycle.service';
 
 @Component({ selector: 'app-report-lifecycle', standalone: false,
   host: { '(window:beforeunload)': 'beforeUnload($event)' },
-  templateUrl: './report-lifecycle.component.html', styleUrls: ['./report-lifecycle.component.css'] })
+  templateUrl: './report-lifecycle.component.html', styleUrls: ['./report-lifecycle.component.css', '../../../shared/creation-flow/creation-flow.css'] })
 export class ReportLifecycleComponent implements OnDestroy {
   readonly lifecycle = inject(ReportLifecycleService);
   private readonly modal = inject(ModalPortalService);

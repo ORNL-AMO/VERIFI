@@ -11,7 +11,7 @@ export interface InventoryFacilityLink extends InventoryTileLink {
 }
 export interface FacilityInventoryDestination {
   readonly facilityGuid: string;
-  readonly resource: 'meters' | 'predictors';
+  readonly resource: 'meters' | 'predictors' | 'energy-uses';
 }
 export interface InventoryResourceSummary {
   readonly facilityGuid: string;
@@ -88,6 +88,29 @@ export interface InventoryTile {
   readonly facilitySnapshot?: InventoryFacilitySnapshot;
   readonly meterSnapshot?: InventoryMeterSnapshot;
   readonly predictorSnapshot?: InventoryReadingSnapshot;
+  readonly energyUseSnapshot?: InventoryEnergyUseSnapshot;
+  readonly energyUseGroupSnapshot?: InventoryEnergyUseGroupSnapshot;
+}
+export interface InventoryMeterGroupLink {
+  readonly guid: string;
+  readonly label: string;
+  /** Unavailable/foreign links retain their identity without offering a destination. */
+  readonly route?: readonly string[];
+}
+export interface InventoryEnergyUseGroupSnapshot {
+  readonly meterGroups?: readonly InventoryMeterGroupLink[];
+  readonly equipmentTypes: readonly { readonly label: string; readonly icon: IconName }[];
+  readonly items: readonly { readonly guid: string; readonly name: string; readonly icon: IconName; readonly route: readonly string[] }[];
+  readonly categories: readonly string[];
+  readonly sources: readonly string[];
+  readonly years: readonly number[];
+}
+export interface InventoryEnergyUseSnapshot {
+  readonly meterGroups?: readonly InventoryMeterGroupLink[];
+  readonly sources: readonly string[];
+  readonly group: string;
+  readonly years: readonly number[];
+  readonly notes: string;
 }
 export interface InventoryTileDetailChange { readonly guid: string; readonly level: InventoryDetailLevel; }
 export interface InventoryAnalysisSnapshot {

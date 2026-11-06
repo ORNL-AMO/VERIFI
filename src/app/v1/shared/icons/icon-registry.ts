@@ -1,5 +1,9 @@
 import type { IconSvgObject } from './icon.types';
 import { CUSTOM_ICONS } from './custom-icons';
+import UfoIcon from '@hugeicons/core-free-icons/UfoIcon';
+import AirVentIcon from '@hugeicons/core-free-icons/AirVentIcon';
+import LampCeilingIcon from '@hugeicons/core-free-icons/LampCeilingIcon';
+import ForkliftIcon from '@hugeicons/core-free-icons/ForkliftIcon';
 import Add01Icon from '@hugeicons/core-free-icons/Add01Icon';
 import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon';
 import ArrowDataTransferHorizontalIcon from '@hugeicons/core-free-icons/ArrowDataTransferHorizontalIcon';
@@ -15,6 +19,7 @@ import BankIcon from '@hugeicons/core-free-icons/BankIcon';
 import BadgeAlertIcon from '@hugeicons/core-free-icons/BadgeAlertIcon';
 import BriefcaseBusinessIcon from '@hugeicons/core-free-icons/BriefcaseBusinessIcon';
 import Building03Icon from '@hugeicons/core-free-icons/Building03Icon';
+import Calculator01Icon from '@hugeicons/core-free-icons/Calculator01Icon';
 import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon';
 import CalendarCheckIcon from '@hugeicons/core-free-icons/CalendarCheckIcon';
 import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon';
@@ -112,6 +117,10 @@ import ZoomOutIcon from '@hugeicons/core-free-icons/ZoomOutIcon';
 
 export const ICON_REGISTRY = {
   ...CUSTOM_ICONS,
+  otherEquipment: UfoIcon,
+  hvac: AirVentIcon,
+  lighting: LampCeilingIcon,
+  mobile: ForkliftIcon,
   account: Building03Icon,
   accountAnalysis: CrowdfundingIcon,
   accountIssue: Alert02Icon,
@@ -125,6 +134,7 @@ export const ICON_REGISTRY = {
   bank: BankIcon,
   badgeAlert: BadgeAlertIcon,
   portfolio: BriefcaseBusinessIcon,
+  calculator: Calculator01Icon,
   calendar: Calendar03Icon,
   calendarCheck: CalendarCheckIcon,
   chartLine: ChartLineData01Icon,

@@ -8,6 +8,14 @@ function actions(resource: 'meters' | 'predictors'): InventoryHeaderActions {
 }
 
 describe('inventory header registrations', () => {
+  it('registers creation independently of selection and retains replacement owners', () => {
+    const registry = new InventoryHeaderActionsRegistry();
+    const first = { resource: 'energy-uses' as const, label: 'Add energy use', canCreate: signal(true), create: vi.fn() };
+    const second = { ...first, create: vi.fn() };
+    const unregister = registry.registerCreation(first);
+    registry.registerCreation(second); unregister();
+    expect(registry.creation()).toBe(second); expect(registry.current()).toBeUndefined();
+  });
   it('keeps a replacement owner when the previous routed child unregisters', () => {
     const registry = new InventoryHeaderActionsRegistry();
     const meters = actions('meters'), predictors = actions('predictors');

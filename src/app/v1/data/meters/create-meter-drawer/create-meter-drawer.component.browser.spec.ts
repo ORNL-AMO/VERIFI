@@ -35,6 +35,7 @@ describe('portfolio meter creation in the shell portal', () => {
           execute: vi.fn().mockImplementation(async (_options, persist) => ({ value: await persist() }))
         } },
         { provide: WorkspaceNavigationService, useValue: {
+          activeEnergyUseGroupGuid: () => undefined,
           isSingleSiteWorkspace: () => false, inventoryFacilityGuid: () => undefined, uploadQuery: () => ({}), activePortfolioTab: signal('meters'),
           accountSettingsRoute: (guid: string, detail: string) => ['/v1', 'workspace', 'account', guid, 'settings', detail],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab]

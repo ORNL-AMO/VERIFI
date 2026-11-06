@@ -1,0 +1,17 @@
+<app-workspace-slideout title="Select Utilities" [hasFooter]="true" (closed)="closed.emit()">
+  @if (hasLinkedGroups()) { <p>Changes that require unlinking meter groups will be reviewed before they apply.</p> }
+  <div class="energy-use-utilities" [formGroup]="form">
+    @for (utility of choices(); track utility.source) {
+      @if (form.controls[utility.source]; as control) {
+        <label class="energy-use-utilities__choice">
+          <input type="checkbox" [formControl]="control">
+          <app-ui-icon [name]="utility.icon" [size]="24"/>
+          <span>{{ utility.source }}</span>
+        </label>
+      }
+    }
+  </div>
+  @if (stale()) { <p class="v1-alert v1-alert--warning" role="alert">Utilities changed while this panel was open. Cancel and reopen it to continue.</p> }
+  <button slideoutFooter type="button" class="v1-btn v1-btn--quiet" (click)="closed.emit()">Cancel</button>
+  <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="!canConfirm()" (click)="confirm()">Confirm</button>
+</app-workspace-slideout>

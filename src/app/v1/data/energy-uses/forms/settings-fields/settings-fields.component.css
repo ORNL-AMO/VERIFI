@@ -1,0 +1,47 @@
+:host { display: block; min-width: 0; }
+.energy-use-fields { border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.energy-use-fields .v1-workbench-section { margin: 0; border: 0; border-bottom: 1px solid var(--v1-border); border-radius: 0; padding: 1rem; }
+.energy-use-fields .v1-workbench-section:last-child { border-bottom: 0; }
+.energy-use-fields h2 { font-size: 1rem; font-weight: 800; line-height: 1.2; margin: 0 0 .8rem; }
+.energy-use-fields__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.energy-use-fields__source-row { display: grid; grid-template-columns: minmax(9rem, 1fr) minmax(0, 3fr); gap: .8rem; align-items: end; }
+.energy-use-fields label { display: grid; gap: .3rem; min-width: 0; }
+.energy-use-fields label > span { font-size: .82rem; font-weight: 800; line-height: 1.3; }
+.energy-use-fields small { font-size: .78rem; font-weight: 400; line-height: 1.4; color: var(--v1-muted); }
+.energy-use-fields input, .energy-use-fields textarea, .energy-use-fields select { width: 100%; min-width: 0; padding: .48rem .65rem; border: 1px solid var(--v1-control-border); background-color: var(--v1-control-surface); color: var(--v1-text); border-radius: var(--v1-radius-sm); font-family: inherit; font-size: 1rem; font-weight: 400; line-height: 1.4; }
+.energy-use-fields input, .energy-use-fields select { min-height: var(--v1-control-height); }
+.energy-use-fields select:not([multiple]) { padding-right: 2.1rem; }
+.energy-use-fields__source-controls { display: flex; align-items: end; gap: .8rem; min-width: 0; }
+.energy-use-fields__source-controls > .energy-use-fields__capacity { flex: 0 1 24rem; }
+.energy-use-fields__quantity { flex: 0 1 8rem; }
+.energy-use-fields__capacity { display: grid; gap: .3rem; min-width: 0; }
+.energy-use-fields__capacity .input-group { flex-wrap: nowrap; min-width: 0; }
+.energy-use-fields__capacity .input-group > .form-control { flex: 1 1 auto; width: 1%; border-radius: var(--v1-radius-sm) 0 0 var(--v1-radius-sm); }
+.energy-use-fields__capacity .input-group > .input-group-text { flex: 0 1 auto; width: auto; max-width: 60%; border-radius: 0 var(--v1-radius-sm) var(--v1-radius-sm) 0; background-color: var(--v1-control-addon-surface); }
+.energy-use-fields__wide { grid-column: 1 / -1; }
+.energy-use-fields__meter-groups { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.energy-use-fields__meter-groups > .v1-btn { margin-left: auto; flex: 0 0 auto; }
+.energy-use-fields__links { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; flex: 1 1 16rem; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.energy-use-fields__no-links { margin: 0; font-size: .82rem; font-weight: 400; line-height: 1.4; color: var(--v1-muted); }
+.energy-use-fields__linked-group { display: inline-flex; align-items: center; gap: .35rem; overflow-wrap: anywhere; }
+.energy-use-fields__linked-group app-ui-icon { flex: 0 0 auto; }
+.energy-use-fields__linked-group span { min-width: 0; }
+.energy-use-fields__linked-group { padding: .35rem .6rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-addon-surface); }
+.energy-use-fields fieldset { min-width: 0; margin: 0; padding: 0 0 .5rem; border: 0; }
+.energy-use-fields__source-label { display: flex; align-items: center; gap: .5rem; min-height: var(--v1-control-height); min-width: 0; font-size: .9rem; font-weight: 700; line-height: 1.3; }
+.energy-use-fields__capacity .input-group-text { font-size: .875rem; font-weight: 500; line-height: 1.4; }
+.energy-use-fields .v1-btn, .energy-use-fields__linked-group { font-size: .82rem; line-height: 1.4; }
+.energy-use-fields__linked-group { font-weight: 500; }
+.energy-use-fields__actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+.energy-use-fields__actions h2 { margin: 0; }
+.energy-use-fields__actions .v1-btn { margin-left: auto; }
+@media (min-width: 42.01rem) {
+  .energy-use-fields__capacity { width: 100%; max-width: 24rem; }
+}
+@media (max-width: 42rem) {
+  .energy-use-fields__grid { grid-template-columns: 1fr; }
+  .energy-use-fields__source-row { grid-template-columns: minmax(0, 1fr); }
+  .energy-use-fields__source-controls > .energy-use-fields__capacity { flex: 2 1 0; }
+  .energy-use-fields__quantity { flex: 1 1 0; }
+  .energy-use-fields__source-label { grid-column: 1 / -1; }
+}

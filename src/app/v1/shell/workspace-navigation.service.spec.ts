@@ -92,6 +92,34 @@ describe('WorkspaceNavigationService', () => {
     service = TestBed.inject(WorkspaceNavigationService);
   });
 
+  it.each([true, false])('toggles from effective visibility %s rather than the default open preference', visible => {
+    expect(service.isSupportPanelOpen()).toBe(true);
+    expect(service.supportPanelRequested()).toBe(false);
+    service.toggleSupportPanel(visible);
+    expect(service.isSupportPanelOpen()).toBe(!visible);
+    expect(service.supportPanelRequested()).toBe(!visible);
+    service.toggleSupportPanel(!visible);
+    expect(service.isSupportPanelOpen()).toBe(visible);
+  });
+
+  it('opens To-dos with a consumable focus request and leaves the panel toggle independent', () => {
+    service.hideSupportPanel(); service.openTodos();
+    expect(service.activePanelTab()).toBe('todos');
+    expect(service.isSupportPanelOpen()).toBe(true);
+    expect(service.supportPanelRequested()).toBe(true);
+    expect(service.todosFocusRequested()).toBe(true);
+    service.completeTodosFocus(); expect(service.todosFocusRequested()).toBe(false);
+    expect(service.supportPanelRequested()).toBe(true);
+    service.openTodos(); service.toggleSupportPanel();
+    expect(service.isSupportPanelOpen()).toBe(false);
+    expect(service.supportPanelRequested()).toBe(false);
+    expect(service.todosFocusRequested()).toBe(false);
+    service.openTodos(); service.setPanelTab('help');
+    expect(service.activePanelTab()).toBe('help');
+    expect(service.todosFocusRequested()).toBe(false);
+    expect(router.navigate).not.toHaveBeenCalled(); expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
+
   it('uses explicit Meters breadcrumb destinations through facility and meter-group navigation', () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/account/account-a/data/portfolio/meters'));
     router.events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/data/meters/meter-a/settings'));
@@ -673,7 +701,8 @@ describe('WorkspaceNavigationService', () => {
       'account',
       'account-a',
       'data',
-      'portfolio'
+      'portfolio',
+      'energy-uses'
     ]);
 
     router.navigate.mockClear();

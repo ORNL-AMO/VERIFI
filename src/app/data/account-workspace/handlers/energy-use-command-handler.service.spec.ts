@@ -10,7 +10,7 @@ describe('EnergyUseCommandHandler', () => {
   function createHandler() {
     const groupDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
     const equipmentDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
-    const handler = new EnergyUseCommandHandler(groupDb as any, equipmentDb as any);
+    const handler = new EnergyUseCommandHandler(groupDb as any, equipmentDb as any, {} as any);
     return { handler, groupDb, equipmentDb };
   }
 

@@ -1,0 +1,5 @@
+:host { display: block; position: relative; min-width: 0; padding: clamp(1rem, 3vw, 1.5rem); }
+.energy-use-workbench__marker { position: absolute; top: 0; left: 0; width: 1px; height: 1px; pointer-events: none; }
+
+.energy-use-workbench__chips { display: inline-flex; align-items: center; flex-wrap: wrap; gap: var(--v1-space-1); }
+.energy-use-workbench__chip { gap: .28rem; min-height: 1.5rem; padding: .18rem .45rem; border-radius: var(--v1-radius-pill); font-size: .8rem; }

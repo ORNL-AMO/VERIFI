@@ -1,0 +1,65 @@
+@let settingsForm = form();
+<div class="energy-use-fields" [formGroup]="settingsForm">
+  <section class="v1-workbench-section">
+    <div class="energy-use-fields__grid">
+      <label><span>Name</span><input type="text" formControlName="name" required>
+        @if (settingsForm.controls.name.touched && settingsForm.controls.name.invalid) { <small role="alert">Enter a name.</small> }
+      </label>
+      <label><span>Category</span><select class="v1-select" formControlName="equipmentType">
+        @if (!categoryKnown()) { <option [value]="settingsForm.controls.equipmentType.value">{{ settingsForm.controls.equipmentType.value }} (saved)</option> }
+        @for (category of categories(); track category) { <option [value]="category">{{ category }}</option> }
+      </select></label>
+      <label class="energy-use-fields__wide"><span>Notes</span><textarea rows="3" formControlName="notes"></textarea></label>
+    </div>
+  </section>
+  <section class="v1-workbench-section" aria-labelledby="energy-use-linked-meter-groups-title">
+    <h2 id="energy-use-linked-meter-groups-title">Linked Utility Meter Groups</h2>
+    <div class="energy-use-fields__meter-groups">
+      @let linkedMeterGroups = linkedGroups();
+      @if (linkedMeterGroups.length) {
+        <ul class="energy-use-fields__links" aria-label="Linked meter groups">
+          @for (group of linkedMeterGroups; track group.guid) { <li class="energy-use-fields__linked-group"><app-ui-icon name="meterGroupItem"/><span>{{ group.name }}</span></li> }
+        </ul>
+      } @else { <p class="energy-use-fields__no-links">No linked meter groups</p> }
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit() || duplicateSources()" (click)="openMeterGroups()"><app-ui-icon name="link"/>Select Meter Groups</button>
+    </div>
+  </section>
+  <section class="v1-workbench-section" formArrayName="sources" aria-labelledby="energy-use-utility-data-title">
+    <div class="energy-use-fields__actions">
+      <h2 id="energy-use-utility-data-title">Energy Uses Utility Data</h2>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit() || duplicateSources()" (click)="openUtilities()"><app-ui-icon name="checklist"/>Select Utilities</button>
+    </div>
+    @if (duplicateSources()) { <p class="v1-alert v1-alert--warning">Repeated saved source types are preserved. Their configuration cannot be edited safely here.</p> }
+    @for (row of sourceRows(); track row.control) {
+      <fieldset [formGroupName]="row.index" [disabled]="!canEdit() || duplicateSources()">
+        <legend class="v1-sr-only">{{ row.source.energySource }}</legend>
+        <div class="energy-use-fields__source-row">
+          <div class="energy-use-fields__source-label" aria-hidden="true"><app-ui-icon [name]="row.icon" [size]="20"/><span>{{ row.source.energySource }}</span></div>
+          <div class="energy-use-fields__source-controls">
+          <div class="energy-use-fields__capacity">
+            <label [for]="'energy-use-capacity-' + row.index"><span>Rated capacity</span></label>
+            <div class="input-group">
+              <input [id]="'energy-use-capacity-' + row.index" class="form-control" type="number" [attr.min]="0" formControlName="size" aria-required="true">
+              <select class="input-group-text v1-select" formControlName="units" aria-label="Capacity units" aria-required="true">
+                @if (!row.knownUnit) { <option [value]="row.source.units">{{ row.source.units || 'Choose units' }} (saved)</option> }
+                @for (unit of units(); track unit.value) { <option [value]="unit.value">{{ unit.shortLabel }}</option> }
+              </select>
+            </div>
+          </div>
+          <label class="energy-use-fields__quantity"><span># of Equipment</span><input type="number" [attr.min]="1" step="any" formControlName="numberOfEquipment" aria-required="true"></label>
+          </div>
+        </div>
+      </fieldset>
+    }
+  </section>
+</div>
+<ng-template #utilitiesDrawer>
+  @if (drawer() === 'utilities') {
+    <app-energy-use-utilities-slideout [sources]="sources()" [hasLinkedGroups]="linkedIds().length > 0" [canEdit]="canEdit()" (confirmed)="confirmUtilities($event)" (closed)="closeDrawer()"/>
+  }
+</ng-template>
+<ng-template #meterGroupsDrawer>
+  @if (drawer() === 'meter-groups') {
+    <app-energy-use-meter-groups-slideout [accountGuid]="accountGuid()" [facilityGuid]="facilityGuid()" [groups]="groups()" [meters]="meters()" [sources]="sources()" [linkedIds]="linkedIds()" [canEdit]="canEdit()" (confirmed)="confirmMeterGroups($event)" (closed)="closeDrawer()"/>
+  }
+</ng-template>

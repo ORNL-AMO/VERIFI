@@ -1,0 +1,39 @@
+@let entry = context.entry();
+@if (context.workspace.loading() && !entry) {
+  <p class="v1-alert v1-alert--info" role="status">Loading energy use…</p>
+} @else if (context.workspace.state() === 'error') {
+  <p class="v1-alert v1-alert--danger" role="alert">The energy use could not be loaded. Retry loading the account.</p>
+} @else if (context.notFound()) {
+  <article class="v1-empty-state" role="status"><app-ui-icon name="tools"/><h1>Energy use unavailable</h1><p>This energy use is not available in this facility.</p>
+    <a class="v1-btn v1-btn--secondary" [routerLink]="context.inventoryLink().route" [queryParams]="context.inventoryLink().queryParams">Back to energy uses</a>
+  </article>
+} @else if (entry) {
+  <span #scrollMarker class="energy-use-workbench__marker" aria-hidden="true"></span>
+  <div #stickyHeader [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" class="v1-data-workbench-sticky">
+    <header class="v1-data-workbench-header v1-page-header">
+      <div class="v1-data-workbench-title-row"><div class="v1-data-workbench-title">
+        <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="entry.name" [icon]="entry.icon" headingId="energy-use-workbench-title" [customTitle]="true">
+          <app-data-workbench-resource-switcher [resources]="context.resources()" [selectedId]="entry.guid" [currentLabel]="entry.name" ariaLabel="Switch energy use" (resourceSelected)="context.switchResource($event)"/>
+        </app-page-identity>
+      </div>
+        <div class="v1-data-workbench-actions energy-use-workbench__chips" aria-label="Energy use save status and validation">
+          @if (saveFeedback(); as feedback) {
+            <span class="v1-chip v1-chip--{{ feedback.tone }} energy-use-workbench__chip" role="status" aria-live="polite" [title]="editor()?.message() || ''">
+              <app-ui-icon [name]="feedback.icon" [spin]="feedback.state === 'saving'"/>{{ feedback.label }}
+            </span>
+            @if (feedback.state === 'error') { <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" [disabled]="!editor()?.canRetry()" (click)="editor()?.retry()">Retry</button> }
+          }
+          @if (validation(); as status) {
+            <span class="v1-chip v1-chip--{{ status.tone }} energy-use-workbench__chip" [title]="status.description" [attr.aria-label]="status.label + ': ' + status.description"><app-ui-icon [name]="status.icon"/>{{ status.label }}</span>
+          }
+        </div>
+      </div>
+      @if (saveFeedback()?.detail; as detail) {
+        <ul class="v1-data-workbench-status-notes"><li><app-ui-icon name="warning"/><span>{{ detail }}</span></li></ul>
+      }
+    </header>
+    <app-data-workbench-tabs [tabs]="tabs" [activeTab]="context.activeTab()" ariaLabel="Energy use workbench sections" (tabSelected)="context.openTab($event)"/>
+  </div>
+}
+@if (context.navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ context.navigationError() }}</p> }
+<router-outlet/>

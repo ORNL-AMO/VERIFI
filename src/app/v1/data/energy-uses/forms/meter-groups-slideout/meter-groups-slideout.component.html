@@ -1,0 +1,22 @@
+<app-workspace-slideout title="Select Meter Groups" [hasFooter]="true" (closed)="closed.emit()">
+  <div class="energy-use-meter-groups" [formGroup]="form">
+    @for (row of rows(); track row.guid) {
+      @if (form.controls[row.guid]; as control) {
+        <label class="energy-use-meter-groups__choice">
+          <input type="checkbox" [formControl]="control" [attr.aria-label]="row.name">
+          <span class="energy-use-meter-groups__details">
+            <strong>{{ row.name }}</strong>
+            <span class="energy-use-meter-groups__sources">
+              @for (source of row.sources; track source.label) { <span><app-ui-icon [name]="source.icon" [size]="18"/>{{ source.label }}</span> }
+            </span>
+            @if (row.reason) { <small>{{ row.reason }}</small> }
+          </span>
+        </label>
+      }
+    } @empty { <p class="v1-alert v1-alert--info">No Energy meter groups are available for this facility.</p> }
+  </div>
+  @if (stale()) { <p class="v1-alert v1-alert--warning" role="alert">Meter-group links changed while this panel was open. Cancel and reopen it to continue.</p> }
+  @else if (error() && !canConfirm()) { <p class="v1-alert v1-alert--warning" role="alert">{{ error() }}</p> }
+  <button slideoutFooter type="button" class="v1-btn v1-btn--quiet" (click)="closed.emit()">Cancel</button>
+  <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="!canConfirm()" (click)="confirm()">Confirm</button>
+</app-workspace-slideout>
