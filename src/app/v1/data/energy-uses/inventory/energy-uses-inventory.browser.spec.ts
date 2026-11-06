@@ -1,4 +1,4 @@
-import { BulkActionsComponent } from './bulk-actions/bulk-actions.component';
+import { EquipmentTableComponent } from '../energy-use-workbench/setup-group/equipment-table/equipment-table.component';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
 import { Location } from '@angular/common';
@@ -181,7 +181,7 @@ describe('energy uses browser journeys', () => {
     const before = structuredClone(view.store.snapshot());
     const setupUrl = `${groupUrl('group-a')}/setup`;
     await view.router.navigateByUrl(setupUrl); await settle(view);
-    const table = view.root.querySelector('app-energy-use-bulk-actions table')!;
+    const table = view.root.querySelector('app-energy-use-equipment-table table')!;
     expect([...table.querySelectorAll('thead th')].map(cell => cell.textContent?.trim())).toEqual(['', 'Name', 'Industrial System', 'Utility Types', 'Notes']);
     expect(table.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(table.querySelectorAll('tbody th app-ui-icon')).toHaveLength(2);
@@ -222,7 +222,7 @@ describe('energy uses browser journeys', () => {
     expect(view.root.querySelector('[role=dialog]')).toBeNull();
     const checkbox = page.getByRole('checkbox', { name: 'Select Pump A', exact: true });
     (checkbox.element() as HTMLElement).focus(); await userEvent.keyboard(' '); await settle(view);
-    const component = view.fixture.debugElement.query(By.directive(BulkActionsComponent)).componentInstance as BulkActionsComponent;
+    const component = view.fixture.debugElement.query(By.directive(EquipmentTableComponent)).componentInstance as EquipmentTableComponent;
     expect(component.selection.selected()).toEqual(['energy-a']);
     expect(view.root.querySelector('input[type=search]')).toBeNull();
     const deleteButton = page.getByRole('button', { name: 'Delete selected', exact: true });
@@ -287,9 +287,9 @@ describe('energy uses browser journeys', () => {
     const applyBatch = vi.fn(async (_account, changes) => { const deleted = new Set(changes.filter(row => !row.after).map(row => row.before.guid)); view.store.publish({ ...snapshot, energyUseEquipment: snapshot.energyUseEquipment.filter(item => !deleted.has(item.guid)) }); });
     Object.assign(view.actions, { applyBatch });
     await view.router.navigateByUrl(`${groupUrl('group-a')}/setup`); await settle(view);
-    const controller = view.fixture.debugElement.query(By.directive(BulkActionsComponent)).componentInstance as BulkActionsComponent;
+    const controller = view.fixture.debugElement.query(By.directive(EquipmentTableComponent)).componentInstance as EquipmentTableComponent;
     expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
-    expect(view.root.querySelectorAll('app-energy-use-bulk-actions tbody tr')).toHaveLength(30);
+    expect(view.root.querySelectorAll('app-energy-use-equipment-table tbody tr')).toHaveLength(30);
     expect(view.root.querySelector('input[type=search]')).toBeNull();
     expect(view.root.textContent).not.toContain('Choose action');
     await page.getByRole('checkbox', { name: 'Select all energy uses', exact: true }).click(); await settle(view);

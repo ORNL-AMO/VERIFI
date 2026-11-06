@@ -4,6 +4,7 @@ import { footprintEnergyUseUnits } from '@domain/calculations/energy-footprint/e
 import { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
 import { energyUseConsumptionAmount, energyUseYears, normalizeEnergyUseSetup } from '../../models/energy-use-setup.models';
 import { EnergyUseSetupForm } from '../energy-use-setup-form.service';
+import type { AnnualYearView } from '../annual-data.models';
 
 @Component({ selector: 'app-energy-use-annual-data-fields', standalone: false,
   templateUrl: './annual-data-fields.component.html', styleUrls: ['./annual-data-fields.component.css'] })
@@ -22,7 +23,7 @@ export class AnnualDataFieldsComponent {
   readonly copyRequested = output<number>();
   readonly removeRequested = output<number>();
   readonly units = computed(() => footprintEnergyUseUnits);
-  readonly years = computed(() => {
+  readonly years = computed<readonly AnnualYearView[]>(() => {
     this.refreshKey();
     const form = this.form(), value = normalizeEnergyUseSetup({ ...form.controls.settings.getRawValue(), conditions: form.controls.conditions.getRawValue(), consumption: form.controls.consumption.getRawValue() }), item = this.item();
     return energyUseYears(value).filter(year => this.yearFilter() === undefined || year === this.yearFilter()).map(year => {

@@ -10,19 +10,20 @@
       <p>Add a facility to the account before selecting facility analyses.</p>
     </article>
   } @else {
-    <div class="v1-account-selection__workspace">
-      <aside class="v1-account-selection__rail" aria-label="Facility selection progress">
+    <div class="v1-account-selection__workspace v1-member-workspace v1-member-workspace--with-rail">
+      <aside class="v1-account-selection__rail v1-member-rail" aria-label="Facility selection progress">
         <header>
           <div><strong>Facilities</strong><span>{{ selection.validCount() }} / {{ items.length }} valid</span></div>
           <div class="v1-account-selection__progress" role="progressbar" aria-label="Valid facilities" [attr.aria-valuenow]="selection.validCount()" aria-valuemin="0" [attr.aria-valuemax]="items.length">
             <span [style.width.%]="(selection.validCount() / items.length) * 100"></span>
           </div>
         </header>
-        <nav aria-label="Facilities">
+        <nav class="v1-member-rail__items" aria-label="Facilities">
           @for (item of items; track item.facility.guid) {
             <button
               #facilityNavItem
               type="button"
+              class="v1-member-rail__item"
               [class.active]="item.facility.guid === selection.activeFacilityGuid()"
               [attr.aria-current]="item.facility.guid === selection.activeFacilityGuid() ? 'step' : null"
               (click)="selection.selectFacility(item.facility.guid)">

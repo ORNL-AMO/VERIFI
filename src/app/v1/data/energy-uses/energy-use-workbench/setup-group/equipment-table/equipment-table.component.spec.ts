@@ -3,12 +3,12 @@ import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
-import { EnergyUseActionsService } from '../../energy-use-actions.service';
-import { EnergyUsesModule } from '../../energy-uses.module';
-import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench/energy-use-workbench-context.service';
-import { buildEnergyUseInventory } from '../energy-use-inventory.models';
-import { energyUseItem, energyUsesSnapshot } from '../../energy-uses.testing';
-import { BulkActionsComponent } from './bulk-actions.component';
+import { EnergyUseActionsService } from '../../../energy-use-actions.service';
+import { EnergyUsesModule } from '../../../energy-uses.module';
+import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench-context.service';
+import { buildEnergyUseInventory } from '../../../inventory/energy-use-inventory.models';
+import { energyUseItem, energyUsesSnapshot } from '../../../energy-uses.testing';
+import { EquipmentTableComponent } from './equipment-table.component';
 
 describe('Manage energy-use items', () => {
   function setup() {
@@ -25,7 +25,7 @@ describe('Manage energy-use items', () => {
       { provide: AccountWorkspaceStore, useValue: store }, { provide: EnergyUseWorkbenchContextService, useValue: context },
       { provide: EnergyUseActionsService, useValue: actions }
     ] });
-    const fixture = TestBed.createComponent(BulkActionsComponent); fixture.componentRef.setInput('canOpen', true); fixture.detectChanges();
+    const fixture = TestBed.createComponent(EquipmentTableComponent); fixture.componentRef.setInput('canOpen', true); fixture.detectChanges();
     return { fixture, component: fixture.componentInstance, store, actions, context };
   }
   it('renders the complete group table with canonical item links and clears selection on group change', () => {

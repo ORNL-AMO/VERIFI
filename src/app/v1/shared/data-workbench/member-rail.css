@@ -1,0 +1,77 @@
+/* Shared layout for workbenches that select members beside independently scrolling content. */
+.v1-member-workspace {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.v1-member-workspace--with-rail {
+  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr);
+}
+
+.v1-member-rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--v1-surface-muted);
+}
+
+.v1-member-rail > header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--v1-border);
+}
+
+.v1-member-rail__items {
+  display: grid;
+  flex: 1 1 auto;
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.v1-member-rail__item {
+  display: grid;
+  align-items: center;
+  gap: .55rem;
+  width: 100%;
+  padding: .8rem 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--v1-border);
+  border-left: .2rem solid transparent;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.v1-member-rail__item:hover { background: var(--v1-surface); }
+.v1-member-rail__item.active {
+  border-left-color: var(--v1-content-control);
+  background: var(--v1-surface);
+  font-weight: 700;
+}
+
+@media (max-width: 850px) {
+  .v1-member-workspace--with-rail { grid-template-columns: minmax(0, 1fr); }
+  .v1-member-rail__items {
+    flex: 0 0 auto;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(11rem, 70vw);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: .75rem;
+    scroll-snap-type: inline proximity;
+    scrollbar-gutter: auto;
+  }
+  .v1-member-rail__item {
+    border-left: 0;
+    border-bottom: .2rem solid transparent;
+    scroll-snap-align: start;
+  }
+  .v1-member-rail__item.active { border-bottom-color: var(--v1-content-control); }
+}
