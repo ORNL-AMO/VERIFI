@@ -26,8 +26,8 @@
           @if (source()?.controls.energySource.value !== 'Other Energy') { <label>Phase<select class="v1-select" formControlName="phase"><option value="Gas">Gas</option><option value="Liquid">Liquid</option><option value="Solid">Solid</option></select></label> }
           <label>Fuel or energy type<select class="v1-select" formControlName="fuel"><option value="">Choose a fuel</option>@for (option of fuel.fuelOptions; track option.value) { <option [value]="option.value">{{ option.value }}</option> }</select></label>
           <label>Physical capacity per hour<input type="number" min="0" formControlName="capacity"></label>
-          <label>Physical units<select class="v1-select" formControlName="physicalUnit">@for (option of fuel.physicalUnitOptions; track option.value) { <option [value]="option.value">{{ option.display }}</option> }</select></label>
-          <label>{{ fuel.heatCapacityLabel }} ({{ fuel.heatCapacityUnitLabel }})<input type="number" min="0" step="any" formControlName="heatCapacity"></label>
+          <label>Physical units<select class="v1-select" formControlName="physicalUnit">@for (option of fuel.physicalUnitOptions; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }</select></label>
+          <label><span>{{ fuel.heatCapacityLabel }} (<span [innerHTML]="fuel.heatCapacityUnitLabel"></span>)</span><input type="number" min="0" step="any" formControlName="heatCapacity"></label>
           <label>Rated power units<select class="v1-select" formControlName="powerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
         }
         @if (result(); as amount) { <p aria-live="polite">Result: {{ amount | number:'1.0-6' }}</p> }
