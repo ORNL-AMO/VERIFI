@@ -11,7 +11,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { getGUID } from '@shared/sharedHelperFunctions';
+import { getGUID, getStartingUnitOptions } from '@shared/sharedHelperFunctions';
 import {
   MeterDraft,
   MeterGroupDraft,
@@ -48,12 +48,18 @@ export class MeterActionsService {
       throw new WorkspaceWriteError('validation-failed', `${draft.source} meters cannot be assigned to ${group?.groupType} groups.`);
     }
 
-    const meter = applyMeterSourceDefaults({
+    const defaults = applyMeterSourceDefaults({
       ...getNewIdbUtilityMeter(facility.guid, account.guid, true, facility.energyUnit),
       name,
       source: draft.source,
       groupId: group?.guid
     }, facility, this.workspace.customFuels());
+    if (draft.startingUnit !== undefined && !getStartingUnitOptions(defaults.source, defaults.phase, defaults.fuel, defaults.scope)
+      .some(option => option.value === draft.startingUnit)) {
+      throw new WorkspaceWriteError('validation-failed', 'Select a collection unit available for this source.');
+    }
+    const meter = draft.startingUnit === undefined ? defaults
+      : applyMeterSourceDefaults(defaults, facility, this.workspace.customFuels(), draft.startingUnit);
 
     const result = await this.commandBoundary.execute(
       {

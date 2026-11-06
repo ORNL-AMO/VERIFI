@@ -246,6 +246,34 @@ describe('DataInventoryComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Meter added. Its settings could not be opened');
   });
 
+  it('hands the included weather types to a facility-owned workbench and requests station selection', async () => {
+    activePortfolioTab.set('predictors'); fixture.detectChanges();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const parent = fixture.componentInstance;
+    parent.openCreatePredictorDrawer();
+    await parent.openNewWeatherPredictors({ facilityGuid: 'facility-b', weatherDataTypes: ['CDD', 'precipitation'] });
+    expect(parent.isCreatePredictorDrawerOpen()).toBe(false);
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(['/v1', 'workspace', 'facility', 'facility-b', 'data', 'predictors', 'weather', 'new'],
+      { queryParams: { weatherType: ['CDD', 'precipitation'], selectStation: true } });
+  });
+
+  it('rejects stale or foreign weather setup handoffs and reports navigation errors', async () => {
+    activePortfolioTab.set('predictors'); fixture.detectChanges();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(false);
+    const parent = fixture.componentInstance;
+    parent.openCreatePredictorDrawer();
+    await parent.openNewWeatherPredictors({ facilityGuid: 'foreign', weatherDataTypes: ['HDD'] });
+    expect(navigate).not.toHaveBeenCalled();
+    parent.openCreatePredictorDrawer();
+    const scope = TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>;
+    scope.set('facility-a');
+    await parent.openNewWeatherPredictors({ facilityGuid: 'facility-b', weatherDataTypes: ['HDD'] });
+    expect(navigate).not.toHaveBeenCalled(); fixture.detectChanges();
+    parent.openCreatePredictorDrawer();
+    await parent.openNewWeatherPredictors({ facilityGuid: 'facility-a', weatherDataTypes: ['HDD'] });
+    expect(parent.meterNavigationError()).toContain('Weather setup could not be opened');
+  });
+
   it('closes a completed facility drawer before opening Settings and releases its leave registration', async () => {
     const parent = fixture.componentInstance;
     const changes = TestBed.inject(UnsavedChangesService);

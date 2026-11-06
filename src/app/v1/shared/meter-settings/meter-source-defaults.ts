@@ -27,13 +27,13 @@ export function meterDefaultStartingUnit(meter: Pick<IdbUtilityMeter, 'source' |
 }
 
 /** Explicit creation/source-transition defaults. Never use this when reading a saved record. */
-export function applyMeterSourceDefaults(meter: IdbUtilityMeter, facility: IdbFacility, customFuels: readonly IdbCustomFuel[] = []): IdbUtilityMeter {
+export function applyMeterSourceDefaults(meter: IdbUtilityMeter, facility: IdbFacility, customFuels: readonly IdbCustomFuel[] = [], startingUnit?: string): IdbUtilityMeter {
   const next = structuredClone(meter);
   next.scope = meterDefaultScope(next.source);
   next.energyUnit = next.source === 'Electricity' ? 'kWh' : facility.energyUnit;
   const fuels = getFuelTypeOptions(next.source, next.phase, [...customFuels], next.scope, next.vehicleCategory, next.vehicleType);
   if (!fuels.some(option => option.value === next.fuel) && fuels.length) next.fuel = fuels[0].value;
-  next.startingUnit = meterDefaultStartingUnit(next, facility);
+  next.startingUnit = startingUnit ?? meterDefaultStartingUnit(next, facility);
   const energyUnit = EnergyUnitOptions.find(option => option.value === next.startingUnit);
   if (energyUnit) next.energyUnit = energyUnit.value;
   const selectedFuel = fuels.find(option => option.value === next.fuel);

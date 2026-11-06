@@ -10,6 +10,21 @@ import { account, facility, group, meter, reading } from './facility-meters.test
 import { MeterActionsService } from './meter-actions.service';
 
 describe('MeterActionsService', () => {
+  it.each([
+    { source: 'Electricity' as const, startingUnit: 'MWh', energyUnit: 'MWh' },
+    { source: 'Natural Gas' as const, startingUnit: 'CCF', energyUnit: 'kWh' },
+    { source: 'Water Intake' as const, startingUnit: 'L', energyUnit: 'kWh' }
+  ])('creates $source with the selected $startingUnit collection unit', async draft => {
+    const { service } = setup();
+    expect(await service.createMeter({ name: 'Selected unit', ...draft })).toMatchObject(draft);
+  });
+
+  it.each(['gal', 'missing', ''])('rejects an unavailable Electricity collection unit: %s', async startingUnit => {
+    const { service, meterHandler } = setup();
+    await expect(service.createMeter({ name: 'Main', source: 'Electricity', startingUnit })).rejects.toMatchObject({ code: 'validation-failed' });
+    expect(meterHandler.addMeter).not.toHaveBeenCalled();
+  });
+
   it('creates a meter from factory defaults plus draft values', async () => {
     const energyGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy' });
     const { service, commandBoundary, meterHandler } = setup({ groups: [energyGroup] });

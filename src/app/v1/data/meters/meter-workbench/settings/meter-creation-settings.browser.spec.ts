@@ -23,6 +23,8 @@ interface CreationDefaults {
   readonly unitLabel: string;
   readonly energyUnit: string;
   readonly siteToSource: number;
+  readonly selectedStartingUnit?: string;
+  readonly heatCapacity?: number;
 }
 
 const SOURCE_DEFAULTS: readonly CreationDefaults[] = [
@@ -32,7 +34,10 @@ const SOURCE_DEFAULTS: readonly CreationDefaults[] = [
   { source: 'Other Energy', scope: 4, startingUnit: 'lb', unitLabel: 'Pounds (lb)', energyUnit: 'MMBtu', siteToSource: 1.33 },
   { source: 'Water Intake', scope: undefined, startingUnit: 'gal', unitLabel: 'Gallon (gal)', energyUnit: 'MMBtu', siteToSource: 1 },
   { source: 'Water Discharge', scope: undefined, startingUnit: 'gal', unitLabel: 'Gallon (gal)', energyUnit: 'MMBtu', siteToSource: 1 },
-  { source: 'Other', scope: 100, startingUnit: 'lb', unitLabel: 'Pounds (lb)', energyUnit: 'MMBtu', siteToSource: 1 }
+  { source: 'Other', scope: 100, startingUnit: 'lb', unitLabel: 'Pounds (lb)', energyUnit: 'MMBtu', siteToSource: 1 },
+  { source: 'Electricity', selectedStartingUnit: 'MWh', scope: 3, startingUnit: 'MWh', unitLabel: 'Megawatt-hour (MWh)', energyUnit: 'MWh', siteToSource: 3 },
+  { source: 'Natural Gas', selectedStartingUnit: 'CCF', scope: 1, startingUnit: 'CCF', unitLabel: 'Hundred Cubic Feet (CCF)', energyUnit: 'MMBtu', heatCapacity: .1029, siteToSource: 1 },
+  { source: 'Water Intake', selectedStartingUnit: 'L', scope: undefined, startingUnit: 'L', unitLabel: 'Liters (L)', energyUnit: 'MMBtu', siteToSource: 1 }
 ];
 
 describe('meter creation defaults through saved Settings in Chromium', () => {
@@ -91,11 +96,12 @@ describe('meter creation defaults through saved Settings in Chromium', () => {
     const store = TestBed.inject(AccountWorkspaceStore);
     const execute = vi.spyOn(TestBed.inject(WorkspaceCommandBoundary), 'execute');
     const updateSettings = vi.spyOn(TestBed.inject(MeterCommandHandler), 'updateMeterWithData');
-    const created = await TestBed.inject(MeterActionsService).createMeter({ name: `${expected.source} meter`, source: expected.source });
+    const created = await TestBed.inject(MeterActionsService).createMeter({ name: `${expected.source} meter`, source: expected.source, startingUnit: expected.selectedStartingUnit });
 
     expect(created.id).toBeDefined();
     expect(created).toMatchObject({ source: expected.source, scope: expected.scope, startingUnit: expected.startingUnit,
       energyUnit: expected.energyUnit, siteToSource: expected.siteToSource, accountId: 'account-a', facilityId: 'facility-a' });
+    if (expected.heatCapacity !== undefined) expect(created.heatCapacity).toBeCloseTo(expected.heatCapacity, 8);
     const persisted = await harness.getAll('utilityMeter');
     expect(persisted).toEqual([created]);
 
