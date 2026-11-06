@@ -5,11 +5,11 @@ import { vi } from 'vitest';
 import { EnergyUseBatchChange } from '@data/account-workspace/handlers/energy-use-command.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
-import { EnergyUseActionsService } from '../../energy-use-actions.service';
-import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench/energy-use-workbench-context.service';
-import { EnergyUsesModule } from '../../energy-uses.module';
-import { energyUseItem, energyUsesSnapshot } from '../../energy-uses.testing';
-import { buildEnergyUseInventory } from '../energy-use-inventory.models';
+import { EnergyUseActionsService } from '../../../energy-use-actions.service';
+import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench-context.service';
+import { EnergyUsesModule } from '../../../energy-uses.module';
+import { energyUseItem, energyUsesSnapshot } from '../../../energy-uses.testing';
+import { buildEnergyUseInventory } from '../../../inventory/energy-use-inventory.models';
 import { AddYearController } from './add-year.controller';
 
 export function setupYearController(count = 3) {

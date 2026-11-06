@@ -1,6 +1,7 @@
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
+import type { EnergyUseSetupForm } from '../../../forms/energy-use-setup-form.service';
 import { setupYearController } from './add-year-drawer.testing';
 
 function finish(c: ReturnType<typeof setupYearController>['controller']): void { c.start(); for (let n = 0; n < c.drafts().length && !c.allOthersReviewed(); n++) { const previous = c.index(); c.next(); if (c.index() === previous) throw new Error(c.current()?.error || 'Cannot advance'); } }
@@ -102,6 +103,41 @@ describe('Group Add year draft controller', () => {
     expect(c.drafts()[1].form).toBe(retained); expect(c.drafts()[1].completed).toBe(true);
     expect(c.drafts()[0].completed).toBe(false); expect(c.stale()).toBe(false);
     c.go(0); c.next(); c.go(2); expect(c.canSave()).toBe(true);
+  });
+  it('disposes replaced forms while retained and current drafts continue reacting once', async () => {
+    const { controller: c, store } = setupYearController();
+    finish(c);
+    const retained = c.drafts()[1].form!;
+    const obsolete: EnergyUseSetupForm[] = [];
+
+    for (const notes of ['First external edit', 'Second external edit']) {
+      obsolete.push(c.drafts()[0].form!);
+      store.publish({ ...store.snapshot()!, energyUseEquipment: store.energyUseEquipment().map((item, index) => index === 0 ? { ...item, notes } : item) });
+      await c.reloadChanged();
+      expect(c.drafts()[1].form).toBe(retained);
+      expect(c.drafts()[1].completed).toBe(true);
+    }
+
+    const version = c.version();
+    const drafts = c.drafts();
+    obsolete.forEach(form => form.controls.conditions.at(1).controls.hoursOfOperation.setValue(123));
+    expect(c.version()).toBe(version);
+    expect(c.drafts()).toBe(drafts);
+
+    const current = c.drafts()[0].form!;
+    current.controls.conditions.at(1).controls.hoursOfOperation.setValue(456);
+    expect(c.version()).toBe(version + 1);
+    retained.controls.conditions.at(1).controls.hoursOfOperation.setValue(789);
+    expect(c.version()).toBe(version + 2);
+    expect(c.drafts()[1].completed).toBe(false);
+    expect(retained.controls.conditions.at(1).controls.hoursOfOperation.value).toBe(789);
+
+    c.discard();
+    const closedVersion = c.version();
+    current.controls.conditions.at(1).controls.hoursOfOperation.setValue(999);
+    retained.controls.conditions.at(1).controls.hoursOfOperation.setValue(999);
+    expect(c.version()).toBe(closedVersion);
+    expect(c.dirty()).toBe(false);
   });
   it.each(['deleted', 'moved', 'foreign'] as const)('blocks saving equipment that was %s', state => {
     const { controller: c, store } = setupYearController(); finish(c);

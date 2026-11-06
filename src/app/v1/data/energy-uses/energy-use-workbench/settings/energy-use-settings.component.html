@@ -27,7 +27,7 @@
 }
 <ng-template #confirmation>
   @if (review(); as current) {
-    <app-confirmation-dialog [title]="current.kind === 'year' ? 'Remove fiscal year?' : current.kind === 'delete' ? 'Delete energy use?' : current.kind === 'utilities' ? 'Confirm utility changes?' : 'Remove energy source?'" titleId="energy-use-confirmation-title" cancelAriaLabel="Cancel energy use action" [confirmLabel]="current.kind === 'year' ? 'Remove year' : current.kind === 'delete' ? 'Delete energy use' : current.kind === 'utilities' ? 'Confirm utility changes' : 'Remove source'" confirmIcon="delete" [disabled]="busy()" [busy]="busy()" [confirmDisabled]="reviewStale()" (confirmed)="confirmReview()" (cancelled)="cancelReview()">
+    <app-confirmation-dialog [title]="current.kind === 'year' ? 'Remove fiscal year?' : current.kind === 'delete' ? 'Delete energy use?' : current.kind === 'utilities' ? 'Confirm utility changes?' : 'Remove energy source?'" titleId="energy-use-confirmation-title" cancelAriaLabel="Cancel energy use action" [confirmLabel]="current.kind === 'year' ? 'Remove year' : current.kind === 'delete' ? 'Delete energy use' : current.kind === 'utilities' ? 'Confirm utility changes' : 'Remove source'" confirmIcon="delete" [disabled]="busy() || !!deletionRecovery()" [busy]="busy()" [confirmDisabled]="reviewStale()" (confirmed)="confirmReview()" (cancelled)="cancelReview()">
       @if (current.kind === 'year') { <p>Remove <strong>{{ current.year }}</strong> from <strong>{{ current.item.name }}</strong>?</p><p>Its operating assumptions and consumption for every source, including manual overrides and unsaved edits for this year, will be removed. Other years will remain. Removing an explicit entry may cause an earlier value to carry forward again.</p>
       } @else if (current.kind === 'delete') { <p>Delete <strong>{{ current.item.name }}</strong> and all its annual assumptions, consumption values, and manual overrides? Its energy-use group and linked meter groups will remain.</p>
         @if (editor.dirty()) { <p>Your unsaved Setup draft will also be discarded after deletion succeeds.</p> }
@@ -45,8 +45,9 @@
         }
         <p>Annual operating assumptions and history for retained utilities will remain.</p>
       }
-      @if (reviewStale()) { <p class="v1-alert v1-alert--warning" role="alert">Saved data changed. Cancel and review this action again.</p> }
+      @if (reviewStale() && !deletionRecovery()) { <p class="v1-alert v1-alert--warning" role="alert">Saved data changed. Cancel and review this action again.</p> }
       @if (actionError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</p> }
+      @if (deletionRecovery()) { <button type="button" class="v1-btn v1-btn--primary" [disabled]="busy()" (click)="recoverDeletion()">Refresh saved changes</button> }
     </app-confirmation-dialog>
   }
 </ng-template>
