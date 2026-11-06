@@ -1,3 +1,4 @@
+import { SetupCalculatorComponent } from './forms/setup-calculator/setup-calculator.component';
 import { RouterModule } from '@angular/router';
 import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
@@ -26,7 +27,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
   declarations: [
     EnergyUsesInventoryComponent,
     EnergyUseWorkbenchComponent,
-    AnnualDataFieldsComponent,
+    AnnualDataFieldsComponent, SetupCalculatorComponent,
     SettingsFieldsComponent, UtilitiesSlideoutComponent, MeterGroupsSlideoutComponent, CreateEnergyUseDrawerComponent, EnergyUseSettingsComponent,
   ],
   imports: [

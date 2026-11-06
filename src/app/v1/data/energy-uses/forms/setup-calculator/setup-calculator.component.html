@@ -1,0 +1,40 @@
+<button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canEdit()" (click)="open()">{{ title() }}</button>
+<ng-template #calculator>
+  @if (opened()) {
+    <app-workspace-slideout [title]="title()" [hasFooter]="true" (closed)="close()">
+      <form [formGroup]="form" (ngSubmit)="apply()" id="setup-calculator-form">
+        @if (kind() === 'hours') {
+          <label>Hours per day<input type="number" min="0" max="24" formControlName="hours"></label>
+          <label>Days per week<input type="number" min="0" max="7" formControlName="days"></label>
+          <label>Weeks per year<input type="number" min="0" max="52" formControlName="weeks"></label>
+        } @else if (kind() === 'load') {
+          <label>Calculation method<select class="v1-select" formControlName="method"><option value="measuredPower">Measured power</option>@if (electricity()) { <option value="voltageCurrent">Voltage and current</option> }</select></label>
+          <label>Rated power<input type="number" min="0" formControlName="ratedPower"></label>
+          <label>Rated power units<select class="v1-select" formControlName="ratedPowerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
+          @if (form.controls.method.value === 'measuredPower') {
+            <label>Measured power<input type="number" min="0" formControlName="measuredPower"></label>
+            <label>Measured power units<select class="v1-select" formControlName="measuredPowerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
+          } @else {
+            <label>Voltage<input type="number" min="0" formControlName="voltage"></label>
+            <label>Current (A)<input type="number" min="0" formControlName="current"></label>
+            <label>Number of phases<select class="v1-select" formControlName="phases"><option [ngValue]="1">1</option><option [ngValue]="2">2</option><option [ngValue]="3">3</option></select></label>
+            <label>Power factor<input type="number" min="0" max="1" step="any" formControlName="powerFactor"></label>
+          }
+          @if (loadWarning()) { <p class="v1-alert v1-alert--warning">Calculated load factor exceeds 100%. Applied values are capped at 115%.</p> }
+        } @else if (fuelCalculator(); as fuel) {
+          <p>Enter physical capacity per hour and fuel properties. Compatible linked meters supply optional defaults; meter readings are not required.</p>
+          @if (source()?.controls.energySource.value !== 'Other Energy') { <label>Phase<select class="v1-select" formControlName="phase"><option value="Gas">Gas</option><option value="Liquid">Liquid</option><option value="Solid">Solid</option></select></label> }
+          <label>Fuel or energy type<select class="v1-select" formControlName="fuel"><option value="">Choose a fuel</option>@for (option of fuel.fuelOptions; track option.value) { <option [value]="option.value">{{ option.value }}</option> }</select></label>
+          <label>Physical capacity per hour<input type="number" min="0" formControlName="capacity"></label>
+          <label>Physical units<select class="v1-select" formControlName="physicalUnit">@for (option of fuel.physicalUnitOptions; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }</select></label>
+          <label><span>{{ fuel.heatCapacityLabel }} (<span [innerHTML]="fuel.heatCapacityUnitLabel"></span>)</span><input type="number" min="0" step="any" formControlName="heatCapacity"></label>
+          <label>Rated power units<select class="v1-select" formControlName="powerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
+        }
+        @if (result(); as amount) { <p aria-live="polite">Result: {{ amount | number:'1.0-6' }}</p> }
+        @else if (result() === 0) { <p aria-live="polite">Result: 0</p> }
+        @else { <p class="v1-alert v1-alert--info">Enter valid inputs to calculate. You can also cancel and enter the value directly in Setup.</p> }
+      </form>
+      <div slideoutFooter><button type="button" class="v1-btn v1-btn--secondary" (click)="close()">Cancel</button><button type="submit" form="setup-calculator-form" class="v1-btn v1-btn--primary" [disabled]="result() === null || !canEdit()">Apply</button></div>
+    </app-workspace-slideout>
+  }
+</ng-template>

@@ -42,6 +42,10 @@
         </label>
         }
       </fieldset>
+      <div class="annual-data__actions">
+        <app-setup-calculator kind="hours" [conditions]="conditions" [editorKey]="editorKey()" [canEdit]="canEdit() && !year.ambiguous"/>
+        <app-setup-calculator kind="load" [conditions]="conditions" [electricity]="year.hasElectricity" [editorKey]="editorKey()" [canEdit]="canEdit() && !year.ambiguous"/>
+      </div>
     } @empty { <p class="v1-alert v1-alert--warning">No saved operating assumptions for this year. Existing consumption is preserved.</p> }
     @for (source of year.sources; track source.entry) {
       <fieldset class="annual-data__source" [formGroup]="source.entry" [disabled]="!canEdit() || source.ambiguous">

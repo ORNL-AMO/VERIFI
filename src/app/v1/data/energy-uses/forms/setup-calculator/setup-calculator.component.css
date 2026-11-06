@@ -1,0 +1,3 @@
+form { display: grid; gap: 1rem; }
+label { display: grid; gap: .35rem; }
+[slideoutFooter] { display: flex; justify-content: flex-end; gap: .5rem; }

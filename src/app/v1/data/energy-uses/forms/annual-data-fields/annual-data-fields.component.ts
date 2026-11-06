@@ -10,6 +10,7 @@ import { AnnualConsumptionForm, EnergyUseSetupForm } from '../energy-use-setup-f
 export class AnnualDataFieldsComponent {
   readonly form = input.required<EnergyUseSetupForm>();
   readonly item = input<IdbFacilityEnergyUseEquipment>();
+  readonly editorKey = input('');
   readonly canEdit = input(false);
   readonly canManageYears = input(false);
   readonly refreshKey = input(0);
