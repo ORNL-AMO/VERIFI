@@ -2,7 +2,7 @@
 
 **Review date:** November 6, 2026
 
-**Status:** Evaluation complete; remediation proposed, not implemented.
+**Status:** E1–E7 implemented and validated; prepared for stacked PR review.
 
 ## Outcome and scope
 
@@ -26,7 +26,7 @@ No critical defect or reason to replace the central editing/persistence design w
 
 ## Findings
 
-Priorities distinguish **P2** reliability/compatibility or substantial maintenance concerns from **P3** bounded cleanup. Source-traced findings below are not claimed as new failing regression tests.
+The findings retain the review-time behavior and line references; links follow the current source locations. Priorities distinguish **P2** reliability/compatibility or substantial maintenance concerns from **P3** bounded cleanup. Implementation and fresh regression evidence are recorded below.
 
 ### E1 — P2: Single-item deletion has no committed-refresh recovery
 
@@ -50,7 +50,7 @@ Priorities distinguish **P2** reliability/compatibility or substantial maintenan
 
 ### E3 — P3: Selective Add year reload retains obsolete form subscriptions
 
-**Evidence:** [Add year controller](../src/app/v1/data/energy-uses/inventory/add-year-drawer/add-year.controller.ts), lines 122–134, appends every form subscription to one array. Lines 175–179 replace changed drafts through `build()` without disposing subscriptions for the replaced forms. Close/reset/destroy eventually clean up the array.
+**Evidence:** [Add year controller](../src/app/v1/data/energy-uses/energy-use-workbench/setup-group/add-year-drawer/add-year.controller.ts), lines 122–134, appends every form subscription to one array. Lines 175–179 replace changed drafts through `build()` without disposing subscriptions for the replaced forms. Close/reset/destroy eventually clean up the array.
 
 **Impact:** Repeated selective reloads retain old forms and closures for the duration of the slideout. A replaced form still has an active handler that can update controller version/dirty state. Unaffected drafts correctly remain mounted and should continue to do so.
 
@@ -68,7 +68,7 @@ Priorities distinguish **P2** reliability/compatibility or substantial maintenan
 
 ### E5 — P2: Group equipment management still has inventory ownership
 
-**Evidence:** [Bulk actions component](../src/app/v1/data/energy-uses/inventory/bulk-actions/bulk-actions.component.ts), lines 15–25, injects the workbench context and constructs group-only selection/Add year controllers. Its only production host is [Setup Group](../src/app/v1/data/energy-uses/energy-use-workbench/setup-group/setup-group.component.html), line 17. The [selection controller](../src/app/v1/data/energy-uses/inventory/energy-use-selection.controller.ts), lines 14–39, retains selection-mode/filter abstractions from the former inventory workflow; the accepted table has no selection mode, filtering, or pagination.
+**Evidence:** [Bulk actions component](../src/app/v1/data/energy-uses/energy-use-workbench/setup-group/equipment-table/equipment-table.component.ts), lines 15–25, injects the workbench context and constructs group-only selection/Add year controllers. Its only production host is [Setup Group](../src/app/v1/data/energy-uses/energy-use-workbench/setup-group/setup-group.component.html), line 17. The [selection controller](../src/app/v1/data/energy-uses/energy-use-workbench/setup-group/energy-use-selection.controller.ts), lines 14–39, retains selection-mode/filter abstractions from the former inventory workflow; the accepted table has no selection mode, filtering, or pagination.
 
 **Impact:** Folder names and controller contracts describe the superseded dashboard rather than the current owner. Understanding a Setup Group operation requires crossing inventory, workbench, and generic inventory-tool contracts, and unused affordances obscure the live behavior.
 
@@ -105,7 +105,7 @@ Each slice should be independently reviewable and retain the accepted workflow.
 
 For each behavior-changing slice, run the validation planner against that slice's files, then the lowest-cost meaningful regressions. Add production web validation for route/module/template behavior and native tests for transaction/publication behavior. Reserve full suites and desktop/export acceptance for the repository's pre-PR/release requirements or an actual Electron boundary change.
 
-## Review validation
+## Review validation before remediation
 
 Fresh review checks and their final results are recorded below before handoff. Existing roadmap test results remain historical evidence. Passing existing tests does not cover E1–E3 until the proposed regressions exist.
 
@@ -119,3 +119,33 @@ Fresh review checks and their final results are recorded below before handoff. E
 | Browser/native integration, production builds, full suites, manual UI and Electron | Not rerun for this evaluation. No implementation changes were made; remediation acceptance above specifies the missing regressions and appropriate gates. |
 
 The first restricted fast-test attempt exited 134 after browser-support warnings without a test result. The rerun with the runner's required local access passed all 250 tests. Browser-support warnings remain.
+
+
+## Remediation implementation
+
+| Finding | Implementation | Evidence |
+| --- | --- | --- |
+| E1 | Deletion retains its owner/key/destination after commit, blocks another write and navigation, and completes through publication-only recovery before discarding the draft and selecting the survivor. Old recovery state clears on identity changes. | Fast rejected-write/repeated-recovery/identity cases and a native commit → failed reload → failed recovery → successful recovery journey. |
+| E2 | Backups preserve unresolved nonempty group GUIDs, remap included groups, reject foreign relationships and stored-GUID collisions, and normalize absent optional meter links to `[]`. No schema or backup version change. | Account/facility export → prepare → native import → reopen tests preserve complete annual history and overrides; null/absent link cases exercise a real footprint consumer; collision tests prove rollback. |
+| E3 | Each annual draft owns its subscription. Selective reload disposes only replaced forms; close/reset/destroy disposes all. | Repeated-reload regression proves obsolete forms are inert and unaffected/current drafts retain edits and react once. |
+| E4 | The roadmap owns current accepted behavior; architecture owns invariants; task routing and the migration guide link to those owners. The protected Angular skill update replaces screen-specific paragraphs with conditional references. | Protected skill update completed; documentation link/anchor checks retain the feature safety rules at their owners. |
+| E5 | Equipment table, Add year, and member selection now live beneath Setup Group. The selection contract consumes current member snapshots instead of generic inventory filters/modes. | Existing group/selection/slideout journeys plus ownership and synthetic unavailable-group deletion regressions. |
+| E6 | Named annual presentation types replace parent-component inference. A pure utility selection policy serves Settings and meter selection. Setup values/normalization and three-way reconciliation have focused pure modules behind the existing public imports. | Pure policy cases, unchanged setup mapping/reconciliation coverage, annual rendering, and type-check. |
+| E7 | Energy Uses and Account Analysis import one semantic member-rail stylesheet while retaining workflow content, borders, and actions locally. | Shared-consumer component/browser checks and production compilation. |
+
+Chart restoration, group results destinations, Excel export, and broader Phase 5 release acceptance remain separate migration work. The disconnected History presentation and its useful projection helpers are retained until the results destination is designed.
+
+### Remediation validation
+
+| Check | Result |
+| --- | --- |
+| Focused fast tests | Passed: 34 files, 269 tests before final optional-link additions; final full-suite result recorded below. |
+| Focused Chromium | Passed: 4 files, 30 tests, including recovery, guided annual drafts, and backup round trips/collisions. |
+| App type-check | Passed after the refactors. |
+| Full fast and browser suites | Passed: `npm run test:all:ci`; the complete fast suite followed by 82 Chromium files / 417 tests. |
+| Production web and Electron compilation | Both passed, with existing browser-support, stylesheet-budget, and CommonJS warnings. |
+| Final comparison review, links and whitespace | Independent source review found no remaining actionable issues; final stack comparisons and document checks are required before publication. |
+
+The first focused compile caught an invalid utility label in a new fixture; it was corrected. The first native deletion regression checked completion before the IndexedDB refresh finished; it now waits for the actual recovered state and passes. The first full-suite run found one pending modal focus listener that violated the repository form-boundary scan (3,593 tests passed, one failed); its focus tracking now reads the browser's active element and passes native focus coverage and the full gate. A later focused native pass also caught one stale inventory journey that still expected the superseded Add year confirmation; it now exercises year cards, annual review, one Save all batch, and preserved unselected equipment. These failures are recorded separately from the final gates.
+
+Production builds retain existing browser-support, stylesheet-budget, and CommonJS warnings. Native OS integration and native print-dialog checks were not performed; no Electron bridge or OS delivery code changed. The PR stack is ordered as calculators → approved group workbench → editing/ownership hardening → backup compatibility. Validation above ran on the complete stack; merge the dependent PRs in that order.
