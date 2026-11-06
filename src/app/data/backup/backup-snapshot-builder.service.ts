@@ -8,6 +8,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { JStatRegressionModel } from '@data/models/analysis';
 import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-analysis/calculations/regression-model-recovery';
+import { energyUseBackupReferencesError } from './energy-use-backup-relations';
 
 export interface BackupSnapshotBuilder {
   buildAccountBackup(snapshot: AccountWorkspaceSnapshot): BackupFile;
@@ -17,6 +18,7 @@ export interface BackupSnapshotBuilder {
 @Injectable({ providedIn: 'root' })
 export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
   buildAccountBackup(snapshot: AccountWorkspaceSnapshot): BackupFile {
+    validateEnergyUseReferences(snapshot, snapshot.energyUseEquipment);
     const facilities = snapshot.facilities.map(facility => structuredClone(facility));
     return {
       dataVersion: CURRENT_DATA_VERSION,
@@ -50,6 +52,8 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
     if (!facility) {
       throw new Error('The requested facility does not belong to the active workspace.');
     }
+    // Check before filtering groups so a known cross-facility link cannot become an unresolved link.
+    validateEnergyUseReferences(snapshot, snapshot.energyUseEquipment.filter(item => item.facilityId === facilityGuid));
     const clonedFacility = structuredClone(facility);
     return {
       dataVersion: CURRENT_DATA_VERSION,
@@ -82,6 +86,13 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
       facilityEnergyUseGroups: snapshot.energyUseGroups.filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
       facilityEnergyUseEquipment: snapshot.energyUseEquipment.filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item))
     };
+  }
+}
+
+function validateEnergyUseReferences(snapshot: AccountWorkspaceSnapshot, equipment: AccountWorkspaceSnapshot['energyUseEquipment']): void {
+  for (const item of equipment) {
+    const error = energyUseBackupReferencesError(item, snapshot.energyUseGroups, snapshot.meterGroups);
+    if (error) throw new Error(error);
   }
 }
 

@@ -5,6 +5,7 @@ import { DATA_MIGRATIONS } from '@data/indexedDB/data-migrations/data-migration.
 import { CURRENT_DATA_VERSION, MigrationData } from '@data/indexedDB/data-migrations/data-migration.models';
 import { StatusWarningDismissal } from '@data/models/status-warning-dismissal';
 import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-analysis/calculations/regression-model-recovery';
+import { energyUseBackupReferencesError } from './energy-use-backup-relations';
 
 export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION };
 
@@ -75,6 +76,10 @@ export class BackupPreparationService {
     }
 
     sanitizeMachineLocalAccountFields(backup);
+    // Legacy backups may omit optional links; persisted consumers require an array.
+    for (const equipment of backup.facilityEnergyUseEquipment) {
+      equipment.utilityMeterGroupIds ??= [];
+    }
     backup.dataVersion = CURRENT_DATA_VERSION;
     validateCoreRelationships(backup);
     return backup as PreparedBackupFile;
@@ -199,7 +204,6 @@ function validateCoreRelationships(backup: BackupFile): void {
   const groupIds = new Set(backup.groups.map(item => item.guid));
   const meterIds = new Set(backup.meters.map(item => item.guid));
   const predictorIds = new Set(backup.predictors.map(item => item.guid));
-  const energyGroupIds = new Set(backup.facilityEnergyUseGroups.map(item => item.guid));
   const rootAccountId = backup.backupFileType === 'Account' ? backup.account.guid : backup.facility.accountId;
   const accountOwned = [
     ...backup.meters, ...backup.meterData, ...backup.groups, ...backup.predictorData,
@@ -223,10 +227,10 @@ function validateCoreRelationships(backup: BackupFile): void {
   requireAll(backup.meters, meter => !meter.groupId || groupIds.has(meter.groupId), 'A meter references a missing meter group.');
   requireAll(backup.meterData, reading => meterIds.has(reading.meterId), 'A meter reading references a missing meter.');
   requireAll(backup.predictorDataV2, reading => predictorIds.has(reading.predictorId), 'A predictor reading references a missing predictor.');
-  requireAll(backup.facilityEnergyUseEquipment, equipment =>
-    energyGroupIds.has(equipment.energyUseGroupId)
-      && (equipment.utilityMeterGroupIds ?? []).every(groupId => groupIds.has(groupId)),
-  'Energy-use equipment references a missing energy-use or meter group.');
+  for (const equipment of backup.facilityEnergyUseEquipment) {
+    const error = energyUseBackupReferencesError(equipment, backup.facilityEnergyUseGroups, backup.groups);
+    if (error) throw new BackupRelationshipError(error);
+  }
 
   for (const analysis of backup.facilityAnalysisItems) {
     const facility = facilities.find(item => item.guid === analysis.facilityId);
