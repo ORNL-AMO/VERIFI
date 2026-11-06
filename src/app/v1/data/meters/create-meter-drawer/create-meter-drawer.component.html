@@ -1,24 +1,84 @@
-<app-meter-draft-slideout
-  [groups]="groups()"
-  [saving]="saving()"
-  [canSubmit]="canCreate()"
-  [error]="error()"
-  (submitted)="createMeter($event)"
-  (cancelled)="closed.emit()">
-  @if (!singleFacility()) {
-  <label meterContext class="v1-portfolio-meter-facility">
-    <span>Facility</span>
-    <select class="v1-select" [formControl]="facilityControl" required>
-      <option value="" disabled>Select a facility</option>
-      @for (facility of facilities(); track facility.guid) {
-        <option [value]="facility.guid">{{ facility.name }}</option>
+@let currentStep = step();
+<app-workspace-slideout title="Add meter" [saving]="saving()" [hasFooter]="true"
+  [initialFocus]="currentStep === 'name' ? '#meter-name' : '#meter-choice-heading'" (closed)="closed.emit()">
+  @if (selections().length) {
+    <div class="meter-selections" aria-label="Meter selections">
+      @for (selection of selections(); track selection.step) {
+        <button type="button" class="meter-selection" [class.meter-selection--active]="currentStep === selection.step"
+          [disabled]="!selection.editable || !canAct()" [attr.aria-label]="selection.editable ? 'Change ' + selection.label : selection.label"
+          [attr.aria-expanded]="selection.editable ? currentStep === selection.step : null" [title]="selection.label" (click)="editSelection(selection.step)">
+          <app-ui-icon [name]="selection.icon"/><span>{{ selection.label }}</span><app-ui-icon [name]="selection.editable ? 'edit' : 'check'"/>
+        </button>
       }
-    </select>
-    @if (!facilities().length) {
-      <span class="v1-muted">Add a facility before adding a meter.</span>
-    } @else if (!selectedFacility() && facilityGuid()) {
-      <span role="alert">This facility is no longer available. Select another facility.</span>
-    }
-  </label>
+    </div>
   }
-</app-meter-draft-slideout>
+  <form id="meter-draft" [formGroup]="form" (ngSubmit)="createMeter()">
+    <fieldset [disabled]="!canAct()">
+      @switch (currentStep) {
+        @case ('facility') {
+          <legend class="visually-hidden"><h3 id="meter-choice-heading" #stepHeading tabindex="-1">Facility</h3></legend>
+          @if (!facilities().length) {
+            <p role="status">Add a facility before adding a meter.</p>
+          } @else {
+            <label class="visually-hidden" for="meter-facility-search">Find facility</label>
+            <input id="meter-facility-search" class="v1-input meter-search" type="search" [formControl]="facilitySearch" placeholder="Find facility" autocomplete="off">
+            <div class="meter-choices">
+              @for (facility of matchingFacilities(); track facility.guid) {
+                <button type="button" class="meter-choice" [attr.aria-pressed]="facilityGuid() === facility.guid" (click)="selectFacility(facility.guid)">
+                  <app-ui-icon name="facility" [size]="28"/><strong>{{ facility.name || 'Unnamed facility' }}</strong>
+                </button>
+              } @empty {
+                <div class="meter-search-empty" role="status"><p>No matching facilities.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="facilitySearch.setValue('')">Clear search</button></div>
+              }
+            </div>
+          }
+        }
+        @case ('source') {
+          <legend class="visually-hidden"><h3 id="meter-choice-heading" #stepHeading tabindex="-1">Source</h3></legend>
+          <div class="meter-choices">
+            @for (source of sources; track source.value) {
+              <button type="button" class="meter-choice" [disabled]="!selectedFacility()" [attr.aria-pressed]="form.controls.source.value === source.value" (click)="selectSource(source.value)">
+                <app-ui-icon [name]="source.icon" [size]="28"/><strong>{{ source.value }}</strong>
+              </button>
+            }
+          </div>
+        }
+        @case ('unit') {
+          <legend class="visually-hidden"><h3 id="meter-choice-heading" #stepHeading tabindex="-1">Collection unit</h3></legend>
+          <div class="meter-choices">
+            @for (unit of units(); track unit.display) {
+              <button type="button" class="meter-choice" [attr.aria-pressed]="form.controls.startingUnit.value === unit.value" (click)="selectUnit(unit.value)">
+                <strong>{{ unit.value }}</strong><span [innerHTML]="unit.display"></span>
+              </button>
+            }
+          </div>
+          <p class="meter-choice-help">Additional source settings can be changed in the meter workbench.</p>
+        }
+        @case ('name') {
+          <label for="meter-name">Meter name</label>
+          <input #meterName id="meter-name" class="v1-input" formControlName="name" autocomplete="off" required
+            [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched"
+            [attr.aria-describedby]="form.controls.name.invalid && form.controls.name.touched ? 'meter-name-error' : null">
+          @if (form.controls.name.invalid && form.controls.name.touched) {
+            <p id="meter-name-error" class="v1-alert v1-alert--danger" role="alert">Enter a meter name.</p>
+          }
+        }
+      }
+    </fieldset>
+    @if (!selectedFacility() && (facilityGuid() || facilityLocked())) {
+      <p class="v1-alert v1-alert--warning" role="alert">This facility is no longer available. {{ facilityLocked() ? 'Close this panel and choose an available facility.' : 'Select another facility.' }}</p>
+    }
+    @if (!canAct() && !saving()) {
+      <p class="v1-alert v1-alert--info" role="status">Meter creation is unavailable while the workspace is not ready for changes.</p>
+    }
+    @if (error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+  </form>
+  <div slideoutFooter class="meter-draft-actions">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="closed.emit()">Cancel</button>
+    @if (currentStep === 'name') {
+      <button type="submit" form="meter-draft" class="v1-btn v1-btn--action" [disabled]="!canCreate()">
+        @if (saving()) { <app-ui-icon name="loading" spin/> }{{ saving() ? 'Adding…' : 'Add meter' }}
+      </button>
+    }
+  </div>
+</app-workspace-slideout>

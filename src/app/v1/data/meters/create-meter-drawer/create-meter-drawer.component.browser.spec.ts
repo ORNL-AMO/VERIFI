@@ -22,7 +22,7 @@ class MeterCreationHost {
 }
 
 describe('portfolio meter creation in the shell portal', () => {
-  it('uses native facility selection, traps and restores focus, and opens the created meter settings', async () => {
+  it('uses selection cards, traps and restores focus, and opens the created meter settings', async () => {
     await page.viewport(390, 740);
     const handler = { addMeter: vi.fn().mockImplementation(async value => ({ ...value, guid: 'new-meter' })) };
     TestBed.configureTestingModule({
@@ -51,6 +51,26 @@ describe('portfolio meter creation in the shell portal', () => {
     const fixture = TestBed.createComponent(MeterCreationHost);
     fixture.detectChanges();
     const host = fixture.nativeElement as HTMLElement;
+    const checkChoices = async (step: string) => {
+      const root = host.querySelector<HTMLElement>('.v1-root')!;
+      for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+        await page.viewport(width, 740);
+        root.className = `v1-root ${theme}`;
+        fixture.detectChanges(); await fixture.whenStable();
+        const panel = host.querySelector<HTMLElement>('.v1-workspace-slideout')!;
+        const body = panel.querySelector<HTMLElement>('.v1-workspace-slideout__body')!;
+        expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth + 1);
+        expect(panel.querySelector('.v1-workspace-slideout__footer')!.getBoundingClientRect().bottom).toBeLessThanOrEqual(740);
+        if (step !== 'name') expect(getComputedStyle(panel.querySelector('.meter-choices')!).gridTemplateColumns.split(' ')).toHaveLength(2);
+        const selections = panel.querySelector<HTMLElement>('.meter-selections')!;
+        expect(getComputedStyle(selections).position).toBe('sticky');
+        const top = selections.getBoundingClientRect().top;
+        body.scrollTop = body.scrollHeight; await fixture.whenStable();
+        expect(selections.getBoundingClientRect().top).toBeCloseTo(top, 0);
+        body.scrollTop = 0;
+        await page.screenshot({ element: panel, path: `../../../../../../.angular/verifi-meter-${step}-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
+      }
+    };
     const opener = page.getByRole('button', { name: 'Add meter', exact: true });
     await opener.click();
     fixture.detectChanges();
@@ -64,10 +84,20 @@ describe('portfolio meter creation in the shell portal', () => {
     expect(document.activeElement?.textContent).toContain('Add meter');
     await opener.click();
     fixture.detectChanges();
-    await page.getByRole('combobox', { name: 'Facility', exact: true }).selectOptions('facility-b');
+    await page.getByRole('button', { name: 'Beta', exact: true }).click();
+    await checkChoices('source');
+    page.getByRole('button', { name: 'Electricity', exact: true }).element().focus();
+    await userEvent.keyboard('{Enter}');
+    expect(document.activeElement?.textContent).toBe('Collection unit');
+    await checkChoices('unit');
+    await page.getByRole('button', { name: 'MWh Megawatt-hour (MWh)', exact: true }).click();
+    expect(document.activeElement?.id).toBe('meter-name');
+    await checkChoices('name');
     await page.getByRole('textbox', { name: 'Meter name', exact: true }).fill('Main Electric');
     fixture.detectChanges();
-    expect(host.querySelector('[role="dialog"]')?.textContent).toContain('Beta group');
+    expect(host.querySelector('.meter-selections')?.textContent).toContain('Beta');
+    expect(host.querySelector('.meter-selections')?.textContent).toContain('MWh');
+    expect(host.querySelector('[formControlName="groupId"]')).toBeNull();
     const submit = host.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     expect(submit.disabled).toBe(false);
     submit.focus();
@@ -78,13 +108,15 @@ describe('portfolio meter creation in the shell portal', () => {
     expect(host.querySelector('[role="dialog"]')).toBeNull();
     await opener.click();
     fixture.detectChanges();
-    await page.getByRole('combobox', { name: 'Facility', exact: true }).selectOptions('facility-b');
+    await page.getByRole('button', { name: 'Beta', exact: true }).click();
+    await page.getByRole('button', { name: 'Electricity', exact: true }).click();
+    await page.getByRole('button', { name: 'MWh Megawatt-hour (MWh)', exact: true }).click();
     await page.getByRole('textbox', { name: 'Meter name', exact: true }).fill('Main Electric');
     fixture.detectChanges();
     host.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
     await fixture.whenStable();
     fixture.detectChanges();
-    expect(handler.addMeter).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ name: 'Main Electric', source: 'Electricity', facilityId: 'facility-b', accountId: 'account-a' }), 'account-a');
+    expect(handler.addMeter).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ name: 'Main Electric', source: 'Electricity', startingUnit: 'MWh', energyUnit: 'MWh', groupId: undefined, facilityId: 'facility-b', accountId: 'account-a' }), 'account-a');
     expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-b', 'data', 'meters', 'new-meter', 'settings']);
     expect(host.querySelector('[role="dialog"]')).toBeNull();
     fixture.destroy();

@@ -48,7 +48,6 @@ import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/wo
 import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 import { InventoryToolsComponent } from '@app/v1/data/inventory/inventory-tools/inventory-tools.component';
 import { InventoryActionsComponent } from '@app/v1/data/inventory/inventory-actions/inventory-actions.component';
-import { MeterDraftSlideoutComponent } from './meter-draft-slideout/meter-draft-slideout.component';
 import { MeterActionsService } from './meter-actions.service';
 
 @NgModule({
@@ -104,7 +103,6 @@ import { MeterActionsService } from './meter-actions.service';
     ModalFocusTrapDirective,
     InventoryToolsComponent,
     InventoryActionsComponent,
-    MeterDraftSlideoutComponent
   ],
   exports: [
     MeterWorkspaceComponent,

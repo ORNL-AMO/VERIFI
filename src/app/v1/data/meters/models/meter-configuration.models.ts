@@ -10,5 +10,6 @@ export const METER_SOURCES: ReadonlyArray<MeterSource> = AllSources;
 export interface MeterDraft {
   readonly name: string;
   readonly source: MeterSource;
+  readonly startingUnit?: string;
   readonly groupId?: string;
 }

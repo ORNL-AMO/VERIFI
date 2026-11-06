@@ -146,6 +146,13 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No data, calculation, import/export, Worker, report, or Electron contracts change.
 - **Tests:** Cover shared semantics and projected actions, then preserve focused feature tests for each inventory's state and action wiring.
 
+### Meter creation selection workflow
+
+- **Workflow:** Add meter from the unified Meters inventory.
+- **Decision:** Match report creation with facility, source, and collection-unit choice cards, followed by meter name and Add meter. Keep prior selections pinned and editable; explicit facility scope (including single-facility workspaces) skips and locks the facility step. Creation omits group assignment and opens the saved meter's Settings workbench.
+- **Shared contracts:** The optional creation draft collection unit maps to the existing `startingUnit` field. Source defaults and dependent energy-unit/heat-capacity calculations use the selected unit before the existing meter command persists it. Existing callers without a unit retain facility defaults; stored shapes, backups, and v0 remain unchanged.
+- **Tests:** Drawer transitions, validation and retry specs; Chromium keyboard/focus and narrow themed layouts; real IndexedDB creation, Settings hydration without extra writes, and reopening with default and selected units.
+
 ### Facility Meters Workspace Navigation Workflow
 
 - **Workflow:** v1 Facility Data > Meters workspace, issues #2644 and #2645.
