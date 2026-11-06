@@ -1,12 +1,12 @@
 import { AnnualYearFieldsComponent } from './forms/annual-year-fields/annual-year-fields.component';
-import { AddYearDrawerComponent } from './inventory/add-year-drawer/add-year-drawer.component';
+import { AddYearDrawerComponent } from './energy-use-workbench/setup-group/add-year-drawer/add-year-drawer.component';
 import { SetupGroupComponent } from './energy-use-workbench/setup-group/setup-group.component';
 import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
 import { InventoryChartSheetComponent } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.component';
 import { EnergyUseChartsComponent } from './inventory/charts/energy-use-charts.component';
 import { EnergyUseHistoryComponent } from './energy-use-workbench/history/energy-use-history.component';
-import { BulkActionsComponent } from './inventory/bulk-actions/bulk-actions.component';
+import { EquipmentTableComponent } from './energy-use-workbench/setup-group/equipment-table/equipment-table.component';
 import { LifecycleActionsComponent } from './energy-use-workbench/lifecycle-actions/lifecycle-actions.component';
 import { SetupCalculatorComponent } from './forms/setup-calculator/setup-calculator.component';
 import { RouterModule } from '@angular/router';
@@ -35,7 +35,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
 
 @NgModule({
   declarations: [
-    EnergyUsesInventoryComponent, BulkActionsComponent, LifecycleActionsComponent, EnergyUseChartsComponent, EnergyUseHistoryComponent,
+    EnergyUsesInventoryComponent, EquipmentTableComponent, LifecycleActionsComponent, EnergyUseChartsComponent, EnergyUseHistoryComponent,
     EnergyUseWorkbenchComponent, SetupGroupComponent,
     AnnualDataFieldsComponent, AnnualYearFieldsComponent, AddYearDrawerComponent, SetupCalculatorComponent,
     SettingsFieldsComponent, UtilitiesSlideoutComponent, MeterGroupsSlideoutComponent, CreateEnergyUseDrawerComponent, EnergyUseSettingsComponent,

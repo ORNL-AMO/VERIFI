@@ -2,7 +2,7 @@ import { Component, ElementRef, TemplateRef, afterRenderEffect, input, output, s
 import { AddYearController } from './add-year.controller';
 
 @Component({ selector: 'app-energy-use-add-year-drawer', standalone: false,
-  templateUrl: './add-year-drawer.component.html', styleUrls: ['./add-year-drawer.component.css', '../../../../shared/creation-flow/creation-flow.css'] })
+  templateUrl: './add-year-drawer.component.html', styleUrls: ['./add-year-drawer.component.css', '../../../../../shared/creation-flow/creation-flow.css'] })
 export class AddYearDrawerComponent {
   readonly controller = input.required<AddYearController>();
   readonly closed = output<void>();

@@ -14,6 +14,6 @@
 @if (context.group()) {
   <section class="v1-workbench-section" aria-labelledby="energy-use-manage-title">
     <h2 id="energy-use-manage-title">Energy Use Equipment</h2>
-    <app-energy-use-bulk-actions [canOpen]="canManage()" [canCreate]="creation()?.canCreate() ?? false" (createRequested)="creation()?.create()"/>
+    <app-energy-use-equipment-table [canOpen]="canManage()" [canCreate]="creation()?.canCreate() ?? false" (createRequested)="creation()?.create()"/>
   </section>
 }

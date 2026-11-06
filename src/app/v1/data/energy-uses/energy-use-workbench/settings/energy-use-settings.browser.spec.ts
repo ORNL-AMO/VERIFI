@@ -208,6 +208,58 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
   });
 
+  it('finishes a committed deletion through refresh-only recovery while retaining the unsaved draft', async () => {
+    const actions = TestBed.inject(EnergyUseActionsService);
+    const created = await actions.create({ initialYear: 2025, group: { kind: 'new', name: 'Equipment' },
+      settings: { name: 'Pump', notes: '', equipmentType: 'Pump', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
+    const survivor = await actions.copy({ accountGuid: account.guid, facilityGuid: facility.guid, energyUseGuid: created.guid });
+    guid.set(created.guid);
+    const settings = mount(EnergyUseSettingsComponent);
+    const portal = mount(EnergyUsePortalHost);
+    await settle(settings);
+    await settle(portal);
+    const component = settings.componentInstance;
+    const context = TestBed.inject(EnergyUseWorkbenchContextService);
+    const navigate = vi.spyOn(context, 'navigate').mockResolvedValue(true);
+    const destination = ['/group/items', survivor.guid];
+    vi.spyOn(context, 'routeAfterRemoval').mockReturnValue(destination);
+    const deleteItem = vi.spyOn(TestBed.inject(EnergyUseCommandHandler), 'deleteItem');
+    const reload = vi.spyOn(TestBed.inject(AccountWorkspaceService), 'reloadActiveWorkspace');
+    reload.mockRejectedValueOnce(new Error('Publication unavailable'));
+    component.form()!.controls.settings.controls.name.setValue('Unsaved name');
+    component.requestDelete();
+    await component.confirmReview();
+    await settle(settings);
+    await settle(portal);
+    expect((await harness.getAll('facilityEnergyUseEquipment')).map(item => item.guid)).toEqual([survivor.guid]);
+    expect(TestBed.inject(AccountWorkspaceStore).energyUseEquipment()).toHaveLength(2);
+    expect(component.editor.dirty()).toBe(true);
+    expect(component.isNavigationBlocked()).toBe(true);
+    const dialog = page.getByRole('dialog', { name: 'Delete energy use?', exact: true });
+    expect(dialog.getByRole('button', { name: 'Delete energy use', exact: true }).element()).toHaveProperty('disabled', true);
+    expect(dialog.getByRole('button', { name: 'Cancel', exact: true }).element()).toHaveProperty('disabled', true);
+    reload.mockRejectedValueOnce(new Error('Publication still unavailable'));
+    await dialog.getByRole('button', { name: 'Refresh saved changes', exact: true }).click();
+    await vi.waitFor(() => expect(component.busy()).toBe(false));
+    await settle(settings);
+    expect(component.form()!.controls.settings.controls.name.value).toBe('Unsaved name');
+    expect(navigate).not.toHaveBeenCalled();
+    await dialog.getByRole('button', { name: 'Refresh saved changes', exact: true }).click();
+    await vi.waitFor(() => expect(component.deletionRecovery()).toBeUndefined());
+    await settle(settings);
+    await settle(portal);
+    expect(deleteItem).toHaveBeenCalledTimes(1);
+    expect(component.deletionRecovery()).toBeUndefined();
+    expect(component.review()).toBeUndefined();
+    expect(component.editor.dirty()).toBe(false);
+    expect(navigate).toHaveBeenCalledWith(destination);
+    expect(TestBed.inject(AccountWorkspaceStore).energyUseEquipment().map(item => item.guid)).toEqual([survivor.guid]);
+    expect(root.querySelector('[role="dialog"]')).toBeNull();
+    await harness.reopen();
+    expect((await harness.getAll('facilityEnergyUseEquipment')).map(item => item.guid)).toEqual([survivor.guid]);
+    expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
+  });
+
   it('keeps source-removal review above the workspace, contains focus, and restores the opener on cancel', async () => {
     const created = await TestBed.inject(EnergyUseActionsService).create({ initialYear: 2025, group: { kind: 'new', name: 'Equipment' },
       settings: { name: 'Pump', notes: '', equipmentType: 'Pump', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);

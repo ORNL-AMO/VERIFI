@@ -9,13 +9,13 @@ import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEn
 import { EnergyUseBatchChange } from '@data/account-workspace/handlers/energy-use-command.models';
 import { draftEqual } from '@app/v1/data/editing/draft-reconciliation';
 import { registerDataDraft } from '@app/v1/data/editing/register-data-draft';
-import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench/energy-use-workbench-context.service';
-import { EnergyUseActionsService } from '../../energy-use-actions.service';
-import { EnergyUseSetupForm, EnergyUseSetupFormService } from '../../forms/energy-use-setup-form.service';
-import { energyUseIcon } from '../../models/energy-use-icons';
-import { savedEnergyUseYears } from '../../models/energy-use-projection.models';
-import { energyUseSetup } from '../../models/energy-use-setup.models';
-import { energyUseYearChange, nextEnergyUseYear, seedEnergyUseYear } from '../../models/energy-use-year-draft.models';
+import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench-context.service';
+import { EnergyUseActionsService } from '../../../energy-use-actions.service';
+import { EnergyUseSetupForm, EnergyUseSetupFormService } from '../../../forms/energy-use-setup-form.service';
+import { energyUseIcon } from '../../../models/energy-use-icons';
+import { savedEnergyUseYears } from '../../../models/energy-use-projection.models';
+import { energyUseSetup } from '../../../models/energy-use-setup.models';
+import { energyUseYearChange, nextEnergyUseYear, seedEnergyUseYear } from '../../../models/energy-use-year-draft.models';
 
 export interface EquipmentYearDraft {
   readonly item: IdbFacilityEnergyUseEquipment;
@@ -34,7 +34,7 @@ export class AddYearController {
   private readonly forms = inject(EnergyUseSetupFormService);
   private readonly injector = inject(Injector);
   private readonly destroy = inject(DestroyRef);
-  private subscriptions: Subscription[] = [];
+  private readonly subscriptions = new Map<EnergyUseSetupForm, Subscription>();
   private originals: IdbFacilityEnergyUseEquipment[] = [];
   private facility?: IdbFacility;
   private openedKey = '';
@@ -87,7 +87,7 @@ export class AddYearController {
 
   constructor(readonly context: EnergyUseWorkbenchContextService, readonly canOpen: Signal<boolean>) {
     registerDataDraft(this.dirty, () => this.discard(), this.blocked);
-    this.destroy.onDestroy(() => this.unsubscribe());
+    this.destroy.onDestroy(() => this.disposeDrafts());
   }
   open(guids: readonly string[]): boolean {
     const selected = this.context.items().filter(entry => guids.includes(entry.guid));
@@ -116,19 +116,25 @@ export class AddYearController {
     if (this.selectedYear() === undefined) this.initialize(); else this.index.set(0);
   }
   private initialize(): void {
-    this.unsubscribe(); this.selectedYear.set(this.year.value!);
-    this.drafts.set(this.originals.map(item => this.build(item, this.facility!))); this.index.set(0); this.dirty.set(true); this.confirmation.set(null);
+    this.disposeDrafts();
+    this.selectedYear.set(this.year.value!);
+    this.drafts.set(this.originals.map(item => this.build(item, this.facility!)));
+    this.index.set(0);
+    this.dirty.set(true);
+    this.confirmation.set(null);
   }
   private build(item: IdbFacilityEnergyUseEquipment, facility: IdbFacility): EquipmentYearDraft {
     const base = { item, facility, icon: energyUseIcon(item.equipmentType), completed: false, error: '', existing: false };
     try {
-      const seeded = seedEnergyUseYear(item, facility, this.selectedYear()!), form = this.forms.build(seeded.value);
+      const seeded = seedEnergyUseYear(item, facility, this.selectedYear()!);
+      const form = this.forms.build(seeded.value);
       this.forms.validate(form, energyUseSetup(item), () => {
         try { energyUseYearChange(item, facility, this.forms.read(form), this.selectedYear()!); return null; }
         catch (error) { return { yearData: error instanceof Error ? error.message : 'Check annual data.' }; }
       });
-      this.subscriptions.push(form.valueChanges.subscribe(() => {
-        this.version.update(value => value + 1); this.dirty.set(true);
+      this.subscriptions.set(form, form.valueChanges.subscribe(() => {
+        this.version.update(value => value + 1);
+        this.dirty.set(true);
         this.drafts.update(drafts => drafts.map(draft => draft.form === form ? { ...draft, completed: false, error: '' } : draft));
       }));
       return { ...base, ...seeded, form };
@@ -156,12 +162,18 @@ export class AddYearController {
   }
   discard(): void {
     if (this.blocked()) return;
-    this.unsubscribe(); this.dirty.set(false); this.opened.set(false); this.confirmation.set(null); this.drafts.set([]);
+    this.disposeDrafts();
+    this.dirty.set(false);
+    this.opened.set(false);
+    this.confirmation.set(null);
+    this.drafts.set([]);
   }
   confirmReset(): void { if (this.canEdit() && this.confirmation() === 'year') this.initialize(); }
   async reloadChanged(): Promise<void> {
     if (!this.canEdit() || this.missing()) return;
-    this.confirmation.set(null); this.busy.set(true); this.error.set('');
+    this.confirmation.set(null);
+    this.busy.set(true);
+    this.error.set('');
     try {
       const result = await this.injector.get(AccountWorkspaceService).reloadActiveWorkspace(false);
       if (this.destroy.destroyed || result === 'superseded' || this.context.key() !== this.openedKey) return;
@@ -170,13 +182,22 @@ export class AddYearController {
       const facilityChanged = !draftEqual(facility, this.facility);
       if (this.selectedYear() === undefined) {
         this.originals = this.originals.map(item => structuredClone(this.workspace.energyUseEquipment().find(saved => saved.guid === item.guid)!));
-        this.facility = structuredClone(facility); this.version.update(value => value + 1); this.reloadNeeded.set(false); return;
+        this.facility = structuredClone(facility);
+        this.version.update(value => value + 1);
+        this.reloadNeeded.set(false);
+        return;
       }
       const updated = this.drafts().map(draft => {
         const saved = this.workspace.energyUseEquipment().find(item => item.guid === draft.item.guid)!;
-        return facilityChanged || !draftEqual(saved, draft.item) ? this.build(structuredClone(saved), structuredClone(facility)) : draft;
+        if (!facilityChanged && draftEqual(saved, draft.item)) return draft;
+        this.disposeDraft(draft);
+        return this.build(structuredClone(saved), structuredClone(facility));
       });
-      this.originals = updated.map(draft => draft.item); this.facility = structuredClone(facility); this.drafts.set(updated); this.version.update(value => value + 1); this.reloadNeeded.set(false);
+      this.originals = updated.map(draft => draft.item);
+      this.facility = structuredClone(facility);
+      this.drafts.set(updated);
+      this.version.update(value => value + 1);
+      this.reloadNeeded.set(false);
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'Saved data could not be reloaded. Your drafts remain.'); }
     finally { if (!this.destroy.destroyed) this.busy.set(false); }
   }
@@ -202,5 +223,13 @@ export class AddYearController {
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'Refresh failed. The saved batch will not be repeated.'); return false; }
     finally { if (!this.destroy.destroyed) this.busy.set(false); }
   }
-  private unsubscribe(): void { this.subscriptions.forEach(subscription => subscription.unsubscribe()); this.subscriptions = []; }
+  private disposeDraft(draft: EquipmentYearDraft): void {
+    if (!draft.form) return;
+    this.subscriptions.get(draft.form)?.unsubscribe();
+    this.subscriptions.delete(draft.form);
+  }
+  private disposeDrafts(): void {
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.clear();
+  }
 }

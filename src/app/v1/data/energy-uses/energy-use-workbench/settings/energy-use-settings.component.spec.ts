@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup, getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -25,7 +26,8 @@ describe('Energy Use Settings lifecycle', () => {
     const actions = { updateSetup: vi.fn(async (_identity, value, _base, _owner, approvals) => {
       const saved = applyEnergyUseSetup(store.energyUseEquipment()[0], value, facility, approvals);
       store.energyUseEquipment.set([saved]); return energyUseSetup(saved);
-    }), copy: vi.fn(async () => ({ ...item, guid: 'copy-a' })), delete: vi.fn(async () => { store.energyUseEquipment.set([]); }) };
+    }), copy: vi.fn(async () => ({ ...item, guid: 'copy-a' })), delete: vi.fn(async () => { store.energyUseEquipment.set([]); }),
+      recoverPublication: vi.fn(async (_accountGuid: string) => { store.energyUseEquipment.set([]); }) };
     const navigation = { openFacilityInventory: vi.fn(async () => true) };
     TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: store }, { provide: EnergyUseActionsService, useValue: actions },
@@ -212,5 +214,72 @@ describe('Energy Use Settings lifecycle', () => {
     component.editor.discard(); fixture.detectChanges(); await component.copy(); expect(actions.copy).toHaveBeenCalledTimes(1);
     component.requestDelete(); await component.confirmReview();
     expect(actions.delete).toHaveBeenCalledTimes(1); expect(navigation.openFacilityInventory).toHaveBeenCalledWith(['/group/items']);
+  });
+  it('retries a rejected deletion without discarding its draft before persistence succeeds', async () => {
+    const { fixture, component, actions, navigation } = setup();
+    component.form()!.controls.settings.controls.name.setValue('Keep my draft');
+    fixture.detectChanges();
+    actions.delete.mockRejectedValueOnce(new WorkspaceWriteError('persistence-failed', 'Write rejected'));
+    component.requestDelete();
+    await component.confirmReview();
+    fixture.detectChanges();
+    expect(component.deletionRecovery()).toBeUndefined();
+    expect(component.form()!.controls.settings.controls.name.value).toBe('Keep my draft');
+    expect(component.editor.dirty()).toBe(true);
+    expect(navigation.openFacilityInventory).not.toHaveBeenCalled();
+    await component.confirmReview();
+    expect(actions.delete).toHaveBeenCalledTimes(2);
+    expect(actions.recoverPublication).not.toHaveBeenCalled();
+    expect(component.editor.dirty()).toBe(false);
+    expect(navigation.openFacilityInventory).toHaveBeenCalledWith(['/group/items']);
+  });
+  it('recovers a committed deletion without another write and retains its draft until refresh succeeds', async () => {
+    const { fixture, component, actions, navigation } = setup();
+    component.form()!.controls.settings.controls.name.setValue('Keep until refreshed');
+    fixture.detectChanges();
+    actions.delete.mockRejectedValueOnce(new WorkspaceWriteError('persistence-failed', 'Reload failed', undefined, true));
+    actions.recoverPublication.mockRejectedValueOnce(new Error('Still unavailable'));
+    component.requestDelete();
+    await component.confirmReview();
+    fixture.detectChanges();
+    expect(component.deletionRecovery()).toMatchObject({ accountGuid: 'account-a', destination: ['/group/items'] });
+    expect(component.isNavigationBlocked()).toBe(true);
+    expect(component.canCommand()).toBe(false);
+    component.cancelReview();
+    await component.confirmReview();
+    expect(component.review()?.kind).toBe('delete');
+    expect(actions.delete).toHaveBeenCalledTimes(1);
+    await component.recoverDeletion();
+    fixture.detectChanges();
+    expect(component.actionError()).toBe('Still unavailable');
+    expect(component.editor.dirty()).toBe(true);
+    expect(component.form()!.controls.settings.controls.name.value).toBe('Keep until refreshed');
+    expect(navigation.openFacilityInventory).not.toHaveBeenCalled();
+    await component.recoverDeletion();
+    fixture.detectChanges();
+    expect(actions.recoverPublication).toHaveBeenCalledTimes(2);
+    expect(actions.recoverPublication).toHaveBeenLastCalledWith('account-a');
+    expect(actions.delete).toHaveBeenCalledTimes(1);
+    expect(component.editor.dirty()).toBe(false);
+    expect(component.review()).toBeUndefined();
+    expect(component.deletionRecovery()).toBeUndefined();
+    expect(navigation.openFacilityInventory).toHaveBeenCalledWith(['/group/items']);
+  });
+  it('does not complete deletion recovery after the editor identity changes', async () => {
+    const { fixture, component, actions, navigation, guid } = setup();
+    actions.delete.mockRejectedValueOnce(new WorkspaceWriteError('persistence-failed', 'Reload failed', undefined, true));
+    component.requestDelete();
+    await component.confirmReview();
+    let finish!: () => void;
+    actions.recoverPublication.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const recovery = component.recoverDeletion();
+    guid.set('another-item');
+    fixture.detectChanges();
+    finish();
+    await recovery;
+    expect(navigation.openFacilityInventory).not.toHaveBeenCalled();
+    expect(actions.delete).toHaveBeenCalledTimes(1);
+    expect(component.deletionRecovery()).toBeUndefined();
+    expect(component.isNavigationBlocked()).toBe(false);
   });
 });

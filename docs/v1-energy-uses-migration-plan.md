@@ -6,19 +6,49 @@ Migrate Energy Uses into the existing v1 Data workflow as a group-first inventor
 
 Use the shared Data inventory and workbench patterns. Each energy-use group owns a workbench with **Setup Group** first, followed by **Energy Use Items** and an internal member sidebar; each item retains its combined Setup editor and autosave. Support estimation independently of meter readings.
 
-This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 4D supersedes the Phase 3A item dashboard/navigation and the Phase 4 item History destination. Earlier phase descriptions and evidence below remain historical; broader group management remains a separate planning effort.
+The [current accepted behavior](#current-accepted-behavior) is the authoritative workflow reference for the implementation under review. The phased delivery sections record targets and historical evidence; earlier phase descriptions do not override that current contract. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 4D supersedes the Phase 3A item dashboard/navigation and the Phase 4 item History destination. Broader group management remains a separate planning effort.
 
-The [Energy Uses review and hardening plan](v1-energy-uses-review-and-hardening-plan.md) evaluates the current group-workbench implementation and proposes reliability, code-organization, and skill-guidance cleanup before continuing results work. It preserves the accepted data-entry workflow and records the remaining compatibility acceptance gap.
+The [Energy Uses review and hardening plan](v1-energy-uses-review-and-hardening-plan.md) records the implementation review and completed reliability, code-organization, skill-guidance, and backup recovery work. It preserves the accepted data-entry workflow and separates remaining results/export acceptance.
 
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Inventory and workspace navigation | Complete |
 | 2 | Creation, Settings, and safe commands | Merged into `unified-ux` |
 | 3 | Combined Setup, annual data, and estimation | Merged |
-| 3A | Group browsing, nested navigation, and equipment icons | Implemented and validated locally; publication checkpoint pending |
-| 4 | Complete item tools and charts | Implemented locally; user iteration and publication pending |
-| 4D | Group workbench, Setup Group, and item sidebar | Implemented and validated locally; user iteration/publication pending |
+| 3A | Group browsing, nested navigation, and equipment icons | Merged in [#2874](https://github.com/ORNL-AMO/VERIFI/pull/2874) |
+| 4 | Complete item tools and charts | Data-entry tools validated; group results remain follow-up scope |
+| 4D | Group workbench, Setup Group, and item sidebar | Approved workflow implemented and validated; prepared for stacked PR review |
 | 5 | Export, compatibility, and release acceptance | Planned |
+
+## Current accepted behavior
+
+This section owns current Energy Uses workflow requirements. Architectural preservation and transaction invariants live in [Energy-use group workbench](../ARCHITECTURE.md#energy-use-group-workbench) and [annual projections](../ARCHITECTURE.md#energy-use-item-tools-and-annual-projections). Update this section when accepted behavior changes; retain phase evidence below as history.
+
+### Browsing and navigation
+
+- Energy Uses shows existing groups as scoped inventory cards, including empty groups and a synthetic unavailable-group bucket for orphaned items. Cards retain equipment icons, linked member summaries, linked utility meter-group unions, missing-source/annual-data notices, and independent outer browse restoration. Group notes are hidden on cards; browsing does not initialize or recalculate records.
+- Facility-owned `data/energy-uses/groups/:energyUseGroupGuid` routes open the group workbench. **Setup Group** at `/setup` is the first primary tab; **Energy Use Items** at `/items/:energyUseGuid` selects the combined item editor. Group landing restores the last successful account/facility/group session visit, otherwise the first alphabetical member, using replacement navigation. Empty groups stay at `/items`. Standalone item and History URLs are removed without aliases.
+- The global sidebar stops at groups; the group switcher stays facility-scoped. Energy Use Items lists every member in an icon/name rail, independently scrolling beside the editor and becoming a compact horizontal rail at narrow widths. Outer inventory filters do not hide members. There is no item finder or repeated selected-item title strip. Setup Group remains full width.
+- Item switches use guarded peer navigation and retain the item editing identity. Keep the outlet and protected drafts mounted when saved groups/items disappear. Creation/copy opens the new member; single-item deletion selects the next alphabetical survivor, then the previous survivor, or the empty group. Synthetic unavailable groups permit orphan access without relationship repair, editable group metadata, or group-preselected creation.
+
+### Combined Setup and utilities
+
+- One typed Settings session edits equipment settings and explicit annual rows together. Annual sections appear in ascending order, with immediate estimates, operating assumptions, source amounts/units, overrides, and copy/remove-year actions. Opening saved records does not recalculate history. Setup readiness is local form feedback, separate from global workspace status. Save feedback stays in the top workbench header through the editor's refresh.
+- Creation chooses a facility, existing group or named new group, and item name; a new group and first item commit atomically. Creation uses existing source/year defaults. New utilities follow the established two-source limit while preserving imported extra/duplicate sources. Manual utility selection retains compatible meter links and reviews required unlinking/history removal. Confirmed meter-group selection determines utilities without overlapping sources across selected groups; links and utilities update together after review, never during hydration.
+- Source/year edits preserve untouched history, copied amounts, calculator inputs, and manual overrides. Review destructive source/year removal against current saved data. Derived consumption is excluded from draft equality. Settings maps edits onto the latest equipment record and preserves unrelated edits. Calculators apply typed values to the existing draft; cancel leaves it unchanged. Retirement/reinstatement preserves saved history.
+
+### Setup Group and Add year
+
+- Setup Group autosaves existing name/notes through the shared Settings session and allowlisted metadata command. Its **Energy Use Equipment** table shows all members with selection, linked Name, Industrial System, Utility Types, and Notes columns. Item names include equipment icons. Content is vertically centered and wraps within fixed columns without a horizontal table scrollbar. There is no search, pagination, Choose action, Copy year, Remove year, or Clear selection action.
+- The right-aligned action row offers Add energy use, Add year, and Delete selected. Selection actions require selected rows. Group settings that are unsaved, failed, conflicted, or busy disable management. Group changes clear selection. Reviewed bulk deletion uses the shared shell confirmation and stays in Setup Group after completion.
+- Add year opens a guided shell-portal slideout. Year cards combine valid saved meter, predictor, and equipment years across the current account, independent of selected equipment; use the current calendar year when none exist, or Other for a typed fiscal year. Each item starts from its highest saved fiscal year, preserving copied calculation provenance, or loads an existing destination year for editing.
+- Completed equipment appears above the current shared annual form and remaining equipment below it. Next validates without saving, skips reviewed items, and wraps to earlier unfinished equipment. Save all is available when every other item is reviewed, independent of alphabetical position, and commits the entire batch atomically. Embedded calculators reuse the same annual fields without replacing the portal.
+- The table owns detached per-item drafts and recovery state outside the portal. Preserve other years/settings, block ambiguous rows and stale ownership/membership, and confirm year resets, discard, and reload. Reload retains unaffected drafts; changed facility settings reset all drafts. Rejected writes retain retryable drafts; committed-refresh failures permit refresh-only recovery and never repeat persistence.
+
+### Results and compatibility scope
+
+- Inventory Charts and feature-owned annual projection helpers remain available. Group Graphs, Table Results, and restored History presentation are subsequent work, without placeholder tabs. Existing projection preserves saved amounts, source-year/unit/override provenance, actual fiscal periods, and explicit history after retirement; it never persists inferred rows.
+- Excel export and final compatibility/release acceptance remain Phase 5. Keep stored equipment/group shapes, GUID relationships, calculations, backup formats, and v0 behavior. The [hardening plan](v1-energy-uses-review-and-hardening-plan.md) records localized reliability fixes and backup recovery acceptance; these do not authorize broader group management or a new results design.
 
 ## Architecture and contracts
 

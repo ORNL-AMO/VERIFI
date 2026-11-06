@@ -34,13 +34,13 @@
 
   </div>
 }
-<div class="energy-use-workbench__workspace" [class.energy-use-workbench__workspace--items]="showItems">
+<div class="energy-use-workbench__workspace v1-member-workspace" [class.energy-use-workbench__workspace--items]="showItems" [class.v1-member-workspace--with-rail]="showItems">
   @if (showItems) {
-    <aside class="energy-use-workbench__item-rail" aria-label="Energy-use item navigation">
+    <aside class="energy-use-workbench__item-rail v1-member-rail" aria-label="Energy-use item navigation">
       <header><strong>Energy use items</strong><span>{{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}</span></header>
-      <nav #itemNavigation aria-label="Energy-use items">
+      <nav #itemNavigation class="v1-member-rail__items" aria-label="Energy-use items">
         @for (item of items; track item.guid) {
-          <button type="button" [class.active]="item.guid === context.energyUseGuid()" [attr.aria-current]="item.guid === context.energyUseGuid() ? 'page' : null" (click)="context.openItem(item.guid)">
+          <button type="button" class="v1-member-rail__item" [class.active]="item.guid === context.energyUseGuid()" [attr.aria-current]="item.guid === context.energyUseGuid() ? 'page' : null" (click)="context.openItem(item.guid)">
             <app-ui-icon [name]="item.icon" [size]="18"/><span>{{ item.name }}</span>
           </button>
         }

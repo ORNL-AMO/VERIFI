@@ -4,8 +4,8 @@ import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, inject, 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { page, userEvent } from 'vitest/browser';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { SetupCalculatorComponent } from '../../forms/setup-calculator/setup-calculator.component';
-import { BulkActionsComponent } from '../bulk-actions/bulk-actions.component';
+import { SetupCalculatorComponent } from '../../../forms/setup-calculator/setup-calculator.component';
+import { EquipmentTableComponent } from '../equipment-table/equipment-table.component';
 import { AddYearDrawerComponent } from './add-year-drawer.component';
 import { AddYearController } from './add-year.controller';
 import { setupYearController } from './add-year-drawer.testing';
@@ -104,7 +104,7 @@ describe('Group Add year slideout in Chromium', () => {
   });
   it('clears the table selection, closes the portal, and restores focus after Save all', async () => {
     await setup(1); fixture.componentInstance.modal.hide(); await settle();
-    const table = TestBed.createComponent(BulkActionsComponent);
+    const table = TestBed.createComponent(EquipmentTableComponent);
     table.nativeElement.removeAttribute('id'); root.prepend(table.nativeElement); table.componentRef.setInput('canOpen', true); table.detectChanges();
     try {
       table.componentInstance.selection.selectAll(); table.detectChanges();
