@@ -9,7 +9,7 @@
     }
     <form [formGroup]="settingsForm" aria-label="Energy use setup" (ngSubmit)="editor.saveNow()">
       <app-energy-use-settings-fields [form]="settingsForm.controls.settings" [editorKey]="key()" [accountGuid]="identity().accountGuid" [facilityGuid]="identity().facilityGuid" [groups]="workspace.meterGroups()" [meters]="workspace.meters()" [canEdit]="editor.canEdit()" [refreshKey]="refreshKey()" (utilitiesConfirmed)="requestUtilities($event)" (meterGroupsConfirmed)="requestMeterGroups($event)"/>
-      <app-energy-use-annual-data-fields [form]="settingsForm" [item]="item()" [canEdit]="editor.canEdit()" [canManageYears]="canManageYears()" [refreshKey]="refreshKey()" (addRequested)="openYearDrawer()" (copyRequested)="openYearDrawer($event)" (removeRequested)="requestRemoveYear($event)"/>
+      <app-energy-use-annual-data-fields [form]="settingsForm" [editorKey]="key()" [item]="item()" [canEdit]="editor.canEdit()" [canManageYears]="canManageYears()" [refreshKey]="refreshKey()" (addRequested)="openYearDrawer()" (copyRequested)="openYearDrawer($event)" (removeRequested)="requestRemoveYear($event)"/>
     </form>
     @if (removedSources().length) {
       <section class="v1-workbench-section" aria-label="Pending source removals">

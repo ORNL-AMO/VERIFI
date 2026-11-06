@@ -46,6 +46,9 @@
               </select>
             </div>
           </div>
+          @if (row.source.energySource !== 'Electricity') {
+            <app-setup-calculator kind="power" [source]="row.control" [editorKey]="editorKey()" [linkedMeters]="compatibleMeters()" [canEdit]="canEdit() && !duplicateSources()"/>
+          }
           <label class="energy-use-fields__quantity"><span># of Equipment</span><input type="number" [attr.min]="1" step="any" formControlName="numberOfEquipment" aria-required="true"></label>
           </div>
         </div>

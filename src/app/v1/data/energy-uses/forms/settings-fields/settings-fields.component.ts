@@ -40,6 +40,8 @@ export class SettingsFieldsComponent {
     icon: meterSourceIcon(source.energySource),
     control: this.form().controls.sources.at(index),
     knownUnit: this.units().some(unit => unit.value === source.units) })));
+  readonly compatibleMeters = computed(() => this.meters().filter(meter => meter.accountId === this.accountGuid() && meter.facilityId === this.facilityGuid()
+    && this.linkedIds().includes(meter.groupId)));
   readonly categoryKnown = computed(() => this.categories().includes(this.values()?.equipmentType!));
   readonly linkedIds = computed(() => this.values()?.utilityMeterGroupIds ?? []);
   readonly linkedGroups = computed(() => {

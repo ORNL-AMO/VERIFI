@@ -1,3 +1,5 @@
+import { By } from '@angular/platform-browser';
+import { SetupCalculatorComponent } from '../../forms/setup-calculator/setup-calculator.component';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { NgComponentOutlet } from '@angular/common';
 import { Component, inject, signal, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
@@ -317,4 +319,16 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
       expect(links.find(group => group.guid === item.utilityMeterGroupIds[0])).toMatchObject({ accountId: item.accountId, facilityId: item.facilityId });
     }
   });
+  it('applies operating-hours calculator inputs through autosave and retains them after reopening', async () => {
+    const actions = TestBed.inject(EnergyUseActionsService);
+    const item = await actions.create({ initialYear: 2025, group: { kind: 'new', name: 'Motors' }, settings: { name: 'Motor', notes: '', equipmentType: 'Motor', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
+    guid.set(item.guid); const fixture = mount(EnergyUseSettingsComponent); await settle(fixture);
+    const calculator = fixture.debugElement.queryAll(By.directive(SetupCalculatorComponent)).map(debug => debug.componentInstance as SetupCalculatorComponent).find(calculator => calculator.kind() === 'hours')!;
+    calculator.open(); calculator.form.patchValue({ hours: 8, days: 5, weeks: 50 }); calculator.apply();
+    expect(await fixture.componentInstance.editor.saveNow()).toBe(true); await settle(fixture);
+    fixture.destroy(); await harness.reopen();
+    const saved = (await harness.getAll<IdbFacilityEnergyUseEquipment & Record<string, unknown>>('facilityEnergyUseEquipment'))[0];
+    expect(saved.operatingConditionsData[0]).toMatchObject({ hoursOfOperation: 2000, hoursPerDay: 8, daysPerWeek: 5, weeksPerYear: 50 });
+  });
+
 });

@@ -84,13 +84,13 @@ Deliver one combined Phase 3A PR against `unified-ux` on the merged Phase 3 base
 Finish the item workflow before declaring release readiness.
 
 - Migrate operating-hours, load-factor, and rated-power calculators. Calculators requiring fuel or meter information explain their prerequisites; direct input remains available.
-- Add retirement and reinstatement using existing lifecycle fields. Preserve all annual history and show retirement metadata.
+- Add retirement and reinstatement using existing lifecycle fields. The retirement year is the last active year; stop carry-forward afterward while preserving and displaying explicitly saved history. Reinstatement restores projection eligibility.
 - Add reviewed bulk deletion and bulk year operations. Each confirmed batch is atomic; selection follows the existing inventory behavior across pagination.
 - Add annual workbench charts and inventory comparisons through shared chart presentation.
-- Chart committed values with one trace per item/source, explicit units, override indicators, and genuine gaps. Do not propagate missing years.
-- Portfolio comparisons identify facility ownership and fiscal periods. Different fiscal calendars remain explicit; comparisons do not imply aligned periods or produce portfolio totals.
+- Resolve committed consumption per source/year: use the explicit entry or its latest earlier entry, carrying its amount, units, and override provenance unchanged. Never backfill before the first entry or persist projected rows. Label carried-forward values and their originating fiscal year; preserve genuine gaps and surface invalid or ambiguous rows.
+- Dashboard treemaps use the shared Charts drawer at both browsing levels. Portfolio hierarchy is actual fiscal period → facility → group → item; totals and percentages remain within matching period branches. Named scope uses facility → group → item; group scope uses group → item. Item workbenches add a History tab.
 
-**Completion:** Users can complete item-level work without returning to v0. Group moves, group rollups, and footprint diagrams remain outside this milestone.
+**Completion:** Users can complete item-level work without returning to v0. Group moves, broader group rollups, and footprint diagrams remain outside this milestone; chart-only subtotals are included.
 
 ### Phase 5 — Export, compatibility, and release acceptance
 
@@ -343,3 +343,13 @@ The first combined review full-suite run had 14 fixture failures; the focused re
 - Simple creation uses the existing default source. Settings permits additions up to the established two-source limit while retaining existing/imported extra sources without truncation.
 - Existing retirement and missing-year propagation inconsistencies are documented separately from formula changes. This migration preserves history and avoids introducing retirement-adjusted item rollups.
 - Phase 3A introduces read-only group browsing. A later grouping plan will define group editing, reassignment, bulk moves, deletion semantics, group/facility consumption summaries, footprint balances, and Sankey views.
+
+## Phase 4 delivery slices
+
+Deliver stacked branches in order: 4A calculators, 4B retirement and atomic bulk operations, then 4C projections, treemaps, and History. Each slice records its own validation before publication.
+
+- **4A:** Typed operating-hours, load-factor, and rated-power calculators apply to the existing Setup draft. Cancel does not edit Setup. Rated-power fuel defaults and conversion behavior are shared with the v0 adapter.
+- **4B:** Group dashboards select individual equipment across pagination for reviewed Delete/Add year/Copy year/Remove year operations. Preserve existing destination years and review skips; block incomplete or ambiguous copies. One native transaction rechecks reviewed records and ownership, then publishes once.
+- **4C:** Carry the latest saved amount forward until a later explicit entry replaces it. A 2022 value of 100 plus newly entered 2025 equipment at 50 produces 150 for 2025. The new equipment has no contribution before 2025. Explicit zeroes remain zero, and invalid newer entries never silently fall back. Setup contains only explicit annual rows. Removing a year may resume an earlier value; retirement stops future projection. Chart details and accessible data distinguish entered, carried-forward, missing, invalid, and inactive values.
+
+No schema, backup, import, export, or v0 calculation policy changes are required. Chart-only period subtotals are presentation values. Excel export and release compatibility acceptance remain Phase 5.
