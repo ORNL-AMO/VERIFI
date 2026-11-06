@@ -24,11 +24,6 @@ export interface NavigationLink {
   readonly queryParams?: Params;
   readonly active: boolean;
   readonly attention?: StatusAttentionSummary;
-  readonly children?: readonly NavigationLink[];
-  readonly childrenId?: string;
-  readonly totalChildren?: number;
-  readonly disclosureKey?: string;
-  readonly activeChildGuid?: string;
   readonly outputs?: readonly { readonly guid: string; readonly label: string; readonly icon: IconName }[];
 }
 
@@ -52,7 +47,6 @@ export interface ResourceNavRoutes {
   facilityDataToolRoute: (facilityGuid: string, detail: string) => readonly string[];
   facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab: 'settings') => readonly string[];
   facilityMeterGroupRoute: (facilityGuid: string, groupGuid: string, tab: 'monthly-table') => readonly string[];
-  facilityEnergyUseRoute: (facilityGuid: string, energyUseGuid: string, tab: 'settings') => readonly string[];
   facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab: 'settings') => readonly string[];
   facilityWeatherPredictorRoute: (facilityGuid: string, key: string) => readonly string[];
 }
@@ -113,16 +107,8 @@ export function buildResourceNavGroups(input: ResourceNavInput, routes: Resource
   }));
   const energyUseEntries = buildEnergyUseInventory(input.accountGuid, [input.facility], input.energyUses, input.energyUseGroups);
   const energyUseGroups: NavigationLink[] = buildEnergyUseGroups(input.accountGuid, [input.facility], input.energyUseGroups, energyUseEntries).map(group => {
-    const members = [...group.items].sort((a, b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid));
-    const activeItem = members.find(item => item.guid === input.activeEnergyUseGuid);
-    const preview = members.slice(0, 20);
-    if (activeItem && !preview.includes(activeItem)) preview[19] = activeItem;
     return { id: group.guid, label: group.name, icon: 'energyUseGroup', route: facilityEnergyUseGroupRoute(facilityGuid, group.guid),
-      active: input.activeEnergyUseGroupGuid === group.guid,
-      activeChildGuid: activeItem?.guid, disclosureKey: JSON.stringify([input.accountGuid, facilityGuid, group.guid]),
-      childrenId: `energy-use-group-${encodeURIComponent(facilityGuid)}-${encodeURIComponent(group.guid)}`,
-      totalChildren: members.length, children: preview.map(item => ({ id: item.guid, label: item.name, icon: item.icon,
-        route: routes.facilityEnergyUseRoute(facilityGuid, item.guid, 'settings'), active: item.guid === input.activeEnergyUseGuid })) };
+      active: input.activeEnergyUseGroupGuid === group.guid };
   });
   return [
     {

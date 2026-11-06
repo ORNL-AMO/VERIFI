@@ -9,7 +9,6 @@ import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbEntry, getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { energyUseLinkedSources, energyUseMeterLinksError } from '@data/account-workspace/handlers/energy-use-command.models';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
 import { ConflictChoices, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
 import { EditSaveMode, SettingsHydrationMode, injectSettingsEditSession } from '@app/v1/data/editing/settings-edit-session';
@@ -34,7 +33,6 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   readonly workspace = inject(AccountWorkspaceStore);
   private readonly forms = inject(EnergyUseSetupFormService);
   private readonly actions = inject(EnergyUseActionsService);
-  private readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
   private readonly modal = inject(ModalPortalService);
   private readonly view = inject(ViewContainerRef);
@@ -56,8 +54,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   @ViewChild('yearEditor') private readonly yearEditor?: TemplateRef<unknown>;
   private copyRequest?: IdbEntry;
   private alive = true;
-  readonly item = computed(() => this.workspace.energyUseEquipment().find(item => item.guid === this.context.energyUseGuid()
-    && item.facilityId === this.context.facilityGuid() && item.accountId === this.workspace.account()?.guid));
+  readonly item = computed(() => this.context.item()?.item);
   readonly identity = computed(() => ({ accountGuid: this.workspace.account()?.guid ?? '', facilityGuid: this.context.facilityGuid() ?? '', energyUseGuid: this.context.energyUseGuid() ?? '' }));
   readonly key = computed(() => { const value = this.identity(); return `${value.accountGuid}:${value.facilityGuid}:${value.energyUseGuid}`; });
   readonly saved = computed(() => { const item = this.item(); return item ? energyUseSetup(item) : undefined; });
@@ -73,6 +70,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   readonly canCommand = computed(() => !!this.item() && this.workspace.canWrite() && !this.workspace.hasPending() && !this.editor.saving() && !this.busy());
   readonly canManageYears = computed(() => this.canCommand() && this.editor.canEdit() && !!this.facility() && !this.review() && !this.yearDrawer());
   readonly showReadOnlyNotice = computed(() => !this.workspace.canWrite() && !this.editor.saving());
+  readonly canLifecycle = computed(() => this.canCommand() && !this.editor.dirty() && ['idle', 'saved'].includes(this.editor.state()) && !!this.form()?.valid && !this.review() && !this.yearDrawer());
   readonly canCopy = computed(() => this.canCommand() && !this.editor.dirty() && !this.review());
   readonly removedSources = computed(() => {
     this.refreshKey();
@@ -120,8 +118,9 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   });
   @ViewChild('confirmation') private readonly confirmation?: TemplateRef<unknown>;
   constructor() {
-    const unregisterHeader = this.header?.register({ key: this.key, state: this.editor.state, message: this.saveMessage,
-      validation: this.setupValidation, canRetry: computed(() => !this.editor.saving() && !!this.item() && this.workspace.canWrite()),
+    const unregisterHeader = this.header?.register({ key: this.key, state: this.editor.state, dirty: this.editor.dirty,
+      blocked: computed(() => this.busy() || !!this.review() || !!this.yearDrawer()), message: this.saveMessage,
+      canRetry: computed(() => !this.editor.saving() && !!this.item() && this.workspace.canWrite()),
       retry: () => this.editor.retry() });
     if (unregisterHeader) inject(DestroyRef).onDestroy(unregisterHeader);
     registerDataDraft(signal(false), () => {}, computed(() => this.busy() || (this.workspace.hasPending() && !this.editor.saving())));
@@ -141,7 +140,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
     effect(() => { const dirty = this.editor.dirty(), form = this.form(); if (form) untracked(() => dirty ? form.markAsDirty() : form.markAsPristine()); });
   }
   hasUnsavedChanges(): boolean { return this.editor.dirty(); }
-  isNavigationBlocked(): boolean { return this.editor.saving() || this.busy() || this.workspace.hasPending(); }
+  isNavigationBlocked(): boolean { return this.editor.saving() || this.busy() || this.workspace.hasPending() || this.modal.workspaceBlocked(); }
   resolveConflicts(choices: ConflictChoices): void { this.editor.resolveConflicts(choices); }
   @HostListener('document:keydown', ['$event'])
   keyboardSave(event: KeyboardEvent): void {
@@ -255,13 +254,13 @@ export class EnergyUseSettingsComponent implements OnDestroy {
       this.approvals = [...this.approvals.filter(row => row.energySource !== review.source.energySource), structuredClone(review.source)];
       this.removeSource(review.source.energySource); this.closeReview(); return;
     }
-    const key = this.key(), identity = this.identity();
+    const key = this.key(), identity = this.identity(), destination = this.context.routeAfterRemoval([review.item.guid]);
     this.busy.set(true); this.actionError.set('');
     try {
       await this.actions.delete(identity, review.item);
       if (!this.alive || key !== this.key()) return;
       this.editor.discard(); this.closeReview(); this.busy.set(false);
-      const opened = await this.navigation.openFacilityInventory(identity.facilityGuid, 'energy-uses');
+      const opened = await this.context.navigate(destination);
       if (!opened) this.actionError.set('Energy use deleted. Use Back to energy uses to return to the inventory.');
     } catch (error) { if (this.alive && key === this.key()) this.actionError.set(error instanceof Error ? error.message : 'The energy use could not be deleted.'); }
     finally { if (this.alive) this.busy.set(false); }
@@ -275,7 +274,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
       this.copyRequest = undefined;
       if (!this.alive || key !== this.key()) return;
       this.busy.set(false);
-      const opened = await this.router.navigate(facilityEnergyUseRoute(copy.facilityId, copy.guid, 'settings'));
+      const opened = await this.router.navigate(facilityEnergyUseRoute(copy.facilityId, this.context.energyUseGroupGuid()!, copy.guid));
       if (opened === false) this.actionError.set('Energy use copied. Open its settings from the inventory.');
     } catch (error) { if (this.alive && key === this.key()) this.actionError.set(error instanceof Error ? error.message : 'The energy use could not be copied.'); }
     finally { if (this.alive) this.busy.set(false); }

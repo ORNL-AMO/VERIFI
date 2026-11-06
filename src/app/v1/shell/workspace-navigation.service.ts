@@ -339,7 +339,6 @@ export class WorkspaceNavigationService {
   readonly facilityAnalysisResultsRoute = routes.facilityAnalysisResultsRoute;
   readonly facilityMeterRoute = routes.facilityMeterRoute;
   readonly facilityMeterGroupRoute = routes.facilityMeterGroupRoute;
-  readonly facilityEnergyUseRoute = routes.facilityEnergyUseRoute;
   readonly facilityPredictorRoute = routes.facilityPredictorRoute;
   readonly facilityWeatherPredictorCreateRoute = routes.facilityWeatherPredictorCreateRoute;
   readonly facilityWeatherPredictorRoute = routes.facilityWeatherPredictorRoute;

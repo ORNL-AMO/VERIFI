@@ -129,7 +129,6 @@ export function setupSectionNavTest() {
             facilityDataToolRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
-            facilityEnergyUseRoute: (facilityGuid: string, guid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'energy-uses', guid, tab],
             facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
             facilityWeatherPredictorRoute: (_facilityGuid: string, groupKey: string, tab = 'setup') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', groupKey, tab],
             accountAnalysisRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'],

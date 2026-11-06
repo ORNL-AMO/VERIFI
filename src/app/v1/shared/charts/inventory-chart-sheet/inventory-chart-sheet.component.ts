@@ -1,5 +1,5 @@
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Component, ElementRef, Injector, afterNextRender, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, Injector, TemplateRef, afterNextRender, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { map } from 'rxjs';
@@ -16,6 +16,8 @@ import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.di
   templateUrl: './inventory-chart-sheet.component.html', styleUrls: ['./inventory-chart-sheet.component.css'] })
 export class InventoryChartSheetComponent {
   private readonly injector = inject(Injector);
+  readonly content = input<TemplateRef<unknown>>();
+  readonly customTitle = input('');
   readonly singleTrace = input(false);
   readonly traceChoices = computed(() => this.singleTrace() ? this.charts().flatMap(chart => chart.metrics) : this.activeChart()?.metrics ?? []);
   readonly traceHiddenGuids = computed(() => this.singleTrace() ? this.traceChoices().filter(trace => trace.id !== this.activeChart()?.id).map(trace => trace.id) : this.view().hiddenGuids);

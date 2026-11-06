@@ -4,9 +4,11 @@
 
 Migrate Energy Uses into the existing v1 Data workflow as a group-first inventory of individual energy uses. An item may represent equipment, a system, or a process.
 
-Use the meter/predictor inventory and workbench patterns, with one **Setup** tab that autosaves equipment settings and annual data together. Support estimation independently of meter readings.
+Use the shared Data inventory and workbench patterns. Each energy-use group owns a workbench with **Setup Group** first, followed by **Energy Use Items** and an internal member sidebar; each item retains its combined Setup editor and autosave. Support estimation independently of meter readings.
 
-This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 3A adds group browsing; broader group management remains a separate planning effort.
+This roadmap records the agreed target experience, not shipped behavior. Work through each phase separately and record its status and validation evidence when completed. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 4D supersedes the Phase 3A item dashboard/navigation and the Phase 4 item History destination. Earlier phase descriptions and evidence below remain historical; broader group management remains a separate planning effort.
+
+The [Energy Uses review and hardening plan](v1-energy-uses-review-and-hardening-plan.md) evaluates the current group-workbench implementation and proposes reliability, code-organization, and skill-guidance cleanup before continuing results work. It preserves the accepted data-entry workflow and records the remaining compatibility acceptance gap.
 
 | Phase | Deliverable | Status |
 | --- | --- | --- |
@@ -14,14 +16,15 @@ This roadmap records the agreed target experience, not shipped behavior. Work th
 | 2 | Creation, Settings, and safe commands | Merged into `unified-ux` |
 | 3 | Combined Setup, annual data, and estimation | Merged |
 | 3A | Group browsing, nested navigation, and equipment icons | Implemented and validated locally; publication checkpoint pending |
-| 4 | Complete item tools and charts | Planned |
+| 4 | Complete item tools and charts | Implemented locally; user iteration and publication pending |
+| 4D | Group workbench, Setup Group, and item sidebar | Implemented and validated locally; user iteration/publication pending |
 | 5 | Export, compatibility, and release acceptance | Planned |
 
 ## Architecture and contracts
 
-- Keep production UI under [`src/app/v1/data/energy-uses/`](../src/app/v1/data/energy-uses/), using feature-owned inventory projections, a collection workspace service, and a route-scoped workbench context. Reuse shared inventory, workbench, navigation, chart, and modal presentation. Follow the [Data workbench architecture norms](unified-ux-migration.md#production-v1-data-workbench-architecture-norms).
+- Keep production UI under [`src/app/v1/data/energy-uses/`](../src/app/v1/data/energy-uses/), using feature-owned inventory projections, a collection workspace service, and separate group and selected-item workbench contexts. Reuse shared inventory, workbench, navigation, chart, and modal presentation. Follow the [Data workbench architecture norms](unified-ux-migration.md#production-v1-data-workbench-architecture-norms).
 - Continue using the existing [equipment](../src/app/data/models/idbModels/facilityEnergyUseEquipment.ts) and [group](../src/app/data/models/idbModels/facilityEnergyUseGroups.ts) records. Keep their persisted names, GUID relationships, annual arrays, and backup formats. No database schema or data-version migration is planned.
-- Every item retains its required energy-use group relationship. Browse existing groups as cards and their members as paginated item cards, without regrouping or rewriting existing records. Energy-use grouping and optional utility meter-group links remain separate relationships.
+- Every item retains its required energy-use group relationship. Browse existing groups as cards and their members as workbench tabs, without regrouping or rewriting existing records. Energy-use grouping and optional utility meter-group links remain separate relationships.
 - Add typed Energy Use settings, annual-data, creation, and command contracts. The combined Setup editor uses one [shared Data editing session](v1-data-form-architecture-roadmap.md) for serialized autosave, reconciliation, failed drafts, and navigation protection.
 - Route writes through `WorkspaceCommandBoundary` and the existing [energy-use handler](../src/app/data/account-workspace/handlers/energy-use-command-handler.service.ts). Resolve current records inside queued commands; compound operations commit atomically and publish once. Follow the [workspace data workflow](data-access-and-workspace.md).
 - Reuse deterministic calculations from [`src/app/domain/calculations/energy-footprint/`](../src/app/domain/calculations/energy-footprint/). Rebuild legacy presentation and forms in v1; extract reusable helpers and file-writing logic into neutral layers where needed. Production v1 must not import v0 presentation or prototype code.
@@ -92,6 +95,20 @@ Finish the item workflow before declaring release readiness.
 
 **Completion:** Users can complete item-level work without returning to v0. Group moves, broader group rollups, and footprint diagrams remain outside this milestone; chart-only subtotals are included.
 
+### Phase 4D — Group workbench pivot
+
+Replace the group item-card dashboard and standalone item workbench with one facility-owned group workbench. This supersedes the navigation and History presentation described in Phases 3A and 4; their forms, command safety, projections, and validation evidence remain applicable.
+
+- Canonical routes are `data/energy-uses/groups/:energyUseGroupGuid`, `/items`, and `/items/:energyUseGuid`. Group landing selects the remembered successful item visit for this account/facility/group, otherwise the first alphabetical member, using replacement navigation. Empty groups remain at `/items`. Old standalone item routes are removed without aliases.
+- The group title switches among groups in the current facility. **Setup Group** is the first primary tab and owns group name, notes, and inline item management. **Energy Use Items** contains every member in an icon/name sidebar patterned after Account Analysis Select Facility Items; the item finder and repeated selected-item title/status strip are removed. Outer inventory filters never hide members; returning restores inventory filters, paging, scroll, and focus. Sidebar links stop at the group, and item switches use peer motion.
+- Reuse the combined Setup editor, annual sections, calculators, lifecycle actions, editing identity, autosave/reconciliation, guarded navigation, and selected-editor save feedback in the top workbench header. Creation preselects the facility/group; create/copy selects the new item. Deletion selects the next alphabetical survivor, then the previous survivor, or the empty group.
+- **Setup Group** autosaves the existing group's name/notes through the shared Settings session and guarded `/setup` route, preserving conflicts, failed drafts, and normalized-equivalent raw text. Queued commands merge current metadata and revalidate the durable facility/group before writing the allowlisted fields and modification date; item relationships/history and other group fields remain untouched. Synthetic unavailable groups cannot edit metadata.
+- **Energy Use Equipment** shows every group member in one table with selection, linked Name, Industrial System, Utility Types, and Notes columns. Name links open the corresponding item in Energy Use Items. Search, pagination, and Choose action are removed. A right-aligned action row always shows Add energy use, Add year, and Delete selected; selection actions are disabled without selected rows. Creation moves here from the workbench header and remains available for empty groups. Clear selection, Copy year, and Remove year are not offered. Item names include category icons; content is vertically centered and wraps without a table scrollbar. Shared shell-portal confirmation handles add-year inputs and reviewed deletion. Group changes clear selection; reviewed commands, stale-record checks, atomicity, and publication-only recovery remain. Unsaved, failed, conflicted, or in-progress group settings disable management. Bulk deletion stays in Setup Group.
+- Missing/mismatched groups/items show unavailable states while mounted editor drafts remain protected. The synthetic unavailable-group bucket retains orphan access without repairing relationships or permitting group-preselected creation.
+- Keep inventory Charts and update all item destinations. Remove the item History tab/route; reusable chart/projection logic remains. Group **Graphs**, **Table Results**, and restored History presentation are deferred without placeholder tabs. No persisted schema, existing item command payload, formula, backup, import, or Electron boundary changes. Group metadata uses an explicit new allowlisted command.
+
+**Completion:** Users open one group workbench, switch item forms from the internal sidebar without another drill-in, and manage selected members from Setup Group with reviewed confirmation. Focused route/editor/sidebar/management tests, Chromium history/layout/focus journeys, type-check, and production web compilation cover this pivot.
+
 ### Phase 5 — Export, compatibility, and release acceptance
 
 Complete the surrounding workflows and verify the full journey.
@@ -115,7 +132,7 @@ Each phase includes focused behavioral tests; validation is part of delivery, no
 - **Compatibility:** Existing multi-group records, imported records with additional sources, workbook fidelity, and backup restoration without lost history or relationships.
 - **Experience:** Fresh facility without readings, portfolio and single-facility journeys, keyboard/focus behavior, responsive layouts, themes, chart gaps, and export availability.
 
-Use `npm run validate:agent -- --mode plan` with the files changed in each phase to choose focused checks. Final persistence handoff requires `npm run test:all:ci`, `npx tsc -p tsconfig.app.json --noEmit`, `npm run build-prod`, and `npm run build-prod-electron`, plus focused desktop export verification. Record results and remaining gaps with the completed phase.
+Use `npm run validate:agent -- --mode plan` with the files changed in each phase to choose focused checks. Phase 4 validation stays focused on changed Energy Use behavior, shared web chart/navigation contracts, native IndexedDB commands, the app type-check, and production web compilation. It does not change Electron boundaries and does not require Electron validation. Full-suite and desktop export acceptance belong to the later release/export milestone where those checks apply. Record results and remaining gaps with the completed phase.
 
 ## Phase 1 delivery evidence
 
@@ -353,3 +370,149 @@ Deliver stacked branches in order: 4A calculators, 4B retirement and atomic bulk
 - **4C:** Carry the latest saved amount forward until a later explicit entry replaces it. A 2022 value of 100 plus newly entered 2025 equipment at 50 produces 150 for 2025. The new equipment has no contribution before 2025. Explicit zeroes remain zero, and invalid newer entries never silently fall back. Setup contains only explicit annual rows. Removing a year may resume an earlier value; retirement stops future projection. Chart details and accessible data distinguish entered, carried-forward, missing, invalid, and inactive values.
 
 No schema, backup, import, export, or v0 calculation policy changes are required. Chart-only period subtotals are presentation values. Excel export and release compatibility acceptance remain Phase 5.
+
+### Phase 4A local validation
+
+Calculator implementation: focused suite 143 passed; final full suite 3,489 fast and 385 Chromium tests passed. App TypeScript check and production web build passed. Initial restricted-process runs exited 134; unrestricted reruns passed. Desktop light and narrow dark Setup captures were inspected. Generated screenshots are not source artifacts. Publication remains deferred for user iteration.
+
+### Phase 4 local implementation and validation
+
+- Setup includes operating-hours, load-factor, and fuel rated-power calculators. Retirement/reinstatement and reviewed group-dashboard deletion/year batches are implemented locally; explicit annual rows and relationships are preserved.
+- Dashboard Charts uses treemaps with actual-period branches, item provenance, partial-coverage details, session memory, and accessible drilldown/data links. The item History tab draws entered segments solid and carried-forward segments dashed, with source-year/override details and genuine invalid/missing gaps.
+- Focused Chromium validation passed 32 tests covering transaction rollback, durable owner/stale-review rejection, one publication, refresh-only recovery, 30-item selection across pagination, reviewed deletion, 100 groups/1,000 chart items, themes, keyboard controls, and actual chart rendering. Desktop and narrow chart/review captures were inspected; inspection caught and corrected invisible History segments before the final run.
+- App type-check, whitespace checks, and production web build passed. The full suites had already been run before the validation scope was narrowed: 3,509 fast and 392 Chromium tests passed. These broad suites are additional evidence, not the routine Phase 4 gate. Existing browser-support, stylesheet-budget, CommonJS, and unrelated chart deprecation warnings remain.
+- The in-flight final Electron build was stopped (exit 130) when validation was narrowed to changed web/persistence behavior. No Electron validation is required for this work; native OS integration and export were not exercised.
+- PR review, pushing, and PR creation remain deferred for user iteration. No schema or persisted-record migration was introduced, and projection itself performs no writes. Generated test screenshots are removed from source folders after inspection.
+
+### Calculator UI iteration validation
+
+Calculator triggers are input-group icon addons. Calculator/year slideouts use shared v1 field styling and neutral Cancel actions. Operating hours uses a highlighted, uniform-size result with hrs/year. Load Factor uses method toggles, attached power-unit dropdowns, a kW breakdown, and the v0 percentage precision/warning presentation. Shared modal focus recovery preserves native field-to-field Tab navigation while retaining disabled-control and nested-modal containment.
+
+Focused validation passed: 28 fast tests across calculator helpers/forms/Setup, 19 Chromium tests across calculator slideouts and shared modal focus, app type-check, whitespace checks, and production web build. Light, dark, and high-contrast narrow captures were inspected. No broad-suite or Electron validation was run for this iteration batch; existing browser-support, style-budget, and CommonJS build warnings remain. Subsequent History feedback is a new UI iteration batch.
+
+## Phase 4D delivery evidence
+
+Implemented and validated locally on 2026-11-06. The group workbench replaces the second card dashboard and standalone item routes; the existing Setup forms, annual editing, calculators, lifecycle actions, and safe command boundary remain active. The sidebar ends at groups. Group Graphs, Table Results, and restored History presentation remain deferred.
+
+| Check | Result |
+| --- | --- |
+| Scoped fast specs for Energy Uses, the changed inventory header, route parsing/navigation, sidebar, and shared tabs | Passed: 345 tests across 33 files. The final workbench-only rerun passed all 13 tests, including the newly added empty-group creation regression. |
+| Focused Chromium Energy Uses and reused native batch-command workflows | Passed: 48 tests across 6 files. The final changed-journey rerun passed all 12 tests, including the added drawer keyboard/focus check. |
+| App type-check: `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
+| Production web build: `npm run build-prod` | Passed; existing browser-support, stylesheet-budget, and CommonJS warnings remain. |
+| Responsive, theme, focus, history, and print checks | Desktop light and narrow dark/high-contrast captures inspected. Journeys cover 1,000 long-named items, search, active-tab scrolling, 30-item drawer selection, reviewed deletion, guarded exits, Back/Forward, orphan access, and outer inventory filter/page/scroll/focus restoration. |
+| Additional repository-wide form-architecture scan | Existing failure: `shared/a11y/modal-focus-trap.directive.ts` reads `event.target` for native focus tracking. This file was already modified before the pivot and remains untouched by Phase 4D. Other scan checks passed. |
+
+Restricted fast-test/build processes initially exited 134 before results; runs with the required process access passed. An initial screenshot destination was outside the test server's allowed paths; captures now use the ignored repository `tmp/` directory. Generated screenshots were moved out of source folders, preserving their prior deletion state. No full-suite or Electron validation was run for this pivot. PR publication remains deferred.
+
+### Setup Group layout iteration
+
+The subsequent 2026-11-06 UI iteration places **Setup Group** first in the primary tab row, followed by **Energy Use Items**. Group landing retains the accepted item-restoration behavior; reordering tabs does not change existing deep links. Setup Group edits the persisted group's name/notes and hosts item selection and operation entry inline. Only reviewed batch confirmation uses the shell portal. The item search and repeated selected-item title/validation strip are removed; save/retry/conflict feedback is in the top header. Each item's existing name, notes, annual form, calculators, and lifecycle tools remain in its own item tab.
+
+Group metadata uses a separate shared Settings session, explicit account/facility/group identity, queued three-way reconciliation, and a durable allowlisted metadata command. It preserves all other group fields, item GUID relationships, annual history, and supported stored/backup shapes. Missing groups retain mounted drafts; synthetic unavailable groups cannot edit name/notes. No schema, default, migration, calculation, v0 command, backup-format, or Electron boundary changes are introduced.
+
+| Focused check | Result |
+| --- | --- |
+| Group/item workbench, group editing, action, management, route, and legacy command-handler fast specs | Passed: 35 tests across 6 files. |
+| Chromium changed journeys and native Energy Use commands | Passed: 32 tests across 2 files; final layout rerun passed all 13 changed journeys. Covers group save/reopen, single committed publication, stale/foreign rejection, rollback, preserved item history, guarded tab changes, inline selection across pages, confirmation keyboard/focus, and retained group metadata. |
+| `npx tsc -p tsconfig.app.json --noEmit` and `git diff --check` | Passed. |
+| `npm run build-prod` | Passed with existing browser-support, stylesheet-budget, and CommonJS warnings. |
+| Visual review | Inspected desktop light and narrow high-contrast Setup Group and item views; corrected connected section borders, field spacing, and heading styling. Captures remain under ignored `tmp/`. |
+
+Validation used the scoped agent validation plan and followed the user's focused-check/no-Electron instruction. No full suite or Electron checks were run for this iteration.
+
+### Setup Group equipment-table iteration
+
+The next 2026-11-06 refinement aligns Setup Group with the v0 equipment table: every group member appears in one table with selection, Name, Industrial System, Utility Types, and Notes. Each name is a canonical native link to that item's Energy Use Items subtab, including guarded navigation and modified-click behavior. The table has no search, pagination, or Choose action workflow. A select-all checkbox and direct selection actions retain the existing reviewed year/delete commands; year inputs and review are collected inside the shared shell-portal confirmation. Narrow layouts scroll the table within its own region. Group metadata editing and item forms are unchanged.
+
+| Focused check | Result |
+| --- | --- |
+| Table/management and Setup Group fast specs | Passed: 8 tests across 2 files; covers every row, canonical links, direct actions, group-change selection reset, stale review, and publication-only recovery. Initial year-action fixtures lacked the required facility energy unit; corrected fixtures pass without changing calculation or persistence behavior. |
+| Changed Chromium journey file | Passed: 15 tests, including v0 column/data alignment, item-link keyboard navigation and Back, all 30 rows without paging, direct deletion, direct year input/review, confirmation focus, and responsive themes. |
+| App type-check and whitespace checks | Passed: `npx tsc -p tsconfig.app.json --noEmit` and `git diff --check`. |
+| Production web compilation | Passed: `npm run build-prod`, with existing browser-support, stylesheet-budget, and CommonJS warnings. |
+| Visual review | Desktop light and narrow high-contrast table captures inspected under ignored `tmp/`; links, utility badges, notes, and contained horizontal scrolling remain readable. |
+
+No persisted model, command, calculation, backup, or Electron boundary changed. No full-suite or Electron checks were run for this table iteration.
+
+### Equipment table action and layout refinement
+
+The final 2026-11-06 refinement moves Add energy use from the workbench header into the right-aligned equipment action row. Add energy use, Add year, and Delete selected are always visible. Creation remains available without selected rows, subject to the existing ownership/editor rules; Add year and Delete selected require selection. Clear selection, Copy year, and Remove year are no longer offered by this table. The selection-header checkbox still supports selecting/deselecting every row.
+
+Item names include equipment icons. Table cells vertically center their content. Fixed-layout columns and wrapped text fit the available width without a table-specific scrollbar, including narrow themes. The final table retains Name, Industrial System, Utility Types, and Notes; no Meter Groups column is added. Group editing, item forms, and persistence/calculation contracts are unchanged.
+
+| Focused check | Result |
+| --- | --- |
+| Table, Setup Group, and workbench fast specs | Passed: 22 tests across 3 files, including always-visible action states, independent creation availability, and creation handoff. |
+| Changed Chromium journey file | Passed: 15 tests. Covers right alignment, empty-selection disabled states, item icons/links, centered cells, no table overflow at desktop/narrow widths, creation from Setup Group, unavailable-group creation protection, and guarded navigation/history. |
+| App type-check, whitespace checks, and production web build | Passed: `npx tsc -p tsconfig.app.json --noEmit`, `git diff --check`, and `npm run build-prod`; existing build warnings remain. |
+| Visual review | Desktop light and narrow high-contrast captures inspected after the final button move; source screenshots remain under ignored `tmp/`. |
+
+Validation remained scoped to the changed content. No full-suite or Electron checks were run.
+
+### Energy Use Items sidebar iteration
+
+The 2026-11-06 navigation refinement replaces horizontal item subtabs with the Account Analysis Select Facility Items layout. Energy Use Items has an internal icon/name rail on the left, a member count, active selection, and independently scrolling navigation/editor panes. Narrow windows use the account-analysis pattern's compact horizontal top rail. Setup Group stays full width; the global Data sidebar still stops at groups. There is no item finder or repeated selected-item heading.
+
+Routes, successful-visit restoration, guarded switching, existing forms/autosave, and table-name links retain their contracts. The editor outlet remains mounted when its saved target disappears. Accepted item changes reveal the active rail button without changing selection before navigation succeeds. Print layout omits the internal rail and exposes the form content.
+
+| Focused check | Result |
+| --- | --- |
+| Workbench fast specs | Passed: 13 tests protecting routing, group membership, creation/copy/deletion, retained drafts, own-save feedback, and cancelled navigation. |
+| Changed Chromium journey file | Passed: 15 tests. Covers 1,000 long-named members, independent list scrolling, compact narrow layout, active-item visibility, contrast, keyboard selection, table links, guarded exits, browser history, and unchanged Setup Group workflows. |
+| App type-check, whitespace checks, and production web build | Passed: `npx tsc -p tsconfig.app.json --noEmit`, `git diff --check`, and `npm run build-prod`; existing build warnings remain. |
+| Visual review | Desktop light and narrow high-contrast captures inspected under ignored `tmp/energy-use-item-sidebar/`. The large-inventory check exposed a generic routed-page display rule overriding the flex host; scoped host styling and an explicit constrained grid row now preserve independent scrolling. The contrast assertion checks the active item's opaque background rather than its transparent navigation parent. |
+
+No persistence, calculation, import/export, or Electron boundaries changed. Validation remained focused; no full suite or Electron checks were run.
+
+### Save-feedback copy refinement
+
+Removed the redundant “Finish saving…” reminders from the workbench header, Setup Group management area, and item lifecycle actions. The top-right save feedback remains the saving/status indicator; existing validation/conflict errors and action-disabled conditions remain unchanged. This presentation-only edit uses the focused workbench, Setup Group, and lifecycle template/save checks selected by the scoped agent validation plan; no new copy-only regression test, broad suite, or Electron check is needed.
+
+
+### Setup Group Add year slideout
+
+The 2026-11-06 Add year follow-up replaces the year-only confirmation with a guided slideout. Select equipment in Setup Group, choose one fiscal year, then review full annual inputs one item at a time in alphabetical order. The default destination is the next highest saved year across the selection; overflowing 9999 remains invalid rather than being silently clamped. With no history, use the existing facility-based year default.
+
+New annual drafts start from each item’s highest saved fiscal year, retaining manual values, units, calculator inputs, and existing copied-calculation behavior. Existing destination years load for editing. Missing annual rows use the existing defaults; ambiguous duplicate source/year buckets block saving without modifying history. Shared annual fields include operating hours, load/duty factors, applicable efficiency, consumption modes, units, previews, and hours/load calculators. Calculators remain inside the same blocking portal.
+
+Completed equipment appears above the current form using creation-step styling; remaining equipment appears below. Previous/Next and direct step selection retain every typed draft. Editing a completed item requires review again. Next validates without saving; Save all validates the entire selection and commits one annual-only transaction. Changing the year or discarding unfinished drafts requires confirmation.
+
+The table owns controller state outside the portal view. Saved-record, facility, ownership, and membership changes block saving while keeping drafts mounted. Reload changed items requires confirmation and resets only changed item drafts; changed facility settings reset all drafts. Removed/moved items require closing and reselecting. Write failures retain drafts for retry; committed refresh failures allow only publication recovery. Success clears table selection, closes the slideout, and restores focus. Persisted models, durable command payloads, formulas, and backup formats remain unchanged. Earlier Phase 4D evidence above remains historical.
+
+| Focused check | Result |
+| --- | --- |
+| Scoped `validate:agent -- --mode plan -- <changed files>` | Selected nearby fast specs, app type-check, and browser checks. Browser execution was limited to the changed slideout and annual batch transaction journeys; the requested production web build was also run. |
+| Annual draft, controller, fields, calculator, and table fast specs | Passed: 30 tests across 6 files. Covers per-item defaults, existing-year edits, partial/ambiguous history, validation, revisits, resets, stale/moved/foreign records, retry, and refresh-only recovery. |
+| Focused Chromium checks | Passed: 20 native command tests plus 4 slideout journeys. Covers mixed existing/new years, atomic rollback and reopening, one blocking portal, calculator Apply/Escape, draft/discard navigation, selection clearing, and focus restoration. The table-handoff test fixture was corrected to retain its portal host before the final passing run. |
+| Responsive/theme visual check | Passed at desktop and 390px widths in light, dark, and strong contrast, including long equipment names, reachable footer actions, and no horizontal panel overflow. The slideout is hidden in print styles. |
+| `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
+| `npm run build-prod` | Passed; existing browser-support, unrelated stylesheet-budget, and CommonJS dependency warnings remain. |
+
+The restricted fast runner initially exited 134; rerunning outside that environment passed. Browser checks caught and verified the correction for normalized optional fields being mistaken for unrelated history edits. No broad suite or Electron validation was run.
+
+
+### Add year selection cards
+
+The year-selection refinement presents sorted, distinct saved years from the current account’s meter readings, predictor readings, and equipment annual data as clickable cards. The list spans facilities and groups, excludes foreign-account records and invalid years, and does not fill gaps. With no dated account data, show the current calendar year. Clicking a year proceeds directly to the equipment forms; Other reveals the validated fiscal-year input and Next item action. Returning to the year step retains the selected card/input, and changing the destination still requires the existing draft-reset confirmation. The next-saved-year suggestion from the original slice remains only as the initial Other input value. Per-item defaults and persistence are unchanged.
+
+Focused validation for this refinement: 14 controller tests and 5 Chromium slideout journeys passed, including account-wide/deduplicated years, foreign/invalid-year exclusion, current-year fallback, direct card selection, Other validation, reset protection, keyboard focus, and narrow layout. App type-check passed. Production web compilation passed with existing browser-support, stylesheet-budget, and dependency warnings. No broad suite or Electron checks were run.
+
+
+### Annual form presentation cleanup
+
+Removed the Copied year annotation beside Consumption in the shared annual fields; copied-value handling remains unchanged. Remaining equipment now uses a locally styled h3 heading, avoiding legacy h4 padding, orange underline, and letter spacing. Focused validation passed: 1 annual-field test and 5 Chromium slideout journeys, including computed-style checks for the heading. The scoped validation plan selected template/style checks; no broad build or Electron checks were run for this presentation-only follow-up.
+
+
+### Add year out-of-order equipment navigation
+
+Fixed the workflow for jumping ahead through Remaining equipment. Next validates the current item and visits the next unfinished item, wrapping to earlier skipped items after reaching the end and skipping already reviewed equipment. Save all depends on every other item being reviewed, rather than the current item’s alphabetical position. Earlier drafts, validation, Previous, and direct step selection retain their existing behavior. The regression covers jumping from equipment 1 to 3 of 9, progressing through 9, returning to 1 and 2, and saving the full batch from item 2.
+
+Focused validation passed: 16 controller tests and 6 Chromium slideout journeys, app type-check, and production web build. The browser regression exercises the nine-item out-of-order path and verifies a single save containing all nine records. Existing browser-support, unrelated stylesheet-budget, and dependency warnings remain; no broad suite or Electron checks were run.
+
+
+### Add year review progress counter
+
+The equipment counter now shows the number of completed equipment drafts plus one, rather than the selected item’s alphabetical position. Jumping directly to the third item with no completed drafts still displays 1 of 9; after reviewing seven items and wrapping back, it displays 8 of 9, then 9 of 9 for the final unfinished draft.
+
+Focused validation passed: all 6 Chromium slideout journeys, with explicit rendered progress assertions for out-of-order completion. The scoped validation plan selected no additional checks for this template-only change; no broad build or Electron validation was run.

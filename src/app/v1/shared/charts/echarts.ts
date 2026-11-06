@@ -1,6 +1,8 @@
 import * as echarts from 'echarts/core';
 export { echarts };
 import {
+  TreemapChart,
+  TreemapSeriesOption,
   BarChart,
   BarSeriesOption,
   CustomChart,
@@ -35,6 +37,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { LegacyGridContainLabel } from 'echarts/features';
 
 echarts.use([
+  TreemapChart,
   BarChart,
   CustomChart,
   HeatmapChart,
@@ -54,6 +57,7 @@ echarts.use([
 ]);
 
 export type V1EChartsOption = echarts.ComposeOption<
+  | TreemapSeriesOption
   | BarSeriesOption
   | CustomSeriesOption
   | HeatmapSeriesOption

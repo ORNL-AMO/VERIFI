@@ -66,7 +66,7 @@ export function filterAndSortEnergyUseGroups(groups: readonly EnergyUseGroupEntr
       .sort((a, b) => a.label.localeCompare(b.label) || a.guid.localeCompare(b.guid));
     return [{ ...group, snapshot: { meterGroups,
       equipmentTypes: categories.map(label => ({ label, icon: energyUseIcon(label) })),
-      items: matchingItems.map(item => ({ guid: item.guid, name: item.name, icon: item.icon, route: facilityEnergyUseRoute(item.facility.guid, item.guid) })),
+      items: matchingItems.map(item => ({ guid: item.guid, name: item.name, icon: item.icon, route: facilityEnergyUseRoute(item.facility.guid, group.guid, item.guid) })),
       categories, sources: unique(items.flatMap(item => item.snapshot.sources)),
       years: [...new Set(items.flatMap(item => item.snapshot.years))].sort((a, b) => a - b) } }];
   });

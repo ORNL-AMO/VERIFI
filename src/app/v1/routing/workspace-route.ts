@@ -6,7 +6,6 @@ export type WorkspaceRouteMotion = NavigationMotion;
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
 export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
-export type FacilityEnergyUseRouteTab = 'settings';
 export type FacilityPredictorRouteTab = 'settings' | 'readings' | 'quality';
 export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
 export type FacilityAnalysisRouteTab = 'setup' | 'used-by';
@@ -174,8 +173,8 @@ export function facilityEnergyUseGroupRoute(facilityGuid: string, groupGuid: str
   return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'energy-uses', 'groups', groupGuid];
 }
 
-export function facilityEnergyUseRoute(facilityGuid: string, energyUseGuid: string, tab: FacilityEnergyUseRouteTab = 'settings'): Array<string> {
-  return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'energy-uses', energyUseGuid, tab];
+export function facilityEnergyUseRoute(facilityGuid: string, groupGuid: string, energyUseGuid: string): Array<string> {
+  return [...facilityEnergyUseGroupRoute(facilityGuid, groupGuid), 'items', energyUseGuid];
 }
 
 export function facilityPredictorRoute(
@@ -268,8 +267,8 @@ export function parseWorkspaceRoute(url: string): RouteState {
         : undefined,
       energyUseGroupGuid: section === 'data' && detail === 'energy-uses' && routeParts[5] === 'groups' && routeParts[6]
         ? safeDecodeRoutePart(routeParts[6]) : undefined,
-      energyUseGuid: section === 'data' && detail === 'energy-uses' && routeParts[5] && routeParts[5] !== 'groups'
-        ? safeDecodeRoutePart(routeParts[5]) : undefined,
+      energyUseGuid: section === 'data' && detail === 'energy-uses' && routeParts[5] === 'groups' && routeParts[6] && routeParts[7] === 'items' && routeParts[8]
+        ? safeDecodeRoutePart(routeParts[8]) : undefined,
       predictorGuid: section === 'data' && detail === 'predictors' && routeParts[5] && !isWeatherPredictorRoute
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,

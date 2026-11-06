@@ -12,7 +12,7 @@ import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { EnergyUseCommandIdentity, EnergyUseOwner, energyUseMeterLinksError } from './energy-use-command.models';
+import { EnergyUseBatchChange, EnergyUseCommandIdentity, EnergyUseGroupIdentity, EnergyUseGroupSettings, EnergyUseOwner, energyUseMeterLinksError } from './energy-use-command.models';
 
 @Injectable({ providedIn: 'root' })
 export class EnergyUseCommandHandler {
@@ -82,11 +82,53 @@ export class EnergyUseCommandHandler {
     });
   }
 
+  /** V1 group metadata edits preserve all relationships and non-editor fields. */
+  async saveGroupSettings(identity: EnergyUseGroupIdentity, before: IdbFacilityEnergyUseGroup,
+    values: EnergyUseGroupSettings): Promise<IdbFacilityEnergyUseGroup> {
+    if (typeof values.name !== 'string' || !values.name.trim() || typeof values.notes !== 'string') this.reject('Enter an energy-use group name.');
+    return this.transactions.runTransaction(['facilities', 'facilityEnergyUseGroups'], 'readwrite', async tx => {
+      await this.requireFacility(tx, identity);
+      const current = await this.requireGroup(tx, identity, identity.energyUseGroupGuid);
+      if (before.id === undefined || before.guid !== identity.energyUseGroupGuid || JSON.stringify(current) !== JSON.stringify(before)) {
+        this.reject('The saved energy-use group changed. Reload or review it again before continuing.');
+      }
+      const saved = { ...current, name: values.name.trim(), notes: values.notes.trim(), modifiedDate: new Date() };
+      await tx.put('facilityEnergyUseGroups', saved);
+      return saved;
+    });
+  }
+
   async deleteItem(identity: EnergyUseCommandIdentity, reviewed: IdbFacilityEnergyUseEquipment): Promise<void> {
     await this.transactions.runTransaction(['facilities', 'facilityEnergyUseEquipment'], 'readwrite', async tx => {
       await this.requireFacility(tx, identity);
       await this.requireCurrentItem(tx, identity, reviewed);
       await tx.deleteByKey('facilityEnergyUseEquipment', reviewed.id!);
+    });
+  }
+
+  async applyBatch(accountGuid: string, changes: readonly EnergyUseBatchChange[]): Promise<void> {
+    const reviewed = structuredClone(changes);
+    if (!reviewed.length || new Set(reviewed.map(row => row.before.guid)).size !== reviewed.length) this.reject('Choose a nonempty set of unique energy uses.');
+    await this.transactions.runTransaction(['facilities', 'facilityEnergyUseEquipment'], 'readwrite', async tx => {
+      for (const row of reviewed) {
+        const identity = { accountGuid, facilityGuid: row.facility.guid, energyUseGuid: row.before.guid };
+        await this.requireFacility(tx, identity);
+        const facilities = await tx.getAllByIndex<IdbFacility>('facilities', 'guid', row.facility.guid);
+        if (JSON.stringify(facilities[0]) !== JSON.stringify(row.facility)) this.reject('Facility settings changed. Review the batch again.');
+        await this.requireCurrentItem(tx, identity, row.before);
+        if (row.after) {
+          this.requireItemOwner(row.after, identity);
+          const fixed = (item: IdbFacilityEnergyUseEquipment) => ({ ...item, operatingConditionsData: undefined,
+            utilityData: item.utilityData.map(source => ({ ...source, energyUse: undefined })), modifiedDate: undefined });
+          if (JSON.stringify(fixed(row.after)) !== JSON.stringify(fixed(row.before))) this.reject('Bulk year operations cannot change equipment settings or relationships.');
+        }
+      }
+      for (const row of reviewed) {
+        if (row.after) {
+          if (JSON.stringify(row.after) !== JSON.stringify(row.before)) await tx.put('facilityEnergyUseEquipment', { ...row.after, modifiedDate: new Date() });
+        }
+        else await tx.deleteByKey('facilityEnergyUseEquipment', row.before.id!);
+      }
     });
   }
 

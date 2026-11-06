@@ -1,0 +1,24 @@
+@if (item(); as current) {
+  @if (current.noLongerInUse?.isNoLongerInUse) { <p class="energy-use-lifecycle__status">No longer in use after FY {{ current.noLongerInUse.year }}. Saved annual history remains available.</p> }
+  <button type="button" class="v1-btn v1-btn--deactivate"
+    [attr.aria-pressed]="current.noLongerInUse?.isNoLongerInUse ?? false"
+    [disabled]="!canAct() || busy() || committed()" (click)="open()">
+    @if (current.noLongerInUse?.isNoLongerInUse) {
+      <app-ui-icon name="refresh"/>Return energy use to use
+    } @else {
+      <app-ui-icon name="viewHidden"/>Mark no longer in use
+    }
+  </button>
+}
+<ng-template #confirmation>
+  @if (review(); as current) {
+    <app-confirmation-dialog [title]="current.noLongerInUse?.isNoLongerInUse ? 'Return energy use to use?' : 'Mark energy use no longer in use?'" titleId="energy-use-lifecycle-title" cancelAriaLabel="Cancel use status change" [confirmLabel]="current.noLongerInUse?.isNoLongerInUse ? 'Return to use' : 'Mark no longer in use'" confirmClass="v1-btn--primary" [confirmIcon]="current.noLongerInUse?.isNoLongerInUse ? 'refresh' : 'viewHidden'" [busy]="busy()" [disabled]="busy() || committed()" [confirmDisabled]="!canAct() || stale() || (!current.noLongerInUse?.isNoLongerInUse && year.invalid)" (confirmed)="confirm()" (cancelled)="close()">
+      <p>{{ current.name }}</p>
+      @if (current.noLongerInUse?.isNoLongerInUse) { <p>Restore carry-forward eligibility. All saved annual history will remain unchanged.</p> }
+      @else { <label>Last active fiscal year<input type="number" min="1" max="9999" [formControl]="year" [readOnly]="busy() || committed()"></label><p>Earlier values carry forward through this year, then stop. Explicitly saved history remains visible, including later entries.</p> }
+      @if (stale()) { <p class="v1-alert v1-alert--warning" role="alert">The saved item changed. Cancel and review again.</p> }
+      @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+      @if (committed()) { <button type="button" class="v1-btn v1-btn--primary" [disabled]="busy()" (click)="recover()">Refresh saved changes</button> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
