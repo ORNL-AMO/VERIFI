@@ -22,8 +22,9 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { PreparedBackupFile } from './backup-preparation.service';
+import { BackupRelationshipError, PreparedBackupFile } from './backup-preparation.service';
 import { GuidPair, remapStatusWarningDismissals } from './status-warning-dismissal-remap';
+import { remapEnergyUseBackupReferences, unresolvedEnergyUseBackupReferences } from './energy-use-backup-relations';
 
 interface PredictorGuidPair extends GuidPair {
   predictorName: string;
@@ -83,6 +84,7 @@ export class BackupImportCommandService {
     const backupFile = structuredClone(preparedBackup);
 
     return this.transactions.runTransaction(ACCOUNT_IMPORT_STORES, 'readwrite', async transaction => {
+      await this.requireUnresolvedGroupsAvailable(transaction, backupFile);
       const accountGUIDs: GuidPair = {
         oldId: backupFile.account.guid,
         newId: this.getGUID()
@@ -358,11 +360,8 @@ export class BackupImportCommandService {
         delete facilityEnergyUseEquipment.id;
         facilityEnergyUseEquipment.accountId = accountGUIDs.newId;
         facilityEnergyUseEquipment.facilityId = this.getNewId(facilityEnergyUseEquipment.facilityId, facilityGUIDs);
-        facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
-        facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
-          return this.getNewId(groupId, meterGroupGUIDs);
-        });
-        await this.addRecord(transaction, 'facilityEnergyUseEquipment', facilityEnergyUseEquipment);
+        await this.addRecord(transaction, 'facilityEnergyUseEquipment',
+          remapEnergyUseBackupReferences(facilityEnergyUseEquipment, facilityEnergyUseGroupGUIDs, meterGroupGUIDs));
       }
 
       if (Array.isArray(newAccount.portfolioFacilityOrder)) {
@@ -473,6 +472,7 @@ export class BackupImportCommandService {
   ): Promise<{ facility: IdbFacility, index?: number }> {
     const backupFile = structuredClone(preparedBackup);
 
+    await this.requireUnresolvedGroupsAvailable(transaction, backupFile);
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
     const newFacilityGUID: string = this.getGUID();
@@ -687,11 +687,8 @@ export class BackupImportCommandService {
       delete facilityEnergyUseEquipment.id;
       facilityEnergyUseEquipment.accountId = accountGUID;
       facilityEnergyUseEquipment.facilityId = newFacilityGUID;
-      facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
-      facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
-        return this.getNewId(groupId, meterGroupGUIDs);
-      });
-      await this.addRecord(transaction, 'facilityEnergyUseEquipment', facilityEnergyUseEquipment);
+      await this.addRecord(transaction, 'facilityEnergyUseEquipment',
+        remapEnergyUseBackupReferences(facilityEnergyUseEquipment, facilityEnergyUseGroupGUIDs, meterGroupGUIDs));
     }
 
     let needsFacilityUpdate: boolean = false;
@@ -777,6 +774,14 @@ export class BackupImportCommandService {
   private getNewId(oldId: string, GUIDs: Array<GuidPair>): string {
     let GUID: string = GUIDs.find(id => { return id.oldId == oldId; })?.newId;
     return GUID;
+  }
+
+  private async requireUnresolvedGroupsAvailable(transaction: IndexedDbTransactionContext, backup: PreparedBackupFile): Promise<void> {
+    for (const { store, guid } of unresolvedEnergyUseBackupReferences(backup)) {
+      if ((await transaction.getAllByIndex(store, 'guid', guid)).length) {
+        throw new BackupRelationshipError('An unavailable group reference is already used by another saved group. The backup cannot be imported without changing its relationships.');
+      }
+    }
   }
 
   private getTrimmedModel(model: JStatRegressionModel): JStatRegressionModel {

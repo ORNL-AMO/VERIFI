@@ -121,6 +121,83 @@ describe('BackupPreparationService', () => {
     })).toThrow(InvalidBackupError);
   });
 
+  it('preserves unresolved energy-use group references in account and extracted facility backups', () => {
+    const input = accountBackup();
+    input.facilityEnergyUseEquipment = [{ guid: 'equipment', accountId: 'account', facilityId: 'facility',
+      energyUseGroupId: 'missing-energy-group', utilityMeterGroupIds: ['missing-meter-group'] } as any];
+    const before = structuredClone(input);
+
+    const prepared = service.prepare(input);
+    const extracted = service.extractFacility(prepared, 'facility');
+
+    expect(prepared.facilityEnergyUseEquipment).toEqual(before.facilityEnergyUseEquipment);
+    expect(extracted.facilityEnergyUseEquipment).toEqual(before.facilityEnergyUseEquipment);
+    expect(prepared.facilityEnergyUseGroups).toEqual([]);
+    expect(prepared.groups).toEqual([]);
+    expect(input).toEqual(before);
+  });
+
+  it.each([null, undefined, '', '   ', 23])('rejects malformed required energy-use group identifiers: %j', energyUseGroupId => {
+    const input = accountBackup();
+    input.facilityEnergyUseEquipment = [{ guid: 'equipment', accountId: 'account', facilityId: 'facility',
+      energyUseGroupId, utilityMeterGroupIds: [] }] as unknown as BackupFile['facilityEnergyUseEquipment'];
+
+    expect(() => service.prepare(input)).toThrow(new BackupRelationshipError('Energy-use equipment needs a nonempty energy-use group identifier.'));
+  });
+
+  it.each([null, undefined])('defaults historically optional meter-group links to an array: %j', utilityMeterGroupIds => {
+    const input = accountBackup();
+    input.facilityEnergyUseEquipment = [{ guid: 'equipment', accountId: 'account', facilityId: 'facility',
+      energyUseGroupId: 'missing-energy-group', utilityMeterGroupIds }] as unknown as BackupFile['facilityEnergyUseEquipment'];
+
+    const before = structuredClone(input);
+    const prepared = service.prepare(input);
+    expect(prepared.facilityEnergyUseEquipment).toEqual(input.facilityEnergyUseEquipment.map(item => ({ ...item, utilityMeterGroupIds: [] })));
+    expect(input).toEqual(before);
+  });
+
+  it.each([null, undefined, '', '   ', 23].map(value => ({ value })))('rejects malformed meter-group identifiers: $value', ({ value }) => {
+    const input = accountBackup();
+    input.facilityEnergyUseEquipment = [{ guid: 'equipment', accountId: 'account', facilityId: 'facility',
+      energyUseGroupId: 'missing-energy-group', utilityMeterGroupIds: [value] }] as unknown as BackupFile['facilityEnergyUseEquipment'];
+
+    expect(() => service.prepare(input)).toThrow(new BackupRelationshipError('Energy-use meter-group links must be an array of nonempty group identifiers.'));
+  });
+
+  it.each(['group-guid', 23, true, {}])('rejects malformed meter-group link collections: %j', utilityMeterGroupIds => {
+    const input = accountBackup();
+    input.facilityEnergyUseEquipment = [{ guid: 'equipment', accountId: 'account', facilityId: 'facility',
+      energyUseGroupId: 'missing-energy-group', utilityMeterGroupIds }] as unknown as BackupFile['facilityEnergyUseEquipment'];
+
+    expect(() => service.prepare(input)).toThrow(new BackupRelationshipError('Energy-use meter-group links must be an array of nonempty group identifiers.'));
+  });
+
+  it.each(['energy-use', 'meter'] as const)('rejects known cross-facility %s group references instead of treating them as missing', kind => {
+    const input = accountBackup();
+    input.facilities.push({ guid: 'other-facility', accountId: 'account' } as any);
+    const groups = kind === 'energy-use' ? input.facilityEnergyUseGroups : input.groups;
+    groups.push({ guid: 'linked-group', accountId: 'account', facilityId: 'other-facility' } as any);
+    input.facilityEnergyUseEquipment = [{ guid: 'equipment', accountId: 'account', facilityId: 'facility',
+      energyUseGroupId: kind === 'energy-use' ? 'linked-group' : 'missing-energy-group',
+      utilityMeterGroupIds: kind === 'meter' ? ['linked-group'] : [] } as any];
+
+    expect(() => service.prepare(input)).toThrow('group owned by another account or facility');
+
+    // A colliding owned GUID does not make a foreign reference unambiguous.
+    groups.push({ guid: 'linked-group', accountId: 'account', facilityId: 'facility' } as any);
+    expect(() => service.prepare(input)).toThrow(BackupRelationshipError);
+  });
+
+  it.each(['equipment', 'energy-use group', 'meter group'] as const)('rejects foreign account ownership for energy-use %s', kind => {
+    const input = accountBackup();
+    input.facilityEnergyUseEquipment = [{ guid: 'equipment', accountId: kind === 'equipment' ? 'foreign' : 'account',
+      facilityId: 'facility', energyUseGroupId: 'energy-group', utilityMeterGroupIds: ['meter-group'] } as any];
+    input.facilityEnergyUseGroups = [{ guid: 'energy-group', accountId: kind === 'energy-use group' ? 'foreign' : 'account', facilityId: 'facility' } as any];
+    input.groups = [{ guid: 'meter-group', accountId: kind === 'meter group' ? 'foreign' : 'account', facilityId: 'facility' } as any];
+
+    expect(() => service.prepare(input)).toThrow('does not belong to the backup account');
+  });
+
   it('recovers a selected regression model that references a missing predictor', () => {
     const input = accountBackup() as any;
     input.predictors.push({ guid: 'pred-live', accountId: 'account', facilityId: 'facility' });
