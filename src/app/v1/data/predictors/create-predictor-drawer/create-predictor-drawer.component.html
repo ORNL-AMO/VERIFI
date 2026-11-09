@@ -1,8 +1,74 @@
-<app-predictor-draft-slideout [saving]="saving()" [canSubmit]="canCreate()" [error]="error()" (submitted)="create($event)" (weatherSelected)="openWeather()" (cancelled)="closed.emit()">
-  @if (!singleFacility()) {
-  <label predictorContext class="predictor-facility"><span>Facility</span><select class="v1-select" [formControl]="facilityControl" required><option value="" disabled>Select a facility</option>@for (facility of facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select>
-    @if (!facilities().length) { <small>Add a facility before adding a predictor.</small> }
-    @else if (facilityGuid() && !selectedFacility()) { <small role="alert">This facility is no longer available. Select another facility.</small> }
-  </label>
+@let currentStep = step();
+<app-workspace-slideout title="Add predictor" [saving]="saving()" [hasFooter]="true"
+  [initialFocus]="currentStep === 'standard' ? '#predictor-name' : '#predictor-choice-heading'" (closed)="closed.emit()">
+  @if (selections().length) {
+    <div class="creation-selections" aria-label="Predictor selections">
+      @for (selection of selections(); track selection.step) {
+        <button type="button" class="creation-selection" [class.creation-selection--active]="currentStep === selection.step"
+          [disabled]="!selection.editable || !canAct()" [attr.aria-label]="selection.editable ? 'Change ' + selection.label : selection.label"
+          [attr.aria-expanded]="selection.editable ? currentStep === selection.step : null" [title]="selection.label" (click)="editSelection(selection.step)">
+          <app-ui-icon [name]="selection.icon"/><span>{{ selection.label }}</span><app-ui-icon [name]="selection.editable ? 'edit' : 'check'"/>
+        </button>
+      }
+    </div>
   }
-</app-predictor-draft-slideout>
+  <form id="predictor-draft" [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset [disabled]="!canAct()">
+      @switch (currentStep) {
+        @case ('facility') {
+          <legend class="visually-hidden"><h3 id="predictor-choice-heading" #stepHeading tabindex="-1">Facility</h3></legend>
+          @if (!facilities().length) { <p role="status">Add a facility before adding a predictor.</p> }
+          @else {
+            <label class="visually-hidden" for="predictor-facility-search">Find facility</label>
+            <input id="predictor-facility-search" class="v1-input creation-search" type="search" [formControl]="facilitySearch" placeholder="Find facility" autocomplete="off">
+            <div class="creation-choices">
+              @for (facility of matchingFacilities(); track facility.guid) {
+                <button type="button" class="creation-choice" [attr.aria-pressed]="facilityGuid() === facility.guid" (click)="selectFacility(facility.guid)"><app-ui-icon name="facility" [size]="28"/><strong>{{ facility.name || 'Unnamed facility' }}</strong></button>
+              } @empty {
+                <div class="creation-search-empty" role="status"><p>No matching facilities.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="facilitySearch.setValue('')">Clear search</button></div>
+              }
+            </div>
+          }
+        }
+        @case ('type') {
+          <legend class="visually-hidden"><h3 id="predictor-choice-heading" #stepHeading tabindex="-1">Predictor type</h3></legend>
+          <div class="creation-choices">
+            <button type="button" class="creation-choice" [disabled]="!selectedFacility()" [attr.aria-pressed]="predictorType() === 'Standard'" (click)="selectType('Standard')"><app-ui-icon name="predictor" [size]="28"/><strong>Standard predictor</strong><span class="creation-choice__description">Enter monthly values directly.</span></button>
+            <button type="button" class="creation-choice" [disabled]="!selectedFacility()" [attr.aria-pressed]="predictorType() === 'Weather'" (click)="selectType('Weather')"><app-ui-icon name="cloudRain" [size]="28"/><strong>Weather predictors</strong><span class="creation-choice__description">Calculate values from weather data.</span></button>
+          </div>
+        }
+        @case ('standard') {
+          <div class="predictor-details">
+            <label for="predictor-name">Predictor name</label>
+            <input #predictorName id="predictor-name" class="v1-input" formControlName="name" autocomplete="off" required maxlength="100"
+              [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched"
+              [attr.aria-describedby]="form.controls.name.invalid && form.controls.name.touched ? 'predictor-name-error' : null">
+            @if (form.controls.name.invalid && form.controls.name.touched) { <p id="predictor-name-error" class="v1-alert v1-alert--danger" role="alert">Enter a predictor name of 100 characters or fewer.</p> }
+            <label class="predictor-production"><input type="checkbox" formControlName="production"><span>Is production?</span></label>
+          </div>
+        }
+        @case ('weather') {
+          <legend><h3 id="predictor-choice-heading" #stepHeading tabindex="-1">Included weather predictors</h3></legend>
+          <p>Choose the predictors to include. Select a station and generate readings in the workbench.</p>
+          <div class="predictor-weather-options">
+            @for (option of weatherTypes; track option.value) {
+              <label class="predictor-weather-option"><input type="checkbox" [formControl]="weatherForm.controls[option.value]"><span>{{ option.label }}</span></label>
+            }
+          </div>
+          @if (!includedWeatherTypes().length) { <p class="v1-alert v1-alert--warning" role="status">Select at least one weather predictor.</p> }
+        }
+      }
+    </fieldset>
+    @if (!selectedFacility() && (facilityGuid() || facilityLocked())) { <p class="v1-alert v1-alert--warning" role="alert">This facility is no longer available. {{ facilityLocked() ? 'Close this panel and choose an available facility.' : 'Select another facility.' }}</p> }
+    @if (!canAct() && !saving()) { <p class="v1-alert v1-alert--info" role="status">Predictor creation is unavailable while the workspace is not ready for changes.</p> }
+    @if (error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+  </form>
+  <div slideoutFooter class="creation-draft-actions">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="closed.emit()">Cancel</button>
+    @if (currentStep === 'standard' || currentStep === 'weather') {
+      <button type="submit" form="predictor-draft" class="v1-btn v1-btn--action" [disabled]="!canCreate()">
+        @if (saving()) { <app-ui-icon name="loading" spin/> }{{ saving() ? 'Adding…' : currentStep === 'weather' ? 'Continue to setup' : 'Add predictor' }}
+      </button>
+    }
+  </div>
+</app-workspace-slideout>

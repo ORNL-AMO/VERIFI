@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterRenderEffect, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, PristineChangeEvent, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -133,6 +133,9 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     && this.canEdit());
 
   private initializedContext: string | undefined;
+  private creationTypes: readonly WeatherDataType[] = ['HDD'];
+  private openedStationFor: string | undefined;
+  private readonly stationSelector = viewChild(WeatherStationSelectorComponent);
   private savedSnapshot: WeatherSetupValue | undefined;
   private conflictInput: { base: WeatherSetupValue; local: WeatherSetupValue; saved: WeatherSetupValue } | undefined;
   private observedRevision: number | undefined;
@@ -158,6 +161,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       this.form.controls.definitions.setValidators(creation ? Validators.required : null);
       this.form.controls.definitions.updateValueAndValidity({ emitEvent: false });
       if (identity !== this.initializedContext) {
+        this.creationTypes = creation ? this.context.creationTypes() : [];
         this.committing.set(false);
         this.deleting.set(false);
         this.savingReviewed = false;
@@ -194,6 +198,13 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   });
 
   constructor() {
+    afterRenderEffect(() => {
+      const identity = this.editIdentity(), selector = this.stationSelector();
+      if (identity && selector && this.context.autoOpenStation() && this.canEdit() && identity !== this.openedStationFor) {
+        this.openedStationFor = identity;
+        selector.openSelector();
+      }
+    });
     registerDataDraft(this.dirty, () => this.discardChanges(), computed(() => this.isNavigationBlocked()));
     this.form.valueChanges.pipe(
       map(() => this.normalizeDefinitionChanges()),
@@ -462,10 +473,11 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
         baseTemperature: (predictor.weatherDataType === 'HDD' ? predictor.heatingBaseTemperature
           : predictor.weatherDataType === 'CDD' ? predictor.coolingBaseTemperature : undefined) ?? null,
         production: !!predictor.production
-      })) ?? [{
-        draftId: 'weather-definition-initial', predictorGuid: null, weatherDataType: 'HDD',
-        name: defaultWeatherPredictorName('HDD', 60), baseTemperature: 60, production: false
-      }]
+      })) ?? this.creationTypes.map(weatherDataType => ({
+        draftId: `weather-definition-initial-${weatherDataType}`, predictorGuid: null, weatherDataType,
+        name: defaultWeatherPredictorName(weatherDataType, isDegreeDay(weatherDataType) ? 60 : undefined),
+        baseTemperature: isDegreeDay(weatherDataType) ? 60 : null, production: false
+      }))
     };
   }
 

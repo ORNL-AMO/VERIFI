@@ -11,6 +11,27 @@ import { createWeatherSetupFixture as createFixture, savedWeatherSetupGroup } fr
 import { WeatherStationSelectorComponent } from '../../shared/weather-station-selector/weather-station-selector.component';
 
 describe('WeatherPredictorSetupComponent', () => {
+  it('seeds checked types, opens station selection once, and preserves edits through publications', () => {
+    const revision = signal(1);
+    const fixture = createFixture({ creationTypes: ['CDD', 'relativeHumidity'], autoOpenStation: true, revisionSignal: revision });
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(component.definitions().map(definition => definition.weatherDataType)).toEqual(['CDD', 'relativeHumidity']);
+    expect(component.definitions().map(definition => definition.baseTemperature)).toEqual([60, undefined]);
+    const selector = fixture.debugElement.query(By.directive(WeatherStationSelectorComponent)).componentInstance as WeatherStationSelectorComponent;
+    expect(selector.selectorOpen()).toBe(true);
+    selector.closeSelector(); fixture.detectChanges();
+    component.setDefinitionName(component.definitions()[0].draftId, 'My cooling history');
+    revision.set(2); fixture.detectChanges();
+    expect(selector.selectorOpen()).toBe(false);
+    expect(component.definitions()[0].name).toBe('My cooling history');
+    expect(component.definitions().map(definition => definition.weatherDataType)).toEqual(['CDD', 'relativeHumidity']);
+    const workflow = TestBed.inject(PredictorWeatherWorkflowService);
+    expect(workflow.previewStationGroup).not.toHaveBeenCalled();
+    expect(workflow.previewStationSelection).not.toHaveBeenCalled();
+    expect(workflow.commitStationGroup).not.toHaveBeenCalled();
+  });
+
   it('uses the same typed form validators for field errors and submission readiness', () => {
     const fixture = createFixture();
     const component = fixture.componentInstance;

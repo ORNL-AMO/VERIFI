@@ -1,6 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, viewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
+import { WeatherPredictorSetupRequest } from '@app/v1/data/predictors/models/predictor-creation.models';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -147,13 +148,14 @@ export class DataInventoryComponent implements OnDestroy {
     await this.navigateCreatedResource(this.navigation.facilityPredictorRoute(predictor.facilityId, predictor.guid, 'settings'),
       'Predictor added. Select it from the list to open its settings.', context);
   }
-  async openNewWeatherPredictors(facilityGuid: string): Promise<void> {
+  async openNewWeatherPredictors(request: WeatherPredictorSetupRequest): Promise<void> {
     const context = this.predictorDrawerContext();
     if (!this.isCurrentCreation(context) || !this.isCreatePredictorDrawerOpen()) return;
     this.closeCreatePredictorDrawer();
-    if (!this.workspace.facilities().some(item => item.guid === facilityGuid)) return;
-    await this.navigateCreatedResource(this.navigation.facilityWeatherPredictorCreateRoute(facilityGuid),
-      'Weather setup could not be opened. Please try again.', context);
+    if (!this.workspace.facilities().some(item => item.guid === request.facilityGuid && item.accountId === this.account()?.guid)) return;
+    await this.navigateCreatedResource(this.navigation.facilityWeatherPredictorCreateRoute(request.facilityGuid),
+      'Weather setup could not be opened. Please try again.', context, false,
+      { queryParams: { weatherType: request.weatherDataTypes, selectStation: true } });
   }
 
   ngOnDestroy(): void {
@@ -194,9 +196,9 @@ export class DataInventoryComponent implements OnDestroy {
       && context === (accountOwned ? this.facilityCreationContext() : this.creationContext());
   }
 
-  private async navigateCreatedResource(route: string[], message: string, context: string, accountOwned = false): Promise<void> {
+  private async navigateCreatedResource(route: string[], message: string, context: string, accountOwned = false, extras?: NavigationExtras): Promise<void> {
     try {
-      const opened = await this.router.navigate(route);
+      const opened = extras ? await this.router.navigate(route, extras) : await this.router.navigate(route);
       if (!opened && this.isCurrentCreation(context, accountOwned)) this.meterNavigationError.set(message);
     } catch {
       if (this.isCurrentCreation(context, accountOwned)) this.meterNavigationError.set(message);

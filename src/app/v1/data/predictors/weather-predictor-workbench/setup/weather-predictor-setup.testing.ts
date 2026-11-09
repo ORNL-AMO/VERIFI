@@ -25,6 +25,8 @@ export function createWeatherSetupFixture(options: {
   defaultRange?: any;
   canWrite?: boolean;
   hasPending?: boolean;
+  creationTypes?: readonly WeatherDataType[];
+  autoOpenStation?: boolean;
 } = {}) {
   const state = signal({ status: 'idle', message: '' });
   const group = options.groupSignal ?? signal(options.group);
@@ -44,6 +46,7 @@ export function createWeatherSetupFixture(options: {
         provide: WeatherPredictorWorkbenchContextService,
         useValue: {
           group, groupKey: computed(() => group()?.routeKey ?? options.group?.routeKey ?? 'station:station-a'), creating: signal(options.creating ?? true),
+          creationTypes: signal(options.creationTypes ?? ['HDD']), autoOpenStation: signal(options.autoOpenStation ?? false),
           predictors: signal(options.group?.predictors ?? []), readings: signal([]), notFound: signal(false)
         }
       },
