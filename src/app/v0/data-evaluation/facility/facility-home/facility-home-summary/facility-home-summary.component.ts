@@ -10,7 +10,7 @@ import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-t
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { getLatestMeterData } from '@shared/dateHelperFunctions';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ToastNotificationsService } from '@app/shared/notifications/toast-notifications.service';
 import { EmailStatusCode, EmailVerifiBackupService } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.service';
 
@@ -62,9 +62,6 @@ export class FacilityHomeSummaryComponent {
 
   ngOnInit() {
     this.emailStatusSubscription = this.emailVerifiBackupService.emailStatus
-      .pipe(
-        filter((status): status is EmailStatusCode => status !== undefined)
-      )
       .subscribe(status => {
         this.closeEmailModal(status);
       });
@@ -108,7 +105,6 @@ export class FacilityHomeSummaryComponent {
   }
 
   openEmailModal() {
-    this.emailVerifiBackupService.resetEmailStatus();
     this.showEmailModal = true;
   }
 

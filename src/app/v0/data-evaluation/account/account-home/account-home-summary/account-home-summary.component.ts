@@ -10,7 +10,7 @@ import { LoadingService } from '@app/core-components/loading/loading.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EmailStatusCode, EmailVerifiBackupService } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.service';
 import { ToastNotificationsService } from '@app/shared/notifications/toast-notifications.service';
-import { filter, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-account-home-summary',
@@ -54,9 +54,6 @@ export class AccountHomeSummaryComponent {
 
   ngOnInit() {
     this.emailStatusSubscription = this.emailVerifiBackupService.emailStatus
-      .pipe(
-        filter((status): status is EmailStatusCode => status !== undefined)
-      )
       .subscribe(status => {
         this.closeEmailModal(status);
       });
@@ -102,7 +99,6 @@ export class AccountHomeSummaryComponent {
   }
 
   openEmailModal() {
-    this.emailVerifiBackupService.resetEmailStatus();
     this.showEmailModal = true;
   }
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BackupFile } from '@app/data/models/backup-file';
 import { environment } from 'src/environments/environment';
@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class EmailVerifiBackupService {
-  emailStatus: BehaviorSubject<EmailStatusCode | undefined>;
+  readonly emailStatus = new Subject<EmailStatusCode>();
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'
@@ -16,23 +16,18 @@ export class EmailVerifiBackupService {
     responseType: 'text' as const
   }
   emailData: EmailData;
-  API_URL = environment.measurUtilitiesApi + 'sendemail';
+  API_URL = environment.measurUtilitiesApi + 'verifi-sendemail';
 
-  constructor(private httpClient: HttpClient) {
-    this.emailStatus = new BehaviorSubject<EmailStatusCode | undefined>(undefined);
-  }
+  constructor(private httpClient: HttpClient) { }
 
   sendEmail(emailData: EmailData) {
     let url: string = this.API_URL;
-    console.log('Sending email with data:', emailData);
     if (emailData) {
       this.httpClient.post(url, emailData, this.httpOptions).subscribe({
         next: (response) => {
-          console.log('Email sent successfully:', response);
           this.setStatus(response);
         },
         error: (error) => {
-          console.error('Error sending email:', error);
           this.setStatus(undefined, error);
         }
       });
@@ -47,10 +42,6 @@ export class EmailVerifiBackupService {
     } else {
       this.emailStatus.next('failed');
     }
-  }
-
-  resetEmailStatus() {
-    this.emailStatus.next(undefined);
   }
 }
 
