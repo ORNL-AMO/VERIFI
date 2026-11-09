@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getConsumptionData, getUnitFromMeter } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-meter-energy-histogram',
@@ -105,19 +106,7 @@ export class MeterEnergyHistogramComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.meterEnergyHistogram?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.meterEnergyHistogram.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.meterEnergyHistogram?.nativeElement);
   }
 }
 

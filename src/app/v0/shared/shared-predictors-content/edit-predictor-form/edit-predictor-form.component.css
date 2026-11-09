@@ -49,3 +49,10 @@ button span {
 .weather-data-select {
     width: 140px;
 }
+
+.alert-sm {
+    padding: 0.25rem 3rem;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: center;
+}

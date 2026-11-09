@@ -27,6 +27,10 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 
 Install Chromium with `npx playwright install chromium` only when the local browser dependency is missing. Do not use `npm run lint` as a gate while it points to the unavailable TSLint builder.
 
+## Release pipeline changes
+
+Read the [release process](../../../docs/release-process.md) and inspect the caller plus every affected reusable workflow. Preserve the invariants that each `master` version advances by SemVer precedence, the preceding release tag points to the preceding commit with a successful completed CI/CD run, release tags target the current run's immutable commit, and production web deployment requires the web artifact and the complete desktop release to succeed for the same workflow run. Do not assume GitHub concurrency is FIFO. Check package/lockfile consistency, normal and hotfix promotion paths, skipped-job handling on `develop`, artifact names and retention, token permissions, signing and draft-release gates, and production concurrency. Validate workflow syntax and documentation links before running the final test and build matrix.
+
 ## Manual checks
 
 - Exercise the changed happy path and its loading, empty, validation, error, disabled, and success states.

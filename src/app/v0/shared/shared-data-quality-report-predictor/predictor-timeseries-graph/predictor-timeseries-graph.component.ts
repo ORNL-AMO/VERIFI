@@ -4,6 +4,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { PredictorStatistics } from '@v0/shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-predictor-timeseries-graph',
@@ -198,19 +199,7 @@ export class PredictorTimeseriesGraphComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.predictorTimeSeriesGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.predictorTimeSeriesGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.predictorTimeSeriesGraph?.nativeElement);
   }
 }
 

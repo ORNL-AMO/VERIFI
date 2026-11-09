@@ -33,6 +33,8 @@ Account creation and import flows activate their persisted account through the l
 
 [`AppComponent`](src/app/app.component.ts) triggers and renders that lifecycle but does not query repositories. Its shell exposes accessible initializing, error/retry, and switching states. Application-instance metadata is lifecycle-owned readonly state; its IndexedDB service is persistence-only.
 
+When startup fails during a record migration, the root shell exposes a recovery workflow before any workspace is published. The recovery service reads the application metadata and complete migration dataset in one readonly transaction, then saves an ordinary JSON support snapshot through the Electron file gateway or a browser Blob download. After a successful export, the user can confirm a reset through `DatabaseResetService`. Recovery snapshots are support artifacts and are never accepted by normal backup import.
+
 Top-level routing is composed by [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts), with the current production route tree owned by v0 under [`src/app/v0/routing/`](src/app/v0/routing/):
 
 - **v0 legacy experience** is lazy-loaded from [`src/app/v0/v0.module.ts`](src/app/v0/v0.module.ts). Its shell owns the current production header, legacy global modals, toast placement, and legacy route outlet while keeping existing public URLs stable.
@@ -94,6 +96,8 @@ Pure TypeScript calculations live under [`src/app/domain/calculations`](src/app/
 
 Compute-heavy operations use workers under [`src/app/platform/web-workers`](src/app/platform/web-workers). [`run-worker.ts`](src/app/platform/web-workers/run-worker.ts) wraps a Worker in an RxJS observable, posts one structured-cloneable payload, emits one result or error, and terminates the worker during teardown. Each worker imports calculation code and owns its request/result contract.
 
+Account-scoped worker jobs capture one `AccountWorkspaceSnapshot` and its revision. Import or account-switch loading cancels active jobs and clears published results; late responses may publish only when their account GUID, workspace revision, request ID, and snapshot still match the active workspace. Calendarization exposes explicit `idle`, `loading`, `ready`, and `error` state, and status validation consumes only a matching `ready` result. Interactive calculation workers time out after two minutes and expose a retry that rebuilds the request from the current snapshot without persistence writes.
+
 When changing calculation inputs or outputs:
 
 1. Update the pure calculation and deterministic unit tests.
@@ -117,6 +121,8 @@ Automatic Electron backups are coordinated by [`AutomaticBackupsService`](src/ap
 Electron conflict reconciliation compares the file `dataBackupId` against the persisted `electronBackups` registry. Missing files, invalid files, and future-version files are surfaced once per account session through the coordinator. Archive writes are built from snapshots and written through the gateway without mutating the account record inside the backup payload.
 
 Every JSON restore path first clones and prepares the file through [`backup-preparation.service.ts`](src/app/data/backup/backup-preparation.service.ts): validate the envelope and data version, run the same ordered migrations as local data, validate core GUID relationships, then remap GUIDs and persist. [`BackupImportCoordinator`](src/app/data/backup/backup-import-coordinator.service.ts) is the single coordinated restore entry point for account import, facility import, replacement, selective facility import, example-data loading, and Electron conflict flows. Missing version metadata means version `0`; future versions are rejected before replacement or import mutation.
+
+Migration recovery snapshots are a separate database-support format. They contain every store consumed by record migrations as ordinary JSON and deliberately omit the normal VERIFI backup envelope. Support repairs them offline and returns ordinary prepared account backups; the application never restores a recovery snapshot directly.
 
 See [Backup workflows and services](docs/data-access-and-workspace.md#backup-workflows-and-services) for developer-facing service responsibilities and the expected manual, restore, and automatic Electron backup flows. For import/export changes, define compatibility before editing, keep parsers pure where possible, and verify a representative round trip from import through persistence to export.
 
@@ -163,7 +169,7 @@ Test targets are configured in `angular.json` and exposed through `package.json`
 - Playwright with Chromium runs `*.browser.spec.ts` tests for IndexedDB, Web Workers, and other browser-native behavior.
 - `npm run test:all:ci` runs both suites.
 
-The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. Web deployment builds `develop` for development and `master` for production. Desktop packaging runs for `master` and creates platform installers through Electron Builder.
+The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. A release-policy job keeps package and lockfile versions aligned, requires each new `master` version to advance by SemVer precedence, and verifies that the preceding release tag points to the preceding commit with a successful completed CI/CD run. Development web builds deploy after tests. On `master`, the web build and desktop release run in parallel, but production web deployment waits for both the web artifact and the complete desktop workflow, including draft GitHub Release creation pinned to the run's immutable commit. Production work is serialized, and the preceding-release guard prevents out-of-order publication because GitHub concurrency does not guarantee FIFO ordering. See the [release process](docs/release-process.md) for the human promotion process, hotfix path, job graph, artifact contracts, and failure behavior.
 
 Agents and contributors must run the relevant local checks before opening a pull request; do not assume a pull-request event will run the workflow.
 

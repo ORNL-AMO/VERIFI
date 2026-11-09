@@ -1,19 +1,21 @@
-@let _calculatingEnergy = calculatingEnergy();
-@let _calculatingOverview = calculatingOverview();
 @let _monthlyEnergyAnalysisData = monthlyEnergyAnalysisData();
 @let _annualEnergyAnalysisSummary = annualEnergyAnalysisSummary();
 @let _latestEnergyAnalysisItem = latestEnergyAnalysisItem();
 @let _accountOverviewData = accountOverviewData();
 @let _account = account();
 @let _carouselIndex = carouselIndex();
+@let _calculationLoading = calculationLoading();
+@let _calculationError = calculationError();
+@let _calculationReady = calculationReady();
 
 <div class="card">
   <div class="card-body">
     <div class="row">
       <div class="col-12">
         <app-account-energy-reduction-goal></app-account-energy-reduction-goal>
-        @if (_calculatingEnergy != false) {
-        <app-calculating-spinner [message]="'Calculating Energy...'" [error]="_calculatingEnergy == 'error'">
+        @if (_calculationLoading || _calculationError) {
+        <app-calculating-spinner [message]="'Calculating Energy...'" [error]="_calculationError"
+          [retryable]="_calculationError" (retry)="retryCalculations()">
         </app-calculating-spinner>
         }
         @let setupErrors = _latestEnergyAnalysisItem.guid | invalidAccountAnalysis;
@@ -26,7 +28,7 @@
       <div class="col-12">
         <hr>
       </div>
-      @if (_calculatingEnergy == false && _calculatingOverview == false && _monthlyEnergyAnalysisData &&
+      @if (_calculationReady && _monthlyEnergyAnalysisData &&
       _annualEnergyAnalysisSummary) {
       <div class="col-12">
         @if (_carouselIndex == 0) {

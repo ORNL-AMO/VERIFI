@@ -1,6 +1,6 @@
 //HELPER FUNCTIONS FOR DATES
 import { IdbPredictorData } from "@data/models/idbModels/predictorData";
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { IdbUtilityMeterData } from "@data/models/idbModels/utilityMeterData";
 
 //PREDICTOR DATA FUNCTIONS

@@ -163,7 +163,7 @@
         }
         @if (displayFuel) {
         <div class="col-6">
-          <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
+          <label for="energySource">{{setEnergySourceLabel}} <span class="required">*</span> </label>
           <div class="mb-3">
             <select class="form-select" id="energySource" type="text" formControlName="fuel" (change)="changeFuel()">
               @for (fuelOption of fuelTypeOptions; track fuelOption) {
@@ -221,7 +221,7 @@
         }
         @if (displayHeatCapacity) {
         <div class="col-6">
-          <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
+          <label for="heatCapacity">{{heatCapacityLabel}} <span class="required">*</span> </label>
           <div class="input-group mb-3">
             <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
               onfocus="this.select();">

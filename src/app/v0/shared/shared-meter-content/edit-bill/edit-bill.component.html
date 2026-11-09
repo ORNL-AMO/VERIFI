@@ -3,15 +3,15 @@
     <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
     @if (addOrEdit == 'edit') {
       <button class="btn btn-primary" (click)="saveAndQuit()"
-      [disabled]="meterDataForm.invalid || invalidDate">Save Changes</button>
+      [disabled]="!canSaveReading">Save Changes</button>
     }
     @if (addOrEdit == 'add') {
       <button class="btn btn-primary me-2" (click)="saveAndQuit()"
-      [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
+      [disabled]="!canSaveReading">Save + Quit</button>
     }
     @if (addOrEdit == 'add') {
       <button class="btn btn-primary" (click)="saveAndAddAnother()"
-        [disabled]="meterDataForm.invalid || invalidDate">Save +
+        [disabled]="!canSaveReading">Save +
       Add Another</button>
     }
   </div>

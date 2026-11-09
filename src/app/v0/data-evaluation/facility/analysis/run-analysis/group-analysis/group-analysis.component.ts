@@ -10,6 +10,7 @@ import { AccountStatusCheckService } from '@shared/helper-services/account-statu
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AnalysisGroupStatusCheck } from '@domain/calculations/status-check-calculations/analysisGroupStatusCheck';
+import { isBankedGroupConfigurationComplete } from '@shared/shared-analysis/banking-configuration';
 
 @Component({
   selector: 'app-group-analysis',
@@ -36,10 +37,10 @@ export class GroupAnalysisComponent {
   showBanked: Signal<boolean> = computed(() => {
     const selectedGroup = this.selectedGroup();
     const analysisItem = this.analysisItem();
-    if (selectedGroup && analysisItem) {
-      return selectedGroup.applyBanking && analysisItem.hasBanking;
-    }
-    return false;
+    const bankedAnalysisItem = analysisItem?.bankedAnalysisItemId
+      ? this.accountWorkspaceQuery.getFacilityAnalysisByGuid(analysisItem.bankedAnalysisItemId)
+      : undefined;
+    return isBankedGroupConfigurationComplete(analysisItem, selectedGroup, bankedAnalysisItem);
   });
 
   private url = toSignal(

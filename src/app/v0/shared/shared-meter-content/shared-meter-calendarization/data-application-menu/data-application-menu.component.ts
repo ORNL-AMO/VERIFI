@@ -61,12 +61,20 @@ export class DataApplicationMenuComponent implements OnInit {
   calanderizeMeter() {
     if (this.utilityMeterData.length > 2) {
       let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-      let calanderizedData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(selectedFacility.guid);
-      this.monthlyData = calanderizedData[0].monthlyData;
+      let calanderizedData: Array<CalanderizedMeter> | undefined = selectedFacility
+        ? this.calanderizationService.getReadyCalanderizedMetersByFacilityID(selectedFacility.guid)
+        : undefined;
+      const calanderizedMeter = calanderizedData?.find(item => item.meter.guid === this.meter.guid);
+      if (!calanderizedMeter) {
+        this.monthlyData = [];
+        this.calanderizationSummary = [];
+        return;
+      }
+      this.monthlyData = [...calanderizedMeter.monthlyData];
       if (this.meter.meterReadingDataApplication == 'backward') {
-        this.monthlyData = this.monthlyData.splice(0, 2);
+        this.monthlyData = this.monthlyData.slice(0, 2);
       } else {
-        this.monthlyData = this.monthlyData.splice(0, 4);
+        this.monthlyData = this.monthlyData.slice(0, 4);
       }
       this.calanderizationSummary = this.getCalendarizationSummary(this.meter, this.utilityMeterData);
     }

@@ -35,6 +35,40 @@ describe('WorkspaceBackupSnapshotBuilder', () => {
     expect(backup.predictors.map(item => item.facilityId)).toEqual(['facility-a']);
     expect(backup.facilityReports.map(item => item.facilityId)).toEqual(['facility-a']);
   });
+
+  it('does not export a selected regression model with unavailable predictors', () => {
+    const builder = new WorkspaceBackupSnapshotBuilder();
+    const snapshot = createSnapshot();
+    snapshot.facilityAnalyses[0].groups[0] = {
+      analysisType: 'regression',
+      idbGroupId: 'group-a',
+      isGeneratedModel: true,
+      selectedModelId: 'model-a',
+      regressionModelYear: 2026,
+      regressionConstant: 10,
+      predictorVariables: [
+        { id: 'predictor-a', name: 'Predictor A', regressionCoefficient: 2 },
+        { id: 'predictor-missing', name: 'Missing', regressionCoefficient: 3 }
+      ],
+      models: [{
+        modelId: 'model-a',
+        coef: [10, 2, 3],
+        t: { p: [0.01, 0.02, 0.03] },
+        predictorVariables: [
+          { id: 'predictor-a', name: 'Predictor A' },
+          { id: 'predictor-missing', name: 'Missing' }
+        ]
+      }]
+    } as any;
+
+    const group = builder.buildAccountBackup(snapshot).facilityAnalysisItems[0].groups[0];
+
+    expect(group.predictorVariables.map(variable => variable.id)).toEqual(['predictor-a']);
+    expect(group.isGeneratedModel).toBe(false);
+    expect(group.selectedModelId).toBeUndefined();
+    expect(group.models).toBeUndefined();
+    expect(group.regressionModelNotes).toContain('Recovered as a user-defined model');
+  });
 });
 
 function createSnapshot(): AccountWorkspaceSnapshot {

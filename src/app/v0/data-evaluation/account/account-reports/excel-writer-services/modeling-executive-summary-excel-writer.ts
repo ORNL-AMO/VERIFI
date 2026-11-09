@@ -60,7 +60,7 @@ export class ModelingExecutiveSummaryExcelWriter {
   ) {
     let sheet: ExcelJS.Worksheet = workbook.addWorksheet('Executive Summary');
 
-    let headerRow = ['Facility', 'Group', 'Baseline Year', 'Model Year', 'R2', 'Adjusted R2', 'Model P-Value', 'Model Equation', 'Model Notes', 'Model Validation Failures', 'Data Validation Failures', 'Constant'];
+    let headerRow = ['Facility', 'Group', 'Baseline Year', 'Model Year', 'R2', 'Adjusted R2', 'Model P-Value', 'Model Equation', 'Minor Issues', 'Critical Issues', 'Moderate Issues', 'Constant'];
 
     for (let i = 0; i < this.maxPredictorCount; i++) {
       headerRow.push('Coefficient ' + (i + 1) + ' Name');

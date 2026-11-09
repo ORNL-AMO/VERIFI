@@ -88,6 +88,22 @@ export class RegressionModelMenuComponent {
     return [];
   });
 
+  calendarYearOptions = computed(() => {
+    const facility = this.selectedFacility();
+    const meters = this.calanderizedMeters() ?? [];
+
+    if (!facility) {
+      return [];
+    }
+
+    const years = meters
+      .filter(meter => meter.meter.facilityId === facility.guid)
+      .flatMap(meter => meter.monthlyData)
+      .map(month => new Date(month.date).getFullYear());
+
+    return [...new Set(years)].sort((first, second) => first - second);
+  });
+
   numVariableOptions: Signal<Array<number>> = computed(() => {
     const group = this.group();
     let options: Array<number> = new Array();
@@ -327,8 +343,10 @@ export class RegressionModelMenuComponent {
     const _analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: _analysisItem.guid, label: 'Save Facility Analysis' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
+      {
+        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: _analysisItem.guid, label: 'Save Facility Analysis',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }
+      },
       () => this.analysisHandler.updateFacilityAnalysis(_analysisItem, activeAccountGuid)
     );
     this.accountWorkspaceService.selectFacilityAnalysis((_analysisItem)?.guid);

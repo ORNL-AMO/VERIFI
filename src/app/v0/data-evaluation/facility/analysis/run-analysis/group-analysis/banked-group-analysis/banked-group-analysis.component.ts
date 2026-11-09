@@ -17,6 +17,7 @@ import { AnnualFacilityAnalysisSummaryClass } from '@domain/calculations/analysi
 import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisReportSettings, getAnalysisReportSettings } from '@data/models/idbModels/facilityReport';
 import { IdbAccount } from '@data/models/idbModels/account';
+import { isBankedGroupConfigurationComplete } from '@shared/shared-analysis/banking-configuration';
 
 @Component({
     selector: 'app-banked-group-analysis',
@@ -31,7 +32,7 @@ export class BankedGroupAnalysisComponent {
   selectedGroupSub: Subscription;
   selectedGroup: AnalysisGroup;
   analysisItemSub: Subscription;
-  // analysisItem: IdbAnalysisItem;
+  analysisItem: IdbAnalysisItem;
   bankedAnalysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   calculating: boolean | 'error' = true;
@@ -42,6 +43,7 @@ export class BankedGroupAnalysisComponent {
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
   };
   analysisReportSettings: AnalysisReportSettings;
+  configurationIncomplete: boolean = false;
   constructor(
     private analysisService: AnalysisService,
     private injector: Injector
@@ -53,12 +55,15 @@ export class BankedGroupAnalysisComponent {
   ngOnInit() {
     this.setReportSettings();
     this.analysisItemSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalysis, { injector: this.injector }).subscribe(val => {
-      let analysisItem: IdbAnalysisItem = val;
-      this.bankedAnalysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(analysisItem.bankedAnalysisItemId);
+      this.analysisItem = val;
+      this.bankedAnalysisItem = val?.bankedAnalysisItemId
+        ? this.accountWorkspaceQuery.getFacilityAnalysisByGuid(val.bankedAnalysisItemId)
+        : undefined;
+      this.refreshAnalysis();
     })
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
-      this.runAnalysis();
+      this.refreshAnalysis();
     });
   }
 
@@ -77,22 +82,35 @@ export class BankedGroupAnalysisComponent {
   }
 
   runAnalysis() {
+    const selectedGroup = this.selectedGroup;
+    const bankedAnalysisItem = this.bankedAnalysisItem;
+    if (!selectedGroup || !bankedAnalysisItem) {
+      return;
+    }
+    if (this.worker) {
+      this.worker.terminate();
+    }
     this.calculating = true;
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    this.facility = this.accountWorkspaceQuery.getFacilityByGuid(this.bankedAnalysisItem.facilityId);
-    let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.bankedAnalysisItem.facilityId);
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.bankedAnalysisItem.facilityId);
-    let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.bankedAnalysisItem.facilityId);
-    let accountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(this.bankedAnalysisItem.facilityId);
+    this.facility = this.accountWorkspaceQuery.getFacilityByGuid(bankedAnalysisItem.facilityId);
+    let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(bankedAnalysisItem.facilityId);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(bankedAnalysisItem.facilityId);
+    let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(bankedAnalysisItem.facilityId);
+    let accountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(bankedAnalysisItem.facilityId);
     let account: IdbAccount = this.accountWorkspaceStore.account();
     // this.bankedAnalysisItem.reportYear = this.selectedGroup.bankedAnalysisYear;
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url));
-      this.worker.onmessage = ({ data }) => {
-        this.worker.terminate();
+      const worker = new Worker(new URL('../../../../../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.worker = worker;
+      worker.onmessage = ({ data }) => {
+        worker.terminate();
+        if (this.worker !== worker) {
+          return;
+        }
+        this.worker = undefined;
         if (!data.error) {
           this.groupSummary = data.groupSummaries.find(summary => {
-            return summary.group.idbGroupId == this.selectedGroup.idbGroupId;
+            return summary.group.idbGroupId == selectedGroup.idbGroupId;
           });
           this.calculating = false;
         } else {
@@ -100,8 +118,8 @@ export class BankedGroupAnalysisComponent {
         }
       };
       this.calculating = true;
-      this.worker.postMessage({
-        analysisItem: this.bankedAnalysisItem,
+      worker.postMessage({
+        analysisItem: bankedAnalysisItem,
         facility: this.facility,
         meters: facilityMeters,
         meterData: facilityMeterData,
@@ -111,13 +129,13 @@ export class BankedGroupAnalysisComponent {
         accountAnalysisItems: accountAnalysisItems,
         includeGroupSummaries: true,
         assessmentReportVersion: account.assessmentReportVersion,
-        reportYear: this.selectedGroup.bankedAnalysisYear
+        reportYear: selectedGroup.bankedAnalysisYear
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.bankedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.bankedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: bankedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(bankedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(
-        this.bankedAnalysisItem,
+        bankedAnalysisItem,
         this.facility,
         calanderizedMeters,
         accountPredictorEntries,
@@ -125,12 +143,35 @@ export class BankedGroupAnalysisComponent {
         accountPredictors,
         undefined,
         true,
-        { reportYear: this.selectedGroup.bankedAnalysisYear }
+        { reportYear: selectedGroup.bankedAnalysisYear }
       );
       this.groupSummary = annualAnalysisSummaryClass.groupSummaries.find(summary => {
-        return summary.group.idbGroupId == this.selectedGroup.idbGroupId;
+        return summary.group.idbGroupId == selectedGroup.idbGroupId;
       });
-
+      this.calculating = false;
     }
+  }
+
+  private refreshAnalysis() {
+    if (!this.analysisItem || !this.selectedGroup) {
+      return;
+    }
+
+    this.configurationIncomplete = !isBankedGroupConfigurationComplete(
+      this.analysisItem,
+      this.selectedGroup,
+      this.bankedAnalysisItem
+    );
+    if (this.configurationIncomplete) {
+      if (this.worker) {
+        this.worker.terminate();
+        this.worker = undefined;
+      }
+      this.calculating = false;
+      this.groupSummary = undefined;
+      return;
+    }
+
+    this.runAnalysis();
   }
 }

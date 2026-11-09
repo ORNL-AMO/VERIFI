@@ -7,6 +7,8 @@ import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { FacilitydbService } from '@data/indexedDB/facility-db.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
+import { ExportReportPdfService } from '@app/v0/shared/pdf-report/services/export-report-pdf.service';
+import { AccountEmissionFactorsReportAdapter } from '../account-emission-factors-report.adapter';
 
 @Component({
   selector: 'app-account-emission-factors-report',
@@ -22,11 +24,14 @@ export class AccountEmissionFactorsReportComponent {
   print: boolean;
   account: IdbAccount;
   accountFacilities: Array<IdbFacility> = [];
+  isExportingPdf: boolean = false;
 
   constructor(
     private dataEvaluationService: DataEvaluationService,
     private router: Router,
-    private facilityDbService: FacilitydbService
+    private facilityDbService: FacilitydbService,
+    private exportReportPdfService: ExportReportPdfService,
+    private accountEmissionFactorsReportAdapter: AccountEmissionFactorsReportAdapter,
   ) { }
 
   ngOnInit(): void {
@@ -45,5 +50,24 @@ export class AccountEmissionFactorsReportComponent {
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+  }
+
+  async onExportPdf() {
+    let selectedReport = this.accountWorkspaceStore.selectedAccountReport();
+    if (!selectedReport || this.isExportingPdf) {
+      return;
+    }
+
+    this.isExportingPdf = true;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const document = this.accountEmissionFactorsReportAdapter.buildDocument({
+        report: selectedReport,
+        accountFacilities: this.accountFacilities
+      });
+      await this.exportReportPdfService.export(document, `${selectedReport.name} - Emission Factors Report`);
+    } finally {
+      this.isExportingPdf = false;
+    }
   }
 }

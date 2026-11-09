@@ -85,7 +85,7 @@ export class FacilityModelingReportAdapter {
         });
 
         if (criticalItems.length > 0) {
-            const criticalSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Validation Failures'], 'Critical Issues', criticalItems);
+            const criticalSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Critical Issues'], 'Critical Issues', criticalItems);
             if (criticalSection) {
                 criticalSection.tocInclude = true;
                 criticalSection.tocLabel = 'Critical Issues';
@@ -94,7 +94,7 @@ export class FacilityModelingReportAdapter {
             }
         }
         if (moderateItems.length > 0) {
-            const moderateSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Data Validation Failures'], 'Moderate Issues', moderateItems);
+            const moderateSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Moderate Issues'], 'Moderate Issues', moderateItems);
             if (moderateSection) {
                 moderateSection.tocInclude = true;
                 moderateSection.tocLabel = 'Moderate Issues';
@@ -103,7 +103,7 @@ export class FacilityModelingReportAdapter {
             }
         }
         if (minorItems.length > 0) {
-            const minorSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Notes'], 'Minor Issues', minorItems);
+            const minorSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Minor Issues'], 'Minor Issues', minorItems);
             if (minorSection) {
                 minorSection.tocInclude = true;
                 minorSection.tocLabel = 'Minor Issues';
@@ -235,7 +235,7 @@ export class FacilityModelingReportAdapter {
     }
 
     buildRegressionSection(title: string, items: Array<FacilityGroupAnalysisItem>): TableSection | undefined {
-        let headers = ['Facility', 'Group', 'Model Year', 'Variable p-Values', 'R2', 'Adjusted R2', 'Model p-Value', 'Formula', 'Model Notes'];
+        let headers = ['Facility', 'Group', 'Model Year', 'Variable p-Values', 'R2', 'Adjusted R2', 'Model p-Value', 'Formula', 'Minor Issues'];
         let rows: string[][] = [];
 
         items.forEach(item => {

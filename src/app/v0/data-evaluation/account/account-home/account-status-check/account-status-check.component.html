@@ -1,7 +1,18 @@
 @let _statusCheck = accountStatusCheck();
 @let _orderedFacilityChecks = orderedFacilityChecks();
+@let _calendarizationState = calendarizationState();
 
-@if (_statusCheck) {
+@if (_calendarizationState.status === 'loading') {
+<div class="alert alert-light border d-flex align-items-center gap-2 mb-0" role="status" aria-live="polite">
+    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+    <span>Checking account status…</span>
+</div>
+} @else if (_calendarizationState.status === 'error') {
+<div class="alert alert-warning d-flex align-items-center justify-content-between gap-3 mb-0" role="alert">
+    <span>{{_calendarizationState.message}}</span>
+    <button type="button" class="btn btn-sm btn-outline-dark" (click)="retryStatusCheck()">Retry</button>
+</div>
+} @else if (_statusCheck) {
 <div class="accordion" id="accountStatusCheckAccordion">
     <div class="accordion-item card">
         <h2 class="accordion-header">
@@ -174,8 +185,8 @@
                                 } @else if(fc.hasNonCurrentMeters){
                                 <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
                                     [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/energy-consumption/energy-source/meters'">
-                                    <span class="fa fa-circle-xmark text-warning me-2"></span>All Meter data is not
-                                    current
+                                    <span class="fa fa-circle-xmark text-warning me-2"></span>Some meters do not cover
+                                    the facility's latest complete month
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
                                 }

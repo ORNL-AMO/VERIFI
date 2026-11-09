@@ -26,7 +26,7 @@ import { volumetricEnergy } from "./definitions/volumetricEnergy";
 import { specificVolume } from "./definitions/specificVolume";
 import { thermalConductivity } from "./definitions/thermalConductivity";
 import { length } from './definitions/length';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 export class ConvertValue {
     _measures = {

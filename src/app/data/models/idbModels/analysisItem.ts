@@ -116,7 +116,7 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     models: undefined,
     baselineAdjustmentsV2: [],
     maxModelVariables: 4,
-    applyBanking: true,
+    applyBanking: false,
     newBaselineYear: undefined,
     bankedAnalysisYear: undefined
   }

@@ -6,6 +6,7 @@ import { UtilityColors } from '@shared/utilityColors';
 import { AnnualSourceData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
 import { EnergySources, WaterSources } from '@data/models/constantsAndTypes';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-utilities-usage-chart',
@@ -136,18 +137,6 @@ export class UtilitiesUsageChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.utilityBarChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.utilityBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.utilityBarChart?.nativeElement);
   }
 }

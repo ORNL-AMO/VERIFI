@@ -249,8 +249,8 @@ export const DataManagementRoutes: Route = {
                                         },
                                         {
                                             path: 'update-calculated-entries',
-                                            component: FacilityPredictorDataBulkUpdateComponent
-                                            // canDeactivate: [canDeactivateGuard]
+                                            component: FacilityPredictorDataBulkUpdateComponent,
+                                            canDeactivate: [canDeactivateGuard]
                                         }
                                     ]
                                 },

@@ -2,6 +2,7 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-monthly-savings-graph',
@@ -90,18 +91,6 @@ export class MonthlySavingsGraphComponent {
   }
 
   async getMonthlySavingsChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.monthlySavingsGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.monthlySavingsGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.monthlySavingsGraph?.nativeElement);
   }
 }

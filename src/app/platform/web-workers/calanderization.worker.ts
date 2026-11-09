@@ -23,7 +23,8 @@ addEventListener('message', ({ data }) => {
         console.log(err);
         postMessage({
             calanderizedMeters: undefined,
-            error: true
+            error: true,
+            message: err instanceof Error ? err.message : 'Unknown calendarization error'
         });
     }
 });

@@ -126,20 +126,25 @@ export class CustomFuelDataFormComponent {
     this.editCustomFuel.isMobile = this.form.controls.isMobile.value;
     this.editCustomFuel.isOnRoad = this.form.controls.isOnRoad.value;
 
-    this.editCustomFuel.CO2 = this.form.controls.CO2.value;
-    this.editCustomFuel.CH4 = this.form.controls.CH4.value;
-    this.editCustomFuel.N2O = this.form.controls.N2O.value;
-    //Fuels saved in MMBtu
-    if (this.selectedAccount.energyUnit != 'MMBtu') {
-      let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
-      this.editCustomFuel.CO2 = this.editCustomFuel.CO2 / conversionHelper;
-      this.editCustomFuel.CH4 = this.editCustomFuel.CH4 / conversionHelper;
-      this.editCustomFuel.N2O = this.editCustomFuel.N2O / conversionHelper;
+    if (this.selectedAccount.displayEmissions) {
+      this.editCustomFuel.CO2 = this.form.controls.CO2.value;
+      this.editCustomFuel.CH4 = this.form.controls.CH4.value;
+      this.editCustomFuel.N2O = this.form.controls.N2O.value;
+      //Fuels saved in MMBtu
+      if (this.selectedAccount.energyUnit != 'MMBtu') {
+        let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+        this.editCustomFuel.CO2 = this.editCustomFuel.CO2 / conversionHelper;
+        this.editCustomFuel.CH4 = this.editCustomFuel.CH4 / conversionHelper;
+        this.editCustomFuel.N2O = this.editCustomFuel.N2O / conversionHelper;
+      }
+      this.editCustomFuel.emissionsOutputRate = this.form.controls.emissionsOutputRate.value;
+      this.editCustomFuel.directEmissionsRate = this.form.controls.directEmissionsRate.value;
+    } else if (this.isAdd) {
+      this.editCustomFuel.CO2 = 0;
+      this.editCustomFuel.CH4 = 0;
+      this.editCustomFuel.N2O = 0;
+      this.editCustomFuel.emissionsOutputRate = 0;
     }
-
-
-    this.editCustomFuel.emissionsOutputRate = this.form.controls.emissionsOutputRate.value;
-    this.editCustomFuel.directEmissionsRate = this.form.controls.directEmissionsRate.value;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     if (this.isAdd) {
       await this.commandBoundary.execute(
@@ -186,6 +191,10 @@ export class CustomFuelDataFormComponent {
     if (editItem.directEmissionsRate == false) {
       chemicalValidators = [Validators.required]
     }
+    const CO2 = this.selectedAccount.displayEmissions ? editItem.CO2 : 0;
+    const CH4 = this.selectedAccount.displayEmissions ? editItem.CH4 : 0;
+    const N2O = this.selectedAccount.displayEmissions ? editItem.N2O : 0;
+    const emissionsOutputRate = this.selectedAccount.displayEmissions ? editItem.emissionsOutputRate : 0;
 
     this.form = this.formBuilder.group({
       'fuelName': [editItem.value, [Validators.required]],
@@ -193,10 +202,10 @@ export class CustomFuelDataFormComponent {
       'heatCapacityValue': [editItem.heatCapacityValue, [Validators.required]],
       'siteToSourceMultiplier': [editItem.siteToSourceMultiplier, [Validators.required]],
       'isBiofuel': [editItem.isBiofuel, [Validators.required]],
-      'CO2': [editItem.CO2, chemicalValidators],
-      'CH4': [editItem.CH4, chemicalValidators],
-      'N2O': [editItem.N2O, chemicalValidators],
-      'emissionsOutputRate': [editItem.emissionsOutputRate, [Validators.required]],
+      'CO2': [CO2, chemicalValidators],
+      'CH4': [CH4, chemicalValidators],
+      'N2O': [N2O, chemicalValidators],
+      'emissionsOutputRate': [emissionsOutputRate, [Validators.required]],
       'directEmissionsRate': [editItem.directEmissionsRate],
       'isMobile': [editItem.isMobile],
       'isOnRoad': [editItem.isOnRoad]
@@ -213,7 +222,7 @@ export class CustomFuelDataFormComponent {
   }
 
   setOutputRate() {
-    if (this.form.controls.isMobile.value == false) {
+    if (this.selectedAccount.displayEmissions && this.form.controls.isMobile.value == false) {
       let CO2: number = this.form.controls.CO2.value;
       let CH4: number = this.form.controls.CH4.value;
       let N2O: number = this.form.controls.N2O.value;
@@ -238,25 +247,27 @@ export class CustomFuelDataFormComponent {
     this.displayFuelModal = false;
     if (selectedOption) {
       this.form.controls.phase.patchValue(selectedOption.phase);
-      let CO2: number = selectedOption.option.CO2;
-      let CH4: number = selectedOption.option.CH4;
-      let N2O: number = selectedOption.option.N2O;
       let heatCapacityValue: number = convertHeatCapacity(selectedOption.option, this.editCustomFuel.startingUnit, this.selectedAccount.energyUnit);
-      if (this.selectedAccount.energyUnit != 'MMBtu') {
-        let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
-        CO2 = CO2 / conversionHelper;
-        CH4 = CH4 / conversionHelper;
-        N2O = N2O / conversionHelper;
+      if (this.selectedAccount.displayEmissions) {
+        let CO2: number = selectedOption.option.CO2;
+        let CH4: number = selectedOption.option.CH4;
+        let N2O: number = selectedOption.option.N2O;
+        if (this.selectedAccount.energyUnit != 'MMBtu') {
+          let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+          CO2 = CO2 / conversionHelper;
+          CH4 = CH4 / conversionHelper;
+          N2O = N2O / conversionHelper;
+        }
+        this.form.controls.CO2.patchValue(CO2);
+        this.form.controls.CH4.patchValue(CH4);
+        this.form.controls.N2O.patchValue(N2O);
+        this.form.controls.directEmissionsRate.patchValue(false);
+        this.form.controls.emissionsOutputRate.patchValue(selectedOption.option.emissionsOutputRate);
       }
-      this.form.controls.CO2.patchValue(CO2);
-      this.form.controls.CH4.patchValue(CH4);
-      this.form.controls.N2O.patchValue(N2O);
       this.form.controls.heatCapacityValue.patchValue(heatCapacityValue);
       this.form.controls.siteToSourceMultiplier.patchValue(selectedOption.option.siteToSourceMultiplier);
       this.form.controls.isBiofuel.patchValue(selectedOption.option.isBiofuel || false);
-      this.form.controls.directEmissionsRate.patchValue(false);
       this.form.controls.fuelName.patchValue(selectedOption.option.value + ' (Modified)');
-      this.form.controls.emissionsOutputRate.patchValue(selectedOption.option.emissionsOutputRate);
       this.form.controls.isMobile.patchValue(selectedOption.option.isMobile);
       this.form.controls.isOnRoad.patchValue(selectedOption.option.isOnRoad || false);
     }

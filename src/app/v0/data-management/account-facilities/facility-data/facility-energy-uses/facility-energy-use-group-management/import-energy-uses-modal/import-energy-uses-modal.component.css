@@ -1,0 +1,113 @@
+.popup {
+    top: 5vh;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+    max-width: 600px;
+    max-height: 90vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.review-popup { 
+    max-width: 1050px; 
+}
+
+.popup-body { 
+    min-height: 0; 
+    overflow-y: auto; 
+}
+
+.popup-header, .popup-footer { 
+    flex-shrink: 0; 
+}
+
+.year-input { 
+    width: 8rem; 
+}
+
+.summary-card { 
+    background-color: var(--summary-bg, #f4f7fb); 
+    border: 1px solid #d7e2ec; 
+    border-top: 3px solid var(--summary-accent, #7992b0); 
+    color: #46596b; 
+}
+
+.summary-card strong { 
+    color: var(--summary-color, #274a6b); 
+}
+
+.summary-new { 
+    --summary-bg: #edf8f3; 
+    --summary-accent: #16806b; 
+    --summary-color: #146951; 
+}
+
+.summary-updates { 
+    --summary-bg: #eef5ff; 
+    --summary-accent: #3979bf; 
+    --summary-color: #265e9e; 
+}
+
+.summary-errors { 
+    --summary-bg: #fff0f2; 
+    --summary-accent: #bf4050; 
+    --summary-color: #a82b3c; 
+}
+
+.summary-skipped { 
+    --summary-bg: #f5f5f7; 
+    --summary-accent: #8c909a; 
+    --summary-color: #6c6f77; 
+}
+
+.preview-list { 
+    max-height: min(45vh, 28rem); 
+    overflow: auto; 
+}
+
+.preview-table td { 
+    overflow-wrap: anywhere; 
+    padding: .65rem .75rem; 
+}
+
+.preview-table > tbody > tr:not(.details-row):hover > td { 
+    background-color: #f0f7fc; 
+}
+
+.preview-table > thead { 
+    --bs-table-bg: #294b68; 
+    --bs-table-color: var(--bs-white); 
+}
+
+.preview-table > thead > tr > th { 
+    position: sticky; 
+    top: 0; z-index: 1; 
+    padding: .75rem; 
+    white-space: nowrap; 
+}
+
+.preview-table, .preview-table > thead, .preview-table > thead > tr, .preview-table > thead > tr > th { 
+    border-top: 0; 
+}
+
+.skip-column { 
+    width: 4rem; 
+    text-align: center; 
+}
+
+.skip-column .form-check-input { 
+    float: none; 
+    margin: 0; 
+    width: 1.5rem; 
+    height: 1.5rem; 
+}
+
+.change-details { 
+    font-size: .85rem; 
+}
+
+.change-details td, .change-details th { 
+    padding: .6rem .75rem; 
+}

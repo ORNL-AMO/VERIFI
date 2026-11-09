@@ -19,6 +19,57 @@ export interface AnalysisGroupModelNormalization {
   recoveredAsUserDefined: boolean;
 }
 
+/**
+ * Removes analysis predictor references that are not available in the owning
+ * backup and discards generated models whose predictor/parameter arrays can no
+ * longer be interpreted safely. A selected model that is discarded is then
+ * recovered through the existing user-defined-model compatibility path.
+ */
+export function normalizeAnalysisGroupForAvailablePredictors(
+  group: AnalysisGroup,
+  availablePredictorIds: ReadonlySet<string>,
+  facility: FiscalYearSettings | undefined,
+  fallbackYear: number | undefined
+): AnalysisGroupModelNormalization {
+  const predictorIsAvailable = (variable: { id?: string }): boolean =>
+    !variable.id || availablePredictorIds.has(variable.id);
+
+  const predictorVariables = (group.predictorVariables ?? []).filter(predictorIsAvailable);
+  const models = group.analysisType === 'regression' && group.isGeneratedModel
+    ? group.models?.filter(model => {
+      if (!Array.isArray(model.predictorVariables)
+        || !model.predictorVariables.every(predictorIsAvailable)) {
+        return false;
+      }
+      if (model.errorModeling) {
+        return true;
+      }
+
+      const expectedParameterCount = model.predictorVariables.length + 1;
+      return Array.isArray(model.coef)
+        && model.coef.length === expectedParameterCount
+        && Array.isArray(model.t?.p)
+        && model.t.p.length === expectedParameterCount;
+    })
+    : group.models;
+  const referencesChanged = predictorVariables.length !== (group.predictorVariables?.length ?? 0)
+    || (models?.length ?? 0) !== (group.models?.length ?? 0);
+  const groupWithAvailablePredictors = referencesChanged
+    ? { ...group, predictorVariables, models }
+    : group;
+  const normalized = normalizeAnalysisGroupModelStorage(
+    groupWithAvailablePredictors,
+    facility,
+    fallbackYear
+  );
+
+  return {
+    group: normalized.group,
+    isChanged: referencesChanged || normalized.isChanged,
+    recoveredAsUserDefined: normalized.recoveredAsUserDefined
+  };
+}
+
 export function getSelectedRegressionModel(group: AnalysisGroup): JStatRegressionModel | undefined {
   if (!group.selectedModelId) {
     return undefined;

@@ -25,7 +25,8 @@
   </div>
   <div class="row justify-content-center">
     <div class="col">
-      <button class="btn action-btn" (click)="showDataApplicationModal()">
+      <button class="btn action-btn" (click)="showDataApplicationModal()" [disabled]="!calendarizationReady()"
+        [attr.title]="calendarizationReady() ? null : 'Waiting for calendarized meter data'">
         View Calanderization Modal
       </button>
     </div>
@@ -47,7 +48,8 @@
     <!--Table/Chart Filters-->
     @if (dataDisplay == 'table') {
     <div class="ps-1 pe-1 mb-2">
-      <button class="btn action-btn" (click)="showDataApplicationModal()">Select
+      <button class="btn action-btn" (click)="showDataApplicationModal()" [disabled]="!calendarizationReady()"
+        [attr.title]="calendarizationReady() ? null : 'Waiting for calendarized meter data'">Select
         Method</button>
     </div>
     <div class="pe-1">
@@ -168,7 +170,7 @@
   }
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
-    <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
+    <button class="btn btn-success" (click)="setDataApplication()" [disabled]="!calendarizationReady()">Submit</button>
   </div>
 </div>
 

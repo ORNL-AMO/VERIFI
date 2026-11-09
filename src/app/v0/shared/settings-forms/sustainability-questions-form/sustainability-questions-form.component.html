@@ -169,21 +169,26 @@
 </form>
 @if (sustainQuestionsDontMatchAccount) {
 <hr>
-@if (selectedFacility.isNewFacility != true) {
+@if (!canMarkAsNewFacility || form.controls.isNewFacility.value != true) {
 <p class="alert alert-warning">
-  Facility organizational goals answers are different then the answers set for the account. If you would like to
+  Facility organizational goals answers are different from the answers set for the account. If you would like to
   use the account answers for this facility click here: <a class="click-link" (click)="setAccountSustainQuestions()">Use
-    Account Answers</a><br><br>
+    Account Answers</a>
+  @if (canMarkAsNewFacility) {
+  <br><br>
   Otherwise, if this facility opened after the account baseline year, check the "This is a new facility" box
   below.
+  }
 </p>
 }
-<form>
+@if (canMarkAsNewFacility) {
+<form [formGroup]="form">
   <!--energy reduction-->
   <div class="form-check new-facility">
-    <input type="checkbox" class="form-check-input" name="isNewFacility" [(ngModel)]="selectedFacility.isNewFacility"
+    <input type="checkbox" class="form-check-input" name="isNewFacility" formControlName="isNewFacility"
       (change)="saveChanges()" id="isNewFacility">
     <label class="form-check-label" for="isNewFacility">This is a new facility</label>
   </div>
 </form>
+}
 }

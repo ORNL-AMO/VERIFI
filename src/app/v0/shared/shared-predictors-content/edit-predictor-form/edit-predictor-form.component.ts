@@ -1,5 +1,5 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { WeatherStation } from '@data/models/degreeDays';
@@ -12,6 +12,7 @@ import { Month, Months } from '@shared/form-data/months';
 import { AccountWorkspaceQueryService } from '@app/data/account-workspace/account-workspace-query.service';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { WeatherDataType } from '@data/models/idbModels/predictor';
+import { applyPredictorFormMode } from '@v0/shared/shared-predictors-content/edit-predictor-form/predictor-form-mode';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -19,7 +20,7 @@ import { WeatherDataType } from '@data/models/idbModels/predictor';
   styleUrl: './edit-predictor-form.component.css',
   standalone: false
 })
-export class EditPredictorFormComponent {
+export class EditPredictorFormComponent implements OnChanges {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input({ required: true })
@@ -48,6 +49,7 @@ export class EditPredictorFormComponent {
   endYear: number;
   facilityPredictorData: Array<IdbPredictorData>;
   selectedWeatherTypes: Array<WeatherDataType>;
+  showFutureDatesWarning: boolean = false;
 
   constructor(
     private router: Router,
@@ -62,14 +64,21 @@ export class EditPredictorFormComponent {
     }
     this.setWeatherPredictorDates();
     this.setValidators();
-    this.selectedWeatherTypes = this.editPredictorFormService.getSelectedWeatherTypes(this.predictorForm);
-    const disableWeatherType = this.addOrEdit === 'edit' && this.predictorForm.controls.predictorType.value === 'Weather';
-    if (disableWeatherType) {
-      this.predictorForm.controls.weatherDataType.patchValue(this.selectedWeatherTypes[0], { emitEvent: false });
-      this.predictorForm.controls.weatherDataType.disable({ emitEvent: false });
-    } else {
-      this.predictorForm.controls.weatherDataType.enable({ emitEvent: false });
+    this.applyFormMode();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (this.predictorForm && (changes.predictorForm || changes.addOrEdit)) {
+      this.applyFormMode();
     }
+    if (this.predictorForm && (changes.firstMeterReading || changes.latestMeterReading)) {
+      this.setWeatherPredictorDates();
+    }
+  }
+
+  private applyFormMode() {
+    this.selectedWeatherTypes = this.editPredictorFormService.getSelectedWeatherTypes(this.predictorForm);
+    applyPredictorFormMode(this.predictorForm, this.addOrEdit, this.selectedWeatherTypes[0]);
   }
 
   setWeatherPredictorDates() {
@@ -80,10 +89,16 @@ export class EditPredictorFormComponent {
 
     const fallBackPredictorData = this.accountWorkspaceQuery.getFacilityPredictorData(this.facility?.guid);
     const sourceData = predictorData.length ? predictorData : fallBackPredictorData;
-    this.facilityPredictorData = sourceData;
+    this.facilityPredictorData = [...sourceData];
     if (!this.facilityPredictorData.length) {
+      const useMeterRange = this.addOrEdit === 'add' && this.firstMeterReading && this.latestMeterReading;
       this.predictorForm.patchValue(
-        { startMonth: null, startYear: null, endMonth: null, endYear: null },
+        {
+          startMonth: useMeterRange ? this.firstMeterReading.getMonth() : null,
+          startYear: useMeterRange ? this.firstMeterReading.getFullYear() : null,
+          endMonth: useMeterRange ? this.latestMeterReading.getMonth() : null,
+          endYear: useMeterRange ? this.latestMeterReading.getFullYear() : null
+        },
         { emitEvent: false }
       );
       return;
@@ -205,5 +220,18 @@ export class EditPredictorFormComponent {
     group.get(key)?.patchValue(checked, { emitEvent: false });
     this.setValidators();
     this.predictorForm.markAsDirty();
+  }
+
+  checkFutureDates() {
+    const currentDate = new Date();
+    const startMonth = this.predictorForm.controls.startMonth.value;
+    const startYear = this.predictorForm.controls.startYear.value;
+    const endMonth = this.predictorForm.controls.endMonth.value;
+    const endYear = this.predictorForm.controls.endYear.value;
+   
+    this.showFutureDatesWarning = startYear > currentDate.getFullYear() ||
+      (startYear === currentDate.getFullYear() && startMonth >= currentDate.getMonth()) ||
+      endYear > currentDate.getFullYear() ||
+      (endYear === currentDate.getFullYear() && endMonth >= currentDate.getMonth());
   }
 }

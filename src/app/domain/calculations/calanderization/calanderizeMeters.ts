@@ -1,6 +1,6 @@
 import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from "@data/models/calanderization";
 import { getIsEnergyMeter, getIsEnergyUnit } from "@shared/sharedHelperFunctions";
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { Months } from "@shared/form-data/months";
 import { daysBetweenDates, getConsumptionUnit, getCurrentMonthsReadings, getMonthsArray, getNextMonthsBill, getPreviousMonthsBill, getUnitFromMeter } from "./calanderizationHelpers";

@@ -32,6 +32,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
   sustainQuestionsDontMatchAccount: boolean;
+  canMarkAsNewFacility: boolean = false;
   years: Array<number> = new Array();
   isFormChange: boolean = false;
   fiscalYearOption: "calendarYear" | "nonCalendarYear";
@@ -56,8 +57,10 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       if (facility && !this.inAccount) {
         this.fiscalYearOption = facility.fiscalYear;
         this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
+        this.canMarkAsNewFacility = this.isFacilityEligibleAsNew(facility);
         if (this.isFormChange == false) {
           this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);
+          this.form.addControl('isNewFacility', new FormControl(facility.isNewFacility === true));
         } else {
           this.isFormChange = false;
         }
@@ -76,11 +79,23 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   async saveChanges() {
     this.isFormChange = true;
     if (!this.inAccount) {
-      this.selectedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
+      const updatedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(
+        this.form,
+        structuredClone(this.selectedFacility)
+      );
+      this.canMarkAsNewFacility = this.isFacilityEligibleAsNew(updatedFacility);
+      updatedFacility.isNewFacility = this.canMarkAsNewFacility && this.form.controls['isNewFacility'].value === true;
+      if (!updatedFacility.isNewFacility) {
+        this.form.controls['isNewFacility'].setValue(false, { emitEvent: false });
+      }
+      this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(
+        this.selectedAccount,
+        updatedFacility
+      );
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' ,
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Saving facility' ,
           publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
-        () => this.facilityHandler.update({ ...this.selectedFacility }, this.accountWorkspaceStore.account()?.guid)
+        () => this.facilityHandler.update(updatedFacility, this.accountWorkspaceStore.account()?.guid)
       );
     }
     if (this.inAccount) {
@@ -95,18 +110,26 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
     }
   }
 
-  setAccountSustainQuestions() {
+  async setAccountSustainQuestions() {
     this.form = this.settingsFormsService.setAccountSustainQuestions(this.form, this.selectedAccount);
-    this.saveChanges();
+    await this.saveChanges();
   }
 
-  changeBaselineYear(baselineControlName: string, targetControlName: string) {
+  async changeBaselineYear(baselineControlName: string, targetControlName: string) {
     let baselineValue: number = this.form.get(baselineControlName).value;
     let value: number = baselineValue + 10;
     if (value > 2050) {
       value = 2050;
     }
     this.form.get(targetControlName).patchValue(value);
-    this.saveChanges();
+    await this.saveChanges();
+  }
+
+  private isFacilityEligibleAsNew(facility: IdbFacility): boolean {
+    const accountBaselineYear = this.selectedAccount?.sustainabilityQuestions?.energyReductionBaselineYear;
+    const facilityBaselineYear = facility?.sustainabilityQuestions?.energyReductionBaselineYear;
+    return accountBaselineYear != undefined
+      && facilityBaselineYear != undefined
+      && facilityBaselineYear > accountBaselineYear;
   }
 }

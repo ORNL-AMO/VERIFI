@@ -2,6 +2,7 @@
 @let _groupErrors = groupErrors();
 @let _analysisItem = analysisItem();
 @let _facility = facility();
+@let _bankedAnalysisItem = bankedAnalysisItem();
 @let _bankedGroup = bankedGroup();
 
 @if (_groupErrors?.missingGroupMeters) {
@@ -364,6 +365,14 @@
                 }
               </select>
             </div>
+            @if (_groupErrors?.missingBankingAppliedYear) {
+            <div class="col-12">
+              <div class="alert alert-danger small mb-1 mt-1">
+                <i class="fa fa-exclamation-circle"></i>
+                Applied banking year is required.
+              </div>
+            </div>
+            }
             @if (_bankedGroup?.analysisType == 'regression' && _group.bankedAnalysisYear <
               _bankedGroup?.regressionModelYear) { <div class="col-12">
               <div class="alert alert-warning small mb-1 mt-1">
@@ -389,6 +398,14 @@
               }
             </select>
           </div>
+          @if (_groupErrors?.missingBankingBaselineYear) {
+          <div class="col-12">
+            <div class="alert alert-danger small mb-1 mt-1">
+              <i class="fa fa-exclamation-circle"></i>
+              New baseline year is required.
+            </div>
+          </div>
+          }
           @if (_group.bankedAnalysisYear >= _group.newBaselineYear) {
           <div class="col-12">
             <div class="alert alert-danger small mb-1 mt-1">
@@ -437,10 +454,17 @@
   }
   </form>
 </div>
-@if (_analysisItem.hasBanking && _group.applyBanking && _group.analysisType != 'skip' && _group.analysisType !=
-'skipAnalysis') {
+@if (bankedResultsReady() && _group.analysisType != 'skip' && _group.analysisType != 'skipAnalysis') {
 <div class="col-lg-6 col-md-12">
-  <app-banked-group-results-table></app-banked-group-results-table>
+  <app-banked-group-results-table [selectedGroup]="_group"
+    [bankedAnalysisItem]="_bankedAnalysisItem"></app-banked-group-results-table>
+</div>
+} @else if (_analysisItem.hasBanking && _group.applyBanking && _group.analysisType != 'skip' &&
+_group.analysisType != 'skipAnalysis') {
+<div class="col-lg-6 col-md-12">
+  <div class="alert alert-info" role="status">
+    Select a valid applied banking year and new baseline year to preview banked results.
+  </div>
 </div>
 }
 </div>

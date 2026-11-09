@@ -119,6 +119,7 @@ export class EditPredictorDataEntryFormComponent {
     if (this.predictor.predictorType == 'Weather') {
       this.predictorData.weatherOverride = true;
       this.predictorData.weatherDataWarning = false;
+      this.predictorData.weatherDataChanged = false;
     }
     this.setChanged();
   }

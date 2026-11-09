@@ -21,14 +21,18 @@
             <button class="btn btn-primary" (click)="saveChanges()"
               [disabled]="predictorForm.invalid || !predictorForm.dirty">
               <span class="fa fa-save"></span>
+              @if (addOrEdit === 'add') {
+              Add Predictor
+              } @else {
               Save Changes
+              }
             </button>
           </div>
         </div>
 
         @if (predictor) {
         <app-edit-predictor-form [predictorForm]="predictorForm" [predictor]="predictor"
-          [latestMeterReading]="latestMeterReading" [firstMeterReading]="firstMeterReading" [addOrEdit]="'edit'"
+          [latestMeterReading]="latestMeterReading" [firstMeterReading]="firstMeterReading" [addOrEdit]="addOrEdit"
           [facility]="facility"></app-edit-predictor-form>
         }
         <hr>

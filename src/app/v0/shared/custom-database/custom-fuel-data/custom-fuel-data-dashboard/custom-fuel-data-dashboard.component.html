@@ -126,7 +126,7 @@
                       }
                     </td>
                   </tr>
-                  @if (!fuel.directEmissionsRate) {
+                  @if (selectedAccount.displayEmissions && !fuel.directEmissionsRate) {
                     <tr>
                       <th>
                         CO<sub>2</sub> Factor
@@ -155,7 +155,7 @@
                       </td>
                     </tr>
                   }
-                  @if (fuel.isMobile == false) {
+                  @if (selectedAccount.displayEmissions && fuel.isMobile == false) {
                     <tr>
                       <th>
                         Emissions Output Rate

@@ -11,8 +11,78 @@ on:
       - 'develop'
   workflow_dispatch:
 
+# Jobs opt in to only the token access they require. The desktop caller needs
+# write access solely so its final job can create the draft GitHub Release.
+permissions: {}
+
+# GitHub does not guarantee FIFO concurrency ordering. This group prevents
+# simultaneous production work; the release-policy job separately verifies
+# that the preceding master commit has completed its tagged release.
+concurrency:
+  group: ${{ github.ref == 'refs/heads/master' && 'verifi-production-release' || format('verifi-ci-{0}', github.run_id) }}
+  queue: max
+
 jobs:
+  # Develop checks shared version metadata; master additionally enforces the
+  # release-only branch policy before any release artifacts are built.
+  release_policy:
+    if: github.event_name == 'pull_request' || github.ref_name == 'develop' || github.ref_name == 'master'
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Validate version files
+        run: node .github/scripts/check-release-version.cjs metadata
+      - name: Require an intentional production version
+        if: github.ref_name == 'master' || github.base_ref == 'master'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p 'require("./package.json").version')
+          PREVIOUS_SHA=""
+          PREVIOUS_VERSION=""
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            PREVIOUS_SHA="$BEFORE_SHA"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            PREVIOUS_SHA="$BASE_SHA"
+          fi
+
+          if [[ -n "$PREVIOUS_SHA" ]]; then
+            PREVIOUS_VERSION=$(git show "${PREVIOUS_SHA}:package.json" | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8")).version')
+            node .github/scripts/check-release-version.cjs advance "$VERSION" "$PREVIOUS_VERSION"
+
+            PREVIOUS_TAG_COMMIT=$(git rev-list -n 1 "refs/tags/v${PREVIOUS_VERSION}" 2>/dev/null || true)
+            if [[ "$PREVIOUS_TAG_COMMIT" != "$PREVIOUS_SHA" ]]; then
+              echo "Previous release v${PREVIOUS_VERSION} must tag commit ${PREVIOUS_SHA} before this release can proceed."
+              exit 1
+            fi
+
+            PREVIOUS_RUN_CONCLUSION=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/main.yml/runs?head_sha=${PREVIOUS_SHA}&per_page=100" \
+              --jq '[.workflow_runs[] | select((.event == "push" or .event == "workflow_dispatch") and .status == "completed")] | sort_by(.run_number) | last | .conclusion // ""')
+            if [[ "$PREVIOUS_RUN_CONCLUSION" != "success" ]]; then
+              echo "Previous release commit ${PREVIOUS_SHA} must have a successful completed CI/CD run before this release can proceed."
+              exit 1
+            fi
+          fi
+
+          TAG_COMMIT=$(git rev-list -n 1 "refs/tags/v${VERSION}" 2>/dev/null || true)
+          if [[ -n "$TAG_COMMIT" && ( "$EVENT_NAME" == "pull_request" || "$TAG_COMMIT" != "$GITHUB_SHA" ) ]]; then
+            echo "Tag v${VERSION} already belongs to commit ${TAG_COMMIT}. Choose a new release version."
+            exit 1
+          fi
+
   test:
+    permissions:
+      contents: read
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -36,15 +106,40 @@ jobs:
   qa:
     needs: test
     if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
     uses: ./.github/workflows/release_qa.yml
 
-  web:
-    needs: test
+  web_build:
+    needs: [release_policy, test]
     if: github.ref_name == 'develop' || github.ref_name == 'master'
-    uses: ./.github/workflows/release_web.yml
+    permissions:
+      contents: read
+    uses: ./.github/workflows/template_build.yml
+    with:
+      # Keep the web artifact distinct from the QA artifact during manual runs.
+      artifact-name: web-dist
+      artifact-path: dist/verifi/browser
 
   desktop:
-    needs: test
+    needs: [release_policy, test]
     if: github.ref_name == 'master'
+    permissions:
+      contents: write
     uses: ./.github/workflows/release_desktop.yml
     secrets: inherit
+
+  web_deploy:
+    needs: [web_build, desktop]
+    # always() evaluates the gate when desktop is intentionally skipped on
+    # develop; production still requires an explicit successful desktop result.
+    if: >-
+      always() &&
+      needs.web_build.result == 'success' &&
+      (
+        github.ref_name == 'develop' ||
+        (github.ref_name == 'master' && needs.desktop.result == 'success')
+      )
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deploy_web.yml

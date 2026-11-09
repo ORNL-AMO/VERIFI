@@ -1,4 +1,10 @@
-@if (calculating != false) {
+@if (configurationIncomplete) {
+  <div class="alert alert-info" role="status">
+    Select a valid applied banking year and new baseline year in Analysis Options before viewing banked results.
+  </div>
+}
+
+@if (!configurationIncomplete && calculating != false) {
   <div class="report">
     <app-calculating-spinner [message]="'Calculating Banked Results...'"
     [error]="calculating == 'error'"></app-calculating-spinner>
@@ -6,7 +12,7 @@
 }
 
 <div class="quick-report">
-  @if (calculating == false) {
+  @if (!configurationIncomplete && calculating == false && groupSummary) {
     <app-group-analysis-report [groupSummary]="groupSummary"
       [analysisItem]="bankedAnalysisItem" [facility]="facility"
       [analysisReportSettings]="analysisReportSettings"

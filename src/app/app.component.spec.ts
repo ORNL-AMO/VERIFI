@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
+import { AppStartupState } from './application-lifecycle/application-lifecycle.models';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -15,19 +16,21 @@ import { AppComponent } from './app.component';
 })
 class AppComponentTestModule { }
 
-describe('AppComponent workspace switching state', () => {
+describe('AppComponent startup and workspace state', () => {
   let fixture: ComponentFixture<AppComponent>;
   const workspaceStatus = signal<'ready' | 'switching'>('switching');
+  const startupState = signal<AppStartupState>({ status: 'ready' });
 
   beforeEach(() => {
     workspaceStatus.set('switching');
+    startupState.set({ status: 'ready' });
     TestBed.configureTestingModule({
       imports: [AppComponentTestModule],
       providers: [
         {
           provide: ApplicationLifecycleService,
           useValue: {
-            state: signal({ status: 'ready' }),
+            state: startupState,
             persistenceReady: signal(true),
             initialize: () => Promise.resolve({ status: 'ready' }),
             retry: () => Promise.resolve({ status: 'ready' })
@@ -64,4 +67,24 @@ describe('AppComponent workspace switching state', () => {
 
     expect(fixture.nativeElement.querySelector('.workspace-switch-overlay')).toBeNull();
   });
+
+  it('delegates startup errors to the startup error component', () => {
+    setStartupError('database');
+    expect(fixture.nativeElement.querySelector('app-startup-error')).not.toBeNull();
+
+    startupState.set({ status: 'ready' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-startup-error')).toBeNull();
+  });
+
+  function setStartupError(step: 'database' | 'migrations'): void {
+    startupState.set({
+      status: 'error',
+      step,
+      message: 'Startup failed.',
+      error: { step, message: 'Startup failed.', retryable: true, cause: new Error('cause') }
+    });
+    fixture.detectChanges();
+  }
+
 });

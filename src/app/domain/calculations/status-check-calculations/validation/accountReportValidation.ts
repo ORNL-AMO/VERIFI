@@ -23,6 +23,7 @@ export function getAccountReportErrors(accountReport: IdbAccountReport,
 
     // Report year and baseline year requirements
     const yearRequiredTypes = ["betterPlants", "performance", "betterClimate", "analysis"];
+    const baselineYearRequiredTypes = ["betterClimate"];
     const endDateRequiredTypes = ["dataOverview", "accountSavings"];
     const startDateRequiredTypes = ["dataOverview"];
 
@@ -31,7 +32,7 @@ export function getAccountReportErrors(accountReport: IdbAccountReport,
         errors.missingReportYear = accountReport.reportYear === undefined || accountReport.reportYear === null || isNaN(accountReport.reportYear);
     }
     // Baseline year
-    if (yearRequiredTypes.includes(accountReport.reportType)) {
+    if (baselineYearRequiredTypes.includes(accountReport.reportType)) {
         errors.missingBaselineYear = accountReport.baselineYear === undefined || accountReport.baselineYear === null || isNaN(accountReport.baselineYear);
     }
 

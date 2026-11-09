@@ -12,12 +12,12 @@
   <div class="row">
     @if (_latestEnergyAnalysisItem) {
     <div [ngClass]="{'col-6': _latestWaterAnalysisItem, 'col-12': !_latestWaterAnalysisItem}">
-      <app-account-energy-card></app-account-energy-card>
+      <app-account-energy-card (retryRequested)="retryEnergyCard()"></app-account-energy-card>
     </div>
     }
     @if (_latestWaterAnalysisItem) {
     <div [ngClass]="{'col-6': _latestEnergyAnalysisItem, 'col-12': !_latestEnergyAnalysisItem}">
-      <app-account-water-card></app-account-water-card>
+      <app-account-water-card (retryRequested)="retryWaterCard()"></app-account-water-card>
     </div>
     }
   </div>

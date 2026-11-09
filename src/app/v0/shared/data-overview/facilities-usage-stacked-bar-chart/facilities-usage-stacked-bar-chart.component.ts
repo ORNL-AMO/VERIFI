@@ -7,6 +7,7 @@ import { UtilityColors } from '@shared/utilityColors';
 import * as _ from 'lodash';
 import { DataOverviewReportSetup } from '@data/models/overview-report';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-facilities-usage-stacked-bar-chart',
@@ -323,18 +324,6 @@ export class FacilitiesUsageStackedBarChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.stackedBarChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.stackedBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.stackedBarChart?.nativeElement);
   }
 }

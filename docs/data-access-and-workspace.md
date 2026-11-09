@@ -304,6 +304,12 @@ Automatic Electron backups are coordinated by `AutomaticBackupsService`. `Applic
 
 Electron backup file access must stay behind `ElectronBackupFileGateway`. Renderer code should not call Electron IPC backup channels directly. The gateway owns request/response error handling for choosing a path, checking existence, reading, and writing. `AutomaticBackupsService` uses account-session tokens so account switches cancel stale inspections and saves; it also queues one follow-up save when a newer committed revision arrives during an active write.
 
+### Migration-failure recovery snapshots
+
+If startup fails while running record migrations, `MigrationRecoveryService` reads `application` and every migration store in one readonly native transaction. It creates an ordinary JSON support snapshot of the current records. The snapshot is intentionally not a `BackupFile`; never route it through normal import or add a raw database restore path.
+
+Electron writes the snapshot through `ElectronBackupFileGateway`, while browser delivery uses a Blob download. A successful export enables the session-only, two-step database reset action. Support should repair the snapshot outside the application and return one normal, prepared account backup per account for import into an empty database.
+
 Conflict review compares the prepared file's `dataBackupId` with the account's `electronBackups` registry entry. A missing registry entry or mismatched ID means the selected file may not reflect the latest known saved state for that account. Missing files, invalid files, future-version files, and write failures should be surfaced through the automatic-backup service so each issue is warned once per account session.
 
 ## Querying repositories directly

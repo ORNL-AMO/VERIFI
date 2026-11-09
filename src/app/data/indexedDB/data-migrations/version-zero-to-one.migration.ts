@@ -248,10 +248,10 @@ function migrateDeprecatedPredictors(data: MigrationData, changed: Set<Migration
     firstPredictors.forEach(oldPredictor => {
       let predictor = data.predictors.find(item => item.guid === oldPredictor.id);
       if (!predictor) {
+        const { id: legacyPredictorId, ...legacyPredictorFields } = oldPredictor;
         predictor = getNewIdbPredictor(entries[0].accountId, entries[0].facilityId);
-        Object.assign(predictor, oldPredictor, {
-          id: undefined,
-          guid: oldPredictor.id,
+        Object.assign(predictor, legacyPredictorFields, {
+          guid: legacyPredictorId,
           description: oldPredictor.description ?? oldPredictor.name
         });
         data.predictors.push(predictor);
@@ -266,7 +266,6 @@ function migrateDeprecatedPredictors(data: MigrationData, changed: Set<Migration
         if (existingReadings.has(key)) { return; }
         const reading: IdbPredictorData = getNewIdbPredictorData(predictor, undefined);
         Object.assign(reading, {
-          id: undefined,
           guid: `${entry.guid}-${predictor.guid}`,
           year: date.year,
           month: date.month,

@@ -1,6 +1,6 @@
 
 import { getIsEnergyMeter, getIsEnergyUnit } from "@shared/sharedHelperFunctions";
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "@shared/fuel-options/stationaryOtherEnergyOptions";
 import { IdbAccount } from "@data/models/idbModels/account";

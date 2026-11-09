@@ -627,7 +627,7 @@ export class FacilityAnalysisReportAdapter {
     }
 
     buildModelDetailsTableSection(group: AnalysisGroup): TableSection | undefined {
-        const headers = ['Model Year', 'Variable p-Values', 'R2', 'Adjusted R2', 'Model p-Value', 'Formula', 'Model Notes'];
+        const headers = ['Model Year', 'Variable p-Values', 'R2', 'Adjusted R2', 'Model p-Value', 'Formula', 'Minor Issues'];
         let rows: string[][] = [];
 
         const groupItem: AnalysisGroupItem = this.analysisService.getGroupItem(group);

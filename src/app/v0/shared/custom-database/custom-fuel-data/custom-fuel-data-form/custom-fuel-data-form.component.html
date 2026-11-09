@@ -107,7 +107,7 @@
           </div>
         </div>
 
-        @if (form.controls.directEmissionsRate.value == false) {
+        @if (selectedAccount.displayEmissions && form.controls.directEmissionsRate.value == false) {
         <div class="col-3">
           <label for="CO2">CO<sub>2</sub> Factor <span class="required">*</span>
           </label>
@@ -143,7 +143,7 @@
         </div>
         }
 
-        @if (form.controls.isMobile.value == false) {
+        @if (selectedAccount.displayEmissions && form.controls.isMobile.value == false) {
         <div class="col-3">
           <label for="emissionsOutputRate">Emissions Output Rate <span class="required">*</span>
           </label>
@@ -164,7 +164,7 @@
           </div>
         </div>
         }
-        @if (form.controls.directEmissionsRate.value == false) {
+        @if (selectedAccount.displayEmissions && form.controls.directEmissionsRate.value == false) {
         <div class="col-12">
           <p class="small fw-light pt-2">
             <span class="fa fa-exclamation-circle"></span> The Emissions Rate displayed here is calculated

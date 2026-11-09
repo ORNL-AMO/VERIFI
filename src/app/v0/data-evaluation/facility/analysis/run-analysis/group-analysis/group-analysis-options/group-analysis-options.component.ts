@@ -17,6 +17,7 @@ import { AccountStatusCheckService } from '@shared/helper-services/account-statu
 import { GroupAnalysisErrors } from '@data/models/validation';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { isBankedGroupConfigurationComplete } from '@shared/shared-analysis/banking-configuration';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -114,6 +115,12 @@ export class GroupAnalysisOptionsComponent {
     }
     return bankedAnalysisItem.groups.find(bankedGroup => bankedGroup.idbGroupId == group.idbGroupId);
   });
+
+  bankedResultsReady: Signal<boolean> = computed(() => isBankedGroupConfigurationComplete(
+    this.analysisItem(),
+    this.group(),
+    this.bankedAnalysisItem()
+  ));
 
   hasModelsGenerated: Signal<boolean> = computed(() => {
     const group = this.group();

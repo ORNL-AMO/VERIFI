@@ -4,7 +4,9 @@ import { FacilityCommandHandler } from '@data/account-workspace/handlers/facilit
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, SimpleChanges, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
@@ -28,6 +30,7 @@ import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 export class SharedMeterCalendarizationComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly calanderizationService = inject(CalanderizationService);
   @Input({ required: true })
   selectedMeter: IdbUtilityMeter;
 
@@ -54,8 +57,13 @@ export class SharedMeterCalendarizationComponent {
 
   calanderizationWorker: Worker;
   calanderizingMeterData: boolean | 'error' = false;
+  readonly calendarizationReady = toSignal(
+    this.calanderizationService.calendarizationState.pipe(
+      map(state => this.calanderizationService.isReadyForCurrentWorkspace(state))
+    ),
+    { initialValue: false }
+  );
   constructor(
-    private calanderizationService: CalanderizationService,
     private commandBoundary: WorkspaceCommandBoundary,
     private meterHandler: MeterCommandHandler,
     private facilityHandler: FacilityCommandHandler,
@@ -267,6 +275,7 @@ export class SharedMeterCalendarizationComponent {
   }
 
   showDataApplicationModal() {
+    if (!this.calanderizationService.isReadyForCurrentWorkspace()) return;
     this.sharedDataService.modalOpen.next(true);
     this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
     this.displayDataApplicationModal = true;
