@@ -8,7 +8,11 @@ import { EnergySources, MeterSource } from '@data/models/constantsAndTypes';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { EnergyEquipmentOperatingConditionsData, EquipmentType, EquipmentUtilityData, getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { calculateTotalEquipmentEnergyUse } from '@app/domain/calculations/energy-footprint/energyFootprintCalculations';
-import { CAPACITY_UNITS, capacityUnitFromExcel, capacityUnitToExcel, ENERGY_UNITS, ENERGY_USES_HEADERS, ENERGY_USES_SHEET, INDUSTRIAL_SYSTEMS, parseMeterGroupNames } from './energy-uses-excel-format';
+import {
+  CAPACITY_UNITS, capacityUnitFromExcel, capacityUnitToExcel, ENERGY_UNITS, ENERGY_USES_HEADERS,
+  ENERGY_USES_NUMERIC_COLUMNS, ENERGY_USES_SHEET, energyUsesNumberError, EXCEL_CAPACITY_UNITS,
+  INDUSTRIAL_SYSTEMS, parseEnergyUsesNumber, parseMeterGroupNames
+} from './energy-uses-excel-format';
 
 export interface EnergyUsesImportRow {
   importedRow: number;
@@ -143,10 +147,8 @@ export class EnergyUsesExcelImportService {
           });
         }
       };
-      const numeric = (column: number): number | undefined => {
-        const value = cells[column];
-        return typeof value === 'number' ? value : undefined;
-      };
+      const numericValues = new Map<number, number>();
+      const numeric = (column: number): number | undefined => numericValues.get(column);
       for (const column of [0, 1, 2, 3]) {
         if (!isText(cells[column])) { error(`${ENERGY_USES_HEADERS[column]} is required.`); }
       }
@@ -246,6 +248,23 @@ export class EnergyUsesExcelImportService {
         return row;
       }
       const includesElectricity = incomingSources.includes('Electricity');
+      for (const column of ENERGY_USES_NUMERIC_COLUMNS) {
+        if (column === 9 && !includesElectricity) { continue; }
+        try {
+          const value = parseEnergyUsesNumber(cells[column]);
+          if (value !== undefined) {
+            const message = energyUsesNumberError(column, value, year);
+            if (message) {
+              error(`${ENERGY_USES_HEADERS[column]}: ${message}`);
+            } else {
+              numericValues.set(column, value);
+            }
+          }
+        } catch (failure) {
+          error(`${ENERGY_USES_HEADERS[column]}: ${(failure as Error).message}`);
+        }
+      }
+      if (row.errors.length) { return row; }
       const annualConditions = (proposed.operatingConditionsData ?? []).filter(value => value.year === year);
       if (annualConditions.length > 1) {
         error(`Duplicate operating-condition records exist for ${year}.`);
@@ -287,7 +306,7 @@ export class EnergyUsesExcelImportService {
         const suppliedEnergy = numeric(column + 4);
         const unit = isBlank(cells[column + 2]) ? isBlank(utility.units) ? ENERGY_USES_IMPORT_DEFAULTS.capacityUnit : utility.units : capacityUnitFromExcel(isText(cells[column + 2]));
         if (!CAPACITY_UNITS.includes(unit)) {
-          error(`${sourceType}: a supported rated power/capacity unit is required.`);
+          error(`${ENERGY_USES_HEADERS[column + 2]}: choose ${EXCEL_CAPACITY_UNITS.join(', ')}.`);
         }
         if (capacity !== undefined) {
           change(`${sourceType} capacity`, utility.size, capacity); utility.size = capacity;
