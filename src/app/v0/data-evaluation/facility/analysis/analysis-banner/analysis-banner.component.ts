@@ -15,7 +15,7 @@ import { SharedDataService } from '@shared/helper-services/shared-data.service';
 
 interface GroupsList {
   group: AnalysisGroup,
-  groupStatusCheck: AnalysisGroupStatusCheck
+  groupStatusCheck: AnalysisGroupStatusCheck | undefined
 }
 
 @Component({
@@ -57,11 +57,11 @@ export class AnalysisBannerComponent {
   groupsList: Signal<Array<GroupsList>> = computed(() => {
     const analysisStatusCheck = this.analysisStatusCheck();
     const analysisItem = this.analysisItem();
-    if (!analysisStatusCheck || !analysisItem) {
+    if (!analysisItem) {
       return [];
     }
     return analysisItem.groups.map(group => {
-      const groupStatusCheck: AnalysisGroupStatusCheck = analysisStatusCheck.getGroupStatusChecksByGroupId(group.idbGroupId);
+      const groupStatusCheck = analysisStatusCheck?.getGroupStatusChecksByGroupId(group.idbGroupId);
       return {
         group: group,
         groupStatusCheck: groupStatusCheck

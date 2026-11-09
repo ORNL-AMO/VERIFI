@@ -1,8 +1,6 @@
 import '@angular/compiler';
-import { CommonModule } from '@angular/common';
-import { NgModule, Pipe, PipeTransform } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BehaviorSubject, defer, of } from 'rxjs';
 import { vi } from 'vitest';
@@ -21,31 +19,10 @@ import { CalanderizationService } from '@shared/helper-services/calanderization.
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
+import { AccountAnalysisTestingModule } from './account-analysis-testing.module';
 import { AccountAnalysisService } from './account-analysis.service';
 import { AccountAnalysisSetupComponent } from './account-analysis-setup/account-analysis-setup.component';
 import { SelectItemTableComponent } from './select-facility-analysis-items/select-item-table/select-item-table.component';
-
-@Pipe({ name: 'invalidAnalysis', standalone: false })
-export class SavingInvalidAnalysisPipe implements PipeTransform {
-  transform(_value: string) { return { hasError: false, groupsHaveErrors: false }; }
-}
-
-@Pipe({ name: 'groupName', standalone: false })
-export class SavingGroupNamePipe implements PipeTransform {
-  transform(value: string) { return value; }
-}
-
-@Pipe({ name: 'yearDisplay', standalone: false })
-export class SavingYearDisplayPipe implements PipeTransform {
-  transform(value: number, _fiscalYear: unknown) { return value; }
-}
-
-@NgModule({
-  declarations: [AccountAnalysisSetupComponent,
-    SavingInvalidAnalysisPipe, SavingGroupNamePipe, SavingYearDisplayPipe],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule]
-})
-class AccountAnalysisSavingTestModule { }
 
 function deferred() {
   let resolve!: () => void;
@@ -125,7 +102,7 @@ function createHarness(delayFirstWrite = true) {
   const accountAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem | undefined>(undefined);
   const navigateByUrl = vi.fn();
   TestBed.configureTestingModule({
-    imports: [AccountAnalysisSavingTestModule],
+    imports: [AccountAnalysisTestingModule],
     providers: [
       FormBuilder,
       { provide: AccountWorkspaceStore, useValue: store },

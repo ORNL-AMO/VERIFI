@@ -22,7 +22,7 @@ import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-ca
 
 interface FacilityAnalysisListItem {
   analysisItem: IdbAnalysisItem;
-  statusCheck: AnalysisStatusCheck;
+  statusCheck: AnalysisStatusCheck | undefined;
 }
 
 @Component({
@@ -61,10 +61,9 @@ export class SelectItemTableComponent {
     const selectedItem = this.selectedAnalysisItem();
     const selectedFacility = this.selectedFacility();
     const accountStatusCheck = this.accountStatusCheck();
-    const accountAnalysisStatusCheck = this.accountAnalysisStatusCheck();
     let filteredItems: Array<FacilityAnalysisListItem> = [];
-    if (allItems && selectedItem && selectedFacility && accountStatusCheck && accountAnalysisStatusCheck) {
-      const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(selectedFacility.guid);
+    if (allItems && selectedItem && selectedFacility) {
+      const facilityStatusCheck = accountStatusCheck?.getFacilityStatusCheckByFacilityId(selectedFacility.guid);
       let filteredAnalysisItems: Array<IdbAnalysisItem> = [];
       if (selectedItem.analysisCategory == 'energy') {
         filteredAnalysisItems = allItems.filter(item => {
