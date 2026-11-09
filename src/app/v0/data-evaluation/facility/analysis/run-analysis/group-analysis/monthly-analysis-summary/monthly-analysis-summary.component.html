@@ -31,7 +31,7 @@
   </div>
 </div>
 
-@if (_calculating == false) {
+@if (_calculating == false && monthlyAnalysisSummary()) {
   <div class="w-100">
     @if (_analysisDisplay == 'table') {
       <app-monthly-analysis-summary-table [analysisItem]="analysisItem()"
@@ -57,4 +57,7 @@
 @if (_calculating != false) {
   <app-calculating-spinner [message]="'Calculating Monthly Results...'"
   [error]="_calculating == 'error'"></app-calculating-spinner>
+}
+@if (_calculating == 'error') {
+  <button class="btn btn-outline-primary" type="button" (click)="retryCalculation()">Retry calculation</button>
 }

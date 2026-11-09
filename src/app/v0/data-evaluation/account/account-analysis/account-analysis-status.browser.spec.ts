@@ -1,7 +1,7 @@
 import '@angular/compiler';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { NavigationEnd, provideRouter, Router } from '@angular/router';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
@@ -15,6 +15,8 @@ import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.
 import { AccountAnalysisTestingModule } from './account-analysis-testing.module';
 import { AccountAnalysisService } from './account-analysis.service';
 import { AccountAnalysisBannerComponent } from './account-analysis-banner/account-analysis-banner.component';
+import { AccountAnalysisFooterComponent } from './account-analysis-footer/account-analysis-footer.component';
+import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { SelectFacilityAnalysisItemsComponent } from './select-facility-analysis-items/select-facility-analysis-items.component';
 
 function createHarness(withStatus = true) {
@@ -135,5 +137,65 @@ describe('Account analysis validation presentation', () => {
     h.banner.detectChanges();
     expect(results.getAttribute('href')).not.toBeNull();
     expect(results.getAttribute('aria-disabled')).toBe('false');
+  });
+});
+
+
+function createFooterHarness(page: 'setup' | 'select-items') {
+  const store = new AccountWorkspaceStore();
+  const facility = { id: 2, guid: 'facility-a', accountId: 'account-a' } as any;
+  const analysis = { id: 3, guid: 'account-analysis-a', accountId: 'account-a',
+    facilityAnalysisItems: [{ facilityId: facility.guid, analysisItemId: 'model-a' }] } as any;
+  store.publish({
+    account: { id: 1, guid: 'account-a' }, facilities: [facility], accountAnalyses: [analysis],
+    facilityAnalyses: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
+    accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
+    energyUseGroups: [], energyUseEquipment: []
+  } as unknown as AccountWorkspaceSnapshot, { accountAnalysis: analysis });
+  const status = new BehaviorSubject<any>({
+    getAccountAnalysisStatusCheckById: () => ({ accountAnalysisSetupErrors: { hasSetupErrors: false } })
+  });
+  TestBed.configureTestingModule({
+    imports: [AccountAnalysisTestingModule],
+    providers: [
+      { provide: AccountWorkspaceStore, useValue: store },
+      { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
+      { provide: AccountStatusCheckService, useValue: { accountStatusCheck: status } },
+      { provide: DataEvaluationService, useValue: { helpWidthBs: new BehaviorSubject(0), sidebarWidthBs: new BehaviorSubject(0) } },
+      { provide: Router, useValue: { url: '/data-evaluation/account/analysis/' + page, events: new Subject<NavigationEnd>() } }
+    ]
+  });
+  const footer = TestBed.createComponent(AccountAnalysisFooterComponent);
+  footer.detectChanges();
+  const button = [...(footer.nativeElement as HTMLElement).querySelectorAll('button')]
+    .find(item => item.textContent.includes('Continue')) as HTMLButtonElement;
+  return { store, status, footer, button };
+}
+
+describe('Account analysis footer readiness', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('enables valid account Setup Continue before a facility is selected', () => {
+    const h = createFooterHarness('setup');
+    expect(h.store.selectedFacility()).toBeUndefined();
+    expect(h.footer.componentInstance.canContinue()).toBe(true);
+    expect(h.button.disabled).toBe(false);
+  });
+
+  it('requires a selected facility on the facility-selection step', () => {
+    const h = createFooterHarness('select-items');
+    expect(h.store.selectedFacility()).toBeUndefined();
+    expect(h.footer.componentInstance.canContinue()).toBe(false);
+    expect(h.button.disabled).toBe(true);
+  });
+
+  it.each(['missing checks', 'workspace loading', 'missing analysis'] as const)('keeps Setup Continue disabled for %s', reason => {
+    const h = createFooterHarness('setup');
+    if (reason === 'missing checks') h.status.next(undefined);
+    if (reason === 'workspace loading') h.store.beginLoad(false);
+    if (reason === 'missing analysis') h.store.setSelections({});
+    h.footer.detectChanges();
+    expect(h.footer.componentInstance.canContinue()).toBe(false);
+    expect(h.button.disabled).toBe(true);
   });
 });
