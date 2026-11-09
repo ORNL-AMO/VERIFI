@@ -4,7 +4,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { EnergyUseCommandHandler } from '@data/account-workspace/handlers/energy-use-command-handler.service';
 import { EnergyUseBatchChange, EnergyUseGroupIdentity, EnergyUseGroupSettings, energyUseMeterLinksError } from '@data/account-workspace/handlers/energy-use-command.models';
-import { getNewIdbFacilityEnergyUseGroup, getRandomFlatHexColor } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { IdbFacilityEnergyUseGroup, getNewIdbFacilityEnergyUseGroup, getRandomFlatHexColor } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { IdbEntry, getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { EditorConflictError, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
@@ -76,6 +76,18 @@ export class EnergyUseActionsService {
       return this.handler.copyItem(identity, current, copy);
     });
     return result.value;
+  }
+  async deleteGroup(identity: EnergyUseGroupIdentity, reviewedGroup: IdbFacilityEnergyUseGroup,
+    reviewedItems: readonly IdbFacilityEnergyUseEquipment[]): Promise<void> {
+    const group = structuredClone(reviewedGroup), items = structuredClone(reviewedItems);
+    await this.boundary.execute({ entityKind: 'energyUseGroup', changeKind: 'delete', entityGuid: identity.energyUseGroupGuid,
+      label: 'Deleting energy-use group', notification: { successTitle: 'Energy-use group deleted' } }, async () => {
+      this.requireFacility(identity.accountGuid, identity.facilityGuid);
+      const current = this.workspace.energyUseGroups().find(row => row.guid === identity.energyUseGroupGuid
+        && row.accountId === identity.accountGuid && row.facilityId === identity.facilityGuid);
+      if (!current || !draftEqual(current, group)) this.reject('The saved group changed. Review its deletion again.');
+      await this.handler.deleteGroupWithItems(identity, group, items);
+    });
   }
   async delete(identity: EnergyUseIdentity, reviewed: IdbFacilityEnergyUseEquipment): Promise<void> {
     const snapshot = structuredClone(reviewed);

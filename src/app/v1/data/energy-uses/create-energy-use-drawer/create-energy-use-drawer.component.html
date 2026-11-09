@@ -3,7 +3,7 @@
   @if (selections().length) {
     <div class="creation-selections" role="group" aria-label="Energy use selections">
       @for (selection of selections(); track selection.id) {
-        <button type="button" class="creation-selection" [class.creation-selection--active]="selection.active" [disabled]="!selection.editable || !canEdit()" [attr.aria-label]="selection.editable ? 'Change ' + (selection.id === 'facility' ? 'facility: ' : 'energy-use group: ') + selection.label : selection.label" [attr.aria-expanded]="selection.editable ? selection.active : null" [title]="selection.label" (click)="editSelection(selection.id)">
+        <button type="button" class="creation-selection" [class.creation-selection--active]="selection.active" [disabled]="!selection.editable || !canEdit()" [attr.aria-label]="selection.editable ? 'Change ' + (selection.id === 'facility' ? 'facility: ' : selection.id === 'category' ? 'category: ' : 'energy-use group: ') + selection.label : selection.label" [attr.aria-expanded]="selection.editable ? selection.active : null" [title]="selection.label" (click)="editSelection(selection.id)">
           <app-ui-icon [name]="selection.icon"/><span>{{ selection.label }}</span>@if (selection.editable) { <app-ui-icon name="edit"/> } @else { <app-ui-icon name="check"/> }
         </button>
       }
@@ -34,9 +34,17 @@
             @for (group of matchingGroups(); track group.guid) {
               <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'existing' && form.controls.groupGuid.value === group.guid" (click)="selectGroup(group.guid)"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>{{ group.name || 'Unnamed energy-use group' }}</strong></button>
             }
-            <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'new'" (click)="startNewGroup()"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>Create energy-use group</strong></button>
+            <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.groupKind.value === 'new'" (click)="startNewGroup()"><app-ui-icon name="add" [size]="28"/><strong>Create energy-use group</strong></button>
           </div>
           @if (groups().length && !matchingGroups().length) { <div class="creation-search-empty" role="status"><p>No matching energy-use groups.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="groupSearch.setValue('')">Clear search</button></div> }
+        }
+        @case ('category') {
+          <legend class="visually-hidden"><h3 id="energy-use-choice-heading" #stepHeading tabindex="-1">Energy use category</h3></legend>
+          <div class="creation-choices">
+            @for (category of categories; track category.name) {
+              <button type="button" class="creation-choice" [attr.aria-pressed]="form.controls.category.value === category.name" (click)="selectCategory(category.name)"><app-ui-icon [name]="category.icon" [size]="28"/><strong>{{ category.name }}</strong></button>
+            }
+          </div>
         }
         @case ('new-group') {
           <label for="energy-use-group-name">Group name</label>
@@ -55,7 +63,7 @@
   </form>
   <div slideoutFooter class="creation-draft-actions">
     <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="requestClose()">Cancel</button>
-    @if (currentStep === 'new-group') { <button type="submit" form="energy-use-draft" class="v1-btn v1-btn--action" [disabled]="!canUseNewGroup()">Use group</button> }
+    @if (currentStep === 'new-group') { <button type="submit" form="energy-use-draft" class="v1-btn v1-btn--action" [disabled]="!canUseNewGroup()">Add Group</button> }
     @if (currentStep === 'name') { <button type="submit" form="energy-use-draft" class="v1-btn v1-btn--action" [disabled]="!canCreate()">@if (saving()) { <app-ui-icon name="loading" spin/> }{{ saving() ? 'Creating…' : 'Create energy use' }}</button> }
   </div>
   @if (discardOpen()) {

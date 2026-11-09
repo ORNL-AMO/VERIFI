@@ -17,6 +17,7 @@ import { EnergyUsesWorkspaceService } from '../energy-uses-workspace.service';
 import { EnergyUseWorkbenchContextService } from './energy-use-workbench-context.service';
 import { EnergyUseResultsService } from './results/energy-use-results.service';
 import { energyUseGroupHeader } from './energy-use-group-header.models';
+import { facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
 
 @Component({
   selector: 'app-energy-use-workbench',
@@ -90,9 +91,9 @@ export class EnergyUseWorkbenchComponent {
     if (restoreFocus && this.opener?.isConnected) this.opener.focus();
   }
   async openCreated(item: IdbFacilityEnergyUseEquipment): Promise<void> {
-    if (this.creationKey !== this.context.key() || item.accountId !== this.store.account()?.guid || item.facilityId !== this.context.facilityGuid() || item.energyUseGroupId !== this.context.energyUseGroupGuid()) return;
+    if (this.creationKey !== this.context.key() || item.accountId !== this.store.account()?.guid || item.facilityId !== this.context.facilityGuid()) return;
     this.closeCreation();
-    if (!await this.context.navigate(this.context.itemRoute(item.guid))) this.context.navigationError.set('Energy use added. Select it in Energy Use Items to open it.');
+    if (!await this.context.navigate(facilityEnergyUseRoute(item.facilityId, item.energyUseGroupId, item.guid))) this.context.navigationError.set('Energy use added. Select it in Energy Use Items to open it.');
   }
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.context.workspace.account(), group = this.context.group();

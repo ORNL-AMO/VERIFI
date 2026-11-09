@@ -52,7 +52,7 @@ function setup(single = false, deferredFacility = false) {
   store.publish(snapshot);
   const pairService = { ensurePairs: vi.fn(async () => true) };
   const workspaceService = { selectAccount: vi.fn(), selectFacility: vi.fn() };
-  const actions = { create: vi.fn<EnergyUseActionsService['create']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
+  const actions = { create: vi.fn<EnergyUseActionsService['create']>(), deleteGroup: vi.fn<EnergyUseActionsService['deleteGroup']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
     store.publish({ ...store.snapshot()!, energyUseGroups: store.energyUseGroups().map(group => group.guid === identity.energyUseGroupGuid ? { ...group, ...value } : group) }); return value;
   }) };
   const account = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
@@ -104,7 +104,43 @@ describe('energy uses browser journeys', () => {
     view.fixture.destroy();
   });
 
-
+  it('reviews group deletion in the shell, restores cancel focus, blocks stale/busy deletes, and returns to the facility dashboard', async () => {
+    const view = setup();
+    await view.router.navigateByUrl(`${groupUrl()}/setup`); await settle(view);
+    const opener = page.getByRole('button', { name: 'Delete Group', exact: true });
+    await opener.click(); await settle(view);
+    let dialog = page.getByRole('dialog', { name: 'Delete Group?', exact: true });
+    expect(dialog.element().textContent).toContain('1 energy use item');
+    expect(dialog.element().contains(document.activeElement)).toBe(true);
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(document.activeElement).toBe(opener.element()); expect(view.actions.deleteGroup).not.toHaveBeenCalled();
+    await opener.click(); await settle(view);
+    view.store.publish({ ...view.store.snapshot()!, energyUseEquipment: view.store.energyUseEquipment().map(item => item.energyUseGroupId === 'group-00' ? { ...item, notes: 'Updated after review' } : item) });
+    await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Delete Group?', exact: true });
+    expect(dialog.getByRole('button', { name: 'Delete Group', exact: true }).element()).toHaveProperty('disabled', true);
+    await dialog.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view);
+    await page.viewport(390, 850); view.root.classList.add('v1-theme-dark', 'v1-contrast-strong');
+    await opener.click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Delete Group?', exact: true });
+    expect((dialog.element() as HTMLElement).scrollWidth).toBeLessThanOrEqual((dialog.element() as HTMLElement).clientWidth + 1);
+    await page.screenshot({ element: dialog.element(), path: '../../../../../../tmp/energy-use-results/delete-group-narrow-contrast.png' });
+    let finish!: () => void;
+    view.actions.deleteGroup.mockImplementationOnce(async (_identity, group, items) => {
+      await new Promise<void>(resolve => finish = resolve);
+      view.store.publish({ ...view.store.snapshot()!, energyUseGroups: view.store.energyUseGroups().filter(row => row.guid !== group.guid), energyUseEquipment: view.store.energyUseEquipment().filter(row => !items.some(item => item.guid === row.guid)) });
+    });
+    await dialog.getByRole('button', { name: 'Delete Group', exact: true }).click(); await settle(view);
+    expect(dialog.getByRole('button', { name: 'Cancel', exact: true }).element()).toHaveProperty('disabled', true);
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(view.root.querySelector('[role="dialog"]')).not.toBeNull();
+    finish(); await settle(view);
+    expect(view.actions.deleteGroup).toHaveBeenCalledTimes(1);
+    expect(view.router.url).toBe(`${inventoryUrl}?facility=facility-a`);
+    expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+    expect(view.store.energyUseGroups()).toHaveLength(49); expect(view.store.energyUseEquipment()).toHaveLength(49);
+    view.fixture.destroy();
+  });
 
   it('selects an item when opening a group card and restores the last visited member on return', async () => {
     const view = setup(false, true);
@@ -127,6 +163,39 @@ describe('energy uses browser journeys', () => {
     expect(view.root.querySelector('[aria-label="Energy-use items"] [aria-current="page"]')?.textContent).toContain('B Fan');
     view.fixture.destroy();
   });
+
+  it.each([[true, false], [true, true], [false, false], [false, true]] as const)(
+    'opens the created item after a workspace reload in single-site=%s, new-group=%s creation', async (single, newGroup) => {
+      const view = setup(single);
+      const url = single ? inventoryUrl : `${inventoryUrl}?facility=facility-a`;
+      await view.router.navigateByUrl(url); await settle(view);
+      const created = energyUseItem({ guid: 'created-item', energyUseGroupId: newGroup ? 'created-group' : 'group-00', name: 'Created pump', equipmentType: 'Pump' });
+      let finish!: () => void;
+      view.actions.create.mockImplementationOnce(async () => {
+        view.store.beginLoad(false);
+        await new Promise<void>(resolve => finish = resolve);
+        view.store.publish({ ...view.snapshot, energyUseGroups: newGroup ? [...view.snapshot.energyUseGroups, energyUseGroup({ guid: 'created-group', name: 'New group' })] : view.snapshot.energyUseGroups,
+          energyUseEquipment: [...view.snapshot.energyUseEquipment, created] });
+        return created;
+      });
+      view.inventory().openCreation(); await settle(view);
+      const dialog = page.getByRole('dialog', { name: 'Add energy use', exact: true });
+      await dialog.getByRole('button', { name: newGroup ? 'Create energy-use group' : 'Pump 00', exact: true }).click(); await settle(view);
+      if (newGroup) {
+        await dialog.getByRole('textbox', { name: 'Group name', exact: true }).fill('New group');
+        await dialog.getByRole('button', { name: 'Add Group', exact: true }).click(); await settle(view);
+      }
+      await dialog.getByRole('button', { name: 'Pump', exact: true }).click(); await settle(view);
+      await dialog.getByRole('textbox', { name: 'Energy use name', exact: true }).fill('Created pump');
+      await dialog.getByRole('button', { name: 'Create energy use', exact: true }).click(); await settle(view);
+      try { expect(view.root.querySelector('[role="dialog"]')).not.toBeNull(); }
+      finally { finish(); }
+      await settle(view);
+      expect(view.router.url).toBe(`${groupUrl(created.energyUseGroupId)}/items/created-item`);
+      expect(view.fixture.debugElement.query(By.directive(EnergyUseSettingsComponent))).toBeTruthy();
+      expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+      view.fixture.destroy();
+    });
 
   it('shows distinct group type icons, makes Summary an item-link list, and opens a workbench directly', async () => {
     const view = setup();
@@ -439,7 +508,7 @@ describe('energy uses browser journeys', () => {
     expect(view.root.querySelectorAll('[aria-label="Energy-use items"] button')).toHaveLength(49);
     await page.getByRole('button', { name: 'Setup Group', exact: true }).click(); await settle(view);
     await page.getByRole('button', { name: 'Add energy use', exact: true }).click(); await settle(view);
-    expect(view.root.querySelector('app-create-energy-use-drawer #energy-use-name')).not.toBeNull();
+    expect(view.root.querySelector('app-create-energy-use-drawer #energy-use-choice-heading')?.textContent).toBe('Energy use category');
     await page.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view);
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toContain('/items/')); await settle(view);
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(outer)); await settle(view);
