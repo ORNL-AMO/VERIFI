@@ -3,12 +3,12 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { FormControl, FormRecord } from '@angular/forms';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench/energy-use-workbench-context.service';
+import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench-context.service';
 import { EnergyUseSelectionController } from '../energy-use-selection.controller';
 
-/** The group table owns transient selection; reviewed commands use the shell confirmation portal. */
-@Component({ selector: 'app-energy-use-bulk-actions', standalone: false, templateUrl: './bulk-actions.component.html', styleUrls: ['./bulk-actions.component.css'] })
-export class BulkActionsComponent {
+/** Owns group member selection and the portal views for reviewed equipment commands. */
+@Component({ selector: 'app-energy-use-equipment-table', standalone: false, templateUrl: './equipment-table.component.html', styleUrls: ['./equipment-table.component.css'] })
+export class EquipmentTableComponent {
   readonly canOpen = input.required<boolean>();
   readonly canCreate = input(false);
   readonly createRequested = output<void>();
@@ -17,14 +17,15 @@ export class BulkActionsComponent {
   readonly selectAllControl = new FormControl(false, { nonNullable: true });
   readonly rows = computed(() => this.context.items().map(item => ({ ...item, route: this.context.itemRoute(item.guid) })));
   readonly selection = new EnergyUseSelectionController({
-    context: computed(() => ({ resource: 'energy-uses' as const, accountGuid: this.context.workspace.account()?.guid, facilityGuid: this.context.facilityGuid(), energyUseGroupGuid: this.context.energyUseGroupGuid() })),
-    matchingGuids: computed(() => this.context.items().map(item => item.guid)),
-    scopeGuids: computed(() => this.context.items().map(item => item.guid)),
-    filtersKey: signal('all')
+    identity: computed(() => ({
+      accountGuid: this.context.workspace.account()?.guid,
+      facilityGuid: this.context.facilityGuid(),
+      energyUseGroupGuid: this.context.energyUseGroupGuid()
+    })),
+    members: computed(() => this.context.items().map(entry => entry.item))
   });
   readonly yearEditor = new AddYearController(this.context, this.canOpen);
   readonly opened = signal(false);
-  readonly operation = signal<'add' | 'delete'>('delete');
   readonly someSelected = computed(() => !!this.selection.selected().length && this.selection.selected().length < this.context.items().length);
   readonly canAct = computed(() => this.canOpen() && this.selection.canAct());
   private readonly injector = inject(Injector);
@@ -57,7 +58,7 @@ export class BulkActionsComponent {
       });
     });
     const all = this.selectAllControl.valueChanges.subscribe(selected => {
-      if (this.canAct()) selected ? this.selection.selectAll() : this.selection.selected.set([]);
+      if (this.canAct()) selected ? this.selection.selectAll() : this.selection.clear();
     });
     this.destroy.onDestroy(() => all.unsubscribe());
     const checks = this.checks.valueChanges.subscribe(values => {
@@ -68,7 +69,7 @@ export class BulkActionsComponent {
   startOperation(kind: 'add' | 'delete'): void {
     if (!this.canAct() || !this.selection.selected().length || !this.confirmation) return;
     if (kind === 'add' && (!this.yearDrawer || !this.yearEditor.open(this.selection.selected()))) return;
-    this.operation.set(kind); this.selection.cancel();
+    this.selection.cancel();
     this.opener = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     this.openedKey = this.context.key(); this.opened.set(true);
     this.portal = new TemplatePortal(kind === 'add' ? this.yearDrawer! : this.confirmation, this.view); this.modal.show(this.portal, { blockWorkspace: true });
@@ -91,7 +92,7 @@ export class BulkActionsComponent {
   }
   prepare(): void {
     if (!this.canOpen() || !this.confirmation) return;
-    this.selection.prepare({ kind: 'delete' });
+    this.selection.prepareDelete();
   }
 
   async confirm(): Promise<void> {

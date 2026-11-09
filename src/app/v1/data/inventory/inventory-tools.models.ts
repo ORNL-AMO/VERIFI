@@ -2,21 +2,20 @@ import { Signal } from '@angular/core';
 
 export type InventoryResource = 'meters' | 'predictors';
 
-export interface InventoryToolsContext<R extends string = InventoryResource> {
+export interface InventoryToolsContext {
   readonly accountGuid: string | undefined;
   readonly facilityGuid: string | undefined;
-  readonly resource: R;
-  readonly energyUseGroupGuid?: string;
+  readonly resource: InventoryResource;
 }
 
 /** The routed inventory supplies filtering and committed browsing context. */
-export interface InventoryToolsSource<R extends string = InventoryResource> {
-  readonly context: Signal<InventoryToolsContext<R>>;
+export interface InventoryToolsSource {
+  readonly context: Signal<InventoryToolsContext>;
   readonly matchingGuids: Signal<readonly string[]>;
   readonly scopeGuids: Signal<readonly string[]>;
   readonly filtersKey: Signal<string>;
 }
 
-export function inventoryToolsContextKey(context: InventoryToolsContext<string>): string {
-  return JSON.stringify(context.energyUseGroupGuid ? [context.accountGuid, context.resource, context.facilityGuid, context.energyUseGroupGuid] : [context.accountGuid, context.resource, context.facilityGuid]);
+export function inventoryToolsContextKey(context: InventoryToolsContext): string {
+  return JSON.stringify([context.accountGuid, context.resource, context.facilityGuid]);
 }

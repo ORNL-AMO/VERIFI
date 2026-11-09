@@ -1,9 +1,6 @@
 :host { display: block; min-width: 0; }
 .bulk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .75rem; font-size: .82rem; }
 .bulk-actions__buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; margin-inline-start: auto; }
-.bulk-actions__year-form { margin-bottom: 1rem; }
-fieldset { display: grid; gap: .75rem; min-width: 0; }
-label { display: grid; gap: .25rem; }
 ul { max-height: 40vh; overflow: auto; }
 .manage-items__table { max-width: 100%; }
 .manage-items__table:focus-visible { outline: 2px solid var(--v1-content-control); outline-offset: 2px; }

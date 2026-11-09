@@ -3,36 +3,15 @@ import { MeterSource } from '@data/models/constantsAndTypes';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { calculateTotalEquipmentEnergyUse } from '@domain/calculations/energy-footprint/energyFootprintCalculations';
 import { footprintEnergyUseUnits } from '@domain/calculations/energy-footprint/energy-footprint-units';
-import { ConflictChoices, DraftMerge, draftEqual, reconcileFields, reconcileKeyedItems } from '@app/v1/data/editing/draft-reconciliation';
-import { EnergyUseSettingsValues, EnergyUseSourceValues, SourceRemovalReview, applyEnergyUseSettings, energyUseSettings, energyUseSettingsError, normalizeEnergyUseSettings, reconcileEnergyUseSettings, validEnergyUseSource } from './energy-use-settings.models';
+import { draftEqual } from '@app/v1/data/editing/draft-reconciliation';
+import { EnergyUseSourceValues, SourceRemovalReview, applyEnergyUseSettings, energyUseSettingsError, validEnergyUseSource } from './energy-use-settings.models';
+import { energyUseSetup, energyUseYears, normalizeAnnualConditions, normalizeEnergyUseSetup } from './energy-use-setup.values';
+import type { AnnualConditionsValues, AnnualConsumptionValues, EnergyUseSetupValues } from './energy-use-setup.values';
 
-export interface AnnualConditionsValues {
-  readonly year: number;
-  readonly hoursOfOperation: number | null;
-  readonly loadFactor: number | null;
-  readonly dutyFactor: number | null;
-  readonly efficiency: number | null;
-  readonly hoursPerDay?: number | null;
-  readonly daysPerWeek?: number | null;
-  readonly weeksPerYear?: number | null;
-}
-export interface AnnualConsumptionValues {
-  readonly year: number;
-  /** Only manual amounts are editable. Calculated saved amounts remain on the record. */
-  readonly energyUse: number | null;
-  readonly overrideEnergyUse: boolean;
-  readonly energyUseUnit: string;
-  /** A new copied row preserves its saved amount until its calculation inputs change. Never persisted. */
-  readonly copy?: { readonly amount: number; readonly conditions: AnnualConditionsValues; readonly source: EnergyUseSourceValues; readonly energyUseUnit: string };
-}
-export interface AnnualSourceValues {
-  readonly energySource: MeterSource;
-  readonly entries: readonly AnnualConsumptionValues[];
-}
-export interface EnergyUseSetupValues extends EnergyUseSettingsValues {
-  readonly conditions: readonly AnnualConditionsValues[];
-  readonly consumption: readonly AnnualSourceValues[];
-}
+export { energyUseSetup, energyUseYears, normalizeEnergyUseSetup } from './energy-use-setup.values';
+export type { AnnualConditionsValues, AnnualConsumptionValues, AnnualSourceValues, EnergyUseSetupValues } from './energy-use-setup.values';
+export { reconcileEnergyUseSetup } from './energy-use-setup-reconciliation';
+
 export interface EnergyUseSetupValidation {
   readonly label: string;
   readonly tone: 'success' | 'warning';
@@ -87,24 +66,6 @@ export interface SetupRemovalReviews {
   readonly years?: readonly YearRemovalReview[];
 }
 
-export function energyUseSetup(item: IdbFacilityEnergyUseEquipment): EnergyUseSetupValues {
-  return normalizeEnergyUseSetup({ ...energyUseSettings(item), conditions: item.operatingConditionsData,
-    consumption: item.utilityData.map(source => ({ energySource: source.energySource, entries: source.energyUse })) });
-}
-export function normalizeEnergyUseSetup(value: EnergyUseSetupValues): EnergyUseSetupValues {
-  return { ...normalizeEnergyUseSettings(value), conditions: value.conditions.map(conditionsValues),
-    consumption: value.consumption.map(source => ({ energySource: source.energySource, entries: source.entries.map(row => ({
-      year: row.year, energyUse: row.overrideEnergyUse ? row.energyUse : null, overrideEnergyUse: row.overrideEnergyUse,
-      energyUseUnit: row.energyUseUnit, ...(row.copy ? { copy: structuredClone(row.copy) } : {}) })) })) };
-}
-function conditionsValues(row: AnnualConditionsValues): AnnualConditionsValues {
-  return { year: row.year, hoursOfOperation: row.hoursOfOperation, loadFactor: row.loadFactor, dutyFactor: row.dutyFactor,
-    efficiency: row.efficiency, ...(row.hoursPerDay != null ? { hoursPerDay: row.hoursPerDay } : {}),
-    ...(row.daysPerWeek != null ? { daysPerWeek: row.daysPerWeek } : {}), ...(row.weeksPerYear != null ? { weeksPerYear: row.weeksPerYear } : {}) };
-}
-export function energyUseYears(value: EnergyUseSetupValues): number[] {
-  return [...new Set([...value.conditions.map(row => row.year), ...value.consumption.flatMap(source => source.entries.map(row => row.year))])].sort((a, b) => a - b);
-}
 export function reviewEnergyUseYear(item: IdbFacilityEnergyUseEquipment, year: number): YearRemovalReview {
   return structuredClone({ year, conditions: item.operatingConditionsData.filter(row => row.year === year),
     consumption: item.utilityData.map(source => ({ energySource: source.energySource, entries: source.energyUse.filter(row => row.year === year) })) });
@@ -199,144 +160,6 @@ function validateAnnualChanges(value: EnergyUseSetupValues, base: EnergyUseSetup
   }
 }
 
-/** Safe fallback for imported collections whose natural keys are ambiguous. */
-function mergeRows<T>(base: readonly T[], local: readonly T[], saved: readonly T[], key: (row: T) => string, merge: (b: T, l: T, s: T, prefix: string) => DraftMerge<T>, choices: ConflictChoices, prefix: string): DraftMerge<readonly T[]> {
-  if ([base, local, saved].every(rows => unique(rows, key))) return reconcileKeyedItems(base, local, saved, key, merge, choices, prefix);
-  const identities = [...new Set([...saved, ...local, ...base].map(key))];
-  const ambiguous = new Set(identities.filter(identity => [base, local, saved].some(rows => rows.filter(row => key(row) === identity).length > 1)));
-  const unambiguous = (rows: readonly T[]) => rows.filter(row => !ambiguous.has(key(row)));
-  const result = reconcileKeyedItems(unambiguous(base), unambiguous(local), unambiguous(saved), key, merge, choices, prefix);
-  const values = new Map(result.value.map(row => [key(row), [row]])), baselines = new Map(result.baseline!.map(row => [key(row), [row]]));
-  const conflicts = [...result.conflicts];
-  for (const identity of ambiguous) {
-    const rows = (values: readonly T[]) => ({ rows: values.filter(row => key(row) === identity) });
-    const repeated = reconcileFields(rows(base), rows(local), rows(saved), { choices, prefix: `${prefix}.${identity}`,
-      groups: [{ id: 'ambiguous', label: 'Imported repeated rows', keys: ['rows'] }] });
-    values.set(identity, [...repeated.value.rows]); baselines.set(identity, [...repeated.baseline!.rows]); conflicts.push(...repeated.conflicts);
-  }
-  return { value: identities.flatMap(identity => values.get(identity) ?? []), baseline: identities.flatMap(identity => baselines.get(identity) ?? []), conflicts };
-}
-function replaceMatching<T>(rows: readonly T[], replacement: readonly T[], matches: (row: T) => boolean): T[] {
-  let replaced = false;
-  const result = rows.flatMap(row => {
-    if (!matches(row)) return [row];
-    if (replaced) return [];
-    replaced = true;
-    return structuredClone([...replacement]);
-  });
-  if (!replaced) result.push(...structuredClone(replacement));
-  return result;
-}
-/** Retain a complete removed-year snapshot until its single destructive choice is accepted. */
-function retainYear(target: EnergyUseSetupValues, snapshot: EnergyUseSetupValues, year: number): EnergyUseSetupValues {
-  const available = [...snapshot.consumption];
-  const consumption = target.consumption.map(source => {
-    const index = available.findIndex(row => row.energySource === source.energySource);
-    const reference = index < 0 ? undefined : available.splice(index, 1)[0];
-    return { ...source, entries: replaceMatching(source.entries, reference?.entries.filter(row => row.year === year) ?? [], row => row.year === year) };
-  });
-  for (const source of available) {
-    if (target.sources.some(row => row.energySource === source.energySource)) consumption.push({ ...source, entries: source.entries.filter(row => row.year === year) });
-  }
-  return { ...target, conditions: replaceMatching(target.conditions, snapshot.conditions.filter(row => row.year === year), row => row.year === year), consumption };
-}
-function underPath(id: string, prefix: string): boolean { return id === prefix || id.startsWith(`${prefix}.`); }
-function withoutYear(value: EnergyUseSetupValues, year: number): EnergyUseSetupValues {
-  return { ...value, conditions: value.conditions.filter(row => row.year !== year),
-    consumption: value.consumption.map(source => ({ ...source, entries: source.entries.filter(row => row.year !== year) })) };
-}
-function yearData(value: EnergyUseSetupValues, year: number) {
-  return { conditions: value.conditions.filter(row => row.year === year), consumption: value.consumption
-    .map(source => ({ energySource: source.energySource, entries: source.entries.filter(row => row.year === year) })).filter(source => source.entries.length) };
-}
-function retainSources(value: EnergyUseSetupValues, snapshot: EnergyUseSetupValues, sources: readonly MeterSource[], excludedYears: readonly number[] = []): EnergyUseSetupValues {
-  let consumption = value.consumption;
-  for (const source of sources) {
-    const replacement = snapshot.consumption.filter(row => row.energySource === source)
-      .map(row => ({ ...row, entries: row.entries.filter(entry => !excludedYears.includes(entry.year)) }));
-    consumption = replaceMatching(consumption, replacement, row => row.energySource === source);
-  }
-  return { ...value, consumption };
-}
-/** Resolved configuration membership owns its annual rows; independent year removals still apply. */
-function matchSourceMembership(value: EnergyUseSetupValues, local: EnergyUseSetupValues, saved: EnergyUseSetupValues,
-  localRemovedYears: readonly number[], savedRemovedYears: readonly number[]): EnergyUseSetupValues {
-  const restoredSaved = value.sources.filter(source => saved.sources.some(row => row.energySource === source.energySource)
-    && !local.sources.some(row => row.energySource === source.energySource)).map(source => source.energySource);
-  const restoredLocal = value.sources.filter(source => local.sources.some(row => row.energySource === source.energySource)
-    && !saved.sources.some(row => row.energySource === source.energySource)).map(source => source.energySource);
-  value = retainSources(retainSources(value, saved, restoredSaved, localRemovedYears), local, restoredLocal, savedRemovedYears);
-  return { ...value, consumption: value.consumption.filter(source => value.sources.some(row => row.energySource === source.energySource)) };
-}
-export function reconcileEnergyUseSetup(base: EnergyUseSetupValues, local: EnergyUseSetupValues, saved: EnergyUseSetupValues, choices: ConflictChoices = {}): DraftMerge<EnergyUseSetupValues> {
-  base = normalizeEnergyUseSetup(base); local = normalizeEnergyUseSetup(local); saved = normalizeEnergyUseSetup(saved);
-  const settings = reconcileEnergyUseSettings(base, local, saved, choices);
-  const conditions = mergeRows(base.conditions, local.conditions, saved.conditions, row => String(row.year),
-    (b, l, s, prefix) => reconcileFields(b, l, s, { choices, prefix }), choices, 'years');
-  const consumption = mergeRows(base.consumption, local.consumption, saved.consumption, row => row.energySource, (b, l, s, prefix) => {
-    const entries = mergeRows(b.entries, l.entries, s.entries, row => String(row.year), (before, mine, theirs, path) => reconcileFields(before, mine, theirs,
-      { choices, prefix: path, groups: [{ id: 'consumption', label: `${s.energySource}: consumption, override, and units`, keys: ['energyUse', 'overrideEnergyUse', 'energyUseUnit'] }] }), choices, prefix);
-    return { value: { energySource: s.energySource, entries: entries.value }, baseline: { energySource: s.energySource, entries: entries.baseline! }, conflicts: entries.conflicts };
-  }, choices, 'sources');
-  let value = { ...settings.value, conditions: conditions.value, consumption: consumption.value };
-  let baseline = { ...settings.baseline!, conditions: conditions.baseline!, consumption: consumption.baseline! };
-  let conflicts = [...settings.conflicts, ...conditions.conflicts, ...consumption.conflicts];
-  // Structural choices span conditions, consumption, and (for sources) configuration and links.
-  const baseYears = energyUseYears(base), localYears = energyUseYears(local), savedYears = energyUseYears(saved);
-  const localRemovedYears = baseYears.filter(year => !localYears.includes(year)), savedRemovedYears = baseYears.filter(year => !savedYears.includes(year));
-  const removedYears = baseYears.filter(year => (localRemovedYears.includes(year) && savedYears.includes(year) && !draftEqual(yearData(base, year), yearData(saved, year)))
-    || (savedRemovedYears.includes(year) && localYears.includes(year) && !draftEqual(yearData(base, year), yearData(local, year))));
-  const removedSources = [...new Set(base.sources.map(row => row.energySource))].filter(source =>
-    (!saved.sources.some(row => row.energySource === source) && local.sources.some(row => row.energySource === source)
-      && !draftEqual(base.consumption.filter(row => row.energySource === source), local.consumption.filter(row => row.energySource === source)))
-    || (!local.sources.some(row => row.energySource === source) && saved.sources.some(row => row.energySource === source)
-      && !draftEqual(base.consumption.filter(row => row.energySource === source), saved.consumption.filter(row => row.energySource === source))));
-  // Overlapping year and source-membership conflicts require one coherent choice.
-  if (removedYears.length && settings.conflicts.some(conflict => conflict.id === 'configuration')) {
-    for (const source of [...local.sources, ...saved.sources]) {
-      if (local.sources.some(row => row.energySource === source.energySource) !== saved.sources.some(row => row.energySource === source.energySource)
-        && !removedSources.includes(source.energySource)) removedSources.push(source.energySource);
-    }
-  }
-  const membershipId = removedSources.length ? 'removed-sources' : removedYears.length === 1 ? `removed-year.${removedYears[0]}` : 'history-membership';
-  const structuralConflict = !!(removedSources.length || removedYears.length), accepted = choices[membershipId] === 'saved';
-  if (structuralConflict) {
-    conflicts = conflicts.filter(conflict => !(removedSources.length && conflict.id === 'configuration')
-      && !removedSources.some(source => underPath(conflict.id, `sources.${source}`))
-      && !removedYears.some(year => underPath(conflict.id, `years.${year}`) || [...base.consumption, ...local.consumption, ...saved.consumption]
-        .some(source => underPath(conflict.id, `sources.${source.energySource}.${year}`))));
-    if (removedSources.length) {
-      const selected = accepted ? saved : local, before = accepted ? saved : base;
-      value = { ...value, sources: selected.sources, utilityMeterGroupIds: selected.utilityMeterGroupIds };
-      baseline = { ...baseline, sources: before.sources, utilityMeterGroupIds: before.utilityMeterGroupIds };
-      value = retainSources(value, selected, removedSources, accepted ? localRemovedYears : []);
-      baseline = retainSources(baseline, before, removedSources);
-    }
-    if (!accepted) {
-      for (const year of removedYears) {
-        value = localYears.includes(year) ? retainYear(value, local, year) : withoutYear(value, year);
-        baseline = retainYear(baseline, base, year);
-      }
-      const snapshot = (draft: EnergyUseSetupValues) => ({ ...(removedSources.length ? { sources: draft.sources, utilityMeterGroupIds: draft.utilityMeterGroupIds,
-        consumption: draft.consumption.filter(source => removedSources.includes(source.energySource)) } : {}), years: removedYears.map(year => yearData(draft, year)) });
-      conflicts.push({ id: membershipId, label: `Saved history changed for ${[...removedSources, ...removedYears].join(', ')}. Keep saved history, then review any removal again.`,
-        localValue: snapshot(local), savedValue: snapshot(saved), allowedChoices: ['saved'] });
-      return { value, baseline, conflicts };
-    }
-  }
-  if (!conflicts.some(conflict => conflict.id === 'configuration')) value = matchSourceMembership(value, local, saved, localRemovedYears, savedRemovedYears);
-  if (structuralConflict && accepted) {
-    for (const year of removedYears) {
-      if (savedYears.includes(year)) {
-        value = retainYear(value, saved, year); baseline = retainYear(baseline, saved, year);
-      } else {
-        value = withoutYear(value, year); baseline = withoutYear(baseline, year);
-      }
-    }
-  }
-  return { value, baseline, conflicts };
-}
-
 export function addEnergyUseYear(value: EnergyUseSetupValues, year: number, facility: IdbFacility, copyFrom?: { readonly year: number; readonly item: IdbFacilityEnergyUseEquipment }): EnergyUseSetupValues {
   if (!Number.isInteger(year) || year < 1 || year > 9999) throw new Error('Enter a fiscal year from 1 to 9999.');
   if (energyUseYears(value).includes(year)) throw new Error(`Fiscal year ${year} already exists.`);
@@ -384,7 +207,7 @@ export function applyEnergyUseSetup(current: IdbFacilityEnergyUseEquipment, valu
     const occurrence = conditionOccurrences.get(row.year) ?? 0;
     conditionOccurrences.set(row.year, occurrence + 1);
     if (matches.length > 1) return structuredClone(matches[occurrence]);
-    if (matches[0] && draftEqual(row, conditionsValues(matches[0]))) return structuredClone(matches[0]);
+    if (matches[0] && draftEqual(row, normalizeAnnualConditions(matches[0]))) return structuredClone(matches[0]);
     const conditions = { ...matches[0], ...row } as EnergyEquipmentOperatingConditionsData;
     for (const field of ['hoursPerDay', 'daysPerWeek', 'weeksPerYear'] as const) { if (row[field] == null) delete conditions[field]; }
     return conditions;
