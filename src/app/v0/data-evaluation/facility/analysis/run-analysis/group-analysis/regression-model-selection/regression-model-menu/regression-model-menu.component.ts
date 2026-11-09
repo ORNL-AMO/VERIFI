@@ -1,8 +1,8 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { getAnalysisGroupChanges } from '../../../analysis-edits';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
-import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
+import { AnalysisCommandHandler, AnalysisGroupChanges } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { DestroyRef, Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
@@ -50,10 +50,10 @@ type RegressionMenuForm = FormGroup<{
   standalone: false
 })
 export class RegressionModelMenuComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly destroyRef = inject(DestroyRef);
 
   // --- Services (DI) ---
   private analysisService: AnalysisService = inject(AnalysisService);
@@ -268,7 +268,7 @@ export class RegressionModelMenuComponent {
           numVariableOptions[numVariableOptions.length - 1],
           { emitEvent: false }
         );
-        this.saveFormValue();
+        this.saveFormValue({ maxModelVariables: this.form.controls.maxModelVariables.value });
       }
     });
   }
@@ -330,28 +330,56 @@ export class RegressionModelMenuComponent {
   }
 
   // --- Persistence ---
-  async saveFormValue(): Promise<void> {
-    await this.saveItem(this.formValueToGroup());
+  async saveFormValue(changes: AnalysisGroupChanges): Promise<void> {
+    await this.saveChanges(changes, this.group().idbGroupId, true);
   }
 
-  async saveItem(group?: AnalysisGroup, suppressFormPatch = true) {
+  savePredictorCoefficient(index: number): Promise<void> {
+    return this.saveFormValue({ predictorVariables: [{
+      id: this.group().predictorVariables[index].id,
+      regressionCoefficient: this.predictorVariablesArray.at(index).controls.regressionCoefficient.value
+    }] });
+  }
+
+  async saveItem(group?: AnalysisGroup, suppressFormPatch = true, before = this.group()) {
     const _group: AnalysisGroup = group ?? this.group();
+    const changes = getAnalysisGroupChanges(before, _group);
+    await this.saveChanges(changes, _group.idbGroupId, suppressFormPatch);
+  }
+
+  private async saveChanges(changes: AnalysisGroupChanges, groupGuid: string, suppressFormPatch: boolean): Promise<void> {
     const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
-    const groupIndex: number = _analysisItemCurrent.groups.findIndex(g => g.idbGroupId == _group.idbGroupId);
-    const updatedGroups = [..._analysisItemCurrent.groups];
-    updatedGroups[groupIndex] = _group;
-    const _analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
       {
-        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: _analysisItem.guid, label: 'Save Facility Analysis',
+        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: _analysisItemCurrent.guid, label: 'Save Facility Analysis',
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }
       },
-      () => this.analysisHandler.updateFacilityAnalysis(_analysisItem, activeAccountGuid)
+      () => this.analysisHandler.updateFacilityAnalysisGroup(_analysisItemCurrent.guid, groupGuid, changes, activeAccountGuid)
     );
-    this.accountWorkspaceService.selectFacilityAnalysis((_analysisItem)?.guid);
-    this._suppressFormPatch = suppressFormPatch;
-    this.analysisService.selectedGroup.next(_group);
+    if (this.isCurrentOwner(activeAccountGuid, _analysisItemCurrent.guid, groupGuid)) {
+      this._suppressFormPatch = suppressFormPatch;
+    }
+  }
+
+  private modelFormIntent(group: AnalysisGroup): AnalysisGroupChanges {
+    return {
+      isGeneratedModel: group.isGeneratedModel, maxModelVariables: group.maxModelVariables,
+      regressionConstant: group.regressionConstant, regressionModelYear: group.regressionModelYear,
+      regressionModelStartMonth: group.regressionModelStartMonth, regressionStartYear: group.regressionStartYear,
+      regressionModelEndMonth: group.regressionModelEndMonth, regressionEndYear: group.regressionEndYear,
+      regressionModelNotes: group.regressionModelNotes, models: group.models,
+      selectedModelId: group.selectedModelId, dateModelsGenerated: group.dateModelsGenerated,
+      predictorVariables: group.predictorVariables.map(variable => ({
+        id: variable.id, productionInAnalysis: variable.productionInAnalysis,
+        regressionCoefficient: variable.regressionCoefficient
+      }))
+    };
+  }
+
+  private isCurrentOwner(accountGuid: string, analysisGuid: string, groupGuid: string): boolean {
+    return !this.destroyRef.destroyed && this.accountWorkspaceStore.account()?.guid === accountGuid
+      && this.analysisItem()?.guid === analysisGuid && this.group()?.idbGroupId === groupGuid;
   }
 
   // --- Model Management ---
@@ -391,7 +419,7 @@ export class RegressionModelMenuComponent {
     };
     this.regressionModelState.setForGroup(_group.idbGroupId, []);
     this.updateFieldDisabledStates(isGeneratedModel);
-    await this.saveItem(_group);
+    await this.saveChanges(this.modelFormIntent(_group), _group.idbGroupId, true);
   }
 
   async generateModels() {
@@ -401,6 +429,7 @@ export class RegressionModelMenuComponent {
     const _meters = this.facilityMeters();
     const _meterData = this.facilityMeterData();
     const _predictorData = this.facilityPredictorData();
+    const accountGuid = this.selectedAccount()?.guid;
     const assessmentReportVersion = this.selectedAccount()?.assessmentReportVersion ?? 'AR6';
 
     const previousSelectedModelId = group.selectedModelId;
@@ -413,10 +442,13 @@ export class RegressionModelMenuComponent {
       const generatedModels = await this.regressionModelsService.generateModels(
         group, _analysisItem, _selectedFacility, _meters, _meterData, _predictorData, assessmentReportVersion
       );
-      await this.handleGenerateResult(generatedModels, group, previousSelectedModelId, previousSelectedModel);
+      if (!this.isCurrentOwner(accountGuid, _analysisItem.guid, group.idbGroupId)) { return; }
+      await this.handleGenerateResult(generatedModels, group, previousSelectedModelId, previousSelectedModel, accountGuid, _analysisItem);
     } catch {
-      this.modelingError.set(true);
-      this.generatingModels.set(false);
+      if (this.isCurrentOwner(accountGuid, _analysisItem.guid, group.idbGroupId)) {
+        this.modelingError.set(true);
+        this.generatingModels.set(false);
+      }
     }
   }
 
@@ -424,7 +456,9 @@ export class RegressionModelMenuComponent {
     generatedModels: Array<JStatRegressionModel>,
     group: AnalysisGroup,
     previousSelectedModelId: string | undefined,
-    previousSelectedModel: JStatRegressionModel | undefined
+    previousSelectedModel: JStatRegressionModel | undefined,
+    accountGuid: string,
+    analysisItem: IdbAnalysisItem
   ): Promise<void> {
     const { updatedGroup, newSelectedModel } = this.regressionModelsService.applyGeneratedModelsToGroup(
       group,
@@ -432,7 +466,7 @@ export class RegressionModelMenuComponent {
       previousSelectedModelId,
       previousSelectedModel,
       this.selectedFacility(),
-      this.analysisItem().baselineYear
+      analysisItem.baselineYear
     );
     if (previousSelectedModelId) {
       this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
@@ -443,8 +477,10 @@ export class RegressionModelMenuComponent {
     );
     // Regeneration can change the selected model's coefficients even when the
     // logical model is equivalent, so refresh the form from the saved group.
-    await this.saveItem(updatedGroup, false);
-    this.generatingModels.set(false);
+    await this.saveItem(updatedGroup, false, group);
+    if (this.isCurrentOwner(accountGuid, analysisItem.guid, group.idbGroupId)) {
+      this.generatingModels.set(false);
+    }
   }
 
   compareUpdatedModel(previousModel: JStatRegressionModel, newModel: JStatRegressionModel) {
@@ -482,8 +518,11 @@ export class RegressionModelMenuComponent {
   }
 
   async confirmUpdateModals() {
+    const accountGuid = this.selectedAccount()?.guid;
+    const analysisGuid = this.analysisItem()?.guid;
+    const groupGuid = this.group()?.idbGroupId;
     await this.generateModels();
-    this.closeUpdateModelsModal();
+    if (this.isCurrentOwner(accountGuid, analysisGuid, groupGuid)) { this.closeUpdateModelsModal(); }
   }
 
 
@@ -498,7 +537,10 @@ export class RegressionModelMenuComponent {
     } else if (group.isGeneratedModel) {
       await this.confirmTogglePredictor();
     } else {
-      await this.saveFormValue();
+      await this.saveFormValue({ predictorVariables: [{
+        id: group.predictorVariables[index].id,
+        productionInAnalysis: this.predictorVariablesArray.at(index).controls.productionInAnalysis.value
+      }] });
     }
   }
 
@@ -526,8 +568,12 @@ export class RegressionModelMenuComponent {
       })),
     };
     this.regressionModelState.setForGroup(_group.idbGroupId, []);
-    await this.saveItem(_group);
-    this.showConfirmPredictorChangeModel = false;
-    this.toggledPredictorIndex = null;
+    const accountGuid = this.selectedAccount()?.guid;
+    const analysisGuid = this.analysisItem()?.guid;
+    await this.saveChanges(this.modelFormIntent(_group), _group.idbGroupId, true);
+    if (this.isCurrentOwner(accountGuid, analysisGuid, _group.idbGroupId)) {
+      this.showConfirmPredictorChangeModel = false;
+      this.toggledPredictorIndex = null;
+    }
   }
 }

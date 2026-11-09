@@ -1,7 +1,6 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
+import { DestroyRef, Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
@@ -28,9 +27,9 @@ import { AccountStatusCheckService } from '@shared/helper-services/account-statu
   standalone: false
 })
 export class AnalysisSetupComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -163,6 +162,8 @@ export class AnalysisSetupComponent {
     bankedAnalysisItemId: this.fb.control<string | null>(null),
   });
 
+  private readonly pendingSetupFields = new Set<string>();
+
   displayEnableForm = false;
 
   constructor() {
@@ -172,6 +173,7 @@ export class AnalysisSetupComponent {
       this._currentItemGuid();
       const item = untracked(() => this.analysisItem());
       if (!item) { return; }
+      this.pendingSetupFields.clear();
       this.form.patchValue({
         name: item.name,
         energyIsSource: item.energyIsSource,
@@ -219,6 +221,11 @@ export class AnalysisSetupComponent {
       }
     });
 
+    // Keep the user's field intent even when it returns to a value whose earlier write is still pending.
+    Object.entries(this.form.controls).forEach(([field, control]) => {
+      (control as FormControl).valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.pendingSetupFields.add(field));
+    });
+
     // Auto-save on any valid form value change.
     this.form.valueChanges.pipe(
       debounceTime(100),
@@ -242,8 +249,7 @@ export class AnalysisSetupComponent {
     const item = this.analysisItem();
     if (!item) { return; }
     const raw = this.form.getRawValue();
-    const updatedItem: IdbAnalysisItem = {
-      ...item,
+    const fields = {
       name: raw.name,
       energyIsSource: raw.energyIsSource,
       energyUnit: raw.energyUnit,
@@ -252,13 +258,15 @@ export class AnalysisSetupComponent {
       baselineYear: raw.baselineYear ?? item.baselineYear,
       bankedAnalysisItemId: raw.hasBanking ? (raw.bankedAnalysisItemId ?? undefined) : undefined,
     };
+    const changes = Object.fromEntries([...this.pendingSetupFields].map(field => [field, fields[field]]));
+    this.pendingSetupFields.clear();
+    if (!Object.keys(changes).length) { return; }
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Facility Analysis' ,
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: item.guid, label: 'Save Facility Analysis' ,
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateFacilityAnalysis(updatedItem, activeAccountGuid)
+      () => this.analysisHandler.updateFacilityAnalysisFields(item.guid, changes, activeAccountGuid)
     );
-    this.accountWorkspaceService.selectFacilityAnalysis((updatedItem)?.guid);
   }
 
   toggleHideInUseMessage(): void {
@@ -276,28 +284,16 @@ export class AnalysisSetupComponent {
   async confirmEnableForm(): Promise<void> {
     const item = this.analysisItem();
     if (!item) { return; }
-    const clearedItem: IdbAnalysisItem = {
-      ...item,
-      groups: item.groups.map(group => ({
-        ...group,
-        models: [],
-        selectedModelId: undefined,
-        regressionConstant: undefined,
-        regressionModelYear: undefined,
-        predictorVariables: group.predictorVariables.map(variable => ({
-          ...variable,
-          regressionCoefficient: undefined,
-        })),
-      })),
-    };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Facility Analysis' ,
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: item.guid, label: 'Save Facility Analysis' ,
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateFacilityAnalysis(clearedItem, activeAccountGuid)
+      () => this.analysisHandler.clearFacilityAnalysisModels(item.guid, activeAccountGuid)
     );
-    this.accountWorkspaceService.selectFacilityAnalysis((clearedItem)?.guid);
-    this.displayEnableForm = false;
+    if (!this.destroyRef.destroyed && this.analysisItem()?.guid === item.guid
+      && this.accountWorkspaceStore.account()?.guid === activeAccountGuid) {
+      this.displayEnableForm = false;
+    }
   }
 
   goToSavingsReport(): void {

@@ -1,7 +1,6 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
+import { DestroyRef, Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
@@ -28,9 +27,9 @@ type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
   standalone: false
 })
 export class RegressionModelSelectionComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly destroyRef = inject(DestroyRef);
   private analysisService: AnalysisService = inject(AnalysisService);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -105,6 +104,7 @@ export class RegressionModelSelectionComponent {
   });
 
   selectedInspectModel: JStatRegressionModel;
+  private inspectionOwner: { accountGuid: string; analysisGuid: string; groupGuid: string };
   dropdownOpen: boolean = false;
 
   showInvalid: WritableSignal<boolean> = signal(false);
@@ -195,25 +195,33 @@ export class RegressionModelSelectionComponent {
         };
       }),
     };
+    const analysisGuid = this.analysisItem()?.guid;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.saveItem(updatedGroup);
-    this.regressionModelState.setForGroup(updatedGroup.idbGroupId, generatedModels);
+    if (this.isCurrentOwner(accountGuid, analysisGuid, updatedGroup.idbGroupId)) {
+      this.regressionModelState.setForGroup(updatedGroup.idbGroupId, generatedModels);
+    }
   }
 
   async saveItem(selectedGroup?: AnalysisGroup) {
     const _group: AnalysisGroup = selectedGroup ?? this.selectedGroup();
     const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
-    const groupIndex: number = _analysisItemCurrent.groups.findIndex(group => group.idbGroupId === _group.idbGroupId);
-    const updatedGroups = [..._analysisItemCurrent.groups];
-    updatedGroups[groupIndex] = _group;
-    const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
+    const changes = {
+      selectedModelId: _group.selectedModelId, regressionConstant: _group.regressionConstant,
+      regressionModelYear: _group.regressionModelYear, models: _group.models,
+      predictorVariables: _group.predictorVariables.map(variable => ({ id: variable.id, regressionCoefficient: variable.regressionCoefficient }))
+    };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis' ,
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: _analysisItemCurrent.guid, label: 'Save Facility Analysis' ,
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateFacilityAnalysis(analysisItem, activeAccountGuid)
+      () => this.analysisHandler.updateFacilityAnalysisGroup(_analysisItemCurrent.guid, _group.idbGroupId, changes, activeAccountGuid)
     );
-    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
-    this.analysisService.selectedGroup.next(_group);
+  }
+
+  private isCurrentOwner(accountGuid: string, analysisGuid: string, groupGuid: string): boolean {
+    return !this.destroyRef.destroyed && this.accountWorkspaceStore.account()?.guid === accountGuid
+      && this.analysisItem()?.guid === analysisGuid && this.selectedGroup()?.idbGroupId === groupGuid;
   }
 
   setOrderDataField(str: OrderDataBy) {
@@ -231,15 +239,27 @@ export class RegressionModelSelectionComponent {
 
   inspectModel(model: JStatRegressionModel) {
     this.selectedInspectModel = model;
+    this.inspectionOwner = {
+      accountGuid: this.accountWorkspaceStore.account()?.guid,
+      analysisGuid: this.analysisItem()?.guid,
+      groupGuid: this.selectedGroup()?.idbGroupId
+    };
   }
 
   cancelInspectModel() {
     this.selectedInspectModel = undefined;
+    this.inspectionOwner = undefined;
   }
 
   async selectFromInspection() {
-    await this.selectModel(this.selectedInspectModel.modelId);
-    this.cancelInspectModel();
+    const model = this.selectedInspectModel;
+    const owner = this.inspectionOwner;
+    if (!owner || !this.isCurrentOwner(owner.accountGuid, owner.analysisGuid, owner.groupGuid)) { return; }
+    const { accountGuid, analysisGuid, groupGuid } = owner;
+    await this.selectModel(model.modelId);
+    if (this.isCurrentOwner(accountGuid, analysisGuid, groupGuid) && this.selectedInspectModel === model) {
+      this.cancelInspectModel();
+    }
   }
 
   toggleHideInUseMessage() {

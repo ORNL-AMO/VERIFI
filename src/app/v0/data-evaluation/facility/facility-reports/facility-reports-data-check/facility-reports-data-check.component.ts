@@ -1,4 +1,3 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -19,7 +18,6 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from '@shared/shar
 })
 export class FacilityReportsDataCheckComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -83,16 +81,16 @@ export class FacilityReportsDataCheckComponent {
   }
 
   async setAnalysisVisited() {
-    if (this.analysisItem) {
-      this.analysisItem.isAnalysisVisited = true;
-      this.analysisItem.dataCheckedDate = new Date();
+    if (this.analysisItem && (!this.analysisItem.isAnalysisVisited || !this.analysisItem.dataCheckedDate)) {
+      const analysisGuid = this.analysisItem.guid;
+      const dataCheckedDate = new Date();
       const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-      await this.commandBoundary.execute(
-        { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: this.analysisItem.guid, label: 'Save Facility Analysis' ,
-          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-        () => this.analysisHandler.updateFacilityAnalysis(this.analysisItem, activeAccountGuid)
+      const { value } = await this.commandBoundary.execute(
+        { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Facility Analysis',
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) } },
+        () => this.analysisHandler.updateFacilityAnalysisFields(analysisGuid, { isAnalysisVisited: true, dataCheckedDate }, activeAccountGuid)
       );
-      this.accountWorkspaceService.selectFacilityAnalysis(this.analysisItem?.guid);
+      if (this.analysisItem?.guid === analysisGuid) this.analysisItem = value;
     }
   }
 }

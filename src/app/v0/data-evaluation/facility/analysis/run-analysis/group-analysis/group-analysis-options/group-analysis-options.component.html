@@ -14,7 +14,7 @@
   </div>
   <div class="form-check mt-5">
     <input class="form-check-input checkbox-input" type="checkbox" id="skip" name="analysisType"
-      [checked]="_group.analysisType === 'skip'" (change)="setExcludeGroup($event)">
+      [ngModel]="_group.analysisType === 'skip'" (ngModelChange)="setExcludeGroup($event)">
     <label class="form-check-label checkbox-label" for="skip">
       Exclude this group from analysis
     </label>
@@ -43,37 +43,37 @@
             <div class="sub-column">
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="analysisType" [value]="'absoluteEnergyConsumption'"
-                  id="absoluteEnergyConsumption" [(ngModel)]="_group.analysisType" (change)="setAnalysisType()">
+                  id="absoluteEnergyConsumption" [ngModel]="_group.analysisType" (ngModelChange)="setAnalysisType($event)">
                 <label class="form-check-label" for="absoluteEnergyConsumption">Absolute</label>
               </div>
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="analysisType" [value]="'energyIntensity'"
-                  id="energyIntensity" [(ngModel)]="_group.analysisType" (change)="setAnalysisType()">
+                  id="energyIntensity" [ngModel]="_group.analysisType" (ngModelChange)="setAnalysisType($event)">
                 <label class="form-check-label" for="energyIntensity">Classic Intensity</label>
               </div>
               <!--TODO: Remove option-->
               <!-- <div class="form-check">
                 <input type="radio" class="form-check-input" name="analysisType"
                   [value]="'modifiedEnergyIntensity'" id="modifiedEnergyIntensity"
-                  [(ngModel)]="_group.analysisType" (change)="setAnalysisType()">
+                  [ngModel]="_group.analysisType" (ngModelChange)="setAnalysisType($event)">
                 <label class="form-check-label" for="modifiedEnergyIntensity">Modified Energy
                 Intensity</label>
               </div> -->
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="analysisType" [value]="'regression'" id="regression"
-                  [(ngModel)]="_group.analysisType" (change)="setAnalysisType()">
+                  [ngModel]="_group.analysisType" (ngModelChange)="setAnalysisType($event)">
                 <label class="form-check-label" for="regression">Regression</label>
               </div>
               @if (_analysisItem.analysisCategory == 'water') {
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="analysisType" [value]="'skipAnalysis'"
-                  id="skipAnalysis" [(ngModel)]="_group.analysisType" (change)="setAnalysisType()">
+                  id="skipAnalysis" [ngModel]="_group.analysisType" (ngModelChange)="setAnalysisType($event)">
                 <label class="form-check-label" for="skipAnalysis">Skip Analysis</label>
               </div>
               }
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="analysisType" [value]="'skip'" id="skip"
-                  [(ngModel)]="_group.analysisType" (change)="setAnalysisType()">
+                  [ngModel]="_group.analysisType" (ngModelChange)="setAnalysisType($event)">
                 <label class="form-check-label" for="skip">Exclude from Analysis</label>
               </div>
             </div>
@@ -108,8 +108,8 @@
                 <div class="col-6 mb-2">
                   <label class="switch" for="{{'predictor_'+predictor.id}}">
                     <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
-                      name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
-                      (change)="saveItem()">
+                      name="{{'predictor_'+predictor.id}}" [ngModel]="predictor.productionInAnalysis"
+                      (ngModelChange)="setProductionInAnalysis(predictor.id, $event)">
                     <span class="slider round"></span>
                   </label>
                 </div>
@@ -148,8 +148,8 @@
                 </div>
                 <div class="col-6">
                   <select required class="form-select" name="specifiedMonthlyPercentBaseload"
-                    id="specifiedMonthlyPercentBaseload" [(ngModel)]="_group.specifiedMonthlyPercentBaseload"
-                    (change)="saveItem()">
+                    id="specifiedMonthlyPercentBaseload" [ngModel]="_group.specifiedMonthlyPercentBaseload"
+                    (ngModelChange)="saveItem({specifiedMonthlyPercentBaseload: $event})">
                     <option [ngValue]="true">% Baseload by Month</option>
                     <option [ngValue]="false">Average % Baseload</option>
                   </select>
@@ -165,7 +165,7 @@
                 <div class="col-6 mt-2">
                   <div class="input-group">
                     <input class="form-control" required type="number" name="averagePercentBaseload"
-                      [(ngModel)]="_group.averagePercentBaseload" id="averagePercentBaseload" (input)="saveItem()">
+                      [ngModel]="_group.averagePercentBaseload" id="averagePercentBaseload" (ngModelChange)="saveItem({averagePercentBaseload: $event})">
                     <span class="input-group-text">%</span>
                   </div>
                 </div>
@@ -191,8 +191,8 @@
                     <div class="col-6 mt-2">
                       <div class="input-group">
                         <input class="form-control" required type="number" name="{{monthlyPercent.monthNum+'_percent'}}"
-                          [(ngModel)]="monthlyPercent.percent" id="{{monthlyPercent.monthNum+'_percent'}}"
-                          (input)="saveItem()">
+                          [ngModel]="monthlyPercent.percent" id="{{monthlyPercent.monthNum+'_percent'}}"
+                          (ngModelChange)="setMonthlyPercentBaseload(monthlyPercent.monthNum, $event)">
                         <span class="input-group-text">%</span>
                       </div>
                     </div>
@@ -240,7 +240,7 @@
             <div class="col-6">
               <div class="input-group">
                 <input class="form-control" type="number" name="{{'dataAdjustment_'+index}}"
-                  id="{{'dataAdjustment_'+index}}" [(ngModel)]="dataAdjustment.amount" (input)="saveItem()" min="0">
+                  id="{{'dataAdjustment_'+index}}" [ngModel]="dataAdjustment.amount" (ngModelChange)="setAdjustment('dataAdjustments', dataAdjustment.year, $event)" min="0">
                 @if (_analysisItem.analysisCategory == 'energy') {
                 <span class="input-group-text" [innerHTML]="_analysisItem.energyUnit | settingsLabel:'/yr'"></span>
                 }
@@ -294,7 +294,7 @@
             <div class="col-6">
               <div class="input-group">
                 <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
-                  id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount" (input)="saveItem()"
+                  id="{{'baselineAdjustment_'+index}}" [ngModel]="baselineAdjustment.amount" (ngModelChange)="setAdjustment('baselineAdjustmentsV2', baselineAdjustment.year, $event)"
                   min="0">
                 @if (_analysisItem.analysisCategory == 'energy') {
                 <span class="input-group-text" [innerHTML]="_analysisItem.energyUnit | settingsLabel:'/yr'"></span>
@@ -345,7 +345,7 @@
             <div class="col-6">
               <label class="switch" for="applyBanking">
                 <input class="checkbox" type="checkbox" id="applyBanking" name="applyBanking"
-                  [(ngModel)]="_group.applyBanking" (change)="saveItem()" [disabled]="hasModelsGenerated()">
+                  [ngModel]="_group.applyBanking" (ngModelChange)="saveItem({applyBanking: $event})" [disabled]="hasModelsGenerated()">
                 <span class="slider round"></span>
               </label>
             </div>
@@ -357,7 +357,7 @@
             </label>
             <div class="col-6">
               <select required class="form-select" id="bankedAnalysisYear" name="bankedAnalysisYear"
-                [(ngModel)]="_group.bankedAnalysisYear" (change)="saveItem()" [required]="true"
+                [ngModel]="_group.bankedAnalysisYear" (ngModelChange)="saveItem({bankedAnalysisYear: $event})" [required]="true"
                 [disabled]="hasModelsGenerated()">
                 @for (year of bankedAnalysisYears(); track year) {
                 <option [ngValue]="year">
@@ -390,7 +390,7 @@
           </label>
           <div class="col-6">
             <select required class="form-select" id="newBaselineYear" name="newBaselineYear"
-              [(ngModel)]="_group.newBaselineYear" (change)="saveItem()" [required]="true"
+              [ngModel]="_group.newBaselineYear" (ngModelChange)="saveItem({newBaselineYear: $event})" [required]="true"
               [disabled]="hasModelsGenerated()">
               @for (year of baselineYearOptions(); track year) {
               <option [ngValue]="year">

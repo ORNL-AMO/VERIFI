@@ -152,15 +152,16 @@ export class FacilityReportAnalysisSelectionComponent {
   }
 
   async saveAnalysisVisitedData(selectedItem: IdbAnalysisItem) {
-    selectedItem.isAnalysisVisited = false;
+    if (!selectedItem?.isAnalysisVisited) return;
+    const analysisGuid = selectedItem.guid;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-    await this.commandBoundary.execute(
+    const { value } = await this.commandBoundary.execute(
       {
-        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: selectedItem.guid, label: 'Save Facility Analysis',
+        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Facility Analysis',
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }
       },
-      () => this.analysisHandler.updateFacilityAnalysis(selectedItem, activeAccountGuid)
+      () => this.analysisHandler.updateFacilityAnalysisFields(analysisGuid, { isAnalysisVisited: false }, activeAccountGuid)
     );
-    this.accountWorkspaceService.selectFacilityAnalysis(selectedItem?.guid);
+    if (this.selectedAnalysisItem?.guid === analysisGuid) this.selectedAnalysisItem = value;
   }
 }

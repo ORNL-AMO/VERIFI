@@ -92,6 +92,8 @@ Do not replace this with separate catalog-refresh and workspace-selection calls.
 
 ## Treat workspace entities as readonly
 
+For queued analysis edits, capture the target account/analysis/group GUIDs and the intended changes at the user action. Resolve and merge the latest record inside the command's persistence callback using the focused `AnalysisCommandHandler` update methods. Constructing an entire replacement record before entering the queue can overwrite an earlier queued edit even though writes run serially. Do not resolve the target from the current selection after waiting, or reselect the old target after a save completes.
+
 Workspace arrays and entities are exposed as readonly. The boundary is enforced by types and immutable publication, not by production deep-freezing. Never mutate an entity obtained from a workspace signal.
 
 Incorrect:
