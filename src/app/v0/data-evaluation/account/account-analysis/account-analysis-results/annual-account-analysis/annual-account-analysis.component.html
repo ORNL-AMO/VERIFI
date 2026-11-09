@@ -2,7 +2,7 @@
   <div class="p-0">
     @if (analysisDisplay == 'table') {
       <app-analysis-summary-table-filter [tableContext]="'annualAccount'"
-      [analysisItem]="accountAnalysisItem"></app-analysis-summary-table-filter>
+      [analysisItem]="accountAnalysisItem()"></app-analysis-summary-table-filter>
     }
   </div>
 
@@ -25,12 +25,12 @@
   <div class="w-100 x-scroll">
     @if (analysisDisplay == 'table') {
       <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummary" [isAccount]="true"
-        [analysisItem]="accountAnalysisItem" [accountOrFacility]="account" [printBlock]="'all'">
+        [analysisItem]="accountAnalysisItem()" [accountOrFacility]="account" [printBlock]="'all'">
       </app-annual-analysis-summary-table>
     }
     @if (analysisDisplay == 'graph') {
       <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummary"
-        [analysisItem]="accountAnalysisItem">
+        [analysisItem]="accountAnalysisItem()">
       </app-annual-analysis-summary-graph>
     }
   </div>
