@@ -122,9 +122,25 @@ export class EnergyUsesExcelExportService {
     }
     const table = sheet.getTable('EnergyUses');
     if (table) {
-      (table as ExcelJS.Table & {
-        model: { headerRow: boolean }
-      }).model.headerRow = true;
+      
+      const model = (table as ExcelJS.Table & {
+        model: { 
+          headerRow: boolean; 
+          tableRef: string; 
+          autoFilterRef: string 
+        }
+      }).model;
+      const reservedLastRow = Number(model.tableRef.match(/\d+$/)?.[0] ?? sheet.rowCount);
+      const lastRow = Math.max(reservedLastRow, exportData.rows.length + 1);
+      const range = `A1:${sheet.getColumn(ENERGY_USES_HEADERS.length).letter}${lastRow}`;
+      model.headerRow = true;
+      model.tableRef = range;
+      model.autoFilterRef = range;
+    } else {
+      sheet.autoFilter = {
+        from: 'A1',
+        to: { row: Math.max(2, sheet.rowCount, exportData.rows.length + 1), column: ENERGY_USES_HEADERS.length }
+      };
     }
     exportData.rows.forEach((values, index) => {
       ENERGY_USES_HEADERS.forEach((_, column) => {
