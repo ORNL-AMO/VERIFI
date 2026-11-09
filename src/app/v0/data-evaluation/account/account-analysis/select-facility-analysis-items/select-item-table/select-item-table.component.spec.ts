@@ -108,7 +108,11 @@ describe('SelectItemTableComponent', () => {
       return { value, change: {} };
     });
     const addFacilityAnalysis = vi.fn(async (value: any) => ({ ...value, guid: 'facility-analysis-new' }));
-    const updateAccountAnalysis = vi.fn(async (value: any) => ({ ...value }));
+    const updateAccountFacilityAssignments = vi.fn(async (_analysisGuid, assignments) => ({
+      ...selectedAnalysisItem,
+      isAnalysisVisited: false,
+      facilityAnalysisItems: assignments
+    }));
     const selectFacilityAnalysis = vi.fn();
     const navigateByUrl = vi.fn();
     const setLoadingMessage = vi.fn();
@@ -121,7 +125,7 @@ describe('SelectItemTableComponent', () => {
         { provide: AccountWorkspaceStore, useValue: store },
         { provide: AccountWorkspaceService, useValue: { selectFacilityAnalysis, reloadActiveWorkspace: vi.fn() } },
         { provide: WorkspaceCommandBoundary, useValue: { execute } },
-        { provide: AnalysisCommandHandler, useValue: { addFacilityAnalysis, updateAccountAnalysis } },
+        { provide: AnalysisCommandHandler, useValue: { addFacilityAnalysis, updateAccountFacilityAssignments } },
         { provide: Router, useValue: { navigateByUrl } },
         { provide: LoadingService, useValue: { setLoadingMessage, setLoadingStatus } },
         { provide: AnalysisService, useValue: { accountAnalysisItem } },
@@ -136,14 +140,9 @@ describe('SelectItemTableComponent', () => {
 
     expect(execute).toHaveBeenCalledTimes(1);
     expect(addFacilityAnalysis).toHaveBeenCalledTimes(1);
-    expect(updateAccountAnalysis).toHaveBeenCalledWith(
-      expect.objectContaining({
-        guid: 'account-analysis-a',
-        isAnalysisVisited: false,
-        facilityAnalysisItems: [
-          { facilityId: 'facility-a', analysisItemId: 'facility-analysis-new' }
-        ]
-      }),
+    expect(updateAccountFacilityAssignments).toHaveBeenCalledWith(
+      'account-analysis-a',
+      [{ facilityId: 'facility-a', analysisItemId: 'facility-analysis-new' }],
       'account-a'
     );
     expect(accountAnalysisItem.getValue()).toEqual(

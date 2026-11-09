@@ -1,9 +1,9 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
+import { AccountAnalysisFieldChanges, AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { Month, Months } from '@shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from '@shared/unitOptions';
 import { debounceTime } from 'rxjs';
@@ -34,7 +34,6 @@ import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-ca
   standalone: false
 })
 export class AccountAnalysisSetupComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly router = inject(Router);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
@@ -192,8 +191,8 @@ export class AccountAnalysisSetupComponent {
     const item = this.analysisItem();
     if (!item) { return; }
     const raw = this.form.getRawValue();
-    const updatedItem: IdbAccountAnalysisItem = {
-      ...item,
+    const analysisGuid = item.guid;
+    const changes: AccountAnalysisFieldChanges = {
       isAnalysisVisited: false,
       name: raw.name,
       energyIsSource: raw.energyIsSource,
@@ -203,11 +202,10 @@ export class AccountAnalysisSetupComponent {
     };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Account Analysis' ,
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Account Analysis' ,
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateAccountAnalysis(updatedItem, activeAccountGuid)
+      () => this.analysisHandler.updateAccountAnalysisFields(analysisGuid, changes, activeAccountGuid)
     );
-    this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
   }
 
   toggleHideInUseMessage(): void {
@@ -225,21 +223,22 @@ export class AccountAnalysisSetupComponent {
   async confirmEnableForm(): Promise<void> {
     const item = this.analysisItem();
     if (!item) { return; }
-    const clearedItem: IdbAccountAnalysisItem = {
-      ...item,
-      facilityItemsInitialized: false,
-      facilityAnalysisItems: item.facilityAnalysisItems.map(fi => ({
-        ...fi,
-        analysisItemId: undefined,
-      })),
-    };
-    const activeAccountGuid2 = this.accountWorkspaceStore.account()?.guid;
+    const analysisGuid = item.guid;
+    const assignments = item.facilityAnalysisItems.map(fi => ({
+      facilityId: fi.facilityId,
+      analysisItemId: undefined,
+    }));
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Account Analysis' ,
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Account Analysis' ,
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateAccountAnalysis(clearedItem, activeAccountGuid2)
+      () => this.analysisHandler.updateAccountFacilityAssignments(
+        analysisGuid,
+        assignments,
+        activeAccountGuid,
+        { facilityItemsInitialized: false }
+      )
     );
-    this.accountWorkspaceService.selectAccountAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }
 
@@ -257,15 +256,25 @@ export class AccountAnalysisSetupComponent {
     this.loadingService.setLoadingStatus(true);
     const account = this.account();
     const analysisItem = this.analysisItem();
+    const analysisGuid = analysisItem.guid;
     const accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     const accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     const facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     const analysisType = this.analysisTypeControl.value;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-    const { value: updatedItem } = await this.commandBoundary.execute(
+    await this.commandBoundary.execute(
       { entityKind: 'accountAnalysis', changeKind: 'bulk', label: 'Create Bulk Facility Analyses' },
       async () => {
-        let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));
+        const currentAnalysis = this.accountWorkspaceStore.accountAnalyses().find(item =>
+          item.guid === analysisGuid && item.accountId === activeAccountGuid
+        );
+        const currentFacilities = this.accountWorkspaceStore.facilities();
+        if (!currentAnalysis || facilities.some(facility =>
+          !currentFacilities.some(item => item.guid === facility.guid && item.accountId === activeAccountGuid) ||
+          !currentAnalysis.facilityAnalysisItems.some(item => item.facilityId === facility.guid))) {
+          throw new WorkspaceWriteError('validation-failed', 'The account analysis or facility is no longer available.');
+        }
+        const assignments: Array<{ facilityId: string; analysisItemId: string }> = [];
         for (let i = 0; i < facilities.length; i++) {
           const facility: IdbFacility = facilities[i];
           let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, analysisItem.analysisCategory);
@@ -287,20 +296,12 @@ export class AccountAnalysisSetupComponent {
           newIdbItem.groups.forEach(group => {
             group.analysisType = analysisType;
           });
-          newIdbItem = await this.analysisHandler.addFacilityAnalysis(newIdbItem, this.accountWorkspaceStore.account()?.guid);
-          updatedFacilityAnalysisItems = updatedFacilityAnalysisItems.map(fi =>
-            fi.facilityId === facility.guid ? { ...fi, analysisItemId: newIdbItem.guid } : fi
-          );
+          newIdbItem = await this.analysisHandler.addFacilityAnalysis(newIdbItem, activeAccountGuid);
+          assignments.push({ facilityId: facility.guid, analysisItemId: newIdbItem.guid });
         }
-        const updatedAnalysisItem: IdbAccountAnalysisItem = {
-          ...analysisItem,
-          isAnalysisVisited: false,
-          facilityAnalysisItems: updatedFacilityAnalysisItems,
-        };
-        return await this.analysisHandler.updateAccountAnalysis(updatedAnalysisItem, activeAccountGuid);
+        return this.analysisHandler.updateAccountFacilityAssignments(analysisGuid, assignments, activeAccountGuid);
       }
     );
-    this.accountWorkspaceService.selectAccountAnalysis(updatedItem?.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');

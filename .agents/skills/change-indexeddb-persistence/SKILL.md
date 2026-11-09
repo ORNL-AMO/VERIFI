@@ -14,6 +14,7 @@ description: Change VERIFI persisted models, IndexedDB stores or indexes, databa
 5. Follow the [data migration guide](../../../src/app/data/indexedDB/data-migrations/README.md) for historical record upgrades. Implement pure, idempotent, contiguous steps, update `CURRENT_DATA_VERSION`, and use the transaction runner; do not migrate during startup collection loading or account selection.
 6. Preserve older JSON backups and supported import formats. Default missing fields intentionally and avoid destructive rewriting unless the issue explicitly approves it.
 7. Keep repositories persistence-only. Read active account data from workspace signals, edit copies, await persistence, and request one committed workspace refresh after the complete logical write. Use a non-committed refresh only for hydration or repair, and never call an ordinary repository from inside a native transaction.
+8. For queued edits, capture ownership GUIDs and intended changes at submission, then resolve the latest committed record and merge inside the command callback. Serializing stale whole-record snapshots does not prevent lost updates. A save acknowledgement must not restore a departed selection or overwrite newer local input.
 
 ## Validate
 

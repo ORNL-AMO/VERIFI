@@ -3,6 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
@@ -116,20 +117,17 @@ export class SelectItemTableComponent {
   constructor() { }
 
   async save(analysisItemId: string) {
-    const selectedAnalysisItem = this.selectedAnalysisItem();
-    const facility = this.selectedFacility();
+    const analysisGuid = this.selectedAnalysisItem()?.guid;
+    const facilityGuid = this.selectedFacility()?.guid;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-    const updatedItem: IdbAccountAnalysisItem = {
-      ...selectedAnalysisItem,
-      isAnalysisVisited: false,
-      facilityAnalysisItems: selectedAnalysisItem.facilityAnalysisItems.map(item =>
-        item.facilityId === facility.guid ? { ...item, analysisItemId } : { ...item }
-      )
-    };
     await this.commandBoundary.execute(
-      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Update Analysis Selection' ,
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Update Analysis Selection' ,
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateAccountAnalysis(updatedItem, activeAccountGuid)
+      () => this.analysisHandler.updateAccountFacilityAssignments(
+        analysisGuid,
+        [{ facilityId: facilityGuid, analysisItemId }],
+        activeAccountGuid
+      )
     );
   }
 
@@ -166,6 +164,8 @@ export class SelectItemTableComponent {
   async confirmCreateNew() {
     const facility = this.selectedFacility();
     const selectedAnalysisItem = this.selectedAnalysisItem();
+    const analysisGuid = selectedAnalysisItem.guid;
+    const facilityGuid = facility.guid;
 
     this.sharedDataService.modalOpen.next(false);
     this.loadingService.setLoadingMessage('Creating Facility Analysis...')
@@ -180,15 +180,22 @@ export class SelectItemTableComponent {
     const { value } = await this.commandBoundary.execute(
       { entityKind: 'facilityAnalysis', changeKind: 'bulk', label: 'Create Facility Analysis' },
       async () => {
+        const currentAnalysis = this.accountWorkspaceStore.accountAnalyses().find(item =>
+          item.guid === analysisGuid && item.accountId === activeAccountGuid
+        );
+        const currentFacility = this.accountWorkspaceStore.facilities().find(item =>
+          item.guid === facilityGuid && item.accountId === activeAccountGuid
+        );
+        if (!currentAnalysis || !currentFacility ||
+          !currentAnalysis.facilityAnalysisItems.some(item => item.facilityId === facilityGuid)) {
+          throw new WorkspaceWriteError('validation-failed', 'The account analysis or facility is no longer available.');
+        }
         const added = await this.analysisHandler.addFacilityAnalysis(newIdbItem, activeAccountGuid);
-        const updatedAccountAnalysisItem: IdbAccountAnalysisItem = {
-          ...selectedAnalysisItem,
-          isAnalysisVisited: false,
-          facilityAnalysisItems: selectedAnalysisItem.facilityAnalysisItems.map(item =>
-            item.facilityId === facility.guid ? { ...item, analysisItemId: added.guid } : { ...item }
-          )
-        };
-        await this.analysisHandler.updateAccountAnalysis(updatedAccountAnalysisItem, activeAccountGuid);
+        const updatedAccountAnalysisItem = await this.analysisHandler.updateAccountFacilityAssignments(
+          analysisGuid,
+          [{ facilityId: facilityGuid, analysisItemId: added.guid }],
+          activeAccountGuid
+        );
         return { addedItem: added, updatedAccountAnalysisItem };
       }
     );
