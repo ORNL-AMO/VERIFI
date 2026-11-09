@@ -7,24 +7,18 @@ import { DataNavComponent } from './data-nav.component';
 import { setupSectionNavTest, activeLinks, meterChildLinks, groupChildLinks, predictorChildLinks, meterNav } from '../section-nav-test.helpers';
 
 describe('DataNavComponent', () => {
-  it('bounds a large group preview, retains the current item, and respects manual collapse until another item is selected', () => {
+  it('stops sidebar links at groups even with 100 groups and 1,000 items', () => {
     state.contextMode.set('facility'); state.selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
     state.activeSection.set('data'); state.activeDetail.set('energy-uses');
+    state.activeEnergyUseGroupGuid.set('group-0'); state.activeEnergyUseGuid.set('energy-999');
     state.energyUseGroups.set(Array.from({ length: 100 }, (_, index) => energyUseGroup({ guid: `group-${index}`, name: `Group ${index}` })));
-    state.energyUses.set(Array.from({ length: 1000 }, (_, index) => energyUseItem({ guid: `energy-${index}`, name: `Pump ${String(index).padStart(4, '0')}`, energyUseGroupId: 'group-0' })));
+    state.energyUses.set(Array.from({ length: 1000 }, (_, index) => energyUseItem({ guid: `energy-${index}`, energyUseGroupId: 'group-0' })));
     const fixture = TestBed.createComponent(DataNavComponent); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(0);
-    state.activeEnergyUseGuid.set('energy-999'); fixture.detectChanges(); fixture.detectChanges();
-    const links = [...root.querySelectorAll<HTMLAnchorElement>('.v1-nav__nested-items a')];
-    expect(links).toHaveLength(21); expect(links.at(-1)?.textContent).toContain('View all 1000 items');
-    expect(links.find(link => link.getAttribute('aria-current') === 'page')?.textContent).toContain('Pump 0999');
-    const toggle = root.querySelector<HTMLButtonElement>('[aria-label="Hide items in Group 0"]')!;
-    toggle.click(); fixture.detectChanges(); expect(root.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(0);
-    state.energyUses.set([...state.energyUses()]); fixture.detectChanges(); expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    state.activeEnergyUseGuid.set('energy-998'); fixture.detectChanges(); fixture.detectChanges();
-    expect(root.querySelectorAll('.v1-nav__nested-items a')).toHaveLength(21);
-    expect(root.querySelector('[aria-current="page"]')?.textContent).toContain('Pump 0998');
+    expect(root.querySelector('[aria-current="page"]')?.textContent).toContain('Group 0');
+    expect(root.querySelectorAll('#v1-energy-use-nav-items-facility-a a')).toHaveLength(100);
+    expect(root.querySelector('[aria-label="Show items in Group 0"]')).toBeNull();
   });
 
   let state: ReturnType<typeof setupSectionNavTest>;
@@ -32,7 +26,7 @@ describe('DataNavComponent', () => {
 
   it('lists scoped energy uses with canonical destinations and active item highlighting without validation badges', () => {
     state.contextMode.set('facility'); state.selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
-    state.activeSection.set('data'); state.activeDetail.set('energy-uses'); state.activeEnergyUseGuid.set('energy-a');
+    state.activeSection.set('data'); state.activeDetail.set('energy-uses'); state.activeEnergyUseGuid.set('energy-a'); state.activeEnergyUseGroupGuid.set('group-a');
     state.energyUseGroups.set([energyUseGroup()]);
     state.energyUses.set([energyUseItem(), energyUseItem({ guid: 'energy-b', name: 'Boiler B' })]);
     const fixture = TestBed.createComponent(DataNavComponent); fixture.detectChanges();
@@ -40,11 +34,11 @@ describe('DataNavComponent', () => {
     const links = [...root.querySelectorAll<HTMLAnchorElement>('a')];
     expect(links.filter(link => link.textContent?.trim() === 'Energy Uses')).toHaveLength(1);
     expect(links.find(link => link.textContent?.trim() === 'Energy Uses')?.getAttribute('href')).toContain('/data/portfolio/energy-uses?facility=facility-a');
-    const item = links.find(link => link.textContent?.trim() === 'Pump A')!;
-    expect(item.getAttribute('href')).toContain('/facility/facility-a/data/energy-uses/energy-a/settings');
+    const item = links.find(link => link.textContent?.trim() === 'Production')!;
+    expect(item.getAttribute('href')).toContain('/facility/facility-a/data/energy-uses/groups/group-a');
     expect(item.getAttribute('aria-current')).toBe('page');
     expect(root.querySelector('#v1-energy-use-nav-items-facility-a .v1-status-attention')).toBeNull();
-    expect(links.filter(link => link.classList.contains('v1-nav__child')).map(link => link.textContent?.trim())).toEqual(['Production', 'Boiler B', 'Pump A', 'View all 2 items']);
+    expect(links.filter(link => link.classList.contains('v1-nav__child')).map(link => link.textContent?.trim())).toEqual(['Production']);
   });
 
   it('omits Facilities in facility context while preserving its scoped resource links', () => {

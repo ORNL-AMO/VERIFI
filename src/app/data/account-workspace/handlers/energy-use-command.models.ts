@@ -33,3 +33,19 @@ export function energyUseMeterLinksError(item: Pick<IdbFacilityEnergyUseEquipmen
   }
   return undefined;
 }
+
+/** Detached reviewed rows; undefined after means equipment-only deletion. */
+export interface EnergyUseBatchChange {
+  readonly facility: import('@data/models/idbModels/facility').IdbFacility;
+  readonly before: IdbFacilityEnergyUseEquipment;
+  readonly after?: IdbFacilityEnergyUseEquipment;
+}
+
+export interface EnergyUseGroupIdentity extends EnergyUseOwner {
+  readonly energyUseGroupGuid: string;
+}
+
+export interface EnergyUseGroupSettings {
+  readonly name: string;
+  readonly notes: string;
+}

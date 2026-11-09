@@ -1,6 +1,8 @@
+import { By } from '@angular/platform-browser';
+import { SetupCalculatorComponent } from '../../forms/setup-calculator/setup-calculator.component';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { NgComponentOutlet } from '@angular/common';
-import { Component, inject, signal, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, computed, inject, signal, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { LocalStorageService } from 'ngx-webstorage';
@@ -55,7 +57,9 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     TestBed.configureTestingModule({ imports: [EnergyUsesModule, EnergyUsePortalHost, EnergyUseCreationPortalHost], providers: [provideRouter([]),
       { provide: LocalStorageService, useValue: { retrieve: () => null, store: () => {}, clear: () => {} } },
       { provide: WorkspaceNavigationService, useValue: { openFacilityInventory: vi.fn(async () => true) } },
-      { provide: EnergyUseWorkbenchContextService, useValue: { energyUseGuid: guid, facilityGuid: signal('facility-a') } }] });
+      { provide: EnergyUseWorkbenchContextService, useValue: { energyUseGuid: guid, facilityGuid: signal('facility-a'), energyUseGroupGuid: signal('group-a'),
+        item: () => { const item = TestBed.inject(AccountWorkspaceStore).energyUseEquipment().find(item => item.guid === guid()); return item ? { item } : undefined; },
+        routeAfterRemoval: () => ['/group/items'], navigate: async () => true } }] });
     harness = await IndexedDbTestHarness.create('energy-use-creation-settings');
     await harness.seed({ accounts: [account], facilities: [facility] });
     await TestBed.inject(AccountWorkspaceService).selectAccount(account.guid);
@@ -204,6 +208,58 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
   });
 
+  it('finishes a committed deletion through refresh-only recovery while retaining the unsaved draft', async () => {
+    const actions = TestBed.inject(EnergyUseActionsService);
+    const created = await actions.create({ initialYear: 2025, group: { kind: 'new', name: 'Equipment' },
+      settings: { name: 'Pump', notes: '', equipmentType: 'Pump', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
+    const survivor = await actions.copy({ accountGuid: account.guid, facilityGuid: facility.guid, energyUseGuid: created.guid });
+    guid.set(created.guid);
+    const settings = mount(EnergyUseSettingsComponent);
+    const portal = mount(EnergyUsePortalHost);
+    await settle(settings);
+    await settle(portal);
+    const component = settings.componentInstance;
+    const context = TestBed.inject(EnergyUseWorkbenchContextService);
+    const navigate = vi.spyOn(context, 'navigate').mockResolvedValue(true);
+    const destination = ['/group/items', survivor.guid];
+    vi.spyOn(context, 'routeAfterRemoval').mockReturnValue(destination);
+    const deleteItem = vi.spyOn(TestBed.inject(EnergyUseCommandHandler), 'deleteItem');
+    const reload = vi.spyOn(TestBed.inject(AccountWorkspaceService), 'reloadActiveWorkspace');
+    reload.mockRejectedValueOnce(new Error('Publication unavailable'));
+    component.form()!.controls.settings.controls.name.setValue('Unsaved name');
+    component.requestDelete();
+    await component.confirmReview();
+    await settle(settings);
+    await settle(portal);
+    expect((await harness.getAll('facilityEnergyUseEquipment')).map(item => item.guid)).toEqual([survivor.guid]);
+    expect(TestBed.inject(AccountWorkspaceStore).energyUseEquipment()).toHaveLength(2);
+    expect(component.editor.dirty()).toBe(true);
+    expect(component.isNavigationBlocked()).toBe(true);
+    const dialog = page.getByRole('dialog', { name: 'Delete energy use?', exact: true });
+    expect(dialog.getByRole('button', { name: 'Delete energy use', exact: true }).element()).toHaveProperty('disabled', true);
+    expect(dialog.getByRole('button', { name: 'Cancel', exact: true }).element()).toHaveProperty('disabled', true);
+    reload.mockRejectedValueOnce(new Error('Publication still unavailable'));
+    await dialog.getByRole('button', { name: 'Refresh saved changes', exact: true }).click();
+    await vi.waitFor(() => expect(component.busy()).toBe(false));
+    await settle(settings);
+    expect(component.form()!.controls.settings.controls.name.value).toBe('Unsaved name');
+    expect(navigate).not.toHaveBeenCalled();
+    await dialog.getByRole('button', { name: 'Refresh saved changes', exact: true }).click();
+    await vi.waitFor(() => expect(component.deletionRecovery()).toBeUndefined());
+    await settle(settings);
+    await settle(portal);
+    expect(deleteItem).toHaveBeenCalledTimes(1);
+    expect(component.deletionRecovery()).toBeUndefined();
+    expect(component.review()).toBeUndefined();
+    expect(component.editor.dirty()).toBe(false);
+    expect(navigate).toHaveBeenCalledWith(destination);
+    expect(TestBed.inject(AccountWorkspaceStore).energyUseEquipment().map(item => item.guid)).toEqual([survivor.guid]);
+    expect(root.querySelector('[role="dialog"]')).toBeNull();
+    await harness.reopen();
+    expect((await harness.getAll('facilityEnergyUseEquipment')).map(item => item.guid)).toEqual([survivor.guid]);
+    expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
+  });
+
   it('keeps source-removal review above the workspace, contains focus, and restores the opener on cancel', async () => {
     const created = await TestBed.inject(EnergyUseActionsService).create({ initialYear: 2025, group: { kind: 'new', name: 'Equipment' },
       settings: { name: 'Pump', notes: '', equipmentType: 'Pump', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
@@ -317,4 +373,79 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
       expect(links.find(group => group.guid === item.utilityMeterGroupIds[0])).toMatchObject({ accountId: item.accountId, facilityId: item.facilityId });
     }
   });
+  it('applies operating-hours calculator inputs through autosave and retains them after reopening', async () => {
+    const actions = TestBed.inject(EnergyUseActionsService);
+    const item = await actions.create({ initialYear: 2025, group: { kind: 'new', name: 'Motors' }, settings: { name: 'Motor', notes: '', equipmentType: 'Motor', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
+    guid.set(item.guid); const fixture = mount(EnergyUseSettingsComponent); await settle(fixture);
+    const calculator = fixture.debugElement.queryAll(By.directive(SetupCalculatorComponent)).map(debug => debug.componentInstance as SetupCalculatorComponent).find(calculator => calculator.kind() === 'hours')!;
+    calculator.open(); calculator.form.patchValue({ hours: 8, days: 5, weeks: 50 }); calculator.apply();
+    expect(await fixture.componentInstance.editor.saveNow()).toBe(true); await settle(fixture);
+    fixture.destroy(); await harness.reopen();
+    const saved = (await harness.getAll<IdbFacilityEnergyUseEquipment & Record<string, unknown>>('facilityEnergyUseEquipment'))[0];
+    expect(saved.operatingConditionsData[0]).toMatchObject({ hoursOfOperation: 2000, hoursPerDay: 8, daysPerWeek: 5, weeksPerYear: 50 });
+  });
+
+  it('uses calculator addons, themed fields, v0 power results, and sequential Tab navigation', async () => {
+    const actions = TestBed.inject(EnergyUseActionsService);
+    const item = await actions.create({ initialYear: 2025, group: { kind: 'new', name: 'Calculator checks' }, settings: {
+      name: 'Pump', notes: '', equipmentType: 'Pump', utilityMeterGroupIds: [], sources: [
+        { energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 },
+        { energySource: 'Natural Gas', size: 1, units: 'MMBtuhr', numberOfEquipment: 1 }
+      ] } }, account.guid, facility.guid);
+    guid.set(item.guid);
+    const settings = mount(EnergyUseSettingsComponent), portal = mount(EnergyUsePortalHost);
+    await settle(settings); await settle(portal);
+    const before = structuredClone(TestBed.inject(AccountWorkspaceStore).snapshot());
+    const hoursOpener = page.getByRole('button', { name: 'Calculate operating hours', exact: true });
+    expect(hoursOpener.element().parentElement?.classList.contains('input-group')).toBe(true);
+    await hoursOpener.click(); await settle(portal);
+    const hours = page.getByRole('dialog', { name: 'Calculate operating hours', exact: true });
+    await hours.getByRole('spinbutton', { name: 'Hours per day', exact: true }).fill('8');
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(hours.getByRole('spinbutton', { name: 'Days per week', exact: true }).element());
+    await hours.getByRole('spinbutton', { name: 'Days per week', exact: true }).fill('5');
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(hours.getByRole('spinbutton', { name: 'Weeks per year', exact: true }).element());
+    await hours.getByRole('spinbutton', { name: 'Weeks per year', exact: true }).fill('50'); await settle(portal);
+    expect(hours.element().textContent).toContain('Operating Hours:');
+    expect(hours.element().textContent).toContain('2,000');
+    const label = hours.element().querySelector('.setup-calculator__result-label')!;
+    const value = hours.element().querySelector('.setup-calculator__result-value')!;
+    expect(getComputedStyle(value).fontSize).toBe(getComputedStyle(label).fontSize);
+    for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle(portal);
+      expect(hours.element().getBoundingClientRect().width).toBeLessThanOrEqual(width);
+      await page.screenshot({ element: hours.element(), path: `./__screenshots__/calculator-hours-${width}-${theme || 'light'}.png` });
+    }
+    await hours.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(portal);
+    expect(document.activeElement).toBe(hoursOpener.element());
+    await page.viewport(1100, 850); root.className = 'v1-root';
+    await page.getByRole('button', { name: 'Calculate load factor', exact: true }).click(); await settle(portal);
+    const load = page.getByRole('dialog', { name: 'Calculate load factor', exact: true });
+    await load.getByRole('button', { name: 'Measured power', exact: true }).click();
+    await load.getByRole('spinbutton', { name: 'Rated power', exact: true }).fill('10');
+    await load.getByRole('combobox', { name: 'Rated power units', exact: true }).selectOptions('kW');
+    await load.getByRole('spinbutton', { name: 'Measured power', exact: true }).fill('5');
+    await load.getByRole('combobox', { name: 'Measured power units', exact: true }).selectOptions('kW'); await settle(portal);
+    expect(load.element().textContent).toContain('5.00 kW'); expect(load.element().textContent).toContain('10.00 kW');
+    expect(load.element().textContent).toContain('50.0%');
+    expect(load.getByRole('combobox', { name: 'Rated power units', exact: true }).element().parentElement?.classList.contains('input-group')).toBe(true);
+    await load.getByRole('button', { name: 'Voltage and current', exact: true }).click();
+    await load.getByRole('spinbutton', { name: 'Voltage', exact: true }).fill('1000');
+    await load.getByRole('spinbutton', { name: 'Current (A)', exact: true }).fill('5');
+    await load.getByRole('combobox', { name: 'Number of phases', exact: true }).selectOptions(load.getByRole('option', { name: '1', exact: true })); await settle(portal);
+    expect(load.element().textContent).toContain('Calculated Power:'); expect(load.element().textContent).toContain('50.0%');
+    await page.screenshot({ element: load.element(), path: './__screenshots__/calculator-load-voltage.png' });
+    await load.getByRole('button', { name: 'Measured power', exact: true }).click();
+    await load.getByRole('spinbutton', { name: 'Measured power', exact: true }).fill('20'); await settle(portal);
+    expect(load.element().textContent).toContain('200.0%'); expect(load.element().textContent).toContain('capped at 115%');
+    await load.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(portal);
+    await page.getByRole('button', { name: 'Calculate rated power', exact: true }).click(); await settle(portal);
+    const power = page.getByRole('dialog', { name: 'Calculate rated power', exact: true });
+    await power.getByRole('spinbutton', { name: 'Physical capacity per hour', exact: true }).fill('1000'); await settle(portal);
+    expect(power.element().textContent).toContain('1.029');
+    await power.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(portal);
+    expect(TestBed.inject(AccountWorkspaceStore).snapshot()).toEqual(before);
+  });
+
 });

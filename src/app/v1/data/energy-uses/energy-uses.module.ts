@@ -1,3 +1,14 @@
+import { AnnualYearFieldsComponent } from './forms/annual-year-fields/annual-year-fields.component';
+import { AddYearDrawerComponent } from './energy-use-workbench/setup-group/add-year-drawer/add-year-drawer.component';
+import { SetupGroupComponent } from './energy-use-workbench/setup-group/setup-group.component';
+import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
+import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
+import { InventoryChartSheetComponent } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.component';
+import { EnergyUseChartsComponent } from './inventory/charts/energy-use-charts.component';
+import { EnergyUseHistoryComponent } from './energy-use-workbench/history/energy-use-history.component';
+import { EquipmentTableComponent } from './energy-use-workbench/setup-group/equipment-table/equipment-table.component';
+import { LifecycleActionsComponent } from './energy-use-workbench/lifecycle-actions/lifecycle-actions.component';
+import { SetupCalculatorComponent } from './forms/setup-calculator/setup-calculator.component';
 import { RouterModule } from '@angular/router';
 import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
@@ -24,13 +35,13 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
 
 @NgModule({
   declarations: [
-    EnergyUsesInventoryComponent,
-    EnergyUseWorkbenchComponent,
-    AnnualDataFieldsComponent,
+    EnergyUsesInventoryComponent, EquipmentTableComponent, LifecycleActionsComponent, EnergyUseChartsComponent, EnergyUseHistoryComponent,
+    EnergyUseWorkbenchComponent, SetupGroupComponent,
+    AnnualDataFieldsComponent, AnnualYearFieldsComponent, AddYearDrawerComponent, SetupCalculatorComponent,
     SettingsFieldsComponent, UtilitiesSlideoutComponent, MeterGroupsSlideoutComponent, CreateEnergyUseDrawerComponent, EnergyUseSettingsComponent,
   ],
   imports: [
-    CommonModule,
+    CommonModule, EChartsChartDirective, InventoryChartDockComponent, InventoryChartSheetComponent,
     WorkspaceSlideoutComponent, ConfirmationDialogComponent, EditorConflictReviewComponent,
     RouterModule,
     PageIdentityComponent,
@@ -44,6 +55,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
     DataEmptyStateModule
   ],
   exports: [
+    EnergyUseChartsComponent, EnergyUseHistoryComponent,
     EnergyUsesInventoryComponent,
     EnergyUseWorkbenchComponent,
     AnnualDataFieldsComponent,

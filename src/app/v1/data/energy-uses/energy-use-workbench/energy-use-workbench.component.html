@@ -1,39 +1,65 @@
-@let entry = context.entry();
-@if (context.workspace.loading() && !entry) {
-  <p class="v1-alert v1-alert--info" role="status">Loading energy use…</p>
+@let group = context.group();
+@let selected = context.entry();
+@let items = context.items();
+@let showItems = context.activeTab() === 'items' && !!group && items.length > 0;
+@if (context.workspace.loading() && !selected && editor()?.state() !== 'saving') {
+  <p class="v1-alert v1-alert--info" role="status">Loading energy-use group…</p>
 } @else if (context.workspace.state() === 'error') {
-  <p class="v1-alert v1-alert--danger" role="alert">The energy use could not be loaded. Retry loading the account.</p>
-} @else if (context.notFound()) {
-  <article class="v1-empty-state" role="status"><app-ui-icon name="tools"/><h1>Energy use unavailable</h1><p>This energy use is not available in this facility.</p>
-    <a class="v1-btn v1-btn--secondary" [routerLink]="context.inventoryLink().route" [queryParams]="context.inventoryLink().queryParams">Back to energy uses</a>
+  <p class="v1-alert v1-alert--danger" role="alert">The energy-use group could not be loaded. Retry loading the account.</p>
+} @else if (!group && context.workspace.ready()) {
+  <article class="v1-empty-state" role="status"><h1>Energy-use group unavailable</h1><p>This group is not available in this facility.</p>
+    <a [routerLink]="context.inventoryLink().route" [queryParams]="context.inventoryLink().queryParams">Back to energy uses</a>
   </article>
-} @else if (entry) {
+}
+@if (group) {
   <span #scrollMarker class="energy-use-workbench__marker" aria-hidden="true"></span>
   <div #stickyHeader [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" class="v1-data-workbench-sticky">
     <header class="v1-data-workbench-header v1-page-header">
-      <div class="v1-data-workbench-title-row"><div class="v1-data-workbench-title">
-        <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="entry.name" [icon]="entry.icon" headingId="energy-use-workbench-title" [customTitle]="true">
-          <app-data-workbench-resource-switcher [resources]="context.resources()" [selectedId]="entry.guid" [currentLabel]="entry.name" ariaLabel="Switch energy use" (resourceSelected)="context.switchResource($event)"/>
-        </app-page-identity>
-      </div>
-        <div class="v1-data-workbench-actions energy-use-workbench__chips" aria-label="Energy use save status and validation">
+      <div class="v1-data-workbench-title-row">
+        <div class="v1-data-workbench-title">
+          <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="group.name" icon="energyUseGroup" headingId="energy-use-workbench-title" [customTitle]="true">
+            <app-data-workbench-resource-switcher [resources]="context.resources()" [selectedId]="group.guid" [currentLabel]="group.name" ariaLabel="Switch energy-use group" (resourceSelected)="context.switchResource($event)"/>
+          </app-page-identity>
+        </div>
+        <div class="v1-data-workbench-actions">
           @if (saveFeedback(); as feedback) {
-            <span class="v1-chip v1-chip--{{ feedback.tone }} energy-use-workbench__chip" role="status" aria-live="polite" [title]="editor()?.message() || ''">
-              <app-ui-icon [name]="feedback.icon" [spin]="feedback.state === 'saving'"/>{{ feedback.label }}
-            </span>
+            <span class="v1-chip v1-chip--{{ feedback.tone }} energy-use-workbench__chip" role="status" aria-live="polite" [title]="editor()?.message() || ''"><app-ui-icon [name]="feedback.icon" [spin]="feedback.state === 'saving'"/>{{ feedback.label }}</span>
             @if (feedback.state === 'error') { <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" [disabled]="!editor()?.canRetry()" (click)="editor()?.retry()">Retry</button> }
-          }
-          @if (validation(); as status) {
-            <span class="v1-chip v1-chip--{{ status.tone }} energy-use-workbench__chip" [title]="status.description" [attr.aria-label]="status.label + ': ' + status.description"><app-ui-icon [name]="status.icon"/>{{ status.label }}</span>
           }
         </div>
       </div>
-      @if (saveFeedback()?.detail; as detail) {
-        <ul class="v1-data-workbench-status-notes"><li><app-ui-icon name="warning"/><span>{{ detail }}</span></li></ul>
-      }
+      @if (saveFeedback()?.detail; as detail) { <ul class="v1-data-workbench-status-notes"><li><app-ui-icon name="warning"/><span>{{ detail }}</span></li></ul> }
     </header>
-    <app-data-workbench-tabs [tabs]="tabs" [activeTab]="context.activeTab()" ariaLabel="Energy use workbench sections" (tabSelected)="context.openTab($event)"/>
+    <app-data-workbench-tabs [tabs]="tabs" [activeTab]="context.activeTab()" ariaLabel="Energy-use group sections" (tabSelected)="context.openTab($event)"/>
+
   </div>
 }
-@if (context.navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ context.navigationError() }}</p> }
-<router-outlet/>
+<div class="energy-use-workbench__workspace v1-member-workspace" [class.energy-use-workbench__workspace--items]="showItems" [class.v1-member-workspace--with-rail]="showItems">
+  @if (showItems) {
+    <aside class="energy-use-workbench__item-rail v1-member-rail" aria-label="Energy-use item navigation">
+      <header><strong>Energy use items</strong><span>{{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}</span></header>
+      <nav #itemNavigation class="v1-member-rail__items" aria-label="Energy-use items">
+        @for (item of items; track item.guid) {
+          <button type="button" class="v1-member-rail__item" [class.active]="item.guid === context.energyUseGuid()" [attr.aria-current]="item.guid === context.energyUseGuid() ? 'page' : null" (click)="context.openItem(item.guid)">
+            <app-ui-icon [name]="item.icon" [size]="18"/><span>{{ item.name }}</span>
+          </button>
+        }
+      </nav>
+    </aside>
+  }
+  <div class="energy-use-workbench__content">
+    @if (group?.unavailable) { <p class="v1-alert v1-alert--info">These items reference groups that are unavailable. Their saved relationships are preserved.</p> }
+    @if (group && context.notFound()) {
+      <article class="v1-workbench-section" role="status"><h2>Energy use unavailable</h2><p>This item is not available in this group. Select another item or return to energy uses.</p></article>
+    } @else if (group && context.activeTab() === 'items' && !items.length && context.workspace.ready()) {
+      <section class="v1-workbench-section"><app-data-empty-state icon="tools" title="No energy uses in this group" description="Add an energy use to begin configuring equipment, systems, or processes.">
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="openCreation()">Add energy use</button>
+      </app-data-empty-state></section>
+    }
+    @if (context.navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ context.navigationError() }}</p> }
+    <router-outlet/>
+  </div>
+</div>
+<ng-template #creationDrawer>
+  @if (creating()) { <app-create-energy-use-drawer [initialFacilityGuid]="context.facilityGuid()" [initialGroupGuid]="context.energyUseGroupGuid()" [singleFacility]="navigation.isSingleSiteWorkspace()" (created)="openCreated($event)" (closed)="closeCreation()"/> }
+</ng-template>

@@ -1,3 +1,6 @@
+import { energyUseYearChange, seedEnergyUseYear } from '@app/v1/data/energy-uses/models/energy-use-year-draft.models';
+import { reviewEnergyUseBatch } from '@app/v1/data/energy-uses/models/energy-use-batch.models';
+import { AccountWorkspaceStore } from '../account-workspace.store';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { LocalStorageService } from 'ngx-webstorage';
@@ -31,6 +34,41 @@ describe('Energy Uses native commands', () => {
     await harness.reopen();
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([saved]);
     expect(await harness.getAll('facilityEnergyUseGroups')).toEqual([expect.objectContaining(group)]);
+  });
+  it('saves group metadata once, preserving all other fields, item history, and relationships after reopening', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler), savedItem = await handler.createItem(owner, item, group);
+    await TestBed.inject(AccountWorkspaceService).selectAccount(account.guid);
+    const before = (await harness.getAll<any>('facilityEnergyUseGroups'))[0];
+    const committed = vi.fn(), subscription = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      await TestBed.inject(EnergyUseActionsService).updateGroupSettings({ ...owner, energyUseGroupGuid: group.guid },
+        { name: ' Packaging ', notes: ' Group notes ' }, { name: group.name, notes: group.notes }, 'group-editor');
+      expect(committed).toHaveBeenCalledTimes(1);
+      expect(TestBed.inject(AccountWorkspaceStore).energyUseGroups()[0].name).toBe('Packaging');
+      await harness.reopen();
+      const [saved] = await harness.getAll<any>('facilityEnergyUseGroups');
+      expect(saved).toMatchObject({ ...before, name: 'Packaging', notes: 'Group notes', modifiedDate: expect.anything() });
+      expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([savedItem]);
+    } finally { subscription.unsubscribe(); }
+  });
+  it('rejects stale or foreign group edits and leaves durable records intact', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler); await handler.createItem(owner, item, group);
+    const before = (await harness.getAll<any>('facilityEnergyUseGroups'))[0], identity = { ...owner, energyUseGroupGuid: group.guid };
+    const saved = await handler.saveGroupSettings(identity, before, { name: 'Current group', notes: 'Keep notes' });
+    await expect(handler.saveGroupSettings(identity, before, { name: 'Stale group', notes: '' })).rejects.toThrow('changed');
+    await expect(handler.saveGroupSettings({ ...identity, facilityGuid: 'missing' }, saved, { name: 'Foreign group', notes: '' })).rejects.toThrow('owning facility');
+    await expect(handler.saveGroupSettings(identity, saved, { name: ' ', notes: '' })).rejects.toThrow('name');
+    await harness.reopen(); expect(await harness.getAll('facilityEnergyUseGroups')).toEqual([saved]);
+  });
+  it('retains the last saved group after a failed metadata write', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler); await handler.createItem(owner, item, group);
+    const before = (await harness.getAll<any>('facilityEnergyUseGroups'))[0];
+    const original = IndexedDbTransactionContext.prototype.put;
+    vi.spyOn(IndexedDbTransactionContext.prototype, 'put').mockImplementation(function(store, value) {
+      return store === 'facilityEnergyUseGroups' ? Promise.reject(new Error('Group write failed')) : original.call(this, store, value);
+    });
+    await expect(handler.saveGroupSettings({ ...owner, energyUseGroupGuid: group.guid }, before, { name: 'Rejected', notes: '' })).rejects.toThrow('Group write failed');
+    await harness.reopen(); expect(await harness.getAll('facilityEnergyUseGroups')).toEqual([before]);
   });
   it('reuses a matching completed creation on retry without duplicating its group or history', async () => {
     const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
@@ -121,4 +159,84 @@ describe('Energy Uses native commands', () => {
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([]);
     expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
   });
+  it('commits a reviewed batch once and reopens it with all groups and ownership intact', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler);
+    const first = await handler.createItem(owner, item, group);
+    const second = await handler.createItem(owner, { ...item, guid: 'energy-b', name: 'Fan' });
+    await TestBed.inject(AccountWorkspaceService).selectAccount(account.guid);
+    const rows = reviewEnergyUseBatch([first, second], [facility], { kind: 'add', year: 2026 });
+    const committed = vi.fn(), sub = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      await TestBed.inject(EnergyUseActionsService).applyBatch(account.guid, rows.map(row => row.change!));
+      expect(committed).toHaveBeenCalledTimes(1); await harness.reopen();
+      const saved = await harness.getAll<any>('facilityEnergyUseEquipment');
+      expect(saved).toHaveLength(2); expect(saved.every(row => row.operatingConditionsData.some(annual => annual.year === 2026))).toBe(true);
+      expect(saved.every(row => row.energyUseGroupId === group.guid && row.facilityId === facility.guid)).toBe(true);
+      expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
+    } finally { sub.unsubscribe(); }
+  });
+  it('commits edited existing years and newly entered years together without changing other history', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler);
+    const configured = { ...item, utilityData: [{ energySource: 'Electricity' as const, size: 1, units: 'kW', numberOfEquipment: 1,
+      energyUse: [{ year: 2025, energyUse: 123, overrideEnergyUse: true, energyUseUnit: 'kWh' }] }] };
+    const original = await handler.createItem(owner, configured, group);
+    const second = await handler.createItem(owner, { ...configured, guid: 'energy-b' });
+    await handler.applyBatch(account.guid, [energyUseYearChange(original, facility, seedEnergyUseYear(original, facility, 2026).value, 2026)]);
+    const first = (await harness.getAll<any>('facilityEnergyUseEquipment')).find(row => row.guid === original.guid);
+    const rows = [first, second].map(saved => {
+      const draft = seedEnergyUseYear(saved, facility, 2026);
+      return energyUseYearChange(saved, facility, { ...draft.value, conditions: draft.value.conditions.map(row => row.year === 2026 ? { ...row, hoursOfOperation: 1000 } : row) }, 2026);
+    });
+    await TestBed.inject(AccountWorkspaceService).selectAccount(account.guid);
+    const committed = vi.fn(), sub = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      await TestBed.inject(EnergyUseActionsService).applyBatch(account.guid, rows);
+      expect(committed).toHaveBeenCalledTimes(1); await harness.reopen();
+      const saved = await harness.getAll<any>('facilityEnergyUseEquipment');
+      for (const equipment of saved) {
+        expect(equipment.operatingConditionsData.find(row => row.year === 2026).hoursOfOperation).toBe(1000);
+        expect(equipment.operatingConditionsData.find(row => row.year === 2025)).toEqual(original.operatingConditionsData[0]);
+        expect(equipment.utilityData[0].energyUse.filter(row => row.year === 2025)).toEqual(original.utilityData[0].energyUse);
+        expect(equipment.energyUseGroupId).toBe(group.guid);
+      }
+    } finally { sub.unsubscribe(); }
+  });
+  it('rolls back every batch write when the second equipment update fails', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler);
+    const first = await handler.createItem(owner, item, group), second = await handler.createItem(owner, { ...item, guid: 'energy-b' });
+    const changes = reviewEnergyUseBatch([first, second], [facility], { kind: 'add', year: 2026 }).map(row => row.change!);
+    const original = IndexedDbTransactionContext.prototype.put; let writes = 0;
+    vi.spyOn(IndexedDbTransactionContext.prototype, 'put').mockImplementation(function(store, value) {
+      if (store === 'facilityEnergyUseEquipment' && ++writes === 2) return Promise.reject(new Error('Second write failed'));
+      return original.call(this, store, value);
+    });
+    await expect(handler.applyBatch(account.guid, changes)).rejects.toThrow('Second write failed');
+    await harness.reopen(); expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([first, second]);
+  });
+  it('rejects stale skipped records, wrong owners, and changed facilities inside the batch transaction', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
+    const changed = await handler.saveItem(identity, saved, { ...saved, notes: 'Updated elsewhere' }, false);
+    await expect(handler.applyBatch(account.guid, [{ facility, before: saved, after: saved }])).rejects.toThrow('changed');
+    await expect(handler.applyBatch('foreign-account', [{ facility, before: changed }])).rejects.toThrow('owning facility');
+    await expect(handler.applyBatch(account.guid, [{ facility: { ...facility, energyUnit: 'GJ' }, before: changed }])).rejects.toThrow('Facility settings changed');
+    await harness.reopen(); expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([changed]);
+  });
+  it('preserves annual history through retirement and reinstatement and recovers a saved batch without rewriting', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
+    const service = TestBed.inject(AccountWorkspaceService), actions = TestBed.inject(EnergyUseActionsService);
+    await service.selectAccount(account.guid);
+    await actions.setLifecycle(identity, saved, 2025);
+    const retired = TestBed.inject(AccountWorkspaceStore).energyUseEquipment()[0];
+    expect(retired.noLongerInUse).toEqual({ isNoLongerInUse: true, year: 2025 }); expect(retired.operatingConditionsData).toEqual(saved.operatingConditionsData);
+    await actions.setLifecycle(identity, retired, null);
+    const current = TestBed.inject(AccountWorkspaceStore).energyUseEquipment()[0];
+    const changes = reviewEnergyUseBatch([current], [facility], { kind: 'add', year: 2026 }).map(row => row.change!);
+    const reload = vi.spyOn(service, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication failed'));
+    const write = vi.spyOn(handler, 'applyBatch');
+    await expect(actions.applyBatch(account.guid, changes)).rejects.toMatchObject({ persistenceCommitted: true });
+    await actions.recoverPublication(account.guid);
+    expect(write).toHaveBeenCalledTimes(1); expect(reload).toHaveBeenCalledTimes(2);
+    await harness.reopen(); expect((await harness.getAll<any>('facilityEnergyUseEquipment'))[0].operatingConditionsData).toHaveLength(2);
+  });
+
 });

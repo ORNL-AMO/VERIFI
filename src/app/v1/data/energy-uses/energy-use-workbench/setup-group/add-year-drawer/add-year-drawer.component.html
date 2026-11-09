@@ -1,0 +1,75 @@
+@let c = controller();
+@let current = c.current();
+<app-workspace-slideout title="Add year data" description="Review each equipment draft. All year data saves together." size="large" [saving]="c.blocked()" [hasFooter]="!calculator()" initialFocus=".year-draft__years button" (closed)="requestClose()">
+  <div #content>
+    <div [hidden]="!!calculator()">
+      @if (c.selectedYear() !== undefined) {
+        <div class="creation-selections" role="group" aria-label="Completed steps, not yet saved">
+          <button type="button" class="creation-selection" [class.creation-selection--active]="c.index() === -1" [disabled]="!c.canEdit()" (click)="c.go(-1)"><app-ui-icon name="calendar"/><span>Fiscal year {{ c.selectedYear() }}</span><app-ui-icon name="edit"/></button>
+          @for (draft of c.completed(); track draft.item.guid) {
+            <button type="button" class="creation-selection" [class.creation-selection--active]="draft.index === c.index()" [disabled]="!c.canEdit()" (click)="c.go(draft.index)"><app-ui-icon [name]="draft.icon"/><span>{{ draft.item.name }}</span><app-ui-icon name="check"/></button>
+          }
+        </div>
+      }
+      @if (c.index() < 0) {
+        <form [formGroup]="c.yearForm" id="add-year-form" (ngSubmit)="c.start()">
+          <h3 id="year-choice-title">Choose a fiscal year</h3>
+          <div class="creation-choices year-draft__years" role="group" aria-labelledby="year-choice-title">
+            @for (year of c.yearChoices(); track year) {
+              <button type="button" class="creation-choice" [attr.aria-pressed]="!c.otherYear() && c.selectedYear() === year" [disabled]="!c.canEdit()" (click)="c.chooseYear(year)"><app-ui-icon name="calendar" [size]="28"/><strong>{{ year }}</strong></button>
+            }
+            <button type="button" class="creation-choice" [attr.aria-pressed]="c.otherYear()" [disabled]="!c.canEdit()" (click)="c.chooseOtherYear()"><app-ui-icon name="edit" [size]="28"/><strong>Other</strong></button>
+          </div>
+          @if (c.otherYear()) {
+            <div class="year-draft__other">
+              <label class="v1-field" for="add-year-input">Fiscal year</label>
+              <input id="add-year-input" class="v1-input" type="number" min="1" max="9999" [formControl]="c.year" [attr.aria-invalid]="c.year.touched && c.year.invalid" aria-describedby="add-year-error" [readOnly]="!c.canEdit()">
+              @if (c.year.touched && c.year.invalid) { <p id="add-year-error" class="v1-alert v1-alert--danger" role="alert">Enter a whole fiscal year from 1 to 9999.</p> }
+            </div>
+          }
+        </form>
+      } @else if (current) {
+        <section class="year-draft__heading">
+          <h3 id="equipment-year-title" tabindex="-1"><app-ui-icon [name]="current.icon"/>{{ current.item.name }}</h3>
+          <p class="v1-muted">{{ c.completed().length + 1 }} of {{ c.drafts().length }} · {{ current.existing ? 'Editing saved data for' : 'New data for' }} {{ c.selectedYear() }}@if (!current.existing && current.sourceYear !== undefined) { · Starting from {{ current.sourceYear }} }@else if (!current.existing) { · No saved history; using default values }</p>
+        </section>
+        @if (current.form; as form) {
+          <app-energy-use-annual-data-fields [form]="form" [item]="current.item" [editorKey]="current.item.guid + ':' + c.selectedYear()" [canEdit]="c.canEdit()" [yearFilter]="c.selectedYear()" [showManagement]="false" [refreshKey]="c.version()" [embeddedCalculators]="true" (calculatorRequested)="calculator.set($event)"/>
+        }
+        @if (c.validationMessage()) { <p class="v1-alert v1-alert--danger" role="alert">{{ c.validationMessage() }}</p> }
+        @if (c.remaining().length) {
+          <section class="year-draft__remaining" aria-labelledby="remaining-equipment-title">
+            <h3 id="remaining-equipment-title" class="year-draft__remaining-title">Remaining equipment</h3>
+            @for (draft of c.remaining(); track draft.item.guid) {
+              <button type="button" class="creation-selection" [disabled]="!c.canEdit()" (click)="c.go(draft.index)"><app-ui-icon [name]="draft.icon"/><span>{{ draft.item.name }}</span></button>
+            }
+          </section>
+        }
+      }
+      @if (c.missing()) { <p class="v1-alert v1-alert--warning" role="alert">Equipment was removed or moved. Close this panel and select equipment again. Your drafts have been retained.</p> }
+      @else if (c.stale() || c.reloadNeeded()) {
+        <p class="v1-alert v1-alert--warning" role="alert">Saved records changed. Reload changed items before saving; your drafts are still here.</p>
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!c.canEdit()" (click)="c.confirmation.set('reload')">Reload changed items</button>
+      }
+      @if (c.error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ c.error() }}</p> }
+    </div>
+    @if (calculator(); as view) { <ng-container [ngTemplateOutlet]="view"/> }
+  </div>
+  <div slideoutFooter class="creation-draft-actions">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="c.blocked()" (click)="requestClose()">Cancel</button>
+    <div class="year-draft__navigation">
+      @if (c.committed()) { <button type="button" class="v1-btn v1-btn--primary" [disabled]="c.busy()" (click)="recover()">Refresh saved changes</button> }
+      @else {
+        @if (c.index() >= 0) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!c.canEdit()" (click)="c.go(c.index() - 1)">Previous</button> }
+        @if (c.index() < 0 && c.otherYear()) { <button type="submit" form="add-year-form" class="v1-btn v1-btn--action" [disabled]="!c.canEdit()">Next item</button> }
+        @else if (c.index() >= 0 && !c.allOthersReviewed()) { <button type="button" class="v1-btn v1-btn--action" [disabled]="!c.canEdit() || !current?.form" (click)="c.next()">Next item</button> }
+        @else if (c.index() >= 0) { <button type="button" class="v1-btn v1-btn--action" [disabled]="!c.canSave()" (click)="save()">@if (c.busy()) { <app-ui-icon name="loading" spin/> }{{ c.busy() ? 'Saving…' : 'Save all' }}</button> }
+      }
+    </div>
+  </div>
+  @switch (c.confirmation()) {
+    @case ('discard') { <app-confirmation-dialog title="Discard year data?" titleId="discard-year-data-title" confirmLabel="Discard drafts" cancelAriaLabel="Keep editing year data" (cancelled)="c.confirmation.set(null)" (confirmed)="discard()"><p>All unfinished equipment drafts will be discarded. Nothing has been saved.</p></app-confirmation-dialog> }
+    @case ('year') { <app-confirmation-dialog title="Change fiscal year?" titleId="reset-year-data-title" confirmLabel="Change year" cancelAriaLabel="Keep current year drafts" (cancelled)="c.cancelYearChange()" (confirmed)="c.confirmReset()"><p>Changing the year will reset all equipment drafts and completion progress.</p></app-confirmation-dialog> }
+    @case ('reload') { <app-confirmation-dialog title="Reload changed items?" titleId="reload-year-data-title" confirmLabel="Reload changed items" cancelAriaLabel="Keep current drafts" (cancelled)="c.confirmation.set(null)" (confirmed)="c.reloadChanged()"><p>Drafts for changed equipment will be replaced with saved data. If facility settings changed, every draft will reset. Other equipment drafts will remain.</p></app-confirmation-dialog> }
+  }
+</app-workspace-slideout>

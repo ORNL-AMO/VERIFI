@@ -35,7 +35,7 @@ describe('energy-use group browsing projections', () => {
     const result = filterAndSortEnergyUseGroups([group], filters)[0];
     expect(result.snapshot.items.map(item => item.guid)).toEqual(['fan']);
     expect(result.snapshot.equipmentTypes).toEqual([{ label: 'Fan', icon: 'fan' }, { label: 'Pump', icon: 'pump' }]);
-    expect(result.snapshot.items).toEqual([{ guid: 'fan', name: 'Fan', icon: 'fan', route: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses', 'fan', 'settings'] }]);
+    expect(result.snapshot.items).toEqual([{ guid: 'fan', name: 'Fan', icon: 'fan', route: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses', 'groups', 'group-a', 'items', 'fan'] }]);
     expect(filterEnergyUseGroupItems(group, filters).map(item => item.guid)).toEqual(result.snapshot.items.map(item => item.guid));
     expect(result.snapshot).toMatchObject({ categories: ['Fan', 'Pump'], sources: ['Electricity', 'Natural Gas'], years: [2024] });
     expect(filterEnergyUseGroupItems(group, { ...filters, search: 'finishing' })).toHaveLength(2);

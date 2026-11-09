@@ -16,13 +16,33 @@ describe('Energy Use actions', () => {
       energyUseEquipment: signal([energyUseItem({ id: 1, utilityMeterGroupIds: [] })]), energyUseGroups: signal([energyUseGroup()]),
       meterGroups: signal([]), meters: signal([]) };
     const handler = { createItem: vi.fn(async (_owner, item) => item), copyItem: vi.fn(async (_identity, _before, copy) => copy),
-      saveItem: vi.fn(async (_identity, _before, updated) => updated), deleteItem: vi.fn(async () => {}) };
+      saveItem: vi.fn(async (_identity, _before, updated) => updated),
+      saveGroupSettings: vi.fn(async (_identity, before, value) => ({ ...before, ...value })), deleteItem: vi.fn(async () => {}) };
     let prepare = () => {};
     const boundary = { execute: vi.fn(async (_options, persist) => { prepare(); return { value: await persist() }; }) };
     TestBed.configureTestingModule({ providers: [{ provide: AccountWorkspaceStore, useValue: store },
       { provide: EnergyUseCommandHandler, useValue: handler }, { provide: WorkspaceCommandBoundary, useValue: boundary }] });
     return { service: TestBed.inject(EnergyUseActionsService), store, handler, boundary, beforePersist: (callback: () => void) => prepare = callback };
   }
+  it('merges group metadata into the queued latest group while preserving non-editor fields', async () => {
+    const { service, store, handler, boundary, beforePersist } = setup();
+    beforePersist(() => store.energyUseGroups.set([{ ...store.energyUseGroups()[0], notes: 'Elsewhere', color: '#abc' }]));
+    await service.updateGroupSettings({ accountGuid: 'account-a', facilityGuid: 'facility-a', energyUseGroupGuid: 'group-a' },
+      { name: ' Packaging ', notes: '' }, { name: 'Production', notes: '' }, 'group-editor');
+    expect(handler.saveGroupSettings).toHaveBeenCalledWith(expect.objectContaining({ energyUseGroupGuid: 'group-a' }),
+      expect.objectContaining({ color: '#abc', notes: 'Elsewhere' }), { name: 'Packaging', notes: 'Elsewhere' });
+    expect(boundary.execute).toHaveBeenCalledWith(expect.objectContaining({ entityKind: 'energyUseGroup', ownerId: 'group-editor' }), expect.any(Function));
+    expect(handler.saveItem).not.toHaveBeenCalled();
+  });
+  it('rejects conflicting group names and foreign group ownership without writing', async () => {
+    const { service, store, handler } = setup();
+    const identity = { accountGuid: 'account-a', facilityGuid: 'facility-a', energyUseGroupGuid: 'group-a' };
+    store.energyUseGroups.set([{ ...store.energyUseGroups()[0], name: 'Saved' }]);
+    await expect(service.updateGroupSettings(identity, { name: 'Local', notes: '' }, { name: 'Production', notes: '' }, 'group-editor')).rejects.toBeInstanceOf(EditorConflictError);
+    store.energyUseGroups.set([{ ...store.energyUseGroups()[0], facilityId: 'other' }]);
+    await expect(service.updateGroupSettings(identity, { name: 'Local', notes: '' }, { name: 'Saved', notes: '' }, 'group-editor')).rejects.toThrow('no longer available');
+    expect(handler.saveGroupSettings).not.toHaveBeenCalled();
+  });
   it('merges into the queued latest record and retains its new annual values', async () => {
     const { service, store, handler, beforePersist } = setup(), base = energyUseSetup(store.energyUseEquipment()[0]);
     beforePersist(() => { const item = structuredClone(store.energyUseEquipment()[0]); item.utilityData[0].energyUse[0].energyUse = 456; item.notes = 'Elsewhere'; store.energyUseEquipment.set([item]); });

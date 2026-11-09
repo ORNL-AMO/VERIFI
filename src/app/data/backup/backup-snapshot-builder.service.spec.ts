@@ -80,6 +80,32 @@ describe('WorkspaceBackupSnapshotBuilder', () => {
     expect(backup.facilityReports.map(item => item.facilityId)).toEqual(['facility-a']);
   });
 
+  it('preserves missing energy-use and meter-group references without synthesizing groups', () => {
+    const original = createSnapshot();
+    const snapshot = { ...original, energyUseEquipment: original.energyUseEquipment.map(item => ({ ...item,
+      energyUseGroupId: 'missing-energy-group', utilityMeterGroupIds: ['missing-meter-group'] })) };
+    const builder = new WorkspaceBackupSnapshotBuilder(), preparation = new BackupPreparationService();
+
+    for (const backup of [builder.buildAccountBackup(snapshot), builder.buildFacilityBackup(snapshot, 'facility-a')]) {
+      const prepared = preparation.prepare(JSON.parse(JSON.stringify(backup)));
+      expect(prepared.facilityEnergyUseEquipment.every(item => item.energyUseGroupId === 'missing-energy-group'
+        && item.utilityMeterGroupIds[0] === 'missing-meter-group')).toBe(true);
+      expect(prepared.facilityEnergyUseGroups.some(group => group.guid === 'missing-energy-group')).toBe(false);
+      expect(prepared.groups.some(group => group.guid === 'missing-meter-group')).toBe(false);
+    }
+    expect(original.energyUseEquipment[0].energyUseGroupId).toBe('energy-group-a');
+  });
+
+  it.each(['energy-use', 'meter'] as const)('rejects known cross-facility %s links before facility filtering', kind => {
+    const original = createSnapshot();
+    const snapshot = { ...original, energyUseEquipment: original.energyUseEquipment.map(item => item.facilityId === 'facility-a'
+      ? { ...item, ...(kind === 'energy-use' ? { energyUseGroupId: 'energy-group-b' } : { utilityMeterGroupIds: ['group-b'] }) } : item) };
+    const builder = new WorkspaceBackupSnapshotBuilder();
+
+    expect(() => builder.buildAccountBackup(snapshot)).toThrow('group owned by another account or facility');
+    expect(() => builder.buildFacilityBackup(snapshot, 'facility-a')).toThrow('group owned by another account or facility');
+  });
+
   it('does not export a selected regression model with unavailable predictors', () => {
     const builder = new WorkspaceBackupSnapshotBuilder();
     const snapshot = createSnapshot();
