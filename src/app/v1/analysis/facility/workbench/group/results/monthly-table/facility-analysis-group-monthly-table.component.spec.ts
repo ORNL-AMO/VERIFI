@@ -43,9 +43,21 @@ describe('FacilityAnalysisGroupMonthlyTableComponent', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
+  it('navigates rendered rows and clamps when refreshed results have fewer months', () => {
+    const root = fixture.nativeElement as HTMLElement;
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Page 3"]')!.click(); fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(3);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(6);
+    (TestBed.inject(FacilityAnalysisGroupResultsService) as any).state.set({ state: 'ready', monthly: monthlyRows(2) });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(1);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(root.querySelector('app-pagination')).toBeNull();
+  });
+
   it('uses a typed page-size control and resets pagination after a rendered selection', () => {
     const component = fixture.componentInstance;
-    component.currentPage.set(2);
+    fixture.nativeElement.querySelector('app-pagination button[aria-label="Next page"]').click();
     fixture.detectChanges();
 
     selectPageSize(fixture.nativeElement, 24);

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { vi } from 'vitest';
@@ -129,6 +129,27 @@ describe('MeterWorkbenchMonthlyDataComponent', () => {
     }
   });
 
+  it('pages monthly rows, resets the page size, and recovers when results shrink', () => {
+    const rows = Array.from({ length: 30 }, (_, index) => monthlyData({ date: new Date(2024, index, 1), monthNumValue: index % 12 }));
+    const fixture = setup({ calendarizedMeters: [calendarizedMeter(rows)] });
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Page 3"]')!.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(3);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(6);
+    const size = root.querySelector<HTMLSelectElement>('select')!;
+    size.value = '24'; size.dispatchEvent(new Event('change')); fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(1);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(24);
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Next page"]')!.click(); fixture.detectChanges();
+    const workspace = TestBed.inject(FacilityMetersWorkspaceService) as any;
+    workspace.calendarizedMeters.set([calendarizedMeter(rows.slice(0, 2))]); fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(1);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(root.querySelector('app-pagination')).toBeNull();
+  });
+
   it('renders REC-specific emissions columns', () => {
     const fixture = setup({
       selectedMeter: meter({ guid: 'meter-a', agreementType: 4, meterReadingDataApplication: 'backward' }),
@@ -167,7 +188,7 @@ function setup(options: {
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchMonthlyDataComponent],
-    imports: [CommonModule, IconComponent, NgbPaginationModule],
+    imports: [CommonModule, IconComponent, PaginationComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

@@ -42,14 +42,12 @@
         Copy Table
       </button>
       @if (rowViews().length > pageSize()) {
-        <ngb-pagination
+        <app-pagination ariaLabel="Group analysis monthly pages"
           [collectionSize]="rowViews().length"
           [pageSize]="pageSize()"
-          [maxSize]="5"
-          [ellipses]="false"
           [page]="currentPage()"
           (pageChange)="currentPage.set($event)">
-        </ngb-pagination>
+        </app-pagination>
       }
     </footer>
   }

@@ -1,0 +1,24 @@
+@let activePage = currentPage();
+@if (pageCount() > 1) {
+  <nav class="pagination" [attr.aria-label]="ariaLabel()">
+    <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">Page {{ activePage }} of {{ pageCount() }}</span>
+    <div class="pagination__controls">
+      <button type="button" class="pagination__button pagination__direction" aria-label="Previous page"
+        [disabled]="previousDisabled()" (click)="selectPage(activePage - 1)">
+        <app-ui-icon name="chevronLeft"/><span class="pagination__direction-label">Previous</span>
+      </button>
+      <ol class="pagination__pages" aria-label="Page numbers">
+        @for (number of pages(); track $index) {
+          <li>
+            <button type="button" class="pagination__button" [attr.aria-label]="'Page ' + number"
+              [attr.aria-current]="number === activePage ? 'page' : null" [disabled]="disabled()" (click)="selectPage(number)">{{ number }}</button>
+          </li>
+        }
+      </ol>
+      <button type="button" class="pagination__button pagination__direction" aria-label="Next page"
+        [disabled]="nextDisabled()" (click)="selectPage(activePage + 1)">
+        <span class="pagination__direction-label">Next</span><app-ui-icon name="chevronRight"/>
+      </button>
+    </div>
+  </nav>
+}

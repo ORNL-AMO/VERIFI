@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -21,7 +21,7 @@ type AnalysisResultColumnSection = 'period' | 'use' | 'improvement';
 
 @Component({
   selector: 'app-account-analysis-monthly-table', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent],
+  imports: [CommonModule, ReactiveFormsModule, PaginationComponent, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent],
   templateUrl: './account-analysis-monthly-table.component.html',
   styleUrls: ['./account-analysis-monthly-table.component.css']
 })

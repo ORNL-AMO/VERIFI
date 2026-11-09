@@ -89,7 +89,10 @@ describe('WeatherPredictorReadingsComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelectorAll('tbody tr')).toHaveLength(12);
-    expect(root.querySelector('ngb-pagination')).not.toBeNull();
+    expect(root.querySelector('app-pagination')).not.toBeNull();
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Next page"]')!.click(); fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(2);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(12);
 
     const pageSize = root.querySelector<HTMLSelectElement>('.weather-readings__control select')!;
     expect(Array.from(pageSize.options).map(option => option.textContent?.trim())).toEqual(['12', '24', '36']);
@@ -99,7 +102,7 @@ describe('WeatherPredictorReadingsComponent', () => {
 
     expect(fixture.componentInstance.currentPage()).toBe(1);
     expect(root.querySelectorAll('tbody tr')).toHaveLength(24);
-    expect(root.querySelector('ngb-pagination')).not.toBeNull();
+    expect(root.querySelector('app-pagination')).not.toBeNull();
   });
 
   it('filters the table to months that need attention and resets pagination', () => {
@@ -119,7 +122,7 @@ describe('WeatherPredictorReadingsComponent', () => {
     expect(fixture.componentInstance.currentPage()).toBe(1);
     expect(root.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(root.querySelectorAll('.weather-readings__source-warning')).toHaveLength(2);
-    expect(root.querySelector('ngb-pagination')).toBeNull();
+    expect(root.querySelector('app-pagination')).toBeNull();
   });
 
   it('copies the displayed table without the row action column', () => {

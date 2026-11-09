@@ -19,7 +19,7 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, PristineChangeEvent, ReactiveFormsModule, Validators } from '@angular/forms';
 import { distinctUntilChanged, filter, map } from 'rxjs';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { HasUnsavedChanges } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ConflictChoices, DraftConflict, draftEqual, reconcileFields } from '@app/v1/data/editing/draft-reconciliation';
@@ -64,7 +64,7 @@ type EditorReplacement = { kind: 'close' | 'add' | 'range' } | { kind: 'edit' | 
   standalone: true,
   imports: [
     ReactiveFormsModule, EditorConflictReviewComponent, ConfirmationDialogComponent,
-    NgbPaginationModule,
+    PaginationComponent,
     IconComponent,
     WorkspaceSlideoutComponent,
     WeatherReadingDeleteConfirmationModalComponent,

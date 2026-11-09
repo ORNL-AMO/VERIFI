@@ -8,6 +8,32 @@ import { AccountAnalysisResultsService } from '../calculation/account-analysis-r
 import { AccountAnalysisMonthlyTableComponent } from './account-analysis-monthly-table.component';
 
 describe('AccountAnalysisMonthlyTableComponent', () => {
+  it('pages account results, resets page size, and clamps after a smaller refresh', () => {
+    const rows = Array.from({ length: 30 }, (_, index) => ({ date: new Date(2024, index, 1), fiscalYear: 2024 + Math.floor(index / 12), energyUse: index, missingValueWarning: false }));
+    const state = signal({ state: 'ready', annual: [], monthly: rows });
+    TestBed.configureTestingModule({ imports: [AccountAnalysisMonthlyTableComponent], providers: [
+      { provide: CopyTableService, useValue: { copyTable: vi.fn() } },
+      { provide: AccountAnalysisWorkbenchContext, useValue: { analysis: signal({ analysisCategory: 'water', waterUnit: 'gal' }), hasBlockingErrors: signal(false) } },
+      { provide: AccountAnalysisFacilitySelectionService, useValue: { resultsReady: signal(true), selectionItems: signal([]) } },
+      { provide: AccountAnalysisResultsService, useValue: { state } },
+      { provide: AnalysisResultsDisplayService, useValue: { monthlyColumns: signal(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS)) } }
+    ] });
+    const fixture = TestBed.createComponent(AccountAnalysisMonthlyTableComponent); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Page 3"]')!.click(); fixture.detectChanges();
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(6);
+    const size = root.querySelector<HTMLSelectElement>('select')!;
+    size.value = Array.from(size.options).find(option => option.textContent?.trim() === '24')!.value;
+    size.dispatchEvent(new Event('change')); fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(1);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(24);
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Next page"]')!.click(); fixture.detectChanges();
+    state.set({ state: 'ready', annual: [], monthly: rows.slice(0, 2) }); fixture.detectChanges();
+    expect(fixture.componentInstance.currentPage()).toBe(1);
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(root.querySelector('app-pagination')).toBeNull();
+  });
+
   it('renders fiscal boundaries, missing-data guidance, and only aggregate account fields', () => {
     TestBed.configureTestingModule({ imports: [AccountAnalysisMonthlyTableComponent], providers: [
       { provide: CopyTableService, useValue: { copyTable: vi.fn() } },

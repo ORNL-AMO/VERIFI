@@ -208,14 +208,12 @@
           Copy Table
         </button>
         @if (currentRows.length > pageSize()) {
-          <ngb-pagination
+          <app-pagination ariaLabel="Weather readings pages"
             [collectionSize]="currentRows.length"
             [pageSize]="pageSize()"
-            [maxSize]="5"
-            [ellipses]="false"
             [page]="currentPage()"
             (pageChange)="setCurrentPage($event)">
-          </ngb-pagination>
+          </app-pagination>
         }
       </footer>
     }

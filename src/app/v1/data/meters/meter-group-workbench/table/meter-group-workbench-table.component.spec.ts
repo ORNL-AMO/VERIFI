@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { vi } from 'vitest';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
@@ -18,7 +18,7 @@ describe('MeterGroupWorkbenchTableComponent', () => {
     const component = fixture.componentInstance;
     const root = fixture.nativeElement as HTMLElement;
 
-    component.currentPage.set(3);
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Page 3"]')!.click();
     fixture.detectChanges();
     expect(visiblePeriods(root)).toHaveLength(5);
 
@@ -28,6 +28,7 @@ describe('MeterGroupWorkbenchTableComponent', () => {
     expect(component.currentPage()).toBe(1);
     expect(visiblePeriods(root)).toEqual(['Feb 2026', 'Jan 2026']);
     expect(root.textContent).not.toContain('No monthly results are available');
+    expect(root.querySelector('app-pagination')).toBeNull();
   });
 
   it('sorts, resets the page size, and copies the rendered table', () => {
@@ -77,7 +78,7 @@ function setup(options: {
 } = {}): ComponentFixture<MeterGroupWorkbenchTableComponent> {
   TestBed.configureTestingModule({
     declarations: [MeterGroupWorkbenchTableComponent],
-    imports: [CommonModule, IconComponent, NgbPaginationModule],
+    imports: [CommonModule, IconComponent, PaginationComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

@@ -51,6 +51,6 @@
       </table>
     </div>
     <app-analysis-result-marker-legend [markers]="legendMarkers()"></app-analysis-result-marker-legend>
-    <footer class="v1-analysis-results-table__footer"><button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="copyTable()"><app-ui-icon name="copy"></app-ui-icon>Copy Table</button>@if (rowViews().length > pageSize()) { <ngb-pagination [collectionSize]="rowViews().length" [pageSize]="pageSize()" [maxSize]="5" [ellipses]="false" [page]="currentPage()" (pageChange)="currentPage.set($event)"></ngb-pagination> }</footer>
+    <footer class="v1-analysis-results-table__footer"><button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="copyTable()"><app-ui-icon name="copy"></app-ui-icon>Copy Table</button>@if (rowViews().length > pageSize()) { <app-pagination ariaLabel="Account analysis monthly pages" [collectionSize]="rowViews().length" [pageSize]="pageSize()" [page]="currentPage()" (pageChange)="currentPage.set($event)"></app-pagination> }</footer>
   }
 </section>

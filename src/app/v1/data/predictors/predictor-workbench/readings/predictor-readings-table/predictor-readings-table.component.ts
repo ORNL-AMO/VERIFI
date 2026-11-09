@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { Component, EventEmitter, Input, Output, computed, effect, signal } from '@angular/core';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -16,7 +16,7 @@ import {
   templateUrl: './predictor-readings-table.component.html',
   styleUrls: ['./predictor-readings-table.component.css'],
   standalone: true,
-  imports: [NgbPaginationModule, IconComponent]
+  imports: [PaginationComponent, IconComponent]
 })
 export class PredictorReadingsTableComponent {
   private static readonly emptyView: PredictorReadingTableView = { rows: [], hasAttention: false };
@@ -50,6 +50,11 @@ export class PredictorReadingsTableComponent {
     : this.viewModel().rows);
   readonly sortedRows = computed(() => [...this.filteredRows()].sort((first, second) =>
     compareRows(first, second, this.sortColumn(), this.sortDirection())));
+  readonly maxPage = computed(() => Math.max(1, Math.ceil(this.sortedRows().length / this.pageSize())));
+  private readonly clampCurrentPage = effect(() => {
+    const page = Math.min(this.maxPage(), Math.max(1, this.currentPage()));
+    if (page !== this.currentPage()) this.currentPage.set(page);
+  });
   readonly displayedRows = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize();
     return this.sortedRows().slice(start, start + this.pageSize());

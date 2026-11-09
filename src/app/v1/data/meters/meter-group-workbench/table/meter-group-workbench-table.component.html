@@ -96,14 +96,12 @@
         Copy Table
       </button>
       @if (currentRows.length > pageSize()) {
-        <ngb-pagination
+        <app-pagination ariaLabel="Meter group results pages"
           [collectionSize]="currentRows.length"
           [pageSize]="pageSize()"
-          [maxSize]="5"
-          [ellipses]="false"
           [page]="currentPage()"
           (pageChange)="currentPage.set($event)">
-        </ngb-pagination>
+        </app-pagination>
       }
     </footer>
   }

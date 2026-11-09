@@ -114,6 +114,22 @@ describe('MeterReadingsTableComponent', () => {
     expect(readDates(root).length).toBe(12);
   });
 
+  it('pages read-only readings through the shared control and clamps after filtering or replacement', () => {
+    const fixture = setup(tableView({ rows: Array.from({ length: 30 }, (_, index) => row(`reading-${index}`, String(index), index < 2, index, index)) }));
+    const component = fixture.componentInstance, root = fixture.nativeElement as HTMLElement;
+    fixture.componentRef.setInput('canAct', false); fixture.detectChanges();
+    const next = root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Next page"]')!;
+    expect(next.disabled).toBe(false); next.click(); fixture.detectChanges();
+    expect(component.currentPage()).toBe(2); expect(readDates(root)).toHaveLength(12);
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Page 3"]')!.click(); fixture.detectChanges();
+    expect(energyValues(root)).toEqual(['5', '4', '3', '2', '1', '0']);
+    component.filterOption.set('estimated'); fixture.detectChanges();
+    expect(component.currentPage()).toBe(1); expect(readDates(root)).toHaveLength(2);
+    component.view = tableView({ rows: [row('remaining', '7')] }); fixture.detectChanges();
+    expect(component.currentPage()).toBe(1); expect(energyValues(root)).toEqual(['7']);
+    expect(root.querySelector('app-pagination')).toBeNull();
+  });
+
   it('emits selected readings for bulk delete and clears selection', () => {
     const fixture = setup(tableView({
       rows: [
