@@ -80,6 +80,32 @@ describe('CreateMeterDrawerComponent', () => {
     component.selectUnit('gal'); expect(component.step()).toBe('source');
   });
 
+  it('lets an unlocked drawer replace a removed facility without losing its meter draft', async () => {
+    const { fixture, component, ready, facilities, choose, actions } = setup(); ready();
+    const created = vi.fn(); component.created.subscribe(created);
+    actions.createMeter.mockResolvedValue(meter({ guid: 'created', facilityId: 'facility-a' }));
+    facilities.set([facility()]); fixture.detectChanges();
+    expect(component.canCreate()).toBe(false);
+    const selection = fixture.nativeElement.querySelector('[aria-label="Change Facility unavailable"]') as HTMLButtonElement;
+    expect(selection).not.toBeNull(); expect(selection.disabled).toBe(false);
+    selection.click(); fixture.detectChanges(); expect(component.step()).toBe('facility');
+    choose('Facility A'); choose('Electricity'); component.selectUnit('MWh'); fixture.detectChanges();
+    expect(component.form.getRawValue()).toEqual({ source: 'Electricity', startingUnit: 'MWh', name: 'Main Electric' });
+    await component.createMeter();
+    expect(actions.createMeter).toHaveBeenCalledExactlyOnceWith({ name: 'Main Electric', source: 'Electricity', startingUnit: 'MWh' }, 'facility-a');
+    expect(created).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ guid: 'created', facilityId: 'facility-a' }));
+  });
+
+  it.each([false, true])('keeps a removed explicit facility visible and locked (single facility: %s)', single => {
+    const { fixture, component, ready, facilities, actions } = setup('facility-b', single); ready();
+    facilities.set([facility()]); fixture.detectChanges();
+    const selection = fixture.nativeElement.querySelector('[aria-label="Facility unavailable"]') as HTMLButtonElement;
+    expect(selection).not.toBeNull(); expect(selection.disabled).toBe(true);
+    selection.click(); component.editSelection('facility'); component.selectFacility('facility-a');
+    expect(component.step()).toBe('name'); expect(component.facilityGuid()).toBe('facility-b');
+    expect(component.canCreate()).toBe(false); expect(actions.createMeter).not.toHaveBeenCalled();
+  });
+
   it('blocks repeat submissions and emits the successfully created meter', async () => {
     const { fixture, component, ready, actions } = setup(); ready();
     const created = vi.fn(); component.created.subscribe(created);

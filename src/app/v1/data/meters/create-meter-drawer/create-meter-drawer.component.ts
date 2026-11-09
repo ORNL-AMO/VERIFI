@@ -79,7 +79,7 @@ export class CreateMeterDrawerComponent {
   readonly selections = computed(() => {
     const selections: MeterSelection[] = [];
     const facility = this.selectedFacility(), source = this.values().source, unit = this.selectedUnit();
-    if (facility) selections.push({ step: 'facility', label: facility.name || 'Unnamed facility', icon: 'facility', editable: !this.facilityLocked() });
+    if (this.facilityGuid()) selections.push({ step: 'facility', label: facility ? facility.name || 'Unnamed facility' : 'Facility unavailable', icon: 'facility', editable: !this.facilityLocked() });
     if (source) selections.push({ step: 'source', label: source, icon: meterSourceIcon(source), editable: true });
     if (unit) selections.push({ step: 'unit', label: unit.value, icon: 'meter', editable: true });
     return selections;

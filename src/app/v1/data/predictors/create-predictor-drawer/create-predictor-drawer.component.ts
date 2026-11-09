@@ -70,7 +70,7 @@ export class CreatePredictorDrawerComponent {
   readonly selections = computed(() => {
     const selections: PredictorSelection[] = [];
     const facility = this.selectedFacility(), type = this.predictorType();
-    if (facility) selections.push({ step: 'facility', label: facility.name || 'Unnamed facility', icon: 'facility', editable: !this.facilityLocked() });
+    if (this.facilityGuid()) selections.push({ step: 'facility', label: facility ? facility.name || 'Unnamed facility' : 'Facility unavailable', icon: 'facility', editable: !this.facilityLocked() });
     if (type) selections.push({ step: 'type', label: type === 'Standard' ? 'Standard predictor' : 'Weather predictors', icon: type === 'Standard' ? 'predictor' : 'cloudRain', editable: true });
     return selections;
   });

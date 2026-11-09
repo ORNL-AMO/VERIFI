@@ -32,7 +32,8 @@ describe('Predictor creation through inventory and Weather setup', () => {
     const workflow = { state: signal({ status: 'idle', message: '' }), busy: signal(false), reset: vi.fn(),
       previewStationSelection: vi.fn(), previewStationGroup: vi.fn(), commitStationGroup: vi.fn() };
     const lookup = { getStation: vi.fn(), searchLocations: vi.fn(), findStations: vi.fn() };
-    TestBed.configureTestingModule({ imports: [PredictorCreationHost], providers: [
+    // Register the portal-created drawer directly so TestBed applies its provider override.
+    TestBed.configureTestingModule({ imports: [PredictorCreationHost, CreatePredictorDrawerComponent], providers: [
       provideRouter([
         { path: '', pathMatch: 'full', component: DataInventoryComponent },
         { path: 'v1/workspace/facility/:facilityGuid/data/predictors/weather/new', component: WeatherPredictorSetupComponent }

@@ -87,6 +87,43 @@ describe('Predictor creation selections', () => {
     facilities.set([]); fixture.detectChanges(); expect(fixture.nativeElement.textContent).toContain('Add a facility before adding a predictor');
   });
 
+  it.each(['Standard predictor', 'Weather predictors'])('replaces a removed facility while retaining %s choices', async type => {
+    const { fixture, component, facilities, choose, actions } = setup();
+    const weather = vi.fn(); component.weatherSelected.subscribe(weather);
+    const created = vi.fn(); component.created.subscribe(created);
+    actions.createPredictor.mockResolvedValue({ guid: 'created', accountId: 'account', facilityId: 'f1' });
+    choose('Two'); choose(type);
+    component.form.patchValue({ name: 'Production', production: true });
+    component.weatherForm.patchValue({ HDD: false, CDD: true, relativeHumidity: true });
+    facilities.set([{ guid: 'f1', accountId: 'account', name: 'One' }]); fixture.detectChanges();
+    expect(component.canCreate()).toBe(false);
+    const selection = fixture.nativeElement.querySelector('[aria-label="Change Facility unavailable"]') as HTMLButtonElement;
+    expect(selection).not.toBeNull(); expect(selection.disabled).toBe(false);
+    selection.click(); fixture.detectChanges(); expect(component.step()).toBe('facility');
+    choose('One'); choose(type);
+    expect(component.form.getRawValue()).toEqual({ name: 'Production', production: true });
+    expect(component.includedWeatherTypes()).toEqual(['CDD', 'relativeHumidity']);
+    await component.submit();
+    if (type === 'Standard predictor') {
+      expect(actions.createPredictor).toHaveBeenCalledExactlyOnceWith({ name: 'Production', production: true, predictorType: 'Standard' }, 'f1');
+      expect(created).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ guid: 'created', facilityId: 'f1' }));
+      expect(weather).not.toHaveBeenCalled();
+    } else {
+      expect(weather).toHaveBeenCalledExactlyOnceWith({ facilityGuid: 'f1', weatherDataTypes: ['CDD', 'relativeHumidity'] });
+      expect(actions.createPredictor).not.toHaveBeenCalled();
+    }
+  });
+
+  it.each([false, true])('keeps a removed explicit facility visible and locked (single facility: %s)', single => {
+    const { fixture, component, facilities, ready } = setup('f2', single); ready();
+    facilities.set([{ guid: 'f1', accountId: 'account', name: 'One' }]); fixture.detectChanges();
+    const selection = fixture.nativeElement.querySelector('[aria-label="Facility unavailable"]') as HTMLButtonElement;
+    expect(selection).not.toBeNull(); expect(selection.disabled).toBe(true);
+    selection.click(); component.editSelection('facility'); component.selectFacility('f1');
+    expect(component.step()).toBe('standard'); expect(component.facilityGuid()).toBe('f2');
+    expect(component.canCreate()).toBe(false);
+  });
+
   it('blocks pending, read-only, deleted-facility and stale-account handoffs', async () => {
     const { fixture, component, ready, canWrite, hasPending, facilities, account, actions } = setup(); ready();
     canWrite.set(false); await component.submit(); canWrite.set(true);
