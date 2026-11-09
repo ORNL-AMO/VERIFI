@@ -4,7 +4,7 @@ import { AnalysisGroupChanges, FacilityAnalysisFieldChanges } from '@data/accoun
 import * as _ from 'lodash';
 
 /** Capture an editor's changes without carrying unrelated values into the command queue. */
-export function getAnalysisGroupChanges(before: AnalysisGroup, after: Partial<AnalysisGroup>): AnalysisGroupChanges {
+export function getAnalysisGroupChanges(before: AnalysisGroup | AnalysisGroupChanges, after: Partial<AnalysisGroup> | AnalysisGroupChanges): AnalysisGroupChanges {
   const changes: AnalysisGroupChanges = {};
   for (const field of Object.keys(after)) {
     if (field !== 'idbGroupId' && field !== 'predictorVariables' && !_.isEqual(before[field], after[field])) {
@@ -13,7 +13,7 @@ export function getAnalysisGroupChanges(before: AnalysisGroup, after: Partial<An
   }
   if (after.predictorVariables) {
     const predictorChanges = after.predictorVariables.flatMap(variable => {
-      const previous = before.predictorVariables.find(item => item.id === variable.id);
+      const previous = before.predictorVariables?.find(item => item.id === variable.id);
       if (!previous) { return []; }
       const change: NonNullable<AnalysisGroupChanges['predictorVariables']>[number] = { id: variable.id };
       if (previous.productionInAnalysis !== variable.productionInAnalysis) {

@@ -33,7 +33,7 @@ export class SetupBankedAnalysisStub {
 @NgModule({ declarations: [AnalysisSetupComponent, SetupYearDisplayPipe, SetupInvalidAnalysisPipe, SetupBankedAnalysisStub], imports: [CommonModule, ReactiveFormsModule], schemas: [CUSTOM_ELEMENTS_SCHEMA] })
 class AnalysisSetupTestModule { }
 
-describe('AnalysisSetupComponent queued field intent', () => {
+describe('AnalysisSetupComponent local autosave', () => {
   let component: AnalysisSetupComponent;
   let analysis: IdbAnalysisItem;
   let selectedAnalysis: ReturnType<typeof signal<IdbAnalysisItem>>;
@@ -70,21 +70,73 @@ describe('AnalysisSetupComponent queued field intent', () => {
 
   afterEach(() => { TestBed.resetTestingModule(); vi.useRealTimers(); });
 
-  it('queues a name reversion as an explicit field intent while an older save is pending', async () => {
+  it('hydrates silently and flushes the latest debounced name before leaving', async () => {
     vi.useFakeTimers();
+    expect(execute).not.toHaveBeenCalled();
+    component.form.controls.name.setValue('Latest name');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(execute).not.toHaveBeenCalled();
+    expect(await component.canDeactivate()).toBe(true);
+    expect(update).toHaveBeenCalledExactlyOnceWith('analysis-a', { name: 'Latest name' }, 'account-a');
+  });
+
+  it('keeps a cleared invalid name local and restores it only when the user discards', async () => {
+    component.form.controls.name.setValue('');
+    expect(await component.flushChanges()).toBe(false);
+    expect(execute).not.toHaveBeenCalled();
+    const guard = TestBed.inject(RouterGuardService);
+    const leaving = component.canDeactivate();
+    await Promise.resolve();
+    expect(guard.showSave.value).toBe(false);
+    guard.setModalAction('discard');
+    expect(await leaving).toBe(true);
+    expect(component.form.controls.name.value).toBe('Original');
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('does not replace newer invalid text when an older committed name arrives', async () => {
     let finish: (value: unknown) => void;
-    const flight = new Promise(resolve => { finish = resolve; });
-    execute.mockImplementation(() => flight);
+    execute.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    component.form.controls.name.setValue('First edit');
+    const saving = component.flushChanges();
+    component.form.controls.name.setValue('');
+    selectedAnalysis.set({ ...analysis, name: 'First edit' });
+    TestBed.flushEffects();
+    finish({ value: selectedAnalysis() });
+    await saving;
+    expect(component.form.controls.name.value).toBe('');
+    expect(component.autosave.dirty()).toBe(true);
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+  it('retries a failed model clear together with newer settings in one command', async () => {
+    clearModels.mockRejectedValueOnce(new Error('disk unavailable'));
+    await component.confirmEnableForm();
+    expect(component.autosave.error()).toContain('could not be saved');
+    component.cancelEnableForm();
+    component.form.controls.name.setValue('Edited after failure');
+    expect(await component.flushChanges()).toBe(true);
+    expect(clearModels).toHaveBeenLastCalledWith('analysis-a', 'account-a', { name: 'Edited after failure' });
+    expect(update).not.toHaveBeenCalled();
+    expect(component.form.controls.name.value).toBe('Edited after failure');
+    expect(component.autosave.dirty()).toBe(false);
+  });
+
+  it('saves a name reversion after the older name write completes', async () => {
+    let finish: (value: unknown) => void;
+    const pending = new Promise(resolve => { finish = resolve; });
+    execute.mockImplementation(() => pending);
     component.form.controls.name.setValue('First edit');
     const first = component.saveItem();
     component.form.controls.name.setValue('Original');
     const reverted = component.saveItem();
-    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(1);
     await execute.mock.calls[0][1]();
+    finish({ value: analysis });
+    await Promise.all([first, reverted]);
+    expect(execute).toHaveBeenCalledTimes(2);
     await execute.mock.calls[1][1]();
     expect(update).toHaveBeenNthCalledWith(1, 'analysis-a', { name: 'First edit' }, 'account-a');
     expect(update).toHaveBeenNthCalledWith(2, 'analysis-a', { name: 'Original' }, 'account-a');
-    finish({ value: analysis });
-    await Promise.all([first, reverted]);
   });
+
 });

@@ -283,9 +283,9 @@ describe('AnalysisCommandHandler queued edits', () => {
 
   it('clears models from current groups while retaining notes and predictor metadata', async () => {
     const { store, handler, facilityCommand } = createContext();
-    await facilityCommand(() => handler.clearFacilityAnalysisModels('a-1', ACCOUNT));
+    await facilityCommand(() => handler.clearFacilityAnalysisModels('a-1', ACCOUNT, { name: 'Changed setup', baselineYear: 2022 }));
     const saved = store.facilityAnalyses()[0];
-    expect(saved.isAnalysisVisited).toBe(false);
+    expect(saved).toMatchObject({ name: 'Changed setup', baselineYear: 2022, isAnalysisVisited: false });
     expect(saved.groups.every(group => group.models?.length === 0 && group.regressionConstant === undefined)).toBe(true);
     expect(saved.groups[0].regressionModelNotes).toBe('Retained notes');
     expect(saved.groups[0].predictorVariables[0]).toMatchObject({ name: 'Production', unit: 'tons', regressionCoefficient: undefined });

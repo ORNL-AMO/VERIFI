@@ -5,6 +5,16 @@
 @let _generatingModels = generatingModels();
 @let _calendarYearOptions = calendarYearOptions();
 
+@if (autosave.error(); as saveError) {
+<div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+  <span>{{saveError}}</span>
+  <button type="button" class="btn btn-outline-danger btn-sm" (click)="flushChanges()" [disabled]="autosave.saving() || !autosave.valid">Retry</button>
+</div>
+}
+@if (autosave.saving()) { <div class="small text-muted mb-2" role="status">Saving changes…</div> }
+@if (autosave.dirty() && form.invalid) {
+<div class="alert alert-warning py-2" role="status">Complete the required model fields to save these changes.</div>
+}
 @if(_group && _groupStatusCheck) {
 @if (_groupStatusCheck.hasMeterSetupErrors) {
 <div class="alert alert-danger p-2 small">
@@ -62,7 +72,7 @@
       <option [ngValue]="true">Calculate Models</option>
       <option [ngValue]="false">User Defined Model</option>
     </select>
-    @if (_group.isGeneratedModel == true) {
+    @if (form.controls.isGeneratedModel.value == true) {
     <label class="bold">Max Variable Combinations</label>
     <select required class="form-select" id="maxModelVariables" formControlName="maxModelVariables"
       (change)="onModelTypeChange()">
@@ -77,7 +87,7 @@
     }
     }
     <div class="d-flex flex-fill justify-content-center align-items-center">
-      @if (_group.isGeneratedModel) {
+      @if (form.controls.isGeneratedModel.value) {
       <div class="p-0">
         @if (!_generatedModels || _generatedModels.length == 0) {
         <div class="p-2">
@@ -138,7 +148,7 @@
         </div>
       </div>
       }
-      @if (!_group.isGeneratedModel) {
+      @if (!form.controls.isGeneratedModel.value) {
       <div class="p-2">
         <p class="fw-light italic">
           Manually select production variables and define model coefficients and constants. The below table and graph
@@ -198,7 +208,7 @@
         @if (predictorVariablesArray.at(i).controls.productionInAnalysis.value) {
         <input class="form-control" type="number" step="any" id="{{'regressionCoefficient_'+predictor.id}}"
           name="{{'regressionCoefficient_'+predictor.id}}" formControlName="regressionCoefficient" required
-          (input)="savePredictorCoefficient(i)">
+          (input)="saveFormValue()">
         }
         @if (!predictorVariablesArray.at(i).controls.productionInAnalysis.value) {
         <span class="bold ">&mdash;</span>
@@ -214,11 +224,11 @@
       </div>
       <div class="col-6">
         <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
-          formControlName="regressionConstant" required (input)="saveFormValue({regressionConstant: form.controls.regressionConstant.value})">
+          formControlName="regressionConstant" required (input)="saveFormValue()">
       </div>
     </div>
 
-    @if (_group.isGeneratedModel) {
+    @if (form.controls.isGeneratedModel.value) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelYear">
@@ -227,7 +237,7 @@
       </div>
       <div class="col-6">
         <select required class="form-select" id="regressionModelYear" formControlName="regressionModelYear"
-          (change)="saveFormValue({regressionModelYear: form.controls.regressionModelYear.value})">
+          (change)="saveFormValue(true)">
           @for (year of _yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -235,7 +245,7 @@
       </div>
     </div>
     }
-    @if (!_group.isGeneratedModel) {
+    @if (!form.controls.isGeneratedModel.value) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelStartMonth">
@@ -244,7 +254,7 @@
       </div>
       <div class="col-6">
         <select required class="form-select" id="regressionModelStartMonth" formControlName="regressionModelStartMonth"
-          (change)="saveFormValue({regressionModelStartMonth: form.controls.regressionModelStartMonth.value})">
+          (change)="saveFormValue(true)">
           @for (month of months; track month) {
           <option [ngValue]="month.monthNumValue">{{month.name}}
           </option>
@@ -260,7 +270,7 @@
       </div>
       <div class="col-6">
         <select required class="form-select" id="regressionStartYear" formControlName="regressionStartYear"
-          (change)="saveFormValue({regressionStartYear: form.controls.regressionStartYear.value})">
+          (change)="saveFormValue(true)">
           @for (year of _calendarYearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -275,7 +285,7 @@
       </div>
       <div class="col-6">
         <select required class="form-select" id="regressionModelEndMonth" formControlName="regressionModelEndMonth"
-          (change)="saveFormValue({regressionModelEndMonth: form.controls.regressionModelEndMonth.value})">
+          (change)="saveFormValue(true)">
           @for (month of months; track month) {
           <option [ngValue]="month.monthNumValue">{{month.name}}
           </option>
@@ -291,7 +301,7 @@
       </div>
       <div class="col-6">
         <select required class="form-select" id="regressionEndYear" formControlName="regressionEndYear"
-          (change)="saveFormValue({regressionEndYear: form.controls.regressionEndYear.value})">
+          (change)="saveFormValue(true)">
           @for (year of _calendarYearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -307,7 +317,7 @@
       </div>
       <div class="col-8">
         <textarea class="form-control" name="regressionModelNotes" id="regressionModelNotes"
-          formControlName="regressionModelNotes" (input)="saveFormValue({regressionModelNotes: form.controls.regressionModelNotes.value})"></textarea>
+          formControlName="regressionModelNotes" (input)="saveFormValue()"></textarea>
       </div>
     </div>
   </div>

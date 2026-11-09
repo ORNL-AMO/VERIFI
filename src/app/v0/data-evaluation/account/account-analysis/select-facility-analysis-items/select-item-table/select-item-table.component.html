@@ -4,6 +4,15 @@
 @let _selectedAnalysisItem = selectedAnalysisItem();
 @let _selectedFacilityItemId = selectedFacilityItemId();
 
+@if (saveError(); as error) {
+<div class="alert alert-danger" role="alert">
+  {{error}} <button type="button" class="btn btn-sm btn-outline" (click)="retrySave()">Retry</button>
+</div>
+}
+@if (saving()) {
+<p class="text-muted mb-2" role="status">Saving analysis selection...</p>
+}
+
 <h4>
   <div class="d-flex justify-content-between">
     <div class="mt-auto">
@@ -59,7 +68,7 @@
             [value]="facilityAnalysisListItem.analysisItem.guid"
             name="{{facilityAnalysisListItem.analysisItem.id + '_selectedFacilityItemId'}}"
             id="{{facilityAnalysisListItem.analysisItem.id + '_selectedFacilityItemId'}}"
-            (change)="save(facilityAnalysisListItem.analysisItem.guid)">
+            (change)="selectAnalysis(facilityAnalysisListItem.analysisItem.guid)">
         </td>
         <!-- Status -->
         <td class="text-center align-middle status-col">
@@ -162,7 +171,7 @@
       <tr class="table-light">
         <td class="radio-td text-center">
           <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()" [value]="'skip'"
-            name="{{_facility?.name + 'skip'}}" id="{{_facility?.name + 'skip'}}" (change)="save('skip')">
+            name="{{_facility?.name + 'skip'}}" id="{{_facility?.name + 'skip'}}" (change)="selectAnalysis('skip')">
         </td>
         <td colspan="6" class="text-muted fst-italic">
           <i class="fa fa-forward-step me-1"></i> Skip this facility

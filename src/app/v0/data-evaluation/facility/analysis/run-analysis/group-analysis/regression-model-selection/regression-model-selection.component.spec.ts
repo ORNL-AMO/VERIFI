@@ -55,12 +55,13 @@ describe('RegressionModelSelectionComponent model intent', () => {
     TestBed.flushEffects();
     const choosing = component.selectModel('model-b');
     const reverting = component.selectModel('model-a');
-    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(1);
     await execute.mock.calls[0][1]();
+    finish({ value: analysis });
+    await Promise.all([choosing, reverting]);
+    expect(execute).toHaveBeenCalledTimes(2);
     await execute.mock.calls[1][1]();
     expect(update).toHaveBeenNthCalledWith(1, 'analysis-a', 'group-a', expect.objectContaining({ selectedModelId: 'model-b', regressionConstant: 20 }), 'account-a');
     expect(update).toHaveBeenNthCalledWith(2, 'analysis-a', 'group-a', expect.objectContaining({ selectedModelId: 'model-a', regressionConstant: 10 }), 'account-a');
-    finish({ value: analysis });
-    await Promise.all([choosing, reverting]);
   });
 });

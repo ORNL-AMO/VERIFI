@@ -1,5 +1,5 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, inject, Signal } from '@angular/core';
+import { Component, computed, inject, Input, Signal } from '@angular/core';
 import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -25,6 +25,8 @@ export class AccountAnalysisFooterComponent {
   private dataEvaluationService: DataEvaluationService = inject(DataEvaluationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private accountWorkspaceService = inject(AccountWorkspaceService);
+
+  @Input() beforeNavigate: () => Promise<boolean> = () => Promise.resolve(true);
 
   helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
@@ -79,7 +81,8 @@ export class AccountAnalysisFooterComponent {
     return true;
   });
 
-  goBack() {
+  async goBack(): Promise<void> {
+    if (!await this.finishCurrentEdits()) return;
     if (this.router.url.includes('setup')) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
     } else if (this.router.url.includes('account/analysis/select-items')) {
@@ -102,7 +105,8 @@ export class AccountAnalysisFooterComponent {
     }
   }
 
-  continue() {
+  async continue(): Promise<void> {
+    if (!await this.finishCurrentEdits()) return;
     if (this.router.url.includes('setup')) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
     } else if (this.router.url.includes('select-items')) {
@@ -119,7 +123,20 @@ export class AccountAnalysisFooterComponent {
     }
   }
 
-  returnToDashboard() {
-    this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
+  async returnToDashboard(): Promise<void> {
+    if (await this.finishCurrentEdits()) {
+      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
+    }
+  }
+
+  private async finishCurrentEdits(): Promise<boolean> {
+    const accountGuid = this.account()?.guid;
+    const analysisGuid = this.analysisItem()?.guid;
+    const facilityGuid = this.selectedFacility()?.guid;
+    const url = this.router.url;
+    const navigationId = this.router.currentNavigation?.()?.id;
+    return await this.beforeNavigate() && this.account()?.guid === accountGuid &&
+      this.analysisItem()?.guid === analysisGuid && this.selectedFacility()?.guid === facilityGuid && this.router.url === url &&
+      this.router.currentNavigation?.()?.id === navigationId;
   }
 }

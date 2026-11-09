@@ -1,6 +1,6 @@
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, effect, inject, Signal } from '@angular/core';
+import { DestroyRef, Input, Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
@@ -9,7 +9,6 @@ import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculati
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { IdbFacility } from '@data/models/idbModels/facility';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
 
@@ -25,6 +24,9 @@ interface GroupsList {
   standalone: false
 })
 export class AnalysisBannerComponent {
+  @Input() beforeNavigate: () => Promise<boolean> = () => Promise.resolve(true);
+  private readonly destroyRef = inject(DestroyRef);
+  private switching = false;
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
@@ -83,18 +85,53 @@ export class AnalysisBannerComponent {
     });
   }
 
-  goToDashboard() {
-    this.router.navigateByUrl('/data-evaluation/analysis/analysis-dashboard')
+  async goToDashboard() {
+    const context = this.navigationContext();
+    if (await this.beforeNavigate() && this.isCurrent(context)) {
+      await this.router.navigateByUrl('/data-evaluation/analysis/analysis-dashboard');
+    }
   }
 
   toggleShow() {
     this.showDropdown = !this.showDropdown;
   }
 
-  selectItem(item: IdbAnalysisItem) {
-    this.accountWorkspaceService.selectFacilityAnalysis((item)?.guid);
-    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/analysis-setup');
-    this.showDropdown = false;
+  async selectItem(item: IdbAnalysisItem): Promise<void> {
+    if (this.switching) { return; }
+    this.switching = true;
+    const context = this.navigationContext();
+    try {
+      if (!await this.beforeNavigate() || !this.isCurrent(context)) { return; }
+      const target = this.analysisItems().find(analysis => analysis.guid === item.guid
+        && analysis.accountId === context.accountGuid && analysis.facilityId === context.facilityGuid);
+      if (!target) { return; }
+      const url = '/data-evaluation/facility/' + context.facilityGuid + '/analysis/run-analysis/analysis-setup';
+      if (url !== context.url) {
+        if (!await this.router.navigateByUrl(url) || !this.isCurrent(context, url, null)) { return; }
+      }
+      if (!this.analysisItems().some(analysis => analysis.guid === target.guid
+        && analysis.accountId === context.accountGuid && analysis.facilityId === context.facilityGuid)) { return; }
+      this.accountWorkspaceService.selectFacilityAnalysis(target.guid);
+      this.showDropdown = false;
+    } finally {
+      this.switching = false;
+    }
+  }
+
+  private navigationContext() {
+    return {
+      accountGuid: this.accountWorkspaceStore.account()?.guid,
+      facilityGuid: this.accountWorkspaceStore.selectedFacility()?.guid,
+      analysisGuid: this.analysisItem()?.guid,
+      url: this.router.url,
+      navigationId: this.router.currentNavigation?.()?.id ?? null
+    };
+  }
+
+  private isCurrent(context: ReturnType<AnalysisBannerComponent['navigationContext']>, url = context.url, navigationId = context.navigationId): boolean {
+    return !this.destroyRef.destroyed && this.accountWorkspaceStore.account()?.guid === context.accountGuid
+      && this.accountWorkspaceStore.selectedFacility()?.guid === context.facilityGuid
+      && this.analysisItem()?.guid === context.analysisGuid && this.router.url === url
+      && (this.router.currentNavigation?.()?.id ?? null) === navigationId;
   }
 }
