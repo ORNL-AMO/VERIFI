@@ -67,11 +67,12 @@ export class AccountAnalysisFooterComponent {
     const analysisItem = this.analysisItem();
     const analysisStatusCheck = this.analysisStatusCheck();
     const selectedFacility = this.selectedFacility();
-    if (!analysisItem || !analysisStatusCheck || !selectedFacility || !this.accountWorkspaceStore.canWrite()) return false;
+    if (!analysisItem || !analysisStatusCheck || !this.accountWorkspaceStore.canWrite()) return false;
     if (url) {
       if (url.includes('setup')) {
         return !analysisStatusCheck.accountAnalysisSetupErrors.hasSetupErrors;
       } else if (url.includes('select-items')) {
+        if (!selectedFacility) return false;
         const hasSelection = analysisItem.facilityAnalysisItems.find(item => item.facilityId == selectedFacility.guid);
         return hasSelection?.analysisItemId != undefined;
       }
