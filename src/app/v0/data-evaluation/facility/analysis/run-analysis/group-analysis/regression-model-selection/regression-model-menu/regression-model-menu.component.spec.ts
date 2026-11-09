@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule, signal } from '@angular/core';
+import { computed, CUSTOM_ELEMENTS_SCHEMA, NgModule, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
@@ -68,6 +68,7 @@ describe('RegressionModelMenuComponent save ownership', () => {
       { provide: AccountWorkspaceStore, useValue: {
         account: signal({ guid: 'account-a', assessmentReportVersion: 'AR6' }),
         selectedFacility: signal({ guid: 'facility-a' }), selectedFacilityAnalysis: selectedAnalysis,
+        facilityAnalyses: computed(() => [selectedAnalysis()]),
         facilityPredictorData: signal([]), facilityMeterData: signal([]), facilityMeters: signal([])
       } },
       { provide: AccountWorkspaceQueryService, useValue: { getAccountAnalysesForFacilityAnalysis: () => [] } },
@@ -315,6 +316,211 @@ describe('RegressionModelMenuComponent save ownership', () => {
     expect(update).toHaveBeenLastCalledWith('analysis-a', 'group-a', expect.objectContaining({
       predictorVariables: [{ id: 'predictor-a', productionInAnalysis: false }]
     }), 'account-a');
+  });
+
+  function publishGroup(next: AnalysisGroup): void {
+    group = next;
+    analysis = { ...selectedAnalysis(), groups: [next] };
+    selectedAnalysis.set(analysis);
+    selectedGroup.next(next);
+  }
+
+  function configureGenerationPersistence(regenerated: JStatRegressionModel, beforeWrite?: (changes: any) => Promise<void>): void {
+    let queue: Promise<unknown> = Promise.resolve();
+    execute.mockImplementation((_options, persist) => {
+      const result = queue.then(persist).then(value => ({ value }));
+      queue = result.catch(() => undefined);
+      return result;
+    });
+    update.mockImplementation(async (_analysisGuid, _groupGuid, changes) => {
+      if (beforeWrite) { await beforeWrite(changes); }
+      const current = selectedAnalysis().groups[0];
+      const { predictorVariables, ...fields } = changes;
+      const next = {
+        ...current, ...fields,
+        predictorVariables: current.predictorVariables.map(variable => ({
+          ...variable, ...predictorVariables?.find(changed => changed.id === variable.id)
+        }))
+      };
+      publishGroup(next);
+      return selectedAnalysis();
+    });
+    applyGenerated.mockImplementation(current => ({
+      updatedGroup: { ...current, models: [regenerated], selectedModelId: regenerated.modelId,
+        regressionModelYear: regenerated.modelYear, regressionConstant: regenerated.coef[0],
+        predictorVariables: current.predictorVariables.map(variable => ({ ...variable, regressionCoefficient: regenerated.coef[1] })) },
+      newSelectedModel: regenerated
+    }));
+  }
+
+  function regeneratedModel(): JStatRegressionModel {
+    return { modelId: 'model-a', modelYear: 2023, coef: [40, 8], predictorVariables: group.predictorVariables, isValid: true } as JStatRegressionModel;
+  }
+
+  it('rejects generation A when model B is still local behind an older notes save', async () => {
+    const selection = attachRealMenuToSelection();
+    const generation = deferred<JStatRegressionModel[]>();
+    const notesStarted = deferred<void>();
+    const notesWrite = deferred<void>();
+    configureGenerationPersistence(regeneratedModel(), async changes => {
+      if (changes.regressionModelNotes === 'pending notes') { notesStarted.resolve(); await notesWrite.promise; }
+    });
+    generate.mockReturnValue(generation.promise);
+    const generating = component.generateModels();
+    component.form.controls.regressionModelNotes.setValue('pending notes');
+    const savingNotes = component.saveFormValue(true);
+    await notesStarted.promise;
+    const choosing = selection.selectModel('model-b');
+    expect(component.autosave.value.values.selectedModelId).toBe('model-b');
+    generation.resolve([regeneratedModel()]);
+    await generating;
+    expect(applyGenerated).not.toHaveBeenCalled();
+    expect(component.generatingModels()).toBe(false);
+    notesWrite.resolve();
+    await Promise.all([savingNotes, choosing]);
+    expect(selectedAnalysis().groups[0]).toMatchObject({ selectedModelId: 'model-b', regressionConstant: 20, regressionModelYear: 2023 });
+    expect(selectedAnalysis().groups[0].models[0].modelId).toBe('model-b');
+    expect(selectedAnalysis().groups[0].predictorVariables[0].regressionCoefficient).toBe(3);
+  });
+
+  it('persists the newest complete model selection even after generation has started its durable write', async () => {
+    const selection = attachRealMenuToSelection();
+    const firstModel = group.models[0];
+    const sameCoefficients = { ...firstModel, modelId: 'model-b' };
+    modelsByGroup.set({ 'group-a': [firstModel, sameCoefficients] });
+    const generationWrite = deferred<void>();
+    const writing = deferred<void>();
+    const regenerated = regeneratedModel();
+    configureGenerationPersistence(regenerated, async changes => {
+      if (changes.regressionConstant === 40) { writing.resolve(); await generationWrite.promise; }
+    });
+    generate.mockResolvedValue([regenerated]);
+    const generating = component.generateModels();
+    await writing.promise;
+    const choosing = selection.selectModel('model-b');
+    generationWrite.resolve();
+    await Promise.all([generating, choosing]);
+    expect(selectedAnalysis().groups[0]).toMatchObject({ selectedModelId: 'model-b', regressionConstant: 10, regressionModelYear: 2023 });
+    expect(selectedAnalysis().groups[0].models[0].coef).toEqual([10, 2]);
+    expect(selectedAnalysis().groups[0].predictorVariables[0].regressionCoefficient).toBe(2);
+    expect(component.form.controls.regressionConstant.value).toBe(10);
+    expect(component.autosave.hasPending).toBe(false);
+  });
+
+  it('preserves notes edited during the generation save then refreshes the committed model controls', async () => {
+    attachRealMenuToSelection();
+    const generationWrite = deferred<void>();
+    const writing = deferred<void>();
+    const regenerated = regeneratedModel();
+    configureGenerationPersistence(regenerated, async changes => {
+      if (changes.models) { writing.resolve(); await generationWrite.promise; }
+    });
+    generate.mockResolvedValue([regenerated]);
+    const generating = component.generateModels();
+    await writing.promise;
+    component.form.controls.regressionModelNotes.setValue('first notes');
+    await component.saveFormValue();
+    component.form.controls.regressionModelNotes.setValue('latest notes');
+    await component.saveFormValue();
+    generationWrite.resolve();
+    await generating;
+    expect(selectedAnalysis().groups[0]).toMatchObject({ regressionConstant: 40, regressionModelNotes: 'latest notes', selectedModelId: 'model-a' });
+    expect(component.form.controls.regressionModelNotes.value).toBe('latest notes');
+    expect(component.form.controls.regressionConstant.value).toBe(40);
+    expect(component.predictorVariablesArray.at(0).controls.regressionCoefficient.value).toBe(8);
+    expect(component.autosave.hasPending).toBe(false);
+    expect(component.autosave.value.values.models[0].coef).toEqual([40, 8]);
+    expect(update.mock.calls[0][2]).toMatchObject({ selectedModelId: 'model-a', regressionModelYear: 2023, regressionConstant: 40 });
+    expect(update.mock.calls.at(-1)[2]).toEqual({ regressionModelNotes: 'latest notes' });
+  });
+
+  it('retains a failed note draft and refreshes committed generation after Retry', async () => {
+    attachRealMenuToSelection();
+    const generationWrite = deferred<void>();
+    const writing = deferred<void>();
+    let rejectNotes = true;
+    const regenerated = regeneratedModel();
+    configureGenerationPersistence(regenerated, async changes => {
+      if (changes.models) { writing.resolve(); await generationWrite.promise; }
+      if (changes.regressionModelNotes && rejectNotes) { rejectNotes = false; throw new Error('Disk unavailable'); }
+    });
+    generate.mockResolvedValue([regenerated]);
+    const generating = component.generateModels();
+    await writing.promise;
+    component.form.controls.regressionModelNotes.setValue('retry notes');
+    await component.saveFormValue();
+    generationWrite.resolve();
+    await generating;
+    expect(selectedAnalysis().groups[0].regressionConstant).toBe(40);
+    expect(component.form.controls.regressionConstant.value).toBe(10);
+    expect(component.form.controls.regressionModelNotes.value).toBe('retry notes');
+    expect(component.autosave.error()).toContain('could not be saved');
+    expect(component.modelingError()).toBe(false);
+    expect(await component.flushChanges()).toBe(true);
+    expect(component.form.controls.regressionConstant.value).toBe(40);
+    expect(component.form.controls.regressionModelNotes.value).toBe('retry notes');
+    expect(component.autosave.value.values.models[0].coef).toEqual([40, 8]);
+    expect(component.autosave.hasPending).toBe(false);
+  });
+
+  it('refreshes the committed model after an accepted Discard without rebasing an active leave decision', async () => {
+    attachRealMenuToSelection();
+    const generationWrite = deferred<void>();
+    const writing = deferred<void>();
+    const regenerated = regeneratedModel();
+    configureGenerationPersistence(regenerated, async changes => {
+      if (changes.models) { writing.resolve(); await generationWrite.promise; }
+      if (changes.regressionModelNotes) { throw new Error('Disk unavailable'); }
+    });
+    generate.mockResolvedValue([regenerated]);
+    const generating = component.generateModels();
+    await writing.promise;
+    component.form.controls.regressionModelNotes.setValue('discard notes');
+    await component.saveFormValue();
+    generationWrite.resolve();
+    await generating;
+    const leaving = component.canDeactivate();
+    expect(component.canDeactivate()).toBe(leaving);
+    const guard = TestBed.inject(RouterGuardService);
+    expect(guard.showModal.value).toBe(true);
+    guard.setModalAction('discard');
+    expect(await leaving).toBe(true);
+    expect(component.form.controls.regressionConstant.value).toBe(40);
+    expect(component.form.controls.regressionModelNotes.value).toBe('original');
+    expect(component.autosave.hasPending).toBe(false);
+  });
+
+  it('uses committed generation settings despite the untouched local max-variable clamp', async () => {
+    attachRealMenuToSelection();
+    publishGroup({ ...group, maxModelVariables: 4 });
+    TestBed.flushEffects();
+    expect(component.form.controls.maxModelVariables.value).toBe(1);
+    const regenerated = regeneratedModel();
+    configureGenerationPersistence(regenerated);
+    generate.mockResolvedValue([regenerated]);
+    await component.generateModels();
+    expect(generate.mock.calls[0][0].maxModelVariables).toBe(4);
+    expect(applyGenerated).toHaveBeenCalledOnce();
+    expect(selectedAnalysis().groups[0].maxModelVariables).toBe(4);
+    expect(component.form.controls.maxModelVariables.value).toBe(1);
+    expect(component.form.controls.regressionConstant.value).toBe(40);
+  });
+
+  it('resets an old owner request without clearing the replacement request spinner', async () => {
+    const first = deferred<JStatRegressionModel[]>();
+    const second = deferred<JStatRegressionModel[]>();
+    generate.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const oldGeneration = component.generateModels();
+    expect(component.generatingModels()).toBe(true);
+    publishGroup(makeGroup('group-b')); TestBed.flushEffects();
+    expect(component.generatingModels()).toBe(false);
+    const newGeneration = component.generateModels();
+    first.resolve([]); await oldGeneration;
+    expect(component.generatingModels()).toBe(true);
+    publishGroup(makeGroup('group-c')); TestBed.flushEffects();
+    second.resolve([]); await newGeneration;
+    expect(component.generatingModels()).toBe(false);
+    expect(applyGenerated).not.toHaveBeenCalled();
   });
 
 });

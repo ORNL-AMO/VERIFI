@@ -37,6 +37,7 @@ describe('AnalysisSetupComponent local autosave', () => {
   let component: AnalysisSetupComponent;
   let analysis: IdbAnalysisItem;
   let selectedAnalysis: ReturnType<typeof signal<IdbAnalysisItem>>;
+  let activeAccount: ReturnType<typeof signal<{ guid: string }>>;
   let execute: ReturnType<typeof vi.fn>;
   let update: ReturnType<typeof vi.fn>;
   let clearModels: ReturnType<typeof vi.fn>;
@@ -47,13 +48,14 @@ describe('AnalysisSetupComponent local autosave', () => {
       baselineYear: 2023, energyIsSource: true, energyUnit: 'MMBtu', waterUnit: 'gal', hasBanking: false
     } as IdbAnalysisItem;
     selectedAnalysis = signal(analysis);
+    activeAccount = signal({ guid: 'account-a' });
     update = vi.fn(async () => analysis);
     clearModels = vi.fn(async () => analysis);
     execute = vi.fn(async (_options: unknown, persist: () => Promise<unknown>) => ({ value: await persist() }));
     TestBed.configureTestingModule({ imports: [AnalysisSetupTestModule], providers: [
       AnalysisSetupComponent,
       { provide: AccountWorkspaceStore, useValue: {
-        account: signal({ guid: 'account-a' }), selectedFacilityAnalysis: selectedAnalysis,
+        account: activeAccount, selectedFacilityAnalysis: selectedAnalysis,
         selectedFacility: signal({ guid: 'facility-a' }), selectedFacilityAnalyses: signal([analysis])
       } },
       { provide: AccountWorkspaceQueryService, useValue: { getAccountAnalysesForFacilityAnalysis: () => [] } },
@@ -137,6 +139,49 @@ describe('AnalysisSetupComponent local autosave', () => {
     await execute.mock.calls[1][1]();
     expect(update).toHaveBeenNthCalledWith(1, 'analysis-a', { name: 'First edit' }, 'account-a');
     expect(update).toHaveBeenNthCalledWith(2, 'analysis-a', { name: 'Original' }, 'account-a');
+  });
+
+
+  it('retries a failed name save with the latest name and baseline together', async () => {
+    vi.useFakeTimers();
+    update.mockRejectedValueOnce(new Error('disk unavailable'));
+    component.form.controls.name.setValue('Failed name');
+    expect(await component.flushChanges()).toBe(false);
+    expect(component.autosave.error()).toContain('could not be saved');
+
+    component.form.controls.name.setValue('');
+    component.form.controls.baselineYear.setValue(2024);
+    component.form.controls.name.setValue('Newest name');
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(await component.flushChanges()).toBe(true);
+    expect(update).toHaveBeenNthCalledWith(2, 'analysis-a', { name: 'Newest name', baselineYear: 2024 }, 'account-a');
+    expect(component.form.controls.name.value).toBe('Newest name');
+    expect(component.form.controls.baselineYear.value).toBe(2024);
+    expect(component.autosave.dirty()).toBe(false);
+    expect(component.autosave.error()).toBeUndefined();
+  });
+
+  it('does not leak a departed owner failure into the current owner retry', async () => {
+    vi.useFakeTimers();
+    let rejectSave!: (reason: unknown) => void;
+    update.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectSave = reject; }));
+    component.form.controls.name.setValue('Departed owner name');
+    const departedSave = component.flushChanges();
+    activeAccount.set({ guid: 'account-b' });
+    selectedAnalysis.set({ ...analysis, guid: 'analysis-b', accountId: 'account-b', name: 'New owner baseline', baselineYear: 2022 });
+    TestBed.flushEffects();
+    component.form.controls.name.setValue('Current owner name');
+    component.form.controls.baselineYear.setValue(2025);
+    const currentSave = component.flushChanges();
+    rejectSave(new Error('departed owner disk failure'));
+
+    expect(await departedSave).toBe(false);
+    expect(await currentSave).toBe(true);
+    expect(update).toHaveBeenNthCalledWith(2, 'analysis-b', { name: 'Current owner name', baselineYear: 2025 }, 'account-b');
+    expect(component.form.controls.name.value).toBe('Current owner name');
+    expect(component.form.controls.baselineYear.value).toBe(2025);
+    expect(component.autosave.error()).toBeUndefined();
+    expect(component.autosave.dirty()).toBe(false);
   });
 
 });
