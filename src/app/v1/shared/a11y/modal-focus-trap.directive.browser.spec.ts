@@ -1,10 +1,11 @@
-import { Component, afterNextRender, signal } from '@angular/core';
+import { Component, afterNextRender, effect, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { page, userEvent } from 'vitest/browser';
 import { ModalFocusTrapDirective } from './modal-focus-trap.directive';
 import { ConfirmationDialogComponent } from './confirmation-dialog.component';
 
-@Component({ standalone: true, imports: [ModalFocusTrapDirective], template: `
+@Component({ standalone: true, imports: [ModalFocusTrapDirective, ReactiveFormsModule], template: `
   <button id="modal-opener" [hidden]="hideOpener()" [disabled]="disableOpener()" (click)="shown.set(true)">Open modal</button>
   <button id="modal-fallback">Fallback</button>
   @if (shown()) {
@@ -13,6 +14,8 @@ import { ConfirmationDialogComponent } from './confirmation-dialog.component';
       <h2 id="modal-heading" tabindex="-1">Modal heading</h2>
       <button id="modal-first" [disabled]="busy()">First</button>
       <input type="hidden" value="saved">
+      <input id="modal-input-first" type="number" aria-label="First value" [formControl]="firstValue">
+      <input id="modal-input-second" type="number" aria-label="Second value" [formControl]="secondValue">
       <button [disabled]="busy()" (click)="nested.set(true)">Open nested modal</button>
       <button id="modal-last" [disabled]="busy()">Last</button>
       <button style="display:none">CSS hidden last</button>
@@ -26,12 +29,22 @@ import { ConfirmationDialogComponent } from './confirmation-dialog.component';
     </section>
   }` })
 class ModalHost {
+  readonly firstValue = new FormControl<number | null>(null);
+  readonly secondValue = new FormControl<number | null>(null);
   readonly shown = signal(false);
   readonly nested = signal(false);
   readonly initial = signal<string | undefined>(undefined);
   readonly hideOpener = signal(false);
   readonly disableOpener = signal(false);
   readonly busy = signal(false);
+  constructor() {
+    effect(() => {
+      for (const control of [this.firstValue, this.secondValue]) {
+        if (this.busy()) control.disable({ emitEvent: false });
+        else control.enable({ emitEvent: false });
+      }
+    });
+  }
   close(): void { if (!this.busy()) this.shown.set(false); }
 }
 
@@ -56,6 +69,22 @@ describe('CDK-backed modal focus', () => {
     expect(document.activeElement).toBe(find('modal-last'));
     await userEvent.keyboard('{Escape}'); await settle();
     expect(document.activeElement).toBe(find('modal-opener'));
+    fixture.destroy();
+  });
+
+  it('advances between editable inputs without resetting focus after a transient blur', async () => {
+    const { fixture, find, settle } = await setup();
+    const first = find('modal-input-first');
+    first.focus();
+    await page.getByRole('spinbutton', { name: 'First value', exact: true }).fill('10');
+    await settle();
+    const transientBlur = vi.spyOn(document, 'activeElement', 'get').mockReturnValue(document.body);
+    try { await settle(); } finally { transientBlur.mockRestore(); }
+    expect(document.activeElement).toBe(first);
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(find('modal-input-second'));
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+    expect(document.activeElement).toBe(first);
     fixture.destroy();
   });
 

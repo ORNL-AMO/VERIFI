@@ -1,40 +1,106 @@
-<button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canEdit()" (click)="open()">{{ title() }}</button>
+<app-ui-icon name="calculator" [size]="18"/>
 <ng-template #calculator>
   @if (opened()) {
-    <app-workspace-slideout [title]="title()" [hasFooter]="true" (closed)="close()">
+    @if (embedded()) {
+      <section (keydown.escape)="$event.preventDefault(); $event.stopPropagation(); close()">
+        <h3 tabindex="-1" id="embedded-calculator-title">{{ title() }}</h3>
+        <ng-container [ngTemplateOutlet]="fields"/>
+        <ng-container [ngTemplateOutlet]="actions"/>
+      </section>
+    } @else {
+      <app-workspace-slideout [title]="title()" [hasFooter]="true" (closed)="close()">
+        <ng-container [ngTemplateOutlet]="fields"/>
+        <div slideoutFooter><ng-container [ngTemplateOutlet]="actions"/></div>
+      </app-workspace-slideout>
+    }
+  }
+</ng-template>
+<ng-template #fields>
       <form [formGroup]="form" (ngSubmit)="apply()" id="setup-calculator-form">
         @if (kind() === 'hours') {
-          <label>Hours per day<input type="number" min="0" max="24" formControlName="hours"></label>
-          <label>Days per week<input type="number" min="0" max="7" formControlName="days"></label>
-          <label>Weeks per year<input type="number" min="0" max="52" formControlName="weeks"></label>
+          <label class="v1-field">Hours per day<input class="v1-input" type="number" min="0" max="24" formControlName="hours"></label>
+          <label class="v1-field">Days per week<input class="v1-input" type="number" min="0" max="7" formControlName="days"></label>
+          <label class="v1-field">Weeks per year<input class="v1-input" type="number" min="0" max="52" formControlName="weeks"></label>
         } @else if (kind() === 'load') {
-          <label>Calculation method<select class="v1-select" formControlName="method"><option value="measuredPower">Measured power</option>@if (electricity()) { <option value="voltageCurrent">Voltage and current</option> }</select></label>
-          <label>Rated power<input type="number" min="0" formControlName="ratedPower"></label>
-          <label>Rated power units<select class="v1-select" formControlName="ratedPowerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
-          @if (form.controls.method.value === 'measuredPower') {
-            <label>Measured power<input type="number" min="0" formControlName="measuredPower"></label>
-            <label>Measured power units<select class="v1-select" formControlName="measuredPowerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
-          } @else {
-            <label>Voltage<input type="number" min="0" formControlName="voltage"></label>
-            <label>Current (A)<input type="number" min="0" formControlName="current"></label>
-            <label>Number of phases<select class="v1-select" formControlName="phases"><option [ngValue]="1">1</option><option [ngValue]="2">2</option><option [ngValue]="3">3</option></select></label>
-            <label>Power factor<input type="number" min="0" max="1" step="any" formControlName="powerFactor"></label>
+          <div class="v1-segmented setup-calculator__methods" role="group" aria-label="Load factor calculation method">
+            <button type="button" class="v1-segmented__btn"
+              [attr.aria-pressed]="form.controls.method.value === 'voltageCurrent'" [disabled]="!electricity()"
+              (click)="form.controls.method.setValue('voltageCurrent')">Voltage and current</button>
+            <button type="button" class="v1-segmented__btn"
+              [attr.aria-pressed]="form.controls.method.value === 'measuredPower'"
+              (click)="form.controls.method.setValue('measuredPower')">Measured power</button>
+          </div>
+          @if (!electricity()) {
+            <p class="v1-muted">Voltage and current requires an Electricity utility.</p>
           }
-          @if (loadWarning()) { <p class="v1-alert v1-alert--warning">Calculated load factor exceeds 100%. Applied values are capped at 115%.</p> }
+          <div class="v1-field">
+            <label for="setup-calculator-rated-power">Rated power</label>
+            <div class="input-group setup-calculator__input-group">
+              <input id="setup-calculator-rated-power" class="v1-input" type="number" min="0" formControlName="ratedPower">
+              <select class="input-group-text v1-select" formControlName="ratedPowerUnit" aria-label="Rated power units">
+                @for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.shortLabel }}</option> }
+              </select>
+            </div>
+          </div>
+          @if (form.controls.method.value === 'measuredPower') {
+            <div class="v1-field">
+              <label for="setup-calculator-measured-power">Measured power</label>
+              <div class="input-group setup-calculator__input-group">
+                <input id="setup-calculator-measured-power" class="v1-input" type="number" min="0" formControlName="measuredPower">
+                <select class="input-group-text v1-select" formControlName="measuredPowerUnit" aria-label="Measured power units">
+                  @for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.shortLabel }}</option> }
+                </select>
+              </div>
+            </div>
+          } @else {
+            <label class="v1-field">Voltage<input class="v1-input" type="number" min="0" formControlName="voltage"></label>
+            <label class="v1-field">Current (A)<input class="v1-input" type="number" min="0" formControlName="current"></label>
+            <label class="v1-field">Number of phases<select class="v1-select" formControlName="phases"><option [ngValue]="1">1</option><option [ngValue]="2">2</option><option [ngValue]="3">3</option></select></label>
+            <label class="v1-field">Power factor<input class="v1-input" type="number" min="0" max="1" step="any" formControlName="powerFactor"></label>
+          }
         } @else if (fuelCalculator(); as fuel) {
           <p>Enter physical capacity per hour and fuel properties. Compatible linked meters supply optional defaults; meter readings are not required.</p>
-          @if (source()?.controls.energySource.value !== 'Other Energy') { <label>Phase<select class="v1-select" formControlName="phase"><option value="Gas">Gas</option><option value="Liquid">Liquid</option><option value="Solid">Solid</option></select></label> }
-          <label>Fuel or energy type<select class="v1-select" formControlName="fuel"><option value="">Choose a fuel</option>@for (option of fuel.fuelOptions; track option.value) { <option [value]="option.value">{{ option.value }}</option> }</select></label>
-          <label>Physical capacity per hour<input type="number" min="0" formControlName="capacity"></label>
-          <label>Physical units<select class="v1-select" formControlName="physicalUnit">@for (option of fuel.physicalUnitOptions; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }</select></label>
-          <label><span>{{ fuel.heatCapacityLabel }} (<span [innerHTML]="fuel.heatCapacityUnitLabel"></span>)</span><input type="number" min="0" step="any" formControlName="heatCapacity"></label>
-          <label>Rated power units<select class="v1-select" formControlName="powerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
+          @if (source()?.controls.energySource.value !== 'Other Energy') { <label class="v1-field">Phase<select class="v1-select" formControlName="phase"><option value="Gas">Gas</option><option value="Liquid">Liquid</option><option value="Solid">Solid</option></select></label> }
+          <label class="v1-field">Fuel or energy type<select class="v1-select" formControlName="fuel"><option value="">Choose a fuel</option>@for (option of fuel.fuelOptions; track option.value) { <option [value]="option.value">{{ option.value }}</option> }</select></label>
+          <label class="v1-field">Physical capacity per hour<input class="v1-input" type="number" min="0" formControlName="capacity"></label>
+          <label class="v1-field">Physical units<select class="v1-select" formControlName="physicalUnit">@for (option of fuel.physicalUnitOptions; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }</select></label>
+          <label class="v1-field"><span>{{ fuel.heatCapacityLabel }} (<span [innerHTML]="fuel.heatCapacityUnitLabel"></span>)</span><input class="v1-input" type="number" min="0" step="any" formControlName="heatCapacity"></label>
+          <label class="v1-field">Rated power units<select class="v1-select" formControlName="powerUnit">@for (unit of units; track unit.value) { <option [value]="unit.value">{{ unit.display }}</option> }</select></label>
         }
-        @if (result(); as amount) { <p aria-live="polite">Result: {{ amount | number:'1.0-6' }}</p> }
-        @else if (result() === 0) { <p aria-live="polite">Result: 0</p> }
-        @else { <p class="v1-alert v1-alert--info">Enter valid inputs to calculate. You can also cancel and enter the value directly in Setup.</p> }
+        @let amount = result();
+        @if (kind() === 'load') {
+          @let powers = loadPowers();
+          @let load = loadFactor();
+          <div class="setup-calculator__load-results" role="status" aria-live="polite" aria-atomic="true">
+            <div class="setup-calculator__power-results">
+              <p>{{ form.controls.method.value === 'voltageCurrent' ? 'Calculated Power' : 'Measured Power' }}:
+                <strong>{{ (powers.actual ?? 0) | number:'1.2-2' }} kW</strong>
+              </p>
+              <p>Rated Power: <strong>{{ (powers.rated ?? 0) | number:'1.2-2' }} kW</strong></p>
+            </div>
+            <div class="setup-calculator__load-result" [class.setup-calculator__load-result--warning]="loadWarning()">
+              <p>Load Factor: <strong>{{ (load?.percent ?? 0) | number:'1.1-1' }}%</strong></p>
+              @if (loadWarning()) {
+                <p class="setup-calculator__load-warning">
+                  {{ (load?.percent ?? 0) > 115 ? 'The load factor is above 115%. Applied values are capped at 115%.' : 'The load factor is above 100%.' }}
+                </p>
+              }
+            </div>
+          </div>
+        } @else if (amount !== null) {
+          @if (kind() === 'hours') {
+            <output class="setup-calculator__hours-result" aria-live="polite" aria-atomic="true">
+              <span class="setup-calculator__result-label">Operating Hours:</span>
+              <strong class="setup-calculator__result-value">{{ amount | number:'1.0-0' }}
+                <span class="setup-calculator__result-unit">hrs/year</span>
+              </strong>
+            </output>
+          } @else { <p aria-live="polite">Result: {{ amount | number:'1.0-6' }}</p> }
+        } @else {
+          <p class="v1-alert v1-alert--info">Enter valid inputs to calculate. You can also cancel and enter the value directly in Setup.</p>
+        }
       </form>
-      <div slideoutFooter><button type="button" class="v1-btn v1-btn--secondary" (click)="close()">Cancel</button><button type="submit" form="setup-calculator-form" class="v1-btn v1-btn--primary" [disabled]="result() === null || !canEdit()">Apply</button></div>
-    </app-workspace-slideout>
-  }
+</ng-template>
+<ng-template #actions>
+      <div class="setup-calculator__actions"><button type="button" class="v1-btn v1-btn--quiet" (click)="close()">Cancel</button><button type="submit" form="setup-calculator-form" class="v1-btn v1-btn--primary" [disabled]="result() === null || !canEdit()">Apply</button></div>
 </ng-template>

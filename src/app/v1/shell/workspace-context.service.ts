@@ -160,7 +160,7 @@ export class WorkspaceContextService {
       if (route.section === 'analysis') return route.contextMode === 'account' ? route.analysisGuid ? 1 : 0 : route.analysisGuid ? 2 : 1;
       if (route.section !== 'data') return undefined;
       if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' || route.portfolioTab === 'predictors' || route.portfolioTab === 'energy-uses' ? 0 : undefined;
-      if (route.detail === 'energy-uses') return route.energyUseGuid ? 3 : route.energyUseGroupGuid ? 2 : 1;
+      if (route.detail === 'energy-uses') return route.energyUseGroupGuid ? 2 : 1;
       if (route.detail === 'predictors') return route.predictorGuid || route.weatherPredictorGroupKey || url.includes('/predictors/weather/new') ? 2 : 1;
       if (route.detail === 'meter-grouping') return route.meterGroupGuid ? 2 : 1;
       return route.detail === 'meters' ? route.meterGuid ? 2 : 1 : undefined;

@@ -17,3 +17,8 @@
 }
 
 app-status-attention { margin-left: .15rem; }
+
+:host { display: block; min-width: 0; }
+.v1-data-tabs.v1-data-tabs--scroll { display: flex; flex-wrap: nowrap; overflow-x: auto; }
+.v1-data-tabs--scroll .v1-data-tabs__tab { flex: 0 0 auto; max-width: min(24rem, 75vw); overflow-wrap: anywhere; }
+@media print { .v1-data-tabs--scroll .v1-data-tabs__tab:not(.v1-data-tabs__tab--active) { display: none; } }

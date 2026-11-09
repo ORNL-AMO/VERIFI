@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
@@ -30,7 +30,9 @@ describe('Energy Use Settings lifecycle', () => {
     TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: store }, { provide: EnergyUseActionsService, useValue: actions },
       { provide: WorkspaceNavigationService, useValue: navigation },
-      { provide: EnergyUseWorkbenchContextService, useValue: { energyUseGuid: guid, facilityGuid: signal('facility-a') } }] });
+      { provide: EnergyUseWorkbenchContextService, useValue: { energyUseGuid: guid, facilityGuid: signal('facility-a'), energyUseGroupGuid: signal('group-a'),
+        item: computed(() => { const item = store.energyUseEquipment().find(item => item.guid === guid()); return item ? { item } : undefined; }),
+        routeAfterRemoval: () => ['/group/items'], navigate: navigation.openFacilityInventory } }] });
     const fixture = TestBed.createComponent(EnergyUseSettingsComponent); fixture.detectChanges(); fixture.detectChanges();
     return { fixture, component: fixture.componentInstance, store, actions, navigation, guid };
   }
@@ -209,6 +211,6 @@ describe('Energy Use Settings lifecycle', () => {
     component.form()!.controls.settings.controls.name.setValue('Pending'); fixture.detectChanges(); await component.copy(); expect(actions.copy).not.toHaveBeenCalled();
     component.editor.discard(); fixture.detectChanges(); await component.copy(); expect(actions.copy).toHaveBeenCalledTimes(1);
     component.requestDelete(); await component.confirmReview();
-    expect(actions.delete).toHaveBeenCalledTimes(1); expect(navigation.openFacilityInventory).toHaveBeenCalledWith('facility-a', 'energy-uses');
+    expect(actions.delete).toHaveBeenCalledTimes(1); expect(navigation.openFacilityInventory).toHaveBeenCalledWith(['/group/items']);
   });
 });

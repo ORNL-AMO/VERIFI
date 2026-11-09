@@ -1,0 +1,42 @@
+<div class="bulk-actions" role="group" aria-label="Selected energy use actions">
+  <span role="status">{{ selection.selected().length }} selected</span>
+  <div class="bulk-actions__buttons">
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="createRequested.emit()"><app-ui-icon name="add"/>Add energy use</button>
+    <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canAct() || !selection.selected().length" (click)="startOperation('add')"><app-ui-icon name="add"/>Add year</button>
+    <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct() || !selection.selected().length" (click)="startOperation('delete')"><app-ui-icon name="delete"/>Delete selected</button>
+  </div>
+</div>
+<div #itemTable class="manage-items__table" tabindex="0" role="region" aria-label="Energy use equipment table">
+  <table>
+    <caption class="visually-hidden">Energy use equipment in this group</caption>
+    <thead><tr>
+      <th scope="col" class="manage-items__select"><input type="checkbox" [formControl]="selectAllControl" [indeterminate]="someSelected()" aria-label="Select all energy uses"></th>
+      <th scope="col">Name</th><th scope="col">Industrial System</th><th scope="col">Utility Types</th><th scope="col">Notes</th>
+    </tr></thead>
+    <tbody>
+      @for (row of rows(); track row.guid) {
+        <tr>
+          <td class="manage-items__select"><input type="checkbox" [formControl]="checks.controls[row.guid]" [attr.aria-label]="'Select ' + row.name"></td>
+          <th scope="row"><a class="manage-items__name" [routerLink]="row.route"><app-ui-icon [name]="row.icon" [size]="18"/><span>{{ row.name }}</span></a></th>
+          <td>{{ row.category }}</td>
+          <td><div class="manage-items__utilities">@for (source of row.snapshot.sources; track $index) { <span class="manage-items__utility">{{ source }}</span> } @empty { <span class="v1-muted">Not configured</span> }</div></td>
+          <td class="manage-items__notes">{{ row.item.notes }}</td>
+        </tr>
+      } @empty { <tr><td colspan="5" role="status">No equipment or systems have been added to this group.</td></tr> }
+    </tbody>
+  </table>
+</div>
+<ng-template #confirmation>
+    <app-confirmation-dialog title="Update selected energy uses" titleId="energy-use-bulk-title" cancelAriaLabel="Cancel bulk action" confirmLabel="Confirm changes" [busy]="selection.busy()" [disabled]="selection.busy() || selection.committed()" [confirmDisabled]="!selection.canConfirm()" (cancelled)="close()" (confirmed)="confirm()">
+    <p>Delete equipment and all its annual history. Energy-use groups and linked meter groups will remain.</p>
+    @if (selection.review(); as rows) {
+      <p>{{ selection.affected() }} items will change. Every confirmed batch commits together.</p>
+      <ul>@for (row of rows; track row.item.guid) { <li><strong>{{ row.facility?.name }} · {{ row.item.name }}</strong>: {{ row.error || row.skipped || 'Will change' }}<br>Sources: {{ row.sources.join(', ') || 'None' }}. Saved years: {{ row.years.join(', ') || 'None' }}.</li> }</ul>
+    }
+    @if (selection.stale()) { <p class="v1-alert v1-alert--warning" role="alert">Saved records changed. Review changes again before confirming.</p> }
+    @if (selection.error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ selection.error() }}</p> }
+    @if (selection.committed()) { <button type="button" class="v1-btn v1-btn--primary" [disabled]="selection.busy()" (click)="recover()">Refresh saved changes</button> }
+    </app-confirmation-dialog>
+</ng-template>
+
+<ng-template #yearDrawer><app-energy-use-add-year-drawer [controller]="yearEditor" (closed)="yearClosed()" (saved)="yearSaved()"/></ng-template>

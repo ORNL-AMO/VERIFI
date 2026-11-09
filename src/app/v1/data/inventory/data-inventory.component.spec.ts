@@ -108,20 +108,18 @@ describe('DataInventoryComponent', () => {
     vi.restoreAllMocks();
   });
 
-  it('uses the inventory header, group identity, breadcrumbs and registered creation on group drill-in', () => {
-    activeEnergyUseGroupGuid.set('group-a');
+  it('keeps Energy Uses creation on the group inventory header without a group drill-in mode', () => {
+    activePortfolioTab.set('energy-uses');
     const create = vi.fn();
     fixture.debugElement.injector.get(InventoryHeaderActionsRegistry).registerCreation({ resource: 'energy-uses', label: 'Add energy use', canCreate: signal(true), create });
     fixture.detectChanges();
     expect(fixture.componentInstance.activeContent()).toBe('energy-uses');
-    expect(fixture.nativeElement.querySelector('.v1-account-portfolio__header h1').textContent).toContain('Production');
-    expect(fixture.componentInstance.breadcrumbs().at(-1)).toMatchObject({ label: 'Energy Uses', icon: 'tools', queryParams: { facility: 'facility-a' } });
+    expect(fixture.nativeElement.querySelector('.v1-account-portfolio__header h1').textContent).toContain('Energy Uses');
     buttonByText('Add energy use').click(); expect(create).toHaveBeenCalledOnce();
     expect(buttonByText('Add facility')).toBeUndefined();
-    activeEnergyUseGroupGuid.set('missing'); fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Energy-use group');
-    activeEnergyUseGroupGuid.set('unavailable'); fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Group unavailable');
+    activeEnergyUseGroupGuid.set('group-a'); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Energy Uses');
+    expect(fixture.nativeElement.querySelector('h1').textContent).not.toContain('Production');
   });
 
   it('delegates the header toggle through the current typed registration and ignores other resource owners', () => {

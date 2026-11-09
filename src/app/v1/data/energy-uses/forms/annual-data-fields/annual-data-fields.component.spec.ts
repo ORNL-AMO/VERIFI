@@ -34,10 +34,10 @@ describe('Annual Data inside Setup', () => {
   });
   it('starts manual override with the displayed value and restores calculations on return', () => {
     const { fixture, form, component } = setup(), row = component.years()[0].sources[0], entry = form.controls.consumption.at(0).controls.entries.at(0);
-    component.toggleOverride(entry, row.amount); fixture.componentRef.setInput('refreshKey', 1); fixture.detectChanges();
+    fixture.nativeElement.querySelector('.annual-data__mode').click(); fixture.componentRef.setInput('refreshKey', 1); fixture.detectChanges();
     expect(entry.getRawValue()).toMatchObject({ energyUse: 123, overrideEnergyUse: true });
     expect(fixture.nativeElement.querySelector('.input-group .annual-data__mode')?.getAttribute('aria-label')).toBe('Use calculated consumption for Electricity in 2024');
-    component.toggleOverride(entry, 123); fixture.componentRef.setInput('refreshKey', 2); fixture.detectChanges();
+    fixture.nativeElement.querySelector('.annual-data__mode').click(); fixture.componentRef.setInput('refreshKey', 2); fixture.detectChanges();
     expect(component.years()[0].sources[0].amount).toBe(123);
     expect(entry.controls.overrideEnergyUse.value).toBe(false);
   });

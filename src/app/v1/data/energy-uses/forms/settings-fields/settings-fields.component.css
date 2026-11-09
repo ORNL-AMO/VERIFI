@@ -45,3 +45,10 @@
   .energy-use-fields__quantity { flex: 1 1 0; }
   .energy-use-fields__source-label { grid-column: 1 / -1; }
 }
+
+.energy-use-fields__capacity .input-group > button[appSetupCalculator] {
+  flex: 0 0 auto;
+  max-width: none;
+  border-radius: var(--v1-radius-sm) 0 0 var(--v1-radius-sm);
+}
+.energy-use-fields__capacity button[appSetupCalculator] + .form-control { border-radius: 0; }

@@ -20,6 +20,7 @@ export class ModalFocusTrapDirective {
   private readonly destroyRef = inject(DestroyRef);
   private readonly opener = this.document.activeElement;
   private trap?: FocusTrap;
+  private lastFocused?: HTMLElement;
 
   constructor() {
     afterNextRender(() => {
@@ -36,7 +37,11 @@ export class ModalFocusTrapDirective {
       if (!this.trap || !this.stack.isActive(this.trap)) return;
       const active = this.document.activeElement;
       // Browsers may blur a disabled control to the body or retain it as active.
-      if (active === this.document.body ||
+      // A normal blur/Tab transition can also briefly report the body. Recover
+      // only when the previous modal control actually became unavailable.
+      const lostUnavailableControl = active === this.document.body && this.lastFocused &&
+        (!this.lastFocused.isConnected || !this.checker.isFocusable(this.lastFocused));
+      if (lostUnavailableControl ||
           (active instanceof HTMLElement && this.host.contains(active) && !this.checker.isFocusable(active))) {
         this.focusInitial();
       }
@@ -50,6 +55,15 @@ export class ModalFocusTrapDirective {
       const fallback = this.modalFocusFallback();
       if (fallback) this.focus(this.document.querySelector<HTMLElement>(fallback));
     });
+  }
+
+  @HostListener('focusin')
+  onFocusIn(): void {
+    const active = this.document.activeElement;
+    if (this.trap && this.stack.isActive(this.trap) && active instanceof HTMLElement &&
+        this.host.contains(active)) {
+      this.lastFocused = active;
+    }
   }
 
   @HostListener('keydown', ['$event'])

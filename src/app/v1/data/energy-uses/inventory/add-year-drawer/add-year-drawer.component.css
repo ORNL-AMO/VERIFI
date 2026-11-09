@@ -1,0 +1,17 @@
+:host { display: block; min-width: 0; }
+[hidden] { display: none !important; }
+h3 { display: flex; align-items: center; gap: .5rem; margin: 0 0 .5rem; font-size: 1.05rem; overflow-wrap: anywhere; }
+h3 app-ui-icon { flex: 0 0 auto; }
+.year-draft__heading { padding: 1rem; border: 1px solid var(--v1-border); border-bottom: 0; }
+.year-draft__heading p { margin: 0; }
+.year-draft__remaining { padding: 1rem; border: 1px solid var(--v1-border); }
+.year-draft__remaining-title { margin: 0 0 .75rem; padding: 0; border: 0; font-size: .95rem; font-weight: 700; line-height: 1.3; letter-spacing: normal; }
+.year-draft__remaining button + button { margin-top: .4rem; }
+.year-draft__navigation { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; }
+.creation-selections { position: static; }
+.creation-selection span { white-space: normal; overflow-wrap: anywhere; }
+.v1-alert { margin: .75rem 0; }
+@media print { :host { display: none; } }
+
+.year-draft__years { grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); }
+.year-draft__other { margin-top: 1rem; }
