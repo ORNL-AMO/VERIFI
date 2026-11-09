@@ -1,6 +1,7 @@
 import { getAnalysisGroupChanges } from '../../../analysis-edits';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { AnalysisCommandHandler, AnalysisGroupChanges } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { DestroyRef, Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
@@ -186,6 +187,9 @@ export class RegressionModelMenuComponent {
   showModelComparison: boolean = false;
   private lastPredictorIds: Array<string> = [];
   private _suppressFormPatch = false;
+  private activeGeneration?: { owner: string };
+  private readonly generationOwner = computed(() =>
+    `${this.selectedAccount()?.guid}:${this.analysisItem()?.guid}:${this.group()?.idbGroupId}`);
 
   // --- Form ---
   form: RegressionMenuForm = this.fb.group({
@@ -206,6 +210,14 @@ export class RegressionModelMenuComponent {
   }
 
   constructor() {
+    effect(() => {
+      const owner = this.generationOwner();
+      if (this.activeGeneration?.owner !== owner) {
+        this.activeGeneration = undefined;
+        this.generatingModels.set(false);
+        this.modelingError.set(false);
+      }
+    });
     // Rebuild form whenever the group changes
     effect(() => {
       const group = this.group();
@@ -432,8 +444,7 @@ export class RegressionModelMenuComponent {
     const accountGuid = this.selectedAccount()?.guid;
     const assessmentReportVersion = this.selectedAccount()?.assessmentReportVersion ?? 'AR6';
 
-    const previousSelectedModelId = group.selectedModelId;
-    const previousSelectedModel = group?.models?.find(model => model.modelId === previousSelectedModelId);
+    const request = this.activeGeneration = { owner: this.generationOwner() };
 
     this.generatingModels.set(true);
     this.modelingError.set(false);
@@ -442,45 +453,77 @@ export class RegressionModelMenuComponent {
       const generatedModels = await this.regressionModelsService.generateModels(
         group, _analysisItem, _selectedFacility, _meters, _meterData, _predictorData, assessmentReportVersion
       );
-      if (!this.isCurrentOwner(accountGuid, _analysisItem.guid, group.idbGroupId)) { return; }
-      await this.handleGenerateResult(generatedModels, group, previousSelectedModelId, previousSelectedModel, accountGuid, _analysisItem);
-    } catch {
-      if (this.isCurrentOwner(accountGuid, _analysisItem.guid, group.idbGroupId)) {
+      const currentGroup = this.accountWorkspaceStore.facilityAnalyses()
+        .find(item => item.guid === _analysisItem.guid)?.groups.find(item => item.idbGroupId === group.idbGroupId);
+      if (!this.isCurrentGeneration(request) || !currentGroup
+        || !_.isEqual(this.generationGroupInputs(group), this.generationGroupInputs(currentGroup))) { return; }
+      await this.handleGenerateResult(generatedModels, group, accountGuid, _analysisItem, request);
+    } catch (error) {
+      if (this.isCurrentGeneration(request) && !(error instanceof WorkspaceWriteError && error.code === 'stale-workspace')) {
         this.modelingError.set(true);
+      }
+    } finally {
+      if (this.activeGeneration === request) {
+        this.activeGeneration = undefined;
         this.generatingModels.set(false);
       }
     }
   }
 
+  private isCurrentGeneration(request: { owner: string }): boolean {
+    return !this.destroyRef.destroyed && this.activeGeneration === request && this.generationOwner() === request.owner;
+  }
+
+  private generationGroupInputs(group: AnalysisGroup): unknown {
+    // Notes and generation timestamps do not supersede the model/configuration captured at launch.
+    const { regressionModelNotes, dateModelsGenerated, ...inputs } = group;
+    return inputs;
+  }
+
   private async handleGenerateResult(
     generatedModels: Array<JStatRegressionModel>,
     group: AnalysisGroup,
-    previousSelectedModelId: string | undefined,
-    previousSelectedModel: JStatRegressionModel | undefined,
     accountGuid: string,
-    analysisItem: IdbAnalysisItem
+    analysisItem: IdbAnalysisItem,
+    request: { owner: string }
   ): Promise<void> {
-    const { updatedGroup, newSelectedModel } = this.regressionModelsService.applyGeneratedModelsToGroup(
-      group,
-      generatedModels,
-      previousSelectedModelId,
-      previousSelectedModel,
-      this.selectedFacility(),
-      analysisItem.baselineYear
+    let comparison: { previousModel: JStatRegressionModel; newModel: JStatRegressionModel };
+    this._suppressFormPatch = false;
+    const { value } = await this.commandBoundary.execute(
+      {
+        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }
+      },
+      () => {
+        const currentAnalysis = this.accountWorkspaceStore.facilityAnalyses().find(item => item.guid === analysisItem.guid);
+        const currentGroup = currentAnalysis?.groups.find(item => item.idbGroupId === group.idbGroupId);
+        if (!this.isCurrentGeneration(request) || !currentGroup
+          || !_.isEqual(this.generationGroupInputs(group), this.generationGroupInputs(currentGroup))) {
+          throw new WorkspaceWriteError('stale-workspace', 'Model generation was superseded by a newer selection or configuration.');
+        }
+        const previousModel = currentGroup.models?.find(model => model.modelId === currentGroup.selectedModelId);
+        const { updatedGroup, newSelectedModel } = this.regressionModelsService.applyGeneratedModelsToGroup(
+          currentGroup, generatedModels, currentGroup.selectedModelId, previousModel,
+          this.selectedFacility(), currentAnalysis.baselineYear
+        );
+        comparison = { previousModel, newModel: newSelectedModel };
+        // Persist a coherent selection, including fields unchanged from the launch snapshot.
+        const changes: AnalysisGroupChanges = {
+          ...getAnalysisGroupChanges(currentGroup, updatedGroup),
+          selectedModelId: updatedGroup.selectedModelId, models: updatedGroup.models,
+          regressionModelYear: updatedGroup.regressionModelYear, regressionConstant: updatedGroup.regressionConstant,
+          predictorVariables: updatedGroup.predictorVariables.map(variable => ({ id: variable.id, regressionCoefficient: variable.regressionCoefficient }))
+        };
+        return this.analysisHandler.updateFacilityAnalysisGroup(analysisItem.guid, group.idbGroupId, changes, accountGuid);
+      }
     );
-    if (previousSelectedModelId) {
-      this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
-    }
+    if (!this.isCurrentGeneration(request)) { return; }
+    if (comparison?.previousModel) { this.compareUpdatedModel(comparison.previousModel, comparison.newModel); }
+    const savedGroup = value.groups.find(item => item.idbGroupId === group.idbGroupId);
     this.regressionModelState.setForGroup(
-      updatedGroup.idbGroupId,
-      updatedGroup.isGeneratedModel ? generatedModels : []
+      group.idbGroupId,
+      savedGroup?.isGeneratedModel ? generatedModels : []
     );
-    // Regeneration can change the selected model's coefficients even when the
-    // logical model is equivalent, so refresh the form from the saved group.
-    await this.saveItem(updatedGroup, false, group);
-    if (this.isCurrentOwner(accountGuid, analysisItem.guid, group.idbGroupId)) {
-      this.generatingModels.set(false);
-    }
   }
 
   compareUpdatedModel(previousModel: JStatRegressionModel, newModel: JStatRegressionModel) {
