@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BackupFile } from '@app/data/models/backup-file';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -15,8 +16,7 @@ export class EmailVerifiBackupService {
     responseType: 'text' as const
   }
   emailData: EmailData;
-  // API_URL = environment.measurUtilitiesApi + 'sendemail';
-  API_URL = 'https://dev.ir-utilities.ornl.gov/' + 'sendemail';
+  API_URL = environment.measurUtilitiesApi + 'sendemail';
 
   constructor(private httpClient: HttpClient) {
     this.emailStatus = new BehaviorSubject<EmailStatusCode | undefined>(undefined);

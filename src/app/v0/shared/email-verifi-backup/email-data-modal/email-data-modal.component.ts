@@ -1,12 +1,19 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { EmailData, EmailStatusCode, EmailVerifiBackupService } from '../email-verifi-backup.service';
-import { AccountWorkspaceStore } from '@app/data/account-workspace/account-workspace.store';
-import { BackupFile } from '@app/data/models/backup-file';
-import { IdbFacility } from '@app/data/models/idbModels/facility';
-import { BackupExportCoordinator } from '@app/data/backup/backup-export-coordinator.service';
-import { environment } from 'src/environments/environment';
-
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { BackupFile } from '@data/models/backup-file';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { EmailData, EmailVerifiBackupService } from '../email-verifi-backup.service';
+import {
+  collectSavedEmails,
+  filterSavedEmails,
+  isValidEmail,
+  splitEmailEntry
+} from './email-address-utils';
 
 @Component({
   selector: 'app-email-data-modal',
@@ -15,56 +22,60 @@ import { environment } from 'src/environments/environment';
   styleUrl: './email-data-modal.component.css',
 })
 export class EmailDataModalComponent {
-
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly formBuilder = inject(FormBuilder);
 
   @Input() isAccount?: boolean;
   @Input() facility?: IdbFacility;
   @Output() cancel = new EventEmitter<void>();
 
-  private formBuilder: FormBuilder = inject(FormBuilder);
   emailForm: FormGroup;
-  senderEmail: string;
   emailData: EmailData;
   modalHeader: string;
+  savedEmails: string[] = [];
+  receiverEntryControl = new FormControl('', {
+    nonNullable: true,
+    validators: [this.emailEntryValidator()]
+  });
 
   constructor(
     private backupExportCoordinator: BackupExportCoordinator,
     private emailVerifiBackupService: EmailVerifiBackupService
-  ) {}
+  ) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.modalHeader = this.isAccount ? 'Account Backup' : 'Facility Backup';
+    this.savedEmails = collectSavedEmails(
+      this.accountWorkspaceStore.account(),
+      this.accountWorkspaceStore.facilities()
+    );
     this.emailForm = this.buildEmailForm();
   }
 
   buildEmailForm(): FormGroup {
-    console.log('facility:', this.facility);
     const accountName = this.accountWorkspaceStore.account()?.name;
-    let defaultName: string;
-    defaultName = this.isAccount ? `${accountName}-backup` : `${this.facility?.name}-backup`;
+    const defaultName = this.isAccount ? `${accountName}-backup` : `${this.facility?.name}-backup`;
 
     return this.formBuilder.group({
       senderEmail: ['', [Validators.required, Validators.email]],
-      receiverEmail: ['', [Validators.required, this.multipleEmailsValidator()]],
+      receiverEmails: [[], Validators.required],
       attachmentName: [defaultName, [Validators.required, this.attachmentNameValidator()]]
     });
   }
 
-  multipleEmailsValidator(): ValidatorFn {
-    return (control: AbstractControl) => {
-      if (!control.value) {
+  emailEntryValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value?.trim()) {
         return null;
       }
-      const emails = control.value.split(/[, ]+/).map((email: string) => email.trim());
-      const invalidEmails = emails.filter((email: string) => Validators.email(new FormControl(email)) !== null);
-      return invalidEmails.length > 0 ? { invalidEmails: true } : null;
+      const emails = splitEmailEntry(control.value);
+      return emails.some(email => !isValidEmail(email)) ? { invalidEmails: true } : null;
     };
   }
 
-  attachmentNameValidator() {
+  attachmentNameValidator(): ValidatorFn {
     const regex = /^[a-zA-Z0-9._\- ()]+$/;
-    return (control: AbstractControl) => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) {
         return null;
       }
@@ -72,36 +83,119 @@ export class EmailDataModalComponent {
     };
   }
 
-  async setEmailData(emailForm: FormGroup) {
+  searchSenderEmails = (text$: Observable<string>) =>
+    text$.pipe(map(term => filterSavedEmails(this.savedEmails, term)));
+
+  searchReceiverEmails = (text$: Observable<string>) =>
+    text$.pipe(map(term => filterSavedEmails(this.savedEmails, term, this.receiverEmails)));
+
+  selectReceiverEmail(event: NgbTypeaheadSelectItemEvent<string>): void {
+    event.preventDefault();
+    this.addReceiverEmails([event.item]);
+    this.receiverEntryControl.setValue('');
+  }
+
+  addReceiverEntry(): void {
+    this.receiverEntryControl.markAsTouched();
+    if (this.receiverEntryControl.invalid) {
+      return;
+    }
+
+    const emails = splitEmailEntry(this.receiverEntryControl.value);
+    if (emails.length === 0) {
+      return;
+    }
+
+    this.addReceiverEmails(emails);
+    this.receiverEntryControl.setValue('');
+  }
+
+  handleReceiverKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ',' || event.key === ';') {
+      event.preventDefault();
+      this.addReceiverEntry();
+      return;
+    }
+
+    if (event.key === 'Backspace' && !this.receiverEntryControl.value && this.receiverEmails.length > 0) {
+      this.removeReceiverEmail(this.receiverEmails.length - 1);
+    }
+  }
+
+  removeReceiverEmail(index: number): void {
+    const nextEmails = this.receiverEmails.filter((_, emailIndex) => emailIndex !== index);
+    this.emailForm.controls.receiverEmails.setValue(nextEmails);
+    this.emailForm.controls.receiverEmails.markAsDirty();
+    this.emailForm.controls.receiverEmails.markAsTouched();
+  }
+
+  get receiverEmails(): string[] {
+    return this.emailForm?.controls.receiverEmails.value ?? [];
+  }
+
+  get canSend(): boolean {
+    const senderValid = this.emailForm?.controls.senderEmail.valid;
+    const attachmentValid = this.emailForm?.controls.attachmentName.valid;
+    const hasReceiver = this.receiverEmails.length > 0
+      || (!!this.receiverEntryControl.value.trim() && this.receiverEntryControl.valid);
+    return !!senderValid && !!attachmentValid && hasReceiver && this.receiverEntryControl.valid;
+  }
+
+  async setEmailData(emailForm: FormGroup): Promise<void> {
     let attachedFile: BackupFile;
     if (this.isAccount) {
       const accountGuid = this.accountWorkspaceStore.account().guid;
       attachedFile = await this.backupExportCoordinator.buildAccountBackupByGuid(accountGuid);
-    }
-    else {
+    } else {
       attachedFile = await this.backupExportCoordinator.buildFacilityBackup(this.facility?.guid);
     }
+
     if (emailForm.valid && attachedFile) {
       this.emailData = {
         emailSender: emailForm.controls.senderEmail.value,
-        emailTo: emailForm.controls.receiverEmail?.value?.replace(/[,\s]+$/, ''),
-        fileName: emailForm.controls.attachmentName?.value,
+        emailTo: emailForm.controls.receiverEmails.value.join(','),
+        fileName: emailForm.controls.attachmentName.value,
         attachment: attachedFile,
-        //isProduction: environment.production
         isProduction: true
-      }
-    }
-    else {
+      };
+    } else {
       this.emailData = undefined;
     }
   }
 
-  async sendEmail() {
+  async sendEmail(): Promise<void> {
+    if (this.receiverEntryControl.value) {
+      this.addReceiverEntry();
+    }
+    if (this.emailForm.invalid || this.receiverEntryControl.invalid) {
+      this.emailForm.markAllAsTouched();
+      return;
+    }
+
     await this.setEmailData(this.emailForm);
-    this.emailVerifiBackupService.sendEmail(this.emailData);
+    if (this.emailData) {
+      this.emailVerifiBackupService.sendEmail(this.emailData);
+    }
   }
 
-  closeEmailModal() {
+  closeEmailModal(): void {
     this.cancel.emit();
+  }
+
+  private addReceiverEmails(emails: readonly string[]): void {
+    const nextEmails = [...this.receiverEmails];
+    const existing = new Set(nextEmails.map(email => email.toLocaleLowerCase()));
+
+    emails.forEach(email => {
+      const key = email.toLocaleLowerCase();
+      if (!existing.has(key)) {
+        nextEmails.push(email);
+        existing.add(key);
+      }
+    });
+
+    this.emailForm.controls.receiverEmails.setValue(nextEmails);
+    this.emailForm.controls.receiverEmails.markAsDirty();
+    this.emailForm.controls.receiverEmails.markAsTouched();
   }
 }
