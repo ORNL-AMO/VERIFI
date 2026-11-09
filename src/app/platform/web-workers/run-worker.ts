@@ -18,6 +18,8 @@ export const CALCULATION_WORKER_TIMEOUT_MS = 120_000;
  */
 export function runWorker<T>(worker: Worker, payload: unknown): Observable<T> {
     return new Observable<T>(subscriber => {
+        // Register cleanup before setup, including a synchronous postMessage failure.
+        subscriber.add(() => worker.terminate());
         worker.addEventListener('message', (e: MessageEvent<T>) => {
             subscriber.next(e.data);
             subscriber.complete();
@@ -28,7 +30,5 @@ export function runWorker<T>(worker: Worker, payload: unknown): Observable<T> {
         }, { once: true });
 
         worker.postMessage(payload);
-
-        return () => worker.terminate();
     });
 }

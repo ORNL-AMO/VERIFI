@@ -44,6 +44,8 @@ export class AccountStatusCheckService implements OnDestroy {
             snapshot,
             calendarizationState
         ]) => {
+            // combineLatest can deliver the refreshed calendarization before its snapshot observable catches up.
+            if (snapshot !== this.accountWorkspaceStore.snapshot()) return;
             if (!snapshot || !this.calanderizationService.isReadyForCurrentWorkspace(calendarizationState)) {
                 this.accountStatusCheck.next(undefined);
                 return;

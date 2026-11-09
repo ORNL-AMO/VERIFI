@@ -9,7 +9,7 @@ description: Change VERIFI calculations, conversions, validation/status checks, 
 2. Locate the pure calculation under `src/app/domain/calculations/` or `src/app/shared/shared-analysis/calculations/`. Trace every caller, relevant model, Worker, dashboard, report component, and file writer before editing.
 3. State the formula, units, aggregation level, date boundaries, missing-data behavior, and rounding policy. Preserve full precision until the existing presentation boundary unless the domain rule says otherwise.
 4. Keep calculation code deterministic. Avoid DOM, Angular service, IndexedDB, or Electron dependencies in code shared with Workers.
-5. When a Worker is involved, update its request payload, response, error result, caller, and structured-clone assumptions together. Check all synchronous and Worker-backed paths using the shared calculation.
+5. When a Worker is involved, update its request payload, response, error result, caller, and structured-clone assumptions together. Invalidate reused results by their complete calculation inputs and account session, not unrelated workspace revisions; keep validation on the current committed snapshot and keep editor DOM independent of background readiness. Check all synchronous and Worker-backed paths using the shared calculation.
 6. Keep on-screen, printed, and exported values aligned. Inspect Excel, PDF, and PowerPoint writers when a shared report value changes.
 7. Add table-driven tests with normal, boundary, zero, missing, invalid, and representative unit-conversion cases. Include a regression case for the issue being solved.
 

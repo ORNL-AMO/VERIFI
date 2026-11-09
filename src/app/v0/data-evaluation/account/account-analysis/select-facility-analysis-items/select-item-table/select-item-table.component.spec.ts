@@ -1,10 +1,6 @@
 import '@angular/compiler';
-import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
-import { Pipe, PipeTransform } from '@angular/core';
 import { Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
@@ -16,27 +12,8 @@ import { LoadingService } from '@app/core-components/loading/loading.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { AccountAnalysisTestingModule } from '../../account-analysis-testing.module';
 import { SelectItemTableComponent } from '@v0/data-evaluation/account/account-analysis/select-facility-analysis-items/select-item-table/select-item-table.component';
-
-@Pipe({ name: 'invalidAnalysis', standalone: false })
-export class InvalidAnalysisStubPipe implements PipeTransform {
-  transform(_value: string) {
-    return { hasError: false, groupsHaveErrors: false };
-  }
-}
-
-@Pipe({ name: 'groupName', standalone: false })
-export class GroupNameStubPipe implements PipeTransform {
-  transform(value: string) {
-    return value;
-  }
-}
-
-@NgModule({
-  declarations: [SelectItemTableComponent, InvalidAnalysisStubPipe, GroupNameStubPipe],
-  imports: [CommonModule, FormsModule]
-})
-class SelectItemTableComponentTestModule { }
 
 describe('SelectItemTableComponent', () => {
   it('publishes the committed account analysis after creating a facility analysis', async () => {
@@ -120,7 +97,7 @@ describe('SelectItemTableComponent', () => {
     const accountAnalysisItem = new BehaviorSubject(undefined);
 
     TestBed.configureTestingModule({
-      imports: [SelectItemTableComponentTestModule],
+      imports: [AccountAnalysisTestingModule],
       providers: [
         { provide: AccountWorkspaceStore, useValue: store },
         { provide: AccountWorkspaceService, useValue: { selectFacilityAnalysis, reloadActiveWorkspace: vi.fn() } },

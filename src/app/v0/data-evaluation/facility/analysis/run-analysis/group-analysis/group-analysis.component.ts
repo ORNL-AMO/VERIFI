@@ -26,6 +26,12 @@ export class GroupAnalysisComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private analysisService: AnalysisService = inject(AnalysisService);
 
+  readonly calendarizationState = toSignal(this.accountStatusCheckService.calendarizationState);
+
+  retryDataChecks(): void {
+    this.accountStatusCheckService.retryCalendarization();
+  }
+
   analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   params: Signal<Params> = toSignal(this.activatedRoute.params);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);

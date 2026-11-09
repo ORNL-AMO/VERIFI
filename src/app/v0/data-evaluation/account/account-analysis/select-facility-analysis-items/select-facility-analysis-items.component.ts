@@ -16,7 +16,7 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 interface FacilityListItem {
   facility: IdbFacility;
   analysisItemId: string;
-  analysisStatusCheck: AnalysisStatusCheck;
+  analysisStatusCheck: AnalysisStatusCheck | undefined;
 }
 
 @Component({
@@ -32,6 +32,12 @@ export class SelectFacilityAnalysisItemsComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private accountWorkspaceService = inject(AccountWorkspaceService);
 
+  readonly calendarizationState = toSignal(this.accountStatusCheckService.calendarizationState);
+
+  retryDataChecks(): void {
+    this.accountStatusCheckService.retryCalendarization();
+  }
+
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
   facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
   facilities = this.accountWorkspaceStore.facilities;
@@ -43,11 +49,10 @@ export class SelectFacilityAnalysisItemsComponent {
 
   facilityList: Signal<Array<FacilityListItem>> = computed(() => {
     const facilities = this.facilities();
-    const facilityAnalysisItems = this.facilityAnalysisItems();
     const analysisItem = this.selectedAnalysisItem();
     const accountStatusCheck = this.accountStatusCheck();
     const account = this.account();
-    if (!facilities || !facilityAnalysisItems || !analysisItem || !accountStatusCheck) {
+    if (!facilities || !analysisItem) {
       return [];
     }
 
@@ -55,15 +60,16 @@ export class SelectFacilityAnalysisItemsComponent {
       return [];
     }
 
-    return analysisItem.facilityAnalysisItems.map(facilityItem => {
+    return analysisItem.facilityAnalysisItems.flatMap(facilityItem => {
       const facility = facilities.find(fac => fac.guid === facilityItem.facilityId);
-      const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(facilityItem.facilityId);
+      if (!facility) return [];
+      const facilityStatusCheck = accountStatusCheck?.getFacilityStatusCheckByFacilityId(facilityItem.facilityId);
       const analysisStatusCheck = facilityStatusCheck?.getAnalysisStatusById(facilityItem.analysisItemId);
-      return {
+      return [{
         facility: facility,
         analysisItemId: facilityItem.analysisItemId,
         analysisStatusCheck: analysisStatusCheck
-      }
+      }]
     });
   });
 
