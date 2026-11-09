@@ -320,8 +320,10 @@
   font-weight: 800;
 }
 
-.meter-readings-table__footer app-pagination {
-  display: block;
+@media screen {
+  .meter-readings-table__footer app-pagination {
+    display: block;
+  }
 }
 
 @media (max-width: 720px) {
