@@ -40,26 +40,46 @@ export class RegressionModelsService {
 
     if (typeof Worker !== 'undefined') {
       return new Promise((resolve, reject) => {
-        this.currentWorker = new Worker(
+        const worker = new Worker(
           new URL('../../../platform/web-workers/regression-models.worker', import.meta.url)
         );
-        this.currentWorker.onmessage = ({ data }) => {
-          this.terminateCurrentWorker();
+        this.currentWorker = worker;
+        const finish = (): boolean => {
+          if (this.currentWorker !== worker) { return false; }
+          this.currentWorker = null;
+          worker.onmessage = null;
+          worker.onerror = null;
+          worker.onmessageerror = null;
+          worker.terminate();
+          return true;
+        };
+        worker.onmessage = ({ data }) => {
+          if (!finish()) { return; }
           if (!data.error) {
             resolve(data.generatedModels);
           } else {
             reject(new Error('Worker error generating regression models'));
           }
         };
-        this.currentWorker.postMessage({
-          group: JSON.parse(JSON.stringify(group)),
-          analysisItem: JSON.parse(JSON.stringify(analysisItem)),
-          facility,
-          meters,
-          meterData,
-          facilityPredictorData,
-          assessmentReportVersion,
-        });
+        worker.onerror = () => {
+          if (finish()) { reject(new Error('Worker error generating regression models')); }
+        };
+        worker.onmessageerror = () => {
+          if (finish()) { reject(new Error('Worker message error generating regression models')); }
+        };
+        try {
+          worker.postMessage({
+            group: JSON.parse(JSON.stringify(group)),
+            analysisItem: JSON.parse(JSON.stringify(analysisItem)),
+            facility,
+            meters,
+            meterData,
+            facilityPredictorData,
+            assessmentReportVersion,
+          });
+        } catch (error) {
+          if (finish()) { reject(error); }
+        }
       });
     } else {
       // Fallback: no Web Worker support

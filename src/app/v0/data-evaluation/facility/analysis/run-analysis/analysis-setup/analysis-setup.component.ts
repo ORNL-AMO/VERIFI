@@ -258,15 +258,25 @@ export class AnalysisSetupComponent {
       baselineYear: raw.baselineYear ?? item.baselineYear,
       bankedAnalysisItemId: raw.hasBanking ? (raw.bankedAnalysisItemId ?? undefined) : undefined,
     };
-    const changes = Object.fromEntries([...this.pendingSetupFields].map(field => [field, fields[field]]));
+    const submittedFields = [...this.pendingSetupFields];
+    const changes = Object.fromEntries(submittedFields.map(field => [field, fields[field]]));
     this.pendingSetupFields.clear();
     if (!Object.keys(changes).length) { return; }
+    const analysisGuid = item.guid;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-    await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: item.guid, label: 'Save Facility Analysis' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateFacilityAnalysisFields(item.guid, changes, activeAccountGuid)
-    );
+    try {
+      await this.commandBoundary.execute(
+        { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Facility Analysis' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
+        () => this.analysisHandler.updateFacilityAnalysisFields(analysisGuid, changes, activeAccountGuid)
+      );
+    } catch (error) {
+      if (!this.destroyRef.destroyed && this.analysisItem()?.guid === analysisGuid &&
+        this.accountWorkspaceStore.account()?.guid === activeAccountGuid) {
+        submittedFields.forEach(field => this.pendingSetupFields.add(field));
+      }
+      throw error;
+    }
   }
 
   toggleHideInUseMessage(): void {

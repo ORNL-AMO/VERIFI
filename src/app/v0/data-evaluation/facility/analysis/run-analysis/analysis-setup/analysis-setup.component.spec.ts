@@ -37,6 +37,7 @@ describe('AnalysisSetupComponent queued field intent', () => {
   let component: AnalysisSetupComponent;
   let analysis: IdbAnalysisItem;
   let selectedAnalysis: ReturnType<typeof signal<IdbAnalysisItem>>;
+  let activeAccount: ReturnType<typeof signal<{ guid: string }>>;
   let execute: ReturnType<typeof vi.fn>;
   let update: ReturnType<typeof vi.fn>;
   let clearModels: ReturnType<typeof vi.fn>;
@@ -47,13 +48,14 @@ describe('AnalysisSetupComponent queued field intent', () => {
       baselineYear: 2023, energyIsSource: true, energyUnit: 'MMBtu', waterUnit: 'gal', hasBanking: false
     } as IdbAnalysisItem;
     selectedAnalysis = signal(analysis);
+    activeAccount = signal({ guid: 'account-a' });
     update = vi.fn(async () => analysis);
     clearModels = vi.fn(async () => analysis);
     execute = vi.fn(async (_options: unknown, persist: () => Promise<unknown>) => ({ value: await persist() }));
     TestBed.configureTestingModule({ imports: [AnalysisSetupTestModule], providers: [
       AnalysisSetupComponent,
       { provide: AccountWorkspaceStore, useValue: {
-        account: signal({ guid: 'account-a' }), selectedFacilityAnalysis: selectedAnalysis,
+        account: activeAccount, selectedFacilityAnalysis: selectedAnalysis,
         selectedFacility: signal({ guid: 'facility-a' }), selectedFacilityAnalyses: signal([analysis])
       } },
       { provide: AccountWorkspaceQueryService, useValue: { getAccountAnalysesForFacilityAnalysis: () => [] } },
@@ -87,4 +89,68 @@ describe('AnalysisSetupComponent queued field intent', () => {
     finish({ value: analysis });
     await Promise.all([first, reverted]);
   });
+
+  it('retains failed field intent when a later edit to another field is saved', async () => {
+    vi.useFakeTimers();
+    const failure = new Error('persistence failed');
+    update.mockRejectedValueOnce(failure);
+    component.form.controls.name.setValue('Retained name');
+    await expect(component.saveItem()).rejects.toBe(failure);
+    component.form.controls.energyUnit.setValue('GJ');
+    await component.saveItem();
+    expect(update).toHaveBeenNthCalledWith(2, 'analysis-a', { name: 'Retained name', energyUnit: 'GJ' }, 'account-a');
+  });
+
+  it('uses the latest form values when retrying fields from a failed in-flight save', async () => {
+    vi.useFakeTimers();
+    const failure = new Error('persistence failed');
+    let rejectSave!: (reason: unknown) => void;
+    update.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectSave = reject; }));
+    component.form.controls.name.setValue('Submitted name');
+    const first = component.saveItem();
+    const rejected = expect(first).rejects.toBe(failure);
+    component.form.controls.name.setValue('Newest name');
+    component.form.controls.energyUnit.setValue('GJ');
+    rejectSave(failure);
+    await rejected;
+    await component.saveItem();
+    expect(update).toHaveBeenNthCalledWith(2, 'analysis-a', { name: 'Newest name', energyUnit: 'GJ' }, 'account-a');
+  });
+
+  it.each(['analysis', 'account'] as const)('does not restore a failed intent after the active %s changes', async owner => {
+    vi.useFakeTimers();
+    const failure = new Error('persistence failed');
+    let rejectSave!: (reason: unknown) => void;
+    update.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectSave = reject; }));
+    component.form.controls.name.setValue('Departed owner name');
+    const first = component.saveItem();
+    const rejected = expect(first).rejects.toBe(failure);
+    const accountGuid = owner === 'account' ? 'account-b' : 'account-a';
+    activeAccount.set({ guid: accountGuid });
+    selectedAnalysis.set({ ...analysis, guid: 'analysis-b', accountId: accountGuid, name: 'New owner name' });
+    TestBed.flushEffects();
+    component.form.controls.energyUnit.setValue('GJ');
+    rejectSave(failure);
+    await rejected;
+    await component.saveItem();
+    expect(update).toHaveBeenNthCalledWith(2, 'analysis-b', { energyUnit: 'GJ' }, accountGuid);
+    expect(component.form.controls.name.value).toBe('New owner name');
+  });
+
+  it('does not restore failed field intent after destruction', async () => {
+    vi.useFakeTimers();
+    const failure = new Error('persistence failed');
+    let rejectSave!: (reason: unknown) => void;
+    update.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectSave = reject; }));
+    component.form.controls.name.setValue('Departed draft');
+    const first = component.saveItem();
+    const rejected = expect(first).rejects.toBe(failure);
+    TestBed.resetTestingModule();
+    rejectSave(failure);
+    await rejected;
+    await component.saveItem();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
 });
