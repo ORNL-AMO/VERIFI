@@ -1,0 +1,40 @@
+@let snapshot = results.display();
+@let owner = snapshot?.facility ?? results.facility();
+@let balance = snapshot?.balance;
+@let calculation = results.calculationStatus();
+<section aria-labelledby="energy-use-balance-facts-title" [attr.aria-busy]="results.refreshing()">
+  <header class="energy-use-balance-facts__heading"><h2 id="energy-use-balance-facts-title">Facility Energy Balance</h2>
+    @if (owner) { <span class="energy-use-balance-facts__context">{{ owner.name }}@if (snapshot?.year !== undefined) { · FY {{ snapshot?.year }} } · {{ owner.energyUnit }}/yr · Site energy</span> }
+    <span class="v1-chip v1-chip--{{ calculation.tone }} energy-use-balance-facts__status" role="status"><app-ui-icon [name]="calculation.icon" [spin]="calculation.icon === 'loading'"/>{{ calculation.label }}</span>
+  </header>
+  @if (!owner) { <p role="status">Facility energy balance is unavailable.</p> }
+  @else if (results.context.workspace.state() === 'error' || results.bills.state() === 'error') {
+    <p class="v1-alert v1-alert--warning" role="alert">Metered Consumption could not be calculated. <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" (click)="results.bills.retry()">Retry energy balance</button></p>
+  }
+  @else if (results.unavailableCalendar()) { <p role="alert">The energy balance is unavailable because the facility fiscal calendar is invalid.</p> }
+  @else if (!balance && !results.refreshing()) { <p role="status">No annual equipment or metered consumption data is available.</p> }
+  @if (owner && balance) {
+    @if (results.refreshing()) { <span class="visually-hidden">Updating facility energy balance. Previous results remain visible.</span> }
+    <dl class="v1-data-workbench-facts">
+      <div><dt>Metered Consumption</dt><dd>{{ balance.consumption === null ? 'Unavailable' : (balance.consumption | number:'1.0-0') }}</dd></div>
+      <div><dt>Equipment Use</dt><dd>{{ balance.equipment | number:'1.0-0' }}@if (snapshot?.result?.partial) { <small>Known contributions only</small> }</dd></div>
+      <div [class.energy-use-balance-facts__over-allocated]="balance.overAllocated"><dt>{{ balance.label }}</dt><dd>{{ balance.remaining === null ? 'Unavailable' : (balance.remaining | number:'1.0-0') }}</dd></div>
+      <div><dt>Accounted for</dt><dd>{{ balance.accountedPercent === null ? 'Unavailable' : (balance.accountedPercent | number:'1.0-0') + '%' }}</dd></div>
+    </dl>
+    @if (!balance.complete) { <p class="v1-data-workbench-facts-note">The energy balance is unavailable until metered consumption covers this fiscal year for every included energy meter and equipment source.</p> }
+    @if (balance.overAllocated) { <p class="v1-alert v1-alert--warning">Equipment use exceeds metered consumption for one or more sources. Review equipment amounts and utility data.</p> }
+    <details class="energy-use-balance-facts__sources"><summary>Energy balance by source</summary>
+      @for (source of balance.sources; track source.source) {
+        <section [attr.aria-label]="source.source + ' energy balance'"><h3>{{ source.source }}</h3>
+          <dl class="v1-data-workbench-facts">
+            <div><dt>Metered Consumption</dt><dd>{{ source.consumption === null ? 'Unavailable' : (source.consumption | number:'1.0-0') }}</dd></div>
+            <div><dt>Equipment Use</dt><dd>{{ source.equipment | number:'1.0-0' }}@if (source.equipmentPartial) { <small>Known contributions only</small> }</dd></div>
+            <div [class.energy-use-balance-facts__over-allocated]="source.unaccounted !== null && source.unaccounted < 0"><dt>{{ source.label }}</dt><dd>{{ source.remaining === null ? 'Unavailable' : (source.remaining | number:'1.0-0') }}</dd></div>
+            <div><dt>Accounted for</dt><dd>{{ source.accountedPercent === null ? 'Unavailable' : (source.accountedPercent | number:'1.0-0') + '%' }}</dd></div>
+          </dl>
+          @if (source.coverage) { <p class="v1-data-workbench-facts-note">{{ source.coverage }}</p> }
+        </section>
+      }
+    </details>
+  }
+</section>

@@ -1,5 +1,3 @@
-import { EnergyUseHistoryComponent } from '../../energy-use-workbench/history/energy-use-history.component';
-import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench/energy-use-workbench-context.service';
 import { PortalModule } from '@angular/cdk/portal';
 import { Component, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -50,22 +48,6 @@ describe('Energy Use treemap in Chromium', () => {
       expect(JSON.stringify(store.snapshot())).toBe(before);
     } finally { fixture.destroy(); }
   });
-  it('renders annual History with entered and carried values through a later account year', async () => {
-    const item = energyUseItem({ utilityData: [energyUseSource({ energyUse: [{ year: 2022, energyUse: 100, energyUseUnit: 'kWh', overrideEnergyUse: true },
-      { year: 2024, energyUse: 75, energyUseUnit: 'kWh', overrideEnergyUse: false }] })] });
-    const base = energyUsesSnapshot([item, energyUseItem({ guid: 'later', utilityData: [energyUseSource({ energyUse: [{ year: 2025, energyUse: 50, energyUseUnit: 'kWh', overrideEnergyUse: true }] })] })]);
-    const facility = { ...base.facilities[0], energyUnit: 'kWh', fiscalYear: 'calendarYear' as const };
-    TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [{ provide: EnergyUseWorkbenchContextService, useValue: { entry: signal({ item, facility }) } }] });
-    TestBed.inject(AccountWorkspaceStore).publish(base);
-    const fixture = TestBed.createComponent(EnergyUseHistoryComponent); fixture.nativeElement.className = 'v1-root';
-    try {
-      await page.viewport(1200, 850); fixture.detectChanges(); await fixture.whenStable();
-      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-      expect(fixture.nativeElement.querySelector('canvas')).not.toBeNull();
-      expect(fixture.componentInstance.details().map(row => row.amount)).toEqual([100, 100, 75, 75]);
-      expect(fixture.nativeElement.textContent).toContain('Carried forward from FY 2024');
-      await page.screenshot({ element: fixture.nativeElement, path: './__screenshots__/phase4-history.png' });
-    } finally { fixture.destroy(); }
-  });
+
 
 });

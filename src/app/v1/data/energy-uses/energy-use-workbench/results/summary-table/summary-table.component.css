@@ -1,0 +1,20 @@
+@import '../results-section.css';
+@import '../../../../../shared/data-workbench/results-table.css';
+
+:host { display: block; min-width: 0; }
+.energy-use-summary-table__scroller { overflow-y: hidden; }
+.v1-results-table { table-layout: auto; }
+thead tr:first-child th:not(:first-child) { text-align: start; }
+.v1-results-table thead tr:last-child th { min-width: 7rem; text-align: right; }
+.energy-use-summary-table__identity { position: sticky; left: 0; z-index: 1; width: auto; background: var(--v1-surface); white-space: nowrap; }
+thead .energy-use-summary-table__identity, tfoot .energy-use-summary-table__identity { background: var(--v1-content-block); }
+tbody th { font-weight: 400; }
+a { display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
+.energy-use-summary-table__icons { display: inline-flex; gap: .2rem; flex-shrink: 0; }
+small { display: block; color: var(--v1-muted); font-weight: 400; }
+@media print {
+  .energy-use-summary-table__scroller { overflow: visible; }
+  .energy-use-summary-table__identity { position: static; }
+  .v1-results-table thead tr:last-child th { min-width: 0; }
+  tr { break-inside: avoid; }
+}

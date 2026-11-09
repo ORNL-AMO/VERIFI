@@ -1,0 +1,36 @@
+<section class="v1-workbench-section energy-use-summary-table" aria-labelledby="energy-use-summary-table-title">
+  <h2 id="energy-use-summary-table-title" class="visually-hidden">Group equipment summary</h2>
+  <div class="v1-table-scroll energy-use-summary-table__scroller" tabindex="0" role="region" aria-label="Equipment summary, scroll for additional years">
+    <table class="v1-results-table">
+      <caption class="visually-hidden">Equipment consumption and share of group total, {{ results.unit() }}/year. An asterisk identifies carried-forward amounts; partial totals include known values only.</caption>
+      <thead>
+        <tr><th rowspan="2" scope="col" class="energy-use-summary-table__identity" [attr.aria-sort]="nameSort()"><button type="button" class="v1-results-table__sort" (click)="order('name')">Equipment <span aria-hidden="true">↕</span></button></th>
+          @for (column of columns(); track column.year) { <th colspan="2" scope="colgroup">{{ column.year }}</th> }
+        </tr>
+        <tr>@for (column of columns(); track column.year) {
+          <th scope="col" [attr.aria-sort]="column.amountSort"><button type="button" class="v1-results-table__sort" (click)="order('amount', column.year)"><span>Energy Use<br>({{ results.unit() }}/yr)</span> <span aria-hidden="true">↕</span></button></th>
+          <th scope="col" [attr.aria-sort]="column.percentSort"><button type="button" class="v1-results-table__sort" (click)="order('percent', column.year)">% of Group Total <span aria-hidden="true">↕</span></button></th>
+        }</tr>
+      </thead>
+      <tbody>@for (row of rows(); track row.entry.guid) {
+        <tr><th scope="row" class="energy-use-summary-table__identity"><a [routerLink]="row.route">
+          <span class="energy-use-summary-table__icons">@for (icon of row.icons; track icon) { <app-ui-icon [name]="icon" [size]="16"/> }</span><span>{{ row.entry.name }}</span>
+        </a></th>
+          @for (cell of row.cells; track cell.year) {
+            <td>{{ cell.item?.amount == null ? 'Unavailable' : (cell.item!.amount | number:'1.0-0') }}
+              @if (cell.item?.projection?.carried) { <span aria-label="Includes carried-forward values">*</span> }
+              @if (cell.item?.projection?.partial) { <small>Partial</small> }
+              @if (cell.item) { <div class="visually-hidden"><span>{{ cell.item.coverage }}</span><app-energy-use-source-details [sources]="cell.item.projection.sources"/></div> }
+            </td>
+            <td>{{ cell.item?.percent == null ? 'Unavailable' : (cell.item!.percent | number:'1.0-0') + '%' }}</td>
+          }
+        </tr>
+      }</tbody>
+      <tfoot><tr><th scope="row" class="energy-use-summary-table__identity">Total</th>
+        @for (column of columns(); track column.year) {
+          <td>{{ column.total | number:'1.0-0' }}@if (column.partial) { <small>Partial coverage · known values only</small> }</td><td>—</td>
+        }
+      </tr></tfoot>
+    </table>
+  </div>
+</section>

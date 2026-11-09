@@ -1,0 +1,17 @@
+@import '../results-section.css';
+@import '../../../../../shared/data-workbench/results-table.css';
+
+:host { display: block; min-width: 0; }
+.energy-use-footprint-table__scroller { overflow-y: hidden; }
+.v1-results-table { table-layout: auto; }
+.energy-use-footprint-table__source th { background: var(--v1-content-block); color: var(--v1-muted); font-size: .76rem; font-weight: 900; text-transform: uppercase; }
+.energy-use-footprint-table__item th { font-weight: 400; padding-inline-start: 1.5rem; }
+a { display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; }
+app-ui-icon { flex-shrink: 0; }
+.energy-use-footprint-table__total { font-weight: 800; background: var(--v1-content-block); }
+small { display: block; color: var(--v1-muted); font-weight: 400; }
+@media (max-width: 40rem) { .energy-use-footprint-table__item th { padding-inline-start: .7rem; } }
+@media print {
+  .energy-use-footprint-table__scroller { overflow: visible; }
+  tr { break-inside: avoid; }
+}

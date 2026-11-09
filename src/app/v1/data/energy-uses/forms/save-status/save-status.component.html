@@ -1,0 +1,5 @@
+<p class="energy-use-save-status" aria-live="polite" [class.is-error]="state() === 'error' || state() === 'invalid' || state() === 'conflict'">
+  @if (state() === 'saving') { <app-ui-icon name="loading" spin/> }
+  {{ message() }}
+  @if (state() === 'error') { <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" [disabled]="!canRetry()" (click)="retryRequested.emit()">Retry</button> }
+</p>

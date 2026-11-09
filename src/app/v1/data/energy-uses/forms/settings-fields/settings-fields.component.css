@@ -3,6 +3,8 @@
 .energy-use-fields .v1-workbench-section { margin: 0; border: 0; border-bottom: 1px solid var(--v1-border); border-radius: 0; padding: 1rem; }
 .energy-use-fields .v1-workbench-section:last-child { border-bottom: 0; }
 .energy-use-fields h2 { font-size: 1rem; font-weight: 800; line-height: 1.2; margin: 0 0 .8rem; }
+.energy-use-fields__heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; margin-bottom: .8rem; }
+.energy-use-fields__heading h2 { margin: 0; }
 .energy-use-fields__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
 .energy-use-fields__source-row { display: grid; grid-template-columns: minmax(9rem, 1fr) minmax(0, 3fr); gap: .8rem; align-items: end; }
 .energy-use-fields label { display: grid; gap: .3rem; min-width: 0; }

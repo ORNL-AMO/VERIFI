@@ -4,7 +4,7 @@
 
 Migrate Energy Uses into the existing v1 Data workflow as a group-first inventory of individual energy uses. An item may represent equipment, a system, or a process.
 
-Use the shared Data inventory and workbench patterns. Each energy-use group owns a workbench with **Setup Group** first, followed by **Energy Use Items** and an internal member sidebar; each item retains its combined Setup editor and autosave. Support estimation independently of meter readings.
+Use the shared Data inventory and workbench patterns. Each energy-use group owns a workbench with **Setup Group** first, followed by **Energy Use Items** **Group Summary**, **Group Footprint**, and **Facility Footprint**. Energy Use Items owns an internal member sidebar; each item retains its combined Setup editor and autosave. Support estimation independently of meter readings.
 
 The [current accepted behavior](#current-accepted-behavior) is the authoritative workflow reference for the implementation under review. The phased delivery sections record targets and historical evidence; earlier phase descriptions do not override that current contract. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 4D supersedes the Phase 3A item dashboard/navigation and the Phase 4 item History destination. Broader group management remains a separate planning effort.
 
@@ -16,7 +16,7 @@ The [Energy Uses review and hardening plan](v1-energy-uses-review-and-hardening-
 | 2 | Creation, Settings, and safe commands | Merged into `unified-ux` |
 | 3 | Combined Setup, annual data, and estimation | Merged |
 | 3A | Group browsing, nested navigation, and equipment icons | Merged in [#2874](https://github.com/ORNL-AMO/VERIFI/pull/2874) |
-| 4 | Complete item tools and charts | Data-entry tools validated; group results remain follow-up scope |
+| 4 | Complete item tools and charts | Group/facility results implemented; inventory polish follows in the stack |
 | 4D | Group workbench, Setup Group, and item sidebar | Approved workflow implemented and validated; prepared for stacked PR review |
 | 5 | Export, compatibility, and release acceptance | Planned |
 
@@ -546,3 +546,7 @@ Focused validation passed: 16 controller tests and 6 Chromium slideout journeys,
 The equipment counter now shows the number of completed equipment drafts plus one, rather than the selected item’s alphabetical position. Jumping directly to the third item with no completed drafts still displays 1 of 9; after reviewing seven items and wrapping back, it displays 8 of 9, then 9 of 9 for the final unfinished draft.
 
 Focused validation passed: all 6 Chromium slideout journeys, with explicit rendered progress assertions for out-of-order completion. The scoped validation plan selected no additional checks for this template-only change; no broad build or Electron validation was run.
+
+### Stacked results workbench delivery
+
+The results workbench adds Group Summary, Group Footprint, and Facility Footprint after Setup Group and Energy Use Items. Summary provides equipment comparison/history and a matching table; footprints provide source flows and matching usage tables. The removed Table Results URL redirects to Group Summary. Group-only header chips summarize committed sources and Setup validation; save/retry feedback belongs in the active form. Shared facts reveal the owning facility energy balance and retain previous results during refresh with a compact chip. The disconnected item History implementation is removed. Results/empty-group links preserve draft guards and session item restoration, including late-mounted shell outlets. Inventory treemap and creation/group-deletion iterations follow in the next stack slices.

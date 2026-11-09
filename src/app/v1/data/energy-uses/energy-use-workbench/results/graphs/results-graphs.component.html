@@ -1,0 +1,24 @@
+<section class="v1-workbench-section energy-use-results-graphs" aria-labelledby="energy-use-graphs-title">
+  <h2 id="energy-use-graphs-title" class="visually-hidden">{{ title() }}</h2>
+  @if (!footprint()) {
+    <header class="energy-use-results-graphs__controls"><app-energy-use-results-controls/></header>
+  }
+  @if (results.context.workspace.state() === 'error') { <p role="alert">Energy-use results could not be loaded. Retry loading the account.</p> }
+  @else if (!results.context.workspace.ready()) { <p role="status">Loading saved energy-use results…</p> }
+  @else if (!results.context.group()) { <p role="status">This energy-use group is unavailable.</p> }
+  @else if (!results.context.items().length) { <p role="status">No energy uses in this group. Add an energy use in Setup Group.</p> }
+  @else if (!results.years().length) { <p role="status">No saved annual data. Add a year in Energy Use Items to begin.</p> }
+  @else if (results.unavailableCalendar()) { <p role="alert">Results are unavailable because the facility fiscal calendar is invalid.</p> }
+  @else {
+    @if (partial()) { <p class="v1-alert v1-alert--warning">Partial coverage · charts show known contributions only.</p> }
+    @if (positive()) {
+      <div class="energy-use-results-graphs__scroller" tabindex="0" role="region" aria-label="Energy use chart, scroll to view all items or years">
+        <div [style.height.px]="plotHeight()" [style.min-width.px]="plotWidth()" [appV1ECharts]="option()" role="img" [attr.aria-describedby]="footprint() ? 'energy-use-footprint-table-title' : 'energy-use-summary-table-title'" [attr.aria-label]="footprint() ? 'Energy sources flowing to individual energy uses' : 'Energy consumption by equipment'"></div>
+      </div>
+    } @else { <p role="status">No positive consumption to chart. Zero and unavailable values are listed below.</p> }
+  }
+</section>
+@if (readyResults()) {
+  @if (footprint()) { <app-energy-use-footprint-table/> }
+  @else { <app-energy-use-summary-table/> }
+}

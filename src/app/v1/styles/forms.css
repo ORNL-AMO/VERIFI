@@ -44,7 +44,7 @@
   outline: 3px solid var(--v1-focus);
   outline-offset: 2px;
   border-color: var(--v1-facility);
-  background: var(--v1-surface);
+  background-color: var(--v1-surface);
 }
 
 .v1-field__error {
