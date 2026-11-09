@@ -39,10 +39,11 @@ import { FacilityEnergyUseEquipmentDbService } from '@data/indexedDB/facility-en
 import { normalizeAnalysisGroupModelStorage } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { BackupFile } from '@data/models/backup-file';
 import { CURRENT_DATA_VERSION } from '@data/indexedDB/data-migrations/data-migration.models';
-import { PreparedBackupFile } from './backup-preparation.service';
+import { BackupRelationshipError, PreparedBackupFile } from './backup-preparation.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { BackupExportCoordinator } from './backup-export-coordinator.service';
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
+import { remapEnergyUseBackupReferences, unresolvedEnergyUseBackupReferences } from './energy-use-backup-relations';
 
 export { BackupFile } from '@data/models/backup-file';
 
@@ -150,6 +151,7 @@ export class BackupDataService {
 
   async importAccountBackupFile(preparedBackup: PreparedBackupFile, currIdx: number): Promise<IdbAccount> {
     let backupFile = structuredClone(preparedBackup);
+    await this.requireUnresolvedGroupsAvailable(backupFile);
     this.analyticsService.sendEvent('import_backup_file');
     let accountGUIDs: { oldId: string, newId: string } = {
       oldId: backupFile.account.guid,
@@ -436,11 +438,8 @@ export class BackupDataService {
       delete facilityEnergyUseEquipment.id;
       facilityEnergyUseEquipment.accountId = accountGUIDs.newId;
       facilityEnergyUseEquipment.facilityId = this.getNewId(facilityEnergyUseEquipment.facilityId, facilityGUIDs);
-      facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
-      facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
-        return this.getNewId(groupId, meterGroupGUIDs);
-      });
-      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(
+        remapEnergyUseBackupReferences(facilityEnergyUseEquipment, facilityEnergyUseGroupGUIDs, meterGroupGUIDs)));
     }
 
 
@@ -490,6 +489,7 @@ export class BackupDataService {
 
   async importFacilityBackupFile(preparedBackup: PreparedBackupFile, accountGUID: string, currIdx: number): Promise<{ facility: IdbFacility, index?: number }> {
     let backupFile = structuredClone(preparedBackup);
+    await this.requireUnresolvedGroupsAvailable(backupFile);
     this.analyticsService.sendEvent('import_backup_file');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
@@ -713,11 +713,8 @@ export class BackupDataService {
       delete facilityEnergyUseEquipment.id;
       facilityEnergyUseEquipment.accountId = accountGUID;
       facilityEnergyUseEquipment.facilityId = newFacilityGUID;
-      facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
-      facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
-        return this.getNewId(groupId, meterGroupGUIDs);
-      });
-      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(
+        remapEnergyUseBackupReferences(facilityEnergyUseEquipment, facilityEnergyUseGroupGUIDs, meterGroupGUIDs)));
     }
 
     let needsFacilityUpdate: boolean = false;
@@ -793,6 +790,15 @@ export class BackupDataService {
       delete group.combinedMonthlyData;
       return group;
     })
+  }
+
+  private async requireUnresolvedGroupsAvailable(backup: PreparedBackupFile): Promise<void> {
+    for (const { store, guid } of unresolvedEnergyUseBackupReferences(backup)) {
+      const repository = store === 'facilityEnergyUseGroups' ? this.facilityEnergyUseGroupsDbService : this.utilityMeterGroupDbService;
+      if (await repository.getStoredByGuid(guid)) {
+        throw new BackupRelationshipError('An unavailable group reference is already used by another saved group. The backup cannot be imported without changing its relationships.');
+      }
+    }
   }
 
   // Export only a valid selected model, recovering orphaned selections first.
