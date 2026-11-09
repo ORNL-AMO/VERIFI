@@ -1,10 +1,9 @@
 :host { display: contents; }
-.energy-use-charts { overflow: auto; padding: .75rem; min-height: 0; flex: 1; color: var(--v1-text); }
-header { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
-h2 { font-size: 1.1rem; margin: 0; }
-label { display: flex; align-items: center; gap: .5rem; }
-.energy-use-charts__plot { width: 100%; height: clamp(16rem, 43dvh, 36rem); }
-ul { padding-inline-start: 1.25rem; } li { margin-block: .4rem; }
-.energy-use-charts__table { overflow: auto; } table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid var(--v1-border); padding: .5rem; text-align: start; vertical-align: top; }
-@media print { .energy-use-charts { overflow: visible; } header button, nav button { display: none; } }
+.energy-use-charts { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; color: var(--v1-text); }
+.energy-use-charts__plot { flex: 1; width: 100%; height: 100%; min-height: 0; }
+.energy-use-charts__plot:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: -2px; }
+.energy-use-charts__accessible { position: absolute; inset: 0; z-index: 1; overflow: auto; padding: .75rem; background: var(--v1-surface); }
+.energy-use-charts__accessible nav { display: flex; flex-wrap: wrap; gap: .5rem; }
+.energy-use-charts__accessible ul { padding-inline-start: 1.25rem; }
+.energy-use-charts__accessible li { margin-block: .4rem; overflow-wrap: anywhere; }
+@media print { .energy-use-charts__accessible { display: none; } }

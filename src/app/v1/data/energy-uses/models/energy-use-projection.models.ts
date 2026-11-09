@@ -19,7 +19,7 @@ export interface EnergyUseTreemapNode {
   readonly id: string; readonly name: string; readonly kind: 'period' | 'facility' | 'group' | 'item';
   readonly value: number; readonly periodKey: string; readonly partial: boolean; readonly carried: boolean;
   readonly facilityGuid?: string; readonly groupGuid?: string; readonly itemGuid?: string;
-  readonly children?: readonly EnergyUseTreemapNode[]; readonly percentOfPeriod: number;
+  readonly children?: readonly EnergyUseTreemapNode[]; readonly percentOfPeriod: number | null;
 }
 export function knownEnergyUseAmount(row: ProjectedEnergyUse): number | null {
   return row.sources.some(source => source.amount !== null) ? row.amount : null;
@@ -82,7 +82,7 @@ export function buildEnergyUseTreemap(rows: readonly ProjectedEnergyUse[], group
   for (const row of rows) { const bucket = periods.get(row.period.key) ?? []; bucket.push(row); periods.set(row.period.key, bucket); }
   const node = (id: string, name: string, kind: EnergyUseTreemapNode['kind'], periodKey: string, children: EnergyUseTreemapNode[], total: number,
     owner: Partial<EnergyUseTreemapNode> = {}): EnergyUseTreemapNode => ({ id, name, kind, periodKey, children, value: children.reduce((sum, child) => sum + child.value, 0),
-      partial: children.some(child => child.partial), carried: children.some(child => child.carried), percentOfPeriod: total > 0 ? children.reduce((sum, child) => sum + child.value, 0) / total * 100 : 0, ...owner });
+      partial: children.some(child => child.partial), carried: children.some(child => child.carried), percentOfPeriod: energyUsePercent(children.reduce((sum, child) => sum + child.value, 0), total), ...owner });
   const result = [...periods].sort(([a], [b]) => a.localeCompare(b)).map(([periodKey, periodRows]) => {
     const total = periodRows.reduce((sum, row) => sum + row.amount, 0);
     const facilities = [...new Set(periodRows.map(row => row.facility.guid))].map(ownerGuid => {
@@ -95,7 +95,7 @@ export function buildEnergyUseTreemap(rows: readonly ProjectedEnergyUse[], group
       const groupNodes = [...grouped].map(([guid, members]) => {
         const group = groups.find(group => group.guid === guid && group.facilityId === ownerGuid);
         const items: EnergyUseTreemapNode[] = members.map(row => ({ id: `item:${row.item.guid}`, name: row.item.name || 'Untitled energy use', kind: 'item',
-          value: row.amount, periodKey, partial: row.partial, carried: row.carried, percentOfPeriod: total > 0 ? row.amount / total * 100 : 0,
+          value: row.amount, periodKey, partial: row.partial, carried: row.carried, percentOfPeriod: energyUsePercent(knownEnergyUseAmount(row), total),
           facilityGuid: ownerGuid, groupGuid: guid, itemGuid: row.item.guid }));
         return node(JSON.stringify(['group', ownerGuid, guid]), group?.name || 'Group unavailable', 'group', periodKey, items, total, { facilityGuid: ownerGuid, groupGuid: guid });
       });
@@ -104,6 +104,6 @@ export function buildEnergyUseTreemap(rows: readonly ProjectedEnergyUse[], group
     return node(`period:${periodKey}`, periodRows[0].period.label, 'period', periodKey, facilities, total);
   });
   if (groupGuid) return result.flatMap(period => period.children!.flatMap(facility => facility.children ?? []));
-  if (facilityGuid) return result.flatMap(period => period.children ?? []);
+  if (facilityGuid) return result.flatMap(period => period.children!.flatMap(facility => facility.children ?? []));
   return result;
 }
