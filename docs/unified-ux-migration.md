@@ -326,6 +326,12 @@ Account Analysis drill-ins reuse the Data whole-page 480ms depth entrance and re
 - To-dos presents workspace loading, data-check progress, and unavailable-check details through the [status-evaluation message](../src/app/v1/shared/status/status-evaluation-message/status-evaluation-message.component.ts). Data and Analysis navigation contain no checking messages or reserved message space and suppress counts while checks are unavailable. The header exposes prolonged checks and failures with an action into To-dos. Common navigation row styles are scoped under the v1 section-navigation surface so import and analysis steppers retain their own styles.
 - Protect composition, disclosure persistence, direct links, weather grouping, active warning changes, status transitions, and both stage layouts with focused fast tests. Validate themes, keyboard use, narrow layouts, and contrast in a browser.
 
+### Shared themed table pagination
+
+- Meter readings, meter monthly data, meter-group results, standard Predictor readings, Weather readings, and account/facility/group Analysis monthly tables use the shared [`app-pagination`](../src/app/v1/shared/pagination/pagination.component.ts) presentation. Keep inventory paging and legacy v0 pagination unchanged.
+- Tables own one-based page state and clamp after live result changes; the pager emits only valid, changed user requests. Preserve each table's page-size choices, reset behavior, selection, sorting, filtering, and copy/print scope. Read-only workspaces retain navigation.
+- The pager shows Previous/Next and up to five numbers in non-rotating batches, hides for zero/one page and print, and announces “Page X of Y” to screen readers without a visible page summary. Use v1 control/focus/disabled tokens and the primary-strong/inverse-text pair for selection. Below 480px, wrap controls and use labeled direction chevrons. No paging preferences or data contracts are added.
+
 ### Production v1 Data workbench model organization
 
 - Use a feature-local `models/` folder when presentation state and deterministic builders serve multiple components in a production v1 Data workbench. Split modules by business responsibility and reason to change, not arbitrary line limits or separate type/function buckets.

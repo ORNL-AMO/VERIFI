@@ -25,7 +25,7 @@ import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-w
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MeterSettingsModule } from '@app/v1/shared/meter-settings/meter-settings.module';
 import { RouterModule } from '@angular/router';
@@ -81,7 +81,7 @@ import { MeterActionsService } from './meter-actions.service';
     DataWorkbenchResourceSwitcherComponent,
     DataWorkbenchFactsToggleComponent,
     IconsModule,
-    NgbPaginationModule,
+    PaginationComponent,
     ReactiveFormsModule,
     MeterSettingsModule,
     RouterModule,

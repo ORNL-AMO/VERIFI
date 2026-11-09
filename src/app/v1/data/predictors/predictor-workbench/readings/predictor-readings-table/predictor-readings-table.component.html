@@ -112,9 +112,8 @@
       </div>
       @if (rows.length > pageSize()) {
         <footer class="predictor-readings-table__footer">
-          <ngb-pagination [collectionSize]="rows.length" [pageSize]="pageSize()" [maxSize]="5"
-            [ellipses]="false" [page]="currentPage()" (pageChange)="currentPage.set($event)">
-          </ngb-pagination>
+          <app-pagination ariaLabel="Predictor readings pages" [collectionSize]="rows.length" [pageSize]="pageSize()" [page]="currentPage()" (pageChange)="currentPage.set($event)">
+          </app-pagination>
         </footer>
       }
     }

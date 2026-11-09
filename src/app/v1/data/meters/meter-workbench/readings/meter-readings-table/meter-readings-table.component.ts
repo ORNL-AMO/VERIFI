@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
@@ -38,7 +38,7 @@ interface MeterReadingDisplayColumn {
   templateUrl: './meter-readings-table.component.html',
   styleUrls: ['./meter-readings-table.component.css'],
   standalone: true,
-  imports: [CommonModule, NgbPaginationModule, IconComponent]
+  imports: [CommonModule, PaginationComponent, IconComponent]
 })
 export class MeterReadingsTableComponent {
   private static readonly emptyView: MeterReadingTableView = {
@@ -145,6 +145,11 @@ export class MeterReadingsTableComponent {
       }
       return sections;
     }, []);
+  });
+  readonly maxPage = computed(() => Math.max(1, Math.ceil(this.sortedRows().length / this.activePageSize())));
+  private readonly clampCurrentPage = effect(() => {
+    const page = Math.min(this.maxPage(), Math.max(1, this.currentPage()));
+    if (page !== this.currentPage()) this.currentPage.set(page);
   });
   readonly displayedRows = computed(() => {
     const start = (this.currentPage() - 1) * this.activePageSize();

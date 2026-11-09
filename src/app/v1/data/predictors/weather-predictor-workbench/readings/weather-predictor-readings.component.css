@@ -262,7 +262,7 @@ thead th small {
   background: var(--v1-surface);
 }
 
-.weather-readings__footer ngb-pagination {
+.weather-readings__footer app-pagination {
   display: block;
 }
 

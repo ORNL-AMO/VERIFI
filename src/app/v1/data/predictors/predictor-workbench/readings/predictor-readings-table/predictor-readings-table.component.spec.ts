@@ -21,6 +21,24 @@ describe('PredictorReadingsTableComponent', () => {
     expect(months(fixture.nativeElement)).toEqual(['Jan 2026']);
   });
 
+  it('pages read-only data, resets page size, and clamps when the filtered rows shrink', () => {
+    const fixture = TestBed.configureTestingModule({ imports: [PredictorReadingsTableComponent] }).createComponent(PredictorReadingsTableComponent);
+    const component = fixture.componentInstance;
+    component.view = buildPredictorReadingTableView(predictor, Array.from({ length: 30 }, (_, i) => reading(`reading-${i}`, 2024 + Math.floor(i / 12), i % 12 + 1, i < 2 ? -1 : i)));
+    component.canAct = false; fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Page 3"]')!.click(); fixture.detectChanges();
+    expect(component.currentPage()).toBe(3); expect(months(root)).toHaveLength(6);
+    component.filter.set('attention'); fixture.detectChanges();
+    expect(component.currentPage()).toBe(1); expect(months(root)).toHaveLength(2);
+    component.setFilter('all'); fixture.detectChanges();
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Next page"]')!.click(); fixture.detectChanges();
+    const size = root.querySelector('select')!; size.value = '24'; size.dispatchEvent(new Event('change')); fixture.detectChanges();
+    expect(component.currentPage()).toBe(1); expect(months(root)).toHaveLength(24);
+    component.view = buildPredictorReadingTableView(predictor, [reading('remaining', 2026, 1, 4)]); fixture.detectChanges();
+    expect(months(root)).toHaveLength(1); expect(root.querySelector('app-pagination')).toBeNull();
+  });
+
   it('emits the selected readings for bulk deletion', () => {
     const fixture = TestBed.configureTestingModule({ imports: [PredictorReadingsTableComponent] })
       .createComponent(PredictorReadingsTableComponent);
@@ -42,13 +60,13 @@ describe('PredictorReadingsTableComponent', () => {
     const fixture = TestBed.configureTestingModule({ imports: [PredictorReadingsTableComponent] })
       .createComponent(PredictorReadingsTableComponent);
     fixture.componentInstance.view = buildPredictorReadingTableView(predictor, Array.from(
-      { length: 12 },
+      { length: 30 },
       (_, index) => reading(`reading-${index}`, 2025 + Math.floor(index / 12), index % 12 + 1, index === 0 ? -1 : index)
     ));
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     root.querySelector<HTMLInputElement>('tbody input')?.click();
-    fixture.componentInstance.currentPage.set(2);
+    root.querySelector<HTMLButtonElement>('app-pagination button[aria-label="Next page"]')!.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.selectedCount()).toBe(1);
 

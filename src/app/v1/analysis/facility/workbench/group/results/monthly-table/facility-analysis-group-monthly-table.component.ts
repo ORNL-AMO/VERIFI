@@ -5,7 +5,7 @@ import { AnalysisResultsTableModule } from '@app/v1/shared/analysis-results/resu
 import { analysisResultsTableView } from '@app/v1/shared/analysis-results/results-table/analysis-results-table.view';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -20,7 +20,7 @@ import { monthlyResultMarkers, orderedUniqueResultMarkers } from '@app/v1/shared
 @Component({
   selector: 'app-facility-analysis-group-monthly-table',
   standalone: true,
-  imports: [AnalysisResultsTableModule, CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultMarkerLegendComponent],
+  imports: [AnalysisResultsTableModule, CommonModule, ReactiveFormsModule, PaginationComponent, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultMarkerLegendComponent],
   templateUrl: './facility-analysis-group-monthly-table.component.html',
   styleUrls: ['./facility-analysis-group-monthly-table.component.css']
 })

@@ -198,14 +198,12 @@
       }
     </div>
     @if (_rows.length > activePageSize()) {
-      <ngb-pagination
+      <app-pagination ariaLabel="Meter readings pages"
         [collectionSize]="_rows.length"
         [pageSize]="activePageSize()"
-        [maxSize]="5"
-        [ellipses]="false"
         [page]="currentPage()"
         (pageChange)="currentPage.set($event)">
-      </ngb-pagination>
+      </app-pagination>
     }
   </footer>
   </div>
