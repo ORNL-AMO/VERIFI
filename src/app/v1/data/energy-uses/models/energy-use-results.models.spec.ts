@@ -7,6 +7,16 @@ describe('Energy Use result agreement', () => {
   const facility = { ...energyUseFacility(), energyUnit: 'kWh', fiscalYear: 'calendarYear' as const };
   const source = (year: number, amount: number, unit = 'kWh') => energyUseSource({ energyUse: [{ year, energyUse: amount, energyUseUnit: unit, overrideEnergyUse: true }] });
 
+  it.each([-1, 12, NaN])('omits unavailable annual projections for invalid fiscal month %s without losing genuine zero totals', fiscalYearMonth => {
+    const item = energyUseItem({ utilityData: [source(2025, 0)] });
+    const owner = { ...facility, fiscalYear: 'nonCalendarYear' as const, fiscalYearMonth };
+    expect(buildEnergyUseResults([item], owner)).toEqual([]);
+    const [valid] = buildEnergyUseResults([item], facility);
+    expect(valid).toMatchObject({ year: 2025, total: 0, partial: false });
+    expect(valid.period).not.toBe('');
+    expect(valid.items[0].amount).toBe(0);
+  });
+
   it('uses one known-value denominator for source flows, equipment bars, tables and treemaps without writes', () => {
     const items = [energyUseItem({ guid: 'a', utilityData: [source(2022, 10), source(2024, 3.6, 'MJ')] }),
       energyUseItem({ guid: 'b', utilityData: [source(2025, 9)] }),

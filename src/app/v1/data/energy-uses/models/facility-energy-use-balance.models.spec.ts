@@ -1,4 +1,7 @@
 import type { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import type { IdbFacility } from '@data/models/idbModels/facility';
+import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import type { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { energyUseFacility, energyUseGroup, energyUseItem, energyUseSource, energyUsesSnapshot } from '../energy-uses.testing';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
@@ -24,6 +27,80 @@ describe('Facility energy balance', () => {
     const groups = buildEnergyUseGroups(facility.accountId, [facility], [energyUseGroup()], buildEnergyUseInventory(facility.accountId, [facility], items, [energyUseGroup()]));
     return buildFacilityEnergyUseResult(groups, facility, 2025)!;
   }
+
+  function canonicalMeters(owner: IdbFacility, meters: readonly IdbUtilityMeter[], readings: readonly IdbUtilityMeterData[]): readonly CalanderizedMeter[] {
+    const snapshot = { ...energyUsesSnapshot(), facilities: [owner], meters: [...meters], meterData: [...readings] };
+    const request = buildWorkspaceCalendarizationRequest(snapshot), input = request.payload;
+    const result = getCalanderizedMeterData(input.meters, input.allMeterData, input.accountOrFacility, input.monthDisplayShort, input.calanderizationOptions,
+      input.co2Emissions, input.customFuels, input.facilities, input.assessmentReportVersion, input.customGWPs);
+    const projected = projectWorkspaceCalendarization({ state: 'ready', accountGuid: snapshot.account.guid, inputFingerprint: request.inputFingerprint, meters: result }, snapshot,
+      { context: { kind: 'facility', guid: owner.guid }, energyUnit: owner.energyUnit, energyIsSource: false, includeEmissions: false });
+    expect(projected.state).toBe('ready');
+    return projected.meters;
+  }
+
+  it.each([false, true])('retains annual allocation into a July–June fiscal year with another complete meter=%s', includeCompleteMeter => {
+    const owner = { ...facility, fiscalYear: 'nonCalendarYear' as const, fiscalYearMonth: 6, fiscalYearCalendarEnd: true };
+    const annual = meter({ guid: 'annual', meterReadingDataApplication: 'fullYear' });
+    const annualBill = reading({ guid: 'annual-bill', meterId: annual.guid, year: 2025, month: 12, totalEnergyUse: 120 });
+    const first = bills('covered', 10, 2024), second = bills('covered', 10, 2025);
+    const meters = includeCompleteMeter ? [annual, first.projected.meter] : [annual];
+    const readings = includeCompleteMeter ? [annualBill, ...first.readings, ...second.readings] : [annualBill];
+    const projected = canonicalMeters(owner, meters, readings);
+    const allocated = projected[0].monthlyData.filter(row => row.fiscalYear === 2025).reduce((sum, row) => sum + row.energyUse, 0);
+    expect(allocated).toBe(60);
+    const balance = buildFacilityEnergyUseBalance(owner, 2025, projected, readings);
+    expect(balance).toMatchObject({ consumption: includeCompleteMeter ? 180 : 60, complete: false, unaccounted: null, accountedPercent: null });
+    expect(balance.sources[0].coverage).toContain(includeCompleteMeter ? '18 of 24' : '6 of 12');
+  });
+
+  it('uses full-month coverage for older meters without a saved calendarization mode', () => {
+    const electric = bills();
+    const legacy = { ...electric.projected.meter, meterReadingDataApplication: undefined };
+    const readings = electric.readings.map(row => ({ ...row, day: 15 }));
+    const projected = canonicalMeters(facility, [legacy], readings);
+    expect(projected[0].monthlyData.reduce((sum, row) => sum + row.energyUse, 0)).toBe(120);
+    expect(buildFacilityEnergyUseBalance(facility, 2025, projected, readings)).toMatchObject({ consumption: 120, complete: true, unaccounted: 120 });
+  });
+
+  it('still excludes annual bills whose allocation year begins after the fiscal year', () => {
+    const owner = { ...facility, fiscalYear: 'nonCalendarYear' as const, fiscalYearMonth: 6, fiscalYearCalendarEnd: true };
+    const annual = meter({ guid: 'future', meterReadingDataApplication: 'fullYear' });
+    const first = bills('covered', 10, 2024), second = bills('covered', 10, 2025);
+    const readings = [...first.readings, ...second.readings,
+      reading({ meterId: annual.guid, year: 2026, month: 12, totalEnergyUse: 120 })];
+    const projected = canonicalMeters(owner, [first.projected.meter, annual], readings);
+    expect(buildFacilityEnergyUseBalance(owner, 2025, projected, readings)).toMatchObject({ consumption: 120, complete: true, unaccounted: 120 });
+  });
+
+  it('rejects an invalid contributing next-year boundary instead of using a later valid bill', () => {
+    const electric = bills();
+    const backward = { ...electric.projected.meter, meterReadingDataApplication: 'backward' as const };
+    const boundary = reading({ guid: 'invalid-boundary', meterId: backward.guid, year: 2026, month: 1, day: 15, totalEnergyUse: NaN });
+    const readings = [reading({ guid: 'previous-boundary', meterId: backward.guid, year: 2024, month: 12, day: 15 }),
+      ...electric.readings.map(row => ({ ...row, day: 15 })), boundary,
+      reading({ guid: 'later-valid-bill', meterId: backward.guid, year: 2026, month: 2, day: 15 })];
+    const projected = canonicalMeters(facility, [backward], readings);
+    const december = projected[0].monthlyData.find(row => row.year === 2025 && row.monthNumValue === 11)!;
+    expect(december.energyUse).toBe(0);
+    const balance = buildFacilityEnergyUseBalance(facility, 2025, projected, readings);
+    expect(balance).toMatchObject({ complete: false, unaccounted: null, accountedPercent: null });
+    expect(balance.sources[0].coverage).toContain('11 of 12');
+    const corrected = readings.map(row => row.guid === boundary.guid ? { ...row, totalEnergyUse: 10 } : row);
+    expect(buildFacilityEnergyUseBalance(facility, 2025, canonicalMeters(facility, [backward], corrected), corrected).complete).toBe(true);
+  });
+
+  it('validates the canonical next-month bill without rejecting unrelated invalid future bills', () => {
+    const electric = bills();
+    const backward = { ...electric.projected.meter, meterReadingDataApplication: 'backward' as const };
+    const readings = [reading({ guid: 'previous', meterId: backward.guid, year: 2024, month: 12, day: 15 }),
+      ...electric.readings.map(row => ({ ...row, day: 15 })),
+      reading({ guid: 'unused-january', meterId: backward.guid, year: 2026, month: 1, day: 5, totalEnergyUse: NaN }),
+      reading({ guid: 'used-january', meterId: backward.guid, year: 2026, month: 1, day: 20, totalEnergyUse: 10 }),
+      reading({ guid: 'unrelated-february', meterId: backward.guid, year: 2026, month: 2, day: 15, totalEnergyUse: NaN })];
+    const projected = canonicalMeters(facility, [backward], readings);
+    expect(buildFacilityEnergyUseBalance(facility, 2025, projected, readings).complete).toBe(true);
+  });
 
   it('balances converted site consumption against all equipment and includes meter-only sources as unaccounted flows', () => {
     const electric = bills('electricity', 36, 2025, 'MJ'), gas = bills('gas', 5);
@@ -91,15 +168,9 @@ describe('Facility energy balance', () => {
 
   it('consumes the canonical calculation and site-unit projection used by the facility adapter', () => {
     const electric = bills(), gas = bills('gas', 5);
-    const base = energyUsesSnapshot();
-    const snapshot = { ...base, facilities: [facility], meters: [electric.projected.meter, gas.projected.meter], meterData: [...electric.readings, ...gas.readings] };
-    const request = buildWorkspaceCalendarizationRequest(snapshot), input = request.payload;
-    const meters = getCalanderizedMeterData(input.meters, input.allMeterData, input.accountOrFacility, input.monthDisplayShort, input.calanderizationOptions,
-      input.co2Emissions, input.customFuels, input.facilities, input.assessmentReportVersion, input.customGWPs);
-    const projected = projectWorkspaceCalendarization({ state: 'ready', accountGuid: snapshot.account.guid, inputFingerprint: request.inputFingerprint, meters }, snapshot,
-      { context: { kind: 'facility', guid: facility.guid }, energyUnit: facility.energyUnit, energyIsSource: false, includeEmissions: false });
-    expect(projected.state).toBe('ready');
-    expect(buildFacilityEnergyUseBalance(facility, 2025, projected.meters, snapshot.meterData, equipment())).toMatchObject({ consumption: 180, equipment: 90, unaccounted: 90, complete: true });
+    const readings = [...electric.readings, ...gas.readings];
+    const projected = canonicalMeters(facility, [electric.projected.meter, gas.projected.meter], readings);
+    expect(buildFacilityEnergyUseBalance(facility, 2025, projected, readings, equipment())).toMatchObject({ consumption: 180, equipment: 90, unaccounted: 90, complete: true });
   });
 
   it('requires backward-reading boundaries to cover the fiscal year and rejects invalid bills', () => {

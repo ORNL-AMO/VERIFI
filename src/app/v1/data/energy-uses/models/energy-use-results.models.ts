@@ -82,10 +82,13 @@ export function summarizeEnergyUseYear(rows: readonly ProjectedEnergyUse[], year
 
 export function buildEnergyUseResults(items: readonly IdbFacilityEnergyUseEquipment[], facility: IdbFacility): EnergyUseAnnualResult[] {
   const ordered = [...items].sort((a, b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid));
-  return energyUseChartYears(ordered).map(year => summarizeEnergyUseYear(ordered.flatMap(item => {
-    const row = projectEnergyUse(item, facility, year, facility.energyUnit);
-    return row ? [row] : [];
-  }), year));
+  return energyUseChartYears(ordered).flatMap(year => {
+    const rows = ordered.flatMap(item => {
+      const row = projectEnergyUse(item, facility, year, facility.energyUnit);
+      return row ? [row] : [];
+    });
+    return rows.length ? [summarizeEnergyUseYear(rows, year)] : [];
+  });
 }
 
 /** Stable across input ordering, filtering, years and chart types. */

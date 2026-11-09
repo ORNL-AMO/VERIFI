@@ -3,6 +3,7 @@ import type { IdbFacility } from '@data/models/idbModels/facility';
 import type { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import { getFiscalYear } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { getCurrentMonthsReadings, getNextMonthsBill } from '@domain/calculations/calanderization/calanderizationHelpers';
 import { getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { energyUseFiscalPeriod } from './energy-use-projection.models';
 import type { FacilityEnergyUseResult } from './facility-energy-use-results.models';
@@ -44,7 +45,8 @@ export function buildFacilityEnergyUseBalance(facility: IdbFacility, year: numbe
   const months = start ? Array.from({ length: 12 }, (_, index) => new Date(start.getFullYear(), start.getMonth() + index, 1)) : [];
   const meterRows = owned.flatMap(row => {
     const saved = readings.filter(reading => reading.meterId === row.meter.guid && reading.accountId === facility.accountId && reading.facilityId === facility.guid);
-    if (saved.length && months.length && saved.every(reading => new Date(reading.year, reading.month - 1, 1) > months[11])) return [];
+    if (saved.length && months.length && saved.every(reading => new Date(reading.year,
+      row.meter.meterReadingDataApplication === 'fullYear' ? 0 : reading.month - 1, 1) > months[11])) return [];
     const retire = row.meter.noLongerInUse && Number.isInteger(row.meter.noLongerInUseYear) && Number.isInteger(row.meter.noLongerInUseMonth)
       ? new Date(row.meter.noLongerInUseYear, row.meter.noLongerInUseMonth + 1, 1) : undefined;
     const expected = months.filter(date => !retire || date < retire);
@@ -92,7 +94,7 @@ export function facilityEnergyBalanceYear(meters: readonly CalanderizedMeter[], 
 /** Calendarization may pad missing months with zero; only saved reading coverage makes them known. */
 function hasSavedCoverage(row: CalanderizedMeter, readings: readonly IdbUtilityMeterData[], date: Date): boolean {
   const valid = (reading: IdbUtilityMeterData) => Number.isFinite(getIsEnergyUnit(row.meter.startingUnit) ? reading.totalEnergyUse : reading.totalVolume);
-  const mode = row.meter.meterReadingDataApplication ?? 'backward';
+  const mode = row.meter.meterReadingDataApplication ?? 'fullMonth';
   if (mode === 'fullYear') {
     const annual = readings.filter(reading => reading.year === date.getFullYear());
     return annual.length > 0 && annual.every(valid);
@@ -101,8 +103,14 @@ function hasSavedCoverage(row: CalanderizedMeter, readings: readonly IdbUtilityM
     const monthly = readings.filter(reading => reading.year === date.getFullYear() && reading.month === date.getMonth() + 1);
     return monthly.length > 0 && monthly.every(valid);
   }
+  if (!readings.length) return false;
   const next = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-  const dated = readings.filter(valid).map(reading => new Date(reading.year, reading.month - 1, reading.day));
+  const dated = readings.map(reading => new Date(reading.year, reading.month - 1, reading.day));
+  // Match canonical backward allocation's actual bills; a later valid bill must
+  // never stand in for an invalid boundary bill whose NaN was normalized to zero.
+  const saved = [...readings];
+  const contributing = [...getCurrentMonthsReadings(date.getMonth(), date.getFullYear(), saved),
+    getNextMonthsBill(date.getMonth(), date.getFullYear(), saved)];
   return dated.some(value => value <= date) && dated.some(value => value >= next)
-    && readings.filter(reading => { const value = new Date(reading.year, reading.month - 1, reading.day); return value >= date && value < next; }).every(valid);
+    && contributing.every(valid);
 }
