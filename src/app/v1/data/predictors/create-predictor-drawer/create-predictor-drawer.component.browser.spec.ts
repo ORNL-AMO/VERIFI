@@ -4,6 +4,9 @@ import { TestBed } from '@angular/core/testing';
 import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { page, userEvent } from 'vitest/browser';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WeatherStationLookupService } from '@platform/weather/weather-station-lookup.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -13,10 +16,8 @@ import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.co
 import { account, facility } from '@app/v1/data/meters/facility-meters.testing';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PredictorWeatherWorkflowService } from '../predictor-weather-workflow.service';
-import { PredictorWorkspaceActionsService } from '../predictor-workspace-actions.service';
 import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench/weather-predictor-workbench-context.service';
 import { WeatherPredictorSetupComponent } from '../weather-predictor-workbench/setup/weather-predictor-setup.component';
-import { CreatePredictorDrawerComponent } from './create-predictor-drawer.component';
 
 @Component({ standalone: true, imports: [DataModule, RouterOutlet, PortalModule],
   template: '<main class="v1-root"><router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
@@ -28,18 +29,24 @@ describe('Predictor creation through inventory and Weather setup', () => {
     const activeAccount = signal(account());
     const revision = signal(1);
     const owner = signal(facility({ guid: 'facility-b', name: 'Beta', city: 'Oak Ridge', state: 'TN' }));
-    const actions = { createPredictor: vi.fn().mockResolvedValue({ guid: 'new-standard', accountId: 'account-a', facilityId: 'facility-b' }) };
+    const handler = { createStandardPredictor: vi.fn<PredictorCommandHandler['createStandardPredictor']>()
+      .mockImplementation(async changes => ({ ...changes.predictor, guid: 'new-standard', id: 1 })) };
+    const recovery = { reloadActiveWorkspace: vi.fn() };
     const workflow = { state: signal({ status: 'idle', message: '' }), busy: signal(false), reset: vi.fn(),
       previewStationSelection: vi.fn(), previewStationGroup: vi.fn(), commitStationGroup: vi.fn() };
     const lookup = { getStation: vi.fn(), searchLocations: vi.fn(), findStations: vi.fn() };
-    // Register the portal-created drawer directly so TestBed applies its provider override.
-    TestBed.configureTestingModule({ imports: [PredictorCreationHost, CreatePredictorDrawerComponent], providers: [
+    TestBed.configureTestingModule({ imports: [PredictorCreationHost], providers: [
       provideRouter([
         { path: '', pathMatch: 'full', component: DataInventoryComponent },
         { path: 'v1/workspace/facility/:facilityGuid/data/predictors/weather/new', component: WeatherPredictorSetupComponent }
       ]), ModalPortalService,
+      { provide: PredictorCommandHandler, useValue: handler },
+      { provide: AccountWorkspaceService, useValue: recovery },
+      { provide: WorkspaceCommandBoundary, useValue: {
+        execute: vi.fn().mockImplementation(async (_options, persist) => ({ value: await persist() }))
+      } },
       { provide: AccountWorkspaceStore, useValue: { account: activeAccount, facilities: signal([facility(), owner()]),
-        canWrite: signal(true), hasPending: signal(false) } },
+        facilityAnalyses: signal([]), canWrite: signal(true), hasPending: signal(false) } },
       { provide: FacilityPredictorsWorkspaceService, useValue: { account: activeAccount, facility: owner, revision,
         weatherStationGroups: signal([]), predictorReadings: signal([]), defaultWeatherRange: signal(undefined),
         canWrite: signal(true), hasPending: signal(false) } },
@@ -53,8 +60,7 @@ describe('Predictor creation through inventory and Weather setup', () => {
         facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab],
         facilityWeatherPredictorCreateRoute: (facilityGuid: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', 'weather', 'new']
       } }
-    ] }).overrideComponent(CreatePredictorDrawerComponent, { set: { providers: [{ provide: PredictorWorkspaceActionsService, useValue: actions }] } })
-      .overrideComponent(WeatherPredictorSetupComponent, { set: { providers: [WeatherPredictorWorkbenchContextService] } });
+    ] }).overrideComponent(WeatherPredictorSetupComponent, { set: { providers: [WeatherPredictorWorkbenchContextService] } });
     const fixture = TestBed.createComponent(PredictorCreationHost);
     const router = TestBed.inject(Router);
     const navigate = router.navigate.bind(router);
@@ -86,7 +92,11 @@ describe('Predictor creation through inventory and Weather setup', () => {
       await page.getByRole('checkbox', { name: 'Is production?', exact: true }).click();
       await screenshot('standard');
       root.querySelector<HTMLButtonElement>('button[type="submit"][form="predictor-draft"]')!.click(); await fixture.whenStable(); fixture.detectChanges();
-      expect(actions.createPredictor).toHaveBeenCalledExactlyOnceWith({ name: 'Production', production: true, predictorType: 'Standard' }, 'facility-b');
+      expect(handler.createStandardPredictor).toHaveBeenCalledExactlyOnceWith({
+        predictor: expect.objectContaining({ name: 'Production', production: true, productionInAnalysis: true,
+          predictorType: 'Standard', accountId: 'account-a', facilityId: 'facility-b' }),
+        facilityAnalyses: []
+      }, 'account-a');
       expect(navigation).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-b', 'data', 'predictors', 'new-standard', 'settings']);
       expect(root.querySelector('[role="dialog"]')).toBeNull();
       await choose('Add predictor'); await choose('Beta'); await choose('Weather predictors Calculate values from weather data.');
@@ -115,7 +125,8 @@ describe('Predictor creation through inventory and Weather setup', () => {
       expect([...root.querySelectorAll<HTMLSelectElement>('.weather-setup__definition select')].map(select => select.value)).toEqual(['CDD', 'relativeHumidity']);
       expect(name.value).toBe('Custom cooling'); expect(root.querySelector('[role="dialog"]')).toBeNull();
       expect(workflow.previewStationSelection).not.toHaveBeenCalled(); expect(workflow.commitStationGroup).not.toHaveBeenCalled();
-      expect(lookup.searchLocations).not.toHaveBeenCalled(); expect(actions.createPredictor).toHaveBeenCalledOnce();
+      expect(lookup.searchLocations).not.toHaveBeenCalled(); expect(handler.createStandardPredictor).toHaveBeenCalledOnce();
+      expect(recovery.reloadActiveWorkspace).not.toHaveBeenCalled();
     } finally { fixture.destroy(); vi.restoreAllMocks(); await page.viewport(1200, 800); }
   });
 });
