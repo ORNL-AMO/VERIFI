@@ -287,6 +287,8 @@ Setup calculators update typed drafts. Fuel-property defaults and rated-power co
 
 The feature-owned annual read model resolves each saved source occurrence independently: an explicit year wins, otherwise its latest earlier amount carries forward unchanged with source-year, unit, and override provenance. It never materializes inferred annual rows or recalculates history from current equipment settings. Invalid/ambiguous newer entries never silently fall back. The retirement year is the last active year; later projection stops while explicitly saved history remains visible. Portfolio projections group matching actual fiscal periods before facilities, groups, and equipment, without a cross-period total or percentage. Chart preferences remain session-only per account/facility/group. Shared chart presentation accepts feature-owned content while Meter/Predictor defaults remain unchanged.
 
+Feature-owned Energy Use results projections under `v1/data/energy-uses/models` provide group totals, source/item contributions, facility-wide results, and equipment-to-meter energy balances without persisted writes. Their pure chart builders share these known-value denominators and provenance; Sankey is registered at the existing shared ECharts boundary. Analysis and forthcoming Energy Use result tables share `v1/shared/data-workbench/results-table.css` while retaining local column geometry.
+
 ## Tests, builds, and delivery
 
 Test targets are configured in `angular.json` and exposed through `package.json`:

@@ -1,6 +1,8 @@
 import * as echarts from 'echarts/core';
 export { echarts };
 import {
+  SankeyChart,
+  SankeySeriesOption,
   TreemapChart,
   TreemapSeriesOption,
   BarChart,
@@ -37,6 +39,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { LegacyGridContainLabel } from 'echarts/features';
 
 echarts.use([
+  SankeyChart,
   TreemapChart,
   BarChart,
   CustomChart,
@@ -57,6 +60,7 @@ echarts.use([
 ]);
 
 export type V1EChartsOption = echarts.ComposeOption<
+  | SankeySeriesOption
   | TreemapSeriesOption
   | BarSeriesOption
   | CustomSeriesOption

@@ -52,6 +52,12 @@ equipment symbol to distinguish mixed membership from an individual item. Use it
 Use `name="motor"` for the cylinder motor with rounded end caps, cooling fins,
 and shaft. Its source is [`motor.svg`](../../../../assets/icons/motor.svg).
 
+For energy-footprint tabs, use `name="groupEnergyFootprint"` for one lightning
+footprint inside the group collection brackets, and `name="facilityEnergyFootprint"`
+for two footprints containing a lightning bolt and a flame. Their design sources
+are [`group-energy-footprint.svg`](../../../../assets/icons/group-energy-footprint.svg)
+and [`facility-energy-footprint.svg`](../../../../assets/icons/facility-energy-footprint.svg).
+
 ## Report icons
 
 Register each custom report icon above, then add its semantic name to the account

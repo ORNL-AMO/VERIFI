@@ -21,6 +21,12 @@ export interface EnergyUseTreemapNode {
   readonly facilityGuid?: string; readonly groupGuid?: string; readonly itemGuid?: string;
   readonly children?: readonly EnergyUseTreemapNode[]; readonly percentOfPeriod: number;
 }
+export function knownEnergyUseAmount(row: ProjectedEnergyUse): number | null {
+  return row.sources.some(source => source.amount !== null) ? row.amount : null;
+}
+export function energyUsePercent(amount: number | null, total: number): number | null {
+  return amount !== null && total > 0 ? amount / total * 100 : null;
+}
 const validYear = (year: number): boolean => Number.isInteger(year) && year >= 1 && year <= 9999;
 export function savedEnergyUseYears(items: readonly IdbFacilityEnergyUseEquipment[]): number[] {
   return [...new Set(items.flatMap(item => [...item.operatingConditionsData.map(row => row.year), ...item.utilityData.flatMap(source => source.energyUse.map(row => row.year))]).filter(validYear))].sort((a, b) => a - b);
@@ -57,9 +63,10 @@ export function projectEnergyUseSource(item: IdbFacilityEnergyUseEquipment, sour
   if (originYear !== year && retired && year > item.noLongerInUse.year) return { ...base, state: 'inactive', amount: 0, description: `Inactive after FY ${item.noLongerInUse.year}; no carry-forward.` };
   if (!rows.length) return { ...base, state: 'missing', amount: null, description: 'No earlier saved consumption; no backward projection.' };
   const row = rows[0];
-  if (row.energyUse == null || !Number.isFinite(row.energyUse) || row.energyUse < 0 || !row.energyUseUnit || !unit) return invalid(`Invalid saved consumption in FY ${originYear}.`);
+  const provenance = { originYear, originalAmount: row.energyUse, originalUnit: row.energyUseUnit, override: !!row.overrideEnergyUse };
+  if (row.energyUse == null || !Number.isFinite(row.energyUse) || row.energyUse < 0 || !row.energyUseUnit || !unit) return { ...invalid(`Invalid saved consumption in FY ${originYear}.`), ...provenance };
   const converted = new ConvertValue(row.energyUse, row.energyUseUnit, unit);
-  if (converted.hasError || !Number.isFinite(converted.convertedValue) || converted.convertedValue < 0) return invalid(`Cannot convert saved ${row.energyUseUnit} to ${unit}.`);
+  if (converted.hasError || !Number.isFinite(converted.convertedValue) || converted.convertedValue < 0) return { ...invalid(`Cannot convert saved ${row.energyUseUnit} to ${unit}.`), ...provenance };
   return { ...base, originYear, originalAmount: row.energyUse, originalUnit: row.energyUseUnit, override: !!row.overrideEnergyUse,
     state: originYear === year ? 'entered' : 'carried', amount: converted.convertedValue,
     description: `${originYear === year ? `Entered in FY ${year}` : `Carried forward from FY ${originYear}`}${row.overrideEnergyUse ? ' · Manual override' : ''}` };
