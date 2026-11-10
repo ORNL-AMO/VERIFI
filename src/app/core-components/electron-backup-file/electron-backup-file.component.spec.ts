@@ -14,7 +14,6 @@ import { LoadingService } from '../loading/loading.service';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { ElectronBackupFileComponent } from './electron-backup-file.component';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
-import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 import { ElectronService } from '@platform/electron/electron.service';
 import { DeleteDataService } from '@data/indexedDB/delete-data.service';
 
@@ -50,6 +49,7 @@ describe('ElectronBackupFileComponent', () => {
     addOrUpdateFile: ReturnType<typeof vi.fn>;
     inspectCurrentAccountFile: ReturnType<typeof vi.fn>;
     overwriteFile: ReturnType<typeof vi.fn>;
+    writeArchive: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -80,7 +80,8 @@ describe('ElectronBackupFileComponent', () => {
       clearReviewRequest: vi.fn(() => automaticBackupsService.reviewRequested.next(false)),
       addOrUpdateFile: vi.fn().mockResolvedValue(undefined),
       inspectCurrentAccountFile: vi.fn().mockResolvedValue(undefined),
-      overwriteFile: vi.fn().mockResolvedValue(undefined)
+      overwriteFile: vi.fn().mockResolvedValue(undefined),
+      writeArchive: vi.fn().mockResolvedValue(undefined)
     };
     TestBed.configureTestingModule({
       imports: [ElectronBackupFileTestModule],
@@ -97,13 +98,12 @@ describe('ElectronBackupFileComponent', () => {
         { provide: ElectronService, useValue: electronService },
         { provide: AutomaticBackupsService, useValue: automaticBackupsService },
         { provide: ToastNotificationsService, useValue: { showToast: vi.fn() } },
-        { provide: BackupExportCoordinator, useValue: { buildActiveAccountBackup: vi.fn() } },
+        { provide: BackupExportCoordinator, useValue: { buildActiveAccountBackup: vi.fn(() => buildPreparedBackupFile()) } },
         { provide: BackupImportCoordinator, useValue: backupImportCoordinator },
         { provide: LoadingService, useValue: loadingService },
         { provide: DeleteDataService, useValue: deleteDataService },
         { provide: WorkspaceCommandBoundary, useValue: commandBoundary },
-        { provide: AccountCommandHandler, useValue: accountHandler },
-        { provide: ElectronBackupFileGateway, useValue: { write: vi.fn() } }
+        { provide: AccountCommandHandler, useValue: accountHandler }
       ]
     });
 
@@ -133,6 +133,22 @@ describe('ElectronBackupFileComponent', () => {
     automaticBackupsService.latestBackupFile.next(buildPreparedBackupFile());
 
     expect(createArchiveSpy).not.toHaveBeenCalled();
+  });
+
+  it('writes archives through the tracked coordinator and awaits completion', async () => {
+    component.account = { guid: 'account-a', dataBackupFilePath: '/tmp/account-a.json' } as ElectronBackupFileComponent['account'];
+    let finish!: () => void;
+    automaticBackupsService.writeArchive.mockReturnValue(new Promise<void>(resolve => { finish = resolve; }));
+    const completed = vi.fn();
+    const archive = component.createArchive().then(completed);
+    expect(automaticBackupsService.writeArchive).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/tmp\/account-a_.+\.json$/), expect.objectContaining({ account: expect.objectContaining({ guid: 'account-a' }) })
+    );
+    await Promise.resolve();
+    expect(completed).not.toHaveBeenCalled();
+    finish();
+    await archive;
+    expect(completed).toHaveBeenCalledOnce();
   });
 
   it('keeps the archive prompt dismissed after automatic saves update the latest backup file', () => {

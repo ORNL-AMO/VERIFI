@@ -9,6 +9,7 @@ import { ElectronBackupsDbService } from '@data/indexedDB/electron-backups-db.se
 import { ElectronBackupFileGateway } from './electron-backup-file.gateway';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbElectronBackup, IdbElectronBackup } from '@data/models/idbModels/electronBackup';
+import { BackupFile } from '@data/models/backup-file';
 
 export type AutomaticBackupStatus =
   | 'disabled'
@@ -35,6 +36,8 @@ export class AutomaticBackupsService {
   private lastObservedRevision?: string;
   private activeWrite = false;
   private readonly pendingOperations = new Set<Promise<unknown>>();
+  private archiveQueue: Promise<void> = Promise.resolve();
+  private archiveWriteFailed = false;
   private queuedRevisionKey?: string;
   private accountSessionToken = 0;
   private warnedIssues = new Set<string>();
@@ -72,6 +75,9 @@ export class AutomaticBackupsService {
       if (token !== this.accountSessionToken) throw new Error('The active account changed. Try restarting again.');
       this.observeWorkspace(this.workspaceStore.state());
       if (this.pendingOperations.size) continue;
+      if (this.archiveWriteFailed) {
+        throw new Error('An automatic backup archive could not be saved. Review the backup file and retry archiving before restarting.');
+      }
       if (this.status.value === 'conflict' || this.status.value === 'error') {
         throw new Error('Resolve the automatic backup issue before restarting to install the update.');
       }
@@ -87,6 +93,28 @@ export class AutomaticBackupsService {
     this.pendingOperations.add(operation);
     operation.then(() => this.pendingOperations.delete(operation), () => this.pendingOperations.delete(operation));
     return operation;
+  }
+
+  /** Track automatic and requested archives alongside attached-file writes before an update. */
+  writeArchive(path: string, backup: BackupFile): Promise<void> {
+    const token = this.accountSessionToken;
+    const accountGuid = this.account?.guid;
+    const operation = this.archiveQueue.then(async () => {
+      try {
+        await this.backupGateway.write(path, backup);
+        if (token === this.accountSessionToken && accountGuid === this.account?.guid) this.archiveWriteFailed = false;
+      } catch (error) {
+        if (token === this.accountSessionToken && accountGuid === this.account?.guid) {
+          this.archiveWriteFailed = true;
+          this.warnOnce('archive-write-failed', 'Automatic Archive Failed',
+            error instanceof Error ? error.message : 'The backup archive could not be written.');
+        }
+        throw error;
+      }
+    });
+    // Archive names can repeat within a minute; serialize writes to their shared temporary paths.
+    this.archiveQueue = operation.then(() => undefined, () => undefined);
+    return this.trackOperation(operation);
   }
 
   async addOrUpdateFile(dataBackupId: string, accountId: string): Promise<void> {
@@ -175,7 +203,11 @@ export class AutomaticBackupsService {
     const account = state.snapshot?.account;
     if (!account) {
       this.clearDebounceTimer();
+      if (this.account) this.accountSessionToken += 1;
       this.account = undefined;
+      this.activeWrite = false;
+      this.queuedRevisionKey = undefined;
+      this.archiveWriteFailed = false;
       this.lastObservedRevision = undefined;
       this.latestBackupFile.next(undefined);
       this.clearReviewRequest();
@@ -209,6 +241,7 @@ export class AutomaticBackupsService {
     this.lastObservedRevision = undefined;
     this.account = account;
     this.accountSessionToken += 1;
+    this.archiveWriteFailed = false;
     this.warnedIssues.clear();
     this.clearReviewRequest();
     this.latestBackupFile.next(undefined);

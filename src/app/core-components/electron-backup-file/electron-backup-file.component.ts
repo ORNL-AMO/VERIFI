@@ -15,7 +15,6 @@ import { IdbElectronBackup } from '@data/models/idbModels/electronBackup';
 import { PreparedBackupFile } from '@data/backup/backup-preparation.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
-import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -52,7 +51,6 @@ export class ElectronBackupFileComponent {
     private deleteDataService: DeleteDataService,
     private commandBoundary: WorkspaceCommandBoundary,
     private accountHandler: AccountCommandHandler,
-    private backupGateway: ElectronBackupFileGateway,
     private injector: Injector) {
 
   }
@@ -85,7 +83,8 @@ export class ElectronBackupFileComponent {
           this.pendingArchiveDecision = true;
         }
         if (val && this.archiveOption == 'always' && this.backupStatus == 'checking') {
-          void this.createArchive();
+          // The coordinator reports failures and retains them in the update restart barrier.
+          void this.createArchive().catch(() => undefined);
         }
         this.checkShowModal();
       });
@@ -220,7 +219,7 @@ export class ElectronBackupFileComponent {
     let timeStr = `${displayHours}_${minutes.toString().padStart(2, '0')}_${ampm}`;
     let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear() + '_' + timeStr;
     const archivePath = sub + '_' + dateStr + '.json';
-    await this.backupGateway.write(archivePath, archiveBackup);
+    await this.automaticBackupsService.writeArchive(archivePath, archiveBackup);
     this.toastNotificationService.showToast('Archive Created', archivePath + ' created!', undefined, false, 'alert-success');
   }
 

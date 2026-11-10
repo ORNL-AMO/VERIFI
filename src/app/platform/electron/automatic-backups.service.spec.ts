@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -9,6 +9,8 @@ import { ToastNotificationsService } from '@shared/notifications/toast-notificat
 import { ElectronBackupsDbService } from '@data/indexedDB/electron-backups-db.service';
 import { AutomaticBackupsService } from './automatic-backups.service';
 import { ElectronBackupFileGateway } from './electron-backup-file.gateway';
+import { UpdateInstallService } from './update-install.service';
+import { ElectronUpdateState } from './electron-update.models';
 
 describe('AutomaticBackupsService', () => {
   let store: AccountWorkspaceStore;
@@ -20,7 +22,7 @@ describe('AutomaticBackupsService', () => {
     write: ReturnType<typeof vi.fn>;
   };
   let exportCoordinator: {
-    buildActiveAccountBackup: ReturnType<typeof vi.fn>;
+    buildActiveAccountBackup: ReturnType<typeof vi.fn<BackupExportCoordinator['buildActiveAccountBackup']>>;
   };
   let electronBackupsDb: {
     getAll: ReturnType<typeof vi.fn>;
@@ -44,7 +46,7 @@ describe('AutomaticBackupsService', () => {
         backupFileType: 'Account',
         origin: 'VERIFI',
         account: { guid: 'account-a', name: 'Account A' }
-      }))
+      } as ReturnType<BackupExportCoordinator['buildActiveAccountBackup']>))
     };
     electronBackupsDb = {
       getAll: vi.fn(() => of([])),
@@ -68,6 +70,87 @@ describe('AutomaticBackupsService', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  function installer() {
+    const electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn() };
+    const install = new UpdateInstallService(
+      { url: '/welcome' } as any,
+      { whenIdle: vi.fn().mockResolvedValue(undefined) } as any,
+      service,
+      electron as any,
+      { setLoadingMessage: vi.fn(), setLoadingStatus: vi.fn() } as any,
+      { initialize: vi.fn().mockResolvedValue({ status: 'ready' }) } as any
+    );
+    return { install, electron };
+  }
+
+  it('waits for an automatic archive started during inspection before requesting installation', async () => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    const archive = deferred<void>();
+    gateway.write.mockReturnValueOnce(archive.promise);
+    const subscription = service.latestBackupFile.subscribe(value => {
+      if (value && service.status.value === 'checking') void service.writeArchive('/tmp/archive.json', exportCoordinator.buildActiveAccountBackup()).catch(() => undefined);
+    });
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    const { install, electron } = installer();
+    const completed = install.install();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(gateway.write).toHaveBeenCalledOnce();
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+    archive.resolve();
+    await expect(completed).resolves.toBe(true);
+    expect(electron.installUpdate).toHaveBeenCalledOnce();
+    subscription.unsubscribe();
+  });
+
+  it('retains archive failures after other backup work is ready and blocks installation until a successful retry', async () => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    const archive = deferred<void>();
+    gateway.write.mockReturnValueOnce(archive.promise);
+    const subscription = service.latestBackupFile.subscribe(value => {
+      if (value && service.status.value === 'checking') void service.writeArchive('/tmp/archive.json', exportCoordinator.buildActiveAccountBackup()).catch(() => undefined);
+    });
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    const { install, electron } = installer();
+    const completed = expect(install.install()).rejects.toThrow('archive offline');
+    await vi.advanceTimersByTimeAsync(0);
+    archive.reject(new Error('archive offline'));
+    await completed;
+    expect(service.status.value).toBe('ready');
+    await expect(install.install()).rejects.toThrow('archive could not be saved');
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+    await service.writeArchive('/tmp/archive-retry.json', exportCoordinator.buildActiveAccountBackup());
+    await expect(install.install()).resolves.toBe(true);
+    expect(electron.installUpdate).toHaveBeenCalledOnce();
+    subscription.unsubscribe();
+  });
+
+  it('serializes archive writes that can share a temporary file path', async () => {
+    store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
+    service.subscribeData();
+    const firstWrite = deferred<void>();
+    gateway.write.mockReturnValueOnce(firstWrite.promise);
+    const first = service.writeArchive('/tmp/archive.json', exportCoordinator.buildActiveAccountBackup());
+    const second = service.writeArchive('/tmp/archive.json', exportCoordinator.buildActiveAccountBackup());
+    await flushAsync();
+    expect(gateway.write).toHaveBeenCalledTimes(1);
+    firstWrite.resolve();
+    await Promise.all([first, second]);
+    expect(gateway.write).toHaveBeenCalledTimes(2);
+  });
+
+  it('clears an archive failure when its account is removed from the workspace', async () => {
+    store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
+    service.subscribeData();
+    gateway.write.mockRejectedValueOnce(new Error('archive offline'));
+    await expect(service.writeArchive('/tmp/archive.json', exportCoordinator.buildActiveAccountBackup())).rejects.toThrow('archive offline');
+    await expect(service.flushPending()).rejects.toThrow('archive could not be saved');
+    store.clear();
+    await expect(service.flushPending()).resolves.toBeUndefined();
+    expect(service.status.value).toBe('disabled');
   });
 
   it('flushes a debounced committed revision before restart without waiting for its timer', async () => {
