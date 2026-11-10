@@ -133,6 +133,38 @@ export class HeaderComponent implements OnInit {
     }
 
     try {
+      const currentUrl = this.router.url;
+      if (this.inDataEvaluation && !currentUrl.includes('weather-data')) {
+        await this.router.navigateByUrl('/data-evaluation/account/home', {
+          state: { workspaceAccountGuid: account.guid },
+          onSameUrlNavigation: 'reload'
+        });
+        return;
+      }
+      if (!this.inDataEvaluation) {
+        let target = '/data-management/' + account.guid;
+        if (currentUrl.includes('weather-data')) {
+          target += '/weather-data';
+        } else if (currentUrl.includes('custom-data')) {
+          if (currentUrl.includes('emissions') || currentUrl.includes('custom-grid-factors')) {
+            target += '/account-custom-data/custom-grid-factors';
+          } else if (currentUrl.includes('fuels')) {
+            target += '/account-custom-data/custom-fuels';
+          } else if (currentUrl.includes('gwp')) {
+            target += '/account-custom-data/custom-gwps';
+          }
+        }
+        const accepted = await this.router.navigateByUrl(target);
+        if (accepted && currentUrl.includes('facilities') && this.accountWorkspaceStore.account()?.guid === account.guid
+          && !this.router.currentNavigation() && (this.router.url === target || this.router.url === target + '/home')) {
+          const facility = this.accountWorkspaceStore.selectedFacility();
+          if (facility) {
+            await this.router.navigateByUrl(`/data-management/${account.guid}/facilities/${facility.guid}`, { replaceUrl: true });
+          }
+        }
+        return;
+      }
+      // Weather keeps its existing account-switch destination and lifecycle.
       const result = await this.accountWorkspaceService.selectAccount(account.guid);
       if (result !== 'published') {
         return;

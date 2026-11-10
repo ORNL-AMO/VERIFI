@@ -35,6 +35,17 @@
       </div>
     </div>
     }
+    @if (saveError(); as error) {
+    <div class="alert alert-danger" role="alert">
+      {{error}} <button type="button" class="btn btn-sm btn-outline" (click)="retrySave()">Retry</button>
+    </div>
+    }
+    @if (saving()) {
+    <p class="text-muted mb-2" role="status">Saving analysis changes...</p>
+    }
+    @if (form.invalid && (form.dirty || form.touched)) {
+    <div class="alert alert-warning" role="alert">A name and baseline year are required to save your changes.</div>
+    }
     <form [formGroup]="form">
       <div class="row">
         <div class="col-6">

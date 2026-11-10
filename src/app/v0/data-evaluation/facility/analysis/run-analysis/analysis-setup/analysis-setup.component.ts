@@ -1,13 +1,17 @@
+import { AnalysisAutosave } from '../analysis-autosave';
+import { FacilityAnalysisFieldChanges } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
+import * as _ from 'lodash';
+import { getFacilityAnalysisFieldChanges } from '../analysis-edits';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { DestroyRef, Component, computed, effect, inject, Signal, untracked } from '@angular/core';
+import { DestroyRef, HostListener, Component, computed, effect, inject, signal, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { EnergyUnitOptions, UnitOption } from '@shared/unitOptions';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime } from 'rxjs';
 import { VolumeLiquidOptions } from '@shared/unitOptions';
 import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { IdbAccount } from '@data/models/idbModels/account';
@@ -20,6 +24,13 @@ import { getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calcul
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
+interface SetupDraft {
+  accountGuid: string;
+  analysisGuid: string;
+  fields: FacilityAnalysisFieldChanges;
+  clearModelsVersion: number;
+}
+
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -30,6 +41,7 @@ export class AnalysisSetupComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly routerGuardService = inject(RouterGuardService);
   private readonly fb = inject(FormBuilder);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -130,19 +142,9 @@ export class AnalysisSetupComponent {
     return hasModelsGenerated;
   });
 
-  readonly facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => {
-    const analysisItem = this.analysisItem();
-    const allFacilityAnalysisItems = this.allFacilityAnalysisItems();
-    if (!analysisItem || !allFacilityAnalysisItems) {
-      return [];
-    }
-    return allFacilityAnalysisItems.filter(item => {
-      return item.energyIsSource == analysisItem.energyIsSource && item.guid != analysisItem.guid && item.analysisCategory == analysisItem.analysisCategory;
-    });
-  });
-
-  // Tracks the GUID of the selected analysis item to detect item switches vs. saves of the same item.
-  private readonly _currentItemGuid = computed(() => this.analysisItem()?.guid);
+  private readonly draftEnergyIsSource = signal<boolean | undefined>(undefined);
+  readonly facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() =>
+    this.getBankingCandidates(this.draftEnergyIsSource() ?? this.analysisItem()?.energyIsSource));
 
   readonly form: FormGroup<{
     name: FormControl<string>;
@@ -162,28 +164,37 @@ export class AnalysisSetupComponent {
     bankedAnalysisItemId: this.fb.control<string | null>(null),
   });
 
-  private readonly pendingSetupFields = new Set<string>();
+  readonly autosave = new AnalysisAutosave<SetupDraft>((draft, baseline) => this.persistDraft(draft, baseline));
+  private ownerKey: string;
+  private clearModelsVersion = 0;
+  private observedDraft: SetupDraft;
 
   displayEnableForm = false;
 
   constructor() {
-    // Patch form only when switching to a different analysis item (GUID change).
-    // Using untracked() to read the item value without creating an additional reactive dependency.
     effect(() => {
-      this._currentItemGuid();
-      const item = untracked(() => this.analysisItem());
+      const item = this.analysisItem();
+      const accountGuid = this.account()?.guid;
       if (!item) { return; }
-      this.pendingSetupFields.clear();
-      this.form.patchValue({
-        name: item.name,
-        energyIsSource: item.energyIsSource,
-        energyUnit: item.energyUnit,
-        waterUnit: item.waterUnit,
-        hasBanking: item.hasBanking,
-        baselineYear: item.baselineYear ?? null,
-        bankedAnalysisItemId: item.bankedAnalysisItemId ?? null,
-      }, { emitEvent: false });
+      untracked(() => {
+        const ownerKey = accountGuid + ':' + item.guid;
+        if (this.ownerKey !== ownerKey || !this.autosave.hasPending) {
+          if (this.ownerKey !== ownerKey) { this.clearModelsVersion = 0; }
+          this.ownerKey = ownerKey;
+          this.form.patchValue({
+            name: item.name, energyIsSource: item.energyIsSource, energyUnit: item.energyUnit,
+            waterUnit: item.waterUnit, hasBanking: item.hasBanking, baselineYear: item.baselineYear ?? null,
+            bankedAnalysisItemId: item.bankedAnalysisItemId ?? null
+          }, { emitEvent: false });
+          this.draftEnergyIsSource.set(item.energyIsSource);
+          this.updateBankingValidation();
+          this.form.markAsPristine();
+          this.observedDraft = this.readDraft();
+          this.autosave.hydrate(this.observedDraft, this.form.valid);
+        }
+      });
     });
+    this.destroyRef.onDestroy(() => this.autosave.destroy());
 
     // Manage individual control disabled states based on model lock and in-use status.
     effect(() => {
@@ -217,66 +228,91 @@ export class AnalysisSetupComponent {
       takeUntilDestroyed()
     ).subscribe(hasBanking => {
       if (!hasBanking) {
-        this.form.controls.bankedAnalysisItemId.setValue(null);
+        this.form.controls.bankedAnalysisItemId.setValue(null, { emitEvent: false });
       }
+      this.updateBankingValidation();
     });
 
-    // Keep the user's field intent even when it returns to a value whose earlier write is still pending.
-    Object.entries(this.form.controls).forEach(([field, control]) => {
-      (control as FormControl).valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.pendingSetupFields.add(field));
-    });
-
-    // Auto-save on any valid form value change.
-    this.form.valueChanges.pipe(
-      debounceTime(100),
-      takeUntilDestroyed()
-    ).subscribe(() => {
-      if (this.form.valid) {
-        this.saveItem();
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      const boundary = this.form.controls.energyIsSource.value;
+      if (this.observedDraft && this.observedDraft.fields.energyIsSource !== boundary
+        && this.form.controls.hasBanking.value) {
+        const candidates = this.getBankingCandidates(boundary);
+        if (!candidates.some(item => item.guid === this.form.controls.bankedAnalysisItemId.value)) {
+          // Reconcile this explicit edit before capturing the complete settings draft.
+          this.form.patchValue({ hasBanking: candidates.length > 0, bankedAnalysisItemId: null }, { emitEvent: false });
+          this.updateBankingValidation();
+        }
       }
-    });
-
-    //turn off banking if there are no other analysis items to bank with
-    effect(() => {
-      const facilityAnalysisItems = this.facilityAnalysisItems();
-      if (this.form.controls.hasBanking.value == true && facilityAnalysisItems.length == 0) {
-        this.form.controls.hasBanking.setValue(false);
-      }
+      this.draftEnergyIsSource.set(boundary);
+      const draft = this.readDraft();
+      const immediate = this.observedDraft && Object.keys(draft.fields)
+        .some(field => field !== 'name' && !_.isEqual(this.observedDraft.fields[field], draft.fields[field]));
+      this.observedDraft = draft;
+      void this.autosave.capture(draft, this.form.valid, immediate);
     });
   }
 
-  async saveItem(): Promise<void> {
-    const item = this.analysisItem();
-    if (!item) { return; }
+  private getBankingCandidates(energyIsSource: boolean): Array<IdbAnalysisItem> {
+    const analysisItem = this.analysisItem();
+    return analysisItem ? this.allFacilityAnalysisItems().filter(item =>
+      item.energyIsSource === energyIsSource && item.guid !== analysisItem.guid
+      && item.analysisCategory === analysisItem.analysisCategory) : [];
+  }
+
+  private updateBankingValidation(): void {
+    const control = this.form.controls.bankedAnalysisItemId;
+    control.setValidators(this.form.controls.hasBanking.value ? Validators.required : null);
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private readDraft(): SetupDraft {
     const raw = this.form.getRawValue();
-    const fields = {
-      name: raw.name,
-      energyIsSource: raw.energyIsSource,
-      energyUnit: raw.energyUnit,
-      waterUnit: raw.waterUnit,
-      hasBanking: raw.hasBanking,
-      baselineYear: raw.baselineYear ?? item.baselineYear,
-      bankedAnalysisItemId: raw.hasBanking ? (raw.bankedAnalysisItemId ?? undefined) : undefined,
-    };
-    const submittedFields = [...this.pendingSetupFields];
-    const changes = Object.fromEntries(submittedFields.map(field => [field, fields[field]]));
-    this.pendingSetupFields.clear();
-    if (!Object.keys(changes).length) { return; }
-    const analysisGuid = item.guid;
-    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-    try {
-      await this.commandBoundary.execute(
-        { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Facility Analysis' ,
-          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-        () => this.analysisHandler.updateFacilityAnalysisFields(analysisGuid, changes, activeAccountGuid)
-      );
-    } catch (error) {
-      if (!this.destroyRef.destroyed && this.analysisItem()?.guid === analysisGuid &&
-        this.accountWorkspaceStore.account()?.guid === activeAccountGuid) {
-        submittedFields.forEach(field => this.pendingSetupFields.add(field));
+    return {
+      accountGuid: this.account()?.guid, analysisGuid: this.analysisItem()?.guid, clearModelsVersion: this.clearModelsVersion,
+      fields: {
+        name: raw.name, energyIsSource: raw.energyIsSource, energyUnit: raw.energyUnit, waterUnit: raw.waterUnit,
+        hasBanking: raw.hasBanking, baselineYear: raw.baselineYear,
+        bankedAnalysisItemId: raw.hasBanking ? raw.bankedAnalysisItemId ?? undefined : undefined
       }
-      throw error;
-    }
+    };
+  }
+
+  private restoreDraft(draft: SetupDraft): void {
+    this.clearModelsVersion = draft.clearModelsVersion;
+    this.form.patchValue({ ...draft.fields, bankedAnalysisItemId: draft.fields.bankedAnalysisItemId ?? null }, { emitEvent: false });
+    this.draftEnergyIsSource.set(this.form.controls.energyIsSource.value);
+    this.updateBankingValidation();
+    this.form.markAsPristine();
+    this.observedDraft = draft;
+  }
+
+  private async persistDraft(draft: SetupDraft, baseline: SetupDraft): Promise<void> {
+    const changes = getFacilityAnalysisFieldChanges(baseline.fields as IdbAnalysisItem, draft.fields);
+    const clearModels = draft.clearModelsVersion !== baseline.clearModelsVersion;
+    if (!Object.keys(changes).length && !clearModels) { return; }
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: draft.analysisGuid, label: clearModels ? 'Clear Facility Analysis Models' : 'Save Facility Analysis',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) } },
+      () => clearModels
+        ? this.analysisHandler.clearFacilityAnalysisModels(draft.analysisGuid, draft.accountGuid, changes)
+        : this.analysisHandler.updateFacilityAnalysisFields(draft.analysisGuid, changes, draft.accountGuid)
+    );
+  }
+
+  saveItem(): Promise<boolean> {
+    return this.autosave.capture(this.readDraft(), this.form.valid, true);
+  }
+
+  flushChanges(): Promise<boolean> { return this.autosave.flush(); }
+
+  canDeactivate(): Promise<boolean> {
+    return this.autosave.canDeactivate(this.routerGuardService, draft => this.restoreDraft(draft));
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (this.autosave.hasPending) { event.preventDefault(); event.returnValue = ''; }
   }
 
   toggleHideInUseMessage(): void {
@@ -292,14 +328,13 @@ export class AnalysisSetupComponent {
   }
 
   async confirmEnableForm(): Promise<void> {
+    if (!await this.flushChanges()) { this.form.markAllAsTouched(); return; }
     const item = this.analysisItem();
     if (!item) { return; }
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-    await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: item.guid, label: 'Save Facility Analysis' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.clearFacilityAnalysisModels(item.guid, activeAccountGuid)
-    );
+    this.clearModelsVersion++;
+    const saved = await this.autosave.capture(this.readDraft(), true, true);
+    if (!saved) { return; }
     if (!this.destroyRef.destroyed && this.analysisItem()?.guid === item.guid
       && this.accountWorkspaceStore.account()?.guid === activeAccountGuid) {
       this.displayEnableForm = false;

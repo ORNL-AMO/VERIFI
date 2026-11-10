@@ -1,7 +1,8 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, OnInit, inject, computed, Injector } from '@angular/core';
+import { Component, OnInit, inject, computed, Injector, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { RouterOutlet } from '@angular/router';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
@@ -15,6 +16,15 @@ import { IdbAccount } from '@data/models/idbModels/account';
 })
 export class AccountAnalysisComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  @ViewChild(RouterOutlet) private routedContent?: RouterOutlet;
+
+  readonly beforeNavigate = (): Promise<boolean> => {
+    const editor = this.routedContent?.isActivated
+      ? this.routedContent.component as { canDeactivate?: () => Promise<boolean> }
+      : undefined;
+    return editor?.canDeactivate?.() ?? Promise.resolve(true);
+  };
 
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;

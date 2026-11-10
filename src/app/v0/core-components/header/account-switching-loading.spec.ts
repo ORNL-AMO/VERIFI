@@ -21,7 +21,7 @@ describe('account switching loading ownership', () => {
   const account = { guid: 'account-b', name: 'Account B' } as IdbAccount;
   const activeAccount = { guid: 'account-a', name: 'Account A' } as IdbAccount;
 
-  it('switches from the header through workspace state without opening legacy loading', async () => {
+  it('requests header account navigation without opening legacy loading', async () => {
     const router = {
       url: '/data-evaluation/account',
       events: of(),
@@ -66,10 +66,12 @@ describe('account switching loading ownership', () => {
 
     await header.switchAccount(account);
 
-    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
+    expect(workspace.selectAccount).not.toHaveBeenCalled();
     expect(loading.setLoadingMessage).not.toHaveBeenCalled();
     expect(loading.setLoadingStatus).not.toHaveBeenCalled();
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/data-evaluation/account');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/data-evaluation/account/home', {
+      state: { workspaceAccountGuid: 'account-b' }, onSameUrlNavigation: 'reload'
+    });
     expect(header.accountList).toEqual([account]);
     expect(header.activeAccount).toEqual(activeAccount);
     header.ngOnDestroy();
@@ -110,17 +112,17 @@ describe('account switching loading ownership', () => {
 
     await header.switchAccount(account);
 
-    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
+    expect(workspace.selectAccount).not.toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-management/account-b/weather-data');
     header.ngOnDestroy();
   });
 
-  it('does not navigate when a header account switch is superseded', async () => {
+  it('does not mutate the workspace when header navigation is canceled', async () => {
     const router = {
       url: '/data-management/account-a',
       events: of(),
       navigate: vi.fn(),
-      navigateByUrl: vi.fn()
+      navigateByUrl: vi.fn().mockResolvedValue(false)
     };
     const workspace = { selectAccount: vi.fn().mockResolvedValue('superseded') };
     const header = new HeaderComponent(
@@ -149,8 +151,9 @@ describe('account switching loading ownership', () => {
 
     await header.switchAccount(account);
 
-    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
-    expect(router.navigateByUrl).not.toHaveBeenCalled();
+    expect(workspace.selectAccount).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/data-management/account-b');
+    expect(header.activeAccount).toEqual(activeAccount);
     header.ngOnDestroy();
   });
 

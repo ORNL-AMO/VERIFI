@@ -82,10 +82,15 @@ export class AnalysisCommandHandler {
     }, activeAccountGuid);
   }
 
-  async clearFacilityAnalysisModels(analysisGuid: string, activeAccountGuid: string): Promise<IdbAnalysisItem> {
+  async clearFacilityAnalysisModels(
+    analysisGuid: string,
+    activeAccountGuid: string,
+    changes: FacilityAnalysisFieldChanges = {}
+  ): Promise<IdbAnalysisItem> {
     const current = this.requireFacilityAnalysis(analysisGuid, activeAccountGuid);
     return this.updateFacilityAnalysis({
       ...current,
+      ...structuredClone(changes),
       isAnalysisVisited: false,
       groups: current.groups.map(group => ({
         ...group,

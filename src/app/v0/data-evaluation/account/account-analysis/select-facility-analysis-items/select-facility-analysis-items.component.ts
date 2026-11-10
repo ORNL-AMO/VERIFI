@@ -1,5 +1,5 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, effect, inject, Signal } from '@angular/core';
+import { Component, computed, effect, inject, Signal, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -12,6 +12,7 @@ import { AccountStatusCheckService } from '@shared/helper-services/account-statu
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { SelectItemTableComponent } from './select-item-table/select-item-table.component';
 
 interface FacilityListItem {
   facility: IdbFacility;
@@ -36,6 +37,16 @@ export class SelectFacilityAnalysisItemsComponent {
 
   retryDataChecks(): void {
     this.accountStatusCheckService.retryCalendarization();
+  }
+
+  @ViewChild(SelectItemTableComponent) private selectionTable?: SelectItemTableComponent;
+
+  canDeactivate(): Promise<boolean> {
+    return this.selectionTable?.canDeactivate() ?? Promise.resolve(true);
+  }
+
+  flushChanges(): Promise<boolean> {
+    return this.selectionTable?.flushChanges() ?? Promise.resolve(true);
   }
 
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
@@ -118,10 +129,19 @@ export class SelectFacilityAnalysisItemsComponent {
     });
   }
 
-  selectFacility(facilityId: string) {
-    const facilities = this.facilities();
-    let selectedFacility: IdbFacility = facilities.find(facility => facility.guid === facilityId);
-    this.accountWorkspaceService.selectFacility(selectedFacility.guid);
+  async selectFacility(facilityId: string): Promise<void> {
+    const currentFacilityGuid = this.selectedFacility()?.guid;
+    if (currentFacilityGuid === facilityId) return;
+    const accountGuid = this.account()?.guid;
+    const analysisGuid = this.selectedAnalysisItem()?.guid;
+    const url = this.router.url;
+    const navigationId = this.router.currentNavigation?.()?.id;
+    if (!await this.canDeactivate() || this.account()?.guid !== accountGuid ||
+      this.selectedAnalysisItem()?.guid !== analysisGuid || this.selectedFacility()?.guid !== currentFacilityGuid || this.router.url !== url ||
+      this.router.currentNavigation?.()?.id !== navigationId) return;
+    if (this.facilities().some(facility => facility.guid === facilityId)) {
+      this.accountWorkspaceService.selectFacility(facilityId);
+    }
   }
 
   toggleHideInUseMessage() {
