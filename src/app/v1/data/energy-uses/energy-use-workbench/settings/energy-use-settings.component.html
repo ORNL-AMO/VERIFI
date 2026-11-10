@@ -1,3 +1,4 @@
+<app-transfer-energy-use #transferPanel [item]="item()" [canAct]="canTransfer()" (transferred)="openTransferred($event)"/>
 @let settingsForm = form();
 @if (settingsForm) {
   <div class="energy-use-settings">
@@ -18,9 +19,10 @@
     }
     <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()" (resolved)="resolveConflicts($event)"/>
     <footer class="v1-workbench-section energy-use-settings__actions">
-      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canCopy()" (click)="copy()"><app-ui-icon name="copy"/>Copy energy use</button>
-      <app-energy-use-lifecycle-actions [item]="item()" [canAct]="canLifecycle()"/>
-      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canCommand()" (click)="requestDelete()"><app-ui-icon name="delete"/>Delete energy use</button>
+      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canCopy() || transferActive()" (click)="copy()"><app-ui-icon name="copy"/>Copy energy use</button>
+      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canTransfer() || transferActive()" (click)="transferPanel.open()"><app-ui-icon name="transfer"/>Transfer energy use</button>
+      <app-energy-use-lifecycle-actions [item]="item()" [canAct]="canLifecycle() && !transferActive()"/>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canCommand() || transferActive()" (click)="requestDelete()"><app-ui-icon name="delete"/>Delete energy use</button>
     </footer>
     @if (actionError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</p> }
   </div>

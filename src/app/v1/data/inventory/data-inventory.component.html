@@ -6,9 +6,9 @@
     <header class="v1-section-header v1-account-portfolio__header v1-page-header">
       <app-page-identity class="v1-account-portfolio__heading" [breadcrumbs]="breadcrumbs()" (breadcrumbSelected)="navigation.changeFacilityScope({ kind: 'all' })" [title]="title()" [icon]="headerIcon()" headingId="v1-account-portfolio-title"/>
       <div class="v1-account-portfolio__header-actions">
-        @if (isMeters() || isPredictors()) {
+        @if (isMeters() || isPredictors() || activeContent() === 'energy-uses') {
           @let tools = selectionActions();
-          <button type="button" class="v1-btn v1-btn--quiet" [class.v1-account-portfolio__select--active]="tools?.selecting()" [disabled]="!canSelectItems()" [attr.aria-pressed]="tools?.selecting() ?? false" [attr.aria-controls]="tools?.selecting() ? activeContent() + '-selection-actions' : null" (click)="tools?.toggleSelection()"><app-ui-icon [name]="tools?.selecting() ? 'check' : 'square'" [size]="18"/>Select {{ activeContent() }}</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [class.v1-account-portfolio__select--active]="tools?.selecting()" [disabled]="!canSelectItems()" [attr.aria-pressed]="tools?.selecting() ?? false" [attr.aria-controls]="tools?.selecting() ? activeContent() + '-selection-actions' : null" (click)="tools?.toggleSelection()"><app-ui-icon [name]="tools?.selecting() ? 'check' : 'square'" [size]="18"/>Select {{ activeContent() === 'energy-uses' ? 'groups' : activeContent() }}</button>
         }
         @if (exportAction(); as action) {
           <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!action.available()" (click)="action.open()"><app-ui-icon name="excel"/>Export Excel</button>

@@ -1,2 +1,5 @@
 :host { display: block; min-width: 0; }
 section { display: grid; gap: .85rem; min-width: 0; }
+
+.group-selection-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; padding: .7rem; border: 1px solid var(--v1-border); background: var(--v1-content-block); }
+@media print { .group-selection-actions { display: none; } }

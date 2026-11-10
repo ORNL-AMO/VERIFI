@@ -1,4 +1,3 @@
-import { InventoryResource } from './inventory-tools.models';
 import { Injectable, Signal, signal } from '@angular/core';
 import { AccountPortfolioTab } from '@app/v1/routing/workspace-route';
 
@@ -16,7 +15,7 @@ export interface InventoryExportAction {
 }
 
 export interface InventoryHeaderActions {
-  readonly resource: InventoryResource;
+  readonly resource: AccountPortfolioTab;
   readonly selecting: Signal<boolean>;
   readonly canToggle: Signal<boolean>;
   toggleSelection(): void;

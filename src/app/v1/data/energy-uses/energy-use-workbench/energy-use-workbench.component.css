@@ -9,7 +9,7 @@
 .energy-use-workbench__facts-region[hidden] { display: none; }
 .energy-use-workbench__workspace { grid-template-rows: minmax(0, 1fr); border-radius: 0 0 var(--v1-radius) var(--v1-radius); overflow: hidden; }
 .energy-use-workbench__item-rail { min-width: 0; border: 1px solid var(--v1-border); border-top: 0; border-right: 0; }
-.energy-use-workbench__item-rail > header { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+.energy-use-workbench__item-rail > header { display: flex; align-items: center; justify-content: space-between; gap: .35rem; }
 .energy-use-workbench__item-rail header strong { font-size: .85rem; }
 .energy-use-workbench__item-rail header span { color: var(--v1-muted); font-size: .78rem; white-space: nowrap; }
 .energy-use-workbench__item-rail nav { min-width: 0; }
@@ -28,3 +28,6 @@
   .energy-use-workbench__content { overflow: visible; }
   .energy-use-workbench__facts-region { max-height: none; overflow: visible; }
 }
+
+.energy-use-workbench__rail-actions { display: flex; align-items: center; gap: .35rem; }
+.energy-use-workbench__item-rail .energy-use-workbench__add { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; min-height: 1.75rem; padding: .2rem; }

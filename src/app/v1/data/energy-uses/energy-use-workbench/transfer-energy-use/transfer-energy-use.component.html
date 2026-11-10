@@ -1,0 +1,26 @@
+<ng-template #transferDrawer>
+  @if (review(); as current) {
+    <app-workspace-slideout title="Transfer energy use" [description]="current.name" [saving]="busy() || committed()" [hasFooter]="true" (closed)="close()">
+      <div class="creation-selections" aria-label="Transfer facility">
+        <div class="creation-selection"><app-ui-icon name="facility"/><span>{{ facility()?.name || 'Facility unavailable' }}</span><app-ui-icon name="check"/></div>
+      </div>
+      <p>Choose a destination energy-use group. All setup, annual values, and meter-group links will move with this item.</p>
+      @if (groups().length) {
+        <label class="visually-hidden" for="energy-use-transfer-search">Find energy-use group</label>
+        <input id="energy-use-transfer-search" class="v1-input creation-search" type="search" [formControl]="search" placeholder="Find energy-use group" [readOnly]="busy() || committed()">
+      }
+      <div class="creation-choices">
+        @for (group of matchingGroups(); track group.guid) {
+          <button type="button" class="creation-choice" [attr.aria-pressed]="target.value?.guid === group.guid" [disabled]="busy() || committed() || stale()" (click)="chooseGroup(group)"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>{{ group.name || 'Unnamed energy-use group' }}</strong></button>
+        } @empty {
+          <div class="creation-search-empty" role="status"><p>{{ groups().length ? 'No matching energy-use groups.' : 'No other energy-use groups are available in this facility.' }}</p>@if (groups().length) { <button type="button" class="v1-btn v1-btn--quiet" (click)="search.setValue('')">Clear search</button> }</div>
+        }
+      </div>
+      @if (stale() && !busy() && !committed()) { <p class="v1-alert v1-alert--warning" role="alert">The item or destination group changed. Cancel and review the transfer again.</p> }
+      @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+      <button slideoutFooter type="button" class="v1-btn v1-btn--quiet" [disabled]="busy() || committed()" (click)="close()">Cancel</button>
+      @if (committed()) { <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="busy()" (click)="recover()">Refresh saved changes</button> }
+      @else { <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="!canConfirm()" (click)="confirm()">@if (busy()) { <app-ui-icon name="loading" spin/> }Transfer energy use</button> }
+    </app-workspace-slideout>
+  }
+</ng-template>

@@ -12,7 +12,7 @@
   @else if (year() === undefined) { <p role="status">No saved annual data in this facility.</p> }
   @else if (unavailableCalendar()) { <p role="alert">Results are unavailable because the facility fiscal calendar is invalid.</p> }
   @else if (snapshot) {
-    <header class="facility-footprint__scope"><strong>{{ owner.name }}</strong><span>FY {{ snapshot.year }} · {{ owner.energyUnit }}/yr · Site energy</span><span class="v1-chip v1-chip--{{ calculation.tone }} facility-footprint__calculation" role="status"><app-ui-icon [name]="calculation.icon" [spin]="calculation.icon === 'loading'"/>{{ calculation.label }}</span></header>
+    <header class="facility-footprint__scope"><strong>{{ owner.name }}</strong><span>FY {{ snapshot.year }} · {{ owner.energyUnit }}/yr · Site energy</span>@if (calculation.tone !== 'success') { <span class="v1-chip v1-chip--{{ calculation.tone }} facility-footprint__calculation" role="status"><app-ui-icon [name]="calculation.icon" [spin]="calculation.icon === 'loading'"/>{{ calculation.label }}</span> }</header>
     @if (snapshot.partial) { <p class="v1-alert v1-alert--warning">Partial coverage · charts show known contributions only.</p> }
     @if (positive()) {
       <div class="facility-footprint__plot-scroll" tabindex="0" role="region" aria-label="Facility energy flow, scroll to view all groups">
