@@ -20,7 +20,7 @@ Executable configuration and source code remain authoritative for volatile facts
 
 Use the [task context index](context-index.md) to select entrypoints, exact sections, mode, skill, cross-boundary triggers, and initial validation.
 
-For pull requests, start with the six-step [team workflow](pr-workflow.md). Agent details cover [fresh review](local-fresh-review.md), [creation/publication](github-pr-creation.md), and [GitHub review comments](github-pr-review.md).
+For agent-assisted pull requests, start with the six-step [agent workflow](pr-workflow.md). Agent details cover [fresh review](local-fresh-review.md), [creation/publication](github-pr-creation.md), the append-only [review record](pr-review-record.md), and [GitHub review comments](github-pr-review.md). Human-only PRs use the general template and [contributor guidance](../../CONTRIBUTING.md#pull-requests).
 
 ## Maintenance
 

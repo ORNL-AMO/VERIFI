@@ -1,6 +1,6 @@
 # GitHub PR creation
 
-Follow the [team checklist](pr-workflow.md) when explicitly asked to open or update a VERIFI PR. This guide does not itself authorize publication.
+Follow this [agent-assisted checklist](pr-workflow.md) when asked to prepare, open, or update a VERIFI PR. This guide does not itself authorize publication; preparation alone does not authorize opening a PR. Human-only PRs follow [CONTRIBUTING.md](../../CONTRIBUTING.md#pull-requests).
 
 ## Prepare and validate
 
@@ -16,9 +16,9 @@ Follow the [team checklist](pr-workflow.md) when explicitly asked to open or upd
 
 ## Publish and verify
 
-7. Push the reviewed commits without force-pushing unless separately authorized. Create a normal PR unless a draft was requested or unresolved work makes it intentionally incomplete. Use the [PR template](../../.github/pull_request_template.md): include delivered behavior, validation commands/results, limitations, related issues, and separate **Context-aware self-review** and **Fresh agent review** evidence copied from their completed reports. Record each reviewer, exact base/head commits, findings/disposition, and checks/gaps; record the fresh reviewer's explicit no-history setting. Set each status `Completed` only when its report covers the current comparison; otherwise use `Not run`, `Failed`, or `Stale` as appropriate. Use non-closing references such as `Connects #123` because QA validates and closes issues; use closing keywords only when requested.
+7. Push the reviewed commits without force-pushing unless separately authorized. Create a normal PR unless a draft was requested or unresolved work makes it intentionally incomplete. Fill the general [PR template](../../.github/pull_request_template.md) with delivered behavior, validation commands/results, limitations, and related issues. Then append the [agent review records](pr-review-record.md) with separate **Context-aware self-review** and **Fresh agent review** evidence copied from their completed reports. Record each reviewer, exact base/head commits, findings/disposition, and checks/gaps; record the fresh reviewer's explicit no-history setting. Set each status `Completed` only when its report covers the current comparison; otherwise use `Not run`, `Failed`, or `Stale` as appropriate. Use non-closing references such as `Connects #123` because QA validates and closes issues; use closing keywords only when requested.
 8. Verify the PR URL, base/head commits, title, body, draft state, and displayed comparison. Attach or surface the PR in the active agent environment when supported, read initial CI/check status once, and return the URL and remaining gaps. Do not imply queued checks passed.
 
 Do not add reviewers, labels, project metadata, auto-merge, or GitHub review comments without authorization. Follow the [GitHub review guide](github-pr-review.md) for explicitly requested review publication.
 
-The review sections are visible evidence records, not GitHub-required status checks or merge approval. After new commits or a moved target, mark both `Stale` until both stages and the comparison check complete. The template also applies to PRs opened through tools/API; do not rely on GitHub to insert it automatically there.
+The review sections are required for this agent-assisted workflow, not for human-only PRs; they are visible evidence records, not GitHub-required status checks or merge approval. After new commits or a moved target, mark both `Stale` until both stages and the comparison check complete. When opening through tools/API, compose the general template and agent records explicitly; do not rely on GitHub to insert them automatically.
