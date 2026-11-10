@@ -37,8 +37,10 @@ export class UpdateInstallService {
     this.loading.setLoadingMessage('Finishing saves and backups before restarting…');
     this.loading.setLoadingStatus(true);
     try {
-      await this.commands.whenIdle();
-      await this.backups.flushPending();
+      do {
+        await this.commands.whenIdle();
+        await this.backups.flushPending();
+      } while (this.commands.hasPendingCommands || this.backups.hasPendingOperations);
       if (this.electron.updateState.value.status !== 'downloaded') return false;
       this.electron.installUpdate();
       return true;

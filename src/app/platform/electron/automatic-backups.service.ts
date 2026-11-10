@@ -32,6 +32,7 @@ export class AutomaticBackupsService {
   accountBackups: IdbElectronBackup[] = [];
 
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
+  private scheduledRevisionKey?: string;
   private observingRevisions = false;
   private lastObservedRevision?: string;
   private activeWrite = false;
@@ -39,7 +40,11 @@ export class AutomaticBackupsService {
   private archiveQueue: Promise<void> = Promise.resolve();
   private readonly archiveFailures = new Set<string>();
   private readonly setupFailures = new Set<string>();
+  private readonly reviewFailures = new Set<string>();
+  private readonly attachedIssues = new Map<string, 'error' | 'conflict'>();
+  private readonly failedRevisions = new Map<string, string>();
   private readonly fileConfigurations = new Map<string, Promise<boolean>>();
+  private readonly fileReviews = new Map<string, Promise<void>>();
   private queuedRevisionKey?: string;
   private accountSessionToken = 0;
   private warnedIssues = new Set<string>();
@@ -68,6 +73,10 @@ export class AutomaticBackupsService {
     this.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
   }
 
+  get hasPendingOperations(): boolean {
+    return this.pendingOperations.size > 0 || Boolean(this.debounceTimer || this.queuedRevisionKey);
+  }
+
   /** Drain committed revisions before a user-requested update; never overwrite a conflict. */
   async flushPending(): Promise<void> {
     this.observeWorkspace(this.workspaceStore.state());
@@ -77,20 +86,26 @@ export class AutomaticBackupsService {
       if (token !== this.accountSessionToken) throw new Error('The active account changed. Try restarting again.');
       this.observeWorkspace(this.workspaceStore.state());
       if (this.pendingOperations.size) continue;
+      if (this.status.value === 'conflict' || this.status.value === 'error') {
+        throw new Error('Resolve the automatic backup issue before restarting to install the update.');
+      }
+      if (this.debounceTimer || this.queuedRevisionKey) {
+        const revision = this.queuedRevisionKey || this.scheduledRevisionKey;
+        this.clearDebounceTimer();
+        this.queuedRevisionKey = undefined;
+        if (revision) await this.saveCommittedRevision(revision, token);
+        continue;
+      }
       if (this.archiveFailures.size) {
         throw new Error('An automatic backup archive could not be saved. Retry archiving for the affected account before restarting.');
       }
       if (this.setupFailures.size) {
         throw new Error('An automatic backup file could not be configured. Complete backup setup for the affected account before restarting.');
       }
-      if (this.status.value === 'conflict' || this.status.value === 'error') {
-        throw new Error('Resolve the automatic backup issue before restarting to install the update.');
+      if (this.reviewFailures.size || this.attachedIssues.size || this.failedRevisions.size) {
+        throw new Error('Resolve the automatic backup issue for the affected account before restarting to install the update.');
       }
-      if (!this.debounceTimer && !this.queuedRevisionKey) return;
-      const revision = this.queuedRevisionKey || this.lastObservedRevision;
-      this.clearDebounceTimer();
-      this.queuedRevisionKey = undefined;
-      if (revision) await this.saveCommittedRevision(revision, token);
+      return;
     }
   }
 
@@ -129,6 +144,21 @@ export class AutomaticBackupsService {
     return this.trackOperation(operation);
   }
 
+  /** A confirmation can archive, import, and submit commands; keep its entire continuation tracked. */
+  confirmFileReview(accountGuid: string, confirm: () => Promise<void>): Promise<void> {
+    const existing = this.fileReviews.get(accountGuid);
+    if (existing) return existing;
+    const operation = Promise.resolve().then(confirm).then(() => {
+      this.reviewFailures.delete(accountGuid);
+    }, error => {
+      this.reviewFailures.add(accountGuid);
+      throw error;
+    });
+    this.fileReviews.set(accountGuid, operation);
+    operation.then(() => this.fileReviews.delete(accountGuid), () => this.fileReviews.delete(accountGuid));
+    return this.trackOperation(operation);
+  }
+
   private async createAttachedFile(account: IdbAccount, saveAccount: (updatedAccount: IdbAccount) => Promise<unknown>): Promise<boolean> {
     const token = this.accountSessionToken;
     const assertCurrentAccount = () => {
@@ -153,6 +183,7 @@ export class AutomaticBackupsService {
       this.observeWorkspace(this.workspaceStore.state());
       await this.inspectCurrentAccountFile();
       this.setupFailures.delete(account.guid);
+      this.failedRevisions.delete(account.guid);
       return true;
     } catch (error) {
       if (writeStarted) {
@@ -202,7 +233,12 @@ export class AutomaticBackupsService {
   }
 
   overwriteFile(): Promise<void> {
-    return this.trackOperation(this.writeAttachedFile());
+    const accountGuid = this.account?.guid;
+    return this.trackOperation(this.writeAttachedFile().catch(error => {
+      if (accountGuid) this.failedRevisions.set(accountGuid, `${accountGuid}:overwrite`);
+      if (accountGuid === this.account?.guid) this.setStatus('error');
+      throw error;
+    }));
   }
 
   private async writeAttachedFile(): Promise<void> {
@@ -216,6 +252,7 @@ export class AutomaticBackupsService {
       return;
     }
     if (!exists) {
+      this.failedRevisions.set(account.guid, `${account.guid}:overwrite`);
       this.latestBackupFile.next(undefined);
       this.setStatus('error');
       this.warnOnce('missing', 'Missing Backup File', 'The selected automatic backup file no longer exists. Choose a new backup location for this account.');
@@ -223,10 +260,9 @@ export class AutomaticBackupsService {
     }
     const backup = this.backupExportCoordinator.buildActiveAccountBackup();
     await this.backupGateway.write(account.dataBackupFilePath, backup);
-    if (token !== this.accountSessionToken) {
-      return;
-    }
     await this.addOrUpdateFile(backup.dataBackupId, account.guid);
+    this.failedRevisions.delete(account.guid);
+    this.attachedIssues.delete(account.guid);
     if (token !== this.accountSessionToken) {
       return;
     }
@@ -304,6 +340,7 @@ export class AutomaticBackupsService {
     }
     this.clearDebounceTimer();
     this.setStatus('pending');
+    this.scheduledRevisionKey = revisionKey;
     const token = this.accountSessionToken;
     this.debounceTimer = setTimeout(() => {
       void this.saveCommittedRevision(revisionKey, token);
@@ -328,6 +365,7 @@ export class AutomaticBackupsService {
     }
 
     this.debounceTimer = undefined;
+    this.scheduledRevisionKey = undefined;
     if (!['ready', 'pending'].includes(this.status.value)) {
       this.queuedRevisionKey = revisionKey;
       return;
@@ -342,6 +380,7 @@ export class AutomaticBackupsService {
         return;
       }
       if (!exists) {
+        this.failedRevisions.set(account.guid, revisionKey);
         this.latestBackupFile.next(undefined);
         this.setStatus('error');
         this.warnOnce('missing', 'Missing Backup File', 'The selected automatic backup file no longer exists. Choose a new backup location for this account.');
@@ -351,12 +390,15 @@ export class AutomaticBackupsService {
       const backup = this.backupExportCoordinator.buildActiveAccountBackup();
       await this.backupGateway.write(account.dataBackupFilePath, backup);
       await this.addOrUpdateFile(backup.dataBackupId, account.guid);
+      this.failedRevisions.delete(account.guid);
+      this.attachedIssues.delete(account.guid);
       if (token !== this.accountSessionToken) {
         return;
       }
       this.latestBackupFile.next(this.backupPreparation.prepare(backup));
       this.setStatus('ready');
     } catch (error) {
+      this.failedRevisions.set(account.guid, revisionKey);
       if (token !== this.accountSessionToken) {
         return;
       }
@@ -417,6 +459,7 @@ export class AutomaticBackupsService {
         this.setStatus('conflict');
       } else {
         this.setStatus('ready');
+        this.queuedRevisionKey ??= this.failedRevisions.get(account.guid);
       }
     } catch (error) {
       if (token !== this.accountSessionToken) {
@@ -455,6 +498,10 @@ export class AutomaticBackupsService {
   }
 
   private setStatus(status: AutomaticBackupStatus): void {
+    if (this.account?.guid) {
+      if (status === 'error' || status === 'conflict') this.attachedIssues.set(this.account.guid, status);
+      if (status === 'ready') this.attachedIssues.delete(this.account.guid);
+    }
     if (this.status.value !== status) {
       this.status.next(status);
     }
@@ -465,5 +512,6 @@ export class AutomaticBackupsService {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = undefined;
     }
+    this.scheduledRevisionKey = undefined;
   }
 }

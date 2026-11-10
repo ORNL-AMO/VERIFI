@@ -40,6 +40,8 @@ export class ElectronBackupFileComponent {
   forceModal: boolean = false;
   backupStatus: AutomaticBackupStatus = 'disabled';
   showArchiveDecision: boolean = false;
+  confirming = false;
+  private confirmation?: Promise<void>;
   private pendingArchiveDecision: boolean = false;
   constructor(private electronService: ElectronService,
     private automaticBackupsService: AutomaticBackupsService,
@@ -132,31 +134,62 @@ export class ElectronBackupFileComponent {
   }
 
   hideModal() {
+    if (this.confirming) return;
     this.automaticBackupsService.clearReviewRequest();
     this.pendingArchiveDecision = false;
     this.showArchiveDecision = false;
     this.showModal = false;
   }
 
-  async confirmActions() {
-    if (this.archiveOption == 'justOnce' || ((this.account.archiveOption != this.archiveOption) && this.archiveOption == 'always')) {
+  confirmActions(): Promise<void> {
+    if (this.confirmation) return this.confirmation;
+    this.confirming = true;
+    const decision = {
+      account: { ...this.account }, archiveOption: this.archiveOption, overwriteOption: this.overwriteOption,
+      differingBackups: this.differingBackups, latestBackupFile: this.latestBackupFile
+    };
+    this.confirmation = this.automaticBackupsService.confirmFileReview(decision.account.guid, () => this.applyConfirmedActions(decision))
+      .then(() => {
+        this.confirming = false;
+        this.hideModal();
+      }).finally(() => {
+        this.confirming = false;
+        this.confirmation = undefined;
+        this.cd.markForCheck();
+      });
+    return this.confirmation;
+  }
+
+  private async applyConfirmedActions(decision: Pick<ElectronBackupFileComponent, 'account' | 'archiveOption' | 'overwriteOption' | 'differingBackups' | 'latestBackupFile'>) {
+    const account = decision.account;
+    const accountGuid = account.guid;
+    const archiveOption = decision.archiveOption;
+    const overwriteOption = decision.overwriteOption;
+    const differingBackups = decision.differingBackups;
+    const backupFile = decision.latestBackupFile;
+    const assertCurrentAccount = () => {
+      if (this.accountWorkspaceStore.account()?.guid !== accountGuid) throw new Error('The active account changed during backup review. Select the account and try again.');
+    };
+    assertCurrentAccount();
+    if (archiveOption == 'justOnce' || ((account.archiveOption != archiveOption) && archiveOption == 'always')) {
       await this.createArchive();
     }
+    assertCurrentAccount();
 
-    let needUpdate: boolean = this.account.archiveOption != this.archiveOption;
-    if (this.differingBackups) {
-      if (this.overwriteOption == 'overwriteFile') {
+    let needUpdate: boolean = account.archiveOption != archiveOption;
+    if (differingBackups) {
+      if (overwriteOption == 'overwriteFile') {
         await this.automaticBackupsService.overwriteFile();
-      } else if (this.overwriteOption == 'updateAccount') {
+      } else if (overwriteOption == 'updateAccount') {
         this.showModal = false;
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.suspendQueuedDeletion();
         try {
-          let backupPath: string = this.account.dataBackupFilePath;
-          let sharedFileAuthor: string = this.account.sharedFileAuthor;
-          let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-          const newAccount = await this.backupImportCoordinator.replaceActiveAccount(this.latestBackupFile);
+          let backupPath: string = account.dataBackupFilePath;
+          let sharedFileAuthor: string = account.sharedFileAuthor;
+          let isSharedBackupFile: boolean = account.isSharedBackupFile;
+          const newAccount = await this.backupImportCoordinator.replaceActiveAccount(backupFile);
           await this.commandBoundary.execute(
             { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' ,
               publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
@@ -173,7 +206,7 @@ export class ElectronBackupFileComponent {
             sharedFileAuthor: sharedFileAuthor,
             isSharedBackupFile: isSharedBackupFile
           };
-          await this.automaticBackupsService.addOrUpdateFile(this.latestBackupFile.dataBackupId, replacement.guid);
+          await this.automaticBackupsService.addOrUpdateFile(backupFile.dataBackupId, replacement.guid);
           await this.automaticBackupsService.inspectCurrentAccountFile();
           needUpdate = false;
           this.loadingService.isLoadingComplete.next(true);
@@ -184,20 +217,16 @@ export class ElectronBackupFileComponent {
     }
 
     if (needUpdate) {
-      //archive created. set to skip for settings.
-      if (this.archiveOption == 'justOnce') {
-        this.account.archiveOption = 'skip';
-      } else {
-        this.account.archiveOption = this.archiveOption;
-      }
+      assertCurrentAccount();
+      const updatedAccount = { ...this.accountWorkspaceStore.account(), archiveOption: archiveOption === 'justOnce' ? 'skip' : archiveOption };
       await this.commandBoundary.execute(
-        { entityKind: 'account', changeKind: 'update', entityGuid: this.account.guid, label: 'Saving account' ,
+        { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Saving account' ,
           publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
-        () => this.accountHandler.update({ ...this.account }, this.account.guid)
+        () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
       );
+      this.account = updatedAccount;
     }
 
-    this.hideModal();
   }
 
 

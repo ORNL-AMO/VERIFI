@@ -50,6 +50,7 @@ describe('ElectronBackupFileComponent', () => {
     inspectCurrentAccountFile: ReturnType<typeof vi.fn>;
     overwriteFile: ReturnType<typeof vi.fn>;
     writeArchive: ReturnType<typeof vi.fn>;
+    confirmFileReview: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -81,7 +82,8 @@ describe('ElectronBackupFileComponent', () => {
       addOrUpdateFile: vi.fn().mockResolvedValue(undefined),
       inspectCurrentAccountFile: vi.fn().mockResolvedValue(undefined),
       overwriteFile: vi.fn().mockResolvedValue(undefined),
-      writeArchive: vi.fn().mockResolvedValue(undefined)
+      writeArchive: vi.fn().mockResolvedValue(undefined),
+      confirmFileReview: vi.fn((_guid: string, confirm: () => Promise<void>) => confirm())
     };
     TestBed.configureTestingModule({
       imports: [ElectronBackupFileTestModule],
@@ -149,6 +151,28 @@ describe('ElectronBackupFileComponent', () => {
     finish();
     await archive;
     expect(completed).toHaveBeenCalledOnce();
+  });
+
+  it('disables backup decisions and prevents dismissal while the complete confirmation is pending', async () => {
+    electronService.isElectron = true;
+    fixture.detectChanges();
+    let finish!: () => void;
+    automaticBackupsService.confirmFileReview.mockReturnValue(new Promise<void>(resolve => { finish = resolve; }));
+    component.account = { guid: 'account-a' } as ElectronBackupFileComponent['account'];
+    component.latestBackupFile = buildPreparedBackupFile();
+    component.showModal = true;
+    const confirmed = component.confirmActions();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('fieldset').disabled).toBe(true);
+    expect([...fixture.nativeElement.querySelectorAll('.popup-footer button')].every((button: HTMLButtonElement) => button.disabled)).toBe(true);
+    component.hideModal();
+    expect(component.showModal).toBe(true);
+    expect(component.confirmActions()).toBe(confirmed);
+    finish();
+    await confirmed;
+    expect(component.showModal).toBe(false);
+    expect(component.confirming).toBe(false);
   });
 
   it('keeps the archive prompt dismissed after automatic saves update the latest backup file', () => {

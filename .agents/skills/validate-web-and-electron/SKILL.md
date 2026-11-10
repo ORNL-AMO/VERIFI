@@ -42,7 +42,7 @@ For desktop upgrades, follow [desktop maintenance](../../../docs/electron-mainte
 - Exercise the changed happy path and its loading, empty, validation, error, disabled, and success states.
 - Check browser behavior without `window.electronAPI`.
 - For Electron changes, verify channel allowlists, request and response payloads, listener cleanup, cancellation, and error handling.
-- For update restarts, trace every backup producer through the coordinator, including initial file setup and archives. Exercise delayed file/registry/account completion, routed-view destruction, retry cancellation, and failures completing across account switches.
+- For update restarts, trace every backup producer through the coordinator, including initial file setup and complete archive/restore confirmations. Exercise delayed file/registry/account completion, final commands and the backups they generate, routed-view destruction, retry cancellation, and attached/setup/archive failures or conflicts retained across account switches.
 - Check responsive layout, keyboard use, focus, charts, printing, and generated files when relevant.
 
 ## Failure handling

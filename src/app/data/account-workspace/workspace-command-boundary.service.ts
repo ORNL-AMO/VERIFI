@@ -65,6 +65,8 @@ export class WorkspaceCommandBoundary {
     while (this.inFlight.size) await Promise.all([...this.inFlight]);
   }
 
+  get hasPendingCommands(): boolean { return this.inFlight.size > 0; }
+
   /**
    * Execute a workspace write command through the boundary.
    *

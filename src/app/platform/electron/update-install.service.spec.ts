@@ -4,8 +4,8 @@ import { UpdateInstallService } from './update-install.service';
 
 function setup() {
   const router = { url: '/data-evaluation', navigateByUrl: vi.fn().mockResolvedValue(true) };
-  const commands = { whenIdle: vi.fn().mockResolvedValue(undefined) };
-  const backups = { flushPending: vi.fn().mockResolvedValue(undefined) };
+  const commands = { whenIdle: vi.fn().mockResolvedValue(undefined), hasPendingCommands: false };
+  const backups = { flushPending: vi.fn().mockResolvedValue(undefined), hasPendingOperations: false };
   const electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn() };
   const loading = { setLoadingMessage: vi.fn(), setLoadingStatus: vi.fn() };
   const lifecycle = { initialize: vi.fn().mockResolvedValue({ status: 'ready' }) };
@@ -13,6 +13,25 @@ function setup() {
 }
 
 describe('UpdateInstallService', () => {
+  it('drains again when finishing a backup submits a command and that command creates another backup', async () => {
+    const { service, commands, backups, electron } = setup();
+    const phases: string[] = [];
+    commands.whenIdle.mockImplementation(async () => {
+      phases.push('commands');
+      if (commands.hasPendingCommands) {
+        commands.hasPendingCommands = false;
+        backups.hasPendingOperations = true;
+      }
+    });
+    backups.flushPending.mockImplementation(async () => {
+      phases.push('backups');
+      if (phases.length === 2) commands.hasPendingCommands = true;
+      else backups.hasPendingOperations = false;
+    });
+    await expect(service.install()).resolves.toBe(true);
+    expect(phases).toEqual(['commands', 'backups', 'commands', 'backups']);
+    expect(electron.installUpdate).toHaveBeenCalledOnce();
+  });
   it('honors canceled editor leave decisions without starting backups or installation', async () => {
     const { service, router, commands, backups, electron, loading } = setup();
     router.navigateByUrl.mockResolvedValue(false);
