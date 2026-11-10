@@ -16,7 +16,7 @@
   @if (state.energyUses.needsRefresh()) {
     <p class="v1-alert v1-alert--warning" role="alert">The import was saved. Refresh saved changes to finish; the workbook will not be imported again.</p>
   } @else if (state.energyUses.reviewStale()) {
-    <div class="v1-alert v1-alert--warning" role="alert"><p>Saved data changed. Review the current changes before importing.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="state.isNavigationBlocked()" (click)="review()">Review saved data again</button></div>
+    <div class="v1-alert v1-alert--warning" role="alert"><p>Saved data changed. Review the current changes before importing.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="state.isNavigationBlocked()" (click)="refreshReview()">Review saved data again</button></div>
   } @else if (preview.errorRows) {
     <p class="v1-alert v1-alert--danger" role="alert">Fix or skip every row with errors before importing.</p>
   } @else if (!preview.created && !preview.updated) {

@@ -161,6 +161,7 @@ export interface EnergyUsesTemplateImportFileDraft extends ImportFileDraftBase {
     skippedRows: number[];
     preview?: EnergyUsesImportPreview;
     recoverySummary?: ImportCommitSummary;
+    requiresWorkspaceRefresh?: boolean;
   };
 }
 

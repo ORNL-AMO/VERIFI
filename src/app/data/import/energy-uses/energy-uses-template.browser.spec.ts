@@ -256,12 +256,50 @@ describe('Energy Uses template import and native recovery', () => {
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([item]);
   });
 
-  it('rejects durable changes from another window even before a local workspace publication', async () => {
-    const { state } = setup();
+  it('refreshes and reviews a cross-window conflict in the rendered workflow without losing the workbook or skips', async () => {
+    const rows = TestBed.inject(EnergyUsesExcelExportService).prepareExportData(2025, new Set([facility.guid])).rows;
+    const changedRow = [...rows[0]]; changedRow[14] = 0;
+    const invalid = [...rows[0]]; invalid[2] = 'Bad row'; invalid[13] = 1.5;
+    const { draft } = setup([changedRow, invalid]);
+    const view = TestBed.createComponent(TemplateImportHost); view.detectChanges();
+    await TestBed.inject(Router).navigateByUrl(`/v1/workspace/account/${account.guid}/imports/file/${draft.id}/review`);
+    view.detectChanges(); await view.whenStable();
+    await page.getByRole('checkbox', { name: 'Skip row 3: Bad row', exact: true }).click();
+    view.detectChanges(); await view.whenStable();
     const changed = { ...item, notes: 'Another window saved this' };
+    const workspace = TestBed.inject(AccountWorkspaceStore), revision = workspace.revision();
     await TestBed.inject(IndexedDbTransactionService).runTransaction(['facilityEnergyUseEquipment'], 'readwrite', tx => tx.put('facilityEnergyUseEquipment', changed));
-    await expect(state.commit()).rejects.toThrow('Saved data changed');
-    expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([changed]);
+    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    view.detectChanges(); await view.whenStable();
+    expect(workspace.revision()).toBe(revision);
+    await expect.element(page.getByRole('button', { name: 'Import', exact: true })).toBeDisabled();
+    await expect.element(page.getByRole('spinbutton', { name: 'Fiscal year', exact: true })).toBeDisabled();
+    const current = TestBed.inject(ImportSessionService).draft(draft.id);
+    expect(current.kind).toBe('energy-uses-template');
+    if (current.kind !== 'energy-uses-template') throw new Error('Wrong draft kind');
+    expect(current.energyUses.skippedRows).toEqual([3]);
+    const savedWorkbook = current.energyUses.workbook;
+    const reload = vi.spyOn(TestBed.inject(AccountWorkspaceService), 'reloadActiveWorkspace');
+    reload.mockRejectedValueOnce(new Error('Refresh temporarily failed'));
+    await page.getByRole('button', { name: 'Review saved data again', exact: true }).click();
+    view.detectChanges(); await view.whenStable();
+    await expect.element(page.getByRole('button', { name: 'Import', exact: true })).toBeDisabled();
+    expect(current.energyUses.requiresWorkspaceRefresh).toBe(true);
+    await page.getByRole('button', { name: 'Review saved data again', exact: true }).click();
+    view.detectChanges(); await view.whenStable();
+    await vi.waitFor(() => expect(current.energyUses.requiresWorkspaceRefresh).toBe(false));
+    view.detectChanges(); await view.whenStable();
+    expect(current.energyUses.workbook).toBe(savedWorkbook);
+    expect(current.energyUses.skippedRows).toEqual([3]);
+    expect(workspace.energyUseEquipment()[0].notes).toBe(changed.notes);
+    await expect.element(page.getByRole('checkbox', { name: 'Skip row 3: Bad row', exact: true })).toBeChecked();
+    await expect.element(page.getByRole('button', { name: 'Import', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    view.detectChanges(); await view.whenStable();
+    await expect.element(page.getByRole('heading', { name: 'Upload complete' })).toBeVisible();
+    expect((await harness.getAll('facilityEnergyUseEquipment'))).toHaveLength(1);
+    expect((await harness.getAll<IdbFacilityEnergyUseEquipment & { [key: string]: unknown }>('facilityEnergyUseEquipment'))[0].utilityData[0].energyUse[1].energyUse).toBe(0);
+    view.destroy();
   });
 
   it('recovers publication after a committed import without repeating persistence', async () => {

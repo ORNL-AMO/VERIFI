@@ -1,4 +1,5 @@
 import { Injectable, computed, inject } from '@angular/core';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
@@ -15,21 +16,23 @@ export class EnergyUsesImportStateService {
   private readonly importer = inject(EnergyUsesExcelImportService);
   private readonly commands = inject(WorkspaceCommandBoundary);
   private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly workspaceService = inject(AccountWorkspaceService);
   readonly draft = computed(() => {
     const draft = this.drafts.draft();
     return draft?.kind === 'energy-uses-template' ? draft : undefined;
   });
   readonly preview = computed(() => this.draft()?.energyUses.preview);
   readonly canImport = computed(() => !this.validationMessage());
+  readonly refreshRequired = computed(() => !!this.draft()?.energyUses.requiresWorkspaceRefresh);
   readonly reviewStale = computed(() => {
     const preview = this.preview();
-    return !!preview && (preview.accountGuid !== this.workspace.account()?.guid || preview.revision !== this.workspace.revision());
+    return this.refreshRequired() || !!preview && (preview.accountGuid !== this.workspace.account()?.guid || preview.revision !== this.workspace.revision());
   });
   readonly needsRefresh = computed(() => !!this.draft()?.energyUses.recoverySummary);
 
   setYear(year: number | null): void {
     const draft = this.draft();
-    if (!draft || this.session.pending() || this.needsRefresh() || draft.energyUses.year === year) return;
+    if (!draft || this.session.pending() || this.needsRefresh() || this.refreshRequired() || draft.energyUses.year === year) return;
     draft.energyUses.year = year;
     draft.energyUses.preview = undefined;
     draft.completedSteps = [];
@@ -38,7 +41,7 @@ export class EnergyUsesImportStateService {
 
   review(): void {
     const draft = this.draft();
-    if (!draft || this.session.pending() || this.needsRefresh()) return;
+    if (!draft || this.session.pending() || this.needsRefresh() || this.refreshRequired()) return;
     const year = draft.energyUses.year;
     if (!Number.isInteger(year) || year < 1000 || year > 9999) {
       throw new Error('Enter a four-digit fiscal year.');
@@ -48,9 +51,29 @@ export class EnergyUsesImportStateService {
     this.drafts.changed();
   }
 
-  skipRow(row: number, skip: boolean): void {
+  async refreshReview(): Promise<void> {
     const draft = this.draft();
     if (!draft || this.session.pending() || this.needsRefresh()) return;
+    const accountGuid = draft.energyUses.preview?.accountGuid;
+    if (!accountGuid || accountGuid !== this.workspace.account()?.guid) throw new Error('The owning account is no longer available.');
+    this.session.setPending(true);
+    try {
+      const result = await this.workspaceService.reloadActiveWorkspace();
+      if (result !== 'published' || this.draft()?.id !== draft.id || this.workspace.account()?.guid !== accountGuid) {
+        throw new Error('The workspace changed while refreshing. Review the workbook again.');
+      }
+      const data = draft.energyUses;
+      const preview = this.importer.preparePreview(data.workbook, data.year, new Set(data.skippedRows));
+      data.preview = preview;
+      data.requiresWorkspaceRefresh = false;
+      draft.completedSteps = [];
+      this.drafts.changed();
+    } finally { this.session.setPending(false); }
+  }
+
+  skipRow(row: number, skip: boolean): void {
+    const draft = this.draft();
+    if (!draft || this.session.pending() || this.needsRefresh() || this.refreshRequired()) return;
     const preview = draft.energyUses.preview;
     if (!preview || preview.accountGuid !== this.workspace.account()?.guid || preview.revision !== this.workspace.revision()) {
       throw new Error('Saved data changed. Review the workbook again before changing included rows.');
@@ -66,6 +89,7 @@ export class EnergyUsesImportStateService {
 
   validationMessage(): string | undefined {
     const data = this.draft()?.energyUses;
+    if (data?.requiresWorkspaceRefresh) return 'Refresh saved data and review this workbook again before importing.';
     if (!data || !Number.isInteger(data.year) || data.year < 1000 || data.year > 9999) return 'Enter a four-digit fiscal year.';
     if (!data.preview) return 'Review the equipment changes before importing.';
     if (data.preview.accountGuid !== this.workspace.account()?.guid || data.preview.revision !== this.workspace.revision()) {
@@ -94,6 +118,9 @@ export class EnergyUsesImportStateService {
     } catch (error) {
       if (error instanceof WorkspaceWriteError && error.persistenceCommitted) {
         draft.energyUses.recoverySummary = summary;
+        this.drafts.changed();
+      } else if (error instanceof WorkspaceWriteError && error.code === 'stale-workspace') {
+        draft.energyUses.requiresWorkspaceRefresh = true;
         this.drafts.changed();
       }
       throw error;

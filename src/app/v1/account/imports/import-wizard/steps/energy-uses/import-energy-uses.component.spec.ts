@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { By } from '@angular/platform-browser';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { PortalModule } from '@angular/cdk/portal';
@@ -33,6 +34,7 @@ function setup(year: number | null = 2025) {
   } satisfies EnergyUsesImportPreview));
   TestBed.configureTestingModule({ imports: [ImportReviewHost], providers: [
     ImportWizardDraftStore, EnergyUsesImportStateService,
+    { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: vi.fn(async () => 'published') } },
     { provide: EnergyUsesExcelImportService, useValue: { preparePreview } },
     { provide: WorkspaceCommandBoundary, useValue: {} },
     { provide: AccountWorkspaceStore, useValue: { account: () => ({ guid: 'account-a' }), revision } },

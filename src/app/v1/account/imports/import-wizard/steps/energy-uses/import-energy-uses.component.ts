@@ -35,7 +35,7 @@ export class ImportEnergyUsesComponent {
   constructor() {
     effect(() => {
       const data = this.state.energyUses.draft()?.energyUses;
-      const blocked = this.state.isNavigationBlocked() || this.state.committed();
+      const blocked = this.state.isNavigationBlocked() || this.state.committed() || this.state.energyUses.refreshRequired();
       this.year.setValue(data?.year ?? null, { emitEvent: false });
       if (blocked) this.year.disable({ emitEvent: false });
       else this.year.enable({ emitEvent: false });
@@ -48,7 +48,7 @@ export class ImportEnergyUsesComponent {
       else this.state.error.set(undefined);
     });
     effect(onCleanup => {
-      const blocked = this.state.isNavigationBlocked() || this.state.committed();
+      const blocked = this.state.isNavigationBlocked() || this.state.committed() || this.state.energyUses.refreshRequired();
       const rows = (this.state.energyUses.preview()?.rows ?? [])
         .filter(row => row.skipped || row.action !== 'Unchanged')
         .map(row => ({ row, status: row.skipped ? 'Skipped' : row.action === 'Create' ? 'New' : row.action,
@@ -81,6 +81,13 @@ export class ImportEnergyUsesComponent {
     } catch (error) {
       this.showError(error);
     }
+  }
+
+  async refreshReview(): Promise<void> {
+    try {
+      await this.state.energyUses.refreshReview();
+      this.state.error.set(undefined);
+    } catch (error) { this.showError(error); }
   }
 
   openDetails(row: EnergyUsesImportRowPreview): void {
