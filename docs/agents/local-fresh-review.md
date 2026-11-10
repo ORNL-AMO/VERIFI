@@ -8,15 +8,15 @@ Confirm the intended target and fetch its remote ref. For an existing PR, read i
 
 Finish selected validation and commit intended changes. Require a clean checkout, including staged, unstaged, untracked, and submodule changes. Use a separate clean checkout if unrelated work is in progress; do not automatically stash or commit it. Record the checkout, branch, base ref/commit, HEAD, and merge base. Review the merge-base-to-HEAD diff that GitHub's three-dot comparison displays.
 
-Agent commands, with the resolved target substituted for `<base>`:
+Agent commands, with the resolved target substituted for `<remote>/<base>` (for example, `origin/develop` in the main repository or `upstream/develop` in a fork):
 
 ```bash
 git status --porcelain --untracked-files=all --ignore-submodules=none
 git rev-parse --abbrev-ref HEAD
-git rev-parse --verify origin/<base>
+git rev-parse --verify <remote>/<base>
 git rev-parse --verify HEAD
-git merge-base origin/<base> HEAD
-git diff origin/<base>...HEAD
+git merge-base <remote>/<base> HEAD
+git diff <remote>/<base>...HEAD
 ```
 
 ## 2. Start without conversation history
