@@ -1,16 +1,14 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
 import { ElectronService } from '@platform/electron/electron.service';
-import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { BackupFile } from '@data/models/backup-file';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 
@@ -23,18 +21,17 @@ import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.
 export class AccountSetupComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
+  private readonly destroyRef = inject(DestroyRef);
 
 
   showDeleteAccount: boolean = false;
   isElectron: boolean;
-  backupFile: BackupFile;
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
   downloadAsZip: boolean = false;
   constructor(private router: Router,
     private electronService: ElectronService,
     private backupExportCoordinator: BackupExportCoordinator,
-    private backupGateway: ElectronBackupFileGateway,
     private commandBoundary: WorkspaceCommandBoundary,
     private accountHandler: AccountCommandHandler,
     private automaticBackupsService: AutomaticBackupsService,
@@ -79,24 +76,14 @@ export class AccountSetupComponent {
   }
 
   async automaticBackup() {
-    this.backupFile = this.backupExportCoordinator.buildActiveAccountBackup();
-    const defaultPath = this.selectedAccount?.dataBackupFilePath ?? `${this.selectedAccount?.name}.json`;
-    const savedFilePath = await this.backupGateway.chooseSavePath(defaultPath);
-    if (!savedFilePath) { return; }
-    await this.backupGateway.write(savedFilePath, this.backupFile);
-    await this.automaticBackupsService.addOrUpdateFile(this.backupFile.dataBackupId, this.selectedAccount.guid);
-    const updatedAccount: IdbAccount = {
-      ...this.selectedAccount,
-      dataBackupFilePath: savedFilePath,
-      dataBackupId: this.backupFile.dataBackupId
-    };
-    await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Updating account' ,
-        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
-      () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
+    const configured = await this.automaticBackupsService.configureFile(this.selectedAccount, updatedAccount =>
+      this.commandBoundary.execute(
+        { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Updating account',
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) } },
+        () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
+      )
     );
-    await this.automaticBackupsService.inspectCurrentAccountFile();
-    this.cd.detectChanges();
+    if (configured && !this.destroyRef.destroyed) this.cd.detectChanges();
   }
 
   async saveChanges() {

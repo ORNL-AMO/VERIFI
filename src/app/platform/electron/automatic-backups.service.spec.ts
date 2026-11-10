@@ -142,15 +142,37 @@ describe('AutomaticBackupsService', () => {
     expect(gateway.write).toHaveBeenCalledTimes(2);
   });
 
-  it('clears an archive failure when its account is removed from the workspace', async () => {
+  it('retains an archive failure across account switches and an empty workspace until its owner retries', async () => {
     store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
     service.subscribeData();
     gateway.write.mockRejectedValueOnce(new Error('archive offline'));
     await expect(service.writeArchive('/tmp/archive.json', exportCoordinator.buildActiveAccountBackup())).rejects.toThrow('archive offline');
     await expect(service.flushPending()).rejects.toThrow('archive could not be saved');
+    store.publish(snapshot('account-b', { dataBackupFilePath: undefined }));
+    await expect(service.flushPending()).rejects.toThrow('archive could not be saved');
+    store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
+    await expect(service.flushPending()).rejects.toThrow('archive could not be saved');
     store.clear();
-    await expect(service.flushPending()).resolves.toBeUndefined();
+    await expect(service.flushPending()).rejects.toThrow('archive could not be saved');
     expect(service.status.value).toBe('disabled');
+    await service.writeArchive('/tmp/archive-retry.json', exportCoordinator.buildActiveAccountBackup());
+    await expect(service.flushPending()).resolves.toBeUndefined();
+  });
+
+  it('retains a late archive failure for its captured owner after switching accounts', async () => {
+    store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
+    service.subscribeData();
+    const archive = deferred<void>();
+    gateway.write.mockReturnValueOnce(archive.promise);
+    const completed = expect(service.writeArchive('/tmp/archive.json', exportCoordinator.buildActiveAccountBackup())).rejects.toThrow('late archive failure');
+    store.publish(snapshot('account-b', { dataBackupFilePath: undefined }));
+    const blocked = expect(service.flushPending()).rejects.toThrow('late archive failure');
+    archive.reject(new Error('late archive failure'));
+    await Promise.all([completed, blocked]);
+    await service.writeArchive('/tmp/b.json', { ...exportCoordinator.buildActiveAccountBackup(), account: { guid: 'account-b' } } as any);
+    await expect(service.flushPending()).rejects.toThrow('archive could not be saved');
+    await service.writeArchive('/tmp/a.json', exportCoordinator.buildActiveAccountBackup());
+    await expect(service.flushPending()).resolves.toBeUndefined();
   });
 
   it('flushes a debounced committed revision before restart without waiting for its timer', async () => {

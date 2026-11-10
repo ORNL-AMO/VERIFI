@@ -15,7 +15,6 @@ import { ImportBackupModalService } from '@v0/core-components/import-backup-moda
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
-import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 import { ElectronService } from '@platform/electron/electron.service';
 import { BackupFile } from '@data/models/backup-file';
 import { IdbAccount } from '@data/models/idbModels/account';
@@ -40,26 +39,17 @@ describe('AccountSettingsComponent', () => {
   let fixture: ComponentFixture<AccountSettingsComponent>;
   let component: AccountSettingsComponent;
   let accountHandler: { update: ReturnType<typeof vi.fn> };
-  let backupGateway: {
-    chooseSavePath: ReturnType<typeof vi.fn>;
-    write: ReturnType<typeof vi.fn>;
-  };
   let automaticBackupsService: {
-    addOrUpdateFile: ReturnType<typeof vi.fn>;
-    inspectCurrentAccountFile: ReturnType<typeof vi.fn>;
+    configureFile: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     accountHandler = {
       update: vi.fn().mockRejectedValue(new Error('persist failed'))
     };
-    backupGateway = {
-      chooseSavePath: vi.fn().mockResolvedValue('/tmp/new-backup.json'),
-      write: vi.fn().mockResolvedValue(undefined)
-    };
     automaticBackupsService = {
-      addOrUpdateFile: vi.fn().mockResolvedValue(undefined),
-      inspectCurrentAccountFile: vi.fn().mockResolvedValue(undefined)
+      configureFile: vi.fn((account: IdbAccount, saveAccount: (updated: IdbAccount) => Promise<unknown>) =>
+        saveAccount({ ...account, dataBackupFilePath: '/tmp/new-backup.json', dataBackupId: 'new-backup-id' }).then(() => true))
     };
 
     TestBed.configureTestingModule({
@@ -74,7 +64,6 @@ describe('AccountSettingsComponent', () => {
         { provide: AccountCommandHandler, useValue: accountHandler },
         { provide: FacilityCommandHandler, useValue: { add: vi.fn(), update: vi.fn(), delete: vi.fn() } },
         { provide: ElectronService, useValue: { isElectron: false, getFolderPath: vi.fn() } },
-        { provide: ElectronBackupFileGateway, useValue: backupGateway },
         { provide: AutomaticBackupsService, useValue: automaticBackupsService },
         { provide: AccountWorkspaceStore, useValue: { account: signal(undefined), facilities: signal([]), accountAnalyses: () => [], accountReports: () => [] } },
         { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
@@ -108,7 +97,7 @@ describe('AccountSettingsComponent', () => {
       }),
       'account-a'
     );
-    expect(automaticBackupsService.inspectCurrentAccountFile).not.toHaveBeenCalled();
+    expect(automaticBackupsService.configureFile).toHaveBeenCalledWith(component.selectedAccount, expect.any(Function));
   });
 });
 

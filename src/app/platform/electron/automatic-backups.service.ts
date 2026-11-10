@@ -37,7 +37,9 @@ export class AutomaticBackupsService {
   private activeWrite = false;
   private readonly pendingOperations = new Set<Promise<unknown>>();
   private archiveQueue: Promise<void> = Promise.resolve();
-  private archiveWriteFailed = false;
+  private readonly archiveFailures = new Set<string>();
+  private readonly setupFailures = new Set<string>();
+  private readonly fileConfigurations = new Map<string, Promise<boolean>>();
   private queuedRevisionKey?: string;
   private accountSessionToken = 0;
   private warnedIssues = new Set<string>();
@@ -75,8 +77,11 @@ export class AutomaticBackupsService {
       if (token !== this.accountSessionToken) throw new Error('The active account changed. Try restarting again.');
       this.observeWorkspace(this.workspaceStore.state());
       if (this.pendingOperations.size) continue;
-      if (this.archiveWriteFailed) {
-        throw new Error('An automatic backup archive could not be saved. Review the backup file and retry archiving before restarting.');
+      if (this.archiveFailures.size) {
+        throw new Error('An automatic backup archive could not be saved. Retry archiving for the affected account before restarting.');
+      }
+      if (this.setupFailures.size) {
+        throw new Error('An automatic backup file could not be configured. Complete backup setup for the affected account before restarting.');
       }
       if (this.status.value === 'conflict' || this.status.value === 'error') {
         throw new Error('Resolve the automatic backup issue before restarting to install the update.');
@@ -97,24 +102,66 @@ export class AutomaticBackupsService {
 
   /** Track automatic and requested archives alongside attached-file writes before an update. */
   writeArchive(path: string, backup: BackupFile): Promise<void> {
-    const token = this.accountSessionToken;
-    const accountGuid = this.account?.guid;
+    const accountGuid = backup.account.guid;
     const operation = this.archiveQueue.then(async () => {
       try {
         await this.backupGateway.write(path, backup);
-        if (token === this.accountSessionToken && accountGuid === this.account?.guid) this.archiveWriteFailed = false;
+        this.archiveFailures.delete(accountGuid);
       } catch (error) {
-        if (token === this.accountSessionToken && accountGuid === this.account?.guid) {
-          this.archiveWriteFailed = true;
-          this.warnOnce('archive-write-failed', 'Automatic Archive Failed',
-            error instanceof Error ? error.message : 'The backup archive could not be written.');
-        }
+        this.archiveFailures.add(accountGuid);
+        this.warnOnce(`archive-write-failed:${accountGuid}`, 'Automatic Archive Failed',
+          error instanceof Error ? error.message : 'The backup archive could not be written.');
         throw error;
       }
     });
     // Archive names can repeat within a minute; serialize writes to their shared temporary paths.
     this.archiveQueue = operation.then(() => undefined, () => undefined);
     return this.trackOperation(operation);
+  }
+
+  /** Keep file selection, writing, registry updates, and account publication in one restart barrier. */
+  configureFile(account: IdbAccount, saveAccount: (updatedAccount: IdbAccount) => Promise<unknown>): Promise<boolean> {
+    const existing = this.fileConfigurations.get(account.guid);
+    if (existing) return existing;
+    const operation = Promise.resolve().then(() => this.createAttachedFile(account, saveAccount));
+    this.fileConfigurations.set(account.guid, operation);
+    operation.then(() => this.fileConfigurations.delete(account.guid), () => this.fileConfigurations.delete(account.guid));
+    return this.trackOperation(operation);
+  }
+
+  private async createAttachedFile(account: IdbAccount, saveAccount: (updatedAccount: IdbAccount) => Promise<unknown>): Promise<boolean> {
+    const token = this.accountSessionToken;
+    const assertCurrentAccount = () => {
+      if (token !== this.accountSessionToken || this.workspaceStore.account()?.guid !== account.guid) {
+        throw new Error('The active account changed during backup setup. Select the account and try again.');
+      }
+    };
+    let writeStarted = false;
+    try {
+      assertCurrentAccount();
+      const backup = this.backupExportCoordinator.buildActiveAccountBackup();
+      const path = await this.backupGateway.chooseSavePath(account.dataBackupFilePath ?? `${account.name}.json`);
+      if (!path) return false;
+      assertCurrentAccount();
+      writeStarted = true;
+      await this.backupGateway.write(path, backup);
+      assertCurrentAccount();
+      await this.addOrUpdateFile(backup.dataBackupId, account.guid);
+      assertCurrentAccount();
+      await saveAccount({ ...this.workspaceStore.account(), dataBackupFilePath: path, dataBackupId: backup.dataBackupId });
+      assertCurrentAccount();
+      this.observeWorkspace(this.workspaceStore.state());
+      await this.inspectCurrentAccountFile();
+      this.setupFailures.delete(account.guid);
+      return true;
+    } catch (error) {
+      if (writeStarted) {
+        this.setupFailures.add(account.guid);
+        this.warnOnce(`setup-write-failed:${account.guid}`, 'Automatic Backup Setup Failed',
+          error instanceof Error ? error.message : 'The automatic backup file could not be configured.');
+      }
+      throw error;
+    }
   }
 
   async addOrUpdateFile(dataBackupId: string, accountId: string): Promise<void> {
@@ -207,7 +254,6 @@ export class AutomaticBackupsService {
       this.account = undefined;
       this.activeWrite = false;
       this.queuedRevisionKey = undefined;
-      this.archiveWriteFailed = false;
       this.lastObservedRevision = undefined;
       this.latestBackupFile.next(undefined);
       this.clearReviewRequest();
@@ -241,7 +287,6 @@ export class AutomaticBackupsService {
     this.lastObservedRevision = undefined;
     this.account = account;
     this.accountSessionToken += 1;
-    this.archiveWriteFailed = false;
     this.warnedIssues.clear();
     this.clearReviewRequest();
     this.latestBackupFile.next(undefined);
