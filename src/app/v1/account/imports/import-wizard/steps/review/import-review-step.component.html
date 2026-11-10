@@ -1,3 +1,6 @@
+@if (state.draft()?.kind === 'energy-uses-template') {
+  <app-import-energy-uses/>
+} @else {
 @if (state.reviewSummary(); as review) {
   @if (review.overview.length) {
     <dl class="import-review-overview" aria-label="Upload totals">
@@ -205,4 +208,6 @@
       }
     </div>
   }
+}
+
 }

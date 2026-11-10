@@ -1,3 +1,4 @@
+import { importSessionGuard } from '@app/v1/account/imports/import-session.guard';
 import { ENERGY_USE_WORKBENCH_ROUTES } from '@app/v1/data/energy-uses/energy-uses.routes';
 import { FACILITY_REPORT_ROUTES } from '@app/v1/reports/facility/facility-reports.routes';
 import { ACCOUNT_REPORT_ROUTES } from '@app/v1/reports/account/account-reports.routes';
@@ -168,6 +169,7 @@ export const V1Routes: Routes = [
           },
           {
             path: 'imports',
+            canActivateChild: [importSessionGuard],
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'upload' },
               { path: 'upload', component: ImportUploadComponent, canDeactivate: [unsavedChangesGuard] },
@@ -187,6 +189,8 @@ export const V1Routes: Routes = [
                   { path: 'predictor-readings', component: ImportPredictorReadingsStepComponent, data: { importStep: 'predictor-readings' } },
                   { path: 'facility', component: ImportFootprintFacilityStepComponent, data: { importStep: 'facility' } },
                   { path: 'equipment', component: ImportEquipmentStepComponent, data: { importStep: 'equipment' } },
+                  { path: 'energy-use-year', pathMatch: 'full', redirectTo: 'review' },
+                  { path: 'energy-use-equipment', pathMatch: 'full', redirectTo: 'review' },
                   { path: 'review', component: ImportReviewStepComponent, data: { importStep: 'review' } }
                 ]
               },

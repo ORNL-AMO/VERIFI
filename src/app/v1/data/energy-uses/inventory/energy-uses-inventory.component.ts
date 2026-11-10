@@ -40,6 +40,9 @@ export class EnergyUsesInventoryComponent {
   private portal?: TemplatePortal;
   @ViewChild('creationDrawer') private readonly creationDrawer?: TemplateRef<unknown>;
   readonly creating = signal(false);
+  readonly exporting = signal(false);
+  @ViewChild('exportPanel') private readonly exportPanel?: TemplateRef<unknown>;
+  readonly canExport = computed(() => this.store.isReady() && !this.creating() && this.entries().length > 0);
   private creationIdentity?: string;
   readonly creationKey = computed(() => JSON.stringify([this.workspace.account()?.guid, this.facilityGuid()]));
   readonly canCreate = computed(() => this.store.canWrite() && !this.store.hasPending() && this.store.facilities().some(facility => facility.accountId === this.workspace.account()?.guid));
@@ -74,15 +77,28 @@ export class EnergyUsesInventoryComponent {
   constructor() {
     const registry = inject(InventoryHeaderActionsRegistry, { optional: true });
     const unregister = registry?.registerCreation({ resource: 'energy-uses', label: 'Add energy use', canCreate: this.canCreate, create: () => this.openCreation() });
-    this.destroy.onDestroy(() => { unregister?.(); this.closeCreation(); });
+    const unregisterExport = registry?.registerExport({ resource: 'energy-uses', available: this.canExport, open: () => this.openExport() });
+    this.destroy.onDestroy(() => { unregister?.(); unregisterExport?.(); this.closeCreation(); this.closeExport(); });
     effect(() => {
       // Reloading saved changes temporarily clears the derived inventory scope.
       // Keep the creation host alive until the committed scope is available again.
       if (this.creating() && this.workspace.ready() && this.creationIdentity !== this.creationKey()) this.closeCreation();
     });
   }
+  openExport(): void {
+    if (!this.canExport() || !this.exportPanel || this.exporting()) return;
+    this.exporting.set(true);
+    this.portal = new TemplatePortal(this.exportPanel, this.view);
+    this.modal.show(this.portal);
+  }
+  closeExport(): void {
+    if (!this.exporting()) return;
+    this.exporting.set(false);
+    if (this.portal && this.modal.activePortal() === this.portal) this.modal.hide();
+    this.portal = undefined;
+  }
   openCreation(): void {
-    if (!this.canCreate() || !this.creationDrawer) return;
+    if (!this.canCreate() || !this.creationDrawer || this.exporting()) return;
     this.creationIdentity = this.creationKey(); this.creating.set(true);
     this.portal = new TemplatePortal(this.creationDrawer, this.view); this.modal.show(this.portal);
   }

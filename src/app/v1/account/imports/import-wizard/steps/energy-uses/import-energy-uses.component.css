@@ -1,0 +1,29 @@
+@import '../../../../../shared/data-workbench/results-table.css';
+
+:host { display: block; min-width: 0; border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.energy-use-import__year { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem 1.5rem; padding: 1rem; border-bottom: 1px solid var(--v1-border); }
+.energy-use-import__year label { display: grid; gap: .4rem; font-weight: 800; }
+.energy-use-import__year input { width: 10rem; }
+.energy-use-import__year p { margin: 0 0 .35rem; color: var(--v1-muted); }
+.energy-use-import__summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: 1rem; gap: .5rem; }
+.energy-use-import__summary > div { display: flex; flex-direction: column-reverse; justify-content: end; padding: .65rem .8rem; background: var(--v1-content-block); border: 1px solid var(--v1-border); }
+.energy-use-import__summary dt { font-size: .8rem; color: var(--v1-muted); }
+.energy-use-import__summary dd { margin: 0; font-size: 1.5rem; font-weight: 800; }
+.energy-use-import__new dd { color: var(--v1-success); }
+.energy-use-import__updates dd { color: var(--v1-content-control); }
+.energy-use-import__invalid dd { color: var(--v1-danger); }
+.v1-alert { margin: 0 1rem 1rem; }
+.v1-alert p { margin: 0 0 .65rem; }
+.energy-use-import__table { min-width: 42rem; table-layout: fixed; }
+.energy-use-import__table th, .energy-use-import__table td { text-align: left; white-space: normal; overflow-wrap: anywhere; border-color: var(--v1-divider); }
+.energy-use-import__table thead th { background: var(--v1-content-block); }
+.energy-use-import__table .energy-use-import__skip { width: 4rem; text-align: center; }
+.energy-use-import__errors { color: var(--v1-danger); font-size: .8rem; }
+.energy-use-import__errors p { margin: 0; }
+.energy-use-import__errors p + p { margin-top: .5rem; }
+.energy-use-import__details-button { display: block; margin-top: .35rem; border: 0; padding: 0; color: var(--v1-content-control); background: transparent; font: inherit; font-size: .8rem; text-decoration: underline; cursor: pointer; }
+.energy-use-import__details-button:focus-visible { outline: 2px solid var(--v1-content-control); outline-offset: 3px; }
+.energy-use-import__changes { background: var(--v1-surface); table-layout: fixed; }
+.energy-use-import__changes th, .energy-use-import__changes td { width: 33.33%; text-align: left; white-space: normal; overflow-wrap: anywhere; border-color: var(--v1-divider); }
+.energy-use-import__empty { padding: 1rem; color: var(--v1-muted); }
+@media (max-width: 45rem) { .energy-use-import__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

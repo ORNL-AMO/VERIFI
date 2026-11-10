@@ -11,6 +11,9 @@ export class ImportSessionService {
   readonly drafts = this.draftsState.asReadonly();
   readonly origin = this.originState.asReadonly();
   readonly pending = this.pendingState.asReadonly();
+  readonly recoveryDraft = computed(() => this.draftsState().find(draft =>
+    draft.kind === 'energy-uses-template' && !!draft.energyUses.recoverySummary));
+  readonly navigationBlocked = computed(() => this.pending() || !!this.recoveryDraft());
   readonly hasUnsavedChanges = computed(() => this.draftsState().some(draft => draft.status !== 'completed'));
 
   begin(origin: ImportOriginContext): void {
@@ -23,6 +26,19 @@ export class ImportSessionService {
 
   draft(id: string): ImportFileDraft | undefined {
     return this.draftsState().find(draft => draft.id === id);
+  }
+
+  /** Remove the queue entry only; imported records are never deleted here. */
+  removeDraft(id: string): boolean {
+    const draft = this.draft(id);
+    if (!draft || this.navigationBlocked() || draft.status === 'importing') return false;
+    this.draftsState.update(drafts => drafts.filter(value => value.id !== id));
+    this.summariesState.update(current => {
+      const summaries = { ...current };
+      delete summaries[id];
+      return summaries;
+    });
+    return true;
   }
 
   updateDraft(id: string, update: (draft: ImportFileDraft) => void): void {

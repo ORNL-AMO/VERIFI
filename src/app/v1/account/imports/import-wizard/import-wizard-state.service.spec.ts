@@ -1,3 +1,4 @@
+import { EnergyUsesImportStateService } from './energy-uses-import-state.service';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -16,6 +17,8 @@ import { ImportMeterReviewStateService } from './import-meter-review-state.servi
 import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';
 import { ImportWizardDraftStore } from './import-wizard-draft.store';
 import { ImportWizardStateService } from './import-wizard-state.service';
+
+type ExistingImportDraft = Exclude<ImportFileDraft, { kind: 'energy-uses-template' }>;
 
 describe('ImportWizardStateService', () => {
   let service: ImportWizardStateService;
@@ -68,6 +71,7 @@ describe('ImportWizardStateService', () => {
     TestBed.configureTestingModule({
       providers: [
         ImportWizardStateService,
+        { provide: EnergyUsesImportStateService, useValue: { needsRefresh: () => false } },
         ImportWizardDraftStore,
         ImportMeterReviewStateService,
         ImportPredictorReviewStateService,
@@ -499,7 +503,7 @@ describe('ImportWizardStateService', () => {
     expect(service.completeCurrentStep()).toBe('predictors');
   });
 
-  it.each<ImportFileDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'general-workbook'])(
+  it.each<ExistingImportDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'general-workbook'])(
     'prepares the same meter-reading review contract for %s drafts',
     kind => {
       const selectedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a' });
@@ -759,7 +763,7 @@ describe('ImportWizardStateService', () => {
     expect(summary?.overview.find(item => item.key === 'meterReadings')?.count).toBe(1);
   });
 
-  it.each<ImportFileDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'energy-treasure-hunt', 'general-workbook'])(
+  it.each<ExistingImportDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'energy-treasure-hunt', 'general-workbook'])(
     'prepares the same predictor-reading review contract for %s drafts',
     kind => {
       service.initialize({
@@ -773,7 +777,7 @@ describe('ImportWizardStateService', () => {
   );
 });
 
-function generalDraft(): ImportFileDraft {
+function generalDraft(): ExistingImportDraft {
   return {
     ...getEmptyFileReference(),
     id: 'draft-1',
@@ -790,7 +794,7 @@ function generalDraft(): ImportFileDraft {
   };
 }
 
-function templateDraft(values: Partial<ImportFileDraft> = {}): ImportFileDraft {
+function templateDraft(values: Partial<ExistingImportDraft> = {}): ExistingImportDraft {
   return {
     ...generalDraft(),
     kind: 'verifi-v2',

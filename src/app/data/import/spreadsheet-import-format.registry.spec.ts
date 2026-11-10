@@ -18,6 +18,8 @@ describe('spreadsheet import format registry', () => {
     expect(importFormat('energy-treasure-hunt').label).toBe('Energy Treasure Hunt');
     expect(importWorkflowForKind('energy-treasure-hunt')).toBe('template');
     expect(importWorkflowForKind('general-workbook')).toBe('general-workbook');
+    expect(importFormat('energy-uses-template').label).toBe('Energy Uses Template');
+    expect(importWorkflowForKind('energy-uses-template')).toBe('energy-uses');
     expect(importWorkflowForKind('footprint-tool')).toBe('footprint');
   });
 });

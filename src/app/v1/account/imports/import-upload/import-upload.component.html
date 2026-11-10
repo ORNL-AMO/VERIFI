@@ -58,7 +58,7 @@
         {{ readingFiles() ? 'Reading files…' : (dragActive() ? 'Drop files to add them' : 'Drag and drop Excel files here') }}
       </strong>
       <span>or</span>
-      <button type="button" class="v1-btn v1-btn--action" [disabled]="readingFiles()" (click)="fileInput.click()">Browse files</button>
+      <button #browseFilesButton type="button" class="v1-btn v1-btn--action" [disabled]="readingFiles()" (click)="fileInput.click()">Browse files</button>
       <small>XLSX, XLS, XLSM · Multiple files supported</small>
       <input #fileInput class="file-input" type="file" multiple accept=".xlsx,.xls,.xlsm" [disabled]="readingFiles()" (change)="filesSelected(fileInput.files); fileInput.value = ''">
     </div>
@@ -81,18 +81,23 @@
       <ul class="queue-list">
         @for (draft of session.drafts(); track draft.id) {
           <li>
-            <div>
-              <strong>{{ draft.name }}</strong>
-              <span>{{ formatLabel(draft.kind) }} · {{ statusLabels[draft.status] }}</span>
+            <div class="queue-entry">
+              <button #removeQueueFile type="button" class="v1-icon-btn queue-remove" [attr.aria-label]="'Remove ' + draft.name + ' from upload queue'" title="Remove from upload queue" [disabled]="queueLocked() || draft.status === 'importing'" (click)="removeDraft(draft.id)"><app-ui-icon name="close" [size]="14"/></button>
+              <div class="queue-file">
+                <strong>{{ draft.name }}</strong>
+                <span>{{ formatLabel(draft.kind) }} · {{ statusLabels[draft.status] }}</span>
+              </div>
             </div>
-            <button type="button" class="v1-btn v1-btn--action" [disabled]="draft.status === 'completed' || draft.status === 'invalid'" (click)="openDraft(draft.id)">
-              Process Upload
+            <button type="button" class="v1-btn v1-btn--action queue-process" [disabled]="draft.status === 'completed' || draft.status === 'invalid'" (click)="openDraft(draft.id)">
+              Process Upload<app-ui-icon name="chevronRight" [size]="16"/>
             </button>
           </li>
         }
       </ul>
     </section>
   }
+
+  <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{{ queueAnnouncement() }}</p>
 
   <footer class="backup-import">
     <span>Have a VERIFI backup?</span>

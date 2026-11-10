@@ -1,3 +1,4 @@
+import type { EnergyUsesImportPreview, EnergyUsesWorkbook } from './energy-uses/energy-uses-excel-import.service';
 import { WorkBook } from "xlsx"
 import { IdbFacility } from "@data/models/idbModels/facility"
 import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter"
@@ -107,9 +108,9 @@ export interface ParsedTemplate {
 export type TemplateVersion = "V1" | "V2" | "V3" | "ETH" | "Non-template" | "Footprint-tool";
 
 export type ImportFileKind = 'verifi-v1' | 'verifi-v2' | 'verifi-v3' |
-  'energy-treasure-hunt' | 'general-workbook' | 'footprint-tool';
+  'energy-treasure-hunt' | 'general-workbook' | 'footprint-tool' | 'energy-uses-template';
 
-export type ImportWorkflowKind = 'template' | 'general-workbook' | 'footprint';
+export type ImportWorkflowKind = 'template' | 'general-workbook' | 'footprint' | 'energy-uses';
 
 export type ImportFileStatus = 'queued' | 'ready' | 'invalid' | 'importing' | 'completed';
 
@@ -152,7 +153,19 @@ export interface FootprintImportFileDraft extends ImportFileDraftBase {
   kind: 'footprint-tool';
 }
 
-export type ImportFileDraft = TemplateImportFileDraft | GeneralWorkbookImportFileDraft | FootprintImportFileDraft;
+export interface EnergyUsesTemplateImportFileDraft extends ImportFileDraftBase {
+  kind: 'energy-uses-template';
+  energyUses: {
+    workbook: EnergyUsesWorkbook;
+    year: number | null;
+    skippedRows: number[];
+    preview?: EnergyUsesImportPreview;
+    recoverySummary?: ImportCommitSummary;
+    requiresWorkspaceRefresh?: boolean;
+  };
+}
+
+export type ImportFileDraft = TemplateImportFileDraft | GeneralWorkbookImportFileDraft | FootprintImportFileDraft | EnergyUsesTemplateImportFileDraft;
 
 export interface ImportCommitRequest {
   accountGuid: string;

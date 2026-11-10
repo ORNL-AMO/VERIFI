@@ -6,25 +6,28 @@
     <header class="v1-section-header v1-account-portfolio__header v1-page-header">
       <app-page-identity class="v1-account-portfolio__heading" [breadcrumbs]="breadcrumbs()" (breadcrumbSelected)="navigation.changeFacilityScope({ kind: 'all' })" [title]="title()" [icon]="headerIcon()" headingId="v1-account-portfolio-title"/>
       <div class="v1-account-portfolio__header-actions">
-        @if (creationAction(); as action) {
-          <button type="button" class="v1-btn v1-btn--action" [disabled]="!action.canCreate()" (click)="action.create()"><app-ui-icon name="add"/>{{ action.label }}</button>
-        }
         @if (isMeters() || isPredictors()) {
           @let tools = selectionActions();
           <button type="button" class="v1-btn v1-btn--quiet" [class.v1-account-portfolio__select--active]="tools?.selecting()" [disabled]="!canSelectItems()" [attr.aria-pressed]="tools?.selecting() ?? false" [attr.aria-controls]="tools?.selecting() ? activeContent() + '-selection-actions' : null" (click)="tools?.toggleSelection()"><app-ui-icon [name]="tools?.selecting() ? 'check' : 'square'" [size]="18"/>Select {{ activeContent() }}</button>
         }
+        @if (exportAction(); as action) {
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!action.available()" (click)="action.open()"><app-ui-icon name="excel"/>Export Excel</button>
+        }
         <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="navigation.uploadQuery()"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
         @if (isMeters()) {
+          <a class="v1-btn v1-btn--secondary" [routerLink]="dataValidationRoute()"><app-ui-icon name="settings"></app-ui-icon>Data Validation</a>
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreateMeterDrawer()"><app-ui-icon name="add"></app-ui-icon>Add meter</button>
-          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="dataValidationRoute()"><app-ui-icon name="settings"></app-ui-icon>Data Validation</a>
         }
         @if (isPredictors()) {
+          <a class="v1-btn v1-btn--secondary" [routerLink]="dataValidationRoute()"><app-ui-icon name="settings"/>Data Validation</a>
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreatePredictorDrawer()"><app-ui-icon name="add"/>Add predictor</button>
-          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="dataValidationRoute()"><app-ui-icon name="settings"/>Data Validation</a>
         }
         @if (isFacilities()) {
+          <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'settings', 'portfolio']"><app-ui-icon name="settings"></app-ui-icon>Manage Portfolio</a>
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openCreateFacilityDrawer()"><app-ui-icon name="add"></app-ui-icon>Add facility</button>
-          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'settings', 'portfolio']"><app-ui-icon name="settings"></app-ui-icon>Manage Portfolio</a>
+        }
+        @if (creationAction(); as action) {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!action.canCreate()" (click)="action.create()"><app-ui-icon name="add"/>{{ action.label }}</button>
         }
       </div>
     </header>

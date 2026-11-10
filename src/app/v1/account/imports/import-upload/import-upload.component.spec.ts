@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router, RouterStateSnapshot } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -17,12 +18,15 @@ describe('ImportUploadComponent', () => {
   let session: {
     hasUnsavedChanges: () => boolean;
     pending: () => boolean;
+    navigationBlocked: () => boolean;
+    recoveryDraft: () => undefined;
     draft: ReturnType<typeof vi.fn>;
     drafts: () => any[];
     origin: ReturnType<typeof vi.fn>;
     addDrafts: ReturnType<typeof vi.fn>;
     begin: ReturnType<typeof vi.fn>;
     clear: ReturnType<typeof vi.fn>;
+    removeDraft: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -41,12 +45,15 @@ describe('ImportUploadComponent', () => {
     session = {
       hasUnsavedChanges: () => true,
       pending: () => false,
+      navigationBlocked: () => false,
+      recoveryDraft: () => undefined,
       draft: vi.fn(() => draft),
       drafts: () => [draft],
       origin: vi.fn(() => ({})),
       addDrafts: vi.fn(),
       begin: vi.fn(),
-      clear: vi.fn()
+      clear: vi.fn(),
+      removeDraft: vi.fn(() => true)
     };
     TestBed.configureTestingModule({
       providers: [
@@ -149,11 +156,44 @@ describe('ImportUploadComponent', () => {
     expect(element.querySelector('app-ui-icon[name="uploadData"]')).not.toBeNull();
     expect(element.querySelector('.queue-list')?.textContent).toContain('VERIFI Template · Ready to process');
     expect(element.querySelector('.queue-list')?.textContent).not.toContain('verifi-v3');
-    expect(element.querySelector('.queue-list button')?.textContent).toContain('Process Upload');
+    expect(element.querySelector('.queue-process')?.textContent).toContain('Process Upload');
     expect(element.textContent?.toLowerCase()).not.toContain('review');
     const backupLink = element.querySelector<HTMLAnchorElement>('.backup-import a');
     expect(backupLink?.textContent).toContain('Import a VERIFI backup (.json)');
     expect(backupLink?.getAttribute('href')).toBe('/v1/workspace/account/account-1/settings/backup');
+  });
+
+  it('removes queue rows through the subtle filename control and keeps keyboard focus in the queue', async () => {
+    const queued = signal([draft, { ...draft, id: 'draft-2', name: 'cooling.xlsx' }]);
+    session.drafts = queued;
+    session.draft.mockImplementation(id => queued().find(value => value.id === id));
+    session.removeDraft.mockImplementation(id => { queued.update(values => values.filter(value => value.id !== id)); return true; });
+    const fixture = TestBed.createComponent(ImportUploadComponent);
+    fixture.detectChanges();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector('.queue-process app-ui-icon[name="chevronRight"]')).not.toBeNull();
+    const first = root.querySelector<HTMLButtonElement>('.queue-remove')!;
+    expect(first.getAttribute('aria-label')).toContain('utility-data.xlsx');
+    first.focus(); first.click();
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(session.removeDraft).toHaveBeenCalledWith('draft-1');
+    expect(root.querySelectorAll('.queue-list li')).toHaveLength(1);
+    const next = root.querySelector<HTMLButtonElement>('.queue-remove')!;
+    expect(document.activeElement).toBe(next);
+    next.click(); fixture.detectChanges(); await fixture.whenStable();
+    expect(root.querySelector('.queue-list')).toBeNull();
+    expect(document.activeElement?.textContent).toContain('Browse files');
+    expect(fixture.componentInstance.queueAnnouncement()).toContain('cooling.xlsx removed');
+  });
+
+  it('blocks queue removal while file parsing or import recovery is active', () => {
+    component.readingFiles.set(true);
+    component.removeDraft('draft-1');
+    expect(session.removeDraft).not.toHaveBeenCalled();
+    component.readingFiles.set(false);
+    session.navigationBlocked = () => true;
+    component.removeDraft('draft-1');
+    expect(session.removeDraft).not.toHaveBeenCalled();
   });
 
   it('renders session loss, processing, and file-specific error states accessibly', () => {
