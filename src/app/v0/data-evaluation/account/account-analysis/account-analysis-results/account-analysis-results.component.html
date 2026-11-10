@@ -26,6 +26,11 @@
         <app-calculated-report-year-warning [reportYear]="calculatedReportYear()"
             [analysisStatusChecks]="selectedAnalysisStatusChecks()" [showFacilityNames]="true">
         </app-calculated-report-year-warning>
+        @if (calculating() === 'error') {
+        <div class="alert alert-danger" role="alert">
+            Results could not be calculated. <button type="button" class="btn btn-sm btn-outline-danger" (click)="retry()">Try again</button>
+        </div>
+        }
         <router-outlet></router-outlet>
     </div>
 </div>

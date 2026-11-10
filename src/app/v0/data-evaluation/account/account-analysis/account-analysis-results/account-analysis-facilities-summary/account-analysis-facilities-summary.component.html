@@ -8,7 +8,7 @@
     @for (facilitySummary of facilitySummaries; track facilitySummary.facility.guid) {
       <div class="col-6">
         <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="facilitySummary.monthlySummaryData"
-          [analysisItem]="analysisItem" [facilityOrAccount]="facilitySummary.facility"
+          [analysisItem]="analysisItem()" [facilityOrAccount]="facilitySummary.facility"
           [inHomeScreen]="true" [inFacilitySummary]="true">
         </app-monthly-analysis-summary-graph>
       </div>
