@@ -144,6 +144,10 @@ Environment replacement is configured in [`angular.json`](angular.json):
 
 [`ElectronService`](src/app/platform/electron/electron.service.ts) detects `window.electronAPI` and guards renderer calls when the bridge is unavailable. `preload.js` allowlists renderer-to-main and main-to-renderer channels. `main.js` owns desktop windows, filesystem access, dialogs, external links, and updates.
 
+The main-process [update controller](electron/update-controller.cjs) owns one set of updater listeners and replays its current status when a renderer connects. Downloads require a user action; completion leaves the application running. An explicit restart awaits startup/migrations, runs editor leave guards through navigation to `/welcome`, waits for `WorkspaceCommandBoundary.whenIdle()`, and drains `AutomaticBackupsService.flushPending()`. Failed writes, backup conflicts, canceled navigation, and startup errors prevent installation. Update status crosses the preload bridge as a small serializable contract; subscriptions return listener-specific cleanup functions.
+
+Privileged IPC accepts only the packaged entry document's main frame. The renderer remains sandboxed with context isolation and no Node integration. External HTTP/HTTPS/mail links open through the operating system; other popup URLs are denied and remote navigation cannot replace the application document. Application identity, profile location, IndexedDB schema, and file-based storage origin are unchanged. See [desktop maintenance](docs/electron-maintenance.md) for compatibility and verification.
+
 Preserve these invariants:
 
 - Browser behavior must not assume the Electron bridge exists.
@@ -179,7 +183,8 @@ Test targets are configured in `angular.json` and exposed through `package.json`
 
 - Vitest with jsdom runs ordinary `*.spec.ts` tests.
 - Playwright with Chromium runs `*.browser.spec.ts` tests for IndexedDB, Web Workers, and other browser-native behavior.
-- `npm run test:all:ci` runs both suites.
+- Node's test runner covers main/preload contracts and desktop release utilities through `npm run test:electron`.
+- `npm run test:all:ci` runs the Electron, fast Angular, and browser suites.
 
 The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. A release-policy job keeps package and lockfile versions aligned, requires each new `master` version to advance by SemVer precedence, and verifies that the preceding release tag points to the preceding commit with a successful completed CI/CD run. Development web builds deploy after tests. On `master`, the web build and desktop release run in parallel, but production web deployment waits for both the web artifact and the complete desktop workflow, including draft GitHub Release creation pinned to the run's immutable commit. Production work is serialized, and the preceding-release guard prevents out-of-order publication because GitHub concurrency does not guarantee FIFO ordering. See the [release process](docs/release-process.md) for the human promotion process, hotfix path, job graph, artifact contracts, and failure behavior.
 

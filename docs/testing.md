@@ -106,7 +106,8 @@ Representative executable patterns already exist for a [pure calculation](../src
 | `npm run test:ci` | Fast suite once |
 | `npm run test:browser` | Browser suite in Chromium |
 | `npm run test:browser:ci` | Browser suite once in headless Chromium |
-| `npm run test:all:ci` | Required fast and browser gate |
+| `npm run test:all:ci` | Required Electron, fast Angular, and browser gate |
+| `npm run test:electron` | Main/preload security, updater lifecycle, and release metadata tests without signing credentials |
 | `npm run test:coverage` | Informational scoped coverage in headless Chromium |
 
 Install Chromium once with `npx playwright install chromium` when it is not available locally.

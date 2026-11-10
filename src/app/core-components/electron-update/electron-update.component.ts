@@ -1,88 +1,56 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ElectronService } from '@platform/electron/electron.service';
-import { trigger, state, style, animate, transition } from '@angular/animations';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { ElectronUpdateState } from '@platform/electron/electron-update.models';
+import { UpdateInstallService } from '@platform/electron/update-install.service';
 
 @Component({
-    selector: 'app-electron-update',
-    templateUrl: './electron-update.component.html',
-    styleUrls: ['./electron-update.component.css'],
-    animations: [
-        trigger('updateToast', [
-            state('show', style({ top: '20px' })),
-            state('hide', style({ top: '-200px' })),
-            transition('hide => show', animate('.5s ease')),
-            transition('show => hide', animate('.5s ease'))
-        ])
-    ],
-    standalone: false
+  selector: 'app-electron-update',
+  templateUrl: './electron-update.component.html',
+  styleUrls: ['./electron-update.component.css'],
+  standalone: false
 })
-export class ElectronUpdateComponent implements OnInit {
+export class ElectronUpdateComponent implements OnInit, OnDestroy {
+  state: ElectronUpdateState = { status: 'idle' };
+  visible = false;
+  preparing = false;
+  restartError?: string;
+  private readonly subscriptions = new Subscription();
 
+  constructor(
+    private readonly electron: ElectronService,
+    private readonly installer: UpdateInstallService,
+    private readonly cd: ChangeDetectorRef
+  ) { }
 
-  showUpdateAvailable: string = 'hide';
-
-  updateAvailable: boolean;
-  updateAvailableSub: Subscription;
-
-  updateInfo: { releaseName: string, releaseNotes: string };
-  updateInfoSub: Subscription;
-  downloading: boolean;
-
-  updateError: boolean;
-  updateErrorSub: Subscription;
-  constructor(private electronService: ElectronService, private cd: ChangeDetectorRef, private loadingService: LoadingService,
-    private sharedDataService: SharedDataService) {
+  ngOnInit(): void {
+    this.subscriptions.add(this.electron.updateState.subscribe(state => {
+      if (state.status !== this.state.status && ['available', 'downloaded', 'error', 'unsupported'].includes(state.status)) this.visible = true;
+      this.state = state;
+      this.cd.markForCheck();
+    }));
+    this.subscriptions.add(this.electron.updateRequested.subscribe(request => {
+      if (request > 0) this.visible = true;
+      this.cd.markForCheck();
+    }));
+    this.electron.sendAppReady('ready');
   }
 
-  ngOnInit() {
-    this.electronService.sendAppReady('ready');
-    this.updateAvailableSub = this.electronService.updateAvailable.subscribe(val => {
-      this.updateAvailable = val;
-      this.cd.detectChanges();
-      if (this.updateAvailable) {
-        this.sharedDataService.modalOpen.next(true);
-        setTimeout(() => {
-          this.showUpdateAvailable = 'show';
-          this.cd.detectChanges();
-        }, 100)
-      }
-    });
+  ngOnDestroy(): void { this.subscriptions.unsubscribe(); }
+  download(): void { this.electron.sendUpdateSignal(); }
+  retry(): void { this.electron.retryUpdate(); }
 
-    this.updateInfoSub = this.electronService.updateInfo.subscribe(val => {
-      this.updateInfo = val;
-    });
-
-    this.updateErrorSub = this.electronService.updateError.subscribe(val => {
-      this.updateError = val;
-      if (this.updateError) {
-        this.loadingService.setLoadingStatus(false);
-        this.loadingService.setLoadingMessage(undefined);
-        this.cd.detectChanges();
-      }
-    })
-  }
-
-  ngOnDestroy() {
-    this.updateAvailableSub.unsubscribe();
-    this.updateInfoSub.unsubscribe();
-    this.updateErrorSub.unsubscribe();
-  }
-
-  update() {
-    this.downloading = true;
-    this.loadingService.setLoadingMessage('Downloading update. Application will close when download is completed. This may take a moment.');
-    this.loadingService.setLoadingStatus(true);
-    this.electronService.sendUpdateSignal();
-  }
-
-  closeUpdateAvailable() {
-    this.sharedDataService.modalOpen.next(false);
-    this.showUpdateAvailable = 'hide';
-    setTimeout(() => {
-      this.updateAvailable = false;
-    }, 500)
+  async restart(): Promise<void> {
+    if (this.preparing) return;
+    this.preparing = true;
+    this.restartError = undefined;
+    try {
+      await this.installer.install();
+    } catch (error) {
+      this.restartError = error instanceof Error ? error.message : 'VERIFI could not prepare to restart. Try again.';
+    } finally {
+      this.preparing = false;
+      this.cd.markForCheck();
+    }
   }
 }

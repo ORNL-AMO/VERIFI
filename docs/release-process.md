@@ -53,6 +53,8 @@ The [build template](../.github/workflows/template_build.yml) creates `web-dist`
 
 The desktop workflow owns its renderer and installer artifacts. Refer to its upload steps for the current platform outputs rather than copying that changing inventory into documentation.
 
+Desktop dependency installation uses `npm ci`. Packaging jobs explicitly verify the Electron binary because recent Electron packages download it on demand. Windows packaging reads only the public signing certificate's common name to embed the updater's expected publisher; private-key signing stays on the existing signing runner. A Windows verification job checks Authenticode trust and the publisher before the finalization job regenerates metadata and blockmaps from the signed installer. macOS metadata and blockmaps are regenerated after notarization and stapling. Both paths verify final file sizes, checksums, and external blockmap contents before releasing artifacts. No unsigned Windows blockmap is included in release assets. See [desktop maintenance](electron-maintenance.md) for local checks without signing credentials and signed release acceptance.
+
 Artifacts expire according to the `retention-days` values on their upload steps. When retrying a deployment, first confirm its required artifacts are still available in the workflow run. If they have expired, rerun the full workflow so deployment cannot consume output from a different commit.
 
 ## macOS hosted runner and verification

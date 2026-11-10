@@ -6,6 +6,36 @@ import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
 import { WorkspaceChangeKind, WorkspaceEntityKind, WorkspaceWriteError } from './workspace-commands.models';
 
 describe('WorkspaceCommandBoundary', () => {
+  it('waits for queued commands and their publication before reporting idle', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+    let finish!: () => void;
+    const first = boundary.execute(makeOptions(), () => new Promise<void>(resolve => { finish = resolve; }));
+    const second = boundary.execute(makeOptions(), async () => 'second');
+    const complete = vi.fn();
+    const idle = boundary.whenIdle().then(complete);
+    await Promise.resolve();
+    expect(complete).not.toHaveBeenCalled();
+    finish();
+    await Promise.all([first, second, idle]);
+    expect(complete).toHaveBeenCalledOnce();
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it('rejects the idle wait if an in-flight command fails', async () => {
+    const { boundary, store } = createBoundary();
+    publishReady(store);
+    let fail!: (error: Error) => void;
+    const command = boundary.execute(makeOptions(), () => new Promise((_resolve, reject) => { fail = reject; }));
+    const commandResult = command.catch(error => error);
+    const idle = expect(boundary.whenIdle()).rejects.toMatchObject({ code: 'persistence-failed' });
+    await Promise.resolve();
+    fail(new Error('write failed'));
+    await idle;
+    await commandResult;
+  });
+
   it('rejects a command when the workspace is not ready', async () => {
     const { boundary } = createBoundary();
 

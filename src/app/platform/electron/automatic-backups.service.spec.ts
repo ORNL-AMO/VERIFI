@@ -70,6 +70,106 @@ describe('AutomaticBackupsService', () => {
     vi.useRealTimers();
   });
 
+  it('flushes a debounced committed revision before restart without waiting for its timer', async () => {
+    store.publish(snapshot('account-a'));
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    service.subscribeData();
+    await flushAsync();
+    store.publishCommitted(snapshot('account-a', { name: 'Changed' }), {});
+    await service.flushPending();
+    expect(gateway.write).toHaveBeenCalledTimes(1);
+    expect(service.status.value).toBe('ready');
+    await vi.runAllTimersAsync();
+    expect(gateway.write).toHaveBeenCalledTimes(1);
+  });
+
+  it('blocks restart on backup conflicts and write failures', async () => {
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await service.flushPending().then(() => { throw new Error('Expected a conflict'); }, error => {
+      expect(error.message).toContain('backup issue');
+    });
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    await service.requestReview();
+    store.publishCommitted(snapshot('account-a', { name: 'Changed' }), {});
+    gateway.write.mockRejectedValue(new Error('disk full'));
+    await expect(service.flushPending()).rejects.toThrow('backup issue');
+    expect(service.status.value).toBe('error');
+  });
+
+  it('waits for a running write and its newer queued revision before restarting', async () => {
+    store.publish(snapshot('account-a'));
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    service.subscribeData();
+    await flushAsync();
+    const write = deferred<void>();
+    gateway.write.mockReturnValueOnce(write.promise);
+    store.publishCommitted(snapshot('account-a', { name: 'First' }), {});
+    await vi.advanceTimersByTimeAsync(3000);
+    store.publishCommitted(snapshot('account-a', { name: 'Second' }), {});
+    const complete = vi.fn();
+    const flush = service.flushPending().then(complete);
+    await flushAsync();
+    expect(complete).not.toHaveBeenCalled();
+    write.resolve();
+    await flush;
+    expect(gateway.write).toHaveBeenCalledTimes(2);
+    expect(service.status.value).toBe('ready');
+  });
+
+  it('does not overwrite an unresolved conflicting file when flushing a newer committed revision', async () => {
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await service.inspectCurrentAccountFile();
+    expect(service.status.value).toBe('conflict');
+
+    store.publishCommitted(snapshot('account-a', { name: 'Changed' }), {});
+    await expect(service.flushPending()).rejects.toThrow('backup issue');
+    await vi.runAllTimersAsync();
+    expect(gateway.write).not.toHaveBeenCalled();
+    expect(service.status.value).toBe('conflict');
+  });
+
+  it('waits for file validation before flushing a committed revision', async () => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    const inspection = deferred<unknown>();
+    gateway.read.mockReturnValueOnce(inspection.promise);
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await flushAsync();
+    store.publishCommitted(snapshot('account-a', { name: 'Changed' }), {});
+    const flush = service.flushPending();
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(gateway.write).not.toHaveBeenCalled();
+    inspection.resolve({ dataBackupId: 'registry-id', backupFileType: 'Account', origin: 'VERIFI', account: { guid: 'account-a' } });
+    await flush;
+    expect(gateway.write).toHaveBeenCalledOnce();
+    expect(service.status.value).toBe('ready');
+  });
+
+  it('keeps newer queued edits blocked after a write fails and resumes after explicit successful review', async () => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await service.inspectCurrentAccountFile();
+    const write = deferred<void>();
+    gateway.write.mockReturnValueOnce(write.promise);
+    store.publishCommitted(snapshot('account-a', { name: 'First' }), {});
+    await vi.advanceTimersByTimeAsync(3000);
+    store.publishCommitted(snapshot('account-a', { name: 'Second' }), {});
+    await flushAsync();
+    write.reject(new Error('disk full'));
+    await vi.runAllTimersAsync();
+    expect(service.status.value).toBe('error');
+    expect(gateway.write).toHaveBeenCalledTimes(1);
+    await expect(service.flushPending()).rejects.toThrow('backup issue');
+
+    await service.requestReview();
+    await service.flushPending();
+    expect(gateway.write).toHaveBeenCalledTimes(2);
+    expect(service.status.value).toBe('ready');
+  });
+
   it('does not save for hydration or selection-only changes', async () => {
     store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
     service.subscribeData();
@@ -82,6 +182,7 @@ describe('AutomaticBackupsService', () => {
   });
 
   it('debounces committed revisions and saves the latest coherent snapshot once', async () => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
     store.publish(snapshot('account-a'));
     service.subscribeData();
     await flushAsync();
@@ -264,6 +365,7 @@ describe('AutomaticBackupsService', () => {
   });
 
   it('does not let a stale save finally clear active write flags for the new account session', async () => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
     store.publish(snapshot('account-a'));
     service.subscribeData();
     await flushAsync();
@@ -286,6 +388,7 @@ describe('AutomaticBackupsService', () => {
       snapshot('account-b', { dataBackupFilePath: undefined }).account
     );
     (service as any).account = snapshot('account-b').account;
+    service.status.next('ready');
     const newToken = (service as any).accountSessionToken;
     const currentSave = (service as any).saveCommittedRevision('account-b:1', newToken);
     await flushAsync();

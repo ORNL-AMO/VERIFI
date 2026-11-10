@@ -1,22 +1,11 @@
-.card.card-toast {
-    position: fixed;
-    z-index: 800;
-    right: 0px;
-    /* bottom: 0px; */
-    margin: 10px;
-    min-width: 300px;
-    max-width: 500px;
+.card-toast {
+  position: fixed;
+  z-index: 800;
+  right: 10px;
+  top: 20px;
+  width: min(500px, calc(100vw - 20px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
 }
 
-.btn-close {
-    float: right;
-}
-
-.card-header i.fa{
-    font-size: 20px;
-    color: white;
-}
-
-.card.card-toast .card-header, .card.card-toast .btn-close{
-    background-color: white;
-}
+.card-body p:last-of-type { margin-bottom: 0.75rem; }

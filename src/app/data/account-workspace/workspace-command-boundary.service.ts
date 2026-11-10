@@ -53,11 +53,17 @@ export class WorkspaceCommandBoundary {
   /** Active account-scoped command queue. Resets when the active account changes. */
   private queueAccountGuid: string | undefined;
   private queue: Promise<unknown> = Promise.resolve();
+  private readonly inFlight = new Set<Promise<unknown>>();
 
   constructor(
     private readonly store: AccountWorkspaceStore,
     private readonly workspaceService: AccountWorkspaceService
   ) { }
+
+  /** Wait for submitted writes and their workspace publication before an explicit desktop restart. */
+  async whenIdle(): Promise<void> {
+    while (this.inFlight.size) await Promise.all([...this.inFlight]);
+  }
 
   /**
    * Execute a workspace write command through the boundary.
@@ -109,6 +115,8 @@ export class WorkspaceCommandBoundary {
       this.queue = Promise.resolve();
     }
     const next = this.queue.then(fn, fn);
+    this.inFlight.add(next);
+    next.then(() => this.inFlight.delete(next), () => this.inFlight.delete(next));
     this.queue = next.then(() => undefined, () => undefined);
     return next;
   }

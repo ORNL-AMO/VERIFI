@@ -25,6 +25,7 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 | Web behavior | `npm run build-prod` |
 | Shared renderer or Electron behavior | `npm run build-prod-electron` in addition to the web build |
 | Electron IPC or desktop integration | Both builds plus a focused manual desktop check |
+| Main/preload updater, security, or release metadata | `npm run test:electron` plus the affected Angular specs; the complete suite includes these tests |
 
 Install Chromium with `npx playwright install chromium` only when the local browser dependency is missing. Do not use `npm run lint` as a gate while it points to the unavailable TSLint builder.
 
@@ -35,6 +36,8 @@ For desktop packaging, read the [desktop pre-release guide](../../../docs/deskto
 Read the [release process](../../../docs/release-process.md) and inspect the caller plus every affected reusable workflow. Preserve the invariants that each `master` version advances by SemVer precedence, the preceding release tag points to the preceding commit with a successful completed CI/CD run, release tags target the current run's immutable commit, and production web deployment requires the web artifact and the complete desktop release to succeed for the same workflow run. Do not assume GitHub concurrency is FIFO. Check package/lockfile consistency, normal and hotfix promotion paths, skipped-job handling on `develop`, artifact names and retention, token permissions, signing and draft-release gates, and production concurrency. Validate workflow syntax and documentation links before running the final test and build matrix.
 
 ## Manual checks
+
+For desktop upgrades, follow [desktop maintenance](../../../docs/electron-maintenance.md). Local packaging uses `npm run dist-local` without certificates or provisioning profiles and never publishes. Signing, notarization, final artifact verification, and signed update acceptance remain CI/release checks; report them as pending when that infrastructure is unavailable. Test with an isolated profile and distinguish a development-runtime smoke check from an installed signed update. Preserve marketing macOS minimums separately from Darwin kernel minimums in updater metadata.
 
 - Exercise the changed happy path and its loading, empty, validation, error, disabled, and success states.
 - Check browser behavior without `window.electronAPI`.
