@@ -9,13 +9,62 @@ function setup() {
   const router = { url: '/data-evaluation', navigateByUrl: vi.fn().mockResolvedValue(true) };
   const commands = { whenIdle: vi.fn().mockResolvedValue(undefined), hasPendingCommands: false };
   const backups = { flushPending: vi.fn().mockResolvedValue(undefined), hasPendingOperations: false };
-  const electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn() };
+  const electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn().mockResolvedValue(true) };
   const loading = { setLoadingMessage: vi.fn(), setLoadingStatus: vi.fn() };
   const lifecycle = { initialize: vi.fn().mockResolvedValue({ status: 'ready' }) };
   return { router, commands, backups, electron, loading, lifecycle, service: new UpdateInstallService(router as any, commands as any, backups as any, electron as any, loading as any, lifecycle as any) };
 }
 
 describe('UpdateInstallService', () => {
+  it('keeps the application barrier through delayed native installation and releases it on a reported failure', async () => {
+    const { service, electron, loading } = setup();
+    electron.installUpdate.mockImplementation(async () => {
+      electron.updateState.next({ status: 'installing' });
+      return true;
+    });
+    await expect(service.install()).resolves.toBe(true);
+    expect(loading.setLoadingStatus).toHaveBeenLastCalledWith(false);
+    expect(service.installationPending()).toBe(true);
+    await expect(service.install()).resolves.toBe(false);
+    expect(service.installationPending()).toBe(true);
+    electron.updateState.next({ status: 'downloaded', message: 'Native installation failed' });
+    expect(service.installationPending()).toBe(false);
+    await expect(service.install()).resolves.toBe(true);
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+  });
+
+  it.each(['refused', 'rejected'])('releases the barrier when the installation request is %s and permits retry', async outcome => {
+    const { service, electron } = setup();
+    if (outcome === 'refused') electron.installUpdate.mockResolvedValueOnce(false);
+    else electron.installUpdate.mockRejectedValueOnce(new Error('Untrusted desktop request'));
+    await expect(service.install()).rejects.toThrow(outcome === 'refused' ? 'could not start' : 'Untrusted');
+    expect(service.installationPending()).toBe(false);
+    await expect(service.install()).resolves.toBe(true);
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+  });
+
+  it('keeps the barrier if the main process acknowledges that installation is already underway', async () => {
+    const { service, electron } = setup();
+    electron.installUpdate.mockImplementation(async () => {
+      electron.updateState.next({ status: 'installing' });
+      return false;
+    });
+    await expect(service.install()).resolves.toBe(false);
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+  });
+
+  it('replays an existing native installation lock and removes its observer on destruction', () => {
+    const { service, electron } = setup();
+    electron.updateState.next({ status: 'installing' });
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+    expect(service.installationPending()).toBe(false);
+    electron.updateState.next({ status: 'installing' });
+    expect(service.installationPending()).toBe(false);
+  });
   it('blocks repeated restart attempts after a real settled command failure until that save succeeds', async () => {
     const state = setup();
     const store = new AccountWorkspaceStore();
@@ -73,6 +122,7 @@ describe('UpdateInstallService', () => {
     await Promise.resolve();
     expect(commands.whenIdle).toHaveBeenCalledOnce();
     expect(backups.flushPending).toHaveBeenCalledOnce();
+    expect(service.installationPending()).toBe(true);
     expect(electron.installUpdate).not.toHaveBeenCalled();
     resolve();
     await expect(first).resolves.toBe(true);

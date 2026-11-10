@@ -14,7 +14,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { AccountWorkspaceService } from './account-workspace.service';
 import { AccountWorkspaceStore } from './account-workspace.store';
-import { WorkspacePatch } from './account-workspace.models';
+import { AccountWorkspaceCollectionKey, AccountWorkspaceSnapshot, WorkspacePatch } from './account-workspace.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 import {
   WorkspaceChangeKind,
@@ -25,6 +25,22 @@ import {
 } from './workspace-commands.models';
 
 let nextOperationId = 0;
+
+const ENTITY_COLLECTIONS: Record<Exclude<WorkspaceEntityKind, 'account'>, AccountWorkspaceCollectionKey> = {
+  facility: 'facilities', meter: 'meters', meterData: 'meterData', meterGroup: 'meterGroups',
+  predictor: 'predictors', predictorData: 'predictorData', facilityAnalysis: 'facilityAnalyses',
+  accountAnalysis: 'accountAnalyses', facilityReport: 'facilityReports', accountReport: 'accountReports',
+  customEmissions: 'customEmissions', customFuel: 'customFuels', customGWP: 'customGWPs',
+  energyUseGroup: 'energyUseGroups', energyUseEquipment: 'energyUseEquipment'
+};
+
+interface FailedCommand {
+  readonly accountGuid: string;
+  readonly entityKind: WorkspaceEntityKind;
+  readonly entityGuid?: string;
+  readonly label: string;
+  readonly error: WorkspaceWriteError;
+}
 
 export interface WorkspaceCommandOptions {
   readonly entityKind: WorkspaceEntityKind;
@@ -55,7 +71,7 @@ export class WorkspaceCommandBoundary {
   private queueAccountGuid: string | undefined;
   private queue: Promise<unknown> = Promise.resolve();
   private readonly inFlight = new Set<Promise<unknown>>();
-  private readonly failedCommands = new Map<string, { accountGuid: string; label: string; error: WorkspaceWriteError }>();
+  private readonly failedCommands = new Map<string, FailedCommand>();
   private catalogAccountGuids?: Set<string>;
 
   constructor(
@@ -137,8 +153,8 @@ export class WorkspaceCommandBoundary {
       this.failedCommands.delete(key);
     }, error => {
       this.inFlight.delete(next);
-      if (error instanceof WorkspaceWriteError && error.code === 'persistence-failed' && (!this.catalogAccountGuids || this.catalogAccountGuids.has(accountGuid))) {
-        this.failedCommands.set(key, { accountGuid, label: options.label, error });
+      if (error instanceof WorkspaceWriteError && ['persistence-failed', 'transaction-failed'].includes(error.code) && (!this.catalogAccountGuids || this.catalogAccountGuids.has(accountGuid))) {
+        this.failedCommands.set(key, { accountGuid, entityKind: options.entityKind, entityGuid: options.entityGuid, label: options.label, error });
       }
     });
     this.queue = next.then(() => undefined, () => undefined);
@@ -151,6 +167,9 @@ export class WorkspaceCommandBoundary {
     persist: () => Promise<T>
   ): Promise<WorkspaceCommandResult<T>> {
     this.assertCommandStillCurrent(submittedAccountGuid, 'before execution');
+    const failuresPresentBefore = [...this.failedCommands].filter(([, failure]) =>
+      failure.accountGuid === submittedAccountGuid && this.containsFailedEntity(failure, this.store.snapshot())
+    ).map(([key]) => key);
 
     const opId = ++nextOperationId;
     this.store.setPending({ id: opId, label: options.label });
@@ -193,6 +212,12 @@ export class WorkspaceCommandBoundary {
     }
 
     this.store.clearPending(opId);
+
+    // A successful cascade can remove failed descendants without issuing a command for each child.
+    for (const key of failuresPresentBefore) {
+      const failure = this.failedCommands.get(key);
+      if (failure && !this.containsFailedEntity(failure, this.store.snapshot())) this.failedCommands.delete(key);
+    }
 
     const change: WorkspaceCommittedChange = {
       entityKind: options.entityKind,
@@ -260,5 +285,11 @@ export class WorkspaceCommandBoundary {
         `Command was submitted for account ${submittedAccountGuid} but the active account is now ${currentAccountGuid} ${phase}.`
       );
     }
+  }
+
+  private containsFailedEntity(failure: FailedCommand, snapshot: AccountWorkspaceSnapshot | undefined): boolean {
+    if (!failure.entityGuid || !snapshot || snapshot.account.guid !== failure.accountGuid) return false;
+    if (failure.entityKind === 'account') return snapshot.account.guid === failure.entityGuid;
+    return snapshot[ENTITY_COLLECTIONS[failure.entityKind]].some(record => record.guid === failure.entityGuid);
   }
 }

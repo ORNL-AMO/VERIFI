@@ -24,7 +24,8 @@ test('only forwards allowlisted commands and invokes', async () => {
     api.send('quit-and-install');
     api.send('update');
     api.send('arbitrary-command');
-    assert.deepEqual(sent, [['quit-and-install', undefined], ['update', undefined]]);
+    assert.deepEqual(sent, [['update', undefined]]);
+    assert.equal((await api.invoke('quit-and-install'))[0], 'quit-and-install');
     await assert.rejects(api.invoke('arbitrary-command'), /not allowed/);
     assert.equal((await api.invoke('backup:exists', { path: '/tmp/test.json' }))[0], 'backup:exists');
     assert.equal(api.ipcRenderer, undefined);

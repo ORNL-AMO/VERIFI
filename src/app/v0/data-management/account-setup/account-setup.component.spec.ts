@@ -60,7 +60,7 @@ for (const componentType of [AccountSetupComponent, AccountSettingsComponent]) {
       };
       registry = { addWithObservable: vi.fn(value => of({ ...value, id: 1 })), updateWithObservable: vi.fn(value => of(value)) };
       accountHandler = { update: vi.fn((account: IdbAccount) => Promise.resolve(account)) };
-      electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn() };
+      electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn().mockResolvedValue(true) };
       TestBed.configureTestingModule({
         imports: componentType === AccountSetupComponent ? [AccountSetupTestModule] : [],
         declarations: componentType === AccountSettingsComponent ? [AccountSettingsComponent] : [],

@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld(
     "electronAPI", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["ready", "check-for-updates", "update", "quit-and-install", "relaunch", "uploadFileDialog", "openUploadedFileLocation", "utilityFileExists", "openBillsFolder", "checkFolderExists", "selectFolder", "disconnectBill"];
+            let validChannels = ["ready", "check-for-updates", "update", "relaunch", "uploadFileDialog", "openUploadedFileLocation", "utilityFileExists", "openBillsFolder", "checkFolderExists", "selectFolder", "disconnectBill"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }
@@ -27,7 +27,7 @@ contextBridge.exposeInMainWorld(
             return () => {};
          },
         invoke: (channel, data) => {
-            let validChannels = ["backup:chooseSavePath", "backup:exists", "backup:read", "backup:write"];
+            let validChannels = ["quit-and-install", "backup:chooseSavePath", "backup:exists", "backup:read", "backup:write"];
             if (validChannels.includes(channel)) {
                 return ipcRenderer.invoke(channel, data);
             }

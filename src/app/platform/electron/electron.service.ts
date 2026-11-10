@@ -119,8 +119,9 @@ export class ElectronService implements OnDestroy {
     else window['electronAPI']?.send('check-for-updates');
   }
 
-  installUpdate(): void {
-    window['electronAPI']?.send('quit-and-install');
+  async installUpdate(): Promise<boolean> {
+    if (!window['electronAPI']?.invoke) return false;
+    return Boolean(await window['electronAPI'].invoke('quit-and-install'));
   }
 
   //Used to tell electron that app is ready

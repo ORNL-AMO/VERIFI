@@ -65,6 +65,8 @@ test('ignores duplicate downloads, forwards progress, and installs only on expli
     await controller.ready();
     assert.equal(controller.state.status, 'downloaded');
     controller.install();
+    updater.emit('update-downloaded', { version: '1.1.0' });
+    assert.equal(controller.state.status, 'installing');
     controller.install();
     assert.equal(calls().installs, 1);
 });

@@ -37,6 +37,9 @@
     text-align: center;
 }
 
+.install-dialog { border: 0; }
+.install-dialog::backdrop { background-color: rgba(0, 0, 0, 0.8); }
+
 .spinner>div {
     width: 18px;
     height: 18px;

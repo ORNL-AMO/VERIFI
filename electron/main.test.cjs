@@ -83,6 +83,19 @@ test('denies popup windows, opens only safe external links, and keeps local rout
     assert.equal(prevented, true);
 });
 
+test('acknowledges installation only for a trusted caller with a downloaded update', async () => {
+    const { requests, trusted, updater } = await setup();
+    const install = requests.get('quit-and-install');
+    assert.throws(() => install({ ...trusted, senderFrame: {} }), /Untrusted/);
+    assert.equal(install(trusted), false);
+    updater.emit('update-downloaded', { version: '1.1.0' });
+    assert.equal(install(trusted), true);
+    assert.equal(install(trusted), false);
+    updater.emit('error', new Error('native installation failed'));
+    updater.quitAndInstall = () => { throw new Error('cannot install'); };
+    assert.equal(install(trusted), false);
+});
+
 test('does not send update notifications to closed windows and recreates the window on activation', async () => {
     const { app, win, updater, windows } = await setup();
     win.emit('closed');

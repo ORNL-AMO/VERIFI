@@ -51,6 +51,15 @@ describe('WorkspaceCommandBoundary', () => {
     expect(boundary.hasUnresolvedFailures).toBe(false);
   });
 
+  it('retains typed transaction failures as unresolved persistence', async () => {
+    const { boundary, store } = createBoundary();
+    publishReady(store);
+    await boundary.execute(makeOptions(), async () => { throw new WorkspaceWriteError('transaction-failed', 'aborted'); }).catch(() => undefined);
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    await boundary.execute(makeOptions(), async () => 'retry committed');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+  });
+
   it('does not resolve a failed save through unrelated entities or another account', async () => {
     const { boundary, store } = createBoundary();
     publishReady(store);
@@ -72,6 +81,24 @@ describe('WorkspaceCommandBoundary', () => {
     await boundary.execute(makeOptions('meter', 'update', 'meter-a'), async () => { throw new Error('offline'); }).catch(() => undefined);
     await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
     await boundary.execute(makeOptions('meter', 'delete', 'meter-a'), async () => 'removed');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it.each(['meter', 'facility'] as const)('resolves only failures for descendants removed by a successful %s cascade', async parent => {
+    const { boundary, store } = createBoundary();
+    store.publish({ ...makeSnapshot('account-a'),
+      meters: [{ guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a' }, { guid: 'meter-b', accountId: 'account-a', facilityId: 'facility-b' }] as any,
+      meterData: [{ guid: 'bill-a', accountId: 'account-a', facilityId: 'facility-a', meterId: 'meter-a' }, { guid: 'bill-b', accountId: 'account-a', facilityId: 'facility-b', meterId: 'meter-b' }] as any
+    });
+    for (const guid of ['bill-a', 'bill-b']) {
+      await boundary.execute(makeOptions('meterData', 'update', guid), async () => { throw new Error('bill offline'); }).catch(() => undefined);
+    }
+    await boundary.execute({ ...makeOptions(parent, 'delete', `${parent}-a`), publication: { mode: 'patch', buildPatch: () => ({ collections: [
+      ...(parent === 'facility' ? [{ collection: 'facilities' as const, deleteGuids: ['facility-a'] }] : []),
+      { collection: 'meters', deleteGuids: ['meter-a'] }, { collection: 'meterData', deleteGuids: ['bill-a'] }
+    ] }) } }, async () => 'removed parent');
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    await boundary.execute(makeOptions('meterData', 'update', 'bill-b'), async () => 'saved unrelated bill');
     await expect(boundary.whenIdle()).resolves.toBeUndefined();
   });
 

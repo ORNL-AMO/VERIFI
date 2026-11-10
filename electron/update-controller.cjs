@@ -17,7 +17,9 @@ class UpdateController {
                 this.setState({ ...this.state, percent: Math.min(100, Math.max(0, Number(progress.percent) || 0)) });
             }
         });
-        updater.on('update-downloaded', info => this.setState({ status: 'downloaded', ...this.release(info) }));
+        updater.on('update-downloaded', info => {
+            if (this.state.status !== 'installing') this.setState({ status: 'downloaded', ...this.release(info) });
+        });
         updater.on('error', error => this.fail(error));
     }
 
@@ -61,14 +63,16 @@ class UpdateController {
     }
 
     install() {
-        if (this.state.status !== 'downloaded') return;
+        if (this.state.status !== 'downloaded') return false;
         const downloaded = this.state;
         this.setState({ ...downloaded, status: 'installing', message: undefined });
         try {
             this.updater.quitAndInstall(false, true);
+            return this.state.status === 'installing';
         } catch (error) {
             this.log.error('Update installation failed', error);
             this.setState({ ...downloaded, message: 'The update could not be installed. Try restarting again.' });
+            return false;
         }
     }
 

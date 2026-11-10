@@ -8,7 +8,7 @@ describe('ElectronService update bridge', () => {
   function setup(available = true) {
     const listeners = new Map<string, (value: unknown) => void>();
     const cleanup = vi.fn();
-    const bridge = { send: vi.fn(), on: vi.fn((channel, callback) => { listeners.set(channel, callback); return cleanup; }) };
+    const bridge = { send: vi.fn(), invoke: vi.fn().mockResolvedValue(true), on: vi.fn((channel, callback) => { listeners.set(channel, callback); return cleanup; }) };
     window['electronAPI'] = available ? bridge : undefined;
     const service = new ElectronService({ retrieve: () => true } as any, { disableNotification: new Subject() } as any);
     return { service, listeners, bridge, cleanup };
@@ -51,6 +51,16 @@ describe('ElectronService update bridge', () => {
     service.installUpdate();
     expect(service.isElectron).toBe(false);
     expect(bridge.send).not.toHaveBeenCalled();
+    service.ngOnDestroy();
+  });
+
+  it('requests an installation acknowledgment through the allowlisted invocation', async () => {
+    const { service, bridge } = setup();
+    await expect(service.installUpdate()).resolves.toBe(true);
+    expect(bridge.invoke).toHaveBeenCalledWith('quit-and-install');
+    expect(bridge.send).not.toHaveBeenCalled();
+    bridge.invoke.mockRejectedValueOnce(new Error('Untrusted desktop request'));
+    await expect(service.installUpdate()).rejects.toThrow('Untrusted');
     service.ngOnDestroy();
   });
 });

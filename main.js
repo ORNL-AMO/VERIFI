@@ -45,7 +45,7 @@ const updates = new UpdateController({
 onTrusted('ready', () => updates.ready());
 onTrusted('check-for-updates', () => updates.check());
 onTrusted('update', () => updates.download());
-onTrusted('quit-and-install', () => updates.install());
+handleTrusted('quit-and-install', () => updates.install());
 onTrusted('relaunch', () => { app.relaunch(); app.exit(); });
 
 function openExternal(value) {

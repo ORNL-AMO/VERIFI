@@ -78,7 +78,7 @@ describe('AutomaticBackupsService', () => {
   });
 
   function installer(commands: Pick<WorkspaceCommandBoundary, 'whenIdle'> = { whenIdle: vi.fn().mockResolvedValue(undefined) }) {
-    const electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn() };
+    const electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn().mockResolvedValue(true) };
     const install = new UpdateInstallService(
       { url: '/welcome' } as any,
       commands as any,

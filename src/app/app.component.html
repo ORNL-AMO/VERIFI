@@ -39,3 +39,11 @@
     <app-shared-router-guard-modal class="hide-print"></app-shared-router-guard-modal>
   </div>
 </div>
+@if (updates.installationPending()) {
+  <dialog #installDialog class="workspace-switch-status install-dialog" aria-modal="true" aria-labelledby="install-update-title"
+    tabindex="-1" (cancel)="$event.preventDefault()">
+    <div class="spinner" aria-hidden="true"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>
+    <h1 id="install-update-title" class="h4">Restarting to install the update…</h1>
+    <p class="mb-0" role="status">Please wait while VERIFI finishes saves and prepares the update. It will close automatically when ready.</p>
+  </dialog>
+}
