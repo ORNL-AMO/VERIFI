@@ -1,0 +1,40 @@
+@import '../results-section.css';
+@import '../../../../../shared/data-workbench/results-table.css';
+
+:host { display: block; min-width: 0; }
+.facility-footprint__scope { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+.facility-footprint__scope span, small { color: var(--v1-muted); }
+.facility-footprint__balance h2 { margin: 0; font-size: 1rem; }
+.facility-footprint__balance-totals, .facility-footprint__source-balances dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: .5rem 0 1rem; }
+.facility-footprint__balance-totals > div { padding: .75rem; background: var(--v1-content-block); border: 1px solid var(--v1-divider); }
+.facility-footprint__balance dt, .facility-footprint__balance dd { margin: 0; }
+.facility-footprint__balance dt { color: var(--v1-muted); font-size: .8rem; }
+.facility-footprint__balance dd { font-variant-numeric: tabular-nums; }
+.facility-footprint__balance-totals dd { font-size: 1.25rem; font-weight: 700; }
+.facility-footprint__balance-totals small { font-size: .8rem; }
+.facility-footprint__source-balances { list-style: none; padding: 0; margin: 0; }
+.facility-footprint__source-balances li { border-top: 1px solid var(--v1-divider); padding: .75rem 0; }
+.facility-footprint__source-balances dl { margin-bottom: 0; }
+.facility-footprint__source-balances dl { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.facility-footprint__over-allocated dd { color: var(--v1-danger); }
+.facility-footprint__plot-scroll { overflow: auto; }
+.facility-footprint__plot-scroll > div { min-width: 620px; }
+.facility-footprint__table-scroll { overflow-y: hidden; }
+.facility-footprint__source th { background: var(--v1-content-block); color: var(--v1-muted); font-size: .76rem; font-weight: 900; text-transform: uppercase; }
+.facility-footprint__group th { padding-inline-start: 1.5rem; font-weight: 400; }
+.facility-footprint__total { background: var(--v1-content-block); font-weight: 800; }
+a { display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; }
+app-ui-icon { flex-shrink: 0; }
+small { display: block; font-weight: 400; }
+.facility-footprint__without-sources { margin-top: .75rem; }
+@media (max-width: 40rem) {
+  .facility-footprint__group th { padding-inline-start: .7rem; }
+  .facility-footprint__balance-totals, .facility-footprint__source-balances dl { grid-template-columns: 1fr; gap: .5rem; }
+}
+@media print {
+  .facility-footprint__plot-scroll, .facility-footprint__table-scroll { overflow: visible; }
+  .facility-footprint__plot-scroll > div { min-width: 0; }
+  tr { break-inside: avoid; }
+}
+
+.facility-footprint__calculation { min-width: 6.5rem; justify-content: center; gap: .3rem; font-size: .78rem; line-height: 1.2; }

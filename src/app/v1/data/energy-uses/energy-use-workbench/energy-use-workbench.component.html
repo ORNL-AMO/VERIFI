@@ -21,14 +21,20 @@
             <app-data-workbench-resource-switcher [resources]="context.resources()" [selectedId]="group.guid" [currentLabel]="group.name" ariaLabel="Switch energy-use group" (resourceSelected)="context.switchResource($event)"/>
           </app-page-identity>
         </div>
-        <div class="v1-data-workbench-actions">
-          @if (saveFeedback(); as feedback) {
-            <span class="v1-chip v1-chip--{{ feedback.tone }} energy-use-workbench__chip" role="status" aria-live="polite" [title]="editor()?.message() || ''"><app-ui-icon [name]="feedback.icon" [spin]="feedback.state === 'saving'"/>{{ feedback.label }}</span>
-            @if (feedback.state === 'error') { <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" [disabled]="!editor()?.canRetry()" (click)="editor()?.retry()">Retry</button> }
+        <div class="v1-data-workbench-actions" aria-label="Energy-use group summary and controls">
+          @let groupSummary = summary();
+          @for (source of groupSummary.sources; track source.name) {
+            <span class="energy-use-workbench__source-chip" [style.--energy-use-source-color]="source.color || null">{{ source.name }}</span>
           }
+          <span class="v1-chip v1-chip--{{ groupSummary.validation.tone }} energy-use-workbench__chip" aria-label="Group validation" [title]="groupSummary.validation.description">
+            <app-ui-icon [name]="groupSummary.validation.icon"/>{{ groupSummary.validation.label }}
+          </span>
+          <app-data-workbench-facts-toggle #factsToggle controls="energy-use-workbench-facts"/>
         </div>
       </div>
-      @if (saveFeedback()?.detail; as detail) { <ul class="v1-data-workbench-status-notes"><li><app-ui-icon name="warning"/><span>{{ detail }}</span></li></ul> }
+      <div id="energy-use-workbench-facts" class="energy-use-workbench__facts-region" role="region" aria-label="Facility energy balance facts" [attr.tabindex]="factsToggle.expanded() ? 0 : -1" [hidden]="!factsToggle.expanded()">
+        @if (factsToggle.expanded()) { <app-energy-use-balance-facts/> }
+      </div>
     </header>
     <app-data-workbench-tabs [tabs]="tabs" [activeTab]="context.activeTab()" ariaLabel="Energy-use group sections" (tabSelected)="context.openTab($event)"/>
 

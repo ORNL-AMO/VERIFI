@@ -38,7 +38,7 @@ export class SetupGroupComponent {
     persist: (value, base, ownerId) => this.actions.updateGroupSettings(this.identity(), value, base, ownerId),
     setEnabled: enabled => enabled ? this.form.enable({ emitEvent: false }) : this.form.disable({ emitEvent: false })
   });
-  readonly message = computed(() => this.editor.state() === 'error' ? this.editor.error() || 'Group settings could not be saved.'
+  readonly message = computed(() => this.editor.state() === 'saving' ? 'Saving group settings…' : this.editor.state() === 'saved' ? 'Saved.' : this.editor.state() === 'error' ? this.editor.error() || 'Group settings could not be saved.'
     : this.editor.state() === 'conflict' ? 'Saved group settings changed. Review conflicting values before saving.'
     : this.editor.state() === 'invalid' ? 'Enter an energy-use group name.' : 'Changes save automatically.');
   readonly canManage = computed(() => !!this.context.group() && this.workspace.canWrite() && !this.workspace.hasPending()

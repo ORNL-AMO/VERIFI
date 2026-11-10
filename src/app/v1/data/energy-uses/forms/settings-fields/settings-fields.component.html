@@ -1,6 +1,9 @@
 @let settingsForm = form();
 <div class="energy-use-fields" [formGroup]="settingsForm">
   <section class="v1-workbench-section">
+    <header class="energy-use-fields__heading"><h2>Energy use information</h2>
+      @if (saveMessage()) { <app-energy-use-save-status [state]="saveState()" [message]="saveMessage()" [canRetry]="canRetry()" (retryRequested)="retryRequested.emit()"/> }
+    </header>
     <div class="energy-use-fields__grid">
       <label><span>Name</span><input type="text" formControlName="name" required>
         @if (settingsForm.controls.name.touched && settingsForm.controls.name.invalid) { <small role="alert">Enter a name.</small> }

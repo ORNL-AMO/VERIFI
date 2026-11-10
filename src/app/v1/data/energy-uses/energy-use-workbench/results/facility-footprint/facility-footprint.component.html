@@ -1,0 +1,92 @@
+@let owner = facility();
+@let snapshot = result();
+@let energyBalance = balanceView();
+@let calculation = calculationStatus();
+<section class="v1-workbench-section facility-footprint" aria-labelledby="facility-footprint-title">
+  <h2 id="facility-footprint-title" class="visually-hidden">Facility Footprint</h2>
+  @if (context.workspace.state() === 'error') { <p role="alert">Facility footprint could not be loaded. Retry loading the account.</p> }
+  @else if (!context.workspace.ready() && !snapshot) { <span class="v1-chip v1-chip--info" role="status"><app-ui-icon name="loading" spin/>Calculating</span> }
+  @else if (!owner) { <p role="status">This facility footprint is unavailable.</p> }
+  @else if (!snapshot && !items().length && (bills.state() === 'idle' || bills.state() === 'evaluating')) { <span class="v1-chip v1-chip--info" role="status"><app-ui-icon name="loading" spin/>Calculating</span> }
+  @else if (!items().length && year() === undefined) { <p role="status">No energy uses in this facility. Add equipment to a group to begin.</p> }
+  @else if (year() === undefined) { <p role="status">No saved annual data in this facility.</p> }
+  @else if (unavailableCalendar()) { <p role="alert">Results are unavailable because the facility fiscal calendar is invalid.</p> }
+  @else if (snapshot) {
+    <header class="facility-footprint__scope"><strong>{{ owner.name }}</strong><span>FY {{ snapshot.year }} · {{ owner.energyUnit }}/yr · Site energy</span><span class="v1-chip v1-chip--{{ calculation.tone }} facility-footprint__calculation" role="status"><app-ui-icon [name]="calculation.icon" [spin]="calculation.icon === 'loading'"/>{{ calculation.label }}</span></header>
+    @if (snapshot.partial) { <p class="v1-alert v1-alert--warning">Partial coverage · charts show known contributions only.</p> }
+    @if (positive()) {
+      <div class="facility-footprint__plot-scroll" tabindex="0" role="region" aria-label="Facility energy flow, scroll to view all groups">
+        <div [style.height.px]="plotHeight()" [appV1ECharts]="option()" role="img" aria-label="Facility energy sources flowing to energy-use groups and unaccounted energy" [attr.aria-describedby]="energyBalance ? 'facility-energy-balance-title facility-footprint-table-title' : 'facility-footprint-table-title'"></div>
+      </div>
+    } @else { <p role="status">No positive consumption to chart. Zero and unavailable values are listed below.</p> }
+  }
+  @if (owner && bills.state() === 'error') { <p class="v1-alert v1-alert--warning" role="alert">Metered Consumption could not be calculated. Equipment results remain available. <button class="v1-btn v1-btn--quiet v1-btn--sm" type="button" (click)="bills.retry()">Retry energy balance</button></p> }
+</section>
+@if (owner && energyBalance) {
+  <section class="v1-workbench-section facility-footprint__balance" aria-labelledby="facility-energy-balance-title">
+    <header class="facility-footprint__scope"><h2 id="facility-energy-balance-title">Energy Balance</h2>
+      @if (energyBalance.accountedPercent !== null) { <strong>{{ energyBalance.accountedPercent | number:'1.0-0' }}% {{ energyBalance.overAllocated ? 'of consumption assigned' : 'accounted for' }}</strong> }
+    </header>
+    <dl class="facility-footprint__balance-totals">
+      <div><dt>Metered Consumption</dt><dd>{{ energyBalance.consumption === null ? 'Unavailable' : (energyBalance.consumption | number:'1.0-0') }} <small>{{ owner.energyUnit }}/yr</small>
+        @if (!energyBalance.complete && energyBalance.consumption !== null) { <small>Partial utility data</small> }
+      </dd></div>
+      <div><dt>Equipment Use</dt><dd>{{ energyBalance.equipment | number:'1.0-0' }} <small>{{ owner.energyUnit }}/yr</small>
+        @if (snapshot?.partial) { <small>Known contributions only</small> }
+      </dd></div>
+      <div [class.facility-footprint__over-allocated]="energyBalance.unaccounted !== null && energyBalance.unaccounted < 0"><dt>{{ energyBalance.label }}</dt><dd>{{ energyBalance.remaining === null ? 'Unavailable' : (energyBalance.remaining | number:'1.0-0') }} <small>{{ owner.energyUnit }}/yr</small></dd></div>
+    </dl>
+    @if (!energyBalance.complete) { <p class="v1-alert v1-alert--warning">The energy balance is unavailable until metered consumption covers this fiscal year for every included energy meter and equipment source.</p> }
+    @if (energyBalance.overAllocated) { <p class="v1-alert v1-alert--warning">Equipment use exceeds metered consumption for one or more sources. Review equipment amounts and utility data.</p> }
+    <ul class="facility-footprint__source-balances" aria-label="Energy balance by source">
+      @for (source of energyBalance.sources; track source.source) {
+        <li><strong>{{ source.source }}</strong>
+          <dl><div><dt>Metered Consumption</dt><dd>{{ source.consumption === null ? 'Unavailable' : (source.consumption | number:'1.0-0') }} {{ owner.energyUnit }}/yr</dd></div>
+            <div><dt>Equipment Use</dt><dd>{{ source.equipment | number:'1.0-0' }} {{ owner.energyUnit }}/yr</dd></div>
+            <div [class.facility-footprint__over-allocated]="source.unaccounted !== null && source.unaccounted < 0"><dt>{{ source.label }}</dt><dd>{{ source.remaining === null ? 'Unavailable' : (source.remaining | number:'1.0-0') }} {{ owner.energyUnit }}/yr</dd></div>
+            <div><dt>Accounted for</dt><dd>{{ source.accountedPercent === null ? 'Unavailable' : (source.accountedPercent | number:'1.0-0') + '%' }}</dd></div></dl>
+          @if (source.coverage) { <small>{{ source.coverage }}</small> }
+          @if (source.equipmentPartial) { <small>Equipment use includes known contributions only.</small> }
+        </li>
+      }
+    </ul>
+  </section>
+}
+@if (owner && snapshot) {
+  <section class="v1-workbench-section" aria-labelledby="facility-footprint-table-title">
+    <h2 id="facility-footprint-table-title" class="visually-hidden">Facility source and energy-use group breakdown</h2>
+    <div class="v1-table-scroll facility-footprint__table-scroll" tabindex="0" role="region" aria-label="Group use by source">
+      <table class="v1-results-table">
+        <caption class="visually-hidden">{{ owner.name }} energy use by source and group, FY {{ snapshot.year }}, {{ snapshot.period }}, {{ owner.energyUnit }}/year. Earlier saved values carry forward unchanged.</caption>
+        <thead><tr><th scope="col">Source</th><th scope="col">Equipment Use<br>({{ owner.energyUnit }}/yr)</th></tr></thead>
+        @for (source of sources(); track source.source) {
+          <tbody>
+            <tr class="facility-footprint__source"><th scope="rowgroup" colspan="2">{{ source.source }}</th></tr>
+            @for (row of source.groups; track row.group.id) {
+              <tr class="facility-footprint__group">
+                <th scope="row"><a [routerLink]="row.route"><app-ui-icon [name]="source.icon" [size]="16"/><span>{{ row.group.name }}</span></a></th>
+                <td>{{ row.amount === null ? 'Unavailable' : (row.amount | number:'1.0-0') }}
+                  @if (row.partial) { <small>Partial coverage · known values only</small> }
+                  <div class="visually-hidden">
+                    @for (member of row.details; track member.guid) { <strong>{{ member.name }}</strong><app-energy-use-source-details [sources]="member.sources"/> }
+                  </div>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="2">No energy-use groups assigned to this source.</td></tr> }
+            <tr class="facility-footprint__total"><th scope="row">Total {{ source.source }}</th><td>{{ source.total === null ? 'Unavailable' : (source.total | number:'1.0-0') }}
+              @if (source.partial) { <small>Partial coverage · known values only</small> }
+            </td></tr>
+          </tbody>
+        } @empty { <tbody><tr><td colspan="2">No saved energy sources to summarize.</td></tr></tbody> }
+        <tfoot><tr><th scope="row">Total Equipment Use</th><td>{{ snapshot.total | number:'1.0-0' }}
+          @if (snapshot.partial) { <small>Partial coverage · known values only</small> }
+        </td></tr></tfoot>
+      </table>
+    </div>
+    @if (withoutSources().length) {
+      <ul class="facility-footprint__without-sources" aria-label="Groups without energy sources">
+        @for (row of withoutSources(); track row.group.id) { <li><a [routerLink]="row.route">{{ row.group.name }}</a>: {{ row.group.items.length ? 'No saved energy sources' : 'No equipment' }}</li> }
+      </ul>
+    }
+  </section>
+}

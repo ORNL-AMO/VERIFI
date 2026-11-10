@@ -1,3 +1,4 @@
+import { SessionStorageService } from 'ngx-webstorage';
 import { EquipmentTableComponent } from '../energy-use-workbench/setup-group/equipment-table/equipment-table.component';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
@@ -35,7 +36,10 @@ const itemUrl = `${groupUrl()}/items/energy-00`;
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule, SectionNavModule], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%">@if (showNav()) { <div style="width:16rem;max-width:100%"><app-section-nav/></div> }<router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
 class EnergyUsesBrowserHost { readonly showNav = signal(false); readonly modal = inject(ModalPortalService); }
 
-function setup(single = false) {
+@Component({ standalone: true, imports: [RouterOutlet], template: '@if (ready()) { <router-outlet/> }' })
+class DeferredFacilityOutlet { readonly ready = signal(false); }
+
+function setup(single = false, deferredFacility = false) {
   const store = new AccountWorkspaceStore();
   const initial = energyUsesSnapshot(Array.from({ length: 50 }, (_, index) => energyUseItem({
     guid: `energy-${String(index).padStart(2, '0')}`, name: `Pump ${String(index).padStart(2, '0')}`,
@@ -48,15 +52,16 @@ function setup(single = false) {
   store.publish(snapshot);
   const pairService = { ensurePairs: vi.fn(async () => true) };
   const workspaceService = { selectAccount: vi.fn(), selectFacility: vi.fn() };
-  const actions = { updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
+  const actions = { create: vi.fn<EnergyUseActionsService['create']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
     store.publish({ ...store.snapshot()!, energyUseGroups: store.energyUseGroups().map(group => group.guid === identity.energyUseGroupGuid ? { ...group, ...value } : group) }); return value;
   }) };
   const account = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
   const facility = V1Routes[0].children!.find(route => route.path === 'workspace/facility/:facilityGuid')!;
   TestBed.configureTestingModule({ imports: [DataModule, EnergyUsesBrowserHost], providers: [
+    { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
     provideRouter([
       { path: 'v1/workspace/account/:accountGuid', canActivateChild: account.canActivateChild, children: account.children!.filter(route => route.path === 'data') },
-      { path: 'v1/workspace/facility/:facilityGuid', children: facility.children!.filter(route => route.path === 'data') }
+      { path: 'v1/workspace/facility/:facilityGuid', ...(deferredFacility ? { component: DeferredFacilityOutlet } : {}), children: facility.children!.filter(route => route.path === 'data') }
     ]),
     { provide: AccountWorkspaceStore, useValue: store }, { provide: AccountWorkspaceService, useValue: workspaceService },
     { provide: EnergyUseActionsService, useValue: actions },
@@ -79,6 +84,50 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it('matches the header background to rounded corners and clips lower workbench edges using the appearance setting', async () => {
+    const view = setup();
+    await view.router.navigateByUrl(`${groupUrl()}/setup`); await settle(view);
+    view.root.style.background = 'linear-gradient(135deg, #236f91, #c1d8df)';
+    for (const [width, theme, name] of [[1200, '', 'rounded-light'], [390, 'v1-theme-dark', 'rounded-dark'],
+      [390, 'v1-theme-dark v1-contrast-strong v1-corners-square', 'square-contrast']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      const sticky = view.root.querySelector<HTMLElement>('.v1-data-workbench-sticky')!;
+      const header = sticky.querySelector<HTMLElement>('.v1-data-workbench-header')!;
+      const workspace = view.root.querySelector<HTMLElement>('.energy-use-workbench__workspace')!;
+      expect(getComputedStyle(sticky).borderTopLeftRadius).toBe(getComputedStyle(header).borderTopLeftRadius);
+      expect(parseFloat(getComputedStyle(sticky).borderTopLeftRadius)).toBeGreaterThan(0);
+      expect(getComputedStyle(workspace).borderBottomRightRadius).toBe(getComputedStyle(header).borderTopRightRadius);
+      expect(getComputedStyle(workspace).overflow).toBe('hidden');
+      expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-results/workbench-corners-${name}.png` });
+    }
+    view.fixture.destroy();
+  });
+
+
+
+  it('selects an item when opening a group card and restores the last visited member on return', async () => {
+    const view = setup(false, true);
+    view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup()], energyUseEquipment: [
+      energyUseItem({ guid: 'member-b', name: 'B Fan' }), energyUseItem({ guid: 'member-a', name: 'A Pump' })] });
+    await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__name')!.click(); await settle(view);
+    const revealFacility = () => {
+      view.fixture.debugElement.query(By.directive(DeferredFacilityOutlet)).componentInstance.ready.set(true);
+    };
+    revealFacility(); await settle(view);
+    expect(view.router.url).toBe(`${groupUrl('group-a')}/items/member-a`);
+    expect(view.root.querySelector('[aria-label="Energy-use items"] [aria-current="page"]')?.textContent).toContain('A Pump');
+    expect(view.fixture.debugElement.query(By.directive(EnergyUseSettingsComponent))).toBeTruthy();
+    await page.getByRole('button', { name: 'B Fan', exact: true }).click(); await settle(view);
+    await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__name')!.click(); await settle(view);
+    revealFacility(); await settle(view);
+    expect(view.router.url).toBe(`${groupUrl('group-a')}/items/member-b`);
+    expect(view.root.querySelector('[aria-label="Energy-use items"] [aria-current="page"]')?.textContent).toContain('B Fan');
+    view.fixture.destroy();
+  });
+
   it('shows distinct group type icons, makes Summary an item-link list, and opens a workbench directly', async () => {
     const view = setup();
     view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup(), energyUseGroup({ guid: 'empty', name: 'Unused group' })], energyUseEquipment: [
@@ -110,7 +159,7 @@ describe('energy uses browser journeys', () => {
     const view = setup();
     await view.router.navigateByUrl(itemUrl); await settle(view);
     const beforeItems = structuredClone(view.store.energyUseEquipment());
-    expect([...view.root.querySelectorAll('[aria-label="Energy-use group sections"] button')].map(button => button.textContent?.trim())).toEqual(['Setup Group', 'Energy Use Items']);
+    expect([...view.root.querySelectorAll('[aria-label="Energy-use group sections"] button')].map(button => button.textContent?.trim())).toEqual(['Setup Group', 'Energy Use Items', 'Group Summary', 'Group Footprint', 'Facility Footprint']);
     await page.getByRole('button', { name: 'Setup Group', exact: true }).click(); await settle(view);
     expect(view.router.url).toBe(`${groupUrl()}/setup`);
     expect(view.root.querySelector('[aria-label="Energy-use items"]')).toBeNull();
@@ -120,7 +169,8 @@ describe('energy uses browser journeys', () => {
     await vi.waitFor(() => expect(view.store.energyUseGroups().find(group => group.guid === 'group-00')?.name).toBe('Packaging')); await settle(view);
     expect(view.root.querySelector('.v1-data-workbench-header h1')?.textContent).toContain('Packaging');
     expect(view.store.energyUseEquipment()).toEqual(beforeItems);
-    expect(view.root.querySelector('.v1-data-workbench-header [role=status]')).not.toBeNull();
+    expect(view.root.querySelector('app-setup-group app-energy-use-save-status')?.textContent).toContain('Saved.');
+    expect(view.root.querySelector('.v1-data-workbench-header [aria-label="Group validation"]')).not.toBeNull();
     for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);

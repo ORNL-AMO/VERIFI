@@ -1,0 +1,6 @@
+:host { display: block; }
+.results-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; padding-block: .5rem; }
+label { display: flex; align-items: center; gap: .5rem; white-space: nowrap; }
+select { width: auto; min-width: 5rem; }
+span { color: var(--v1-muted); }
+@media print { :host { display: none; } }

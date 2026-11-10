@@ -1,0 +1,30 @@
+<section class="v1-workbench-section energy-use-footprint-table" aria-labelledby="energy-use-footprint-table-title">
+  <h2 id="energy-use-footprint-table-title" class="visually-hidden">Group footprint source breakdown</h2>
+  <div class="v1-table-scroll energy-use-footprint-table__scroller" tabindex="0" role="region" aria-label="Equipment use by source">
+  <table class="v1-results-table">
+    <caption class="visually-hidden">Equipment use by source for FY {{ results.latest()?.year }}, {{ results.unit() }}/year. Earlier saved values carry forward unchanged.</caption>
+    <thead><tr><th scope="col">Source</th><th scope="col">Equipment Use<br>({{ results.unit() }}/yr)</th></tr></thead>
+    @for (group of groups(); track group.source) {
+      <tbody>
+        <tr class="energy-use-footprint-table__source"><th scope="rowgroup" colspan="2">{{ group.source }}</th></tr>
+        @for (row of group.items; track row.item.guid) {
+          <tr class="energy-use-footprint-table__item">
+            <th scope="row"><a [routerLink]="row.route"><app-ui-icon [name]="group.icon" [size]="16"/><span>{{ row.item.name }}</span></a></th>
+            <td>{{ row.amount === null ? 'Unavailable' : (row.amount | number:'1.0-0') }}
+              @if (row.partial) { <small>Partial coverage · known values only</small> }
+              @if (row.carried) { <span class="visually-hidden">Includes carried-forward values.</span> }
+              @if (row.inactive) { <small>Inactive</small> }
+              <div class="visually-hidden"><app-energy-use-source-details [sources]="row.sources"/></div>
+            </td>
+          </tr>
+        }
+        <tr class="energy-use-footprint-table__total"><th scope="row">Total {{ group.source }}</th>
+          <td>{{ group.total === null ? 'Unavailable' : (group.total | number:'1.0-0') }}
+            @if (group.partial) { <small>Partial coverage · known values only</small> }
+          </td>
+        </tr>
+      </tbody>
+    } @empty { <tbody><tr><td colspan="2">No saved energy sources to summarize.</td></tr></tbody> }
+  </table>
+  </div>
+</section>

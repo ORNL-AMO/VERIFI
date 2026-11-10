@@ -1,0 +1,9 @@
+@import '../results-section.css';
+
+:host { display: block; min-width: 0; }
+h2 { font-size: 1.1rem; margin: 0 0 .75rem; }
+h3 { font-size: 1rem; margin-top: 1rem; }
+.energy-use-results-graphs__controls { display: flex; justify-content: flex-end; }
+.energy-use-results-graphs__period { color: var(--v1-muted); font-size: .85rem; }
+.energy-use-results-graphs__scroller { overflow: auto; border: 0; }
+@media print { .energy-use-results-graphs__scroller { max-height: none; overflow: visible; } }
