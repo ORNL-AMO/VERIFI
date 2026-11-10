@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import { getFacilityAnalysisFieldChanges } from '../analysis-edits';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { DestroyRef, HostListener, Component, computed, effect, inject, Signal, untracked } from '@angular/core';
+import { DestroyRef, HostListener, Component, computed, effect, inject, signal, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
@@ -142,16 +142,9 @@ export class AnalysisSetupComponent {
     return hasModelsGenerated;
   });
 
-  readonly facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => {
-    const analysisItem = this.analysisItem();
-    const allFacilityAnalysisItems = this.allFacilityAnalysisItems();
-    if (!analysisItem || !allFacilityAnalysisItems) {
-      return [];
-    }
-    return allFacilityAnalysisItems.filter(item => {
-      return item.energyIsSource == analysisItem.energyIsSource && item.guid != analysisItem.guid && item.analysisCategory == analysisItem.analysisCategory;
-    });
-  });
+  private readonly draftEnergyIsSource = signal<boolean | undefined>(undefined);
+  readonly facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() =>
+    this.getBankingCandidates(this.draftEnergyIsSource() ?? this.analysisItem()?.energyIsSource));
 
   readonly form: FormGroup<{
     name: FormControl<string>;
@@ -193,6 +186,7 @@ export class AnalysisSetupComponent {
             waterUnit: item.waterUnit, hasBanking: item.hasBanking, baselineYear: item.baselineYear ?? null,
             bankedAnalysisItemId: item.bankedAnalysisItemId ?? null
           }, { emitEvent: false });
+          this.draftEnergyIsSource.set(item.energyIsSource);
           this.updateBankingValidation();
           this.form.markAsPristine();
           this.observedDraft = this.readDraft();
@@ -240,12 +234,30 @@ export class AnalysisSetupComponent {
     });
 
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      const boundary = this.form.controls.energyIsSource.value;
+      if (this.observedDraft && this.observedDraft.fields.energyIsSource !== boundary
+        && this.form.controls.hasBanking.value) {
+        const candidates = this.getBankingCandidates(boundary);
+        if (!candidates.some(item => item.guid === this.form.controls.bankedAnalysisItemId.value)) {
+          // Reconcile this explicit edit before capturing the complete settings draft.
+          this.form.patchValue({ hasBanking: candidates.length > 0, bankedAnalysisItemId: null }, { emitEvent: false });
+          this.updateBankingValidation();
+        }
+      }
+      this.draftEnergyIsSource.set(boundary);
       const draft = this.readDraft();
       const immediate = this.observedDraft && Object.keys(draft.fields)
         .some(field => field !== 'name' && !_.isEqual(this.observedDraft.fields[field], draft.fields[field]));
       this.observedDraft = draft;
       void this.autosave.capture(draft, this.form.valid, immediate);
     });
+  }
+
+  private getBankingCandidates(energyIsSource: boolean): Array<IdbAnalysisItem> {
+    const analysisItem = this.analysisItem();
+    return analysisItem ? this.allFacilityAnalysisItems().filter(item =>
+      item.energyIsSource === energyIsSource && item.guid !== analysisItem.guid
+      && item.analysisCategory === analysisItem.analysisCategory) : [];
   }
 
   private updateBankingValidation(): void {
@@ -269,6 +281,7 @@ export class AnalysisSetupComponent {
   private restoreDraft(draft: SetupDraft): void {
     this.clearModelsVersion = draft.clearModelsVersion;
     this.form.patchValue({ ...draft.fields, bankedAnalysisItemId: draft.fields.bankedAnalysisItemId ?? null }, { emitEvent: false });
+    this.draftEnergyIsSource.set(this.form.controls.energyIsSource.value);
     this.updateBankingValidation();
     this.form.markAsPristine();
     this.observedDraft = draft;

@@ -111,7 +111,7 @@
           </div>
         </div>
         }
-        @if (_facilityAnalysisItems?.length > 0) {
+        @if (_facilityAnalysisItems?.length > 0 || form.controls.hasBanking.value) {
         <div class="form-group row">
           <label class="col-5 col-form-label" for="hasBanking">Has Banking</label>
           <div class="col-6">

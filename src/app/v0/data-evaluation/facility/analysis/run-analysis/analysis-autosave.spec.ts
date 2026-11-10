@@ -182,4 +182,152 @@ describe('legacy analysis autosave draft lifetime', () => {
     } finally { editor.destroy(); }
   });
 
+  it.each(['discard', 'save'] as const)('rejects a stale %s response after a newer edit to the same owner', async choice => {
+    vi.useFakeTimers();
+    const persist = vi.fn(async () => undefined);
+    const editor = new AnalysisAutosave(persist);
+    const guard = new RouterGuardService();
+    const restore = vi.fn();
+    try {
+      editor.hydrate({ text: 'original' }, true);
+      await editor.capture({ text: '' }, false);
+      const leaving = editor.canDeactivate(guard, restore);
+      await Promise.resolve();
+      expect(guard.showModal.value).toBe(true);
+      await editor.capture({ text: 'newer text' }, true);
+      guard.setModalAction(choice);
+      expect(await leaving).toBe(false);
+      expect(editor.value).toEqual({ text: 'newer text' });
+      expect(editor.dirty()).toBe(true);
+      expect(restore).not.toHaveBeenCalled();
+      expect(persist).not.toHaveBeenCalled();
+    } finally { editor.destroy(); }
+  });
+
+  it('does not invalidate a leave decision for an unchanged capture', async () => {
+    const editor = new AnalysisAutosave(vi.fn(async () => undefined));
+    const guard = new RouterGuardService();
+    const restore = vi.fn();
+    try {
+      editor.hydrate({ text: 'original' }, true);
+      await editor.capture({ text: '' }, false);
+      const leaving = editor.canDeactivate(guard, restore);
+      await Promise.resolve();
+      await editor.capture({ text: '' }, false);
+      guard.setModalAction('discard');
+      expect(await leaving).toBe(true);
+      expect(restore).toHaveBeenCalledWith({ text: 'original' });
+    } finally { editor.destroy(); }
+  });
+
+  it('preserves newer invalid input entered while Discard waits for an active retry', async () => {
+    const retry = deferred<void>();
+    const persist = vi.fn().mockRejectedValueOnce(new Error('disk unavailable')).mockReturnValueOnce(retry.promise);
+    const editor = new AnalysisAutosave(persist);
+    const guard = new RouterGuardService();
+    const restore = vi.fn();
+    try {
+      editor.hydrate({ text: 'original' }, true);
+      expect(await editor.capture({ text: 'first edit' }, true, true)).toBe(false);
+      const leaving = editor.canDeactivate(guard, restore);
+      const saving = editor.flush();
+      guard.setModalAction('discard');
+      await Promise.resolve();
+      await editor.capture({ text: '' }, false);
+      retry.resolve();
+      await saving;
+      expect(await leaving).toBe(false);
+      expect(editor.value).toEqual({ text: '' });
+      expect(editor.valid).toBe(false);
+      expect(editor.dirty()).toBe(true);
+      expect(restore).not.toHaveBeenCalled();
+    } finally { editor.destroy(); }
+  });
+
+  it('resumes autosave for newer valid input after a stale Discard finishes waiting', async () => {
+    vi.useFakeTimers();
+    const retry = deferred<void>();
+    const persist = vi.fn().mockRejectedValueOnce(new Error('disk unavailable'))
+      .mockReturnValueOnce(retry.promise).mockResolvedValue(undefined);
+    const editor = new AnalysisAutosave(persist);
+    const guard = new RouterGuardService();
+    const restore = vi.fn();
+    try {
+      editor.hydrate({ text: 'original' }, true);
+      await editor.capture({ text: 'first edit' }, true, true);
+      const leaving = editor.canDeactivate(guard, restore);
+      const saving = editor.flush();
+      guard.setModalAction('discard');
+      await Promise.resolve();
+      await editor.capture({ text: 'newest edit' }, true);
+      await vi.advanceTimersByTimeAsync(300);
+      expect(persist).toHaveBeenCalledTimes(2);
+      retry.resolve();
+      await saving;
+      expect(await leaving).toBe(false);
+      expect(editor.value).toEqual({ text: 'newest edit' });
+      expect(restore).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(300);
+      expect(persist).toHaveBeenCalledTimes(3);
+      expect(persist).toHaveBeenLastCalledWith({ text: 'newest edit' }, { text: 'first edit' });
+      expect(editor.dirty()).toBe(false);
+    } finally { editor.destroy(); }
+  });
+
+  it('saves a new owner edit when its timer expires while an old owner Discard waits for a retry', async () => {
+    vi.useFakeTimers();
+    const retry = deferred<void>();
+    const persist = vi.fn().mockRejectedValueOnce(new Error('disk unavailable'))
+      .mockReturnValueOnce(retry.promise).mockResolvedValue(undefined);
+    const editor = new AnalysisAutosave(persist);
+    const guard = new RouterGuardService();
+    const restore = vi.fn();
+    try {
+      editor.hydrate({ owner: 'a', text: 'original-a' }, true);
+      await editor.capture({ owner: 'a', text: 'first-a' }, true, true);
+      const leaving = editor.canDeactivate(guard, restore);
+      const saving = editor.flush();
+      guard.setModalAction('discard');
+      await Promise.resolve();
+      editor.hydrate({ owner: 'b', text: 'original-b' }, true);
+      await editor.capture({ owner: 'b', text: 'newest-b' }, true);
+      await vi.advanceTimersByTimeAsync(300);
+      expect(persist).toHaveBeenCalledTimes(2);
+      retry.resolve();
+      await saving;
+      expect(await leaving).toBe(false);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(persist).toHaveBeenCalledTimes(3);
+      expect(persist).toHaveBeenLastCalledWith(
+        { owner: 'b', text: 'newest-b' }, { owner: 'b', text: 'original-b' }
+      );
+      expect(editor.value).toEqual({ owner: 'b', text: 'newest-b' });
+      expect(editor.dirty()).toBe(false);
+      expect(editor.error()).toBeUndefined();
+      expect(restore).not.toHaveBeenCalled();
+    } finally { editor.destroy(); }
+  });
+
+  it('rejects a Save decision superseded while its retry is running', async () => {
+    const retry = deferred<void>();
+    const persist = vi.fn().mockRejectedValueOnce(new Error('disk unavailable')).mockReturnValueOnce(retry.promise);
+    const editor = new AnalysisAutosave(persist);
+    const guard = new RouterGuardService();
+    const restore = vi.fn();
+    try {
+      editor.hydrate({ text: 'original' }, true);
+      await editor.capture({ text: 'first edit' }, true, true);
+      const leaving = editor.canDeactivate(guard, restore);
+      guard.setModalAction('save');
+      await Promise.resolve();
+      await editor.capture({ text: '' }, false);
+      retry.resolve();
+      expect(await leaving).toBe(false);
+      expect(editor.value).toEqual({ text: '' });
+      expect(editor.dirty()).toBe(true);
+      expect(guard.showModal.value).toBe(false);
+      expect(restore).not.toHaveBeenCalled();
+    } finally { editor.destroy(); }
+  });
+
 });

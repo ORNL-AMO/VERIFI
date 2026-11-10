@@ -14,7 +14,8 @@ export class AnalysisAutosave<T> {
   private flight: Promise<boolean>;
   private flightContext: number;
   private context = 0;
-  private discarding = false;
+  private editRevision = 0;
+  private discarding?: { context: number };
   private leaving: Promise<boolean>;
 
   constructor(private readonly persist: (value: T, baseline: T) => Promise<void>) { }
@@ -22,6 +23,7 @@ export class AnalysisAutosave<T> {
   get value(): T { return _.cloneDeep(this.latest?.value); }
   get hasPending(): boolean { return this.dirty() || this.saving(); }
   get valid(): boolean { return this.latest?.valid ?? true; }
+  private get isDiscarding(): boolean { return this.discarding?.context === this.context; }
 
   hydrate(value: T, valid: boolean): void {
     this.cancelTimer();
@@ -34,7 +36,9 @@ export class AnalysisAutosave<T> {
 
   capture(value: T, valid: boolean, immediate = false): Promise<boolean> {
     this.cancelTimer();
-    if (!this.latest || !_.isEqual(this.latest.value, value)) { this.error.set(undefined); }
+    const valueChanged = !this.latest || !_.isEqual(this.latest.value, value);
+    if (valueChanged || this.latest.valid !== valid) { this.editRevision++; }
+    if (valueChanged) { this.error.set(undefined); }
     this.latest = { value: _.cloneDeep(value), valid };
     this.dirty.set(!_.isEqual(this.baseline, value));
     if (immediate) { return this.flush(false); }
@@ -45,12 +49,12 @@ export class AnalysisAutosave<T> {
   async flush(immediate = true): Promise<boolean> {
     if (immediate) { this.cancelTimer(); }
     if (!immediate && this.timer) { return !this.dirty(); }
-    if (this.discarding) { return false; }
+    if (this.isDiscarding) { return false; }
     if (this.flight) {
       const context = this.context;
       const flightContext = this.flightContext;
       const saved = await this.flight;
-      return context === this.context && (saved || flightContext !== context) && !this.discarding ? this.flush(immediate) : false;
+      return context === this.context && (saved || flightContext !== context) && !this.isDiscarding ? this.flush(immediate) : false;
     }
     if (!this.dirty()) { return true; }
     if (!this.latest.valid) { return false; }
@@ -79,19 +83,28 @@ export class AnalysisAutosave<T> {
       this.flight = undefined;
       this.saving.set(false);
     }
-    return saved && context === this.context && !this.discarding ? this.flush(immediate) : false;
+    return saved && context === this.context && !this.isDiscarding ? this.flush(immediate) : false;
   }
 
-  async discard(): Promise<void> {
+  async discard(editRevision = this.editRevision): Promise<boolean> {
     this.cancelTimer();
-    this.discarding = true;
     const context = this.context;
+    const discard = this.discarding = { context };
     await this.flight;
-    if (context !== this.context) { this.discarding = false; return; }
+    if (this.discarding !== discard || context !== this.context || editRevision !== this.editRevision) {
+      const ownsDiscard = this.discarding === discard;
+      if (ownsDiscard) { this.discarding = undefined; }
+      // A timer may have expired while Discard waited for the durable write.
+      if (ownsDiscard && context === this.context && this.latest.valid && this.dirty()) {
+        void this.capture(this.latest.value, this.latest.valid);
+      }
+      return false;
+    }
     this.latest = { value: _.cloneDeep(this.baseline), valid: true };
     this.dirty.set(false);
     this.error.set(undefined);
-    this.discarding = false;
+    this.discarding = undefined;
+    return true;
   }
 
   canDeactivate(guard: RouterGuardService, restore: (value: T) => void): Promise<boolean> {
@@ -105,18 +118,22 @@ export class AnalysisAutosave<T> {
     if (context !== this.context) return false;
     if (!this.error() && await this.flush()) { return context === this.context; }
     if (context !== this.context) return false;
+    const editRevision = this.editRevision;
     const action = firstValueFrom(guard.getModalAction().pipe(take(1)));
     guard.setShowSave(this.valid);
     guard.setShowModal(true);
     const choice = await action;
-    if (context !== this.context) return false;
+    if (context !== this.context || editRevision !== this.editRevision) return false;
     switch (choice) {
-      case 'save':
-        if (await this.flush()) return context === this.context;
+      case 'save': {
+        const saved = await this.flush();
+        if (context !== this.context || editRevision !== this.editRevision) return false;
+        if (saved) return true;
         return this.decideLeave(guard, restore, context);
+      }
       case 'discard':
-        await this.discard();
-        if (context !== this.context) return false;
+        if (!await this.discard(editRevision)) return false;
+        if (context !== this.context || editRevision !== this.editRevision) return false;
         restore(this.value);
         return true;
       default: return false;

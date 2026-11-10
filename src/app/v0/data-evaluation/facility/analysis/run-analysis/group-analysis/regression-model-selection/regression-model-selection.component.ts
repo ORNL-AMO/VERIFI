@@ -226,15 +226,7 @@ export class RegressionModelSelectionComponent {
         };
       }),
     };
-    const analysisGuid = this.analysisItem()?.guid;
-    const accountGuid = this.accountWorkspaceStore.account()?.guid;
-    if (this.modelMenu) {
-      if (!await this.modelMenu.saveModelSelection(updatedGroup)) { return false; }
-    } else if (!await this.saveItem(updatedGroup)) { return false; }
-    if (this.isCurrentOwner(accountGuid, analysisGuid, updatedGroup.idbGroupId)) {
-      this.regressionModelState.setForGroup(updatedGroup.idbGroupId, generatedModels);
-    }
-    return true;
+    return this.modelMenu ? this.modelMenu.saveModelSelection(updatedGroup) : this.saveItem(updatedGroup);
   }
 
   saveItem(selectedGroup?: AnalysisGroup): Promise<boolean> {
@@ -247,6 +239,19 @@ export class RegressionModelSelectionComponent {
   private async persistSelection(draft: ModelSelectionDraft, baseline: ModelSelectionDraft): Promise<void> {
     const changes = getAnalysisGroupChanges(baseline.group, draft.group);
     if (!Object.keys(changes).length) { return; }
+    if (Object.prototype.hasOwnProperty.call(changes, 'selectedModelId')
+      || Object.prototype.hasOwnProperty.call(changes, 'models')) {
+      // Keep model identity, year, and every coefficient coherent across queued generation writes.
+      const predictorChanges = changes.predictorVariables;
+      Object.assign(changes, {
+        selectedModelId: draft.group.selectedModelId, models: _.cloneDeep(draft.group.models),
+        regressionModelYear: draft.group.regressionModelYear, regressionConstant: draft.group.regressionConstant,
+        predictorVariables: draft.group.predictorVariables.map(variable => ({
+          ...predictorChanges?.find(changed => changed.id === variable.id),
+          id: variable.id, regressionCoefficient: variable.regressionCoefficient
+        }))
+      });
+    }
     await this.commandBoundary.execute(
       { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: draft.analysisGuid, label: 'Save Facility Analysis',
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) } },

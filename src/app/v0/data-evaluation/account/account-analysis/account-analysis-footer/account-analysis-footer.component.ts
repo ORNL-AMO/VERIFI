@@ -27,6 +27,7 @@ export class AccountAnalysisFooterComponent {
   private accountWorkspaceService = inject(AccountWorkspaceService);
 
   @Input() beforeNavigate: () => Promise<boolean> = () => Promise.resolve(true);
+  private navigating = false;
 
   helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
@@ -82,51 +83,62 @@ export class AccountAnalysisFooterComponent {
     return true;
   });
 
-  async goBack(): Promise<void> {
-    if (!await this.finishCurrentEdits()) return;
-    if (this.router.url.includes('setup')) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
-    } else if (this.router.url.includes('account/analysis/select-items')) {
-      const facilities: Array<IdbFacility> = this.facilities().map(facility => ({ ...facility }));
-      const selectedFacility: IdbFacility = this.selectedFacility();
-      const facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
-      if (facilityIndex == 0) {
-        this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
-      } else {
-        this.accountWorkspaceService.selectFacility(facilities[facilityIndex - 1].guid);
-      }
-    } else if (this.router.url.includes('results')) {
-      if (this.router.url.includes('monthly-analysis')) {
-        this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
-      } else {
+  goBack(): Promise<void> {
+    return this.navigateAfterSave(() => {
+      if (this.router.url.includes('setup')) {
+        return this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
+      } else if (this.router.url.includes('account/analysis/select-items')) {
         const facilities: Array<IdbFacility> = this.facilities().map(facility => ({ ...facility }));
-        this.accountWorkspaceService.selectFacility(facilities[facilities.length - 1].guid);
-        this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
+        const selectedFacility: IdbFacility = this.selectedFacility();
+        const facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
+        if (facilityIndex == 0) {
+          return this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
+        } else {
+          this.accountWorkspaceService.selectFacility(facilities[facilityIndex - 1].guid);
+        }
+      } else if (this.router.url.includes('results')) {
+        if (this.router.url.includes('monthly-analysis')) {
+          return this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
+        } else {
+          const facilities: Array<IdbFacility> = this.facilities().map(facility => ({ ...facility }));
+          this.accountWorkspaceService.selectFacility(facilities[facilities.length - 1].guid);
+          return this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
+        }
       }
-    }
+    });
   }
 
-  async continue(): Promise<void> {
-    if (!await this.finishCurrentEdits()) return;
-    if (this.router.url.includes('setup')) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
-    } else if (this.router.url.includes('select-items')) {
-      const facilities: Array<IdbFacility> = this.facilities().map(facility => ({ ...facility }));
-      const selectedFacility: IdbFacility = this.selectedFacility();
-      const facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
-      if (facilityIndex == facilities.length - 1) {
-        this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
-      } else {
-        this.accountWorkspaceService.selectFacility(facilities[facilityIndex + 1].guid);
+  continue(): Promise<void> {
+    return this.navigateAfterSave(() => {
+      if (this.router.url.includes('setup')) {
+        return this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
+      } else if (this.router.url.includes('select-items')) {
+        const facilities: Array<IdbFacility> = this.facilities().map(facility => ({ ...facility }));
+        const selectedFacility: IdbFacility = this.selectedFacility();
+        const facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
+        if (facilityIndex == facilities.length - 1) {
+          return this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
+        } else {
+          this.accountWorkspaceService.selectFacility(facilities[facilityIndex + 1].guid);
+        }
+      } else if (this.router.url.includes('results')) {
+        return this.router.navigateByUrl('/data-evaluation/account/analysis/results/monthly-analysis');
       }
-    } else if (this.router.url.includes('results')) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/results/monthly-analysis');
-    }
+    });
   }
 
-  async returnToDashboard(): Promise<void> {
-    if (await this.finishCurrentEdits()) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
+  returnToDashboard(): Promise<void> {
+    return this.navigateAfterSave(() => this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard'));
+  }
+
+  private async navigateAfterSave(action: () => Promise<boolean> | void): Promise<void> {
+    if (this.navigating) return;
+    this.navigating = true;
+    try {
+      if (!await this.finishCurrentEdits()) return;
+      await action();
+    } finally {
+      this.navigating = false;
     }
   }
 

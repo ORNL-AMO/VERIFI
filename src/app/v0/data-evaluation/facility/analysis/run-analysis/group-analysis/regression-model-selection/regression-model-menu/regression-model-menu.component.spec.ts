@@ -2,7 +2,8 @@ import { computed, CUSTOM_ELEMENTS_SCHEMA, NgModule, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
+import { AnalysisDbService } from '@data/indexedDB/analysis-db.service';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
@@ -69,6 +70,7 @@ describe('RegressionModelMenuComponent save ownership', () => {
         account: signal({ guid: 'account-a', assessmentReportVersion: 'AR6' }),
         selectedFacility: signal({ guid: 'facility-a' }), selectedFacilityAnalysis: selectedAnalysis,
         facilityAnalyses: computed(() => [selectedAnalysis()]),
+        facilities: signal([{ guid: 'facility-a', accountId: 'account-a' }]),
         facilityPredictorData: signal([]), facilityMeterData: signal([]), facilityMeters: signal([])
       } },
       { provide: AccountWorkspaceQueryService, useValue: { getAccountAnalysesForFacilityAnalysis: () => [] } },
@@ -353,6 +355,23 @@ describe('RegressionModelMenuComponent save ownership', () => {
     }));
   }
 
+  function configureRealHandlerPersistence(regenerated: JStatRegressionModel, beforeWrite?: (record: IdbAnalysisItem) => Promise<void>): void {
+    configureGenerationPersistence(regenerated);
+    const database = {
+      updateWithObservable: (record: IdbAnalysisItem) => from((async () => {
+        if (beforeWrite) { await beforeWrite(record); }
+        analysis = record;
+        group = record.groups[0];
+        selectedAnalysis.set(record);
+        selectedGroup.next(group);
+        return record;
+      })())
+    } as unknown as AnalysisDbService;
+    const handler = new AnalysisCommandHandler(database, undefined, TestBed.inject(AccountWorkspaceStore));
+    update.mockImplementation((analysisGuid, groupGuid, changes, accountGuid) =>
+      handler.updateFacilityAnalysisGroup(analysisGuid, groupGuid, changes, accountGuid));
+  }
+
   function regeneratedModel(): JStatRegressionModel {
     return { modelId: 'model-a', modelYear: 2023, coef: [40, 8], predictorVariables: group.predictorVariables, isValid: true } as JStatRegressionModel;
   }
@@ -405,6 +424,72 @@ describe('RegressionModelMenuComponent save ownership', () => {
     expect(selectedAnalysis().groups[0].predictorVariables[0].regressionCoefficient).toBe(2);
     expect(component.form.controls.regressionConstant.value).toBe(10);
     expect(component.autosave.hasPending).toBe(false);
+  });
+
+  it('keeps the candidate cache cleared when a newer configuration is saved behind model selection', async () => {
+    const selection = attachRealMenuToSelection();
+    setForGroup.mockImplementation((groupGuid, models) => modelsByGroup.update(current => ({ ...current, [groupGuid]: models })));
+    const selectionWrite = deferred<void>();
+    const writing = deferred<void>();
+    configureRealHandlerPersistence(regeneratedModel(), async record => {
+      if (record.groups[0].selectedModelId === 'model-b' && record.groups[0].maxModelVariables === 1) {
+        writing.resolve();
+        await selectionWrite.promise;
+      }
+    });
+    const choosing = selection.selectModel('model-b');
+    await writing.promise;
+    component.form.controls.maxModelVariables.setValue(2);
+    const changing = component.saveFormValue(true);
+    selectionWrite.resolve();
+    expect(await choosing).toBe(true);
+    expect(await changing).toBe(true);
+    expect(selectedAnalysis().groups[0]).toMatchObject({ selectedModelId: 'model-b', maxModelVariables: 2 });
+    expect(modelsByGroup()['group-a']).toEqual([]);
+    expect(setForGroup).toHaveBeenLastCalledWith('group-a', []);
+  });
+
+  it('persists the complete inspection selection without a menu when generation is already writing', async () => {
+    const selection = attachRealMenuToSelection();
+    Object.assign(selection, { modelMenu: undefined });
+    const firstModel = group.models[0];
+    const secondModel = { ...firstModel, modelId: 'model-b' };
+    modelsByGroup.set({ 'group-a': [firstModel, secondModel] });
+    await selection.inspectModel(secondModel);
+    const generationWrite = deferred<void>();
+    const writing = deferred<void>();
+    const regenerated = { ...regeneratedModel(), modelYear: 2024 };
+    configureRealHandlerPersistence(regenerated, async record => {
+      if (record.groups[0].regressionConstant === 40) {
+        writing.resolve();
+        await generationWrite.promise;
+      }
+    });
+    generate.mockResolvedValue([regenerated]);
+    const generating = component.generateModels();
+    await writing.promise;
+    const choosing = selection.selectFromInspection();
+    expect(selection.selectionAutosave.hasPending).toBe(true);
+    generationWrite.resolve();
+    await Promise.all([generating, choosing]);
+    const saved = selectedAnalysis().groups[0];
+    expect(saved).toMatchObject({ selectedModelId: 'model-b', regressionConstant: 10, regressionModelYear: 2023,
+      regressionModelNotes: 'original' });
+    expect(saved.models[0].coef).toEqual([10, 2]);
+    expect(saved.models[0].modelYear).toBe(2023);
+    expect(saved.predictorVariables[0].regressionCoefficient).toBe(2);
+    expect(saved.predictorVariables[0].name).toBe('Production');
+    expect(selection.selectedInspectModel).toBeUndefined();
+  });
+
+  it('keeps inspection fallback notes-only saves narrow', async () => {
+    const selection = attachRealMenuToSelection();
+    Object.assign(selection, { modelMenu: undefined });
+    configureRealHandlerPersistence(regeneratedModel());
+    expect(await selection.saveItem({ ...group, regressionModelNotes: 'inspection notes' })).toBe(true);
+    expect(update).toHaveBeenLastCalledWith('analysis-a', 'group-a', { regressionModelNotes: 'inspection notes' }, 'account-a');
+    expect(selectedAnalysis().groups[0]).toMatchObject({ selectedModelId: 'model-a', regressionConstant: 10,
+      regressionModelNotes: 'inspection notes' });
   });
 
   it('preserves notes edited during the generation save then refreshes the committed model controls', async () => {

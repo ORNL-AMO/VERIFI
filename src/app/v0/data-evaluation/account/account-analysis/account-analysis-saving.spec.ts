@@ -34,13 +34,13 @@ function deferred() {
   return { promise, resolve };
 }
 
-function createHarness(delayFirstWrite = true) {
+function createHarness(delayFirstWrite = true, facilitySuffixes = ['a', 'b']) {
   const store = new AccountWorkspaceStore();
   const account = {
     id: 1, guid: 'account-a', name: 'Account A', energyUnit: 'MMBtu', volumeLiquidUnit: 'kgal', energyIsSource: false,
     sustainabilityQuestions: { energyReductionBaselineYear: 2020, waterReductionBaselineYear: 2020 }
   } as any;
-  const facilities = ['a', 'b'].map((suffix, index) => ({
+  const facilities = facilitySuffixes.map((suffix, index) => ({
     id: index + 2, guid: `facility-${suffix}`, accountId: account.guid, name: `Facility ${suffix}`,
     isNewFacility: false, energyIsSource: false, energyUnit: 'MMBtu', volumeLiquidUnit: 'kgal',
     sustainabilityQuestions: { energyReductionBaselineYear: 2020, waterReductionBaselineYear: 2020 }
@@ -621,6 +621,89 @@ describe('Account analysis queued edits', () => {
     guard.setModalAction('cancel');
     expect(await leaving).toBe(false);
     expect(h.setup.form.controls.name.value).toBe('Retained draft');
+  });
+
+  it.each(['continue', 'goBack', 'returnToDashboard'] as const)('ignores a second %s while Continue waits for the current assignment', async duplicateAction => {
+    const h = createHarness(true, ['a', 'b', 'c']);
+    h.router.url = '/data-evaluation/account/analysis/select-items';
+    TestBed.inject(AccountStatusCheckService).accountStatusCheck.next({
+      getAccountAnalysisStatusCheckById: () => ({ accountAnalysisSetupErrors: { hasSetupErrors: false } })
+    } as any);
+    const footer = TestBed.runInInjectionContext(() => new AccountAnalysisFooterComponent());
+    const beforeNavigate = vi.fn(() => h.table.canDeactivate());
+    footer.beforeNavigate = beforeNavigate;
+    const saving = h.table.save(h.models[0].guid);
+    const continuing = footer.continue();
+    const duplicate = footer[duplicateAction]();
+    await h.firstWriteStarted.promise;
+    h.releaseFirstWrite.resolve();
+    await Promise.all([saving, continuing, duplicate]);
+
+    expect(beforeNavigate).toHaveBeenCalledTimes(1);
+    expect(h.selectFacility).toHaveBeenCalledExactlyOnceWith(h.facilities[1].guid);
+    expect(h.store.selectedFacility().guid).toBe(h.facilities[1].guid);
+    expect(footer.canContinue()).toBe(false);
+    expect(h.navigateByUrl).not.toHaveBeenCalled();
+
+    await h.table.save('skip');
+    expect(footer.canContinue()).toBe(true);
+    await footer.continue();
+    expect(beforeNavigate).toHaveBeenCalledTimes(2);
+    expect(h.selectFacility).toHaveBeenCalledTimes(2);
+    expect(h.store.selectedFacility().guid).toBe(h.facilities[2].guid);
+    expect(h.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it.each(['canceled', 'failed'] as const)('allows a later deliberate Continue after leaving was %s', async outcome => {
+    const h = createHarness(false);
+    h.router.url = '/data-evaluation/account/analysis/select-items';
+    await h.table.save('skip');
+    const footer = TestBed.runInInjectionContext(() => new AccountAnalysisFooterComponent());
+    const failure = new Error('leave failed');
+    const beforeNavigate = vi.fn().mockResolvedValue(true);
+    if (outcome === 'canceled') beforeNavigate.mockResolvedValueOnce(false);
+    else beforeNavigate.mockRejectedValueOnce(failure);
+    footer.beforeNavigate = beforeNavigate;
+    const first = footer.continue();
+    const duplicateBack = footer.goBack();
+    const duplicateReturn = footer.returnToDashboard();
+    if (outcome === 'failed') await expect(first).rejects.toBe(failure);
+    else await first;
+    await Promise.all([duplicateBack, duplicateReturn]);
+    expect(h.store.selectedFacility().guid).toBe(h.facilities[0].guid);
+    expect(h.selectFacility).not.toHaveBeenCalled();
+    expect(h.navigateByUrl).not.toHaveBeenCalled();
+    expect(beforeNavigate).toHaveBeenCalledTimes(1);
+
+    await footer.continue();
+    expect(beforeNavigate).toHaveBeenCalledTimes(2);
+    expect(h.selectFacility).toHaveBeenCalledExactlyOnceWith(h.facilities[1].guid);
+  });
+
+  it('holds the footer action until routing finishes before accepting another action', async () => {
+    const h = createHarness(false);
+    const footer = TestBed.runInInjectionContext(() => new AccountAnalysisFooterComponent());
+    const beforeNavigate = vi.fn(async () => true);
+    footer.beforeNavigate = beforeNavigate;
+    const started = deferred();
+    const completed = deferred();
+    h.navigateByUrl.mockImplementationOnce(() => {
+      started.resolve();
+      return completed.promise.then(() => true);
+    });
+    const first = footer.continue();
+    await started.promise;
+    const duplicateBack = footer.goBack();
+    const duplicateReturn = footer.returnToDashboard();
+    expect(h.navigateByUrl).toHaveBeenCalledTimes(1);
+    expect(beforeNavigate).toHaveBeenCalledTimes(1);
+    completed.resolve();
+    await Promise.all([first, duplicateBack, duplicateReturn]);
+    expect(h.navigateByUrl).toHaveBeenCalledTimes(1);
+
+    await footer.returnToDashboard();
+    expect(beforeNavigate).toHaveBeenCalledTimes(2);
+    expect(h.navigateByUrl).toHaveBeenNthCalledWith(2, '/data-evaluation/account/analysis/dashboard');
   });
 
 });
