@@ -16,7 +16,9 @@ Follow the [team checklist](pr-workflow.md) when explicitly asked to open or upd
 
 ## Publish and verify
 
-7. Push the reviewed commits without force-pushing unless separately authorized. Create a normal PR unless a draft was requested or unresolved work makes it intentionally incomplete. Include the delivered behavior, validation commands/results, limitations, and related issues. Use non-closing references such as `Connects #123` because QA validates and closes issues; use closing keywords only when requested.
+7. Push the reviewed commits without force-pushing unless separately authorized. Create a normal PR unless a draft was requested or unresolved work makes it intentionally incomplete. Use the [PR template](../../.github/pull_request_template.md): include delivered behavior, validation commands/results, limitations, related issues, and **Fresh agent review** evidence copied from the completed report. Record the reviewer, explicit no-history setting, exact base/head commits, findings/disposition, and reviewer checks/gaps. Set status `Completed` only when a report exists for the current comparison; otherwise use `Not run`, `Failed`, or `Stale` as appropriate. Use non-closing references such as `Connects #123` because QA validates and closes issues; use closing keywords only when requested.
 8. Verify the PR URL, base/head commits, title, body, draft state, and displayed comparison. Attach or surface the PR in the active agent environment when supported, read initial CI/check status once, and return the URL and remaining gaps. Do not imply queued checks passed.
 
 Do not add reviewers, labels, project metadata, auto-merge, or GitHub review comments without authorization. Follow the [GitHub review guide](github-pr-review.md) for explicitly requested review publication.
+
+The review section is a visible evidence record, not a GitHub-required status check or merge approval. After new commits or a moved target, mark it `Stale` until a fresh review and comparison check complete. The template also applies to PRs opened through tools/API; do not rely on GitHub to insert it automatically there.
