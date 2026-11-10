@@ -17,9 +17,10 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 
 | Change | Required validation |
 | --- | --- |
+| Documentation-only | Validate links, commands, and relevant workflow behavior under the [testing guide's documentation exception](../../../docs/testing.md#what-a-change-requires); no unrelated application suites or builds |
 | Ordinary logic or Angular behavior | `npm run test:ci` |
 | IndexedDB or Web Worker behavior | `npm run test:browser:ci` in addition to fast tests |
-| Final test gate | `npm run test:all:ci` |
+| Final code-change test gate | `npm run test:all:ci` |
 | Informational calculation, IndexedDB, and Worker coverage | `npm run test:coverage` when coverage evidence is requested; never treat it as a required gate |
 | Web behavior | `npm run build-prod` |
 | Shared renderer or Electron behavior | `npm run build-prod-electron` in addition to the web build |
