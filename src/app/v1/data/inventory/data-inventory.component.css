@@ -74,12 +74,6 @@
   outline-offset: 2px;
 }
 
-.v1-account-portfolio__manage {
-  border-color: var(--v1-facility);
-  background: var(--v1-facility);
-  color: var(--v1-inverse-text);
-}
-
 @media (max-width: 42rem) {
   .v1-account-portfolio__header { grid-template-columns: 1fr; }
   .v1-account-portfolio__header-actions { justify-content: flex-start; }

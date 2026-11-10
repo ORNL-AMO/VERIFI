@@ -6,7 +6,7 @@ export interface ImportFormatDefinition {
   readonly workflow: ImportWorkflowKind;
 }
 
-const FORMAT_BY_VERSION: Record<TemplateVersion, ImportFileKind> = {
+const FORMAT_BY_VERSION: Record<TemplateVersion, Exclude<ImportFileKind, 'energy-uses-template'>> = {
   V1: 'verifi-v1',
   V2: 'verifi-v2',
   V3: 'verifi-v3',
@@ -29,10 +29,11 @@ const FORMATS: Record<ImportFileKind, ImportFormatDefinition> = {
     label: 'Spread Sheet Columns',
     workflow: 'general-workbook'
   },
+  'energy-uses-template': { kind: 'energy-uses-template', label: 'Energy Uses Template', workflow: 'energy-uses' },
   'footprint-tool': { kind: 'footprint-tool', label: 'Energy Footprint Tool', workflow: 'footprint' }
 };
 
-export function importKindForTemplateVersion(version: TemplateVersion): ImportFileKind {
+export function importKindForTemplateVersion(version: TemplateVersion): Exclude<ImportFileKind, 'energy-uses-template'> {
   return FORMAT_BY_VERSION[version];
 }
 

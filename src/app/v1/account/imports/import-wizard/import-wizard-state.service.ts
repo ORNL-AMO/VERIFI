@@ -1,3 +1,4 @@
+import { EnergyUsesImportStateService } from './energy-uses-import-state.service';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
@@ -45,6 +46,7 @@ export class ImportWizardStateService {
   readonly meters = inject(ImportMeterReviewStateService);
   readonly predictors = inject(ImportPredictorReviewStateService);
 
+  readonly energyUses = inject(EnergyUsesImportStateService);
   readonly draft = this.draftStore.draft;
   readonly currentStepId = signal('');
   readonly error = signal<string | undefined>(undefined);
@@ -140,7 +142,7 @@ export class ImportWizardStateService {
     : []);
   readonly reviewSummary = computed(() => {
     const draft = this.draft();
-    if (!draft) return undefined;
+    if (!draft || draft.kind === 'energy-uses-template') return undefined;
     return buildImportReviewSummary({
       kind: draft.kind,
       selectedFacilityId: draft.selectedFacilityId,
@@ -165,6 +167,8 @@ export class ImportWizardStateService {
   }
 
   allowedStep(requestedStep: string | undefined): string {
+    if (this.energyUses.needsRefresh()) return 'review';
+    if (this.session.pending() && this.currentStepId()) return this.currentStepId();
     const steps = this.steps();
     const draft = this.draft();
     const requestedIndex = steps.findIndex(step => step.id === requestedStep);
@@ -197,6 +201,7 @@ export class ImportWizardStateService {
   }
 
   completeCurrentStep(): string | undefined {
+    if (this.isNavigationBlocked()) return undefined;
     const issue = this.validationMessage();
     if (issue) {
       this.error.set(issue);
@@ -216,7 +221,8 @@ export class ImportWizardStateService {
   }
 
   async commit(): Promise<ImportFileDraft | undefined> {
-    const issue = this.validationMessage();
+    if (this.session.pending()) return undefined;
+    const issue = this.energyUses.needsRefresh() ? undefined : this.validationMessage();
     if (issue) {
       this.error.set(issue);
       return undefined;
@@ -225,7 +231,9 @@ export class ImportWizardStateService {
     this.session.setPending(true);
     this.session.updateDraft(draft.id, current => current.status = 'importing');
     try {
-      const summary = await this.commands.commit(this.commitRequest(draft));
+      const summary = draft.kind === 'energy-uses-template'
+        ? await this.energyUses.commit()
+        : await this.commands.commit(this.commitRequest(draft));
       this.session.complete(draft.id, summary);
       this.committed.set(true);
       return this.session.nextReady(draft.id);
@@ -405,7 +413,7 @@ export class ImportWizardStateService {
     return !this.committed() && this.session.hasUnsavedChanges();
   }
 
-  isNavigationBlocked(): boolean { return this.session.pending(); }
+  isNavigationBlocked(): boolean { return this.session.navigationBlocked(); }
 
   viewImportedData(): void {
     const draft = this.draft();
@@ -415,12 +423,16 @@ export class ImportWizardStateService {
       accountGuid,
       this.workspace.facilities().map(facility => facility.guid)
     );
-    if (returnUrl) {
+    if (returnUrl && draft.kind !== 'energy-uses-template') {
       void this.router.navigateByUrl(returnUrl);
       return;
     }
     const affected = this.session.summary(draft.id)?.affectedFacilityGuids ?? [];
-    if (draft.kind === 'footprint-tool' && draft.selectedFacilityId) {
+    if (draft.kind === 'energy-uses-template') {
+      void this.router.navigate(['/v1/workspace/account', accountGuid, 'data', 'portfolio', 'energy-uses'], {
+        queryParams: affected.length === 1 && this.workspace.account()?.isSingleFacilityCompany !== true ? { facility: affected[0] } : {}
+      });
+    } else if (draft.kind === 'footprint-tool' && draft.selectedFacilityId) {
       void this.router.navigate(['/v1/workspace/facility', draft.selectedFacilityId, 'data', 'energy-uses']);
     } else if (affected.length === 1) {
       const detail = draft.predictors.length && !draft.meters.length ? 'predictors' : 'meters';
@@ -440,6 +452,7 @@ export class ImportWizardStateService {
     const draft = this.draft();
     const step = this.currentStepId();
     if (!draft) return 'The upload session is no longer available.';
+    if (draft.kind === 'energy-uses-template') return this.energyUses.validationMessage();
     if (step === 'review' && !hasSpreadsheetImportRecords(this.commitRequest(draft))) {
       return 'Include at least one record before uploading this file.';
     }

@@ -6,6 +6,7 @@ export function buildSpreadsheetImportCommitRequest(
   draft: ImportFileDraft,
   accountGuid: string
 ): ImportCommitRequest {
+  if (draft.kind === 'energy-uses-template') throw new Error('Energy Uses templates require their reviewed import command.');
   const meters = draft.meters.filter(meter => !meter.skipImport);
   const predictors = draft.predictors.filter(predictor => !predictor.skipImport);
   const meterIds = new Set(meters.map(meter => meter.guid));

@@ -34,9 +34,14 @@ const FOOTPRINT_STEPS: ImportStepDefinition[] = [
   { id: 'review', label: 'Review', help: 'Confirm the energy-use upload before saving.' }
 ];
 
+const ENERGY_USES_STEPS: ImportStepDefinition[] = [
+  { id: 'review', label: 'Import Energy Uses', help: 'Review one fiscal year of equipment data across existing facilities.' }
+];
+
 export function stepsForDraft(draft: ImportFileDraft): ImportStepDefinition[] {
   const workflow = importWorkflowForKind(draft.kind);
   if (workflow === 'general-workbook') return GENERAL_STEPS;
+  if (workflow === 'energy-uses') return ENERGY_USES_STEPS;
   if (workflow === 'footprint') return FOOTPRINT_STEPS;
   return TEMPLATE_STEPS;
 }

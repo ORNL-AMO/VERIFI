@@ -1,3 +1,5 @@
+import { EnergyUsesExcelExportService } from '@shared/energy-uses-excel/energy-uses-excel-export.service';
+import * as XLSX from 'xlsx';
 import { SessionStorageService } from 'ngx-webstorage';
 import { EquipmentTableComponent } from '../energy-use-workbench/setup-group/equipment-table/equipment-table.component';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
@@ -84,6 +86,45 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it('exports committed annual rows from the inventory regardless of filters, with keyboard focus return', async () => {
+    const view = setup();
+    await view.router.navigateByUrl(`${inventoryUrl}?facility=facility-b`);
+    await settle(view);
+    view.inventory().filtersForm.controls.search.setValue('No matching cards');
+    await settle(view);
+    const exportButton = page.getByRole('button', { name: 'Export Excel', exact: true });
+    await exportButton.click();
+    await settle(view);
+    const dialog = page.getByRole('dialog', { name: 'Export Energy Uses' });
+    await expect.element(dialog).toBeVisible();
+    expect(dialog.element().textContent).toContain('1 equipment row');
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850);
+      view.root.className = `v1-root ${theme}`;
+      await settle(view);
+      const panel = dialog.element();
+      expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
+      await page.screenshot({ element: panel, path: `../../../../../../.angular/phase5/export-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
+    }
+    await userEvent.keyboard('{Escape}');
+    await settle(view);
+    await expect.element(dialog).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(exportButton.element());
+    await exportButton.click(); await settle(view);
+    const exporter = TestBed.inject(EnergyUsesExcelExportService);
+    const download = vi.spyOn(exporter, 'download').mockImplementation(() => {});
+    await page.getByRole('dialog', { name: 'Export Energy Uses' }).getByRole('button', { name: 'Export Excel', exact: true }).click();
+    await vi.waitFor(() => expect(download).toHaveBeenCalledTimes(1));
+    const [blob, year] = download.mock.calls[0];
+    expect(year).toBe(2024);
+    const workbook = XLSX.read(await blob.arrayBuffer(), { type: 'array' });
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets['Energy Uses'], { header: 1, blankrows: false });
+    expect(rows).toHaveLength(2);
+    expect(rows[1][2]).toBe('Pump 49');
+    expect(rows[1][14]).toBe(0);
+    view.fixture.destroy();
+  });
+
   it('matches the header background to rounded corners and clips lower workbench edges using the appearance setting', async () => {
     const view = setup();
     await view.router.navigateByUrl(`${groupUrl()}/setup`); await settle(view);

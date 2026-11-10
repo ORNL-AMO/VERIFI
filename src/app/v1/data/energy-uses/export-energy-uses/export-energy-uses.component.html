@@ -1,0 +1,21 @@
+<app-workspace-slideout title="Export Energy Uses" description="Download saved annual data in the Energy Uses Excel template." [saving]="saving()" [hasFooter]="true" (closed)="closed.emit()">
+  <label for="energy-use-export-year">Fiscal year</label>
+  <select id="energy-use-export-year" class="v1-select" [formControl]="year">
+    @for (year of years(); track year) { <option [ngValue]="year">{{ year }}</option> }
+  </select>
+  <fieldset><legend>Facilities</legend>
+    @for (entry of facilityRows(); track entry.facility.guid) {
+      @if (entry.control) { <label><input type="checkbox" [formControl]="entry.control">{{ entry.facility.name }}</label> }
+    }
+  </fieldset>
+  @if (data(); as data) {
+    <p role="status">{{ data.rows.length }} equipment {{ data.rows.length === 1 ? 'row' : 'rows' }} will be exported.</p>
+    @if (data.hasExcessUtilityTypes) { <p class="v1-alert v1-alert--warning" role="alert">Some included equipment has more than two utility types. This template supports two. Choose other facilities or retain the complete data in a backup.</p> }
+  } @else { <p role="status">No saved annual data is available for the selected facilities.</p> }
+  @if (!available()) { <p class="v1-alert v1-alert--info" role="status">Wait for changes to finish saving before exporting.</p> }
+  @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+  <div slideoutFooter class="export-actions">
+    <button type="button" class="v1-btn v1-btn--secondary" [disabled]="saving()" (click)="closed.emit()">Cancel</button>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canExport()" (click)="export()">@if (saving()) { <app-ui-icon name="loading" spin/>Preparing… } @else { <app-ui-icon name="excel"/>Export Excel }</button>
+  </div>
+</app-workspace-slideout>

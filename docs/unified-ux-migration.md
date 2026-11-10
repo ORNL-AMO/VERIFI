@@ -50,6 +50,7 @@ If the workflow needs current-state detail, add a short current-state note using
 
 - **Decision:** Rebuild the legacy equipment workflow as a group-first v1 inventory and group workbench, reusing shared Data editing, command, navigation, and modal boundaries. Preserve shared records, calculation behavior, GUID relationships, and v0 compatibility.
 - **Current requirements:** The [Energy Uses current accepted behavior](v1-energy-uses-migration-plan.md#current-accepted-behavior) owns the implemented navigation/data-entry contract and deferred scope. [Feature architecture](../ARCHITECTURE.md#energy-use-group-workbench) owns preservation and transaction invariants. Update those owners when the workflow changes rather than duplicating screen specifications here.
+- **File workflows:** Inventory Excel export and standalone Energy Uses template uploads share neutral workbook contracts with v0. Uploads use the account import queue with explicit year and row-change review; Footprint Tool retains its existing mapping workflow. See [Phase 5](v1-energy-uses-migration-plan.md#phase-5--export-compatibility-and-release-acceptance) for compatibility and release evidence.
 - **Delivery and acceptance:** The [roadmap](v1-energy-uses-migration-plan.md#phased-delivery) retains phase targets and historical validation. The [hardening plan](v1-energy-uses-review-and-hardening-plan.md) records review findings and remediation evidence; final export/compatibility acceptance remains in the roadmap.
 
 ### Header Facility Scope — Phase 1

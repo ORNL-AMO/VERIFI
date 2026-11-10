@@ -1,0 +1,55 @@
+<div class="energy-use-import__year">
+  <label for="energy-use-import-year">Fiscal year
+    <input id="energy-use-import-year" class="v1-input" type="number" min="1000" max="9999" step="1" [formControl]="year" aria-describedby="energy-use-import-year-help" [attr.aria-invalid]="year.invalid && year.touched">
+  </label>
+  <p id="energy-use-import-year-help">Import one year of equipment data. Other saved years are preserved.</p>
+</div>
+@if (year.invalid && year.touched) { <p class="v1-alert v1-alert--danger" role="alert">Enter a four-digit fiscal year.</p> }
+@if (state.energyUses.preview(); as preview) {
+  <dl class="energy-use-import__summary" aria-label="Import summary" aria-live="polite">
+    <div><dt>New groups</dt><dd>{{ preview.newGroups.length }}</dd></div>
+    <div class="energy-use-import__new"><dt>New equipment</dt><dd>{{ preview.created }}</dd></div>
+    <div class="energy-use-import__updates"><dt>Updates</dt><dd>{{ preview.updated }}</dd></div>
+    <div class="energy-use-import__invalid"><dt>Rows with errors</dt><dd>{{ preview.errorRows }}</dd></div>
+    <div><dt>Skipped</dt><dd>{{ skippedCount() }}</dd></div>
+  </dl>
+  @if (state.energyUses.needsRefresh()) {
+    <p class="v1-alert v1-alert--warning" role="alert">The import was saved. Refresh saved changes to finish; the workbook will not be imported again.</p>
+  } @else if (state.energyUses.reviewStale()) {
+    <div class="v1-alert v1-alert--warning" role="alert"><p>Saved data changed. Review the current changes before importing.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="state.isNavigationBlocked()" (click)="review()">Review saved data again</button></div>
+  } @else if (preview.errorRows) {
+    <p class="v1-alert v1-alert--danger" role="alert">Fix or skip every row with errors before importing.</p>
+  } @else if (!preview.created && !preview.updated) {
+    <p class="v1-alert v1-alert--info" role="status">No changes to import.</p>
+  }
+  <div class="v1-table-scroll" role="region" aria-label="Equipment import preview" tabindex="0">
+    <table class="v1-results-table energy-use-import__table">
+      <thead><tr><th scope="col">Facility</th><th scope="col">Group</th><th scope="col">Equipment</th><th scope="col">Status</th>@if (hasRowErrors()) { <th scope="col">Errors</th> }<th scope="col" class="energy-use-import__skip">Skip</th></tr></thead>
+      <tbody>
+        @for (entry of rows(); track entry.row.importedRow) {
+          @let row = entry.row;
+          <tr>
+            <td>{{ row.facility }}</td><td>{{ row.group }}</td><th scope="row">{{ row.equipment }}</th>
+            <td><span class="v1-chip" [class.v1-chip--success]="!row.skipped && row.action === 'Create'" [class.v1-chip--info]="!row.skipped && row.action === 'Update'" [class.v1-chip--danger]="!row.skipped && row.action === 'Error'">{{ entry.status }}</span>
+              @if (row.action === 'Update') { <button type="button" class="energy-use-import__details-button" aria-haspopup="dialog" [attr.aria-label]="'Show changes for ' + row.equipment" (click)="openDetails(row)">Show details</button> }
+            </td>
+            @if (hasRowErrors()) { <td class="energy-use-import__errors">@for (error of row.errors; track $index) { <p>{{ error }}</p> } @empty { <span aria-label="No errors">—</span> }</td> }
+            <td class="energy-use-import__skip"><input type="checkbox" [formControl]="entry.skip" [attr.aria-label]="'Skip row ' + row.importedRow + ': ' + row.equipment"></td>
+          </tr>
+
+        } @empty { <tr><td [attr.colspan]="columns()" class="energy-use-import__empty">No equipment changes or errors to show.</td></tr> }
+      </tbody>
+    </table>
+  </div>
+} @else { <p class="energy-use-import__empty" role="status">Enter the fiscal year to review the equipment being imported.</p> }
+
+<ng-template #changeDetails>
+  @if (details(); as row) {
+    <app-workspace-slideout [title]="'Changes for ' + row.equipment" [description]="row.facility + ' / ' + row.group" [saving]="state.session.pending()" (closed)="closeDetails()">
+      <table class="v1-results-table energy-use-import__changes" [attr.aria-label]="'Changes for ' + row.equipment">
+        <thead><tr><th scope="col">Field</th><th scope="col">Current value</th><th scope="col">Imported value</th></tr></thead>
+        <tbody>@for (change of row.changes; track $index) { <tr><th scope="row">{{ change.field }}</th><td>{{ change.before }}</td><td>{{ change.after }}</td></tr> }</tbody>
+      </table>
+    </app-workspace-slideout>
+  }
+</ng-template>

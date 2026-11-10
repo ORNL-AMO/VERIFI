@@ -7,8 +7,8 @@
           <h1
             id="import-wizard-title"
             class="import-page__title"
-            [attr.aria-label]="'Step ' + state.currentStepNumber() + ': ' + step.label">
-            <span class="import-page__step-number" aria-hidden="true">{{ state.currentStepNumber() }}</span>
+            [attr.aria-label]="file.kind === 'energy-uses-template' ? step.label : 'Step ' + state.currentStepNumber() + ': ' + step.label">
+            @if (file.kind !== 'energy-uses-template') { <span class="import-page__step-number" aria-hidden="true">{{ state.currentStepNumber() }}</span> }
             <span>{{ step.label }}</span>
           </h1>
           <p class="v1-section-header__summary">{{ step.help }}</p>
@@ -55,18 +55,18 @@
       </article>
 
       <footer class="v1-wizard-actions">
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="session.pending()" (click)="back()">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="state.isNavigationBlocked()" (click)="back()">
           <app-ui-icon name="chevronLeft"></app-ui-icon>
-          Back
+          {{ file.kind === 'energy-uses-template' ? 'Back to files' : 'Back' }}
         </button>
         @if (state.currentStepId() === 'review') {
-          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="commit()">
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending() || (file.kind === 'energy-uses-template' && !state.energyUses.needsRefresh() && !state.energyUses.canImport())" (click)="commit()">
             @if (session.pending()) {
               <app-ui-icon name="loading" spin></app-ui-icon>
               Uploading…
             } @else {
               <app-ui-icon name="save"></app-ui-icon>
-              Upload data
+              {{ state.energyUses.needsRefresh() ? 'Refresh saved changes' : file.kind === 'energy-uses-template' ? 'Import' : 'Upload data' }}
             }
           </button>
         } @else {

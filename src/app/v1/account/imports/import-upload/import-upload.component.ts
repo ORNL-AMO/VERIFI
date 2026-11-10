@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, Injector, OnDestroy, OnInit, afterNextRender, computed, inject, signal, viewChild, viewChildren } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterStateSnapshot } from '@angular/router';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
 import { ImportFileStatus } from '@data/import/spreadsheet-import.models';
@@ -25,12 +25,17 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly unsaved = inject(UnsavedChangesService);
+  private readonly injector = inject(Injector);
+  private readonly browseButton = viewChild<ElementRef<HTMLButtonElement>>('browseFilesButton');
+  private readonly removeButtons = viewChildren<ElementRef<HTMLButtonElement>>('removeQueueFile');
   readonly session = inject(ImportSessionService);
   readonly workspace = inject(AccountWorkspaceStore);
   readonly failures = signal<UploadFailure[]>([]);
   readonly readingFiles = signal(false);
   readonly dragActive = signal(false);
   readonly sessionLost = signal(false);
+  readonly queueAnnouncement = signal('');
+  readonly queueLocked = computed(() => this.isNavigationBlocked());
   readonly statusLabels: Record<ImportFileStatus, string> = {
     queued: 'Queued',
     ready: 'Ready to process',
@@ -60,7 +65,7 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   }
 
   hasUnsavedChanges(): boolean { return this.session.hasUnsavedChanges(); }
-  isNavigationBlocked(): boolean { return this.session.pending() || this.readingFiles(); }
+  isNavigationBlocked(): boolean { return this.session.navigationBlocked() || this.readingFiles(); }
 
   canNavigateWithoutDiscard(nextState: RouterStateSnapshot): boolean {
     const accountGuid = this.workspace.account()?.guid;
@@ -102,7 +107,7 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   }
 
   private async processFiles(files: File[]): Promise<void> {
-    if (!files.length || this.readingFiles()) return;
+    if (!files.length || this.isNavigationBlocked()) return;
     this.readingFiles.set(true);
     const failures: UploadFailure[] = [];
     try {
@@ -131,10 +136,25 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
     this.dragActive.set(false);
   }
 
+  removeDraft(id: string): void {
+    if (this.isNavigationBlocked()) return;
+    const index = this.session.drafts().findIndex(draft => draft.id === id);
+    const draft = this.session.draft(id);
+    if (!draft || !this.session.removeDraft(id)) return;
+    this.queueAnnouncement.set(`${draft.name} removed from the upload queue.`);
+    afterNextRender(() => {
+      const buttons = this.removeButtons();
+      const next = buttons[Math.min(index, buttons.length - 1)]?.nativeElement;
+      (next ?? this.browseButton()?.nativeElement)?.focus();
+    }, { injector: this.injector });
+  }
+
   openDraft(id: string): void {
     const draft = this.session.draft(id);
     const accountGuid = this.workspace.account()?.guid;
+    const recovery = this.session.recoveryDraft();
+    if (this.session.pending() || recovery && recovery.id !== id) return;
     if (!draft || !accountGuid || draft.status === 'invalid') return;
-    void this.router.navigate(['/v1/workspace/account', accountGuid, 'imports', 'file', id, stepsForDraft(draft)[0].id]);
+    void this.router.navigate(['/v1/workspace/account', accountGuid, 'imports', 'file', id, recovery ? 'review' : stepsForDraft(draft)[0].id]);
   }
 }

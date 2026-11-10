@@ -6,6 +6,8 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { profileGeneralWorkbookColumn } from './general-workbook-column-profile';
 
+type ExistingImportDraft = Exclude<ImportFileDraft, { kind: 'energy-uses-template' }>;
+
 describe('SpreadsheetImportDraftService', () => {
   const service = new SpreadsheetImportDraftService(
     {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any
@@ -411,7 +413,7 @@ describe('SpreadsheetImportDraftService', () => {
   });
 });
 
-function importDraft(kind: ImportFileDraft['kind'], values: Partial<ImportFileDraft> = {}): ImportFileDraft {
+function importDraft(kind: ExistingImportDraft['kind'], values: Partial<ExistingImportDraft> = {}): ExistingImportDraft {
   return {
     ...getEmptyFileReference(),
     id: 'draft-1',

@@ -1,3 +1,4 @@
+import { ExportEnergyUsesComponent } from './export-energy-uses/export-energy-uses.component';
 import { BalanceFactsComponent } from './energy-use-workbench/balance-facts/balance-facts.component';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { SaveStatusComponent } from './forms/save-status/save-status.component';
@@ -43,7 +44,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
 
 @NgModule({
   declarations: [
-    EnergyUsesInventoryComponent, EquipmentTableComponent, LifecycleActionsComponent, EnergyUseChartsComponent,
+    ExportEnergyUsesComponent, EnergyUsesInventoryComponent, EquipmentTableComponent, LifecycleActionsComponent, EnergyUseChartsComponent,
     ResultsGraphsComponent, FootprintTableComponent, SummaryTableComponent, FacilityFootprintComponent, ResultsControlsComponent, SourceDetailsComponent,
     EnergyUseWorkbenchComponent, SetupGroupComponent, BalanceFactsComponent,
     AnnualDataFieldsComponent, AnnualYearFieldsComponent, AddYearDrawerComponent, SetupCalculatorComponent,
