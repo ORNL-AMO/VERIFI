@@ -85,6 +85,12 @@
               Export Facility <br> Utility Data
             </button>
           </div>
+          <div class="p-1">
+            <button class="btn btn-outline m-0" (click)="openEmailModal()">
+              <span class="fa fa-share-square"></span><br>
+              Email Facility <br> Data
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -111,3 +117,7 @@
     </div>
   </div>
 </div>
+
+@if (showEmailModal) {
+  <app-email-data-modal [facility]="_facility" (cancel)="closeEmailModal()"></app-email-data-modal>
+}

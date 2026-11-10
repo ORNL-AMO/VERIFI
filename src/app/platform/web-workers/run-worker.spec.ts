@@ -54,6 +54,31 @@ describe('runWorker', () => {
     expect(terminate).toHaveBeenCalledOnce();
   });
 
+  it('propagates a synchronous postMessage failure and terminates exactly once', () => {
+    const { postMessage, terminate, worker } = createFakeWorker();
+    const failure = new DOMException('The payload cannot be cloned.', 'DataCloneError');
+    postMessage.mockImplementationOnce(() => { throw failure; });
+    const error = vi.fn();
+
+    const subscription = runWorker(worker, { input: 42 }).subscribe({ error });
+
+    expect(error).toHaveBeenCalledWith(failure);
+    expect(subscription.closed).toBe(true);
+    expect(terminate).toHaveBeenCalledOnce();
+    subscription.unsubscribe();
+    expect(terminate).toHaveBeenCalledOnce();
+  });
+
+  it('rejects an unreadable worker message and terminates its worker', () => {
+    const { listeners, terminate, worker } = createFakeWorker();
+    const error = vi.fn();
+    const subscription = runWorker(worker, undefined).subscribe({ error });
+    listeners.get('messageerror')?.(new MessageEvent('messageerror'));
+    expect(error).toHaveBeenCalledWith(expect.objectContaining({ message: 'Worker message could not be deserialized.' }));
+    expect(subscription.closed).toBe(true);
+    expect(terminate).toHaveBeenCalledOnce();
+  });
+
   it('terminates the worker when the subscription is cancelled', () => {
     const { terminate, worker } = createFakeWorker();
 

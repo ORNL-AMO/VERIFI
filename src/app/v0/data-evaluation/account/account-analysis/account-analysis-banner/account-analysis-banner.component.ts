@@ -1,6 +1,6 @@
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, effect, inject, Signal } from '@angular/core';
+import { Component, computed, effect, inject, Input, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
@@ -22,6 +22,8 @@ export class AccountAnalysisBannerComponent {
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+
+  @Input() beforeNavigate: () => Promise<boolean> = () => Promise.resolve(true);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
   accountAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
@@ -59,16 +61,27 @@ export class AccountAnalysisBannerComponent {
     })
   }
 
-  goToDashboard() {
-    this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
+  async goToDashboard(): Promise<void> {
+    if (await this.beforeNavigate()) {
+      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
+    }
   }
 
   toggleShow() {
     this.showDropdown = !this.showDropdown;
   }
 
-  selectItem(item: IdbAccountAnalysisItem) {
-    this.accountWorkspaceService.selectAccountAnalysis((item)?.guid);
+  async selectItem(item: IdbAccountAnalysisItem): Promise<void> {
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const previousAnalysisGuid = this.accountAnalysisItem()?.guid;
+    const analysisGuid = item.guid;
+    const url = this.router.url;
+    const navigationId = this.router.currentNavigation?.()?.id;
+    if (!await this.beforeNavigate() || this.accountWorkspaceStore.account()?.guid !== accountGuid ||
+      this.accountAnalysisItem()?.guid !== previousAnalysisGuid || this.router.url !== url ||
+      this.router.currentNavigation?.()?.id !== navigationId) return;
+    if (!this.accountWorkspaceStore.accountAnalyses().some(analysis => analysis.guid === analysisGuid && analysis.accountId === accountGuid)) return;
+    this.accountWorkspaceService.selectAccountAnalysis(analysisGuid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

@@ -13,12 +13,14 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 
 | Change | Required validation |
 | --- | --- |
+| Documentation-only | Validate links, commands, and relevant workflow behavior under the [testing guide's documentation exception](../../../docs/testing.md#what-a-change-requires); no unrelated application suites or builds |
 | Ordinary logic or Angular behavior | Focused affected `*.spec.ts` first; use `npm run test:ci` when the touched behavior is broad or there is no reliable narrower suite |
 | TypeScript or app source changes | `npx tsc -p tsconfig.app.json --noEmit` |
 | Production Angular routing, modules, templates, app entrypoints, environment files, or release-sensitive UI behavior | `npm run build-prod` unless a known local exit-134 build abort has already been classified for the same checkout and the current change does not affect build configuration |
 | Styling-only Angular changes | Focused specs that compile the affected component styles when available, plus a focused visual/accessibility check; do not run `build-prod` by habit |
 | IndexedDB, Web Worker, File API, or native browser behavior | `npm run test:browser:ci` in addition to fast tests |
 | Explicit pre-PR or release gate | `npm run test:all:ci` plus production builds selected by the changed runtime boundaries |
+| Final code-change test gate | `npm run test:all:ci` |
 | Informational calculation, IndexedDB, and Worker coverage | `npm run test:coverage` when coverage evidence is requested; never treat it as a required gate |
 | Electron preload, IPC, filesystem, dialog, shell, updater, Electron environment/config, or explicit desktop release behavior | `npm run build-prod-electron` in addition to relevant fast/web checks, plus a focused manual desktop check for OS integration |
 

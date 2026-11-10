@@ -51,7 +51,7 @@
             @if (selectedReport.performanceReportSetup.includeSavings) {
               <div class="col-6">
                 <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
-                {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Facilities</h5>
+                {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Facilities (Savings)</h5>
                 <app-top-performers-table [performanceReport]="performanceReport" [chartDataOption]="'savings'"
                   [dataType]="'facility'"
                 [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-performers-table>
@@ -68,7 +68,7 @@
             }
             <div class="col-6">
               <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
-              {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Performance</h5>
+              {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Performance (Annual Savings)</h5>
               <app-top-performers-table [performanceReport]="performanceReport"
                 [chartDataOption]="'changeInAdjustedBaseline'" [dataType]="'facility'"
               [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-performers-table>
@@ -129,7 +129,7 @@
                   @if (selectedReport.performanceReportSetup.includeSavings) {
                     <div class="col-6">
                       <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
-                      {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Groups</h5>
+                      {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Groups (Savings)</h5>
                       <app-top-performers-table [performanceReport]="performanceReport" [chartDataOption]="'savings'"
                         [dataType]="'group'"
                       [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-performers-table>
@@ -146,7 +146,7 @@
                   }
                   <div class="col-6">
                     <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
-                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Performance</h5>
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Performance (Annual Savings)</h5>
                     <app-top-performers-table [performanceReport]="performanceReport"
                       [chartDataOption]="'changeInAdjustedBaseline'" [dataType]="'group'"
                     [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-performers-table>

@@ -1,10 +1,10 @@
 @if (utilityMeterData.length != 0) {
-  <app-account-analysis-banner></app-account-analysis-banner>
+  <app-account-analysis-banner [beforeNavigate]="beforeNavigate"></app-account-analysis-banner>
 }
 @if (utilityMeterData.length != 0) {
   <router-outlet></router-outlet>
 }
-<app-account-analysis-footer></app-account-analysis-footer>
+<app-account-analysis-footer [beforeNavigate]="beforeNavigate"></app-account-analysis-footer>
 
 @if (utilityMeterData.length == 0) {
   <div class="p-5">

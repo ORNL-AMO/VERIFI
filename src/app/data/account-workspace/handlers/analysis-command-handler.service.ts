@@ -8,6 +8,7 @@ import { AnalysisDbService } from '@data/indexedDB/analysis-db.service';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { AnalysisGroup, AnalysisGroupPredictorVariable } from '@data/models/analysis';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { AccountWorkspaceStore } from '../account-workspace.store';
 import {
@@ -82,6 +83,15 @@ export interface CreateLinkedFacilityAnalysisResult {
   readonly accountAnalysis: IdbAccountAnalysisItem;
   readonly analysis: IdbAnalysisItem;
 }
+
+export type FacilityAnalysisFieldChanges = Partial<Omit<IdbAnalysisItem, 'id' | 'guid' | 'accountId' | 'facilityId' | 'groups'>>;
+export type AccountAnalysisFieldChanges = Partial<Omit<IdbAccountAnalysisItem, 'id' | 'guid' | 'accountId' | 'facilityAnalysisItems'>>;
+export type AnalysisPredictorChanges = Pick<AnalysisGroupPredictorVariable, 'id'>
+  & Partial<Pick<AnalysisGroupPredictorVariable, 'productionInAnalysis' | 'regressionCoefficient'>>;
+export type AnalysisGroupChanges = Partial<Omit<AnalysisGroup, 'idbGroupId' | 'predictorVariables'>> & {
+  predictorVariables?: readonly AnalysisPredictorChanges[];
+};
+export type AccountFacilityAssignment = IdbAccountAnalysisItem['facilityAnalysisItems'][number];
 
 @Injectable({ providedIn: 'root' })
 export class AnalysisCommandHandler {
@@ -193,6 +203,66 @@ export class AnalysisCommandHandler {
       'readwrite',
       transaction => this.reconcileSingleFacilityAnalysisPairsInTransaction(transaction, accountGuid)
     );
+  }
+
+  /** Resolve inside the command callback so queued edits merge with earlier commits. */
+  async updateFacilityAnalysisFields(
+    analysisGuid: string,
+    changes: FacilityAnalysisFieldChanges,
+    activeAccountGuid: string
+  ): Promise<IdbAnalysisItem> {
+    const current = this.requireFacilityAnalysis(analysisGuid, activeAccountGuid);
+    return this.updateFacilityAnalysis({ ...current, ...structuredClone(changes) }, activeAccountGuid);
+  }
+
+  async updateFacilityAnalysisGroup(
+    analysisGuid: string,
+    groupGuid: string,
+    changes: AnalysisGroupChanges,
+    activeAccountGuid: string
+  ): Promise<IdbAnalysisItem> {
+    const current = this.requireFacilityAnalysis(analysisGuid, activeAccountGuid);
+    const group = current.groups.find(item => item.idbGroupId === groupGuid);
+    if (!group) throw new WorkspaceWriteError('validation-failed', 'The analysis group no longer exists.');
+    const { predictorVariables, ...fields } = structuredClone(changes);
+    const predictorChanges = new Map(predictorVariables?.map(variable => [variable.id, variable]));
+    if (predictorVariables?.some(variable => !group.predictorVariables.some(currentVariable => currentVariable.id === variable.id))) {
+      throw new WorkspaceWriteError('validation-failed', 'An edited analysis predictor no longer exists.');
+    }
+    const updatedGroup: AnalysisGroup = {
+      ...group,
+      ...fields,
+      predictorVariables: group.predictorVariables.map(variable => {
+        const changed = predictorChanges.get(variable.id);
+        return changed ? { ...variable, ...changed } : variable;
+      })
+    };
+    return this.updateFacilityAnalysis({
+      ...current,
+      isAnalysisVisited: false,
+      groups: current.groups.map(item => item.idbGroupId === groupGuid ? updatedGroup : item)
+    }, activeAccountGuid);
+  }
+
+  async clearFacilityAnalysisModels(
+    analysisGuid: string,
+    activeAccountGuid: string,
+    changes: FacilityAnalysisFieldChanges = {}
+  ): Promise<IdbAnalysisItem> {
+    const current = this.requireFacilityAnalysis(analysisGuid, activeAccountGuid);
+    return this.updateFacilityAnalysis({
+      ...current,
+      ...structuredClone(changes),
+      isAnalysisVisited: false,
+      groups: current.groups.map(group => ({
+        ...group,
+        models: [],
+        selectedModelId: undefined,
+        regressionConstant: undefined,
+        regressionModelYear: undefined,
+        predictorVariables: group.predictorVariables.map(variable => ({ ...variable, regressionCoefficient: undefined }))
+      }))
+    }, activeAccountGuid);
   }
 
   async deleteFacilityAnalysis(analysis: IdbAnalysisItem, activeAccountGuid: string): Promise<number> {
@@ -450,6 +520,49 @@ export class AnalysisCommandHandler {
         return { accountAnalysis: updatedAccountAnalysis, analysis };
       }
     );
+  }
+
+  async updateAccountAnalysisFields(
+    analysisGuid: string,
+    changes: AccountAnalysisFieldChanges,
+    activeAccountGuid: string
+  ): Promise<IdbAccountAnalysisItem> {
+    const current = this.requireAccountAnalysis(analysisGuid, activeAccountGuid);
+    return this.updateAccountAnalysis({ ...current, ...structuredClone(changes) }, activeAccountGuid);
+  }
+
+  async updateAccountFacilityAssignments(
+    analysisGuid: string,
+    assignments: readonly AccountFacilityAssignment[],
+    activeAccountGuid: string,
+    changes: AccountAnalysisFieldChanges = {}
+  ): Promise<IdbAccountAnalysisItem> {
+    const current = this.requireAccountAnalysis(analysisGuid, activeAccountGuid);
+    const facilities = this.accountWorkspaceStore.facilities();
+    for (const assignment of assignments) {
+      if (!facilities.some(item => item.guid === assignment.facilityId && item.accountId === activeAccountGuid)) {
+        throw new WorkspaceWriteError('validation-failed', 'An assigned facility no longer exists in this account.');
+      }
+      if (assignment.analysisItemId && assignment.analysisItemId !== 'skip') {
+        // A compound command may have created this analysis before workspace publication.
+        const selected = this.accountWorkspaceStore.facilityAnalyses().find(item => item.guid === assignment.analysisItemId)
+          ?? await this.analysisDb.getStoredByGuid(assignment.analysisItemId);
+        if (!selected || selected.accountId !== activeAccountGuid || selected.facilityId !== assignment.facilityId) {
+          throw new WorkspaceWriteError('validation-failed', 'The assigned analysis no longer belongs to this facility.');
+        }
+      }
+    }
+    const assignmentByFacility = new Map(assignments.map(item => [item.facilityId, structuredClone(item)]));
+    const updatedAssignments = current.facilityAnalysisItems.map(item => assignmentByFacility.get(item.facilityId) ?? item);
+    for (const assignment of assignmentByFacility.values()) {
+      if (!updatedAssignments.some(item => item.facilityId === assignment.facilityId)) updatedAssignments.push(assignment);
+    }
+    return this.updateAccountAnalysis({
+      ...current,
+      isAnalysisVisited: false,
+      ...structuredClone(changes),
+      facilityAnalysisItems: updatedAssignments
+    }, activeAccountGuid);
   }
 
   async deleteAccountAnalysis(analysis: IdbAccountAnalysisItem, activeAccountGuid: string): Promise<number> {
@@ -745,6 +858,23 @@ export class AnalysisCommandHandler {
     };
     await transaction.put('accounts', updatedAccount);
     return { accountAnalyses: writtenPairs, account: updatedAccount };
+  }
+
+  private requireFacilityAnalysis(analysisGuid: string, activeAccountGuid: string): IdbAnalysisItem {
+    const current = this.accountWorkspaceStore.facilityAnalyses().find(item => item.guid === analysisGuid);
+    if (!current) throw new WorkspaceWriteError('validation-failed', 'The facility analysis no longer exists.');
+    this.assertOwnership(current.accountId, activeAccountGuid, 'facility analysis');
+    if (!this.accountWorkspaceStore.facilities().some(item => item.guid === current.facilityId && item.accountId === activeAccountGuid)) {
+      throw new WorkspaceWriteError('validation-failed', 'The facility analysis owner no longer exists.');
+    }
+    return current;
+  }
+
+  private requireAccountAnalysis(analysisGuid: string, activeAccountGuid: string): IdbAccountAnalysisItem {
+    const current = this.accountWorkspaceStore.accountAnalyses().find(item => item.guid === analysisGuid);
+    if (!current) throw new WorkspaceWriteError('validation-failed', 'The account analysis no longer exists.');
+    this.assertOwnership(current.accountId, activeAccountGuid, 'account analysis');
+    return current;
   }
 
   private assertOwnership(entityAccountGuid: string | undefined, activeAccountGuid: string, label: string): void {
