@@ -1,6 +1,7 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, DestroyRef, ElementRef, inject, Signal, ViewChild, signal, WritableSignal, untracked, afterRenderEffect } from '@angular/core';
-import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
+import { UserDefinedInspectionPoint } from '@domain/calculations/analysis-calculations/user-defined-inspection-calculation';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -50,7 +51,7 @@ export class RegressionUserDefinedModelInspectionComponent {
   private readonly calendarizationReady = computed(() => this.calanderizationService.isReadyForCurrentWorkspace(this.calendarizationState()));
 
   calculating: WritableSignal<boolean | 'error'> = signal(false);
-  inspectedMonthlyAnalysisSummaryData: WritableSignal<Array<MonthlyAnalysisSummaryData> | undefined> = signal(undefined);
+  inspectedMonthlyAnalysisSummaryData: WritableSignal<UserDefinedInspectionPoint[] | undefined> = signal(undefined);
 
   userModel: Signal<JStatRegressionModel> = computed(() => {
     const input = this.calculationInput();
@@ -100,12 +101,12 @@ export class RegressionUserDefinedModelInspectionComponent {
     ).subscribe(({ input, response }) => {
       const current = this.calculationInput();
       if (!current || input.attempt !== current.attempt || !isEqual(input.inputs, current.inputs)) return;
-      if (response.error || !response.monthlyAnalysisSummary?.monthlyAnalysisSummaryData) {
+      if (response.error || !response.chartData) {
         this.inspectedMonthlyAnalysisSummaryData.set(undefined);
         this.calculating.set('error');
         return;
       }
-      this.inspectedMonthlyAnalysisSummaryData.set(response.monthlyAnalysisSummary.monthlyAnalysisSummaryData);
+      this.inspectedMonthlyAnalysisSummaryData.set(response.chartData);
       this.calculating.set(false);
     });
     afterRenderEffect(() => {

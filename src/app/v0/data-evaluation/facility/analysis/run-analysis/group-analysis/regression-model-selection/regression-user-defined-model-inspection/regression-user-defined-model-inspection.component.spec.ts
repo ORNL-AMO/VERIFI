@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { NgModule, Pipe, PipeTransform } from '@angular/core';
+import { ElementRef, NgModule, Pipe, PipeTransform } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
@@ -29,7 +29,7 @@ class InspectionWorker {
   fail(): void { this.listeners.get('error')?.(new Error('Native failure')); }
 }
 
-const response = (modeledEnergy: number) => ({ error: false, monthlyAnalysisSummary: { monthlyAnalysisSummaryData: [{ modeledEnergy }] } });
+const response = (modeledEnergy: number) => ({ error: false, chartData: [{ modeledEnergy }] });
 function fixture(): AccountWorkspaceSnapshot {
   const group = {
     ...getNewAnalysisGroup('group-a', [{ id: 'predictor-a', name: 'Production', unit: 'tons', production: true, productionInAnalysis: true, regressionCoefficient: 2 }]),
@@ -140,6 +140,21 @@ describe('RegressionUserDefinedModelInspectionComponent input lifetime', () => {
     expect(InspectionWorker.instances[2].postMessage.mock.calls[0][0]).toMatchObject({ analysisItem: { energyUnit: 'kWh' }, selectedGroup: { regressionConstant: 4 } });
     InspectionWorker.instances[2].respond(response(4));
     expect(component.calculating()).toBe(false);
+  });
+
+  it('plots the complete selected pre-baseline period while retaining the saved baseline in its request', () => {
+    const group = store.facilityAnalyses()[0].groups[0];
+    update({ baselineYear: 2024, groups: [{ ...group, regressionStartYear: 2023, regressionEndYear: 2023 }] });
+    TestBed.tick();
+    const worker = InspectionWorker.instances.at(-1)!;
+    expect(worker.postMessage.mock.calls[0][0].analysisItem.baselineYear).toBe(2024);
+    const chartData = Array.from({ length: 36 }, (_, index) => ({ date: new Date(2023, index, 1), energyUse: 100, modeledEnergy: 21 }));
+    worker.respond({ error: false, chartData });
+    component.monthlyAnalysisGraph = new ElementRef(document.createElement('div'));
+    component.drawChart();
+    const traces = vi.mocked(TestBed.inject(PlotlyService).newPlot).mock.calls.at(-1)![1] as any[];
+    expect(traces.find(trace => trace.name === 'Potential Model Year').x).toEqual(chartData.slice(0, 12).map(point => point.date));
+    expect(traces.find(trace => trace.name === 'Potential Model Year').y).toEqual(Array(12).fill(21));
   });
 
   it('settles timeout and worker construction failures into an error', () => {
