@@ -24,7 +24,8 @@ describe('facility results presentation during refresh', () => {
     state.set('ready');
     expect(results.display()?.balance?.equipment).toBe(250); expect(results.display()?.year).toBe(2026);
     expect(results.calculationStatus().label).toBe('Updated');
-    state.set('error'); expect(results.display()?.balance?.equipment).toBe(250);
+    state.set('error'); expect(results.display()?.result?.total).toBe(250);
+    expect(results.display()?.balance).toBeUndefined();
     expect(results.calculationStatus().label).toBe('Unavailable');
   });
   it('clears cached values when units/calendar/ownership change, and accepts a completed empty result', () => {

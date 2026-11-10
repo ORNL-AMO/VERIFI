@@ -55,12 +55,12 @@ export class FacilityEnergyUseResultsService {
       const facility = this.facility();
       return { facility, key: JSON.stringify([this.context.workspace.account()?.guid, facility?.guid, facility?.energyUnit,
         facility?.fiscalYear, facility?.fiscalYearMonth, facility?.fiscalYearCalendarEnd]),
-        ready: this.context.workspace.ready() && this.bills.state() === 'ready', year: this.year(), result: this.result(), balance: this.balanceView() };
+        ready: this.context.workspace.ready(), refreshing: this.refreshing(), year: this.year(), result: this.result(), balance: this.balanceView() };
     },
     computation: (current, previous): FacilityDisplay | undefined => {
       if (!current.facility) return undefined;
-      if (current.ready) return { ...current, facility: current.facility };
-      return previous?.value?.key === current.key ? previous.value : undefined;
+      if (current.ready && !current.refreshing) return { ...current, facility: current.facility };
+      return current.refreshing && previous?.value?.key === current.key ? previous.value : undefined;
     }
   });
   readonly calculationStatus = computed(() => {

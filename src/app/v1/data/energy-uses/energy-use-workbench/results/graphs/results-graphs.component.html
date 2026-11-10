@@ -10,6 +10,9 @@
   @else if (!results.years().length) { <p role="status">No saved annual data. Add a year in Energy Use Items to begin.</p> }
   @else if (results.unavailableCalendar()) { <p role="alert">Results are unavailable because the facility fiscal calendar is invalid.</p> }
   @else {
+    @if (footprint()) {
+      <header class="energy-use-results-graphs__controls"><span class="energy-use-results-graphs__period">FY {{ results.latest()?.year }} · {{ results.unit() }}/yr</span></header>
+    }
     @if (partial()) { <p class="v1-alert v1-alert--warning">Partial coverage · charts show known contributions only.</p> }
     @if (positive()) {
       <div class="energy-use-results-graphs__scroller" tabindex="0" role="region" aria-label="Energy use chart, scroll to view all items or years">

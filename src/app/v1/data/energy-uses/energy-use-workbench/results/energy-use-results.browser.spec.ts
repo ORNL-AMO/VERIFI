@@ -68,6 +68,41 @@ function setup(count = 8) {
 }
 
 describe('Energy Use group results in Chromium', () => {
+  it('shows the resolved group footprint year in narrow themes and print independently of the facility bill year', async () => {
+    const view = setup(1);
+    const media = cdp() as { send(command: string, parameters: Record<string, unknown>): Promise<void> };
+    const electric = meter({ guid: 'newer-bills', meterReadingDataApplication: 'fullMonth' });
+    const original = view.store.snapshot()!;
+    view.store.publish({ ...original, energyUseGroups: [...original.energyUseGroups, energyUseGroup({ guid: 'older', name: 'Older group' })],
+      energyUseEquipment: [resultsEquipment('current', 2025, 100), { ...resultsEquipment('older', 2023, 50), energyUseGroupId: 'older' }],
+      meters: [electric], meterData: Array.from({ length: 12 }, (_, index) => reading({ meterId: electric.guid, year: 2026, month: index + 1 })) });
+    const before = JSON.stringify(view.store.snapshot());
+    const period = () => view.root.querySelector<HTMLElement>('.energy-use-results-graphs__period');
+    try {
+      await view.router.navigateByUrl(`${groupUrl}/facility-footprint`); await view.settle();
+      await vi.waitFor(async () => { await view.settle(); expect(view.root.querySelector('.facility-footprint__scope')?.textContent).toContain('FY 2026'); });
+      await view.router.navigateByUrl(`${groupUrl}/group-footprint`); await view.settle();
+      expect(period()).not.toBeNull();
+      expect(period()!.textContent).toContain('FY 2025');
+      for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+        await page.viewport(width, 1000); view.root.className = `v1-root ${theme}`; await view.settle();
+        expect(period()!.getBoundingClientRect().width).toBeGreaterThan(40);
+        expect(period()!.getBoundingClientRect().height).toBeGreaterThan(10);
+        expect(view.root.querySelector('.energy-use-results-graphs select')).toBeNull();
+        expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+        await page.screenshot({ element: view.root, path: `../../../../../../../tmp/energy-use-results/review-2892-year-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
+      }
+      await view.router.navigateByUrl(`${groupUrl.replace('group-a', 'older')}/group-footprint`); await view.settle();
+      expect(period()!.textContent).toContain('FY 2023');
+      await page.viewport(1200, 1000); view.root.className = 'v1-root';
+      await media.send('Emulation.setEmulatedMedia', { media: 'print' }); await view.settle();
+      expect(period()!.getBoundingClientRect().height).toBeGreaterThan(10);
+      expect(period()!.textContent).toContain('FY 2023');
+      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/review-2892-year-print.png' });
+      expect(JSON.stringify(view.store.snapshot())).toBe(before);
+    } finally { await media.send('Emulation.setEmulatedMedia', { media: '', features: [] }); view.destroy(); }
+  });
+
   it('keeps expanded facts and the item form in place while an entered value is saved and results refresh', async () => {
     const view = setup(1), original = view.store.snapshot()!;
     const saved = { ...resultsEquipment('editing', 2025, 100), utilityMeterGroupIds: [], operatingConditionsData: [

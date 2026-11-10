@@ -6,6 +6,8 @@ Migrate Energy Uses into the existing v1 Data workflow as a group-first inventor
 
 Use the shared Data inventory and workbench patterns. Each energy-use group owns a workbench with **Setup Group** first, followed by **Energy Use Items** **Group Summary**, **Group Footprint**, and **Facility Footprint**. Energy Use Items owns an internal member sidebar; each item retains its combined Setup editor and autosave. Support estimation independently of meter readings.
 
+Group Footprint shows its latest group fiscal year visibly above the chart, including in print, without a year selector. Facility Footprint and balance facts retain a prior snapshot only during active refresh. A terminal meter-calculation error clears the old balance while committed equipment results remain current; retry restores the balance when calculation succeeds.
+
 The [current accepted behavior](#current-accepted-behavior) is the authoritative workflow reference for the implementation under review. The phased delivery sections record targets and historical evidence; earlier phase descriptions do not override that current contract. The first release includes the complete item workflow: management, estimation, calculators, charts, comparisons, bulk actions, retirement, and Excel export. Phase 4D supersedes the Phase 3A item dashboard/navigation and the Phase 4 item History destination. Broader group management remains a separate planning effort.
 
 The [Energy Uses review and hardening plan](v1-energy-uses-review-and-hardening-plan.md) records the implementation review and completed reliability, code-organization, skill-guidance, and backup recovery work. It preserves the accepted data-entry workflow and separates remaining results/export acceptance.
