@@ -37,6 +37,9 @@ describe('Energy Use result agreement', () => {
     expect(breakdown[0].items).toHaveLength(3);
     expect(breakdown[0].total).toBeCloseTo(selected.total, 9);
     expect(breakdown[0].partial).toBe(true);
+    const tree = buildEnergyUseTreemap(selected.items.map(row => row.projection), [energyUseGroup()], undefined, facility.guid);
+    expect(tree[0].value).toBeCloseTo(selected.total, 9);
+    expect(tree[0].children?.find(row => row.itemGuid === 'a')?.percentOfPeriod).toBeCloseTo(44, 9);
     const bars = energyUseComparisonOption([selected], 'kWh', false).series as { data: { value: number | null }[] }[];
     expect(bars[0].data.reduce((sum, row) => sum + (row.value ?? 0), 0)).toBeCloseTo(selected.total, 9);
     expect(JSON.stringify(items)).toBe(before);
@@ -64,6 +67,8 @@ describe('Energy Use result agreement', () => {
     expect(byId.get('duplicate')?.projection.sources[0].state).toBe('invalid');
     expect(result.items.every(row => row.percent === null)).toBe(true);
     expect(energyUseSourceBreakdown(result)[0].items.find(row => row.item.guid === 'inactive')).toMatchObject({ amount: 0, inactive: true });
+    const tree = buildEnergyUseTreemap(result.items.map(row => row.projection), [energyUseGroup()]);
+    expect(tree[0].percentOfPeriod).toBeNull();
   });
 
   it('retains explicit post-retirement history and reinstatement while preserving source provenance', () => {
