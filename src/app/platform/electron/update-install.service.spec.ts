@@ -1,6 +1,9 @@
 import { BehaviorSubject } from 'rxjs';
 import { ElectronUpdateState } from './electron-update.models';
 import { UpdateInstallService } from './update-install.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 
 function setup() {
   const router = { url: '/data-evaluation', navigateByUrl: vi.fn().mockResolvedValue(true) };
@@ -13,6 +16,21 @@ function setup() {
 }
 
 describe('UpdateInstallService', () => {
+  it('blocks repeated restart attempts after a real settled command failure until that save succeeds', async () => {
+    const state = setup();
+    const store = new AccountWorkspaceStore();
+    store.publish({ account: { guid: 'account-a' } as AccountWorkspaceSnapshot['account'], facilities: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] });
+    const commands = new WorkspaceCommandBoundary(store, { reloadActiveWorkspace: vi.fn().mockResolvedValue('published') } as any);
+    const options = { entityKind: 'account' as const, changeKind: 'update' as const, entityGuid: 'account-a', label: 'Saving account' };
+    await commands.execute(options, async () => { throw new Error('disk unavailable'); }).catch(() => undefined);
+    const service = new UpdateInstallService(state.router as any, commands, state.backups as any, state.electron as any, state.loading as any, state.lifecycle as any);
+    await expect(service.install()).rejects.toThrow('Retry that save');
+    await expect(service.install()).rejects.toThrow('Retry that save');
+    expect(state.electron.installUpdate).not.toHaveBeenCalled();
+    await commands.execute(options, async () => 'saved');
+    await expect(service.install()).resolves.toBe(true);
+    expect(state.electron.installUpdate).toHaveBeenCalledOnce();
+  });
   it('drains again when finishing a backup submits a command and that command creates another backup', async () => {
     const { service, commands, backups, electron } = setup();
     const phases: string[] = [];

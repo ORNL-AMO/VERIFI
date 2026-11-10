@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
 import { AccountWorkspaceService } from './account-workspace.service';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspacePatch } from './account-workspace.models';
+import { IdbAccount } from '@data/models/idbModels/account';
 import {
   WorkspaceChangeKind,
   WorkspaceCommittedChange,
@@ -54,6 +55,8 @@ export class WorkspaceCommandBoundary {
   private queueAccountGuid: string | undefined;
   private queue: Promise<unknown> = Promise.resolve();
   private readonly inFlight = new Set<Promise<unknown>>();
+  private readonly failedCommands = new Map<string, { accountGuid: string; label: string; error: WorkspaceWriteError }>();
+  private catalogAccountGuids?: Set<string>;
 
   constructor(
     private readonly store: AccountWorkspaceStore,
@@ -63,9 +66,19 @@ export class WorkspaceCommandBoundary {
   /** Wait for submitted writes and their workspace publication before an explicit desktop restart. */
   async whenIdle(): Promise<void> {
     while (this.inFlight.size) await Promise.all([...this.inFlight]);
+    const failure = this.failedCommands.values().next().value;
+    if (failure) throw new WorkspaceWriteError('persistence-failed', `A previous save (${failure.label}) failed. Retry that save successfully before restarting.`, failure.error);
   }
 
   get hasPendingCommands(): boolean { return this.inFlight.size > 0; }
+  get hasUnresolvedFailures(): boolean { return this.failedCommands.size > 0; }
+
+  reconcileAccounts(accounts: readonly IdbAccount[]): void {
+    this.catalogAccountGuids = new Set(accounts.filter(account => !account.deleteAccount).map(account => account.guid));
+    for (const [key, failure] of this.failedCommands) {
+      if (!this.catalogAccountGuids.has(failure.accountGuid)) this.failedCommands.delete(key);
+    }
+  }
 
   /**
    * Execute a workspace write command through the boundary.
@@ -87,7 +100,7 @@ export class WorkspaceCommandBoundary {
     } catch (error) {
       return Promise.reject(error);
     }
-    return this.enqueue(accountGuid, () => this.run(accountGuid, options, persist));
+    return this.enqueue(accountGuid, options, () => this.run(accountGuid, options, persist));
   }
 
   // ---------------------------------------------------------------------------
@@ -111,14 +124,23 @@ export class WorkspaceCommandBoundary {
     return accountGuid;
   }
 
-  private enqueue<T>(accountGuid: string, fn: () => Promise<T>): Promise<T> {
+  private enqueue<T>(accountGuid: string, options: WorkspaceCommandOptions, fn: () => Promise<T>): Promise<T> {
     if (this.queueAccountGuid !== accountGuid) {
       this.queueAccountGuid = accountGuid;
       this.queue = Promise.resolve();
     }
     const next = this.queue.then(fn, fn);
     this.inFlight.add(next);
-    next.then(() => this.inFlight.delete(next), () => this.inFlight.delete(next));
+    const key = JSON.stringify([accountGuid, options.entityKind, options.entityGuid ?? null]);
+    next.then(() => {
+      this.inFlight.delete(next);
+      this.failedCommands.delete(key);
+    }, error => {
+      this.inFlight.delete(next);
+      if (error instanceof WorkspaceWriteError && error.code === 'persistence-failed' && (!this.catalogAccountGuids || this.catalogAccountGuids.has(accountGuid))) {
+        this.failedCommands.set(key, { accountGuid, label: options.label, error });
+      }
+    });
     this.queue = next.then(() => undefined, () => undefined);
     return next;
   }

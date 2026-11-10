@@ -23,6 +23,7 @@ describe('AutomaticBackupsService', () => {
     exists: ReturnType<typeof vi.fn>;
     read: ReturnType<typeof vi.fn>;
     write: ReturnType<typeof vi.fn>;
+    chooseSavePath: ReturnType<typeof vi.fn>;
   };
   let exportCoordinator: {
     buildActiveAccountBackup: ReturnType<typeof vi.fn<BackupExportCoordinator['buildActiveAccountBackup']>>;
@@ -40,7 +41,8 @@ describe('AutomaticBackupsService', () => {
       isAvailable: true,
       exists: vi.fn().mockResolvedValue(true),
       read: vi.fn().mockResolvedValue({ dataBackupId: 'registry-id', backupFileType: 'Account', origin: 'VERIFI', account: { guid: 'account-a' } }),
-      write: vi.fn().mockResolvedValue(undefined)
+      write: vi.fn().mockResolvedValue(undefined),
+      chooseSavePath: vi.fn().mockResolvedValue('/tmp/new-account-a.json')
     };
     exportCoordinator = {
       buildActiveAccountBackup: vi.fn(() => ({
@@ -362,6 +364,60 @@ describe('AutomaticBackupsService', () => {
     store.publish(snapshot('account-a', { name: 'Changed' }));
     await expect(service.flushPending()).resolves.toBeUndefined();
     expect(gateway.write).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['missing', 'read error', 'conflict'] as const)('retains a delayed inspection %s for its inactive owner without changing the new account UI', async outcome => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    const inspection = deferred<any>();
+    if (outcome === 'missing') gateway.exists.mockReturnValueOnce(inspection.promise);
+    else gateway.read.mockReturnValueOnce(inspection.promise);
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await flushAsync();
+    store.publish(snapshot('account-b', { dataBackupFilePath: undefined }));
+    const blocked = expect(service.flushPending()).rejects.toThrow('backup issue');
+    if (outcome === 'read error') inspection.reject(new Error('read offline'));
+    else inspection.resolve(outcome === 'missing' ? false : { dataBackupId: 'conflicting-id' });
+    await blocked;
+    expect(service.account.guid).toBe('account-b');
+    expect(service.status.value).toBe('disabled');
+    expect(service.latestBackupFile.value).toBeUndefined();
+    await expect(service.flushPending()).rejects.toThrow('backup issue');
+    store.publish(snapshot('account-a'));
+    await expect(service.flushPending()).resolves.toBeUndefined();
+  });
+
+  it('does not recreate an inactive inspection issue after the catalog confirms its owner was removed', async () => {
+    service.reconcileAccounts([snapshot('account-a').account]);
+    const inspection = deferred<any>();
+    gateway.read.mockReturnValueOnce(inspection.promise);
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await flushAsync();
+    store.clear();
+    service.reconcileAccounts([]);
+    const flushed = service.flushPending();
+    inspection.reject(new Error('removed owner read'));
+    await expect(flushed).resolves.toBeUndefined();
+    expect(service.status.value).toBe('disabled');
+  });
+
+  it('does not let an older file inspection replace the outcome of a successfully configured new attachment', async () => {
+    service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
+    const oldRead = deferred<any>();
+    gateway.read.mockReturnValueOnce(oldRead.promise);
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await flushAsync();
+    gateway.read.mockResolvedValue({ dataBackupId: 'written-backup-id', account: { guid: 'account-a' } });
+    await service.configureFile(store.account(), async account => {
+      store.publishCommitted({ ...store.snapshot(), account }, {});
+    });
+    const flushed = service.flushPending();
+    oldRead.reject(new Error('old attachment offline'));
+    await expect(flushed).resolves.toBeUndefined();
+    expect(service.account.dataBackupFilePath).toBe('/tmp/new-account-a.json');
+    expect(service.status.value).toBe('ready');
   });
 
   it('waits for a running write and its newer queued revision before restarting', async () => {

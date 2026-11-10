@@ -46,6 +46,8 @@ export class AutomaticBackupsService {
   private readonly fileConfigurations = new Map<string, Promise<boolean>>();
   private readonly fileReviews = new Map<string, Promise<void>>();
   private catalogAccountGuids?: Set<string>;
+  private nextInspectionId = 0;
+  private readonly inspections = new Map<string, number>();
   private queuedRevisionKey?: string;
   private accountSessionToken = 0;
   private warnedIssues = new Set<string>();
@@ -77,7 +79,7 @@ export class AutomaticBackupsService {
   /** Only the persisted catalog can retire an owner; navigation and empty workspaces cannot. */
   reconcileAccounts(accounts: readonly IdbAccount[]): void {
     this.catalogAccountGuids = new Set(accounts.filter(account => !account.deleteAccount).map(account => account.guid));
-    for (const issues of [this.archiveFailures, this.setupFailures, this.reviewFailures, this.attachedIssues, this.failedRevisions]) {
+    for (const issues of [this.archiveFailures, this.setupFailures, this.reviewFailures, this.attachedIssues, this.failedRevisions, this.inspections]) {
       for (const guid of issues.keys()) if (!this.catalogAccountGuids.has(guid)) issues.delete(guid);
     }
   }
@@ -445,10 +447,13 @@ export class AutomaticBackupsService {
   }
 
   private inspectAttachedFile(account: IdbAccount, token: number): Promise<void> {
-    return this.trackOperation(this.readAttachedFile(account, token));
+    const inspectionId = ++this.nextInspectionId;
+    this.inspections.set(account.guid, inspectionId);
+    return this.trackOperation(this.readAttachedFile(account, token, inspectionId));
   }
 
-  private async readAttachedFile(account: IdbAccount, token: number): Promise<void> {
+  private async readAttachedFile(account: IdbAccount, token: number, inspectionId: number): Promise<void> {
+    const latestInspection = () => this.inspections.get(account.guid) === inspectionId;
     if (!account.dataBackupFilePath) {
       this.latestBackupFile.next(undefined);
       this.setStatus('disabled');
@@ -457,10 +462,10 @@ export class AutomaticBackupsService {
     this.setStatus('checking');
     try {
       const exists = await this.backupGateway.exists(account.dataBackupFilePath);
-      if (token !== this.accountSessionToken) {
-        return;
-      }
+      if (!latestInspection()) return;
       if (!exists) {
+        this.retainAttachedIssue(account.guid, 'error');
+        if (token !== this.accountSessionToken) return;
         this.latestBackupFile.next(undefined);
         this.setStatus('error');
         this.warnOnce('missing', 'Missing Backup File', 'The selected automatic backup file no longer exists. Choose a new backup location for this account.');
@@ -468,19 +473,23 @@ export class AutomaticBackupsService {
       }
 
       const raw = await this.backupGateway.read(account.dataBackupFilePath);
-      if (token !== this.accountSessionToken) {
-        return;
-      }
+      if (!latestInspection()) return;
       const prepared = this.backupPreparation.prepare(raw);
-      this.latestBackupFile.next(prepared);
       const registry = this.accountBackups.find(backup => backup.accountId === account.guid);
-      if (!registry || registry.dataBackupId !== prepared.dataBackupId) {
+      const conflict = !registry || registry.dataBackupId !== prepared.dataBackupId;
+      if (conflict) this.retainAttachedIssue(account.guid, 'conflict');
+      else this.attachedIssues.delete(account.guid);
+      if (token !== this.accountSessionToken) return;
+      this.latestBackupFile.next(prepared);
+      if (conflict) {
         this.setStatus('conflict');
       } else {
         this.setStatus('ready');
         this.queuedRevisionKey ??= this.failedRevisions.get(account.guid);
       }
     } catch (error) {
+      if (!latestInspection()) return;
+      this.retainAttachedIssue(account.guid, 'error');
       if (token !== this.accountSessionToken) {
         return;
       }
@@ -500,7 +509,7 @@ export class AutomaticBackupsService {
         );
       }
     } finally {
-      this.resumeQueuedSave(token);
+      if (latestInspection()) this.resumeQueuedSave(token);
     }
   }
 
@@ -518,12 +527,16 @@ export class AutomaticBackupsService {
 
   private setStatus(status: AutomaticBackupStatus): void {
     if (this.account?.guid) {
-      if ((status === 'error' || status === 'conflict') && this.retainOwner(this.account.guid)) this.attachedIssues.set(this.account.guid, status);
+      if (status === 'error' || status === 'conflict') this.retainAttachedIssue(this.account.guid, status);
       if (status === 'ready') this.attachedIssues.delete(this.account.guid);
     }
     if (this.status.value !== status) {
       this.status.next(status);
     }
+  }
+
+  private retainAttachedIssue(accountGuid: string, issue: 'error' | 'conflict'): void {
+    if (this.retainOwner(accountGuid)) this.attachedIssues.set(accountGuid, issue);
   }
 
   private clearDebounceTimer(): void {

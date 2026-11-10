@@ -40,7 +40,7 @@ export class UpdateInstallService {
       do {
         await this.commands.whenIdle();
         await this.backups.flushPending();
-      } while (this.commands.hasPendingCommands || this.backups.hasPendingOperations);
+      } while (this.commands.hasPendingCommands || this.commands.hasUnresolvedFailures || this.backups.hasPendingOperations);
       if (this.electron.updateState.value.status !== 'downloaded') return false;
       this.electron.installUpdate();
       return true;
