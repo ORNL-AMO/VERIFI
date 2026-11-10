@@ -22,7 +22,7 @@ export function capacityUnitToExcel(unit: string): string {
 export const EXCEL_CAPACITY_UNITS = CAPACITY_UNITS.map(capacityUnitToExcel);
 
 export function capacityUnitFromExcel(unit: string): string | undefined {
-  return CAPACITY_UNITS.find(code => capacityUnitToExcel(code) === unit);
+  return CAPACITY_UNITS.find(code => code === unit || capacityUnitToExcel(code) === unit);
 }
 
 export function energyUsesMaximumHours(year: number): number {
