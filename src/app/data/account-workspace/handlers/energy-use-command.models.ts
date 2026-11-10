@@ -45,6 +45,11 @@ export interface EnergyUseGroupIdentity extends EnergyUseOwner {
   readonly energyUseGroupGuid: string;
 }
 
+export interface EnergyUseGroupDeletion {
+  readonly group: import('@data/models/idbModels/facilityEnergyUseGroups').IdbFacilityEnergyUseGroup;
+  readonly items: readonly IdbFacilityEnergyUseEquipment[];
+}
+
 export interface EnergyUseGroupSettings {
   readonly name: string;
   readonly notes: string;

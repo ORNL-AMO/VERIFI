@@ -15,7 +15,7 @@ describe('Energy Use actions', () => {
     const store = { account: signal({ guid: 'account-a' }), canWrite: signal(true), facilities: signal([{ ...energyUseFacility(), energyUnit: 'kWh' }]),
       energyUseEquipment: signal([energyUseItem({ id: 1, utilityMeterGroupIds: [] })]), energyUseGroups: signal([energyUseGroup()]),
       meterGroups: signal([]), meters: signal([]) };
-    const handler = { createItem: vi.fn(async (_owner, item) => item), copyItem: vi.fn(async (_identity, _before, copy) => copy),
+    const handler = { transferItem: vi.fn(async (_identity, before, target) => ({ ...before, energyUseGroupId: target.guid })), createItem: vi.fn(async (_owner, item) => item), copyItem: vi.fn(async (_identity, _before, copy) => copy),
       saveItem: vi.fn(async (_identity, _before, updated) => updated),
       saveGroupSettings: vi.fn(async (_identity, before, value) => ({ ...before, ...value })), deleteItem: vi.fn(async () => {}), deleteGroupWithItems: vi.fn(async () => {}) };
     let prepare = () => {};
@@ -24,6 +24,16 @@ describe('Energy Use actions', () => {
       { provide: EnergyUseCommandHandler, useValue: handler }, { provide: WorkspaceCommandBoundary, useValue: boundary }] });
     return { service: TestBed.inject(EnergyUseActionsService), store, handler, boundary, beforePersist: (callback: () => void) => prepare = callback };
   }
+  it('queues a reviewed transfer and rejects an item changed before execution', async () => {
+    const { service, store, handler, beforePersist } = setup();
+    const before = structuredClone(store.energyUseEquipment()[0]), target = energyUseGroup({ guid: 'target' });
+    await expect(service.transfer(identity, before, target)).resolves.toMatchObject({ guid: before.guid, energyUseGroupId: target.guid });
+    expect(handler.transferItem).toHaveBeenCalledWith(identity, before, target);
+    handler.transferItem.mockClear();
+    beforePersist(() => store.energyUseEquipment.set([{ ...before, notes: 'New edit' }]));
+    await expect(service.transfer(identity, before, target)).rejects.toThrow('Review its transfer');
+    expect(handler.transferItem).not.toHaveBeenCalled();
+  });
   it('queues one reviewed group deletion and rejects a group changed before execution', async () => {
     const { service, store, handler, boundary, beforePersist } = setup();
     const groupIdentity = { ...identity, energyUseGroupGuid: 'group-a' };

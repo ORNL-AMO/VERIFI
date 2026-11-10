@@ -43,7 +43,7 @@
 <div class="energy-use-workbench__workspace v1-member-workspace" [class.energy-use-workbench__workspace--items]="showItems" [class.v1-member-workspace--with-rail]="showItems">
   @if (showItems) {
     <aside class="energy-use-workbench__item-rail v1-member-rail" aria-label="Energy-use item navigation">
-      <header><strong>Energy use items</strong><span>{{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}</span></header>
+      <header><strong>Energy use items</strong><div class="energy-use-workbench__rail-actions"><span>{{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}</span><button type="button" class="v1-icon-btn energy-use-workbench__add" aria-label="Add energy use" title="Add energy use" [disabled]="!canCreate()" (click)="openCreation()"><app-ui-icon name="add" [size]="16"/></button></div></header>
       <nav #itemNavigation class="v1-member-rail__items" aria-label="Energy-use items">
         @for (item of items; track item.guid) {
           <button type="button" class="v1-member-rail__item" [class.active]="item.guid === context.energyUseGuid()" [attr.aria-current]="item.guid === context.energyUseGuid() ? 'page' : null" (click)="context.openItem(item.guid)">

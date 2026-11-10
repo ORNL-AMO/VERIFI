@@ -1,3 +1,4 @@
+import { EnergyUseGroupSelectionController } from './energy-use-group-selection.controller';
 import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -73,17 +74,32 @@ export class EnergyUsesInventoryComponent {
   readonly allIds = computed(() => this.groups().map(group => group.id));
   readonly inventory = new InventoryViewState(this.browseKey, this.tiles,
     this.allIds, this.filters, this.workspace.ready);
+  readonly selection = new EnergyUseGroupSelectionController({ key: this.creationKey,
+    filtersKey: computed(() => JSON.stringify(this.filters())), groups: this.groups, matching: this.filteredGroups });
+  @ViewChild('deleteConfirmation') private readonly deleteConfirmation?: TemplateRef<unknown>;
+  private deletionPortal?: TemplatePortal;
   readonly browseReady = computed(() => this.workspace.ready() && this.inventory.ready());
   constructor() {
     const registry = inject(InventoryHeaderActionsRegistry, { optional: true });
     const unregister = registry?.registerCreation({ resource: 'energy-uses', label: 'Add energy use', canCreate: this.canCreate, create: () => this.openCreation() });
+    const unregisterSelection = registry?.register({ resource: 'energy-uses', selecting: this.selection.selecting, canToggle: this.selection.canToggle, toggleSelection: () => this.selection.toggleSelection() });
     const unregisterExport = registry?.registerExport({ resource: 'energy-uses', available: this.canExport, open: () => this.openExport() });
-    this.destroy.onDestroy(() => { unregister?.(); unregisterExport?.(); this.closeCreation(); this.closeExport(); });
+    this.destroy.onDestroy(() => { unregister?.(); unregisterExport?.(); unregisterSelection?.(); this.hideDeletion(); this.closeCreation(); this.closeExport(); });
+    effect(() => { if (!this.selection.review()) this.hideDeletion(); });
     effect(() => {
       // Reloading saved changes temporarily clears the derived inventory scope.
       // Keep the creation host alive until the committed scope is available again.
       if (this.creating() && this.workspace.ready() && this.creationIdentity !== this.creationKey()) this.closeCreation();
     });
+  }
+  requestDelete(id?: string): void {
+    if (!this.deleteConfirmation || !this.selection.requestDelete(id)) return;
+    this.deletionPortal = new TemplatePortal(this.deleteConfirmation, this.view);
+    this.modal.show(this.deletionPortal, { blockWorkspace: true });
+  }
+  private hideDeletion(): void {
+    if (this.deletionPortal && this.modal.activePortal() === this.deletionPortal) this.modal.hide();
+    this.deletionPortal = undefined;
   }
   openExport(): void {
     if (!this.canExport() || !this.exportPanel || this.exporting()) return;

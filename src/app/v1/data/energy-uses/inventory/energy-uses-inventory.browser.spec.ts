@@ -54,7 +54,7 @@ function setup(single = false, deferredFacility = false) {
   store.publish(snapshot);
   const pairService = { ensurePairs: vi.fn(async () => true) };
   const workspaceService = { selectAccount: vi.fn(), selectFacility: vi.fn() };
-  const actions = { create: vi.fn<EnergyUseActionsService['create']>(), deleteGroup: vi.fn<EnergyUseActionsService['deleteGroup']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
+  const actions = { transfer: vi.fn<EnergyUseActionsService['transfer']>(), deleteGroups: vi.fn<EnergyUseActionsService['deleteGroups']>(), recoverPublication: vi.fn(async () => {}), create: vi.fn<EnergyUseActionsService['create']>(), deleteGroup: vi.fn<EnergyUseActionsService['deleteGroup']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
     store.publish({ ...store.snapshot()!, energyUseGroups: store.energyUseGroups().map(group => group.guid === identity.energyUseGroupGuid ? { ...group, ...value } : group) }); return value;
   }) };
   const account = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
@@ -86,6 +86,89 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it('adds from the item-rail plus with its group selected and transfers the saved item through a group-card slideout', async () => {
+    const view = setup(); await view.router.navigateByUrl(itemUrl); await settle(view);
+    const add = page.getByRole('button', { name: 'Add energy use', exact: true });
+    await add.click(); await settle(view);
+    const creation = page.getByRole('dialog', { name: 'Add energy use', exact: true });
+    expect(creation.element().textContent).toContain('Pump 00');
+    expect(creation.element().textContent).toContain('North plant');
+    expect(creation.element().textContent).toContain('Energy use category');
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(document.activeElement).toBe(add.element());
+    const transfer = page.getByRole('button', { name: 'Transfer energy use', exact: true });
+    await transfer.click(); await settle(view);
+    let dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
+    expect(dialog.element().textContent).toContain('North plant');
+    expect([...dialog.element().querySelectorAll('.creation-choice')].some(button => button.textContent?.trim() === 'Pump 00')).toBe(false);
+    expect([...dialog.element().querySelectorAll('.creation-choice')].some(button => button.textContent?.trim() === 'Pump 49')).toBe(false);
+    await dialog.getByRole('button', { name: 'Pump 01', exact: true }).click(); await settle(view);
+    expect(dialog.getByRole('button', { name: 'Transfer energy use', exact: true }).element()).toHaveProperty('disabled', false);
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
+      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/phase5/transfer-energy-use-${width}.png` });
+    }
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(document.activeElement).toBe(transfer.element()); expect(view.actions.transfer).not.toHaveBeenCalled();
+    await transfer.click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
+    await dialog.getByRole('button', { name: 'Pump 01', exact: true }).click(); await settle(view);
+    const original = structuredClone(view.store.energyUseEquipment().find(item => item.guid === 'energy-00')!);
+    view.actions.transfer.mockImplementationOnce(async (_identity, before, target) => {
+      const saved = { ...before, energyUseGroupId: target.guid };
+      view.store.publish({ ...view.store.snapshot()!, energyUseEquipment: view.store.energyUseEquipment().map(item => item.guid === saved.guid ? saved : item) });
+      return saved;
+    });
+    await dialog.getByRole('button', { name: 'Transfer energy use', exact: true }).click(); await settle(view);
+    expect(view.actions.transfer).toHaveBeenCalledTimes(1);
+    expect(view.store.energyUseEquipment().find(item => item.guid === original.guid)).toEqual({ ...original, energyUseGroupId: 'group-01' });
+    expect(view.router.url).toBe(`${groupUrl('group-01')}/items/energy-00`);
+    await expect.element(dialog).not.toBeInTheDocument();
+    expect(view.root.querySelector('[aria-current="page"].v1-member-rail__item')?.textContent).toContain('Pump 00');
+    view.fixture.destroy();
+  });
+
+  it('selects groups across matching pages and offers individual deletion from card options', async () => {
+    const view = setup(); await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    const select = page.getByRole('button', { name: 'Select groups', exact: true });
+    expect(view.root.querySelector('.v1-account-portfolio__header-actions')?.firstElementChild).toBe(select.element());
+    await select.click(); await settle(view);
+    await page.getByRole('checkbox', { name: 'Select Pump 00', exact: true }).click(); await settle(view);
+    await page.getByRole('button', { name: 'Next', exact: true }).click(); await settle(view);
+    await page.getByRole('checkbox', { name: 'Select Pump 24', exact: true }).click(); await settle(view);
+    expect(view.inventory().selection.selected()).toHaveLength(2);
+    await page.getByRole('button', { name: 'Select all', exact: true }).click(); await settle(view);
+    expect(view.inventory().selection.selected()).toHaveLength(50);
+    await page.getByRole('button', { name: 'Delete selected', exact: true }).click(); await settle(view);
+    let dialog = page.getByRole('dialog', { name: 'Delete selected groups?', exact: true });
+    expect(dialog.element().textContent).toContain('50 groups and 50 energy use items');
+    expect(await view.navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(false);
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(view.actions.deleteGroups).not.toHaveBeenCalled();
+    await page.getByRole('button', { name: 'Cancel selection', exact: true }).click(); await settle(view);
+    view.inventory().inventory.selectPage(0); await settle(view);
+    await page.getByRole('button', { name: 'Options for Pump 00', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Delete group', exact: true }).click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Delete group?', exact: true });
+    expect(dialog.element().textContent).toContain('Pump 00: 1 item');
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
+      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/phase5/group-delete-${width}.png` });
+    }
+    view.actions.deleteGroups.mockImplementationOnce(async (_accountGuid, rows) => {
+      const ids = new Set(rows.map(row => row.group.guid));
+      view.store.publish({ ...view.store.snapshot()!, energyUseGroups: view.store.energyUseGroups().filter(group => !ids.has(group.guid)), energyUseEquipment: view.store.energyUseEquipment().filter(item => !ids.has(item.energyUseGroupId)) });
+    });
+    await dialog.getByRole('button', { name: 'Delete group', exact: true }).click(); await settle(view);
+    expect(view.actions.deleteGroups).toHaveBeenCalledTimes(1);
+    expect(view.actions.deleteGroups.mock.calls[0][1]).toHaveLength(1);
+    await expect.element(dialog).not.toBeInTheDocument();
+    expect(view.router.url).toBe(inventoryUrl);
+    view.fixture.destroy();
+  });
+
   it('exports committed annual rows from the inventory regardless of filters, with keyboard focus return', async () => {
     const view = setup();
     await view.router.navigateByUrl(`${inventoryUrl}?facility=facility-b`);
