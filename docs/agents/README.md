@@ -20,6 +20,8 @@ Executable configuration and source code remain authoritative for volatile facts
 
 Use the [task context index](context-index.md) to select entrypoints, exact sections, mode, skill, cross-boundary triggers, and initial validation.
 
+For pull requests, start with the six-step [team workflow](pr-workflow.md). Agent details cover [fresh review](local-fresh-review.md), [creation/publication](github-pr-creation.md), and [GitHub review comments](github-pr-review.md).
+
 ## Maintenance
 
 - Keep `AGENTS.md` small and limited to durable repository-wide guidance.

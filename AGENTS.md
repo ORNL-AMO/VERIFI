@@ -60,6 +60,8 @@ Install Chromium once with `npx playwright install chromium` when browser tests 
 
 Use the mode and discoverable skill selected by the [task context index](docs/agents/context-index.md). Combine skills only when the task crosses their stated boundaries. Use Designer with Implementer for UI implementation; design-only work does not authorize code changes.
 
+For PR preparation, follow the [team PR workflow](docs/agents/pr-workflow.md) and [creation guide](docs/agents/github-pr-creation.md). Pre-PR reviews use a subagent with conversation-history inheritance explicitly disabled and the development agent's model/effort. Pass only pinned comparison facts, neutral requirements, validation evidence, and repository guidance; do not substitute self-review or treat reviewer completion as approval. Honor existing session authorization, and obtain decisions on new findings or material validation gaps before publication.
+
 ## Working rules
 
 - Diagnose before editing when the request asks for analysis, investigation, or review only.
