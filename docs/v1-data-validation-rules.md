@@ -113,6 +113,8 @@ Generated regression groups require a selected model, model year, constant, and 
 
 Report findings contribute to their facility or account summary.
 
+Facility Data Quality selection completeness is derived from current owned records rather than trusting the saved `missingSelection` flag. Analysis mode requires an available facility analysis and available referenced production predictors; manual mode requires at least one selected meter or predictor with no unavailable selections. Statistical/model quality findings do not prevent inspecting data quality. Reading a report does not repair its settings; explicit setup saves maintain the existing compatibility flag. Missing selections can save as drafts while Continue remains disabled. No Data Checks or acknowledgment stage is added.
+
 Facility Analysis report years may equal the linked analysis baseline; years before baseline and unavailable full-year selections block generation. Data Checks and acknowledgment cover only the selected report year, independently of historical annual rows or visible report sections. Account report period rules remain unchanged.
 
 ### Explicit report analysis review

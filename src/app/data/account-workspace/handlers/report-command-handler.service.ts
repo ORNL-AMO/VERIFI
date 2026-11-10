@@ -16,7 +16,10 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { buildSingleFacilityAnalysisPair, singleFacilityAnalysisPairCandidates, singleFacilityAnalysisPairIsCurrent } from '../single-facility-analysis-pairs';
-import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings } from '../facility-report-setup.models';
+import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings } from '../facility-report-setup.models';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
 
 @Injectable({ providedIn: 'root' })
 export class ReportCommandHandler {
@@ -43,7 +46,7 @@ export class ReportCommandHandler {
 
   async updateFacilityReportSetup(facilityGuid: string, reportGuid: string, changes: FacilityReportSetupChanges,
     accountGuid: string): Promise<IdbFacilityReport> {
-    return this.transactions.runTransaction(['accounts', 'facilities', 'facilityReports', 'analysisItems'], 'readwrite', async tx => {
+    return this.transactions.runTransaction(['accounts', 'facilities', 'facilityReports', 'analysisItems', 'utilityMeter', 'predictor'], 'readwrite', async tx => {
       const account = (await tx.getAll<IdbAccount>('accounts')).find(item => item.guid === accountGuid);
       const facility = (await tx.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid)).find(item => item.guid === facilityGuid);
       const report = (await tx.getAllByIndex<IdbFacilityReport>('facilityReports', 'accountId', accountGuid))
@@ -55,6 +58,9 @@ export class ReportCommandHandler {
         throw new WorkspaceWriteError('validation-failed', 'Enable Other Impacts to access this report.');
       }
       if (changes.name !== undefined && !changes.name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a nonblank report name.');
+      if (changes.dataQualityReportSettings !== undefined && report.facilityReportType !== 'dataQuality') {
+        throw new WorkspaceWriteError('validation-failed', 'These settings belong to a Data Quality report.');
+      }
       let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
       if (changes.analysisItemId !== undefined || changes.analysisReportSettings !== undefined) {
         if (report.facilityReportType !== 'analysis') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a facility Analysis report.');
@@ -68,6 +74,26 @@ export class ReportCommandHandler {
         }
         if (changes.analysisReportSettings) updated = { ...updated,
           analysisReportSettings: mergeFacilityAnalysisSettings(report.analysisReportSettings, changes.analysisReportSettings) };
+      }
+      if (report.facilityReportType === 'dataQuality') {
+        const patch = changes.dataQualityReportSettings ?? {};
+        const settings = mergeFacilityDataQualitySettings(report.dataQualityReportSettings, patch);
+        const analyses = await tx.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountGuid);
+        const meters = await tx.getAllByIndex<IdbUtilityMeter>('utilityMeter', 'accountId', accountGuid);
+        const predictors = await tx.getAllByIndex<IdbPredictor>('predictor', 'accountId', accountGuid);
+        const owned = (item: { accountId: string; facilityId: string; guid: string }, id: string) =>
+          item.guid === id && item.accountId === accountGuid && item.facilityId === facilityGuid;
+        if ((patch.selectedAnalysisItemId && !analyses.some(item => owned(item, patch.selectedAnalysisItemId!) && ['energy', 'water'].includes(item.analysisCategory)))
+          || patch.selectedMeterIds?.some(id => !meters.some(item => owned(item, id)))
+          || patch.selectedPredictorIds?.some(id => !predictors.some(item => owned(item, id)))) {
+          throw new WorkspaceWriteError('validation-failed', 'Choose available source items belonging to this facility.');
+        }
+        const selection = resolveDataQualitySelection({ accountGuid, facilityGuid, settings, facilityAnalyses: analyses, meters, predictors });
+        settings.missingSelection = !selection.valid;
+        const selectionChanged = patch.selectedMode !== undefined || patch.selectedAnalysisItemId !== undefined
+          || patch.selectedMeterIds !== undefined || patch.selectedPredictorIds !== undefined;
+        updated = { ...updated, dataQualityReportSettings: settings,
+          ...(selectionChanged ? { analysisItemId: settings.selectedMode === 'analysis' ? settings.selectedAnalysisItemId : undefined } : {}) };
       }
       if (JSON.stringify(updated) !== JSON.stringify(report)) {
         updated = { ...updated, modifiedDate: new Date() };

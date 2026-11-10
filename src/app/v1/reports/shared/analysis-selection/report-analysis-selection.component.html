@@ -34,10 +34,10 @@
               <span class="v1-chip report-analysis-card__status" [class]="'v1-chip--' + analysis.statusTone" role="status"><app-ui-icon [name]="analysis.statusIcon"/>{{ analysis.statusLabel }}</span>
             </span>
           </label>
-          <button type="button" class="v1-icon-btn report-analysis-card__inspect" [attr.aria-label]="'Inspect ' + analysis.name" title="Inspect analysis" (click)="inspected.emit(analysis.value)"><app-ui-icon name="monocle"/></button>
+          @if (showInspection()) { <button type="button" class="v1-icon-btn report-analysis-card__inspect" [attr.aria-label]="'Inspect ' + analysis.name" title="Inspect analysis" (click)="inspected.emit(analysis.value)"><app-ui-icon name="monocle"/></button> }
         </div>
       }
     </div>
-    @if (!cards().length) { <p class="report-setup-help" role="status">No eligible analyses are available. Create an analysis before continuing to data checks.</p> }
+    @if (!cards().length) { <p class="report-setup-help" role="status">{{ emptyMessage() }}</p> }
   </fieldset>
 </div>

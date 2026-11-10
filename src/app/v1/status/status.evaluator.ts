@@ -13,6 +13,8 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from '@data/models/validation';
 import { buildMeterDataQualityReport } from '@domain/calculations/data-quality/meter-data-quality';
 import { buildPredictorDataQualityReport } from '@domain/calculations/data-quality/predictor-data-quality';
+import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
+import { getDataQualityReportSettings } from '@data/models/idbModels/facilityReport';
 import { getLatestCompleteAnalysisYear, getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { getAccountAnalysisSetupErrors } from '@domain/calculations/status-check-calculations/validation/accountAnalysisValidation';
 import { getAccountReportErrors } from '@domain/calculations/status-check-calculations/validation/accountReportValidation';
@@ -392,7 +394,13 @@ function evaluateReports(
   for (const report of snapshot.facilityReports) {
     const facility = snapshot.facilities.find(item => item.guid === report.facilityId);
     if (!facility) continue;
-    const errors = getFacilityReportErrors(report, [...facilityAnalysisErrors.values()]);
+    const qualitySettings = report.dataQualityReportSettings ?? getDataQualityReportSettings();
+    const evaluatedReport = report.facilityReportType === 'dataQuality' ? { ...report, dataQualityReportSettings: {
+      ...qualitySettings, missingSelection: !resolveDataQualitySelection({ accountGuid: snapshot.account.guid,
+        facilityGuid: facility.guid, settings: qualitySettings, facilityAnalyses: snapshot.facilityAnalyses,
+        meters: snapshot.meters, predictors: snapshot.predictors }).valid
+    } } : report;
+    const errors = getFacilityReportErrors(evaluatedReport, [...facilityAnalysisErrors.values()]);
     if (report.facilityReportType === 'analysis') {
       const linked = snapshot.facilityAnalyses.find(item => item.accountId === snapshot.account.guid
         && item.facilityId === facility.guid && item.guid === report.analysisItemId);

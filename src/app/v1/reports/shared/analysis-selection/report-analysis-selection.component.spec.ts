@@ -19,6 +19,14 @@ function setup() {
 }
 
 describe('shared report analysis selection', () => {
+  it('allows reports without inspection or data checks to supply their own empty-state guidance', () => {
+    const { fixture, root } = setup();
+    fixture.componentRef.setInput('showInspection', false); fixture.detectChanges();
+    expect(root.querySelector('button[title="Inspect analysis"]')).toBeNull();
+    fixture.componentRef.setInput('cards', []);
+    fixture.componentRef.setInput('emptyMessage', 'Choose manual source data or create an analysis.'); fixture.detectChanges();
+    expect(root.textContent).toContain('Choose manual source data or create an analysis.');
+  });
   it('filters and clears browsing without changing the linked analysis', () => {
     const { fixture, control, component, root } = setup(), changed = vi.fn(); control.valueChanges.subscribe(changed);
     component.form.controls.category.setValue('water'); fixture.detectChanges();

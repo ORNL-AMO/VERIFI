@@ -132,6 +132,8 @@ Facility Analysis reports use direct, detached facility inputs without hidden ac
 
 Report adapters select validation periods independently of output periods. Better Plants checks and acknowledges only the selected report year, while **Include all years** can still generate historical pages. Its report coordinator includes output-period selection in cancellation and freshness keys without rerunning unchanged selected-year checks.
 
+Facility Data Quality Setup shares a pure GUID-selection resolver between the typed report editor, transactional report setup commands, and v1 status evaluation. Incomplete selections remain savable drafts; stage readiness derives from current owned records rather than persisted readiness flags. Explicit partial saves preserve unrelated settings and maintain the legacy selection flag and edited analysis link. Report values and PDF generation remain pending. See [V1 report architecture](docs/v1-reports-architecture.md).
+
 ## Imports, exports, and backups
 
 Spreadsheet parsing and mapping contracts live under [`src/app/data/import/`](src/app/data/import). Both the v0 import routes and the account-scoped v1 Imports & Backup workflow use these files directly. SheetJS detection routes V1, both V2 signatures, V3, Energy Treasure Hunt, general workbooks, and footprint-tool files through their established parsers and mapping rules. [`spreadsheet-import-format.registry.ts`](src/app/data/import/spreadsheet-import-format.registry.ts) maps those source formats to user-facing labels and the shared template, general-workbook, or footprint workflow without merging their parsers. Template versions and external formats are compatibility boundaries, not redundant code to consolidate casually.

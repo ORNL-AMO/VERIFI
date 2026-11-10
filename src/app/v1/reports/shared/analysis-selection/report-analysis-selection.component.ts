@@ -14,6 +14,8 @@ export class ReportAnalysisSelectionComponent {
   readonly idPrefix = input.required<string>();
   readonly canEdit = input(true);
   readonly showTypeFilter = input(false);
+  readonly showInspection = input(true);
+  readonly emptyMessage = input('No eligible analyses are available. Create an analysis before continuing to data checks.');
   readonly inspected = output<string>();
   readonly form = new FormGroup({
     category: new FormControl<'all' | 'energy' | 'water'>('all', { nonNullable: true }),

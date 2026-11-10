@@ -21,21 +21,27 @@ describe('facility report workbench navigation', () => {
     const footer: HTMLElement = harness.routeNativeElement!.querySelector('footer')!;
     expect(footer.querySelector('app-report-output-actions')).toBeNull();
     expect(footer.querySelector('a')?.getAttribute('href')).toContain('/reports/dashboard');
-    if (value === 'analysis') expect(footer.querySelector<HTMLButtonElement>('button.v1-btn--action')?.disabled).toBe(true);
+    if (value === 'analysis' || value === 'dataQuality') expect(footer.querySelector<HTMLButtonElement>('button.v1-btn--action')?.disabled).toBe(true);
     else expect(footer.querySelectorAll('a')[1].getAttribute('href')).toContain(workbench.workbench.next()!.id);
-    if (value !== 'analysis') expect(harness.routeNativeElement!.textContent).toContain('Report-specific settings');
-    if (value !== 'analysis') expect(harness.routeNativeElement!.querySelector('app-facility-report-setup')?.textContent).toContain(`${label} settings are pending migration`);
-    else expect(harness.routeNativeElement!.querySelector('app-analysis-report-setup')).not.toBeNull();
+    if (value === 'dataQuality') expect(harness.routeNativeElement!.querySelector('app-data-quality-report-setup')).not.toBeNull();
+    else if (value === 'analysis') expect(harness.routeNativeElement!.querySelector('app-analysis-report-setup')).not.toBeNull();
+    else {
+      expect(harness.routeNativeElement!.textContent).toContain('Report-specific settings');
+      expect(harness.routeNativeElement!.querySelector('app-facility-report-setup')?.textContent).toContain(`${label} settings are pending migration`);
+    }
     await open('report-a', 'report');
-    expect(harness.routeNativeElement!.querySelector(value === 'analysis' ? 'app-analysis-report-preview h2' : 'app-pending-report-stage h2')?.textContent?.trim()).toBe(value === 'analysis' ? 'Facility analysis report' : `${label} Report`);
-    if (value === 'analysis') {
+    const previewSelector = value === 'analysis' ? 'app-analysis-report-preview'
+      : value === 'dataQuality' ? 'app-data-quality-report-preview' : 'app-pending-report-stage';
+    expect(harness.routeNativeElement!.querySelector(`${previewSelector} h2`)?.textContent?.trim()).toBe(value === 'analysis' ? 'Facility analysis report' : `${label} Report`);
+    if (value === 'analysis' || value === 'dataQuality') {
       const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions')!;
       const buttons = Array.from(outputs.querySelectorAll<HTMLButtonElement>('button'));
-      expect(buttons.map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint']);
+      expect(buttons.map(button => button.textContent?.trim())).toEqual(value === 'analysis' ? ['PDF', 'PowerPoint'] : ['PDF']);
       expect(buttons.every(button => button.disabled && button.type === 'button')).toBe(true);
     } else expect(harness.routeNativeElement!.querySelector('footer')?.textContent).toContain('Back to reports');
     expect(harness.routeNativeElement!.querySelector('footer a')?.getAttribute('href')).toContain(['analysis', 'savings', 'costSavings'].includes(value) ? '/data-checks' : '/setup');
-    expect(harness.routeNativeElement!.textContent).toContain(value === 'analysis' ? 'Waiting for' : 'preview is pending migration');
+    expect(harness.routeNativeElement!.textContent).toContain(value === 'analysis' ? 'Waiting for'
+      : value === 'dataQuality' ? 'results are being implemented' : 'preview is pending migration');
     expect(updateName).not.toHaveBeenCalled();
     expect(store.committedRevision()).toBeUndefined();
   });

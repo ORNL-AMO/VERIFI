@@ -1,0 +1,117 @@
+@let fields = editor.form.controls.settings.controls;
+@let settings = editor.draft().settings;
+@let selection = editor.selection();
+<section class="report-section report-setup" aria-label="Data Quality report setup">
+  <div class="report-setup-section">
+    <h2>Report information</h2>
+    <div class="report-setup-field report-setup-name">
+      <label for="report-workbench-name">Name <span class="report-setup-required" aria-hidden="true">*</span></label>
+      <input id="report-workbench-name" class="v1-input" [formControl]="editor.name" required autocomplete="off"
+        [attr.aria-invalid]="editor.name.invalid ? true : null" aria-describedby="data-quality-name-help">
+      <p id="data-quality-name-help" class="report-setup-help" [class.v1-field-error]="editor.name.invalid">
+        {{ editor.name.invalid ? 'Enter a nonblank report name.' : 'Changes save automatically, including incomplete selections.' }}
+      </p>
+    </div>
+  </div>
+  <div class="report-setup-section">
+    <fieldset class="selection-mode" [disabled]="!editor.canEdit()">
+      <legend>Choose report data</legend>
+      <label class="report-setup-option"><input type="radio" name="data-quality-mode" [formControl]="fields.selectedMode" value="analysis"><span>By Analysis</span></label>
+      <label class="report-setup-option"><input type="radio" name="data-quality-mode" [formControl]="fields.selectedMode" value="manual"><span>By Meters &amp; Predictors</span></label>
+    </fieldset>
+  </div>
+  <div class="report-setup-section">
+    @if (settings.selectedMode === 'analysis') {
+      <app-report-analysis-selection [cards]="analysisCards()" [selectionControl]="fields.selectedAnalysisItemId"
+        [selectedValue]="settings.selectedAnalysisItemId" [resetKey]="context.key()" idPrefix="data-quality-report"
+        [canEdit]="editor.canEdit()" [showTypeFilter]="showTypeFilter()" [showInspection]="false"
+        emptyMessage="No eligible analyses are available. Create an analysis or choose By Meters & Predictors."/>
+      @if (unavailableAnalysis()) {
+        <p class="report-setup-help v1-field-error" role="status">The saved analysis is unavailable. Select another analysis or change the selection method.</p>
+      }
+    } @else {
+      <div class="source-sections">
+        <section class="source-section" aria-labelledby="data-quality-meters-heading">
+          <div class="source-heading">
+            <h2 id="data-quality-meters-heading">Meters @if (selection.meters.length) { <span class="source-count">{{ selection.meters.length }} selected</span> }</h2>
+          </div>
+          <div class="source-tag-list" role="group" aria-labelledby="data-quality-meters-heading">
+            @for (choice of meterChoices(); track choice.guid) {
+              <button type="button" class="source-tag" [class.source-tag--selected]="choice.control.value"
+                [attr.aria-pressed]="choice.control.value" [disabled]="!editor.canEdit()" (click)="toggleSource(choice)">
+                <span class="source-tag-check" [class.source-tag-check--hidden]="!choice.control.value" aria-hidden="true"><app-ui-icon name="check"/></span>
+                <span class="source-tag-name">{{ choice.name }}</span>
+              </button>
+            } @empty {
+              <p class="report-setup-help" role="status">No meters are available in this facility.</p>
+            }
+          </div>
+        </section>
+        <section class="source-section" aria-labelledby="data-quality-predictors-heading">
+          <div class="source-heading">
+            <h2 id="data-quality-predictors-heading">Predictors @if (selection.predictors.length) { <span class="source-count">{{ selection.predictors.length }} selected</span> }</h2>
+          </div>
+          <div class="source-tag-list" role="group" aria-labelledby="data-quality-predictors-heading">
+            @for (choice of predictorChoices(); track choice.guid) {
+              <button type="button" class="source-tag" [class.source-tag--selected]="choice.control.value"
+                [attr.aria-pressed]="choice.control.value" [disabled]="!editor.canEdit()" (click)="toggleSource(choice)">
+                <span class="source-tag-check" [class.source-tag-check--hidden]="!choice.control.value" aria-hidden="true"><app-ui-icon name="check"/></span>
+                <span class="source-tag-name">{{ choice.name }}</span>
+              </button>
+            } @empty {
+              <p class="report-setup-help" role="status">No predictors are available in this facility.</p>
+            }
+          </div>
+        </section>
+      </div>
+    }
+    @if (selection.missingMeterIds.length || selection.missingPredictorIds.length) {
+      <div class="v1-alert v1-alert--danger" role="status">
+        <p>Some selected source items are unavailable. Correct the selection before continuing.</p>
+        <ul>
+          @for (id of selection.missingMeterIds; track id) { <li>Unavailable meter: {{ id }}</li> }
+          @for (id of selection.missingPredictorIds; track id) { <li>Unavailable predictor: {{ id }}</li> }
+        </ul>
+        @if (settings.selectedMode === 'manual') {
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit()" (click)="editor.removeUnavailableSelections()">Remove unavailable selections</button>
+        } @else { <p>Select another analysis or update the analysis's predictor references.</p> }
+      </div>
+    }
+  </div>
+  <div class="report-setup-section report-content">
+    <h2 id="data-quality-content-heading">Included Content</h2>
+    <div class="content-presets" role="group" aria-label="Content presets">
+      @for (preset of contentPresets; track preset.id) {
+        <button type="button" class="content-preset v1-segmented__btn" [attr.aria-pressed]="presetControl.value === preset.id"
+          [disabled]="presetControl.disabled" (click)="presetControl.setValue(preset.id)">{{ preset.label }}</button>
+      }
+      <button type="button" class="content-preset v1-segmented__btn" [attr.aria-pressed]="presetControl.value === 'custom'"
+        [disabled]="presetControl.disabled" (click)="presetControl.setValue('custom')">Custom</button>
+    </div>
+    <table class="content-matrix" aria-labelledby="data-quality-content-heading">
+      <colgroup><col class="content-section-column"><col class="content-format-column"><col class="content-format-column"></colgroup>
+      <thead><tr><th scope="col">Section</th><th scope="col" class="content-format">Tables</th><th scope="col" class="content-format">Charts</th></tr></thead>
+      @for (group of contentGroups; track group.id) {
+        <tbody>
+          <tr class="content-scope"><th colspan="3" scope="rowgroup">
+            @if (group.key) { <label class="report-setup-option"><input type="checkbox" [formControl]="fields[group.key]"><span>{{ group.label }}</span></label> }
+            @else { {{ group.label }} }
+          </th></tr>
+          @for (row of group.rows; track row.id) {
+            <tr [attr.data-content-section]="row.id">
+              <th scope="row">{{ row.label }}</th>
+              @if (row.table) {
+                <td class="content-format"><label class="report-setup-option"><input type="checkbox" [formControl]="fields[row.table]"
+                  [attr.aria-label]="row.tableLabel ?? group.label + ': ' + row.label + ' table'"><span class="content-mobile-label">Tables</span></label></td>
+              } @else { <td class="content-format content-not-applicable report-setup-help" aria-label="Not applicable">—</td> }
+              @if (row.charts) {
+                <td class="content-format"><label class="report-setup-option"><input type="checkbox" [formControl]="fields[row.charts]"
+                  [attr.aria-label]="group.label + ': ' + row.label + ' chart'"><span class="content-mobile-label">Charts</span></label></td>
+              } @else { <td class="content-format content-not-applicable report-setup-help" aria-label="Not applicable">—</td> }
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+  </div>
+</section>

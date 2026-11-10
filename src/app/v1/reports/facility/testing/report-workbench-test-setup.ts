@@ -1,6 +1,7 @@
 import { AnalysisReportEditor } from '../analysis/editing/analysis-report-editor.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { mergeFacilityAnalysisSettings } from '@data/account-workspace/facility-report-setup.models';
+import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings } from '@data/account-workspace/facility-report-setup.models';
+import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
 import { AccountReportActionsService } from '@app/v1/reports/account/account-report-actions.service';
 import { Component, Provider, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -38,6 +39,16 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
     const report = { ...current, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}),
       ...(changes.analysisItemId !== undefined ? { analysisItemId: changes.analysisItemId ?? undefined } : {}),
       ...(changes.analysisReportSettings ? { analysisReportSettings: mergeFacilityAnalysisSettings(current.analysisReportSettings, changes.analysisReportSettings) } : {}) };
+    if (current.facilityReportType === 'dataQuality') {
+      const settings = mergeFacilityDataQualitySettings(current.dataQualityReportSettings, changes.dataQualityReportSettings ?? {});
+      settings.missingSelection = !resolveDataQualitySelection({ accountGuid: current.accountId, facilityGuid: current.facilityId,
+        settings, facilityAnalyses: store.facilityAnalyses(), meters: store.meters(), predictors: store.predictors() }).valid;
+      report.dataQualityReportSettings = settings;
+      const patch = changes.dataQualityReportSettings;
+      if (patch?.selectedMode !== undefined || patch?.selectedAnalysisItemId !== undefined) {
+        report.analysisItemId = settings.selectedMode === 'analysis' ? settings.selectedAnalysisItemId : undefined;
+      }
+    }
     store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [report] }] }); return report;
   });
   const status = { state: signal<'ready' | 'evaluating' | 'error'>('ready'), items: signal<StatusItem[]>([]) };
