@@ -50,7 +50,7 @@ Be sure to periodically synchronize the upstream develop branch into your featur
 
 ## Pull Requests
 
-Follow the six-step [team PR workflow](docs/agents/pr-workflow.md): scope, implement/validate, fresh review, evaluate/revise, publish, and human review/QA. Codex app users can ask their development chat to prepare a PR; repository instructions require a reviewer with no inherited development conversation. Existing PRs can use the same fresh-review workflow. Findings stay in chat unless posting to GitHub is explicitly requested.
+Follow the six-step [team PR workflow](docs/agents/pr-workflow.md): scope, implement/validate, context-aware self-review, fresh review/evaluation, publish, and human review/QA. Codex app users can ask their development chat to prepare a PR; repository instructions require both a self-review and a reviewer with no inherited development conversation. Both stages are recorded in the PR. Existing PRs can also request a fresh review. Findings stay in chat unless posting to GitHub is explicitly requested.
 
 Pull requests must be made for all changes. Most pull requests should be made against the develop
 branch unless patching a bug that needs to be addressed immediately, and only core developers should
