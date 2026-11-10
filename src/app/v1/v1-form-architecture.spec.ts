@@ -21,7 +21,6 @@ const DATA_FORM_ROOTS = [
   join(V1_ROOT, 'data', 'predictors', 'shared', 'weather-station-selector')
 ];
 const TEMPLATE_DRIVEN_ALLOWLIST = new Set([
-  'account/imports/import-wizard/steps/footprint-facility/import-footprint-facility-step.component.html',
   'account/imports/import-wizard/steps/mapping/import-mapping-step.component.html',
   'account/imports/import-wizard/steps/meters/import-meters-step.component.html',
   'account/imports/import-wizard/steps/predictors/import-predictors-step.component.html',
