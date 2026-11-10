@@ -1,7 +1,10 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AnalysisAutosave } from '../../analysis-autosave';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
+import { RegressionModelMenuComponent } from './regression-model-menu/regression-model-menu.component';
+import { getAnalysisGroupChanges } from '../../analysis-edits';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
+import { DestroyRef, Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
@@ -19,6 +22,12 @@ import { emptyGroupAnalysisErrors } from '@domain/calculations/status-check-calc
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { RegressionModelStateService } from '@data/account-workspace/regression-model-state.service';
 
+interface ModelSelectionDraft {
+  accountGuid: string;
+  analysisGuid: string;
+  group: AnalysisGroup;
+}
+
 type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
 @Component({
@@ -28,9 +37,13 @@ type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
   standalone: false
 })
 export class RegressionModelSelectionComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly routerGuardService = inject(RouterGuardService);
+  readonly selectionAutosave = new AnalysisAutosave<ModelSelectionDraft>((draft, baseline) => this.persistSelection(draft, baseline));
+  readonly modelSelectionError = this.selectionAutosave.error;
+  private selectionOwnerKey: string;
   private analysisService: AnalysisService = inject(AnalysisService);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -105,6 +118,7 @@ export class RegressionModelSelectionComponent {
   });
 
   selectedInspectModel: JStatRegressionModel;
+  private inspectionOwner: { accountGuid: string; analysisGuid: string; groupGuid: string };
   dropdownOpen: boolean = false;
 
   showInvalid: WritableSignal<boolean> = signal(false);
@@ -127,9 +141,25 @@ export class RegressionModelSelectionComponent {
   });
 
   @ViewChild('dropdown') dropdownRef: ElementRef;
+  @ViewChild(RegressionModelMenuComponent) private modelMenu: RegressionModelMenuComponent;
 
   selectedGroupId: string;
   constructor() {
+    effect(() => {
+      const group = this.selectedGroup();
+      const analysisGuid = this.analysisItem()?.guid;
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      if (!group || !analysisGuid) { return; }
+      untracked(() => {
+        const ownerKey = accountGuid + ':' + analysisGuid + ':' + group.idbGroupId;
+        if (this.selectionOwnerKey !== ownerKey || !this.selectionAutosave.hasPending) {
+          this.selectionOwnerKey = ownerKey;
+          this.selectionAutosave.hydrate({ accountGuid, analysisGuid, group }, true);
+        }
+      });
+    });
+    this.destroyRef.onDestroy(() => this.selectionAutosave.destroy());
+
     effect(() => {
       const selectedGroup = this.selectedGroup();
       const calanderizedMeters = this.calanderizedMeters();
@@ -176,11 +206,12 @@ export class RegressionModelSelectionComponent {
     })
   }
 
-  async selectModel(modelId?: string) {
+  async selectModel(modelId?: string): Promise<boolean> {
     const currentGroup: AnalysisGroup = this.selectedGroup();
     const selectedModelId = modelId ?? currentGroup.selectedModelId;
     const generatedModels: Array<JStatRegressionModel> = this.generatedModels();
     const selectedModel: JStatRegressionModel = generatedModels.find(model => model.modelId === selectedModelId);
+    if (!selectedModel) { return false; }
     const updatedGroup: AnalysisGroup = {
       ...currentGroup,
       selectedModelId,
@@ -195,25 +226,44 @@ export class RegressionModelSelectionComponent {
         };
       }),
     };
-    await this.saveItem(updatedGroup);
-    this.regressionModelState.setForGroup(updatedGroup.idbGroupId, generatedModels);
+    return this.modelMenu ? this.modelMenu.saveModelSelection(updatedGroup) : this.saveItem(updatedGroup);
   }
 
-  async saveItem(selectedGroup?: AnalysisGroup) {
-    const _group: AnalysisGroup = selectedGroup ?? this.selectedGroup();
-    const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
-    const groupIndex: number = _analysisItemCurrent.groups.findIndex(group => group.idbGroupId === _group.idbGroupId);
-    const updatedGroups = [..._analysisItemCurrent.groups];
-    updatedGroups[groupIndex] = _group;
-    const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
-    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+  saveItem(selectedGroup?: AnalysisGroup): Promise<boolean> {
+    return this.selectionAutosave.capture({
+      accountGuid: this.accountWorkspaceStore.account()?.guid, analysisGuid: this.analysisItem()?.guid,
+      group: selectedGroup ?? this.selectedGroup()
+    }, true, true);
+  }
+
+  private async persistSelection(draft: ModelSelectionDraft, baseline: ModelSelectionDraft): Promise<void> {
+    const changes = getAnalysisGroupChanges(baseline.group, draft.group);
+    if (!Object.keys(changes).length) { return; }
+    if (Object.prototype.hasOwnProperty.call(changes, 'selectedModelId')
+      || Object.prototype.hasOwnProperty.call(changes, 'models')) {
+      // Keep model identity, year, and every coefficient coherent across queued generation writes.
+      const predictorChanges = changes.predictorVariables;
+      Object.assign(changes, {
+        selectedModelId: draft.group.selectedModelId, models: _.cloneDeep(draft.group.models),
+        regressionModelYear: draft.group.regressionModelYear, regressionConstant: draft.group.regressionConstant,
+        predictorVariables: draft.group.predictorVariables.map(variable => ({
+          ...predictorChanges?.find(changed => changed.id === variable.id),
+          id: variable.id, regressionCoefficient: variable.regressionCoefficient
+        }))
+      });
+    }
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateFacilityAnalysis(analysisItem, activeAccountGuid)
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: draft.analysisGuid, label: 'Save Facility Analysis',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) } },
+      () => this.analysisHandler.updateFacilityAnalysisGroup(draft.analysisGuid, draft.group.idbGroupId, changes, draft.accountGuid)
     );
-    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
-    this.analysisService.selectedGroup.next(_group);
+  }
+
+  retryModelSelection(): Promise<boolean> { return this.selectionAutosave.flush(); }
+
+  private isCurrentOwner(accountGuid: string, analysisGuid: string, groupGuid: string): boolean {
+    return !this.destroyRef.destroyed && this.accountWorkspaceStore.account()?.guid === accountGuid
+      && this.analysisItem()?.guid === analysisGuid && this.selectedGroup()?.idbGroupId === groupGuid;
   }
 
   setOrderDataField(str: OrderDataBy) {
@@ -229,17 +279,48 @@ export class RegressionModelSelectionComponent {
     }
   }
 
-  inspectModel(model: JStatRegressionModel) {
+  async inspectModel(model: JStatRegressionModel) {
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const analysisGuid = this.analysisItem()?.guid;
+    const groupGuid = this.selectedGroup()?.idbGroupId;
+    if (!await this.flushChanges() || !this.isCurrentOwner(accountGuid, analysisGuid, groupGuid)) { return; }
     this.selectedInspectModel = model;
+    this.inspectionOwner = {
+      accountGuid: this.accountWorkspaceStore.account()?.guid,
+      analysisGuid: this.analysisItem()?.guid,
+      groupGuid: this.selectedGroup()?.idbGroupId
+    };
+  }
+
+  async flushChanges(): Promise<boolean> {
+    if (!await this.selectionAutosave.flush()) { return false; }
+    return this.modelMenu?.flushChanges() ?? true;
+  }
+
+  async canDeactivate(): Promise<boolean> {
+    if (!await this.selectionAutosave.canDeactivate(this.routerGuardService, () => undefined)) { return false; }
+    return this.modelMenu?.canDeactivate() ?? true;
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (this.selectionAutosave.hasPending) { event.preventDefault(); event.returnValue = ''; }
   }
 
   cancelInspectModel() {
     this.selectedInspectModel = undefined;
+    this.inspectionOwner = undefined;
   }
 
   async selectFromInspection() {
-    await this.selectModel(this.selectedInspectModel.modelId);
-    this.cancelInspectModel();
+    const model = this.selectedInspectModel;
+    const owner = this.inspectionOwner;
+    if (!owner || !this.isCurrentOwner(owner.accountGuid, owner.analysisGuid, owner.groupGuid)) { return; }
+    const { accountGuid, analysisGuid, groupGuid } = owner;
+    if (!await this.selectModel(model.modelId)) { return; }
+    if (this.isCurrentOwner(accountGuid, analysisGuid, groupGuid) && this.selectedInspectModel === model) {
+      this.cancelInspectModel();
+    }
   }
 
   toggleHideInUseMessage() {

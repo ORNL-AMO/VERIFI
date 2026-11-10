@@ -3,7 +3,7 @@
 
 @if(_calculating === 'error') {
 <div class="alert alert-danger" role="alert">
-  An error occurred while calculating the model. Please try again.
+  An error occurred while calculating the model. <button type="button" class="btn btn-sm btn-outline-danger" (click)="retry()">Try again</button>
 </div>
 }@else if(_calculating) {
 <div class="d-flex justify-content-center my-2">

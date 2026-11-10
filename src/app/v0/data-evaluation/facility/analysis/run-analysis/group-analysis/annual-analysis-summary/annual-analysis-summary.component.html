@@ -24,7 +24,7 @@
 </div>
 
 
-@if (_calculating == false) {
+@if (_calculating == false && annualAnalysisSummary()) {
   <div class="w-100 x-scroll">
     @if (_analysisDisplay == 'table') {
       <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummary()"
@@ -42,4 +42,7 @@
 @if (_calculating != false) {
   <app-calculating-spinner [message]="'Calculating Annual Results...'"
   [error]="_calculating == 'error'"></app-calculating-spinner>
+}
+@if (_calculating == 'error') {
+  <button class="btn btn-outline-primary" type="button" (click)="retryCalculation()">Retry calculation</button>
 }

@@ -1,6 +1,6 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, effect, inject, OnDestroy, Signal, computed } from '@angular/core';
-import { Router } from '@angular/router';
+import { ViewChild, Component, effect, inject, OnDestroy, Signal, computed } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
@@ -14,6 +14,15 @@ import { RegressionModelStateService } from '@data/account-workspace/regression-
   standalone: false
 })
 export class AnalysisComponent implements OnDestroy {
+  @ViewChild(RouterOutlet) private outlet: RouterOutlet;
+
+  readonly beforeNavigate = () => this.canDeactivate();
+
+  canDeactivate(): Promise<boolean> {
+    const child = this.outlet?.isActivated ? this.outlet.component as { canDeactivate?: () => Promise<boolean> | boolean } : undefined;
+    return Promise.resolve(child?.canDeactivate?.() ?? true);
+  }
+
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private analysisService: AnalysisService = inject(AnalysisService);

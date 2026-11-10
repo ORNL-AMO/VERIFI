@@ -2,7 +2,7 @@
 @let _utilityMeterGroups = utilityMeterGroups();
 
 @if (_utilityMeterData.length != 0 && _utilityMeterGroups.length != 0) {
-<app-analysis-banner></app-analysis-banner>
+<app-analysis-banner [beforeNavigate]="beforeNavigate"></app-analysis-banner>
 <router-outlet></router-outlet>
 }
 @if (_utilityMeterData.length == 0) {

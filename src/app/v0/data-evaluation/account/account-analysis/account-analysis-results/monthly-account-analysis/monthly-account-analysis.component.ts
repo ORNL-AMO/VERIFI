@@ -7,7 +7,6 @@ import { MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
     selector: 'app-monthly-account-analysis',
@@ -19,7 +18,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   monthlyAccountAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  accountAnalysisItem: IdbAccountAnalysisItem;
+  readonly accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis;
   account: IdbAccount;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
@@ -39,7 +38,6 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
 
     this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.account = val;

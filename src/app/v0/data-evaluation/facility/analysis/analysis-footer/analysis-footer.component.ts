@@ -1,6 +1,6 @@
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, inject, Signal } from '@angular/core';
+import { DestroyRef, Input, Component, computed, inject, Signal } from '@angular/core';
 import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
@@ -21,6 +21,9 @@ import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculati
   standalone: false
 })
 export class AnalysisFooterComponent {
+  @Input() beforeNavigate: () => Promise<boolean> = () => Promise.resolve(true);
+  private readonly destroyRef = inject(DestroyRef);
+  private navigating = false;
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
@@ -123,92 +126,121 @@ export class AnalysisFooterComponent {
     return accountAnalysisItem !== undefined;
   });
 
-  goBack() {
-    const facility: IdbFacility = this.facility();
-    const selectedGroup: AnalysisGroup = this.selectedGroup();
-    const analysisItem: IdbAnalysisItem = this.analysisItem();
-    const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
-    if (this.router.url.includes('account-analysis')) {
-      this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/monthly-analysis');
-    } else if (this.router.url.includes('facility-analysis')) {
-      if (this.router.url.includes('monthly-analysis')) {
-        this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/annual-analysis');
-      } else {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[analysisItem.groups.length - 1].idbGroupId + '/monthly-analysis');
-      }
-    } else if (this.router.url.includes('group-analysis')) {
-      if (this.router.url.includes('monthly-analysis')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
-      } else if (this.router.url.includes('annual-analysis')) {
-        if (selectedGroup.analysisType == 'regression') {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/model-selection');
+  goBack(): Promise<boolean | void> {
+    return this.navigateAfterSave(() => {
+      const facility: IdbFacility = this.facility();
+      const selectedGroup: AnalysisGroup = this.selectedGroup();
+      const analysisItem: IdbAnalysisItem = this.analysisItem();
+      const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
+      if (this.router.url.includes('account-analysis')) {
+        return this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/monthly-analysis');
+      } else if (this.router.url.includes('facility-analysis')) {
+        if (this.router.url.includes('monthly-analysis')) {
+          return this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/annual-analysis');
         } else {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/options');
+          return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[analysisItem.groups.length - 1].idbGroupId + '/monthly-analysis');
         }
-      } else if (this.router.url.includes('model-selection')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/options');
-      } else if (this.router.url.includes('options')) {
-        let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
-        if (groupIndex > 0) {
-          if (analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
-            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
+      } else if (this.router.url.includes('group-analysis')) {
+        if (this.router.url.includes('monthly-analysis')) {
+          return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
+        } else if (this.router.url.includes('annual-analysis')) {
+          if (selectedGroup.analysisType == 'regression') {
+            return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/model-selection');
           } else {
-            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
+            return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/options');
           }
-        } else {
-          this.router.navigateByUrl(facilityUrlStr + 'analysis-setup');
+        } else if (this.router.url.includes('model-selection')) {
+          return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/options');
+        } else if (this.router.url.includes('options')) {
+          let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
+          if (groupIndex > 0) {
+            if (analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
+              return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
+            } else {
+              return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
+            }
+          } else {
+            return this.router.navigateByUrl(facilityUrlStr + 'analysis-setup');
+          }
         }
-      }
-    } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
-    }
-  }
-
-  continue() {
-    const facility: IdbFacility = this.facility();
-    const selectedGroup: AnalysisGroup = this.selectedGroup();
-    const analysisItem: IdbAnalysisItem = this.analysisItem();
-    const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
-    if (this.router.url.includes('analysis-setup')) {
-      this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[0].idbGroupId + '/options');
-    } else if (this.router.url.includes('group-analysis')) {
-      if (this.router.url.includes('options') && selectedGroup.analysisType != 'skip') {
-        if (selectedGroup.analysisType == 'regression') {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/model-selection');
-        } else {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
-        }
-      } else if (this.router.url.includes('model-selection')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
-      } else if (this.router.url.includes('annual-analysis')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/monthly-analysis');
       } else {
-        let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
-        if (groupIndex < analysisItem.groups.length - 1) {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex + 1].idbGroupId + '/options');
+        return this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
+      }
+    });
+  }
+
+  continue(): Promise<boolean | void> {
+    return this.navigateAfterSave(() => {
+      const facility: IdbFacility = this.facility();
+      const selectedGroup: AnalysisGroup = this.selectedGroup();
+      const analysisItem: IdbAnalysisItem = this.analysisItem();
+      const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
+      if (this.router.url.includes('analysis-setup')) {
+        return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[0].idbGroupId + '/options');
+      } else if (this.router.url.includes('group-analysis')) {
+        if (this.router.url.includes('options') && selectedGroup.analysisType != 'skip') {
+          if (selectedGroup.analysisType == 'regression') {
+            return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/model-selection');
+          } else {
+            return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
+          }
+        } else if (this.router.url.includes('model-selection')) {
+          return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
+        } else if (this.router.url.includes('annual-analysis')) {
+          return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/monthly-analysis');
         } else {
-          this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/annual-analysis');
+          let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
+          if (groupIndex < analysisItem.groups.length - 1) {
+            return this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex + 1].idbGroupId + '/options');
+          } else {
+            return this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/annual-analysis');
+          }
+        }
+      } else if (this.router.url.includes('facility-analysis')) {
+        if (this.router.url.includes('annual-analysis')) {
+          return this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/monthly-analysis');
+        } else {
+          return this.router.navigateByUrl(facilityUrlStr + 'account-analysis');
         }
       }
-    } else if (this.router.url.includes('facility-analysis')) {
-      if (this.router.url.includes('annual-analysis')) {
-        this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/monthly-analysis');
-      } else {
-        this.router.navigateByUrl(facilityUrlStr + 'account-analysis');
-      }
+    });
+  }
+
+  goBackToAccount(): Promise<boolean | void> {
+    return this.navigateAfterSave(() => {
+      const accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
+      const accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItem();
+      if (!accountAnalysisItem) { return; }
+      const selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == accountAnalysisItem.guid })
+      if (!selectedAnalysisItem) { return; }
+      this.accountWorkspaceService.selectAccountAnalysis((selectedAnalysisItem)?.guid);
+      return this.router.navigateByUrl('/data-evaluation/account/analysis/select-items')
+    });
+  }
+
+  returnToDashboard(): Promise<boolean | void> {
+    return this.navigateAfterSave(() => {
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      return this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
+    });
+  }
+
+  private async navigateAfterSave(action: () => Promise<boolean> | void): Promise<boolean | void> {
+    if (this.navigating) { return; }
+    this.navigating = true;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const facilityGuid = this.facility()?.guid;
+    const analysisGuid = this.analysisItem()?.guid;
+    const url = this.router.url;
+    const navigationId = this.router.currentNavigation?.()?.id;
+    try {
+      if (!await this.beforeNavigate() || this.destroyRef.destroyed
+        || this.accountWorkspaceStore.account()?.guid !== accountGuid
+        || this.facility()?.guid !== facilityGuid || this.analysisItem()?.guid !== analysisGuid || this.router.url !== url
+        || this.router.currentNavigation?.()?.id !== navigationId) { return; }
+      return await action();
+    } finally {
+      this.navigating = false;
     }
-  }
-
-  goBackToAccount() {
-    const accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
-    const accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItem();
-    const selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == accountAnalysisItem.guid })
-    this.accountWorkspaceService.selectAccountAnalysis((selectedAnalysisItem)?.guid);
-    this.router.navigateByUrl('/data-evaluation/account/analysis/select-items')
-  }
-
-  returnToDashboard() {
-    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
   }
 }

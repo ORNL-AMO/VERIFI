@@ -3,6 +3,7 @@ import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-worksp
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { CALCULATION_WORKER_TIMEOUT_MS } from '@platform/web-workers/run-worker';
 import { CalanderizationService } from './calanderization.service';
+import { AccountStatusCheckService } from './account-status-check.service';
 
 type Listener = (event: MessageEvent | ErrorEvent) => void;
 
@@ -39,7 +40,7 @@ describe('CalanderizationService', () => {
   beforeEach(() => {
     FakeWorker.instances = [];
     vi.stubGlobal('Worker', FakeWorker);
-    TestBed.configureTestingModule({ providers: [AccountWorkspaceStore, CalanderizationService] });
+    TestBed.configureTestingModule({ providers: [AccountWorkspaceStore, CalanderizationService, AccountStatusCheckService] });
   });
 
   afterEach(() => {
@@ -74,6 +75,109 @@ describe('CalanderizationService', () => {
       expect(state.accountGuid).toBe('account-b');
       expect(state.workspaceSnapshot).toBe(store.snapshot());
     }
+  });
+
+  it('reuses ready meter data across analysis-only commits and rebinds the revision', () => {
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const service = TestBed.inject(CalanderizationService);
+    store.publish(createSnapshot('account-a'));
+    TestBed.flushEffects();
+    const meters = [];
+    FakeWorker.instances[0].dispatchMessage({ error: false, calanderizedMeters: meters });
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityAnalyses', upsert: [{ guid: 'analysis-a', accountId: 'account-a' }] }] });
+    TestBed.flushEffects();
+    expect(FakeWorker.instances).toHaveLength(1);
+    expect(service.calanderizedMeters.value).toBe(meters);
+    expect(service.calendarizationState.value).toMatchObject({ status: 'ready', workspaceRevision: 1 });
+    expect(service.isReadyForCurrentWorkspace()).toBe(true);
+    if (service.calendarizationState.value.status === 'ready') {
+      expect(service.calendarizationState.value.workspaceSnapshot).toBe(store.snapshot());
+    }
+  });
+
+  it('refreshes validation for the current analysis snapshot without a transient missing status', () => {
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const calendarization = TestBed.inject(CalanderizationService);
+    const checks = TestBed.inject(AccountStatusCheckService);
+    store.publish(createSnapshot('account-a'));
+    TestBed.flushEffects();
+    FakeWorker.instances[0].dispatchMessage({ error: false, calanderizedMeters: [] });
+    const previous = checks.accountStatusCheck.value;
+    expect(previous).toBeDefined();
+    const published: unknown[] = [];
+    const subscription = checks.accountStatusCheck.subscribe(value => published.push(value));
+    published.length = 0;
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityAnalyses', upsert: [{ guid: 'analysis-a', accountId: 'account-a' }] }] });
+    TestBed.flushEffects();
+    expect(checks.accountStatusCheck.value).toBeDefined();
+    expect(checks.accountStatusCheck.value).not.toBe(previous);
+    expect(published).not.toContain(undefined);
+    expect(calendarization.isReadyForCurrentWorkspace()).toBe(true);
+    subscription.unsubscribe();
+  });
+
+  it('keeps an in-flight request across unrelated commits and publishes for the latest snapshot', () => {
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const service = TestBed.inject(CalanderizationService);
+    store.publish(createSnapshot('account-a'));
+    TestBed.flushEffects();
+    const worker = FakeWorker.instances[0];
+    store.publishCommittedPatch({ collections: [{ collection: 'accountAnalyses', upsert: [{ guid: 'analysis-a', accountId: 'account-a' }] }] });
+    TestBed.flushEffects();
+    expect(worker.terminate).not.toHaveBeenCalled();
+    expect(FakeWorker.instances).toHaveLength(1);
+    worker.dispatchMessage({ error: false, calanderizedMeters: [] });
+    expect(service.calendarizationState.value).toMatchObject({ status: 'ready', workspaceRevision: 1 });
+    expect(service.isReadyForCurrentWorkspace()).toBe(true);
+  });
+
+  it('invalidates ready data for changed settings or readings, including before effects run', () => {
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const service = TestBed.inject(CalanderizationService);
+    store.publish(createSnapshot('account-a'));
+    TestBed.flushEffects();
+    FakeWorker.instances[0].dispatchMessage({ error: false, calanderizedMeters: [] });
+    store.publishCommittedPatch({ account: { ...store.account(), energyUnit: 'kWh' } as any });
+    expect(service.isReadyForCurrentWorkspace()).toBe(false);
+    TestBed.flushEffects();
+    expect(FakeWorker.instances).toHaveLength(2);
+    FakeWorker.instances[1].dispatchMessage({ error: false, calanderizedMeters: [] });
+    store.publishCommittedPatch({ collections: [{ collection: 'meterData', upsert: [{ guid: 'reading-a', accountId: 'account-a', totalEnergyUse: 42 } as any] }] });
+    expect(service.isReadyForCurrentWorkspace()).toBe(false);
+    TestBed.flushEffects();
+    expect(FakeWorker.instances).toHaveLength(3);
+    expect(service.calendarizationState.value.status).toBe('loading');
+  });
+
+  it('exposes a recoverable error when constructing a worker fails', () => {
+    vi.stubGlobal('Worker', class { constructor() { throw new Error('worker unavailable'); } });
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const service = TestBed.inject(CalanderizationService);
+    store.publish(createSnapshot('account-a'));
+    TestBed.flushEffects();
+    expect(service.calendarizationState.value.status).toBe('error');
+    vi.stubGlobal('Worker', FakeWorker);
+    service.recalculateCurrentWorkspace();
+    expect(FakeWorker.instances).toHaveLength(1);
+    FakeWorker.instances[0].dispatchMessage({ error: false, calanderizedMeters: [] });
+    expect(service.calendarizationState.value.status).toBe('ready');
+  });
+
+  it('restarts a finished rejected request when inputs revert before the workspace observable flushes', () => {
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const service = TestBed.inject(CalanderizationService);
+    store.publish(createSnapshot('account-a'));
+    TestBed.flushEffects();
+    const originalAccount = store.account();
+    const worker = FakeWorker.instances[0];
+    store.publishCommittedPatch({ account: { ...originalAccount, energyUnit: 'kWh' } as any });
+    worker.dispatchMessage({ error: false, calanderizedMeters: [] });
+    expect(worker.terminate).toHaveBeenCalledOnce();
+    store.publishCommittedPatch({ account: { ...originalAccount } as any });
+    TestBed.flushEffects();
+    expect(FakeWorker.instances).toHaveLength(2);
+    FakeWorker.instances[1].dispatchMessage({ error: false, calanderizedMeters: [] });
+    expect(service.calendarizationState.value.status).toBe('ready');
   });
 
   it('publishes an error on native worker failure and starts a fresh retry', () => {

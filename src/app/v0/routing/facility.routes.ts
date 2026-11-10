@@ -290,14 +290,14 @@ export const FacilityRoutes: Route = {
                     component: RunAnalysisComponent,
                     children: [
                         { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
-                        { path: 'analysis-setup', component: AnalysisSetupComponent },
+                        { path: 'analysis-setup', component: AnalysisSetupComponent, canDeactivate: [canDeactivateGuard] },
                         {
                             path: 'group-analysis/:id',
                             component: GroupAnalysisComponent,
                             children: [
                                 { path: '', pathMatch: 'full', redirectTo: 'options' },
                                 { path: 'options', component: GroupAnalysisOptionsComponent },
-                                { path: 'model-selection', component: RegressionModelSelectionComponent },
+                                { path: 'model-selection', component: RegressionModelSelectionComponent, canDeactivate: [canDeactivateGuard] },
                                 { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
                                 { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent },
                                 { path: 'banked-analysis', component: BankedGroupAnalysisComponent }

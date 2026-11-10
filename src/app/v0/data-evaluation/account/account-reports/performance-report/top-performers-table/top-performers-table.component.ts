@@ -37,11 +37,9 @@ export class TopPerformersTableComponent {
   ngOnInit() {
     if (this.chartDataOption == 'contribution' || this.chartDataOption == 'changeInContribution') {
       this.valueLabel = 'Contribution';
-    } else if (this.chartDataOption == 'savings') {
+    } else if (this.chartDataOption == 'savings' || this.chartDataOption == 'changeInAdjustedBaseline') {
       this.valueLabel = 'Savings';
-    } else if (this.chartDataOption == 'changeInAdjustedBaseline') {
-      this.valueLabel = 'Production';
-    };
+    }
     if (this.dataType == 'facility') {
       this.setFacilityData();
     } else if (this.dataType == 'group') {

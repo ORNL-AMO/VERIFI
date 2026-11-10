@@ -61,7 +61,7 @@ Install Chromium once with `npx playwright install chromium` when browser tests 
 
 Use the mode and discoverable skill selected by the [task context index](docs/agents/context-index.md). Combine skills only when the task crosses their stated boundaries. Use Designer with Implementer for UI implementation; design-only work does not authorize code changes.
 
-When explicitly asked to open a pull request, follow the [GitHub PR creation guide](docs/agents/github-pr-creation.md). Use non-closing issue references by default because QA validates and closes issues; use automatic-closing keywords only when explicitly requested.
+For agent-assisted PR preparation, follow the [agent PR workflow](docs/agents/pr-workflow.md) and [creation guide](docs/agents/github-pr-creation.md). Review in two stages: the context-aware development agent self-reviews first, then a subagent reviews with conversation-history inheritance explicitly disabled and the development agent's model/effort. Pass only pinned comparison facts, neutral requirements, validation evidence, and repository guidance to the fresh reviewer, excluding self-review conclusions. Append both [review records](docs/agents/pr-review-record.md) to the general PR description; human-only PRs do not need them. Neither stage grants merge approval. Honor existing session authorization, and obtain decisions on new findings or material validation gaps before publication.
 
 ## Working rules
 

@@ -16,6 +16,7 @@ import { FacilityStatusCheckComponent } from '@v0/data-evaluation/facility/facil
 import { AnalysisStatusCheckComponent } from '@v0/data-evaluation/facility/facility-home/facility-status-check/analysis-status-check/analysis-status-check.component';
 import { MetersStatusCheckComponent } from '@v0/data-evaluation/facility/facility-home/facility-status-check/meters-status-check/meters-status-check.component';
 import { PredictorsStatusCheckComponent } from '@v0/data-evaluation/facility/facility-home/facility-status-check/predictors-status-check/predictors-status-check.component';
+import { EmailVerifiBackupModule } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.module';
 
 
 
@@ -39,7 +40,8 @@ import { PredictorsStatusCheckComponent } from '@v0/data-evaluation/facility/fac
     CalculatingSpinnerModule,
     SharedAnalysisModule,
     DataOverviewModule,
-    FormsModule
+    FormsModule,
+    EmailVerifiBackupModule
   ]
 })
 export class FacilityHomeModule { }

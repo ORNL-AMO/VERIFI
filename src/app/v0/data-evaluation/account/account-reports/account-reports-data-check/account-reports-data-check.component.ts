@@ -1,4 +1,3 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -22,7 +21,6 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from '@shared/shar
 })
 export class AccountReportsDataCheckComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -58,15 +56,15 @@ export class AccountReportsDataCheckComponent {
   }
 
   async setAnalysisVisited() {
-    if (this.selectedAnalysisItem) {
-      this.selectedAnalysisItem.isAnalysisVisited = true;
+    if (this.selectedAnalysisItem && !this.selectedAnalysisItem.isAnalysisVisited) {
+      const analysisGuid = this.selectedAnalysisItem.guid;
       const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-      await this.commandBoundary.execute(
-        { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: this.selectedAnalysisItem.guid, label: 'Save Account Analysis' ,
-          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
-        () => this.analysisHandler.updateAccountAnalysis(this.selectedAnalysisItem, activeAccountGuid)
+      const { value } = await this.commandBoundary.execute(
+        { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Account Analysis',
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) } },
+        () => this.analysisHandler.updateAccountAnalysisFields(analysisGuid, { isAnalysisVisited: true }, activeAccountGuid)
       );
-      this.accountWorkspaceService.selectAccountAnalysis(this.selectedAnalysisItem?.guid);
+      if (this.selectedAnalysisItem?.guid === analysisGuid) this.selectedAnalysisItem = value;
     }
   }
 
