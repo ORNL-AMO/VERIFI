@@ -1,1 +1,4 @@
+@import '../../../../../shared/creation-flow/creation-flow.css';
 :host { display: block; }
+h3 { font-size: 1rem; margin-bottom: 1rem; }
+.creation-choices { grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr)); }

@@ -1,17 +1,44 @@
-<p>Review name-matched equipment updates and choose source-compatible meter groups. A piece of equipment can use only one meter group for each energy source.</p>
-@for (equipment of state.draft().facilityEnergyUseEquipment; track equipment.guid; let equipmentIndex = $index) {
-  <section class="equipment">
-    <h3>{{ equipment.name }} <small>{{ equipment.id ? 'Update' : 'New' }}</small></h3>
-    @for (group of state.compatibleMeterGroups(equipmentIndex); track group.guid) {
-      <label class="check-row">
-        <input #groupIncluded
-          type="checkbox"
-          [checked]="equipment.utilityMeterGroupIds.includes(group.guid)"
-          [disabled]="state.meterGroupSourceConflict(equipmentIndex, group.guid)"
-          (change)="state.toggleEquipmentMeterGroup(equipmentIndex, group.guid, groupIncluded.checked)">
-        {{ group.name }}
-        @if (state.meterGroupSourceConflict(equipmentIndex, group.guid)) { <span>— source already linked</span> }
-      </label>
-    }
+@for (group of sections(); track group.guid) {
+  <section class="equipment-group" [attr.aria-label]="group.name">
+    <header><h3><app-ui-icon name="energyUseGroup"/>{{ group.name }} <small>{{ group.rows.length }} {{ group.rows.length === 1 ? 'item' : 'items' }}</small></h3>
+      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="state.session.pending()" (click)="openMeters(group.guid)"><app-ui-icon name="link"/>Link meter groups</button>
+    </header>
+    <div class="equipment-table-scroll">
+      <table class="v1-results-table equipment-table">
+        <thead><tr><th scope="col">Equipment</th><th scope="col">Category</th><th scope="col">Sources</th><th scope="col">Meter groups</th></tr></thead>
+        <tbody>@for (row of group.rows; track row.item.guid) {
+          <tr>
+            <td><span class="equipment-name"><app-ui-icon [name]="row.icon"/><strong>{{ row.item.name }}</strong><span class="v1-badge equipment-status" [class.v1-badge--info]="!!row.item.id" [class.v1-badge--success]="!row.item.id">{{ row.item.id ? 'Update' : 'New' }}</span></span></td>
+            <td><button type="button" class="v1-btn v1-btn--quiet equipment-category" [disabled]="state.session.pending()" [attr.aria-label]="'Set category for ' + row.item.name" (click)="openCategory(row.item.guid)"><app-ui-icon [name]="row.icon"/>{{ row.category }}<app-ui-icon name="edit" [size]="14"/></button></td>
+            <td><div class="equipment-sources">@for (source of row.sources; track source.name) { <span><app-ui-icon [name]="source.icon" [size]="16"/>{{ source.name }}</span> }</div></td>
+            <td><button type="button" class="v1-btn v1-btn--quiet equipment-meter-groups" [disabled]="state.session.pending()" [attr.aria-label]="'Select meter groups for ' + row.item.name" (click)="openMeters(group.guid, row.item.guid)"><app-ui-icon name="meterGroupItem" [size]="16"/><span>@for (link of row.links; track link.guid; let last = $last) { {{ link.name }}{{ last ? '' : ', ' }} } @empty { Select meter groups }</span><app-ui-icon name="edit" [size]="14"/></button></td>
+          </tr>
+        }</tbody>
+      </table>
+    </div>
   </section>
-}
+} @empty { <p class="v1-alert v1-alert--info" role="status">No equipment was found in this footprint workbook.</p> }
+<ng-template #mappingPanel>
+  @if (panel(); as current) {
+    <app-workspace-slideout [title]="current.kind === 'meters' ? 'Select Meter Groups' : 'Select equipment category'" [description]="current.name" [hasFooter]="true" [saving]="state.session.pending()" (closed)="close()">
+      @if (current.kind === 'meters') {
+        @if (current.items.length > 1) { <p>Apply these links to {{ current.items.length }} items in this energy-use group. Each item receives only groups matching its sources. This replaces its current meter-group assignments.</p> }
+        <div class="meter-group-choices" [formGroup]="meterForm">
+          @for (choice of choices(); track choice.guid) {
+            <label class="meter-group-choice"><input type="checkbox" [formControl]="meterForm.controls[choice.guid]" [attr.aria-label]="choice.name"><span><strong>{{ choice.name }}</strong><span class="equipment-sources">@for (source of choice.sources; track source.name) { <span><app-ui-icon [name]="source.icon" [size]="16"/>{{ source.name }}</span> }</span>@if (choice.reason) { <small>{{ choice.reason }}</small> }</span></label>
+          } @empty { <p class="v1-alert v1-alert--info">No source-compatible Energy meter groups are available for this facility.</p> }
+        </div>
+        <p class="mapping-help">Only one meter group can be linked for each energy source. Clear all selections to remove the links.</p>
+        @if (meterError()) { <p class="v1-alert v1-alert--warning" role="alert">{{ meterError() }}</p> }
+      } @else {
+        <div class="creation-choices">
+          @for (choice of categories; track choice.name) { <button type="button" class="creation-choice" [disabled]="stale() || state.session.pending()" [attr.aria-pressed]="category.value === choice.name" (click)="category.setValue(choice.name)"><app-ui-icon [name]="choice.icon" [size]="28"/><strong>{{ choice.name }}</strong></button> }
+        </div>
+      }
+      @if (stale()) { <p class="v1-alert v1-alert--warning" role="alert">Equipment changed while this panel was open. Cancel and reopen it.</p> }
+      @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
+      <button slideoutFooter type="button" class="v1-btn v1-btn--quiet" [disabled]="state.session.pending()" (click)="close()">Cancel</button>
+      <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="stale() || state.session.pending() || (current.kind === 'meters' ? !!meterError() : !category.value)" (click)="confirm()">Apply</button>
+    </app-workspace-slideout>
+  }
+</ng-template>

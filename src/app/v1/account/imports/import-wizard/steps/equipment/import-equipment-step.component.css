@@ -1,1 +1,28 @@
-:host { display: block; }
+@import '../../../../../shared/creation-flow/creation-flow.css';
+@import '../../../../../shared/data-workbench/results-table.css';
+:host { display: block; min-width: 0; }
+.equipment-group { border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.equipment-group + .equipment-group { margin-top: 1rem; }
+.equipment-group > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .75rem; background: var(--v1-content-block); border-bottom: 1px solid var(--v1-border); }
+h3 { display: flex; align-items: center; gap: .5rem; margin: 0; font-size: 1rem; overflow-wrap: anywhere; }
+h3 small, .mapping-help { color: var(--v1-muted); font-weight: 400; }
+.equipment-table-scroll { overflow-x: auto; }
+.equipment-table { width: 100%; table-layout: fixed; margin: 0; }
+.equipment-table th:nth-child(1) { width: 28%; }
+.equipment-table th:nth-child(2) { width: 23%; }
+.equipment-table th:nth-child(3) { width: 20%; }
+.equipment-table :is(th,td) { border: 0; border-bottom: 1px solid var(--v1-divider); vertical-align: middle; overflow-wrap: anywhere; white-space: normal; text-align: left; }
+.equipment-name, .equipment-sources > span { display: inline-flex; gap: .4rem; align-items: center; }
+.equipment-name { flex-wrap: wrap; }
+.equipment-name > app-ui-icon { flex-shrink: 0; }
+.equipment-status { flex-shrink: 0; white-space: nowrap; }
+.equipment-table tbody tr:last-child > td { border-bottom: 0; }
+.equipment-category, .equipment-meter-groups { max-width: 100%; white-space: normal; text-align: left; }
+.equipment-sources { display: flex; flex-wrap: wrap; gap: .4rem .7rem; }
+.meter-group-choices { display: grid; gap: .6rem; }
+label.meter-group-choice { display: flex; gap: .75rem; align-items: flex-start; padding: .85rem; margin: 0; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-surface); font-weight: 400; }
+.meter-group-choice > input { margin-top: .2rem; accent-color: var(--v1-action); }
+.meter-group-choice > span { display: grid; gap: .4rem; min-width: 0; overflow-wrap: anywhere; }
+.meter-group-choice small { color: var(--v1-muted); }
+.mapping-help { margin-top: 1rem; }
+@media (max-width: 700px) { .equipment-table { min-width: 44rem; } }

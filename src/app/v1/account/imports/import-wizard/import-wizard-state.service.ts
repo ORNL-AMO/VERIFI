@@ -1,3 +1,6 @@
+import { ENERGY_USE_CATEGORIES } from '@data/models/energy-use-options';
+import type { EquipmentType, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { footprintMeterGroupOptions, footprintMeterGroupError, footprintEquipmentLinks } from './footprint-equipment-mapping';
 import { EnergyUsesImportStateService } from './energy-uses-import-state.service';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -381,32 +384,30 @@ export class ImportWizardStateService {
   }
 
   setFootprintFacility(facilityId: string): void {
-    this.drafts.applyFootprintFacility(this.draft(), facilityId);
-    this.changed();
-  }
-
-  compatibleMeterGroups(equipmentIndex: number) {
     const draft = this.draft();
-    const equipment = draft.facilityEnergyUseEquipment[equipmentIndex];
-    const equipmentSources = new Set(equipment.utilityData.map(value => value.energySource));
-    return this.workspace.meterGroups().filter(group => group.facilityId === draft.selectedFacilityId &&
-      this.workspace.meters().some(meter => meter.groupId === group.guid && equipmentSources.has(meter.source)));
-  }
-
-  meterGroupSourceConflict(equipmentIndex: number, groupId: string): boolean {
-    const equipment = this.draft().facilityEnergyUseEquipment[equipmentIndex];
-    if (equipment.utilityMeterGroupIds.includes(groupId)) return false;
-    const selectedSources = new Set(this.workspace.meters()
-      .filter(meter => equipment.utilityMeterGroupIds.includes(meter.groupId))
-      .map(meter => meter.source));
-    return this.workspace.meters().some(meter => meter.groupId === groupId && selectedSources.has(meter.source));
-  }
-
-  toggleEquipmentMeterGroup(equipmentIndex: number, groupId: string, checked: boolean): void {
-    const equipment = this.draft().facilityEnergyUseEquipment[equipmentIndex];
-    if (checked && !equipment.utilityMeterGroupIds.includes(groupId)) equipment.utilityMeterGroupIds.push(groupId);
-    if (!checked) equipment.utilityMeterGroupIds = equipment.utilityMeterGroupIds.filter(id => id !== groupId);
+    if (draft.kind !== 'footprint-tool' || this.session.pending() || draft.selectedFacilityId === facilityId || !this.workspace.facilities().some(facility => facility.guid === facilityId && facility.accountId === this.workspace.account()?.guid)) return;
+    this.drafts.applyFootprintFacility(draft, facilityId);
+    for (const item of draft.facilityEnergyUseEquipment) item.utilityMeterGroupIds = [];
+    this.invalidateFromStep('facility');
     this.changed();
+  }
+
+  setFootprintEquipmentMapping(reviewed: readonly IdbFacilityEnergyUseEquipment[], mapping: { meterGroupIds: readonly string[] } | { category: EquipmentType }): boolean {
+    const draft = this.draft();
+    if (draft.kind !== 'footprint-tool' || this.session.pending() || !reviewed.length) return false;
+    const items = reviewed.map(before => draft.facilityEnergyUseEquipment.find(item => item.guid === before.guid));
+    if (items.some((item, index) => !item || JSON.stringify(item) !== JSON.stringify(reviewed[index]))) return false;
+    const current = items as IdbFacilityEnergyUseEquipment[];
+    const options = footprintMeterGroupOptions(this.workspace.account()?.guid ?? '', draft.selectedFacilityId, current, this.workspace.meterGroups(), this.workspace.meters());
+    if ('meterGroupIds' in mapping && footprintMeterGroupError(mapping.meterGroupIds, options)) return false;
+    if ('category' in mapping && !ENERGY_USE_CATEGORIES.includes(mapping.category)) return false;
+    for (const item of current) {
+      if ('meterGroupIds' in mapping) item.utilityMeterGroupIds = footprintEquipmentLinks(item, mapping.meterGroupIds, options);
+      else item.equipmentType = mapping.category;
+    }
+    this.invalidateFromStep('equipment');
+    this.changed();
+    return true;
   }
 
   hasUnsavedChanges(): boolean {

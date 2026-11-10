@@ -1,3 +1,4 @@
+import { IdbEntry } from '@data/models/idbModels/idbEntry';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
@@ -8,7 +9,6 @@ import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } fr
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { getEnergyUseUnit, setEnergyFootprintEnergyUse } from '@domain/calculations/energy-footprint/energyFootprintCalculations';
-import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +16,8 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 export class UploadDataFootprintToolService {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly groupIdentities = new WeakMap<IdbFacilityEnergyUseGroup, IdbEntry>();
+  private readonly equipmentIdentities = new WeakMap<IdbFacilityEnergyUseEquipment, IdbEntry & { energyUseGroupId: string }>();
 
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
@@ -176,37 +178,38 @@ export class UploadDataFootprintToolService {
   }
 
   setSelectedFacility(fileReference: FileReference): FileReference {
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (fileReference.selectedFacilityId));
-    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountWorkspaceQuery.getFacilityEnergyUseGroups(selectedFacility.guid);
-    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountWorkspaceQuery.getFacilityEnergyUseEquipment(selectedFacility.guid);
-    fileReference.facilityEnergyUseGroups.forEach(group => {
-      group.facilityId = selectedFacility.guid;
-      //check group exists
-      let existingGroup: IdbFacilityEnergyUseGroup = facilityEnergyUseGroups.find(facilityGroup => { return facilityGroup.name.toLowerCase() == group.name.toLowerCase() });
-      if (existingGroup) {
-        group.id = existingGroup.id;
-        let oldGuid = group.guid;
-        group.guid = existingGroup.guid;
-        //check equipment exists
-        fileReference.facilityEnergyUseEquipment.forEach(equipment => {
-          if (equipment.energyUseGroupId == oldGuid) {
-            equipment.energyUseGroupId = existingGroup.guid;
-            let groupEquipment: Array<IdbFacilityEnergyUseEquipment> = facilityEnergyUseEquipment.filter(facilityEquipment => { return facilityEquipment.energyUseGroupId == existingGroup.guid });
-            let existingEquipment: IdbFacilityEnergyUseEquipment = groupEquipment.find(equip => { return equip.name.toLowerCase() == equipment.name.toLowerCase() });
-            if (existingEquipment) {
-              equipment.id = existingEquipment.id;
-            } else {
-              delete equipment.id;
-            }
-          }
-        });
-      } else {
-        delete group.id;
+    const facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === fileReference.selectedFacilityId
+      && facility.accountId === this.accountWorkspaceStore.account()?.guid);
+    if (!facility) throw new Error('Select an available facility for this footprint upload.');
+    const savedGroups = this.accountWorkspaceQuery.getFacilityEnergyUseGroups(facility.guid);
+    const savedEquipment = this.accountWorkspaceQuery.getFacilityEnergyUseEquipment(facility.guid);
+    // Retain parsed identities so changing facilities cannot reuse a prior owner's GUID or key.
+    const identity = (entry: IdbEntry): IdbEntry => ({ guid: entry.guid, createdDate: entry.createdDate, modifiedDate: entry.modifiedDate });
+    for (const group of fileReference.facilityEnergyUseGroups) {
+      if (!this.groupIdentities.has(group)) this.groupIdentities.set(group, identity(group));
+    }
+    for (const equipment of fileReference.facilityEnergyUseEquipment) {
+      if (!this.equipmentIdentities.has(equipment)) this.equipmentIdentities.set(equipment, { ...identity(equipment), energyUseGroupId: equipment.energyUseGroupId });
+    }
+    for (const group of fileReference.facilityEnergyUseGroups) {
+      const parsedGroup = this.groupIdentities.get(group)!;
+      const existingGroup = savedGroups.find(saved => saved.name.toLowerCase() === group.name.toLowerCase());
+      group.guid = existingGroup?.guid ?? parsedGroup.guid;
+      group.createdDate = existingGroup?.createdDate ?? parsedGroup.createdDate;
+      if (existingGroup) group.id = existingGroup.id; else delete group.id;
+      group.facilityId = facility.guid;
+      for (const equipment of fileReference.facilityEnergyUseEquipment) {
+        const parsedItem = this.equipmentIdentities.get(equipment)!;
+        if (parsedItem.energyUseGroupId !== parsedGroup.guid) continue;
+        const existingItem = existingGroup && savedEquipment.find(saved => saved.energyUseGroupId === existingGroup.guid
+          && saved.name.toLowerCase() === equipment.name.toLowerCase());
+        equipment.guid = existingItem?.guid ?? parsedItem.guid;
+        equipment.createdDate = existingItem?.createdDate ?? parsedItem.createdDate;
+        if (existingItem) equipment.id = existingItem.id; else delete equipment.id;
+        equipment.energyUseGroupId = group.guid;
+        equipment.facilityId = facility.guid;
       }
-    });
-    fileReference.facilityEnergyUseEquipment.forEach(equipment => {
-      equipment.facilityId = selectedFacility.guid;
-    });
+    }
     return fileReference;
   }
 }

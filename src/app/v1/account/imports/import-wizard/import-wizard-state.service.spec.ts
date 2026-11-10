@@ -1,3 +1,4 @@
+import { energyUseItem } from '@app/v1/data/energy-uses/energy-uses.testing';
 import { EnergyUsesImportStateService } from './energy-uses-import-state.service';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
@@ -113,6 +114,25 @@ describe('ImportWizardStateService', () => {
       ]
     });
     service = TestBed.inject(ImportWizardStateService);
+  });
+
+  it('applies reviewed footprint links by source and categories only to the draft, and invalidates later review', () => {
+    const items = [energyUseItem({ accountId: 'account-1' }), energyUseItem({ guid: 'gas-item', accountId: 'account-1', utilityData: [{ energySource: 'Natural Gas' } as never] })];
+    workspaceMeterGroups.set([group({ guid: 'electric', accountId: 'account-1', facilityId: 'facility-a', groupType: 'Energy' }), group({ guid: 'gas', accountId: 'account-1', facilityId: 'facility-a', groupType: 'Energy' })]);
+    workspaceMeters.set([meter({ guid: 'electric-meter', accountId: 'account-1', facilityId: 'facility-a', groupId: 'electric', source: 'Electricity' }), meter({ guid: 'gas-meter', accountId: 'account-1', facilityId: 'facility-a', groupId: 'gas', source: 'Natural Gas' })]);
+    const draft = templateDraft({ kind: 'footprint-tool', selectedFacilityId: 'facility-a', facilityEnergyUseEquipment: items, completedSteps: ['facility', 'equipment', 'review'] });
+    service.initialize(draft);
+    const originalValues = structuredClone(items.map(item => item.utilityData));
+    expect(service.setFootprintEquipmentMapping(structuredClone(items), { meterGroupIds: ['electric', 'gas'] })).toBe(true);
+    expect(items.map(item => item.utilityMeterGroupIds)).toEqual([['electric'], ['gas']]);
+    expect(items.map(item => item.utilityData)).toEqual(originalValues);
+    expect(draft.completedSteps).toEqual(['facility']);
+    expect(service.setFootprintEquipmentMapping([structuredClone(items[1])], { category: 'Steam' })).toBe(true);
+    expect(items[1].equipmentType).toBe('Steam'); expect(items[0].equipmentType).toBe('Pump');
+    expect(commandCommit).not.toHaveBeenCalled();
+    const stale = structuredClone(items); items[0].notes = 'Changed after opening';
+    expect(service.setFootprintEquipmentMapping(stale, { meterGroupIds: [] })).toBe(false);
+    expect(items[0].utilityMeterGroupIds).toEqual(['electric']);
   });
 
   it('blocks a deep link beyond the first incomplete child route', () => {
