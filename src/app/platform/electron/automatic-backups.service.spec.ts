@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector } from '@angular/core';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -89,6 +89,20 @@ describe('AutomaticBackupsService', () => {
     );
     return { install, electron };
   }
+
+  it('blocks installation after optional backup metadata initialization fails until that metadata loads successfully', async () => {
+    store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
+    service.subscribeData();
+    electronBackupsDb.getAll.mockReturnValueOnce(throwError(() => new Error('registry offline')));
+    await expect(service.initializeMetadata()).rejects.toThrow('registry offline');
+    const { install, electron } = installer();
+    await expect(install.install()).rejects.toThrow('backup information could not be loaded');
+    await expect(install.install()).rejects.toThrow('backup information could not be loaded');
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+    await service.initializeMetadata();
+    await expect(install.install()).resolves.toBe(true);
+    expect(electron.installUpdate).toHaveBeenCalledOnce();
+  });
 
   function confirmationComponent(commands: WorkspaceCommandBoundary, update: (account: any) => Promise<any>) {
     return TestBed.runInInjectionContext(() => new ElectronBackupFileComponent(

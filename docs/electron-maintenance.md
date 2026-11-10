@@ -61,7 +61,7 @@ Local verification on November 10, 2026, against integration commit `34bd058d4`:
 | Check | Result and limitation |
 | --- | --- |
 | Clean `npm ci` with the configured toolchain | Passed. Electron's separate on-demand binary install and version verification passed. |
-| `npm run test:all:ci` | Passed: 21 Electron/release tests, 589 Angular tests, and 53 native browser tests. |
+| `npm run test:all:ci` | Passed: 21 Electron/release tests, 590 Angular tests, and 53 native browser tests. |
 | `npx tsc -p tsconfig.app.json --noEmit` | Passed. |
 | `npm run build-prod` and `npm run build-prod-electron` | Passed, with existing browser-support/CommonJS warnings. Restricted runs initially aborted with exit 134; reruns with the required execution access passed. |
 | `npm run dist-local -- --dir` and `npm run dist-local` | Passed on Apple Silicon without a certificate or provisioning profile. Generated the app, DMG, and ZIP; these are ad-hoc-signed, unnotarized development packages. |
@@ -79,5 +79,7 @@ Automatic saves remain queued during file validation, conflicts, and errors. Att
 Failed persistence commands remain blocking after settling, including on repeated restart attempts. A successful command for the same account/entity, explicit entity deletion, or catalog-confirmed account removal resolves them. Existing Save/Discard/Cancel navigation still handles unsaved drafts; a failed database operation needs successful persistence or owner removal. Delayed inspection outcomes stay with their original owner without changing another account's UI. A newer validated file inspection supersedes an older attachment request.
 
 Successful parent deletions also resolve retained failures for descendants proven removed from the committed workspace. Unrelated failures remain blocking. Installation acknowledgment, delayed native handoff, failure recovery, and the modal's dismissal prevention have dedicated regression coverage.
+
+An optional backup-metadata startup failure also blocks installation until successful metadata recovery, even when the rest of the application remains usable.
 
 Regression coverage includes retained conflicts, delayed inspection, failed-write recovery, delayed/failed archives, late failures across account switches, serialization, complete confirmation/account/final-backup sequences, disabled confirmation controls, both setup/settings callers with delayed file/registry/account operations, routed-view destruction, failed setup phases, canceled retries, and delayed dialogs after a switch. The full test suite and both renderer builds cover these final safeguards. Earlier packaging and native 39-to-45 checks predate them. The final-source Electron 45 launch verifies startup, IPC, profile relaunch, and controlled update UI; failed-save and installer fault scenarios are covered by automated tests and the release acceptance checklist, not a signed local update.

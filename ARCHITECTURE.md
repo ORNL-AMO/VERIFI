@@ -136,6 +136,8 @@ Backup issues remain associated with their owning account GUID across account sw
 
 An inspection retains its owner's missing-file, read, validation, or conflict outcome even after an account switch; current-account UI updates remain guarded separately. A newer inspection for that owner supersedes an older request, so an obsolete attachment cannot replace the validated result of a newly configured file.
 
+Backup metadata initialization is tracked too. Its failure can leave ordinary startup usable as an optional-integration error, but blocks update installation until the metadata loads successfully.
+
 Every JSON restore path first clones and prepares the file through [`backup-preparation.service.ts`](src/app/data/backup/backup-preparation.service.ts): validate the envelope and data version, run the same ordered migrations as local data, validate core GUID relationships, then remap GUIDs and persist. [`BackupImportCoordinator`](src/app/data/backup/backup-import-coordinator.service.ts) is the single coordinated restore entry point for account import, facility import, replacement, selective facility import, example-data loading, and Electron conflict flows. Missing version metadata means version `0`; future versions are rejected before replacement or import mutation.
 
 Migration recovery snapshots are a separate database-support format. They contain every store consumed by record migrations as ordinary JSON and deliberately omit the normal VERIFI backup envelope. Support repairs them offline and returns ordinary prepared account backups; the application never restores a recovery snapshot directly.

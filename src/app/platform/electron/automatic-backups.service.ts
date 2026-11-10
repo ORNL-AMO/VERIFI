@@ -48,6 +48,7 @@ export class AutomaticBackupsService {
   private catalogAccountGuids?: Set<string>;
   private nextInspectionId = 0;
   private readonly inspections = new Map<string, number>();
+  private metadataFailed = false;
   private queuedRevisionKey?: string;
   private accountSessionToken = 0;
   private warnedIssues = new Set<string>();
@@ -72,8 +73,18 @@ export class AutomaticBackupsService {
     this.observeWorkspace(this.workspaceStore.state());
   }
 
-  async initializeMetadata(): Promise<void> {
-    this.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
+  initializeMetadata(): Promise<void> {
+    return this.trackOperation(this.loadMetadata());
+  }
+
+  private async loadMetadata(): Promise<void> {
+    try {
+      this.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
+      this.metadataFailed = false;
+    } catch (error) {
+      this.metadataFailed = true;
+      throw error;
+    }
   }
 
   /** Only the persisted catalog can retire an owner; navigation and empty workspaces cannot. */
@@ -105,6 +116,9 @@ export class AutomaticBackupsService {
       if (token !== this.accountSessionToken) throw new Error('The active account changed. Try restarting again.');
       this.observeWorkspace(this.workspaceStore.state());
       if (this.pendingOperations.size) continue;
+      if (this.metadataFailed) {
+        throw new Error('Automatic backup information could not be loaded. Close and reopen VERIFI before installing the update.');
+      }
       if (this.status.value === 'conflict' || this.status.value === 'error') {
         throw new Error('Resolve the automatic backup issue before restarting to install the update.');
       }
