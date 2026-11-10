@@ -73,6 +73,7 @@ export class ApplicationLifecycleService {
 
   async refreshAccountCatalog(): Promise<readonly IdbAccount[]> {
     const accounts = sortAccounts(await firstValueFrom(this.accounts.getAll()));
+    this.automaticBackups.reconcileAccounts(accounts);
     this.writableAccountCatalog.set(accounts);
     return accounts;
   }

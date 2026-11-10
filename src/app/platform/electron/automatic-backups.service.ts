@@ -45,6 +45,7 @@ export class AutomaticBackupsService {
   private readonly failedRevisions = new Map<string, string>();
   private readonly fileConfigurations = new Map<string, Promise<boolean>>();
   private readonly fileReviews = new Map<string, Promise<void>>();
+  private catalogAccountGuids?: Set<string>;
   private queuedRevisionKey?: string;
   private accountSessionToken = 0;
   private warnedIssues = new Set<string>();
@@ -71,6 +72,22 @@ export class AutomaticBackupsService {
 
   async initializeMetadata(): Promise<void> {
     this.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
+  }
+
+  /** Only the persisted catalog can retire an owner; navigation and empty workspaces cannot. */
+  reconcileAccounts(accounts: readonly IdbAccount[]): void {
+    this.catalogAccountGuids = new Set(accounts.filter(account => !account.deleteAccount).map(account => account.guid));
+    for (const issues of [this.archiveFailures, this.setupFailures, this.reviewFailures, this.attachedIssues, this.failedRevisions]) {
+      for (const guid of issues.keys()) if (!this.catalogAccountGuids.has(guid)) issues.delete(guid);
+    }
+  }
+
+  private retainOwner(accountGuid: string): boolean {
+    return !this.catalogAccountGuids || this.catalogAccountGuids.has(accountGuid);
+  }
+
+  private retainFailedRevision(accountGuid: string, revision: string): void {
+    if (this.retainOwner(accountGuid)) this.failedRevisions.set(accountGuid, revision);
   }
 
   get hasPendingOperations(): boolean {
@@ -123,7 +140,7 @@ export class AutomaticBackupsService {
         await this.backupGateway.write(path, backup);
         this.archiveFailures.delete(accountGuid);
       } catch (error) {
-        this.archiveFailures.add(accountGuid);
+        if (this.retainOwner(accountGuid)) this.archiveFailures.add(accountGuid);
         this.warnOnce(`archive-write-failed:${accountGuid}`, 'Automatic Archive Failed',
           error instanceof Error ? error.message : 'The backup archive could not be written.');
         throw error;
@@ -145,13 +162,15 @@ export class AutomaticBackupsService {
   }
 
   /** A confirmation can archive, import, and submit commands; keep its entire continuation tracked. */
-  confirmFileReview(accountGuid: string, confirm: () => Promise<void>): Promise<void> {
+  confirmFileReview(accountGuid: string, confirm: (replaceOwner: (guid: string) => void) => Promise<void>): Promise<void> {
     const existing = this.fileReviews.get(accountGuid);
     if (existing) return existing;
-    const operation = Promise.resolve().then(confirm).then(() => {
+    let ownerGuid = accountGuid;
+    const operation = Promise.resolve().then(() => confirm(guid => { ownerGuid = guid; })).then(() => {
       this.reviewFailures.delete(accountGuid);
+      this.reviewFailures.delete(ownerGuid);
     }, error => {
-      this.reviewFailures.add(accountGuid);
+      if (this.retainOwner(ownerGuid)) this.reviewFailures.add(ownerGuid);
       throw error;
     });
     this.fileReviews.set(accountGuid, operation);
@@ -186,7 +205,7 @@ export class AutomaticBackupsService {
       this.failedRevisions.delete(account.guid);
       return true;
     } catch (error) {
-      if (writeStarted) {
+      if (writeStarted && this.retainOwner(account.guid)) {
         this.setupFailures.add(account.guid);
         this.warnOnce(`setup-write-failed:${account.guid}`, 'Automatic Backup Setup Failed',
           error instanceof Error ? error.message : 'The automatic backup file could not be configured.');
@@ -235,7 +254,7 @@ export class AutomaticBackupsService {
   overwriteFile(): Promise<void> {
     const accountGuid = this.account?.guid;
     return this.trackOperation(this.writeAttachedFile().catch(error => {
-      if (accountGuid) this.failedRevisions.set(accountGuid, `${accountGuid}:overwrite`);
+      if (accountGuid) this.retainFailedRevision(accountGuid, `${accountGuid}:overwrite`);
       if (accountGuid === this.account?.guid) this.setStatus('error');
       throw error;
     }));
@@ -252,7 +271,7 @@ export class AutomaticBackupsService {
       return;
     }
     if (!exists) {
-      this.failedRevisions.set(account.guid, `${account.guid}:overwrite`);
+      this.retainFailedRevision(account.guid, `${account.guid}:overwrite`);
       this.latestBackupFile.next(undefined);
       this.setStatus('error');
       this.warnOnce('missing', 'Missing Backup File', 'The selected automatic backup file no longer exists. Choose a new backup location for this account.');
@@ -380,7 +399,7 @@ export class AutomaticBackupsService {
         return;
       }
       if (!exists) {
-        this.failedRevisions.set(account.guid, revisionKey);
+        this.retainFailedRevision(account.guid, revisionKey);
         this.latestBackupFile.next(undefined);
         this.setStatus('error');
         this.warnOnce('missing', 'Missing Backup File', 'The selected automatic backup file no longer exists. Choose a new backup location for this account.');
@@ -398,7 +417,7 @@ export class AutomaticBackupsService {
       this.latestBackupFile.next(this.backupPreparation.prepare(backup));
       this.setStatus('ready');
     } catch (error) {
-      this.failedRevisions.set(account.guid, revisionKey);
+      this.retainFailedRevision(account.guid, revisionKey);
       if (token !== this.accountSessionToken) {
         return;
       }
@@ -499,7 +518,7 @@ export class AutomaticBackupsService {
 
   private setStatus(status: AutomaticBackupStatus): void {
     if (this.account?.guid) {
-      if (status === 'error' || status === 'conflict') this.attachedIssues.set(this.account.guid, status);
+      if ((status === 'error' || status === 'conflict') && this.retainOwner(this.account.guid)) this.attachedIssues.set(this.account.guid, status);
       if (status === 'ready') this.attachedIssues.delete(this.account.guid);
     }
     if (this.status.value !== status) {

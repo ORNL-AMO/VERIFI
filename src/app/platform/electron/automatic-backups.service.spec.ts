@@ -287,6 +287,47 @@ describe('AutomaticBackupsService', () => {
     await expect(service.flushPending()).resolves.toBeUndefined();
   });
 
+  it('retires a replaced owner only when the persisted catalog confirms removal', async () => {
+    service.reconcileAccounts([snapshot('account-a').account, snapshot('account-b').account]);
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await service.inspectCurrentAccountFile();
+    expect(service.status.value).toBe('conflict');
+    store.publish(snapshot('account-b', { dataBackupFilePath: undefined }));
+    service.reconcileAccounts([snapshot('account-a').account, store.account()]);
+    await expect(service.flushPending()).rejects.toThrow('backup issue');
+    service.reconcileAccounts([{ ...snapshot('account-a').account, deleteAccount: true }, store.account()]);
+    await expect(service.flushPending()).resolves.toBeUndefined();
+  });
+
+  it('retains a confirmation failure for the replacement owner after the original owner is retired', async () => {
+    store.publish(snapshot('account-b', { dataBackupFilePath: undefined }));
+    service.subscribeData();
+    service.reconcileAccounts([store.account()]);
+    await expect(service.confirmFileReview('account-a', async replaceOwner => {
+      replaceOwner('account-b');
+      throw new Error('replacement save failed');
+    })).rejects.toThrow('replacement save failed');
+    await expect(service.flushPending()).rejects.toThrow('backup issue');
+    await service.confirmFileReview('account-b', async () => undefined);
+    await expect(service.flushPending()).resolves.toBeUndefined();
+  });
+
+  it('waits for a retired owner archive to settle without recreating its failure after confirmed removal', async () => {
+    service.reconcileAccounts([snapshot('account-a').account]);
+    store.publish(snapshot('account-a', { dataBackupFilePath: undefined }));
+    service.subscribeData();
+    const archive = deferred<void>();
+    gateway.write.mockReturnValueOnce(archive.promise);
+    const written = expect(service.writeArchive('/tmp/removed.json', exportCoordinator.buildActiveAccountBackup())).rejects.toThrow('old disk error');
+    store.clear();
+    service.reconcileAccounts([]);
+    const blocked = expect(service.flushPending()).rejects.toThrow('old disk error');
+    archive.reject(new Error('old disk error'));
+    await Promise.all([written, blocked]);
+    await expect(service.flushPending()).resolves.toBeUndefined();
+  });
+
   it('retains a failed attached revision across switches and rewrites it only after validating its owner file', async () => {
     service.accountBackups = [{ accountId: 'account-a', dataBackupId: 'registry-id' } as any];
     store.publish(snapshot('account-a'));

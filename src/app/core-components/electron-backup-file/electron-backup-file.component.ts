@@ -148,7 +148,7 @@ export class ElectronBackupFileComponent {
       account: { ...this.account }, archiveOption: this.archiveOption, overwriteOption: this.overwriteOption,
       differingBackups: this.differingBackups, latestBackupFile: this.latestBackupFile
     };
-    this.confirmation = this.automaticBackupsService.confirmFileReview(decision.account.guid, () => this.applyConfirmedActions(decision))
+    this.confirmation = this.automaticBackupsService.confirmFileReview(decision.account.guid, replaceOwner => this.applyConfirmedActions(decision, replaceOwner))
       .then(() => {
         this.confirming = false;
         this.hideModal();
@@ -160,7 +160,7 @@ export class ElectronBackupFileComponent {
     return this.confirmation;
   }
 
-  private async applyConfirmedActions(decision: Pick<ElectronBackupFileComponent, 'account' | 'archiveOption' | 'overwriteOption' | 'differingBackups' | 'latestBackupFile'>) {
+  private async applyConfirmedActions(decision: Pick<ElectronBackupFileComponent, 'account' | 'archiveOption' | 'overwriteOption' | 'differingBackups' | 'latestBackupFile'>, replaceOwner: (guid: string) => void = () => {}) {
     const account = decision.account;
     const accountGuid = account.guid;
     const archiveOption = decision.archiveOption;
@@ -190,6 +190,7 @@ export class ElectronBackupFileComponent {
           let sharedFileAuthor: string = account.sharedFileAuthor;
           let isSharedBackupFile: boolean = account.isSharedBackupFile;
           const newAccount = await this.backupImportCoordinator.replaceActiveAccount(backupFile);
+          replaceOwner(newAccount.guid);
           await this.commandBoundary.execute(
             { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' ,
               publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
