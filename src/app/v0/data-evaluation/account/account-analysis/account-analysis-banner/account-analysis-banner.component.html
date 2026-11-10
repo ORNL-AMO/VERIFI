@@ -1,7 +1,7 @@
 @let _analysisStatusCheck = analysisStatusCheck();
 @let _accountAnalysisItem = accountAnalysisItem();
 
-@if (!inDashboard() && _accountAnalysisItem && _analysisStatusCheck) {
+@if (!inDashboard() && _accountAnalysisItem) {
 <div class="analysis banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen()}">
   <div>
     <ul class="nav nav-tabs">
@@ -9,24 +9,25 @@
         <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
           <i class="fa fa-gears"></i>
           Analysis Setup
-          @if (_analysisStatusCheck.accountAnalysisSetupErrors.hasSetupErrors) {
+          @if (_analysisStatusCheck?.accountAnalysisSetupErrors.hasSetupErrors) {
           <span class="fa fa-exclamation-triangle text-warning"></span>
           }
         </a>
       </li>
-      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.accountAnalysisSetupErrors.hasSetupErrors}">
+      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck?.accountAnalysisSetupErrors.hasSetupErrors}">
         <a class="nav-link" routerLink="select-items" [routerLinkActive]="['active']">
           <i class="fa fa-list-check"></i>
           Select Facility Items
           <!--'warning' = warnings in facilities-->
-          @if (_analysisStatusCheck.accountAnalysisSetupErrors.facilitiesSelectionsInvalid ||
-          _analysisStatusCheck.facilityAnalysisHasWarnings) {
+          @if (_analysisStatusCheck?.accountAnalysisSetupErrors.facilitiesSelectionsInvalid ||
+          _analysisStatusCheck?.facilityAnalysisHasWarnings) {
           <span class="fa fa-exclamation-triangle text-warning"></span>
           }
         </a>
       </li>
-      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.accountAnalysisSetupErrors.hasError}">
-        <a class="nav-link" routerLink="results" [routerLinkActive]="['active']">
+      <li class="nav-item" [ngClass]="{'disabled': !_analysisStatusCheck || _analysisStatusCheck.accountAnalysisSetupErrors.hasError}">
+        <a class="nav-link" [routerLink]="_analysisStatusCheck && !_analysisStatusCheck.accountAnalysisSetupErrors.hasError ? ['results'] : null"
+          [attr.aria-disabled]="!_analysisStatusCheck || _analysisStatusCheck.accountAnalysisSetupErrors.hasError" [routerLinkActive]="['active']">
           <i class="fa fa-magnifying-glass-chart"></i>
           Analysis Results</a>
       </li>

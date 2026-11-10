@@ -6,7 +6,6 @@ import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.
 import { AnnualAnalysisSummary } from '@data/models/analysis';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
     selector: 'app-annual-account-analysis',
@@ -17,7 +16,7 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 export class AnnualAccountAnalysisComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  accountAnalysisItem: IdbAccountAnalysisItem;
+  readonly accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis;
   account: IdbAccount;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   calculating: boolean | 'error';
@@ -34,7 +33,6 @@ export class AnnualAccountAnalysisComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
 
     this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.account = val;

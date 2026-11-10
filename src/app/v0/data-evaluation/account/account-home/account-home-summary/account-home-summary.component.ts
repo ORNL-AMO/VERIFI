@@ -8,6 +8,9 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { EmailStatusCode, EmailVerifiBackupService } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.service';
+import { ToastNotificationsService } from '@app/shared/notifications/toast-notifications.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-account-home-summary',
@@ -34,8 +37,12 @@ export class AccountHomeSummaryComponent {
     return (accountMeterData.length == 0);
   });
 
+  showEmailModal: boolean = false;
+  emailStatusSubscription: Subscription;
 
-  constructor() {
+  constructor(private toastNotificationsService: ToastNotificationsService,
+    private emailVerifiBackupService: EmailVerifiBackupService
+  ) {
     effect(() => {
       const loadingContext = this.navigationAfterLoading();
       if (loadingContext === 'export-facilities-to-excel') {
@@ -43,6 +50,19 @@ export class AccountHomeSummaryComponent {
         this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
+  }
+
+  ngOnInit() {
+    this.emailStatusSubscription = this.emailVerifiBackupService.emailStatus
+      .subscribe(status => {
+        this.closeEmailModal(status);
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.emailStatusSubscription) {
+      this.emailStatusSubscription.unsubscribe();
+    }
   }
 
   navigateTo(urlStr: string) {
@@ -76,5 +96,29 @@ export class AccountHomeSummaryComponent {
 
   goToDataManagement() {
     this.router.navigateByUrl('/data-management/' + this.account().guid + '/import-data');
+  }
+
+  openEmailModal() {
+    this.showEmailModal = true;
+  }
+
+  closeEmailModal(status?: EmailStatusCode) {
+    this.showEmailModal = false;
+    if (status) {
+      switch (status) {
+        case 'success':
+          this.toastNotificationsService.showToast('Email sent successfully!', undefined, 5000, false, "alert-success");
+          break;
+        case 'failed':
+          this.toastNotificationsService.showToast('Email sending failed!', undefined, 5000, false, "alert-danger");
+          break;
+        case 'content-too-large':
+          this.toastNotificationsService.showToast('Email content too large.', undefined, 5000, false, "alert-warning");
+          break;
+        default:
+          this.toastNotificationsService.showToast('There was an error sending the email.', undefined, 5000, false, "alert-danger");
+          break;
+      }
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { canDeactivateGuard } from '@v0/routing/can-deactivate.guard';
 import { Route } from "@angular/router";
 import { AccountAnalysisDashboardComponent } from "@v0/data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-dashboard.component";
 import { AccountAnalysisResultsComponent } from "@v0/data-evaluation/account/account-analysis/account-analysis-results/account-analysis-results.component";
@@ -43,6 +44,7 @@ export const AccountRoutes: Route = {
     path: 'account',
     component: AccountComponent,
     canActivate: [accountReadyGuard],
+    runGuardsAndResolvers: 'always',
     children: [
         {
             path: '',
@@ -97,8 +99,8 @@ export const AccountRoutes: Route = {
                         { path: '', component: AccountAnalysisDetailsTableComponent }
                     ]
                 },
-                { path: 'setup', component: AccountAnalysisSetupComponent },
-                { path: 'select-items', component: SelectFacilityAnalysisItemsComponent },
+                { path: 'setup', component: AccountAnalysisSetupComponent, canDeactivate: [canDeactivateGuard] },
+                { path: 'select-items', component: SelectFacilityAnalysisItemsComponent, canDeactivate: [canDeactivateGuard] },
                 {
                     path: 'results',
                     component: AccountAnalysisResultsComponent,

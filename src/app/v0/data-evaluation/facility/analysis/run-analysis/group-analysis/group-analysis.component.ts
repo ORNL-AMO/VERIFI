@@ -1,7 +1,7 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
-import { Component, computed, effect, inject, Signal } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
+import { Component, computed, effect, inject, Signal, ViewChild } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Params, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -19,12 +19,25 @@ import { isBankedGroupConfigurationComplete } from '@shared/shared-analysis/bank
   standalone: false
 })
 export class GroupAnalysisComponent {
+  @ViewChild(RouterOutlet) private outlet: RouterOutlet;
+
+  canDeactivate(): Promise<boolean> {
+    const child = this.outlet?.isActivated ? this.outlet.component as { canDeactivate?: () => Promise<boolean> | boolean } : undefined;
+    return Promise.resolve(child?.canDeactivate?.() ?? true);
+  }
+
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private router: Router = inject(Router);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private analysisService: AnalysisService = inject(AnalysisService);
+
+  readonly calendarizationState = toSignal(this.accountStatusCheckService.calendarizationState);
+
+  retryDataChecks(): void {
+    this.accountStatusCheckService.retryCalendarization();
+  }
 
   analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   params: Signal<Params> = toSignal(this.activatedRoute.params);

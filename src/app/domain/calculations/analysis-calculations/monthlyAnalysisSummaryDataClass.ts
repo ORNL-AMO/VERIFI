@@ -189,17 +189,7 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 
     calculateRegressionModeledEnergy(predictorVariables: Array<AnalysisGroupPredictorVariable>): number {
-        let modeledEnergy: number = 0;
-        predictorVariables.forEach(variable => {
-            let usageVal: number = 0;
-            this.monthPredictorData.forEach(data => {
-                if (data.predictorId == variable.id) {
-                    usageVal = usageVal + data.amount;
-                }
-            });
-            modeledEnergy = modeledEnergy + (usageVal * variable.regressionCoefficient);
-        });
-        modeledEnergy = modeledEnergy + this.group.regressionConstant;
+        const modeledEnergy = calculateRegressionModeledEnergy(predictorVariables, this.monthPredictorData, this.group.regressionConstant);
         this.isPredictorDataMissing(predictorVariables);
         return modeledEnergy;
     }
@@ -348,4 +338,20 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 }
 
+/** Shared regression expression; callers apply their existing nonnegative display/calculation boundary. */
+export function calculateRegressionModeledEnergy(
+    predictorVariables: readonly AnalysisGroupPredictorVariable[],
+    monthPredictorData: readonly IdbPredictorData[],
+    regressionConstant: number
+): number {
+    let modeledEnergy = 0;
+    predictorVariables.forEach(variable => {
+        let usage = 0;
+        monthPredictorData.forEach(data => {
+            if (data.predictorId == variable.id) usage += data.amount;
+        });
+        modeledEnergy += usage * variable.regressionCoefficient;
+    });
+    return modeledEnergy + regressionConstant;
+}
 

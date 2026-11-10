@@ -1,7 +1,7 @@
 @let _analysisStatusCheck = analysisStatusCheck();
 @let _analysisItem = analysisItem();
 
-@if (inRunAnalysis() && _analysisStatusCheck && _analysisItem) {
+@if (inRunAnalysis() && _analysisItem) {
 <div class="analysis banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen()}">
   <div>
     <ul class="nav nav-tabs">
@@ -9,25 +9,25 @@
         <a class="nav-link" routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">
           <i class="fa fa-gears"></i>
           Analysis Setup
-          @if (_analysisStatusCheck.hasSetupErrors) {
+          @if (_analysisStatusCheck?.hasSetupErrors) {
           <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
       </li>
       @for (groupListItem of groupsList(); track groupListItem.group.idbGroupId) {
-      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.hasSetupErrors}">
+      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck?.hasSetupErrors}">
         <a class="nav-link" routerLink="run-analysis/group-analysis/{{groupListItem.group.idbGroupId}}"
           [routerLinkActive]="['active']">
           <i class="fa fa-file-edit"></i>
           {{groupListItem.group.idbGroupId | groupName}}
-          @if (groupListItem.groupStatusCheck.status !== 'good') {
+          @if (groupListItem.groupStatusCheck && groupListItem.groupStatusCheck.status !== 'good') {
           <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
       </li>
       }
-      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.status === 'error'}">
-        <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">
+      <li class="nav-item" [ngClass]="{'disabled': !_analysisStatusCheck || _analysisStatusCheck.status === 'error'}">
+        <a class="nav-link" [routerLink]="_analysisStatusCheck && _analysisStatusCheck.status !== 'error' ? ['run-analysis/facility-analysis'] : null" [attr.aria-disabled]="!_analysisStatusCheck || _analysisStatusCheck.status === 'error'" [routerLinkActive]="['active']">
           <i class="fa fa-magnifying-glass-chart"></i>Facility
           Summary</a>
       </li>
