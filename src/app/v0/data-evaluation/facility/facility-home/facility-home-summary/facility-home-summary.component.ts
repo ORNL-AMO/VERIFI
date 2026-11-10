@@ -10,6 +10,9 @@ import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-t
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { getLatestMeterData } from '@shared/dateHelperFunctions';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
+import { ToastNotificationsService } from '@app/shared/notifications/toast-notifications.service';
+import { EmailStatusCode, EmailVerifiBackupService } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.service';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -42,7 +45,12 @@ export class FacilityHomeSummaryComponent {
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
 
-  constructor() {
+  showEmailModal: boolean = false;
+  emailStatusSubscription: Subscription;
+
+  constructor(private toastNotificationsService: ToastNotificationsService,
+    private emailVerifiBackupService: EmailVerifiBackupService
+  ) {
     effect(() => {
       const loadingContext = this.navigationAfterLoading();
       if (loadingContext === 'export-facilities-to-excel') {
@@ -50,6 +58,19 @@ export class FacilityHomeSummaryComponent {
         this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
+  }
+
+  ngOnInit() {
+    this.emailStatusSubscription = this.emailVerifiBackupService.emailStatus
+      .subscribe(status => {
+        this.closeEmailModal(status);
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.emailStatusSubscription) {
+      this.emailStatusSubscription.unsubscribe();
+    }
   }
 
   navigateTo(urlStr: string) {
@@ -81,5 +102,29 @@ export class FacilityHomeSummaryComponent {
 
   goToDataManagement() {
     this.router.navigateByUrl('/data-management/' + this.facility().accountId + '/facilities/' + this.facility().guid);
+  }
+
+  openEmailModal() {
+    this.showEmailModal = true;
+  }
+
+  closeEmailModal(status?: EmailStatusCode) {
+    this.showEmailModal = false;
+    if (status) {
+      switch (status) {
+        case 'success':
+          this.toastNotificationsService.showToast('Email sent successfully!', undefined, 5000, false, "alert-success");
+          break;
+        case 'failed':
+          this.toastNotificationsService.showToast('Email sending failed!', undefined, 5000, false, "alert-danger");
+          break;
+        case 'content-too-large':
+          this.toastNotificationsService.showToast('Email content too large.', undefined, 5000, false, "alert-warning");
+          break;
+        default:
+          this.toastNotificationsService.showToast('There was an error sending the email.', undefined, 5000, false, "alert-danger");
+          break;
+      }
+    }
   }
 }
