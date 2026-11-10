@@ -53,6 +53,16 @@ The desktop workflow owns its renderer and installer artifacts. Refer to its upl
 
 Artifacts expire according to the `retention-days` values on their upload steps. When retrying a deployment, first confirm its required artifacts are still available in the workflow run. If they have expired, rerun the full workflow so deployment cannot consume output from a different commit.
 
+## macOS hosted runner and verification
+
+The [desktop workflow](../.github/workflows/release_desktop.yml) pins macOS packaging to `macos-26`, an Apple Silicon hosted runner, and installs the Node version configured by the project. It continues to produce universal Intel/Apple Silicon installers. The build-host migration tracked in [#2825](https://github.com/ORNL-AMO/VERIFI/issues/2825) does not intentionally change supported application OS versions; the Electron upgrade remains separate in [#2530](https://github.com/ORNL-AMO/VERIFI/issues/2530).
+
+Before notarization, the job uses `lipo -verify_arch x86_64 arm64` to check the packaged executable and `codesign --verify --deep --strict` to verify the application signature. It requires exactly one matching DMG, an `Accepted` notarization response, and successful stapling and ticket validation before uploading the macOS artifacts.
+
+The first production run after the migration must confirm dependency installation, universal packaging, signing, notarization, artifact collection, and draft-release creation succeed. Confirm production web deployment starts only after the desktop workflow succeeds. Before publishing the draft, review its installers, blockmaps, and updater metadata, then install and launch the Mac package on Intel and Apple Silicon, including a supported older macOS version. These signing and installer checks require the production workflow and maintainer verification; pull-request checks do not exercise them.
+
+GitHub retired macOS 14 runners on November 2, 2026. Fix and retry a failed release under the existing release policy rather than reverting to the retired runner. See the [retirement notice](https://github.blog/changelog/2026-10-01-github-actions-macos-14-runner-image-retirement/) and [runner reference](https://github.com/actions/runner-images#available-images).
+
 ## Concurrent releases
 
 Runs from `master` share the `verifi-production-release` concurrency group, which prevents simultaneous signing, notarization, draft creation, and deployment. GitHub does not guarantee FIFO ordering for runs waiting on a concurrency group. The release-policy sequence guard therefore requires the preceding `master` commit to have its matching release tag and a successful completed CI/CD run before a later commit can build or deploy. Development and pull-request runs use run-specific groups and remain parallel.
