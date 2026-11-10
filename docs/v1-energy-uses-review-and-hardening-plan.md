@@ -133,7 +133,7 @@ The first restricted fast-test attempt exited 134 after browser-support warnings
 | E6 | Named annual presentation types replace parent-component inference. A pure utility selection policy serves Settings and meter selection. Setup values/normalization and three-way reconciliation have focused pure modules behind the existing public imports. | Pure policy cases, unchanged setup mapping/reconciliation coverage, annual rendering, and type-check. |
 | E7 | Energy Uses and Account Analysis import one semantic member-rail stylesheet while retaining workflow content, borders, and actions locally. | Shared-consumer component/browser checks and production compilation. |
 
-Chart restoration, group results destinations, Excel export, and broader Phase 5 release acceptance remain separate migration work. The disconnected History presentation and its useful projection helpers are retained until the results destination is designed.
+The separate [Phase 4E–4G results follow-up](v1-energy-uses-migration-plan.md#phases-4e4g--complete-group-results-and-inventory-charts) now implements Group Summary, Group Footprint, Facility Footprint and inventory treemap polish, retaining the committed projection rules and removing the disconnected item History presentation. Excel export and broader Phase 5 release acceptance remain separate migration work. The review scope and validation above remain historical hardening evidence.
 
 ### Remediation validation
 

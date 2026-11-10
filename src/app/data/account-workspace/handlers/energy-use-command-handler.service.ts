@@ -106,6 +106,26 @@ export class EnergyUseCommandHandler {
     });
   }
 
+  /** Delete a reviewed group and its complete membership as one durable operation. */
+  async deleteGroupWithItems(identity: EnergyUseGroupIdentity, reviewedGroup: IdbFacilityEnergyUseGroup,
+    reviewedItems: readonly IdbFacilityEnergyUseEquipment[]): Promise<void> {
+    await this.transactions.runTransaction(['facilities', 'facilityEnergyUseGroups', 'facilityEnergyUseEquipment'], 'readwrite', async tx => {
+      await this.requireFacility(tx, identity);
+      const group = await this.requireGroup(tx, identity, identity.energyUseGroupGuid);
+      if (group.id === undefined || JSON.stringify(group) !== JSON.stringify(reviewedGroup)) this.reject('The saved group changed. Review its deletion again.');
+      const members = (await tx.getAll<IdbFacilityEnergyUseEquipment>('facilityEnergyUseEquipment'))
+        .filter(item => item.energyUseGroupId === group.guid);
+      const ordered = (items: readonly IdbFacilityEnergyUseEquipment[]) => [...items].sort((a, b) => a.guid.localeCompare(b.guid));
+      if (JSON.stringify(ordered(members)) !== JSON.stringify(ordered(reviewedItems))) this.reject('The group items changed. Review the group deletion again.');
+      for (const item of members) {
+        this.requireItemOwner(item, identity);
+        if (item.id === undefined) this.reject('The saved group items are invalid.');
+      }
+      for (const item of members) await tx.deleteByKey('facilityEnergyUseEquipment', item.id!);
+      await tx.deleteByKey('facilityEnergyUseGroups', group.id);
+    });
+  }
+
   async applyBatch(accountGuid: string, changes: readonly EnergyUseBatchChange[]): Promise<void> {
     const reviewed = structuredClone(changes);
     if (!reviewed.length || new Set(reviewed.map(row => row.before.guid)).size !== reviewed.length) this.reject('Choose a nonempty set of unique energy uses.');

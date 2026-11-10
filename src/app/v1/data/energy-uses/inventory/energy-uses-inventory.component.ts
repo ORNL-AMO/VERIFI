@@ -75,7 +75,11 @@ export class EnergyUsesInventoryComponent {
     const registry = inject(InventoryHeaderActionsRegistry, { optional: true });
     const unregister = registry?.registerCreation({ resource: 'energy-uses', label: 'Add energy use', canCreate: this.canCreate, create: () => this.openCreation() });
     this.destroy.onDestroy(() => { unregister?.(); this.closeCreation(); });
-    effect(() => { if (this.creating() && this.creationIdentity !== this.creationKey()) this.closeCreation(); });
+    effect(() => {
+      // Reloading saved changes temporarily clears the derived inventory scope.
+      // Keep the creation host alive until the committed scope is available again.
+      if (this.creating() && this.workspace.ready() && this.creationIdentity !== this.creationKey()) this.closeCreation();
+    });
   }
   openCreation(): void {
     if (!this.canCreate() || !this.creationDrawer) return;

@@ -1,7 +1,9 @@
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import type { EnergyUseGroupSettings } from '@data/account-workspace/handlers/energy-use-command.models';
 import { EnergyUseActionsService } from '../../energy-use-actions.service';
 import { EnergyUsesModule } from '../../energy-uses.module';
@@ -16,8 +18,9 @@ function setup() {
   const items = computed(() => buildEnergyUseInventory('account-a', store.facilities(), store.energyUseEquipment(), store.energyUseGroups()));
   const context = { energyUseGroupGuid: signal('group-a'), facilityGuid: signal('facility-a'), energyUseGuid: signal(undefined), key: signal('group-a'),
     itemRoute: (guid: string) => ['/items', guid],
+    inventoryLink: () => ({ route: ['/inventory'], queryParams: { facility: 'facility-a' } }),
     group: computed(() => store.energyUseGroups().length ? { unavailable: false } : undefined), items, workspace: { account: store.account } };
-  const actions = { updateGroupSettings: vi.fn(async (_identity, value: EnergyUseGroupSettings) => {
+  const actions = { deleteGroup: vi.fn<EnergyUseActionsService['deleteGroup']>(async () => {}), recoverPublication: vi.fn(async () => {}), updateGroupSettings: vi.fn(async (_identity, value: EnergyUseGroupSettings) => {
     store.publish({ ...store.snapshot()!, energyUseGroups: store.energyUseGroups().map(group => ({ ...group, ...value })) }); return value;
   }) };
   TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [provideRouter([]), EnergyUseWorkbenchHeaderService,
@@ -29,6 +32,46 @@ function setup() {
 }
 
 describe('Setup Group editing', () => {
+  it('offers group deletion at the bottom, reviews the complete membership, and cancels without writing', () => {
+    const { fixture, component, actions } = setup();
+    const button = fixture.nativeElement.querySelector('.energy-use-group-actions button') as HTMLButtonElement;
+    expect(button.disabled).toBe(false); button.click(); fixture.detectChanges();
+    expect(TestBed.inject(ModalPortalService).workspaceBlocked()).toBe(true);
+    expect(component.deletionReview()?.items).toHaveLength(1);
+    component.cancelDelete();
+    expect(actions.deleteGroup).not.toHaveBeenCalled();
+    expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+    component.form.controls.name.setValue(' '); fixture.detectChanges();
+    expect(button.disabled).toBe(true);
+  });
+  it('rejects a stale membership review, retains rejected deletes for retry, and returns to the scoped inventory after success', async () => {
+    const { fixture, component, actions, store } = setup();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    component.requestDelete();
+    store.publish({ ...store.snapshot()!, energyUseEquipment: store.energyUseEquipment().map(item => ({ ...item, notes: 'Changed' })) }); fixture.detectChanges();
+    expect(component.deletionStale()).toBe(true); await component.confirmDelete();
+    expect(actions.deleteGroup).not.toHaveBeenCalled();
+    component.cancelDelete(); component.requestDelete();
+    actions.deleteGroup.mockRejectedValueOnce(new Error('Write failed'));
+    await component.confirmDelete();
+    expect(component.deletionError()).toBe('Write failed'); expect(component.canDelete()).toBe(true);
+    await component.confirmDelete();
+    expect(actions.deleteGroup).toHaveBeenCalledTimes(2);
+    expect(navigate).toHaveBeenCalledWith(['/inventory'], { queryParams: { facility: 'facility-a' } });
+    expect(component.deletionReview()).toBeUndefined();
+  });
+  it('uses refresh-only recovery after committed group deletion and blocks repeated deletion or dismissal', async () => {
+    const { component, actions } = setup();
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    actions.deleteGroup.mockRejectedValueOnce(new WorkspaceWriteError('stale-workspace', 'Refresh failed', undefined, true));
+    component.requestDelete(); await component.confirmDelete();
+    expect(component.deletionCommitted()).toBe(true); expect(component.isNavigationBlocked()).toBe(true);
+    component.cancelDelete(); await component.confirmDelete();
+    expect(component.deletionReview()).toBeDefined(); expect(actions.deleteGroup).toHaveBeenCalledTimes(1);
+    await component.recoverDeletion();
+    expect(actions.recoverPublication).toHaveBeenCalledWith('account-a');
+    expect(actions.deleteGroup).toHaveBeenCalledTimes(1); expect(component.deleted()).toBe(true);
+  });
   it('opens without writes and autosaves normalized metadata while preserving raw equivalent text and items', async () => {
     vi.useFakeTimers();
     try {

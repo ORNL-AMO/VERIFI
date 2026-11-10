@@ -214,7 +214,18 @@ describe('energy use workbench routes', () => {
     await workbench.openCreated(created); await harness.fixture.whenStable(); harness.detectChanges();
     expect(workbench.creating()).toBe(false); expect(router.url).toBe(path('new-member'));
   });
-
+  it('opens a created item in its new group when creation started in another group', async () => {
+    const { harness, store, snapshot, router } = await setup();
+    const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
+    workbench.openCreation(); harness.detectChanges();
+    const group = energyUseGroup({ guid: 'new-group', name: 'Roasting' });
+    const created = energyUseItem({ guid: 'new-member', energyUseGroupId: group.guid });
+    store.publish({ ...snapshot, energyUseGroups: [...snapshot.energyUseGroups, group], energyUseEquipment: [...snapshot.energyUseEquipment, created] });
+    await workbench.openCreated(created); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(workbench.creating()).toBe(false);
+    expect(router.url).toBe(path('new-member', 'new-group'));
+    expect(harness.routeDebugElement!.query(By.directive(EnergyUseSettingsComponent))).toBeTruthy();
+  });
   it('opens the first item created in an empty group without a competing default navigation', async () => {
     const { harness, store, snapshot, router } = await setup();
     store.publish({ ...snapshot, energyUseEquipment: [] });

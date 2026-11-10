@@ -1,7 +1,7 @@
 @if (initialized()) {
   <section class="v1-workbench-section" aria-label="Group settings">
     @if (!group()) { <p class="v1-alert v1-alert--warning" role="alert">The saved group is no longer available. Your draft has been retained.</p> }
-    <header class="energy-use-group-heading"><h2>Group information</h2><app-energy-use-save-status [state]="editor.state()" [message]="message()" [canRetry]="!!group() && !editor.saving()" (retryRequested)="editor.retry()"/></header>
+    <header class="energy-use-group-heading"><h2>Group information</h2><app-energy-use-save-status [state]="editor.state()" [message]="message()" [canRetry]="!!group() && !blocked()" (retryRequested)="editor.retry()"/></header>
     <form [formGroup]="form" (ngSubmit)="editor.saveNow()" aria-label="Energy-use group setup">
       <label class="v1-field"><span>Group name</span><input class="v1-input" type="text" formControlName="name" required [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.dirty ? 'true' : null" [attr.aria-describedby]="form.controls.name.invalid && form.controls.name.dirty ? 'energy-use-group-name-error' : null"></label>
       @if (form.controls.name.invalid && form.controls.name.dirty) { <p id="energy-use-group-name-error" class="v1-alert v1-alert--warning" role="alert">Enter an energy-use group name.</p> }
@@ -18,3 +18,23 @@
     <app-energy-use-equipment-table [canOpen]="canManage()" [canCreate]="creation()?.canCreate() ?? false" (createRequested)="creation()?.create()"/>
   </section>
 }
+@if (group() && !deleted()) {
+  <section class="v1-workbench-section energy-use-group-actions">
+    <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDelete()"><app-ui-icon name="delete"/>Delete Group</button>
+  </section>
+}
+@if (deleted()) {
+  <section class="v1-workbench-section"><p role="status">Group deleted.</p><a [routerLink]="context.inventoryLink().route" [queryParams]="context.inventoryLink().queryParams">Back to energy uses</a></section>
+}
+@if (deletionError() && !deletionReview()) { <p class="v1-alert v1-alert--danger" role="alert">{{ deletionError() }}</p> }
+<ng-template #deleteConfirmation>
+  @if (deletionReview(); as review) {
+    <app-confirmation-dialog title="Delete Group?" titleId="energy-use-delete-group-title" cancelAriaLabel="Cancel group deletion" confirmLabel="Delete Group" confirmIcon="delete" [disabled]="deleting() || deletionCommitted()" [busy]="deleting()" [confirmDisabled]="deletionStale()" (confirmed)="confirmDelete()" (cancelled)="cancelDelete()">
+      <p>Delete <strong>{{ review.group.name }}</strong> and its <strong>{{ review.items.length }} {{ review.items.length === 1 ? 'energy use item' : 'energy use items' }}</strong>?</p>
+      <p>All item settings, annual assumptions, consumption values, and manual overrides will be permanently deleted. Linked meters and meter groups will remain.</p>
+      @if (deletionStale() && !deletionCommitted()) { <p class="v1-alert v1-alert--warning" role="alert">The group or its items changed. Cancel and review the deletion again.</p> }
+      @if (deletionError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ deletionError() }}</p> }
+      @if (deletionCommitted()) { <button type="button" class="v1-btn v1-btn--action" [disabled]="deleting()" (click)="recoverDeletion()">Refresh saved changes</button> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
