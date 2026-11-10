@@ -51,7 +51,7 @@ jobs:
 
   bundle_mac:
     if: github.ref_name == 'master'
-    runs-on: macos-14
+    runs-on: macos-26
     needs: [build]
     steps:
       - name: Checkout
@@ -68,7 +68,7 @@ jobs:
         with:
           node-version: ${{ needs.build.outputs.NODE_VERSION }}
       - name: Cache setup
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
@@ -80,20 +80,20 @@ jobs:
           APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
           APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
         run: |
-          CERT_A_PATH=$RUNNER_TEMP/app_certificate.p12
-          PROV_PROF_PATH=$RUNNER_TEMP/AMO.provisionprofile
-          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
+          CERT_A_PATH="$RUNNER_TEMP/app_certificate.p12"
+          PROV_PROF_PATH="$RUNNER_TEMP/AMO.provisionprofile"
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
 
-          echo -n "$APPLE_CERT_A_BASE64" | base64 --decode -o $CERT_A_PATH
-          echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode -o $PROV_PROF_PATH
+          echo -n "$APPLE_CERT_A_BASE64" | base64 --decode -o "$CERT_A_PATH"
+          echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode -o "$PROV_PROF_PATH"
 
-          security -v create-keychain -p "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security -v default-keychain -s $KEYCHAIN_PATH
-          security -v unlock-keychain -p "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
+          security -v create-keychain -p "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security -v default-keychain -s "$KEYCHAIN_PATH"
+          security -v unlock-keychain -p "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
 
-          security -v import $CERT_A_PATH -P "$APPLE_CERT_SECRET" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
+          security -v import "$CERT_A_PATH" -P "$APPLE_CERT_SECRET" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
 
           cp "$PROV_PROF_PATH" ./embedded.provisionprofile
       - name: Install dependencies
@@ -102,14 +102,29 @@ jobs:
         run: npm run build-prod-electron
       - name: Package [Mac]
         run: npm run dist-nopublish -- --mac --universal
+      - name: Verify [Mac]
+        run: |
+          lipo -verify_arch x86_64 arm64 "output/mac-universal/VERIFI.app/Contents/MacOS/VERIFI"
+          codesign --verify --deep --strict --verbose=2 "output/mac-universal/VERIFI.app"
       - name: Notarize
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          xcrun notarytool submit --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" $(find ./output -name "VERIFI-*.*.*.dmg")
-          xcrun stapler staple $(find ./output -name "VERIFI-*.*.*.dmg")
+          shopt -s nullglob
+          DMG_PATHS=(output/VERIFI-*.*.*.dmg)
+          if [[ ${#DMG_PATHS[@]} -ne 1 ]]; then
+            echo "Expected exactly one VERIFI DMG; found ${#DMG_PATHS[@]}." >&2
+            exit 1
+          fi
+          BUNDLE_PATH="${DMG_PATHS[0]}"
+          NOTARIZATION_PATH="$RUNNER_TEMP/notarization.json"
+
+          xcrun notarytool submit "$BUNDLE_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" --output-format json > "$NOTARIZATION_PATH"
+          node -e 'const result = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); if (result.status !== "Accepted") { console.error("Notarization failed:", result.status); process.exit(1); }' "$NOTARIZATION_PATH"
+          xcrun stapler staple "$BUNDLE_PATH"
+          xcrun stapler validate "$BUNDLE_PATH"
       - name: Prepare output
         id: output
         run: |
@@ -152,7 +167,7 @@ jobs:
         with:
           node-version: ${{ needs.build.outputs.NODE_VERSION }}
       - name: Cache setup
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
@@ -245,7 +260,7 @@ jobs:
           path: release/
           merge-multiple: true
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         # if: startsWith(github.ref, 'refs/tags/') # Uncomment if enabling tag gating
         with:
           name: VERIFI v${{ env.VERSION }}
