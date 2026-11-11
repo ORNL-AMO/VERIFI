@@ -20,6 +20,7 @@
           @if (editor.form.controls.name.invalid) { <p id="visualization-name-error" role="alert">Enter a name.</p> }
           <p>Scope: {{ scopeLabel() }}</p>
           @for (source of sourceSummary(); track source.id) { <p>{{ source.familyLabel }} · {{ source.measure }}</p> }
+          @for (source of sourceEditors(); track source.id) { <ng-container *ngComponentOutlet="source.component; inputs: source.inputs"/> }
           <p>Period: {{ periodSummary() }}</p><p>Comparison: {{ definition.comparison.kind }}</p>
           <p>Chart: {{ chartSummary() }}</p>
           <p>Your chart choice and source families are saved. Detailed source selection and chart settings will become available as their editors are added.</p>
@@ -29,7 +30,10 @@
           <label class="visualization-workbench__checkbox"><input formControlName="legend" type="checkbox">Show legend</label>
         </section>
       </form>
-      <section class="visualization-workbench__preview" aria-label="Visualization preview"><h2>Preview</h2><p>Preview support will be available with the selected source and chart adapters.</p></section>
+      <section class="visualization-workbench__preview" aria-label="Visualization preview"><h2>Preview</h2>
+        @if (previewActive()) { <app-visualization-preview [definition]="definition" [identity]="previewIdentity()" [active]="previewActive()"/> }
+        @else { <p role="status">Preview is paused while the owning workspace or saved source relationships are unavailable. Saved intent and local input are retained.</p> }
+      </section>
     </div>
   } @else {
     <div class="v1-empty-state" role="status"><h2>Visualization unavailable</h2><p>It may have been deleted, belong to another account, or use an unsupported format. Its saved content is preserved.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="back()">Return to Dashboard</button></div>
