@@ -1,6 +1,6 @@
 import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { Injectable, signal } from '@angular/core';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { visualizationTransferMaps, mergeVisualizationTransferMaps, transferSavedVisualization, summarizeVisualizationImport, VisualizationImportSummary } from './visualization-backup';
 import { VisualizationGuidMaps } from '@domain/visualizations/visualization-references';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';

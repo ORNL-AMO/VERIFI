@@ -4,7 +4,8 @@ import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { IdbSavedVisualization, readSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { visualizationReferences } from '@domain/visualizations/visualization-references';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { BackupImportCommandService } from './backup-import-command.service';

@@ -1,5 +1,5 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { analysisVisualizationFixture, energyUseVisualizationFixture, utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
@@ -7,7 +7,7 @@ import { createVisualizationDefinition, VisualizationDefinition } from '@domain/
 
 export function savedVisualizationFixture(definition: VisualizationDefinition, guid = 'visualization-a'): IdbSavedVisualization {
   return { guid, accountId: definition.accountGuid, ...(definition.scope.kind === 'facility' ? { facilityId: definition.scope.facilityGuid } : {}),
-    recordVersion: 1, revision: 3, createdDate: '2026-01-01T00:00:00.000Z', modifiedDate: '2026-01-02T00:00:00.000Z', definition };
+    recordVersion: 1, revision: 3, createdDate: new Date('2026-01-01T00:00:00.000Z'), modifiedDate: new Date('2026-01-02T00:00:00.000Z'), definition };
 }
 
 export function visualizationBackupSnapshot(): AccountWorkspaceSnapshot {

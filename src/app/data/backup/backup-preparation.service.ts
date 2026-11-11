@@ -1,4 +1,5 @@
-import { IdbSavedVisualization, savedVisualizationEnvelopeError } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
 import { Injectable } from '@angular/core';
 import { BackupFile } from '@data/models/backup-file';
 import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '@data/indexedDB/data-migrations/data-migration.errors';

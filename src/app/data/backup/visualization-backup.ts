@@ -2,7 +2,7 @@ import { AnalysisGroup } from '@data/models/analysis';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { BackupFile } from '@data/models/backup-file';
-import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { remapVisualizationDefinition, VisualizationGuidMaps, VisualizationReferenceKind, visualizationReferenceKey } from '@domain/visualizations/visualization-references';
 

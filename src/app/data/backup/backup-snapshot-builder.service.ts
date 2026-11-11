@@ -1,5 +1,5 @@
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
-import { savedVisualizationEnvelopeError } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
 import { Injectable } from '@angular/core';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { CURRENT_DATA_VERSION } from '@data/indexedDB/data-migrations/data-migration.models';

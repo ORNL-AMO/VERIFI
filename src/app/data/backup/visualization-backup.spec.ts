@@ -2,7 +2,7 @@ import { BackupPreparationService } from './backup-preparation.service';
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
 import { savedVisualizationFixture, visualizationBackupSnapshot } from './visualization-backup.testing';
 import { transferSavedVisualization, summarizeVisualizationImport, visualizationTransferMaps } from './visualization-backup';
-import { readSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 
 describe('saved visualization backup preparation and transfer', () => {
