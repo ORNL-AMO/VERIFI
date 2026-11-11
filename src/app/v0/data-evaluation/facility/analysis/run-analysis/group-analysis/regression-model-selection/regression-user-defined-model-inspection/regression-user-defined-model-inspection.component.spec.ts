@@ -41,7 +41,7 @@ function fixture(): AccountWorkspaceSnapshot {
     facilities: [{ id: 1, guid: 'facility-a', accountId: 'account-a' }],
     facilityAnalyses: [{ id: 1, guid: 'analysis-a', accountId: 'account-a', facilityId: 'facility-a', energyUnit: 'MMBtu', waterUnit: 'gal', groups: [group] }],
     accountAnalyses: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
-    accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot;
 }
 

@@ -49,7 +49,7 @@ function createHarness() {
   store.publish({
     account, facilities: [facility], facilityAnalyses: [facilityAnalysis], accountAnalyses: [accountAnalysis],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot, { facility });
   const facilityWrites: IdbAnalysisItem[] = [];
   const accountWrites: IdbAccountAnalysisItem[] = [];

@@ -14,6 +14,6 @@ export function reportSnapshot(reports: readonly IdbFacilityReport[] = [reportFi
     account: reportAccount, facilities: [reportFacility], facilityReports: reports,
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], customEmissions: [], customFuels: [],
-    customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []
   };
 }

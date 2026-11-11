@@ -63,7 +63,7 @@ describe('account analysis results request', () => {
       { guid: 'predictor-reading-b', facilityId: 'facility-b', predictorId: 'predictor-b', amount: 4 }
     ], accountAnalyses: [analysis],
     accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-    energyUseGroups: [], energyUseEquipment: []
+    energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot;
 
   it('includes selected facility analyses and their banking dependencies', () => {

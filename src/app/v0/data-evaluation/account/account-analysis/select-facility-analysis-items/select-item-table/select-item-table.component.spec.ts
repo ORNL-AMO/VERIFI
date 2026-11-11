@@ -76,7 +76,7 @@ describe('SelectItemTableComponent', () => {
       customFuels: [],
       customGWPs: [],
       energyUseGroups: [],
-      energyUseEquipment: []
+      energyUseEquipment: [], savedVisualizations: []
     } as unknown as AccountWorkspaceSnapshot;
     store.publish(snapshot, { facility, accountAnalysis: selectedAnalysisItem });
 

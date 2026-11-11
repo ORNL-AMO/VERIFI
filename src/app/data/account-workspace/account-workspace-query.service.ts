@@ -17,10 +17,16 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceQueryService {
   constructor(private store: AccountWorkspaceStore) { }
+
+  getSavedVisualizationByGuid(guid: string): IdbSavedVisualization | undefined {
+    const record = this.store.savedVisualizations().find(item => item.guid === guid);
+    return record ? structuredClone(record) : undefined;
+  }
 
   getFacilityByGuid(guid: string): IdbFacility | undefined {
     const facility = this.store.facilities().find(item => item.guid === guid);

@@ -144,7 +144,7 @@ describe('Energy-use backup relationships in Chromium', () => {
       harness.getAll<IdbFacilityEnergyUseEquipment & IndexedDbTestRecord>('facilityEnergyUseEquipment')
     ]);
     const owned = <T extends { accountId: string }>(items: T[]) => items.filter(item => item.accountId === accountGuid);
-    return { account: accounts.find(item => item.guid === accountGuid), facilities: owned(facilities), meterGroups: owned(meterGroups),
+    return { savedVisualizations: [], account: accounts.find(item => item.guid === accountGuid), facilities: owned(facilities), meterGroups: owned(meterGroups),
       energyUseGroups: owned(energyUseGroups), energyUseEquipment: owned(energyUseEquipment),
       meters: [], meterData: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [],
       accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [] };
@@ -164,7 +164,7 @@ function energyUseSnapshot(): AccountWorkspaceSnapshot {
     noLongerInUse: { isNoLongerInUse: true, year: 2025 } };
   const orphan = { ...structuredClone(equipment), guid: 'orphaned-equipment', name: 'Orphaned equipment',
     energyUseGroupId: 'missing-energy-group', utilityMeterGroupIds: [meterGroup.guid, 'missing-meter-group'] };
-  return { account, facilities: [facility], meterGroups: [meterGroup], energyUseGroups: [energyGroup], energyUseEquipment: [equipment, orphan],
+  return { savedVisualizations: [], account, facilities: [facility], meterGroups: [meterGroup], energyUseGroups: [energyGroup], energyUseEquipment: [equipment, orphan],
     meters: [], meterData: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [], accountReports: [],
     facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [] };
 }

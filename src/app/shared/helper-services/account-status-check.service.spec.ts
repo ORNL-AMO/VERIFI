@@ -88,6 +88,6 @@ function createSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
     account: { guid: accountGuid, name: 'Existing Account' } as any,
     facilities: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []
   };
 }

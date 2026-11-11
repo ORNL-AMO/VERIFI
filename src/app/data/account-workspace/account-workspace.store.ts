@@ -45,6 +45,7 @@ export class AccountWorkspaceStore {
   readonly customGWPs = computed(() => this.snapshot()?.customGWPs ?? []);
   readonly energyUseGroups = computed(() => this.snapshot()?.energyUseGroups ?? []);
   readonly energyUseEquipment = computed(() => this.snapshot()?.energyUseEquipment ?? []);
+  readonly savedVisualizations = computed(() => this.snapshot()?.savedVisualizations ?? []);
   readonly selections = computed(() => this.state().selections);
   readonly selectedFacility = computed(() => this.selections().facility);
   readonly selectedMeter = computed(() => this.selections().meter);
@@ -71,6 +72,8 @@ export class AccountWorkspaceStore {
   readonly selectedFacilityReports = computed(() => this.forSelectedFacility(this.facilityReports()));
   readonly facilityEnergyUseGroups = computed(() => this.forSelectedFacility(this.energyUseGroups()));
   readonly facilityEnergyUseEquipment = computed(() => this.forSelectedFacility(this.energyUseEquipment()));
+
+  readonly facilitySavedVisualizations = computed(() => this.forSelectedFacility(this.savedVisualizations()));
 
   readonly pendingOperations = computed(() => this.state().pendingOperations);
   readonly hasPending = computed(() => this.state().pendingOperations.length > 0);
@@ -217,6 +220,7 @@ export class AccountWorkspaceStore {
 function copySnapshot(snapshot: AccountWorkspaceSnapshot): AccountWorkspaceSnapshot {
   return {
     account: snapshot.account,
+    savedVisualizations: [...snapshot.savedVisualizations],
     facilities: [...snapshot.facilities],
     meters: [...snapshot.meters],
     meterData: [...snapshot.meterData],

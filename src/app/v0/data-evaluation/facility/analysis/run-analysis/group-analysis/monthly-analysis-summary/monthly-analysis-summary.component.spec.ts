@@ -239,5 +239,5 @@ function createSnapshot(accountGuid = 'account-a'): AccountWorkspaceSnapshot {
     groups: ['group-a', 'group-b'].map(id => ({ ...getNewAnalysisGroup(id, []), regressionConstant: 10 })) };
   return { account, facilities: [facility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [],
-    customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] };
+    customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: [] };
 }

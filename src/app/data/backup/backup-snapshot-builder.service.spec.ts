@@ -143,6 +143,7 @@ describe('WorkspaceBackupSnapshotBuilder', () => {
 
 function createSnapshot(): AccountWorkspaceSnapshot {
   return {
+    savedVisualizations: [],
     account: {
       guid: 'account-a',
       name: 'Account A',

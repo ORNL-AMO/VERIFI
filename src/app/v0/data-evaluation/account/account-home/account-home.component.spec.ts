@@ -167,6 +167,6 @@ function createSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
       modifiedDate: new Date(2026, 0, 1)
     } as any],
     accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-    energyUseGroups: [], energyUseEquipment: []
+    energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []
   };
 }

@@ -19,6 +19,12 @@ describe('AccountWorkspaceLoaderService', () => {
 
     expect(snapshot.facilities.map(item => item.guid)).toEqual(['facility-a', 'facility-b']);
 
+    repositories.savedVisualizations.getAllAccountVisualizations.mockResolvedValue([
+      { id: 3, guid: 'chart-b', accountId: 'account-b' }
+    ]);
+    await expect(loader.load('account-a')).rejects.toThrow('savedVisualizations query returned data belonging to another account');
+    repositories.savedVisualizations.getAllAccountVisualizations.mockResolvedValue([]);
+
     repositories.meters.getAllAccountMeters.mockResolvedValue([
       { id: 1, guid: 'meter-b', accountId: 'account-b' }
     ]);
@@ -37,6 +43,7 @@ describe('AccountWorkspaceLoaderService', () => {
     expect(repositories.facilities.getAllAccountFacilities).toHaveBeenCalled();
     expect(repositories.meters.getAllAccountMeters).toHaveBeenCalled();
     expect(repositories.energyUseEquipment.getAllAccountEnergyUseEquipment).toHaveBeenCalled();
+    expect(repositories.savedVisualizations.getAllAccountVisualizations).toHaveBeenCalled();
 
     facilities.resolve([]);
     await expect(load).resolves.toMatchObject({ account: { guid: 'account-a' } });
@@ -267,7 +274,8 @@ function createRepositories() {
     customFuels: { getAllAccountCustomFuels: empty() },
     customGWPs: { getAllAccountCustomGWP: empty() },
     energyUseGroups: { getAllAccountEnergyUseGroups: empty() },
-    energyUseEquipment: { getAllAccountEnergyUseEquipment: empty() }
+    energyUseEquipment: { getAllAccountEnergyUseEquipment: empty() },
+    savedVisualizations: { getAllAccountVisualizations: empty() }
   };
 }
 
@@ -288,7 +296,8 @@ function createLoader(repositories: ReturnType<typeof createRepositories>): Acco
     repositories.customFuels as any,
     repositories.customGWPs as any,
     repositories.energyUseGroups as any,
-    repositories.energyUseEquipment as any
+    repositories.energyUseEquipment as any,
+    repositories.savedVisualizations as any
   );
 }
 
@@ -316,7 +325,7 @@ function createSnapshot(accountGuid: string, accountId: number): AccountWorkspac
     facilities: [{ id: 11, guid: `${accountGuid}-facility`, accountId: accountGuid }] as any,
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   };
 }
 

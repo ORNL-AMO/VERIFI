@@ -293,6 +293,6 @@ function createSnapshot(accountGuid: string, facilityGuid?: string): AccountWork
     facilities: facilityGuid ? [{ id: 20, guid: facilityGuid, accountId: accountGuid, name: facilityGuid }] : [],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot;
 }

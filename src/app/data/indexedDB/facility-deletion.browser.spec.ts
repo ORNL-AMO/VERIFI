@@ -102,7 +102,7 @@ describe('facility deletion in Chromium', () => {
     expect(await harness.getAll('facilities')).toEqual([accountBFixture.facility]);
 
     for (const { storeName } of FACILITY_DELETION_CHILD_STORES) {
-      expect(await harness.getAll(storeName)).toEqual(accountBFixture.seed[storeName]);
+      expect(await harness.getAll(storeName)).toEqual(accountBFixture.seed[storeName] ?? []);
     }
 
     const reports = await harness.getAll('accountReports');

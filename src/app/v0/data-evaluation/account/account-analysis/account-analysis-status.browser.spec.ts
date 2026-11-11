@@ -35,7 +35,7 @@ function createHarness(withStatus = true) {
   store.publish({
     account, facilities: [facility], facilityAnalyses: [model], accountAnalyses: [analysis],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot, { facility, accountAnalysis: analysis });
   const modelStatus = { status: 'good' };
   const goodStatus = {
@@ -150,7 +150,7 @@ function createFooterHarness(page: 'setup' | 'select-items') {
     account: { id: 1, guid: 'account-a' }, facilities: [facility], accountAnalyses: [analysis],
     facilityAnalyses: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-    energyUseGroups: [], energyUseEquipment: []
+    energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot, { accountAnalysis: analysis });
   const status = new BehaviorSubject<any>({
     getAccountAnalysisStatusCheckById: () => ({ accountAnalysisSetupErrors: { hasSetupErrors: false } })

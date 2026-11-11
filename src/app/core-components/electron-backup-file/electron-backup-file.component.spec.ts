@@ -248,6 +248,6 @@ function buildPreparedBackupFile(): PreparedBackupFile {
     customGWPs: [],
     facilityReports: [],
     facilityEnergyUseGroups: [],
-    facilityEnergyUseEquipment: []
+    savedVisualizations: [], facilityEnergyUseEquipment: []
   };
 }

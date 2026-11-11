@@ -80,7 +80,7 @@ describe('AccountWorkspaceQueryService', () => {
       facilities: [{ id: 3, guid: 'facility-c', accountId: 'account-b' }] as any,
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
     });
 
     expect(query.getFacilityByGuid('facility-a')).toBeUndefined();
@@ -130,6 +130,6 @@ function createSnapshot(): AccountWorkspaceSnapshot {
       facilityId: 'facility-a',
       analysisReportSettings: { reportYear: 2024 }
     }] as any,
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   };
 }

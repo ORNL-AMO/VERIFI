@@ -2,6 +2,7 @@ import { firstValueFrom } from 'rxjs';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from '@data/indexedDB/testing/indexed-db-test-fixtures';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { IndexedDbAccessService } from '@data/indexedDB/indexed-db-access.service';
+import { SavedVisualizationsDbService } from '@data/indexedDB/saved-visualizations-db.service';
 import { AccountWorkspaceLoaderService } from './account-workspace-loader.service';
 
 describe('Account workspace loading in Chromium', () => {
@@ -37,7 +38,8 @@ describe('Account workspace loading in Chromium', () => {
       { getAllAccountCustomFuels: byAccount('customFuels').load } as any,
       { getAllAccountCustomGWP: byAccount('customGWP').load } as any,
       { getAllAccountEnergyUseGroups: byAccount('facilityEnergyUseGroups').load } as any,
-      { getAllAccountEnergyUseEquipment: byAccount('facilityEnergyUseEquipment').load } as any
+      { getAllAccountEnergyUseEquipment: byAccount('facilityEnergyUseEquipment').load } as any,
+      new SavedVisualizationsDbService(harness.dbService, access)
     );
 
     const snapshot = await loader.load(accountAFixture.account.guid as string);

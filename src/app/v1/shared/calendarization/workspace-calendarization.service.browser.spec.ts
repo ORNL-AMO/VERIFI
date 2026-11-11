@@ -108,7 +108,7 @@ function workspaceSnapshot(accountGuid: string, energyUse: number): AccountWorks
     account: accountValue, facilities: [facilityValue], meters: [meterValue],
     meterData: [reading({ accountId: accountGuid, facilityId: 'facility-a', meterId: 'meter-a', totalEnergyUse: energyUse })],
     meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [], accountReports: [],
-    facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   };
 }
 

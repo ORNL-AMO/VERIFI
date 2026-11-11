@@ -36,7 +36,7 @@ describe('Calendarization request reuse in Chromium', () => {
       account: { guid: 'account-a', energyUnit: 'MMBtu', assessmentReportVersion: 'AR6' },
       facilities: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
     } as any);
     TestBed.flushEffects();
     expect(starts).toBe(1);

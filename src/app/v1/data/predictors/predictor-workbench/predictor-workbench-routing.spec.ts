@@ -125,7 +125,7 @@ async function setupRoute(tab: 'settings' | 'readings') {
       createdDate: new Date('2026-01-01'), modifiedDate: new Date('2026-01-01')
     }], facilityAnalyses: [], accountAnalyses: [],
     accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-    energyUseGroups: [], energyUseEquipment: [] };
+    energyUseGroups: [], savedVisualizations: [], energyUseEquipment: [] };
   store.publish(snapshot, { facility: selectedFacility });
   const harness = await RouterTestingHarness.create(`/predictors/predictor-a/${tab}`);
   return { harness, store, snapshot, selectedFacility, updateSettings, updatePredictorReading };

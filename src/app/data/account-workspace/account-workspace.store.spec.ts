@@ -2,6 +2,25 @@ import { AccountWorkspaceSnapshot } from './account-workspace.models';
 import { AccountWorkspaceStore } from './account-workspace.store';
 
 describe('AccountWorkspaceStore', () => {
+  it('publishes saved definitions atomically and derives facility-owned definitions without changing selections', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    const base = {
+      recordVersion: 1, revision: 1, createdDate: '2026-11-11', modifiedDate: '2026-11-11',
+      accountId: snapshot.account.guid, definition: { version: 999 }
+    };
+    const portfolio = { ...base, guid: 'portfolio-chart', id: 1 };
+    const facility = { ...base, guid: 'facility-chart', id: 2, facilityId: snapshot.facilities[0].guid };
+    store.publish({ ...snapshot, savedVisualizations: [portfolio, facility] }, { facility: snapshot.facilities[0] });
+    expect(store.savedVisualizations()).toEqual([portfolio, facility]);
+    expect(store.facilitySavedVisualizations()).toEqual([facility]);
+    expect(store.committedRevision()).toBeUndefined();
+    store.publishCommittedPatch({ collections: [{ collection: 'savedVisualizations', deleteGuids: [portfolio.guid] }] });
+    expect(store.savedVisualizations()).toEqual([facility]);
+    expect(store.selectedFacility()?.guid).toBe(snapshot.facilities[0].guid);
+    expect(store.committedRevision()).toEqual({ accountGuid: snapshot.account.guid, revision: 1 });
+  });
+
   it('publishes a complete snapshot atomically and derives facility collections', () => {
     const store = new AccountWorkspaceStore();
     const snapshot = createSnapshot();
@@ -245,6 +264,7 @@ function createSnapshot(): AccountWorkspaceSnapshot {
   ] as any;
   return {
     account: { id: 1, guid: 'account-a', name: 'Account A' } as any,
+    savedVisualizations: [],
     facilities,
     meters: [
       { id: 1, guid: 'meter-a', facilityId: 'facility-a', accountId: 'account-a' },

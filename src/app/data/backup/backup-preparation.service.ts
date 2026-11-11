@@ -170,6 +170,7 @@ export function backupToMigrationData(backup: BackupFile): MigrationData {
     customFuels: backup.customFuels,
     customGWPs: backup.customGWPs,
     energyUseGroups: backup.facilityEnergyUseGroups,
+    savedVisualizations: backup.savedVisualizations ?? [],
     energyUseEquipment: backup.facilityEnergyUseEquipment
   };
 }
@@ -196,6 +197,7 @@ function applyMigrationDataToBackup(backup: BackupFile, data: MigrationData): vo
   backup.customGWPs = data.customGWPs;
   backup.facilityEnergyUseGroups = data.energyUseGroups;
   backup.facilityEnergyUseEquipment = data.energyUseEquipment;
+  backup.savedVisualizations = data.savedVisualizations;
 }
 
 function validateCoreRelationships(backup: BackupFile): void {
