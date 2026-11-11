@@ -121,4 +121,4 @@ export class WorkbenchComponent {
   }
 }
 
-export const visualizationLeaveGuard: CanDeactivateFn<WorkbenchComponent> = component => component.resolveLeave();
+export const visualizationLeaveGuard: CanDeactivateFn<WorkbenchComponent> = () => inject(UnsavedChangesService).resolveNavigationPreflight();

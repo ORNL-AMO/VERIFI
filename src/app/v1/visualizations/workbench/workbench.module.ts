@@ -5,6 +5,7 @@ import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-di
 import { EditorConflictReviewComponent } from '@app/v1/data/editing/editor-conflict-review/editor-conflict-review.component';
 import { WorkbenchComponent } from './workbench.component';
 import { PreviewModule } from '../preview/preview.module';
+import { RecoveryModule } from '../recovery/recovery.module';
 
-@NgModule({ declarations: [WorkbenchComponent], imports: [CommonModule, ReactiveFormsModule, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule], exports: [WorkbenchComponent] })
+@NgModule({ declarations: [WorkbenchComponent], imports: [CommonModule, ReactiveFormsModule, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule], exports: [WorkbenchComponent] })
 export class WorkbenchModule { }

@@ -47,7 +47,7 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
   }
   const decoded = decodeVisualizationDefinition(result);
   if (decoded.state === 'invalid' || decoded.state === 'unsupported') throw new Error('This definition cannot be safely reset. Its original intent has been preserved.');
-  return { definition: result, cleared, referencePaths: issues.filter(issue => issue.path !== 'scope.facilityGuid').map(issue => issue.path) };
+  return { definition: result, cleared, referencePaths: issues.map(issue => issue.path) };
 }
 
 export function reviewVisualizationScopeCopy(definition: VisualizationDefinition, scope: VisualizationScope,
