@@ -6,7 +6,7 @@ describe('saved definitions in historical data migrations', () => {
     const original = emptyMigrationData();
     original.savedVisualizations = [{
       id: 42, guid: 'opaque-definition', accountId: 'account', recordVersion: 77, revision: 3,
-      createdDate: '2026-11-11T00:00:00Z', modifiedDate: '2026-11-11T00:00:00Z',
+      createdDate: new Date('2026-11-11T00:00:00Z'), modifiedDate: new Date('2026-11-11T00:00:00Z'),
       definition: { version: 999, unknownSettings: { values: [0, null, 'retain'] } }
     }];
     let data = original;

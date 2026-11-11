@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Observable } from 'rxjs';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
 /** Persistence only; workspace commands own validation and publication. */

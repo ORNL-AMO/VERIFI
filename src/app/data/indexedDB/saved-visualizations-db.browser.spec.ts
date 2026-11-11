@@ -1,5 +1,5 @@
 import { firstValueFrom } from 'rxjs';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 import { SavedVisualizationsDbService } from './saved-visualizations-db.service';
 import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
@@ -33,7 +33,7 @@ describe('saved visualization storage in Chromium', () => {
     const definition = { version: 90, provider: { unknown: ['retain', 0, null] } };
     const records: IdbSavedVisualization[] = ['a', 'b'].map(account => ({
       guid: `chart-${account}`, accountId: `account-${account}`, recordVersion: 1, revision: 1,
-      createdDate: '2026-11-11T00:00:00Z', modifiedDate: '2026-11-11T00:00:00Z', definition
+      createdDate: new Date('2026-11-11T00:00:00Z'), modifiedDate: new Date('2026-11-11T00:00:00Z'), definition
     }));
     for (const record of records) await firstValueFrom(repository.addWithObservable(record));
     const saved = await repository.getStoredByGuid('chart-a');

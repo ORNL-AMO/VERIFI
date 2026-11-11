@@ -2,7 +2,7 @@
  * Defines the readonly snapshot, selection, lifecycle, revision, and error contracts
  * shared by the account workspace store, loader, service, and consumers.
  */
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';

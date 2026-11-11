@@ -17,7 +17,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceQueryService {

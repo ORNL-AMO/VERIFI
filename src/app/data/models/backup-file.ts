@@ -1,4 +1,4 @@
-import { IdbSavedVisualization } from './idbModels/saved-visualization';
+import { IdbSavedVisualization } from './idbModels/savedVisualization';
 import { IdbAccount } from './idbModels/account';
 import { IdbAccountAnalysisItem } from './idbModels/accountAnalysisItem';
 import { IdbAccountReport } from './idbModels/accountReport';
