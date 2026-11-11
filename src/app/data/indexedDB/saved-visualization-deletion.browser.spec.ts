@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { dbConfig } from './_dbConfig';
@@ -61,7 +61,7 @@ describe('saved visualization owner deletion in Chromium', () => {
 
 function saved(guid: string, accountId: string, facilityId?: string): IdbSavedVisualization {
   return { guid, accountId, ...(facilityId ? { facilityId } : {}), recordVersion: 1, revision: 1,
-    createdDate: '2026-11-11T00:00:00.000Z', modifiedDate: '2026-11-11T00:00:00.000Z',
+    createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'),
     definition: facilityId ? createVisualizationDefinition(guid, accountId, { kind: 'facility', facilityGuid: facilityId }, 'utility')
       : { ...utilityVisualizationFixture(), accountGuid: accountId } };
 }

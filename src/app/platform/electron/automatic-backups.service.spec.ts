@@ -112,10 +112,10 @@ describe('AutomaticBackupsService', () => {
 
   it('includes supported and preserved saved definitions in automatic backup serialization through the existing gateway', async () => {
     const current = { ...snapshot('account-a'), savedVisualizations: [{ guid: 'chart-a', accountId: 'account-a', recordVersion: 1, revision: 2,
-      createdDate: '2026-11-11T00:00:00.000Z', modifiedDate: '2026-11-11T00:00:00.000Z',
+      createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'),
       definition: createVisualizationDefinition('Saved chart', 'account-a', { kind: 'portfolio' }, 'utility') },
     { guid: 'opaque-a', accountId: 'account-a', recordVersion: 1, revision: 1,
-      createdDate: '2026-11-11T00:00:00.000Z', modifiedDate: '2026-11-11T00:00:00.000Z', definition: { version: 99, originalIntent: 'retain' },
+      createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'), definition: { version: 99, originalIntent: 'retain' },
       preservation: { locked: true, references: [], transfers: [] } }] };
     const exporter = new WorkspaceBackupSnapshotBuilder();
     const serializer = new JsonBackupSerializer();
@@ -130,7 +130,7 @@ describe('AutomaticBackupsService', () => {
     await flushAsync();
     expect(gateway.write).toHaveBeenCalledOnce();
     const serialized = JSON.parse(serializer.serialize(gateway.write.mock.calls[0][1]));
-    expect(serialized.savedVisualizations).toEqual(current.savedVisualizations);
+    expect(serialized.savedVisualizations).toEqual(JSON.parse(JSON.stringify(current.savedVisualizations)));
     expect(serialized.savedVisualizations[1].preservation.locked).toBe(true);
   });
 
