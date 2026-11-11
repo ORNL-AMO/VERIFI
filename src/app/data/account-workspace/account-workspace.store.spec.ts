@@ -6,7 +6,7 @@ describe('AccountWorkspaceStore', () => {
     const store = new AccountWorkspaceStore();
     const snapshot = createSnapshot();
     const base = {
-      recordVersion: 1, revision: 1, createdDate: '2026-11-11', modifiedDate: '2026-11-11',
+      recordVersion: 1, revision: 1, createdDate: new Date('2026-11-11'), modifiedDate: new Date('2026-11-11'),
       accountId: snapshot.account.guid, definition: { version: 999 }
     };
     const portfolio = { ...base, guid: 'portfolio-chart', id: 1 };
