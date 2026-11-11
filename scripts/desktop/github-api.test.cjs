@@ -7,7 +7,9 @@ test('supports GitHub comparison syntax while keeping API requests confined to t
     t.mock.method(globalThis, 'fetch', async (url, options) => { requests.push({ url, options }); return { ok: true, status: 200, json: () => ({ status: 'ahead' }) }; });
     const api = githubApi('ORNL-AMO/VERIFI', 'test-token');
     assert.deepEqual(await api(`/compare/${'a'.repeat(40)}...${'b'.repeat(40)}`), { status: 'ahead' });
-    assert.match(requests[0].url, /^https:\/\/api.github.com\/repos\/ORNL-AMO\/VERIFI\/compare\//);
+    const requestUrl = new URL(requests[0].url);
+    assert.equal(requestUrl.origin, 'https://api.github.com');
+    assert.equal(requestUrl.pathname, `/repos/ORNL-AMO/VERIFI/compare/${'a'.repeat(40)}...${'b'.repeat(40)}`);
     await assert.rejects(api('//other.example'), /route/);
     await assert.rejects(api('/../another-repository'), /route/);
     assert.equal(requests.length, 1);
