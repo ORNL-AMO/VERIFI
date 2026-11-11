@@ -1,0 +1,55 @@
+@if (lifecycle.editor(); as editor) {
+  <app-workspace-slideout [title]="editor.entry ? 'Rename visualization' : 'Create visualization'" [saving]="lifecycle.saving()" [hasFooter]="true" initialFocus="#visualization-name" (closed)="lifecycle.requestClose()">
+    <form id="visualization-creation-form" [formGroup]="lifecycle.form" (ngSubmit)="lifecycle.submit()">
+      <fieldset [disabled]="lifecycle.saving() || lifecycle.lockedProposal()">
+        <label for="visualization-name">Visualization name</label>
+        <input id="visualization-name" class="form-control v1-input" formControlName="name" autocomplete="off" required [readOnly]="lifecycle.saving() || lifecycle.lockedProposal()" [attr.aria-invalid]="lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched" aria-describedby="visualization-name-error">
+        @if (lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched) { <p id="visualization-name-error" class="v1-alert v1-alert--danger" role="alert">Enter a visualization name.</p> }
+        @if (!editor.entry) {
+          @if (!editor.fixedFacility) {
+            <h3>Scope</h3>
+            <div class="creation-choices creation-choices--scope">
+              <button type="button" class="creation-choice" [attr.aria-pressed]="lifecycle.form.controls.scope.value === 'portfolio'" (click)="lifecycle.form.controls.scope.setValue('portfolio')"><app-ui-icon name="account" [size]="28"/><strong>Portfolio</strong></button>
+              <button type="button" class="creation-choice" [disabled]="!lifecycle.facilities().length" [attr.aria-pressed]="lifecycle.form.controls.scope.value === 'facility'" (click)="lifecycle.form.controls.scope.setValue('facility')"><app-ui-icon name="facility" [size]="28"/><strong>Facility</strong></button>
+            </div>
+            @if (lifecycle.form.controls.scope.value === 'facility') {
+              <label for="visualization-facility">Facility</label>
+              <select id="visualization-facility" class="v1-select" formControlName="facilityGuid"><option value="">Choose a facility</option>@for (facility of lifecycle.facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name || 'Unnamed facility' }}</option> }</select>
+            }
+          } @else { <p class="creation-choice-help">This visualization belongs to the selected facility.</p> }
+          <h3>Source family</h3>
+          <div class="creation-choices" aria-label="Source family">
+            @for (family of families; track family.value) { <button type="button" class="creation-choice" [attr.aria-pressed]="lifecycle.form.controls.family.value === family.value" (click)="lifecycle.form.controls.family.setValue(family.value)"><app-ui-icon name="dataVisualization" [size]="28"/><strong>{{ family.label }}</strong><span class="creation-choice__pending">Setup item</span></button> }
+          </div>
+          <p class="creation-choice-help">Your saved visualization opens in its workbench. Detailed source selection and chart preview become available as each source family is supported.</p>
+        } @else { <p>{{ editor.entry.familyLabel }} · {{ editor.entry.ownerName }}</p> }
+      </fieldset>
+      @if (!lifecycle.ownerValid()) { <div class="v1-alert v1-alert--warning" role="status">Choose an available facility.</div> }
+      @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+      @if (lifecycle.outcome() === 'conflict' && lifecycle.conflictCurrent()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="lifecycle.useSavedConflict()">Use saved name</button><button type="button" class="v1-btn v1-btn--quiet" (click)="lifecycle.keepLocalConflict()">Keep my name</button> }
+    </form>
+    <div slideoutFooter class="creation-draft-actions">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="lifecycle.saving()" (click)="lifecycle.requestClose()">Cancel</button>
+      @if (lifecycle.lockedProposal()) { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canRetry()" (click)="lifecycle.retry()">{{ lifecycle.outcome() === 'refresh-required' ? 'Retry refresh' : 'Retry save' }}</button> }
+      @else { <button type="submit" form="visualization-creation-form" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canSubmit()">{{ lifecycle.saving() ? 'Saving…' : editor.entry ? 'Save name' : 'Create visualization' }}</button> }
+    </div>
+  </app-workspace-slideout>
+}
+<ng-template #deleteConfirmation>
+  @if (lifecycle.deleteCandidate(); as candidate) {
+    <app-confirmation-dialog title="Delete visualization?" titleId="delete-visualization-title" cancelAriaLabel="Cancel visualization deletion" confirmLabel="Delete visualization" confirmClass="v1-btn--danger" confirmIcon="delete" [busy]="lifecycle.saving()" [disabled]="lifecycle.saving()" [confirmDisabled]="!!lifecycle.proposal()" (confirmed)="lifecycle.confirmDelete()" (cancelled)="lifecycle.cancelConfirmation()">
+      <p>Permanently delete <strong>{{ candidate.name }}</strong> belonging to <strong>{{ candidate.ownerName }}</strong>? Source records remain available.</p>
+      @if (lifecycle.outcome() === 'conflict') { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="lifecycle.saving()" (click)="lifecycle.reloadSavedConflict()">Reload saved state and discard proposal</button> }
+      @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+      @if (lifecycle.proposal()) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!lifecycle.canRetry()" (click)="lifecycle.retry()">{{ lifecycle.outcome() === 'refresh-required' ? 'Retry refresh' : 'Retry deletion' }}</button><button type="button" class="v1-btn v1-btn--quiet" [disabled]="!lifecycle.canDiscard()" (click)="lifecycle.discard()">Discard proposal</button> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
+<ng-template #discardConfirmation>
+  <app-confirmation-dialog [title]="lifecycle.outcome() === 'refresh-required' ? 'Refresh saved visualization' : 'Discard proposed visualization changes?'" titleId="discard-visualization-title" cancelAriaLabel="Stay with visualization changes" confirmLabel="Discard changes" [busy]="lifecycle.saving()" [disabled]="lifecycle.saving()" [confirmDisabled]="!lifecycle.canDiscard()" (confirmed)="lifecycle.discard()" (cancelled)="lifecycle.cancelConfirmation()">
+    @if (lifecycle.outcome() === 'refresh-required') { <p>Your change is already committed. Retry refresh before leaving so the saved identity can be acknowledged safely.</p> }
+    @else { <p>Your unsaved proposed changes will be discarded.</p> }
+    @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+    @if (lifecycle.canRetry()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="lifecycle.retry()">{{ lifecycle.outcome() === 'refresh-required' ? 'Retry refresh' : 'Retry save' }}</button> }
+  </app-confirmation-dialog>
+</ng-template>
