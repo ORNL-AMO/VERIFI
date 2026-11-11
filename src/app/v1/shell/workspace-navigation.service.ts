@@ -30,7 +30,7 @@ export class WorkspaceNavigationService {
 
   readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
     ...section,
-    enabled: section.id === 'settings' || section.id === 'data' || section.id === 'analysis' || section.id === 'reports' || section.id === 'imports'
+    enabled: section.id === 'settings' || section.id === 'data' || section.id === 'analysis' || section.id === 'reports' || section.id === 'imports' || section.id === 'visualization'
       ? this.isWorkspaceRoute()
       : section.enabled
   })));
@@ -57,6 +57,7 @@ export class WorkspaceNavigationService {
   readonly activePredictorGuid = this.context.activePredictorGuid;
   readonly activeWeatherPredictorGroupKey = this.context.activeWeatherPredictorGroupKey;
   readonly activeReportGuid = this.context.activeReportGuid;
+  readonly activeVisualizationGuid = this.context.activeVisualizationGuid;
   readonly activeAnalysisGuid = this.context.activeAnalysisGuid;
   readonly activeAnalysisGroupGuid = this.context.activeAnalysisGroupGuid;
   readonly activeAnalysisStageScope = this.context.activeAnalysisStageScope;
@@ -119,6 +120,7 @@ export class WorkspaceNavigationService {
   }
 
   async openAccount(accountGuid: string): Promise<void> {
+    if (!await this.unsavedChanges.resolveNavigationPreflight()) return;
     if (!this.unsavedChanges.confirmDiscard()) return;
     const result = await this.workspaceService.selectAccount(accountGuid);
     if (result === 'published') {
@@ -127,6 +129,7 @@ export class WorkspaceNavigationService {
   }
 
   async openWorkspace(accountGuid: string): Promise<void> {
+    if (!await this.unsavedChanges.resolveNavigationPreflight()) return;
     if (this.activeSection() === 'reports' && this.activeDetail() === 'workbench'
       && !await this.unsavedChanges.flushPendingChanges()) return;
     if (!this.unsavedChanges.confirmDiscard()) return;
@@ -150,6 +153,7 @@ export class WorkspaceNavigationService {
   }
 
   async openAccountData(accountGuid: string): Promise<void> {
+    if (!await this.unsavedChanges.resolveNavigationPreflight()) return;
     if (!this.unsavedChanges.confirmDiscard()) return;
     const result = await this.workspaceService.selectAccount(accountGuid);
     if (result === 'published') {
@@ -183,6 +187,7 @@ export class WorkspaceNavigationService {
       route = this.facilityDataToolRoute(facilityGuid, 'meter-grouping'); query = {};
     } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
     else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
+    else if (state.section === 'visualization') route = routes.visualizationLibraryRoute(account.guid);
     else if (state.portfolioTab === 'facilities' && facilityGuid) route = this.accountPortfolioRoute(account.guid, 'meters');
     else {
       const tab = state.portfolioTab ?? (state.detail === 'energy-uses' ? 'energy-uses' : state.detail === 'predictors' ? 'predictors'
@@ -197,6 +202,7 @@ export class WorkspaceNavigationService {
     this.scopeChangePending.set(true);
     this.contextNavigationError.set('');
     try {
+      if (!await this.unsavedChanges.resolveNavigationPreflight()) return false;
       // Report leave guards own their save/discard UI; other editors flush before their ordinary leave guard.
       if (!(this.activeSection() === 'reports' && this.activeDetail() === 'workbench')
         && !await this.unsavedChanges.flushPendingChanges()) return false;
@@ -304,12 +310,12 @@ export class WorkspaceNavigationService {
       await this.navigateScopeDestination(facility ? this.facilitySettingsRoute(facility.guid, detail) : this.accountSettingsRoute(account.guid, detail));
       return;
     }
-    if (['data', 'analysis', 'reports'].includes(sectionId)) {
+    if (['data', 'analysis', 'reports', 'visualization'].includes(sectionId)) {
       const account = this.account();
       if (account) {
         const scope = this.headerScope();
         const route = sectionId === 'data' ? scope.kind === 'facility' ? this.accountPortfolioRoute(account.guid, 'meters') : this.accountDataRoute(account.guid)
-          : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : this.accountReportsRoute(account.guid);
+          : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : sectionId === 'visualization' ? routes.visualizationLibraryRoute(account.guid) : this.accountReportsRoute(account.guid);
         await this.navigateScopeDestination(route, this.isSingleSiteWorkspace() ? {} : facilityScopeQuery(scope));
       }
       return;
@@ -357,6 +363,7 @@ export class WorkspaceNavigationService {
       if (detail === 'energy-uses') return this.accountPortfolioRoute(accountGuid, 'energy-uses');
       return this.accountDataRoute(accountGuid, this.resolveAccountDataDetail(detail));
     }
+    if (section === 'visualization') return routes.visualizationLibraryRoute(accountGuid);
     if (section === 'imports') return this.accountImportsRoute(accountGuid);
     if (section === 'reports') return this.accountReportsRoute(accountGuid);
     if (section === 'analysis') return this.accountAnalysisRoute(accountGuid);
@@ -364,6 +371,7 @@ export class WorkspaceNavigationService {
   }
 
   private facilityDestination(facilityGuid: string, section: SectionId, detail: string): { route: string[]; queryParams?: Params } {
+    if (section === 'visualization' && this.account()) return { route: routes.visualizationLibraryRoute(this.account()!.guid), queryParams: { facility: facilityGuid } };
     if (section === 'settings') return { route: this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail)) };
     if (section === 'analysis' || section === 'reports') return this.facilityInventoryLink(facilityGuid, section);
     if (section === 'data') return ['meter-grouping', 'custom-grid-factors', 'custom-fuels', 'custom-gwps'].includes(detail)

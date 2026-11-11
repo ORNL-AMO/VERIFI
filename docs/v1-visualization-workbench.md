@@ -54,3 +54,14 @@ Library, editor and preview development may proceed in parallel after interfaces
 Fast tests cover Dashboard projections and controls, all families, single-site creation, retry identity, save races/conflicts/recovery, invalid input, reset/copy, unknown preservation and canceled navigation. Chromium covers real storage/reopen after reinitialization, keyboard/focus, browser history, source loss, external deletion, reviewed repair, account/scope changes before publication, and obsolete preview rejection. Protect shared inventory, existing editor policies and single-site no-analysis-write behavior.
 
 Use the validation planner, focused checks, app type-check, full tests before handoff and production web build. The persisted incomplete-Scatter contract adjustment also receives production Electron build and backup/reopen coverage; no IPC or desktop integration behavior changes. Vis3's framework journey can be accepted independently; actual real-data preview acceptance remains pending until the first Vis4/Vis6 integration. Record actual validation evidence and gaps; do not close the broader acceptance early.
+
+## Historical implementation evidence before alignment
+
+The six slices are implemented locally. The library is enabled only with the integrated guarded workbench. Real-data source/chart acceptance remains pending in Vis4–Vis8; this does not close #2904. Invalid single-facility account setup blocks creation/copy until its sole facility is restored or the account is explicitly converted to a portfolio.
+
+- `npm run test:all:ci`: 4,297 fast tests and 533 Chromium tests passed. Vis3 includes native storage/reopen, publication recovery without write replay, reviewed transfer repair, deleted-draft recovery, keyboard, browser-history, and stale-preview coverage.
+- App and browser-spec TypeScript checks passed; local documentation links and whitespace checks passed.
+- Production web build passed with existing component-budget and dependency-format warnings. No Electron boundary changed; Electron release validation is not claimed.
+- Earlier restricted Angular invocations aborted with exit 134 and were rerun with normal process access. An existing Energy Use browser year check timed out in one full run, then passed both focused and full reruns without unrelated calculation or test changes.
+
+PR preparation retains context-aware self-review and separate fresh no-history review records. Publication, human review, QA and merge remain separate steps.

@@ -110,6 +110,7 @@ describe('contextual workspace navigation', () => {
     const pending = navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' });
     expect(await navigation.changeFacilityScope({ kind: 'all' })).toBe(false);
     expect(router.url).toBe(url);
+    await vi.waitFor(() => expect(flush).toHaveBeenCalledOnce());
     finish(false); expect(await pending).toBe(false); flush.mockRestore();
     vi.spyOn(router, 'navigate').mockRejectedValueOnce(new Error('Navigation failed'));
     expect(await navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(false);

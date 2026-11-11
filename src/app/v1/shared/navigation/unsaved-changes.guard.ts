@@ -17,3 +17,7 @@ export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges | null> = (c
 
 export const flushPendingChangesGuard: CanActivateFn = () =>
   inject(UnsavedChangesService).flushPendingChanges();
+
+/** Runs before readiness guards can select/publish a different owning account. */
+export const protectedNavigationPreflightGuard: CanActivateFn = () =>
+  inject(UnsavedChangesService).resolveNavigationPreflight();

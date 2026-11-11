@@ -1,3 +1,4 @@
+import { VisualizationsModule } from '@app/v1/visualizations/visualizations.module';
 import { WorkspaceCheckIndicatorComponent } from '@app/v1/shell/header/workspace-check-indicator/workspace-check-indicator.component';
 import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { FacilityReportsModule } from '@app/v1/reports/facility/facility-reports.module';
@@ -55,6 +56,7 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     ScrollingModule,
     NavigationMotionDirective,
     DataModule,
+    VisualizationsModule,
     FacilityReportsModule,
     AccountReportsModule,
     AccountSettingsModule,

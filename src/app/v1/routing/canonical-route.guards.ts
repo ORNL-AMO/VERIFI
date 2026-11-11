@@ -36,7 +36,7 @@ export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route,
   // Reports and Upload retain account scope even for a single-facility workspace.
   const parts = accountRouteParts(state);
   const section = parts[3];
-  if (section === 'reports' || section === 'imports' || (section === 'settings' && parts[4] === 'backup')) return true;
+  if (section === 'reports' || section === 'visualization' || section === 'imports' || (section === 'settings' && parts[4] === 'backup')) return true;
 
   // Energy Uses is read-only in phase 1; entering its inventory must not initialize analysis records.
   if (section === 'data' && parts[4] === 'portfolio' && parts[5] === 'energy-uses') return true;
