@@ -27,6 +27,8 @@ A creation-only assertion such as `should create` is not behavioral coverage. Re
 
 ## Test layers
 
+Desktop packaging contracts have a fast Node suite (`npm run test:desktop-tooling`) included in `test:all:ci`. It protects trusted-source selection, artifact identity/reuse, ordered QA versions, metadata/blockmaps, and production publication gates without running installers or using signing credentials. The [desktop pre-release guide](desktop-prerelease.md) describes on-demand signed packaging and the installed-app acceptance still required downstream.
+
 | Layer | File convention | Purpose | Typical subjects |
 | --- | --- | --- | --- |
 | Fast unit and component | `*.spec.ts` | Deterministic feedback in Vitest with jsdom | Pure calculations, transformations, services, pipes, guards, forms, component rendering and interaction supported by jsdom |

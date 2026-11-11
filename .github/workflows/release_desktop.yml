@@ -7,268 +7,46 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  package:
     if: github.ref_name == 'master'
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Setup outputs
-        id: output
-        run: |
-          _NODE_VERSION=$(grep -o -P -m 1 '(?<=node":\s").*(?=")' package.json)
-          _BUILD_VERSION=$(grep '"version"' package.json | head -n1 | sed -E 's/.*"version": *"([^"]+)".*/\1/')
-          echo "NODE_VERSION=$_NODE_VERSION" >> "$GITHUB_OUTPUT"
-          echo "BUILD_VERSION=$_BUILD_VERSION" >> "$GITHUB_OUTPUT"
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ steps.output.outputs.NODE_VERSION }}
-      - name: Setup cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-      - name: Setup dependencies
-        run: npm install
-      - name: Build
-        run: npm run build-prod-electron
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifact
-          path: |
-            dist
-          compression-level: 6
-          if-no-files-found: error
-          retention-days: 1
-    outputs:
-      NODE_VERSION: ${{ steps.output.outputs.NODE_VERSION }}
-      BUILD_VERSION: ${{ steps.output.outputs.BUILD_VERSION }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package_desktop.yml
+    with:
+      source-sha: ${{ github.sha }}
+      artifact-prefix: release
+      retention-days: 1
+    secrets: inherit
 
-  bundle_mac:
-    if: github.ref_name == 'master'
-    runs-on: macos-26
-    needs: [build]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifact
-          path: dist/
-      - name: Node setup
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ needs.build.outputs.NODE_VERSION }}
-      - name: Cache setup
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-      - name: Cert setup
-        env:
-          APPLE_CERT_A_BASE64: ${{ secrets.APPLE_CERT_A_BASE64 }}
-          APPLE_PROV_PROF_BASE64: ${{ secrets.APPLE_PROV_PROF_BASE64 }}
-          APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
-          APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
-        run: |
-          CERT_A_PATH="$RUNNER_TEMP/app_certificate.p12"
-          PROV_PROF_PATH="$RUNNER_TEMP/AMO.provisionprofile"
-          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
-
-          echo -n "$APPLE_CERT_A_BASE64" | base64 --decode -o "$CERT_A_PATH"
-          echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode -o "$PROV_PROF_PATH"
-
-          security -v create-keychain -p "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security -v default-keychain -s "$KEYCHAIN_PATH"
-          security -v unlock-keychain -p "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
-
-          security -v import "$CERT_A_PATH" -P "$APPLE_CERT_SECRET" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
-
-          cp "$PROV_PROF_PATH" ./embedded.provisionprofile
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: npm run build-prod-electron
-      - name: Package [Mac]
-        run: npm run dist-nopublish -- --mac --universal
-      - name: Verify [Mac]
-        run: |
-          lipo -verify_arch x86_64 arm64 "output/mac-universal/VERIFI.app/Contents/MacOS/VERIFI"
-          codesign --verify --deep --strict --verbose=2 "output/mac-universal/VERIFI.app"
-      - name: Notarize
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          shopt -s nullglob
-          DMG_PATHS=(output/VERIFI-*.*.*.dmg)
-          if [[ ${#DMG_PATHS[@]} -ne 1 ]]; then
-            echo "Expected exactly one VERIFI DMG; found ${#DMG_PATHS[@]}." >&2
-            exit 1
-          fi
-          BUNDLE_PATH="${DMG_PATHS[0]}"
-          NOTARIZATION_PATH="$RUNNER_TEMP/notarization.json"
-
-          xcrun notarytool submit "$BUNDLE_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" --output-format json > "$NOTARIZATION_PATH"
-          node -e 'const result = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); if (result.status !== "Accepted") { console.error("Notarization failed:", result.status); process.exit(1); }' "$NOTARIZATION_PATH"
-          xcrun stapler staple "$BUNDLE_PATH"
-          xcrun stapler validate "$BUNDLE_PATH"
-      - name: Prepare output
-        id: output
-        run: |
-          VERSION=$(grep -A3 'version:' ./output/latest-mac.yml | head -n1 | awk '{print $2}')
-          echo "BUILD_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-1-artifact
-          path: |
-            output/*.blockmap
-            output/*.dmg
-            output/*.zip
-            output/latest-mac.yml
-          compression-level: 1
-          if-no-files-found: error
-          retention-days: 1
-    outputs:
-      BUILD_VERSION: ${{ steps.output.outputs.BUILD_VERSION }}
-
-  bundle_winux:
-    if: github.ref_name == 'master'
-    runs-on: ubuntu-24.04
-    needs: [build]
-    container:
-      image: electronuserland/builder:wine
-      options: --user 1001
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifact
-          path: dist/
-      - name: Node setup
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ needs.build.outputs.NODE_VERSION }}
-      - name: Cache setup
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: npm run build-prod-electron
-      - name: Package [Win]
-        run: node ./node_modules/.bin/electron-builder --win --publish never
-      - name: Package [Linux]
-        run: npm run dist-nopublish
-      - name: Upload signing artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sign-win-artifact
-          path: |
-            output/*.exe
-            output/latest.yml
-          compression-level: 1
-          if-no-files-found: error
-          retention-days: 1
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-2-artifact
-          path: |
-            output/*.AppImage
-            output/*.blockmap
-            output/*.tar.gz
-            output/latest-linux.yml
-          compression-level: 1
-          if-no-files-found: error
-          retention-days: 1
-
-  sign_win:
-    if: github.ref_name == 'master'
-    runs-on: [self-hosted, cs]
-    needs: [bundle_winux]
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: sign-win-artifact
-          path: output/
-      - name: Codesign
-        run: |
-          TMP_CERT_PATH="$RUNNER_TEMP/cert.pem"
-          BUNDLE_PATH=$(find output -name "VERIFI-Setup-*.exe")
-
-          echo -n "${{ secrets.WIN_CERT_BASE64 }}" | base64 --decode > $TMP_CERT_PATH
-
-          jsign --storetype "${{ secrets.WIN_STORE_TYPE }}" \
-                --storepass "${{ secrets.WIN_STORE_SECRET }}" \
-                --tsaurl "http://timestamp.sectigo.com" \
-                --certfile $TMP_CERT_PATH \
-                $BUNDLE_PATH
-
-          OLD_HASH=$(grep -o -P -m 1 '(?<=sha512:\s).*' ./output/latest.yml)
-          NEW_HASH=$(gen_hash -f "$BUNDLE_PATH")
-          sed -i "s|$OLD_HASH|$NEW_HASH|g" ./output/latest.yml
-      - name: Upload release artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-3-artifact
-          path: |
-            output/*.exe
-            output/latest.yml
-          compression-level: 0
-          if-no-files-found: error
-          retention-days: 1
-      - name: Cleanup
-        run: rm -rf ./output
-
-  # The caller treats this workflow as production-ready only after the signed
-  # installers are collected and the draft GitHub Release is created.
+  # Production web deployment still waits for packaging, signing, verification,
+  # artifact collection, and immutable draft release creation to finish.
   release:
     if: github.ref_name == 'master'
-    runs-on: ubuntu-22.04
-    needs: [build, bundle_mac, bundle_winux, sign_win]
+    runs-on: ubuntu-24.04
+    needs: package
     permissions:
       contents: write
-    env:
-      VERSION: ${{ needs.build.outputs.BUILD_VERSION }}
     steps:
-      - name: Get artifacts
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Read release version
+        id: version
+        run: node -p '"version=" + require("./package.json").version' >> "$GITHUB_OUTPUT"
+      - name: Get verified distributions
         uses: actions/download-artifact@v4
         with:
           pattern: release-*-artifact
           path: release/
           merge-multiple: true
-      - name: Release
+      - name: Create draft release
         uses: softprops/action-gh-release@v2
-        # if: startsWith(github.ref, 'refs/tags/') # Uncomment if enabling tag gating
         with:
-          name: VERIFI v${{ env.VERSION }}
-          tag_name: v${{ env.VERSION }}
-          # A later push can move master while installers are being packaged.
-          # Pin the tag and generated notes to this workflow run's commit.
+          name: VERIFI v${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}
           target_commitish: ${{ github.sha }}
-          draft: true # Comment out if enabling tag gating and publishing via action
+          draft: true
           generate_release_notes: true
-          files: |
-            release/*
+          files: release/*
+          fail_on_unmatched_files: true
