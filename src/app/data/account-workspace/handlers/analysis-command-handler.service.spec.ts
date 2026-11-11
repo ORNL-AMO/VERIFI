@@ -496,7 +496,7 @@ describe('AnalysisCommandHandler queued edits', () => {
       facilityAnalyses: [first, second], accountAnalyses: [accountAnalysis],
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-      energyUseGroups: [], energyUseEquipment: []
+      energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
     } as unknown as AccountWorkspaceSnapshot);
     const analysisDb = { updateWithObservable: vi.fn((value: IdbAnalysisItem) => of(value)), getStoredByGuid: vi.fn().mockResolvedValue(undefined) };
     const accountAnalysisDb = { updateWithObservable: vi.fn((value: IdbAccountAnalysisItem) => of(value)) };

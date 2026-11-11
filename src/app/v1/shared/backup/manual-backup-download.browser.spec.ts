@@ -43,7 +43,7 @@ describe('manual backup downloads in Chromium', () => {
       })),
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
     };
     snapshot = { ...snapshot, meters: snapshot.facilities.map(facility => ({
       ...getNewIdbUtilityMeter(facility.guid, account.guid, true, 'MMBtu'),

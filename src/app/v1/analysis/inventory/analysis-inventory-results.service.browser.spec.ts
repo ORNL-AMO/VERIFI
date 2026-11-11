@@ -285,7 +285,7 @@ function configure(
     accountAnalyses: analyses(),
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], accountReports: [],
     facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [],
-    energyUseEquipment: []
+    energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot));
   TestBed.configureTestingModule({ providers: [
     AnalysisInventoryResultsService,

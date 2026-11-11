@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgxIndexedDBService, provideIndexedDb } from 'ngx-indexed-db';
 import { firstValueFrom } from 'rxjs';
 import { dbConfig } from '../_dbConfig';
-import { REQUIRED_INDEXES, VERIFI_DB_VERSION, VerifiStoreName } from '../indexed-db-schema';
+import { historicalIndexes, VERSION_20_INDEXES } from './indexed-db-historical-schema';
 
 export interface IndexedDbTestRecord {
   id?: number;
@@ -39,7 +39,17 @@ export class IndexedDbTestHarness {
     seedData: IndexedDbTestSeed
   ): Promise<IndexedDbTestHarness> {
     const databaseName = `verifi-test-${testName}-${crypto.randomUUID()}`;
-    await IndexedDbTestHarness.createVersion19Database(databaseName, seedData);
+    await IndexedDbTestHarness.createHistoricalDatabase(databaseName, seedData, 19);
+    const dbService = await IndexedDbTestHarness.initialize(databaseName);
+    return new IndexedDbTestHarness(databaseName, dbService);
+  }
+
+  static async createUpgradedFromVersion20(
+    testName: string,
+    seedData: IndexedDbTestSeed
+  ): Promise<IndexedDbTestHarness> {
+    const databaseName = `verifi-test-${testName}-${crypto.randomUUID()}`;
+    await IndexedDbTestHarness.createHistoricalDatabase(databaseName, seedData, 20);
     const dbService = await IndexedDbTestHarness.initialize(databaseName);
     return new IndexedDbTestHarness(databaseName, dbService);
   }
@@ -118,35 +128,21 @@ export class IndexedDbTestHarness {
     return dbService;
   }
 
-  private static async createVersion19Database(
+  private static async createHistoricalDatabase(
     databaseName: string,
-    seedData: IndexedDbTestSeed
+    seedData: IndexedDbTestSeed,
+    version: 19 | 20
   ): Promise<void> {
     TestBed.resetTestingModule();
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(databaseName, VERIFI_DB_VERSION - 1);
+      const request = indexedDB.open(databaseName, version);
       request.onerror = () => reject(request.error);
       request.onupgradeneeded = () => {
         const newDatabase = request.result;
-        for (const storeMeta of dbConfig.objectStoresMeta) {
-          const objectStore = newDatabase.createObjectStore(storeMeta.store, storeMeta.storeConfig);
-          const newVersionIndexNames = new Set(
-            REQUIRED_INDEXES[storeMeta.store as VerifiStoreName]
-              .filter(indexDefinition => indexDefinition.name === 'guid'
-                || (storeMeta.store === 'electronBackups' && indexDefinition.name === 'accountId')
-                || (storeMeta.store === 'facilityEnergyUseEquipment'
-                  && indexDefinition.name === 'energyUseGroupId'))
-              .map(indexDefinition => indexDefinition.name)
-          );
-
-          for (const storeSchema of storeMeta.storeSchema) {
-            if (newVersionIndexNames.has(storeSchema.name)) {
-              continue;
-            }
-            const keyPath = storeMeta.store === 'utilityMeter' && storeSchema.name === 'location'
-              ? 'notes'
-              : storeSchema.keypath;
-            objectStore.createIndex(storeSchema.name, keyPath, storeSchema.options);
+        for (const storeName of Object.keys(VERSION_20_INDEXES)) {
+          const objectStore = newDatabase.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+          for (const [name, keyPath] of Object.entries(historicalIndexes(version, storeName))) {
+            objectStore.createIndex(name, keyPath, { unique: false });
           }
         }
       };

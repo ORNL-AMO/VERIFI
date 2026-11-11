@@ -51,7 +51,7 @@ describe('Analysis edit merges in Chromium', () => {
       facilityAnalyses: [facilityAnalysis], accountAnalyses: [accountAnalysis],
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-      energyUseGroups: [], energyUseEquipment: []
+      energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
     } as unknown as AccountWorkspaceSnapshot);
     const handler = new AnalysisCommandHandler(analysisDb, accountAnalysisDb, store, undefined);
     const boundary = new WorkspaceCommandBoundary(store, { reloadActiveWorkspace: () => Promise.reject(new Error('Unexpected reload')) } as any);

@@ -22,7 +22,7 @@ export function energyUsesSnapshot(items = [energyUseItem()]): import('@data/acc
   return {
     account: { guid: 'account-a', name: 'Example account' } as import('@data/models/idbModels/account').IdbAccount,
     facilities: [energyUseFacility(), energyUseFacility('facility-b', 'South plant')],
-    energyUseEquipment: items, energyUseGroups: [energyUseGroup()],
+    savedVisualizations: [], energyUseEquipment: items, energyUseGroups: [energyUseGroup()],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [],
     accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: []
   };

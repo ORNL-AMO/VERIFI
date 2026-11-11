@@ -35,7 +35,7 @@ function snapshot(guid: string): AccountWorkspaceSnapshot {
     account: { id: guid === 'account-a' ? 1 : 2, guid, name: guid } as IdbAccount,
     facilities: [{ id: 10, guid: `facility-${guid}`, accountId: guid } as any], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [],
     accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-    energyUseGroups: [], energyUseEquipment: []
+    energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []
   };
 }
 

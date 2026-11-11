@@ -65,7 +65,7 @@ async function openEditor(analysisType: AnalysisGroup['analysisType'], path: 'mo
     account: { guid: 'account-a' }, facilities: [facility], facilityAnalyses: [analysis],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], accountAnalyses: [],
     accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
-    energyUseGroups: [], energyUseEquipment: []
+    energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot, { facility: facility as any, facilityAnalysis: analysis as any });
   const checks = new BehaviorSubject<any>(facilityCheck());
   const calendarization = new BehaviorSubject<any>({ status: 'ready' });

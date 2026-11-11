@@ -152,6 +152,6 @@ function createSnapshot(): AccountWorkspaceSnapshot {
     predictorData: months.map(({ year, month }) => ({ ...getNewIdbPredictorData(predictor), year, month: month + 1,
       amount: year === 2022 ? 10 : 20 })),
     facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [],
-    customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   };
 }

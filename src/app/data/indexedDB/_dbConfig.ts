@@ -199,6 +199,11 @@ const objectStoresMeta: DBConfig['objectStoresMeta'] = [{
       { name: 'accountId', keypath: 'accountId', options: { unique: false } },
       { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
     ]
+  },
+  {
+    store: 'savedVisualizations',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: []
   }
   ];
 

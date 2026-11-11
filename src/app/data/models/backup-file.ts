@@ -1,3 +1,4 @@
+import { IdbSavedVisualization } from './idbModels/savedVisualization';
 import { IdbAccount } from './idbModels/account';
 import { IdbAccountAnalysisItem } from './idbModels/accountAnalysisItem';
 import { IdbAccountReport } from './idbModels/accountReport';
@@ -18,6 +19,8 @@ import { IdbUtilityMeterGroup } from './idbModels/utilityMeterGroup';
 
 export interface BackupFile {
   dataVersion?: number;
+  /** Optional only for supported backups created before saved visualizations. */
+  savedVisualizations?: Array<IdbSavedVisualization>;
   account: IdbAccount;
   facilities: Array<IdbFacility>;
   facility: IdbFacility;

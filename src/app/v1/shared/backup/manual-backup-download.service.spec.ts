@@ -207,6 +207,6 @@ function snapshot(guid = 'account-a'): AccountWorkspaceSnapshot {
     facilities: [{ ...getNewIdbFacility(account), guid: 'facility-a', name: 'Facility A' }],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []
   };
 }

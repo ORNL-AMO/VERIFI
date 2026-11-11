@@ -2,6 +2,7 @@
  * Builds a complete account workspace snapshot from persistence. It loads account-scoped
  * collections concurrently, validates account ownership, and returns deterministic ordering without publishing state.
  */
+import { SavedVisualizationsDbService } from '@data/indexedDB/saved-visualizations-db.service';
 import { Injectable } from '@angular/core';
 import { AccountAnalysisDbService } from '@data/indexedDB/account-analysis-db.service';
 import { AccountdbService } from '@data/indexedDB/account-db.service';
@@ -46,7 +47,8 @@ export class AccountWorkspaceLoaderService {
     private customFuelRepository: CustomFuelDbService,
     private customGwpRepository: CustomGWPDbService,
     private energyUseGroupRepository: FacilityEnergyUseGroupsDbService,
-    private energyUseEquipmentRepository: FacilityEnergyUseEquipmentDbService
+    private energyUseEquipmentRepository: FacilityEnergyUseEquipmentDbService,
+    private savedVisualizationsRepository: SavedVisualizationsDbService
   ) { }
 
   async load(accountGuid: string): Promise<AccountWorkspaceSnapshot> {
@@ -75,7 +77,8 @@ export class AccountWorkspaceLoaderService {
         customFuels,
         customGWPs,
         energyUseGroups,
-        energyUseEquipment
+        energyUseEquipment,
+        savedVisualizations
       ] = await Promise.all([
         this.facilityRepository.getAllAccountFacilities(accountGuid),
         this.meterRepository.getAllAccountMeters(accountGuid),
@@ -91,7 +94,8 @@ export class AccountWorkspaceLoaderService {
         this.customFuelRepository.getAllAccountCustomFuels(accountGuid),
         this.customGwpRepository.getAllAccountCustomGWP(accountGuid),
         this.energyUseGroupRepository.getAllAccountEnergyUseGroups(accountGuid),
-        this.energyUseEquipmentRepository.getAllAccountEnergyUseEquipment(accountGuid)
+        this.energyUseEquipmentRepository.getAllAccountEnergyUseEquipment(accountGuid),
+        this.savedVisualizationsRepository.getAllAccountVisualizations(accountGuid)
       ]);
 
       const collections = {
@@ -109,12 +113,14 @@ export class AccountWorkspaceLoaderService {
         customFuels,
         customGWPs,
         energyUseGroups,
-        energyUseEquipment
+        energyUseEquipment,
+        savedVisualizations
       };
       validateAccountOwnership(accountGuid, collections);
 
       return {
         account,
+        savedVisualizations: sortByLocalId(savedVisualizations),
         facilities: sortByLocalId(facilities),
         meters: sortByLocalId(meters),
         meterData: sortByLocalId(meterData),

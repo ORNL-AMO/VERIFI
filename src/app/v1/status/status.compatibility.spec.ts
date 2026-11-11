@@ -51,7 +51,7 @@ function snapshot(overrides: Partial<AccountWorkspaceSnapshot> = {}): AccountWor
     facilities: [facility({ dataStalenessSettings: { enabled: false, thresholdMonths: 3, useAccountSettings: true } })],
     meters: [meter({ guid: 'meter-a', groupId: 'group-a' })], meterData: [], meterGroups: [group({ guid: 'group-a' })],
     predictors: [predictor()], predictorData: [predictorData()], facilityAnalyses: [], accountAnalyses: [], accountReports: [],
-    facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [],
+    facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: [],
     ...overrides
   };
 }

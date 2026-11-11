@@ -59,7 +59,7 @@ function createHarness(delayFirstWrite = true, facilitySuffixes = ['a', 'b']) {
   const snapshot = {
     account, facilities, meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: models, accountAnalyses: [analysis, otherAnalysis], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot;
   store.publish(snapshot, { facility: facilities[0], accountAnalysis: analysis });
 

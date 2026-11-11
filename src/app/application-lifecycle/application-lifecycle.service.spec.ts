@@ -134,7 +134,7 @@ function createDependencies(order: string[]) {
     account: { id: 1, guid: 'account-a', name: 'Account A' },
     facilities: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as any;
   const workspace = {
     selectAccount: vi.fn(async (_guid: string) => {

@@ -1,5 +1,5 @@
 export const VERIFI_DB_NAME = 'verifi';
-export const VERIFI_DB_VERSION = 20;
+export const VERIFI_DB_VERSION = 21;
 
 export const VERIFI_STORE_NAMES = [
   'accounts',
@@ -21,7 +21,8 @@ export const VERIFI_STORE_NAMES = [
   'facilityReports',
   'application',
   'facilityEnergyUseGroups',
-  'facilityEnergyUseEquipment'
+  'facilityEnergyUseEquipment',
+  'savedVisualizations'
 ] as const;
 
 export type VerifiStoreName = typeof VERIFI_STORE_NAMES[number];
@@ -61,7 +62,8 @@ const GUID_STORES: ReadonlyArray<VerifiStoreName> = [
   'facilityReports',
   'application',
   'facilityEnergyUseGroups',
-  'facilityEnergyUseEquipment'
+  'facilityEnergyUseEquipment',
+  'savedVisualizations'
 ];
 
 const ACCOUNT_OWNED_STORES: ReadonlyArray<VerifiStoreName> = [
@@ -81,7 +83,8 @@ const ACCOUNT_OWNED_STORES: ReadonlyArray<VerifiStoreName> = [
   'predictorData',
   'facilityReports',
   'facilityEnergyUseGroups',
-  'facilityEnergyUseEquipment'
+  'facilityEnergyUseEquipment',
+  'savedVisualizations'
 ];
 
 const FACILITY_OWNED_STORES: ReadonlyArray<VerifiStoreName> = [
@@ -94,7 +97,8 @@ const FACILITY_OWNED_STORES: ReadonlyArray<VerifiStoreName> = [
   'predictorData',
   'facilityReports',
   'facilityEnergyUseGroups',
-  'facilityEnergyUseEquipment'
+  'facilityEnergyUseEquipment',
+  'savedVisualizations'
 ];
 
 function index(name: string, keypath: string = name): VerifiIndexDefinition {
@@ -159,11 +163,25 @@ export function migrateVersion20(database: IDBDatabase, transaction: IDBTransact
   }
 }
 
+/** Adds saved definitions without rewriting existing records. */
+export function migrateVersion21(database: IDBDatabase, transaction: IDBTransaction): void {
+  if (!database.objectStoreNames.contains('savedVisualizations')) {
+    database.createObjectStore('savedVisualizations', { keyPath: 'id', autoIncrement: true });
+  }
+  const store = transaction.objectStore('savedVisualizations');
+  for (const requiredIndex of REQUIRED_INDEXES.savedVisualizations) {
+    if (!store.indexNames.contains(requiredIndex.name)) {
+      store.createIndex(requiredIndex.name, requiredIndex.keypath, requiredIndex.options);
+    }
+  }
+}
+
 export function verifiMigrationFactory(): {
   [version: number]: (database: IDBDatabase, transaction: IDBTransaction) => void;
 } {
   return {
-    [VERIFI_DB_VERSION]: migrateVersion20
+    20: migrateVersion20,
+    21: migrateVersion21
   };
 }
 

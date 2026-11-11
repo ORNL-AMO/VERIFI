@@ -23,7 +23,7 @@ describe('Account result presentation identity', () => {
     const item = { id: 1, guid: 'analysis-a', accountId: 'account-a', energyUnit: 'MMBtu', baselineYear: 2020 } as IdbAccountAnalysisItem;
     store.publish({ account: { id: 1, guid: 'account-a' }, facilities: [], accountAnalyses: [item], facilityAnalyses: [],
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], accountReports: [], facilityReports: [],
-      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] } as unknown as AccountWorkspaceSnapshot,
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: [] } as unknown as AccountWorkspaceSnapshot,
       { accountAnalysis: item });
     const results = new AccountAnalysisService();
     results.calculating.next(false);

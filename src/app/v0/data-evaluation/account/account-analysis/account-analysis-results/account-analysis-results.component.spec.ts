@@ -32,7 +32,7 @@ function snapshot(): AccountWorkspaceSnapshot {
     account: { id: 1, guid: 'account-a', fiscalYear: 'calendarYear' }, facilities: [],
     accountAnalyses: [{ id: 1, guid: 'analysis-a', accountId: 'account-a', name: 'Analysis', energyUnit: 'MMBtu', baselineYear: 2020, facilityAnalysisItems: [] }],
     facilityAnalyses: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
-    accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot;
 }
 

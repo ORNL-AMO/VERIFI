@@ -6,6 +6,7 @@ export interface AccountDeletionStoreDefinition {
 }
 
 export const ACCOUNT_DELETION_STORES: ReadonlyArray<AccountDeletionStoreDefinition> = [
+  { storeName: 'savedVisualizations', message: 'Deleting Saved Visualizations' },
   { storeName: 'predictorData', message: 'Deleting Predictor Data' },
   { storeName: 'predictor', message: 'Deleting Predictors' },
   { storeName: 'predictors', message: 'Deleting Legacy Predictors' },
