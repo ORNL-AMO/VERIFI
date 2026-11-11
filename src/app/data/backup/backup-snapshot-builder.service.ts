@@ -1,3 +1,5 @@
+import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { savedVisualizationEnvelopeError } from '@data/models/idbModels/saved-visualization';
 import { Injectable } from '@angular/core';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { CURRENT_DATA_VERSION } from '@data/indexedDB/data-migrations/data-migration.models';
@@ -7,7 +9,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { JStatRegressionModel } from '@data/models/analysis';
-import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-analysis/calculations/regression-model-recovery';
+import { normalizeVisualizationAnalysisGroup } from './visualization-backup';
 import { energyUseBackupReferencesError } from './energy-use-backup-relations';
 
 export interface BackupSnapshotBuilder {
@@ -18,10 +20,12 @@ export interface BackupSnapshotBuilder {
 @Injectable({ providedIn: 'root' })
 export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
   buildAccountBackup(snapshot: AccountWorkspaceSnapshot): BackupFile {
+    validateVisualizations(snapshot);
     validateEnergyUseReferences(snapshot, snapshot.energyUseEquipment);
     const facilities = snapshot.facilities.map(facility => structuredClone(facility));
     return {
       dataVersion: CURRENT_DATA_VERSION,
+      savedVisualizations: snapshot.savedVisualizations.map(item => structuredClone(item)),
       account: sanitizeAccount(snapshot.account),
       facilities,
       facility: undefined,
@@ -30,7 +34,7 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
       groups: trimGroups(snapshot.meterGroups.map(item => structuredClone(item))),
       accountReports: snapshot.accountReports.map(item => structuredClone(item)),
       accountAnalysisItems: snapshot.accountAnalyses.map(item => structuredClone(item)),
-      facilityAnalysisItems: trimAnalysisModels(snapshot.facilityAnalyses, facilities, new Set(snapshot.predictors.map(p => p.guid))),
+      facilityAnalysisItems: trimAnalysisModels(snapshot.facilityAnalyses, facilities, new Set(snapshot.predictors.map(p => p.guid)), snapshot.savedVisualizations),
       predictorData: [],
       predictorDataV2: snapshot.predictorData.map(item => structuredClone(item)),
       predictors: snapshot.predictors.map(item => structuredClone(item)),
@@ -48,6 +52,7 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
   }
 
   buildFacilityBackup(snapshot: AccountWorkspaceSnapshot, facilityGuid: string): BackupFile {
+    validateVisualizations(snapshot);
     const facility = snapshot.facilities.find(item => item.guid === facilityGuid);
     if (!facility) {
       throw new Error('The requested facility does not belong to the active workspace.');
@@ -57,6 +62,7 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
     const clonedFacility = structuredClone(facility);
     return {
       dataVersion: CURRENT_DATA_VERSION,
+      savedVisualizations: snapshot.savedVisualizations.filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
       account: undefined,
       facilities: [],
       facility: clonedFacility,
@@ -70,7 +76,8 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
       facilityAnalysisItems: trimAnalysisModels(
         snapshot.facilityAnalyses.filter(item => item.facilityId === facilityGuid),
         [clonedFacility],
-        new Set(snapshot.predictors.filter(p => p.facilityId === facilityGuid).map(p => p.guid))
+        new Set(snapshot.predictors.filter(p => p.facilityId === facilityGuid).map(p => p.guid)),
+        snapshot.savedVisualizations.filter(item => item.facilityId === facilityGuid)
       ),
       predictorData: [],
       predictorDataV2: snapshot.predictorData.filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
@@ -116,23 +123,16 @@ function trimGroups(groups: Array<IdbUtilityMeterGroup>): Array<IdbUtilityMeterG
 function trimAnalysisModels(
   analysisItems: ReadonlyArray<Readonly<IdbAnalysisItem>>,
   facilities: Array<IdbFacility>,
-  predictorGuids: ReadonlySet<string>
+  predictorGuids: ReadonlySet<string>,
+  visualizations: readonly Readonly<IdbSavedVisualization>[]
 ): Array<IdbAnalysisItem> {
   return analysisItems.map(item => {
     const facility = facilities.find(candidate => candidate.guid === item.facilityId);
     return {
       ...structuredClone(item),
       groups: item.groups.map(group => {
-        const normalizedGroup = normalizeAnalysisGroupForAvailablePredictors(
-          structuredClone(group),
-          predictorGuids,
-          facility,
-          item.baselineYear
-        ).group;
-        return {
-          ...normalizedGroup,
-          models: normalizedGroup.models?.map(model => getTrimmedModel(structuredClone(model)))
-        };
+        const normalizedGroup = normalizeVisualizationAnalysisGroup(group, item.guid, predictorGuids, facility, item.baselineYear, visualizations);
+        return { ...normalizedGroup, models: normalizedGroup.models?.map(model => getTrimmedModel(structuredClone(model))) };
       })
     };
   });
@@ -174,4 +174,15 @@ function getTrimmedModel(model: JStatRegressionModel): JStatRegressionModel {
 
 function newBackupId(): string {
   return Math.random().toString(36).slice(2, 11);
+}
+
+function validateVisualizations(snapshot: AccountWorkspaceSnapshot): void {
+  for (const record of snapshot.savedVisualizations) {
+    const error = savedVisualizationEnvelopeError(record);
+    if (error) throw new Error(error);
+    if (record.accountId !== snapshot.account.guid || (record.facilityId !== undefined
+      && !snapshot.facilities.some(facility => facility.guid === record.facilityId && facility.accountId === record.accountId))) {
+      throw new Error('A saved visualization does not belong to its backup owner.');
+    }
+  }
 }
