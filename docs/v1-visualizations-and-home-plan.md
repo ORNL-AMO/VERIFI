@@ -106,6 +106,8 @@ The [Vis1 foundation specification](v1-visualization-foundation.md) defines the 
 
 Make saved visualization definitions durable and portable with the account data they reference.
 
+The [Vis2 persistence specification](v1-visualization-persistence.md) records the accepted ownership, recovery, compatibility, transfer/isolation decisions and five-PR implementation stack. Older backups remain supported; the deliberately unchanged global backup data version means older VERIFI releases may omit saved visualizations when importing new backups.
+
 **Scope**
 
 - Add versioned saved-definition persistence through existing workspace command and publication boundaries, using GUID relationships rather than local numeric database keys.
