@@ -3,12 +3,12 @@ const assert = require('node:assert/strict');
 const { testMatrix } = require('./prepare-qa-tests.cjs');
 const { validateResults } = require('./collect-qa-tests.cjs');
 const { resolvePlan } = require('./resolve-qa.cjs');
-const { qualifyingInvocation, assertUpgradeEvidence, requiredAtHead, writeCheck } = require('./validation-check.cjs');
+const { qualifyingInvocation, assertUpgradeEvidence, assertDefaultPackageRuns, requiredAtHead, writeCheck, policyCandidates, publishPolicy } = require('./validation-check.cjs');
 
 function fixture(scenario = 'electron-upgrade') {
     const source = 'a'.repeat(40), candidate = 'b'.repeat(40);
     const builds = [{ role: 'baseline', sourceSha: source, version: '0.0.30' }, ...(scenario === 'electron-upgrade' ? [{ role: 'candidate-a', sourceSha: candidate, version: '0.0.31' }] : []), { role: 'candidate-b', sourceSha: candidate, version: '0.0.32' }];
-    const plan = { scenario, candidateSha: candidate, builds };
+    const plan = { scenario, candidateSha: candidate, builds, workflowRef: 'refs/heads/develop' };
     const packages = builds.flatMap((build, index) => ['windows', 'mac', 'linux'].map((platform, offset) => ({ ...build, platform, artifactId: 10 + index * 3 + offset, artifactRunId: 90,
         manifest: { electronVersion: build.role === 'baseline' ? '39.8.10' : '45.2.3', qaInstrumentation: { instrumentationVersion: 2, updaterContract: build.role === 'baseline' ? 'legacy' : 'guarded-v1' } } })));
     const testPlan = { testRunId: 100, testToolingSha: 'c'.repeat(40), packageRunId: 90, report: { plan, packages } };
@@ -63,13 +63,38 @@ test('only a full default-branch invocation may satisfy the exact-commit upgrade
     const run = { id: 100, head_sha: plan.testToolingSha, head_branch: 'develop', event: 'workflow_dispatch', path: '.github/workflows/desktop_prerelease.yml', status: 'completed', conclusion: 'success' };
     const invocation = { schemaVersion: 1, kind: 'desktop-qa-invocation', runId: 100, workflowSha: run.head_sha, workflowRef: 'refs/heads/develop', operation: 'test-only', scenario: 'electron-upgrade', testPlatform: 'all', candidateSha: report.candidateSha, packageRunId: 90 };
     assert.equal(qualifyingInvocation(invocation, run, 'develop'), true);
-    assert.equal(assertUpgradeEvidence(report, plan.report, invocation, run), report);
+    assert.equal(assertUpgradeEvidence(report, plan.report, invocation, run, 'develop'), report);
     for (const patch of [{ testPlatform: 'windows' }, { operation: 'build-only' }, { workflowRef: 'refs/heads/codex/pilot' }, { workflowSha: 'd'.repeat(40) }, { scenario: 'baseline-validation' }, { runId: 99 }]) {
         assert.equal(qualifyingInvocation({ ...invocation, ...patch }, run, 'develop'), false);
     }
-    for (const patch of [{ conclusion: 'cancelled' }, { conclusion: 'failure' }, { status: 'in_progress' }]) assert.throws(() => assertUpgradeEvidence(report, plan.report, invocation, { ...run, ...patch }));
-    for (const patch of [{ status: 'partial' }, { selection: 'windows' }, { candidateSha: 'd'.repeat(40) }, { testToolingSha: 'd'.repeat(40) }, { testRunId: 99 }, { packageRunId: 89 }, { results: results.slice(1) }]) assert.throws(() => assertUpgradeEvidence({ ...report, ...patch }, plan.report, invocation, run));
-    assert.throws(() => assertUpgradeEvidence(report, plan.report, invocation, run, { fromElectronMajor: 38, toElectronMajor: 45 }), /runtime upgrade/);
+    for (const patch of [{ conclusion: 'cancelled' }, { conclusion: 'failure' }, { status: 'in_progress' }]) assert.throws(() => assertUpgradeEvidence(report, plan.report, invocation, { ...run, ...patch }, 'develop'));
+    for (const patch of [{ status: 'partial' }, { selection: 'windows' }, { candidateSha: 'd'.repeat(40) }, { testToolingSha: 'd'.repeat(40) }, { testRunId: 99 }, { packageRunId: 89 }, { results: results.slice(1) }]) assert.throws(() => assertUpgradeEvidence({ ...report, ...patch }, plan.report, invocation, run, 'develop'));
+    assert.throws(() => assertUpgradeEvidence(report, plan.report, invocation, run, 'develop', { fromElectronMajor: 38, toElectronMajor: 45 }), /runtime upgrade/);
+    assert.throws(() => assertUpgradeEvidence(report, { ...plan.report, plan: { ...plan.report.plan, workflowRef: 'refs/heads/codex/pilot' } }, invocation, run, 'develop'), /default-branch package/);
+});
+
+test('policy refresh clears obsolete failures after head, base, or state changes without bypassing an active shared head', async () => {
+    const old = 'a'.repeat(40), current = 'b'.repeat(40);
+    const pr = { number: 2920, state: 'open', base: { ref: 'develop' }, head: { sha: current } };
+    const event = { action: 'synchronize', before: old, pull_request: { number: 2920 } };
+    assert.deepEqual(policyCandidates(pr, event, 'develop'), [current, old]);
+    assert.deepEqual(policyCandidates({ ...pr, state: 'closed' }, { action: 'closed' }, 'develop'), [current]);
+    assert.deepEqual(policyCandidates({ ...pr, base: { ref: 'codex/stack' } }, { action: 'edited' }, 'develop'), [current]);
+    const ordinary = { ...pr, number: 3000, head: { sha: old } };
+    assert.deepEqual(policyCandidates(ordinary, event, 'develop'), [old]);
+    for (const requiredPr of [pr, { ...pr, head: { sha: old }, state: 'closed' }, { ...pr, head: { sha: old }, base: { ref: 'codex/stack' } }]) {
+        const writes = [];
+        const api = async (route, options) => {
+            if (route.startsWith('/pulls/')) return requiredPr;
+            if (route.startsWith('/commits/')) return { check_runs: [{ id: 1, name: 'desktop-installer-validation', app: { slug: 'github-actions' }, external_id: 'desktop-validation:200', status: 'completed', conclusion: 'failure' }] };
+            writes.push(JSON.parse(options.body)); return {};
+        };
+        await publishPolicy(api, old, 'develop');
+        assert.equal(writes.length, 1); assert.equal(writes[0].conclusion, 'success'); assert.equal(writes[0].output.title, 'Not applicable');
+        assert.equal(await requiredAtHead(api, old, 'develop'), undefined);
+        writes.length = 0;
+        if (requiredPr === pr) { await publishPolicy(api, current, 'develop'); assert.equal(writes.length, 0); }
+    }
 });
 
 test('the required policy follows a shared candidate commit and applies only to the default base', async () => {
@@ -77,6 +102,15 @@ test('the required policy follows a shared candidate commit and applies only to 
     assert.equal(await requiredAtHead(async () => pr, candidate, 'develop'), pr);
     assert.equal(await requiredAtHead(async () => pr, 'd'.repeat(40), 'develop'), undefined);
     assert.equal(await requiredAtHead(async () => ({ ...pr, base: { ref: 'codex/harness' } }), candidate, 'develop'), undefined);
+});
+
+test('required evidence also verifies the workflow origin of reused baseline artifacts', async () => {
+    const workflow = 'c'.repeat(40), cohort = { packages: [{ artifactRunId: 90, manifest: { workflowSha: workflow } }, { artifactRunId: 80, manifest: { workflowSha: workflow } }] };
+    const origin = { status: 'completed', event: 'workflow_dispatch', head_branch: 'develop', head_sha: workflow, path: '.github/workflows/desktop_prerelease.yml' };
+    await assertDefaultPackageRuns(async () => origin, cohort, 'develop');
+    for (const patch of [{ head_branch: 'codex/pilot' }, { head_sha: 'd'.repeat(40) }, { status: 'in_progress' }, { event: 'pull_request' }]) {
+        await assert.rejects(assertDefaultPackageRuns(async route => route.endsWith('/80') ? { ...origin, ...patch } : origin, cohort, 'develop'), /Every package/);
+    }
 });
 
 test('serialized check publishing cannot regress a newer run or reopen its terminal result', async () => {

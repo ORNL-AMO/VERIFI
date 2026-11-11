@@ -2,7 +2,7 @@ name: Desktop validation policy
 
 on:
   pull_request_target:
-    types: [opened, reopened, synchronize, edited]
+    types: [opened, reopened, synchronize, edited, closed]
   workflow_run:
     workflows: [Desktop pre-release]
     types: [completed]
@@ -11,14 +11,13 @@ permissions: {}
 
 jobs:
   identify:
-    if: github.event_name == 'workflow_run' || github.event.pull_request.base.ref == github.event.repository.default_branch
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: read
     outputs:
       enabled: ${{ steps.identify.outputs.enabled }}
-      candidate-sha: ${{ steps.identify.outputs.candidate-sha }}
+      candidates: ${{ steps.identify.outputs.candidates }}
       pr-number: ${{ steps.identify.outputs.pr-number }}
     steps:
       # pull_request_target and workflow_run select trusted base/default code.
@@ -39,6 +38,10 @@ jobs:
   report:
     needs: identify
     if: needs.identify.outputs.enabled == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: ${{ fromJSON(needs.identify.outputs.candidates) }}
     permissions:
       contents: read
       actions: read
@@ -47,6 +50,6 @@ jobs:
     uses: ./.github/workflows/desktop_validation_check.yml
     with:
       phase: ${{ github.event_name == 'workflow_run' && 'completed' || 'pull-request' }}
-      candidate-sha: ${{ needs.identify.outputs.candidate-sha }}
+      candidate-sha: ${{ matrix.candidate }}
       run-id: ${{ format('{0}', github.event.workflow_run.id || 0) }}
       pr-number: ${{ needs.identify.outputs.pr-number }}
