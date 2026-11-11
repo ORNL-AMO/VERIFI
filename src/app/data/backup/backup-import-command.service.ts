@@ -1,5 +1,10 @@
 import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { visualizationTransferMaps, mergeVisualizationTransferMaps, transferSavedVisualization, summarizeVisualizationImport, VisualizationImportSummary } from './visualization-backup';
+import { VisualizationGuidMaps } from '@domain/visualizations/visualization-references';
+import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
+import { inspectVisualizationReferences, readVisualizationReferenceCatalog } from '@data/account-workspace/visualization-reference-inspection';
 import { FACILITY_DELETION_CHILD_STORES, FACILITY_DELETION_PARTICIPANT_STORES } from '@data/indexedDB/facility-deletion.config';
 import { removeFacilityFromAccountAnalysis, removeFacilityFromAccountReport } from '@data/indexedDB/facility-deletion-references';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
@@ -47,7 +52,8 @@ const ACCOUNT_IMPORT_STORES: ReadonlyArray<VerifiStoreName> = [
   'accountReports',
   'facilityReports',
   'facilityEnergyUseGroups',
-  'facilityEnergyUseEquipment'
+  'facilityEnergyUseEquipment',
+  'savedVisualizations'
 ];
 
 const FACILITY_IMPORT_STORES: ReadonlyArray<VerifiStoreName> = [
@@ -65,7 +71,8 @@ const FACILITY_IMPORT_STORES: ReadonlyArray<VerifiStoreName> = [
   'accountReports',
   'facilityReports',
   'facilityEnergyUseGroups',
-  'facilityEnergyUseEquipment'
+  'facilityEnergyUseEquipment',
+  'savedVisualizations'
 ];
 
 const FACILITY_RESTORE_STORES = dedupeStores(
@@ -75,6 +82,11 @@ const FACILITY_RESTORE_STORES = dedupeStores(
 
 @Injectable({ providedIn: 'root' })
 export class BackupImportCommandService {
+  private readonly summary = signal<VisualizationImportSummary | undefined>(undefined);
+  readonly visualizationImportSummary = this.summary.asReadonly();
+
+  clearVisualizationImportSummary(): void { this.summary.set(undefined); }
+
   constructor(
     private readonly transactions: IndexedDbTransactionService,
     private readonly loadingService: LoadingService
@@ -82,8 +94,10 @@ export class BackupImportCommandService {
 
   async importAccountBackupFile(preparedBackup: PreparedBackupFile, currIdx: number): Promise<IdbAccount> {
     const backupFile = structuredClone(preparedBackup);
+    const visualizations: IdbSavedVisualization[] = [];
+    this.summary.set(undefined);
 
-    return this.transactions.runTransaction(ACCOUNT_IMPORT_STORES, 'readwrite', async transaction => {
+    const result = await this.transactions.runTransaction(ACCOUNT_IMPORT_STORES, 'readwrite', async transaction => {
       await this.requireUnresolvedGroupsAvailable(transaction, backupFile);
       const accountGUIDs: GuidPair = {
         oldId: backupFile.account.guid,
@@ -407,8 +421,12 @@ export class BackupImportCommandService {
         }
       }
 
+      visualizations.push(...await this.importVisualizations(transaction, preparedBackup, newAccount.guid,
+        visualizationTransferMaps(preparedBackup, backupFile)));
       return newAccount;
     });
+    this.summary.set(summarizeVisualizationImport(result.guid, visualizations));
+    return result;
   }
 
   async importFacilityBackupFile(
@@ -416,9 +434,16 @@ export class BackupImportCommandService {
     accountGUID: string,
     currIdx: number
   ): Promise<{ facility: IdbFacility, index?: number }> {
-    return this.transactions.runTransaction(FACILITY_IMPORT_STORES, 'readwrite', transaction =>
-      this.importFacilityBackupInTransaction(transaction, preparedBackup, accountGUID, currIdx)
-    );
+    this.summary.set(undefined);
+    const visualizations: IdbSavedVisualization[] = [];
+    const result = await this.transactions.runTransaction(FACILITY_IMPORT_STORES, 'readwrite', async transaction => {
+      const imported = await this.importFacilityBackupInTransaction(transaction, preparedBackup, accountGUID, currIdx);
+      visualizations.push(...await this.importVisualizations(transaction, preparedBackup, accountGUID,
+        visualizationTransferMaps(preparedBackup, imported.transferred)));
+      return { facility: imported.facility, index: imported.index };
+    });
+    this.summary.set(summarizeVisualizationImport(accountGUID, visualizations));
+    return result;
   }
 
   async replaceFacilityBackupFile(
@@ -427,10 +452,17 @@ export class BackupImportCommandService {
     facilityToReplace: IdbFacility,
     currIdx: number
   ): Promise<{ facility: IdbFacility, index?: number }> {
-    return this.transactions.runTransaction(FACILITY_RESTORE_STORES, 'readwrite', async transaction => {
+    this.summary.set(undefined);
+    const visualizations: IdbSavedVisualization[] = [];
+    const result = await this.transactions.runTransaction(FACILITY_RESTORE_STORES, 'readwrite', async transaction => {
       currIdx = await this.deleteFacilityInTransaction(transaction, facilityToReplace, accountGUID, currIdx);
-      return this.importFacilityBackupInTransaction(transaction, preparedBackup, accountGUID, currIdx);
+      const imported = await this.importFacilityBackupInTransaction(transaction, preparedBackup, accountGUID, currIdx);
+      visualizations.push(...await this.importVisualizations(transaction, preparedBackup, accountGUID,
+        visualizationTransferMaps(preparedBackup, imported.transferred)));
+      return { facility: imported.facility, index: imported.index };
     });
+    this.summary.set(summarizeVisualizationImport(accountGUID, visualizations));
+    return result;
   }
 
   async importSelectedFacilities(
@@ -439,7 +471,10 @@ export class BackupImportCommandService {
     facilityImportSelections: Record<string, { importAs: 'new' | 'replace'; replacedFacility?: string }>,
     accountFacilities: Array<IdbFacility>
   ): Promise<void> {
+    this.summary.set(undefined);
+    const visualizations: IdbSavedVisualization[] = [];
     await this.transactions.runTransaction(FACILITY_RESTORE_STORES, 'readwrite', async transaction => {
+      const importedBackups: Array<{ source: PreparedBackupFile; transferred: PreparedBackupFile }> = [];
       let idx = 1;
       for (const { selectedFacility } of preparedFacilities) {
         const selection = facilityImportSelections[selectedFacility.name];
@@ -453,15 +488,21 @@ export class BackupImportCommandService {
 
       for (const { backup } of preparedFacilities) {
         this.loadingService.setCurrentLoadingIndex(idx);
-        const { index = idx } = await this.importFacilityBackupInTransaction(
+        const imported = await this.importFacilityBackupInTransaction(
           transaction,
           backup,
           selectedAccount.guid,
           idx
         );
-        idx = index + 1;
+        importedBackups.push({ source: backup, transferred: imported.transferred });
+        idx = (imported.index ?? idx) + 1;
+      }
+      const maps = mergeVisualizationTransferMaps(importedBackups.map(item => visualizationTransferMaps(item.source, item.transferred)));
+      for (const item of importedBackups) {
+        visualizations.push(...await this.importVisualizations(transaction, item.source, selectedAccount.guid, maps));
       }
     });
+    this.summary.set(summarizeVisualizationImport(selectedAccount.guid, visualizations));
   }
 
   private async importFacilityBackupInTransaction(
@@ -469,7 +510,7 @@ export class BackupImportCommandService {
     preparedBackup: PreparedBackupFile,
     accountGUID: string,
     currIdx: number
-  ): Promise<{ facility: IdbFacility, index?: number }> {
+  ): Promise<{ facility: IdbFacility, index?: number, transferred: PreparedBackupFile }> {
     const backupFile = structuredClone(preparedBackup);
 
     await this.requireUnresolvedGroupsAvailable(transaction, backupFile);
@@ -703,7 +744,7 @@ export class BackupImportCommandService {
     if (needsFacilityUpdate) {
       await transaction.put('facilities', newFacility);
     }
-    return { facility: newFacility, index: currIdx };
+    return { facility: newFacility, index: currIdx, transferred: backupFile };
   }
 
   private async deleteFacilityInTransaction(
@@ -753,6 +794,25 @@ export class BackupImportCommandService {
     await transaction.deleteByKey('facilities', facility.id);
 
     return currIdx;
+  }
+
+  private async importVisualizations(transaction: IndexedDbTransactionContext, source: PreparedBackupFile,
+    accountGuid: string, maps: VisualizationGuidMaps): Promise<IdbSavedVisualization[]> {
+    const imported: IdbSavedVisualization[] = [];
+    if (!source.savedVisualizations?.length) return imported;
+    const catalog = await readVisualizationReferenceCatalog(transaction);
+    for (const record of source.savedVisualizations ?? []) {
+      const target = transferSavedVisualization(record, accountGuid, maps, this.getGUID());
+      const decoded = decodeVisualizationDefinition(target.definition);
+      if (!target.preservation?.locked && 'definition' in decoded) {
+        target.preservation = { ...target.preservation,
+          references: inspectVisualizationReferences(decoded.definition, catalog, target.preservation?.references),
+          transfers: target.preservation?.transfers ?? [] };
+      }
+      target.id = await this.addRecord(transaction, 'savedVisualizations', target);
+      imported.push(target);
+    }
+    return imported;
   }
 
   private async addRecord<T extends { id?: number }>(

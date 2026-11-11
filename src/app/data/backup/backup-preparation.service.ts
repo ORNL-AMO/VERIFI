@@ -1,13 +1,15 @@
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
 import { Injectable } from '@angular/core';
 import { BackupFile } from '@data/models/backup-file';
 import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '@data/indexedDB/data-migrations/data-migration.errors';
 import { DATA_MIGRATIONS } from '@data/indexedDB/data-migrations/data-migration.registry';
 import { CURRENT_DATA_VERSION, MigrationData } from '@data/indexedDB/data-migrations/data-migration.models';
 import { StatusWarningDismissal } from '@data/models/status-warning-dismissal';
-import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-analysis/calculations/regression-model-recovery';
+import { normalizeVisualizationAnalysisGroup } from './visualization-backup';
 import { energyUseBackupReferencesError } from './energy-use-backup-relations';
 
-export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION };
+export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION; savedVisualizations: IdbSavedVisualization[] };
 
 export class InvalidBackupError extends Error {
   constructor(message = 'Selected file is not a valid VERIFI backup.') {
@@ -41,7 +43,7 @@ const COLLECTION_FIELDS = [
   'facilities', 'meters', 'meterData', 'groups', 'accountReports', 'accountAnalysisItems',
   'facilityAnalysisItems', 'predictorData', 'predictorDataV2', 'predictors',
   'customEmissionsItems', 'customFuels', 'customGWPs', 'facilityReports',
-  'facilityEnergyUseGroups', 'facilityEnergyUseEquipment'
+  'facilityEnergyUseGroups', 'facilityEnergyUseEquipment', 'savedVisualizations'
 ] as const;
 
 @Injectable({ providedIn: 'root' })
@@ -104,6 +106,7 @@ export class BackupPreparationService {
       facilityReports: backup.facilityReports.filter(item => item.facilityId === facilityGuid),
       facilityEnergyUseGroups: backup.facilityEnergyUseGroups.filter(item => item.facilityId === facilityGuid),
       facilityEnergyUseEquipment: backup.facilityEnergyUseEquipment.filter(item => item.facilityId === facilityGuid),
+      savedVisualizations: backup.savedVisualizations.filter(item => item.facilityId === facilityGuid),
       accountReports: [], accountAnalysisItems: []
     });
   }
@@ -201,6 +204,13 @@ function applyMigrationDataToBackup(backup: BackupFile, data: MigrationData): vo
 }
 
 function validateCoreRelationships(backup: BackupFile): void {
+  const visualizationGuids = new Set<string>();
+  for (const [index, record] of (backup.savedVisualizations ?? []).entries()) {
+    const error = savedVisualizationEnvelopeError(record);
+    if (error) throw new BackupRelationshipError(`Visualization ${index + 1}: ${error}`);
+    if (visualizationGuids.has(record.guid)) throw new BackupRelationshipError(`Visualization ${index + 1} has a duplicate identity.`);
+    visualizationGuids.add(record.guid);
+  }
   const facilities = backup.backupFileType === 'Account' ? backup.facilities : [backup.facility];
   const facilityIds = new Set(facilities.map(item => item.guid));
   const groupIds = new Set(backup.groups.map(item => item.guid));
@@ -212,7 +222,7 @@ function validateCoreRelationships(backup: BackupFile): void {
     ...backup.predictors, ...backup.predictorDataV2, ...backup.facilityAnalysisItems,
     ...backup.accountAnalysisItems, ...backup.accountReports, ...backup.facilityReports,
     ...backup.customEmissionsItems, ...backup.customFuels, ...backup.customGWPs,
-    ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment
+    ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment, ...(backup.savedVisualizations ?? [])
   ];
 
   if (backup.backupFileType === 'Account') {
@@ -225,6 +235,11 @@ function validateCoreRelationships(backup: BackupFile): void {
     ...backup.predictorDataV2, ...backup.facilityAnalysisItems, ...backup.facilityReports,
     ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment
   ];
+  const scopedVisualizations = (backup.savedVisualizations ?? []).filter(item => item.facilityId !== undefined);
+  requireAll(scopedVisualizations, item => facilityIds.has(item.facilityId), 'A visualization references an owning facility that is not in the backup.');
+  if (backup.backupFileType === 'Facility' && scopedVisualizations.length !== (backup.savedVisualizations ?? []).length) {
+    throw new BackupRelationshipError('A facility backup cannot own portfolio visualizations.');
+  }
   requireAll(facilityOwned, item => facilityIds.has(item.facilityId), 'A record references a facility that is not in the backup.');
   requireAll(backup.meters, meter => !meter.groupId || groupIds.has(meter.groupId), 'A meter references a missing meter group.');
   requireAll(backup.meterData, reading => meterIds.has(reading.meterId), 'A meter reading references a missing meter.');
@@ -240,12 +255,7 @@ function validateCoreRelationships(backup: BackupFile): void {
       if (group.idbGroupId && !groupIds.has(group.idbGroupId)) {
         throw new BackupRelationshipError('An analysis references a missing meter group.');
       }
-      return normalizeAnalysisGroupForAvailablePredictors(
-        group,
-        predictorIds,
-        facility,
-        analysis.baselineYear
-      ).group;
+      return normalizeVisualizationAnalysisGroup(group, analysis.guid, predictorIds, facility, analysis.baselineYear, backup.savedVisualizations ?? []);
     });
   }
 }
