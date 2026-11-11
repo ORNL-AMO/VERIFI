@@ -1,6 +1,6 @@
 # Desktop pre-release validation
 
-This is the packaging foundation for [#2586](https://github.com/ORNL-AMO/VERIFI/issues/2586). The packaging and installed-app harness retain the current Electron runtime; the final stacked PR upgrades Electron. A packaging-only result is **not** installed-update acceptance. Required candidate-specific check publication belongs to the final upgrade PR.
+This implements the packaging and installed-app harness for [#2586](https://github.com/ORNL-AMO/VERIFI/issues/2586). Both retain the current Electron runtime; the final stacked PR upgrades Electron. A packaging-only result is **not** installed-update acceptance. The harness also registers the trusted check publisher so it can enforce evidence before the upgrade merges.
 
 ## First rollout
 
@@ -9,6 +9,7 @@ This is the packaging foundation for [#2586](https://github.com/ORNL-AMO/VERIFI/
 3. Run **Desktop pre-release** from `develop`, select `build-only`, and supply a candidate and an explicit baseline. For the first baseline trial, both may identify the same current source; generated QA versions remain ordered.
 4. Review the resolved source commits and QA versions in the run summary, then approve signing. The initiating maintainer may approve.
 5. Require the signed three-platform packaging trial to succeed before accepting the installed-app harness. After workflow registration on `develop`, select the reviewed harness PR branch to run its pre-merge pilot. That workflow commit must itself resolve to a protected-branch commit or current same-repository PR head, and its SHA appears in the signing approval plan. Start with Windows, then require `test_platform: all` baseline evidence before merging the harness. Keep #2920 unmerged until both update paths and all safeguards have passing evidence.
+6. After the harness lands, configure `desktop-installer-validation` from GitHub Actions as a required check. Retarget the final upgrade to `develop`, then dispatch full `electron-upgrade` validation from `develop` for its exact head commit. A changed candidate requires new evidence.
 
 ## Inputs and retained packages
 
@@ -43,5 +44,13 @@ The UI imports a small synthetic account with facility, meter/readings, predicto
 Failures retain installer/updater/renderer/controller logs, snapshots, screenshots, traces and machine-readable results. Missing, failed, duplicate, incompatible or partial results cannot produce complete acceptance. The final upgrade gate consumes only full successful default-branch workflow evidence for the exact current candidate; branch pilots remain review evidence.
 
 The Windows-first packaged pilot, complete signed baseline matrix, and upgrade matrix are still required CI evidence. Local fixture/feed/contract tests and certificate-free Mac checks do not establish that these signed scenarios passed.
+
+## Exact-commit check
+
+The [trusted policy](../scripts/desktop/validation-policy.json) identifies #2920 as requiring the upgrade matrix, including the expected runtime-major transition. Other PRs targeting the default branch receive an explicit not-applicable success. A second PR sharing the required PR's head cannot bypass its policy.
+
+The [metadata event workflow](../.github/workflows/desktop_validation_events.yml) executes base/default-branch reporting code. It never executes candidate code or receives signing credentials. PR synchronization queues the check on the current candidate SHA. A full default-branch dispatch announces its exact candidate, and workflow completion revalidates immutable invocation/package/result records before reporting success or failure. Missing, failed, canceled or partial evidence cannot pass. Feature-branch pilots cannot satisfy this gate.
+
+Publishers serialize per candidate, retain queued events, and compare validation-run IDs before updating checks. An older validation cannot overwrite a newer result. A test-only dispatch may reuse the same retained signed cohort, but expiration or a different candidate requires a new explicitly identified build.
 
 Keep production-identity artifact/trust verification and the unchanged released client's post-publication production-feed check in release acceptance. Broad OS-version coverage, Intel Mac execution, tarball updating, installer-wizard automation, and extensive download/signature failure injection remain follow-ups. Recovery uses verified backups and forward fixes, not an assumed Chromium-profile downgrade.

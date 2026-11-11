@@ -1,0 +1,55 @@
+name: Publish desktop validation
+
+on:
+  workflow_call:
+    inputs:
+      phase:
+        type: string
+        required: true
+      candidate-sha:
+        type: string
+        required: true
+      run-id:
+        type: string
+        default: '0'
+      pr-number:
+        type: string
+        default: '0'
+
+permissions: {}
+
+# Both event and dispatch publishers serialize updates for the same candidate.
+# Keep pending completions rather than replacing them with newer queued events.
+concurrency:
+  group: desktop-validation-${{ inputs.candidate-sha }}
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+      - uses: actions/download-artifact@v4
+        if: inputs.phase == 'start'
+        with:
+          name: desktop-qa-plan
+      - name: Publish from trusted metadata and retained evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_PHASE: ${{ inputs.phase }}
+          VALIDATION_CANDIDATE_SHA: ${{ inputs.candidate-sha }}
+          VALIDATION_RUN_ID: ${{ inputs.run-id }}
+          VALIDATION_PR_NUMBER: ${{ inputs.pr-number }}
+        run: node scripts/desktop/validation-check.cjs

@@ -87,7 +87,10 @@ async function runScenario({ plan, from, to, scenario, evidence, installRoot }) 
         if (browser?.isConnected()) await browser.contexts()[0].tracing.stop({ path: path.join(evidence, `${browser.traceName}.zip`) });
     };
     const screenshot = name => page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: true });
-    const ready = () => page.locator('app-header').getByRole('button', { name: 'QA Update Account', exact: true }).waitFor();
+    const ready = async () => {
+        await page.locator('app-loading .windowOverlay').waitFor({ state: 'hidden', timeout: 120000 });
+        await page.locator('app-header').getByRole('button', { name: 'QA Update Account', exact: true }).waitFor();
+    };
     let expected, before, after;
     try {
         await phase('create-disposable-profile', async () => {
@@ -107,6 +110,7 @@ async function runScenario({ plan, from, to, scenario, evidence, installRoot }) 
             await page.locator('app-import-backup-modal input[type=file]').setInputFiles(file);
             await page.locator('app-import-backup-modal .popup.open').getByRole('button', { name: /Import Backup/ }).click();
             await until('imported GUID-linked data and values', async () => assertSeededValues(await snapshot(page)));
+            await page.locator('app-loading').getByRole('button', { name: 'Done', exact: true }).click();
             await ready();
         });
         await phase('configure-real-backup', async () => {

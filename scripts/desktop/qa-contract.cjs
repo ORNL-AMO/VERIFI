@@ -43,6 +43,7 @@ function precedes(a, b) {
 function validateInputs(input) {
     assert(['build-only', 'build-and-test', 'test-only'].includes(input.mode), 'Invalid operation.');
     assert(['baseline-validation', 'electron-upgrade'].includes(input.scenario), 'Invalid scenario.');
+    assert(input.test_platform === undefined || ['all', 'windows', 'mac', 'linux'].includes(input.test_platform), 'Invalid pilot platform.');
     if (input.mode === 'test-only') {
         positiveInteger(input.artifact_run_id, 'artifact run ID');
         assert(!input.candidate_ref && !input.baseline_ref && !input.baseline_run_id, 'Test-only uses only its original artifact run; source overrides are forbidden.');

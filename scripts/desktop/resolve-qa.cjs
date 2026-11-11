@@ -56,6 +56,8 @@ async function main() {
         plan = await resolvePlan(input, context, api, baseline);
     }
     await fs.writeFile('qa-plan.json', JSON.stringify(plan, null, 2) + '\n');
+    await fs.writeFile('qa-invocation.json', JSON.stringify({ schemaVersion: 1, kind: 'desktop-qa-invocation', runId: Number(context.runId), workflowSha: context.workflowSha,
+        workflowRef: context.ref, candidateSha: plan.candidateSha, packageRunId: plan.runId, operation: input.mode, scenario: plan.scenario, testPlatform: input.test_platform || 'all' }, null, 2) + '\n');
     const builds = plan.builds.filter(build => !build.reuseRunId);
     await fs.appendFile(process.env.GITHUB_OUTPUT, `builds=${JSON.stringify(builds)}\ncandidate-sha=${plan.candidateSha}\n`);
     await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, `## Desktop QA plan\n\nCandidate: ${plan.candidateSha}\n\nWorkflow: ${plan.workflowSha}\n\nScenario: ${plan.scenario}\n\n${plan.builds.map(build => `- ${build.role}: ${build.sourceSha} → ${build.version}${build.reuseRunId ? ` (retained run ${build.reuseRunId})` : ''}`).join('\n')}\n\nSigning approval applies to these resolved commits and QA versions.\n`);

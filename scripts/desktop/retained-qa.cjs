@@ -30,7 +30,8 @@ function validateRunReport(report, run, artifacts, repository, now = Date.now(),
     return report;
 }
 
-async function readReport(api, artifact) {
+async function readReport(api, artifact, fileName = 'qa-run.json') {
+    assert(['qa-run.json', 'qa-installed-report.json', 'qa-invocation.json'].includes(fileName), 'Unsupported report filename.');
     assert(!artifact.expired && artifact.digest?.startsWith('sha256:'), 'Report artifact expired or has no digest.');
     // Fetch the authenticated redirect separately; never forward the token to blob storage.
     const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/actions/artifacts/${artifact.id}/zip`, {
@@ -45,7 +46,7 @@ async function readReport(api, artifact) {
     try {
         const file = path.join(directory, 'report.zip');
         await fs.writeFile(file, bytes);
-        return JSON.parse(execFileSync('unzip', ['-p', file, 'qa-run.json'], { maxBuffer: 10_000_000 }).toString());
+        return JSON.parse(execFileSync('unzip', ['-p', file, fileName], { maxBuffer: 10_000_000 }).toString());
     } finally { await fs.rm(directory, { recursive: true, force: true }); }
 }
 
@@ -64,4 +65,4 @@ async function loadRetainedRun(api, runId, repository, allowFailedTests = false,
     return validateRunReport(report, run, artifacts, repository, Date.now(), allowFailedTests, currentRun);
 }
 
-module.exports = { validateRunReport, loadRetainedRun };
+module.exports = { validateRunReport, loadRetainedRun, readReport };

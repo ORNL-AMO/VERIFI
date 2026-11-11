@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Build-only is available in the foundation; installed tests require the harness PR.
+        description: Build signed packages, exercise retained packages, or build without installed tests.
         type: choice
         options: [build-only, build-and-test, test-only]
         default: build-only
@@ -73,9 +73,27 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-qa-plan
-          path: qa-plan.json
+          path: |
+            qa-plan.json
+            qa-invocation.json
           if-no-files-found: error
           retention-days: 14
+
+  announce_validation:
+    needs: resolve
+    if: >-
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+      inputs.mode != 'build-only' && inputs.scenario == 'electron-upgrade' && inputs.test_platform == 'all'
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      checks: write
+    uses: ./.github/workflows/desktop_validation_check.yml
+    with:
+      phase: start
+      candidate-sha: ${{ needs.resolve.outputs.candidate-sha }}
+      run-id: ${{ github.run_id }}
 
   approve:
     needs: resolve

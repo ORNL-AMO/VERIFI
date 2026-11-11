@@ -58,11 +58,14 @@ async function snapshot(page) {
             request.onupgradeneeded = () => { request.transaction.abort(); reject(new Error('Cannot create or upgrade storage during inspection.')); };
             request.onerror = () => reject(request.error);
             request.onsuccess = () => {
+                // The plural `predictors` store contains legacy V0 data. Current
+                // predictor records live in the singular `predictor` store.
                 const db = request.result, names = Object.keys(fields), result = {};
+                const storeName = name => name === 'predictors' ? 'predictor' : name;
                 let transaction;
-                try { transaction = db.transaction(names, 'readonly'); } catch (error) { db.close(); reject(error); return; }
+                try { transaction = db.transaction(names.map(storeName), 'readonly'); } catch (error) { db.close(); reject(error); return; }
                 for (const name of names) {
-                    const read = transaction.objectStore(name).getAll();
+                    const read = transaction.objectStore(storeName(name)).getAll();
                     read.onsuccess = () => { result[name] = read.result.map(row => Object.fromEntries(fields[name].filter(key => row[key] !== undefined).map(key => [key, row[key]]))).sort((a, b) => a.guid.localeCompare(b.guid)); };
                 }
                 transaction.oncomplete = () => { db.close(); resolve(result); };
