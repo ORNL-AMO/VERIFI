@@ -15,8 +15,9 @@ build({
     }
 }).then(async () => {
     if (process.platform === 'darwin' && !process.argv.includes('--dir')) {
-        const { finalizeMetadata } = require('./update-metadata.cjs');
-        await finalizeMetadata('output', 'latest-mac.yml', true);
-        await finalizeMetadata('output', 'latest-mac.yml');
+        const { finalizeMetadata, darwinMinimum } = require('./update-metadata.cjs');
+        const minimum = darwinMinimum(require('../../package.json').build.mac.minimumSystemVersion);
+        await finalizeMetadata('output', 'latest-mac.yml', true, minimum);
+        await finalizeMetadata('output', 'latest-mac.yml', false, minimum);
     }
 }).catch(error => { console.error(error.message); process.exitCode = 1; });

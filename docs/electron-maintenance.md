@@ -44,13 +44,13 @@ Before publishing the draft:
 
 The normal GitHub feed cannot discover draft releases. After publication, test the unchanged previously released application's actual signed update path on isolated Windows and Mac profiles. Confirm final checksums, differential download or full-download fallback, restart/install behavior, and persisted data after reopening. Do not claim these release checks passed based on local unsigned packages or mocked tests.
 
-The new controller's Download/Later/Restart/error paths are covered before release by controlled tests. Validate the complete signed new-to-new update path when a subsequent signed version is available. Recovery uses verified backups and a forward fix, not an assumed Chromium profile downgrade.
+The new controller's Download/Later/Restart/error paths have controlled regression coverage. Before merging the upgrade, require the [desktop pre-release suite](desktop-prerelease.md) for this PR's exact current commit on all three platforms: current runtime → candidate B, and candidate A → B with Cancel/Save, Discard and backup failure/recovery. Candidate A/B reuse the same source with ordered QA versions. A partial pilot, packaging-only result or changed commit cannot satisfy `desktop-installer-validation`. Required-check and signing approval setup are rollout prerequisites. Recovery uses verified backups and a forward fix, not an assumed Chromium profile downgrade.
 
 ## Evaluation and deferred improvements
 
 The previous implementation registered updater listeners on every renderer-ready message, consumed its download command once, used a private updater property, misread error-event arguments, and installed immediately on download completion. Window activation called an undefined function and popup handling used a removed event. Those defects are addressed together with IPC sender validation and listener cleanup.
 
-Broader follow-ups remain separate: narrow macOS entitlements, Electron fuses, content-security policy, filesystem capabilities, request-header scoping, periodic/manual update checks, and a packaged desktop automation pilot. Signing infrastructure and the update provider are retained.
+Broader follow-ups remain separate: narrow macOS entitlements, Electron fuses, content-security policy, filesystem capabilities, request-header scoping, and periodic/manual update checks. Packaged automation is supplied by the preceding harness PR. Signing infrastructure and the production update provider are retained.
 
 Dependency audit findings must be compared with the unchanged integration branch. Do not run an automatic broad dependency upgrade as part of desktop maintenance; record pre-existing findings and address them through their owning dependency work.
 
