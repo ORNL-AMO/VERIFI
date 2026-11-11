@@ -14,6 +14,7 @@ The user journey is **create or capture a visualization → save and revisit it 
 - Home widgets reference saved visualizations. Editing one updates all dashboard appearances. Duplicate creates an independent visualization.
 - Dashboard layout and widget overrides belong to the dashboard instance. They do not silently change the linked visualization.
 - Templates are reusable starting points. Customizing an instance never changes the shipped template. Personas guide content without restricting capabilities or requiring a role-selection step.
+- The Visualizations section lists saved items on Dashboard. Add visualization steps through ownership, concrete chart type, multiple source families, then name; chart/source compatibility is established by adapters, not by family selection alone.
 - Support utility usage, costs, charges, emissions, water, predictors/weather, Energy Uses, and existing analysis results. Offer chart/settings combinations that preserve the selected data's meaning.
 - Use ECharts extensively for rendering and interaction while keeping VERIFI calculations, units, fiscal periods, provenance, and quality rules authoritative.
 - Custom report authoring is deferred. Reusable visualization definitions and rendering boundaries should support that later extension.
@@ -37,6 +38,20 @@ Preserve existing v0 behavior, calculations, source records, report settings, an
 
 Dependencies below describe implementation prerequisites. Slices can overlap when their shared contract is stable, while visualization completion remains the first delivery milestone.
 
+## Visualization starter recipes
+
+**Status: planned downstream; not implemented by Vis3.** Deliver a recipe chooser alongside Custom once the first Vis4 utility provider and Vis6 time-series editor can render real saved charts. The Custom path uses Vis3's chart-first workflow. Recipes prefill ordinary editable visualization intent and require explicit account/facility resource binding before adding an independent saved visualization. Editing an instance never changes the shipped recipe. Do not automatically populate accounts or facilities.
+
+| Recipe | Delivery dependency |
+| --- | --- |
+| Energy usage trend | First working Vis4/Vis6 utility path |
+| Utility cost trend | First working Vis4/Vis6 utility path |
+| Utility/source breakdown | Applicable Vis4/Vis8 composition adapter |
+| Usage versus production or weather | Vis5 with compatible Vis6/Vis7 editing |
+| Analysis comparisons | Applicable Vis5 analysis and Vis6/Vis7 adapters |
+
+Each recipe must preserve ownership, explicit source bindings, period/units/provenance, save/reopen behavior and actionable unavailable states. Unusable recipes explain missing data/support. Deliver the first two recipes with the first working chart path, then expand as adapters arrive; Vis10 verifies combined acceptance. Visualization recipes create individual saved charts and remain distinct from the Home layout templates below.
+
 ## Default Home templates
 
 | Template | Primary audience | Starting content |
@@ -57,7 +72,7 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 | --- | --- | --- | --- |
 | Vis1 | [#2901 Define the visualization workflow and reusable configuration contract](https://github.com/ORNL-AMO/VERIFI/issues/2901) | Implemented locally; review/QA pending | None |
 | Vis2 | [#2903 Persist saved visualizations and preserve them through backup and restore](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Implemented locally; review/QA pending | Vis1 |
-| Vis3 | [#2904 Build the Visualizations library and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | In progress | Vis1, Vis2 |
+| Vis3 | [#2904 Build the Visualizations Dashboard and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | In progress | Vis1, Vis2 |
 | Vis4 | [#2905 Build utility cost emissions and charge data selection](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Not started | Vis1, Vis3 |
 | Vis5 | [#2906 Add predictor weather Energy Use and analysis result sources](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Not started | Vis1, Vis3, Vis4 |
 | Vis6 | [#2907 Build time series and comparison chart editing](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Not started | Vis3, Vis4 |
@@ -78,13 +93,13 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 
 **Issue:** [#2901](https://github.com/ORNL-AMO/VERIFI/issues/2901) · **Status:** Implemented locally; review/QA pending
 
-Define a coherent library, editor, chart capture, and embedding workflow before implementing the saved visualization model.
+Define a coherent Dashboard, editor, chart capture, and embedding workflow before implementing the saved visualization model.
 
 The [Vis1 foundation specification](v1-visualization-foundation.md) defines the accepted workflow, focused chart dispositions, executable contract boundaries, and three-PR delivery stack. Vis1 does not implement persistence, production providers, routes, capture actions, or Home widgets.
 
 **Scope**
 
-- Specify account ownership, portfolio/facility scope, source selection, fixed and rolling date ranges, comparison periods, save behavior, and library/workbench navigation.
+- Specify account ownership, portfolio/facility scope, source selection, fixed and rolling date ranges, comparison periods, save behavior, and Dashboard/workbench navigation.
 - Define a versioned VERIFI visualization definition that separates source/calculation intent and presentation from generated ECharts options and computed data.
 - Define source-provider and chart-capability boundaries so existing chart families can participate without losing their meaning.
 
@@ -126,18 +141,18 @@ The [Vis2 persistence specification](v1-visualization-persistence.md) records th
 
 **Validation:** Fast mapping/version tests plus real Chromium IndexedDB save/reopen, rollback/recovery, migration, GUID remapping, deletion, and representative old/new backup round trips.
 
-### Vis3 Build the Visualizations library and workbench
+### Vis3 Build the Visualizations Dashboard and workbench
 
 **Issue:** [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) · **Status:** In progress
 
-The [Vis3 workbench specification](v1-visualization-workbench.md) records the accepted card library, autosave/navigation/recovery decisions and six-slice delivery stack. This is framework-first delivery; concrete source and chart adapters remain in Vis4–Vis8.
+The [Vis3 workbench specification](v1-visualization-workbench.md) records the accepted card Dashboard, autosave/navigation/recovery decisions and six-slice delivery stack. This is framework-first delivery; concrete source and chart adapters remain in Vis4–Vis8.
 
 Enable the Visualizations rail destination and provide the main place to create, organize, and edit saved visualizations.
 
 **Scope**
 
-- Build feature-owned production v1 library and editor routes, navigation, scope presentation, and guarded transitions.
-- Support creation, opening, renaming, duplication, deletion, search/filter/sort, and useful library organization.
+- Build feature-owned production v1 Dashboard and editor routes, navigation, scope presentation, and guarded transitions.
+- Support creation, opening, renaming, duplication, deletion, search/filter/sort, and useful Dashboard organization.
 - Provide live preview, source/settings controls, visible save state, and recovery actions.
 
 **Acceptance criteria**
@@ -150,7 +165,7 @@ Enable the Visualizations rail destination and provide the main place to create,
 
 **Dependencies:** Vis1 ([#2901](https://github.com/ORNL-AMO/VERIFI/issues/2901)), Vis2 ([#2903](https://github.com/ORNL-AMO/VERIFI/issues/2903))
 
-**Validation:** Focused library/editor/router and save-state tests, plus Chromium keyboard, guarded navigation, source loss, account switching, and reopen journeys. Select final builds with the repository validation planner.
+**Validation:** Focused Dashboard/editor/router and save-state tests, plus Chromium keyboard, guarded navigation, source loss, account switching, and reopen journeys. Select final builds with the repository validation planner.
 
 ### Vis4 Build utility cost emissions and charge data selection
 
@@ -403,7 +418,7 @@ Reuse saved visualizations as live dashboard widgets and let users return to the
 
 **Scope**
 
-- Choose existing saved visualizations from the library and render them with the shared chart/data pipeline.
+- Choose existing saved visualizations from Dashboard and render them with the shared chart/data pipeline.
 - Apply explicit dashboard context/filter overrides according to Home1 without mutating the saved definition.
 - Provide open-in-Visualizations, replace/remove, source context, and missing/error/retry behavior.
 
@@ -458,7 +473,7 @@ Ship the agreed Home template collection and verify complete linked-dashboard jo
 **Acceptance criteria**
 
 - [ ] Templates offer useful starting content from existing data without requiring users to construct every visualization manually or select a persona.
-- [ ] Template-created charts use the saved visualization library and linked semantics; template instantiation avoids accidental orphan or duplicate records.
+- [ ] Template-created charts use the saved visualization Dashboard and linked semantics; template instantiation avoids accidental orphan or duplicate records.
 - [ ] Users can choose a default, customize widgets, reopen dashboards, edit a linked chart, and recover missing inputs.
 - [ ] Retained v0 Home/Overview values match authoritative calculations, and every deliberate content difference is documented.
 - [ ] Backup/restore, source deletion, filters, dense portfolios, incomplete data, keyboard/focus, themes, responsive layouts, printing, and practical Electron windows pass acceptance.

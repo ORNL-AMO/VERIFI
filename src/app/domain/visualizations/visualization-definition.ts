@@ -105,7 +105,7 @@ export interface VisualizationSeries {
 export type VisualizationChart =
   | { readonly kind: 'time-series'; readonly type: 'line' | 'bar' | 'area' | 'combination'; readonly interval: 'monthly' | 'yearly' | 'native';
       readonly stack: 'none' | 'absolute' | 'percent'; readonly seriesTypes?: readonly { readonly seriesId: string; readonly type: 'line' | 'bar' | 'area' }[] }
-  | { readonly kind: 'scatter'; readonly xSeriesId: string; readonly ySeriesId: string; readonly showFit: boolean }
+  | { readonly kind: 'scatter'; readonly xSeriesId?: string; readonly ySeriesId?: string; readonly showFit: boolean }
   | { readonly kind: 'correlation'; readonly statistic: 'r' | 'r-squared'; readonly scale: 'raw' | 'z-score' }
   | { readonly kind: 'heatmap'; readonly dimension: 'month-year' | 'series-period'; readonly scale: 'linear' | 'diverging' }
   | { readonly kind: 'breakdown'; readonly type: 'bar' | 'donut'; readonly values: 'absolute' | 'percent' }
@@ -139,5 +139,28 @@ export function createVisualizationDefinition(name: string, accountGuid: string,
     : { ...base, kind: sourceKind, measure: 'value', aggregation: 'none' };
   return { version: VISUALIZATION_DEFINITION_VERSION, name, accountGuid, scope: { ...scope }, sources: [source],
     period: sourceKind === 'energy-use' ? { kind: 'latest-saved-year', basis: 'fiscal' } : { kind: 'all-history' },
+    comparison: { kind: 'none' }, series: [], appearance: { legend: true } };
+}
+
+/** A setup choice describes intent without claiming source compatibility or runtime availability. */
+export interface VisualizationSetupInput {
+  readonly name: string;
+  readonly accountGuid: string;
+  readonly scope: VisualizationScope;
+  readonly chart: VisualizationChart;
+  readonly sourceKinds: readonly VisualizationSourceKind[];
+}
+
+/** Every selected family starts independently; the workbench assigns actual resources and series. */
+export function createVisualizationSetupDefinition(input: VisualizationSetupInput): VisualizationDefinition {
+  if (!input.sourceKinds.length || new Set(input.sourceKinds).size !== input.sourceKinds.length)
+    throw new Error('Choose one or more unique source families.');
+  const sources = input.sourceKinds.map((kind, index) => ({
+    ...createVisualizationDefinition(input.name, input.accountGuid, input.scope, kind).sources[0], id: `source-${index + 1}`
+  }));
+  return { version: VISUALIZATION_DEFINITION_VERSION, name: input.name, accountGuid: input.accountGuid,
+    scope: { ...input.scope }, sources, chart: structuredClone(input.chart),
+    period: input.sourceKinds.length === 1 && input.sourceKinds[0] === 'energy-use'
+      ? { kind: 'latest-saved-year', basis: 'fiscal' } : { kind: 'all-history' },
     comparison: { kind: 'none' }, series: [], appearance: { legend: true } };
 }

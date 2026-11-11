@@ -34,14 +34,16 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
   if (result.chart?.kind === 'time-series' && result.chart.seriesTypes) {
     result = { ...result, chart: { ...result.chart, seriesTypes: result.chart.seriesTypes.filter(type => result.series.some(series => series.id === type.seriesId)) } };
   }
-  // Scatter axis identities, for example, cannot remain after their series are removed.
-  const brokenScatter = result.chart?.kind === 'scatter'
-    && (!result.series.some(series => series.id === (result.chart as Extract<VisualizationDefinition['chart'], { kind: 'scatter' }>).xSeriesId)
-      || !result.series.some(series => series.id === (result.chart as Extract<VisualizationDefinition['chart'], { kind: 'scatter' }>).ySeriesId));
-  if ((brokenScatter || decodeVisualizationDefinition(result).state === 'invalid') && result.chart) {
-    cleared.push('Chart configuration that depends on cleared series');
-    const { chart, ...withoutChart } = result;
-    result = withoutChart;
+  // Retain the selected chart while clearing only axes whose declared series were removed.
+  if (result.chart?.kind === 'scatter') {
+    const chart = { ...result.chart };
+    if (chart.xSeriesId && !result.series.some(series => series.id === chart.xSeriesId)) {
+      delete chart.xSeriesId; cleared.push('Scatter X axis that depends on cleared series');
+    }
+    if (chart.ySeriesId && !result.series.some(series => series.id === chart.ySeriesId)) {
+      delete chart.ySeriesId; cleared.push('Scatter Y axis that depends on cleared series');
+    }
+    result = { ...result, chart };
   }
   const decoded = decodeVisualizationDefinition(result);
   if (decoded.state === 'invalid' || decoded.state === 'unsupported') throw new Error('This definition cannot be safely reset. Its original intent has been preserved.');
