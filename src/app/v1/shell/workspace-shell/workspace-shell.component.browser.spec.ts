@@ -6,6 +6,7 @@ import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-
 import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
 import { page } from 'vitest/browser';
 import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
+import { VisualizationImportNotificationBridgeService } from '@app/v1/shared/notifications/visualization-import-notification-bridge.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { WorkspaceShellComponent } from './workspace-shell.component';
 
@@ -41,6 +42,7 @@ describe('workspace notification clearance in Chromium', () => {
       </main>` } });
     TestBed.configureTestingModule({ imports: [WorkspaceShellGeometryModule], providers: [
       { provide: CommandNotificationBridgeService, useValue: {} },
+      { provide: VisualizationImportNotificationBridgeService, useValue: {} },
       { provide: WorkspaceNavigationService, useValue: {} }
     ] });
     fixture = TestBed.createComponent(WorkspaceShellComponent);
