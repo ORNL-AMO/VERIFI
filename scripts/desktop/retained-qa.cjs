@@ -6,15 +6,17 @@ const path = require('node:path');
 const { assert, positiveInteger, validatePlan, PLATFORMS } = require('./qa-contract.cjs');
 const { paginate } = require('./github-api.cjs');
 
-function assertTrustedRun(run, allowFailedTests = false) {
-    assert(run.status === 'completed' && (run.conclusion === 'success' || (allowFailedTests && ['failure', 'cancelled'].includes(run.conclusion))) && run.event === 'workflow_dispatch' && run.head_branch === 'develop' && run.path === '.github/workflows/desktop_prerelease.yml', 'Retained run is not a completed trusted desktop pre-release run.');
+function assertTrustedRun(run, allowFailedTests = false, currentRun) {
+    const current = currentRun && run.id === currentRun.id && run.head_sha === currentRun.workflowSha && run.status === 'in_progress';
+    assert((current || (run.status === 'completed' && (run.conclusion === 'success' || (allowFailedTests && ['failure', 'cancelled'].includes(run.conclusion))))) && run.event === 'workflow_dispatch' && typeof run.head_branch === 'string' && run.path === '.github/workflows/desktop_prerelease.yml', 'Retained run is not a completed trusted desktop pre-release run.');
 }
 
-function validateRunReport(report, run, artifacts, repository, now = Date.now(), allowFailedTests = false) {
-    assertTrustedRun(run, allowFailedTests);
+function validateRunReport(report, run, artifacts, repository, now = Date.now(), allowFailedTests = false, currentRun) {
+    assertTrustedRun(run, allowFailedTests, currentRun);
     assert(report.schemaVersion === 1 && report.kind === 'desktop-qa-packages' && report.status === 'passed' && report.runId === run.id, 'Invalid retained package report.');
     const plan = validatePlan(report.plan);
     assert(plan.repository === repository && plan.runId === run.id && plan.workflowSha === run.head_sha, 'Retained plan provenance mismatch.');
+    assert((plan.workflowRef || 'refs/heads/develop') === `refs/heads/${run.head_branch}`, 'Retained workflow branch mismatch.');
     assert(Array.isArray(report.packages) && report.packages.length === plan.builds.length * PLATFORMS.length, 'Incomplete retained platform set.');
     for (const build of plan.builds) for (const platform of PLATFORMS) {
         const matches = report.packages.filter(item => item.role === build.role && item.platform === platform);
@@ -47,10 +49,10 @@ async function readReport(api, artifact) {
     } finally { await fs.rm(directory, { recursive: true, force: true }); }
 }
 
-async function loadRetainedRun(api, runId, repository, allowFailedTests = false) {
+async function loadRetainedRun(api, runId, repository, allowFailedTests = false, currentRun) {
     const id = positiveInteger(runId, 'retained run ID');
     const run = await api(`/actions/runs/${id}`);
-    assertTrustedRun(run, allowFailedTests);
+    assertTrustedRun(run, allowFailedTests, currentRun);
     const artifacts = await paginate(api, `/actions/runs/${id}/artifacts`, 'artifacts');
     const reports = artifacts.filter(item => item.name === 'desktop-qa-report');
     assert(reports.length === 1, 'Retained run must contain exactly one QA report.');
@@ -59,7 +61,7 @@ async function loadRetainedRun(api, runId, repository, allowFailedTests = false)
     for (const item of report.packages || []) {
         if (!artifacts.some(value => value.id === item.artifactId)) artifacts.push(await api(`/actions/artifacts/${positiveInteger(item.artifactId, 'artifact ID')}`));
     }
-    return validateRunReport(report, run, artifacts, repository, Date.now(), allowFailedTests);
+    return validateRunReport(report, run, artifacts, repository, Date.now(), allowFailedTests, currentRun);
 }
 
 module.exports = { validateRunReport, loadRetainedRun };

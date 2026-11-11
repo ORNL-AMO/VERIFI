@@ -13,6 +13,11 @@ on:
         type: choice
         options: [baseline-validation, electron-upgrade]
         default: baseline-validation
+      test_platform:
+        description: Use Windows for the initial pilot; all platforms are required for acceptance.
+        type: choice
+        options: [all, windows, mac, linux]
+        default: all
       candidate_ref:
         description: Candidate commit or ref (leave empty for test-only)
         type: string
@@ -35,7 +40,7 @@ concurrency:
 
 jobs:
   resolve:
-    if: github.ref == 'refs/heads/develop'
+    if: startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -133,7 +138,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  test:
+  prepare_tests:
     needs: [resolve, packages]
     if: >-
       always() && needs.resolve.result == 'success' &&
@@ -142,13 +147,131 @@ jobs:
     permissions:
       actions: read
       contents: read
+    outputs:
+      matrix: ${{ steps.prepare.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Installed-app harness extension point
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+      - name: Resolve verified retained packages and required scenarios
+        id: prepare
         env:
           GH_TOKEN: ${{ github.token }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id || github.run_id }}
-        run: node scripts/desktop/run-update-tests.cjs
+          QA_TEST_PLATFORM: ${{ inputs.test_platform }}
+        run: node scripts/desktop/prepare-qa-tests.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-test-plan
+          path: qa-tests.json
+          if-no-files-found: error
+          retention-days: 14
+
+  installed:
+    needs: prepare_tests
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare_tests.outputs.matrix) }}
+    name: Installed ${{ matrix.platform }} / ${{ matrix.scenario }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Require a fresh test-only dispatch for reruns
+        if: github.run_attempt != 1
+        shell: bash
+        run: exit 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: desktop-test-plan
+      - name: Download exact baseline artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ matrix.fromArtifactId }}
+          run-id: ${{ matrix.fromArtifactRunId }}
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: baseline
+      - name: Download exact candidate artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ matrix.toArtifactId }}
+          run-id: ${{ matrix.toArtifactRunId }}
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: candidate
+      - name: Prepare Linux AppImage host and virtual display
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2t64 xvfb libnss3 libatk-bridge2.0-0 libgbm1
+          # Permit Chromium's real user-namespace sandbox on this disposable VM.
+          if [[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+      - name: Install, update, and verify using the external controller
+        shell: bash
+        env:
+          QA_TEST_CASE: ${{ matrix.scenario }}
+        run: |
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            xvfb-run -a --server-args='-screen 0 1440x1000x24' node scripts/desktop/run-update-tests.cjs
+          else
+            node scripts/desktop/run-update-tests.cjs
+          fi
+      - name: Retain controller and native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-test-result-${{ matrix.platform }}-${{ matrix.scenario }}
+          path: evidence/*
+          if-no-files-found: warn
+          retention-days: 14
+
+  installed_result:
+    needs: [prepare_tests, installed]
+    if: always() && needs.prepare_tests.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: desktop-test-plan
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-test-result-*
+          path: test-results
+      - name: Require the complete installed-app matrix
+        run: node scripts/desktop/collect-qa-tests.cjs
+      - name: Preserve exact-candidate result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-installed-report
+          path: qa-installed-report.json
+          if-no-files-found: error
+          retention-days: 14

@@ -15,15 +15,18 @@ async function packageConfig(source, platform, qaVersion) {
         assert(pkg.main === 'main.js', 'QA wrapper requires the existing main.js entrypoint.');
         const wrapper = await fs.readFile(path.join(__dirname, 'qa-bootstrap.cjs'));
         const configuration = JSON.stringify(QA_IDENTITY, null, 2) + '\n';
+        let updaterContract = 'legacy';
+        try { await fs.access(path.join(source, 'electron/update-controller.cjs')); updaterContract = 'guarded-v1'; }
+        catch (error) { if (error.code !== 'ENOENT') throw error; }
         await fs.writeFile(path.join(source, 'desktop-qa-bootstrap.cjs'), wrapper);
         await fs.writeFile(path.join(source, 'desktop-qa-config.json'), configuration);
         Object.assign(config, {
             appId: QA_IDENTITY.appId, productName: QA_IDENTITY.productName,
             extraMetadata: { name: QA_IDENTITY.name, version: qaVersion, main: 'desktop-qa-bootstrap.cjs', verifiQa: {
-                sourceSha: sha(process.env.DESKTOP_SOURCE_SHA), workflowSha: sha(process.env.DESKTOP_WORKFLOW_SHA),
+                sourceSha: sha(process.env.DESKTOP_SOURCE_SHA), workflowSha: sha(process.env.DESKTOP_WORKFLOW_SHA), instrumentationVersion: 2, updaterContract,
                 wrapperSha256: createHash('sha256').update(wrapper).digest('hex'), configSha256: createHash('sha256').update(configuration).digest('hex')
             } },
-            publish: [{ provider: 'generic', url: QA_IDENTITY.feed, channel: 'latest' }],
+            publish: [{ provider: 'generic', url: QA_IDENTITY.feed, channel: 'latest', useMultipleRangeRequest: false }],
             // QA has its own bundle identity and no restricted entitlements requiring
             // the production identity's provisioning profile. Developer ID signing remains.
             mac: { provisioningProfile: null },

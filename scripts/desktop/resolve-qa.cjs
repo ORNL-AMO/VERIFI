@@ -25,14 +25,15 @@ async function assertSigningApproval(api) {
 async function resolvePlan(input, context, api, reusedBaseline) {
     validateInputs(input);
     assert(input.mode !== 'test-only', 'Test-only must load the retained plan.');
-    assert(context.ref === 'refs/heads/develop', 'Dispatch the trusted workflow from develop.');
+    assert(context.ref.startsWith('refs/heads/'), 'Dispatch from a trusted branch.');
+    if (context.ref !== 'refs/heads/develop') assert(await trustedCommit(api, context.workflowSha, context.repository) === context.workflowSha, 'Untrusted workflow definition.');
     assert(String(context.attempt) === '1', 'Do not rebuild signed artifacts on rerun; dispatch test-only or start a new build run.');
     const candidateSha = await trustedCommit(api, input.candidate_ref, context.repository);
     const baseline = reusedBaseline || { sourceSha: await trustedCommit(api, input.baseline_ref, context.repository), version: qaVersion(context.runNumber, 0) };
     const builds = [{ role: 'baseline', ...baseline }];
     if (input.scenario === 'electron-upgrade') builds.push({ role: 'candidate-a', sourceSha: candidateSha, version: qaVersion(context.runNumber, 1) });
     builds.push({ role: 'candidate-b', sourceSha: candidateSha, version: qaVersion(context.runNumber, 2) });
-    return validatePlan({ schemaVersion: SCHEMA_VERSION, kind: 'desktop-qa-plan', repository: context.repository, workflowSha: sha(context.workflowSha), candidateSha, runId: Number(context.runId), scenario: input.scenario, identity: QA_IDENTITY, builds });
+    return validatePlan({ schemaVersion: SCHEMA_VERSION, kind: 'desktop-qa-plan', repository: context.repository, workflowSha: sha(context.workflowSha), workflowRef: context.ref, candidateSha, runId: Number(context.runId), scenario: input.scenario, identity: QA_IDENTITY, builds });
 }
 
 async function main() {

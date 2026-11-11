@@ -58,6 +58,7 @@ function validateInputs(input) {
 function validatePlan(plan) {
     assert(plan.schemaVersion === SCHEMA_VERSION && plan.kind === 'desktop-qa-plan', 'Unsupported QA plan.');
     sha(plan.workflowSha);
+    assert(plan.workflowRef === undefined || (plan.workflowRef.startsWith('refs/heads/') && !/[\x00-\x1f]/.test(plan.workflowRef)), 'Invalid workflow branch.');
     sha(plan.candidateSha);
     assert(plan.identity && Object.keys(plan.identity).length === Object.keys(QA_IDENTITY).length && Object.entries(QA_IDENTITY).every(([key, value]) => plan.identity[key] === value), 'Incompatible QA identity or feed.');
     assert(['baseline-validation', 'electron-upgrade'].includes(plan.scenario), 'Invalid plan scenario.');

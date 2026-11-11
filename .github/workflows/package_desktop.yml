@@ -26,7 +26,7 @@ jobs:
   native:
     if: >-
       (inputs.qa-version == '' && github.ref == 'refs/heads/master' && inputs.source-sha == github.sha) ||
-      (inputs.qa-version != '' && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
+      (inputs.qa-version != '' && github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/heads/'))
     strategy:
       fail-fast: false
       matrix:
