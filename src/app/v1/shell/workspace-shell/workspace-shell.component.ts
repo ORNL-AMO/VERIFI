@@ -1,5 +1,6 @@
 import { Component, ElementRef, NgZone, OnDestroy, afterNextRender, inject } from '@angular/core';
 import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
+import { VisualizationImportNotificationBridgeService } from '@app/v1/shared/notifications/visualization-import-notification-bridge.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 @Component({
@@ -10,6 +11,7 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 })
 export class WorkspaceShellComponent implements OnDestroy {
   private readonly commandNotificationBridge = inject(CommandNotificationBridgeService);
+  private readonly visualizationImportNotifications = inject(VisualizationImportNotificationBridgeService);
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly zone = inject(NgZone);
   private workspace?: HTMLElement;

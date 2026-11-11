@@ -56,7 +56,7 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 | Tag | Issue | Status | Prerequisites |
 | --- | --- | --- | --- |
 | Vis1 | [#2901 Define the visualization workflow and reusable configuration contract](https://github.com/ORNL-AMO/VERIFI/issues/2901) | Implemented locally; review/QA pending | None |
-| Vis2 | [#2903 Persist saved visualizations and preserve them through backup and restore](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Not started | Vis1 |
+| Vis2 | [#2903 Persist saved visualizations and preserve them through backup and restore](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Implemented locally; review/QA pending | Vis1 |
 | Vis3 | [#2904 Build the Visualizations library and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Not started | Vis1, Vis2 |
 | Vis4 | [#2905 Build utility cost emissions and charge data selection](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Not started | Vis1, Vis3 |
 | Vis5 | [#2906 Add predictor weather Energy Use and analysis result sources](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Not started | Vis1, Vis3, Vis4 |
@@ -102,7 +102,7 @@ The [Vis1 foundation specification](v1-visualization-foundation.md) defines the 
 
 ### Vis2 Persist saved visualizations and preserve them through backup and restore
 
-**Issue:** [#2903](https://github.com/ORNL-AMO/VERIFI/issues/2903) · **Status:** Not started
+**Issue:** [#2903](https://github.com/ORNL-AMO/VERIFI/issues/2903) · **Status:** Implemented locally; review/QA pending
 
 Make saved visualization definitions durable and portable with the account data they reference.
 
@@ -116,11 +116,11 @@ The [Vis2 persistence specification](v1-visualization-persistence.md) records th
 
 **Acceptance criteria**
 
-- [ ] Create, update, duplicate, delete, and reopen definitions without persisting chart instances, executable callbacks, or derived result snapshots.
-- [ ] Restore and copy remap the definition's account/facility/source relationships correctly; duplication produces an independent identity.
-- [ ] Source rename, deletion, and unavailable calculation inputs produce a repairable saved definition rather than silent source replacement or fabricated results.
-- [ ] Schema upgrades and record-version upgrades are idempotent. Older backups without visualizations remain supported.
-- [ ] Failed saves retain recoverable user intent; committed-refresh failures do not repeat an already committed mutation.
+- [x] Create, update, duplicate, delete, and reopen definitions without persisting chart instances, executable callbacks, or derived result snapshots.
+- [x] Restore and copy remap the definition's account/facility/source relationships correctly; duplication produces an independent identity.
+- [x] Source rename, deletion, and unavailable calculation inputs produce a repairable saved definition rather than silent source replacement or fabricated results.
+- [x] Schema upgrades and record-version upgrades are idempotent. Older backups without visualizations remain supported.
+- [x] Failed saves retain recoverable user intent; committed-refresh failures do not repeat an already committed mutation.
 
 **Dependencies:** Vis1 ([#2901](https://github.com/ORNL-AMO/VERIFI/issues/2901))
 

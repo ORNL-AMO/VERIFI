@@ -10,6 +10,7 @@ import { vi } from 'vitest';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ImportStepperComponent } from '@app/v1/account/imports/import-stepper/import-stepper.component';
 import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
+import { VisualizationImportNotificationBridgeService } from '@app/v1/shared/notifications/visualization-import-notification-bridge.service';
 import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
 import { SectionNavModule } from '../section-nav/section-nav.module';
 import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-evaluation-message/status-evaluation-message.component';
@@ -90,6 +91,7 @@ describe('WorkspaceShellComponent', () => {
       imports: [WorkspaceShellTestModule],
       providers: [
         { provide: CommandNotificationBridgeService, useValue: {} },
+        { provide: VisualizationImportNotificationBridgeService, useValue: {} },
         { provide: WorkspaceNavigationService, useValue: navigation },
         { provide: WorkspaceStatusService, useValue: status }
       ]
