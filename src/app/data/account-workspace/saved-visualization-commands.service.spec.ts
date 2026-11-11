@@ -1,13 +1,13 @@
 import { vi } from 'vitest';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { SavedVisualizationCommands } from './saved-visualization-commands.service';
 import { WorkspaceWriteError } from './workspace-commands.models';
 import { VisualizationConflictError } from './visualization-commands.models';
 
 describe('saved visualization command outcomes', () => {
   const record: IdbSavedVisualization = { guid: 'visualization-a', accountId: 'account-a', revision: 1, recordVersion: 1,
-    createdDate: '2026-11-11T00:00:00.000Z', modifiedDate: '2026-11-11T00:00:00.000Z', definition: utilityVisualizationFixture() };
+    createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'), definition: utilityVisualizationFixture() };
   function setup() {
     const boundary = { execute: vi.fn(async (_options, persist) => ({ value: await persist() })), recoverCommittedPublication: vi.fn(async () => {}) };
     const handler = { create: vi.fn(async (_command: unknown, _account: string) => structuredClone(record)), update: vi.fn(async () => structuredClone(record)),

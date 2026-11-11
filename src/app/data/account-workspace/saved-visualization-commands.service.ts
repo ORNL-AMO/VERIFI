@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IdbSavedVisualization, readSavedVisualization, SavedVisualizationReadResult } from '@data/models/idbModels/saved-visualization';
+import { getNewIdbSavedVisualization, IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { readSavedVisualization, SavedVisualizationReadResult } from '@data/visualizations/saved-visualization-record';
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
-import { getGUID } from '@shared/sharedHelperFunctions';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
 import { WorkspaceWriteError } from './workspace-commands.models';
@@ -18,15 +18,16 @@ export class SavedVisualizationCommands {
 
   /** Keep this command in the live editor until acknowledged or explicitly discarded. */
   prepareCreate(definition: VisualizationDefinition): CreateVisualizationCommand {
-    return { kind: 'create', accountGuid: definition.accountGuid, guid: getGUID(), definition: structuredClone(definition), createdDate: new Date().toISOString() };
+    const record = getNewIdbSavedVisualization(definition);
+    return { kind: 'create', accountGuid: record.accountId, guid: record.guid,
+      definition: structuredClone(definition), createdDate: record.createdDate.toISOString() };
   }
 
   prepareDuplicate(record: Readonly<IdbSavedVisualization>, name?: string): DuplicateVisualizationCommand {
     const decoded = readSavedVisualization(record);
     if (decoded.state !== 'valid' && decoded.state !== 'setup-required') throw new WorkspaceWriteError('validation-failed', 'Repair this visualization before duplicating it.');
-    return { kind: 'duplicate', accountGuid: record.accountId, guid: getGUID(), sourceGuid: record.guid,
-      expectedRevision: record.revision, definition: structuredClone({ ...decoded.definition, name: name ?? `${decoded.definition.name} (Copy)` }),
-      createdDate: new Date().toISOString() };
+    const proposal = this.prepareCreate({ ...decoded.definition, name: name ?? `${decoded.definition.name} (Copy)` });
+    return { ...proposal, kind: 'duplicate', sourceGuid: record.guid, expectedRevision: record.revision };
   }
 
   submit(command: VisualizationCommand): Promise<VisualizationCommandOutcome> {

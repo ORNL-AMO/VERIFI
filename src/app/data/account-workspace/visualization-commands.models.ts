@@ -1,6 +1,6 @@
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { WorkspaceWriteError } from './workspace-commands.models';
 
 interface VisualizationCommandIdentity {

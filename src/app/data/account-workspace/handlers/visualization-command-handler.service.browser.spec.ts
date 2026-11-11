@@ -5,7 +5,7 @@ import { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transact
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
-import { IdbSavedVisualization } from '@data/models/idbModels/saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { AccountWorkspaceService } from '../account-workspace.service';
 import { AccountWorkspaceStore } from '../account-workspace.store';
@@ -32,6 +32,8 @@ describe('saved visualization native commands', () => {
     const handler = TestBed.inject(VisualizationCommandHandler);
     const command = proposal();
     const saved = await handler.create(command, account.guid);
+    expect(saved.createdDate).toBeInstanceOf(Date);
+    expect(saved.modifiedDate).toBeInstanceOf(Date);
     expect(await handler.create(structuredClone(command), account.guid)).toEqual(saved);
     expect((await handler.inspect(saved)).map(ref => ref.reason)).toEqual(['missing', 'missing']);
     const duplicate = await handler.duplicate({ ...command, kind: 'duplicate', guid: 'visualization-copy', sourceGuid: saved.guid,

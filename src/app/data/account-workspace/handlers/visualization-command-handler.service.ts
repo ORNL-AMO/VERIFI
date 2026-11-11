@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { VerifiStoreName } from '@data/indexedDB/indexed-db-schema';
-import { IdbSavedVisualization, readSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/saved-visualization';
+import { getNewIdbSavedVisualization, IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
+import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
@@ -95,10 +96,10 @@ export class VisualizationCommandHandler {
     if (!command.guid?.trim() || !Number.isFinite(new Date(command.createdDate).getTime())) this.invalid('A stable identity and creation date are required.');
     const existing = await this.find(tx, command.guid);
     if (existing) return this.matchCreation(existing, command);
-    const record: IdbSavedVisualization = { guid: command.guid, accountId: command.accountGuid,
-      ...(command.definition.scope.kind === 'facility' ? { facilityId: command.definition.scope.facilityGuid } : {}),
-      recordVersion: SAVED_VISUALIZATION_RECORD_VERSION, revision: 1, createdDate: command.createdDate,
-      modifiedDate: command.createdDate, definition: command.definition };
+    const createdDate = new Date(command.createdDate);
+    const record = getNewIdbSavedVisualization(command.definition, {
+      guid: command.guid, createdDate, modifiedDate: createdDate
+    });
     record.id = await tx.add('savedVisualizations', record) as number;
     return record;
   }
