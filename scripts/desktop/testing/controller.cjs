@@ -202,8 +202,11 @@ async function runScenario({ plan, from, to, scenario, evidence, installRoot }) 
                     await fs.unlink(path.dirname(backup)); await fs.rename(path.dirname(backup) + '.saved', path.dirname(backup));
                     await page.locator('app-header [title="Automatic Account Backups Active"]').click();
                     const modal = page.locator('app-electron-backup-file .popup.open');
-                    await modal.locator('#overwriteFile').check();
-                    await modal.getByRole('button', { name: 'Confirm', exact: true }).click();
+                    // The restored file keeps its registered dataBackupId. Review
+                    // validates it and resumes the queued failed revision; it is
+                    // a matching-file review, not a divergent-backup conflict.
+                    await modal.getByText(/up to date with the latest backup file/i).waitFor();
+                    await modal.getByRole('button', { name: 'Do Nothing', exact: true }).click();
                     const reading = expected.predictorData.find(row => row.year === 2024 && row.month === 1);
                     await until('real backup recovery', async () => (await backupAmount(backup, reading.predictorId)) === 321.5);
                     result.guards.backupRecovery = true;
