@@ -2,6 +2,8 @@
 
 Use one row to start a task. Load only the linked sections and add another subsystem skill when a cross-boundary trigger applies. Source and executable configuration remain authoritative.
 
+For the Visualizations and Home phase, start with the [V1 Visualizations and Home plan](../v1-visualizations-and-home-plan.md). It records accepted product decisions, issue dependencies, and local implementation progress. The [Vis1 foundation specification](../v1-visualization-foundation.md) defines workflow, chart dispositions, contract boundaries, and downstream handoffs; use the subsystem rows below as each issue reaches implementation.
+
 For an explicitly requested UI feedback loop, use [`$ui-iterate`](../../.agents/skills/ui-iterate/SKILL.md) alongside the relevant UI skill. It defers validation until the user is ready to test the accumulated changes and asks whether to continue editing after each change. Do not activate it automatically for ordinary UI work.
 
 | Task | Stable starting points | Read | Mode and skill | Cross-boundary triggers | First validation |
