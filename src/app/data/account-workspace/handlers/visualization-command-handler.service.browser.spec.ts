@@ -94,7 +94,7 @@ describe('saved visualization native commands', () => {
   it('keeps locked transfers unavailable until explicit source review and leaves other account records untouched', async () => {
     const handler = TestBed.inject(VisualizationCommandHandler), command = proposal();
     const preserved: IdbSavedVisualization = { guid: command.guid, accountId: account.guid, facilityId: facility.guid,
-      recordVersion: 1, revision: 1, createdDate: command.createdDate, modifiedDate: command.createdDate, definition: command.definition,
+      recordVersion: 1, revision: 1, createdDate: new Date(command.createdDate), modifiedDate: new Date(command.createdDate), definition: command.definition,
       preservation: { locked: true, references: [{ path: 'sources.0.selection.guids.0', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' }], transfers: [] } };
     const other = { ...preserved, guid: 'other-account-chart', accountId: 'account-b' };
     await harness.seed({ savedVisualizations: [{ ...preserved }, { ...other }], utilityMeter: [{ guid: 'meter-a', accountId: account.guid, facilityId: facility.guid }] });
