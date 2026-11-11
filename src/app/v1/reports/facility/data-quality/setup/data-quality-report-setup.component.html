@@ -2,6 +2,9 @@
 @let settings = editor.draft().settings;
 @let selection = editor.selection();
 <section class="report-section report-setup" aria-label="Data Quality report setup">
+  @if (!editor.canEdit()) {
+    <p class="v1-alert v1-alert--warning" role="status">Report settings are read-only while workspace editing is unavailable. Your saved settings are preserved.</p>
+  }
   <div class="report-setup-section">
     <h2>Report information</h2>
     <div class="report-setup-field report-setup-name">
@@ -24,10 +27,13 @@
     @if (settings.selectedMode === 'analysis') {
       <app-report-analysis-selection [cards]="analysisCards()" [selectionControl]="fields.selectedAnalysisItemId"
         [selectedValue]="settings.selectedAnalysisItemId" [resetKey]="context.key()" idPrefix="data-quality-report"
-        [canEdit]="editor.canEdit()" [showTypeFilter]="showTypeFilter()" [showInspection]="false"
+        [canEdit]="editor.canEdit()" [showTypeFilter]="showTypeFilter()" (inspected)="inspect($event)"
         emptyMessage="No eligible analyses are available. Create an analysis or choose By Meters & Predictors."/>
       @if (unavailableAnalysis()) {
         <p class="report-setup-help v1-field-error" role="status">The saved analysis is unavailable. Select another analysis or change the selection method.</p>
+      }
+      @if (selection.analysis && !selection.meters.length && !selection.predictors.length) {
+        <p class="report-setup-help v1-field-error" role="status">This analysis has no available meters or production predictors in its included groups. Select another analysis or choose By Meters &amp; Predictors.</p>
       }
     } @else {
       <div class="source-sections">
@@ -37,9 +43,9 @@
           </div>
           <div class="source-tag-list" role="group" aria-labelledby="data-quality-meters-heading">
             @for (choice of meterChoices(); track choice.guid) {
-              <button type="button" class="source-tag" [class.source-tag--selected]="choice.control.value"
-                [attr.aria-pressed]="choice.control.value" [disabled]="!editor.canEdit()" (click)="toggleSource(choice)">
-                <span class="source-tag-check" [class.source-tag-check--hidden]="!choice.control.value" aria-hidden="true"><app-ui-icon name="check"/></span>
+              <button type="button" class="source-tag" [class.source-tag--selected]="choice.selected"
+                [attr.aria-pressed]="choice.selected" [disabled]="!editor.canEdit()" (click)="toggleSource('meter', choice.guid)">
+                <span class="source-tag-check" [class.source-tag-check--hidden]="!choice.selected" aria-hidden="true"><app-ui-icon name="check"/></span>
                 <span class="source-tag-name">{{ choice.name }}</span>
               </button>
             } @empty {
@@ -53,9 +59,9 @@
           </div>
           <div class="source-tag-list" role="group" aria-labelledby="data-quality-predictors-heading">
             @for (choice of predictorChoices(); track choice.guid) {
-              <button type="button" class="source-tag" [class.source-tag--selected]="choice.control.value"
-                [attr.aria-pressed]="choice.control.value" [disabled]="!editor.canEdit()" (click)="toggleSource(choice)">
-                <span class="source-tag-check" [class.source-tag-check--hidden]="!choice.control.value" aria-hidden="true"><app-ui-icon name="check"/></span>
+              <button type="button" class="source-tag" [class.source-tag--selected]="choice.selected"
+                [attr.aria-pressed]="choice.selected" [disabled]="!editor.canEdit()" (click)="toggleSource('predictor', choice.guid)">
+                <span class="source-tag-check" [class.source-tag-check--hidden]="!choice.selected" aria-hidden="true"><app-ui-icon name="check"/></span>
                 <span class="source-tag-name">{{ choice.name }}</span>
               </button>
             } @empty {
@@ -63,18 +69,6 @@
             }
           </div>
         </section>
-      </div>
-    }
-    @if (selection.missingMeterIds.length || selection.missingPredictorIds.length) {
-      <div class="v1-alert v1-alert--danger" role="status">
-        <p>Some selected source items are unavailable. Correct the selection before continuing.</p>
-        <ul>
-          @for (id of selection.missingMeterIds; track id) { <li>Unavailable meter: {{ id }}</li> }
-          @for (id of selection.missingPredictorIds; track id) { <li>Unavailable predictor: {{ id }}</li> }
-        </ul>
-        @if (settings.selectedMode === 'manual') {
-          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit()" (click)="editor.removeUnavailableSelections()">Remove unavailable selections</button>
-        } @else { <p>Select another analysis or update the analysis's predictor references.</p> }
       </div>
     }
   </div>
@@ -115,3 +109,12 @@
     </table>
   </div>
 </section>
+@if (inspected(); as entry) {
+  @if (entry.scope === 'facility') {
+    <app-analysis-details-slideout [card]="entry.card" [evaluation]="inventories.statusState()"
+      [meterGroups]="inventories.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay" [showCategory]="showTypeFilter()"
+      actionLabel="Select for report" actionIcon="check" [actionDisabled]="!editor.canEdit() || openingAnalysis()"
+      secondaryActionLabel="Go To Analysis" [secondaryActionDisabled]="openingAnalysis()"
+      (secondaryActionSelected)="goToAnalysis()" (closed)="closeInspection()" (opened)="selectInspected()"/>
+  }
+}

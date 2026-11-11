@@ -3,10 +3,17 @@ import { DataQualityReportSettings } from '@data/models/idbModels/facilityReport
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
+export interface DataQualitySelectionSettings {
+  readonly selectedMode: DataQualityReportSettings['selectedMode'];
+  readonly selectedAnalysisItemId?: string | null;
+  readonly selectedMeterIds?: readonly string[];
+  readonly selectedPredictorIds?: readonly string[];
+}
+
 export interface DataQualitySelectionInputs {
   readonly accountGuid: string;
   readonly facilityGuid: string;
-  readonly settings: DataQualityReportSettings;
+  readonly settings: DataQualitySelectionSettings;
   readonly facilityAnalyses: readonly IdbAnalysisItem[];
   readonly meters: readonly IdbUtilityMeter[];
   readonly predictors: readonly IdbPredictor[];
@@ -35,10 +42,7 @@ export function resolveDataQualitySelection(input: DataQualitySelectionInputs) {
   }
   const selectedMeters = [...meterIds].flatMap(id => meters.filter(meter => meter.guid === id));
   const selectedPredictors = [...predictorIds].flatMap(id => predictors.filter(predictor => predictor.guid === id));
-  const missingMeterIds = [...meterIds].filter(id => !meters.some(meter => meter.guid === id));
-  const missingPredictorIds = [...predictorIds].filter(id => !predictors.some(predictor => predictor.guid === id));
-  const hasSelection = settings.selectedMode === 'analysis' ? !!analysis
-    : settings.selectedMode === 'manual' && meterIds.size + predictorIds.size > 0;
-  return { analysis, meters: selectedMeters, predictors: selectedPredictors, missingMeterIds, missingPredictorIds,
-    valid: hasSelection && !missingMeterIds.length && !missingPredictorIds.length };
+  const hasSelection = selectedMeters.length + selectedPredictors.length > 0;
+  return { analysis, meters: selectedMeters, predictors: selectedPredictors,
+    valid: hasSelection && (settings.selectedMode === 'manual' || !!analysis) };
 }

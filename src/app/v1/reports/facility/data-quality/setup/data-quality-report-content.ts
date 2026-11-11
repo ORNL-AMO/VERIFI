@@ -23,8 +23,7 @@ export const DATA_QUALITY_CONTENT_GROUPS: readonly {
 ];
 
 export const DATA_QUALITY_CONTENT_PRESETS = [
-  { id: 'all', label: 'All content' }, { id: 'tables', label: 'Tables only' }, { id: 'charts', label: 'Charts only' },
-  { id: 'meters', label: 'Meters only' }, { id: 'predictors', label: 'Predictors only' }
+  { id: 'all', label: 'All content' }, { id: 'tables', label: 'Tables only' }, { id: 'charts', label: 'Charts only' }
 ] as const;
 export type DataQualityContentPresetId = typeof DATA_QUALITY_CONTENT_PRESETS[number]['id'];
 type ContentSettings = Pick<DataQualitySettingsDraft, ContentFlag | 'includeMeter' | 'includePredictors'>;
@@ -33,9 +32,7 @@ const TABLE_FLAGS = new Set<ContentFlag>(['includeMeterStatisticsTable', 'includ
 const PRESET_CONTENT_FLAGS: Record<DataQualityContentPresetId, readonly ContentFlag[]> = {
   all: CONTENT_FLAGS,
   tables: [...TABLE_FLAGS],
-  charts: CONTENT_FLAGS.filter(key => !TABLE_FLAGS.has(key)),
-  meters: [...METER_CONTENT_FLAGS, 'includeAnnualTotalsTable'],
-  predictors: PREDICTOR_CONTENT_FLAGS
+  charts: CONTENT_FLAGS.filter(key => !TABLE_FLAGS.has(key))
 };
 
 /** Presets edit existing content switches only; report identity and source selections are retained. */

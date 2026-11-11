@@ -1,7 +1,7 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { IdbFacilityReport, DataQualityReportSettings } from '@data/models/idbModels/facilityReport';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { DataQualityReportSetupChanges, FacilityReportSetupChanges } from '@data/account-workspace/facility-report-setup.models';
 import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
 import { ReportAutosaveController } from '@app/v1/reports/shared/editing/report-autosave-controller';
@@ -18,6 +18,7 @@ function reportDraft(report?: IdbFacilityReport): DataQualityDraft {
 export class DataQualityReportEditor {
   readonly context = inject(FacilityReportWorkbenchContext);
   private readonly actions = inject(FacilityReportActionsService);
+  private readonly destroy = inject(DestroyRef);
   private hydrated = reportDraft();
   readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
@@ -42,7 +43,7 @@ export class DataQualityReportEditor {
         ...(Object.keys(patch).length ? { dataQualityReportSettings: patch } : {})
       };
       const saved = await this.actions.updateSetup(report.facilityId, report.guid, changes);
-      if (key !== this.context.key()) return draft;
+      if (this.destroy.destroyed || key !== this.context.key() || !this.context.report()) return draft;
       const committed = reportDraft(saved), current = this.read();
       // Keep edits made while saving; merge durable changes only into unchanged fields.
       if (current.name === before.name && changes.name === undefined) this.name.setValue(committed.name, { emitEvent: false });
@@ -63,8 +64,7 @@ export class DataQualityReportEditor {
   readonly draft = computed(() => { this.changes(); this.context.report(); this.state(); return this.read(); });
   readonly selection = computed(() => resolveDataQualitySelection({
     accountGuid: this.context.workspace.account()?.guid ?? '', facilityGuid: this.context.report()?.facilityId ?? '',
-    settings: { ...this.draft().settings, selectedAnalysisItemId: this.draft().settings.selectedAnalysisItemId ?? undefined,
-      missingSelection: false } as DataQualityReportSettings,
+    settings: this.draft().settings,
     facilityAnalyses: this.context.workspace.facilityAnalyses(), meters: this.context.workspace.meters(), predictors: this.context.workspace.predictors()
   }));
   readonly setupValid = computed(() => !!this.context.report() && !!this.draft().name.trim()
@@ -94,15 +94,6 @@ export class DataQualityReportEditor {
   discard(): void { this.controller.discard(); }
   pauseAutosave(): void { this.controller.pauseAutosave(); }
   resumeAutosave(): void { this.controller.resumeAutosave(); }
-  removeUnavailableSelections(): void {
-    if (!this.canEdit()) return;
-    const controls = this.form.controls.settings.controls, selection = this.selection();
-    this.form.controls.settings.patchValue({
-      selectedAnalysisItemId: selection.analysis ? controls.selectedAnalysisItemId.value : null,
-      selectedMeterIds: controls.selectedMeterIds.value.filter(id => !selection.missingMeterIds.includes(id)),
-      selectedPredictorIds: controls.selectedPredictorIds.value.filter(id => !selection.missingPredictorIds.includes(id))
-    });
-  }
 }
 
 function equal(first: unknown, second: unknown): boolean { return JSON.stringify(first) === JSON.stringify(second); }

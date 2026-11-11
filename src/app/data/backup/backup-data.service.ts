@@ -1,3 +1,4 @@
+import { remapDataQualityBackupReferences } from './data-quality-backup-relations';
 import { Injectable } from '@angular/core';
 import { AccountdbService } from '@data/indexedDB/account-db.service';
 import { FacilitydbService } from '@data/indexedDB/facility-db.service';
@@ -410,6 +411,7 @@ export class BackupDataService {
       facilityReport.accountId = accountGUIDs.newId;
       facilityReport.facilityId = this.getNewId(facilityReport.facilityId, facilityGUIDs);
       facilityReport.analysisItemId = this.getNewId(facilityReport.analysisItemId, facilityAnalysisGUIDs);
+      remapDataQualityBackupReferences(facilityReport, facilityAnalysisGUIDs, meterGUIDs, predictorGUIDs);
       await firstValueFrom(this.facilityReportsDbService.addWithObservable(facilityReport));
     }
 
@@ -683,6 +685,7 @@ export class BackupDataService {
       facilityReport.accountId = accountGUID;
       facilityReport.facilityId = newFacilityGUID;
       facilityReport.analysisItemId = this.getNewId(facilityReport.analysisItemId, facilityAnalysisGUIDs);
+      remapDataQualityBackupReferences(facilityReport, facilityAnalysisGUIDs, meterGUIDs, predictorGUIDs);
       await firstValueFrom(this.facilityReportsDbService.addWithObservable(facilityReport));
     }
 

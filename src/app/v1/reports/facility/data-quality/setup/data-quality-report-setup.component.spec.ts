@@ -1,4 +1,5 @@
 import { By } from '@angular/platform-browser';
+import { vi } from 'vitest';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 import { dataQualityReport, dataQualitySnapshot } from '../testing/data-quality-report-test-fixtures';
 import { DataQualityReportSetupComponent } from './data-quality-report-setup.component';
@@ -12,25 +13,122 @@ async function setup(snapshot = dataQualitySnapshot()) {
 }
 
 describe('Data Quality report Setup', () => {
-  it.each([
-    ['Meters only', true], ['Predictors only', false]
-  ] as const)('saves and restores the %s content preset without changing source selections', async (label, metersEnabled) => {
-    const { harness, editor, open, store } = await setup(dataQualitySnapshot([
-      dataQualityReport(), dataQualityReport({ id: 20, guid: 'report-b' })
-    ]));
-    const preset = () => [...harness.routeNativeElement!.querySelectorAll<HTMLButtonElement>('.content-presets button')]
-      .find(button => button.textContent?.trim() === label)!;
-    preset().click(); harness.detectChanges();
-    const settings = editor.draft().settings;
-    expect(METER_CONTENT_FLAGS.every(key => settings[key] === metersEnabled)).toBe(true);
-    expect(PREDICTOR_CONTENT_FLAGS.every(key => settings[key] === !metersEnabled)).toBe(true);
-    expect(settings).toMatchObject({ includeMeter: metersEnabled, includePredictors: !metersEnabled,
-      includeAnnualTotalsTable: metersEnabled, selectedMode: 'manual', selectedMeterIds: ['meter-a'], selectedPredictorIds: ['predictor-a'] });
-    expect(preset().getAttribute('aria-pressed')).toBe('true');
+  it('inspects each analysis without changing the selection and selects through the existing autosave', async () => {
+    const snapshot = dataQualitySnapshot();
+    snapshot.facilityAnalyses.push({ ...snapshot.facilityAnalyses[0], id: 31, guid: 'analysis-b', name: 'Other analysis' });
+    Object.assign(snapshot.facilityReports[0].dataQualityReportSettings, { selectedMode: 'analysis', selectedAnalysisItemId: 'analysis-a' });
+    const { component, harness, editor, updateSetup, store } = await setup(snapshot);
+    const root = harness.routeNativeElement!;
+    expect(root.querySelectorAll('.report-analysis-card__inspect').length).toBe(2);
+    root.querySelector<HTMLButtonElement>('[aria-label="Inspect Other analysis"]')!.click(); harness.detectChanges();
+    const dialog = root.querySelector<HTMLElement>('[role="dialog"]')!;
+    expect(dialog.textContent).toContain('Other analysis');
+    expect(dialog.textContent).toContain('Go To Analysis');
+    expect(editor.draft().settings.selectedAnalysisItemId).toBe('analysis-a');
+    expect(updateSetup).not.toHaveBeenCalled();
+    [...dialog.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Select for report')!.click();
+    harness.detectChanges();
+    expect(component.inspected()).toBeUndefined();
+    expect(editor.draft().settings.selectedAnalysisItemId).toBe('analysis-b');
     expect(await editor.flush()).toBe(true);
-    expect(dataQualitySettingsDraft(store.facilityReports()[0].dataQualityReportSettings)).toEqual(settings);
+    expect(store.facilityReports()[0].dataQualityReportSettings.selectedAnalysisItemId).toBe('analysis-b');
+  });
+  it('saves before opening the inspected analysis, preserves the selection, and supplies the report return origin', async () => {
+    const snapshot = dataQualitySnapshot();
+    Object.assign(snapshot.facilityReports[0].dataQualityReportSettings, { selectedMode: 'analysis', selectedAnalysisItemId: 'analysis-a' });
+    const { component, editor, router, harness, updateSetup, store } = await setup(snapshot);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    component.inspect('analysis-a'); harness.detectChanges();
+    editor.name.setValue('Updated quality report');
+    updateSetup.mockRejectedValueOnce(new Error('Storage unavailable'));
+    await component.goToAnalysis();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(editor.error()).toBe('Storage unavailable');
+    editor.retry();
+    await component.goToAnalysis();
+    expect(store.facilityReports()[0].name).toBe('Updated quality report');
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(
+      ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'setup'],
+      { queryParams: { returnReportAccountGuid: 'account-a', returnReportGuid: 'report-a', returnReportScope: 'facility', returnReportFacilityGuid: 'facility-a' } });
+    expect(editor.draft().settings.selectedAnalysisItemId).toBe('analysis-a');
+  });
+  it('keeps inspection read-only when editing is unavailable and clears it on mode or report changes', async () => {
+    const snapshot = dataQualitySnapshot([dataQualityReport(), dataQualityReport({ id: 20, guid: 'report-b' })]);
+    Object.assign(snapshot.facilityReports[0].dataQualityReportSettings, { selectedMode: 'analysis', selectedAnalysisItemId: 'analysis-a' });
+    const { component, editor, harness, store, open } = await setup(snapshot);
+    component.inspect('analysis-a'); harness.detectChanges();
+    store.setPending({ id: 901, label: 'Importing data' }); harness.detectChanges();
+    const select = [...harness.routeNativeElement!.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')]
+      .find(button => button.textContent?.trim() === 'Select for report')!;
+    expect(select.disabled).toBe(true);
+    store.clearPending(901); harness.detectChanges();
+    editor.form.controls.settings.controls.selectedMode.setValue('manual'); harness.detectChanges();
+    expect(component.inspected()).toBeUndefined();
+    editor.form.controls.settings.controls.selectedMode.setValue('analysis'); harness.detectChanges();
+    component.inspect('analysis-a'); harness.detectChanges();
+    expect(component.inspected()).toBeDefined();
+    await editor.flush(); await open('report-b');
+    expect(harness.routeNativeElement!.querySelector('[role="dialog"]')).toBeNull();
+  });
+  it('disables source and content editing during another operation and restores controls without writes', async () => {
+    const { editor, component, store, harness, updateSetup } = await setup();
+    const before = editor.draft();
+    store.setPending({ id: 900, label: 'Importing data' }); harness.detectChanges();
+    expect(editor.form.disabled).toBe(true); expect(component.presetControl.disabled).toBe(true);
+    const root = harness.routeNativeElement!;
+    expect(root.textContent).toContain('Report settings are read-only');
+    expect(sourceTag(root, 'Meter b')!.disabled).toBe(true);
+    sourceTag(root, 'Meter b')!.click(); harness.detectChanges();
+    expect(editor.draft()).toEqual(before); expect(updateSetup).not.toHaveBeenCalled();
+    store.clearPending(900); harness.detectChanges();
+    expect(editor.form.enabled).toBe(true); expect(sourceTag(root, 'Meter b')!.disabled).toBe(false);
+  });
+  it('blocks an empty analysis with recovery guidance and preserves the saved draft', async () => {
+    const snapshot = dataQualitySnapshot();
+    Object.assign(snapshot.facilityReports[0].dataQualityReportSettings, { selectedMode: 'analysis', selectedAnalysisItemId: 'analysis-a' });
+    snapshot.facilityAnalyses[0].groups.forEach(group => group.analysisType = 'skip');
+    const { editor, harness, updateSetup } = await setup(snapshot);
+    expect(editor.setupValid()).toBe(false);
+    expect(harness.routeNativeElement!.textContent).toContain('This analysis has no available meters or production predictors');
+    expect(updateSetup).not.toHaveBeenCalled();
+    expect(editor.draft().settings.selectedAnalysisItemId).toBe('analysis-a');
+  });
+  it('recovers a failed selection/content save, retaining newer edits and flushing them before Report navigation', async () => {
+    const { editor, updateSetup, harness, router, store } = await setup();
+    const fields = editor.form.controls.settings.controls;
+    updateSetup.mockRejectedValueOnce(new Error('Storage unavailable'));
+    fields.selectedMeterIds.setValue(['meter-b']); fields.includePredictorHistogram.setValue(false);
+    expect(await editor.flush()).toBe(false);
+    expect(editor.error()).toBe('Storage unavailable');
+    expect(await router.navigateByUrl('/v1/workspace/facility/facility-a/reports/workbench/report-a/report')).toBe(false);
+    fields.includeMeterConsumptionHistogram.setValue(false);
+    editor.retry(); expect(await editor.flush()).toBe(true);
+    expect(await router.navigateByUrl('/v1/workspace/facility/facility-a/reports/workbench/report-a/report')).toBe(true);
+    harness.detectChanges();
+    expect(store.facilityReports()[0].dataQualityReportSettings).toMatchObject({ selectedMeterIds: ['meter-b'],
+      includePredictorHistogram: false, includeMeterConsumptionHistogram: false });
+  });
+  it.each([true, false])('preserves previously saved meter-only=%s settings as Custom without rewriting them', async metersEnabled => {
+    const snapshot = dataQualitySnapshot([
+      dataQualityReport(), dataQualityReport({ id: 20, guid: 'report-b' })
+    ]);
+    const saved = snapshot.facilityReports[0].dataQualityReportSettings;
+    for (const key of METER_CONTENT_FLAGS) saved[key] = metersEnabled;
+    for (const key of PREDICTOR_CONTENT_FLAGS) saved[key] = !metersEnabled;
+    Object.assign(saved, { includeMeter: metersEnabled, includePredictors: !metersEnabled, includeAnnualTotalsTable: metersEnabled });
+    const expected = dataQualitySettingsDraft(saved);
+    const { harness, editor, open, store, updateSetup } = await setup(snapshot);
+    const presets = () => [...harness.routeNativeElement!.querySelectorAll<HTMLButtonElement>('.content-presets button')];
+    expect(presets().map(button => button.textContent?.trim())).toEqual(['All content', 'Tables only', 'Charts only', 'Custom']);
+    expect(presets().find(button => button.textContent?.trim() === 'Custom')!.getAttribute('aria-pressed')).toBe('true');
+    expect(editor.draft().settings).toEqual(expected);
+    expect(updateSetup).not.toHaveBeenCalled();
+    editor.name.setValue('Renamed custom report');
+    expect(await editor.flush()).toBe(true);
+    expect(dataQualitySettingsDraft(store.facilityReports()[0].dataQualityReportSettings)).toEqual(expected);
     await open('report-b'); await open();
-    expect(preset().getAttribute('aria-pressed')).toBe('true');
+    expect(editor.draft().settings).toEqual(expected);
+    expect(presets().find(button => button.textContent?.trim() === 'Custom')!.getAttribute('aria-pressed')).toBe('true');
   });
   it('applies Included Content presets through the matrix without changing the source selection', async () => {
     const { harness, editor, store } = await setup();
@@ -120,12 +218,61 @@ describe('Data Quality report Setup', () => {
     expect(editor.setupValid()).toBe(false);
     expect(updateSetup).not.toHaveBeenCalled();
   });
+  it.each([
+    ['meter', 'selectedMeterIds', 'Meter a', 'Meter b'],
+    ['predictor', 'selectedPredictorIds', 'Predictor a', 'Predictor b']
+  ] as const)('drops unavailable %s GUIDs on selection edits and preserves retained order', async (kind, field, firstName, secondName) => {
+    const snapshot = dataQualitySnapshot();
+    snapshot.facilityReports[0].dataQualityReportSettings[field] = [`deleted-${kind}`, `${kind}-b`];
+    const { harness, editor, store, updateSetup } = await setup(snapshot);
+    const root = harness.routeNativeElement!;
+    expect(updateSetup).not.toHaveBeenCalled();
+    expect(sourceTag(root, secondName)!.getAttribute('aria-pressed')).toBe('true');
+    sourceTag(root, firstName)!.click(); harness.detectChanges();
+    expect(editor.draft().settings[field]).toEqual([`${kind}-b`, `${kind}-a`]);
+    sourceTag(root, secondName)!.click(); harness.detectChanges();
+    expect(editor.draft().settings[field]).toEqual([`${kind}-a`]);
+    expect(sourceTag(root, firstName)!.getAttribute('aria-pressed')).toBe('true');
+    expect(sourceTag(root, secondName)!.getAttribute('aria-pressed')).toBe('false');
+    expect(await editor.flush()).toBe(true);
+    expect(store.facilityReports()[0].dataQualityReportSettings[field]).toEqual([`${kind}-a`]);
+  });
+  it('refreshes sorted owned choices after source additions and deletions without changing selections or saving', async () => {
+    const { harness, editor, component, store, updateSetup } = await setup();
+    const meter = store.meters()[0], predictor = store.predictors()[0];
+    const before = editor.draft();
+    const meters = [
+      { ...meter, id: 101, guid: 'meter-c', name: 'Alpha meter' },
+      { ...meter, id: 102, guid: 'foreign-meter', name: 'Foreign meter', facilityId: 'other-facility' }
+    ];
+    const predictors = [
+      { ...predictor, id: 103, guid: 'predictor-c', name: 'Alpha predictor' },
+      { ...predictor, id: 104, guid: 'foreign-predictor', name: 'Foreign predictor', facilityId: 'other-facility' }
+    ];
+    store.publishCommittedPatch({ collections: [
+      { collection: 'meters', deleteGuids: [meter.guid], upsert: meters },
+      { collection: 'predictors', deleteGuids: [predictor.guid], upsert: predictors }
+    ] });
+    harness.detectChanges();
+    expect(component.meterChoices().map(choice => choice.name)).toEqual(['Alpha meter', 'Meter b']);
+    expect(component.predictorChoices().map(choice => choice.name)).toEqual(['Alpha predictor', 'Predictor b']);
+    expect(component.meterChoices().every(choice => !choice.selected)).toBe(true);
+    expect(component.predictorChoices().every(choice => !choice.selected)).toBe(true);
+    expect(sourceTag(harness.routeNativeElement!, 'Meter a')).toBeUndefined();
+    expect(editor.selection().meters).toEqual([]);
+    expect(editor.selection().predictors).toEqual([]);
+    expect(editor.setupValid()).toBe(false);
+    component.toggleSource('meter', 'foreign-meter'); component.toggleSource('predictor', 'foreign-predictor');
+    component.toggleSource('meter', 'missing');
+    expect(editor.draft()).toEqual(before);
+    expect(updateSetup).not.toHaveBeenCalled();
+  });
   it('disables selection tags when editing is unavailable', async () => {
     const { component, harness, editor, updateSetup, store } = await setup();
     store.setPending({ id: 99, label: 'Another workspace operation' }); harness.detectChanges();
     const tag = sourceTag(harness.routeNativeElement!, 'Meter b');
     expect(tag.disabled).toBe(true); tag.click();
-    component.toggleSource(component.meterChoices().find(choice => choice.guid === 'meter-b')!);
+    component.toggleSource('meter', 'meter-b');
     expect(editor.draft().settings.selectedMeterIds).toEqual(['meter-a']);
     expect(updateSetup).not.toHaveBeenCalled();
     store.clearPending(99); harness.detectChanges();
@@ -151,15 +298,18 @@ describe('Data Quality report Setup', () => {
     expect(controls.includeMeterStatisticsTable.value).toBe(true); expect(controls.includePredictorStatisticsTable.value).toBe(true);
     expect(await editor.flush()).toBe(true);
   });
-  it('preserves missing saved selections until explicitly removed and allows incomplete drafts to save', async () => {
+  it('ignores a deleted predictor without an alert, recovery button, or opening-time save', async () => {
     const snapshot = dataQualitySnapshot();
-    snapshot.facilityReports[0].dataQualityReportSettings.selectedMeterIds!.push('deleted');
-    const { editor, harness, updateSetup } = await setup(snapshot);
-    expect(editor.selection().missingMeterIds).toEqual(['deleted']); expect(editor.setupValid()).toBe(false);
-    expect(harness.routeNativeElement!.textContent).toContain('Unavailable meter: deleted');
+    snapshot.predictors = snapshot.predictors.filter(predictor => predictor.guid !== 'predictor-a');
+    const { editor, harness, updateSetup, open } = await setup(snapshot);
+    expect(editor.selection().predictors).toEqual([]); expect(editor.setupValid()).toBe(true);
+    expect(harness.routeNativeElement!.textContent).not.toContain('Some selected source items are unavailable');
+    expect(harness.routeNativeElement!.textContent).not.toContain('Unavailable predictor:');
+    expect(harness.routeNativeElement!.textContent).not.toContain('Remove unavailable selections');
     expect(updateSetup).not.toHaveBeenCalled();
-    editor.removeUnavailableSelections();
-    expect(editor.setupValid()).toBe(true); expect(await editor.flush()).toBe(true);
+    await open('report-a', 'report'); await open();
+    expect(editor.setupValid()).toBe(true);
+    expect(updateSetup).not.toHaveBeenCalled();
     editor.form.controls.settings.patchValue({ selectedMeterIds: [], selectedPredictorIds: [] });
     expect(editor.setupValid()).toBe(false); expect(await editor.flush()).toBe(true);
   });

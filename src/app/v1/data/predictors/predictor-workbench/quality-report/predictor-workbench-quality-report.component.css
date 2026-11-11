@@ -102,56 +102,6 @@
   gap: var(--v1-space-2);
 }
 
-.predictor-quality__scroller {
-  overflow: auto;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius-sm);
-  background: var(--v1-surface);
-}
-
-.predictor-quality__table {
-  width: 100%;
-  min-width: 58rem;
-  border-collapse: collapse;
-  font-size: .88rem;
-}
-
-.predictor-quality__table th,
-.predictor-quality__table td {
-  padding: .6rem .7rem;
-  border-bottom: 1px solid var(--v1-divider);
-  text-align: left;
-  vertical-align: middle;
-}
-
-.predictor-quality__table th {
-  background: var(--v1-content-block);
-  color: var(--v1-muted);
-  font-size: .76rem;
-  font-weight: 900;
-  line-height: 1.25;
-  text-transform: uppercase;
-}
-
-.predictor-quality__table tbody th {
-  color: var(--v1-text);
-  text-transform: none;
-}
-
-.predictor-quality__number {
-  text-align: right;
-}
-
-.predictor-quality__chart-panel {
-  min-width: 0;
-}
-
-.predictor-quality__chart {
-  width: 100%;
-  min-height: 25rem;
-  background: var(--v1-surface);
-}
-
 @media (max-width: 760px) {
   .predictor-quality {
     padding: var(--v1-space-3);
@@ -164,8 +114,10 @@
   .predictor-quality__finding-actions {
     grid-column: 1 / -1;
   }
-
-  .predictor-quality__chart {
-    min-height: 22rem;
-  }
+}
+.predictor-quality__panel + app-predictor-quality-presentation,
+.predictor-quality__findings + app-predictor-quality-presentation {
+  margin-top: var(--v1-space-4);
+  padding-top: var(--v1-space-4);
+  border-top: 1px solid var(--v1-divider);
 }

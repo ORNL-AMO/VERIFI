@@ -66,6 +66,29 @@ describe('Data Quality setup transactions', () => {
       selectedMode: 'manual', selectedAnalysisItemId: null, selectedMeterIds: [], selectedPredictorIds: [] } });
     expect(manual.analysisItemId).toBeUndefined(); expect(manual.dataQualityReportSettings.missingSelection).toBe(true);
   });
+  it('recomputes the legacy selection flag only on explicit saves and retains source GUIDs after deletion', async () => {
+    const { actions, transactions, snapshot, store } = await setup();
+    const source = snapshot.facilityReports[0];
+    const stale = { ...source, dataQualityReportSettings: { ...source.dataQualityReportSettings, missingSelection: true } };
+    await transactions.runTransaction(['facilityReports'], 'readwrite', tx => tx.put('facilityReports', stale));
+    const valid = await actions.updateSetup('facility-a', source.guid, { name: 'Validated selection' });
+    expect(valid.dataQualityReportSettings.missingSelection).toBe(false);
+    await transactions.runTransaction(['utilityMeter'], 'readwrite', tx => tx.deleteByKey('utilityMeter', snapshot.meters[0].id!));
+    const partial = await actions.updateSetup('facility-a', source.guid, { name: 'Remaining predictor' });
+    expect(partial.dataQualityReportSettings.missingSelection).toBe(false);
+    expect(partial.dataQualityReportSettings.selectedMeterIds).toEqual(['meter-a']);
+    await transactions.runTransaction(['predictor'], 'readwrite', tx => tx.deleteByKey('predictor', snapshot.predictors[0].id!));
+    const missing = await actions.updateSetup('facility-a', source.guid, { name: 'No remaining sources' });
+    expect(missing.dataQualityReportSettings.missingSelection).toBe(true);
+    expect(missing.dataQualityReportSettings.selectedMeterIds).toEqual(['meter-a']);
+    const copy = await actions.copy('facility-a', source.guid);
+    expect(copy.dataQualityReportSettings).toEqual(missing.dataQualityReportSettings);
+    await actions.delete('facility-a', source.guid); await harness.reopen();
+    const reports = await harness.getAll<IdbFacilityReport & Record<string, unknown>>('facilityReports');
+    expect(reports.find(report => report.guid === source.guid)).toBeUndefined();
+    expect(reports.find(report => report.guid === copy.guid)?.dataQualityReportSettings).toEqual(missing.dataQualityReportSettings);
+    expect(store.facilityReports().map(report => report.guid)).toEqual([copy.guid]);
+  });
   it('rejects missing and foreign source GUIDs atomically and retains existing unavailable references on unrelated edits', async () => {
     const { actions, transactions, snapshot, store } = await setup();
     await transactions.runTransaction(['predictor'], 'readwrite', tx => tx.put('predictor', {
@@ -81,7 +104,7 @@ describe('Data Quality setup transactions', () => {
     }));
     const saved = await actions.updateSetup('facility-a', 'report-a', { dataQualityReportSettings: { includePredictorHistogram: false } });
     expect(saved.dataQualityReportSettings.selectedMeterIds).toEqual(['deleted']);
-    expect(saved.dataQualityReportSettings.missingSelection).toBe(true);
+    expect(saved.dataQualityReportSettings.missingSelection).toBe(false);
   });
   it('rolls back failed writes without publication or losing the saved settings', async () => {
     const { actions, store, snapshot } = await setup();

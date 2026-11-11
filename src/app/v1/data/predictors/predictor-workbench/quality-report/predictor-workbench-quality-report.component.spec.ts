@@ -1,7 +1,8 @@
-import { Directive, EventEmitter, Input, Output, forwardRef, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
+import { PredictorQualityPresentationComponent } from '@app/v1/shared/data-quality/predictor-quality-presentation/predictor-quality-presentation.component';
+import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -13,14 +14,15 @@ import { PREDICTOR_QUALITY_CONTEXT } from '../../predictor-quality-context';
 import { PredictorWorkbenchQualityReportComponent } from './predictor-workbench-quality-report.component';
 
 describe('PredictorWorkbenchQualityReportComponent', () => {
+  afterEach(() => vi.restoreAllMocks());
   it.each(['ready', 'evaluating', 'error'] as const)('retains outlier details but suppresses range alerts in %s state', statusState => {
     const fixture = setup({ statusState, expectedRangeEnabled: false,
       readings: [10, 10, 11, 12, 100].map((amount, index) => reading({ guid: `r${index}`, month: index + 1, amount }))
     });
     expect(fixture.componentInstance.report()?.outlierCount).toBe(1);
     expect(fixture.componentInstance.findings().some(finding => finding.code === 'predictor.quality.outlier')).toBe(false);
-    expect(fixture.componentInstance.accessibleChartRows().some(row => row.expectedRangeLabel === 'Outlier')).toBe(true);
-    expect(JSON.stringify(fixture.componentInstance.qualityChartOption())).toContain('Outliers');
+    expect(presentation(fixture).accessibleChartRows().some(row => row.expectedRangeLabel === 'Outlier')).toBe(true);
+    expect(JSON.stringify(presentation(fixture).qualityChartOption())).toContain('Outliers');
   });
 
   it('renders an empty state and routes users to Readings', () => {
@@ -64,13 +66,13 @@ describe('PredictorWorkbenchQualityReportComponent', () => {
       expect(element.textContent).toContain('Negative values are not permitted');
       expect(element.textContent).toContain('Incomplete source data');
       expect(element.textContent).toContain('Revised source data');
-      expect(element.textContent).toContain('Predictor statistics');
+      expect(element.textContent).toContain('Predictor consumption statistics');
       expect(element.textContent).toContain('Median Absolute Deviation');
       expect(element.textContent).toContain('Readings over time');
       expect(element.textContent).not.toContain('Histogram');
       expect(element.textContent).not.toContain('Number of bins');
 
-      const option = fixture.componentInstance.qualityChartOption() as Record<string, any>;
+      const option = presentation(fixture).qualityChartOption() as Record<string, any>;
       expect(option.yAxis.name).toBe('Production (days)');
       expect(option.series.map((series: { name: string }) => series.name)).toEqual([
         'Predictor values', 'Outliers', 'Weather warnings', 'Revised weather data', 'Missing months'
@@ -87,7 +89,7 @@ describe('PredictorWorkbenchQualityReportComponent', () => {
       expect(copyTable).toHaveBeenCalledOnce();
 
       element.querySelector<HTMLButtonElement>('[aria-label="Download Predictor readings chart as PNG"]')?.click();
-      const chart = fixture.debugElement.query(By.directive(EChartsStubDirective)).injector.get(EChartsStubDirective);
+      const chart = fixture.debugElement.query(By.directive(EChartsChartDirective)).injector.get(EChartsChartDirective);
       expect(chart.downloadPng).toHaveBeenCalledWith('production-data-quality-readings');
     } finally {
       vi.useRealTimers();
@@ -137,17 +139,6 @@ describe('PredictorWorkbenchQualityReportComponent', () => {
   });
 });
 
-@Directive({
-  selector: '[appV1ECharts]',
-  standalone: true,
-  providers: [{ provide: EChartsChartDirective, useExisting: forwardRef(() => EChartsStubDirective) }]
-})
-class EChartsStubDirective {
-  @Input('appV1ECharts') option?: V1EChartsOption;
-  @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();
-  readonly downloadPng = vi.fn();
-}
-
 function setup(options: {
   selectedPredictor?: IdbPredictor;
   readings?: IdbPredictorData[];
@@ -157,6 +148,10 @@ function setup(options: {
   statusFindings?: StatusItem[];
   discardWarning?: ReturnType<typeof vi.fn>;
 } = {}): ComponentFixture<PredictorWorkbenchQualityReportComponent> {
+  // Canvas rendering is covered in Chromium; keep this suite focused on workbench behavior.
+  vi.spyOn(EChartsChartDirective.prototype, 'ngAfterViewInit').mockImplementation(() => {});
+  vi.spyOn(EChartsChartDirective.prototype, 'ngOnChanges').mockImplementation(() => {});
+  vi.spyOn(EChartsChartDirective.prototype, 'downloadPng').mockImplementation(() => {});
   const selectedPredictor = options.selectedPredictor ?? predictor();
   const readings = options.readings ?? [
     reading({ amount: 10 }),
@@ -174,7 +169,7 @@ function setup(options: {
   ];
 
   TestBed.configureTestingModule({
-    imports: [PredictorWorkbenchQualityReportComponent, EChartsStubDirective],
+    imports: [PredictorWorkbenchQualityReportComponent],
     providers: [
       {
         provide: PREDICTOR_QUALITY_CONTEXT,
@@ -201,9 +196,6 @@ function setup(options: {
         }
       }
     ]
-  }).overrideComponent(PredictorWorkbenchQualityReportComponent, {
-    remove: { imports: [EChartsChartDirective] },
-    add: { imports: [EChartsStubDirective] }
   });
 
   return TestBed.createComponent(PredictorWorkbenchQualityReportComponent);
@@ -223,4 +215,9 @@ function reading(overrides: Partial<IdbPredictorData> = {}): IdbPredictorData {
     month: 1, year: 2026, amount: 10, weatherDataWarning: false, weatherDataChanged: false,
     weatherOverride: false, ...overrides
   } as IdbPredictorData;
+}
+
+function presentation(fixture: ComponentFixture<PredictorWorkbenchQualityReportComponent>): PredictorQualityPresentationComponent {
+  fixture.detectChanges();
+  return fixture.debugElement.query(By.directive(PredictorQualityPresentationComponent)).componentInstance;
 }

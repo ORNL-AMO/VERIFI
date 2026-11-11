@@ -12,6 +12,39 @@ function fixture() {
 }
 
 describe('Data Quality report selection', () => {
+  it('resolves analyses from selection-only settings with no content flags or source arrays', () => {
+    const input = fixture();
+    const result = resolveDataQualitySelection({ ...input,
+      settings: { selectedMode: 'analysis', selectedAnalysisItemId: 'facility-analysis' } });
+    expect(result).toEqual(resolveDataQualitySelection(input));
+    expect(result.valid).toBe(true);
+  });
+  it('accepts minimal manual settings with readonly GUID arrays and preserves deduplication', () => {
+    const settings = { selectedMode: 'manual', selectedMeterIds: ['meter', 'meter'], selectedPredictorIds: ['predictor-1'] } as const;
+    const result = resolveDataQualitySelection({ ...fixture(), settings });
+    expect(result.valid).toBe(true);
+    expect(result.meters.map(meter => meter.guid)).toEqual(['meter']);
+    expect(result.predictors.map(predictor => predictor.guid)).toEqual(['predictor-1']);
+  });
+  it.each([null, undefined])('treats an unset analysis ID (%s) as incomplete without normalizing the caller', selectedAnalysisItemId => {
+    const settings = { selectedMode: 'analysis' as const, selectedAnalysisItemId };
+    expect(resolveDataQualitySelection({ ...fixture(), settings })).toMatchObject({
+      valid: false, analysis: undefined, meters: [], predictors: []
+    });
+    expect(settings.selectedAnalysisItemId).toBe(selectedAnalysisItemId);
+  });
+  it.each(['analysis', 'manual'] as const)('accepts omitted analysis and source IDs in older %s settings', selectedMode => {
+    expect(resolveDataQualitySelection({ ...fixture(), settings: { selectedMode } })).toMatchObject({
+      valid: false, analysis: undefined, meters: [], predictors: []
+    });
+  });
+  it.each(['skip', 'skipAnalysis', 'deleted sources'] as const)('blocks analyses resolving to no sources: %s', reason => {
+    const input = fixture();
+    if (reason === 'deleted sources') {
+      input.meters = []; input.facilityAnalyses[0].groups[0].predictorVariables = [];
+    } else input.facilityAnalyses[0].groups.forEach(group => group.analysisType = reason);
+    expect(resolveDataQualitySelection(input)).toMatchObject({ valid: false, meters: [], predictors: [] });
+  });
   it.each(['energyIntensity', 'modifiedEnergyIntensity', 'regression'] as const)('resolves %s production predictors and deduplicates groups', method => {
     const input = fixture(), group = input.facilityAnalyses[0].groups[0];
     group.analysisType = method;
@@ -40,30 +73,42 @@ describe('Data Quality report selection', () => {
   it('uses manual GUIDs without applying analysis membership or calendar/year restrictions', () => {
     const input = fixture();
     input.settings = { ...input.settings, selectedMode: 'manual', selectedMeterIds: ['meter', 'meter'], selectedPredictorIds: ['predictor-1'] };
-    expect(resolveDataQualitySelection(input)).toMatchObject({ valid: true, analysis: undefined, missingMeterIds: [], missingPredictorIds: [] });
+    expect(resolveDataQualitySelection(input)).toMatchObject({ valid: true, analysis: undefined });
     expect(resolveDataQualitySelection(input).meters).toHaveLength(1);
     input.settings.selectedMeterIds = [];
     expect(resolveDataQualitySelection(input).valid).toBe(true);
     input.settings.selectedPredictorIds = [];
     expect(resolveDataQualitySelection(input).valid).toBe(false);
   });
-  it('identifies missing and foreign records rather than silently dropping selections', () => {
+  it('excludes missing and foreign records and requires an available source', () => {
     const input = fixture();
     input.settings = { ...input.settings, selectedMode: 'manual', selectedMeterIds: ['meter'], selectedPredictorIds: ['predictor-0', 'deleted'] };
     input.meters[0].facilityId = 'foreign';
     input.predictors[0].accountId = 'foreign';
-    expect(resolveDataQualitySelection(input)).toMatchObject({ valid: false, meters: [], predictors: [],
-      missingMeterIds: ['meter'], missingPredictorIds: ['predictor-0', 'deleted'] });
+    expect(resolveDataQualitySelection(input)).toMatchObject({ valid: false, meters: [], predictors: [] });
     input.settings.selectedMode = 'analysis';
     input.facilityAnalyses[0].facilityId = 'foreign';
     expect(resolveDataQualitySelection(input)).toMatchObject({ valid: false, analysis: undefined });
   });
-  it('requires a selection, and detects unavailable production predictor references in analysis mode', () => {
+  it('requires an available analysis and ignores deleted production predictors while meters remain', () => {
     const input = fixture();
     input.settings.selectedAnalysisItemId = undefined;
     expect(resolveDataQualitySelection(input).valid).toBe(false);
     input.settings.selectedAnalysisItemId = 'facility-analysis';
     input.predictors = [];
-    expect(resolveDataQualitySelection(input)).toMatchObject({ valid: false, missingPredictorIds: ['predictor-0', 'predictor-1'] });
+    expect(resolveDataQualitySelection(input)).toMatchObject({ valid: true, predictors: [] });
+    input.meters = [];
+    expect(resolveDataQualitySelection(input).valid).toBe(false);
+  });
+  it('ignores unavailable manual references without changing saved GUID arrays', () => {
+    const input = fixture();
+    input.settings = { ...input.settings, selectedMode: 'manual', selectedMeterIds: ['deleted-meter', 'meter'],
+      selectedPredictorIds: ['deleted-predictor', 'predictor-1'] };
+    const before = structuredClone(input.settings);
+    const result = resolveDataQualitySelection(input);
+    expect(result.valid).toBe(true);
+    expect(result.meters.map(meter => meter.guid)).toEqual(['meter']);
+    expect(result.predictors.map(predictor => predictor.guid)).toEqual(['predictor-1']);
+    expect(input.settings).toEqual(before);
   });
 });

@@ -1,9 +1,48 @@
+import { Component, inject } from '@angular/core';
+import { singleFacilityAnalysisPairGuard } from '@app/v1/analysis/single-facility-analysis-pair.guard';
+import { SingleFacilityAnalysisPairService } from '@app/v1/analysis/single-facility-analysis-pair.service';
+import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
 import { page, userEvent } from 'vitest/browser';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 import { dataQualitySnapshot } from '../testing/data-quality-report-test-fixtures';
 
+@Component({ standalone: true, providers: [ReportAnalysisReturnService], template: `
+  <h1>Inspected analysis</h1>
+  @if (reportReturn.origin()) { <button type="button" (click)="reportReturn.returnToReport()">Return to Report</button> }
+` })
+class InspectedAnalysisDestination {
+  readonly reportReturn = inject(ReportAnalysisReturnService);
+}
+
 describe('Data Quality Setup in Chromium', () => {
   afterEach(async () => { await page.viewport(1280, 720); });
+  it('opens an unselected analysis through the real route guard and returns after saving the report name', async () => {
+    const snapshot = dataQualitySnapshot();
+    snapshot.facilityAnalyses.push({ ...snapshot.facilityAnalyses[0], id: 31, guid: 'analysis-b', name: 'Another analysis' });
+    Object.assign(snapshot.facilityReports[0].dataQualityReportSettings, { selectedMode: 'analysis', selectedAnalysisItemId: 'analysis-a' });
+    const ensurePairs = vi.fn(async () => true);
+    const view = await setupReportWorkbench(snapshot.facilityReports,
+      [{ provide: SingleFacilityAnalysisPairService, useValue: { ensurePairs } }], snapshot);
+    view.router.resetConfig([...view.router.config, {
+      path: 'v1/workspace/facility/:facilityGuid/analysis', canActivateChild: [singleFacilityAnalysisPairGuard],
+      children: [{ path: 'workbench/:analysisGuid/setup', component: InspectedAnalysisDestination }]
+    }]);
+    await view.open();
+    (view.harness.fixture.nativeElement as HTMLElement).classList.add('v1-root');
+    await page.getByRole('textbox', { name: 'Name', exact: true }).fill('Renamed before inspection');
+    await page.getByRole('button', { name: 'Inspect Another analysis', exact: true }).click();
+    await page.getByRole('button', { name: 'Go To Analysis', exact: true }).click();
+    await vi.waitFor(() => expect(view.router.url).toContain('/analysis/workbench/analysis-b/setup?'));
+    view.harness.detectChanges();
+    expect(view.store.facilityReports()[0].name).toBe('Renamed before inspection');
+    expect(view.store.facilityReports()[0].dataQualityReportSettings.selectedAnalysisItemId).toBe('analysis-a');
+    expect(ensurePairs).not.toHaveBeenCalled();
+    await page.getByRole('button', { name: 'Return to Report', exact: true }).click();
+    await vi.waitFor(() => expect(view.router.url).toBe('/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
+    view.harness.detectChanges();
+    expect(view.harness.routeNativeElement!.querySelector<HTMLInputElement>('#report-workbench-name')!.value).toBe('Renamed before inspection');
+    expect(view.store.facilityReports()[0].dataQualityReportSettings.selectedAnalysisItemId).toBe('analysis-a');
+  });
   it.each([
     ['light', [], 1100], ['dark', ['v1-theme-dark'], 760],
     ['high-contrast', ['v1-theme-dark', 'v1-contrast-strong'], 420]
@@ -56,6 +95,7 @@ describe('Data Quality Setup in Chromium', () => {
       expect(Math.abs(checkbox.y + checkbox.height / 2 - text.y - text.height / 2)).toBeLessThanOrEqual(1);
     }
     const presets = [...setup.querySelectorAll<HTMLButtonElement>('.content-presets button')];
+    expect(presets.map(button => button.textContent?.trim())).toEqual(['All content', 'Tables only', 'Charts only', 'Custom']);
     const tablesOnly = presets.find(button => button.textContent?.trim() === 'Tables only')!;
     tablesOnly.scrollIntoView(); tablesOnly.focus(); await userEvent.keyboard('{Enter}'); view.harness.detectChanges();
     expect(tablesOnly.getAttribute('aria-pressed')).toBe('true');
@@ -67,12 +107,6 @@ describe('Data Quality Setup in Chromium', () => {
     const annual = setup.querySelector<HTMLInputElement>('[aria-label="Annual Totals Table"]')!;
     annual.scrollIntoView(); annual.focus(); await userEvent.keyboard(' '); view.harness.detectChanges();
     expect(annual.checked).toBe(false);
-    for (const label of ['Meters only', 'Predictors only']) {
-      const button = presets.find(preset => preset.textContent?.trim() === label)!;
-      button.scrollIntoView(); button.focus(); await userEvent.keyboard('{Enter}'); view.harness.detectChanges();
-      expect(button.getAttribute('aria-pressed')).toBe('true');
-      expect(annual.checked).toBe(label === 'Meters only');
-    }
     const modes = [...setup.querySelectorAll<HTMLLabelElement>('.selection-mode label')];
     for (const option of modes) {
       const radio = option.querySelector('input')!.getBoundingClientRect();
@@ -82,6 +116,15 @@ describe('Data Quality Setup in Chromium', () => {
     }
     modes[0].querySelector('input')!.click(); view.harness.detectChanges();
     expect(setup.textContent).not.toContain('Select an analysis to continue.');
+    const inspect = setup.querySelector<HTMLButtonElement>('[aria-label="Inspect Energy analysis"]')!;
+    inspect.scrollIntoView(); inspect.focus(); await userEvent.keyboard('{Enter}'); view.harness.detectChanges();
+    const dialog = host.querySelector<HTMLElement>('[role="dialog"]')!;
+    expect(dialog.textContent).toContain('Energy analysis');
+    expect(dialog.textContent).toContain('Select for report');
+    expect(dialog.getBoundingClientRect().width).toBeLessThanOrEqual(width);
+    await userEvent.keyboard('{Escape}'); view.harness.detectChanges();
+    expect(host.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(inspect);
     modes[1].querySelector('input')!.click(); view.harness.detectChanges();
     findMeter().click(); view.harness.detectChanges();
     expect(host.scrollWidth).toBeLessThanOrEqual(width + 1);

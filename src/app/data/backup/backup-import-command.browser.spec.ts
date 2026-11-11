@@ -5,7 +5,9 @@ import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/
 import { VerifiStoreName } from '@data/indexedDB/indexed-db-schema';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { BackupImportCommandService } from './backup-import-command.service';
-import { PreparedBackupFile } from './backup-preparation.service';
+import { BackupPreparationService, PreparedBackupFile } from './backup-preparation.service';
+import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
+import { dataQualityReport, dataQualityPredictorReadingsSnapshot } from '@app/v1/reports/facility/data-quality/testing/data-quality-report-test-fixtures';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
@@ -19,6 +21,48 @@ describe('BackupImportCommandService restore transactions in Chromium', () => {
   afterEach(async () => {
     vi.restoreAllMocks();
     await harness.destroy();
+  });
+
+  it.each(['Account', 'Facility'] as const)('restores Data Quality source relationships and re-exports existing settings from a %s backup', async scope => {
+    const manual = dataQualityReport({ name: 'Manual selection' });
+    const analysis = dataQualityReport({ id: 21, guid: 'report-analysis', name: 'Analysis selection' });
+    analysis.analysisItemId = 'analysis-a';
+    Object.assign(analysis.dataQualityReportSettings, { selectedMode: 'analysis', selectedAnalysisItemId: 'analysis-a' });
+    const unavailable = dataQualityReport({ id: 22, guid: 'report-unavailable', name: 'Unavailable selection' });
+    Object.assign(unavailable.dataQualityReportSettings, { selectedAnalysisItemId: 'deleted-analysis',
+      selectedMeterIds: ['deleted-meter'], selectedPredictorIds: ['deleted-predictor'] });
+    for (const report of [manual, analysis, unavailable]) delete report.dataQualityReportSettings.includeAnnualTotalsTable;
+    const snapshot = dataQualityPredictorReadingsSnapshot([manual, analysis, unavailable]);
+    const builder = new WorkspaceBackupSnapshotBuilder(), preparation = new BackupPreparationService();
+    const backup = preparation.prepare(JSON.parse(JSON.stringify(scope === 'Account'
+      ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    const original = structuredClone(snapshot.facilityReports);
+    if (scope === 'Account') await createService().importAccountBackupFile(backup, 0);
+    else {
+      await harness.seed({ accounts: [{ ...snapshot.account }] });
+      await createService().importFacilityBackupFile(backup, snapshot.account.guid, 0);
+    }
+    await harness.reopen();
+    const reports = await harness.getAll<typeof manual & Record<string, unknown>>('facilityReports');
+    const meters = await harness.getAll('utilityMeter'), predictors = await harness.getAll('predictor');
+    const analyses = await harness.getAll('analysisItems'), facilities = await harness.getAll('facilities');
+    const restoredManual = reports.find(report => report.name === manual.name)!;
+    expect(restoredManual.guid).not.toBe(manual.guid);
+    expect(restoredManual.dataQualityReportSettings.selectedMeterIds).toEqual([meters.find(meter => meter.name === 'Meter a')!.guid]);
+    expect(restoredManual.dataQualityReportSettings.selectedPredictorIds).toEqual([predictors.find(predictor => predictor.name === 'Predictor a')!.guid]);
+    const restoredAnalysis = reports.find(report => report.name === analysis.name)!;
+    expect(restoredAnalysis.analysisItemId).toBe(analyses[0].guid);
+    expect(restoredAnalysis.dataQualityReportSettings.selectedAnalysisItemId).toBe(analyses[0].guid);
+    expect(reports.find(report => report.name === unavailable.name)!.dataQualityReportSettings).toMatchObject({
+      selectedAnalysisItemId: 'deleted-analysis', selectedMeterIds: ['deleted-meter'], selectedPredictorIds: ['deleted-predictor'] });
+    expect(restoredManual.dataQualityReportSettings).not.toHaveProperty('includeAnnualTotalsTable');
+    const exported = preparation.prepare({ ...backup, account: scope === 'Account' ? (await harness.getAll('accounts'))[0] : undefined,
+      facility: scope === 'Facility' ? facilities[0] : undefined, facilities: scope === 'Account' ? facilities : [],
+      facilityReports: reports, meters, predictors, groups: await harness.getAll('utilityMeterGroups'),
+      meterData: await harness.getAll('utilityMeterData'), predictorDataV2: await harness.getAll('predictorData'), facilityAnalysisItems: analyses });
+    expect(exported.facilityReports.map(report => report.dataQualityReportSettings)).toEqual(reports.map(report => report.dataQualityReportSettings));
+    expect(exported.meterData.map(reading => reading.totalEnergyUse)).toEqual(snapshot.meterData.map(reading => reading.totalEnergyUse));
+    expect(snapshot.facilityReports).toEqual(original);
   });
 
   it('rolls back account restore when a later store write fails', async () => {

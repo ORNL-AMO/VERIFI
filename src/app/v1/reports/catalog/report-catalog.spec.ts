@@ -1,6 +1,11 @@
 import { ACCOUNT_REPORT_TYPES, FACILITY_REPORT_TYPES, reportDefinition, reportTypeChoices, reportTypePresentation } from './report-catalog';
 
 describe('report catalog', () => {
+  it('supports facility Data Quality analysis inspection without adding a data checks stage', () => {
+    expect(reportDefinition('facility', 'dataQuality')).toMatchObject({
+      contentImplemented: true, hasDataChecks: false, supportsAnalysisReturn: true, requiresOtherImpacts: false
+    });
+  });
   it('keeps account and facility Analysis capabilities separate', () => {
     expect(reportDefinition('account', 'analysis')).toMatchObject({
       icon: 'report', hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: true

@@ -1,17 +1,86 @@
 import { reportDefinition } from '@app/v1/reports/catalog/report-catalog';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 import { dataQualityReport, dataQualitySnapshot } from '../testing/data-quality-report-test-fixtures';
+import { DataQualityReportService } from '../data-quality-report.service';
+import { DataQualityReportEditor } from '../editing/data-quality-report-editor.service';
 
 function setup(reports = [dataQualityReport()]) { return setupReportWorkbench(reports, [], dataQualitySnapshot(reports)); }
 
 describe('Data Quality report foundation', () => {
+  it('cleans up facility sessions and deleted reports without carrying session preferences or writing settings', async () => {
+    const { open, harness, router, store, updateSetup } = await setup();
+    const workbench = await open();
+    const first = workbench.workbench.session()!;
+    first.injector.get(DataQualityReportService).setHistogramBinCount('preference', 9);
+    const snapshot = store.snapshot()!;
+    const other = dataQualityReport({ id: 20, guid: 'report-b', facilityId: 'facility-b' });
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
+      facilityReports: [...snapshot.facilityReports, other] });
+    expect(await router.navigateByUrl('/v1/workspace/facility/facility-b/reports/workbench/report-b/setup')).toBe(true);
+    harness.detectChanges();
+    const second = workbench.workbench.session()!;
+    expect(first.injector.destroyed).toBe(true);
+    expect(second.injector.get(DataQualityReportService).histogramBinCount('preference')()).toBe(50);
+    expect(second.injector.get(DataQualityReportEditor).selection().meters).toEqual([]);
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', deleteGuids: ['report-b'] }] });
+    harness.detectChanges();
+    expect(workbench.workbench.session()).toBeUndefined();
+    expect(second.injector.destroyed).toBe(true);
+    expect(harness.routeNativeElement!.textContent).toContain('Report unavailable');
+    expect(updateSetup).not.toHaveBeenCalled();
+  });
+  it('uses current source records instead of the saved missingSelection flag and does not repair records on open', async () => {
+    const report = dataQualityReport(); report.dataQualityReportSettings.missingSelection = true;
+    const { open, harness, store, updateSetup } = await setup([report]);
+    const workbench = await open('report-a', 'report');
+    const session = workbench.workbench.session()!, results = session.injector.get(DataQualityReportService);
+    await vi.waitFor(() => { harness.detectChanges(); expect(results.state().state).toBe('ready'); });
+    expect(updateSetup).not.toHaveBeenCalled();
+    store.publishCommittedPatch({ collections: [{ collection: 'meters', deleteGuids: ['meter-a'] }] });
+    expect(results.state().value).toBeUndefined(); harness.detectChanges();
+    await vi.waitFor(() => { harness.detectChanges(); expect(results.state().state).toBe('ready'); });
+    expect(results.state().value!.meters).toEqual([]);
+    expect(results.state().value!.predictors).toHaveLength(1);
+    expect(session.injector.get(DataQualityReportEditor).setupValid()).toBe(true);
+    await open('report-a', 'setup');
+    expect(harness.routeNativeElement!.textContent).not.toContain('Unavailable meter:');
+    expect(updateSetup).not.toHaveBeenCalled();
+  });
+  it('destroys pending save sessions on account changes and does not apply late responses to the new editor', async () => {
+    const second = dataQualityReport({ id: 20, guid: 'report-b', name: 'Other report' });
+    const { open, harness, store, updateSetup } = await setup([dataQualityReport(), second]);
+    const workbench = await open();
+    const oldSession = workbench.workbench.session()!, oldEditor = oldSession.injector.get(DataQualityReportEditor);
+    const oldResults = oldSession.injector.get(DataQualityReportService);
+    oldResults.setHistogramBinCount('session-preference', 7);
+    let resolve!: (report: ReturnType<typeof dataQualityReport>) => void;
+    updateSetup.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+    oldEditor.name.setValue('Pending old save'); const saving = oldEditor.flush();
+    // Switching the active account invalidates the session even before its route changes.
+    const snapshot = store.snapshot()!;
+    store.publish({ ...snapshot, account: { ...snapshot.account, guid: 'account-b' },
+      facilities: snapshot.facilities.map(item => ({ ...item, accountId: 'account-b' })),
+      facilityReports: snapshot.facilityReports.map(item => ({ ...item, accountId: 'account-b' })),
+      meters: snapshot.meters.map(item => ({ ...item, accountId: 'account-b' })),
+      predictors: snapshot.predictors.map(item => ({ ...item, accountId: 'account-b' })) });
+    harness.detectChanges();
+    expect(oldSession.injector.destroyed).toBe(true);
+    const currentWorkbench = await open('report-b');
+    const currentSession = currentWorkbench.workbench.session()!, currentEditor = currentSession.injector.get(DataQualityReportEditor);
+    resolve(dataQualityReport({ name: 'Pending old save' })); expect(await saving).toBe(false); harness.detectChanges();
+    expect(currentEditor.name.value).toBe(second.name);
+    expect(currentSession.injector.get(DataQualityReportService).histogramBinCount('session-preference')()).toBe(50);
+    expect(store.account()?.guid).toBe('account-b');
+    expect(updateSetup).toHaveBeenCalledOnce();
+  });
   it('opens saved settings without writes and renders a disabled PDF action through the shared footer', async () => {
     const saved = dataQualityReport();
     const { open, harness, store, updateName, updateSetup } = await setup([saved]);
     const workbench = await open('report-a', 'report');
     expect(workbench.workbench.stages().map(stage => stage.id)).toEqual(['setup', 'report']);
     const preview = harness.routeNativeElement!.querySelector('app-data-quality-report-preview')!;
-    expect(preview.querySelector('[role="status"]')?.textContent).toContain('results are being implemented');
+    await vi.waitFor(() => { harness.detectChanges(); expect(preview.textContent).toContain('No readings found for this meter.'); });
+    expect(preview.textContent).toContain('No readings found for this meter.');
     expect(preview.textContent).toContain('PDF export is not available yet.');
     const button = harness.routeNativeElement!.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!;
     expect(button.textContent?.trim()).toBe('PDF');
@@ -27,7 +96,7 @@ describe('Data Quality report foundation', () => {
     expect(updateSetup).not.toHaveBeenCalled();
     expect(store.facilityReports()[0]).toEqual(saved);
     expect(store.committedRevision()).toBeUndefined();
-    expect(reportDefinition('facility', 'dataQuality')?.contentImplemented).toBe(false);
+    expect(reportDefinition('facility', 'dataQuality')?.contentImplemented).toBe(true);
   });
 
   it('saves name edits before stage navigation, retains the session, and preserves all saved report settings', async () => {
