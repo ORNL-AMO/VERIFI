@@ -4,7 +4,7 @@
 
 Deliver the next unified UX phase in [epic #2564](https://github.com/ORNL-AMO/VERIFI/issues/2564): saved Visualizations first, then customizable Home dashboards that reuse them.
 
-The user journey is **create or capture a visualization → save and revisit it → reuse it on Home → later reuse it in a custom report**. The accepted phase plan was agreed on November 10, 2026. Vis1 foundation work has started; its [workflow and contract specification](v1-visualization-foundation.md) records the decisions accepted on November 11, 2026. Application integration remains in the downstream issues.
+The user journey is **create or capture a visualization → save and revisit it → reuse it on Home → later reuse it in a custom report**. The accepted phase plan was agreed on November 10, 2026. Vis1 foundation contracts are implemented locally; its [workflow and contract specification](v1-visualization-foundation.md) records the decisions accepted on November 11, 2026. Application integration remains in the downstream issues.
 
 ## Accepted product decisions
 
@@ -55,7 +55,7 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 
 | Tag | Issue | Status | Prerequisites |
 | --- | --- | --- | --- |
-| Vis1 | [#2901 Define the visualization workflow and reusable configuration contract](https://github.com/ORNL-AMO/VERIFI/issues/2901) | In progress | None |
+| Vis1 | [#2901 Define the visualization workflow and reusable configuration contract](https://github.com/ORNL-AMO/VERIFI/issues/2901) | Implemented locally; review/QA pending | None |
 | Vis2 | [#2903 Persist saved visualizations and preserve them through backup and restore](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Not started | Vis1 |
 | Vis3 | [#2904 Build the Visualizations library and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Not started | Vis1, Vis2 |
 | Vis4 | [#2905 Build utility cost emissions and charge data selection](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Not started | Vis1, Vis3 |
@@ -76,7 +76,7 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 
 ### Vis1 Define the visualization workflow and reusable configuration contract
 
-**Issue:** [#2901](https://github.com/ORNL-AMO/VERIFI/issues/2901) · **Status:** In progress
+**Issue:** [#2901](https://github.com/ORNL-AMO/VERIFI/issues/2901) · **Status:** Implemented locally; review/QA pending
 
 Define a coherent library, editor, chart capture, and embedding workflow before implementing the saved visualization model.
 
@@ -90,11 +90,11 @@ The [Vis1 foundation specification](v1-visualization-foundation.md) defines the 
 
 **Acceptance criteria**
 
-- [ ] Document the create or capture → save → reopen → reuse on Home journey, including loading, empty, invalid, failed-save, and missing-source states.
-- [ ] Saved definitions retain source identity, filters, aggregation, units, site/source treatment, selected series, date rules, appearance, and relevant chart-specific settings.
-- [ ] Home uses linked visualizations: editing the saved definition updates every embedding; Duplicate creates an independent definition. Future reports can consume the same contract.
-- [ ] Distinguish fixed resource selections from scope-driven selections, and persistent settings from temporary hover, zoom, or navigation state. Opening a chart must not silently retarget it.
-- [ ] Record a focused disposition of current v1 chart families and required data sources, including capture fidelity and compatible editing controls. No exhaustive legacy inventory is required.
+- [x] Document the create or capture → save → reopen → reuse on Home journey, including loading, empty, invalid, failed-save, and missing-source states.
+- [x] Saved definitions retain source identity, filters, aggregation, units, site/source treatment, selected series, date rules, appearance, and relevant chart-specific settings.
+- [x] Home uses linked visualizations: editing the saved definition updates every embedding; Duplicate creates an independent definition. Future reports can consume the same contract.
+- [x] Distinguish fixed resource selections from scope-driven selections, and persistent settings from temporary hover, zoom, or navigation state. Opening a chart must not silently retarget it.
+- [x] Record a focused disposition of current v1 chart families and required data sources, including capture fidelity and compatible editing controls. No exhaustive legacy inventory is required.
 
 **Dependencies:** None; start here.
 
@@ -483,3 +483,4 @@ The tables above track local implementation progress. Keep each status aligned w
 | 2026-11-10 | Planning | Accepted linked visualization semantics and visualization-first delivery. Created and attached Vis1–Vis10 and Home1–Home6 to epic #2564; all begin Not started. No application behavior changed. |
 | 2026-11-10 | Planning validation | Verified all 16 published issue bodies, dependencies, milestone/label, and native parent links; preserved #2635. Local links, issue mappings, and dependency graph passed checks. `npm run validate:agent -- --mode plan` selected documentation checks only; `git diff --check` passed. |
 | 2026-11-11 | Vis1 workflow slice | Added the foundation specification, accepted workflow/state decisions, focused current-v1 chart/source dispositions, acceptance crosswalk and three-PR handoff. Local link targets verified. This slice changes documentation only; executable contract validation is recorded with the following slices. |
+| 2026-11-11 | Vis1 contracts | Added strict serializable definitions, incomplete/unsupported validation, provider/capability/capture/embedding contracts, and fake-provider behavior examples. Actual UI, persistence and source adapters remain downstream. Local stack targets `unified-ux`; publication and QA remain pending. |
