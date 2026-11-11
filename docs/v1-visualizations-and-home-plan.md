@@ -57,7 +57,7 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 | --- | --- | --- | --- |
 | Vis1 | [#2901 Define the visualization workflow and reusable configuration contract](https://github.com/ORNL-AMO/VERIFI/issues/2901) | Implemented locally; review/QA pending | None |
 | Vis2 | [#2903 Persist saved visualizations and preserve them through backup and restore](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Implemented locally; review/QA pending | Vis1 |
-| Vis3 | [#2904 Build the Visualizations library and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Not started | Vis1, Vis2 |
+| Vis3 | [#2904 Build the Visualizations library and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | In progress | Vis1, Vis2 |
 | Vis4 | [#2905 Build utility cost emissions and charge data selection](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Not started | Vis1, Vis3 |
 | Vis5 | [#2906 Add predictor weather Energy Use and analysis result sources](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Not started | Vis1, Vis3, Vis4 |
 | Vis6 | [#2907 Build time series and comparison chart editing](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Not started | Vis3, Vis4 |
@@ -128,7 +128,9 @@ The [Vis2 persistence specification](v1-visualization-persistence.md) records th
 
 ### Vis3 Build the Visualizations library and workbench
 
-**Issue:** [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) · **Status:** Not started
+**Issue:** [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) · **Status:** In progress
+
+The [Vis3 workbench specification](v1-visualization-workbench.md) records the accepted card library, autosave/navigation/recovery decisions and six-slice delivery stack. This is framework-first delivery; concrete source and chart adapters remain in Vis4–Vis8.
 
 Enable the Visualizations rail destination and provide the main place to create, organize, and edit saved visualizations.
 

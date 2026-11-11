@@ -30,6 +30,7 @@ export interface RouteState {
   readonly energyUseGroupGuid?: string;
   readonly weatherPredictorGroupKey?: string;
   readonly reportGuid?: string;
+  readonly visualizationGuid?: string;
   readonly reportStage?: 'setup' | 'data-checks' | 'report';
   readonly analysisGuid?: string;
   readonly analysisGroupGuid?: string;
@@ -56,7 +57,7 @@ const VALID_SECTION_IDS: ReadonlyArray<SectionId> = ['home', 'data', 'visualizat
 const DEFAULT_DETAILS: Record<SectionId, string> = {
   home: 'overview',
   data: 'portfolio',
-  visualization: 'time-series',
+  visualization: 'library',
   analysis: 'dashboard',
   reports: 'dashboard',
   settings: 'profile',
@@ -69,7 +70,16 @@ const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
 
 export function isAccountInventory(state: RouteState): boolean {
   return state.contextMode === 'account' && ((state.section === 'data' && state.detail === 'portfolio')
-    || ((state.section === 'analysis' || state.section === 'reports') && state.detail === 'dashboard'));
+    || ((state.section === 'analysis' || state.section === 'reports') && state.detail === 'dashboard')
+    || (state.section === 'visualization' && state.detail === 'library'));
+}
+
+export function visualizationLibraryRoute(accountGuid: string): string[] {
+  return ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'library'];
+}
+
+export function visualizationWorkbenchRoute(accountGuid: string, visualizationGuid: string): string[] {
+  return ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'workbench', visualizationGuid];
 }
 
 export function accountRoute(accountGuid: string): Array<string> {
@@ -256,6 +266,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       facilityGuid: routeParts[2],
       section,
       detail,
+      visualizationGuid: section === 'visualization' && detail === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
       reportGuid: section === 'reports' && detail === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
       reportStage: section === 'reports' && detail === 'workbench' && routeParts[5]
         ? routeParts[6] === 'data-checks' || routeParts[6] === 'report' ? routeParts[6] : 'setup' : undefined,
@@ -312,6 +323,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       : undefined,
     section,
     detail: routeParts[4] || DEFAULT_DETAILS[section],
+    visualizationGuid: section === 'visualization' && routeParts[4] === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
     reportGuid: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
     reportStage: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5]
       ? routeParts[6] === 'data-checks' || routeParts[6] === 'report' ? routeParts[6] : 'setup' : undefined,
