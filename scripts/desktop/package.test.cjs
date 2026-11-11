@@ -72,6 +72,10 @@ test('production publication remains downstream of all package verification and 
     assert.equal(publish.with.draft, true); assert.equal(publish.with.target_commitish, '${{ github.sha }}');
     assert.deepEqual(packaging.jobs.sign_windows.needs, 'native');
     assert.deepEqual(packaging.jobs.finalize_windows.needs, 'sign_windows');
+    for (const job of Object.values(packaging.jobs)) {
+        assert.equal(job.steps[0].if, "inputs.qa-version != '' && github.run_attempt != 1");
+        assert.match(job.steps[0].run, /exit 1/);
+    }
     assert.equal(qa.jobs.approve.environment, 'desktop-qa-signing');
     assert.deepEqual(qa.jobs.package.needs, ['resolve', 'approve']);
     assert.equal(qa.jobs.package.with['retention-days'], 14);

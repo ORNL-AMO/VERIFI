@@ -50,6 +50,12 @@ jobs:
       DESKTOP_PLATFORM: ${{ matrix.platform }}
       DESKTOP_METADATA: ${{ matrix.metadata }}
     steps:
+      - name: Require a new dispatch for QA packaging
+        if: inputs.qa-version != '' && github.run_attempt != 1
+        shell: bash
+        run: |
+          echo 'QA packages must not be rebuilt or signed on workflow reruns. Dispatch a new build, or test retained artifacts.' >&2
+          exit 1
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
@@ -91,22 +97,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          shopt -s nullglob
-          APPS=(source/output/mac-universal/*.app)
-          DMGS=(source/output/*.dmg)
-          [[ ${#APPS[@]} -eq 1 && ${#DMGS[@]} -eq 1 ]]
-          EXECUTABLE=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${APPS[0]}/Contents/Info.plist")
-          lipo -verify_arch x86_64 arm64 "${APPS[0]}/Contents/MacOS/$EXECUTABLE"
-          codesign --verify --deep --strict --verbose=2 "${APPS[0]}"
-          codesign -dv --verbose=4 "${APPS[0]}" 2> "$RUNNER_TEMP/desktop-codesign.txt"
-          grep -q '^Authority=Developer ID Application:' "$RUNNER_TEMP/desktop-codesign.txt"
-          grep -Fqx "TeamIdentifier=$APPLE_TEAM_ID" "$RUNNER_TEMP/desktop-codesign.txt"
-          xcrun notarytool submit "${DMGS[0]}" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" --output-format json > "$RUNNER_TEMP/desktop-notarization.json"
-          node -e 'if (JSON.parse(require("fs").readFileSync(process.argv[1])).status !== "Accepted") process.exit(1)' "$RUNNER_TEMP/desktop-notarization.json"
-          xcrun stapler staple "${DMGS[0]}"
-          xcrun stapler validate "${DMGS[0]}"
-          echo '{"platform":"mac","verified":true,"signature":true,"universal":true,"notarization":"Accepted","stapling":true}' > source/desktop-verification.json
+        run: bash tooling/scripts/desktop/notarize-mac.sh source
       - name: Finalize native update metadata
         if: matrix.platform != 'windows'
         shell: bash
@@ -165,6 +156,12 @@ jobs:
     env:
       DESKTOP_PREFIX: ${{ inputs.artifact-prefix }}
     steps:
+      - name: Require a new dispatch for QA packaging
+        if: inputs.qa-version != '' && github.run_attempt != 1
+        shell: bash
+        run: |
+          echo 'QA packages must not be rebuilt or signed on workflow reruns. Dispatch a new build, or test retained artifacts.' >&2
+          exit 1
       - uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.artifact-prefix }}-windows-unsigned
@@ -209,6 +206,12 @@ jobs:
       DESKTOP_SOURCE_DIR: ${{ github.workspace }}/source
       DESKTOP_ROLE: ${{ inputs.role }}
     steps:
+      - name: Require a new dispatch for QA packaging
+        if: inputs.qa-version != '' && github.run_attempt != 1
+        shell: bash
+        run: |
+          echo 'QA packages must not be rebuilt or signed on workflow reruns. Dispatch a new build, or test retained artifacts.' >&2
+          exit 1
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}

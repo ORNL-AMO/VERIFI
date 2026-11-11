@@ -11,7 +11,7 @@ async function prepareManifest(source, platform, destination, env = process.env)
     const verification = JSON.parse(await fs.readFile(path.join(source, 'desktop-verification.json'), 'utf8'));
     assert(verification.platform === platform && verification.verified === true, 'Platform verification is required before artifact publication.');
     if (platform === 'windows') assert(verification.signature === true && typeof verification.publisher === 'string' && verification.publisher.length > 0, 'Windows signature/publisher verification is required.');
-    if (platform === 'mac') assert(verification.signature === true && verification.universal === true && verification.notarization === 'Accepted' && verification.stapling === true, 'Mac signing/universal/notarization/stapling verification is required.');
+    if (platform === 'mac') assert(verification.signature === true && verification.universal === true && verification.notarization === 'Accepted' && ['app', 'dmg', 'zip'].every(target => verification.stapling?.[target] === true), 'Mac signing/universal/notarization/stapling verification is required.');
     if (platform === 'linux') assert(verification.metadata === true, 'Linux metadata verification is required.');
     await fs.mkdir(destination, { recursive: true });
     const output = path.join(source, 'output');
