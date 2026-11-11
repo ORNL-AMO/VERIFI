@@ -1,35 +1,6 @@
-import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition, VisualizationIssue } from '@domain/visualizations/visualization-validation';
-import { VisualizationGuidMaps, VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
-
-export const SAVED_VISUALIZATION_RECORD_VERSION = 1;
-
-export interface VisualizationTransferContext {
-  readonly accountId: string;
-  readonly targetAccountId: string;
-  readonly maps: VisualizationGuidMaps;
-}
-
-export interface VisualizationPreservation {
-  /** Opaque transferred payloads cannot activate simply because a newer decoder recognizes them. */
-  readonly locked?: boolean;
-  readonly references: readonly VisualizationReferenceIssue[];
-  /** Ordered hops preserve opaque references through repeated transfers without guessing their schema. */
-  readonly transfers: readonly VisualizationTransferContext[];
-}
-
-export interface IdbSavedVisualization {
-  id?: number;
-  guid: string;
-  accountId: string;
-  facilityId?: string;
-  recordVersion: number;
-  revision: number;
-  createdDate: Date | string;
-  modifiedDate: Date | string;
-  definition: unknown;
-  preservation?: VisualizationPreservation;
-}
+import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
 
 export type SavedVisualizationReadResult =
   | { readonly state: 'valid' | 'setup-required'; readonly record: Readonly<IdbSavedVisualization>;

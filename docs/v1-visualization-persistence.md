@@ -4,7 +4,7 @@ This implements [Vis2 / #2903](https://github.com/ORNL-AMO/VERIFI/issues/2903) i
 
 ## Durable ownership and versions
 
-`savedVisualizations` is an account-owned IndexedDB store. A facility-scoped record additionally declares its owning facility. The envelope holds the GUID, local numeric key, ownership, record version, saved revision, timestamps, definition payload, and any preservation metadata. The domain definition remains independent of Angular and IndexedDB.
+`savedVisualizations` is an account-owned IndexedDB store. A facility-scoped record additionally declares its owning facility. The envelope holds the GUID, local numeric key, ownership, record version, saved revision, timestamps, definition payload, and any preservation metadata. The persisted model follows the existing `IdbEntry` and `getNewIdbEntry()` factory pattern in `savedVisualization.ts`. Decode/version/backup validation lives outside the model in `data/visualizations/saved-visualization-record.ts`; serialized backup dates remain supported at that boundary. The domain definition remains independent of Angular and IndexedDB.
 
 Three versions have different purposes: record/definition versions describe durable formats, the saved revision protects an individual definition from stale writes, and the workspace revision identifies committed application state. Numeric IndexedDB keys never identify sources or cross-record relationships.
 

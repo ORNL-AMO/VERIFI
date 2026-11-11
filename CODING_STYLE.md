@@ -16,7 +16,7 @@
 - Classes, interfaces: `PascalCase` (e.g., `UserService`)
 - Variables, functions, properties: `camelCase` (e.g., `userName`)
 - Constants: `UPPER_CASE` if exported, otherwise `camelCase`
-- File names: `kebab-case` (e.g., `user-profile.component.ts`)
+- File names: `kebab-case` (e.g., `user-profile.component.ts`). Persisted models under `src/app/data/models/idbModels/` follow the established `camelCase` convention (e.g., `facilityReport.ts`).
 
 ## Imports/Exports
 - Use ES6 import/export syntax.

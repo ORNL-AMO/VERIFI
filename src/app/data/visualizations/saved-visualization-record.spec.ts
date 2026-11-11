@@ -1,10 +1,11 @@
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
-import { IdbSavedVisualization, readSavedVisualization, savedVisualizationEnvelopeError } from './saved-visualization';
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { readSavedVisualization, savedVisualizationEnvelopeError } from './saved-visualization-record';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 
 function record(): IdbSavedVisualization {
   return { guid: 'visualization-a', accountId: 'account-a', recordVersion: 1, revision: 1,
-    createdDate: '2026-11-11T00:00:00.000Z', modifiedDate: '2026-11-11T00:00:00.000Z', definition: utilityVisualizationFixture() };
+    createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'), definition: utilityVisualizationFixture() };
 }
 
 describe('saved visualization envelope and version routing', () => {
@@ -13,6 +14,14 @@ describe('saved visualization envelope and version routing', () => {
     expect(readSavedVisualization(input).state).toBe('valid');
     expect(readSavedVisualization(input)).toEqual(readSavedVisualization(input));
     expect(savedVisualizationEnvelopeError(input)).toBeUndefined();
+    expect(input).toEqual(before);
+  });
+
+  it('accepts serialized backup dates without modifying the raw input', () => {
+    const input = JSON.parse(JSON.stringify(record()));
+    const before = structuredClone(input);
+    expect(savedVisualizationEnvelopeError(input)).toBeUndefined();
+    expect(readSavedVisualization(input).state).toBe('valid');
     expect(input).toEqual(before);
   });
 
