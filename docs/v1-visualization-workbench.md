@@ -34,7 +34,7 @@ An externally deleted editor remains mounted with its draft. Save as new reviews
 
 Preview is independent of save status. Only active previews request providers. Use one shared date context, exact chart support and domain compatibility checks. Abort and reject obsolete account/workspace/definition/edit/request responses. Providers/presenters and optional source editors are registrations; test adapters exercise ready, empty, loading/waiting, missing source, incompatible and calculation-error states. Production adapters and real-data chart acceptance remain downstream in Vis4–Vis8.
 
-Use shared inventory/chart layers, portal-based `ConfirmationDialogComponent`, focus restoration, meaningful labels, accessible values alternatives, light/dark/high-contrast tokens, narrow windows and printing. No schema, backup version, calculation, v0, report, weather retrieval or IPC changes.
+Use shared inventory/chart layers, portal-based `ConfirmationDialogComponent`, focus restoration, meaningful labels, accessible values alternatives, light/dark/high-contrast tokens, narrow windows and printing. No database schema, envelope version, calculation, v0, report, weather retrieval or IPC changes.
 
 ## Delivery stack
 
@@ -42,12 +42,12 @@ Use shared inventory/chart layers, portal-based `ConfirmationDialogComponent`, f
 | --- | --- | --- |
 | `codex/vis3-contracts` | Specification, routes/browse/card contracts, preflight and registration boundaries, pure reset/copy helpers/tests | `unified-ux` |
 | `codex/vis3-library` | Card dashboard, filters/paging/detail, creation, rename, same-scope duplicate, delete, browse restoration | Contracts |
-| `codex/vis3-editor` | Workbench, metadata forms, autosave, reconciliation, protected leave | Library |
+| `codex/vis3-editor` | Workbench, metadata forms, autosave, reconciliation, protected leave | Dashboard |
 | `codex/vis3-preview` | Resolution/presenter/editor slots, compatibility/cancellation, state presentation, test adapters | Editor |
 | `codex/vis3-recovery` | Reviewed source reset, cross-scope copy, transfer locks, deleted-draft recovery | Preview |
 | `codex/vis3-integration` | Shell routes/navigation/single-site behavior, Dashboard sidebar, rail activation, combined acceptance | Recovery |
 
-Library, editor and preview development may proceed in parallel after interfaces are pinned; integrate into the ordered stack with disjoint ownership. One integrator owns shared interfaces and shell changes. Every slice owns focused tests. Each PR requires context-aware self-review and a fresh no-history reviewer, both [review records](agents/pr-review-record.md), and non-closing `Connects #2904`. Publication/merge are separate authorization steps.
+Dashboard, editor and preview development may proceed in parallel after interfaces are pinned; integrate into the ordered stack with disjoint ownership. One integrator owns shared interfaces and shell changes. Every slice owns focused tests. Each PR requires context-aware self-review and a fresh no-history reviewer, both [review records](agents/pr-review-record.md), and non-closing `Connects #2904`. Publication/merge are separate authorization steps.
 
 ## Validation and acceptance
 
@@ -55,13 +55,14 @@ Fast tests cover Dashboard projections and controls, all families, single-site c
 
 Use the validation planner, focused checks, app type-check, full tests before handoff and production web build. The persisted incomplete-Scatter contract adjustment also receives production Electron build and backup/reopen coverage; no IPC or desktop integration behavior changes. Vis3's framework journey can be accepted independently; actual real-data preview acceptance remains pending until the first Vis4/Vis6 integration. Record actual validation evidence and gaps; do not close the broader acceptance early.
 
-## Historical implementation evidence before alignment
+## Local implementation evidence
 
-The six slices are implemented locally. The library is enabled only with the integrated guarded workbench. Real-data source/chart acceptance remains pending in Vis4–Vis8; this does not close #2904. Invalid single-facility account setup blocks creation/copy until its sole facility is restored or the account is explicitly converted to a portfolio.
+The six local slices include Dashboard naming and stepped Add visualization with concrete chart choices and multiple source families. Native tests retain chart/source intent through reopen, reviewed repair/copy, duplication, deleted-draft recovery and Account/Facility backups. Invalid single-facility setup still blocks creation/copy until its sole facility is restored or the account is explicitly converted to a portfolio.
 
-- `npm run test:all:ci`: 4,297 fast tests and 533 Chromium tests passed. Vis3 includes native storage/reopen, publication recovery without write replay, reviewed transfer repair, deleted-draft recovery, keyboard, browser-history, and stale-preview coverage.
-- App and browser-spec TypeScript checks passed; local documentation links and whitespace checks passed.
-- Production web build passed with existing component-budget and dependency-format warnings. No Electron boundary changed; Electron release validation is not claimed.
-- Earlier restricted Angular invocations aborted with exit 134 and were rerun with normal process access. An existing Energy Use browser year check timed out in one full run, then passed both focused and full reruns without unrelated calculation or test changes.
+- `npm run test:all:ci`: 4,368 fast tests and 544 Chromium tests passed. Focused domain/visualization checks passed 327 unit tests and 31 Chromium tests.
+- App, unit-spec and browser-spec TypeScript checks passed; local documentation links and whitespace checks passed.
+- Production web and Electron-target builds passed with existing component-budget and dependency-format warnings. No IPC or operating-system integration changed; desktop release acceptance is not claimed.
+- Wide light and narrow dark/high-contrast screenshots were visually inspected. Chromium also checks all palette/mode combinations, overflow, keyboard operation and focus. Routed journeys use controlled command publication; real IndexedDB and backup behavior are verified separately. Full production-shell end-to-end acceptance remains outside this harness.
+- Restricted Angular runs exited 134 and were followed by passing normal-process checks. Combined tests exposed an eager chart-catalog snapshot, corrected using the neighboring lazy-read pattern. Two new browser-fixture assertions were corrected before the passing final gates: distinguish source cards from selection chips, and seed the valid meter relationship required by the legacy recovery case.
 
-PR preparation retains context-aware self-review and separate fresh no-history review records. Publication, human review, QA and merge remain separate steps.
+Concrete providers/chart editors, real-data preview acceptance and starter recipe implementation remain downstream; this framework does not close #2904. PR preparation refreshes context-aware self-review and separate fresh no-history review records for the final comparisons. Human review, QA, publication and merge remain separate steps.
