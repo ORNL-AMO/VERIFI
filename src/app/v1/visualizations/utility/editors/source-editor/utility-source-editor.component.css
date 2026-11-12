@@ -1,0 +1,10 @@
+:host { display:block; min-width:0; }
+.utility-editor { margin:0; padding:.75rem 0; border:0; border-top:1px solid var(--v1-border); min-width:0; }
+legend { font-size:1rem; font-weight:600; margin-bottom:.5rem; }
+label { display:grid; gap:.25rem; margin-bottom:.75rem; }
+input[type=text], input[type=search] { min-width:0; width:100%; padding:.4rem; border:1px solid var(--v1-border); background:var(--v1-surface); color:var(--v1-text); }
+select { width:100%; min-width:0; }
+select[multiple] { min-height:6rem; }
+.utility-editor__check { display:flex; align-items:center; gap:.5rem; }
+p { margin:0 0 .75rem; font-size:.85rem; overflow-wrap:anywhere; }
+[role=alert] { color:var(--v1-danger, var(--v1-text)); }

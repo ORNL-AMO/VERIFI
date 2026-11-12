@@ -14,21 +14,82 @@ import { VisualizationNavigationService } from '../visualization-navigation.serv
 import { createVisualizationChart, VISUALIZATION_CHART_CHOICES } from '../visualization-charts';
 import { WorkbenchModule } from './workbench.module';
 import { WorkbenchComponent } from './workbench.component';
+import { By } from '@angular/platform-browser';
+import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-actions.component';
 
 describe('visualization workbench', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it('protects invalid child field drafts through metadata edits and explicitly discards them', async () => {
+    const { component, fixture } = setup();
+    const periods = fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
+    periods.form.controls.kind.setValue('fixed');
+    component.editor.form.controls.title.setValue('A coherent title');
+    fixture.detectChanges();
+    expect(component.hasInvalidFields()).toBe(true);
+    expect(component.saveLabel()).toContain('unsaved');
+    const pending = component.resolveLeave(); await Promise.resolve(); await Promise.resolve();
+    expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
+    component.discardLeave();
+    await expect(pending).resolves.toBe(true); expect(component.hasInvalidFields()).toBe(false);
+  });
+  it('adds independent utility sources and removes only the chosen source configuration', () => {
+    const { component } = setup();
+    const original = component.editor.definition()!;
+    component.addUtilitySource();
+    expect(component.editor.definition()!.sources).toHaveLength(original.sources.length + 1);
+    const added = component.editor.definition()!.sources.at(-1)!;
+    expect(added.id).not.toBe(original.sources[0].id);
+    component.removeSource(added.id);
+    expect(component.editor.definition()!.sources).toEqual(original.sources);
+    expect(component.editor.definition()!.series).toEqual(original.series);
+  });
+  it('keeps a mounted incomplete period after external deletion until Save as new explicitly discards field drafts', async () => {
+    const { component, fixture, store, submit, prepareCreate } = setup();
+    const periods = fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
+    periods.form.controls.kind.setValue('fixed'); periods.form.controls.start.setValue('2026-03-01');
+    fixture.detectChanges();
+    expect(component.hasInvalidFields()).toBe(true);
+    store.publish({ ...store.snapshot()!, savedVisualizations: [] }); fixture.detectChanges();
+    expect(component.editor.isMissing()).toBe(true);
+    const recovery = fixture.debugElement.query(By.directive(RecoveryActionsComponent)).componentInstance as RecoveryActionsComponent;
+    const open = vi.spyOn(TestBed.inject(VisualizationNavigationService), 'open').mockResolvedValue(true);
+    const saveAsNew = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(button => button.textContent?.trim() === 'Save as new')!;
+    saveAsNew.click(); await Promise.resolve(); fixture.detectChanges();
+    expect(recovery.childDraftDecision()).toBe('new'); expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
+    expect(prepareCreate).not.toHaveBeenCalled(); expect(submit).not.toHaveBeenCalled();
+    expect(fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance).toBe(periods);
+    expect(periods.form.controls.start.value).toBe('2026-03-01'); expect(periods.form.controls.end.value).toBe('');
+    expect(component.editor.definition()).toBeDefined(); expect(component.hasInvalidFields()).toBe(true);
+    recovery.cancelChildDraftDecision(); fixture.detectChanges();
+    expect(periods.form.controls.kind.value).toBe('fixed'); expect(component.hasInvalidFields()).toBe(true);
+    expect(TestBed.inject(UnsavedChangesService).hasUnsavedChanges()).toBe(true);
+    saveAsNew.click(); await Promise.resolve(); fixture.detectChanges();
+    await recovery.discardChildDraftsAndContinue(); fixture.detectChanges();
+    expect(component.hasInvalidFields()).toBe(false); expect(periods.form.controls.kind.value).toBe('all-history');
+    expect(recovery.mode()).toBe('new'); expect(prepareCreate).not.toHaveBeenCalled();
+    await recovery.confirm(); fixture.detectChanges();
+    expect(prepareCreate).toHaveBeenCalledOnce();
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ kind: 'create', guid: 'new-identity', definition: expect.objectContaining({ period: { kind: 'all-history' } }) }));
+    expect(open).toHaveBeenCalledWith('account-a', 'new-identity');
+    expect(component.editor.definition()).toBeUndefined();
+    await expect(TestBed.inject(UnsavedChangesService).resolveNavigationPreflight()).resolves.toBe(true);
+  });
   function setup(definition?: VisualizationDefinition) {
     const snapshot = visualizationSnapshot();
     const store = new AccountWorkspaceStore(); store.publish(definition ? { ...snapshot,
       savedVisualizations: [{ ...getNewIdbSavedVisualization(definition), id: 1, guid: 'visualization-a' }] } : snapshot);
     const route = signal({ section: 'visualization', accountGuid: 'account-a', visualizationGuid: 'visualization-a' });
-    const submit = vi.fn(async (command: any) => ({ state: 'committed', value: { ...store.savedVisualizations()[0], definition: command.definition, revision: command.expectedRevision + 1 }, command, referenceIssues: [] }));
+    const prepareCreate = vi.fn((value: VisualizationDefinition) => ({ kind: 'create' as const, accountGuid: value.accountGuid, guid: 'new-identity', definition: value, createdDate: '2026-11-12T00:00:00.000Z' }));
+    const submit = vi.fn(async (command: any) => ({ state: 'committed', value: command.kind === 'create'
+      ? { ...getNewIdbSavedVisualization(command.definition), guid: command.guid }
+      : { ...store.savedVisualizations()[0], definition: command.definition, revision: command.expectedRevision + 1 }, command, referenceIssues: [] }));
     TestBed.configureTestingModule({ imports: [WorkbenchModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: store }, { provide: WorkspaceNavigationService, useValue: { routeState: route } },
-      { provide: SavedVisualizationCommands, useValue: { submit } }
+      { provide: SavedVisualizationCommands, useValue: { submit, prepareCreate } }
     ] });
     const fixture = TestBed.createComponent(WorkbenchComponent); fixture.detectChanges();
-    return { fixture, component: fixture.componentInstance, store, submit, route };
+    return { fixture, component: fixture.componentInstance, store, submit, prepareCreate, route };
   }
   it('shows saved ownership and saves valid edits before leaving', async () => {
     const { fixture, component, submit } = setup();

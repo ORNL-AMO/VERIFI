@@ -8,6 +8,14 @@
   @if (editor.isMissing() && editor.definition()) { <button type="button" class="v1-btn v1-btn--action" [disabled]="saving() || editor.form.invalid" (click)="start('new')">Save as new</button> }
 </div>
 <ng-template #reviewDialog>
+  @if (childDraftDecision()) {
+    <app-confirmation-dialog title="Resolve unsaved field input" titleId="visualization-recovery-fields-title" cancelAriaLabel="Keep unsaved field input" confirmLabel="Discard field input and continue"
+      [disabled]="saving()" (confirmed)="discardChildDraftsAndContinue()" (cancelled)="cancelChildDraftDecision()">
+      <p>Some source or date fields contain incomplete input or an unresolved field conflict. Recovery can only use the last coherent configuration.</p>
+      <p>Cancel to keep and correct that input, or explicitly discard those field drafts before continuing. The remaining coherent visualization changes are retained.</p>
+      @if (error()) { <p role="alert">{{ error() }}</p> }
+    </app-confirmation-dialog>
+  } @else {
   <app-confirmation-dialog [title]="mode() === 'reset' ? 'Reset affected sources to setup?' : mode() === 'new' ? 'Save local intent as new?' : 'Duplicate to another scope?'"
     titleId="visualization-recovery-title" cancelAriaLabel="Cancel visualization recovery" [confirmLabel]="proposal() ? 'Retry' : mode() === 'reset' ? 'Reset sources' : 'Create independent copy'"
     confirmClass="v1-btn--action" [disabled]="saving()" [confirmDisabled]="!proposal() && (stale() || !review())" (confirmed)="confirm()" (cancelled)="cancel()">
@@ -25,4 +33,5 @@
     @if (stale() && !proposal()) { <p role="alert">Saved data or local input changed during review. Cancel and reopen this review before continuing.</p> }
     @if (error()) { <p role="alert">{{ error() }}</p> }
   </app-confirmation-dialog>
+  }
 </ng-template>

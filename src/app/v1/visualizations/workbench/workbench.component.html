@@ -8,8 +8,9 @@
     <div class="v1-alert v1-alert--info" role="status">The account workspace is unavailable or loading. Saved intent and local input are retained.</div>
   }
   @if (editor.error()) { <div class="v1-alert v1-alert--warning" role="alert">{{ editor.error() }}</div> }
+  @if (hasInvalidFields()) { <p class="v1-alert v1-alert--warning" role="status">Correct the unsaved field input. Preview and saved data retain the last coherent settings.</p> }
   <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()" (resolved)="editor.resolveConflicts($event)"/>
-  <app-visualization-recovery-actions/>
+  <app-visualization-recovery-actions [childDrafts]="recoveryChildDrafts"/>
   @if (editor.state() === 'error' || editor.state() === 'refresh-required') {
     <button type="button" class="v1-btn v1-btn--secondary" [disabled]="editor.saving()" (click)="editor.retry()">Retry save or refresh</button>
   }
@@ -20,12 +21,18 @@
           <label>Name<input formControlName="name" type="text" aria-describedby="visualization-name-error"></label>
           @if (editor.form.controls.name.invalid) { <p id="visualization-name-error" role="alert">Enter a name.</p> }
           <p>Scope: {{ scopeLabel() }}</p>
-          @for (source of sourceSummary(); track source.id) { <p>{{ source.familyLabel }} · {{ source.measure }}</p> }
-          @for (source of sourceEditors(); track source.id) { <ng-container *ngComponentOutlet="source.component; inputs: source.inputs"/> }
+          @for (source of sourceSummary(); track source.id) {
+            <p>{{ source.familyLabel }} · {{ source.measure }}</p>
+            @if (definition.sources.length > 1) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" (click)="removeSource(source.id)">Remove {{ source.familyLabel }} source {{ source.id }}</button> }
+          }
+          @for (source of sourceEditors(); track source.id) {
+            <ng-container *ngComponentOutlet="source.component; inputs: source.inputs"/>
+          }
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit()" (click)="addUtilitySource()">Add utility source</button>
           <p>Period: {{ periodSummary() }}</p><p>Comparison: {{ definition.comparison.kind }}</p>
           <p>Chart: {{ chartSummary() }}</p>
-          <p>Your chart choice and source families are saved. Detailed source selection and chart settings will become available as their editors are added.</p>
         </section>
+        <section><app-utility-period-settings [context]="periodContext()"/></section>
         <section aria-labelledby="visualization-appearance"><h2 id="visualization-appearance">Appearance</h2>
           <label>Display title<input formControlName="title" type="text"></label>
           <label class="visualization-workbench__checkbox"><input formControlName="legend" type="checkbox">Show legend</label>
@@ -44,6 +51,6 @@
   <app-confirmation-dialog title="Resolve unsaved visualization changes" titleId="visualization-leave-title" cancelAriaLabel="Stay in the visualization" confirmLabel="Discard and leave" [disabled]="editor.saving()" [confirmDisabled]="editor.state() === 'refresh-required'" (confirmed)="discardLeave()" (cancelled)="finishLeave(false)">
     <p>Your local input has not been fully saved. Stay to correct or review it, retry the save, or explicitly discard it.</p>
     @if (editor.error()) { <p role="alert">{{ editor.error() }}</p> }
-    <button type="button" class="v1-btn v1-btn--secondary" [disabled]="editor.saving() || editor.state() === 'invalid' || editor.state() === 'conflict' || editor.isMissing()" (click)="retryLeave()">Retry and leave</button>
+    <button type="button" class="v1-btn v1-btn--secondary" [disabled]="hasInvalidFields() || editor.saving() || editor.state() === 'invalid' || editor.state() === 'conflict' || editor.isMissing()" (click)="retryLeave()">Retry and leave</button>
   </app-confirmation-dialog>
 </ng-template>
