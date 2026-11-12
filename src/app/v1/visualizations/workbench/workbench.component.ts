@@ -7,6 +7,8 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { VisualizationEditorSession } from '../editing/visualization-editor-session.service';
 import { VisualizationNavigationService } from '../visualization-navigation.service';
+import { visualizationChartLabel } from '../visualization-charts';
+import { VISUALIZATION_FAMILIES } from '../visualization-families';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false,
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -33,7 +35,9 @@ export class WorkbenchComponent {
     return record.facilityId ? this.workspace.facilities().find(item => item.guid === record.facilityId)?.name ?? 'Unavailable facility'
       : 'Portfolio';
   });
-  readonly sourceSummary = computed(() => this.editor.definition()?.sources.map(source => ({ id: source.id, kind: source.kind, measure: source.measure })) ?? []);
+  readonly sourceSummary = computed(() => this.editor.definition()?.sources.map(source => ({ id: source.id,
+    familyLabel: VISUALIZATION_FAMILIES.find(family => family.value === source.kind)!.label, measure: source.measure })) ?? []);
+  readonly chartSummary = computed(() => visualizationChartLabel(this.editor.definition()?.chart));
   readonly periodSummary = computed(() => {
     const period = this.editor.definition()?.period;
     if (!period) return 'Unavailable';

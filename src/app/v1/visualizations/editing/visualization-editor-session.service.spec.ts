@@ -5,7 +5,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import { VisualizationCommandOutcome, VisualizationConflictError, UpdateVisualizationCommand } from '@data/account-workspace/visualization-commands.models';
 import { IdbSavedVisualization, getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { createVisualizationDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { VisualizationEditorSession } from './visualization-editor-session.service';
@@ -73,6 +73,44 @@ describe('VisualizationEditorSession', () => {
     pending.resolve(committed(test.submit.mock.calls[0][0], 2)); await vi.advanceTimersByTimeAsync(650);
     expect(test.submit).toHaveBeenCalledTimes(2);
     expect(test.submit.mock.calls[1][0].definition.name).toBe('Original');
+  });
+
+  it('retains mixed-family Scatter setup through autosave acknowledgements and newer metadata input', async () => {
+    vi.useFakeTimers();
+    const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor', 'weather'] });
+    const test = setup(record(definition)), pending = deferred<VisualizationCommandOutcome>();
+    test.submit.mockImplementationOnce(() => pending.promise);
+    test.session.form.controls.name.setValue('First edit'); await vi.advanceTimersByTimeAsync(650);
+    const first = test.submit.mock.calls[0][0];
+    test.session.form.patchValue({ name: ' Newer edit ', title: 'Usage and predictors', legend: false });
+    pending.resolve(committed(first, 2)); await vi.advanceTimersByTimeAsync(0);
+    expect(test.session.form.controls.name.value).toBe(' Newer edit ');
+    expect(test.session.needsProtection()).toBe(true);
+    await vi.advanceTimersByTimeAsync(650);
+    expect(test.submit).toHaveBeenCalledTimes(2);
+    for (const [command] of test.submit.mock.calls) {
+      expect(command.definition.sources).toEqual(definition.sources);
+      expect(command.definition.chart).toEqual({ kind: 'scatter', showFit: false });
+      expect(command.definition.series).toEqual([]);
+      expect(command.definition.period).toEqual(definition.period);
+    }
+    expect(test.submit.mock.calls[1][0]).toMatchObject({ expectedRevision: 2,
+      definition: { name: 'Newer edit', appearance: { title: 'Usage and predictors', legend: false } } });
+    expect(test.session.needsProtection()).toBe(false);
+  });
+
+  it('retains incomplete mixed-source chart intent when an invalid metadata draft blocks navigation', async () => {
+    const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+    const test = setup(record(definition));
+    test.session.form.controls.name.setValue('');
+    expect(await test.session.flush()).toBe(false);
+    expect(test.session.needsProtection()).toBe(true);
+    expect(test.session.definition()).toMatchObject({ sources: definition.sources, chart: definition.chart, series: [] });
+    expect(test.submit).not.toHaveBeenCalled();
+    test.session.discard();
+    expect(test.session.definition()).toEqual(definition);
   });
 
   it('flushes all newer coherent edits before authorizing navigation', async () => {

@@ -10,7 +10,7 @@ import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-ha
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { VisualizationEditorSession } from './visualization-editor-session.service';
 
 describe('visualization editor session with native IndexedDB', () => {
@@ -26,18 +26,23 @@ describe('visualization editor session with native IndexedDB', () => {
   });
   afterEach(async () => { vi.restoreAllMocks(); await harness?.destroy(); });
 
-  async function create() {
+  async function create(definition: VisualizationDefinition = createVisualizationDefinition('Original', account.guid,
+    { kind: 'facility', facilityGuid: facility.guid }, 'utility')) {
     const commands = TestBed.inject(SavedVisualizationCommands);
-    const proposal = commands.prepareCreate(createVisualizationDefinition('Original', account.guid,
-      { kind: 'facility', facilityGuid: facility.guid }, 'utility'));
+    const proposal = commands.prepareCreate(definition);
     expect((await commands.submit(proposal)).state).toBe('committed');
     const session = TestBed.runInInjectionContext(() => new VisualizationEditorSession());
     session.open(account.guid, proposal.guid); TestBed.tick();
     return { commands, proposal, session };
   }
 
-  it('saves metadata and rehydrates a fresh session from the durable record after database reopen', async () => {
-    const { session, proposal } = await create();
+  it.each([
+    { label: 'existing single-family setup', definition: createVisualizationDefinition('Original', account.guid,
+      { kind: 'facility', facilityGuid: facility.guid }, 'utility') },
+    { label: 'mixed-family Scatter setup', definition: createVisualizationSetupDefinition({ name: 'Original', accountGuid: account.guid,
+      scope: { kind: 'facility', facilityGuid: facility.guid }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] }) }
+  ])('saves metadata and rehydrates $label from the durable record after database reopen', async ({ definition }) => {
+    const { session, proposal } = await create(definition);
     session.form.patchValue({ name: ' Durable name ', title: 'Current utility use', legend: false });
     expect(await session.flush()).toBe(true);
     const previous = TestBed.inject(AccountWorkspaceStore).snapshot()!;
@@ -46,6 +51,7 @@ describe('visualization editor session with native IndexedDB', () => {
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({ guid: proposal.guid, revision: 2,
       definition: { name: 'Durable name', appearance: { title: 'Current utility use', legend: false } } });
+    expect(saved[0].definition).toEqual({ ...definition, name: 'Durable name', appearance: { title: 'Current utility use', legend: false } });
     const store = TestBed.inject(AccountWorkspaceStore);
     store.publish({ ...previous, savedVisualizations: saved });
     // Reopening destroys all original providers. This fresh editor reads the reopened committed snapshot;
@@ -55,6 +61,7 @@ describe('visualization editor session with native IndexedDB', () => {
     try {
       const reopened = injector.get(VisualizationEditorSession); reopened.open(account.guid, proposal.guid); TestBed.tick();
       expect(reopened.form.getRawValue()).toEqual({ name: 'Durable name', title: 'Current utility use', legend: false });
+      expect(reopened.definition()).toEqual(saved[0].definition);
       expect(reopened.state()).toBe('saved'); expect(reopened.needsProtection()).toBe(false);
     } finally { injector.destroy(); }
   });

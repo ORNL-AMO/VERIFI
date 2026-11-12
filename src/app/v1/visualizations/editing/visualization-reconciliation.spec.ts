@@ -1,4 +1,4 @@
-import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { normalizeVisualizationIntent, reconcileVisualizationIntent, visualizationIntentEqual } from './visualization-reconciliation';
 
 describe('visualization reconciliation', () => {
@@ -32,5 +32,15 @@ describe('visualization reconciliation', () => {
     const selected = reconcileVisualizationIntent(result.baseline, result.value, saved, { configuration: 'saved' });
     expect(selected.value.sources).toEqual(saved.sources); expect(selected.value.period).toEqual(saved.period);
     expect(selected.value).not.toHaveProperty('chart');
+  });
+  it('reconciles metadata independently while retaining the complete mixed-family chart setup', () => {
+    const base = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+    const local = { ...base, name: 'My name' };
+    const saved = { ...base, appearance: { legend: false, title: 'Saved title' } };
+    const result = reconcileVisualizationIntent(base, local, saved);
+    expect(result.conflicts).toEqual([]);
+    expect(result.value).toEqual({ ...base, name: 'My name', appearance: saved.appearance });
+    expect(normalizeVisualizationIntent(result.value).chart).toEqual({ kind: 'scatter', showFit: false });
   });
 });
