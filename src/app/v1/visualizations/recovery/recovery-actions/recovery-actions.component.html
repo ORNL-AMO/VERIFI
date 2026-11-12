@@ -17,7 +17,7 @@
       @else { <p>Destination: {{ singleFacility()?.name }}</p> }
     }
     @if (review(); as review) {
-      <p>Keep reusable appearance and period settings. Explicitly approve these changes:</p>
+      <p>Keep the chart choice, reusable appearance and period settings, and unaffected sources. Explicitly approve these changes:</p>
       <ul>@for (cleared of review.cleared; track $index) { <li>{{ cleared }}</li> }</ul>
       @if (referencesForReview().length) { <p>Source relationships to clear:</p><ul>@for (reference of referencesForReview(); track $index) { <li>{{ reference.kind }}: {{ reference.guid }}</li> }</ul> }
       @if (mode() === 'reset' && editor.record()?.preservation?.locked) { <p>This reviews the imported visualization and clears source relationships that could not be verified.</p> }

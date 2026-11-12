@@ -154,7 +154,7 @@ export class RecoveryActionsComponent {
       if (this.mode() === 'new') this.editor.discard();
       this.proposal.set(undefined); this.refreshRequired.set(false); this.hide(); this.mode.set(undefined);
       this.saving.set(false);
-      if (!await this.journeys.open(proposal.accountGuid, proposal.guid)) this.error.set('The new visualization was saved, but could not be opened. Find it in the library.');
+      if (!await this.journeys.open(proposal.accountGuid, proposal.guid)) this.error.set('The new visualization was saved, but could not be opened. Find it on Dashboard.');
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'The copy could not be recovered.'); }
     finally { this.saving.set(false); }
   }

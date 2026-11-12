@@ -6,6 +6,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
+import { createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { VisualizationEditorSession } from '../../editing/visualization-editor-session.service';
 import { VisualizationNavigationService } from '../../visualization-navigation.service';
@@ -15,9 +16,9 @@ import { RecoveryModule } from '../recovery.module';
 
 describe('reviewed visualization recovery actions', () => {
   afterEach(() => TestBed.resetTestingModule());
-  function setup() {
+  function setup(definition: VisualizationDefinition = utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' })) {
     const store = new AccountWorkspaceStore();
-    const record = { ...visualizationRecord(), definition: utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' }) };
+    const record = { ...visualizationRecord(), definition };
     store.publish({ ...visualizationSnapshot(), facilities: [visualizationFacility, { ...visualizationFacility, guid: 'facility-b', name: 'Plant B' }], savedVisualizations: [record] });
     const prepareCreate = vi.fn((definition: any) => ({ kind: 'create', accountGuid: definition.accountGuid, guid: 'new-identity', definition, createdDate: new Date().toISOString() }));
     const submit = vi.fn(async (command: any): Promise<any> => ({ state: 'committed', command,
@@ -52,14 +53,20 @@ describe('reviewed visualization recovery actions', () => {
     expect(open).toHaveBeenCalledWith('account-a', 'new-identity');
     expect(editor.record()!.guid).toBe('visualization-a');
   });
-  it('retries one proposal and recovers a committed copy without replaying its create', async () => {
-    const { component, prepareCreate, submit, recover, open } = setup();
+  it('retains mixed-family Scatter intent in one retried proposal and recovers publication without replay', async () => {
+    const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
+      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+    const { component, prepareCreate, submit, recover, open } = setup(definition);
     submit.mockResolvedValueOnce({ state: 'failed' }).mockResolvedValueOnce({ state: 'refresh-required' });
-    await component.start('copy'); await component.confirm(); await component.confirm();
+    await component.start('copy'); component.scopeControl.setValue('facility-b'); await component.confirm();
+    const proposal = component.proposal()!;
+    expect(proposal.definition).toEqual({ ...definition, name: `${definition.name} (Copy)`, scope: { kind: 'facility', facilityGuid: 'facility-b' } });
+    await component.confirm();
     expect(prepareCreate).toHaveBeenCalledOnce();
     component.cancel(); expect(component.proposal()).toBeDefined();
     await component.confirm();
     expect(submit).toHaveBeenCalledTimes(2); expect(recover).toHaveBeenCalledWith('account-a', 'new-identity');
+    expect(submit.mock.calls[0][0]).toBe(proposal); expect(submit.mock.calls[1][0]).toBe(proposal);
     expect(open).toHaveBeenCalledOnce();
   });
   it('invalidates review when the committed workspace changes', async () => {
