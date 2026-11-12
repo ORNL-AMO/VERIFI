@@ -57,7 +57,8 @@ export const VISUALIZATION_DATE_CONTEXT_RESOLVER = new InjectionToken<PreviewDat
 export const VISUALIZATION_SOURCE_EDITORS = new InjectionToken<readonly VisualizationSourceEditorRegistration[]>(
   'Visualization source editors', { providedIn: 'root', factory: () => [] });
 
-@Injectable({ providedIn: 'root' })
+/** Resolve feature registrations from the injector that imports PreviewModule. */
+@Injectable()
 export class PreviewRegistry {
   private readonly providers = inject(VISUALIZATION_SOURCE_PROVIDERS);
   private readonly presenters = inject(VISUALIZATION_PREVIEW_PRESENTERS);

@@ -6,7 +6,7 @@ import { createVisualizationSetupDefinition, VisualizationDefinition } from '@do
 import type { VisualizationSourceProvider, VisualizationSourceRequest, VisualizationSourceResolution } from '@domain/visualizations/visualization-source-provider';
 import { createVisualizationChart, VISUALIZATION_CHART_CHOICES } from '../visualization-charts';
 import { PreviewController } from './preview-controller';
-import { PreviewDateContextResolver, PreviewIdentity, PreviewPresentation, VISUALIZATION_DATE_CONTEXT_RESOLVER,
+import { PreviewDateContextResolver, PreviewIdentity, PreviewPresentation, PreviewRegistry, VISUALIZATION_DATE_CONTEXT_RESOLVER,
   VISUALIZATION_PREVIEW_PRESENTERS, VISUALIZATION_SOURCE_PROVIDERS, VisualizationPreviewPresenter } from './preview-registry';
 
 @Component({ selector: 'app-preview-test-chart', template: '<p>Test presentation</p>' })
@@ -26,7 +26,7 @@ function setup(options: { provider?: Partial<VisualizationSourceProvider>; prese
     supportsChart: (_source, chart) => ({ state: 'supported', chart }),
     resolve: async request => ({ ...evidence.resolution, identity: request.identity }), ...options.provider };
   const presenter: VisualizationPreviewPresenter = { kind: 'time-series', component: TestChartComponent, prepare: () => presentation, ...options.presenter };
-  TestBed.configureTestingModule({ providers: [PreviewController,
+  TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry,
     { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: options.empty ? [] : [provider] },
     { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: options.empty ? [] : [presenter] },
     { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: options.empty ? undefined : options.dates ?? dates }] });
@@ -48,7 +48,7 @@ function setupMixed(options: { definition?: VisualizationDefinition; providers?:
     resolve: vi.fn(async request => ({ ...entry.resolution, identity: request.identity })), ...options.providers?.[index] }));
   const prepare = vi.fn<VisualizationPreviewPresenter['prepare']>(() => presentation);
   const resolveDates = vi.fn(dates.resolve);
-  TestBed.configureTestingModule({ providers: [PreviewController,
+  TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry,
     { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: providers },
     { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: TestChartComponent, prepare }] },
     { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: { resolve: resolveDates } }] });
