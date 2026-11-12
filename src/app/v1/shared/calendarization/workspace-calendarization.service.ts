@@ -2,6 +2,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { CalanderizedMeter } from '@data/models/calanderization';
+import { SubregionEmissions } from '@data/models/eGridEmissions';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { runWorker } from '@platform/web-workers/run-worker';
 import {
@@ -43,13 +45,15 @@ interface WorkspaceCalendarizationInput {
 @Injectable({ providedIn: 'root' })
 export class WorkspaceCalendarizationService {
   private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly eGrid = inject(EGridService);
   private readonly retryAttempt = signal(0);
   private readonly currentInput = computed<WorkspaceCalendarizationInput>(() => {
     const snapshot = this.workspace.snapshot();
     return this.workspace.isReady() && snapshot
-      ? { ready: true, attempt: this.retryAttempt(), request: buildWorkspaceCalendarizationRequest(snapshot) }
+      ? { ready: true, attempt: this.retryAttempt(), request: buildWorkspaceCalendarizationRequest(snapshot, this.eGrid.builtinEmissions() ?? []) }
       : { ready: false, attempt: this.retryAttempt() };
   });
+  readonly currentEmissionsRates = computed<readonly SubregionEmissions[]>(() => this.currentInput().request?.payload.co2Emissions ?? []);
   readonly currentInputFingerprint = computed(() => this.currentInput().request?.inputFingerprint);
   private readonly input$ = toObservable(this.currentInput).pipe(
     distinctUntilChanged((first, second) => first.ready === second.ready

@@ -1,3 +1,6 @@
+import { SubregionEmissions } from '@data/models/eGridEmissions';
+import { getNewAccountEmissionsItem } from '@data/models/idbModels/customEmissions';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
@@ -7,6 +10,7 @@ import { account, facility, meter, reading } from '@app/v1/data/meters/facility-
 import { Subscription } from 'rxjs';
 import { WorkspaceCalendarizationBaseResult } from './workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from './workspace-calendarization.service';
+import { WorkspaceCalendarizationWorkerPayload } from './workspace-calendarization-request';
 
 describe('WorkspaceCalendarizationService browser contract', () => {
   let originalWorker: typeof Worker;
@@ -43,6 +47,47 @@ describe('WorkspaceCalendarizationService browser contract', () => {
     await settleSignals();
 
     expect(FakeWorker.instances).toHaveLength(1);
+  });
+
+  it('starts no inactive Worker for catalog loading, then replaces only active work when rate inputs change', async () => {
+    const original = workspaceSnapshot('account-a', 10);
+    const custom = { ...getNewAccountEmissionsItem('account-a'), subregion: 'CUSTOM-A' };
+    const snapshot = signal({ ...original, customEmissions: [custom] });
+    const builtin = signal<readonly SubregionEmissions[] | undefined>(undefined);
+    const service = setup(snapshot, signal(true), builtin);
+    const rates: SubregionEmissions[] = [{ subregion: 'BUILTIN', locationEmissionRates: [{ year: 2025, CO2: 10, CH4: 0, N2O: 0 }], residualEmissionRates: [] }];
+    const ratesBefore = structuredClone(rates), customBefore = structuredClone(custom);
+    builtin.set(rates); await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(0);
+    expect(service.currentEmissionsRates()).toEqual([...rates, custom]);
+    const subscription = service.calendarizeBase().subscribe(); subscriptions.push(subscription); await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(1);
+    const payload = FakeWorker.instances[0].payload as WorkspaceCalendarizationWorkerPayload;
+    expect(payload.co2Emissions).toEqual([...rates, custom]);
+    const fingerprint = service.currentInputFingerprint();
+    builtin.set(structuredClone(rates)); await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(1); expect(service.currentInputFingerprint()).toBe(fingerprint);
+    const changed = structuredClone(rates); changed[0].locationEmissionRates[0].CO2 = 11;
+    builtin.set(changed); await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(2); expect(FakeWorker.instances[0].terminate).toHaveBeenCalled();
+    expect(service.currentInputFingerprint()).not.toBe(fingerprint);
+    subscription.unsubscribe();
+    builtin.set(rates); await settleSignals(); expect(FakeWorker.instances).toHaveLength(2);
+    expect(rates).toEqual(ratesBefore); expect(custom).toEqual(customBefore);
+  });
+
+  it('switches custom rate inputs with the account snapshot without leaking legacy account rates', async () => {
+    const customA = { ...getNewAccountEmissionsItem('account-a'), subregion: 'CUSTOM-A' };
+    const customB = { ...getNewAccountEmissionsItem('account-b'), subregion: 'CUSTOM-B' };
+    const snapshot = signal({ ...workspaceSnapshot('account-a', 10), customEmissions: [customA] });
+    const builtin = signal<readonly SubregionEmissions[] | undefined>([{ subregion: 'BUILTIN', locationEmissionRates: [], residualEmissionRates: [] }]);
+    const service = setup(snapshot, signal(true), builtin);
+    subscriptions.push(service.calendarizeBase().subscribe()); await settleSignals();
+    expect((FakeWorker.instances[0].payload as WorkspaceCalendarizationWorkerPayload).co2Emissions.map(item => item.subregion)).toEqual(['BUILTIN', 'CUSTOM-A']);
+    snapshot.set({ ...workspaceSnapshot('account-b', 20), customEmissions: [customB] }); await settleSignals();
+    expect(FakeWorker.instances[0].terminate).toHaveBeenCalled();
+    expect((FakeWorker.instances[1].payload as WorkspaceCalendarizationWorkerPayload).co2Emissions.map(item => item.subregion)).toEqual(['BUILTIN', 'CUSTOM-B']);
+    expect(service.currentEmissionsRates().map(item => item.subregion)).toEqual(['BUILTIN', 'CUSTOM-B']);
   });
 
   it('terminates obsolete work and rejects stale publication after calculation inputs or accounts change', async () => {
@@ -93,8 +138,11 @@ describe('WorkspaceCalendarizationService browser contract', () => {
   });
 });
 
-function setup(snapshot: WritableSignal<AccountWorkspaceSnapshot>, ready: WritableSignal<boolean>): WorkspaceCalendarizationService {
-  TestBed.configureTestingModule({ providers: [WorkspaceCalendarizationService, {
+function setup(snapshot: WritableSignal<AccountWorkspaceSnapshot>, ready: WritableSignal<boolean>,
+  builtin: WritableSignal<readonly SubregionEmissions[] | undefined> = signal(undefined)): WorkspaceCalendarizationService {
+  TestBed.configureTestingModule({ providers: [WorkspaceCalendarizationService,
+    { provide: EGridService, useValue: { builtinEmissions: builtin,
+      co2Emissions: [{ subregion: 'STALE-LEGACY-ACCOUNT', locationEmissionRates: [], residualEmissionRates: [] }] } }, {
     provide: AccountWorkspaceStore, useValue: { snapshot, isReady: ready }
   }] });
   return TestBed.inject(WorkspaceCalendarizationService);
