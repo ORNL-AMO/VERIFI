@@ -9,6 +9,8 @@ import { VisualizationEditorSession } from '../editing/visualization-editor-sess
 import { VisualizationNavigationService } from '../visualization-navigation.service';
 import { visualizationChartLabel } from '../visualization-charts';
 import { VISUALIZATION_FAMILIES } from '../visualization-families';
+import { PreviewRegistry } from '../preview/preview-registry';
+import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false,
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -17,6 +19,7 @@ export class WorkbenchComponent {
   readonly workspace = inject(AccountWorkspaceStore);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly journeys = inject(VisualizationNavigationService);
+  private readonly registry = inject(PreviewRegistry);
   private readonly unsaved = inject(UnsavedChangesService);
   private readonly modal = inject(ModalPortalService);
   private readonly container = inject(ViewContainerRef);
@@ -38,6 +41,26 @@ export class WorkbenchComponent {
   readonly sourceSummary = computed(() => this.editor.definition()?.sources.map(source => ({ id: source.id,
     familyLabel: VISUALIZATION_FAMILIES.find(family => family.value === source.kind)!.label, measure: source.measure })) ?? []);
   readonly chartSummary = computed(() => visualizationChartLabel(this.editor.definition()?.chart));
+  readonly previewIdentity = computed(() => ({ accountGuid: this.accountGuid(), workspaceRevision: this.workspace.revision(),
+    definitionGuid: this.navigation.routeState().visualizationGuid ?? '', definitionRevision: this.editor.localRevision() }));
+  readonly previewActive = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    return !!definition && !!snapshot && this.workspace.isReady() && snapshot.account.guid === this.accountGuid()
+      && this.editor.record()?.guid === this.navigation.routeState().visualizationGuid
+      && !this.editor.isMissing() && this.editor.state() !== 'readonly' && !this.editor.record()?.preservation?.locked
+      && !inspectVisualizationReferences(definition, snapshot, this.editor.record()?.preservation?.references).length;
+  });
+  readonly sourceEditors = computed(() => {
+    const definition = this.editor.definition(), key = this.editor.key(), revision = this.editor.localRevision();
+    if (!definition) return [];
+    return definition.sources.flatMap(source => {
+      const registered = this.registry.editor(source.kind);
+      return registered ? [{ id: source.id, component: registered.component, inputs: { context: { definition, sourceId: source.id,
+        disabled: !this.editor.canEdit(), changed: (next: typeof definition) => {
+          if (this.editor.key() === key && this.editor.localRevision() === revision) this.editor.applyDefinition(next);
+        } } } }] : [];
+    });
+  });
   readonly periodSummary = computed(() => {
     const period = this.editor.definition()?.period;
     if (!period) return 'Unavailable';
