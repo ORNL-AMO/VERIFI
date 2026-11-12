@@ -176,6 +176,27 @@ describe('saved visualization reference mapping', () => {
     expect(second.definition.series[0].resourceGuid).toBe('meter-a');
   });
 
+  it.each(['cost', 'usage'] as const)('transfers the native charge %s metric with its source identity', measure => {
+    const original: VisualizationDefinition = { ...utilityVisualizationFixture(), sources: [{ id: 'charge', kind: 'utility',
+      measure: 'charge', aggregation: 'none', dataMode: 'billing-period', groupBy: 'meter',
+      charge: { meterGuid: 'meter-a', chargeGuid: 'charge-a', measure } }],
+      series: [{ id: 'saved', sourceId: 'charge', metric: `charge:charge-a:${measure}`, axis: 'left', visible: false },
+        { id: 'opaque', sourceId: 'charge', metric: 'unknown-charge-metric', axis: 'left' }] };
+    const first = remapVisualizationDefinition(original, 'account-b', { meter: { 'meter-a': 'meter-b' },
+      charge: { '["meter-a","charge-a"]': 'charge-b' } });
+    expect(first.issues).toEqual([]);
+    expect(first.definition.series[0]).toEqual({ ...original.series[0], metric: `charge:charge-b:${measure}` });
+    expect(first.definition.series[1]).toEqual(original.series[1]);
+    const second = remapVisualizationDefinition(first.definition, 'account-c', { meter: { 'meter-b': 'meter-c' },
+      charge: { '["meter-b","charge-b"]': 'charge-c' } });
+    expect(second.issues).toEqual([]);
+    expect(second.definition.series[0].metric).toBe(`charge:charge-c:${measure}`);
+    const blocked = remapVisualizationDefinition(original, 'account-b', { meter: { 'meter-a': 'meter-b' } });
+    expect(blocked.issues).toContainEqual(expect.objectContaining({ kind: 'charge', reason: 'not-transferred' }));
+    expect(blocked.definition.series[0].metric).toBe(original.series[0].metric);
+    expect(original.sources[0]).toMatchObject({ charge: { chargeGuid: 'charge-a' } });
+  });
+
   it('does not use inherited object properties as transfer mappings', () => {
     const original = { ...utilityVisualizationFixture(), series: [] };
     const source = original.sources[0];

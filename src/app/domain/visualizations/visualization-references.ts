@@ -134,6 +134,19 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
       setPath(result, ref.path.replace(/resourceGuid$/, 'accountGuid'), mapped ? accountGuid : ref.accountGuid!);
     } else if (!mapped) issues.push(existing ?? { ...ref, reason: ref.kind === 'unknown' ? 'unclassified' : 'not-transferred' });
   }
+  // Native charge metrics include the durable charge identity as well as its
+  // measure. Keep that selector attached to the transferred source, while
+  // leaving unknown metrics and blocked charge references untouched.
+  definition.series.forEach((series, index) => {
+    const sourceIndex = definition.sources.findIndex(source => source.id === series.sourceId);
+    const source = definition.sources[sourceIndex];
+    const mapped = result.sources[sourceIndex];
+    if (source?.kind === 'utility' && source.measure === 'charge' && source.charge &&
+      mapped?.kind === 'utility' && mapped.charge &&
+      series.metric === `charge:${source.charge.chargeGuid}:${source.charge.measure}`) {
+      setPath(result, `series.${index}.metric`, `charge:${mapped.charge.chargeGuid}:${mapped.charge.measure}`);
+    }
+  });
   return { definition: { ...result, accountGuid }, issues };
 }
 
