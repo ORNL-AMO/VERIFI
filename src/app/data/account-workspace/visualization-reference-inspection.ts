@@ -35,7 +35,7 @@ export async function readVisualizationReferenceCatalog(tx: IndexedDbTransaction
 /** No calculations, weather retrieval, label matching, or mutation. Missing sources remain exact GUID intent. */
 export function inspectVisualizationReferences(definition: VisualizationDefinition, catalog: VisualizationReferenceCatalog,
   preserved: readonly VisualizationReferenceIssue[] = []): readonly VisualizationReferenceIssue[] {
-  return visualizationReferences(definition).flatMap(ref => {
+  return visualizationReferences(definition).filter(ref => !ref.optional).flatMap(ref => {
     const blocked = preserved.find(item => item.path === ref.path);
     if (blocked) return [blocked];
     const resource = findReference(ref, catalog);

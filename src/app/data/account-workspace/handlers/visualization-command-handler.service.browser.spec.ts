@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { LocalStorageService } from 'ngx-webstorage';
 import { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transaction.service';
-import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
+import { IndexedDbTestHarness, IndexedDbTestRecord } from '@data/indexedDB/testing/indexed-db-test-harness';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
@@ -44,6 +44,31 @@ describe('saved visualization native commands', () => {
     await harness.reopen();
     expect(await harness.getAll('savedVisualizations')).toEqual([updated, duplicate]);
     expect((duplicate.definition as any).name).toBe('Independent copy');
+  });
+
+  it('duplicates a historical v1 record as equivalent v2 intent, retries by stable identity, and leaves the source unchanged', async () => {
+    const definition = { ...proposal().definition, version: 1 };
+    const historical: IdbSavedVisualization = { guid: 'historical-chart', accountId: account.guid, facilityId: facility.guid,
+      recordVersion: 1, revision: 7, createdDate: new Date('2026-11-10T00:00:00Z'),
+      modifiedDate: new Date('2026-11-11T00:00:00Z'), definition };
+    await harness.seed({ savedVisualizations: [{ ...historical }] });
+    const stored = (await harness.getAll<IdbSavedVisualization & IndexedDbTestRecord>('savedVisualizations'))[0];
+    const before = structuredClone(stored);
+    const commands = TestBed.inject(SavedVisualizationCommands), handler = TestBed.inject(VisualizationCommandHandler);
+    const duplicate = commands.prepareDuplicate(stored, 'Historical independent copy');
+    expect(duplicate.definition.version).toBe(2);
+    const commandBefore = structuredClone(duplicate);
+    const created = await handler.duplicate(duplicate, account.guid);
+    expect(created.definition).toEqual({ ...proposal().definition, name: 'Historical independent copy' });
+    expect(created.guid).not.toBe(stored.guid); expect(created.revision).toBe(1);
+    expect(await handler.duplicate(structuredClone(duplicate), account.guid)).toEqual(created);
+    await harness.reopen();
+    const records = await harness.getAll<IdbSavedVisualization & IndexedDbTestRecord>('savedVisualizations');
+    expect(records).toHaveLength(2);
+    expect(records.find(record => record.guid === stored.guid)).toEqual(before);
+    expect(records.find(record => record.guid === stored.guid)?.definition).toEqual(definition);
+    expect(await TestBed.inject(VisualizationCommandHandler).duplicate(duplicate, account.guid)).toEqual(created);
+    expect(duplicate).toEqual(commandBefore);
   });
 
   it('rejects stale revisions, scope changes, foreign owners, and malformed definitions without writing', async () => {

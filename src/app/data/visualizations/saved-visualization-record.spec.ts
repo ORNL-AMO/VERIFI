@@ -17,6 +17,16 @@ describe('saved visualization envelope and version routing', () => {
     expect(input).toEqual(before);
   });
 
+  it('decodes historical definitions repeatedly without rewriting the stored envelope or revision', () => {
+    const current = utilityVisualizationFixture();
+    const input = { ...record(), definition: { ...current, version: 1 } }, before = structuredClone(input);
+    const first = readSavedVisualization(input), second = readSavedVisualization(input);
+    expect(first.state).toBe('valid');
+    expect('definition' in first && first.definition).toEqual(current);
+    expect(second).toEqual(first);
+    expect(input).toEqual(before);
+  });
+
   it('accepts serialized backup dates without modifying the raw input', () => {
     const input = JSON.parse(JSON.stringify(record()));
     const before = structuredClone(input);

@@ -60,7 +60,7 @@ export function buildVisualizationLibrary(snapshot: AccountWorkspaceSnapshot): V
     const families = [...new Set(definition?.sources.map(source => source.kind) ?? [])];
     const familyLabel = families.map(kind => VISUALIZATION_FAMILIES.find(option => option.value === kind)?.label).join(', ') || 'Unknown source family';
     const issues = [...read.issues.map(issue => issue.message), ...references.map(reference => `${reference.kind} ${reference.guid}: ${reference.reason}`)];
-    const labels = definition && supported ? visualizationReferences(definition).map(reference => sourceRecords.find(item => item.guid === reference.guid)?.name || reference.guid) : [];
+    const labels = definition && supported ? visualizationReferences(definition).filter(reference => !reference.optional).map(reference => sourceRecords.find(item => item.guid === reference.guid)?.name || reference.guid) : [];
     const periodLabel = definition ? visualizationPeriodLabel(definition) : 'Period unavailable';
     const chartLabel = visualizationChartLabel(definition?.chart);
     const modified = new Date(record.modifiedDate).getTime();

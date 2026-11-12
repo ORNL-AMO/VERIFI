@@ -3,6 +3,32 @@ import { decodeVisualizationDefinition } from './visualization-validation';
 import { analysisVisualizationFixture, energyUseVisualizationFixture, utilityVisualizationFixture } from './testing/visualization-fixtures';
 
 describe('visualization saved intent', () => {
+  it('reads v1 into equivalent v2 intent without changing the supplied historical payload', () => {
+    const current = utilityVisualizationFixture();
+    const historical = { ...current, version: 1 };
+    const before = structuredClone(historical);
+    const decoded = decodeVisualizationDefinition(historical);
+    expect(decoded.state).toBe('valid');
+    expect('definition' in decoded && decoded.definition).toEqual(current);
+    expect(historical).toEqual(before);
+    expect('definition' in decoded && decodeVisualizationDefinition(decoded.definition)).toEqual(decoded);
+  });
+
+  it('allows v2 visibility and dormant presentation overrides, but never accepts them as v1 fields', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const definition = { ...base, series: [{ ...wildcard, visible: true, overrides: [
+      { resourceGuid: 'meter-a', visible: false, color: '#123456' },
+      { resourceGuid: 'retired-meter', label: 'Retained name', axis: 'right' }
+    ] }] };
+    expect(decodeVisualizationDefinition(definition).state).toBe('valid');
+    expect(decodeVisualizationDefinition({ ...definition, version: 1 }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...definition, series: [{ ...definition.series[0], overrides: [
+      { resourceGuid: 'meter-a' }, { resourceGuid: 'meter-a', visible: false }
+    ] }] }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...definition, series: [{ ...definition.series[0], resourceGuid: 'meter-a' }] }).state).toBe('invalid');
+  });
+
   it.each([
     ['portfolio utility', utilityVisualizationFixture()],
     ['single facility utility', utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' })],
@@ -36,7 +62,22 @@ describe('visualization saved intent', () => {
     expect(value.sources[0].settings).not.toBe(value.sources[1].settings);
     expect(decodeVisualizationDefinition(JSON.parse(JSON.stringify(value))).state).toBe('setup-required');
     expect(value.period).toEqual({ kind: 'all-history' });
-    expect(value.version).toBe(1);
+    expect(value.version).toBe(2);
+  });
+
+  it('decodes category presentation identities and rejects ambiguous or absent selectors', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const withOverrides = (overrides: unknown[]) => ({ ...base, series: [{ ...wildcard, overrides }] });
+    expect(decodeVisualizationDefinition(withOverrides([{ seriesId: 'utility:source:Electricity', visible: false, order: 0 }])).state).toBe('valid');
+    for (const order of [-1, 0.5, Number.MAX_SAFE_INTEGER + 1, '1'])
+      expect(decodeVisualizationDefinition(withOverrides([{ seriesId: 'category', order }])).state).toBe('invalid');
+    expect(decodeVisualizationDefinition(withOverrides([{ seriesId: 'utility:source:Electricity', resourceGuid: 'meter-a' }])).state).toBe('invalid');
+    expect(decodeVisualizationDefinition(withOverrides([{ visible: false }])).state).toBe('invalid');
+    expect(decodeVisualizationDefinition(withOverrides([{ seriesId: '' }])).state).toBe('invalid');
+    expect(decodeVisualizationDefinition(withOverrides([{ seriesId: 'category' }, { seriesId: 'category' }])).state).toBe('invalid');
+    // Equal strings in different identity namespaces are not ambiguous.
+    expect(decodeVisualizationDefinition(withOverrides([{ seriesId: 'category' }, { resourceGuid: 'category' }])).state).toBe('valid');
   });
 
   it('uses the latest saved fiscal year only for Energy Use alone', () => {
@@ -190,7 +231,7 @@ describe('visualization saved intent', () => {
   });
 
   it('distinguishes unsupported versions and providers without altering caller data', () => {
-    const value = { ...utilityVisualizationFixture(), version: 2, futureSettings: { untouched: true } };
+    const value = { ...utilityVisualizationFixture(), version: 3, futureSettings: { untouched: true } };
     const before = JSON.stringify(value);
     expect(decodeVisualizationDefinition(value).state).toBe('unsupported');
     expect(JSON.stringify(value)).toBe(before);

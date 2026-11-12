@@ -4,6 +4,8 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 import { SavedVisualizationsDbService } from './saved-visualizations-db.service';
 import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
 import { twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
+import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
+import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { VERIFI_DB_VERSION } from './indexed-db-schema';
 
 describe('saved visualization storage in Chromium', () => {
@@ -25,6 +27,31 @@ describe('saved visualization storage in Chromium', () => {
       expect(await harness.getAll(storeName)).toEqual(records);
     }
     expect(await harness.getAll('savedVisualizations')).toEqual([]);
+  });
+
+  it('reads historical definitions without writes and preserves version2 overrides across native reopen', async () => {
+    harness = await IndexedDbTestHarness.create('saved-visualizations-v2');
+    const repository = () => new SavedVisualizationsDbService(harness.dbService, new IndexedDbAccessService(harness.dbService));
+    const current = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = current.series[0];
+    const definitions = [{ ...current, version: 1 }, { ...current, series: [{ ...wildcard, overrides: [
+      { resourceGuid: 'meter-a', visible: false, order: 0 }, { resourceGuid: 'absent-meter', color: '#123456', order: 2 },
+      { seriesId: 'utility:source:Electricity', label: 'Category appearance', order: 1 }
+    ] }] }];
+    for (const [index, definition] of definitions.entries()) await firstValueFrom(repository().addWithObservable({
+      guid: `version-${index}`, accountId: current.accountGuid, recordVersion: 1, revision: 4,
+      createdDate: new Date('2026-11-11T00:00:00Z'), modifiedDate: new Date('2026-11-11T00:00:00Z'), definition
+    }));
+    const stored = await repository().getAllAccountVisualizations(current.accountGuid);
+    for (const record of stored) {
+      const decoded = readSavedVisualization(record);
+      expect(decoded.state).toBe('valid');
+      expect('definition' in decoded && decoded.definition.version).toBe(2);
+    }
+    await harness.reopen();
+    expect(await repository().getAllAccountVisualizations(current.accountGuid)).toEqual(stored);
+    expect((await repository().getStoredByGuid('version-0'))?.definition).toEqual(definitions[0]);
+    expect((await repository().getStoredByGuid('version-1'))?.definition).toEqual(definitions[1]);
   });
 
   it('keeps account queries isolated and preserves opaque payloads and local keys after reopen', async () => {
