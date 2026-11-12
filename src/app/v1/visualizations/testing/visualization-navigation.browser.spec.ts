@@ -104,8 +104,9 @@ function dialogButton(root: HTMLElement, text: string): HTMLButtonElement {
 }
 
 function namedButton(root: HTMLElement, label: string): HTMLButtonElement {
-  const button = [...root.querySelectorAll<HTMLButtonElement>('button')].find(item =>
-    item.querySelector('strong')?.textContent?.trim() === label || item.textContent?.trim() === label);
+  const buttons = [...root.querySelectorAll<HTMLButtonElement>('button')];
+  const button = buttons.find(item => item.querySelector('strong')?.textContent?.trim() === label)
+    ?? buttons.find(item => item.textContent?.trim() === label);
   if (!button) throw new Error(`Missing button: ${label}`);
   return button;
 }
