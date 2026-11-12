@@ -45,6 +45,7 @@ Use non-watch commands for verification:
 | Check | Command | Use it for |
 | --- | --- | --- |
 | Fast unit tests | `npm run test:ci` | Pure TypeScript, Angular components, services, pipes, and ordinary utilities |
+| Electron boundary tests | `npm run test:electron` | Main/preload security, updater lifecycle, and release metadata without signing credentials |
 | Browser tests | `npm run test:browser:ci` | IndexedDB, Web Workers, and behavior requiring native browser APIs |
 | Full test suite | `npm run test:all:ci` | Final verification before a pull request |
 | Informational coverage | `npm run test:coverage` | Scoped calculation, IndexedDB, and Web Worker coverage; not a gate |

@@ -37,6 +37,8 @@ describe('ApplicationLifecycleService', () => {
 
     expect(dependencies.workspace.selectAccount).toHaveBeenCalledWith('account-b');
     expect(lifecycle.accountCatalog().map(account => account.id)).toEqual([1, 2, 4]);
+    expect(dependencies.automaticBackups.reconcileAccounts).toHaveBeenCalledWith(lifecycle.accountCatalog());
+    expect(dependencies.commands.reconcileAccounts).toHaveBeenCalledWith(lifecycle.accountCatalog());
   });
 
   it('reaches empty without creating a placeholder account', async () => {
@@ -196,7 +198,9 @@ function createDependencies(order: string[]) {
     },
     electron: { isElectron: false },
     electronBackups: { getAll: vi.fn(() => of([])), accountBackups: [] },
+    commands: { reconcileAccounts: vi.fn() },
     automaticBackups: {
+      reconcileAccounts: vi.fn(),
       subscribeData: vi.fn(() => order.push('automatic-backups')),
       initializeAccount: vi.fn()
     }
@@ -225,6 +229,7 @@ function createLifecycle(dependencies: ReturnType<typeof createDependencies>): A
     dependencies.workspaceStore,
     dependencies.selectionStorage as any,
     dependencies.electron as any,
-    dependencies.automaticBackups as any
+    dependencies.automaticBackups as any,
+    dependencies.commands as any
   );
 }

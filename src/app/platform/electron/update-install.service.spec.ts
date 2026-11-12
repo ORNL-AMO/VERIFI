@@ -1,0 +1,163 @@
+import { BehaviorSubject } from 'rxjs';
+import { ElectronUpdateState } from './electron-update.models';
+import { UpdateInstallService } from './update-install.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+
+function setup() {
+  const router = { url: '/data-evaluation', navigateByUrl: vi.fn().mockResolvedValue(true) };
+  const commands = { whenIdle: vi.fn().mockResolvedValue(undefined), hasPendingCommands: false };
+  const backups = { flushPending: vi.fn().mockResolvedValue(undefined), hasPendingOperations: false };
+  const electron = { isElectron: true, updateState: new BehaviorSubject<ElectronUpdateState>({ status: 'downloaded' }), installUpdate: vi.fn().mockResolvedValue(true) };
+  const loading = { setLoadingMessage: vi.fn(), setLoadingStatus: vi.fn() };
+  const lifecycle = { initialize: vi.fn().mockResolvedValue({ status: 'ready' }) };
+  return { router, commands, backups, electron, loading, lifecycle, service: new UpdateInstallService(router as any, commands as any, backups as any, electron as any, loading as any, lifecycle as any) };
+}
+
+describe('UpdateInstallService', () => {
+  it('keeps the application barrier through delayed native installation and releases it on a reported failure', async () => {
+    const { service, electron, loading } = setup();
+    electron.installUpdate.mockImplementation(async () => {
+      electron.updateState.next({ status: 'installing' });
+      return true;
+    });
+    await expect(service.install()).resolves.toBe(true);
+    expect(loading.setLoadingStatus).toHaveBeenLastCalledWith(false);
+    expect(service.installationPending()).toBe(true);
+    await expect(service.install()).resolves.toBe(false);
+    expect(service.installationPending()).toBe(true);
+    electron.updateState.next({ status: 'downloaded', message: 'Native installation failed' });
+    expect(service.installationPending()).toBe(false);
+    await expect(service.install()).resolves.toBe(true);
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+  });
+
+  it.each(['refused', 'rejected'])('releases the barrier when the installation request is %s and permits retry', async outcome => {
+    const { service, electron } = setup();
+    if (outcome === 'refused') electron.installUpdate.mockResolvedValueOnce(false);
+    else electron.installUpdate.mockRejectedValueOnce(new Error('Untrusted desktop request'));
+    await expect(service.install()).rejects.toThrow(outcome === 'refused' ? 'could not start' : 'Untrusted');
+    expect(service.installationPending()).toBe(false);
+    await expect(service.install()).resolves.toBe(true);
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+  });
+
+  it('keeps the barrier if the main process acknowledges that installation is already underway', async () => {
+    const { service, electron } = setup();
+    electron.installUpdate.mockImplementation(async () => {
+      electron.updateState.next({ status: 'installing' });
+      return false;
+    });
+    await expect(service.install()).resolves.toBe(false);
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+  });
+
+  it('replays an existing native installation lock and removes its observer on destruction', () => {
+    const { service, electron } = setup();
+    electron.updateState.next({ status: 'installing' });
+    expect(service.installationPending()).toBe(true);
+    service.ngOnDestroy();
+    expect(service.installationPending()).toBe(false);
+    electron.updateState.next({ status: 'installing' });
+    expect(service.installationPending()).toBe(false);
+  });
+  it('blocks repeated restart attempts after a real settled command failure until that save succeeds', async () => {
+    const state = setup();
+    const store = new AccountWorkspaceStore();
+    store.publish({ account: { guid: 'account-a' } as AccountWorkspaceSnapshot['account'], facilities: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] });
+    const commands = new WorkspaceCommandBoundary(store, { reloadActiveWorkspace: vi.fn().mockResolvedValue('published') } as any);
+    const options = { entityKind: 'account' as const, changeKind: 'update' as const, entityGuid: 'account-a', label: 'Saving account' };
+    await commands.execute(options, async () => { throw new Error('disk unavailable'); }).catch(() => undefined);
+    const service = new UpdateInstallService(state.router as any, commands, state.backups as any, state.electron as any, state.loading as any, state.lifecycle as any);
+    await expect(service.install()).rejects.toThrow('Retry that save');
+    await expect(service.install()).rejects.toThrow('Retry that save');
+    expect(state.electron.installUpdate).not.toHaveBeenCalled();
+    await commands.execute(options, async () => 'saved');
+    await expect(service.install()).resolves.toBe(true);
+    expect(state.electron.installUpdate).toHaveBeenCalledOnce();
+  });
+  it('drains again when finishing a backup submits a command and that command creates another backup', async () => {
+    const { service, commands, backups, electron } = setup();
+    const phases: string[] = [];
+    commands.whenIdle.mockImplementation(async () => {
+      phases.push('commands');
+      if (commands.hasPendingCommands) {
+        commands.hasPendingCommands = false;
+        backups.hasPendingOperations = true;
+      }
+    });
+    backups.flushPending.mockImplementation(async () => {
+      phases.push('backups');
+      if (phases.length === 2) commands.hasPendingCommands = true;
+      else backups.hasPendingOperations = false;
+    });
+    await expect(service.install()).resolves.toBe(true);
+    expect(phases).toEqual(['commands', 'backups', 'commands', 'backups']);
+    expect(electron.installUpdate).toHaveBeenCalledOnce();
+  });
+  it('honors canceled editor leave decisions without starting backups or installation', async () => {
+    const { service, router, commands, backups, electron, loading } = setup();
+    router.navigateByUrl.mockResolvedValue(false);
+    await expect(service.install()).resolves.toBe(false);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/welcome');
+    expect(commands.whenIdle).not.toHaveBeenCalled();
+    expect(backups.flushPending).not.toHaveBeenCalled();
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+    expect(loading.setLoadingStatus).not.toHaveBeenCalled();
+  });
+
+  it('waits for writes and backups and deduplicates repeated restart clicks', async () => {
+    const { service, commands, backups, electron, loading } = setup();
+    let resolve!: () => void;
+    backups.flushPending.mockReturnValue(new Promise<void>(done => { resolve = done; }));
+    const first = service.install();
+    const second = service.install();
+    expect(second).toBe(first);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(commands.whenIdle).toHaveBeenCalledOnce();
+    expect(backups.flushPending).toHaveBeenCalledOnce();
+    expect(service.installationPending()).toBe(true);
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+    resolve();
+    await expect(first).resolves.toBe(true);
+    expect(electron.installUpdate).toHaveBeenCalledOnce();
+    expect(loading.setLoadingStatus).toHaveBeenLastCalledWith(false);
+  });
+
+  it.each(['writes', 'backups'])('does not install when %s fail and permits retry', async failed => {
+    const { service, commands, backups, electron } = setup();
+    const dependency = failed === 'writes' ? commands.whenIdle : backups.flushPending;
+    dependency.mockRejectedValueOnce(new Error('Save failed'));
+    await expect(service.install()).rejects.toThrow('Save failed');
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+    await expect(service.install()).resolves.toBe(true);
+  });
+
+  it('does nothing outside Electron or before the update is downloaded', async () => {
+    const { service, electron } = setup();
+    electron.isElectron = false;
+    await expect(service.install()).resolves.toBe(false);
+    electron.isElectron = true;
+    electron.updateState.next({ status: 'downloading' });
+    await expect(service.install()).resolves.toBe(false);
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+  });
+
+  it('waits for startup migrations and blocks installation after failed initialization', async () => {
+    const { service, lifecycle, router, electron } = setup();
+    let finish!: (state: { status: string }) => void;
+    lifecycle.initialize.mockReturnValue(new Promise(resolve => { finish = resolve; }));
+    const install = service.install();
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+    finish({ status: 'error' });
+    await expect(install).rejects.toThrow('startup issue');
+    expect(electron.installUpdate).not.toHaveBeenCalled();
+  });
+});

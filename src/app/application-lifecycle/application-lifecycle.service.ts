@@ -4,6 +4,7 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceSelectionStorageService } from '@data/account-workspace/workspace-selection-storage.service';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ElectronService } from '@platform/electron/electron.service';
 import { AccountdbService } from '@data/indexedDB/account-db.service';
 import { AnalysisSelectionRepairService } from '@data/indexedDB/analysis-selection-repair.service';
@@ -49,7 +50,8 @@ export class ApplicationLifecycleService {
     private workspaceStore: AccountWorkspaceStore,
     private selectionStorage: WorkspaceSelectionStorageService,
     private electron: ElectronService,
-    private automaticBackups: AutomaticBackupsService
+    private automaticBackups: AutomaticBackupsService,
+    private commands: WorkspaceCommandBoundary
   ) { }
 
   initialize(): Promise<AppStartupState> {
@@ -73,6 +75,8 @@ export class ApplicationLifecycleService {
 
   async refreshAccountCatalog(): Promise<readonly IdbAccount[]> {
     const accounts = sortAccounts(await firstValueFrom(this.accounts.getAll()));
+    this.automaticBackups.reconcileAccounts(accounts);
+    this.commands.reconcileAccounts(accounts);
     this.writableAccountCatalog.set(accounts);
     return accounts;
   }

@@ -1,4 +1,4 @@
-import { Component, Signal } from '@angular/core';
+import { Component, ElementRef, Signal, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
@@ -6,6 +6,7 @@ import { AppStartupState } from './application-lifecycle/application-lifecycle.m
 import { WorkspaceStatus } from '@data/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { environment } from 'src/environments/environment';
+import { UpdateInstallService } from '@platform/electron/update-install.service';
 
 @Component({
   selector: 'app-root',
@@ -16,12 +17,19 @@ import { environment } from 'src/environments/environment';
 export class AppComponent {
   readonly startupState: Signal<AppStartupState>;
   readonly workspaceStatus: Signal<WorkspaceStatus>;
+  @ViewChild('installDialog') set installDialog(element: ElementRef<HTMLDialogElement> | undefined) {
+    if (element) {
+      if (!element.nativeElement.open) element.nativeElement.showModal();
+      element.nativeElement.focus();
+    }
+  }
 
   constructor(
     public router: Router,
     public lifecycle: ApplicationLifecycleService,
     private workspace: AccountWorkspaceStore,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    public updates: UpdateInstallService
   ) {
     this.startupState = this.lifecycle.state;
     this.workspaceStatus = this.workspace.status;

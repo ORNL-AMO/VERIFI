@@ -1,13 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { BackupFile } from '@data/models/backup-file';
+import { ElectronUpdateState } from './electron-update.models';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ElectronService {
+export class ElectronService implements OnDestroy {
+
+  readonly updateState = new BehaviorSubject<ElectronUpdateState>({ status: 'idle' });
+  readonly updateRequested = new BehaviorSubject<number>(0);
+  private readonly listeners: Array<() => void> = [];
+  private listening = false;
 
   updateAvailable: BehaviorSubject<boolean>;
   updateInfo: BehaviorSubject<{ releaseName: string, releaseNotes: string }>;
@@ -24,7 +30,7 @@ export class ElectronService {
     this.updateError = new BehaviorSubject<boolean>(false);
     this.folderPathSubject = new BehaviorSubject<string>(null);
     this.folderErrorSubject = new BehaviorSubject<string>(null);
-    this.isElectron = window["electronAPI"]
+    this.isElectron = Boolean(window["electronAPI"]);
     if (this.isElectron) {
       this.listen();
     } else {
@@ -38,33 +44,18 @@ export class ElectronService {
 
   //listens for messages from electron about updates
   listen(): void {
-    if (!window["electronAPI"]) {
+    if (!window["electronAPI"] || this.listening) {
       return;
     }
-    window["electronAPI"].on("release-info", (data: { releaseName: string, releaseNotes: string }) => {
-      console.log('release-info');
-      console.log(data)
-      this.updateInfo.next(data);
+    this.listening = true;
+    this.on('update-status', (data: ElectronUpdateState) => {
+      this.updateState.next(data);
+      this.updateAvailable.next(['available', 'downloading', 'downloaded', 'installing'].includes(data.status) || (data.status === 'error' && data.operation === 'download'));
+      this.updateError.next(data.status === 'error');
+      this.updateInfo.next(data.version ? { releaseName: data.releaseName || data.version, releaseNotes: '' } : undefined);
     });
 
-    window["electronAPI"].on("available", (data) => {
-      console.log('available');
-      console.log(data)
-      this.updateAvailable.next(true);
-    });
-
-    window["electronAPI"].on("error", (data) => {
-      console.log('error');
-      console.log(data)
-      this.updateError.next(true);
-    });
-
-    window["electronAPI"].on("update-downloaded", (data) => {
-      console.log('update-downloaded');
-      console.log(data)
-    });
-
-    window["electronAPI"].on("utility-file-path", (path) => {
+    this.on("utility-file-path", (path: string) => {
       console.log('electron service utility-file-path...');
       this.checkKeyExists(this.currentKey);
       if (this.currentKey && this.savedUtilityFilePath[this.currentKey]) {
@@ -73,7 +64,7 @@ export class ElectronService {
       }
     });
 
-    window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
+    this.on("utility-file-exists", (exists: boolean) => {
       console.log('electron service utility-file-exists...');
       this.checkKeyExists(this.currentKey);
       if (this.currentKey && this.fileDeletedSubject[this.currentKey]) {
@@ -84,7 +75,7 @@ export class ElectronService {
       }
     });
 
-    window["electronAPI"].on("folder-exists", ({ exists, folderPath }: { exists: boolean, folderPath: string }) => {
+    this.on("folder-exists", ({ exists, folderPath }: { exists: boolean, folderPath: string }) => {
       const currentFolderPath = this.folderPathSubject.value;
       if (!exists && currentFolderPath === folderPath) {
         this.folderPathSubject.next(null);
@@ -95,18 +86,42 @@ export class ElectronService {
       }
     });
 
-    window["electronAPI"].on("folder-selected", (path) => {
+    this.on("folder-selected", (path: string) => {
       this.folderPathSubject.next(path);
       this.folderErrorSubject.next(null);
     });
 
-    window["electronAPI"].on("bill-disconnected", (data: { success: boolean }) => {
+    this.on("bill-disconnected", (data: { success: boolean }) => {
       if (data.success) {
         this.savedUtilityFilePath[this.currentKey].next(null);
       } else {
         console.log('Error disconnecting bill');
       }
     });
+  }
+
+  private on<T>(channel: string, listener: (data: T) => void): void {
+    const unsubscribe = window['electronAPI'].on(channel, listener);
+    if (typeof unsubscribe === 'function') this.listeners.push(unsubscribe);
+  }
+
+  ngOnDestroy(): void {
+    this.listeners.splice(0).forEach(unsubscribe => unsubscribe());
+    this.listening = false;
+  }
+
+  showUpdate(): void {
+    this.updateRequested.next(this.updateRequested.value + 1);
+  }
+
+  retryUpdate(): void {
+    if (this.updateState.value.operation === 'download') this.sendUpdateSignal();
+    else window['electronAPI']?.send('check-for-updates');
+  }
+
+  async installUpdate(): Promise<boolean> {
+    if (!window['electronAPI']?.invoke) return false;
+    return Boolean(await window['electronAPI'].invoke('quit-and-install'));
   }
 
   //Used to tell electron that app is ready

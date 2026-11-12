@@ -11,20 +11,23 @@ contextBridge.exposeInMainWorld(
     "electronAPI", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["ready", "update", "relaunch", "uploadFileDialog", "openUploadedFileLocation", "utilityFileExists", "openBillsFolder", "checkFolderExists", "selectFolder", "disconnectBill"];
+            let validChannels = ["ready", "check-for-updates", "update", "relaunch", "uploadFileDialog", "openUploadedFileLocation", "utilityFileExists", "openBillsFolder", "checkFolderExists", "selectFolder", "disconnectBill"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }
         },
         on: (channel, func) => {
-            let validChannels = ["release-info", "available", "error", "update-downloaded", "utility-file-path", "utility-file-exists", "folder-exists", "folder-selected", "bill-disconnected"];
+            let validChannels = ["update-status", "utility-file-path", "utility-file-exists", "folder-exists", "folder-selected", "bill-disconnected"];
             if (validChannels.includes(channel)) {
                 // Deliberately strip event as it includes `sender` 
-                ipcRenderer.on(channel, (event, ...args) => func(...args));
+                const listener = (_event, ...args) => func(...args);
+                ipcRenderer.on(channel, listener);
+                return () => ipcRenderer.removeListener(channel, listener);
             }
+            return () => {};
          },
         invoke: (channel, data) => {
-            let validChannels = ["backup:chooseSavePath", "backup:exists", "backup:read", "backup:write"];
+            let validChannels = ["quit-and-install", "backup:chooseSavePath", "backup:exists", "backup:read", "backup:write"];
             if (validChannels.includes(channel)) {
                 return ipcRenderer.invoke(channel, data);
             }

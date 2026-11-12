@@ -8,6 +8,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
 import { AppStartupState } from './application-lifecycle/application-lifecycle.models';
 import { AppComponent } from './app.component';
+import { UpdateInstallService } from '@platform/electron/update-install.service';
 
 @NgModule({
   imports: [CommonModule],
@@ -20,13 +21,16 @@ describe('AppComponent startup and workspace state', () => {
   let fixture: ComponentFixture<AppComponent>;
   const workspaceStatus = signal<'ready' | 'switching'>('switching');
   const startupState = signal<AppStartupState>({ status: 'ready' });
+  const installationPending = signal(false);
 
   beforeEach(() => {
     workspaceStatus.set('switching');
     startupState.set({ status: 'ready' });
+    installationPending.set(false);
     TestBed.configureTestingModule({
       imports: [AppComponentTestModule],
       providers: [
+        { provide: UpdateInstallService, useValue: { installationPending } },
         {
           provide: ApplicationLifecycleService,
           useValue: {
@@ -75,6 +79,31 @@ describe('AppComponent startup and workspace state', () => {
     startupState.set({ status: 'ready' });
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-startup-error')).toBeNull();
+  });
+
+  it('opens a non-dismissible modal barrier until installation finishes or fails', () => {
+    const prototype = HTMLDialogElement.prototype;
+    const original = Object.getOwnPropertyDescriptor(prototype, 'showModal');
+    const showModal = vi.fn(function(this: HTMLDialogElement) { this.open = true; });
+    Object.defineProperty(prototype, 'showModal', { configurable: true, value: showModal });
+    try {
+      installationPending.set(true);
+      fixture.detectChanges();
+      const dialog = fixture.nativeElement.querySelector('dialog') as HTMLDialogElement;
+      expect(dialog.open).toBe(true);
+      expect(showModal).toHaveBeenCalledOnce();
+      expect(document.activeElement).toBe(dialog);
+      const cancel = new Event('cancel', { cancelable: true });
+      dialog.dispatchEvent(cancel);
+      expect(cancel.defaultPrevented).toBe(true);
+      expect(dialog.open).toBe(true);
+      installationPending.set(false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('dialog')).toBeNull();
+    } finally {
+      if (original) Object.defineProperty(prototype, 'showModal', original);
+      else delete prototype['showModal'];
+    }
   });
 
   function setStartupError(step: 'database' | 'migrations'): void {

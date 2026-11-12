@@ -25,6 +25,7 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 | Web behavior | `npm run build-prod` |
 | Shared renderer or Electron behavior | `npm run build-prod-electron` in addition to the web build |
 | Electron IPC or desktop integration | Both builds plus a focused manual desktop check |
+| Main/preload updater, security, or release metadata | `npm run test:electron` plus the affected Angular specs; the complete suite includes these tests |
 
 Install Chromium with `npx playwright install chromium` only when the local browser dependency is missing. Do not use `npm run lint` as a gate while it points to the unavailable TSLint builder.
 
@@ -36,9 +37,14 @@ Read the [release process](../../../docs/release-process.md) and inspect the cal
 
 ## Manual checks
 
+For desktop upgrades, follow [desktop maintenance](../../../docs/electron-maintenance.md). Local packaging uses `npm run dist-local` without certificates or provisioning profiles and never publishes. Signing, notarization, final artifact verification, and signed update acceptance remain CI/release checks; report them as pending when that infrastructure is unavailable. Test with an isolated profile and distinguish a development-runtime smoke check from an installed signed update. Preserve marketing macOS minimums separately from Darwin kernel minimums in updater metadata.
+
 - Exercise the changed happy path and its loading, empty, validation, error, disabled, and success states.
 - Check browser behavior without `window.electronAPI`.
 - For Electron changes, verify channel allowlists, request and response payloads, listener cleanup, cancellation, and error handling.
+- For update restarts, trace every backup producer through the coordinator, including initial file setup and complete archive/restore confirmations. Exercise delayed file/registry/account completion, final commands and the backups they generate, routed-view destruction, retry cancellation, and attached/setup/archive failures or conflicts retained across account switches. Distinguish navigation from catalog-confirmed owner removal, and retain the replacement GUID when a restore transfers pending work.
+- Exercise already-settled and in-flight persistence failures on repeated restart attempts, matching versus unrelated command recovery, and late inspection outcomes without stale UI updates. A newly validated attachment must supersede older inspection requests.
+- Keep pointer and keyboard interaction blocked until asynchronous native installation quits or fails; exercise acknowledgment errors and failure recovery. Check retained child failures after successful parent cascades without clearing unrelated failures.
 - Check responsive layout, keyboard use, focus, charts, printing, and generated files when relevant.
 
 ## Failure handling

@@ -1,11 +1,12 @@
 @if (isElectron) {
   <div [ngClass]="{'windowOverlay': showModal}">
   </div>
-  <div class="popup" [class.open]="showModal">
+  <div class="popup" [class.open]="showModal" [attr.aria-busy]="confirming">
     <div class="popup-header">Backup File Found
     </div>
     @if (latestBackupFile) {
-      <div class="popup-body">
+      <fieldset class="popup-body" [disabled]="confirming">
+        <legend class="visually-hidden">Backup choices</legend>
         @if (differingBackups) {
           @if (electronBackup) {
             <p> The data found in the backup file corresponding to this account differs from the data in the
@@ -120,11 +121,12 @@
           </div>
           <hr>
           }
-        </div>
+        </fieldset>
       }
+      @if (confirming) { <p class="px-3" role="status">Finishing backup operations…</p> }
       <div class="popup-footer text-end">
-        <button class="btn btn-secondary" (click)="hideModal()">Do Nothing</button>
-        <button class="btn action-btn" (click)="confirmActions()">Confirm</button>
+        <button class="btn btn-secondary" [disabled]="confirming" (click)="hideModal()">Do Nothing</button>
+        <button class="btn action-btn" [disabled]="confirming" (click)="confirmActions()">Confirm</button>
       </div>
     </div>
   }

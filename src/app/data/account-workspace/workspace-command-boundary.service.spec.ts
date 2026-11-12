@@ -6,6 +6,122 @@ import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
 import { WorkspaceChangeKind, WorkspaceEntityKind, WorkspaceWriteError } from './workspace-commands.models';
 
 describe('WorkspaceCommandBoundary', () => {
+  it('waits for queued commands and their publication before reporting idle', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+    let finish!: () => void;
+    const first = boundary.execute(makeOptions(), () => new Promise<void>(resolve => { finish = resolve; }));
+    const second = boundary.execute(makeOptions(), async () => 'second');
+    const complete = vi.fn();
+    const idle = boundary.whenIdle().then(complete);
+    await Promise.resolve();
+    expect(complete).not.toHaveBeenCalled();
+    finish();
+    await Promise.all([first, second, idle]);
+    expect(complete).toHaveBeenCalledOnce();
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it('rejects the idle wait if an in-flight command fails', async () => {
+    const { boundary, store } = createBoundary();
+    publishReady(store);
+    let fail!: (error: Error) => void;
+    const command = boundary.execute(makeOptions(), () => new Promise((_resolve, reject) => { fail = reject; }));
+    const commandResult = command.catch(error => error);
+    const idle = expect(boundary.whenIdle()).rejects.toMatchObject({ code: 'persistence-failed' });
+    await Promise.resolve();
+    fail(new Error('write failed'));
+    await idle;
+    await commandResult;
+    await expect(boundary.whenIdle()).rejects.toMatchObject({ code: 'persistence-failed' });
+  });
+
+  it('retains an already-settled failed save until its matching command succeeds', async () => {
+    const { boundary, store } = createBoundary();
+    publishReady(store);
+    const options = makeOptions('account', 'update', 'account-a');
+    await expect(boundary.execute(options, async () => { throw new Error('disk unavailable'); })).rejects.toMatchObject({ code: 'persistence-failed' });
+    expect(boundary.hasPendingCommands).toBe(false);
+    expect(boundary.hasUnresolvedFailures).toBe(true);
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    await boundary.execute(options, async () => 'saved');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+    expect(boundary.hasUnresolvedFailures).toBe(false);
+  });
+
+  it('retains typed transaction failures as unresolved persistence', async () => {
+    const { boundary, store } = createBoundary();
+    publishReady(store);
+    await boundary.execute(makeOptions(), async () => { throw new WorkspaceWriteError('transaction-failed', 'aborted'); }).catch(() => undefined);
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    await boundary.execute(makeOptions(), async () => 'retry committed');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it('does not resolve a failed save through unrelated entities or another account', async () => {
+    const { boundary, store } = createBoundary();
+    publishReady(store);
+    const options = makeOptions('account', 'update', 'account-a');
+    await boundary.execute(options, async () => { throw new Error('offline'); }).catch(() => undefined);
+    await boundary.execute(makeOptions('facility', 'update', 'facility-a'), async () => 'other entity');
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    publishReady(store, 'account-b');
+    await boundary.execute(options, async () => 'other account');
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    publishReady(store);
+    await boundary.execute(options, async () => 'real retry');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it('treats a successful explicit deletion of the failed entity as resolution', async () => {
+    const { boundary, store } = createBoundary();
+    publishReady(store);
+    await boundary.execute(makeOptions('meter', 'update', 'meter-a'), async () => { throw new Error('offline'); }).catch(() => undefined);
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    await boundary.execute(makeOptions('meter', 'delete', 'meter-a'), async () => 'removed');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it.each(['meter', 'facility'] as const)('resolves only failures for descendants removed by a successful %s cascade', async parent => {
+    const { boundary, store } = createBoundary();
+    store.publish({ ...makeSnapshot('account-a'),
+      meters: [{ guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a' }, { guid: 'meter-b', accountId: 'account-a', facilityId: 'facility-b' }] as any,
+      meterData: [{ guid: 'bill-a', accountId: 'account-a', facilityId: 'facility-a', meterId: 'meter-a' }, { guid: 'bill-b', accountId: 'account-a', facilityId: 'facility-b', meterId: 'meter-b' }] as any
+    });
+    for (const guid of ['bill-a', 'bill-b']) {
+      await boundary.execute(makeOptions('meterData', 'update', guid), async () => { throw new Error('bill offline'); }).catch(() => undefined);
+    }
+    await boundary.execute({ ...makeOptions(parent, 'delete', `${parent}-a`), publication: { mode: 'patch', buildPatch: () => ({ collections: [
+      ...(parent === 'facility' ? [{ collection: 'facilities' as const, deleteGuids: ['facility-a'] }] : []),
+      { collection: 'meters', deleteGuids: ['meter-a'] }, { collection: 'meterData', deleteGuids: ['bill-a'] }
+    ] }) } }, async () => 'removed parent');
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    await boundary.execute(makeOptions('meterData', 'update', 'bill-b'), async () => 'saved unrelated bill');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it('retires a failed save only after catalog-confirmed owner removal and ignores its late failure', async () => {
+    const { boundary, store } = createBoundary();
+    const account = publishReady(store).account;
+    boundary.reconcileAccounts([account]);
+    await boundary.execute(makeOptions(), async () => { throw new Error('offline'); }).catch(() => undefined);
+    store.clear();
+    await expect(boundary.whenIdle()).rejects.toThrow('Retry that save');
+    boundary.reconcileAccounts([{ ...account, deleteAccount: true }]);
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+    publishReady(store);
+    boundary.reconcileAccounts([account]);
+    const write = deferred<string>();
+    const result = boundary.execute(makeOptions(), () => write.promise).catch(error => error);
+    await Promise.resolve();
+    boundary.reconcileAccounts([]);
+    write.reject(new Error('late failure'));
+    await result;
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
+  });
+
   it('rejects a command when the workspace is not ready', async () => {
     const { boundary } = createBoundary();
 
@@ -61,6 +177,7 @@ describe('WorkspaceCommandBoundary', () => {
 
     expect(caught).toBe(original);
     expect(caught.code).toBe('validation-failed');
+    await expect(boundary.whenIdle()).resolves.toBeUndefined();
   });
 
   it('leaves workspace state unchanged when persistence fails', async () => {

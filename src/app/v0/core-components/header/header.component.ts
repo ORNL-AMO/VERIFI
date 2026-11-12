@@ -44,7 +44,7 @@ export class HeaderComponent implements OnInit {
 
   updateAvailableSub: Subscription;
   updateAvailable: boolean;
-  showUpdateModal: boolean = false;
+
   updateErrorSub: Subscription;
   updateError: boolean;
 
@@ -211,15 +211,8 @@ export class HeaderComponent implements OnInit {
     this.importBackupModalService.showModal.next(true);
   }
 
-  update() {
-    this.showUpdateModal = false;
-    this.loadingService.setLoadingMessage('Downloading update. Application will close when download is completed. This may take a moment.');
-    this.loadingService.setLoadingStatus(true);
-    this.electronService.sendUpdateSignal();
-  }
-
   toggleUpdateModal() {
-    this.showUpdateModal = !this.showUpdateModal;
+    this.electronService.showUpdate();
   }
 
   goToManageAccounts() {

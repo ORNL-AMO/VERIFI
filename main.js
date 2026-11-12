@@ -1,159 +1,110 @@
 const { app, BrowserWindow, ipcMain, Menu, shell, dialog, session } = require('electron');
-const path = require('path');
-const url = require('url');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
+const fs = require('node:fs');
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
-const jetpack = require('fs-jetpack');
-const { event } = require('jquery');
-const fs = require('fs');
-const os = require('os');
+const { UpdateController } = require('./electron/update-controller.cjs');
+const { isApplicationUrl, isTrustedSender, isExternalUrl } = require('./electron/security.cjs');
 
-function isDev() {
-    return app.isPackaged === false;
-};
-
-
-app.allowRendererProcessReuse = false
-// Logger for autoUpdater
-autoUpdater.logger = log;
-autoUpdater.logger.transports.file.level = 'info';
-//needed for forcing update check in develop
-// autoUpdater.forceDevUpdateConfig = true;
-log.info('App starting...');
-
+const entryPath = path.join(__dirname, 'dist/verifi/browser/index.html');
 let win = null;
 
-app.on('ready', function () {
-    // Initialize the window to our specified dimensions
+function reply(channel, data) {
+    if (win && !win.isDestroyed() && !win.webContents.isDestroyed()) {
+        win.webContents.send(channel, data);
+    }
+}
+
+function onTrusted(channel, handler) {
+    ipcMain.on(channel, (event, ...args) => {
+        if (!isTrustedSender(event, win, entryPath)) {
+            log.warn('Rejected IPC sender', channel);
+            return;
+        }
+        Promise.resolve().then(() => handler(event, ...args)).catch(error => log.error('Desktop request failed', channel, error));
+    });
+}
+
+function handleTrusted(channel, handler) {
+    ipcMain.handle(channel, (event, ...args) => {
+        if (!isTrustedSender(event, win, entryPath)) throw new Error('Untrusted desktop request.');
+        return handler(event, ...args);
+    });
+}
+
+autoUpdater.logger = log;
+log.transports.file.level = 'info';
+log.info('App starting...');
+const updates = new UpdateController({
+    updater: autoUpdater, log,
+    publish: state => reply('update-status', state),
+    supported: app.isPackaged && (process.platform !== 'linux' || Boolean(process.env.APPIMAGE))
+});
+
+onTrusted('ready', () => updates.ready());
+onTrusted('check-for-updates', () => updates.check());
+onTrusted('update', () => updates.download());
+handleTrusted('quit-and-install', () => updates.install());
+onTrusted('relaunch', () => { app.relaunch(); app.exit(); });
+
+function openExternal(value) {
+    if (isExternalUrl(value)) shell.openExternal(value).catch(error => log.error('Could not open external link', error));
+}
+
+function createWindow() {
     win = new BrowserWindow({
         width: 1300,
         height: 1500,
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,
+            sandbox: true,
             preload: path.join(__dirname, 'preload.js')
-        },
+        }
     });
-    // win.maximize();
-
-    // Specify entry point
-    win.loadURL(url.format({
-        pathname: path.join(__dirname, 'dist/verifi/browser/index.html'),
-        protocol: 'file',
-        slashes: true
-    }));
-
-    if (isDev()) {
-        win.toggleDevTools();
-    }
-    // Remove window once app is closed
-    win.on('closed', function () {
-        win = null;
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        openExternal(url);
+        return { action: 'deny' };
     });
+    win.webContents.on('will-navigate', (event, value) => {
+        if (!isApplicationUrl(value, entryPath)) {
+            event.preventDefault();
+            openExternal(value);
+        }
+    });
+    win.webContents.on('will-redirect', (event, value) => {
+        if (!isApplicationUrl(value, entryPath)) event.preventDefault();
+    });
+    win.loadURL(pathToFileURL(entryPath).href).catch(error => log.error('Application could not load', error));
+    if (!app.isPackaged) win.webContents.openDevTools();
+    win.on('closed', () => { win = null; });
+    win.setMenuBarVisibility(false);
+}
 
-
-
+app.whenReady().then(() => {
+    // Preserve the service headers used by the existing desktop API integrations.
     session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-        details.requestHeaders['User-Agent'] = 'VERIFI'
+        details.requestHeaders['User-Agent'] = 'VERIFI';
         details.requestHeaders['Origin'] = 'https://verifi.ornl.gov';
         callback({ cancel: false, requestHeaders: details.requestHeaders });
     });
+    Menu.setApplicationMenu(Menu.buildFromTemplate([
+        { label: 'Application', submenu: [
+            { role: 'quit' },
+            { label: 'Dev Tools', accelerator: 'CmdOrCtrl+I', click: () => win?.webContents.toggleDevTools() }
+        ] },
+        { label: 'Edit', submenu: [
+            { role: 'undo' }, { role: 'redo' }, { type: 'separator' },
+            { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }
+        ] }
+    ]));
+    createWindow();
+}).catch(error => log.error('Desktop startup failed', error));
+app.on('activate', () => { if (win === null) createWindow(); });
+app.on('window-all-closed', () => app.quit());
 
-
-    //signal from core.component to check for update
-    ipcMain.on('ready', (coreCompEvent, arg) => {
-
-        if (!isDev()) {
-            autoUpdater.checkForUpdates().then(() => {
-                log.info('done checking for updates');
-                if (autoUpdater.updateInfoAndProvider) {
-                    win.webContents.send('release-info', autoUpdater.updateInfoAndProvider.info);
-                }
-            });
-            autoUpdater.on('update-available', (event, info) => {
-                log.info('update available');
-                win.webContents.send('available', true);
-            });
-            autoUpdater.on('error', (event, error) => {
-                log.info('error');
-                win.webContents.send('error', error);
-            });
-
-            autoUpdater.on('update-downloaded', (event, info) => {
-                autoUpdater.quitAndInstall();
-                win.webContents.send('update-downloaded');
-            });
-        }
-    })
-
-    ipcMain.once('quit-and-install', (event, arg) => {
-        autoUpdater.quitAndInstall(false);
-    })
-
-    //Check for updates and install
-    autoUpdater.autoDownload = false;
-    autoUpdater.autoInstallOnAppQuit = false;
-
-    var template = [{
-        label: "Application",
-        submenu: [
-            { label: "Quit", accelerator: "Command+Q", click: function () { app.quit(); } },
-            { label: "Dev Tools", accelerator: "CmdOrCtrl+I", click: function () { win.toggleDevTools(); } }
-        ]
-    }, {
-        label: "Edit",
-        submenu: [
-            { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-            { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-            { type: "separator" },
-            { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-            { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-            { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
-        ]
-    }
-    ];
-
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-    win.setMenuBarVisibility(false)
-
-    win.webContents.on('new-window', function (e, url) {
-        // make sure local urls stay in electron perimeter
-        if ('file://' === url.substr(0, 'file://'.length)) {
-            return;
-        }
-
-        e.preventDefault();
-        shell.openExternal(url);
-    });
-
-});
-
-// Listen for message from application (electron component) to either download updates
-ipcMain.once('update', (event, arg) => {
-    log.info('update')
-    autoUpdater.downloadUpdate();
-});
-
-ipcMain.once('later', (event, arg) => {
-    update = null;
-});
-
-ipcMain.once('relaunch', () => {
-    app.relaunch();
-    app.exit();
-});
-
-app.on('activate', () => {
-    if (win === null) {
-        createWindow();
-    }
-});
-
-app.on('window-all-closed', function () {
-    app.quit();
-});
-
-ipcMain.on("selectFolder", async (event) => {
+onTrusted("selectFolder", async (event) => {
     try {
         const result = await dialog.showOpenDialog({
             title: "Select a Folder",
@@ -161,27 +112,27 @@ ipcMain.on("selectFolder", async (event) => {
         });
 
         if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
-            win.webContents.send('folder-selected', null);
+            reply('folder-selected', null);
             return;
         }
         const selectedPath = result.filePaths[0];
 
         if (fs.existsSync(selectedPath)) {
-            win.webContents.send('folder-selected', selectedPath);
+            reply('folder-selected', selectedPath);
         } else {
-            win.webContents.send('folder-selected', null);
+            reply('folder-selected', null);
         }
     } catch (err) {
         log.error('Error getting bills folder:', err);
     }
 });
 
-ipcMain.on("checkFolderExists", async (event, folderPath) => {
+onTrusted("checkFolderExists", async (event, folderPath) => {
     const exists = fs.existsSync(folderPath);
-    win.webContents.send('folder-exists', { exists, folderPath });
+    reply('folder-exists', { exists, folderPath });
 });
 
-ipcMain.on("openBillsFolder", async (event, folderPath) => {
+onTrusted("openBillsFolder", async (event, folderPath) => {
     try {
         if (folderPath && fs.existsSync(folderPath)) {
             shell.openPath(folderPath);
@@ -193,7 +144,7 @@ ipcMain.on("openBillsFolder", async (event, folderPath) => {
 
 });
 
-ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, date }) => {
+onTrusted("uploadFileDialog", async (event, { key, folderPath, meterNumber, date }) => {
     try {
         log.info('open upload bill dialog');
         const result = await dialog.showOpenDialog({
@@ -222,41 +173,41 @@ ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, dat
                 log.error('Error copying file:', err);
                 return;
             }
-            win.webContents.send('utility-file-path', destinationPath);
+            reply('utility-file-path', destinationPath);
         });
     } catch (err) {
         log.error('Error during file upload:', err);
     }
 });
 
-ipcMain.on("openUploadedFileLocation", (event, filepath) => {
+onTrusted("openUploadedFileLocation", (event, filepath) => {
     if (filepath && fs.existsSync(filepath)) {
         shell.openPath(filepath);
     }
 });
 
-ipcMain.on("disconnectBill", async (event, path) => {
+onTrusted("disconnectBill", async (event, path) => {
     try {
         if (path && fs.existsSync(path)) {
             fs.unlinkSync(path);
-            win.webContents.send('bill-disconnected', { success: true });
+            reply('bill-disconnected', { success: true });
         }
         else {
-            win.webContents.send('bill-disconnected', { success: false });
+            reply('bill-disconnected', { success: false });
         }
     } catch (err) {
         console.error('In main.js Error disconnecting bill:', err);
-        win.webContents.send('bill-disconnected', { success: false });
+        reply('bill-disconnected', { success: false });
     }
 });
 
-ipcMain.on("utilityFileExists", (event, path) => {
+onTrusted("utilityFileExists", (event, path) => {
     log.info('Checking if file exists');
     const exists = fs.existsSync(path);
-    win.webContents.send('utility-file-exists', exists);
+    reply('utility-file-exists', exists);
 });
 
-ipcMain.handle("backup:chooseSavePath", async (_event, arg) => {
+handleTrusted("backup:chooseSavePath", async (_event, arg) => {
     const defaultPath = typeof arg?.defaultPath === 'string' ? arg.defaultPath : undefined;
     const result = await dialog.showSaveDialog(win, {
         filters: [{ name: "JSON Files", extensions: ["json"] }],
@@ -265,14 +216,14 @@ ipcMain.handle("backup:chooseSavePath", async (_event, arg) => {
     return result.canceled ? undefined : result.filePath;
 });
 
-ipcMain.handle("backup:exists", async (_event, arg) => {
+handleTrusted("backup:exists", async (_event, arg) => {
     if (!arg?.path || typeof arg.path !== 'string') {
         return { ok: false, error: 'A backup file path is required.' };
     }
     return { ok: true, exists: fs.existsSync(arg.path) };
 });
 
-ipcMain.handle("backup:read", async (_event, arg) => {
+handleTrusted("backup:read", async (_event, arg) => {
     if (!arg?.path || typeof arg.path !== 'string') {
         return { ok: false, error: 'A backup file path is required.' };
     }
@@ -287,7 +238,7 @@ ipcMain.handle("backup:read", async (_event, arg) => {
     }
 });
 
-ipcMain.handle("backup:write", async (_event, arg) => {
+handleTrusted("backup:write", async (_event, arg) => {
     const backupPath = typeof arg?.path === 'string' ? arg.path : undefined;
     const backup = arg?.backup;
     if (!backupPath) {

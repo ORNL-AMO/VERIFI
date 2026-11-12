@@ -95,17 +95,3 @@
   </div>
   }
 </nav>
-
-
-<div [ngClass]="{'windowOverlay': showUpdateModal}"></div>
-<div class="popup" [ngClass]="{'open': showUpdateModal}">
-  <div class="popup-header">Download Latest Version of VERIFI
-    <button class="item-right" (click)="toggleUpdateModal()">x</button>
-  </div>
-  <div class="popup-footer text-end pt-2">
-    <button class="btn btn-secondary" (click)="toggleUpdateModal()">Cancel</button>
-    <button class="btn btn-primary" (click)="update()">
-      Download Update
-    </button>
-  </div>
-</div>

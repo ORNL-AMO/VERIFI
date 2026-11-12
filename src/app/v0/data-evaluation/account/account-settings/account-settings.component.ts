@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
-import { ChangeDetectorRef, Component, OnInit, inject, Injector } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, skip, take } from 'rxjs';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
@@ -13,10 +13,8 @@ import { FacilityCommandHandler } from '@data/account-workspace/handlers/facilit
 import { FACILITY_DELETION_MESSAGES } from '@data/indexedDB/facility-deletion.config';
 import { ElectronService } from '@platform/electron/electron.service';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
-import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
-import { BackupFile } from '@data/models/backup-file';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 
@@ -30,6 +28,7 @@ export class AccountSettingsComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
+  private readonly destroyRef = inject(DestroyRef);
 
   facilityList: Array<IdbFacility> = [];
   facilityMenuOpen: number;
@@ -53,7 +52,6 @@ export class AccountSettingsComponent implements OnInit {
     };
 
   isElectron: boolean;
-  backupFile: BackupFile;
   folderPath: string;
   folderError: string;
   downloadAsZip: boolean = false;
@@ -67,7 +65,6 @@ export class AccountSettingsComponent implements OnInit {
     private accountHandler: AccountCommandHandler,
     private facilityHandler: FacilityCommandHandler,
     private electronService: ElectronService,
-    private backupGateway: ElectronBackupFileGateway,
     private cd: ChangeDetectorRef,
     private automaticBackupsService: AutomaticBackupsService,
     private injector: Injector
@@ -264,24 +261,14 @@ export class AccountSettingsComponent implements OnInit {
 
 
   async automaticBackup() {
-    this.backupFile = this.backupExportCoordinator.buildActiveAccountBackup();
-    const defaultPath = this.selectedAccount?.dataBackupFilePath ?? `${this.selectedAccount?.name}.json`;
-    const savedFilePath = await this.backupGateway.chooseSavePath(defaultPath);
-    if (!savedFilePath) { return; }
-    await this.backupGateway.write(savedFilePath, this.backupFile);
-    await this.automaticBackupsService.addOrUpdateFile(this.backupFile.dataBackupId, this.selectedAccount.guid);
-    const updatedAccount: IdbAccount = {
-      ...this.selectedAccount,
-      dataBackupFilePath: savedFilePath,
-      dataBackupId: this.backupFile.dataBackupId
-    };
-    await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Saving account' ,
-        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
-      () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
+    const configured = await this.automaticBackupsService.configureFile(this.selectedAccount, updatedAccount =>
+      this.commandBoundary.execute(
+        { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Saving account',
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) } },
+        () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
+      )
     );
-    await this.automaticBackupsService.inspectCurrentAccountFile();
-    this.cd.detectChanges();
+    if (configured && !this.destroyRef.destroyed) this.cd.detectChanges();
   }
 
   async saveChanges() {
