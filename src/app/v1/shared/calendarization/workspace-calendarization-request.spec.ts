@@ -1,3 +1,5 @@
+import { SubregionEmissions } from '@data/models/eGridEmissions';
+import { getNewAccountEmissionsItem } from '@data/models/idbModels/customEmissions';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { account, facility, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import {
@@ -5,7 +7,7 @@ import {
   CANONICAL_GAS_UNIT,
   CANONICAL_LIQUID_UNIT,
   CANONICAL_MASS_UNIT,
-  buildWorkspaceCalendarizationRequest
+  buildWorkspaceCalendarizationRequest, workspaceEmissionsRates
 } from './workspace-calendarization-request';
 
 describe('v1 canonical workspace calendarization request', () => {
@@ -45,6 +47,39 @@ describe('v1 canonical workspace calendarization request', () => {
 
     expect(buildWorkspaceCalendarizationRequest(displayOnly).inputFingerprint).toBe(first.inputFingerprint);
     expect(buildWorkspaceCalendarizationRequest(readingChange).inputFingerprint).not.toBe(first.inputFingerprint);
+  });
+
+  it('passes bundled then current custom rates with exact canonical precedence and detached rate arrays', () => {
+    const builtin: SubregionEmissions[] = [{ subregion: 'REGION', locationEmissionRates: [{ year: 2025, CO2: 10, CH4: 2, N2O: 3 }],
+      residualEmissionRates: [{ year: 2025, CO2: 20, CH4: 4, N2O: 6 }] }];
+    const custom = { ...getNewAccountEmissionsItem('account-a'), subregion: 'CUSTOM',
+      locationEmissionRates: [{ year: 2025, CO2: 50, CH4: 0, N2O: 0, co2Emissions: 50 }],
+      residualEmissionRates: [{ year: 2025, CO2: 60, CH4: 0, N2O: 0, co2Emissions: 60 }] };
+    const snapshot = { ...workspaceSnapshot(), customEmissions: [custom] };
+    const before = structuredClone({ builtin, snapshot });
+    const request = buildWorkspaceCalendarizationRequest(snapshot, builtin);
+    expect(request.payload.co2Emissions).toEqual([builtin[0], custom]);
+    expect(workspaceEmissionsRates(snapshot)).toEqual([custom]);
+    expect(request.payload.co2Emissions[0]).not.toBe(builtin[0]);
+    expect(request.payload.co2Emissions[0].locationEmissionRates).not.toBe(builtin[0].locationEmissionRates);
+    expect(request.payload.co2Emissions[1].residualEmissionRates[0]).not.toBe(custom.residualEmissionRates[0]);
+    request.payload.co2Emissions[0].locationEmissionRates[0].CO2 = -1;
+    request.payload.co2Emissions[1].residualEmissionRates[0].CO2 = -2;
+    expect({ builtin, snapshot }).toEqual(before);
+  });
+
+  it('fingerprints all bundled rate values and uses only the current snapshot custom catalog', () => {
+    const first = { ...workspaceSnapshot(), customEmissions: [{ ...getNewAccountEmissionsItem('account-a'), subregion: 'ACCOUNT-A' }] };
+    const builtin: SubregionEmissions[] = [{ subregion: 'REGION', locationEmissionRates: [{ year: 2025, CO2: 10, CH4: 0, N2O: 0 }], residualEmissionRates: [] }];
+    const initial = buildWorkspaceCalendarizationRequest(first, builtin);
+    expect(buildWorkspaceCalendarizationRequest(first, structuredClone(builtin)).inputFingerprint).toBe(initial.inputFingerprint);
+    const changed = structuredClone(builtin); changed[0].locationEmissionRates[0].CO2 = 11;
+    expect(buildWorkspaceCalendarizationRequest(first, changed).inputFingerprint).not.toBe(initial.inputFingerprint);
+    expect(buildWorkspaceCalendarizationRequest(first).inputFingerprint).not.toBe(initial.inputFingerprint);
+    const second = { ...workspaceSnapshot(), account: { ...first.account, guid: 'account-b' },
+      customEmissions: [{ ...getNewAccountEmissionsItem('account-b'), subregion: 'ACCOUNT-B' }] };
+    expect(buildWorkspaceCalendarizationRequest(second, builtin).payload.co2Emissions.map(region => region.subregion)).toEqual(['REGION', 'ACCOUNT-B']);
+    expect(first.customEmissions[0].subregion).toBe('ACCOUNT-A');
   });
 
   it('builds one non-duplicated payload for 500 meters with ten years of monthly data', () => {
