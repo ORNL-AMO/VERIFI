@@ -89,8 +89,18 @@ export class RecoveryActionsComponent {
     });
     const release = this.unsaved.register(() => !!this.proposal(), () => this.cancel(), () => this.saving() || this.refreshRequired());
     const unprotect = this.unsaved.protectBeforeUnload(this.protected);
-    const unpreflight = this.unsaved.registerNavigationPreflight(async () => !this.protected());
+    const unpreflight = this.unsaved.registerNavigationPreflight(async () => !this.blocksNavigation());
     this.destroy.onDestroy(() => { release(); unprotect(); unpreflight(); this.hide(); });
+  }
+
+  /** Pending recovery owns its review until saved intent is acknowledged or a rejected proposal is canceled. */
+  blocksNavigation(): boolean {
+    if (!this.protected()) return false;
+    if (this.mode()) {
+      this.portal ??= new TemplatePortal(this.reviewDialog, this.view);
+      if (this.modal.activePortal() !== this.portal) this.modal.show(this.portal, { blockWorkspace: true });
+    }
+    return true;
   }
 
   async start(mode: 'reset' | 'copy' | 'new'): Promise<void> {
