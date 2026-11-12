@@ -1,5 +1,5 @@
 /** Saved intent only. Record identity, revisions, and persistence belong to Vis2. */
-export const VISUALIZATION_DEFINITION_VERSION = 1;
+export const VISUALIZATION_DEFINITION_VERSION = 2;
 
 export type VisualizationScope =
   | { readonly kind: 'portfolio' }
@@ -91,6 +91,22 @@ export type VisualizationComparison =
   | { readonly kind: 'previous-year'; readonly basis: 'calendar' | 'fiscal' }
   | { readonly kind: 'custom'; readonly start: string; readonly end: string };
 
+/** Presentation only. A provider-local category identity is never a domain reference. */
+export type VisualizationSeriesOverride = (
+  | { readonly resourceGuid: string; readonly seriesId?: never }
+  | { readonly seriesId: string; readonly resourceGuid?: never }
+) & {
+  /** Omitted means the definition owner; retained on cross-account transfers with no mapping. */
+  readonly accountGuid?: string;
+  readonly label?: string;
+  readonly color?: string;
+  readonly axis?: 'left' | 'right';
+  readonly lineStyle?: 'solid' | 'dashed' | 'dotted';
+  readonly visible?: boolean;
+  /** Explicit position; appearance changes alone never reorder matching members. */
+  readonly order?: number;
+};
+
 export interface VisualizationSeries {
   readonly id: string;
   readonly sourceId: string;
@@ -100,6 +116,9 @@ export interface VisualizationSeries {
   readonly color?: string;
   readonly axis: 'left' | 'right';
   readonly lineStyle?: 'solid' | 'dashed' | 'dotted';
+  readonly visible?: boolean;
+  /** Only an override's explicit order changes member ordering; new matches retain provider order. */
+  readonly overrides?: readonly VisualizationSeriesOverride[];
 }
 
 export type VisualizationChart =

@@ -1,3 +1,4 @@
+import { resolveVisualizationSeries } from './visualization-series';
 import { checkVisualizationCompatibility } from './visualization-capabilities';
 import { visualizationEvidenceFixture } from './testing/visualization-provider-fixtures';
 import { decodeVisualizationDefinition } from './visualization-validation';
@@ -6,6 +7,116 @@ import { VisualizationDefinition } from './visualization-definition';
 import { remapVisualizationDefinition, visualizationReferenceKey, visualizationReferences } from './visualization-references';
 
 describe('saved visualization reference mapping', () => {
+  it('preserves the resource namespace declared by a legacy grouping even when the configuration is unavailable', () => {
+    const base = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...base, sources: base.sources.map(source => source.kind === 'utility'
+      ? { ...source, aggregation: 'none', groupBy: 'group' } : source), series: [{ ...base.series[0], resourceGuid: 'group-a' }] };
+    const mapped = remapVisualizationDefinition(definition, 'account-b', { meter: { 'meter-a': 'meter-b' }, 'meter-group': { 'group-a': 'group-b' } });
+    expect(mapped.issues).toEqual([]); expect(mapped.definition.series[0].resourceGuid).toBe('group-b');
+  });
+  it('maps display overrides and preserves unmapped overrides dormant across repeated account transfers', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const original = { ...base, series: [{ ...wildcard, overrides: [
+      { resourceGuid: 'meter-a', visible: false }, { resourceGuid: 'old-meter', color: '#123456' }
+    ] }] };
+    const first = remapVisualizationDefinition(original, 'account-b', { meter: { 'meter-a': 'meter-b' } });
+    expect(first.issues).toEqual([]);
+    expect(first.definition.series[0].overrides).toEqual([
+      { resourceGuid: 'meter-b', visible: false, accountGuid: 'account-b' },
+      { resourceGuid: 'old-meter', color: '#123456', accountGuid: 'account-a' }
+    ]);
+    const second = remapVisualizationDefinition(first.definition, 'account-c', { meter: {
+      'meter-b': 'meter-c', 'old-meter': 'unrelated-meter'
+    } });
+    expect(second.issues).toEqual([]);
+    expect(second.definition.series[0].overrides).toEqual([
+      { resourceGuid: 'meter-c', visible: false, accountGuid: 'account-c' },
+      { resourceGuid: 'old-meter', color: '#123456', accountGuid: 'account-a' }
+    ]);
+    expect(original.series[0].overrides[0].resourceGuid).toBe('meter-a');
+  });
+
+  it('copies provider-local category appearances without treating their identities as domain references', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const original: VisualizationDefinition = { ...base, series: [{ ...wildcard, overrides: [
+      { seriesId: 'utility:source:Electricity', visible: false, color: '#123456' },
+      { seriesId: 'utility:source:Water', accountGuid: 'foreign-account', label: 'Dormant' },
+      { resourceGuid: 'old-meter', visible: false }
+    ] }] };
+    expect(visualizationReferences(original).filter(ref => ref.optional).map(ref => ref.guid)).toEqual(['old-meter']);
+    const first = remapVisualizationDefinition(original, 'account-b', { meter: { 'meter-a': 'meter-b' } });
+    expect(first.issues).toEqual([]);
+    expect(first.definition.series[0].overrides).toEqual([
+      { seriesId: 'utility:source:Electricity', accountGuid: 'account-b', visible: false, color: '#123456' },
+      { seriesId: 'utility:source:Water', accountGuid: 'foreign-account', label: 'Dormant' },
+      { resourceGuid: 'old-meter', accountGuid: 'account-a', visible: false }
+    ]);
+    const second = remapVisualizationDefinition(first.definition, 'account-c', { meter: { 'meter-b': 'meter-c' } });
+    expect(second.issues).toEqual([]);
+    expect(second.definition.series[0].overrides?.[0]).toMatchObject({ seriesId: 'utility:source:Electricity', accountGuid: 'account-c' });
+    expect(second.definition.series[0].overrides?.[1]).toMatchObject({ accountGuid: 'foreign-account' });
+    expect(original.series[0].overrides[0]).not.toHaveProperty('accountGuid');
+  });
+
+  it('remaps known Unassigned utility categories through their facility boundary without losing appearance', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const sourceId = 'utility:main';
+    const original: VisualizationDefinition = { ...base, sources: [{ id: sourceId, kind: 'utility', measure: 'energy',
+      aggregation: 'sum', dataMode: 'calendarized', groupBy: 'group', selection: { kind: 'rule', resource: 'meter', filter: {} } }],
+      series: [{ ...wildcard, sourceId, overrides: [{ seriesId: `${sourceId}:unassigned:facility-a`,
+        visible: false, color: '#123456', label: 'Hidden other meters', axis: 'right', lineStyle: 'dashed', order: 0 }] }] };
+    const before = structuredClone(original);
+    const first = remapVisualizationDefinition(original, 'account-b', { facility: { 'facility-a': 'facility-b' } });
+    expect(first.issues).toEqual([]);
+    expect(visualizationReferences(first.definition)).toEqual([]);
+    expect(first.definition.series[0].overrides?.[0]).toEqual({ ...original.series[0].overrides![0],
+      seriesId: `${sourceId}:unassigned:facility-b`, accountGuid: 'account-b' });
+    const resolved = (facility: string) => [{ id: `${sourceId}:unassigned:${facility}`, sourceId, metric: 'energy',
+      label: 'Unassigned', unit: 'kWh', dimension: 'energy', additive: true }];
+    expect(resolveVisualizationSeries(first.definition, resolved('facility-b'))).toEqual([]);
+    const ordered = resolveVisualizationSeries(first.definition, [
+      { ...resolved('facility-b')[0], id: `${sourceId}:group-b`, resourceGuid: 'group-b', label: 'Other group' }, ...resolved('facility-b')
+    ], true);
+    expect(ordered.map(entry => entry.metadata.id)).toEqual([`${sourceId}:unassigned:facility-b`, `${sourceId}:group-b`]);
+    const hidden = ordered[0];
+    expect(hidden.selected).toMatchObject({ visible: false, color: '#123456', label: 'Hidden other meters', axis: 'right', lineStyle: 'dashed' });
+    const second = remapVisualizationDefinition(first.definition, 'account-c', { facility: { 'facility-b': 'facility-c' } });
+    expect(second.issues).toEqual([]);
+    expect(second.definition.series[0].overrides?.[0]).toMatchObject({ seriesId: `${sourceId}:unassigned:facility-c`, accountGuid: 'account-c', order: 0 });
+    expect(resolveVisualizationSeries(second.definition, resolved('facility-c'))).toEqual([]);
+    expect(original).toEqual(before);
+  });
+
+  it('keeps unmapped or foreign Unassigned utility appearances dormant through later transfers', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const original: VisualizationDefinition = { ...base, sources: [{ id: 'utility', kind: 'utility', measure: 'energy',
+      aggregation: 'sum', dataMode: 'calendarized', groupBy: 'group', selection: { kind: 'rule', resource: 'meter', filter: {} } }],
+      series: [{ ...wildcard, overrides: [
+        { seriesId: 'utility:unassigned:facility-a', visible: false, order: 0 },
+        { seriesId: 'utility:unassigned:foreign-facility', accountGuid: 'foreign-account', visible: false, label: 'Dormant' },
+        { seriesId: 'utility:source:Electricity', color: '#123456' }, { seriesId: 'utility:total', label: 'Selected total' }
+      ] }] };
+    const first = remapVisualizationDefinition(original, 'account-b', {});
+    expect(first.issues).toEqual([]);
+    expect(first.definition.series[0].overrides?.[0]).toMatchObject({ seriesId: 'utility:unassigned:facility-a', accountGuid: 'account-a', visible: false });
+    expect(first.definition.series[0].overrides?.[1]).toEqual(original.series[0].overrides![1]);
+    expect(first.definition.series[0].overrides?.slice(2).map(override => override.accountGuid)).toEqual(['account-b', 'account-b']);
+    const second = remapVisualizationDefinition(first.definition, 'account-c', { facility: {
+      'facility-a': 'unrelated-facility', 'foreign-facility': 'unrelated-foreign-facility'
+    } });
+    expect(second.issues).toEqual([]);
+    expect(second.definition.series[0].overrides?.[0]).toEqual(first.definition.series[0].overrides?.[0]);
+    expect(second.definition.series[0].overrides?.[1]).toEqual(original.series[0].overrides![1]);
+    const collision = [{ id: 'utility:unassigned:facility-a', sourceId: 'utility', metric: 'energy', label: 'Other account meters',
+      unit: 'kWh', dimension: 'energy', additive: true }];
+    expect(resolveVisualizationSeries(second.definition, collision)).toHaveLength(1);
+    expect(resolveVisualizationSeries(second.definition, collision)[0].selected.visible).not.toBe(false);
+  });
+
   it('maps scope, rules, selections and selected series without changing local IDs or source input', () => {
     const original: VisualizationDefinition = { ...energyUseVisualizationFixture(), sources: [
       { id: 'equipment', kind: 'energy-use', measure: 'consumption', aggregation: 'sum', denominator: 'facility',

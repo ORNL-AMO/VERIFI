@@ -71,8 +71,8 @@ export class RecoveryActionsComponent {
   readonly referencesForReview = computed(() => {
     const base = this.base(), review = this.review();
     if (!base || !review) return [];
-    const retained = visualizationReferences(review.definition);
-    const candidates = [...(this.mode() === 'reset' ? this.editor.record()?.preservation?.references ?? [] : []), ...visualizationReferences(base)];
+    const retained = visualizationReferences(review.definition).filter(reference => !reference.optional);
+    const candidates = [...(this.mode() === 'reset' ? this.editor.record()?.preservation?.references ?? [] : []), ...visualizationReferences(base).filter(reference => !reference.optional)];
     const cleared = candidates.filter(ref => review.referencePaths.includes(ref.path)
       || !retained.some(next => next.path === ref.path && next.guid === ref.guid));
     return [...new Map(cleared.map(ref => [`${ref.kind}:${visualizationReferenceKey(ref)}`, ref])).values()];

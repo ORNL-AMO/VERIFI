@@ -9,6 +9,9 @@ export interface VisualizationReference {
   readonly guid: string;
   readonly parentGuid?: string;
   readonly groupGuid?: string;
+  /** Cosmetic resource binding: absence never blocks the selected source. */
+  readonly optional?: true;
+  readonly accountGuid?: string;
 }
 
 export interface VisualizationReferenceIssue extends VisualizationReference {
@@ -55,10 +58,17 @@ export function visualizationReferences(definition: VisualizationDefinition): re
     }
   });
   definition.series.forEach((series, i) => {
-    if (!series.resourceGuid) return;
     const source = definition.sources.find(item => item.id === series.sourceId);
-    const reference = seriesReference(source, series.resourceGuid, definition.scope);
-    add(`series.${i}.resourceGuid`, reference.kind, series.resourceGuid, reference.parentGuid, reference.groupGuid);
+    if (series.resourceGuid) {
+      const reference = seriesReference(source, series.resourceGuid, definition.scope);
+      add(`series.${i}.resourceGuid`, reference.kind, series.resourceGuid, reference.parentGuid, reference.groupGuid);
+    }
+    series.overrides?.forEach((override, overrideIndex) => {
+      if (override.resourceGuid === undefined) return;
+      const reference = seriesReference(source, override.resourceGuid, definition.scope);
+      refs.push({ path: `series.${i}.overrides.${overrideIndex}.resourceGuid`, ...reference, guid: override.resourceGuid,
+        optional: true, accountGuid: override.accountGuid ?? definition.accountGuid });
+    });
   });
   return refs;
 }
@@ -91,13 +101,38 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
   } {
   const result = structuredClone(definition);
   const issues: VisualizationReferenceIssue[] = [];
+  // Ordinary category identities are definition-local. The known utility Unassigned
+  // category additionally embeds a facility GUID, so preserve its typed transfer boundary.
+  definition.series.forEach((series, seriesIndex) => series.overrides?.forEach((override, overrideIndex) => {
+    if (override.seriesId === undefined) return;
+    const owner = override.accountGuid ?? definition.accountGuid;
+    if (owner !== definition.accountGuid) return; // Foreign appearances must never reconnect.
+    const path = `series.${seriesIndex}.overrides.${overrideIndex}`;
+    const source = definition.sources.find(source => source.id === series.sourceId);
+    const unassignedPrefix = source?.kind === 'utility' && source.groupBy === 'group' ? `${source.id}:unassigned:` : undefined;
+    if (unassignedPrefix && override.seriesId.startsWith(unassignedPrefix) && override.seriesId.length > unassignedPrefix.length) {
+      const facilityGuid = override.seriesId.slice(unassignedPrefix.length);
+      const mapped = maps.facility && Object.hasOwn(maps.facility, facilityGuid) ? maps.facility[facilityGuid] : undefined;
+      if (mapped) {
+        setPath(result, `${path}.seriesId`, `${unassignedPrefix}${mapped}`);
+        setPath(result, `${path}.accountGuid`, accountGuid);
+      } else {
+        // Retain unmapped cosmetic identity without making it a required source anchor.
+        setPath(result, `${path}.accountGuid`, owner);
+      }
+    } else setPath(result, `${path}.accountGuid`, accountGuid);
+  }));
   for (const ref of visualizationReferences(definition)) {
     const existing = blocked.find(item => item.path === ref.path);
     const map = maps[ref.kind];
     const key = visualizationReferenceKey(ref);
-    const mapped = !existing && map && Object.hasOwn(map, key) ? map[key] : undefined;
+    const local = !ref.optional || ref.accountGuid === definition.accountGuid;
+    const mapped = !existing && local && map && Object.hasOwn(map, key) ? map[key] : undefined;
     if (mapped) setPath(result, ref.path, mapped);
-    else issues.push(existing ?? { ...ref, reason: ref.kind === 'unknown' ? 'unclassified' : 'not-transferred' });
+    if (ref.optional) {
+      // Keep unmapped presentation intent qualified to its original owner, never retargeted.
+      setPath(result, ref.path.replace(/resourceGuid$/, 'accountGuid'), mapped ? accountGuid : ref.accountGuid!);
+    } else if (!mapped) issues.push(existing ?? { ...ref, reason: ref.kind === 'unknown' ? 'unclassified' : 'not-transferred' });
   }
   return { definition: { ...result, accountGuid }, issues };
 }

@@ -40,8 +40,8 @@ export class VisualizationCommandHandler {
       const decoded = readSavedVisualization(source);
       if (decoded.state !== 'valid' && decoded.state !== 'setup-required') this.invalid('Repair this visualization before duplicating it.');
       if (!sameScope(source, submitted.definition)) this.invalid('Duplicate retains the original visualization scope.');
-      const expected = { ...(source.definition as VisualizationDefinition), name: submitted.definition.name };
-      if (!sameJson(expected, submitted.definition)) throw new VisualizationConflictError(source);
+      const expected = { ...decoded.definition, name: submitted.definition.name };
+      if (!sameDefinitionIntent(expected, submitted.definition)) throw new VisualizationConflictError(source);
       await this.assertScopeExists(tx, submitted.definition);
       return this.addOnce(tx, submitted);
     });
@@ -105,7 +105,7 @@ export class VisualizationCommandHandler {
   }
 
   private matchCreation(record: IdbSavedVisualization, command: CreateVisualizationCommand | DuplicateVisualizationCommand): IdbSavedVisualization {
-    if (record.accountId !== command.accountGuid || record.revision !== 1 || !sameJson(record.definition, command.definition)
+    if (record.accountId !== command.accountGuid || record.revision !== 1 || !sameDefinitionIntent(record.definition, command.definition)
       || new Date(record.createdDate).getTime() !== new Date(command.createdDate).getTime()) throw new VisualizationConflictError(record.accountId === command.accountGuid ? record : undefined);
     return record;
   }
@@ -146,6 +146,12 @@ export class VisualizationCommandHandler {
 
 function sameScope(record: Readonly<IdbSavedVisualization>, definition: VisualizationDefinition): boolean {
   return record.accountId === definition.accountGuid && record.facilityId === (definition.scope.kind === 'facility' ? definition.scope.facilityGuid : undefined);
+}
+
+/** Historical payloads compare as current intent without rewriting either record. */
+function sameDefinitionIntent(left: unknown, right: unknown): boolean {
+  const a = decodeVisualizationDefinition(left), b = decodeVisualizationDefinition(right);
+  return 'definition' in a && 'definition' in b && sameJson(a.definition, b.definition);
 }
 
 /** Definitions have a closed decoder-approved JSON shape; object key order is not semantic. */

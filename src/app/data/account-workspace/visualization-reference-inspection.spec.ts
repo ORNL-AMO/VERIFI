@@ -23,6 +23,16 @@ describe('saved visualization reference inspection', () => {
     expect(definition).toEqual(original);
   });
 
+  it('keeps absent presentation overrides dormant while missing fixed resources still require repair', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const definition = { ...base, series: [{ ...wildcard, overrides: [{ resourceGuid: 'absent-meter', visible: false }] }] };
+    expect(inspectVisualizationReferences(definition, catalog)).toEqual([]);
+    expect(inspectVisualizationReferences(definition, { ...catalog, meters: [] })).toEqual([
+      { path: 'sources.0.selection.guids.0', kind: 'meter', guid: 'meter-a', reason: 'missing' }
+    ]);
+  });
+
   it.each([
     ['facility', 'facility-a'], ['meter', 'meter-a'], ['meter-group', 'group-a'], ['predictor', 'predictor-a'],
     ['equipment', 'equipment-a'], ['energy-use-group', 'energy-group-a']

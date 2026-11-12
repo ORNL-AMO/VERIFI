@@ -9,6 +9,29 @@ describe('saved visualization backup preparation and transfer', () => {
   const preparation = new BackupPreparationService();
   const builder = new WorkspaceBackupSnapshotBuilder();
 
+  it('transfers v1 definitions as v2 and retains hidden/dormant v2 appearance through serialized backups', () => {
+    const base = utilityVisualizationFixture();
+    const { resourceGuid, ...wildcard } = base.series[0];
+    const definition = { ...base, series: [{ ...wildcard, overrides: [
+      { resourceGuid: 'meter-a', visible: false, label: 'Private name' },
+      { resourceGuid: 'old-meter', color: '#123456' }
+    ] }] };
+    const original = savedVisualizationFixture(definition);
+    const serialized = JSON.parse(JSON.stringify(original));
+    const transferred = transferSavedVisualization(serialized, 'account-b', { meter: { 'meter-a': 'meter-b' } }, 'copy');
+    const decoded = readSavedVisualization(transferred);
+    expect(decoded.state).toBe('valid');
+    expect('definition' in decoded && decoded.definition.series[0].overrides).toEqual([
+      { resourceGuid: 'meter-b', visible: false, label: 'Private name', accountGuid: 'account-b' },
+      { resourceGuid: 'old-meter', color: '#123456', accountGuid: 'account-a' }
+    ]);
+    expect(serialized.definition).toEqual(definition);
+    const historical = { ...original, definition: { ...base, version: 1 } };
+    const historicalCopy = transferSavedVisualization(historical, 'account-b', { meter: { 'meter-a': 'meter-b' } }, 'historical-copy');
+    expect(historicalCopy.definition).toMatchObject({ version: 2 });
+    expect(historical.definition.version).toBe(1);
+  });
+
   it('exports all account definitions and only the owning facility definitions without mutating the snapshot', () => {
     const source = visualizationBackupSnapshot(), before = structuredClone(source);
     expect(builder.buildAccountBackup(source).savedVisualizations).toHaveLength(8);

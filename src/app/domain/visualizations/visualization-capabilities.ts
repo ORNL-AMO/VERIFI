@@ -1,4 +1,5 @@
-import type { VisualizationChart, VisualizationDefinition, VisualizationSeries, VisualizationSource } from './visualization-definition';
+import { resolveVisualizationSeries } from './visualization-series';
+import type { VisualizationChart, VisualizationDefinition, VisualizationSource } from './visualization-definition';
 import { decodeVisualizationDefinition } from './visualization-validation';
 import {
   isCurrentVisualizationResponse, sameVisualizationScope, VisualizationControl, VisualizationDataShape,
@@ -91,11 +92,6 @@ function observations(data: VisualizationResolvedData['data']): readonly Visuali
   }
 }
 
-function matchingSeries(selected: VisualizationSeries, resolved: VisualizationResolvedData) {
-  return resolved.series.filter(candidate => candidate.sourceId === selected.sourceId && candidate.metric === selected.metric
-    && (selected.resourceGuid === undefined || selected.resourceGuid === candidate.resourceGuid));
-}
-
 function explicitSourceFacilities(source: VisualizationSource): readonly string[] | undefined {
   const selection = 'selection' in source ? source.selection : undefined;
   return selection?.kind === 'rule' ? selection.filter.facilityGuids
@@ -167,7 +163,7 @@ function resolvedDataReasons(definition: VisualizationDefinition, source: Visual
   const metadataIds = new Set(resolved.series.map(series => series.id));
   if (metadataIds.size !== resolved.series.length || resolved.series.some(series => !series.id.trim()))
     add('series', 'Resolved series IDs must be nonempty and unique.');
-  const selectedMetadata = definition.series.filter(series => series.sourceId === source.id).flatMap(series => matchingSeries(series, resolved));
+  const selectedMetadata = resolveVisualizationSeries(definition, resolved.series).map(entry => entry.metadata);
   const data = resolved.data;
   if (!observations(data).length) add('data', 'Use an empty source resolution when no explicit observations are available.');
   if (data.kind === 'time-series') {
@@ -240,6 +236,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add(resolution.state === 'missing-source' ? 'missing-source' : 'data', resolution.message, source.id); continue;
     }
     const resolved = resolution.resolved;
+    if (!capabilities.controls.includes('axes') && resolveVisualizationSeries(definition, resolved.series).some(entry => entry.selected.axis === 'right'))
+      add('capability', 'This source does not support the requested axis override.', source.id);
     reasons.push(...resolvedDataReasons(definition, source, resolved));
     if (!chartCapability.shapes.includes(resolved.data.kind) || !capabilities.shapes.includes(resolved.data.kind)
       || !capabilities.alignments.includes(resolved.alignment.kind))
@@ -263,28 +261,31 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('data', 'This composition contains unsupported negative contributions; use the source details to repair it.', source.id);
     resolvedSources.push({ source, resolved });
   }
-  const selected = definition.series.flatMap(series => {
-    const entry = resolvedSources.find(entry => entry.source.id === series.sourceId);
-    const resolved = entry?.resolved;
-    const matches = resolved ? matchingSeries(series, resolved) : [];
-    if (!matches.length) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
-    const resourceGuids = [series.resourceGuid, ...matches.map(metadata => metadata.resourceGuid)]
-      .filter((guid): guid is string => guid !== undefined);
-    for (const resourceGuid of new Set(resourceGuids)) {
-      const references = entry?.resolved.references.filter(reference => reference.id === resourceGuid
-        && seriesReferenceKinds(entry.source, resourceGuid).includes(reference.kind)) ?? [];
-      if (entry && (!resourceGuid.trim() || !references.length))
+  const allMetadata = resolvedSources.flatMap(entry => entry.resolved.series);
+  const selected = resolveVisualizationSeries(definition, allMetadata);
+  if (!selected.length) add('series', 'Choose at least one available visible series.');
+  for (const series of definition.series) {
+    const available = allMetadata.some(metadata => metadata.sourceId === series.sourceId && metadata.metric === series.metric
+      && (series.resourceGuid === undefined || metadata.resourceGuid === series.resourceGuid));
+    if (!available && series.visible !== false) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
+  }
+  for (const { selected: series, metadata } of selected) {
+    const entry = resolvedSources.find(entry => entry.source.id === series.sourceId)!;
+    const resourceGuid = metadata.resourceGuid;
+    if (resourceGuid !== undefined) {
+      const references = entry.resolved.references.filter(reference => reference.id === resourceGuid
+        && seriesReferenceKinds(entry.source, resourceGuid).includes(reference.kind));
+      if (!resourceGuid.trim() || !references.length)
         add('missing-source', `Repair the selected series resource: ${resourceGuid}.`, series.sourceId);
-      if (entry) for (const reference of references) reasons.push(...referenceSelectionReasons(entry.source, reference));
+      for (const reference of references) reasons.push(...referenceSelectionReasons(entry.source, reference));
     }
-    const unit = entry?.source.settings?.unit;
-    if (unit?.kind === 'pinned' && matches.some(metadata => metadata.unit !== unit.value))
+    const unit = entry.source.settings?.unit;
+    if (unit?.kind === 'pinned' && metadata.unit !== unit.value)
       add('units', 'Resolve the pinned unit before rendering; a unit label is not a conversion.', series.sourceId);
-    const treatment = entry?.source.settings?.energyTreatment;
-    if (treatment?.kind === 'pinned' && matches.some(metadata => metadata.energyTreatment !== treatment.value))
+    const treatment = entry.source.settings?.energyTreatment;
+    if (treatment?.kind === 'pinned' && metadata.energyTreatment !== treatment.value)
       add('units', 'Resolve the pinned site/source treatment before rendering.', series.sourceId);
-    return matches.map(metadata => ({ selected: series, metadata }));
-  });
+  }
   const shapeKinds = new Set(resolvedSources.map(entry => entry.resolved.data.kind));
   if (shapeKinds.size > 1) add('capability', 'Combine sources only after a provider supplies one compatible data shape.');
   if (new Set(resolvedSources.map(entry => `${entry.resolved.alignment.kind}:${entry.resolved.alignment.key}`)).size > 1)

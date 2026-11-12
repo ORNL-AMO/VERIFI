@@ -1,4 +1,4 @@
-import { VisualizationDefinition, VisualizationSource, VisualizationSourceKind } from './visualization-definition';
+import { VISUALIZATION_DEFINITION_VERSION, VisualizationDefinition, VisualizationSource, VisualizationSourceKind } from './visualization-definition';
 
 export interface VisualizationIssue {
   readonly path: string;
@@ -110,12 +110,27 @@ const chart = variant({
   treemap: object({ kind: enumeration('treemap'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment')), values: enumeration('absolute', 'percent') }),
   sankey: object({ kind: enumeration('sankey'), flow: enumeration('source-to-equipment', 'source-to-group', 'energy-balance') })
 }, true);
-const definition = object({
-  version: enumeration(1), name: text, accountGuid: text,
+const seriesFields = { id: text, sourceId: text, metric: text, resourceGuid: text, label: text, color: text,
+  axis: enumeration('left', 'right'), lineStyle: enumeration('solid', 'dashed', 'dotted') };
+const seriesOptional = ['resourceGuid', 'label', 'color', 'lineStyle'];
+const seriesOverride: Check = (value, path, issues) => {
+  object({ resourceGuid: text, seriesId: text, accountGuid: text, label: text, color: text,
+    axis: enumeration('left', 'right'), lineStyle: enumeration('solid', 'dashed', 'dotted'), visible: boolean,
+    order: (value, path, issues) => {
+      if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) issue(issues, path, 'Enter a nonnegative safe integer for explicit series order.');
+    } },
+    ['resourceGuid', 'seriesId', 'accountGuid', 'label', 'color', 'axis', 'lineStyle', 'visible', 'order'])(value, path, issues);
+  if (value && typeof value === 'object') {
+    const count = Number(Object.hasOwn(value, 'resourceGuid')) + Number(Object.hasOwn(value, 'seriesId'));
+    if (count !== 1) issue(issues, path, 'Choose exactly one resource GUID or provider series identity for a presentation override.');
+  }
+};
+const definition = (version: 1 | 2): Check => object({
+  version: enumeration(version), name: text, accountGuid: text,
   scope: variant({ portfolio: object({ kind: enumeration('portfolio') }), facility: object({ kind: enumeration('facility'), facilityGuid: text }) }),
   sources: array(source), period, comparison,
-  series: array(object({ id: text, sourceId: text, metric: text, resourceGuid: text, label: text, color: text, axis: enumeration('left', 'right'),
-    lineStyle: enumeration('solid', 'dashed', 'dotted') }, ['resourceGuid', 'label', 'color', 'lineStyle'])),
+  series: array(version === 1 ? object(seriesFields, seriesOptional)
+    : object({ ...seriesFields, visible: boolean, overrides: array(seriesOverride) }, [...seriesOptional, 'visible', 'overrides'])),
   chart, appearance: object({ legend: boolean, title: text }, ['title'])
 }, ['chart']);
 
@@ -181,19 +196,20 @@ function sourceResources(kind: VisualizationSourceKind): readonly string[] {
     : kind === 'energy-use' ? ['facility', 'equipment', 'energy-use-group'] : [];
 }
 
-/** Decode without normalizing, retargeting, or mutating caller-owned intent. */
+/** Decode supported versions into current intent without mutation or persistence writes. */
 export function decodeVisualizationDefinition(value: unknown): VisualizationValidationResult {
   const issues: VisualizationIssue[] = [];
   checkJson(value, '$', issues);
   if (issues.length) return { state: 'invalid', issues };
   if (value && typeof value === 'object' && !Array.isArray(value) && Object.hasOwn(value, 'version')) {
     const version = (value as { version: unknown }).version;
-    if (typeof version === 'number' && Number.isSafeInteger(version) && version > 0 && version !== 1)
+    if (typeof version === 'number' && Number.isSafeInteger(version) && version > 0 && version !== 1 && version !== VISUALIZATION_DEFINITION_VERSION)
       return { state: 'unsupported', issues: [{ path: '$.version', code: 'unsupported', message: `Unsupported definition version: ${version}.` }] };
   }
-  definition(value, '$', issues);
+  const sourceVersion = (value as { version?: unknown })?.version === 1 ? 1 : VISUALIZATION_DEFINITION_VERSION;
+  definition(sourceVersion)(value, '$', issues);
   if (issues.length) return { state: issues.some(entry => entry.code === 'invalid') ? 'invalid' : 'unsupported', issues };
-  const decoded = value as VisualizationDefinition;
+  const decoded: VisualizationDefinition = { ...structuredClone(value as VisualizationDefinition), version: VISUALIZATION_DEFINITION_VERSION };
   for (const [key, entries] of [['sources', decoded.sources], ['series', decoded.series]] as const) {
     const ids = entries.map(entry => entry.id);
     if (new Set(ids).size !== ids.length) issue(issues, `$.${key}`, 'Definition-local IDs must be unique.');
@@ -202,6 +218,12 @@ export function decodeVisualizationDefinition(value: unknown): VisualizationVali
     if ('selection' in selected && selected.selection?.kind === 'fixed' && new Set(selected.selection.guids).size !== selected.selection.guids.length)
       issue(issues, `$.sources[${index}].selection.guids`, 'Fixed selections cannot contain duplicate GUIDs.');
   }
+  decoded.series.forEach((series, index) => {
+    const keys = (series.overrides ?? []).map(override => JSON.stringify([override.accountGuid ?? decoded.accountGuid,
+      override.resourceGuid !== undefined ? 'resource' : 'series', override.resourceGuid ?? override.seriesId]));
+    if (new Set(keys).size !== keys.length) issue(issues, `$.series[${index}].overrides`, 'Presentation override selectors must be unique within an account.');
+    if (series.resourceGuid && series.overrides?.length) issue(issues, `$.series[${index}].overrides`, 'Resource overrides require a matching-set series.');
+  });
   if (issues.length) return { state: 'invalid', issues };
   const incomplete = setupIssues(decoded);
   return { state: incomplete.length ? 'setup-required' : 'valid', definition: decoded, issues: incomplete };
