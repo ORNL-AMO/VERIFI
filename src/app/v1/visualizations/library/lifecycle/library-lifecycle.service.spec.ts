@@ -1,3 +1,6 @@
+import { Router } from '@angular/router';
+import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { TestBed } from '@angular/core/testing';
 import type { VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { LibraryLifecycle } from './library-lifecycle.service';
@@ -57,6 +60,39 @@ describe('visualization Dashboard lifecycle', () => {
     workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true }, facilities: [] });
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle);
     expect(lifecycle.editor()).toBeUndefined(); expect(lifecycle.error()).toContain('sole facility');
+  });
+  it('reviews a retained portfolio visualization before copying it into a single-facility account', async () => {
+    const { workspace, commands, visualizations } = configureLibraryTest(); const record = libraryRecord('Retained portfolio');
+    const original = structuredClone(record.definition);
+    workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true }, savedVisualizations: [record] });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const lifecycle = TestBed.inject(LibraryLifecycle); await lifecycle.duplicate(buildVisualizationLibrary(workspace.snapshot()!)[0]);
+    expect(navigate).toHaveBeenCalledWith(visualizations.workbenchRoute('account-a', record.guid), { queryParams: { action: 'copy-scope' } });
+    expect(commands.prepareDuplicate).not.toHaveBeenCalled(); expect(commands.submit).not.toHaveBeenCalled();
+    expect(lifecycle.proposal()).toBeUndefined(); expect(record.definition).toEqual(original);
+    expect(workspace.savedVisualizations()).toEqual([record]);
+  });
+  it.each(['duplicate', 'duplicateToScope'] as const)('blocks %s when the single-facility account has no valid sole facility', async action => {
+    const { workspace, commands } = configureLibraryTest(); const record = libraryRecord(); const original = structuredClone(record.definition);
+    workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true }, facilities: [], savedVisualizations: [record] });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const lifecycle = TestBed.inject(LibraryLifecycle); await lifecycle[action](buildVisualizationLibrary(workspace.snapshot()!)[0]);
+    expect(lifecycle.error()).toContain('Restore the sole facility or convert this account to a portfolio');
+    expect(commands.prepareDuplicate).not.toHaveBeenCalled(); expect(commands.submit).not.toHaveBeenCalled(); expect(navigate).not.toHaveBeenCalled();
+    expect(record.definition).toEqual(original);
+  });
+  it('keeps ordinary facility-owned duplication available in a valid single-facility account', async () => {
+    const { workspace, commands, visualizations } = configureLibraryTest();
+    const record = getNewIdbSavedVisualization(createVisualizationDefinition('Facility setup', 'account-a', { kind: 'facility', facilityGuid: 'facility-a' }, 'utility'));
+    const original = structuredClone(record.definition);
+    workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true }, savedVisualizations: [record] });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const lifecycle = TestBed.inject(LibraryLifecycle); await lifecycle.duplicate(buildVisualizationLibrary(workspace.snapshot()!)[0]);
+    expect(commands.prepareDuplicate).toHaveBeenCalledWith(record);
+    expect(commands.submit.mock.calls[0][0]).toMatchObject({ kind: 'duplicate', sourceGuid: record.guid,
+      definition: { scope: { kind: 'facility', facilityGuid: 'facility-a' } } });
+    expect(visualizations.open).toHaveBeenCalledWith('account-a', 'copy-1'); expect(navigate).not.toHaveBeenCalled();
+    expect(record.definition).toEqual(original);
   });
   it('refreshes a conflicting source before explicitly discarding a rejected duplicate proposal', async () => {
     const { commands, workspace } = configureLibraryTest(); const record = libraryRecord();

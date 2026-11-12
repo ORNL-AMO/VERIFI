@@ -160,15 +160,23 @@ export class LibraryLifecycle {
     await this.execute();
   }
   async duplicate(entry: VisualizationLibraryEntry): Promise<void> {
-    if (!this.canAct() || this.editor() || this.proposal() || !entry.editable) return;
+    if (!this.canAct() || this.editor() || this.proposal() || !entry.editable || !this.copyOwnerAvailable()) return;
+    if (this.workspace.account()?.isSingleFacilityCompany && entry.scope === 'portfolio') {
+      await this.duplicateToScope(entry); return;
+    }
     try { this.proposal.set(this.commands.prepareDuplicate(entry.record)); await this.execute(); }
     catch (error) { this.error.set(message(error)); }
   }
   async duplicateToScope(entry: VisualizationLibraryEntry): Promise<void> {
-    if (!this.canAct() || this.needsProtection() || this.editor() || !entry.editable) return;
+    if (!this.canAct() || this.needsProtection() || this.editor() || !entry.editable || !this.copyOwnerAvailable()) return;
     this.visualizations.rememberReturn(entry.record.accountId, this.navigation.inventoryFacilityGuid());
     try { if (!await this.router.navigate(this.visualizations.workbenchRoute(entry.record.accountId, entry.record.guid), { queryParams: { action: 'copy-scope' } })) this.error.set('The visualization could not be opened.'); }
     catch { this.error.set('The visualization could not be opened. Please try again.'); }
+  }
+  private copyOwnerAvailable(): boolean {
+    if (!this.workspace.account()?.isSingleFacilityCompany || this.navigation.isSingleSiteWorkspace()) return true;
+    this.error.set('Restore the sole facility or convert this account to a portfolio before duplicating a visualization.');
+    return false;
   }
   requestDelete(entry: VisualizationLibraryEntry): void {
     if (!this.canAct() || this.editor() || this.proposal()) return;

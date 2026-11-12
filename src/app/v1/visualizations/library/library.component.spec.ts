@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -50,6 +51,19 @@ describe('visualization library dashboard', () => {
     expect(component.entries()).toHaveLength(2); component.openCreate(); fixture.detectChanges();
     expect(component.lifecycle.editor()?.fixedFacility).toBe('facility-a');
     expect(component.lifecycle.form.controls.scope.value).toBe('facility');
+  });
+  it('keeps the retained portfolio card and routes its Duplicate action through scope review for a single facility', async () => {
+    const { component, fixture, workspace, facility, commands, visualizations } = await setup();
+    workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true } });
+    facility.set('facility-a'); fixture.detectChanges();
+    const portfolio = component.entries().find(entry => entry.scope === 'portfolio')!;
+    const original = structuredClone(portfolio.record.definition);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    component.requestAction({ guid: portfolio.record.guid, action: 'copy' }); await fixture.whenStable(); fixture.detectChanges();
+    expect(component.entries()).toHaveLength(2);
+    expect(navigate).toHaveBeenCalledWith(visualizations.workbenchRoute('account-a', portfolio.record.guid), { queryParams: { action: 'copy-scope' } });
+    expect(commands.prepareDuplicate).not.toHaveBeenCalled(); expect(commands.submit).not.toHaveBeenCalled();
+    expect(portfolio.record.definition).toEqual(original);
   });
   it('captures originating facility browse context before opening the exact saved item', async () => {
     const { component, fixture, facility, visualizations } = await setup(); facility.set('facility-a'); fixture.detectChanges();
