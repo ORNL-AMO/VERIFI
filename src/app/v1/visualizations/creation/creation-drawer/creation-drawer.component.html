@@ -62,7 +62,7 @@
               <p>Choose exact meters for this independent saved visualization. Their future saved readings update the chart.</p>
               <label for="visualization-recipe-meters">Meters</label>
               <select id="visualization-recipe-meters" class="v1-select" multiple size="8" formControlName="meterGuids">
-                @for (meter of lifecycle.recipeResources(); track meter.guid) { <option [value]="meter.guid">{{ meter.name }} · {{ meter.source }}{{ meter.noLongerInUse ? ' · Retired' : '' }}</option> }
+                @for (meter of lifecycle.recipeResourceOptions(); track meter.guid) { <option [value]="meter.guid">{{ meter.label }}</option> }
               </select>
               @if (!lifecycle.recipeResources().length) { <p role="status">No supported saved meter history is available in this scope. Choose Custom or add meter readings first.</p> }
             }

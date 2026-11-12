@@ -75,6 +75,11 @@ export class LibraryLifecycle {
     const snapshot = this.workspace.snapshot(), draft = this.draft();
     return snapshot ? recipeMeters(snapshot, draft.scope === 'facility' ? { kind: 'facility', facilityGuid: draft.facilityGuid } : { kind: 'portfolio' }, draft.recipe) : [];
   });
+  readonly recipeResourceOptions = computed(() => {
+    const facilities = new Map(this.facilities().map(facility => [facility.guid, facility.name || 'Unnamed facility']));
+    return this.recipeResources().map(meter => ({ guid: meter.guid,
+      label: `${facilities.get(meter.facilityId) ?? meter.facilityId} / ${meter.name || 'Unnamed meter'} · ${meter.source}${meter.noLongerInUse ? ' · Retired' : ''}` }));
+  });
   readonly recipeValid = computed(() => this.draft().recipe === 'custom' || this.draft().meterGuids.length > 0
     && this.draft().meterGuids.every(guid => this.recipeResources().some(m => m.guid === guid)));
   readonly canContinueRecipe = computed(() => this.canEditDraft() && this.ownerValid() && this.recipeValid());
