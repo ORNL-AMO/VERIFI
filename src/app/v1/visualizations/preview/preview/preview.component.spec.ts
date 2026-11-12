@@ -57,11 +57,11 @@ describe('visualization preview presentation', () => {
     expect(fixture.nativeElement.querySelector('button')).toBeNull();
   });
 
-  it('announces the selected Scatter setup for multiple families without mounting chart data', () => {
+  it('announces the selected Scatter setup for multiple data sources without mounting chart data', () => {
     TestBed.configureTestingModule({ imports: [PreviewModule] });
     const fixture = TestBed.createComponent(PreviewComponent);
     fixture.componentRef.setInput('definition', createVisualizationSetupDefinition({ name: 'Usage versus temperature', accountGuid: 'account-a',
-      scope: { kind: 'portfolio' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] }));
+      scope: { kind: 'portfolio' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] }));
     fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelector('[role="status"]')!.textContent).toContain('Scatter visualization');

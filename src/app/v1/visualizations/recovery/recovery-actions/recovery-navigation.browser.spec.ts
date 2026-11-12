@@ -34,7 +34,7 @@ const originalUrl = `${workbenchBase}/visualization-a`;
 function setup(firstOutcome: 'failed' | 'refresh-required') {
   const store = new AccountWorkspaceStore();
   const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-    scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+    scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
   store.publish({ ...visualizationSnapshot(), savedVisualizations: [{ ...visualizationRecord(), definition }] });
   const currentUrl = signal('/');
   const routeState = computed(() => parseWorkspaceRoute(currentUrl()));
@@ -139,7 +139,7 @@ describe('routed deleted-draft recovery protection in Chromium', () => {
       expect(test.recover).toHaveBeenCalledTimes(outcome === 'refresh-required' ? 1 : 0);
       expect(test.submit.mock.calls.every(([command]) => command.guid === 'recovered-identity')).toBe(true);
       expect(test.store.savedVisualizations()).toHaveLength(1);
-      expect(test.workbench()!.editor.definition()?.sources.map(source => source.kind)).toEqual(['utility', 'weather']);
+      expect(test.workbench()!.editor.definition()?.sources.map(source => source.kind)).toEqual(['utility', 'predictor']);
       expect(test.workbench()!.editor.definition()?.chart).toEqual({ kind: 'scatter', showFit: false });
       expect(test.modal.activePortal()).toBeNull();
     } finally { test.destroy(); }

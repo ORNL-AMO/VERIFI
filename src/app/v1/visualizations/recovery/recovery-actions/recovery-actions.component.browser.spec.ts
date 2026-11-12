@@ -18,7 +18,7 @@ import { RecoveryActionsComponent } from './recovery-actions.component';
 
 function mixedSetup(): VisualizationDefinition {
   return createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-    scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+    scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
 }
 
 describe('reviewed visualization recovery with native storage', () => {
@@ -52,7 +52,7 @@ describe('reviewed visualization recovery with native storage', () => {
     expect((saved.definition as any).sources[0].selection).toBeUndefined();
   });
 
-  it('resets only a broken source and its Scatter binding while retaining the chart and unaffected family after reopen', async () => {
+  it('resets only a broken source and its Scatter binding while retaining the chart and unaffected sourceKind after reopen', async () => {
     const setup = mixedSetup();
     const definition: VisualizationDefinition = { ...setup,
       sources: [{ ...utilityVisualizationFixture().sources[0], id: setup.sources[0].id }, setup.sources[1]],
@@ -72,12 +72,12 @@ describe('reviewed visualization recovery with native storage', () => {
     const saved = readSavedVisualization(records[0]); expect(saved.state).toBe('setup-required');
     if (!('definition' in saved)) throw new Error('Expected readable saved setup.');
     expect(saved.definition.chart).toEqual(setup.chart); expect(saved.definition.series).toEqual([]);
-    expect(saved.definition.sources.map(source => source.kind)).toEqual(['utility', 'weather']);
+    expect(saved.definition.sources.map(source => source.kind)).toEqual(['utility', 'predictor']);
     expect(saved.definition.sources[1]).toEqual(definition.sources[1]);
     expect(saved.definition.sources[0]).not.toHaveProperty('selection');
   });
 
-  it('duplicates incomplete mixed-family Scatter intent with independent identity and unchanged original after reopen', async () => {
+  it('duplicates incomplete mixed-sourceKind Scatter intent with independent identity and unchanged original after reopen', async () => {
     await TestBed.inject(AccountWorkspaceService).selectAccount('account-a');
     const commands = TestBed.inject(SavedVisualizationCommands), definition = mixedSetup();
     const original = commands.prepareCreate(definition); await commands.submit(original);
@@ -92,7 +92,7 @@ describe('reviewed visualization recovery with native storage', () => {
     expect(readSavedVisualization(duplicate).state).toBe('setup-required');
   });
 
-  it('copies unassigned Scatter intent to an explicitly reviewed facility and preserves both source families after reopen', async () => {
+  it('copies unassigned Scatter intent to an explicitly reviewed facility and preserves both data sources after reopen', async () => {
     await harness.seed({ facilities: [{ ...visualizationFacility, id: 2, guid: 'facility-b', name: 'Plant B' }] });
     await TestBed.inject(AccountWorkspaceService).selectAccount('account-a');
     const commands = TestBed.inject(SavedVisualizationCommands), definition = mixedSetup();
@@ -112,7 +112,7 @@ describe('reviewed visualization recovery with native storage', () => {
     expect(readSavedVisualization(copied).state).toBe('setup-required');
   });
 
-  it.each(['legacy', 'mixed-family Scatter'] as const)('saves a deleted %s editor draft under a new GUID without recreating its removed identity', async kind => {
+  it.each(['legacy', 'mixed-sourceKind Scatter'] as const)('saves a deleted %s editor draft under a new GUID without recreating its removed identity', async kind => {
     if (kind === 'legacy') await harness.seed({ utilityMeter: [{
       ...getNewIdbUtilityMeter('facility-a', 'account-a', true, 'kWh'), guid: 'meter-a'
     }] });

@@ -75,10 +75,10 @@ describe('VisualizationEditorSession', () => {
     expect(test.submit.mock.calls[1][0].definition.name).toBe('Original');
   });
 
-  it('retains mixed-family Scatter setup through autosave acknowledgements and newer metadata input', async () => {
+  it('retains mixed-sourceKind Scatter setup through autosave acknowledgements and newer metadata input', async () => {
     vi.useFakeTimers();
     const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
-      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor', 'weather'] });
+      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor', 'analysis'] });
     const test = setup(record(definition)), pending = deferred<VisualizationCommandOutcome>();
     test.submit.mockImplementationOnce(() => pending.promise);
     test.session.form.controls.name.setValue('First edit'); await vi.advanceTimersByTimeAsync(650);
@@ -102,7 +102,7 @@ describe('VisualizationEditorSession', () => {
 
   it('retains incomplete mixed-source chart intent when an invalid metadata draft blocks navigation', async () => {
     const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
-      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const test = setup(record(definition));
     test.session.form.controls.name.setValue('');
     expect(await test.session.flush()).toBe(false);

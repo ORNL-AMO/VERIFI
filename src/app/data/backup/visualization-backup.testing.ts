@@ -14,9 +14,9 @@ export function visualizationBackupSnapshot(): AccountWorkspaceSnapshot {
   const account = { ...getNewIdbAccount(), guid: 'account-a' };
   const facility = { ...getNewIdbFacility(account), guid: 'facility-a' };
   const utility = utilityVisualizationFixture({ kind: 'facility', facilityGuid: facility.guid });
-  const predictor = (kind: 'predictor' | 'weather'): VisualizationDefinition => ({
-    ...createVisualizationDefinition(kind, account.guid, { kind: 'facility', facilityGuid: facility.guid }, kind),
-    sources: [{ id: 'predictor', kind, measure: 'value', aggregation: 'none', selection: { kind: 'fixed', resource: 'predictor', guids: ['predictor-a'] } }]
+  const predictor = (guid: string): VisualizationDefinition => ({
+    ...createVisualizationDefinition(guid, account.guid, { kind: 'facility', facilityGuid: facility.guid }, 'predictor'),
+    sources: [{ id: 'predictor', kind: 'predictor', measure: 'value', aggregation: 'none', selection: { kind: 'fixed', resource: 'predictor', guids: [guid] } }]
   });
   const energy = { ...energyUseVisualizationFixture(), sources: [{ ...energyUseVisualizationFixture().sources[0],
     selection: { kind: 'fixed', resource: 'equipment', guids: ['equipment-a'] } }] } as VisualizationDefinition;
@@ -27,7 +27,8 @@ export function visualizationBackupSnapshot(): AccountWorkspaceSnapshot {
     meters: [{ guid: 'meter-a', accountId: account.guid, facilityId: facility.guid, groupId: 'group-a', name: 'Meter',
       charges: [{ guid: 'charge-a', name: 'Demand', chargeType: 'demand' }] } as any],
     meterGroups: [{ guid: 'group-a', accountId: account.guid, facilityId: facility.guid, name: 'Meter group' } as any],
-    predictors: [{ guid: 'predictor-a', accountId: account.guid, facilityId: facility.guid, name: 'Predictor' } as any],
+    predictors: [{ guid: 'predictor-a', accountId: account.guid, facilityId: facility.guid, name: 'Predictor', predictorType: 'Standard' } as any,
+      { guid: 'weather-a', accountId: account.guid, facilityId: facility.guid, name: 'Weather', predictorType: 'Weather' } as any],
     facilityAnalyses: [{ guid: 'analysis-a', accountId: account.guid, facilityId: facility.guid, groups: [{
       idbGroupId: 'group-a', analysisType: 'regression', isGeneratedModel: true, predictorVariables: [], selectedModelId: 'model-a',
       models: [{ modelId: 'model-a', predictorVariables: [], coef: [1], t: { p: [.1] }, f: {} },
@@ -36,7 +37,7 @@ export function visualizationBackupSnapshot(): AccountWorkspaceSnapshot {
     energyUseGroups: [{ guid: 'energy-group-a', accountId: account.guid, facilityId: facility.guid, name: 'Equipment group' } as any],
     energyUseEquipment: [{ guid: 'equipment-a', accountId: account.guid, facilityId: facility.guid, name: 'Equipment',
       energyUseGroupId: 'energy-group-a', utilityMeterGroupIds: [], utilityData: [] } as any],
-    savedVisualizations: [utility, utilityVisualizationFixture(), predictor('predictor'), predictor('weather'), energy,
+    savedVisualizations: [utility, utilityVisualizationFixture(), predictor('predictor-a'), predictor('weather-a'), energy,
       analysisVisualizationFixture(), analysisVisualizationFixture(true), charges]
       .map((definition, index) => savedVisualizationFixture(definition, `visualization-${index}`)),
     meterData: [], predictorData: [], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: []

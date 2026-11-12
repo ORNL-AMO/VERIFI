@@ -4,59 +4,107 @@ import { createVisualizationDefinition } from '@domain/visualizations/visualizat
 import { TestBed } from '@angular/core/testing';
 import type { VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { LibraryLifecycle } from './library-lifecycle.service';
-import { VISUALIZATION_FAMILIES, buildVisualizationLibrary } from '../visualization-library.models';
+import { VISUALIZATION_DATA_SOURCES, buildVisualizationLibrary } from '../visualization-library.models';
 import { configureLibraryTest, libraryRecord } from '../testing/library-testing';
-import { meter, reading } from '@app/v1/data/meters/facility-meters.testing';
+import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
-function selectSetup(lifecycle: LibraryLifecycle, families: readonly VisualizationSourceKind[] = ['utility']): void {
+function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly VisualizationSourceKind[] = ['utility']): void {
   if (!lifecycle.editor()?.fixedFacility) lifecycle.selectScope('portfolio');
   lifecycle.selectChart('line');
-  for (const family of families) lifecycle.toggleFamily(family);
-  lifecycle.continueFamilies();
+  for (const sourceKind of sourceKinds) lifecycle.toggleSource(sourceKind);
+  lifecycle.continueSources();
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it('clears resources when revisiting the grouping step and blocks removed choices', () => {
+    const { workspace, commands } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, meters: [meter({ groupId: 'group-a' })], meterData: [reading({})],
+      meterGroups: [group({ guid: 'group-a', name: 'Production' })] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.selectScope('portfolio'); lifecycle.selectRecipe('energy-trend');
+    expect(lifecycle.form.controls.recipeGrouping.value).toBeNull();
+    lifecycle.selectRecipeGrouping('sources'); lifecycle.toggleRecipeResource('Electricity');
+    expect(lifecycle.canContinueRecipe()).toBe(true);
+    lifecycle.editSelection('recipe-grouping'); lifecycle.selectRecipeGrouping('sources');
+    expect(lifecycle.form.controls.recipeResourceIds.value).toEqual([]);
+    lifecycle.editSelection('recipe-grouping'); lifecycle.selectRecipeGrouping('groups');
+    expect(lifecycle.form.controls.recipeResourceIds.value).toEqual([]); expect(lifecycle.canContinueRecipe()).toBe(false);
+    lifecycle.toggleRecipeResource('group-a'); expect(lifecycle.canContinueRecipe()).toBe(true);
+    workspace.publish({ ...workspace.snapshot()!, meterGroups: [] });
+    expect(lifecycle.canContinueRecipe()).toBe(false);
+    expect(lifecycle.recipeResourceCards()).toContainEqual({ value: 'group-a', label: 'Unavailable selection', detail: 'Select to remove', icon: 'meterGroupItem' });
+    lifecycle.continueRecipe(); expect(lifecycle.step()).toBe('recipe-resources'); expect(commands.prepareCreate).not.toHaveBeenCalled();
+    lifecycle.toggleRecipeResource('group-a'); expect(lifecycle.form.controls.recipeResourceIds.value).toEqual([]);
+  });
   it('binds a recipe to explicit saved meters before preparing one independent creation', async () => {
     const { commands, workspace } = configureLibraryTest();
     workspace.publish({ ...workspace.snapshot()!, meters: [meter({})], meterData: [reading({})] });
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.selectScope('portfolio'); lifecycle.selectRecipe('energy-trend');
+    expect(lifecycle.step()).toBe('recipe-grouping'); lifecycle.selectRecipeGrouping('meters');
     expect(lifecycle.step()).toBe('recipe-resources'); expect(lifecycle.canContinueRecipe()).toBe(false);
     lifecycle.continueRecipe(); await lifecycle.submit(); expect(commands.prepareCreate).not.toHaveBeenCalled();
-    lifecycle.form.controls.meterGuids.setValue(['meter-a']); lifecycle.continueRecipe(); await lifecycle.submit();
+    lifecycle.form.controls.recipeResourceIds.setValue(['meter-a']); lifecycle.continueRecipe(); await lifecycle.submit();
     expect(commands.prepareCreate).toHaveBeenCalledTimes(1);
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ name: 'Energy usage trend',
       chart: { kind: 'time-series', type: 'line', interval: 'monthly' }, sources: [{ measure: 'energy', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] } }] });
   });
-  it('requires an explicit chart, source families and final name step before adding', async () => {
+  it('requires an explicit chart, data sources and final name step before adding', async () => {
     const { commands } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
     lifecycle.form.controls.name.setValue('Premature'); await lifecycle.submit();
     expect(commands.prepareCreate).not.toHaveBeenCalled();
     lifecycle.selectScope('portfolio'); lifecycle.selectChart('scatter'); await lifecycle.submit();
-    expect(lifecycle.canContinueFamilies()).toBe(false); expect(commands.prepareCreate).not.toHaveBeenCalled();
-    lifecycle.toggleFamily('utility'); await lifecycle.submit();
-    expect(commands.prepareCreate).not.toHaveBeenCalled(); lifecycle.continueFamilies(); await lifecycle.submit();
+    expect(lifecycle.canContinueSources()).toBe(false); expect(commands.prepareCreate).not.toHaveBeenCalled();
+    lifecycle.toggleSource('utility'); await lifecycle.submit();
+    expect(commands.prepareCreate).not.toHaveBeenCalled(); lifecycle.continueSources(); await lifecycle.submit();
     expect(commands.prepareCreate).toHaveBeenCalledTimes(1);
     expect(commands.prepareCreate.mock.calls[0][0].chart).toEqual({ kind: 'scatter', showFit: false });
   });
-  it('retains mixed-family choices and name while revisiting ownership and chart selections', async () => {
+  it('clears later choices immediately when revisiting chart and ownership selections', async () => {
     const { commands } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
     lifecycle.selectScope('facility'); expect(lifecycle.step()).toBe('facility'); lifecycle.selectFacility('facility-a');
-    lifecycle.selectChart('scatter'); lifecycle.toggleFamily('utility'); lifecycle.toggleFamily('weather'); lifecycle.continueFamilies();
+    lifecycle.selectChart('scatter'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
     lifecycle.form.controls.name.setValue('Usage versus weather');
-    lifecycle.editSelection('chart'); expect(lifecycle.step()).toBe('chart'); lifecycle.selectChart('combination');
-    expect(lifecycle.form.controls.families.value).toEqual(['utility', 'weather']);
-    lifecycle.continueFamilies(); lifecycle.editSelection('scope'); lifecycle.selectScope('portfolio');
-    expect(lifecycle.form.controls.name.value).toBe('Usage versus weather');
-    expect(lifecycle.form.controls.chart.value).toBe('combination'); lifecycle.selectChart('combination'); lifecycle.continueFamilies();
+    lifecycle.editSelection('chart'); expect(lifecycle.step()).toBe('chart');
+    expect(lifecycle.form.controls.chart.value).toBe('scatter'); expect(lifecycle.form.controls.facilityGuid.value).toBe('facility-a');
+    expect(lifecycle.form.controls.sourceKinds.value).toEqual([]); expect(lifecycle.form.controls.name.value).toBe('');
+    lifecycle.selectChart('combination'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
+    lifecycle.form.controls.name.setValue('New selection'); lifecycle.editSelection('scope');
+    expect(lifecycle.form.controls.facilityGuid.value).toBe(''); expect(lifecycle.form.controls.chart.value).toBeNull();
+    expect(lifecycle.form.controls.sourceKinds.value).toEqual([]); expect(lifecycle.form.controls.name.value).toBe('');
+    expect(lifecycle.canSubmit()).toBe(false);
+    lifecycle.selectScope('portfolio'); lifecycle.selectChart('combination'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor');
+    lifecycle.continueSources(); lifecycle.form.controls.name.setValue('Fresh name');
     await lifecycle.submit();
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ scope: { kind: 'portfolio' }, chart: { kind: 'time-series', type: 'combination' },
-      sources: [{ id: 'source-1', kind: 'utility' }, { id: 'source-2', kind: 'weather' }] });
+      sources: [{ id: 'source-1', kind: 'utility' }, { id: 'source-2', kind: 'predictor' }] });
+  });
+  it.each(['energy-trend', 'cost-trend'] as const)('clears the %s path immediately when reopening the facility step', recipe => {
+    const { workspace } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, meters: [meter({})], meterData: [reading({})] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.selectScope('facility'); lifecycle.selectFacility('facility-a');
+    lifecycle.selectRecipe(recipe); if (recipe === 'energy-trend') lifecycle.selectRecipeGrouping('meters');
+    lifecycle.toggleRecipeResource('meter-a'); lifecycle.continueRecipe(); lifecycle.form.controls.name.markAsTouched();
+    lifecycle.editSelection('facility');
+    expect(lifecycle.step()).toBe('facility');
+    expect(lifecycle.form.getRawValue()).toMatchObject({ scope: 'facility', facilityGuid: 'facility-a', chart: null,
+      sourceKinds: [], recipe: 'custom', recipeGrouping: null, recipeResourceIds: [], name: '' });
+    expect(lifecycle.selections().map(selection => selection.step)).toEqual(['scope', 'facility']);
+    expect(lifecycle.form.controls.name.touched).toBe(false); expect(lifecycle.canSubmit()).toBe(false);
+  });
+  it('keeps the current resources but clears the later name when editing resource selection', () => {
+    const { workspace } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, meters: [meter({})], meterData: [reading({})] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.selectScope('portfolio'); lifecycle.selectRecipe('energy-trend');
+    lifecycle.selectRecipeGrouping('meters'); lifecycle.toggleRecipeResource('meter-a'); lifecycle.continueRecipe();
+    lifecycle.editSelection('recipe-resources');
+    expect(lifecycle.form.controls.recipeResourceIds.value).toEqual(['meter-a']);
+    expect(lifecycle.form.controls.recipeGrouping.value).toBe('meters'); expect(lifecycle.form.controls.name.value).toBe('');
+    expect(lifecycle.canContinueRecipe()).toBe(true); expect(lifecycle.canSubmit()).toBe(false);
   });
   it('resets steps and selections when Add is reopened after explicit discard', () => {
-    configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'weather']);
+    configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'predictor']);
     lifecycle.form.controls.name.setValue('Discard this setup'); lifecycle.discard(); lifecycle.openCreate();
     expect(lifecycle.step()).toBe('scope'); expect(lifecycle.selections()).toEqual([]);
-    expect(lifecycle.form.controls.chart.value).toBeNull(); expect(lifecycle.form.controls.families.value).toEqual([]);
+    expect(lifecycle.form.controls.chart.value).toBeNull(); expect(lifecycle.form.controls.sourceKinds.value).toEqual([]);
     expect(lifecycle.form.controls.name.value).toBe(''); expect(lifecycle.canSubmit()).toBe(false);
   });
   it('skips ownership for a preselected facility and blocks an unavailable owner', () => {
@@ -129,21 +177,21 @@ describe('visualization Dashboard lifecycle', () => {
     expect(visualizations.open).not.toHaveBeenCalled();
     expect(lifecycle.needsProtection()).toBe(false);
   });
-  it.each(VISUALIZATION_FAMILIES)('creates one saved setup identity for $value and opens its workbench', async family => {
+  it.each(VISUALIZATION_DATA_SOURCES)('creates one saved setup identity for $value and opens its workbench', async sourceKind => {
     const { commands, visualizations } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle);
-    lifecycle.openCreate(); selectSetup(lifecycle, [family.value]); lifecycle.form.patchValue({ name: '  Useful name  ' }); await lifecycle.submit();
+    lifecycle.openCreate(); selectSetup(lifecycle, [sourceKind.value]); lifecycle.form.patchValue({ name: '  Useful name  ' }); await lifecycle.submit();
     expect(commands.prepareCreate).toHaveBeenCalledTimes(1);
-    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ name: 'Useful name', sources: [{ kind: family.value }] });
+    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ name: 'Useful name', sources: [{ kind: sourceKind.value }] });
     expect(visualizations.open).toHaveBeenCalledWith('account-a', 'created-1'); expect(lifecycle.needsProtection()).toBe(false);
   });
   it('retains one failed creation proposal and recovers a committed publication without resubmitting', async () => {
     const { commands, visualizations } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle);
     commands.submit.mockImplementationOnce(async command => ({ state: 'failed', command, error: new Error('Storage unavailable') } as any))
       .mockImplementationOnce(async command => ({ state: 'refresh-required', command, error: new Error('Refresh unavailable') } as any));
-    lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'weather']); lifecycle.form.controls.name.setValue('Retained'); await lifecycle.submit();
+    lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'predictor']); lifecycle.form.controls.name.setValue('Retained'); await lifecycle.submit();
     const proposal = lifecycle.proposal();
-    expect(proposal).toMatchObject({ definition: { chart: { kind: 'time-series', type: 'line' }, sources: [{ kind: 'utility' }, { kind: 'weather' }] } });
-    lifecycle.toggleFamily('predictor'); expect(lifecycle.form.controls.families.value).toEqual(['utility', 'weather']);
+    expect(proposal).toMatchObject({ definition: { chart: { kind: 'time-series', type: 'line' }, sources: [{ kind: 'utility' }, { kind: 'predictor' }] } });
+    lifecycle.toggleSource('predictor'); expect(lifecycle.form.controls.sourceKinds.value).toEqual(['utility', 'predictor']);
     expect(lifecycle.needsProtection()).toBe(true); expect(lifecycle.form.controls.name.value).toBe('Retained');
     await lifecycle.retry(); expect(lifecycle.proposal()).toBe(proposal); expect(lifecycle.outcome()).toBe('refresh-required');
     lifecycle.discard(); expect(lifecycle.proposal()).toBe(proposal); expect(lifecycle.canDiscard()).toBe(false);

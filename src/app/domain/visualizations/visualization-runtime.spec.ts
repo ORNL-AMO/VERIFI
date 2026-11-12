@@ -39,7 +39,7 @@ describe('visualization source/runtime contracts', () => {
     expect(checkVisualizationCompatibility(definition, [{ ...evidence, resolution: response }]).state).toBe('compatible');
     const resolved = ready(evidence);
     expect(resolved.provenance).toEqual([definition.sources[0].kind === 'energy-use' ? 'estimated'
-      : definition.sources[0].kind === 'analysis-model' ? 'modeled' : 'measured']);
+      : definition.sources[0].kind === 'analysis' && definition.sources[0].mode === 'model' ? 'modeled' : 'measured']);
     const observation = resolved.data.kind === 'time-series' ? Object.values(resolved.data.rows[0].values)[0]
       : resolved.data.kind === 'hierarchy' ? resolved.data.nodes[0].observation
       : resolved.data.kind === 'flow' ? resolved.data.links[0].observation : undefined;
@@ -47,17 +47,37 @@ describe('visualization source/runtime contracts', () => {
     expect(JSON.stringify(definition)).toBe(before);
   });
 
-  it.each(['predictor', 'weather'] as const)('retains %s provenance without a remote-data dependency', kind => {
-    const initial = createVisualizationDefinition('Temperature', 'account-a', { kind: 'portfolio' }, kind);
-    const definition: VisualizationDefinition = { ...initial, sources: [{ id: kind, kind, measure: 'value', aggregation: 'none',
+  it.each(['Standard', 'Weather'] as const)('retains %s predictor provenance without a remote-data dependency', predictorType => {
+    const initial = createVisualizationDefinition('Temperature', 'account-a', { kind: 'portfolio' }, 'predictor');
+    const definition: VisualizationDefinition = { ...initial, sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
       selection: { kind: 'fixed', resource: 'predictor', guids: ['temperature-a'] } }],
-      series: [{ id: 'temperature', sourceId: kind, metric: 'value', axis: 'left' }],
+      series: [{ id: 'temperature', sourceId: 'predictors', resourceGuid: 'temperature-a', metric: 'value', axis: 'left' }],
       chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' } };
-    const evidence = visualizationEvidenceFixture(definition);
+    const evidence = visualizationEvidenceFixture(definition, 0, [{ guid: 'temperature-a', predictorType }]);
     expect(checkVisualizationCompatibility(definition, [evidence]).state).toBe('compatible');
-    const resolved = ready(evidence); expect(resolved.provenance).toEqual([kind]);
+    const provenance = predictorType === 'Weather' ? 'weather' : 'predictor';
+    const resolved = ready(evidence); expect(resolved.provenance).toEqual([provenance]);
     if (resolved.data.kind !== 'time-series') throw new Error('Expected time-series');
-    expect(Object.values(resolved.data.rows[0].values)[0]).toMatchObject({ provenance: kind });
+    expect(Object.values(resolved.data.rows[0].values)[0]).toMatchObject({ provenance });
+  });
+
+  it('retains standard and weather observations within one predictor source', () => {
+    const definition: VisualizationDefinition = {
+      ...createVisualizationDefinition('Predictors', 'account-a', { kind: 'portfolio' }, 'predictor'),
+      sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
+        selection: { kind: 'fixed', resource: 'predictor', guids: ['standard-a', 'weather-a'] } }],
+      series: ['standard-a', 'weather-a'].map(resourceGuid => ({ id: resourceGuid, sourceId: 'predictors', resourceGuid, metric: 'value', axis: 'left' })),
+      chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' }
+    };
+    const evidence = visualizationEvidenceFixture(definition, 0, [
+      { guid: 'standard-a', predictorType: 'Standard' }, { guid: 'weather-a', predictorType: 'Weather' }
+    ]);
+    expect(checkVisualizationCompatibility(definition, [evidence]).state).toBe('compatible');
+    const resolved = ready(evidence);
+    expect(resolved.provenance).toEqual(['predictor', 'weather']);
+    if (resolved.data.kind !== 'time-series') throw new Error('Expected time-series');
+    expect(resolved.data.rows[0].values['standard-a']).toMatchObject({ provenance: 'predictor' });
+    expect(resolved.data.rows[0].values['weather-a']).toMatchObject({ provenance: 'weather' });
   });
 
   it('preserves carried-forward equipment values alongside estimates', () => {

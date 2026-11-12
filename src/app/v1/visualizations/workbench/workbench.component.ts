@@ -1,6 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
+import { FormControl } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -8,11 +9,11 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { VisualizationEditorSession } from '../editing/visualization-editor-session.service';
 import { VisualizationNavigationService } from '../visualization-navigation.service';
 import { visualizationChartLabel } from '../visualization-charts';
-import { VISUALIZATION_FAMILIES } from '../visualization-families';
+import { VISUALIZATION_DATA_SOURCES, visualizationDataSourceChoices } from '../visualization-data-sources';
 import { PreviewRegistry } from '../preview/preview-registry';
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
 import { RecoveryActionsComponent, VisualizationChildDraftGuard } from '../recovery/recovery-actions/recovery-actions.component';
-import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 
@@ -20,6 +21,8 @@ import { visualizationIntentEqual } from '../editing/visualization-reconciliatio
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
 export class WorkbenchComponent {
   readonly editor = inject(VisualizationEditorSession);
+  readonly dataSources = visualizationDataSourceChoices();
+  readonly sourceKindControl = new FormControl<VisualizationSourceKind>('utility', { nonNullable: true });
   readonly workspace = inject(AccountWorkspaceStore);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly journeys = inject(VisualizationNavigationService);
@@ -49,7 +52,8 @@ export class WorkbenchComponent {
       : 'Portfolio';
   });
   readonly sourceSummary = computed(() => this.editor.definition()?.sources.map(source => ({ id: source.id,
-    familyLabel: VISUALIZATION_FAMILIES.find(family => family.value === source.kind)!.label, measure: source.measure })) ?? []);
+    dataSourceLabel: VISUALIZATION_DATA_SOURCES.find(option => option.value === source.kind)!.label,
+    measure: source.measure, setupUnavailable: !this.registry.editor(source.kind) })) ?? []);
   readonly chartSummary = computed(() => visualizationChartLabel(this.editor.definition()?.chart));
   readonly previewIdentity = computed(() => ({ accountGuid: this.accountGuid(), workspaceRevision: this.workspace.revision(),
     definitionGuid: this.navigation.routeState().visualizationGuid ?? '', definitionRevision: this.editor.localRevision() }));
@@ -101,7 +105,7 @@ export class WorkbenchComponent {
     const unregisterFields = this.unsaved.register(() => this.hasInvalidFields(), () => this.discardFields(), () => this.editor.saving());
     const unloadFields = this.unsaved.protectBeforeUnload(this.hasInvalidFields);
     let priorKey = '';
-    effect(() => { const key = this.editor.key(); if (key !== priorKey) { priorKey = key; untracked(() => this.invalidEditors.set({})); } });
+    effect(() => { const key = this.editor.key(); if (key !== priorKey) { priorKey = key; untracked(() => { this.invalidEditors.set({}); this.sourceKindControl.setValue('utility', { emitEvent: false }); }); } });
     this.destroy.onDestroy(() => { unregister(); unregisterFields(); unloadFields(); this.finishLeave(false); });
   }
 
@@ -115,10 +119,12 @@ export class WorkbenchComponent {
     this.invalidEditors.update(state => ({ ...state, [id]: invalid }));
   }
   private discardFields(): void { this.invalidEditors.set({}); this.editorReset.update(value => value + 1); }
-  addUtilitySource(): void {
+  addDataSource(): void {
     const definition = this.editor.definition(); if (!definition || !this.editor.canEdit()) return;
-    let index = 1; while (definition.sources.some(source => source.id === `utility-${index}`)) index++;
-    const source = { ...createVisualizationDefinition('', definition.accountGuid, definition.scope, 'utility').sources[0], id: `utility-${index}` };
+    const kind = this.sourceKindControl.value;
+    if (!this.dataSources.some(option => option.value === kind)) return;
+    let index = 1; while (definition.sources.some(source => source.id === `${kind}-${index}`)) index++;
+    const source = { ...createVisualizationDefinition('', definition.accountGuid, definition.scope, kind).sources[0], id: `${kind}-${index}` };
     this.editor.applyDefinition({ ...definition, sources: [...definition.sources, source] });
   }
   removeSource(id: string): void {
@@ -127,7 +133,7 @@ export class WorkbenchComponent {
     this.editor.applyDefinition({ ...definition, sources: definition.sources.filter(source => source.id !== id), series: definition.series.filter(series => series.sourceId !== id) });
   }
 
-  back(): void { void this.journeys.returnToLibrary(this.accountGuid()); }
+  back(): void { void this.journeys.returnToDashboard(this.accountGuid()); }
 
   resolveLeave(): Promise<boolean> {
     if (this.leaving) return this.leaving;

@@ -22,6 +22,7 @@ import { VISUALIZATION_ROUTES } from '../visualizations.routes';
 import { WorkbenchComponent } from '../workbench/workbench.component';
 import { WorkbenchModule } from '../workbench/workbench.module';
 import { visualizationRecord, visualizationSnapshot } from './visualization-test-fixtures';
+import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: `
   <main class="v1-root" style="height:600px;overflow:auto"><router-outlet/></main>
@@ -49,7 +50,7 @@ function setup(options: { singleFacility?: boolean } = {}) {
   const navigation = {
     routeState, isSingleSiteWorkspace: computed(() => store.account()?.isSingleFacilityCompany === true && store.facilities().length === 1),
     inventoryFacilityGuid: computed(() => router?.parseUrl(currentUrl()).queryParamMap.get('facility') ?? undefined),
-    changeFacilityScope: vi.fn(async scope => router.navigateByUrl(`${base}/library${scope.kind === 'facility' ? `?facility=${scope.facilityGuid}` : ''}`))
+    changeFacilityScope: vi.fn(async scope => router.navigateByUrl(`${base}/dashboard${scope.kind === 'facility' ? `?facility=${scope.facilityGuid}` : ''}`))
   };
   let nextGuid = 0;
   const prepareCreate = vi.fn<SavedVisualizationCommands['prepareCreate']>(definition => ({ kind: 'create',
@@ -126,17 +127,60 @@ function creationDialog(test: ReturnType<typeof setup>): HTMLElement {
 }
 
 describe('visualization routed journeys in Chromium', () => {
-  it('adds a mixed-family Scatter with the keyboard and reopens its full intent after restoring Dashboard filters', async () => {
+  it.each(['', '/dashboard', '/unknown'])('opens the Dashboard from the section path %s while retaining facility scope', async path => {
     const test = setup();
     try {
-      await test.navigate(`${base}/library`);
+      await test.navigate(`${base}${path}?facility=facility-a`);
+      expect(test.router.url).toBe(`${base}/dashboard?facility=facility-a`);
+      expect(test.library()).toBeDefined();
+      expect(test.library()!.scopedFacilityGuid()).toBe('facility-a');
+      expect(test.library()!.entries().every(entry => entry.facilityGuid === 'facility-a')).toBe(true);
+    } finally { test.destroy(); }
+  });
+
+  it.each([
+    { label: 'Source', resource: 'Electricity', grouping: 'source' },
+    { label: 'Meter group', resource: 'Production', grouping: 'group' },
+    { label: 'Meters', resource: 'Main meter', grouping: 'meter' }
+  ])('creates and reopens an energy trend using $label cards with keyboard selection', async choice => {
+    await page.viewport(480, 760);
+    const test = setup();
+    try {
+      test.store.publish({ ...test.store.snapshot()!, meters: [meter({ groupId: 'group-a', name: 'Main meter' })],
+        meterGroups: [group({ guid: 'group-a', name: 'Production' })], meterData: [reading({})] });
+      await test.navigate(`${base}/dashboard`); await activate(test, 'Add visualization'); await activate(test, 'Portfolio');
+      await activate(test, 'Energy usage trend');
+      const grouping = creationDialog(test).querySelector('[aria-label="View meters by"]')!;
+      expect([...grouping.querySelectorAll('strong')].map(item => item.textContent)).toEqual(['Source', 'Meter group', 'Meters']);
+      expect([...grouping.querySelectorAll('button')].every(button => button.getAttribute('aria-pressed') === 'false')).toBe(true);
+      await activate(test, choice.label);
+      const dialog = creationDialog(test), resource = namedButton(dialog, choice.resource);
+      expect(dialog.querySelector('select')).toBeNull(); expect(resource.getAttribute('aria-pressed')).toBe('false');
+      expect(namedButton(dialog, 'Continue').disabled).toBe(true);
+      const marker = resource.querySelector<HTMLElement>('.creation-choice__selection')!.getBoundingClientRect(), card = resource.getBoundingClientRect();
+      expect(marker.left).toBeGreaterThan(card.left); expect(marker.right).toBeLessThan(card.left + card.width / 2);
+      expect(marker.top).toBeGreaterThan(card.top); expect(marker.bottom).toBeLessThan(card.top + card.height / 2);
+      await activate(test, choice.resource); expect(resource.getAttribute('aria-pressed')).toBe('true');
+      await page.screenshot({ element: dialog, path: `../../../../../.angular/vis3-alignment/energy-trend-${choice.grouping}-cards.png` });
+      await activate(test, 'Continue'); await activate(test, 'Add visualization');
+      await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/workbench/created-1`); });
+      const record = test.store.savedVisualizations().find(item => item.guid === 'created-1')!;
+      expect(record.definition).toMatchObject({ sources: [{ kind: 'utility', groupBy: choice.grouping }] });
+      await activate(test, 'Back to Dashboard'); await test.navigate(`${base}/workbench/created-1`);
+      expect(test.editor()!.editor.definition()).toEqual(record.definition);
+    } finally { test.destroy(); await page.viewport(1280, 900); }
+  });
+  it('adds a mixed-sourceKind Scatter with the keyboard and reopens its full intent after restoring Dashboard filters', async () => {
+    const test = setup();
+    try {
+      await test.navigate(`${base}/dashboard`);
       const search = test.root.querySelector<HTMLInputElement>('input[type="search"]')!;
       await userEvent.type(search, 'My energy'); test.fixture.detectChanges();
       await activate(test, 'Add visualization'); await activate(test, 'Portfolio');
-      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(11);
-      await activate(test, 'Scatter'); await activate(test, 'Utility'); await activate(test, 'Weather');
-      expect(namedButton(creationDialog(test), 'Utility').getAttribute('aria-pressed')).toBe('true');
-      expect(namedButton(creationDialog(test), 'Weather').getAttribute('aria-pressed')).toBe('true');
+      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      await activate(test, 'Scatter'); await activate(test, 'Meters'); await activate(test, 'Predictors');
+      expect(namedButton(creationDialog(test), 'Meters').getAttribute('aria-pressed')).toBe('true');
+      expect(namedButton(creationDialog(test), 'Predictors').getAttribute('aria-pressed')).toBe('true');
       expect(creationDialog(test).querySelector('input[formcontrolname="name"]')).toBeNull();
       await activate(test, 'Continue');
       const name = creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
@@ -149,12 +193,12 @@ describe('visualization routed journeys in Chromium', () => {
       expect(decoded.state).toBe('setup-required');
       if (!('definition' in decoded)) throw new Error('Expected readable setup intent.');
       expect(decoded.definition).toMatchObject({ name: 'Weather and usage', scope: { kind: 'portfolio' }, chart: { kind: 'scatter', showFit: false },
-        sources: [{ id: 'source-1', kind: 'utility' }, { id: 'source-2', kind: 'weather' }], series: [] });
+        sources: [{ id: 'source-1', kind: 'utility' }, { id: 'source-2', kind: 'predictor' }], series: [] });
       expect(test.editor()?.editor.definition()).toEqual(decoded.definition);
-      expect(test.root.textContent).toContain('Scatter'); expect(test.root.textContent).toContain('Weather');
+      expect(test.root.textContent).toContain('Scatter'); expect(test.root.textContent).toContain('Predictors');
       await activate(test, 'Back to Dashboard');
       await vi.waitFor(() => {
-        test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/library`);
+        test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/dashboard`);
         expect(test.root.querySelector<HTMLInputElement>('input[type="search"]')!.value).toBe('My energy');
       });
       expect(test.root.querySelector('[data-browse-id="created-1"]')).toBeNull();
@@ -170,14 +214,14 @@ describe('visualization routed journeys in Chromium', () => {
   it('keeps an Add draft when a scope change is canceled and leaves only after explicit discard', async () => {
     const test = setup();
     try {
-      await test.navigate(`${base}/library`);
+      await test.navigate(`${base}/dashboard`);
       await activate(test, 'Add visualization'); await activate(test, 'Portfolio');
-      await activate(test, 'Scatter'); await activate(test, 'Utility');
-      const departure = test.router.navigateByUrl(`${base}/library?facility=facility-a`); await waitForDialog(test);
+      await activate(test, 'Scatter'); await activate(test, 'Meters');
+      const departure = test.router.navigateByUrl(`${base}/dashboard?facility=facility-a`); await waitForDialog(test);
       dialogButton(test.root, 'Cancel').focus(); await userEvent.keyboard('{Enter}');
       await expect(departure).resolves.toBe(false); test.fixture.detectChanges();
-      expect(test.router.url).toBe(`${base}/library`);
-      expect(namedButton(creationDialog(test), 'Utility').getAttribute('aria-pressed')).toBe('true');
+      expect(test.router.url).toBe(`${base}/dashboard`);
+      expect(namedButton(creationDialog(test), 'Meters').getAttribute('aria-pressed')).toBe('true');
       expect(test.library()!.lifecycle.needsProtection()).toBe(true); expect(test.submit).not.toHaveBeenCalled();
       const accepted = test.router.navigateByUrl('/outside'); await waitForDialog(test);
       dialogButton(test.root, 'Discard changes').focus(); await userEvent.keyboard('{Enter}');
@@ -189,10 +233,10 @@ describe('visualization routed journeys in Chromium', () => {
   it('starts single-facility creation at chart selection and retains sole-facility ownership without creating analyses', async () => {
     const test = setup({ singleFacility: true });
     try {
-      await test.navigate(`${base}/library`); await activate(test, 'Add visualization');
+      await test.navigate(`${base}/dashboard`); await activate(test, 'Add visualization');
       expect(creationDialog(test).querySelector('[aria-label="Visualization ownership"]')).toBeNull();
-      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(11);
-      await activate(test, 'Line'); await activate(test, 'Utility'); await activate(test, 'Continue');
+      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      await activate(test, 'Line'); await activate(test, 'Meters'); await activate(test, 'Continue');
       await userEvent.type(creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!, 'Plant usage');
       test.fixture.detectChanges(); await activate(test, 'Add visualization');
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/workbench/created-1`); });
@@ -206,14 +250,21 @@ describe('visualization routed journeys in Chromium', () => {
     await page.viewport(1280, 900);
     const test = setup();
     try {
-      await test.navigate(`${base}/library`); await activate(test, 'Add visualization'); await activate(test, 'Portfolio');
+      await test.navigate(`${base}/dashboard`); await activate(test, 'Add visualization'); await activate(test, 'Portfolio');
       const dialog = creationDialog(test);
-      expect(dialog.querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(11);
+      expect(dialog.querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      expect([...dialog.querySelectorAll('.creation-section-title')].map(heading => heading.textContent)).toEqual(['Pre-configured', 'Custom']);
+      for (const heading of dialog.querySelectorAll<HTMLElement>('.creation-section-title')) {
+        expect(getComputedStyle(heading).borderBottomWidth).toBe('0px');
+        expect(getComputedStyle(heading).letterSpacing).toBe('normal');
+      }
+      expect(dialog.textContent).not.toContain('Choose saved meters next');
+      expect(dialog.textContent).not.toContain('Choose a chart to configure');
       await userEvent.keyboard('{Tab}');
-      expect(document.activeElement).toBe(namedButton(dialog, 'Line'));
+      expect(document.activeElement).toBe(namedButton(dialog, 'Energy usage trend'));
       expect(parseFloat(getComputedStyle(document.activeElement!).outlineWidth)).toBeGreaterThanOrEqual(2);
       await page.screenshot({ element: dialog, path: '../../../../../.angular/vis3-alignment/chart-choices-wide.png' });
-      await activate(test, 'Scatter'); await activate(test, 'Utility'); await activate(test, 'Weather');
+      await activate(test, 'Scatter'); await activate(test, 'Meters'); await activate(test, 'Predictors');
       for (const width of [1280, 480]) {
         await page.viewport(width, 760);
         for (const palette of PORTFOLIO_PALETTES) {
@@ -222,7 +273,7 @@ describe('visualization routed journeys in Chromium', () => {
             const panel = creationDialog(test), bounds = panel.getBoundingClientRect();
             expect(bounds.left).toBeGreaterThanOrEqual(0); expect(bounds.right).toBeLessThanOrEqual(width);
             expect(panel.scrollWidth).toBeLessThanOrEqual(Math.ceil(bounds.width));
-            const choice = namedButton(panel, 'Utility');
+            const choice = namedButton(panel, 'Meters');
             expect(choice.getAttribute('aria-pressed')).toBe('true'); expect(textContrast(choice)).toBeGreaterThanOrEqual(4.5);
             const body = panel.querySelector<HTMLElement>('.v1-workspace-slideout__body')!;
             expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth);
@@ -230,7 +281,7 @@ describe('visualization routed journeys in Chromium', () => {
           }
         }
       }
-      await page.screenshot({ element: creationDialog(test), path: '../../../../../.angular/vis3-alignment/source-families-narrow-dark-contrast.png' });
+      await page.screenshot({ element: creationDialog(test), path: '../../../../../.angular/vis3-alignment/data-sources-narrow-dark-contrast.png' });
       await activate(test, 'Continue');
       expect(document.activeElement).toBe(creationDialog(test).querySelector('input[formcontrolname="name"]'));
       await userEvent.keyboard('{Tab}');
@@ -240,7 +291,7 @@ describe('visualization routed journeys in Chromium', () => {
   });
 
   it('opens a Dashboard card with Enter and restores its search and item focus on return', async () => {
-    const test = setup(); await test.navigate(`${base}/library`);
+    const test = setup(); await test.navigate(`${base}/dashboard`);
     const search = test.root.querySelector<HTMLInputElement>('input[type="search"]')!;
     search.focus(); await userEvent.type(search, 'My energy'); test.fixture.detectChanges();
     const link = test.root.querySelector<HTMLAnchorElement>('a.portfolio-tile__name[data-browse-id="visualization-a"]')!;
@@ -250,7 +301,7 @@ describe('visualization routed journeys in Chromium', () => {
     const back = [...test.root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent!.trim() === 'Back to Dashboard')!;
     back.focus(); await userEvent.keyboard('{Enter}');
     await vi.waitFor(() => {
-      test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/library`);
+      test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/dashboard`);
       expect(test.root.querySelector<HTMLInputElement>('input[type="search"]')!.value).toBe('My energy');
       expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('visualization-a');
     });
@@ -287,7 +338,7 @@ describe('visualization routed journeys in Chromium', () => {
   });
 
   it('protects browser Back with the same shell portal and preserves invalid local input on Escape', async () => {
-    const test = setup(); await test.navigate(`${base}/library`); await test.navigate(workbenchA);
+    const test = setup(); await test.navigate(`${base}/dashboard`); await test.navigate(workbenchA);
     test.editor()!.editor.form.controls.name.setValue(''); test.fixture.detectChanges();
     TestBed.inject(Location).back(); await waitForDialog(test);
     await userEvent.keyboard('{Escape}');
@@ -308,7 +359,7 @@ describe('visualization routed journeys in Chromium', () => {
       expect(test.root.querySelector('input[formcontrolname="name"]')).toBeNull();
       expect(test.editor()!.editor.needsProtection()).toBe(false);
     }
-    await test.navigate(`${base}/library`);
+    await test.navigate(`${base}/dashboard`);
     expect(test.root.textContent).not.toContain('Private Account B chart'); expect(test.library()!.entries()).toHaveLength(2); test.destroy();
   });
 });

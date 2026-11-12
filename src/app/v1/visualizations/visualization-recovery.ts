@@ -24,9 +24,9 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
     const copy = { ...source };
     if ('selection' in copy) delete copy.selection;
     if (copy.kind === 'utility') delete copy.charge;
-    if (copy.kind === 'analysis-result' || copy.kind === 'analysis-model') {
+    if (copy.kind === 'analysis') {
       delete copy.analysisGuid; delete copy.groupGuid;
-      if (copy.kind === 'analysis-model') { delete copy.modelId; delete copy.comparisonModelId; }
+      if (copy.mode === 'model') { delete copy.modelId; delete copy.comparisonModelId; }
     }
     return copy;
   });

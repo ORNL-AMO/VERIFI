@@ -1,7 +1,7 @@
 @if (selectedSource()?.kind === 'utility') {
   @let current = value();
   <fieldset [formGroup]="form" class="utility-editor">
-    <legend>Utility source</legend>
+    <legend>Meters</legend>
     @if (conflict()) {
       <div role="alert">
         <p>Saved settings changed while your local input was incomplete. Review which settings to keep before continuing.</p>

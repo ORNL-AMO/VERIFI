@@ -70,10 +70,10 @@ function requiredReferences(source: VisualizationSource, definition: Visualizati
     }
   }
   if (source.kind === 'utility' && source.charge) required.push({ kind: 'meter', id: source.charge.meterGuid }, { kind: 'charge', id: source.charge.chargeGuid });
-  if (source.kind === 'analysis-result' || source.kind === 'analysis-model') {
+  if (source.kind === 'analysis') {
     if (source.analysisGuid) required.push({ kind: 'analysis', id: source.analysisGuid });
     if (source.groupGuid) required.push({ kind: 'analysis-group', id: source.groupGuid });
-    if (source.kind === 'analysis-model') {
+    if (source.mode === 'model') {
       if (source.modelId) required.push({ kind: 'model', id: source.modelId });
       if (source.comparisonModelId) required.push({ kind: 'model', id: source.comparisonModelId });
     }
@@ -118,12 +118,12 @@ function seriesReferenceKinds(source: VisualizationSource, guid: string): readon
     return source.groupBy === 'facility' || source.groupBy === 'group' || source.groupBy === 'meter'
       ? [grouping[source.groupBy]] : source.selection ? [source.selection.resource] : [];
   }
-  if (source.kind === 'predictor' || source.kind === 'weather') return ['predictor'];
+  if (source.kind === 'predictor') return ['predictor'];
   if (source.kind === 'energy-use') return source.selection ? [source.selection.resource] : [];
-  if (source.kind === 'analysis-result' || source.kind === 'analysis-model') {
+  if (source.kind === 'analysis') {
     if (guid === source.analysisGuid) return ['analysis'];
     if (guid === source.groupGuid) return ['analysis-group'];
-    if (source.kind === 'analysis-model' && (guid === source.modelId || guid === source.comparisonModelId)) return ['model'];
+    if (source.mode === 'model' && (guid === source.modelId || guid === source.comparisonModelId)) return ['model'];
     return ['facility', 'analysis-group'];
   }
   return [];
@@ -242,7 +242,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     if (!chartCapability.shapes.includes(resolved.data.kind) || !capabilities.shapes.includes(resolved.data.kind)
       || !capabilities.alignments.includes(resolved.alignment.kind))
       add('capability', 'This chart cannot preserve the resolved data shape.', source.id);
-    if ((source.kind === 'analysis-result' || source.kind === 'analysis-model') && resolved.analysisFreshness !== 'current')
+    if (source.kind === 'analysis' && resolved.analysisFreshness !== 'current')
       add('stale', 'Wait for current authoritative analysis results; stale results cannot be displayed.', source.id);
     for (const reference of requiredReferences(source, definition)) {
       const candidates = resolved.references.filter(candidate => candidate.kind === reference.kind && candidate.id === reference.id);

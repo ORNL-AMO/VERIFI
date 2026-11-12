@@ -48,10 +48,10 @@ export function visualizationReferences(definition: VisualizationDefinition): re
       add(`${path}.charge.meterGuid`, 'meter', source.charge.meterGuid);
       add(`${path}.charge.chargeGuid`, 'charge', source.charge.chargeGuid, source.charge.meterGuid);
     }
-    if (source.kind === 'analysis-result' || source.kind === 'analysis-model') {
+    if (source.kind === 'analysis') {
       add(`${path}.analysisGuid`, 'analysis', source.analysisGuid);
       add(`${path}.groupGuid`, 'meter-group', source.groupGuid, source.analysisGuid);
-      if (source.kind === 'analysis-model') {
+      if (source.mode === 'model') {
         add(`${path}.modelId`, 'model', source.modelId, source.analysisGuid, source.groupGuid);
         add(`${path}.comparisonModelId`, 'model', source.comparisonModelId, source.analysisGuid, source.groupGuid);
       }
@@ -80,11 +80,11 @@ function seriesReference(source: VisualizationSource | undefined, guid: string, 
     if (source.groupBy === 'group') return { kind: 'meter-group' };
     if (source.groupBy === 'meter') return { kind: 'meter' };
   }
-  if (source?.kind === 'predictor' || source?.kind === 'weather') return { kind: 'predictor' };
-  if (source?.kind === 'analysis-result' || source?.kind === 'analysis-model') {
+  if (source?.kind === 'predictor') return { kind: 'predictor' };
+  if (source?.kind === 'analysis') {
     if (guid === source.analysisGuid) return { kind: 'analysis' };
     if (guid === source.groupGuid) return { kind: 'meter-group', parentGuid: source.analysisGuid };
-    if (source.kind === 'analysis-model' && (guid === source.modelId || guid === source.comparisonModelId))
+    if (source.mode === 'model' && (guid === source.modelId || guid === source.comparisonModelId))
       return { kind: 'model', parentGuid: source.analysisGuid, groupGuid: source.groupGuid };
     if (scope.kind === 'facility' && guid === scope.facilityGuid) return { kind: 'facility' };
     // Other analysis series may identify a facility or an analysis group. Do not guess the namespace.

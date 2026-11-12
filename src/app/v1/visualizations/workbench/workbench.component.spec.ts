@@ -17,6 +17,7 @@ import { WorkbenchComponent } from './workbench.component';
 import { By } from '@angular/platform-browser';
 import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
 import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-actions.component';
+import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 
 describe('visualization workbench', () => {
   afterEach(() => TestBed.resetTestingModule());
@@ -33,13 +34,21 @@ describe('visualization workbench', () => {
     component.discardLeave();
     await expect(pending).resolves.toBe(true); expect(component.hasInvalidFields()).toBe(false);
   });
-  it('adds independent utility sources and removes only the chosen source configuration', () => {
-    const { component } = setup();
+  it.each(VISUALIZATION_DATA_SOURCES)('adds independent $label sources and removes only the chosen configuration', choice => {
+    const { component, fixture } = setup();
     const original = component.editor.definition()!;
-    component.addUtilitySource();
+    component.sourceKindControl.setValue(choice.value);
+    component.addDataSource();
     expect(component.editor.definition()!.sources).toHaveLength(original.sources.length + 1);
     const added = component.editor.definition()!.sources.at(-1)!;
+    expect(added.kind).toBe(choice.value);
     expect(added.id).not.toBe(original.sources[0].id);
+    component.addDataSource();
+    const repeated = component.editor.definition()!.sources.at(-1)!;
+    expect(repeated.kind).toBe(choice.value); expect(repeated.id).not.toBe(added.id);
+    fixture.detectChanges();
+    if (choice.value === 'predictor' || choice.value === 'analysis') expect(fixture.nativeElement.textContent).toContain(`Data selection for ${choice.label} is not available yet.`);
+    component.removeSource(repeated.id);
     component.removeSource(added.id);
     expect(component.editor.definition()!.sources).toEqual(original.sources);
     expect(component.editor.definition()!.series).toEqual(original.series);
@@ -99,13 +108,13 @@ describe('visualization workbench', () => {
     expect(submit).toHaveBeenCalledWith(expect.objectContaining({ expectedRevision: 1, definition: expect.objectContaining({ name: 'Updated name' }) }));
     expect(component.editor.needsProtection()).toBe(false);
   });
-  it.each(VISUALIZATION_CHART_CHOICES)('shows the saved $label chart choice and all selected source families', choice => {
+  it.each(VISUALIZATION_CHART_CHOICES)('shows the saved $label chart choice and all selected data sources', choice => {
     const definition = createVisualizationSetupDefinition({ name: 'Mixed chart', accountGuid: 'account-a', scope: { kind: 'portfolio' },
-      chart: createVisualizationChart(choice.value), sourceKinds: ['utility', 'weather', 'analysis-model'] });
+      chart: createVisualizationChart(choice.value), sourceKinds: ['utility', 'predictor', 'analysis'] });
     const { fixture, component } = setup(definition);
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain(`Chart: ${choice.label}`);
-    expect(root.textContent).toContain('Utility'); expect(root.textContent).toContain('Weather'); expect(root.textContent).toContain('Analysis Model');
+    expect(root.textContent).toContain('Meters'); expect(root.textContent).toContain('Predictors'); expect(root.textContent).toContain('Analysis');
     expect(root.textContent).toContain('Back to Dashboard');
     expect(component.editor.definition()).toEqual(definition);
   });
@@ -132,7 +141,7 @@ describe('visualization workbench', () => {
   });
   it('returns through account-isolated browse context', () => {
     const { component } = setup();
-    const back = vi.spyOn(TestBed.inject(VisualizationNavigationService), 'returnToLibrary').mockResolvedValue(true);
+    const back = vi.spyOn(TestBed.inject(VisualizationNavigationService), 'returnToDashboard').mockResolvedValue(true);
     component.back(); expect(back).toHaveBeenCalledWith('account-a');
   });
 });

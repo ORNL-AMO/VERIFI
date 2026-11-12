@@ -33,9 +33,9 @@ describe('visualization reconciliation', () => {
     expect(selected.value.sources).toEqual(saved.sources); expect(selected.value.period).toEqual(saved.period);
     expect(selected.value).not.toHaveProperty('chart');
   });
-  it('reconciles metadata independently while retaining the complete mixed-family chart setup', () => {
+  it('reconciles metadata independently while retaining the complete mixed-sourceKind chart setup', () => {
     const base = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
-      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+      chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const local = { ...base, name: 'My name' };
     const saved = { ...base, appearance: { legend: false, title: 'Saved title' } };
     const result = reconcileVisualizationIntent(base, local, saved);

@@ -56,11 +56,11 @@ function setupMixed(options: { definition?: VisualizationDefinition; providers?:
 }
 
 describe('visualization preview orchestration', () => {
-  it.each(VISUALIZATION_CHART_CHOICES)('retains $label mixed-family setup without requesting data or dates', ({ value, label }) => {
+  it.each(VISUALIZATION_CHART_CHOICES)('retains $label mixed-sourceKind setup without requesting data or dates', ({ value, label }) => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve), describe = vi.fn(), supportsChart = vi.fn(), prepare = vi.fn();
     const { controller } = setup({ provider: { resolve, describe, supportsChart }, presenter: { prepare }, dates: { resolve: resolveDates } });
     const definition = createVisualizationSetupDefinition({ name: 'Mixed setup', accountGuid: 'account-a', scope: { kind: 'portfolio' },
-      chart: createVisualizationChart(value), sourceKinds: ['utility', 'predictor', 'weather', 'energy-use', 'analysis-result', 'analysis-model'] });
+      chart: createVisualizationChart(value), sourceKinds: ['utility', 'predictor', 'energy-use', 'analysis'] });
     const original = structuredClone(definition);
     controller.update(definition, identity);
     expect(controller.state()).toMatchObject({ state: 'setup-required', message: expect.stringContaining(label) });
@@ -94,7 +94,7 @@ describe('visualization preview orchestration', () => {
     for (const provider of providers) expect(provider.resolve).toHaveBeenCalledTimes(1);
   });
 
-  it('preserves configured mixed sources when one family has no adapter, without requesting partial data', () => {
+  it('preserves configured mixed sources when one sourceKind has no adapter, without requesting partial data', () => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve);
     const { controller } = setup({ provider: { resolve }, dates: { resolve: resolveDates } });
     const definition = mixedDefinition(), original = structuredClone(definition);

@@ -9,7 +9,7 @@ import { InventoryView } from '@app/v1/shared/inventory/inventory.models';
 import type { VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 
 export interface BrowseFilters {
-  visualizations: { search: string; scope: 'all' | 'portfolio' | 'facility'; family: 'all' | VisualizationSourceKind; status: 'all' | 'setup-required' | 'repair-required' | 'unsupported' | 'configured'; sort: 'modified' | 'name' | 'attention' };
+  visualizations: { search: string; scope: 'all' | 'portfolio' | 'facility'; sourceKind: 'all' | VisualizationSourceKind; status: 'all' | 'setup-required' | 'repair-required' | 'unsupported' | 'configured'; sort: 'modified' | 'name' | 'attention' };
   'energy-uses': EnergyUseInventoryFilters;
   reports: ReportInventoryFilters;
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };

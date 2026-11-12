@@ -10,6 +10,8 @@ A visualization belongs to one account and declares portfolio or single-facility
 
 Scope and ownership are fixed for a saved identity. Ordinary Duplicate creates an independent identity with the same intent. Duplicate to another scope retains reusable presentation and period settings, but requires explicit review and replacement of incompatible resource references. Names are not source-mapping keys. Existing widgets continue referencing the original identity. Supported account/facility copy and backup GUID remapping belong to Vis2, not this editor operation.
 
+Data Sources uses four categories throughout creation, browsing and editing: **Meters**, **Predictors**, **Energy Use** and **Analysis**. Their saved kinds are `utility`, `predictor`, `energy-use` and `analysis`. Predictor records determine standard versus weather identity; weather remains distinct observation provenance. Analysis uses result/model modes within one category, preserving the existing measure sets and durable model pins. Newly selected Analysis defaults to result/actual setup intent. This greenfield contract replaces the former source-kind split in place, without migration or compatibility aliases. Concrete non-meter editors/providers remain downstream integrations.
+
 Source selection is explicit:
 
 - **Fixed:** identify exact resources by GUID. Rename changes labels, not identity. A missing selected resource blocks rendering and offers repair; it is never replaced or silently excluded from a total.
@@ -25,7 +27,7 @@ Persistent intent includes source identities and modes, measures, filters, aggre
 flowchart LR
   Dashboard --> Owner[Ownership]
   Owner --> Chart[Chart type]
-  Chart --> Families[One or more source families]
+  Chart --> Families[One or more data sources]
   Families --> Name[Name]
   Name --> Commit[Add saved visualization]
   Existing[Existing chart] --> Fidelity{Faithful capture supported?}
@@ -39,9 +41,9 @@ flowchart LR
   Home --> Workbench
 ```
 
-Add visualization is a stepped workflow: ownership, concrete chart type, one or more source families, then name. Preselected or single-facility ownership skips unavailable choices. Each selected family creates one setup source with independent local identity; the workbench later selects resources and repeated sources within a family. Creation saves coherent incomplete chart intent, without fabricated resources or series. The Dashboard and Home can therefore show setup-required items. Capture creates a saved item with a useful name immediately after faithful mapping succeeds; unsupported capture leaves the source chart unchanged. Failed creation retains the proposed definition for Retry and prevents repeated activation from creating duplicate records. A committed creation with failed publication must recover that identity rather than create it again.
+Add visualization is a stepped workflow: ownership, concrete chart type, one or more data sources, then name. Preselected or single-facility ownership skips unavailable choices. Each selected category creates one setup source with independent local identity; the workbench later selects resources and repeated sources within a category. Creation saves coherent incomplete chart intent, without fabricated resources or series. The Dashboard and Home can therefore show setup-required items. Capture creates a saved item with a useful name immediately after faithful mapping succeeds; unsupported capture leaves the source chart unchanged. Failed creation retains the proposed definition for Retry and prevents repeated activation from creating duplicate records. A committed creation with failed publication must recover that identity rather than create it again.
 
-The creation catalog offers chart setup intent before sources are configured; choosing a type or family does not establish rendering compatibility. Concrete source and chart adapters determine compatible combinations in Vis4–Vis8. Unavailable rendering explains the missing capability; users change sources or settings through the supported editors. Switching among compatible types retains shared settings and visibly initializes newly applicable controls. Supported mixed-source charts require declared alignment, compatible meaning, and appropriate axis settings. A renderer cannot make incompatible data compatible.
+The creation catalog offers chart setup intent before sources are configured; choosing a chart type or data-source category does not establish rendering compatibility. Concrete source and chart adapters determine compatible combinations in Vis4–Vis8. Unavailable rendering explains the missing capability; users change sources or settings through the supported editors. Switching among compatible types retains shared settings and visibly initializes newly applicable controls. Supported mixed-source charts require declared alignment, compatible meaning, and appropriate axis settings. A renderer cannot make incompatible data compatible.
 
 The workbench previews local coherent edits and autosaves them. Linked consumers use committed definitions, not the editor draft. Invalid field input stays local; a coherent definition may be saved even when setup is incomplete, sources are missing, or calculation is unavailable. This separates **definition validity**, **configuration completeness/compatibility**, and **runtime availability**.
 
@@ -69,7 +71,7 @@ Navigating away, switching scope/account, or deleting the edited item must resol
 
 New monthly utility charts use **all saved history**, which intentionally grows as saved history changes. Fixed ranges retain exact civil dates. Rolling ranges explicitly choose a calendar or latest-data anchor, with resolved dates visible. Latest-data anchors use the newest eligible observation among selected sources; lagging members retain gaps and partial-coverage notices. Calendar ranges do not imply that unsaved observations exist. Period-boundary, calendarization, fiscal-year, and unit interpretation remain owned by established VERIFI helpers and providers.
 
-Energy Use-only setup defaults to an explicit **latest saved fiscal year** rule, with an option to pin a fiscal year. The resolved actual fiscal interval is visible. Portfolio annual values cannot be merged solely because their year labels match; incompatible fiscal intervals block the rollup. Mixed-family setup starts with all saved history, and adapters must explicitly review native period compatibility. Annual estimates are never resampled into invented monthly observations.
+Energy Use-only setup defaults to an explicit **latest saved fiscal year** rule, with an option to pin a fiscal year. The resolved actual fiscal interval is visible. Portfolio annual values cannot be merged solely because their year labels match; incompatible fiscal intervals block the rollup. Mixed-source setup starts with all saved history, and adapters must explicitly review native period compatibility. Annual estimates are never resampled into invented monthly observations.
 
 Comparisons support previous period, previous calendar/fiscal year, and explicit dates where provider capabilities permit them. Comparison alignment retains actual period meaning. Analysis baselines remain owned by the named analysis; visualization dates are display requests, not edits to baseline settings. Result charts follow the named analysis's current saved calculation. Model-inspection charts pin durable model identity; deleting it requires repair. An unsaved candidate is not a durable source.
 

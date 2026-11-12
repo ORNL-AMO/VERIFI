@@ -99,6 +99,43 @@ export const FacilityEnergyFootprintIcon = [
   ['path', { d: 'M16.9 3.6C17.05 4.9 15.1 5.4 15.1 7.1C15.1 8.15 15.85 8.8 16.9 8.8C17.95 8.8 18.7 8.1 18.7 7.05C18.7 6.05 18.25 5.35 17.6 4.75C17.7 5.45 17.35 5.9 17 6.15C17.2 5.1 17.15 4.2 16.9 3.6Z', stroke: 'currentColor', strokeWidth: 0.737, strokeLinecap: 'round', strokeLinejoin: 'round' }]
 ] as const satisfies IconSvgObject;
 
+/** Design source: src/assets/icons/heatmap.svg. Keep geometry in sync. */
+export const HeatmapIcon = [
+  ['rect', { x: 3, y: 3, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.1, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 9, y: 3, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.3, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 15, y: 3, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.68, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 3, y: 9, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.43, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 9, y: 9, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.78, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 15, y: 9, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.2, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 3, y: 15, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.64, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 9, y: 15, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.16, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 15, y: 15, width: 6, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.4, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 3, y: 3, width: 18, height: 18, rx: 2, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M9 3v18m6-18v18M3 9h18M3 15h18', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/treemap.svg. Keep geometry in sync. */
+export const TreemapIcon = [
+  ['rect', { x: 3, y: 3, width: 8, height: 12, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.14, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 3, y: 15, width: 8, height: 6, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.4, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 11, y: 3, width: 10, height: 8, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.08, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 11, y: 11, width: 5, height: 10, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.25, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 16, y: 11, width: 5, height: 10, rx: 1.35, fill: 'currentColor', stroke: 'none', opacity: 0.65, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 3, y: 3, width: 18, height: 18, rx: 2, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M11 3v18M3 15h8m0-4h10m-5 0v10', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/sankey.svg. Keep geometry in sync. */
+export const SankeyIcon = [
+  ['path', { d: 'M5.5 5C11 5 12 2.5 19.5 2.5v6C12 8.5 11 11 5.5 11V5Z', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M5.5 11c6 0 6.5-.5 14-.5v4C12 14.5 11.5 15 5.5 15v-4Z', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M5.5 15c5.5 0 7 2.5 14 2.5v4C12.5 21.5 11 19 5.5 19v-4Z', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 2.5, y: 5, width: 3, height: 14, rx: 0.6, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 19.5, y: 2.5, width: 2.5, height: 6, rx: 0.5, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 19.5, y: 10.5, width: 2.5, height: 4, rx: 0.5, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['rect', { x: 19.5, y: 17.5, width: 2.5, height: 4, rx: 0.5, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
 export const CUSTOM_ICONS = {
   dataVisualization: VerifiChartIcon,
   betterPlantsReport: BetterPlantsReportIcon,
@@ -112,5 +149,8 @@ export const CUSTOM_ICONS = {
   energyUseGroup: EnergyUseGroupIcon,
   motor: MotorIcon,
   groupEnergyFootprint: GroupEnergyFootprintIcon,
-  facilityEnergyFootprint: FacilityEnergyFootprintIcon
+  facilityEnergyFootprint: FacilityEnergyFootprintIcon,
+  heatmap: HeatmapIcon,
+  treemap: TreemapIcon,
+  sankey: SankeyIcon
 };

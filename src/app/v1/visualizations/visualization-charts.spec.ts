@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
-import { createVisualizationChart, VISUALIZATION_CHART_CHOICES, visualizationChartLabel } from './visualization-charts';
+import { createVisualizationChart, VISUALIZATION_CHART_CHOICES, visualizationChartIcon, visualizationChartLabel } from './visualization-charts';
 
 describe('visualization chart choices', () => {
   it.each(VISUALIZATION_CHART_CHOICES)('retains $label as coherent incomplete setup intent', choice => {
@@ -13,6 +13,7 @@ describe('visualization chart choices', () => {
     expect('definition' in result && result.definition.chart).toEqual(chart);
     expect(value.series).toEqual([]);
     expect(visualizationChartLabel(chart)).toBe(choice.label);
+    expect(visualizationChartIcon(chart)).toBe(choice.icon);
   });
 
   it('initializes settings independently and never fabricates Scatter axes or treemap levels', () => {
@@ -28,5 +29,6 @@ describe('visualization chart choices', () => {
     expect(first).not.toBe(second);
     if (first.kind === 'treemap' && second.kind === 'treemap') expect(first.hierarchy).not.toBe(second.hierarchy);
     expect(visualizationChartLabel(undefined)).toBe('Chart not selected');
+    expect(visualizationChartIcon(undefined)).toBe('dataVisualization');
   });
 });

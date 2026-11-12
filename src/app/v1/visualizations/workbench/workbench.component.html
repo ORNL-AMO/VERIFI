@@ -17,18 +17,25 @@
   @if (editor.definition(); as definition) {
     <div class="visualization-workbench__layout">
       <form class="visualization-workbench__controls" [formGroup]="editor.form" (ngSubmit)="$event.preventDefault()">
-        <section aria-labelledby="visualization-sources"><h2 id="visualization-sources">Sources</h2>
+        <section aria-labelledby="visualization-sources"><h2 id="visualization-sources">Data Sources</h2>
           <label>Name<input formControlName="name" type="text" aria-describedby="visualization-name-error"></label>
           @if (editor.form.controls.name.invalid) { <p id="visualization-name-error" role="alert">Enter a name.</p> }
           <p>Scope: {{ scopeLabel() }}</p>
           @for (source of sourceSummary(); track source.id) {
-            <p>{{ source.familyLabel }} · {{ source.measure }}</p>
-            @if (definition.sources.length > 1) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" (click)="removeSource(source.id)">Remove {{ source.familyLabel }} source {{ source.id }}</button> }
+            <p>{{ source.dataSourceLabel }} · {{ source.measure }}</p>
+            @if (source.setupUnavailable) { <p role="status">Setup required. Data selection for {{ source.dataSourceLabel }} is not available yet.</p> }
+            @if (definition.sources.length > 1) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" (click)="removeSource(source.id)">Remove {{ source.dataSourceLabel }} source {{ source.id }}</button> }
           }
           @for (source of sourceEditors(); track source.id) {
             <ng-container *ngComponentOutlet="source.component; inputs: source.inputs"/>
           }
-          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit()" (click)="addUtilitySource()">Add utility source</button>
+          <fieldset class="visualization-workbench__add-source" [disabled]="!editor.canEdit()">
+            <label for="visualization-add-source">Data source</label>
+            <select id="visualization-add-source" class="v1-select" [formControl]="sourceKindControl">
+              @for (option of dataSources; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+            </select>
+            <button type="button" class="v1-btn v1-btn--secondary" (click)="addDataSource()">Add data source</button>
+          </fieldset>
           <p>Period: {{ periodSummary() }}</p><p>Comparison: {{ definition.comparison.kind }}</p>
           <p>Chart: {{ chartSummary() }}</p>
         </section>

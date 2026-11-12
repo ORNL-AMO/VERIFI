@@ -4,6 +4,28 @@ import { portfolioTile } from '../inventory.testing';
 import { InventoryTileComponent } from './inventory-tile.component';
 
 describe('portfolio tile interactions and additive details', () => {
+  it('uses the account report header pattern for account visualizations at every detail level and in print', () => {
+    TestBed.configureTestingModule({ imports: [InventoryTileComponent], providers: [provideRouter([])] });
+    const fixture = TestBed.createComponent(InventoryTileComponent);
+    fixture.componentRef.setInput('tile', portfolioTile('visualization', { name: 'Energy usage trend', icon: 'chartTimeSeries',
+      visualizationSnapshot: { scope: 'account', dataSources: [{ label: 'Meters', icon: 'meter' }, { label: 'Predictors', icon: 'predictor' },
+        { label: 'Energy Use', icon: 'energyUseGroup' }, { label: 'Analysis', icon: 'analysis' }], scopeLabel: 'Portfolio', periodLabel: 'All saved history',
+        chartLabel: 'Line', modified: 'Today', issues: [] } }));
+    const root = fixture.nativeElement as HTMLElement;
+    for (const print of [false, true]) for (const level of ['simple', 'summary', 'detailed']) {
+      fixture.componentRef.setInput('print', print); fixture.componentRef.setInput('level', level); fixture.detectChanges();
+      const header = root.querySelector('app-inventory-card-header')!;
+      expect(header.textContent?.trim()).toBe('Account visualization'); expect(header.getAttribute('data-scope')).toBe('account');
+      expect(root.querySelector('article')?.classList.contains('portfolio-tile--scoped')).toBe(true);
+      expect(root.querySelector('.portfolio-tile__location')).toBeNull();
+      expect([...root.querySelectorAll('.portfolio-tile__data-sources [role="img"]')].map(icon => icon.getAttribute('aria-label')))
+        .toEqual(['Meters', 'Predictors', 'Energy Use', 'Analysis']);
+      expect(root.querySelector('.portfolio-tile__chip')).toBeNull();
+      expect(root.querySelector('.portfolio-tile__name')?.textContent).toBe('Energy usage trend');
+    }
+    fixture.componentRef.setInput('showOwnership', false); fixture.detectChanges();
+    expect(root.querySelector('app-inventory-card-header')).toBeNull(); fixture.destroy();
+  });
   it('uses distinct type icons instead of count text for group cards and icon links in Summary', () => {
     TestBed.configureTestingModule({ imports: [InventoryTileComponent], providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(InventoryTileComponent);

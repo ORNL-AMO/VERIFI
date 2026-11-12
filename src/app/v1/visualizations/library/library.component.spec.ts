@@ -9,7 +9,7 @@ import { configureLibraryTest, libraryRecord } from './testing/library-testing';
 async function setup() {
   const context = configureLibraryTest([LibraryModule]);
   context.workspace.publish({ ...context.workspace.snapshot()!, savedVisualizations: [libraryRecord('Portfolio trend'),
-    getNewIdbSavedVisualization(createVisualizationDefinition('Facility weather', 'account-a', { kind: 'facility', facilityGuid: 'facility-a' }, 'weather'))] });
+    getNewIdbSavedVisualization(createVisualizationDefinition('Facility weather', 'account-a', { kind: 'facility', facilityGuid: 'facility-a' }, 'predictor'))] });
   await TestBed.compileComponents();
   const fixture = TestBed.createComponent(LibraryComponent); fixture.detectChanges();
   return { ...context, fixture, component: fixture.componentInstance, root: fixture.nativeElement as HTMLElement };
@@ -35,10 +35,10 @@ describe('visualization library dashboard', () => {
     }
     expect(component.lifecycle.proposal()).toBeUndefined();
   });
-  it('shows cards, filters family and search, and provides a clear no-match recovery', async () => {
+  it('shows cards, filters sourceKind and search, and provides a clear no-match recovery', async () => {
     const { component, fixture, root } = await setup();
     expect(root.textContent).toContain('Portfolio trend'); expect(root.textContent).toContain('Facility weather');
-    component.filtersForm.controls.family.setValue('weather'); fixture.detectChanges();
+    component.filtersForm.controls.sourceKind.setValue('predictor'); fixture.detectChanges();
     expect(component.filteredEntries().map(entry => entry.name)).toEqual(['Facility weather']);
     component.filtersForm.controls.search.setValue('not a match'); fixture.detectChanges();
     expect(root.textContent).toContain('No visualizations match these filters'); component.clearFilters(); fixture.detectChanges();

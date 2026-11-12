@@ -37,11 +37,11 @@ const object = (fields: Readonly<Record<string, Check>>, optional: readonly stri
     else if (!optional.includes(key)) issue(issues, `${path}.${key}`, 'Required field.');
   }
 };
-const variant = (variants: Readonly<Record<string, Check>>, unsupported = false): Check => (value, path, issues) => {
+const variant = (variants: Readonly<Record<string, Check>>, unsupported = false, discriminator = 'kind'): Check => (value, path, issues) => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) { issue(issues, path, 'Expected a typed object.'); return; }
-  const kind = (value as { kind?: unknown }).kind;
-  if (typeof kind !== 'string') { issue(issues, `${path}.kind`, 'Expected a kind.'); return; }
-  if (!Object.hasOwn(variants, kind)) { issue(issues, `${path}.kind`, `Unsupported kind: ${kind}.`, unsupported ? 'unsupported' : 'invalid'); return; }
+  const kind = (value as Record<string, unknown>)[discriminator];
+  if (typeof kind !== 'string') { issue(issues, `${path}.${discriminator}`, `Expected a ${discriminator}.`); return; }
+  if (!Object.hasOwn(variants, kind)) { issue(issues, `${path}.${discriminator}`, `Unsupported ${discriminator}: ${kind}.`, unsupported ? 'unsupported' : 'invalid'); return; }
   variants[kind](value, path, issues);
 };
 const civilDate: Check = (value, path, issues) => {
@@ -75,14 +75,15 @@ const source = variant({
     groupBy: enumeration('total', 'facility', 'group', 'meter', 'source'),
     charge: object({ meterGuid: text, chargeGuid: text, measure: enumeration('cost', 'usage') }) }, ['settings', 'selection', 'charge']),
   predictor: object({ ...base, kind: enumeration('predictor'), measure: enumeration('value'), selection, aggregation: enumeration('none', 'sum', 'mean') }, ['settings', 'selection']),
-  weather: object({ ...base, kind: enumeration('weather'), measure: enumeration('value'), selection, aggregation: enumeration('none', 'sum', 'mean') }, ['settings', 'selection']),
   'energy-use': object({ ...base, kind: enumeration('energy-use'), measure: enumeration('consumption', 'cost', 'emissions', 'balance'), selection,
     aggregation: enumeration('none', 'sum'), denominator: enumeration('selected', 'facility', 'account', 'metered-consumption') }, ['settings', 'selection']),
-  'analysis-result': object({ ...base, kind: enumeration('analysis-result'), analysisGuid: text, groupGuid: text,
-    measure: enumeration('actual', 'calculated', 'savings', 'losses', 'annual-improvement', 'total-improvement', 'banked-savings', 'banked-losses'),
-    aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid']),
-  'analysis-model': object({ ...base, kind: enumeration('analysis-model'), analysisGuid: text, groupGuid: text, modelId: text, comparisonModelId: text,
-    measure: enumeration('actual', 'modeled', 'residual'), aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid', 'modelId', 'comparisonModelId'])
+  analysis: variant({
+    result: object({ ...base, kind: enumeration('analysis'), mode: enumeration('result'), analysisGuid: text, groupGuid: text,
+      measure: enumeration('actual', 'calculated', 'savings', 'losses', 'annual-improvement', 'total-improvement', 'banked-savings', 'banked-losses'),
+      aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid']),
+    model: object({ ...base, kind: enumeration('analysis'), mode: enumeration('model'), analysisGuid: text, groupGuid: text, modelId: text, comparisonModelId: text,
+      measure: enumeration('actual', 'modeled', 'residual'), aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid', 'modelId', 'comparisonModelId'])
+  }, false, 'mode')
 }, true);
 const basis = enumeration('calendar', 'fiscal');
 const period = variant({
@@ -164,16 +165,16 @@ function checkJson(value: unknown, path: string, issues: VisualizationIssue[], a
 function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
   const issues: VisualizationIssue[] = [];
   const need = (path: string, message: string) => issue(issues, path, message, 'setup-required');
-  if (!value.sources.length) need('$.sources', 'Choose a source family.');
+  if (!value.sources.length) need('$.sources', 'Choose a data source.');
   for (const [index, selected] of value.sources.entries()) {
     const path = `$.sources[${index}]`;
-    if ('selection' in selected || ['utility', 'predictor', 'weather', 'energy-use'].includes(selected.kind)) {
+    if ('selection' in selected || ['utility', 'predictor', 'energy-use'].includes(selected.kind)) {
       const picked = 'selection' in selected ? selected.selection : undefined;
       if (!picked || picked.kind === 'fixed' && !picked.guids.length) need(`${path}.selection`, 'Select resources or an explicit filter rule.');
       if (picked && !sourceResources(selected.kind).includes(picked.resource)) need(`${path}.selection.resource`, 'Choose a resource kind supported by this source.');
     }
-    if ((selected.kind === 'analysis-result' || selected.kind === 'analysis-model') && !selected.analysisGuid) need(`${path}.analysisGuid`, 'Select a saved analysis.');
-    if (selected.kind === 'analysis-model' && (!selected.modelId || !selected.groupGuid)) need(path, 'Select a saved group and durable model identity.');
+    if (selected.kind === 'analysis' && !selected.analysisGuid) need(`${path}.analysisGuid`, 'Select a saved analysis.');
+    if (selected.kind === 'analysis' && selected.mode === 'model' && (!selected.modelId || !selected.groupGuid)) need(path, 'Select a saved group and durable model identity.');
     if (selected.kind === 'utility' && selected.measure === 'charge' && !selected.charge) need(`${path}.charge`, 'Select a meter and charge definition.');
     if (selected.kind === 'utility' && selected.measure !== 'charge' && selected.charge) need(`${path}.charge`, 'Charge settings require the charge measure.');
   }
@@ -192,7 +193,7 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
 }
 
 function sourceResources(kind: VisualizationSourceKind): readonly string[] {
-  return kind === 'utility' ? ['facility', 'meter', 'meter-group'] : kind === 'predictor' || kind === 'weather' ? ['predictor']
+  return kind === 'utility' ? ['facility', 'meter', 'meter-group'] : kind === 'predictor' ? ['predictor']
     : kind === 'energy-use' ? ['facility', 'equipment', 'energy-use-group'] : [];
 }
 
