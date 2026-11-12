@@ -13,6 +13,28 @@ async function setup(snapshot = dataQualitySnapshot()) {
 }
 
 describe('Data Quality report Setup', () => {
+  it.each(['manual', 'analysis'] as const)('groups %s Setup into three labelled sections with subordinate source headings', async mode => {
+    const snapshot = dataQualitySnapshot();
+    snapshot.facilityReports[0].dataQualityReportSettings.selectedMode = mode;
+    const { harness } = await setup(snapshot);
+    const root = harness.routeNativeElement!.querySelector('app-data-quality-report-setup > .report-setup')!;
+    const sections = [...root.querySelectorAll(':scope > .report-setup-section')];
+    expect(sections.map(section => section.querySelector(':scope > h2')!.textContent))
+      .toEqual(['Report information', 'Choose report data', 'Included Content']);
+    for (const section of sections) {
+      expect(section.tagName).toBe('SECTION');
+      expect(section.getAttribute('aria-labelledby')).toBe(section.querySelector(':scope > h2')!.id);
+    }
+    expect(root.querySelector('#report-workbench-name')!.closest('.report-setup-section')).toBe(sections[0]);
+    expect(root.querySelector('.selection-mode')!.closest('.report-setup-section')).toBe(sections[1]);
+    expect(root.querySelector(mode === 'manual' ? '.source-sections' : 'app-report-analysis-selection')!
+      .closest('.report-setup-section')).toBe(sections[1]);
+    expect(root.querySelector('.content-matrix')!.closest('.report-setup-section')).toBe(sections[2]);
+    if (mode === 'manual') {
+      expect(root.querySelector('#data-quality-meters-heading')!.tagName).toBe('H3');
+      expect(root.querySelector('#data-quality-predictors-heading')!.tagName).toBe('H3');
+    }
+  });
   it('inspects each analysis without changing the selection and selects through the existing autosave', async () => {
     const snapshot = dataQualitySnapshot();
     snapshot.facilityAnalyses.push({ ...snapshot.facilityAnalyses[0], id: 31, guid: 'analysis-b', name: 'Other analysis' });

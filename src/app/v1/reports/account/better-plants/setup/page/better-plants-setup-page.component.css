@@ -1,8 +1,6 @@
 @import '../../../../shared/workbench/report-workbench-stage.css';
 @import '../../../../shared/editing/report-setup.css';
 
-.report-setup-content { margin-top: 1rem; }
-.report-setup-content h3 { margin: 0 0 .65rem; font-size: 1rem; font-weight: 800; }
 .report-setup-content .report-setup-option { display: flex; margin: 0; }
 .report-setup-content .report-setup-option + .report-setup-option { margin-top: .65rem; }
 .report-setup-content__names { padding-left: 1.65rem; }

@@ -35,6 +35,10 @@ describe('Data Quality distribution charts in Chromium', () => {
     }
     expect(host.querySelectorAll('#data-quality-report-heading')).toHaveLength(1);
     expect(host.querySelectorAll('.report-component-divider')).toHaveLength(3);
+    for (const heading of host.querySelectorAll<HTMLElement>('.quality-histogram__heading h2')) {
+      const groupHeading = heading.closest('article')!.querySelector<HTMLElement>('h3')!;
+      expect(parseFloat(getComputedStyle(groupHeading).fontSize)).toBeGreaterThan(parseFloat(getComputedStyle(heading).fontSize));
+    }
     expect(host.scrollWidth).toBeLessThanOrEqual(width + 1);
     expect(inputs()[0].labels![0].textContent).toBe('Number of bins');
     const first = () => echarts.getInstanceByDom(charts()[0])!;

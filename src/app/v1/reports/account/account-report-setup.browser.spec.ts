@@ -1,4 +1,6 @@
 import { Injector } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { page, userEvent } from 'vitest/browser';
 import { vi } from 'vitest';
 import { dbConfig } from '@data/indexedDB/_dbConfig';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
@@ -15,6 +17,61 @@ import { accountReportReferencesAnalysis, IdbAccountReport } from '@data/models/
 import { buildSingleFacilityAnalysisPair, isSingleFacilityAnalysisPair } from '@data/account-workspace/single-facility-analysis-pairs';
 import { AccountReportActionsService } from './account-report-actions.service';
 import { accountReportSnapshot } from './testing/account-report-test-fixtures';
+import { setupAccountReportWorkbench } from './testing/account-report-workbench-test-setup';
+import { expectReportSetupSections } from '../testing/report-setup-browser-assertions';
+
+describe('account report Setup section presentation', () => {
+  afterEach(async () => { TestBed.resetTestingModule(); await page.viewport(1280, 720); });
+  for (const [theme, classes, width] of [
+    ['light', [], 1100], ['dark', ['v1-theme-dark'], 760],
+    ['high-contrast', ['v1-theme-dark', 'v1-contrast-strong'], 420]
+  ] as const) {
+    it.each(['energy', 'water', 'performance', 'dataOverview'] as const)(
+      'connects %s Setup sections in ' + theme, async variant => {
+        await page.viewport(width, 900);
+        const snapshot = accountReportSnapshot();
+        snapshot.accountReports[0].reportType = variant === 'energy' || variant === 'water' ? 'betterPlants' : variant;
+        snapshot.accountReports[0].betterPlantsReportSetup.analysisItemId = 'account-analysis';
+        snapshot.accountAnalyses[0].analysisCategory = variant === 'water' ? 'water' : 'energy';
+        const view = await setupAccountReportWorkbench(snapshot);
+        await view.open();
+        const host = view.harness.fixture.nativeElement as HTMLElement;
+        host.classList.add('v1-root', ...classes);
+        Object.assign(host.style, {
+          display: 'block', width: `${width}px`, height: '850px', overflow: 'auto',
+          '--v1-rail-width': '0px', '--v1-section-nav-width': '0px',
+          '--v1-support-panel-width': '0px', '--v1-header-height': '0px'
+        });
+        Object.assign(host.querySelector<HTMLElement>('app-account-report-workbench')!.style,
+          { display: 'flex', overflow: 'visible', minHeight: '100%' });
+        view.harness.detectChanges();
+        const setup = host.querySelector<HTMLElement>('.report-section.report-setup')!;
+        const sectionCounts = { water: 5, energy: 4, performance: 3, dataOverview: 2 };
+        const sections = expectReportSetupSections(setup, sectionCounts[variant]);
+        host.classList.add('v1-corners-square');
+        expectReportSetupSections(setup, sectionCounts[variant]);
+        host.classList.remove('v1-corners-square');
+        const name = setup.querySelector<HTMLInputElement>('#account-report-name')!;
+        const year = setup.querySelector<HTMLSelectElement>('#better-plants-report-year');
+        if (year) {
+          expect(year.closest('.report-setup-section')).toBe(name.closest('.report-setup-section'));
+          if (width > 992) {
+            expect(year.getBoundingClientRect().left).toBeGreaterThan(name.getBoundingClientRect().right);
+          } else {
+            expect(year.getBoundingClientRect().top).toBeGreaterThanOrEqual(name.getBoundingClientRect().bottom);
+          }
+        }
+        name.scrollIntoView(); name.focus(); await userEvent.keyboard('{Tab}');
+        expect(document.activeElement).not.toBe(name);
+        const deletion = setup.querySelector<HTMLElement>('app-account-report-delete')!;
+        expect(deletion.getBoundingClientRect().top).toBeCloseTo(sections.at(-1)!.getBoundingClientRect().bottom, 0);
+        expect(deletion.querySelector('button')!.textContent).toContain('Delete report');
+        expect(host.scrollWidth).toBeLessThanOrEqual(width + 1);
+        expect(view.updateSetup).not.toHaveBeenCalled();
+      }
+    );
+  }
+});
 
 describe('account report setup transactions in Chromium', () => {
   let harness: IndexedDbTestHarness;

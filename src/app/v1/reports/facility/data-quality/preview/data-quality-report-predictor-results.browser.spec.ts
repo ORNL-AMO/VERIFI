@@ -43,6 +43,10 @@ describe('Data Quality predictor report in Chromium', () => {
       expect(getComputedStyle(heading).textAlign).toBe('center');
       expect(Number(getComputedStyle(heading).fontWeight)).toBeGreaterThanOrEqual(700);
     }
+    for (const heading of host.querySelectorAll<HTMLElement>('.predictor-quality__panel-heading h2')) {
+      const groupHeading = heading.closest('article')!.querySelector<HTMLElement>('h3')!;
+      expect(parseFloat(getComputedStyle(groupHeading).fontSize)).toBeGreaterThan(parseFloat(getComputedStyle(heading).fontSize));
+    }
     const frame = host.querySelector<HTMLElement>('.predictor-report')!.getBoundingClientRect();
     const preview = host.querySelector<HTMLElement>('app-data-quality-report-preview')!.getBoundingClientRect();
     const rootFont = parseFloat(getComputedStyle(document.documentElement).fontSize);

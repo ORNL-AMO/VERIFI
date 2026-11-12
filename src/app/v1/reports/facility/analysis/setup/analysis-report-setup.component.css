@@ -4,4 +4,4 @@
 :host { display: block; min-width: 0; }
 .report-period { min-width: 0; }
 .report-period .report-setup-help { margin-block: .75rem; }
-.column-summary { margin-block: -.5rem 1rem; }
+.column-summary { margin-bottom: 1rem; }

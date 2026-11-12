@@ -23,6 +23,7 @@ import { setupAccountReportWorkbench } from '../testing/account-report-workbench
 import { StatusItem } from '@app/v1/status/status.models';
 import { BetterPlantsReportService } from './better-plants-report.service';
 import { BetterPlantsOutputService } from './output/better-plants-output.service';
+import { expectReportSetupSections } from '../../testing/report-setup-browser-assertions';
 
 describe('Better Plants review and display in Chromium', () => {
   let database: IndexedDbTestHarness;
@@ -73,19 +74,26 @@ describe('Better Plants review and display in Chromium', () => {
     expect(view.store.committedRevision()).toBeUndefined();
     await page.viewport(1200, 900);
     const setup = root.querySelector<HTMLElement>('app-better-plants-setup-page')!;
-    expectBottomCorners(setup.querySelector<HTMLElement>('.report-setup')!);
-    const information = setup.querySelector<HTMLElement>('.report-setup-top h2')!.getBoundingClientRect();
-    const period = setup.querySelector<HTMLElement>('app-better-plants-reporting-period h2')!.getBoundingClientRect();
-    expect(period.left).toBeGreaterThan(information.right);
-    expect(period.top).toBeCloseTo(information.top, 0);
+    for (const square of [false, true]) {
+      root.classList.toggle('v1-corners-square', square);
+      expectReportSetupSections(setup.querySelector<HTMLElement>('.report-setup')!, category === 'water' ? 5 : 4);
+    }
+    root.classList.remove('v1-corners-square');
+    const name = setup.querySelector<HTMLInputElement>('#account-report-name')!;
+    const year = setup.querySelector<HTMLSelectElement>('#better-plants-report-year')!;
+    expect(year.closest('.report-setup-section')).toBe(name.closest('.report-setup-section'));
+    expect(year.getBoundingClientRect().left).toBeGreaterThan(name.getBoundingClientRect().right);
+    expect(year.getBoundingClientRect().top).toBeCloseTo(name.getBoundingClientRect().top, 0);
+    expect(setup.querySelector('app-better-plants-reporting-period h2')).toBeNull();
     const radio = setup.querySelector<HTMLInputElement>('.report-analysis-card input:checked')!;
     const selectedAnalysis = component.editor.form.controls.analysis.value;
     radio.focus(); await userEvent.keyboard('{ArrowRight}');
     expect(component.editor.form.controls.analysis.value).toBe(selectedAnalysis);
     expect(setup.querySelectorAll('.report-analysis-card input')).toHaveLength(1);
     const includedContent = setup.querySelector<HTMLElement>('.report-setup-content')!;
-    expect(includedContent.closest('.report-setup-top')).not.toBeNull();
-    expect(includedContent.getBoundingClientRect().top).toBeGreaterThan(setup.querySelector('#account-report-name')!.getBoundingClientRect().bottom);
+    expect(includedContent.parentElement).toBe(setup.querySelector('.report-setup'));
+    const analysis = setup.querySelector<HTMLElement>('app-report-analysis-selection > .report-setup-section')!;
+    expect(includedContent.getBoundingClientRect().top).toBeGreaterThanOrEqual(analysis.getBoundingClientRect().bottom);
     for (const helpId of ['better-plants-baseline-help', 'better-plants-modifications-help', ...(category === 'water' ? ['better-plants-methodology-help'] : [])]) {
       const help = setup.querySelector<HTMLElement>(`#${helpId}`)!;
       const textarea = setup.querySelector<HTMLTextAreaElement>(`textarea[aria-describedby="${helpId}"]`)!;
@@ -124,8 +132,7 @@ describe('Better Plants review and display in Chromium', () => {
         await page.viewport(width, 900); view.harness.detectChanges();
         expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
         if (width === 390) {
-          expect(setup.querySelector<HTMLElement>('app-better-plants-reporting-period h2')!.getBoundingClientRect().top)
-            .toBeGreaterThan(setup.querySelector<HTMLElement>('#account-report-name')!.getBoundingClientRect().bottom);
+          expect(year.getBoundingClientRect().top).toBeGreaterThan(name.getBoundingClientRect().bottom);
         }
       }
     }

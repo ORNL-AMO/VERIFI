@@ -15,6 +15,7 @@ export class ReportAnalysisSelectionComponent {
   readonly canEdit = input(true);
   readonly showTypeFilter = input(false);
   readonly showInspection = input(true);
+  readonly sectioned = input(false);
   readonly emptyMessage = input('No eligible analyses are available. Create an analysis before continuing to data checks.');
   readonly inspected = output<string>();
   readonly form = new FormGroup({

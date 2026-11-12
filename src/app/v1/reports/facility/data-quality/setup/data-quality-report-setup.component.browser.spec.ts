@@ -5,6 +5,7 @@ import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-ins
 import { page, userEvent } from 'vitest/browser';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 import { dataQualitySnapshot } from '../testing/data-quality-report-test-fixtures';
+import { expectReportSetupSections } from '../../../testing/report-setup-browser-assertions';
 
 @Component({ standalone: true, providers: [ReportAnalysisReturnService], template: `
   <h1>Inspected analysis</h1>
@@ -63,6 +64,11 @@ describe('Data Quality Setup in Chromium', () => {
       { display: 'flex', overflow: 'visible', minHeight: '100%' });
     view.harness.detectChanges();
     const setup = host.querySelector('app-data-quality-report-setup')!;
+    const sections = expectReportSetupSections(setup.querySelector<HTMLElement>(':scope > .report-setup')!, 3);
+    const headerStyle = getComputedStyle(sections[0].querySelector('.setup-section-heading')!);
+    for (const heading of setup.querySelectorAll<HTMLElement>('.source-heading h3')) {
+      expect(parseFloat(getComputedStyle(heading).fontSize)).toBeLessThan(parseFloat(headerStyle.fontSize));
+    }
     const findMeter = () => [...setup.querySelectorAll<HTMLButtonElement>('.source-tag')]
       .find(button => button.querySelector('.source-tag-name')?.textContent?.trim() === 'Meter b')!;
     const meter = findMeter();
