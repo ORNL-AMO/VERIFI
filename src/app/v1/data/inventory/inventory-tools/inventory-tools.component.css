@@ -5,6 +5,9 @@
 .inventory-tools__multiple { display: flex; align-items: center; gap: .5rem; min-height: var(--v1-control-height); color: var(--v1-text); cursor: pointer; }
 .inventory-tools__multiple input { accent-color: var(--v1-content-control); }
 .inventory-tools__mode-help { color: var(--v1-muted); font-size: .875rem; margin: 0 0 .5rem; }
+.inventory-tools__capture { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-block: .5rem; min-width: 0; }
+.inventory-tools__capture p { flex-basis: 100%; margin: 0; color: var(--v1-muted); overflow-wrap: anywhere; }
+.inventory-tools__capture [role="alert"] { color: var(--v1-danger, var(--v1-text)); }
 @media print { :host { display: none; } }
 
 .inventory-tools__grouping { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .4rem; }

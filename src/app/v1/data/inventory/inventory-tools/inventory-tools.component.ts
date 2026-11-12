@@ -71,8 +71,7 @@ export class InventoryToolsComponent {
   }
 
   closeCharts(): void {
-    this.chart().close();
-    this.hidePortal();
+    if (this.chart().close()) this.hidePortal();
   }
 
   requestDelete(): void {

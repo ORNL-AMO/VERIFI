@@ -1,4 +1,4 @@
-<app-workspace-bottom-sheet [modal]="false" [showHeader]="false" [fillBody]="true" panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="customTitle() || facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
+<app-workspace-bottom-sheet [modal]="false" [showHeader]="false" [fillBody]="true" [closeBlocked]="closeBlocked()" panelId="inventory-chart-sheet" surfaceClass="inventory-chart-sheet" [title]="customTitle() || facilityName() + ' · Monthly data'" closeLabel="Close charts" dismissLabel="Dismiss chart sheet" (closed)="closed.emit()">
     @if (content(); as custom) { <ng-container [ngTemplateOutlet]="custom"/> } @else {
     <div class="inventory-chart-sheet__body inventory-chart-sheet__body--fill"><ng-content/>
       @if (!charts().length) {
