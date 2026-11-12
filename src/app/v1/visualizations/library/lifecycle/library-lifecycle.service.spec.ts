@@ -6,6 +6,7 @@ import type { VisualizationSourceKind } from '@domain/visualizations/visualizati
 import { LibraryLifecycle } from './library-lifecycle.service';
 import { VISUALIZATION_FAMILIES, buildVisualizationLibrary } from '../visualization-library.models';
 import { configureLibraryTest, libraryRecord } from '../testing/library-testing';
+import { meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
 function selectSetup(lifecycle: LibraryLifecycle, families: readonly VisualizationSourceKind[] = ['utility']): void {
   if (!lifecycle.editor()?.fixedFacility) lifecycle.selectScope('portfolio');
@@ -15,6 +16,17 @@ function selectSetup(lifecycle: LibraryLifecycle, families: readonly Visualizati
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it('binds a recipe to explicit saved meters before preparing one independent creation', async () => {
+    const { commands, workspace } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, meters: [meter({})], meterData: [reading({})] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.selectScope('portfolio'); lifecycle.selectRecipe('energy-trend');
+    expect(lifecycle.step()).toBe('recipe-resources'); expect(lifecycle.canContinueRecipe()).toBe(false);
+    lifecycle.continueRecipe(); await lifecycle.submit(); expect(commands.prepareCreate).not.toHaveBeenCalled();
+    lifecycle.form.controls.meterGuids.setValue(['meter-a']); lifecycle.continueRecipe(); await lifecycle.submit();
+    expect(commands.prepareCreate).toHaveBeenCalledTimes(1);
+    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ name: 'Energy usage trend',
+      chart: { kind: 'time-series', type: 'line', interval: 'monthly' }, sources: [{ measure: 'energy', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] } }] });
+  });
   it('requires an explicit chart, source families and final name step before adding', async () => {
     const { commands } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
     lifecycle.form.controls.name.setValue('Premature'); await lifecycle.submit();
