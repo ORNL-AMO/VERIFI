@@ -25,14 +25,15 @@ async function assertSigningApproval(api) {
 async function resolvePlan(input, context, api, reusedBaseline) {
     validateInputs(input);
     assert(input.mode !== 'test-only', 'Test-only must load the retained plan.');
-    assert(context.ref === 'refs/heads/develop', 'Dispatch the trusted workflow from develop.');
+    assert(context.ref.startsWith('refs/heads/'), 'Dispatch from a trusted branch.');
+    if (context.ref !== 'refs/heads/develop') assert(await trustedCommit(api, context.workflowSha, context.repository) === context.workflowSha, 'Untrusted workflow definition.');
     assert(String(context.attempt) === '1', 'Do not rebuild signed artifacts on rerun; dispatch test-only or start a new build run.');
     const candidateSha = await trustedCommit(api, input.candidate_ref, context.repository);
     const baseline = reusedBaseline || { sourceSha: await trustedCommit(api, input.baseline_ref, context.repository), version: qaVersion(context.runNumber, 0) };
     const builds = [{ role: 'baseline', ...baseline }];
     if (input.scenario === 'electron-upgrade') builds.push({ role: 'candidate-a', sourceSha: candidateSha, version: qaVersion(context.runNumber, 1) });
     builds.push({ role: 'candidate-b', sourceSha: candidateSha, version: qaVersion(context.runNumber, 2) });
-    return validatePlan({ schemaVersion: SCHEMA_VERSION, kind: 'desktop-qa-plan', repository: context.repository, workflowSha: sha(context.workflowSha), candidateSha, runId: Number(context.runId), scenario: input.scenario, identity: QA_IDENTITY, builds });
+    return validatePlan({ schemaVersion: SCHEMA_VERSION, kind: 'desktop-qa-plan', repository: context.repository, workflowSha: sha(context.workflowSha), workflowRef: context.ref, candidateSha, runId: Number(context.runId), scenario: input.scenario, identity: QA_IDENTITY, builds });
 }
 
 async function main() {
@@ -55,6 +56,8 @@ async function main() {
         plan = await resolvePlan(input, context, api, baseline);
     }
     await fs.writeFile('qa-plan.json', JSON.stringify(plan, null, 2) + '\n');
+    await fs.writeFile('qa-invocation.json', JSON.stringify({ schemaVersion: 1, kind: 'desktop-qa-invocation', runId: Number(context.runId), workflowSha: context.workflowSha,
+        workflowRef: context.ref, candidateSha: plan.candidateSha, packageRunId: plan.runId, operation: input.mode, scenario: plan.scenario, testPlatform: input.test_platform || 'all' }, null, 2) + '\n');
     const builds = plan.builds.filter(build => !build.reuseRunId);
     await fs.appendFile(process.env.GITHUB_OUTPUT, `builds=${JSON.stringify(builds)}\ncandidate-sha=${plan.candidateSha}\n`);
     await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, `## Desktop QA plan\n\nCandidate: ${plan.candidateSha}\n\nWorkflow: ${plan.workflowSha}\n\nScenario: ${plan.scenario}\n\n${plan.builds.map(build => `- ${build.role}: ${build.sourceSha} → ${build.version}${build.reuseRunId ? ` (retained run ${build.reuseRunId})` : ''}`).join('\n')}\n\nSigning approval applies to these resolved commits and QA versions.\n`);

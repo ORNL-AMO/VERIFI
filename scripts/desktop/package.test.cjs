@@ -5,7 +5,7 @@ const path = require('node:path');
 const os = require('node:os');
 const vm = require('node:vm');
 const { packageConfig } = require('./package.cjs');
-const { QA_IDENTITY } = require('./qa-contract.cjs');
+const { QA_IDENTITY, QA_INSTRUMENTATION_VERSION } = require('./qa-contract.cjs');
 
 test('QA packaging isolates identity/feed/version while production retains its entrypoint and rejects QA contamination', async t => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'verifi-qa-config-'));
@@ -33,6 +33,7 @@ test('QA packaging isolates identity/feed/version while production retains its e
     assert.equal(qa.appId, QA_IDENTITY.appId);
     assert.equal(qa.publish[0].url, QA_IDENTITY.feed);
     assert.equal(qa.publish[0].provider, 'generic');
+    assert.equal(qa.extraMetadata.verifiQa.instrumentationVersion, QA_INSTRUMENTATION_VERSION);
     assert.match(qa.extraMetadata.verifiQa.wrapperSha256, /^[a-f0-9]{64}$/);
     await assert.rejects(packageConfig(directory, 'mac'), /production package/);
     await assert.rejects(packageConfig(directory, 'mac', '1.0.0'), /QA version/);
@@ -40,11 +41,13 @@ test('QA packaging isolates identity/feed/version while production retains its e
 
 test('QA bootstrap confines profile/debugging to QA and invokes the original application unchanged', async () => {
     const calls = [];
-    const app = { setName: value => calls.push(['name', value]), getPath: () => '/disposable/appdata', setPath: (...args) => calls.push(['path', ...args]), setAppUserModelId: value => calls.push(['id', value]), commandLine: { appendSwitch: (...args) => calls.push(['switch', ...args]) } };
+    const app = { on() {}, setAppLogsPath() {}, setName: value => calls.push(['name', value]), getPath: () => '/disposable/appdata', setPath: (...args) => calls.push(['path', ...args]), setAppUserModelId: value => calls.push(['id', value]), commandLine: { appendSwitch: (...args) => calls.push(['switch', ...args]) } };
     const source = await fs.readFile(path.join(__dirname, 'qa-bootstrap.cjs'), 'utf8');
     const execute = (config, platform = 'darwin') => vm.runInNewContext(source, { process: { platform }, require: name => {
-        if (name === 'electron') return { app };
+        if (name === 'electron') return { app, dialog: { showSaveDialog: async () => ({ canceled: true }) } };
         if (name === 'node:path') return path;
+        if (name === 'node:fs' || name === 'original-fs') return require('node:fs');
+        if (name === 'node:crypto') return require('node:crypto');
         if (name === './desktop-qa-config.json') return config;
         assert.equal(name, './main.js'); calls.push(['original-main']);
     } });
@@ -80,4 +83,42 @@ test('production publication remains downstream of all package verification and 
     assert.deepEqual(qa.jobs.package.needs, ['resolve', 'approve']);
     assert.equal(qa.jobs.package.with['retention-days'], 14);
     assert(!Object.values(qa.jobs).some(job => job.steps?.some(step => step.uses?.startsWith('softprops/action-gh-release'))));
+});
+
+for (const noSandbox of [false, true]) test(`QA witness observes no-sandbox=${noSandbox} with secure window preferences and confines file choices`, async t => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'verifi-qa-witness-'));
+    t.after(() => fs.rm(directory, { recursive: true, force: true }));
+    const archive = path.join(directory, 'app.asar'); await fs.writeFile(archive, 'packaged application bytes');
+    const locations = { appData: directory }, events = {};
+    const app = { isPackaged: true, getVersion: () => '0.0.32', getAppPath: () => archive,
+        setName() {}, setPath: (name, value) => locations[name] = value, getPath: name => locations[name],
+        setAppLogsPath: value => locations.logs = value, commandLine: { appendSwitch() {}, hasSwitch: name => { assert.equal(name, 'no-sandbox'); return noSandbox; } }, on: (event, callback) => events[event] = callback };
+    let nativeDialogs = 0;
+    const dialog = { showSaveDialog: async () => { nativeDialogs++; return { canceled: true }; } };
+    const provenance = { sourceSha: 'a'.repeat(40), instrumentationVersion: QA_INSTRUMENTATION_VERSION };
+    const source = await fs.readFile(path.join(__dirname, 'qa-bootstrap.cjs'), 'utf8');
+    vm.runInNewContext(source, { process: { platform: 'darwin', pid: process.pid, versions: { electron: '39.8.10' }, execPath: '/qa/VERIFI QA', env: {} }, require: name => {
+        if (name === 'electron') return { app, dialog };
+        if (name === './desktop-qa-config.json') return QA_IDENTITY;
+        if (name === './package.json') return { verifiQa: provenance };
+        if (name === 'original-fs') return require('node:fs');
+        if (name === './main.js') return;
+        return require(name);
+    } });
+    const preferences = { contextIsolation: true, nodeIntegration: false, sandbox: true };
+    events['browser-window-created'](null, { webContents: { getLastWebPreferences: () => preferences } });
+    const file = path.join(locations.userData, 'desktop-qa-runtime.json');
+    const runtime = JSON.parse(await fs.readFile(file, 'utf8'));
+    assert.equal(runtime.archiveSha256, require('node:crypto').createHash('sha256').update('packaged application bytes').digest('hex'));
+    assert.deepEqual(runtime.security, { ...preferences, noSandbox });
+    assert.equal(runtime.packaged, true);
+    events['browser-window-created'](null, { webContents: { getLastWebPreferences: () => ({ sandbox: false }) } });
+    assert.equal(JSON.parse(await fs.readFile(file, 'utf8')).nonce, runtime.nonce);
+    const choice = path.join(locations.userData, 'desktop-qa-file-choice.json');
+    const savePath = path.join(locations.userData, 'backups/account.json');
+    await fs.writeFile(choice, JSON.stringify({ savePath }));
+    assert.equal((await dialog.showSaveDialog()).filePath, savePath);
+    await fs.writeFile(choice, JSON.stringify({ savePath: path.join(directory, 'outside.json') }));
+    await assert.rejects(dialog.showSaveDialog(), /disposable QA profile/);
+    assert.equal(nativeDialogs, 0);
 });

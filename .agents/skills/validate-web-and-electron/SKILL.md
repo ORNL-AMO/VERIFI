@@ -49,3 +49,9 @@ Read the [release process](../../../docs/release-process.md) and inspect the cal
 - Report checks that cannot run and the exact missing dependency or environment.
 
 Complete with a validation table listing each command or manual scenario, its result, and any remaining gap.
+
+## Installed-app/update harness
+
+Use `build-and-test` or a new `test-only` dispatch against retained packages. Start with the Windows pilot; full acceptance requires every platform and scenario. Partial pilot reports never satisfy the upgrade gate. Check source/workflow SHA provenance, compatible QA instrumentation, actual native installation/updater exit/relaunch, read-only GUID/settings comparisons, and real backup failure/recovery. Keep test jobs credential-free and preserve renderer security; never substitute extracted AppImage execution, mocked updater events, or separately launching candidate B. Before publishing harness changes, record the focused tests and local pilot limitations, then require the signed baseline matrix before merging.
+
+For required-check changes, verify the default-branch policy, candidate-SHA targeting, complete-matrix aggregation, canceled/missing evidence, shared-head PRs, and older-run ordering. Keep publisher code on trusted base/default commits with check-write permission only in reporting jobs. Register the publisher before relying on it to gate a later upgrade PR; branch pilot evidence cannot satisfy the required check.

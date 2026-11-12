@@ -47,7 +47,7 @@ Manual dispatch runs QA after the test gate. When dispatched from `develop` or `
 
 ## Artifacts and ownership
 
-On-demand desktop QA uses the separate [desktop pre-release workflow](desktop-prerelease.md). It shares packaging/signing with production but cannot publish a release or deploy the website. Its current result proves signed package production only; installed-app/update acceptance and exact-candidate merge enforcement remain downstream work.
+On-demand desktop QA uses the separate [desktop pre-release workflow](desktop-prerelease.md). It shares packaging/signing with production but cannot publish a release or deploy the website. Build-only results prove package production; full installed-app runs exercise real updates and data preservation. Trusted metadata reporting enforces exact-candidate upgrade evidence after default-branch registration and required-check configuration. Signed baseline and upgrade matrices remain rollout requirements.
 
 The [build template](../.github/workflows/template_build.yml) creates `web-dist` for the release web deployment and `dist` for QA. The deployment workflow only consumes the appropriate artifact; it never rebuilds the application.
 

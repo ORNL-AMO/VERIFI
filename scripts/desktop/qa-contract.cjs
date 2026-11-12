@@ -3,6 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 
 const SCHEMA_VERSION = 1;
+const QA_INSTRUMENTATION_VERSION = 3;
 const RETENTION_DAYS = 14;
 const PLATFORMS = ['linux', 'windows', 'mac'];
 const QA_IDENTITY = Object.freeze({ appId: 'gov.ornl.amo.verifi.qa', name: 'verifi-desktop-qa', productName: 'VERIFI QA', feed: 'http://127.0.0.1:47831/updates/', debugPort: 47832 });
@@ -43,6 +44,7 @@ function precedes(a, b) {
 function validateInputs(input) {
     assert(['build-only', 'build-and-test', 'test-only'].includes(input.mode), 'Invalid operation.');
     assert(['baseline-validation', 'electron-upgrade'].includes(input.scenario), 'Invalid scenario.');
+    assert(input.test_platform === undefined || ['all', 'windows', 'mac', 'linux'].includes(input.test_platform), 'Invalid pilot platform.');
     if (input.mode === 'test-only') {
         positiveInteger(input.artifact_run_id, 'artifact run ID');
         assert(!input.candidate_ref && !input.baseline_ref && !input.baseline_run_id, 'Test-only uses only its original artifact run; source overrides are forbidden.');
@@ -58,6 +60,7 @@ function validateInputs(input) {
 function validatePlan(plan) {
     assert(plan.schemaVersion === SCHEMA_VERSION && plan.kind === 'desktop-qa-plan', 'Unsupported QA plan.');
     sha(plan.workflowSha);
+    assert(plan.workflowRef === undefined || (plan.workflowRef.startsWith('refs/heads/') && !/[\x00-\x1f]/.test(plan.workflowRef)), 'Invalid workflow branch.');
     sha(plan.candidateSha);
     assert(plan.identity && Object.keys(plan.identity).length === Object.keys(QA_IDENTITY).length && Object.entries(QA_IDENTITY).every(([key, value]) => plan.identity[key] === value), 'Incompatible QA identity or feed.');
     assert(['baseline-validation', 'electron-upgrade'].includes(plan.scenario), 'Invalid plan scenario.');
@@ -98,4 +101,4 @@ async function verifyFiles(directory, files) {
     }
 }
 
-module.exports = { SCHEMA_VERSION, RETENTION_DAYS, PLATFORMS, QA_IDENTITY, assert, sha, positiveInteger, qaVersion, precedes, validateInputs, validatePlan, safeName, describe, verifyFiles };
+module.exports = { SCHEMA_VERSION, QA_INSTRUMENTATION_VERSION, RETENTION_DAYS, PLATFORMS, QA_IDENTITY, assert, sha, positiveInteger, qaVersion, precedes, validateInputs, validatePlan, safeName, describe, verifyFiles };

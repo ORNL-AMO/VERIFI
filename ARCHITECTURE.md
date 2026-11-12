@@ -171,7 +171,9 @@ The repository does not define a separate design system. Do not introduce one im
 
 ## Tests, builds, and delivery
 
-Desktop package creation is shared by the production release wrapper and a separate on-demand QA workflow. QA resolves and approves immutable sources before signing, uses a separate identity/profile/feed and generated startup wrapper, and binds final file manifests to retained artifact IDs/digests. Production retains its original entrypoint and publication gates. QA packaging success is distinct from installed-app/update acceptance; see [desktop pre-release validation](docs/desktop-prerelease.md).
+Desktop package creation is shared by the production release wrapper and a separate on-demand QA workflow. QA resolves and approves immutable sources before signing, uses a separate identity/profile/feed and generated startup wrapper, and binds final file manifests to retained artifact IDs/digests. Production retains its original entrypoint and publication gates. An external installed-app controller consumes the pinned packages, imports synthetic data through the UI, runs actual updater installation/relaunch, and checks read-only storage/runtime witnesses. Signing credentials remain outside test jobs. QA packaging success and focused pilot results are distinct from complete installed-app/update acceptance; see [desktop pre-release validation](docs/desktop-prerelease.md).
+
+Required installer checks are published against the candidate commit by trusted metadata-only code. Default-branch policy selects the upgrade PR; all other eligible PRs receive explicit not-applicable success. Reporting verifies complete retained evidence and source/runtime relationships, serializes candidate updates, and rejects older validation-run results. Candidate execution and signing remain in separate jobs without check-write permission.
 
 Test targets are configured in `angular.json` and exposed through `package.json`:
 

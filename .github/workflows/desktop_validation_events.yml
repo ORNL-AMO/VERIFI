@@ -1,0 +1,55 @@
+name: Desktop validation policy
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, edited, closed]
+  workflow_run:
+    workflows: [Desktop pre-release]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  identify:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      enabled: ${{ steps.identify.outputs.enabled }}
+      candidates: ${{ steps.identify.outputs.candidates }}
+      pr-number: ${{ steps.identify.outputs.pr-number }}
+    steps:
+      # pull_request_target and workflow_run select trusted base/default code.
+      # Never check out or execute the candidate in this reporting workflow.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+      - id: identify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_PHASE: identify
+        run: node scripts/desktop/validation-check.cjs
+
+  report:
+    needs: identify
+    if: needs.identify.outputs.enabled == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: ${{ fromJSON(needs.identify.outputs.candidates) }}
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      checks: write
+    uses: ./.github/workflows/desktop_validation_check.yml
+    with:
+      phase: ${{ github.event_name == 'workflow_run' && 'completed' || 'pull-request' }}
+      candidate-sha: ${{ matrix.candidate }}
+      run-id: ${{ format('{0}', github.event.workflow_run.id || 0) }}
+      pr-number: ${{ needs.identify.outputs.pr-number }}

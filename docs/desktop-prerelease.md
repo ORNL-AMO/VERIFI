@@ -1,6 +1,6 @@
 # Desktop pre-release validation
 
-This is the packaging foundation for [#2586](https://github.com/ORNL-AMO/VERIFI/issues/2586). It retains the current Electron runtime. Signed package production is implemented; installed-app automation and candidate-specific merge enforcement are downstream changes. A successful packaging run is **not** proof of installation or automatic updating.
+This implements the packaging and installed-app harness for [#2586](https://github.com/ORNL-AMO/VERIFI/issues/2586). Both retain the current Electron runtime; the final stacked PR upgrades Electron. A packaging-only result is **not** installed-update acceptance. The harness also registers the trusted check publisher so it can enforce evidence before the upgrade merges.
 
 ## First rollout
 
@@ -8,7 +8,8 @@ This is the packaging foundation for [#2586](https://github.com/ORNL-AMO/VERIFI/
 2. Merge the foundation into `develop` after its tests, builds, and reviews. GitHub requires the new manual workflow on the default branch before normal dispatch is available.
 3. Run **Desktop pre-release** from `develop`, select `build-only`, and supply a candidate and an explicit baseline. For the first baseline trial, both may identify the same current source; generated QA versions remain ordered.
 4. Review the resolved source commits and QA versions in the run summary, then approve signing. The initiating maintainer may approve.
-5. Require the signed three-platform packaging trial to succeed before advancing the installed-app harness PR. Keep #2920 unmerged until both update paths and all safeguards have actual passing evidence.
+5. Require the signed three-platform packaging trial to succeed before accepting the installed-app harness. After workflow registration on `develop`, select the reviewed harness PR branch to run its pre-merge pilot. That workflow commit must itself resolve to a protected-branch commit or current same-repository PR head, and its SHA appears in the signing approval plan. Start with Windows, then require `test_platform: all` baseline evidence before merging the harness. Keep #2920 unmerged until both update paths and all safeguards have passing evidence.
+6. After the harness lands, configure `desktop-installer-validation` from GitHub Actions as a required check. Retarget the final upgrade to `develop`, then dispatch full `electron-upgrade` validation from `develop` for its exact head commit. A changed candidate requires new evidence.
 
 ## Inputs and retained packages
 
@@ -22,7 +23,7 @@ Retention is 14 days for QA artifacts. The report links each package manifest to
 
 Do not use GitHub's rerun command to rebuild signed packages. QA packaging, signing, and finalization each reject later workflow attempts, including partial reruns that reuse successful resolver outputs; production retry behavior is retained. Dispatch a new build for packaging failures, or use the same retained packages for test reruns. Expired artifacts require a new build with new recorded relationships; never substitute another artifact silently.
 
-The `build-and-test` and `test-only` input contracts are reserved for the installed-app harness PR and currently fail explicitly because that harness is unavailable. Test-only will accept an original run with verified packages even if its later installed tests failed or were canceled; it will reject source overrides. This foundation cannot report installed-test success.
+Use `build-and-test` to test newly built packages, or `test-only` with their original `artifact_run_id` to reuse them after failed or canceled tests. Test-only rejects source overrides. Dispatch a new test-only run rather than rerunning individual GitHub jobs. QA wrapper instrumentation must be compatible; packages from earlier witness versions require a new build. `test_platform` permits focused pilots, whose reports are explicitly partial and never satisfy full acceptance.
 
 ## Isolation and production release behavior
 
@@ -32,10 +33,24 @@ The [shared packaging workflow](../.github/workflows/package_desktop.yml) produc
 
 The [production wrapper](../.github/workflows/release_desktop.yml) alone creates a draft release. CI/CD still restricts it to `master`; release-policy and ordinary tests precede it, tags target the run commit, and production web deployment waits for the complete desktop workflow. Production retention remains unchanged.
 
-## Evidence still required
+## Installed-app acceptance
 
-The installed-app PR must first establish Windows packaged automation with sandbox/context isolation retained, then add macOS and actual AppImage adapters. Each platform must import representative synthetic data through the UI, complete a real updater installation/relaunch, and compare persisted values, GUID relationships, and settings. Only file/folder choices may be controlled; backups, downloads, installation, and relaunch remain real.
+The external controller installs NSIS on Windows, copies the signed app from the mounted Mac DMG, or executes the actual FUSE-mounted AppImage on Linux. It remains alive while VERIFI quits and the updater relaunches the replacement. It never launches candidate B as a substitute for updating. A temporary loopback feed serves exact retained artifacts and byte ranges; file hashes validate before use.
 
-The upgrade PR additionally needs Later, Cancel/Save, Discard, and actual backup failure/recovery on each platform. Its final check must identify the candidate commit, require every scenario/platform, reject stale results, and refresh on candidate changes. Repository required-check configuration belongs to that rollout; this foundation does not configure branch protection.
+The UI imports a small synthetic account with facility, meter/readings, predictor/readings, account/facility analyses and their GUID links. File choices are supplied inside the disposable QA profile; real backup operations remain untouched. A read-only runtime witness records process/version/archive/security information, including whether Chromium's global `--no-sandbox` switch is present. Both installed launches must report that switch absent as well as secure window preferences; missing security evidence fails validation. The controller verifies the live OS executable, sandbox/context isolation, changed version/archive, reopened data/settings, and actual backup contents. Existing profiles are refused, and cleanup touches only the profile created by the run.
+
+`baseline-validation` requires a real baseline → candidate update on Windows, Mac Apple Silicon and Linux. `electron-upgrade` additionally requires candidate-A → B cases for Later/Cancel/Save, Discard, and a real backup filesystem obstruction followed by UI recovery. Cases use separate hosted jobs/profiles and reuse the same signed packages. The old client's immediate-restart behavior applies to the first upgrade path; current guarded clients explicitly restart when ready.
+
+Failures retain installer/updater/renderer/controller logs, snapshots, screenshots, traces and machine-readable results. Missing, failed, duplicate, incompatible or partial results cannot produce complete acceptance. The final upgrade gate consumes only full successful default-branch workflow evidence for the exact current candidate; branch pilots remain review evidence.
+
+The Windows-first packaged pilot, complete signed baseline matrix, and upgrade matrix are still required CI evidence. Local fixture/feed/contract tests and certificate-free Mac checks do not establish that these signed scenarios passed.
+
+## Exact-commit check
+
+The [trusted policy](../scripts/desktop/validation-policy.json) identifies #2920 as requiring the upgrade matrix, including the expected runtime-major transition. Other PRs targeting the default branch receive an explicit not-applicable success. A second PR sharing the required PR's head cannot bypass its policy.
+
+The [metadata event workflow](../.github/workflows/desktop_validation_events.yml) executes base/default-branch reporting code. It never executes candidate code or receives signing credentials. PR synchronization queues the check on the current candidate SHA and clears obsolete policy on the preceding head; closure and retargeting refresh policy too. A full default-branch dispatch announces its exact candidate, and workflow completion revalidates immutable invocation/package/result records before reporting success or failure. Both package production and installed-test invocation must originate from the default-branch workflow for this gate. Missing, failed, canceled or partial evidence cannot pass. Feature-branch pilots and their package cohorts remain pilot evidence.
+
+Publishers serialize per candidate, retain queued events, and compare validation-run IDs before updating checks. An older validation cannot overwrite a newer result. A test-only dispatch may reuse the same retained signed cohort, but expiration or a different candidate requires a new explicitly identified build.
 
 Keep production-identity artifact/trust verification and the unchanged released client's post-publication production-feed check in release acceptance. Broad OS-version coverage, Intel Mac execution, tarball updating, installer-wizard automation, and extensive download/signature failure injection remain follow-ups. Recovery uses verified backups and forward fixes, not an assumed Chromium-profile downgrade.

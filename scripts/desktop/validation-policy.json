@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "checkName": "desktop-installer-validation",
+  "requiredPullRequests": [2920],
+  "fromElectronMajor": 39,
+  "toElectronMajor": 45
+}

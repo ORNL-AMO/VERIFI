@@ -54,7 +54,7 @@ test('requires an actual signing reviewer and allows maintainer self-approval', 
 test('resolves distinct source/version relationships for the two upgrade paths', async () => {
     const result = await resolvePlan({ ...input, scenario: 'electron-upgrade' }, context, apiForTrust);
     assert.deepEqual(result.builds.map(value => [value.role, value.sourceSha, value.version]), [['baseline', sourceSha, '0.0.30'], ['candidate-a', candidateSha, '0.0.31'], ['candidate-b', candidateSha, '0.0.32']]);
-    await assert.rejects(resolvePlan(input, { ...context, ref: 'refs/heads/master' }, apiForTrust), /develop/);
+    await assert.rejects(resolvePlan(input, { ...context, ref: 'refs/tags/test' }, apiForTrust), /branch/);
     await assert.rejects(resolvePlan(input, { ...context, attempt: '2' }, apiForTrust), /rebuild/);
     await assert.rejects(resolvePlan(input, context, apiForTrust, { sourceSha, version: '0.0.99', reuseRunId: 3 }), /increase/);
 });
@@ -88,6 +88,8 @@ test('retained reports require the trusted successful run, every platform, and l
     assert.doesNotThrow(() => validateRunReport(report, { ...run, conclusion: 'failure' }, artifacts, context.repository, Date.now(), true));
     assert.throws(() => validateRunReport({ ...report, status: 'failed' }, { ...run, conclusion: 'failure' }, artifacts, context.repository, Date.now(), true));
     assert.throws(() => validateRunReport(report, { ...run, head_sha: candidateSha }, artifacts, context.repository));
+    assert.doesNotThrow(() => validateRunReport(report, { ...run, status: 'in_progress', conclusion: null }, artifacts, context.repository, Date.now(), true, { id: run.id, workflowSha }));
+    assert.throws(() => validateRunReport(report, { ...run, status: 'in_progress', conclusion: null }, artifacts, context.repository, Date.now(), true, { id: 999, workflowSha }));
     assert.throws(() => validateRunReport({ ...report, packages: packages.slice(1) }, run, artifacts, context.repository));
     assert.throws(() => validateRunReport(report, run, artifacts.map((a, i) => i ? a : { ...a, expired: true }), context.repository), /expired/);
     assert.throws(() => validateRunReport(report, run, artifacts.map((a, i) => i ? a : { ...a, digest: 'different' }), context.repository), /mismatched/);
