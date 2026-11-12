@@ -1,0 +1,6 @@
+:host { display: contents; }
+fieldset { border: 0; padding: 0; min-width: 0; }
+h3 { font-size: 1rem; margin: 1.25rem 0 .65rem; }
+input,select { width: 100%; margin: .4rem 0 1rem; }
+.creation-choices { margin-bottom: 1rem; }
+@media print { :host { display: none; } }
