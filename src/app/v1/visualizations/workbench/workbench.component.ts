@@ -11,7 +11,10 @@ import { visualizationChartLabel } from '../visualization-charts';
 import { VISUALIZATION_FAMILIES } from '../visualization-families';
 import { PreviewRegistry } from '../preview/preview-registry';
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
-import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-actions.component';
+import { RecoveryActionsComponent, VisualizationChildDraftGuard } from '../recovery/recovery-actions/recovery-actions.component';
+import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
+import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false,
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -31,6 +34,11 @@ export class WorkbenchComponent {
   private leaveKey = '';
   private leaveRevision = 0;
   readonly leaveOpen = signal(false);
+  private readonly invalidEditors = signal<Readonly<Record<string, boolean>>>({});
+  private readonly editorReset = signal(0);
+  readonly hasInvalidFields = computed(() => Object.values(this.invalidEditors()).some(Boolean));
+  readonly editorKey = computed(() => `${this.editor.key()}:${this.editorReset()}`);
+  readonly recoveryChildDrafts: VisualizationChildDraftGuard = { invalid: this.hasInvalidFields, key: this.editorKey, discard: () => this.discardFields() };
   @ViewChild('leaveDialog', { static: true }) private leaveDialog!: TemplateRef<unknown>;
   @ViewChild(RecoveryActionsComponent) private recoveryActions?: RecoveryActionsComponent;
   readonly accountGuid = computed(() => this.navigation.routeState().accountGuid ?? '');
@@ -58,11 +66,18 @@ export class WorkbenchComponent {
     return definition.sources.flatMap(source => {
       const registered = this.registry.editor(source.kind);
       return registered ? [{ id: source.id, component: registered.component, inputs: { context: { definition, sourceId: source.id,
+        editorKey: this.editorKey(), validityChanged: (invalid: boolean) => this.setEditorValidity(key, source.id, invalid),
         disabled: !this.editor.canEdit(), changed: (next: typeof definition) => {
           if (this.editor.key() === key && this.editor.localRevision() === revision) this.editor.applyDefinition(next);
         } } } }] : [];
     });
   });
+  readonly periodContext = computed(() => this.editContext('periods'));
+  readonly discoveredSeries = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    return definition && snapshot ? definition.sources.flatMap(source => source.kind === 'utility' ? discoverUtilitySeries(snapshot, definition.scope, source) : []) : [];
+  });
+  readonly chartContext = computed(() => ({ ...this.editContext('chart'), resolvedSeries: this.discoveredSeries(), identity: this.editorKey() }));
   readonly periodSummary = computed(() => {
     const period = this.editor.definition()?.period;
     if (!period) return 'Unavailable';
@@ -71,7 +86,7 @@ export class WorkbenchComponent {
     if (period.kind === 'rolling') return `Rolling ${period.count} ${period.unit}(s), ${period.anchor} anchor (${period.basis})`;
     return period.kind === 'fiscal-year' ? `Fiscal year ${period.year}` : 'Latest saved fiscal year';
   });
-  readonly saveLabel = computed(() => ({ saved: 'Saved', dirty: 'Changes pending', saving: 'Saving…', invalid: 'Correct invalid input',
+  readonly saveLabel = computed(() => this.hasInvalidFields() ? 'Correct unsaved field input' : ({ saved: 'Saved', dirty: 'Changes pending', saving: 'Saving…', invalid: 'Correct invalid input',
     error: 'Save failed', conflict: 'Review conflicting changes', 'refresh-required': 'Saved; workspace refresh required',
     missing: 'Visualization unavailable', readonly: 'Read-only saved visualization' })[this.editor.state()]);
 
@@ -83,7 +98,33 @@ export class WorkbenchComponent {
       }
     });
     const unregister = this.unsaved.registerNavigationPreflight(() => this.resolveLeave());
-    this.destroy.onDestroy(() => { unregister(); this.finishLeave(false); });
+    const unregisterFields = this.unsaved.register(() => this.hasInvalidFields(), () => this.discardFields(), () => this.editor.saving());
+    const unloadFields = this.unsaved.protectBeforeUnload(this.hasInvalidFields);
+    let priorKey = '';
+    effect(() => { const key = this.editor.key(); if (key !== priorKey) { priorKey = key; untracked(() => this.invalidEditors.set({})); } });
+    this.destroy.onDestroy(() => { unregister(); unregisterFields(); unloadFields(); this.finishLeave(false); });
+  }
+
+  private editContext(id: string) {
+    const definition = this.editor.definition()!, key = this.editor.key(), revision = this.editor.localRevision();
+    return { definition, editorKey: this.editorKey(), disabled: !this.editor.canEdit(), validityChanged: (invalid: boolean) => this.setEditorValidity(key, id, invalid),
+      changed: (next: typeof definition) => { if (this.editor.key() === key && this.editor.localRevision() === revision && !visualizationIntentEqual(next, this.editor.definition())) this.editor.applyDefinition(next); } };
+  }
+  private setEditorValidity(key: string, id: string, invalid: boolean): void {
+    if (key !== this.editor.key() || !!this.invalidEditors()[id] === invalid) return;
+    this.invalidEditors.update(state => ({ ...state, [id]: invalid }));
+  }
+  private discardFields(): void { this.invalidEditors.set({}); this.editorReset.update(value => value + 1); }
+  addUtilitySource(): void {
+    const definition = this.editor.definition(); if (!definition || !this.editor.canEdit()) return;
+    let index = 1; while (definition.sources.some(source => source.id === `utility-${index}`)) index++;
+    const source = { ...createVisualizationDefinition('', definition.accountGuid, definition.scope, 'utility').sources[0], id: `utility-${index}` };
+    this.editor.applyDefinition({ ...definition, sources: [...definition.sources, source] });
+  }
+  removeSource(id: string): void {
+    const definition = this.editor.definition(); if (!definition || !this.editor.canEdit() || definition.sources.length < 2) return;
+    this.invalidEditors.update(state => Object.fromEntries(Object.entries(state).filter(([key]) => key !== id)));
+    this.editor.applyDefinition({ ...definition, sources: definition.sources.filter(source => source.id !== id), series: definition.series.filter(series => series.sourceId !== id) });
   }
 
   back(): void { void this.journeys.returnToLibrary(this.accountGuid()); }
@@ -96,11 +137,11 @@ export class WorkbenchComponent {
 
   private async prepareLeave(): Promise<boolean> {
     if (this.recoveryActions?.blocksNavigation()) return false;
-    if (!this.editor.needsProtection()) return true;
-    const flushed = await this.editor.flush();
+    if (!this.editor.needsProtection() && !this.hasInvalidFields()) return true;
+    const flushed = !this.hasInvalidFields() && await this.editor.flush();
     if (this.recoveryActions?.blocksNavigation()) return false;
-    if (flushed) return true;
-    if (!this.editor.needsProtection()) return true;
+    if (flushed && !this.hasInvalidFields()) return true;
+    if (!this.editor.needsProtection() && !this.hasInvalidFields()) return true;
     this.leaveKey = this.editor.key(); this.leaveRevision = this.editor.localRevision();
     this.leaveOpen.set(true);
     this.portal = new TemplatePortal(this.leaveDialog, this.container);
@@ -111,11 +152,11 @@ export class WorkbenchComponent {
   discardLeave(): void {
     if (this.editor.saving() || this.editor.state() === 'refresh-required' || this.leaveKey !== this.editor.key()
       || this.leaveRevision !== this.editor.localRevision()) { this.finishLeave(false); return; }
-    this.editor.discard(); this.finishLeave(!this.editor.needsProtection());
+    this.editor.discard(); this.discardFields(); this.finishLeave(!this.editor.needsProtection());
   }
 
   async retryLeave(): Promise<void> {
-    if (await this.editor.retry()) this.finishLeave(true);
+    if (!this.hasInvalidFields() && await this.editor.retry()) this.finishLeave(true);
     else { this.leaveKey = this.editor.key(); this.leaveRevision = this.editor.localRevision(); }
   }
 

@@ -1,0 +1,37 @@
+@let current = value();
+<fieldset [formGroup]="form" class="period-settings">
+  <legend>Periods and comparisons</legend>
+    @if (conflict()) {
+      <div role="alert">
+        <p>Saved settings changed while your local input was incomplete. Review which settings to keep before continuing.</p>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useSaved()">Use saved settings</button>
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled()" (click)="keepLocal()">Keep local input</button>
+      </div>
+    }
+  <label>Saved period<select class="v1-select" formControlName="kind">
+    <option value="all-history">All saved history</option><option value="fixed">Fixed dates</option><option value="rolling">Rolling period</option>
+    <option value="fiscal-year">Pinned fiscal year</option><option value="latest-saved-year">Latest saved fiscal year</option>
+  </select></label>
+  @if (current.kind === 'fixed') {
+    <label>Start date<input type="date" formControlName="start"></label><label>End date<input type="date" formControlName="end"></label>
+  }
+  @if (current.kind === 'fixed' || current.kind === 'rolling') {
+    <label>Calendar basis<select class="v1-select" formControlName="basis"><option value="calendar">Calendar</option><option value="fiscal">Owner's fiscal calendar</option></select></label>
+  }
+  @if (current.kind === 'rolling') {
+    <label>Number of periods<input type="number" min="1" step="1" formControlName="count"></label>
+    <label>Period unit<select class="v1-select" formControlName="unit"><option value="month">Months</option><option value="year">Years</option></select></label>
+    <label>Anchor<select class="v1-select" formControlName="anchor"><option value="latest-data">Newest eligible selected data</option><option value="calendar">Current calendar date</option></select></label>
+    <label class="period-settings__check"><input type="checkbox" formControlName="includeIncomplete">Include the incomplete current period</label>
+  }
+  @if (current.kind === 'fiscal-year') { <label>Fiscal year<input type="number" min="1" max="9999" step="1" formControlName="year"></label> }
+  <label>Comparison<select class="v1-select" formControlName="comparison"><option value="none">None</option><option value="previous-period">Previous period</option><option value="previous-year">Previous year</option><option value="custom">Custom dates</option></select></label>
+  @if (current.comparison === 'previous-year') {
+    <label>Comparison calendar<select class="v1-select" formControlName="comparisonBasis"><option value="calendar">Calendar year</option><option value="fiscal">Owner's fiscal year</option></select></label>
+  }
+  @if (current.comparison === 'custom') {
+    <label>Comparison start<input type="date" formControlName="comparisonStart"></label><label>Comparison end<input type="date" formControlName="comparisonEnd"></label>
+  }
+  @if (issue(); as message) { <p role="alert">{{ message }} Your input is retained until corrected or discarded.</p> }
+  <p>Portfolio charts follow the account calendar; facility charts follow the owning facility. The preview shows resolved dates and retains whole native observations. Unsupported comparisons remain explained.</p>
+</fieldset>

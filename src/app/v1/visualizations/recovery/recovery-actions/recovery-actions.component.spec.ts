@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -75,5 +76,33 @@ describe('reviewed visualization recovery actions', () => {
     store.publish({ ...store.snapshot()!, predictors: [] });
     expect(component.stale()).toBe(true);
     await component.confirm(); expect(submit).not.toHaveBeenCalled();
+  });
+  it('gates a reviewed reset if a child field becomes incomplete before confirmation', async () => {
+    const { component, fixture, editor, submit } = setup();
+    const invalid = signal(false), discard = vi.fn(() => invalid.set(false));
+    fixture.componentRef.setInput('childDrafts', { invalid, key: signal('editor-a'), discard }); fixture.detectChanges();
+    await component.start('reset');
+    const before = structuredClone(editor.definition()); invalid.set(true);
+    await component.confirm(); fixture.detectChanges();
+    expect(component.childDraftDecision()).toBe('reset'); expect(submit).not.toHaveBeenCalled(); expect(editor.definition()).toEqual(before);
+    component.cancelChildDraftDecision(); expect(discard).not.toHaveBeenCalled(); expect(invalid()).toBe(true);
+    await component.start('reset'); await component.discardChildDraftsAndContinue(); await component.confirm();
+    expect(discard).toHaveBeenCalledOnce(); expect(submit).toHaveBeenCalledOnce();
+  });
+  it('retains late child drafts after a committed new copy and recovers its identity without replay', async () => {
+    const { component, fixture, editor, store, submit, recover, open } = setup();
+    const invalid = signal(false), discard = vi.fn(() => invalid.set(false));
+    fixture.componentRef.setInput('childDrafts', { invalid, key: signal('editor-a'), discard }); fixture.detectChanges();
+    store.publish({ ...store.snapshot()!, savedVisualizations: [] }); fixture.detectChanges();
+    let complete!: (value: unknown) => void;
+    submit.mockImplementationOnce(() => new Promise(resolve => { complete = resolve; }));
+    await component.start('new'); const pending = component.confirm();
+    invalid.set(true); complete({ state: 'committed' }); await pending; fixture.detectChanges();
+    expect(component.childDraftDecision()).toBe('new'); expect(editor.definition()).toBeDefined();
+    expect(component.proposal()?.guid).toBe('new-identity'); expect(open).not.toHaveBeenCalled();
+    await component.discardChildDraftsAndContinue();
+    expect(discard).toHaveBeenCalledOnce(); expect(recover).toHaveBeenCalledWith('account-a', 'new-identity');
+    expect(submit).toHaveBeenCalledOnce(); expect(open).toHaveBeenCalledWith('account-a', 'new-identity');
+    expect(editor.definition()).toBeUndefined();
   });
 });
