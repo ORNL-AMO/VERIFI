@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { visualizationEvidenceFixture } from '@domain/visualizations/testing/visualization-provider-fixtures';
+import { createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import type { VisualizationSourceProvider, VisualizationSourceRequest, VisualizationSourceResolution } from '@domain/visualizations/visualization-source-provider';
+import { createVisualizationChart, VISUALIZATION_CHART_CHOICES } from '../visualization-charts';
 import { PreviewController } from './preview-controller';
 import { PreviewDateContextResolver, PreviewIdentity, PreviewPresentation, VISUALIZATION_DATE_CONTEXT_RESOLVER,
   VISUALIZATION_PREVIEW_PRESENTERS, VISUALIZATION_SOURCE_PROVIDERS, VisualizationPreviewPresenter } from './preview-registry';
@@ -31,7 +33,107 @@ function setup(options: { provider?: Partial<VisualizationSourceProvider>; prese
   return { controller: TestBed.inject(PreviewController), definition, evidence, provider };
 }
 
+function mixedDefinition(): VisualizationDefinition {
+  const utility = utilityVisualizationFixture();
+  return { ...utility, sources: [...utility.sources, { id: 'temperature-source', kind: 'predictor', measure: 'value', aggregation: 'none',
+    selection: { kind: 'fixed', resource: 'predictor', guids: ['predictor-a'] }, settings: { unit: { kind: 'pinned', value: 'degC' } } }],
+    series: [...utility.series, { id: 'temperature', sourceId: 'temperature-source', metric: 'value', resourceGuid: 'predictor-a', axis: 'right' }] };
+}
+
+function setupMixed(options: { definition?: VisualizationDefinition; providers?: readonly Partial<VisualizationSourceProvider>[] } = {}) {
+  const definition = options.definition ?? mixedDefinition();
+  const evidence = definition.sources.map((_, index) => visualizationEvidenceFixture(definition, index));
+  const providers: VisualizationSourceProvider[] = evidence.map((entry, index) => ({ kind: entry.capabilities.kind,
+    describe: () => entry.capabilities, supportsChart: (_source, chart) => ({ state: 'supported', chart }),
+    resolve: vi.fn(async request => ({ ...entry.resolution, identity: request.identity })), ...options.providers?.[index] }));
+  const prepare = vi.fn<VisualizationPreviewPresenter['prepare']>(() => presentation);
+  const resolveDates = vi.fn(dates.resolve);
+  TestBed.configureTestingModule({ providers: [PreviewController,
+    { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: providers },
+    { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: TestChartComponent, prepare }] },
+    { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: { resolve: resolveDates } }] });
+  return { controller: TestBed.inject(PreviewController), definition, evidence, providers, prepare, resolveDates };
+}
+
 describe('visualization preview orchestration', () => {
+  it.each(VISUALIZATION_CHART_CHOICES)('retains $label mixed-family setup without requesting data or dates', ({ value, label }) => {
+    const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve), describe = vi.fn(), supportsChart = vi.fn(), prepare = vi.fn();
+    const { controller } = setup({ provider: { resolve, describe, supportsChart }, presenter: { prepare }, dates: { resolve: resolveDates } });
+    const definition = createVisualizationSetupDefinition({ name: 'Mixed setup', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      chart: createVisualizationChart(value), sourceKinds: ['utility', 'predictor', 'weather', 'energy-use', 'analysis-result', 'analysis-model'] });
+    const original = structuredClone(definition);
+    controller.update(definition, identity);
+    expect(controller.state()).toMatchObject({ state: 'setup-required', message: expect.stringContaining(label) });
+    expect(definition).toEqual(original);
+    expect(resolveDates).not.toHaveBeenCalled(); expect(describe).not.toHaveBeenCalled();
+    expect(supportsChart).not.toHaveBeenCalled(); expect(resolve).not.toHaveBeenCalled(); expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it('keeps unassigned Scatter axes in setup even after mixed sources and series are selected', () => {
+    const { controller, definition, providers, resolveDates, prepare } = setupMixed({
+      definition: { ...mixedDefinition(), chart: { kind: 'scatter', showFit: false } }
+    });
+    controller.update(definition, identity);
+    const state = controller.state();
+    expect(state).toMatchObject({ state: 'setup-required', message: expect.stringContaining('Scatter') });
+    expect(state.state === 'setup-required' && state.reasons).toContain('Choose declared X and Y series.');
+    expect(resolveDates).not.toHaveBeenCalled(); expect(prepare).not.toHaveBeenCalled();
+    for (const provider of providers) expect(provider.resolve).not.toHaveBeenCalled();
+  });
+
+  it('resolves compatible utility and predictor series against one shared date context and presents both', async () => {
+    const { controller, definition, providers, prepare, resolveDates } = setupMixed();
+    controller.update(definition, identity); await settle();
+    expect(controller.state().state).toBe('ready'); expect(resolveDates).toHaveBeenCalledTimes(1); expect(prepare).toHaveBeenCalledTimes(1);
+    const submitted = prepare.mock.calls[0][1];
+    expect(submitted.map(entry => entry.request.source.kind)).toEqual(['utility', 'predictor']);
+    expect(submitted.map(entry => entry.request.series.map(series => series.id))).toEqual([['energy'], ['temperature']]);
+    expect(submitted[0].request.dateContext).toBe(submitted[1].request.dateContext);
+    expect(submitted[0].request.identity.requestId).toBe(submitted[1].request.identity.requestId);
+    expect(submitted.map(entry => entry.request.identity.sourceId)).toEqual(definition.sources.map(source => source.id));
+    for (const provider of providers) expect(provider.resolve).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves configured mixed sources when one family has no adapter, without requesting partial data', () => {
+    const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve);
+    const { controller } = setup({ provider: { resolve }, dates: { resolve: resolveDates } });
+    const definition = mixedDefinition(), original = structuredClone(definition);
+    controller.update(definition, identity);
+    expect(controller.state()).toMatchObject({ state: 'unsupported', message: expect.stringContaining('saved setup is preserved') });
+    expect(definition).toEqual(original); expect(resolve).not.toHaveBeenCalled(); expect(resolveDates).not.toHaveBeenCalled();
+  });
+
+  it('rejects incompatible mixed-source units on one axis before mounting the presenter', async () => {
+    const base = mixedDefinition();
+    const { controller, definition, prepare } = setupMixed({ definition: { ...base, series: base.series.map(series => ({ ...series, axis: 'left' })) } });
+    controller.update(definition, identity); await settle();
+    expect(controller.state()).toMatchObject({ state: 'incompatible', reasons: expect.arrayContaining([expect.stringContaining('compatible units')]) });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it('rejects mixed-source observations with different declared alignment', async () => {
+    const predictor = visualizationEvidenceFixture(mixedDefinition(), 1).resolution;
+    if (predictor.state !== 'ready') throw new Error('Expected ready fixture.');
+    const { controller, definition, prepare } = setupMixed({ providers: [{}, { resolve: async request => ({ ...predictor, identity: request.identity,
+      resolved: { ...predictor.resolved, alignment: { kind: 'civil-month', key: 'different-month-alignment' } } }) }] });
+    controller.update(definition, identity); await settle();
+    expect(controller.state()).toMatchObject({ state: 'incompatible', reasons: expect.arrayContaining([expect.stringContaining('same observation alignment')]) });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it('cancels an obsolete mixed-source request when a new incomplete setup replaces it', async () => {
+    const pending = deferred<VisualizationSourceResolution>(); let submitted!: VisualizationSourceRequest; let signal!: AbortSignal;
+    const { controller, definition, evidence, prepare } = setupMixed({ providers: [{}, { resolve: (request, abort) => {
+      submitted = request; signal = abort; return pending.promise;
+    } }] });
+    controller.update(definition, identity); await settle(); expect(controller.state().state).toBe('loading');
+    const next = createVisualizationSetupDefinition({ name: 'New Scatter setup', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      chart: createVisualizationChart('scatter'), sourceKinds: ['utility', 'predictor'] });
+    controller.update(next, { ...identity, definitionRevision: 2 });
+    expect(signal.aborted).toBe(true); pending.resolve({ ...evidence[1].resolution, identity: submitted.identity }); await settle();
+    expect(controller.state()).toMatchObject({ state: 'setup-required', message: expect.stringContaining('Scatter') }); expect(prepare).not.toHaveBeenCalled();
+  });
+
   it('shows setup-required before issuing any requests for incomplete intent', async () => {
     const resolve = vi.fn(); const { controller, definition } = setup({ provider: { resolve } });
     const { chart, ...incomplete } = definition;

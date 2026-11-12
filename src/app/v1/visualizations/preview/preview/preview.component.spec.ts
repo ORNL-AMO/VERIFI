@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { visualizationEvidenceFixture } from '@domain/visualizations/testing/visualization-provider-fixtures';
 import { PreviewModule } from '../preview.module';
@@ -29,6 +29,19 @@ describe('visualization preview presentation', () => {
     fixture.componentRef.setInput('definition', utilityVisualizationFixture()); fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain('not available yet');
     expect(fixture.nativeElement.querySelector('button')).toBeNull();
+  });
+
+  it('announces the selected Scatter setup for multiple families without mounting chart data', () => {
+    TestBed.configureTestingModule({ imports: [PreviewModule] });
+    const fixture = TestBed.createComponent(PreviewComponent);
+    fixture.componentRef.setInput('definition', createVisualizationSetupDefinition({ name: 'Usage versus temperature', accountGuid: 'account-a',
+      scope: { kind: 'portfolio' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] }));
+    fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[role="status"]')!.textContent).toContain('Scatter visualization');
+    expect(root.textContent).toContain('Choose declared X and Y series.');
+    expect(root.textContent).toContain('save and reopen this setup');
+    expect(root.querySelector('table')).toBeNull(); expect(root.querySelector('button')).toBeNull();
   });
 
   it('mounts the registered presenter with an accessible table after evidence checks', async () => {

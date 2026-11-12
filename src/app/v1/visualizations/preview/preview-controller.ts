@@ -3,6 +3,7 @@ import { checkVisualizationCompatibility } from '@domain/visualizations/visualiz
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { isCurrentVisualizationResponse, VisualizationSourceEvidence, VisualizationSourceRequest } from '@domain/visualizations/visualization-source-provider';
+import { visualizationChartLabel } from '../visualization-charts';
 import { PreviewIdentity, PreviewPresentation, PreviewRegistry } from './preview-registry';
 
 export type PreviewState =
@@ -33,7 +34,11 @@ export class PreviewController {
     const decoded = decodeVisualizationDefinition(this.context.definition);
     if (decoded.state !== 'valid') {
       this.value.set({ state: decoded.state === 'unsupported' ? 'unsupported' : decoded.state === 'invalid' ? 'invalid' : 'setup-required',
-        message: decoded.state === 'setup-required' ? 'Complete source and chart setup to preview this visualization.' : 'This saved configuration cannot be previewed.',
+        message: decoded.state === 'setup-required'
+          ? decoded.definition.chart
+            ? `Complete source selection and the remaining settings for this ${visualizationChartLabel(decoded.definition.chart)} visualization.`
+            : 'Complete source and chart setup to preview this visualization.'
+          : 'This saved configuration cannot be previewed.',
         reasons: decoded.issues.map(issue => issue.message) });
       return;
     }
