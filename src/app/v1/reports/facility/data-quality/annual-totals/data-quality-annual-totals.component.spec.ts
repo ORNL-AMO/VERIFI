@@ -22,7 +22,7 @@ async function setup(snapshot = annualTotalsSnapshot()) {
 describe('Annual Totals in the report workbench', () => {
   beforeEach(() => vi.stubGlobal('Worker', undefined));
   afterEach(() => vi.unstubAllGlobals());
-  it('renders annual-only content, sorts by year and cost with v0 direction behavior, and leaves PDF disabled', async () => {
+  it('renders annual-only content, sorts by year and cost with v0 direction behavior, and enables PDF', async () => {
     const { root, harness, table } = await setup();
     expect(root.querySelectorAll('app-data-quality-annual-totals')).toHaveLength(1);
     expect(root.querySelector('app-meter-quality-presentation, app-data-quality-report-histogram')).toBeNull();
@@ -34,8 +34,7 @@ describe('Annual Totals in the report workbench', () => {
     expect(table().rows().map(row => row.year)).toEqual([2024, 2023]);
     expect(root.querySelector('th[aria-sort="descending"]')!.textContent).toContain('Total Cost');
     expect(table().rows()[0].cells.at(-1)!.text).toBe('$70');
-    expect(root.querySelector<HTMLButtonElement>('button[title="PDF export is not available yet."]')?.disabled
-      ?? [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.includes('PDF'))?.disabled).toBe(true);
+    expect(root.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!.disabled).toBe(false);
     expect(root.textContent).not.toContain('Sections being implemented');
   });
   it('suppresses stale readings immediately, updates facility projections and Other Impacts without saving report settings', async () => {

@@ -8,9 +8,10 @@ Implementation roadmap for [#2791](https://github.com/ORNL-AMO/VERIFI/issues/279
 | --- | --- |
 | Facility Analysis | PDF and a new PowerPoint presentation |
 | Account Better Plants | Direct PDF and existing Excel output; no PowerPoint |
+| Facility Data Quality | PDF using ready report results and session histogram preferences |
 | Future reports | Feature-owned adapters registered through the same runtime capability |
 
-Better Plants PDF retains the official energy/water form appearance. Its two bundled Excel templates remain byte-for-byte unchanged, with the existing workbook formulas and mappings preserved. Other layouts adapt to v1. Browser printing and presentation mode are deferred. These two implemented reports replace the issue's original Data Overview pilot.
+Better Plants PDF retains the official energy/water form appearance. Its two bundled Excel templates remain byte-for-byte unchanged, with the existing workbook formulas and mappings preserved. Other layouts adapt to v1. Browser printing and presentation mode are deferred. Analysis and Better Plants replaced the issue's original Data Overview pilot; Data Quality uses the same export foundation.
 
 ## Architectural decisions
 

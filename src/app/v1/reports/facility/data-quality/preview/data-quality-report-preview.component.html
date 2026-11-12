@@ -1,6 +1,5 @@
 @let state = results.state();
 @let draft = editor.draft();
-@let settings = draft.settings;
 @let meterSections = meters();
 @let predictorSections = predictors();
 @if (state.state !== 'ready') {
@@ -14,10 +13,9 @@
     } @else {
       <p role="status">{{ state.message || 'Preparing the report…' }}</p>
     }
-    <p class="report-note">{{ pdfUnavailableReason }}</p>
   </section>
 } @else {
-  @for (meter of meterSections; track meter.report.meter.guid; let first = $first; let last = $last) {
+  @for (meter of meterSections; track meter.report.meter.guid; let first = $first) {
     <article class="report-document meter-report" [attr.aria-labelledby]="meter.idPrefix + '-heading'">
       @if (first) {
         <header class="document-title"><h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2></header>
@@ -25,66 +23,65 @@
       <div class="document-section">
         <h3 [id]="meter.idPrefix + '-heading'">{{ meter.report.meter.name }}</h3>
         @if (!meter.report.hasData) {
-          <p role="status">No readings found for this meter.</p>
+          <p role="status">{{ messages.noMeterReadings }}</p>
         } @else {
           @if (meter.evidence.length) {
             <aside class="v1-alert v1-alert--warning reading-quality" aria-label="Reading quality">
               <ul role="list">@for (evidence of meter.evidence; track evidence) { <li>{{ evidence }}</li> }</ul>
             </aside>
           }
-          @if (settings.includeMeterStatisticsTable) {
+          @if (meter.content.statistics) {
             <app-meter-quality-presentation [report]="meter.report" [idPrefix]="meter.idPrefix" [reportStatistics]="true" [headingLevel]="4"
               [showConsumptionChart]="false" [showCostChart]="false"/>
             <hr class="report-component-divider">
           }
-          @if (settings.includeMeterConsumptionTimeseriesGraph) {
+          @if (meter.content.consumptionTimeseries) {
             <app-meter-quality-presentation [report]="meter.report" [idPrefix]="meter.idPrefix + '-consumption'" [headingLevel]="4"
               chartHeading="Total Consumption" [chartFileName]="meter.report.meter.name + '-consumption-readings'"
               [showStatistics]="false" [includeExcludedConsumption]="true" [showCostChart]="false" [showExpectedRangeLabel]="false"/>
             <hr class="report-component-divider">
           }
-          @if (settings.includeMeterCostTimeseriesGraph && meter.costChartIncluded) {
+          @if (meter.content.costTimeseries) {
             <app-meter-quality-presentation [report]="meter.report" [idPrefix]="meter.idPrefix + '-cost'" [headingLevel]="4"
               chartHeading="Total Cost" [chartFileName]="meter.report.meter.name + '-cost-readings'"
               [showStatistics]="false" [showConsumptionChart]="false" [showExpectedRangeLabel]="false"/>
             <hr class="report-component-divider">
           }
-          @if (settings.includeMeterConsumptionHistogram && meter.report.showConsumption) {
+          @if (meter.content.consumptionHistogram) {
             <app-data-quality-report-histogram [values]="meter.consumptionHistogram.values" [idPrefix]="meter.idPrefix + '-consumption-histogram'"
               heading="Distribution of Total Consumption" metric="Total Consumption" [unit]="meter.report.unit"
               [chartFileName]="meter.report.meter.name + '-consumption-distribution'" [numberOfBins]="meter.consumptionHistogram.binCount()"
               (numberOfBinsChange)="results.setHistogramBinCount(meter.consumptionHistogram.key, $event)"/>
             <hr class="report-component-divider">
           }
-          @if (settings.includeMeterConsumptionHistogram && !meter.report.showConsumption) {
-            <p class="report-note">The consumption distribution is unavailable because this meter is excluded from energy totals.</p>
+          @if (meter.content.excludedConsumption) {
+            <p class="report-note">{{ messages.excludedConsumption }}</p>
           }
-          @if (settings.includeMeterCostHistogram && meter.costChartIncluded) {
+          @if (meter.content.costHistogram) {
             <app-data-quality-report-histogram [values]="meter.costHistogram.values" [idPrefix]="meter.idPrefix + '-cost-histogram'"
               heading="Distribution of Total Cost" metric="Total Cost" unit="$"
               [chartFileName]="meter.report.meter.name + '-cost-distribution'" [numberOfBins]="meter.costHistogram.binCount()"
               (numberOfBinsChange)="results.setHistogramBinCount(meter.costHistogram.key, $event)"/>
             <hr class="report-component-divider">
           }
-          @if ((settings.includeMeterCostTimeseriesGraph || settings.includeMeterCostHistogram) && !meter.costChartIncluded) {
+          @if (meter.content.costUnavailable) {
             <aside class="v1-alert v1-alert--info cost-chart-notice" role="note" [attr.aria-labelledby]="meter.idPrefix + '-cost-notice-heading'">
               <div class="cost-chart-notice__heading">
                 <app-ui-icon name="info" aria-hidden="true"/>
-                <strong [id]="meter.idPrefix + '-cost-notice-heading'">Cost charts unavailable</strong>
+                <strong [id]="meter.idPrefix + '-cost-notice-heading'">{{ messages.costUnavailableTitle }}</strong>
               </div>
-              <p>No cost chart is available because the average cost is zero or unavailable.</p>
+              <p>{{ messages.costUnavailable }}</p>
             </aside>
           }
         }
-        @if (settings.includeAnnualTotalsTable && meter.annualTotals) {
+        @if (meter.content.annualTotals && meter.annualTotals) {
           <app-data-quality-annual-totals [totals]="meter.annualTotals" [idPrefix]="meter.idPrefix"/>
           <hr class="report-component-divider">
         }
-        @if (last && !predictorSections.length) { <p class="report-note">{{ pdfUnavailableReason }}</p> }
       </div>
     </article>
   }
-  @for (predictor of predictorSections; track predictor.report.predictor.guid; let first = $first; let last = $last) {
+  @for (predictor of predictorSections; track predictor.report.predictor.guid; let first = $first) {
     <article class="report-document predictor-report" [attr.aria-labelledby]="predictor.idPrefix + '-heading'">
       @if (first && !meterSections.length) {
         <header class="document-title"><h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2></header>
@@ -93,7 +90,7 @@
         <h3 [id]="predictor.idPrefix + '-heading'">{{ predictor.report.predictor.name }}</h3>
         @if (predictor.weatherDescription) { <p class="predictor-description">{{ predictor.weatherDescription }}</p> }
         @if (!predictor.report.hasData) {
-          <p role="status">No readings found for this predictor.</p>
+          <p role="status">{{ messages.noPredictorReadings }}</p>
         } @else {
           @if (predictor.evidence.length) {
             <aside class="v1-alert v1-alert--warning reading-quality" aria-label="Reading quality">
@@ -101,21 +98,21 @@
             </aside>
           }
           @if (!predictor.report.hasUsableData) {
-            <p role="status">No usable values. Review the predictor readings and correct values that are not finite numbers.</p>
+            <p role="status">{{ messages.noPredictorValues }}</p>
           } @else {
-            @if (settings.includePredictorStatisticsTable) {
+            @if (predictor.content.statistics) {
               <app-predictor-quality-presentation [report]="predictor.report" [idPrefix]="predictor.idPrefix"
                 [reportStatistics]="true" [headingLevel]="4" [showChart]="false"/>
               <hr class="report-component-divider">
             }
-            @if (settings.includePredictorTimeseriesGraph) {
+            @if (predictor.content.timeseries) {
               <app-predictor-quality-presentation [report]="predictor.report" [idPrefix]="predictor.idPrefix + '-readings'"
                 [headingLevel]="4" [showStatistics]="false" [showExpectedRangeLabel]="false" chartHeading="Predictor Readings"
                 [chartFileName]="predictor.report.predictor.name + '-readings'"/>
               <hr class="report-component-divider">
-              @if (!predictor.report.chartRows.length) { <p role="status">No readings have valid months and years for the time series.</p> }
+              @if (!predictor.report.chartRows.length) { <p role="status">{{ messages.noPredictorPeriods }}</p> }
             }
-            @if (settings.includePredictorHistogram) {
+            @if (predictor.content.histogram) {
               <app-data-quality-report-histogram [values]="predictor.histogram.values" [idPrefix]="predictor.idPrefix + '-histogram'"
                 heading="Distribution of Predictors" [metric]="predictor.report.predictor.name" [unit]="predictor.histogramUnit"
                 [chartFileName]="predictor.report.predictor.name + '-distribution'" [numberOfBins]="predictor.histogram.binCount()"
@@ -124,15 +121,13 @@
             }
           }
         }
-        @if (last) { <p class="report-note">{{ pdfUnavailableReason }}</p> }
       </div>
     </article>
   }
   @if (!meterSections.length && !predictorSections.length) {
     <section class="report-section report-document" aria-labelledby="data-quality-report-heading">
       <h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2>
-      <p role="status">No report content is enabled for the selected data. Choose sections in Setup.</p>
-      <p class="report-note">{{ pdfUnavailableReason }}</p>
+      <p role="status">{{ messages.noContent }}</p>
     </section>
   }
 }

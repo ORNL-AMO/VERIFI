@@ -137,7 +137,8 @@ describe('Data Quality Setup in Chromium', () => {
     expect(await workbench.editor.flush()).toBe(true);
     await view.open('report-a', 'report');
     const pdf = host.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!;
-    expect(pdf.disabled).toBe(true); expect(pdf.title).toBe('PDF export is not available yet.');
+    await vi.waitFor(() => { view.harness.detectChanges(); expect(pdf.disabled).toBe(false); });
+    expect(pdf.title).toBe('');
   });
 });
 

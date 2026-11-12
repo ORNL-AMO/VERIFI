@@ -26,6 +26,44 @@ async function ready(service: DataQualityReportService) {
 }
 describe('Data Quality meter result session', () => {
   afterEach(() => vi.restoreAllMocks());
+  it('prepares cloneable export inputs with current bins without recalculating or modifying the draft', async () => {
+    const { service, snapshot, draft, stage, pending } = setup();
+    snapshot.set(dataQualityPredictorReadingsSnapshot());
+    expect(service.exportSnapshot()).toBeUndefined();
+    await ready(service);
+    const result = service.state().value, savedDraft = draft();
+    expect(service.exportSnapshot()!.identity).toEqual({ scope: 'facility', accountGuid: 'account-a',
+      facilityGuid: 'facility-a', reportGuid: 'report-a' });
+    expect(service.exportSnapshot()!.histogramBinCounts).toEqual({
+      'meter-meter-a-consumption': 50, 'meter-meter-a-cost': 50, 'predictor-predictor-a': 50
+    });
+    service.setHistogramBinCount('meter-meter-a-consumption', 7);
+    service.setHistogramBinCount('predictor-predictor-a', 12);
+    service.setHistogramBinCount('predictor-predictor-a', 0);
+    const prepared = service.exportSnapshot()!;
+    expect(prepared.histogramBinCounts['meter-meter-a-consumption']).toBe(7);
+    expect(prepared.histogramBinCounts['predictor-predictor-a']).toBe(12);
+    expect(service.state().value).toBe(result);
+    expect(draft()).toBe(savedDraft);
+    const cloned = structuredClone(prepared);
+    expect(cloned).toEqual(prepared);
+    expect(cloned.results.meters[0].chartRows[0].date).toBeInstanceOf(Date);
+    cloned.facility.name = 'Detached facility';
+    cloned.settings.selectedMeterIds.push('unrelated');
+    cloned.results.meters[0].meterData[0].totalCost = -123;
+    expect(snapshot().facilities[0].name).not.toBe('Detached facility');
+    expect(draft().settings.selectedMeterIds).toEqual(['meter-a']);
+    expect(service.state().value!.meters[0].meterData[0].totalCost).toBe(20);
+    pending.set(true);
+    expect(service.exportSnapshot()).toBeUndefined();
+    pending.set(false);
+    await ready(service);
+    stage.set('setup');
+    expect(service.exportSnapshot()).toBeUndefined();
+    stage.set('report');
+    await ready(service);
+    expect(service.exportSnapshot()!.histogramBinCounts['predictor-predictor-a']).toBe(12);
+  });
   it('calculates full-history statistics, units, zero-MAD outliers, and duplicate months in both selection modes', async () => {
     const { service, draft } = setup(); await ready(service);
     const meter = service.state().value!.meters[0];

@@ -94,7 +94,7 @@ describe('Annual Totals with native calendarization', () => {
     expect(getComputedStyle(annual.querySelector('thead th')!).textAlign).toBe('center');
     expect(getComputedStyle(annual.querySelector('tbody th')!).textAlign).toBe('left');
     const pdf = host.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!;
-    expect(pdf.disabled).toBe(true); expect(pdf.title).toBe('PDF export is not available yet.');
+    expect(pdf.disabled).toBe(false); expect(pdf.title).toBe('');
     if (mode === 'manual' && theme !== 'dark') await page.screenshot({ element: host,
       path: `../../../../../../../.angular/data-quality-complete-${theme}.png` });
     await activate(host.querySelector<HTMLAnchorElement>('footer a')!);

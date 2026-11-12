@@ -11,6 +11,7 @@ import { buildMeterDataQualityReport, MeterDataQualityReport } from '@domain/cal
 import { buildPredictorDataQualityReport, PredictorDataQualityReport } from '@domain/calculations/data-quality/predictor-data-quality';
 import { ReportResultController, ReportResultRequest } from '@app/v1/reports/shared/calculation/report-result-controller';
 import { DataQualityReportEditor } from './editing/data-quality-report-editor.service';
+import { buildDataQualityReportSnapshot, dataQualityHistogramKey } from './data-quality-report.view';
 
 export interface DataQualityReportResult { 
   readonly meters: readonly MeterDataQualityReport[]; 
@@ -110,6 +111,19 @@ export class DataQualityReportService {
     project: (_value: DataQualityReportResult, result: DataQualityReportResult) => result
   });
   readonly state = this.results.state;
+  readonly exportSnapshot = computed(() => {
+    const state = this.state(), report = this.context.report();
+    if (state.state !== 'ready' || !state.value || !report) return undefined;
+    const facility = this.context.workspace.snapshot()?.facilities.find(item => item.guid === report.facilityId);
+    if (!facility) return undefined;
+    const keys = [
+      ...state.value.meters.flatMap(item => [dataQualityHistogramKey('consumption', item.meter.guid),
+        dataQualityHistogramKey('cost', item.meter.guid)]),
+      ...state.value.predictors.map(item => dataQualityHistogramKey('predictor', item.predictor.guid))
+    ];
+    const histogramBinCounts = Object.fromEntries(keys.map(key => [key, this.histogramBinCount(key)()]));
+    return buildDataQualityReportSnapshot(report, facility, this.editor.draft().settings, state.value, histogramBinCounts);
+  });
   retry(): void {
     if (this.annualEnabled()) this.injector.get(WorkspaceCalendarizationService).retry();
     this.results.retry();

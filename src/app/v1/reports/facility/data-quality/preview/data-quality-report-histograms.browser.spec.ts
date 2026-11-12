@@ -51,6 +51,12 @@ describe('Data Quality distribution charts in Chromium', () => {
     expect(inputs()[0].getAttribute('aria-invalid')).toBe('true');
     expect(host.textContent).toContain('The chart keeps the last valid count.');
     expect((first().getOption().series as { data: number[][] }[])[0].data.map(point => point[1])).toEqual([2, 1]);
+    const inputsForExport = results.exportSnapshot()!;
+    const detached = structuredClone(inputsForExport);
+    expect(detached.histogramBinCounts['meter-meter-a-consumption']).toBe(2);
+    expect(detached.results.meters[0].chartRows[0].date).toBeInstanceOf(Date);
+    detached.facility.name = 'Detached export facility';
+    expect(view.store.facilities()[0].name).not.toBe('Detached export facility');
     await userEvent.fill(inputs()[0], '2'); view.harness.detectChanges();
     first().setOption({ animation: false }); first().getZr().refreshImmediately();
     const point = (first().getOption().series as { data: number[][] }[])[0].data[0];
@@ -76,7 +82,7 @@ describe('Data Quality distribution charts in Chromium', () => {
     await vi.waitFor(() => { view.harness.detectChanges(); expect(inputs().map(input => input.value)).toEqual(['2', '50', '50']); });
     expect(view.updateSetup).not.toHaveBeenCalled();
     expect(view.store.facilityReports()[0].dataQualityReportSettings).toEqual(savedSettings);
-    expect(host.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!.disabled).toBe(true);
+    expect(host.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!.disabled).toBe(false);
   });
   it('renders constant values as one bar and removes it for invalid-only readings', async () => {
     const snapshot = dataQualityHistogramSnapshot();

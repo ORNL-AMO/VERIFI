@@ -7,6 +7,11 @@ import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterG
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
 import { reportFixture, reportSnapshot } from '../../testing/report-test-fixtures';
+import { buildMeterDataQualityReport } from '@domain/calculations/data-quality/meter-data-quality';
+import { buildPredictorDataQualityReport } from '@domain/calculations/data-quality/predictor-data-quality';
+import { getZeroEmissionsResults } from '@domain/calculations/emissions-calculations/emissions';
+import { buildDataQualityReportSnapshot } from '../data-quality-report.view';
+import { dataQualitySettingsDraft, METER_CONTENT_FLAGS, PREDICTOR_CONTENT_FLAGS } from '../data-quality-report-settings';
 
 export function dataQualityReport(overrides: Parameters<typeof reportFixture>[0] = {}) {
   const report = reportFixture({ facilityReportType: 'dataQuality', ...overrides });
@@ -59,4 +64,26 @@ export function dataQualityHistogramSnapshot() {
     includeMeterConsumptionHistogram: true, includeMeterCostHistogram: true, includePredictorHistogram: true
   });
   return snapshot;
+}
+
+export function dataQualityPdfSnapshot() {
+  const workspace = dataQualityPredictorReadingsSnapshot();
+  const report = workspace.facilityReports[0], settings = dataQualitySettingsDraft(report.dataQualityReportSettings);
+  for (const flag of [...METER_CONTENT_FLAGS, ...PREDICTOR_CONTENT_FLAGS]) settings[flag] = true;
+  settings.includeAnnualTotalsTable = true;
+  const meter = workspace.meters[0], predictor = workspace.predictors[0];
+  const results = {
+    meters: [buildMeterDataQualityReport(workspace.meterData.filter(row => row.meterId === meter.guid), meter)],
+    predictors: [buildPredictorDataQualityReport(
+      workspace.predictorData.filter(row => row.predictorId === predictor.guid), predictor)],
+    annualTotals: [{ meterGuid: meter.guid, columns: [
+      { key: 'year' as const, label: 'Year' },
+      { key: 'energyUse' as const, label: 'Total Energy', unit: 'MMBtu' },
+      { key: 'energyCost' as const, label: 'Total Cost', unit: '$' }
+    ], rows: [2025, 2024].map(year => ({ ...getZeroEmissionsResults(), year,
+      energyConsumption: 130, energyUse: 130, energyCost: year === 2025 ? 260 : 250 })) }]
+  };
+  return { ...buildDataQualityReportSnapshot(report, workspace.facilities[0], settings, results, {
+    'meter-meter-a-consumption': 7, 'meter-meter-a-cost': 12, 'predictor-predictor-a': 9
+  }), results };
 }

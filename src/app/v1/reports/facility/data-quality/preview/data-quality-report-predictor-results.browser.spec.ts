@@ -103,7 +103,7 @@ describe('Data Quality predictor report in Chromium', () => {
     await view.open('report-a', 'report');
     await vi.waitFor(() => { view.harness.detectChanges(); expect(service.state().state).toBe('ready'); });
     expect(service.state().value!.predictors[0].statistics.average).toBe(36.6);
-    expect(host.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!.disabled).toBe(true);
+    expect(host.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!.disabled).toBe(false);
   });
   it('renders both source types in analysis mode with unique headings and native charts', async () => {
     const snapshot = dataQualityPredictorReadingsSnapshot();

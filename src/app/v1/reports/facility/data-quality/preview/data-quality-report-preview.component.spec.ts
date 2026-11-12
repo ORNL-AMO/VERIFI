@@ -73,7 +73,7 @@ describe('Data Quality report foundation', () => {
     expect(store.account()?.guid).toBe('account-b');
     expect(updateSetup).toHaveBeenCalledOnce();
   });
-  it('opens saved settings without writes and renders a disabled PDF action through the shared footer', async () => {
+  it('opens saved settings without writes and exposes PDF output through the shared footer', async () => {
     const saved = dataQualityReport();
     const { open, harness, store, updateName, updateSetup } = await setup([saved]);
     const workbench = await open('report-a', 'report');
@@ -81,15 +81,15 @@ describe('Data Quality report foundation', () => {
     const preview = harness.routeNativeElement!.querySelector('app-data-quality-report-preview')!;
     await vi.waitFor(() => { harness.detectChanges(); expect(preview.textContent).toContain('No readings found for this meter.'); });
     expect(preview.textContent).toContain('No readings found for this meter.');
-    expect(preview.textContent).toContain('PDF export is not available yet.');
+    expect(preview.textContent).not.toContain('PDF export is not available yet.');
     const button = harness.routeNativeElement!.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!;
     expect(button.textContent?.trim()).toBe('PDF');
-    expect(button.disabled).toBe(true);
-    expect(button.title).toBe('PDF export is not available yet.');
+    expect(button.disabled).toBe(false);
+    expect(button.title).toBe('');
     const output = workbench.workbench.session()!.runtime.output!;
-    const generate = vi.spyOn(output, 'generate');
+    const generate = vi.spyOn(output, 'generate').mockResolvedValue();
     button.click();
-    expect(generate).not.toHaveBeenCalled();
+    expect(generate).toHaveBeenCalledExactlyOnceWith('pdf');
     expect(output.busy()).toBe(false);
     expect(output.state().phase).toBe('idle');
     expect(updateName).not.toHaveBeenCalled();

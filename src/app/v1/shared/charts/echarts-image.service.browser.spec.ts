@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { EChartsImageService } from './echarts-image.service';
+import { EChartsImageService, PDF_CHART_IMAGE_OPTIONS } from './echarts-image.service';
 import { V1EChartsOption } from './echarts';
 import { metricResultsChartOption } from './metric-results-chart/metric-results-chart-option';
 
@@ -15,6 +15,21 @@ describe('EChartsImageService in Chromium', () => {
     const image = await decodeImage(dataUrl);
     expect([image.width, image.height]).toEqual([2400, 1350]);
     expect(await coloredPixels(image)).toBeGreaterThan(1000);
+    expect(document.querySelector('[data-report-chart-capture]')).toBeNull();
+  });
+
+  it('renders the balanced PDF profile as a white 1600 × 900 JPEG without a mounted preview', async () => {
+    const dataUrl = await TestBed.inject(EChartsImageService).capture({
+      xAxis: { type: 'category', data: ['Baseline', 'Report'] }, yAxis: { type: 'value' },
+      series: [{ type: 'line', data: [100, 75], label: { show: true } }]
+    }, PDF_CHART_IMAGE_OPTIONS);
+    expect(dataUrl).toMatch(/^data:image\/jpeg;base64,/);
+    const image = await decodeImage(dataUrl);
+    expect([image.width, image.height]).toEqual([1600, 900]);
+    expect(await coloredPixels(image)).toBeGreaterThan(1000);
+    const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+    const context = canvas.getContext('2d')!; context.drawImage(image, 0, 0);
+    expect([...context.getImageData(0, 0, 1, 1).data]).toEqual([255, 255, 255, 255]);
     expect(document.querySelector('[data-report-chart-capture]')).toBeNull();
   });
 

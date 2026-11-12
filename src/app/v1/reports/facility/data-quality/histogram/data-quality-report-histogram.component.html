@@ -1,4 +1,3 @@
-@let distribution = histogram();
 @let option = chartOption();
 @let prefix = idPrefix();
 <section class="quality-histogram" [attr.aria-labelledby]="prefix + '-heading'">
@@ -18,10 +17,8 @@
         }</tbody>
       </table>
     </div>
-  } @else if (distribution.state === 'empty') {
-    <p role="status">No usable numeric readings are available for this distribution.</p>
   } @else {
-    <p role="status">These values cannot be displayed with this bin count. Choose a different count or review the readings.</p>
+    <p role="status">{{ message() }}</p>
   }
   <div class="quality-histogram__controls">
     <label [for]="prefix + '-bins'">Number of bins</label>
