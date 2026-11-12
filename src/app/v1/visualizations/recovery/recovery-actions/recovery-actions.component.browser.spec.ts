@@ -6,6 +6,7 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import { getNewIdbSavedVisualization, IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -112,6 +113,9 @@ describe('reviewed visualization recovery with native storage', () => {
   });
 
   it.each(['legacy', 'mixed-family Scatter'] as const)('saves a deleted %s editor draft under a new GUID without recreating its removed identity', async kind => {
+    if (kind === 'legacy') await harness.seed({ utilityMeter: [{
+      ...getNewIdbUtilityMeter('facility-a', 'account-a', true, 'kWh'), guid: 'meter-a'
+    }] });
     await TestBed.inject(AccountWorkspaceService).selectAccount('account-a');
     const commands = TestBed.inject(SavedVisualizationCommands);
     const definition = kind === 'legacy' ? utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' }) : mixedSetup();
