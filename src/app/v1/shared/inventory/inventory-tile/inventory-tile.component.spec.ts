@@ -18,13 +18,15 @@ describe('portfolio tile interactions and additive details', () => {
       expect(header.textContent?.trim()).toBe('Account visualization'); expect(header.getAttribute('data-scope')).toBe('account');
       expect(root.querySelector('article')?.classList.contains('portfolio-tile--scoped')).toBe(true);
       expect(root.querySelector('.portfolio-tile__location')).toBeNull();
+      expect(root.querySelector('app-visualization-snapshot')?.textContent ?? '').not.toContain('Scope');
       expect([...root.querySelectorAll('.portfolio-tile__data-sources [role="img"]')].map(icon => icon.getAttribute('aria-label')))
         .toEqual(['Meters', 'Predictors', 'Energy Use', 'Analysis']);
       expect(root.querySelector('.portfolio-tile__chip')).toBeNull();
       expect(root.querySelector('.portfolio-tile__name')?.textContent).toBe('Energy usage trend');
     }
     fixture.componentRef.setInput('showOwnership', false); fixture.detectChanges();
-    expect(root.querySelector('app-inventory-card-header')).toBeNull(); fixture.destroy();
+    expect(root.querySelector('app-inventory-card-header')).toBeNull();
+    expect(root.querySelector('app-visualization-snapshot')?.textContent).toContain('ScopePortfolio'); fixture.destroy();
   });
   it('uses distinct type icons instead of count text for group cards and icon links in Summary', () => {
     TestBed.configureTestingModule({ imports: [InventoryTileComponent], providers: [provideRouter([])] });
@@ -75,11 +77,12 @@ describe('portfolio tile interactions and additive details', () => {
     expect(root.textContent).toContain('120'); expect(root.textContent).toContain('kWh'); expect(root.textContent).toContain('Missing readings');
     expect(root.querySelector('.reading-snapshot__attention a')?.getAttribute('href')).toBe('/quality');
   });
-  it.each(['meter', 'predictor', 'analysis', 'report'] as const)('shows the facility name once in the %s header at every detail level', resource => {
+  it.each(['meter', 'predictor', 'analysis', 'report', 'visualization'] as const)('shows the facility name once in the %s header at every detail level', resource => {
     const fixture = setup(), root = fixture.nativeElement as HTMLElement;
     const base = portfolioTile('owned', { owner: { facilityGuid: 'facility-a', label: 'North plant', route: ['/north'] } });
     const tile = resource === 'analysis' ? { ...base, analysisSnapshot: { scope: 'facility' as const, active: false, outcomes: [], facts: [], rosterTitle: '', roster: [], findings: [], modified: 'Today' } }
       : resource === 'report' ? { ...base, reportSnapshot: { scope: 'facility' as const, typeLabel: 'Analysis', facts: [], modified: 'Today', scopeLabel: 'North plant', findings: [] } }
+      : resource === 'visualization' ? { ...base, visualizationSnapshot: { scope: 'facility' as const, dataSources: [], scopeLabel: 'Facility: North plant', periodLabel: 'All saved history', chartLabel: 'Line', modified: 'Today', issues: [] } }
       : { ...base, ...(resource === 'meter' ? { meterSnapshot: fixture.componentInstance.tile.meterSnapshot } : { predictorSnapshot: fixture.componentInstance.tile.meterSnapshot }) };
     fixture.componentRef.setInput('tile', tile);
     for (const level of ['simple', 'summary', 'detailed'] as const) {
@@ -91,6 +94,7 @@ describe('portfolio tile interactions and additive details', () => {
       expect(header.querySelector('a')?.getAttribute('href')).toBe('/north');
       expect(root.querySelectorAll('.portfolio-tile__owner')).toHaveLength(1);
       expect(root.querySelector('.portfolio-tile__metadata .portfolio-tile__owner')).toBeNull();
+      if (resource === 'visualization') expect(root.textContent?.split('North plant')).toHaveLength(2);
     }
   });
   it('emits typed navigation only for unmodified link clicks and leaves native link context menus intact', () => {
