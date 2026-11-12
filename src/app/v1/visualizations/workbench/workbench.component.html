@@ -9,6 +9,7 @@
   }
   @if (editor.error()) { <div class="v1-alert v1-alert--warning" role="alert">{{ editor.error() }}</div> }
   <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()" (resolved)="editor.resolveConflicts($event)"/>
+  <app-visualization-recovery-actions/>
   @if (editor.state() === 'error' || editor.state() === 'refresh-required') {
     <button type="button" class="v1-btn v1-btn--secondary" [disabled]="editor.saving()" (click)="editor.retry()">Retry save or refresh</button>
   }

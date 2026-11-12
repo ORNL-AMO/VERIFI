@@ -11,6 +11,7 @@ import { visualizationChartLabel } from '../visualization-charts';
 import { VISUALIZATION_FAMILIES } from '../visualization-families';
 import { PreviewRegistry } from '../preview/preview-registry';
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
+import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-actions.component';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false,
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -31,6 +32,7 @@ export class WorkbenchComponent {
   private leaveRevision = 0;
   readonly leaveOpen = signal(false);
   @ViewChild('leaveDialog', { static: true }) private leaveDialog!: TemplateRef<unknown>;
+  @ViewChild(RecoveryActionsComponent) private recoveryActions?: RecoveryActionsComponent;
   readonly accountGuid = computed(() => this.navigation.routeState().accountGuid ?? '');
   readonly scopeLabel = computed(() => {
     const record = this.editor.record();
@@ -93,8 +95,11 @@ export class WorkbenchComponent {
   }
 
   private async prepareLeave(): Promise<boolean> {
+    if (this.recoveryActions?.blocksNavigation()) return false;
     if (!this.editor.needsProtection()) return true;
-    if (await this.editor.flush()) return true;
+    const flushed = await this.editor.flush();
+    if (this.recoveryActions?.blocksNavigation()) return false;
+    if (flushed) return true;
     if (!this.editor.needsProtection()) return true;
     this.leaveKey = this.editor.key(); this.leaveRevision = this.editor.localRevision();
     this.leaveOpen.set(true);
@@ -121,4 +126,4 @@ export class WorkbenchComponent {
   }
 }
 
-export const visualizationLeaveGuard: CanDeactivateFn<WorkbenchComponent> = component => component.resolveLeave();
+export const visualizationLeaveGuard: CanDeactivateFn<WorkbenchComponent> = () => inject(UnsavedChangesService).resolveNavigationPreflight();

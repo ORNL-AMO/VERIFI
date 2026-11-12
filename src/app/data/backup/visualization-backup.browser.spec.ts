@@ -8,6 +8,7 @@ import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { visualizationReferences } from '@domain/visualizations/visualization-references';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
+import { createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { BackupImportCommandService } from './backup-import-command.service';
 import { BackupPreparationService } from './backup-preparation.service';
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
@@ -18,6 +19,33 @@ describe('saved visualization backup transactions in Chromium', () => {
   const builder = new WorkspaceBackupSnapshotBuilder(), preparation = new BackupPreparationService();
   beforeEach(async () => { harness = await IndexedDbTestHarness.create('visualization-backup'); });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
+
+  it.each(['Account', 'Facility'] as const)('round trips incomplete mixed-family Scatter intent in a %s backup without fabricating bindings', async kind => {
+    const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
+      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+    const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition, 'scatter-setup')] };
+    const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account'
+      ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    const before = structuredClone(backup), service = createService();
+    let accountGuid: string;
+    if (kind === 'Account') accountGuid = (await service.importAccountBackupFile(backup, 0)).guid;
+    else {
+      await harness.seed({ accounts: [{ guid: 'destination', name: 'Destination' }] });
+      accountGuid = 'destination'; await service.importFacilityBackupFile(backup, accountGuid, 0);
+    }
+    await harness.reopen();
+    const restored = await readSnapshot(accountGuid); expect(restored.savedVisualizations).toHaveLength(1);
+    const record = restored.savedVisualizations[0], decoded = readSavedVisualization(record);
+    expect(record.guid).not.toBe('scatter-setup'); expect(record.accountId).toBe(accountGuid);
+    expect(record.facilityId).toBe(restored.facilities[0].guid); expect(record.recordVersion).toBe(1);
+    expect(record.preservation.references).toEqual([]); expect(decoded.state).toBe('setup-required');
+    if (!('definition' in decoded)) throw new Error('Expected readable restored setup.');
+    expect(decoded.definition).toEqual({ ...definition, accountGuid, scope: { kind: 'facility', facilityGuid: restored.facilities[0].guid } });
+    expect(decoded.definition.chart).not.toHaveProperty('xSeriesId'); expect(decoded.definition.chart).not.toHaveProperty('ySeriesId');
+    const reexported = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored))));
+    expect(reexported.savedVisualizations[0].definition).toEqual(decoded.definition);
+    expect(backup).toEqual(before);
+  });
 
   it.each(['Account', 'Facility'] as const)('round trips all source families in a %s backup and preserves pinned comparison models', async kind => {
     const snapshot = { ...visualizationBackupSnapshot() };

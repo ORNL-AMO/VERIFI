@@ -1,0 +1,4 @@
+:host { display: block; }
+.recovery-actions { display: flex; flex-wrap: wrap; gap: .5rem; padding: .5rem 0; }
+label { display: grid; gap: .25rem; margin-bottom: .75rem; }
+@media print { .recovery-actions { display: none; } }
