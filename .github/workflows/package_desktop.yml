@@ -1,0 +1,261 @@
+name: Package desktop
+
+on:
+  workflow_call:
+    inputs:
+      source-sha:
+        type: string
+        required: true
+      qa-version:
+        type: string
+        default: ''
+      role:
+        type: string
+        default: production
+      artifact-prefix:
+        type: string
+        default: release
+      retention-days:
+        type: number
+        default: 1
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    if: >-
+      (inputs.qa-version == '' && github.ref == 'refs/heads/master' && inputs.source-sha == github.sha) ||
+      (inputs.qa-version != '' && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-24.04
+            metadata: latest-linux.yml
+          - platform: mac
+            os: macos-26
+            metadata: latest-mac.yml
+          - platform: windows
+            os: windows-2025
+            metadata: latest.yml
+    runs-on: ${{ matrix.os }}
+    env:
+      DESKTOP_SOURCE_SHA: ${{ inputs.source-sha }}
+      DESKTOP_WORKFLOW_SHA: ${{ github.sha }}
+      DESKTOP_SOURCE_DIR: ${{ github.workspace }}/source
+      DESKTOP_ROLE: ${{ inputs.role }}
+      DESKTOP_QA_VERSION: ${{ inputs.qa-version }}
+      DESKTOP_PLATFORM: ${{ matrix.platform }}
+      DESKTOP_METADATA: ${{ matrix.metadata }}
+    steps:
+      - name: Require a new dispatch for QA packaging
+        if: inputs.qa-version != '' && github.run_attempt != 1
+        shell: bash
+        run: |
+          echo 'QA packages must not be rebuilt or signed on workflow reruns. Dispatch a new build, or test retained artifacts.' >&2
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/desktop-source
+        with:
+          source-sha: ${{ inputs.source-sha }}
+          tooling-sha: ${{ github.sha }}
+      - name: Install Linux packaging prerequisites
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      - name: Configure Mac signing
+        if: matrix.platform == 'mac'
+        env:
+          APPLE_CERT_A_BASE64: ${{ secrets.APPLE_CERT_A_BASE64 }}
+          APPLE_PROV_PROF_BASE64: ${{ secrets.APPLE_PROV_PROF_BASE64 }}
+          APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
+          APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
+        run: |
+          CERT_PATH="$RUNNER_TEMP/desktop_certificate.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/desktop-build.keychain"
+          echo -n "$APPLE_CERT_A_BASE64" | base64 --decode -o "$CERT_PATH"
+          echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode -o source/embedded.provisionprofile
+          security default-keychain -d user > "$RUNNER_TEMP/desktop-original-keychain"
+          security create-keychain -p "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$APPLE_CERT_SECRET" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_SECRET" "$KEYCHAIN_PATH"
+      - name: Package once without publishing
+        shell: bash
+        env:
+          WIN_CERT_BASE64: ${{ secrets.WIN_CERT_BASE64 }}
+        run: node tooling/scripts/desktop/package.cjs source "$DESKTOP_PLATFORM" "$DESKTOP_QA_VERSION"
+      - name: Verify and notarize Mac
+        if: matrix.platform == 'mac'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: bash tooling/scripts/desktop/notarize-mac.sh source
+      - name: Finalize native update metadata
+        if: matrix.platform != 'windows'
+        shell: bash
+        run: |
+          node tooling/scripts/desktop/update-metadata.cjs source/output "$DESKTOP_METADATA" refresh
+          node tooling/scripts/desktop/update-metadata.cjs source/output "$DESKTOP_METADATA" verify
+      - name: Record Linux verification
+        if: matrix.platform == 'linux'
+        run: echo '{"platform":"linux","verified":true,"metadata":true}' > source/desktop-verification.json
+      - name: Prepare native distribution manifest
+        if: matrix.platform != 'windows'
+        shell: bash
+        run: node tooling/scripts/desktop/package-manifest.cjs source "$DESKTOP_PLATFORM" deliverables evidence/package-manifest.json
+      - name: Upload native packages
+        if: matrix.platform != 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-${{ matrix.platform }}-artifact
+          path: deliverables/*
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
+          compression-level: 0
+      - name: Upload native manifest
+        if: matrix.platform != 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-${{ matrix.platform }}-manifest
+          path: evidence/package-manifest.json
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
+      - name: Upload unsigned Windows input
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-windows-unsigned
+          path: |
+            source/output/*.exe
+            source/output/latest.yml
+            source/desktop-package-config.json
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
+          compression-level: 0
+      - name: Clean Mac signing material
+        if: always() && matrix.platform == 'mac'
+        run: |
+          if [[ -f "$RUNNER_TEMP/desktop-original-keychain" ]]; then
+            ORIGINAL=$(tr -d '"' < "$RUNNER_TEMP/desktop-original-keychain" | xargs)
+            security default-keychain -s "$ORIGINAL"
+          fi
+          security delete-keychain "$RUNNER_TEMP/desktop-build.keychain" || true
+          rm -f "$RUNNER_TEMP/desktop_certificate.p12" source/embedded.provisionprofile
+
+  sign_windows:
+    needs: native
+    runs-on: [self-hosted, cs]
+    env:
+      DESKTOP_PREFIX: ${{ inputs.artifact-prefix }}
+    steps:
+      - name: Require a new dispatch for QA packaging
+        if: inputs.qa-version != '' && github.run_attempt != 1
+        shell: bash
+        run: |
+          echo 'QA packages must not be rebuilt or signed on workflow reruns. Dispatch a new build, or test retained artifacts.' >&2
+          exit 1
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-windows-unsigned
+          path: ${{ runner.temp }}/desktop-${{ github.run_id }}-${{ inputs.role }}
+      - name: Sign Windows installer
+        env:
+          WIN_CERT_BASE64: ${{ secrets.WIN_CERT_BASE64 }}
+          WIN_STORE_TYPE: ${{ secrets.WIN_STORE_TYPE }}
+          WIN_STORE_SECRET: ${{ secrets.WIN_STORE_SECRET }}
+          SIGNING_DIRECTORY: ${{ runner.temp }}/desktop-${{ github.run_id }}-${{ inputs.role }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          INSTALLERS=("$SIGNING_DIRECTORY"/output/*.exe)
+          [[ ${#INSTALLERS[@]} -eq 1 ]]
+          CERT_PATH="$SIGNING_DIRECTORY/cert.pem"
+          trap 'rm -f "$CERT_PATH"' EXIT
+          echo -n "$WIN_CERT_BASE64" | base64 --decode > "$CERT_PATH"
+          jsign --storetype "$WIN_STORE_TYPE" --storepass "$WIN_STORE_SECRET" --tsaurl 'http://timestamp.sectigo.com' --certfile "$CERT_PATH" "${INSTALLERS[0]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-windows-signed
+          path: |
+            ${{ runner.temp }}/desktop-${{ github.run_id }}-${{ inputs.role }}/output/*.exe
+            ${{ runner.temp }}/desktop-${{ github.run_id }}-${{ inputs.role }}/output/latest.yml
+            ${{ runner.temp }}/desktop-${{ github.run_id }}-${{ inputs.role }}/desktop-package-config.json
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
+          compression-level: 0
+      - name: Clean signing workspace
+        if: always()
+        env:
+          SIGNING_DIRECTORY: ${{ runner.temp }}/desktop-${{ github.run_id }}-${{ inputs.role }}
+        run: rm -rf -- "$SIGNING_DIRECTORY"
+
+  finalize_windows:
+    needs: sign_windows
+    runs-on: windows-2025
+    env:
+      DESKTOP_SOURCE_SHA: ${{ inputs.source-sha }}
+      DESKTOP_WORKFLOW_SHA: ${{ github.sha }}
+      DESKTOP_SOURCE_DIR: ${{ github.workspace }}/source
+      DESKTOP_ROLE: ${{ inputs.role }}
+    steps:
+      - name: Require a new dispatch for QA packaging
+        if: inputs.qa-version != '' && github.run_attempt != 1
+        shell: bash
+        run: |
+          echo 'QA packages must not be rebuilt or signed on workflow reruns. Dispatch a new build, or test retained artifacts.' >&2
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/desktop-source
+        with:
+          source-sha: ${{ inputs.source-sha }}
+          tooling-sha: ${{ github.sha }}
+          build-renderer: 'false'
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-windows-signed
+          path: source
+      - name: Read public signing publisher
+        shell: bash
+        env:
+          WIN_CERT_BASE64: ${{ secrets.WIN_CERT_BASE64 }}
+        run: node -e 'require("fs").appendFileSync(process.env.GITHUB_ENV,"VERIFI_EXPECTED_PUBLISHER="+require("./tooling/scripts/desktop/package-windows.cjs").publisherFromCertificate(process.env.WIN_CERT_BASE64)+"\n")'
+      - name: Verify signature and publisher
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem source/output/*.exe)
+          if ($installers.Count -ne 1) { throw 'Expected one signed installer.' }
+          $signature = Get-AuthenticodeSignature $installers[0].FullName
+          if ($signature.Status -ne 'Valid') { throw "Invalid Authenticode signature: $($signature.Status)" }
+          $publisher = $signature.SignerCertificate.GetNameInfo([System.Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false)
+          if ($publisher -cne $env:VERIFI_EXPECTED_PUBLISHER) { throw 'Installer publisher does not match updater identity.' }
+          @{ platform='windows'; verified=$true; signature=$true; publisher=$publisher } | ConvertTo-Json | Set-Content source/desktop-verification.json -Encoding utf8
+      - name: Finalize signed metadata and manifest
+        shell: bash
+        run: |
+          node tooling/scripts/desktop/update-metadata.cjs source/output latest.yml refresh
+          node tooling/scripts/desktop/update-metadata.cjs source/output latest.yml verify
+          node tooling/scripts/desktop/package-manifest.cjs source windows deliverables evidence/package-manifest.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-windows-artifact
+          path: deliverables/*
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-prefix }}-windows-manifest
+          path: evidence/package-manifest.json
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}

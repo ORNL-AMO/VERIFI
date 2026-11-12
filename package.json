@@ -62,14 +62,15 @@
     "test:ci": "ng test --no-watch --no-progress",
     "test:browser": "ng run verifi:test-browser",
     "test:browser:ci": "ng run verifi:test-browser --no-watch --no-progress --headless",
-    "test:all:ci": "npm run test:ci && npm run test:browser:ci",
+    "test:all:ci": "npm run test:desktop-tooling && npm run test:ci && npm run test:browser:ci",
     "test:coverage": "ng run verifi:test-coverage --no-watch --no-progress --headless",
     "lint": "ng lint",
     "electron": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist-nopublish": "electron-builder --publish never",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "test:desktop-tooling": "node --test scripts/desktop/*.test.cjs"
   },
   "private": true,
   "dependencies": {

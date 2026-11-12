@@ -1,0 +1,43 @@
+name: Prepare desktop source
+description: Check out immutable application and tooling sources and build the renderer once for this platform.
+inputs:
+  source-sha:
+    required: true
+    description: Immutable application commit
+  tooling-sha:
+    required: true
+    description: Trusted workflow/tooling commit
+  build-renderer:
+    default: 'true'
+    description: Whether to build the renderer
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.source-sha }}
+        path: source
+        persist-credentials: false
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.tooling-sha }}
+        path: tooling
+        persist-credentials: false
+    - name: Read toolchain
+      id: node
+      shell: bash
+      run: node -p '"version=" + require("./source/package.json").engines.node' >> "$GITHUB_OUTPUT"
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ steps.node.outputs.version }}
+        cache: npm
+        cache-dependency-path: source/package-lock.json
+    - name: Install source dependencies
+      shell: bash
+      working-directory: source
+      run: npm ci
+    - name: Build renderer
+      if: inputs.build-renderer == 'true'
+      shell: bash
+      working-directory: source
+      run: npm run build-prod-electron

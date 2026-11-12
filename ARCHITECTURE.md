@@ -171,6 +171,8 @@ The repository does not define a separate design system. Do not introduce one im
 
 ## Tests, builds, and delivery
 
+Desktop package creation is shared by the production release wrapper and a separate on-demand QA workflow. QA resolves and approves immutable sources before signing, uses a separate identity/profile/feed and generated startup wrapper, and binds final file manifests to retained artifact IDs/digests. Production retains its original entrypoint and publication gates. QA packaging success is distinct from installed-app/update acceptance; see [desktop pre-release validation](docs/desktop-prerelease.md).
+
 Test targets are configured in `angular.json` and exposed through `package.json`:
 
 - Vitest with jsdom runs ordinary `*.spec.ts` tests.

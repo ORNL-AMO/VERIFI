@@ -1,0 +1,154 @@
+name: Desktop pre-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Build-only is available in the foundation; installed tests require the harness PR.
+        type: choice
+        options: [build-only, build-and-test, test-only]
+        default: build-only
+      scenario:
+        description: Required baseline/candidate source relationships
+        type: choice
+        options: [baseline-validation, electron-upgrade]
+        default: baseline-validation
+      candidate_ref:
+        description: Candidate commit or ref (leave empty for test-only)
+        type: string
+      baseline_ref:
+        description: Baseline commit or ref; alternatively supply baseline_run_id
+        type: string
+      baseline_run_id:
+        description: Successful retained QA run supplying the baseline
+        type: string
+      artifact_run_id:
+        description: Original package run to reuse in test-only mode
+        type: string
+
+permissions: {}
+
+# The shared signing runner is serialized; test-only jobs will not need this group.
+concurrency:
+  group: desktop-qa-${{ inputs.mode == 'test-only' && github.run_id || 'packaging' }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+    outputs:
+      builds: ${{ steps.plan.outputs.builds }}
+      candidate-sha: ${{ steps.plan.outputs.candidate-sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+      - name: Require installed-app harness for test operations
+        if: inputs.mode != 'build-only'
+        run: |
+          test -f scripts/desktop/run-update-tests.cjs || {
+            echo 'Installed-app harness is not available yet. Use build-only for PR 1 packaging validation.' >&2
+            exit 1
+          }
+      - name: Resolve immutable QA plan
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_INPUTS: ${{ toJSON(inputs) }}
+        run: node scripts/desktop/resolve-qa.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-qa-plan
+          path: qa-plan.json
+          if-no-files-found: error
+          retention-days: 14
+
+  approve:
+    needs: resolve
+    if: inputs.mode != 'test-only'
+    name: Approve signing candidate ${{ needs.resolve.outputs.candidate-sha }}
+    runs-on: ubuntu-24.04
+    environment: desktop-qa-signing
+    permissions: {}
+    steps:
+      - run: echo 'Maintainer approved the resolved source and QA-version plan shown in the run summary.'
+
+  package:
+    needs: [resolve, approve]
+    if: inputs.mode != 'test-only'
+    strategy:
+      fail-fast: false
+      matrix:
+        build: ${{ fromJSON(needs.resolve.outputs.builds) }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package_desktop.yml
+    with:
+      source-sha: ${{ matrix.build.sourceSha }}
+      qa-version: ${{ matrix.build.version }}
+      role: ${{ matrix.build.role }}
+      artifact-prefix: desktop-qa-${{ matrix.build.role }}
+      retention-days: 14
+    secrets: inherit
+
+  packages:
+    needs: [resolve, package]
+    if: inputs.mode != 'test-only'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: desktop-qa-plan
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-qa-*-manifest
+          path: package-manifests
+      - name: Bind verified packages to immutable artifact IDs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/desktop/collect-qa.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-qa-report
+          path: qa-run.json
+          if-no-files-found: error
+          retention-days: 14
+
+  test:
+    needs: [resolve, packages]
+    if: >-
+      always() && needs.resolve.result == 'success' &&
+      (inputs.mode == 'test-only' || (inputs.mode == 'build-and-test' && needs.packages.result == 'success'))
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Installed-app harness extension point
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id || github.run_id }}
+        run: node scripts/desktop/run-update-tests.cjs
