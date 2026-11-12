@@ -1,0 +1,7 @@
+:host { display: block; min-width: 0; color: var(--v1-text); }
+.time-series-actions { display: flex; justify-content: flex-end; margin-block-end: .5rem; }
+.time-series-canvas { width: 100%; min-width: 0; height: clamp(18rem, 48vh, 34rem); }
+.time-series-warning { border-inline-start: 3px solid var(--v1-warning, #b87816); padding: .5rem .75rem; background: var(--v1-surface-alt, var(--v1-surface)); }
+.time-series-notices { margin-block-end: .75rem; overflow-wrap: anywhere; }
+.time-series-notices ul { max-height: 20rem; overflow: auto; }
+@media print { .time-series-actions { display: none; } .time-series-canvas { height: 20rem; break-inside: avoid; } }
