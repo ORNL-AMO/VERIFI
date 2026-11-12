@@ -209,9 +209,11 @@ describe('visualization routed journeys in Chromium', () => {
       await test.navigate(`${base}/library`); await activate(test, 'Add visualization'); await activate(test, 'Portfolio');
       const dialog = creationDialog(test);
       expect(dialog.querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(11);
-      await userEvent.keyboard('{Tab}');
-      expect(document.activeElement).toBe(namedButton(dialog, 'Line'));
-      expect(parseFloat(getComputedStyle(document.activeElement!).outlineWidth)).toBeGreaterThanOrEqual(2);
+      for (const label of ['Energy usage trend', 'Utility cost trend', 'Line']) {
+        await userEvent.keyboard('{Tab}');
+        expect(document.activeElement).toBe(namedButton(dialog, label));
+        expect(parseFloat(getComputedStyle(document.activeElement!).outlineWidth)).toBeGreaterThanOrEqual(2);
+      }
       await page.screenshot({ element: dialog, path: '../../../../../.angular/vis3-alignment/chart-choices-wide.png' });
       await activate(test, 'Scatter'); await activate(test, 'Utility'); await activate(test, 'Weather');
       for (const width of [1280, 480]) {
