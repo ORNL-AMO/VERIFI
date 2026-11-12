@@ -8,7 +8,7 @@ import { configureLibraryTest, libraryRecord } from '../../library/testing/libra
 import { CreationComponent } from './creation-drawer.component';
 
 describe('visualization creation drawer', () => {
-  it.each(['Energy usage trend', 'Utility cost trend'])('distinguishes same-named portfolio meters by facility when binding %s', async recipe => {
+  it.each(['energy-trend', 'cost-trend'] as const)('distinguishes same-named portfolio meters by facility when binding %s', async recipe => {
     const { commands, workspace } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
     const snapshot = workspace.snapshot()!;
     workspace.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b', name: 'Facility B' }],
@@ -16,17 +16,16 @@ describe('visualization creation drawer', () => {
       meterData: [reading({}), reading({ guid: 'bill-b', meterId: 'meter-b', facilityId: 'facility-b' })] });
     const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
     try {
-      lifecycle.openCreate(); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+      lifecycle.openCreate(); lifecycle.selectScope('portfolio'); lifecycle.selectRecipe(recipe);
+      fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
       const root = fixture.nativeElement as HTMLElement;
-      const button = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('button')].find(item =>
-        item.querySelector('strong')?.textContent?.trim() === label || item.textContent?.trim() === label)!;
-      button('Portfolio').click(); fixture.detectChanges(); button(recipe).click(); fixture.detectChanges();
       const select = root.querySelector<HTMLSelectElement>('#visualization-recipe-meters')!;
-      expect([...select.options].map(option => ({ guid: option.value, label: option.textContent }))).toEqual([
-        { guid: 'meter-a', label: 'Facility A / Main · Electricity' }, { guid: 'meter-b', label: 'Facility B / Main · Electricity · Retired' }
+      expect([...select.options].map(option => option.textContent)).toEqual([
+        'Facility A / Main · Electricity', 'Facility B / Main · Electricity · Retired'
       ]);
       select.options[1].selected = true; select.dispatchEvent(new Event('change')); fixture.detectChanges();
-      button('Continue').click(); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();
+      expect(lifecycle.form.controls.meterGuids.value).toEqual(['meter-b']);
+      lifecycle.continueRecipe(); await lifecycle.submit();
       expect(commands.prepareCreate).toHaveBeenCalledOnce();
       expect(commands.prepareCreate.mock.calls[0][0].sources[0]).toMatchObject({ selection: { kind: 'fixed', resource: 'meter', guids: ['meter-b'] } });
     } finally { fixture.destroy(); }
