@@ -2,7 +2,7 @@
   @if (modal()) { <button type="button" class="v1-modal-backdrop" [attr.aria-label]="dismissLabel()" (click)="requestClose()"></button> }
   <section [id]="panelId()" [class]="classes()" (animationend)="finishClose($event)" role="dialog" [attr.aria-modal]="modal() ? 'true' : null" [attr.aria-labelledby]="showHeader() ? panelId() + '-title' : null" [attr.aria-label]="showHeader() ? null : title()" appModalFocusTrap [modalFocusEnabled]="modal()" [modalInitialFocus]="initialFocus()" [modalFocusFallback]="focusFallback()" (escapePressed)="requestClose()">
     <div class="workspace-bottom-sheet__handle-bar">
-      <button type="button" class="workspace-bottom-sheet__handle" [attr.aria-label]="closeLabel()" (click)="clickHandle()" (pointerdown)="startPull($event)" (pointerup)="finishPull($event)" (pointercancel)="cancelPull()"><span class="workspace-bottom-sheet__grip" aria-hidden="true"></span><app-ui-icon name="chevronDown"/><span>{{ closeLabel() }}</span></button>
+      <button type="button" class="workspace-bottom-sheet__handle" [disabled]="closeBlocked()" [attr.title]="closeBlocked() ? 'Retry or resolve the pending action before closing' : null" [attr.aria-label]="closeLabel()" (click)="clickHandle()" (pointerdown)="startPull($event)" (pointerup)="finishPull($event)" (pointercancel)="cancelPull()"><span class="workspace-bottom-sheet__grip" aria-hidden="true"></span><app-ui-icon name="chevronDown"/><span>{{ closeLabel() }}</span></button>
     </div>
     @if (showHeader()) { <header class="workspace-bottom-sheet__header"><h2 [id]="panelId() + '-title'" [title]="title()">{{ title() }}</h2></header> }
     <div class="workspace-bottom-sheet__body" [class.workspace-bottom-sheet__body--fill]="fillBody()"><ng-content/></div>

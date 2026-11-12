@@ -15,6 +15,8 @@ export class WorkspaceBottomSheetComponent {
   readonly surfaceClass = input('');
   readonly initialFocus = input<string>();
   readonly focusFallback = input<string>();
+  /** Opt-in protection for a retained or saving proposal hosted inside the sheet. */
+  readonly closeBlocked = input(false);
   readonly closed = output<void>();
   readonly closing = signal(false);
   readonly classes = computed(() => `workspace-bottom-sheet ${this.surfaceClass()}${this.closing() ? ' workspace-bottom-sheet--closing ' + (this.surfaceClass() ? this.surfaceClass() + '--closing' : '') : ''}`);
@@ -22,7 +24,7 @@ export class WorkspaceBottomSheetComponent {
   private pullStart?: number;
   private suppressClick = false;
   requestClose(): void {
-    if (this.closing()) return;
+    if (this.closeBlocked() || this.closing()) return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { this.closed.emit(); return; }
     this.closing.set(true);
     this.closeTimer = setTimeout(() => this.finishClose(), 360);
@@ -30,6 +32,7 @@ export class WorkspaceBottomSheetComponent {
   finishClose(event?: AnimationEvent): void {
     if (event && (!event.animationName.endsWith('workspace-sheet-down') || event.composedPath()[0] !== event.currentTarget)) return;
     if (!this.closing()) return;
+    if (this.closeBlocked()) { clearTimeout(this.closeTimer); this.closing.set(false); return; }
     clearTimeout(this.closeTimer); this.closed.emit();
   }
   startPull(event: PointerEvent): void {

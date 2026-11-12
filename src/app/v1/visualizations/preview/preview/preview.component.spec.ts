@@ -6,6 +6,8 @@ import { visualizationEvidenceFixture } from '@domain/visualizations/testing/vis
 import { PreviewModule } from '../preview.module';
 import { PreviewIdentity, VISUALIZATION_DATE_CONTEXT_RESOLVER, VISUALIZATION_PREVIEW_PRESENTERS, VISUALIZATION_SOURCE_PROVIDERS } from '../preview-registry';
 import { PreviewComponent } from './preview.component';
+import { By } from '@angular/platform-browser';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 
 @Component({ selector: 'app-preview-renderer-fixture', template: '<p>{{ text }}</p>' })
 class RendererFixtureComponent { @Input() text = ''; }
@@ -14,6 +16,30 @@ const identity: PreviewIdentity = { accountGuid: 'account-a', definitionGuid: 'v
 async function settle() { for (let i = 0; i < 8; i++) await Promise.resolve(); }
 
 describe('visualization preview presentation', () => {
+  it('pages dense underlying values without truncating print output or changing the saved definition', async () => {
+    const definition = utilityVisualizationFixture(), evidence = visualizationEvidenceFixture(definition);
+    const rows = Array.from({ length: 130 }, (_, index) => [`Observation ${index}`, String(index)]);
+    TestBed.configureTestingModule({ imports: [PreviewModule, RendererFixtureComponent], providers: [
+      { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: [{ kind: 'utility', describe: () => evidence.capabilities,
+        supportsChart: () => evidence.chartSupport, resolve: async request => ({ ...evidence.resolution, identity: request.identity }) }] },
+      { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: RendererFixtureComponent,
+        prepare: () => ({ inputs: {}, details: { caption: 'Dense source values', columns: ['Period', 'Value'], rows } }) }] },
+      { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: { resolve: async () => ({ calendarDate: '2026-11-12' }) } }
+    ] });
+    const fixture = TestBed.createComponent(PreviewComponent), before = structuredClone(definition);
+    fixture.componentRef.setInput('definition', definition); fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
+    await settle(); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(50);
+    const paging = fixture.debugElement.query(By.directive(PaginationComponent)).componentInstance as PaginationComponent;
+    paging.selectPage(3); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('tbody').textContent).toContain('Observation 129');
+    window.dispatchEvent(new Event('beforeprint')); fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('details') as HTMLDetailsElement).open).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(130);
+    window.dispatchEvent(new Event('afterprint')); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(30); expect(definition).toEqual(before);
+    fixture.destroy();
+  });
   it('explains incomplete setup without a fabricated chart', () => {
     TestBed.configureTestingModule({ imports: [PreviewModule] });
     const fixture = TestBed.createComponent(PreviewComponent);

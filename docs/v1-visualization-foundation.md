@@ -4,6 +4,8 @@ This is the workflow and contract specification for [Vis1 / #2901](https://githu
 
 ## Ownership and saved intent
 
+For the concrete utility implementation and definition-v2 display extension, see [Utility visualizations](v1-utility-visualizations.md). The identity, period, provenance and source-authority rules below remain its foundation.
+
 A visualization belongs to one account and declares portfolio or single-facility scope. The account Dashboard lists all its visualizations; entering from a facility starts with that facility's filter. Explicitly browsing another scope does not change a definition. A single-facility account uses the same contracts, without requiring a hidden account-analysis record to become a separate user selection.
 
 Scope and ownership are fixed for a saved identity. Ordinary Duplicate creates an independent identity with the same intent. Duplicate to another scope retains reusable presentation and period settings, but requires explicit review and replacement of incompatible resource references. Names are not source-mapping keys. Existing widgets continue referencing the original identity. Supported account/facility copy and backup GUID remapping belong to Vis2, not this editor operation.
