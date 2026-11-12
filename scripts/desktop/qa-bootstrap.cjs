@@ -39,7 +39,9 @@ app.on('browser-window-created', (_event, window) => {
         version: app.getVersion(), electron: process.versions.electron, packaged: app.isPackaged,
         executable: process.execPath, appImage: process.env.APPIMAGE || null,
         appPath: app.getAppPath(), profile: app.getPath('userData'), logs: app.getPath('logs'),
-        security: { contextIsolation: preferences.contextIsolation, nodeIntegration: preferences.nodeIntegration, sandbox: preferences.sandbox },
+        security: { contextIsolation: preferences.contextIsolation, nodeIntegration: preferences.nodeIntegration, sandbox: preferences.sandbox,
+            // Chromium's global switch overrides the per-window sandbox preference.
+            noSandbox: app.commandLine.hasSwitch('no-sandbox') },
         archiveSha256: createHash('sha256').update(archiveFs.readFileSync(app.getAppPath())).digest('hex'),
         provenance: require('./package.json').verifiQa
     };

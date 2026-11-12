@@ -1,7 +1,7 @@
 const fs = require('node:fs/promises');
 const { githubApi } = require('./github-api.cjs');
 const { loadRetainedRun } = require('./retained-qa.cjs');
-const { assert, positiveInteger, sha } = require('./qa-contract.cjs');
+const { assert, positiveInteger, sha, QA_INSTRUMENTATION_VERSION } = require('./qa-contract.cjs');
 
 const PLATFORMS = [{ platform: 'windows', os: 'windows-2025' }, { platform: 'mac', os: 'macos-26' }, { platform: 'linux', os: 'ubuntu-24.04' }];
 function testMatrix(report) {
@@ -9,7 +9,7 @@ function testMatrix(report) {
     return PLATFORMS.flatMap(platform => cases.map(scenario => {
         const from = report.packages.find(item => item.platform === platform.platform && item.role === (scenario === 'baseline-update' ? 'baseline' : 'candidate-a'));
         const to = report.packages.find(item => item.platform === platform.platform && item.role === 'candidate-b');
-        assert(from && to && from.manifest?.qaInstrumentation?.instrumentationVersion === 2 && to.manifest?.qaInstrumentation?.instrumentationVersion === 2, 'Rebuild a compatible baseline with this harness; earlier QA wrappers have no runtime witness.');
+        assert(from && to && from.manifest?.qaInstrumentation?.instrumentationVersion === QA_INSTRUMENTATION_VERSION && to.manifest?.qaInstrumentation?.instrumentationVersion === QA_INSTRUMENTATION_VERSION, 'Rebuild compatible baseline and candidate packages; earlier QA witnesses lack the required security evidence.');
         if (scenario !== 'baseline-update') assert(from.manifest.qaInstrumentation.updaterContract === 'guarded-v1', 'Candidate does not expose the guarded updater contract required by this scenario.');
         return { ...platform, scenario, fromArtifactId: from.artifactId, fromArtifactRunId: from.artifactRunId, toArtifactId: to.artifactId, toArtifactRunId: to.artifactRunId };
     }));

@@ -6,7 +6,7 @@ const os = require('node:os');
 const { createFixture, FIELDS, assertRelationships } = require('./testing/fixture.cjs');
 const { validateRuntime, until } = require('./testing/controller.cjs');
 const { createFeed } = require('./testing/feed.cjs');
-const { describe, QA_IDENTITY } = require('./qa-contract.cjs');
+const { describe, QA_IDENTITY, QA_INSTRUMENTATION_VERSION } = require('./qa-contract.cjs');
 
 test('fixture preserves measured zero and all account/facility/meter/predictor/analysis links', () => {
     const backup = createFixture();
@@ -23,9 +23,10 @@ test('fixture preserves measured zero and all account/facility/meter/predictor/a
 test('runtime verification rejects an unpackaged app, another source/version, and weakened renderer security', () => {
     const item = { manifest: { version: '0.0.32', electronVersion: '39.8.10', sourceSha: 'a'.repeat(40) } };
     const runtime = { schemaVersion: 1, profile: '/qa-profile', version: '0.0.32', electron: '39.8.10', packaged: true,
-        provenance: { sourceSha: item.manifest.sourceSha, instrumentationVersion: 2 }, security: { contextIsolation: true, nodeIntegration: false, sandbox: true }, archiveSha256: 'b'.repeat(64), nonce: 'new-launch', pid: 100 };
+        provenance: { sourceSha: item.manifest.sourceSha, instrumentationVersion: QA_INSTRUMENTATION_VERSION }, security: { contextIsolation: true, nodeIntegration: false, sandbox: true, noSandbox: false }, archiveSha256: 'b'.repeat(64), nonce: 'new-launch', pid: 100 };
     assert.equal(validateRuntime(runtime, item, '/qa-profile'), runtime);
-    for (const change of [{ packaged: false }, { version: '0.0.31' }, { security: { ...runtime.security, sandbox: false } }, { profile: '/production' }]) assert.throws(() => validateRuntime({ ...runtime, ...change }, item, '/qa-profile'));
+    for (const change of [{ packaged: false }, { version: '0.0.31' }, { security: { ...runtime.security, sandbox: false } },
+        { security: { ...runtime.security, noSandbox: true } }, { security: { ...runtime.security, noSandbox: undefined } }, { profile: '/production' }]) assert.throws(() => validateRuntime({ ...runtime, ...change }, item, '/qa-profile'));
 });
 
 test('controller waits are bounded and do not rerun failed scenarios', async () => {

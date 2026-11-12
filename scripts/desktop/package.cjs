@@ -2,7 +2,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { createRequire } = require('node:module');
 const { createHash } = require('node:crypto');
-const { QA_IDENTITY, assert, sha } = require('./qa-contract.cjs');
+const { QA_IDENTITY, QA_INSTRUMENTATION_VERSION, assert, sha } = require('./qa-contract.cjs');
 const { publisherFromCertificate } = require('./package-windows.cjs');
 
 async function packageConfig(source, platform, qaVersion) {
@@ -23,7 +23,7 @@ async function packageConfig(source, platform, qaVersion) {
         Object.assign(config, {
             appId: QA_IDENTITY.appId, productName: QA_IDENTITY.productName,
             extraMetadata: { name: QA_IDENTITY.name, version: qaVersion, main: 'desktop-qa-bootstrap.cjs', verifiQa: {
-                sourceSha: sha(process.env.DESKTOP_SOURCE_SHA), workflowSha: sha(process.env.DESKTOP_WORKFLOW_SHA), instrumentationVersion: 2, updaterContract,
+                sourceSha: sha(process.env.DESKTOP_SOURCE_SHA), workflowSha: sha(process.env.DESKTOP_WORKFLOW_SHA), instrumentationVersion: QA_INSTRUMENTATION_VERSION, updaterContract,
                 wrapperSha256: createHash('sha256').update(wrapper).digest('hex'), configSha256: createHash('sha256').update(configuration).digest('hex')
             } },
             publish: [{ provider: 'generic', url: QA_IDENTITY.feed, channel: 'latest', useMultipleRangeRequest: false }],

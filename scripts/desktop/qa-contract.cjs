@@ -3,6 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 
 const SCHEMA_VERSION = 1;
+const QA_INSTRUMENTATION_VERSION = 3;
 const RETENTION_DAYS = 14;
 const PLATFORMS = ['linux', 'windows', 'mac'];
 const QA_IDENTITY = Object.freeze({ appId: 'gov.ornl.amo.verifi.qa', name: 'verifi-desktop-qa', productName: 'VERIFI QA', feed: 'http://127.0.0.1:47831/updates/', debugPort: 47832 });
@@ -100,4 +101,4 @@ async function verifyFiles(directory, files) {
     }
 }
 
-module.exports = { SCHEMA_VERSION, RETENTION_DAYS, PLATFORMS, QA_IDENTITY, assert, sha, positiveInteger, qaVersion, precedes, validateInputs, validatePlan, safeName, describe, verifyFiles };
+module.exports = { SCHEMA_VERSION, QA_INSTRUMENTATION_VERSION, RETENTION_DAYS, PLATFORMS, QA_IDENTITY, assert, sha, positiveInteger, qaVersion, precedes, validateInputs, validatePlan, safeName, describe, verifyFiles };

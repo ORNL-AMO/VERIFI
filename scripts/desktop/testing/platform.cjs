@@ -4,7 +4,7 @@ const os = require('node:os');
 const { spawn, execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const execute = promisify(execFile);
-const { assert, QA_IDENTITY, verifyFiles } = require('../qa-contract.cjs');
+const { assert, QA_IDENTITY, QA_INSTRUMENTATION_VERSION, verifyFiles } = require('../qa-contract.cjs');
 
 const platformName = { win32: 'windows', darwin: 'mac', linux: 'linux' }[process.platform];
 function profilePath(platform = process.platform, env = process.env) {
@@ -17,7 +17,7 @@ function processAlive(pid) { try { process.kill(pid, 0); return true; } catch (e
 
 async function install(item, root, logFile) {
     await verifyFiles(item.directory, item.manifest.files);
-    assert(item.manifest.platform === platformName && item.manifest.qa === true && item.manifest.qaInstrumentation?.instrumentationVersion === 2, 'Package is incompatible with this installed-app harness.');
+    assert(item.manifest.platform === platformName && item.manifest.qa === true && item.manifest.qaInstrumentation?.instrumentationVersion === QA_INSTRUMENTATION_VERSION, 'Package is incompatible with this installed-app harness.');
     const payload = extension => {
         const matches = item.manifest.files.filter(file => file.name.endsWith(extension));
         assert(matches.length === 1, `Expected exactly one ${extension} installer.`);

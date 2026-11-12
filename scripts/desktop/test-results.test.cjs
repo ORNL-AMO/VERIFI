@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { testMatrix } = require('./prepare-qa-tests.cjs');
 const { validateResults } = require('./collect-qa-tests.cjs');
 const { resolvePlan } = require('./resolve-qa.cjs');
+const { QA_INSTRUMENTATION_VERSION } = require('./qa-contract.cjs');
 const { qualifyingInvocation, assertUpgradeEvidence, assertDefaultPackageRuns, requiredAtHead, writeCheck, policyCandidates, publishPolicy } = require('./validation-check.cjs');
 
 function fixture(scenario = 'electron-upgrade') {
@@ -10,7 +11,7 @@ function fixture(scenario = 'electron-upgrade') {
     const builds = [{ role: 'baseline', sourceSha: source, version: '0.0.30' }, ...(scenario === 'electron-upgrade' ? [{ role: 'candidate-a', sourceSha: candidate, version: '0.0.31' }] : []), { role: 'candidate-b', sourceSha: candidate, version: '0.0.32' }];
     const plan = { scenario, candidateSha: candidate, builds, workflowRef: 'refs/heads/develop' };
     const packages = builds.flatMap((build, index) => ['windows', 'mac', 'linux'].map((platform, offset) => ({ ...build, platform, artifactId: 10 + index * 3 + offset, artifactRunId: 90,
-        manifest: { electronVersion: build.role === 'baseline' ? '39.8.10' : '45.2.3', qaInstrumentation: { instrumentationVersion: 2, updaterContract: build.role === 'baseline' ? 'legacy' : 'guarded-v1' } } })));
+        manifest: { electronVersion: build.role === 'baseline' ? '39.8.10' : '45.2.3', qaInstrumentation: { instrumentationVersion: QA_INSTRUMENTATION_VERSION, updaterContract: build.role === 'baseline' ? 'legacy' : 'guarded-v1' } } })));
     const testPlan = { testRunId: 100, testToolingSha: 'c'.repeat(40), packageRunId: 90, report: { plan, packages } };
     return testPlan;
 }
@@ -18,7 +19,7 @@ function validResults(testPlan) {
     return testMatrix(testPlan.report).map((row, index) => {
         const from = testPlan.report.packages.find(item => item.artifactId === row.fromArtifactId), to = testPlan.report.packages.find(item => item.artifactId === row.toArtifactId);
         const runtime = (item, suffix) => ({ packaged: true, version: item.version, electron: item.manifest.electronVersion, provenance: { sourceSha: item.sourceSha }, nonce: suffix, pid: index * 2 + (suffix === 'before' ? 100 : 101), archiveSha256: suffix,
-            security: { contextIsolation: true, nodeIntegration: false, sandbox: true } });
+            security: { contextIsolation: true, nodeIntegration: false, sandbox: true, noSandbox: false } });
         return { schemaVersion: 1, kind: 'desktop-installed-test', status: 'passed', platform: row.platform, scenario: row.scenario,
             realUpdate: true, dataPreserved: true, candidateSha: testPlan.report.plan.candidateSha, baselineSha: testPlan.report.plan.builds[0].sourceSha, packageRunId: testPlan.packageRunId,
             from: { sourceSha: from.sourceSha, version: from.version, artifactId: from.artifactId }, to: { sourceSha: to.sourceSha, version: to.version, artifactId: to.artifactId },
@@ -39,9 +40,23 @@ test('requires three baseline cases and all twelve platform/upgrade safeguard ca
     }
 });
 
-test('rejects baseline packages without a compatible QA runtime witness', () => {
-    const plan = fixture(); delete plan.report.packages[0].manifest.qaInstrumentation.instrumentationVersion;
-    assert.throws(() => testMatrix(plan.report), /compatible baseline/);
+test('rejects either package when the QA runtime witness is missing or outdated', () => {
+    for (const role of ['baseline', 'candidate-a', 'candidate-b']) for (const version of [undefined, QA_INSTRUMENTATION_VERSION - 1]) {
+        const plan = fixture();
+        plan.report.packages.find(item => item.role === role).manifest.qaInstrumentation.instrumentationVersion = version;
+        assert.throws(() => testMatrix(plan.report), /Rebuild compatible/);
+    }
+});
+
+test('rejects globally disabled or unobserved sandboxing in either installed launch', () => {
+    const plan = fixture(), results = validResults(plan);
+    assert.equal(validateResults(plan, results).status, 'passed');
+    for (const launch of ['runtimeBefore', 'runtimeAfter']) for (const noSandbox of [true, undefined]) {
+        const changed = structuredClone(results);
+        if (noSandbox === undefined) delete changed[0][launch].security.noSandbox;
+        else changed[0][launch].security.noSandbox = noSandbox;
+        assert.throws(() => validateResults(plan, changed), /Packaged security invariant failed/);
+    }
 });
 
 test('permits a pinned internal workflow PR for the pre-merge pilot, while recording its branch', async () => {
