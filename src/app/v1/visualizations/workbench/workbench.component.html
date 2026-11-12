@@ -33,6 +33,7 @@
           <p>Chart: {{ chartSummary() }}</p>
         </section>
         <section><app-utility-period-settings [context]="periodContext()"/></section>
+        <section><app-visualization-chart-settings [context]="chartContext()"/></section>
         <section aria-labelledby="visualization-appearance"><h2 id="visualization-appearance">Appearance</h2>
           <label>Display title<input formControlName="title" type="text"></label>
           <label class="visualization-workbench__checkbox"><input formControlName="legend" type="checkbox">Show legend</label>

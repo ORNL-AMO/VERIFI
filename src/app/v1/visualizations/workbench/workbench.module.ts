@@ -7,6 +7,7 @@ import { WorkbenchComponent } from './workbench.component';
 import { PreviewModule } from '../preview/preview.module';
 import { RecoveryModule } from '../recovery/recovery.module';
 import { UtilityEditorsModule } from '../utility/editors/utility-editors.module';
+import { TimeSeriesModule } from '../time-series/time-series.module';
 
-@NgModule({ declarations: [WorkbenchComponent], imports: [CommonModule, ReactiveFormsModule, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule], exports: [WorkbenchComponent] })
+@NgModule({ declarations: [WorkbenchComponent], imports: [CommonModule, ReactiveFormsModule, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule, TimeSeriesModule], exports: [WorkbenchComponent] })
 export class WorkbenchModule { }

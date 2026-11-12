@@ -1,0 +1,12 @@
+@if (model) {
+  <div class="time-series-actions"><button type="button" class="v1-btn v1-btn--quiet" (click)="resetZoom()">Reset zoom</button></div>
+  @if (model.partial) { <p class="time-series-warning" role="status">Partial coverage: review unavailable observations and omitted contributions before interpreting totals.</p> }
+  @if (model.warnings.length) {
+    <details class="time-series-notices"><summary>Data quality and overlap notices ({{ model.warnings.length }})</summary>
+      <ul>@for (warning of model.warnings; track warning) { <li>{{ warning }}</li> }</ul>
+    </details>
+  }
+  @if (model.traces.length) {
+    <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)" role="img" [attr.aria-label]="model.title + '. Exact values and quality are available in Source data.'"></div>
+  } @else { <p role="status">No visible series. Turn on a series in Chart settings.</p> }
+}
