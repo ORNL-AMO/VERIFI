@@ -4,7 +4,7 @@ This is the workflow and contract specification for [Vis1 / #2901](https://githu
 
 ## Ownership and saved intent
 
-A visualization belongs to one account and declares portfolio or single-facility scope. The account library lists all its visualizations; entering from a facility starts with that facility's filter. Explicitly browsing another scope does not change a definition. A single-facility account uses the same contracts, without requiring a hidden account-analysis record to become a separate user selection.
+A visualization belongs to one account and declares portfolio or single-facility scope. The account Dashboard lists all its visualizations; entering from a facility starts with that facility's filter. Explicitly browsing another scope does not change a definition. A single-facility account uses the same contracts, without requiring a hidden account-analysis record to become a separate user selection.
 
 Scope and ownership are fixed for a saved identity. Ordinary Duplicate creates an independent identity with the same intent. Duplicate to another scope retains reusable presentation and period settings, but requires explicit review and replacement of incompatible resource references. Names are not source-mapping keys. Existing widgets continue referencing the original identity. Supported account/facility copy and backup GUID remapping belong to Vis2, not this editor operation.
 
@@ -21,22 +21,25 @@ Persistent intent includes source identities and modes, measures, filters, aggre
 
 ```mermaid
 flowchart LR
-  Library --> Choice[Name + scope + source family]
-  Choice --> Commit[Create saved definition]
+  Dashboard --> Owner[Ownership]
+  Owner --> Chart[Chart type]
+  Chart --> Families[One or more source families]
+  Families --> Name[Name]
+  Name --> Commit[Add saved visualization]
   Existing[Existing chart] --> Fidelity{Faithful capture supported?}
   Fidelity -->|Yes| Commit
   Fidelity -->|No| Explain[Explain unsupported meaning or settings]
   Commit --> Workbench[Open autosaving workbench]
   Workbench --> Saved[Committed definition]
-  Saved --> Reopen[Reopen from library]
+  Saved --> Reopen[Reopen from Dashboard]
   Saved --> Home[Linked Home widget]
   Reopen --> Workbench
   Home --> Workbench
 ```
 
-Creation saves a coherent incomplete definition once name, scope, and source family are chosen. The workbench completes setup. The library and Home can therefore show setup-required items. Capture creates a saved item with a useful name immediately after faithful mapping succeeds; unsupported capture leaves the source chart unchanged. Failed creation retains the proposed definition for Retry and prevents repeated activation from creating duplicate records. A committed creation with failed publication must recover that identity rather than create it again.
+Add visualization is a stepped workflow: ownership, concrete chart type, one or more source families, then name. Preselected or single-facility ownership skips unavailable choices. Each selected family creates one setup source with independent local identity; the workbench later selects resources and repeated sources within a family. Creation saves coherent incomplete chart intent, without fabricated resources or series. The Dashboard and Home can therefore show setup-required items. Capture creates a saved item with a useful name immediately after faithful mapping succeeds; unsupported capture leaves the source chart unchanged. Failed creation retains the proposed definition for Retry and prevents repeated activation from creating duplicate records. A committed creation with failed publication must recover that identity rather than create it again.
 
-Only compatible chart types are offered. Unavailable choices explain the missing capability; users change sources or settings first. Switching among compatible types retains shared settings and visibly initializes newly applicable controls. Supported mixed-source charts require declared alignment, compatible meaning, and appropriate axis settings. A renderer cannot make incompatible data compatible.
+The creation catalog offers chart setup intent before sources are configured; choosing a type or family does not establish rendering compatibility. Concrete source and chart adapters determine compatible combinations in Vis4–Vis8. Unavailable rendering explains the missing capability; users change sources or settings through the supported editors. Switching among compatible types retains shared settings and visibly initializes newly applicable controls. Supported mixed-source charts require declared alignment, compatible meaning, and appropriate axis settings. A renderer cannot make incompatible data compatible.
 
 The workbench previews local coherent edits and autosaves them. Linked consumers use committed definitions, not the editor draft. Invalid field input stays local; a coherent definition may be saved even when setup is incomplete, sources are missing, or calculation is unavailable. This separates **definition validity**, **configuration completeness/compatibility**, and **runtime availability**.
 
@@ -64,7 +67,7 @@ Navigating away, switching scope/account, or deleting the edited item must resol
 
 New monthly utility charts use **all saved history**, which intentionally grows as saved history changes. Fixed ranges retain exact civil dates. Rolling ranges explicitly choose a calendar or latest-data anchor, with resolved dates visible. Latest-data anchors use the newest eligible observation among selected sources; lagging members retain gaps and partial-coverage notices. Calendar ranges do not imply that unsaved observations exist. Period-boundary, calendarization, fiscal-year, and unit interpretation remain owned by established VERIFI helpers and providers.
 
-Annual Energy Use composition defaults to an explicit **latest saved fiscal year** rule, with an option to pin a fiscal year. The resolved actual fiscal interval is visible. Portfolio annual values cannot be merged solely because their year labels match; incompatible fiscal intervals block the rollup. Annual estimates are never resampled into invented monthly observations.
+Energy Use-only setup defaults to an explicit **latest saved fiscal year** rule, with an option to pin a fiscal year. The resolved actual fiscal interval is visible. Portfolio annual values cannot be merged solely because their year labels match; incompatible fiscal intervals block the rollup. Mixed-family setup starts with all saved history, and adapters must explicitly review native period compatibility. Annual estimates are never resampled into invented monthly observations.
 
 Comparisons support previous period, previous calendar/fiscal year, and explicit dates where provider capabilities permit them. Comparison alignment retains actual period meaning. Analysis baselines remain owned by the named analysis; visualization dates are display requests, not edits to baseline settings. Result charts follow the named analysis's current saved calculation. Model-inspection charts pin durable model identity; deleting it requires repair. An unsaved candidate is not a durable source.
 
@@ -127,7 +130,7 @@ Resolved periods must contain real, ordered civil dates and the requested primar
 | 2: `codex/vis1-definition` | Serializable typed intent, decoder/validation and behavior tests | One owner controls exports; a test agent may add boundary cases after interfaces are pinned. Coherent incomplete definitions are saveable; malformed input is not. |
 | 3: `codex/vis1-provider-contracts` | Provider/capability/capture/embedding contracts, pure decisions and fake-provider examples | Split files after interfaces stabilize; integrator reviews combined meaning. No real adapters, renderer or calculation coordinator. |
 
-Stack the branches in that order, with the first PR targeting the `unified-ux` feature branch and each later PR targeting its predecessor. Vis2 implements persistence, GUID remapping, backup/copy and durable version upgrades. Vis3 implements library/workbench/autosave/navigation. Vis4–Vis8 implement concrete sources and compatible editing/rendering. Vis9 adds feature-owned capture actions. Home1–Home4 implement linked reuse; Vis10 completes integration acceptance. Each slice owns its focused tests. Existing v0 behavior, calculations, durable source records, supported formats, weather retrieval, Electron IPC and report outputs remain unchanged.
+Stack the branches in that order, with the first PR targeting the `unified-ux` feature branch and each later PR targeting its predecessor. Vis2 implements persistence, GUID remapping, backup/copy and durable version upgrades. Vis3 implements Dashboard/workbench/autosave/navigation. Vis4–Vis8 implement concrete sources and compatible editing/rendering. Vis9 adds feature-owned capture actions. Home1–Home4 implement linked reuse; Vis10 completes integration acceptance. Each slice owns its focused tests. Existing v0 behavior, calculations, durable source records, supported formats, weather retrieval, Electron IPC and report outputs remain unchanged.
 
 | Vis1 acceptance criterion | Evidence and downstream proof |
 | --- | --- |

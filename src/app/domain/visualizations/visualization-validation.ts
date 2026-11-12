@@ -103,7 +103,7 @@ const comparison = variant({
 const chart = variant({
   'time-series': object({ kind: enumeration('time-series'), type: enumeration('line', 'bar', 'area', 'combination'), interval: enumeration('monthly', 'yearly', 'native'),
     stack: enumeration('none', 'absolute', 'percent'), seriesTypes: array(object({ seriesId: text, type: enumeration('line', 'bar', 'area') })) }, ['seriesTypes']),
-  scatter: object({ kind: enumeration('scatter'), xSeriesId: text, ySeriesId: text, showFit: boolean }),
+  scatter: object({ kind: enumeration('scatter'), xSeriesId: text, ySeriesId: text, showFit: boolean }, ['xSeriesId', 'ySeriesId']),
   correlation: object({ kind: enumeration('correlation'), statistic: enumeration('r', 'r-squared'), scale: enumeration('raw', 'z-score') }),
   heatmap: object({ kind: enumeration('heatmap'), dimension: enumeration('month-year', 'series-period'), scale: enumeration('linear', 'diverging') }),
   breakdown: object({ kind: enumeration('breakdown'), type: enumeration('bar', 'donut'), values: enumeration('absolute', 'percent') }),

@@ -1,4 +1,4 @@
-import { createVisualizationDefinition, VisualizationChart, VisualizationComparison, VisualizationDefinition, VisualizationPeriod, VisualizationSourceKind } from './visualization-definition';
+import { createVisualizationSetupDefinition, createVisualizationDefinition, VisualizationChart, VisualizationComparison, VisualizationDefinition, VisualizationPeriod, VisualizationSourceKind } from './visualization-definition';
 import { decodeVisualizationDefinition } from './visualization-validation';
 import { analysisVisualizationFixture, energyUseVisualizationFixture, utilityVisualizationFixture } from './testing/visualization-fixtures';
 
@@ -22,6 +22,54 @@ describe('visualization saved intent', () => {
     expect(result.state).toBe('setup-required');
     expect('definition' in result && result.definition.sources[0].kind).toBe(kind);
     expect(value.period.kind).toBe(kind === 'energy-use' ? 'latest-saved-year' : 'all-history');
+  });
+
+  it('creates independent setup sources and retains chart intent without inventing series', () => {
+    const chart = { kind: 'scatter' as const, showFit: false };
+    const value = createVisualizationSetupDefinition({ name: 'Usage versus production', accountGuid: 'account-a',
+      scope: { kind: 'portfolio' }, chart, sourceKinds: ['utility', 'predictor', 'weather'] });
+    expect(value.sources.map(source => source.kind)).toEqual(['utility', 'predictor', 'weather']);
+    expect(value.sources.map(source => source.id)).toEqual(['source-1', 'source-2', 'source-3']);
+    expect(value.series).toEqual([]);
+    expect(value.chart).toEqual(chart);
+    expect(value.chart).not.toBe(chart);
+    expect(value.sources[0].settings).not.toBe(value.sources[1].settings);
+    expect(decodeVisualizationDefinition(JSON.parse(JSON.stringify(value))).state).toBe('setup-required');
+    expect(value.period).toEqual({ kind: 'all-history' });
+    expect(value.version).toBe(1);
+  });
+
+  it('uses the latest saved fiscal year only for Energy Use alone', () => {
+    const create = (sourceKinds: readonly VisualizationSourceKind[]) => createVisualizationSetupDefinition({
+      name: 'New chart', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      chart: { kind: 'treemap', hierarchy: [], values: 'absolute' }, sourceKinds });
+    expect(create(['energy-use']).period).toEqual({ kind: 'latest-saved-year', basis: 'fiscal' });
+    expect(create(['energy-use', 'utility']).period).toEqual({ kind: 'all-history' });
+    expect(create(['utility', 'energy-use']).period).toEqual({ kind: 'all-history' });
+    expect(() => create([])).toThrow('unique source families');
+    expect(() => create(['utility', 'utility'])).toThrow('unique source families');
+  });
+
+  it('keeps unassigned Scatter axes incomplete while accepting existing assigned axes', () => {
+    const base = utilityVisualizationFixture();
+    for (const chart of [
+      { kind: 'scatter', showFit: false },
+      { kind: 'scatter', xSeriesId: 'energy', showFit: false },
+      { kind: 'scatter', ySeriesId: 'energy', showFit: false }
+    ]) {
+      const result = decodeVisualizationDefinition({ ...base, chart });
+      expect(result.state).toBe('setup-required');
+      expect('definition' in result && result.definition.chart).toEqual(chart);
+    }
+    expect(decodeVisualizationDefinition({ ...base, chart: {
+      kind: 'scatter', xSeriesId: 'energy', ySeriesId: 'energy', showFit: false
+    } }).state).toBe('valid');
+  });
+
+  it.each(['', ' ', null, 3, undefined])('rejects malformed supplied Scatter axis %s', xSeriesId => {
+    expect(decodeVisualizationDefinition({ ...utilityVisualizationFixture(), chart: {
+      kind: 'scatter', xSeriesId, showFit: false
+    } }).state).toBe('invalid');
   });
 
   it.each<VisualizationPeriod>([

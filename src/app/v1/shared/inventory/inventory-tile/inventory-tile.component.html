@@ -48,7 +48,9 @@
     @if (level !== 'simple' && tile.analysisSnapshot; as analysis) { <p class="portfolio-tile__analysis-modified">Updated {{ analysis.modified }}</p> }
   </div>
   </div>
-  @if (tile.reportSnapshot; as report) {
+  @if (tile.visualizationSnapshot; as visualization) {
+    @if (level !== 'simple') { <app-visualization-snapshot [snapshot]="visualization" [detailed]="level === 'detailed'"/> }
+  } @else if (tile.reportSnapshot; as report) {
     @if (report.contentPending !== false) { <p class="portfolio-tile__report-pending"><app-ui-icon name="info" [size]="18"/>Report content pending</p> }
     @if (level !== 'simple') { <app-report-snapshot [snapshot]="report" [detailed]="level === 'detailed'" [resourceName]="tile.name" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
   } @else if (tile.analysisSnapshot; as analysis) {
