@@ -6,6 +6,7 @@ import { VisualizationDefinition, VisualizationSourceKind } from '@domain/visual
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { visualizationReferences } from '@domain/visualizations/visualization-references';
 import { InventoryTile } from '@app/v1/shared/inventory/inventory.models';
+import { visualizationChartLabel } from '../visualization-charts';
 import { VISUALIZATION_FAMILIES } from '../visualization-families';
 
 export { VISUALIZATION_FAMILIES } from '../visualization-families';
@@ -61,7 +62,7 @@ export function buildVisualizationLibrary(snapshot: AccountWorkspaceSnapshot): V
     const issues = [...read.issues.map(issue => issue.message), ...references.map(reference => `${reference.kind} ${reference.guid}: ${reference.reason}`)];
     const labels = definition && supported ? visualizationReferences(definition).map(reference => sourceRecords.find(item => item.guid === reference.guid)?.name || reference.guid) : [];
     const periodLabel = definition ? visualizationPeriodLabel(definition) : 'Period unavailable';
-    const chartLabel = definition?.chart ? definition.chart.kind.replace(/-/g, ' ') : 'Chart not selected';
+    const chartLabel = visualizationChartLabel(definition?.chart);
     const modified = new Date(record.modifiedDate).getTime();
     return { record, definition, name, scope: record.facilityId ? 'facility' as const : 'portfolio' as const,
       facilityGuid: record.facilityId, ownerName, families, familyLabel, status, statusLabel: STATUS_LABELS[status], periodLabel, chartLabel,

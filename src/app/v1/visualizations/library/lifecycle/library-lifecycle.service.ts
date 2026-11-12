@@ -6,13 +6,21 @@ import { SavedVisualizationCommands } from '@data/account-workspace/saved-visual
 import { VisualizationCommand, VisualizationCommandOutcome } from '@data/account-workspace/visualization-commands.models';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
-import { createVisualizationDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
+import { createVisualizationSetupDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { VisualizationNavigationService } from '../../visualization-navigation.service';
 import { VisualizationLibraryEntry } from '../visualization-library.models';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
+import { VISUALIZATION_CHART_CHOICES, VisualizationChartChoiceId, createVisualizationChart } from '../../visualization-charts';
+import { VISUALIZATION_FAMILIES } from '../../visualization-families';
 
-export interface VisualizationCreationDraft { name: string; scope: 'portfolio' | 'facility'; facilityGuid: string; family: VisualizationSourceKind; }
+export type VisualizationCreationStep = 'scope' | 'facility' | 'chart' | 'families' | 'name';
+export interface VisualizationCreationDraft {
+  name: string; scope: 'portfolio' | 'facility'; facilityGuid: string;
+  chart: VisualizationChartChoiceId | null; families: readonly VisualizationSourceKind[];
+}
+interface CreationSelection { readonly step: VisualizationCreationStep; readonly label: string; readonly icon: IconName; readonly editable: boolean; }
 interface LibraryEditor { readonly initial: VisualizationCreationDraft; readonly accountGuid: string; readonly fixedFacility?: string; readonly entry?: VisualizationLibraryEntry; }
 
 /** Owns one live creation/rename proposal; retry never allocates a second saved identity. */
@@ -26,6 +34,8 @@ export class LibraryLifecycle {
   private readonly destroy = inject(DestroyRef);
   readonly editor = signal<LibraryEditor | undefined>(undefined);
   readonly saving = signal(false);
+  readonly step = signal<VisualizationCreationStep>('scope');
+  private readonly ownerChosen = signal(false);
   readonly error = signal<string | undefined>(undefined);
   readonly confirmation = signal<'delete' | 'discard' | undefined>(undefined);
   readonly deleteCandidate = signal<VisualizationLibraryEntry | undefined>(undefined);
@@ -36,7 +46,8 @@ export class LibraryLifecycle {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     scope: new FormControl<'portfolio' | 'facility'>('portfolio', { nonNullable: true }),
     facilityGuid: new FormControl('', { nonNullable: true }),
-    family: new FormControl<VisualizationSourceKind>('utility', { nonNullable: true })
+    chart: new FormControl<VisualizationChartChoiceId | null>(null),
+    families: new FormControl<readonly VisualizationSourceKind[]>([], { nonNullable: true })
   });
   private readonly draft = signal(this.form.getRawValue());
   readonly facilities = computed(() => this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid));
@@ -47,8 +58,31 @@ export class LibraryLifecycle {
   readonly canRetry = computed(() => !!this.proposal() && this.outcome() !== 'conflict' && this.canAct());
   readonly canDiscard = computed(() => !this.saving() && this.outcome() !== 'refresh-required');
   readonly ownerValid = computed(() => this.draft().scope === 'portfolio' || this.facilities().some(item => item.guid === this.draft().facilityGuid));
-  readonly canSubmit = computed(() => this.canAct() && !!this.editor() && !this.lockedProposal() && !!this.draft().name.trim() && this.ownerValid()
+  readonly canEditDraft = computed(() => this.canAct() && !!this.editor() && !this.lockedProposal()
     && this.editor()!.accountGuid === this.workspace.account()?.guid);
+  readonly selectedChart = computed(() => VISUALIZATION_CHART_CHOICES.find(choice => choice.value === this.draft().chart));
+  readonly selectedFamilies = computed(() => VISUALIZATION_FAMILIES.filter(family => this.draft().families.includes(family.value)));
+  readonly familiesValid = computed(() => this.draft().families.length > 0
+    && new Set(this.draft().families).size === this.draft().families.length
+    && this.selectedFamilies().length === this.draft().families.length);
+  readonly canContinueFamilies = computed(() => this.canEditDraft() && this.ownerValid() && !!this.selectedChart() && this.familiesValid());
+  readonly canSubmit = computed(() => this.canEditDraft() && !!this.draft().name.trim() && this.ownerValid()
+    && (!!this.editor()?.entry || this.step() === 'name' && !!this.selectedChart() && this.familiesValid()));
+  readonly selections = computed(() => {
+    const selections: CreationSelection[] = [];
+    const editor = this.editor(), value = this.draft();
+    const facility = this.facilities().find(item => item.guid === value.facilityGuid);
+    if (!editor || editor.entry) return selections;
+    if (this.ownerChosen()) {
+      if (!editor.fixedFacility) selections.push({ step: 'scope', label: value.scope === 'portfolio' ? 'Portfolio' : 'Facility', icon: value.scope === 'portfolio' ? 'account' : 'facility', editable: !editor.fixedFacility });
+      if (value.scope === 'facility' && value.facilityGuid) selections.push({ step: 'facility',
+        label: facility ? facility.name || 'Unnamed facility' : 'Facility unavailable', icon: 'facility', editable: !editor.fixedFacility });
+    }
+    const chart = this.selectedChart();
+    if (chart) selections.push({ step: 'chart', label: chart.label, icon: 'dataVisualization', editable: true });
+    if (this.selectedFamilies().length) selections.push({ step: 'families', label: this.selectedFamilies().map(family => family.label).join(', '), icon: 'database', editable: true });
+    return selections;
+  });
   private running?: Promise<void>;
   private leaveResolve?: (value: boolean) => void;
   private leavePromise?: Promise<boolean>;
@@ -70,18 +104,42 @@ export class LibraryLifecycle {
     const accountGuid = this.workspace.account()?.guid;
     if (!accountGuid) return;
     const fixedFacility = this.navigation.isSingleSiteWorkspace() ? this.facilities()[0]?.guid : this.navigation.inventoryFacilityGuid();
-    const initial: VisualizationCreationDraft = { name: '', scope: fixedFacility ? 'facility' : 'portfolio', facilityGuid: fixedFacility ?? '', family: 'utility' };
+    const initial: VisualizationCreationDraft = { name: '', scope: fixedFacility ? 'facility' : 'portfolio', facilityGuid: fixedFacility ?? '', chart: null, families: [] };
     this.startEditor({ initial, fixedFacility, accountGuid });
   }
   rename(entry: VisualizationLibraryEntry): void {
     if (!this.canAct() || this.editor() || !entry.editable) return;
     this.startEditor({ accountGuid: entry.record.accountId, entry, initial: {
-      name: entry.name, scope: entry.scope, facilityGuid: entry.facilityGuid ?? '', family: entry.families[0] ?? 'utility'
+      name: entry.name, scope: entry.scope, facilityGuid: entry.facilityGuid ?? '', chart: null, families: entry.families
     } });
   }
   private startEditor(editor: LibraryEditor): void {
     this.error.set(undefined); this.outcome.set(undefined); this.conflictCurrent.set(undefined);
     this.form.reset(editor.initial, { emitEvent: false }); this.draft.set(this.form.getRawValue()); this.editor.set(editor);
+    this.ownerChosen.set(!!editor.fixedFacility); this.step.set(editor.entry ? 'name' : editor.fixedFacility ? 'chart' : 'scope');
+  }
+  selectScope(scope: 'portfolio' | 'facility'): void {
+    if (!this.canEditDraft() || this.editor()?.entry || this.editor()?.fixedFacility || scope === 'facility' && !this.facilities().length) return;
+    this.form.controls.scope.setValue(scope); this.ownerChosen.set(true);
+    this.step.set(scope === 'facility' ? 'facility' : 'chart');
+  }
+  selectFacility(guid: string): void {
+    if (!this.canEditDraft() || this.editor()?.entry || this.editor()?.fixedFacility
+      || this.form.controls.scope.value !== 'facility' || !this.facilities().some(facility => facility.guid === guid)) return;
+    this.form.controls.facilityGuid.setValue(guid); this.step.set('chart');
+  }
+  selectChart(chart: VisualizationChartChoiceId): void {
+    if (!this.canEditDraft() || this.editor()?.entry || !this.ownerValid() || !VISUALIZATION_CHART_CHOICES.some(choice => choice.value === chart)) return;
+    this.form.controls.chart.setValue(chart); this.step.set('families');
+  }
+  toggleFamily(kind: VisualizationSourceKind): void {
+    if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_FAMILIES.some(family => family.value === kind)) return;
+    const selected = this.form.controls.families.value;
+    this.form.controls.families.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]);
+  }
+  continueFamilies(): void { if (this.canContinueFamilies()) this.step.set('name'); }
+  editSelection(step: VisualizationCreationStep): void {
+    if (this.canEditDraft() && this.selections().some(selection => selection.step === step && selection.editable)) this.step.set(step);
   }
   async submit(): Promise<void> {
     const editor = this.editor();
@@ -95,8 +153,9 @@ export class LibraryLifecycle {
     const command: VisualizationCommand = editor.entry ? {
       kind: 'update', accountGuid: editor.accountGuid, guid: editor.entry.record.guid, expectedRevision: editor.entry.record.revision,
       definition: { ...editor.entry.definition!, name: value.name.trim() }
-    } : this.commands.prepareCreate(createVisualizationDefinition(value.name.trim(), editor.accountGuid,
-      value.scope === 'facility' ? { kind: 'facility', facilityGuid: value.facilityGuid } : { kind: 'portfolio' }, value.family));
+    } : this.commands.prepareCreate(createVisualizationSetupDefinition({ name: value.name.trim(), accountGuid: editor.accountGuid,
+      scope: value.scope === 'facility' ? { kind: 'facility', facilityGuid: value.facilityGuid } : { kind: 'portfolio' },
+      chart: createVisualizationChart(value.chart!), sourceKinds: value.families }));
     this.proposal.set(command);
     await this.execute();
   }
@@ -166,7 +225,7 @@ export class LibraryLifecycle {
     this.finishLeave(true);
     if (!callerOwnsNavigation && (proposal.kind === 'create' || proposal.kind === 'duplicate')) {
       this.visualizations.rememberReturn(proposal.accountGuid, this.navigation.inventoryFacilityGuid());
-      if (!await this.visualizations.open(proposal.accountGuid, proposal.guid)) this.error.set('Saved successfully. Open the visualization from the library to continue.');
+      if (!await this.visualizations.open(proposal.accountGuid, proposal.guid)) this.error.set('Saved successfully. Open the visualization from Dashboard to continue.');
     }
   }
   useSavedConflict(): void { this.resolveRenameConflict('saved'); }

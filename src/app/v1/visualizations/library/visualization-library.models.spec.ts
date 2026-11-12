@@ -1,7 +1,8 @@
-import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { DEFAULT_VISUALIZATION_FILTERS, VISUALIZATION_FAMILIES, buildVisualizationLibrary, filterVisualizationLibrary, visualizationLibraryTile } from './visualization-library.models';
+import { VISUALIZATION_CHART_CHOICES, createVisualizationChart } from '../visualization-charts';
 import { libraryRecord, librarySnapshot } from './testing/library-testing';
 
 describe('visualization library projections', () => {
@@ -11,6 +12,16 @@ describe('visualization library projections', () => {
     expect(entry.status).toBe('setup-required'); expect(entry.familyLabel).toBe(family.label);
     expect(entry.periodLabel).toBe(family.value === 'energy-use' ? 'Latest saved fiscal year' : 'All saved history');
     expect(entry.editable).toBe(true); expect(entry.issues.length).toBeGreaterThan(0);
+  });
+  it.each(VISUALIZATION_CHART_CHOICES)('shows the concrete $label chart with every selected family and matches either filter', choice => {
+    const definition = createVisualizationSetupDefinition({ name: 'Mixed sources', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      chart: createVisualizationChart(choice.value), sourceKinds: ['utility', 'weather'] });
+    const snapshot = { ...librarySnapshot(), savedVisualizations: [getNewIdbSavedVisualization(definition)] };
+    const entries = buildVisualizationLibrary(snapshot); expect(entries[0].chartLabel).toBe(choice.label);
+    expect(entries[0].familyLabel).toBe('Utility, Weather');
+    expect(visualizationLibraryTile(entries[0], ['workbench'], ['library']).visualizationSnapshot?.chartLabel).toBe(choice.label);
+    for (const family of ['utility', 'weather'] as const) expect(filterVisualizationLibrary(entries, { ...DEFAULT_VISUALIZATION_FILTERS, family })).toHaveLength(1);
+    expect(filterVisualizationLibrary(entries, { ...DEFAULT_VISUALIZATION_FILTERS, family: 'predictor' })).toEqual([]);
   });
   it('filters account ownership and searches source labels without replacing missing references', () => {
     const snapshot = { ...librarySnapshot(), meters: [{ guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a', name: 'Boiler steam' }] as any };

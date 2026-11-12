@@ -1,6 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, effect, inject, untracked } from '@angular/core';
+import { Component, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterRenderEffect, effect, inject, untracked, viewChild } from '@angular/core';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { VISUALIZATION_CHART_CHOICES } from '../../visualization-charts';
 import { LibraryLifecycle } from '../../library/lifecycle/library-lifecycle.service';
 import { visualizationFamilyChoices } from '../../visualization-families';
 
@@ -9,12 +10,24 @@ import { visualizationFamilyChoices } from '../../visualization-families';
 export class CreationComponent implements OnDestroy {
   readonly lifecycle = inject(LibraryLifecycle);
   readonly families = visualizationFamilyChoices();
+  get charts(): typeof VISUALIZATION_CHART_CHOICES { return VISUALIZATION_CHART_CHOICES; }
+  private readonly stepHeading = viewChild<ElementRef<HTMLElement>>('stepHeading');
+  private readonly visualizationName = viewChild<ElementRef<HTMLInputElement>>('visualizationName');
   private readonly modal = inject(ModalPortalService);
   private readonly container = inject(ViewContainerRef);
   @ViewChild('deleteConfirmation', { static: true }) private deleteConfirmation!: TemplateRef<unknown>;
   @ViewChild('discardConfirmation', { static: true }) private discardConfirmation!: TemplateRef<unknown>;
   private portal?: TemplatePortal;
   constructor() {
+    let focusedStep: string | undefined;
+    let focusedEditor: unknown;
+    afterRenderEffect(() => {
+      const editor = this.lifecycle.editor(), step = this.lifecycle.step();
+      const target = editor?.entry || step === 'name' ? this.visualizationName()?.nativeElement : this.stepHeading()?.nativeElement;
+      if (target && (focusedStep !== step || focusedEditor !== editor)) {
+        focusedStep = step; focusedEditor = editor; target.focus();
+      }
+    });
     effect(() => {
       const confirmation = this.lifecycle.confirmation();
       untracked(() => {
