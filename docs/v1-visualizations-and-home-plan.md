@@ -72,7 +72,7 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 | --- | --- | --- | --- |
 | Vis1 | [#2901 Define the visualization workflow and reusable configuration contract](https://github.com/ORNL-AMO/VERIFI/issues/2901) | Implemented locally; review/QA pending | None |
 | Vis2 | [#2903 Persist saved visualizations and preserve them through backup and restore](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Implemented locally; review/QA pending | Vis1 |
-| Vis3 | [#2904 Build the Visualizations Dashboard and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | In progress | Vis1, Vis2 |
+| Vis3 | [#2904 Build the Visualizations Dashboard and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Framework and alignment implemented locally; review/QA pending | Vis1, Vis2 |
 | Vis4 | [#2905 Build utility cost emissions and charge data selection](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Not started | Vis1, Vis3 |
 | Vis5 | [#2906 Add predictor weather Energy Use and analysis result sources](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Not started | Vis1, Vis3, Vis4 |
 | Vis6 | [#2907 Build time series and comparison chart editing](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Not started | Vis3, Vis4 |
@@ -143,7 +143,7 @@ The [Vis2 persistence specification](v1-visualization-persistence.md) records th
 
 ### Vis3 Build the Visualizations Dashboard and workbench
 
-**Issue:** [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) · **Status:** In progress
+**Issue:** [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) · **Status:** Framework and alignment implemented locally; review/QA pending
 
 The [Vis3 workbench specification](v1-visualization-workbench.md) records the accepted card Dashboard, autosave/navigation/recovery decisions and six-slice delivery stack. This is framework-first delivery; concrete source and chart adapters remain in Vis4–Vis8.
 
@@ -503,3 +503,5 @@ The tables above track local implementation progress. Keep each status aligned w
 | 2026-11-10 | Planning validation | Verified all 16 published issue bodies, dependencies, milestone/label, and native parent links; preserved #2635. Local links, issue mappings, and dependency graph passed checks. `npm run validate:agent -- --mode plan` selected documentation checks only; `git diff --check` passed. |
 | 2026-11-11 | Vis1 workflow slice | Added the foundation specification, accepted workflow/state decisions, focused current-v1 chart/source dispositions, acceptance crosswalk and three-PR handoff. Local link targets verified. This slice changes documentation only; executable contract validation is recorded with the following slices. |
 | 2026-11-11 | Vis1 contracts | Added strict serializable definitions, incomplete/unsupported validation, provider/capability/capture/embedding contracts, and fake-provider behavior examples. Actual UI, persistence and source adapters remain downstream. Local stack targets `unified-ux`; publication and QA remain pending. |
+| 2026-11-11 | Vis3 framework | Implemented the six-slice library/workbench stack, guarded autosave/navigation, reviewed repair/copy recovery, and cancellable preview registrations. Full fast suite: 4,297 tests; Chromium: 533 tests. Concrete source/chart adapters and real-data preview acceptance remain downstream; issue #2904 is not closed by this framework delivery. |
+| 2026-11-11 | Vis3 alignment | Added Dashboard/Add naming, stepped chart-first creation with multiple source families, explicit incomplete Scatter bindings, retained recovery intent and the downstream starter recipe plan. Final focused validation: 334 unit tests, 35 Chromium tests, app/spec type checks and production web compilation passed; existing build warnings remain. Ownership, feature-registration and recovery-navigation review findings have regression coverage. No Electron boundary changed. Wide/narrow theme and keyboard checks passed. Real-data adapters, recipes, human review and QA remain downstream. |

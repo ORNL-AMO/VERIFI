@@ -55,7 +55,7 @@ describe('v1 canonical route guards', () => {
       .toEqual({ commands: facilityRoute('facility-a') });
   });
 
-  it.each(['settings/backup', 'reports/dashboard', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {
+  it.each(['settings/backup', 'reports/dashboard', 'visualization/library', 'visualization/workbench/visualization-a', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {
     workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
     await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),

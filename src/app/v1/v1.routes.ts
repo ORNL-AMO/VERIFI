@@ -1,3 +1,4 @@
+import { VISUALIZATION_ROUTES, visualizationFacilityEntryGuard } from '@app/v1/visualizations/visualizations.routes';
 import { importSessionGuard } from '@app/v1/account/imports/import-session.guard';
 import { ENERGY_USE_WORKBENCH_ROUTES } from '@app/v1/data/energy-uses/energy-uses.routes';
 import { FACILITY_REPORT_ROUTES } from '@app/v1/reports/facility/facility-reports.routes';
@@ -7,7 +8,7 @@ import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from
 import { CustomGridFactorsComponent } from '@app/v1/data/custom-database/custom-grid-factors/custom-grid-factors.component';
 import { CustomFuelsComponent } from '@app/v1/data/custom-database/custom-fuels/custom-fuels.component';
 import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/custom-gwps.component';
-import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
+import { flushPendingChangesGuard, unsavedChangesGuard, protectedNavigationPreflightGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
 import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
 import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
@@ -116,7 +117,7 @@ export const V1Routes: Routes = [
       {
         path: 'workspace/account/:accountGuid',
         component: WorkspaceShellComponent,
-        canActivate: [accountGuidReadyGuard],
+        canActivate: [protectedNavigationPreflightGuard, accountGuidReadyGuard],
         canActivateChild: [singleSiteAccountRedirectGuard, inventoryScopeChangeGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
@@ -232,6 +233,7 @@ export const V1Routes: Routes = [
               { path: '**', redirectTo: 'dashboard' }
             ]
           },
+          { path: 'visualization', children: VISUALIZATION_ROUTES },
           {
             path: 'reports', children: ACCOUNT_REPORT_ROUTES
           },
@@ -241,8 +243,10 @@ export const V1Routes: Routes = [
       {
         path: 'workspace/facility/:facilityGuid',
         component: WorkspaceShellComponent,
-        canActivate: [facilityReadyGuard],
+        canActivate: [protectedNavigationPreflightGuard, facilityReadyGuard],
         children: [
+          { path: 'visualization/workbench/:visualizationGuid', canActivate: [visualizationFacilityEntryGuard], children: [] },
+          { path: 'visualization', canActivate: [visualizationFacilityEntryGuard], children: [{ path: '**', children: [] }] },
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
           {
