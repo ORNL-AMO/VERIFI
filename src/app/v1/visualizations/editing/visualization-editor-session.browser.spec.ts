@@ -104,11 +104,11 @@ describe('visualization editor session with native IndexedDB', () => {
   it('keeps an external ownership conflict unresolved when local configuration cannot use ordinary autosave', async () => {
     const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: account.guid,
       facilitySelection: { kind: 'fixed', facilityGuids: [facility.guid] }, sourceKinds: ['utility'],
-      chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' } });
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' } });
     const { session, commands, proposal } = await create(definition);
     const update = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'update');
     session.applyDefinition({ ...session.definition()!, chart: {
-      kind: 'time-series', type: 'bar', interval: 'yearly', stack: 'none'
+      kind: 'time-series', defaultTraceType: 'bar', interval: 'yearly', stack: 'none'
     } });
     session.form.controls.name.setValue('Retained local name');
     const local = structuredClone(session.definition());

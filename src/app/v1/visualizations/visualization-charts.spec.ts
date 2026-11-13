@@ -17,7 +17,7 @@ describe('visualization chart choices', () => {
   });
 
   it('initializes settings independently and never fabricates Scatter axes or treemap levels', () => {
-    expect(createVisualizationChart('line')).toEqual({ kind: 'time-series', type: 'line', interval: 'native', stack: 'none' });
+    expect(createVisualizationChart('line')).toEqual({ kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' });
     expect(createVisualizationChart('scatter')).toEqual({ kind: 'scatter', showFit: false });
     expect(createVisualizationChart('correlation')).toEqual({ kind: 'correlation', statistic: 'r', scale: 'raw' });
     expect(createVisualizationChart('heatmap')).toEqual({ kind: 'heatmap', dimension: 'month-year', scale: 'linear' });

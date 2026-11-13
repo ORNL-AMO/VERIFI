@@ -181,7 +181,7 @@ describe('visualization preview orchestration', () => {
 
   it('rejects claimed support for a different exact chart', async () => {
     const prepare = vi.fn(() => presentation);
-    const { controller, definition } = setup({ provider: { supportsChart: () => ({ state: 'supported', chart: { kind: 'time-series', type: 'bar', interval: 'monthly', stack: 'none' } }) }, presenter: { prepare } });
+    const { controller, definition } = setup({ provider: { supportsChart: () => ({ state: 'supported', chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } }) }, presenter: { prepare } });
     controller.update(definition, identity); await settle();
     expect(controller.state().state).toBe('incompatible'); expect(prepare).not.toHaveBeenCalled();
   });

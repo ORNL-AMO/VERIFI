@@ -45,7 +45,7 @@ describe('visualization Dashboard lifecycle', () => {
     lifecycle.form.controls.recipeResourceIds.setValue(['meter-a']); lifecycle.continueRecipe(); await lifecycle.submit();
     expect(commands.prepareCreate).toHaveBeenCalledTimes(1);
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ name: 'Energy usage trend',
-      chart: { kind: 'time-series', type: 'line', interval: 'monthly' }, sources: [{ measure: 'energy', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] } }] });
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly' }, sources: [{ measure: 'energy', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] } }] });
   });
   it('requires an explicit chart, data sources and final name step before adding', async () => {
     const { commands } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
@@ -66,15 +66,15 @@ describe('visualization Dashboard lifecycle', () => {
     lifecycle.editSelection('chart'); expect(lifecycle.step()).toBe('chart');
     expect(lifecycle.form.controls.chart.value).toBe('scatter'); expect(lifecycle.form.controls.facilityGuid.value).toBe('facility-a');
     expect(lifecycle.form.controls.sourceKinds.value).toEqual([]); expect(lifecycle.form.controls.name.value).toBe('');
-    lifecycle.selectChart('combination'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
+    lifecycle.selectChart('line'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
     lifecycle.form.controls.name.setValue('New selection'); lifecycle.editSelection('scope');
     expect(lifecycle.form.controls.facilityGuid.value).toBe(''); expect(lifecycle.form.controls.chart.value).toBeNull();
     expect(lifecycle.form.controls.sourceKinds.value).toEqual([]); expect(lifecycle.form.controls.name.value).toBe('');
     expect(lifecycle.canSubmit()).toBe(false);
-    lifecycle.selectScope('portfolio'); lifecycle.selectChart('combination'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor');
+    lifecycle.selectScope('portfolio'); lifecycle.selectChart('line'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor');
     lifecycle.continueSources(); lifecycle.form.controls.name.setValue('Fresh name');
     await lifecycle.submit();
-    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ facilitySelection: { kind: 'all' }, chart: { kind: 'time-series', type: 'combination' },
+    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ facilitySelection: { kind: 'all' }, chart: { kind: 'time-series', defaultTraceType: 'line' },
       sources: [{ id: 'source-1', kind: 'utility' }, { id: 'source-2', kind: 'predictor' }] });
   });
   it.each(['energy-trend', 'cost-trend'] as const)('clears the %s path immediately when reopening the facility step', recipe => {
@@ -191,7 +191,7 @@ describe('visualization Dashboard lifecycle', () => {
       .mockImplementationOnce(async command => ({ state: 'refresh-required', command, error: new Error('Refresh unavailable') } as any));
     lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'predictor']); lifecycle.form.controls.name.setValue('Retained'); await lifecycle.submit();
     const proposal = lifecycle.proposal();
-    expect(proposal).toMatchObject({ definition: { chart: { kind: 'time-series', type: 'line' }, sources: [{ kind: 'utility' }, { kind: 'predictor' }] } });
+    expect(proposal).toMatchObject({ definition: { chart: { kind: 'time-series', defaultTraceType: 'line' }, sources: [{ kind: 'utility' }, { kind: 'predictor' }] } });
     lifecycle.toggleSource('predictor'); expect(lifecycle.form.controls.sourceKinds.value).toEqual(['utility', 'predictor']);
     expect(lifecycle.needsProtection()).toBe(true); expect(lifecycle.form.controls.name.value).toBe('Retained');
     await lifecycle.retry(); expect(lifecycle.proposal()).toBe(proposal); expect(lifecycle.outcome()).toBe('refresh-required');

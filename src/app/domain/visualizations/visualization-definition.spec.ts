@@ -5,6 +5,15 @@ import { analysisVisualizationFixture, energyUseVisualizationFixture, utilityVis
 describe('visualization saved intent', () => {
 
 
+  it('validates explicit selection modes and item trace types without accepting superseded chart fields', () => {
+    const base = utilityVisualizationFixture();
+    const mixed: VisualizationDefinition = { ...base, series: base.series.map(series => ({ ...series, traceType: 'bar' })) };
+    expect(decodeVisualizationDefinition(mixed).state).toBe('valid');
+    expect(decodeVisualizationDefinition({ ...base, chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' } }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...base, sources: base.sources.map(source => ({ ...source, selectionMode: 'invented' })) }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...base, sources: base.sources.map(source => ({ ...source, selectionMode: 'source' as const, selection: { kind: 'rule', resource: 'meter', filter: { utilitySources: [] } } })) }).state).toBe('setup-required');
+  });
+
   it('allows visibility and dormant presentation overrides with unique selectors', () => {
     const base = utilityVisualizationFixture();
     const { resourceGuid, ...wildcard } = base.series[0];
@@ -17,6 +26,17 @@ describe('visualization saved intent', () => {
       { resourceGuid: 'meter-a' }, { resourceGuid: 'meter-a', visible: false }
     ] }] }).state).toBe('invalid');
     expect(decodeVisualizationDefinition({ ...definition, series: [{ ...definition.series[0], resourceGuid: 'meter-a' }] }).state).toBe('invalid');
+  });
+
+  it('allows an exact item order override without introducing competing presentation or resource bindings', () => {
+    const base = utilityVisualizationFixture();
+    const withOverrides = (overrides: unknown[]) => ({ ...base, series: [{ ...base.series[0], overrides }] });
+    expect(decodeVisualizationDefinition(withOverrides([{ resourceGuid: 'meter-a', accountGuid: base.accountGuid, order: 1 }])).state).toBe('valid');
+    for (const override of [
+      { resourceGuid: 'meter-b', order: 1 }, { seriesId: 'utility:energy:meter-a', order: 1 },
+      { resourceGuid: 'meter-a', color: '#123456', order: 1 }, { resourceGuid: 'meter-a', traceType: 'bar', order: 1 },
+      { resourceGuid: 'meter-a', visible: false, order: 1 }, { resourceGuid: 'meter-a' }
+    ]) expect(decodeVisualizationDefinition(withOverrides([override])).state).toBe('invalid');
   });
 
   it.each([
@@ -147,7 +167,7 @@ describe('visualization saved intent', () => {
   });
 
   it.each<VisualizationChart>([
-    { kind: 'time-series', type: 'bar', interval: 'monthly', stack: 'absolute' },
+    { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'absolute' },
     { kind: 'scatter', xSeriesId: 'energy', ySeriesId: 'energy', showFit: false },
     { kind: 'correlation', statistic: 'r-squared', scale: 'z-score' },
     { kind: 'heatmap', dimension: 'series-period', scale: 'diverging' },

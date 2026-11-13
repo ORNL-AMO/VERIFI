@@ -52,7 +52,7 @@ describe('visualization source/runtime contracts', () => {
     const definition: VisualizationDefinition = { ...initial, sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
       selection: { kind: 'fixed', resource: 'predictor', guids: ['temperature-a'] } }],
       series: [{ id: 'temperature', sourceId: 'predictors', resourceGuid: 'temperature-a', metric: 'value', axis: 'left' }],
-      chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' } };
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' } };
     const evidence = visualizationEvidenceFixture(definition, 0, [{ guid: 'temperature-a', predictorType }]);
     expect(checkVisualizationCompatibility(definition, [evidence]).state).toBe('compatible');
     const provenance = predictorType === 'Weather' ? 'weather' : 'predictor';
@@ -67,7 +67,7 @@ describe('visualization source/runtime contracts', () => {
       sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
         selection: { kind: 'fixed', resource: 'predictor', guids: ['standard-a', 'weather-a'] } }],
       series: ['standard-a', 'weather-a'].map(resourceGuid => ({ id: resourceGuid, sourceId: 'predictors', resourceGuid, metric: 'value', axis: 'left' })),
-      chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' }
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' }
     };
     const evidence = visualizationEvidenceFixture(definition, 0, [
       { guid: 'standard-a', predictorType: 'Standard' }, { guid: 'weather-a', predictorType: 'Weather' }
@@ -163,7 +163,7 @@ describe('visualization source/runtime contracts', () => {
   it.each(['period', 'comparison', 'source', 'series', 'chart'] as const)('rejects stale %s intent despite matching revision labels', key => {
     const definition = utilityVisualizationFixture(); const evidence = visualizationEvidenceFixture(definition);
     const request = { ...evidence.request, [key]: key === 'period' ? { kind: 'fiscal-year', year: 2020 }
-      : key === 'comparison' ? { kind: 'previous-period' } : key === 'series' ? [] : key === 'chart' ? { ...evidence.request.chart, type: 'bar' } : { ...evidence.request.source, measure: 'cost' } };
+      : key === 'comparison' ? { kind: 'previous-period' } : key === 'series' ? [] : key === 'chart' ? { ...evidence.request.chart, defaultTraceType: 'bar' } : { ...evidence.request.source, measure: 'cost' } };
     expect(reasonCodes(definition, [{ ...evidence, request } as VisualizationSourceEvidence])).toContain('stale');
   });
 
@@ -318,7 +318,7 @@ describe('visualization source/runtime contracts', () => {
         selectionMode: 'facility' as const, selection: { kind: 'fixed', resource: 'facility', guids: ['facility-a'] },
         charge: { meterGuid: 'meter-b', chargeGuid: 'charge-b', measure: 'usage' } }],
       series: [{ id: 'charge', sourceId: source.id, metric: 'charge', axis: 'left' }],
-      chart: { kind: 'time-series', type: 'line', interval: 'native', stack: 'none' } };
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'native', stack: 'none' } };
     const evidence = visualizationEvidenceFixture(definition), resolved = ready(evidence);
     const outside = replaceResolved(evidence, {
       references: resolved.references.map(reference => reference.kind === 'facility' ? reference : { ...reference, facilityGuid: 'facility-b' }),
@@ -377,7 +377,7 @@ describe('visualization source/runtime contracts', () => {
   });
 
   it('rejects annual estimates as monthly observations', () => {
-    const definition = { ...energyUseVisualizationFixture(), chart: { kind: 'time-series' as const, type: 'line' as const, interval: 'monthly' as const, stack: 'none' as const } };
+    const definition = { ...energyUseVisualizationFixture(), chart: { kind: 'time-series' as const, defaultTraceType: 'line' as const, interval: 'monthly' as const, stack: 'none' as const } };
     const evidence = visualizationEvidenceFixture(definition);
     expect(reasonCodes(definition, [evidence])).toContain('period');
   });
@@ -482,7 +482,7 @@ describe('mixed-source eligibility', () => {
     return { ...base, sources: [...base.sources, {  ...base.sources[0], id: 'other', kind: 'utility', measure: 'energy',
       aggregation: 'sum', dataMode: 'calendarized', groupBy: 'meter', selectionMode: 'meter' as const, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-b'] } }],
       series: [...base.series, { id: 'other-energy', sourceId: 'other', metric: 'energy', resourceGuid: 'meter-b', axis: 'left' }],
-      chart: { kind: 'time-series', type: 'area', interval: 'monthly', stack } };
+      chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack } };
   }
   function mixedFixture(): VisualizationDefinition {
     const utility = utilityVisualizationFixture();
@@ -509,13 +509,13 @@ describe('mixed-source eligibility', () => {
     const definition: VisualizationDefinition = { ...initial, sources: initial.sources.map((source, index) => ({ ...source,
       settings: { ...source.settings, energyTreatment: { kind: 'pinned', value: index ? 'source' : 'site' } } })) };
     expect(checkVisualizationCompatibility(definition, [visualizationEvidenceFixture(definition), visualizationEvidenceFixture(definition, 1)]).state).toBe('compatible');
-    const stacked: VisualizationDefinition = { ...definition, chart: { kind: 'time-series', type: 'area', interval: 'monthly', stack: 'absolute' } };
+    const stacked: VisualizationDefinition = { ...definition, chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'absolute' } };
     expect(reasonCodes(stacked, [visualizationEvidenceFixture(stacked), visualizationEvidenceFixture(stacked, 1)])).toContain('units');
   });
   it('rejects mixed units/currencies on one axis and nonadditive stacking', () => {
     const base = mixedFixture(); const definition = { ...base, series: base.series.map(series => ({ ...series, axis: 'left' as const })) };
     expect(reasonCodes(definition, mixedEvidence(definition))).toContain('units');
-    const stacked = { ...base, chart: { kind: 'time-series' as const, type: 'area' as const, interval: 'monthly' as const, stack: 'absolute' as const } };
+    const stacked = { ...base, chart: { kind: 'time-series' as const, defaultTraceType: 'area' as const, interval: 'monthly' as const, stack: 'absolute' as const } };
     expect(reasonCodes(stacked, mixedEvidence(stacked))).toContain('units');
   });
   it('does not require scatter X/Y quantities to have the same unit', () => {

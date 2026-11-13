@@ -59,9 +59,24 @@ describe('saved time-series presentation', () => {
     expect(presentation.details.rows[1][4]).toBe('missing: Invalid cost input');
     expect(amended).toEqual(snapshot);
   });
+  it('resolves each item type independently and applies it to the comparison trace', () => {
+    const original = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...original, comparison: { kind: 'previous-year', basis: 'calendar' }, series: [
+      { id: 'energy', sourceId: original.sources[0].id, metric: 'energy', axis: 'left', traceType: 'line',
+        overrides: [{ resourceGuid: 'meter-a', traceType: 'bar' }] }
+    ] };
+    const evidence = ready(definition);
+    if (evidence.resolution.state !== 'ready') throw new Error('Fixture must be ready.');
+    const first = { ...evidence.resolution.resolved.series[0], resourceGuid: 'meter-a' };
+    const second = { ...first, id: 'second-meter', resourceGuid: 'meter-b' };
+    const amended = { ...evidence, resolution: { ...evidence.resolution, resolved: { ...evidence.resolution.resolved, series: [first, second] } } };
+    const model = prepareTimeSeries(definition, [amended]);
+    expect(model.traces.filter(trace => trace.id.startsWith(first.id + ':')).map(trace => trace.type)).toEqual(['bar', 'bar']);
+    expect(model.traces.filter(trace => trace.id.startsWith('second-meter:')).map(trace => trace.type)).toEqual(['line', 'line']);
+  });
   it('rejects unsupported styles and aborted presentation', () => {
     const definition = utilityVisualizationFixture();
-    expect(() => prepareTimeSeries({ ...definition, chart: { kind: 'time-series', type: 'area', interval: 'monthly', stack: 'none' } }, [ready(definition)])).toThrow('line or bar');
+    expect(() => prepareTimeSeries({ ...definition, chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'none' } }, [ready(definition)])).toThrow('line or bar');
     const abort = new AbortController(); abort.abort();
     expect(() => new TimeSeriesPresenter().prepare(definition, [ready(definition)], abort.signal)).toThrow('canceled');
   });

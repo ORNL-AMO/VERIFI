@@ -2,6 +2,7 @@
   <h2>Chart settings</h2>
   <div class="chart-settings-options" [formGroup]="chartForm">
     <label>Chart type<select class="v1-select" formControlName="type"><option value="unsupported" disabled>Saved chart type (not yet supported here)</option><option value="line">Line</option><option value="bar">Bar</option></select></label>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="context.disabled || chartForm.controls.type.value === 'unsupported'" (click)="applyChartType()">Apply type to all items</button>
     <label>Interval<select class="v1-select" formControlName="interval"><option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="native">Native bill observations</option></select></label>
   </div>
   <p>Series on each axis must share compatible units and meaning. Changes to chart settings do not change source values.</p>
@@ -12,6 +13,7 @@
       <legend>{{ row.label }} @if (row.unit) { <span>({{ row.unit }})</span> }</legend>
       <label class="chart-settings-checkbox"><input type="checkbox" formControlName="visible">Show series</label>
       <label>Display label<input type="text" formControlName="label" [placeholder]="row.label"></label>
+      <label>Trace type<select class="v1-select" formControlName="traceType"><option value="area" disabled>Saved Area trace (not supported here)</option><option value="line">Line</option><option value="bar">Bar</option></select></label>
       <label>Axis<select class="v1-select" formControlName="axis"><option value="left">Left</option><option value="right">Right</option></select></label>
       <label>Line pattern<select class="v1-select" formControlName="lineStyle"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></label>
       <label class="chart-settings-checkbox"><input type="checkbox" formControlName="customColor">Custom color</label>

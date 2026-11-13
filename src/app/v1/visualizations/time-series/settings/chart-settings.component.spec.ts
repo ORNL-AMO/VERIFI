@@ -1,6 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { visualizationEvidenceFixture } from '@domain/visualizations/testing/visualization-provider-fixtures';
@@ -55,7 +53,52 @@ describe('saved chart settings', () => {
   it('retains live selection and untouched settings when switching chart type', () => {
     const { fixture, context, changed } = setup();
     fixture.componentInstance.chartForm.controls.type.setValue('bar');
-    expect(changed.mock.calls[0][0]).toEqual({ ...context.definition, chart: { kind: 'time-series', type: 'bar', interval: 'monthly', stack: 'none' } });
+    expect(changed.mock.calls[0][0]).toEqual({ ...context.definition, chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } });
+  });
+  it('edits a member trace type through a current-owner override and retains rapid sibling edits', () => {
+    const state = groupedSetup();
+    const electricity = state.fixture.componentInstance.rows().find(row => row.key === 'utility:source:Electricity')!;
+    const gas = state.fixture.componentInstance.rows().find(row => row.key === 'utility:source:Natural Gas')!;
+    electricity.form.controls.traceType.setValue('bar'); gas.form.controls.label.setValue('Delivered gas');
+    const saved = state.acknowledge();
+    expect(saved.series[0].overrides).toContainEqual(expect.objectContaining({ seriesId: electricity.key, accountGuid: 'account-a', traceType: 'bar' }));
+    expect(saved.series[0].overrides).toContainEqual(expect.objectContaining({ seriesId: gas.key, label: 'Delivered gas' }));
+    expect(electricity.form.controls.traceType.value).toBe('bar'); expect(gas.form.controls.traceType.value).toBe('line');
+    const type = state.fixture.nativeElement.querySelector('select[formcontrolname="traceType"]') as HTMLSelectElement;
+    expect(type.classList.contains('v1-select')).toBe(true); expect(type.value).toBe('bar');
+  });
+  it('stores an exact item trace type on its declaration without creating an override', () => {
+    const { fixture, context, changed } = setup();
+    const definition: VisualizationDefinition = { ...context.definition, series: [{ ...context.definition.series[0], resourceGuid: 'meter-a' }] };
+    fixture.componentRef.setInput('context', { ...context, definition }); fixture.detectChanges();
+    fixture.componentInstance.rows()[0].form.controls.traceType.setValue('bar');
+    expect(changed.mock.lastCall![0].series[0]).toMatchObject({ resourceGuid: 'meter-a', traceType: 'bar' });
+    expect(changed.mock.lastCall![0].series[0].overrides).toBeUndefined();
+  });
+  it('reapplies the existing default globally, clearing dormant local type exceptions while preserving style and foreign overrides', () => {
+    const foreign: VisualizationSeriesOverride = { seriesId: 'utility:source:Foreign', accountGuid: 'foreign-account', traceType: 'bar', color: '#123456' };
+    const state = groupedSetup([{ seriesId: 'utility:source:Electricity', traceType: 'bar', label: 'Electricity supply', order: 0 },
+      { seriesId: 'utility:source:Dormant', traceType: 'bar', visible: false, color: '#abcdef' }, foreign]);
+    state.hydrate({ ...state.context().definition, series: state.context().definition.series.map(series => ({ ...series, traceType: 'bar' })) });
+    const button = [...(state.fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button')]
+      .find(item => item.textContent?.trim() === 'Apply type to all items')!;
+    expect(state.fixture.componentInstance.chartForm.controls.type.value).toBe('line'); button.click();
+    const saved = state.acknowledge();
+    expect(saved.chart).toMatchObject({ defaultTraceType: 'line' }); expect(saved.series[0].traceType).toBeUndefined();
+    expect(saved.series[0].overrides).toEqual([
+      { seriesId: 'utility:source:Electricity', label: 'Electricity supply', order: 0 },
+      { seriesId: 'utility:source:Dormant', visible: false, color: '#abcdef' }, foreign
+    ]);
+    expect(state.fixture.componentInstance.rows().every(row => row.form.controls.traceType.value === 'line')).toBe(true);
+  });
+  it('preserves item type exceptions when only the interval changes', () => {
+    const state = groupedSetup([{ seriesId: 'utility:source:Electricity', traceType: 'bar' },
+      { seriesId: 'utility:source:Dormant', traceType: 'bar', label: 'Dormant' }]);
+    const before = state.context().definition;
+    state.fixture.componentInstance.chartForm.controls.interval.setValue('yearly');
+    const saved = state.acknowledge();
+    expect(saved.chart).toEqual({ ...before.chart, interval: 'yearly' }); expect(saved.series).toEqual(before.series);
+    expect(state.fixture.componentInstance.rows()[0].form.controls.traceType.value).toBe('bar');
   });
   it('disables saved changes in a read-only workspace and retains controls across acknowledgement', () => {
     const { fixture, context, changed } = setup();

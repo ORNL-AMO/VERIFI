@@ -58,7 +58,7 @@ export function createRecipeDefinition(snapshot: AccountWorkspaceSnapshot, recip
   const available = recipeResourceChoices(snapshot, scope, recipe, selection.grouping), selected = [...new Set(selection.ids)];
   if (!selected.length || selected.some(id => !available.some(choice => choice.value === id))) throw new Error('Choose available resources for this recipe.');
   const definition = createVisualizationSetupDefinition({ name, accountGuid: snapshot.account.guid, facilitySelection,
-    chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' }, sourceKinds: ['utility'] });
+    chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' }, sourceKinds: ['utility'] });
   const source: UtilityVisualizationSource = { id: 'source-1', kind: 'utility', selectionMode: selection.grouping === 'sources' ? 'source' : selection.grouping === 'groups' ? 'group' : 'meter', measure: recipe === 'energy-trend' ? 'energy' : 'cost',
     selection: selection.grouping === 'sources' ? { kind: 'rule', resource: 'meter', filter: { utilitySources: selected } }
       : { kind: 'fixed', resource: selection.grouping === 'groups' ? 'meter-group' : 'meter', guids: selected },

@@ -62,7 +62,7 @@ export function captureInventoryUtility(input: InventoryUtilityCaptureInput): Vi
   const definition: VisualizationDefinition = { ...createVisualizationDefinition(`${input.contextLabel} · ${chart.title} trend`, snapshot.account.guid, facilitySelection, 'utility'),
     sources: [source], period: { kind: 'all-history' }, comparison: { kind: 'none' },
     series: [{ id: 'inventory-series', sourceId: source.id, metric: utilityMeasureKey(source), axis: 'left', overrides }],
-    chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' }, appearance: { legend: false, title: `${chart.title} monthly data` } };
+    chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' }, appearance: { legend: false, title: `${chart.title} monthly data` } };
   const request: VisualizationSourceRequest = { identity: { accountGuid: snapshot.account.guid, scope, workspaceRevision: input.workspaceRevision,
     definitionGuid: 'inventory-capture', definitionRevision: 1, requestId: 'inventory-capture', sourceId: source.id }, source, chart: definition.chart!, period: definition.period,
     comparison: definition.comparison, series: definition.series, dateContext: { calendarDate: input.calendarDate } };

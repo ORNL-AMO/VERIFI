@@ -1,13 +1,15 @@
-import type { VisualizationChart } from '@domain/visualizations/visualization-definition';
+import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { configuredChartSummary } from './utility/utility-items';
+import type { VisualizationChart, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 
-export type VisualizationChartChoiceId = 'line' | 'bar' | 'area' | 'combination' | 'scatter' | 'correlation'
+export type VisualizationChartChoiceId = 'line' | 'bar' | 'area' | 'scatter' | 'correlation'
   | 'heatmap' | 'breakdown-bar' | 'donut' | 'treemap' | 'sankey';
 
 /** Pure catalog: selecting setup intent never requires a provider or a calculation. */
 export const VISUALIZATION_CHART_CHOICES: readonly { readonly value: VisualizationChartChoiceId; readonly label: string; readonly icon: IconName }[] = [
   { value: 'line', label: 'Line', icon: 'chartTimeSeries' }, { value: 'bar', label: 'Bar', icon: 'chartBar' },
-  { value: 'area', label: 'Area', icon: 'chartTimeSeries' }, { value: 'combination', label: 'Combination', icon: 'chartTimeSeries' },
+  { value: 'area', label: 'Area', icon: 'chartTimeSeries' },
   { value: 'scatter', label: 'Scatter', icon: 'chartScatter' }, { value: 'correlation', label: 'Correlation', icon: 'covariate' },
   { value: 'heatmap', label: 'Heatmap', icon: 'heatmap' }, { value: 'breakdown-bar', label: 'Breakdown bar', icon: 'chartBar' },
   { value: 'donut', label: 'Donut', icon: 'chartDonut' }, { value: 'treemap', label: 'Treemap', icon: 'treemap' },
@@ -16,8 +18,8 @@ export const VISUALIZATION_CHART_CHOICES: readonly { readonly value: Visualizati
 
 export function createVisualizationChart(choice: VisualizationChartChoiceId): VisualizationChart {
   switch (choice) {
-    case 'line': case 'bar': case 'area': case 'combination':
-      return { kind: 'time-series', type: choice, interval: 'native', stack: 'none' };
+    case 'line': case 'bar': case 'area':
+      return { kind: 'time-series', defaultTraceType: choice, interval: 'monthly', stack: 'none' };
     case 'scatter': return { kind: 'scatter', showFit: false };
     case 'correlation': return { kind: 'correlation', statistic: 'r', scale: 'raw' };
     case 'heatmap': return { kind: 'heatmap', dimension: 'month-year', scale: 'linear' };
@@ -38,7 +40,12 @@ export function visualizationChartIcon(chart: VisualizationChart | undefined): I
 
 function visualizationChartChoice(chart: VisualizationChart | undefined) {
   if (!chart) return undefined;
-  const choice = chart.kind === 'time-series' ? chart.type
+  const choice = chart.kind === 'time-series' ? chart.defaultTraceType
     : chart.kind === 'breakdown' ? chart.type === 'bar' ? 'breakdown-bar' : 'donut' : chart.kind;
   return VISUALIZATION_CHART_CHOICES.find(item => item.value === choice);
+}
+
+/** Catalog-only summary: no data provider or calculation is requested. */
+export function visualizationDefinitionChartLabel(definition: VisualizationDefinition | undefined, snapshot: AccountWorkspaceSnapshot): string {
+  return definition ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : 'Chart not selected';
 }
