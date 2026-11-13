@@ -79,7 +79,7 @@ describe('visualization workbench', () => {
     ];
     store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
       meters: [meter({ guid: 'meter-a', facilityId: 'facility-b' })],
-      savedVisualizations: [{ ...snapshot.savedVisualizations[0], preservation: { references, transfers: [] } }] }); fixture.detectChanges();
+      savedVisualizations: [{ ...snapshot.savedVisualizations[0], revision: snapshot.savedVisualizations[0].revision + 1, preservation: { references, transfers: [] } }] }); fixture.detectChanges();
     await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] }); fixture.detectChanges();
     expect(component.facilityChange()).toBeUndefined();
     expect(submit).toHaveBeenCalledWith(expect.objectContaining({ kind: 'retarget', reviewedDefinition: expect.objectContaining({
