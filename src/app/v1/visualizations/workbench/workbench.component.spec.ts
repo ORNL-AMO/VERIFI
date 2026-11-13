@@ -72,6 +72,22 @@ describe('visualization workbench', () => {
     expect(component.facilityChange()).toBeUndefined();
   });
 
+  it('passes imported preservation through the facility review before any destructive projection', async () => {
+    const definition = utilityVisualizationFixture(), { fixture, component, store, submit } = setup(definition);
+    const snapshot = store.snapshot()!, references = [
+      { path: 'sources.0.selection.guids.0', kind: 'meter' as const, guid: 'meter-a', reason: 'not-transferred' as const }
+    ];
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
+      meters: [meter({ guid: 'meter-a', facilityId: 'facility-b' })],
+      savedVisualizations: [{ ...snapshot.savedVisualizations[0], preservation: { references, transfers: [] } }] }); fixture.detectChanges();
+    await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] }); fixture.detectChanges();
+    expect(component.facilityChange()).toBeUndefined();
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ kind: 'retarget', reviewedDefinition: expect.objectContaining({
+      sources: definition.sources, series: definition.series
+    }) }));
+    expect(component.editor.record()!.preservation!.references).toEqual(references);
+  });
+
   it.each(['failed', 'refresh-required'] as const)('cancels only rejected facility proposals, retaining %s publication protection', async state => {
     const { fixture, component, store, submit } = setup(utilityVisualizationFixture());
     const snapshot = store.snapshot()!;
@@ -187,7 +203,7 @@ describe('visualization workbench', () => {
     const submit = vi.fn(async (command: any) => ({ state: 'committed', value: command.kind === 'create'
       ? { ...getNewIdbSavedVisualization(command.definition), guid: command.guid }
       : { ...store.savedVisualizations()[0], definition: command.kind === 'retarget'
-        ? prepareVisualizationFacilityChange(store.savedVisualizations()[0].definition as VisualizationDefinition, command.targetFacilities, store.snapshot()!).definition
+        ? prepareVisualizationFacilityChange(store.savedVisualizations()[0].definition as VisualizationDefinition, command.targetFacilities, store.snapshot()!, store.savedVisualizations()[0].preservation?.references).definition
         : command.definition, revision: command.expectedRevision + 1 }, command, referenceIssues: [] }));
     TestBed.configureTestingModule({ imports: [WorkbenchModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: store }, { provide: WorkspaceNavigationService, useValue: { routeState: route } },

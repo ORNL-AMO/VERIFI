@@ -167,7 +167,7 @@ export class WorkbenchComponent {
     if (!await this.editor.flush()) { this.facilityError.set('Save or resolve the current changes before reviewing facilities.'); return; }
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     if (ownerKey !== this.editor.key() || !definition || !snapshot || !this.editor.canRetarget()) return;
-    const review = prepareVisualizationFacilityChange(definition, selection, snapshot);
+    const review = prepareVisualizationFacilityChange(definition, selection, snapshot, this.editor.record()?.preservation?.references);
     if (!review.cleared.length) { await this.editor.retarget(selection, review.definition); return; }
     this.facilityChange.set({ selection, ...review, key: this.editor.key(), revision: this.editor.localRevision(), snapshot });
     this.facilityPortal = new TemplatePortal(this.facilityDialog, this.container);
