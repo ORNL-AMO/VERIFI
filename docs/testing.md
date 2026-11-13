@@ -54,6 +54,23 @@ Manual QA complements automated coverage. It must not be used to repeatedly rech
 | Behavior-preserving refactor | Run the affected suite. Add characterization coverage only for a high-risk contract that lacks useful protection. Avoid tests coupled to the old implementation. |
 | Documentation, comment, or styling-only change | No unit test by default. Validate links and commands, build affected assets, or perform a focused visual/accessibility check as appropriate. |
 
+### Runtime checks and handoff gates
+
+Use these gates after focused behavior checks. The validation workflow explains execution and failure classification; feature references identify risks rather than overriding this policy.
+
+| Surface | Required check |
+| --- | --- |
+| App TypeScript changes | `npx tsc -p tsconfig.app.json --noEmit` |
+| Production Angular routing, modules, templates, entrypoints, or environment/build configuration | `npm run build-prod` |
+| Styling only | Focused style-compiling specs when available and visual/accessibility inspection; no production build by habit |
+| Native IndexedDB, Worker, File API, or browser integration | `npm run test:browser:ci` in addition to focused fast coverage |
+| Explicit pre-PR or release checkpoint | `npm run test:all:ci`, plus production builds selected by the changed runtime boundaries |
+| Electron preload/IPC, filesystem, dialogs, shell, updater, Electron configuration, or explicit desktop release | `npm run build-prod-electron` and a focused desktop check for affected OS integration |
+| Documentation or comments | Local links/headings, commands, and relevant workflow evidence; no unrelated app suites/builds |
+| Documentation checker or other executable tooling | Its focused executable tests plus its real repository check |
+
+For agent documentation, run `npm run docs:check`. It validates local Markdown destinations/headings, excludes fenced examples and external URLs, enforces shared-entry word limits, and reports sizes. Run `node --test .github/scripts/check-agent-docs.test.cjs` when that checker changes. Link checks do not establish source correctness, external issue state, or executable command validity; verify those separately. Keep completed delivery evidence in PRs rather than current references.
+
 ## Designing valuable tests
 
 ### Assert behavior and contracts
@@ -108,6 +125,7 @@ Representative executable patterns already exist for a [pure calculation](../src
 | `npm run test:browser:ci` | Browser suite once in headless Chromium |
 | `npm run test:all:ci` | Required fast and browser gate |
 | `npm run test:coverage` | Informational scoped coverage in headless Chromium |
+| `npm run docs:check` | Local documentation links, headings, word limits, and size report |
 | `npm run validate:agent -- --mode plan` | Advisory validation plan selected from changed files |
 | `npm run validate:agent -- --mode run` | Execute the advisory command plan and stop on first failure |
 

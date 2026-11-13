@@ -156,3 +156,9 @@ When a production pattern becomes broadly reused, consider extracting it into `s
 For this documentation baseline, validate links and paths in the same change. TypeScript or build checks are not required unless the documentation adds source examples that need compilation.
 
 For the first production v1 shell that applies this foundation, add focused tests for theme class application, context indicators, support panel state, drawer open and close behavior, and confirmation modal behavior. Manual review should include light and dark themes, keyboard focus, contrast, drawer sizing, mobile and Electron window behavior, long labels, and visible error and status states.
+
+## Shared result controls
+
+Result-table pagination uses the shared one-based pager; each table owns page size/filtering/sorting/reset/clamp state and input updates never emit navigation. The pager renders nonrotating batches of five numbers, announces its page, remains usable read-only, and hides for zero/one page and print. Inventory and v0 pagination retain their own behavior.
+
+Typed custom SVG icons extend the shared icon registry through its existing README; icon definitions/presentation choices do not enter saved domain records. Report identity icons already have an owner in Reports architecture.
