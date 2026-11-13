@@ -35,7 +35,11 @@ export function recipeResourceChoices(snapshot: AccountWorkspaceSnapshot, scope:
   if (grouping === 'sources') return [...new Set(meters.map(meter => meter.source))].sort().map(source => ({
     value: source, label: source, detail: '', icon: meterSourceIcon(source)
   }));
-  const facilityName = (guid: string) => scope.kind === 'portfolio' ? snapshot.facilities.find(facility => facility.guid === guid)?.name ?? 'Unavailable facility' : '';
+  const facilityName = (guid: string) => {
+    if (scope.kind !== 'portfolio') return '';
+    const facility = snapshot.facilities.find(facility => facility.guid === guid);
+    return facility ? facility.name || 'Unnamed facility' : 'Unavailable facility';
+  };
   if (grouping === 'groups') return snapshot.meterGroups.filter(group => group.accountId === snapshot.account.guid
     && (scope.kind === 'portfolio' || group.facilityId === scope.facilityGuid)
     && meters.some(meter => meter.groupId === group.guid && meter.facilityId === group.facilityId))

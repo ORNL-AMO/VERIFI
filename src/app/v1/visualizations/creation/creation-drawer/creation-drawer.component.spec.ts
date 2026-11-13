@@ -13,9 +13,12 @@ describe('visualization creation drawer', () => {
   it.each(['energy-trend', 'cost-trend'] as const)('distinguishes same-named portfolio meters by facility when binding %s', async recipe => {
     const { commands, workspace } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
     const snapshot = workspace.snapshot()!;
-    workspace.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b', name: 'Facility B' }],
-      meters: [meter({ name: 'Main' }), meter({ guid: 'meter-b', facilityId: 'facility-b', name: 'Main', noLongerInUse: true })],
-      meterData: [reading({}), reading({ guid: 'bill-b', meterId: 'meter-b', facilityId: 'facility-b' })] });
+    workspace.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b', name: 'Facility B' },
+        { ...snapshot.facilities[0], guid: 'facility-c', name: '' }],
+      meters: [meter({ name: 'Main' }), meter({ guid: 'meter-b', facilityId: 'facility-b', name: 'Main', noLongerInUse: true }),
+        meter({ guid: 'meter-c', facilityId: 'facility-c', name: 'Main' })],
+      meterData: [reading({}), reading({ guid: 'bill-b', meterId: 'meter-b', facilityId: 'facility-b' }),
+        reading({ guid: 'bill-c', meterId: 'meter-c', facilityId: 'facility-c' })] });
     const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
     try {
       lifecycle.openCreate(); lifecycle.selectScope('portfolio'); lifecycle.selectRecipe(recipe);
@@ -23,9 +26,9 @@ describe('visualization creation drawer', () => {
       fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
       const root = fixture.nativeElement as HTMLElement;
       const cards = [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Trend resources"] button')];
-      expect(cards.map(card => card.querySelector('strong')?.textContent)).toEqual(['Main', 'Main']);
+      expect(cards.map(card => card.querySelector('strong')?.textContent)).toEqual(['Main', 'Main', 'Main']);
       expect(cards.map(card => card.querySelector('.creation-choice__description')?.textContent)).toEqual([
-        'Electricity · Facility A', 'Electricity · Facility B · Retired'
+        'Electricity · Facility A', 'Electricity · Facility B · Retired', 'Electricity · Unnamed facility'
       ]);
       cards[1].click(); fixture.detectChanges();
       expect(lifecycle.form.controls.recipeResourceIds.value).toEqual(['meter-b']);
