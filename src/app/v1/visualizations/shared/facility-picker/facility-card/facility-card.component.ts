@@ -16,6 +16,7 @@ export class FacilityCardComponent implements OnChanges {
   readonly disabled = input(false);
   readonly busy = input(false);
   readonly uncheckLocked = input(false);
+  readonly showOnly = input(false);
   readonly interactionKey = input<unknown>();
   readonly selectionRequested = output<boolean>();
   readonly onlyRequested = output<void>();
@@ -56,6 +57,10 @@ export class FacilityCardComponent implements OnChanges {
     if (this.busy()) return;
     this.cancelPointer();
     if (!this.disabled()) { this.focusCard(); this.onlyRequested.emit(); }
+  }
+  requestOnly(): void {
+    this.cancelPointer();
+    if (this.showOnly() && !this.disabled() && !this.busy()) this.onlyRequested.emit();
   }
   private focusCard(): void {
     const checkbox = this.checkbox?.nativeElement;

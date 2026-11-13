@@ -3,7 +3,7 @@
   <div class="facility-picker__rows" role="group" aria-label="Facilities">
     <app-visualization-facility-card class="facility-picker__all" label="All Facilities" description="Includes future facilities" icon="account" [selected]="all()" [disabled]="disabled() || !facilities().length" [busy]="busy()" [uncheckLocked]="all()" [interactionKey]="interactionKey()" (selectionRequested)="selectAll()" (onlyRequested)="selectAll()"/>
     @for (facility of rows(); track facility.guid) {
-      <app-visualization-facility-card [label]="facility.name" [icon]="facility.missing ? 'warning' : 'facility'" [selected]="facility.selected" [disabled]="disabled()" [busy]="busy()" [uncheckLocked]="facility.final" [interactionKey]="interactionKey()" (selectionRequested)="toggle(facility.guid)" (onlyRequested)="selectOnly(facility.guid)"/>
+      <app-visualization-facility-card [label]="facility.name" [showOnly]="!facility.missing" [icon]="facility.missing ? 'warning' : 'facility'" [selected]="facility.selected" [disabled]="disabled()" [busy]="busy()" [uncheckLocked]="facility.final" [interactionKey]="interactionKey()" (selectionRequested)="toggle(facility.guid)" (onlyRequested)="selectOnly(facility.guid)"/>
     } @empty { <p role="status">{{ facilities().length || selectedCount() ? 'No matching facilities.' : 'No facilities available. Add a facility to continue.' }}</p> }
   </div>
   <p class="facility-picker__count" role="status">{{ selectedCount() }} selected</p>

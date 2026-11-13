@@ -25,6 +25,16 @@ describe('visualization facility cards', () => {
     expect(root.querySelector<HTMLInputElement>('[aria-label="Roasting"]')!.checked).toBe(false);
     expect(root.querySelector<HTMLInputElement>('[aria-label="Peanuts"]')!.disabled).toBe(true);
   });
+  it('offers Only for current owned rows, excludes All and unavailable rows, and avoids equivalent proposals', () => {
+    const { fixture, component, requested, root } = setup({ kind: 'fixed', facilityGuids: ['a', 'missing'] });
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('button')];
+    expect(buttons.map(button => button.getAttribute('aria-label'))).toEqual(['Select only Roasting', 'Select only Peanuts']);
+    buttons[0].click(); expect(requested).toHaveBeenCalledExactlyOnceWith({ kind: 'fixed', facilityGuids: ['a'] });
+    fixture.componentRef.setInput('selection', requested.mock.calls[0][0]); fixture.detectChanges(); requested.mockClear();
+    buttons[0].click(); component.toggle('a'); expect(requested).not.toHaveBeenCalled();
+    expect(root.querySelector<HTMLInputElement>('[aria-label="Roasting"]')!.disabled).toBe(true);
+    fixture.destroy();
+  });
   it('promotes checking every row to live All and follows future catalog entries without emitting', () => {
     const { component, fixture, requested } = setup({ kind: 'fixed', facilityGuids: ['a'] });
     component.toggle('b'); expect(requested).toHaveBeenCalledExactlyOnceWith({ kind: 'all' });
