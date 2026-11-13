@@ -1,13 +1,12 @@
-import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
+import { readSavedVisualization, savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { VisualizationDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { visualizationReferences } from '@domain/visualizations/visualization-references';
 import { InventoryTile } from '@app/v1/shared/inventory/inventory.models';
-import { visualizationChartIcon, visualizationChartLabel } from '../visualization-charts';
+import { visualizationChartIcon, visualizationDefinitionChartLabel } from '../visualization-charts';
 import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 
 export { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
@@ -64,7 +63,7 @@ export function buildVisualizationLibrary(snapshot: AccountWorkspaceSnapshot): V
     const issues = [...read.issues.map(issue => issue.message), ...references.map(reference => `${reference.kind} ${reference.guid}: ${reference.reason}`)];
     const labels = definition && supported ? visualizationReferences(definition).filter(reference => !reference.optional).map(reference => sourceRecords.find(item => item.guid === reference.guid)?.name || reference.guid) : [];
     const periodLabel = definition ? visualizationPeriodLabel(definition) : 'Period unavailable';
-    const chartLabel = visualizationChartLabel(definition?.chart);
+    const chartLabel = visualizationDefinitionChartLabel(definition, snapshot);
     const modified = new Date(record.modifiedDate).getTime();
     return { record, definition, name, scope: facilityGuid ? 'facility' as const : 'portfolio' as const,
       facilityGuid, ownerName, sourceKinds, dataSourceLabel, status, statusLabel: STATUS_LABELS[status], periodLabel, chartLabel,
@@ -97,7 +96,9 @@ export function filterVisualizationLibrary(entries: readonly VisualizationLibrar
     });
 }
 export function visualizationLibraryTile(entry: VisualizationLibraryEntry, route: readonly string[], dashboardRoute: readonly string[]): InventoryTile {
-  return { guid: entry.record.guid, name: entry.name, icon: visualizationChartIcon(entry.definition?.chart), route,
+  const icon = entry.definition?.chart?.kind === 'time-series' ? entry.chartLabel === 'Bar' ? 'chartBar' : 'chartTimeSeries'
+    : visualizationChartIcon(entry.definition?.chart);
+  return { guid: entry.record.guid, name: entry.name, icon, route,
     owner: entry.facilityGuid ? { facilityGuid: entry.facilityGuid, label: entry.ownerName, route: dashboardRoute, queryParams: { facility: entry.facilityGuid } } : undefined,
     status: { tone: entry.status === 'repair-required' ? 'danger' : entry.status === 'configured' ? 'success' : 'warning',
       icon: entry.status === 'configured' ? 'success' : 'warning', label: entry.status === 'configured' ? 'Setup valid' : entry.statusLabel },

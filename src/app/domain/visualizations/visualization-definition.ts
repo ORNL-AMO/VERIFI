@@ -10,6 +10,7 @@ export type VisualizationScope =
   | { readonly kind: 'portfolio'; readonly facilityGuids: readonly string[] }
   | { readonly kind: 'facility'; readonly facilityGuid: string; readonly facilityGuids: readonly string[] };
 
+export type VisualizationTraceType = 'line' | 'bar' | 'area';
 export type UtilitySelectionMode = 'source' | 'group' | 'meter' | 'facility' | 'rule';
 
 export type SettingBinding<T> = { readonly kind: 'owner' } | { readonly kind: 'pinned'; readonly value: T };
@@ -111,6 +112,7 @@ export type VisualizationSeriesOverride = (
   readonly accountGuid?: string;
   readonly label?: string;
   readonly color?: string;
+  readonly traceType?: VisualizationTraceType;
   readonly axis?: 'left' | 'right';
   readonly lineStyle?: 'solid' | 'dashed' | 'dotted';
   readonly visible?: boolean;
@@ -125,6 +127,7 @@ export interface VisualizationSeries {
   readonly resourceGuid?: string;
   readonly label?: string;
   readonly color?: string;
+  readonly traceType?: VisualizationTraceType;
   readonly axis: 'left' | 'right';
   readonly lineStyle?: 'solid' | 'dashed' | 'dotted';
   readonly visible?: boolean;
@@ -133,8 +136,8 @@ export interface VisualizationSeries {
 }
 
 export type VisualizationChart =
-  | { readonly kind: 'time-series'; readonly type: 'line' | 'bar' | 'area' | 'combination'; readonly interval: 'monthly' | 'yearly' | 'native';
-      readonly stack: 'none' | 'absolute' | 'percent'; readonly seriesTypes?: readonly { readonly seriesId: string; readonly type: 'line' | 'bar' | 'area' }[] }
+  | { readonly kind: 'time-series'; readonly defaultTraceType: VisualizationTraceType; readonly interval: 'monthly' | 'yearly' | 'native';
+      readonly stack: 'none' | 'absolute' | 'percent' }
   | { readonly kind: 'scatter'; readonly xSeriesId?: string; readonly ySeriesId?: string; readonly showFit: boolean }
   | { readonly kind: 'correlation'; readonly statistic: 'r' | 'r-squared'; readonly scale: 'raw' | 'z-score' }
   | { readonly kind: 'heatmap'; readonly dimension: 'month-year' | 'series-period'; readonly scale: 'linear' | 'diverging' }

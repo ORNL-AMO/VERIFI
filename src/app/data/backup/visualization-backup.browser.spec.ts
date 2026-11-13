@@ -25,7 +25,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
     const { resourceGuid: _resource, ...series } = base.series[0];
     const definition = { ...base, series: [{ ...series, overrides: [
-      { seriesId: 'utility:meter-a', visible: false, color: '#123456', lineStyle: 'dotted' as const, order: 0 }
+      { seriesId: 'utility:meter-a', visible: false, traceType: 'bar' as const, color: '#123456', lineStyle: 'dotted' as const, order: 0 }
     ] }] };
     const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)] };
     const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account'
@@ -42,8 +42,36 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(decoded.state).toBe('valid');
     if (!('definition' in decoded)) throw new Error('Expected current restored intent.');
     expect(decoded.definition.series[0].overrides).toEqual([{ seriesId: `utility:${restored.meters[0].guid}`,
-      visible: false, color: '#123456', lineStyle: 'dotted', order: 0, accountGuid }]);
+      visible: false, traceType: 'bar', color: '#123456', lineStyle: 'dotted', order: 0, accountGuid }]);
     expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(decoded.definition);
+  });
+
+  it.each(['Account', 'Facility'] as const)('round trips an exact item order override in a %s backup', async kind => {
+    const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    const definition = { ...base, series: [{ ...base.series[0], traceType: 'bar' as const, overrides: [
+      { accountGuid: base.accountGuid, resourceGuid: 'meter-a', order: 2 }
+    ] }] };
+    const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)] };
+    const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account'
+      ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    const service = createService();
+    let accountGuid: string;
+    if (kind === 'Account') accountGuid = (await service.importAccountBackupFile(backup, 0)).guid;
+    else {
+      await harness.seed({ accounts: [{ guid: 'destination', name: 'Destination' }] });
+      accountGuid = 'destination'; await service.importFacilityBackupFile(backup, accountGuid, 0);
+    }
+    await harness.reopen();
+    const restored = await readSnapshot(accountGuid), decoded = readSavedVisualization(restored.savedVisualizations[0]);
+    expect(decoded.state).toBe('valid');
+    if (!('definition' in decoded)) throw new Error('Expected readable restored ordered item.');
+    expect(decoded.definition.series[0].overrides).toEqual([
+      { accountGuid, resourceGuid: decoded.definition.series[0].resourceGuid, order: 2 }
+    ]);
+    expect(decoded.definition.series[0].traceType).toBe('bar');
+    expect(decoded.definition.series[0].resourceGuid).toBe(restored.meters[0].guid);
+    const reexported = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored))));
+    expect(reexported.savedVisualizations[0].definition).toEqual(decoded.definition);
   });
 
   it.each(['Account', 'Facility'] as const)('round trips incomplete mixed-family Scatter intent in a %s backup without fabricating bindings', async kind => {

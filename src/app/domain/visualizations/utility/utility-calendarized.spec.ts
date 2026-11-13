@@ -27,7 +27,7 @@ describe('calendarized utility projections', () => {
       meters: [meter({ meterReadingDataApplication: 'fullMonth' })], meterData: [reading({})], ...overrides };
     const request: VisualizationSourceRequest = { identity: { accountGuid: snapshot.account.guid, workspaceRevision: 1, definitionGuid: 'visualization-a', definitionRevision: 1,
       requestId: 'monthly-a', scope: resolveVisualizationFacilities(definition, snapshot.facilities).scope, sourceId: source.id }, source,
-      chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' }, period: { kind: 'all-history' }, comparison: { kind: 'none' },
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' }, period: { kind: 'all-history' }, comparison: { kind: 'none' },
       series: [{ id: 'shown', sourceId: source.id, metric: utilityMeasureKey(source), axis: 'left' }], dateContext: { calendarDate: '2026-11-12', latestDataDate: '2026-03-31' } };
     return { source, snapshot, request };
   }
@@ -169,7 +169,7 @@ describe('calendarized utility projections', () => {
   it('rolls up complete actual fiscal intervals and marks missing months partial', () => {
     const original = visualizationSnapshot();
     const { snapshot, request } = setup({}, { account: { ...original.account, energyUnit: 'kWh', fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: true } });
-    const actual = ready(resolveCalendarizedUtility(snapshot, { ...request, chart: { kind: 'time-series', type: 'bar', interval: 'yearly', stack: 'none' }, period: { kind: 'fiscal-year', year: 2026 } }, [project(snapshot)]));
+    const actual = ready(resolveCalendarizedUtility(snapshot, { ...request, chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'yearly', stack: 'none' }, period: { kind: 'fiscal-year', year: 2026 } }, [project(snapshot)]));
     expect(actual.rows).toHaveLength(1);
     expect(actual.rows[0]).toMatchObject({ periodKey: 'FY2026', start: '2025-07-01', end: '2026-06-30' });
     expect(actual.periods[0]).toMatchObject({ fiscalYear: 2026, basis: 'fiscal', interval: 'yearly' });
@@ -188,7 +188,7 @@ describe('calendarized utility projections', () => {
     const { snapshot, request } = setup({ measure }, { meters: [selectedMeter], meterData: [reading({ totalEnergyUse: 120, totalCost: 240 })] });
     const canonical = getCalanderizedMeterData([...snapshot.meters], structuredClone([...snapshot.meterData]), snapshot.account, false, { energyIsSource: false, neededUnits: 'kWh' },
       [...snapshot.customEmissions], [...snapshot.customFuels], [...snapshot.facilities], snapshot.account.assessmentReportVersion, [...snapshot.customGWPs]);
-    const actual = ready(resolveCalendarizedUtility(snapshot, { ...request, chart: { kind: 'time-series', type: 'line', interval: 'yearly', stack: 'none' } }, canonical));
+    const actual = ready(resolveCalendarizedUtility(snapshot, { ...request, chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'yearly', stack: 'none' } }, canonical));
     expect(Object.values(actual.rows[0].values)[0]).toMatchObject({ state: 'observed', value: measure === 'energy' ? 120 : 240, partial: false });
   });
   it.each(['energy', 'cost'] as const)('retains full multi-year backward %s history beyond the four help-illustration markers', measure => {
@@ -305,7 +305,7 @@ describe('calendarized utility projections', () => {
   it('requires an explicit matching fiscal basis for yearly comparisons rather than silently reinterpreting calendar years', () => {
     const original = visualizationSnapshot();
     const { snapshot, request } = setup({}, { account: { ...original.account, energyUnit: 'kWh', fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: true } });
-    expect(resolveCalendarizedUtility(snapshot, { ...request, chart: { kind: 'time-series', type: 'line', interval: 'yearly', stack: 'none' }, comparison: { kind: 'previous-year', basis: 'calendar' } }, [project(snapshot)]))
+    expect(resolveCalendarizedUtility(snapshot, { ...request, chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'yearly', stack: 'none' }, comparison: { kind: 'previous-year', basis: 'calendar' } }, [project(snapshot)]))
       .toMatchObject({ state: 'unsupported', message: expect.stringContaining('same calendar or fiscal basis') });
   });
 });
