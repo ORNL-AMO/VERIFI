@@ -19,6 +19,8 @@ import { RecoveryActionsComponent, VisualizationChildDraftGuard } from '../recov
 import { createVisualizationDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
+import { configuredChartSummary } from '../utility/utility-items';
+import type { ChartSettingsContext } from '../time-series/settings/chart-settings.component';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false,
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -62,7 +64,10 @@ export class WorkbenchComponent {
   readonly sourceSummary = computed(() => this.editor.definition()?.sources.map(source => ({ id: source.id,
     dataSourceLabel: VISUALIZATION_DATA_SOURCES.find(option => option.value === source.kind)!.label,
     measure: source.measure, setupUnavailable: !this.registry.editor(source.kind) })) ?? []);
-  readonly chartSummary = computed(() => visualizationChartLabel(this.editor.definition()?.chart));
+  readonly chartSummary = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    return definition && snapshot ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : visualizationChartLabel(definition?.chart);
+  });
   readonly previewIdentity = computed(() => ({ accountGuid: this.accountGuid(), workspaceRevision: this.workspace.revision(),
     definitionGuid: this.navigation.routeState().visualizationGuid ?? '', definitionRevision: this.editor.localRevision() }));
   readonly previewActive = computed(() => {
@@ -89,7 +94,21 @@ export class WorkbenchComponent {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? definition.sources.flatMap(source => source.kind === 'utility' ? discoverUtilitySeries(snapshot, resolveVisualizationFacilities(definition, snapshot.facilities).scope, source) : []) : [];
   });
-  readonly chartContext = computed(() => ({ ...this.editContext('chart'), resolvedSeries: this.discoveredSeries(), identity: this.editorKey() }));
+  readonly chartContext = computed<ChartSettingsContext>(() => {
+    const definition = this.editor.definition()!, key = this.editor.key(), identity = this.editorKey();
+    let expectedChart = definition?.chart, expectedSeries = definition?.series;
+    return { definition, disabled: !this.editor.canEdit(), resolvedSeries: this.discoveredSeries(), identity,
+      changed: next => {
+        const current = this.editor.definition();
+        if (!current || this.editor.key() !== key || this.editorKey() !== identity || !this.editor.canEdit()
+          || !visualizationIntentEqual(current.facilitySelection, definition.facilitySelection)
+          || !visualizationIntentEqual(current.sources, definition.sources)
+          || !visualizationIntentEqual(current.chart, expectedChart) || !visualizationIntentEqual(current.series, expectedSeries)) return;
+        const patched = { ...current, chart: next.chart, series: next.series };
+        if (!visualizationIntentEqual(patched, current)) this.editor.applyDefinition(patched);
+        expectedChart = this.editor.definition()!.chart; expectedSeries = this.editor.definition()!.series;
+      } };
+  });
   readonly periodSummary = computed(() => {
     const period = this.editor.definition()?.period;
     if (!period) return 'Unavailable';

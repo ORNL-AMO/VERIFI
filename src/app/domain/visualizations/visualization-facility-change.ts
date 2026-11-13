@@ -83,7 +83,7 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
     const kind = visualizationSeriesReference(source, guid, definition.facilitySelection).kind;
     return !!kind && excluded(kind, guid, source);
   };
-  const custom = (series: VisualizationSeries) => !!series.label || !!series.color || series.axis === 'right'
+  const custom = (series: VisualizationSeries) => !!series.label || !!series.color || series.traceType !== undefined || series.axis === 'right'
     || series.lineStyle !== undefined || series.visible === false || !!series.overrides?.length;
   const series = definition.series.flatMap((series, index) => {
     const source = definition.sources.find(source => source.id === series.sourceId);
@@ -109,9 +109,6 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
     return [{ ...base, ...(overrides?.length ? { overrides } : {}) }];
   });
   let chart = definition.chart;
-  if (chart?.kind === 'time-series' && chart.seriesTypes) {
-    chart = { ...chart, seriesTypes: chart.seriesTypes.filter(item => series.some(selected => selected.id === item.seriesId)) };
-  }
   if (chart?.kind === 'scatter') {
     const { xSeriesId, ySeriesId, ...base } = chart;
     chart = { ...base, ...(series.some(item => item.id === xSeriesId) ? { xSeriesId } : {}), ...(series.some(item => item.id === ySeriesId) ? { ySeriesId } : {}) };

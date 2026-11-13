@@ -157,7 +157,7 @@ describe('saved utility journey across native browser boundaries', () => {
     const series = [{ ...base.series[0], metric: 'location-emissions' }];
     const workerMessages = vi.spyOn(Worker.prototype, 'postMessage');
     const native = await createSaved({ ...base, sources: [{ ...emissions, dataMode: 'billing-period', aggregation: 'none' }], series,
-      chart: { kind: 'time-series', type: 'line', interval: 'native', stack: 'none' } });
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'native', stack: 'none' } });
     const nativePreview = mount(native); await expectValue(nativePreview, expected);
     expect(workerMessages).not.toHaveBeenCalled(); nativePreview.destroy();
     const monthly = await createSaved({ ...base, sources: [emissions], series });
@@ -182,7 +182,7 @@ describe('saved utility journey across native browser boundaries', () => {
     const beforeEdit = decoded(saved);
     const edited: VisualizationDefinition = { ...beforeEdit, appearance: { ...beforeEdit.appearance, title: 'Saved source energy' },
       sources: beforeEdit.sources.map(source => source.kind === 'utility' ? { ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } } : source),
-      chart: { kind: 'time-series', type: 'bar', interval: 'monthly', stack: 'none' } };
+      chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } };
     // Local presentation/unit edits reproject existing canonical results before any durable workspace reload.
     render(first, { ...saved, definition: edited });
     await expectValue(first, 0.01);

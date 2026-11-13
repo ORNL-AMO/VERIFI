@@ -19,6 +19,17 @@ function matchingDefinition() {
 }
 
 describe('effective visualization series', () => {
+  it('resolves item type before declared series type and the chart default, without using foreign exceptions', () => {
+    const base = matchingDefinition();
+    const definition: VisualizationDefinition = { ...base, chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' },
+      series: [{ ...base.series[0], traceType: 'line', overrides: [
+        { resourceGuid: 'meter-a', traceType: 'bar' }, { resourceGuid: 'meter-b', traceType: 'bar', accountGuid: 'foreign' }
+      ] }] };
+    expect(resolveVisualizationSeries(definition, resolved).map(item => item.selected.traceType)).toEqual(['bar', 'line', 'line']);
+    expect(resolveVisualizationSeries({ ...definition, series: [{ ...base.series[0], overrides: [] }] }, resolved).map(item => item.selected.traceType))
+      .toEqual(['bar', 'bar', 'bar']);
+  });
+
   it('applies exact-resource overrides before defaults and includes new live matches without changing intent', () => {
     const definition = matchingDefinition(), before = structuredClone(definition);
     const result = resolveVisualizationSeries(definition, resolved);
@@ -96,6 +107,27 @@ describe('effective visualization series', () => {
     const result = resolveVisualizationSeries({ ...definition, series: [...definition.series, exact] }, resolved);
     expect(result.filter(item => item.metadata.resourceGuid === 'meter-a')).toHaveLength(1);
     expect(result.find(item => item.metadata.resourceGuid === 'meter-a')?.selected.label).toBe('Explicit resource');
+  });
+
+  it('orders exact and matching-set items together within stable source groups', () => {
+    const base = utilityVisualizationFixture(), { resourceGuid: _resourceGuid, ...wildcard } = base.series[0];
+    const definition: VisualizationDefinition = { ...base, series: [
+      { ...base.series[0], id: 'exact-a', traceType: 'bar', label: 'Exact A', overrides: [
+        { accountGuid: base.accountGuid, resourceGuid: 'meter-a', order: 1 }
+      ] },
+      { ...wildcard, id: 'matching', traceType: 'line', overrides: [
+        { accountGuid: base.accountGuid, resourceGuid: 'meter-b', order: 0 },
+        { accountGuid: base.accountGuid, resourceGuid: 'meter-c', order: 2 }
+      ] },
+      { ...wildcard, id: 'other-source', sourceId: 'other', overrides: [{ resourceGuid: 'other-meter', order: 0 }] }
+    ] };
+    const metadata = ['meter-a', 'meter-b', 'meter-c', 'other-meter'].map(resourceGuid => ({ ...resolved[0],
+      id: `utility:energy:${resourceGuid}`, resourceGuid, sourceId: resourceGuid === 'other-meter' ? 'other' : 'utility' }));
+    const result = resolveVisualizationSeries(definition, metadata);
+    expect(result.map(item => item.metadata.resourceGuid)).toEqual(['meter-b', 'meter-a', 'meter-c', 'other-meter']);
+    expect(result.map(item => item.selected.traceType)).toEqual(['line', 'bar', 'line', 'line']);
+    expect(result[1].selected.label).toBe('Exact A');
+    expect(result.every(item => !Object.hasOwn(item, 'order') && !Object.hasOwn(item.selected, 'order'))).toBe(true);
   });
 });
 

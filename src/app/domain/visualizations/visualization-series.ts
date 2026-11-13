@@ -11,11 +11,12 @@ export interface EffectiveVisualizationSeries {
  * take precedence over a wildcard; owner-qualified overrides supply presentation only.
  */
 export function resolveVisualizationSeries(
-  definition: Pick<VisualizationDefinition, 'accountGuid' | 'series'>,
+  definition: Pick<VisualizationDefinition, 'accountGuid' | 'series'> & Partial<Pick<VisualizationDefinition, 'chart'>>,
   resolved: readonly ResolvedVisualizationSeries[],
   includeHidden = false
 ): readonly EffectiveVisualizationSeries[] {
-  return definition.series.flatMap(selected => {
+  const sourceOrder = [...new Set(definition.series.map(selected => selected.sourceId))];
+  const expanded = definition.series.flatMap(selected => {
     const matches = resolved.filter(candidate => candidate.sourceId === selected.sourceId && candidate.metric === selected.metric
       && (selected.resourceGuid === undefined || selected.resourceGuid === candidate.resourceGuid)
       && (selected.resourceGuid !== undefined || !definition.series.some(exact => exact.sourceId === candidate.sourceId
@@ -26,19 +27,22 @@ export function resolveVisualizationSeries(
       const resource = overrides.find(override => override.resourceGuid !== undefined && override.resourceGuid === metadata.resourceGuid);
       return resource ?? overrides.find(override => override.seriesId !== undefined && override.seriesId === metadata.id);
     };
-    const ordered = [...matches].sort((left, right) => {
-      const leftOrder = matchingOverride(left)?.order, rightOrder = matchingOverride(right)?.order;
-      if (leftOrder === rightOrder) return 0;
-      if (leftOrder === undefined) return 1;
-      if (rightOrder === undefined) return -1;
-      return leftOrder - rightOrder;
-    });
-    return ordered.flatMap(metadata => {
+    return matches.flatMap(metadata => {
       const override = matchingOverride(metadata);
       const { overrides: _overrides, ...base } = selected;
       const { resourceGuid: _resourceGuid, seriesId: _seriesId, accountGuid: _accountGuid, order: _order, ...appearance } = override ?? {};
-      const effective: VisualizationSeries = { ...base, ...appearance };
-      return !includeHidden && effective.visible === false ? [] : [{ selected: effective, metadata }];
+      const traceType = override?.traceType ?? base.traceType
+        ?? (definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : undefined);
+      const effective: VisualizationSeries = { ...base, ...appearance, ...(traceType ? { traceType } : {}) };
+      return !includeHidden && effective.visible === false ? [] : [{ selected: effective, metadata, order: override?.order }];
     });
   });
+  // Item order spans exact and matching-set declarations, while source groups stay together.
+  return sourceOrder.flatMap(sourceId => expanded.filter(item => item.metadata.sourceId === sourceId)
+    .sort((left, right) => {
+      if (left.order === right.order) return 0;
+      if (left.order === undefined) return 1;
+      if (right.order === undefined) return -1;
+      return left.order - right.order;
+    }).map(({ selected, metadata }) => ({ selected, metadata })));
 }
