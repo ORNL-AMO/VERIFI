@@ -259,14 +259,15 @@ describe('shared visualization decisions', () => {
   });
   it('adds renderable and editable items alongside exact declarations without duplicating siblings', () => {
     const selectedA = selected('meter', ['meter-a']);
-    const definition: VisualizationDefinition = { ...selectedA, series: [{ id: 'exact-a', sourceId: 'source-1', metric: 'energy', resourceGuid: 'meter-a', axis: 'left', color: '#123456' }] };
+    const definition: VisualizationDefinition = { ...selectedA, series: [{ id: 'exact-a', sourceId: 'source-1', metric: 'energy', resourceGuid: 'meter-a', axis: 'left', color: '#123456', traceType: 'bar', overrides: [{ resourceGuid: 'meter-a', order: 4 }] }] };
     expect(prepareDecisionChange(definition, { kind: 'source-settings', sourceId: 'source-1', settings: {} }, { snapshot: snapshot() }).state).toBe('unchanged');
     const added = apply(definition, { kind: 'toggle-resource', sourceId: 'source-1', resourceId: 'meter-b', selected: true });
+    expect(added.series[0]).toEqual(definition.series[0]);
     const styled = apply(added, { kind: 'item-style', sourceId: 'source-1', item: { resourceGuid: 'meter-b' }, changes: { traceType: 'bar', label: 'Second meter' } });
     const metadata = discoverUtilitySeries({ ...snapshot(), meterData: [...snapshot().meterData, reading({ guid: 'reading-b', meterId: 'meter-b' })] }, resolveVisualizationFacilities(styled, snapshot().facilities).scope, styled.sources[0] as UtilityVisualizationSource);
     const resolved = resolveVisualizationSeries(styled, metadata);
     expect(resolved.map(item => [item.metadata.resourceGuid, item.selected.traceType, item.selected.color])).toEqual([
-      ['meter-a', 'line', '#123456'], ['meter-b', 'bar', undefined]
+      ['meter-a', 'bar', '#123456'], ['meter-b', 'bar', undefined]
     ]);
     expect(projectMeterItems(styled, 'source-1', snapshot()).find(item => item.identity.resourceGuid === 'meter-b')?.appearance.label).toBe('Second meter');
     const removed = apply(styled, { kind: 'toggle-resource', sourceId: 'source-1', resourceId: 'meter-a', selected: false });
