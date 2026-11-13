@@ -260,9 +260,11 @@ describe('visualization routed journeys in Chromium', () => {
       }
       expect(dialog.textContent).not.toContain('Choose saved meters next');
       expect(dialog.textContent).not.toContain('Choose a chart to configure');
-      await userEvent.keyboard('{Tab}');
-      expect(document.activeElement).toBe(namedButton(dialog, 'Energy usage trend'));
-      expect(parseFloat(getComputedStyle(document.activeElement!).outlineWidth)).toBeGreaterThanOrEqual(2);
+      for (const label of ['Energy usage trend', 'Utility cost trend', 'Line']) {
+        await userEvent.keyboard('{Tab}');
+        expect(document.activeElement).toBe(namedButton(dialog, label));
+        expect(parseFloat(getComputedStyle(document.activeElement!).outlineWidth)).toBeGreaterThanOrEqual(2);
+      }
       await page.screenshot({ element: dialog, path: '../../../../../.angular/vis3-alignment/chart-choices-wide.png' });
       await activate(test, 'Scatter'); await activate(test, 'Meters'); await activate(test, 'Predictors');
       for (const width of [1280, 480]) {

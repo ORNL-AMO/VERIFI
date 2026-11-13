@@ -1,8 +1,8 @@
 # v1 visual foundation
 
-Use this note with issue #2553 when building the production v1 workspace. It turns the useful P1 prototype visual work into a lightweight living foundation. It is not a complete production design system, and it should grow only as real v1 workflows are implemented.
+Use this note with issue #2553 when building the production v1 workspace. It defines the current production visual and interaction foundation. It is not a complete production design system, and it should grow only as real v1 workflows are implemented.
 
-The source code, [UI architecture](../../ARCHITECTURE.md#ui-architecture), [prototype design foundation](prototype-foundation.md), [P1 selected prototype baseline](p1-selected-prototype-baseline.md), and [P1 walkthrough feedback](p1-prototype-walkthrough-feedback.md) remain supporting sources of truth.
+Use implemented neighboring v1 screens, shared components, theme tokens, and [UI architecture](../../ARCHITECTURE.md#ui-architecture) as supporting references.
 
 ## Acceptance framing
 
@@ -10,8 +10,16 @@ Issue #2553 is satisfied by defining the visual and interaction defaults that ke
 
 - Visual foundation means shared direction, tokens, interaction patterns, and maintenance rules, not a complete component catalog.
 - Common controls are defined by role and expected behavior first. Concrete production components should be added as v1 workflows need them.
-- P1 remains the visual reference. Production v1 should rebuild patterns under `src/app/v1/` rather than importing prototype-only components.
+- Implemented v1 screens and shared production styles are the visual reference. Keep version-neutral logic outside versioned presentation.
 - Future workflow work should update this note only when a pattern becomes durable across v1.
+
+## Product and workflow requirements
+
+Treat data entry, visualization, analysis, reporting, settings, and imports as one working application. Preserve domain language, fields, units, validation, help, and side effects when rebuilding a legacy workflow. Reuse neutral data, calculation, persistence, backup, file, Worker, and Electron contracts; retire a legacy capability only through an explicit workflow decision.
+
+Welcome keeps create account, import backup, load example, and existing-account entry points, plus Industrial Resources/help, subscription, and contact information. Make the next action clear for both new and returning users. Account/facility Home content follows its owning feature plan rather than an obsolete screen inventory.
+
+Keep account and facility context visible, with explicit access to account-level work in single-facility presentation. Support both small sites and larger portfolios. Keep setup progress and blocking errors visible; put long calculation and workflow explanations in accessible contextual help. Preserve primary actions and context at narrow widths while dense data uses deliberate overflow rather than unreadably small text.
 
 ## Brand and tokens
 
@@ -35,7 +43,7 @@ Typography should stay practical and dense. Use readable application-scale headi
 
 ## Shell and context
 
-Production v1 should use the P1 workspace structure as the starting point:
+Production v1 uses this workspace structure:
 
 - Persistent labeled primary navigation.
 - Contextual secondary navigation for section details and selected records.
@@ -100,7 +108,7 @@ Avoid large form workflows in global modals unless the workflow must block the w
 
 ## Theme policy
 
-Keep light mode, dark mode, and user-selectable appearance options. Theme options were a strong positive signal in the P1 walkthrough.
+Keep light mode, dark mode, and user-selectable appearance options.
 
 Promote a small production-ready theme set first:
 
@@ -113,7 +121,7 @@ Promote a small production-ready theme set first:
 
 Neon and Aurora are supported as experimental v1 palettes. Every theme must be built from semantic tokens, pass contrast checks in light and dark mode, and work with tables, charts, forms, drawers, modals, and status colors.
 
-Corner-style and high-contrast options are v1 appearance settings. Palette-matched background patterns are supported for the promoted theme set: Default and Blueprint use Blueprint grid, Steel uses Machined hatch, Neon uses Neon grid, Aurora uses Aurora flow, and Forest uses Topographic contours. Backgrounds remain secondary and must never reduce readability or status clarity. Glow effects remain a prototype-only reference until a production issue explicitly promotes them.
+Corner-style and high-contrast options are v1 appearance settings. Palette-matched background patterns are supported for the promoted theme set: Default and Blueprint use Blueprint grid, Steel uses Machined hatch, Neon uses Neon grid, Aurora uses Aurora flow, and Forest uses Topographic contours. Backgrounds remain secondary and must never reduce readability or status clarity. Add glow effects only when an explicitly scoped production workflow requires them.
 
 ## Accessibility and responsive expectations
 
@@ -141,10 +149,16 @@ Maintain this foundation just-in-time:
 - Do not copy a full inventory of components, routes, screens, or states.
 - Do not change data, persistence, imports, exports, calculations, reports, Workers, or Electron behavior as part of visual foundation work.
 
-When a production pattern becomes broadly reused, consider extracting it into `src/app/v1/` UI structure or a version-neutral shared helper only if it is free of v0 and prototype presentation assumptions.
+When a production pattern becomes broadly reused, consider extracting it into `src/app/v1/` UI structure or a version-neutral shared helper only if it is free of version-specific presentation assumptions.
 
 ## Validation expectations
 
 For this documentation baseline, validate links and paths in the same change. TypeScript or build checks are not required unless the documentation adds source examples that need compilation.
 
 For the first production v1 shell that applies this foundation, add focused tests for theme class application, context indicators, support panel state, drawer open and close behavior, and confirmation modal behavior. Manual review should include light and dark themes, keyboard focus, contrast, drawer sizing, mobile and Electron window behavior, long labels, and visible error and status states.
+
+## Shared result controls
+
+Result-table pagination uses the shared one-based pager; each table owns page size/filtering/sorting/reset/clamp state and input updates never emit navigation. The pager renders nonrotating batches of five numbers, announces its page, remains usable read-only, and hides for zero/one page and print. Inventory and v0 pagination retain their own behavior.
+
+Typed custom SVG icons extend the shared icon registry through its existing README; icon definitions/presentation choices do not enter saved domain records. Report identity icons already have an owner in Reports architecture.

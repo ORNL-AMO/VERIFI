@@ -47,7 +47,7 @@ Use this mode for code review, risk assessment, or final verification.
 - Verify documentation and compatibility claims against source.
 - Distinguish actionable findings from optional improvements.
 - Use [review-code-changes](../../.agents/skills/review-code-changes/SKILL.md) for code reviews and the [GitHub review guide](github-pr-review.md) for PR feedback.
-- At the pre-PR checkpoint, the context-aware development agent self-reviews first, then follows the [fresh-review workflow](local-fresh-review.md): disable conversation-history inheritance and inherit the development agent's model/effort without passing self-review conclusions. Record both stages. Explicit fresh reviews of existing PRs may run on their own; independently started reviewers perform the review directly without recursive delegation.
+- At the pre-PR checkpoint, follow the [PR workflow](pr-workflow.md) for self-review, independent review, and current-comparison evidence.
 
 Deliver prioritized findings with precise evidence. State explicitly when there are no actionable findings and identify any validation that could not be performed.
 
@@ -80,15 +80,6 @@ Specify the interaction:
 - Cover loading, empty, validation, error, disabled, and success states.
 - Cover responsive layout, keyboard access, visible focus, labels, focus order, contrast, and screen-reader semantics.
 - Reuse Bootstrap, ng-bootstrap, Font Awesome, Plotly, shared components, and established style layers where practical.
-
-For redesign prototype work:
-
-- Read the [prototype design foundation](prototype-foundation.md) before proposing or reviewing prototype screens.
-- Preserve established workflow content, fields, options, help text, validation states, data relationships, calculations, weather-data behavior, imports, backups, and reports while improving layout, hierarchy, and interaction.
-- Use existing production components and neighboring screens as content references, then translate them into the prototype's visual direction rather than inventing new functionality.
-- Check that the design supports responsive layouts, dense help content, light and dark mode viability, and the required VERIFI brand colors.
-- Identify meaningful prototype component boundaries for complex pages so implementation does not collapse major forms, tables, help panels, and status regions into one route component.
-- Make prototype assumptions explicit, especially when using static mock data or when a production workflow is represented only visually.
 
 Deliver:
 

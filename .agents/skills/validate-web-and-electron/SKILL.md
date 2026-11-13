@@ -9,22 +9,11 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 2. Run `npm run validate:agent -- --mode plan` to classify the current diff. When the work is a narrow follow-up inside a larger dirty diff, pass the files changed for that follow-up explicitly so unrelated pending route, template, or style files do not inflate the validation matrix. Use the output as the default command plan and adjust only when the diff has risk the helper cannot see.
 3. Run the smallest useful focused check while iterating. Before handoff, run the selected risk-based matrix, not the largest available matrix by habit.
 
-## Command matrix
+## Policy and commands
 
-| Change | Required validation |
-| --- | --- |
-| Documentation-only | Validate links, commands, and relevant workflow behavior under the [testing guide's documentation exception](../../../docs/testing.md#what-a-change-requires); no unrelated application suites or builds |
-| Ordinary logic or Angular behavior | Focused affected `*.spec.ts` first; use `npm run test:ci` when the touched behavior is broad or there is no reliable narrower suite |
-| TypeScript or app source changes | `npx tsc -p tsconfig.app.json --noEmit` |
-| Production Angular routing, modules, templates, app entrypoints, environment files, or release-sensitive UI behavior | `npm run build-prod` unless a known local exit-134 build abort has already been classified for the same checkout and the current change does not affect build configuration |
-| Styling-only Angular changes | Focused specs that compile the affected component styles when available, plus a focused visual/accessibility check; do not run `build-prod` by habit |
-| IndexedDB, Web Worker, File API, or native browser behavior | `npm run test:browser:ci` in addition to fast tests |
-| Explicit pre-PR or release gate | `npm run test:all:ci` plus production builds selected by the changed runtime boundaries |
-| Final code-change test gate | `npm run test:all:ci` |
-| Informational calculation, IndexedDB, and Worker coverage | `npm run test:coverage` when coverage evidence is requested; never treat it as a required gate |
-| Electron preload, IPC, filesystem, dialog, shell, updater, Electron environment/config, or explicit desktop release behavior | `npm run build-prod-electron` in addition to relevant fast/web checks, plus a focused manual desktop check for OS integration |
+The [testing guide](../../../docs/testing.md#pull-request-policy) owns validation requirements; [commands and CI](../../../docs/testing.md#commands-and-ci) lists test commands, while `package.json` and `angular.json` define executable targets. Keep routine checks focused, use the full test gate for explicit pre-PR/release work, and select Electron checks for its runtime boundaries. Styling/prose changes do not justify artificial tests or unrelated builds. Documentation tooling changes require their own executable tests.
 
-Install Chromium with `npx playwright install chromium` only when the local browser dependency is missing. Do not use `npm run lint` as a gate while it points to the unavailable TSLint builder.
+Install Chromium with `npx playwright install chromium` only when missing. Do not use the unavailable TSLint target as a gate.
 
 ## Helper script
 
@@ -35,7 +24,7 @@ Install Chromium with `npx playwright install chromium` only when the local brow
 
 ## Release pipeline changes
 
-Read the [release process](../../../docs/release-process.md) and inspect the caller plus every affected reusable workflow. Preserve the invariants that each `master` version advances by SemVer precedence, the preceding release tag points to the preceding commit with a successful completed CI/CD run, release tags target the current run's immutable commit, and production web deployment requires the web artifact and the complete desktop release to succeed for the same workflow run. Do not assume GitHub concurrency is FIFO. Check package/lockfile consistency, normal and hotfix promotion paths, skipped-job handling on `develop`, artifact names and retention, token permissions, signing and draft-release gates, and production concurrency. Validate workflow syntax and documentation links before running the final test and build matrix.
+Read the [release process](../../../docs/release-process.md) and inspect the caller plus affected reusable workflows. Preserve version/release ordering, immutable commit/artifact identity, required desktop-before-web publication, signing, and production concurrency. Validate actual workflow syntax and commands; use the testing policy for runtime gates.
 
 ## Manual checks
 

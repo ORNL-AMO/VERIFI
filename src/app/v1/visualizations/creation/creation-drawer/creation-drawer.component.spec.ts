@@ -10,6 +10,30 @@ import { CreationComponent } from './creation-drawer.component';
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
 describe('visualization creation drawer', () => {
+  it.each(['energy-trend', 'cost-trend'] as const)('distinguishes same-named portfolio meters by facility when binding %s', async recipe => {
+    const { commands, workspace } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
+    const snapshot = workspace.snapshot()!;
+    workspace.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b', name: 'Facility B' }],
+      meters: [meter({ name: 'Main' }), meter({ guid: 'meter-b', facilityId: 'facility-b', name: 'Main', noLongerInUse: true })],
+      meterData: [reading({}), reading({ guid: 'bill-b', meterId: 'meter-b', facilityId: 'facility-b' })] });
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    try {
+      lifecycle.openCreate(); lifecycle.selectScope('portfolio'); lifecycle.selectRecipe(recipe);
+      if (recipe === 'energy-trend') lifecycle.selectRecipeGrouping('meters');
+      fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const cards = [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Trend resources"] button')];
+      expect(cards.map(card => card.querySelector('strong')?.textContent)).toEqual(['Main', 'Main']);
+      expect(cards.map(card => card.querySelector('.creation-choice__description')?.textContent)).toEqual([
+        'Electricity · Facility A', 'Electricity · Facility B · Retired'
+      ]);
+      cards[1].click(); fixture.detectChanges();
+      expect(lifecycle.form.controls.recipeResourceIds.value).toEqual(['meter-b']);
+      lifecycle.continueRecipe(); await lifecycle.submit();
+      expect(commands.prepareCreate).toHaveBeenCalledOnce();
+      expect(commands.prepareCreate.mock.calls[0][0].sources[0]).toMatchObject({ selection: { kind: 'fixed', resource: 'meter', guids: ['meter-b'] } });
+    } finally { fixture.destroy(); }
+  });
   it('steps through chart and multiple data sources before requiring a name', async () => {
     const { commands } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
     const fixture = TestBed.createComponent(CreationComponent); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); fixture.detectChanges();
