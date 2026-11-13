@@ -22,7 +22,7 @@ export class UtilityDateContextResolver implements PreviewDateContextResolver {
     if (definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data') for (const source of sources) {
       // Use the same ownership, allocation, retirement and measure-quality gates as the preview.
       const result = await this.provider.resolve({ identity: { ...identity, scope, sourceId: source.id, requestId: 'date-context' }, source,
-        chart: { kind: 'time-series', type: 'line', interval: source.dataMode === 'calendarized' ? 'monthly' : 'native', stack: 'none' },
+        chart: { kind: 'time-series', defaultTraceType: 'line', interval: source.dataMode === 'calendarized' ? 'monthly' : 'native', stack: 'none' },
         period: { kind: 'all-history' }, comparison: { kind: 'none' }, series: definition.series, dateContext: { calendarDate } }, signal);
       if (signal.aborted || !this.data.isCurrent(identity)) throw new DOMException('Date context superseded', 'AbortError');
       if (result.state !== 'ready' || result.resolved.data.kind !== 'time-series') continue;

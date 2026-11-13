@@ -32,9 +32,7 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
     return copy;
   });
   let result: VisualizationDefinition = { ...next, sources, series: next.series.filter(series => !affected.has(series.sourceId)) };
-  if (result.chart?.kind === 'time-series' && result.chart.seriesTypes) {
-    result = { ...result, chart: { ...result.chart, seriesTypes: result.chart.seriesTypes.filter(type => result.series.some(series => series.id === type.seriesId)) } };
-  }
+
   // Retain the selected chart while clearing only axes whose declared series were removed.
   if (result.chart?.kind === 'scatter') {
     const chart = { ...result.chart };

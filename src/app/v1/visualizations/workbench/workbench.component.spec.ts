@@ -21,9 +21,39 @@ import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { meter } from '@app/v1/data/meters/facility-meters.testing';
+import { ChartSettingsComponent } from '../time-series/settings/chart-settings.component';
 
 describe('visualization workbench', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it('retains consecutive item edits before render without restoring older metadata', () => {
+    const { fixture, component } = setup(utilityVisualizationFixture());
+    const chart = fixture.debugElement.query(By.directive(ChartSettingsComponent)).componentInstance as ChartSettingsComponent;
+    const row = chart.rows()[0];
+    row.form.controls.traceType.setValue('bar');
+    component.editor.form.controls.title.setValue('Current title');
+    row.form.controls.label.setValue('Custom meter');
+    fixture.detectChanges();
+    expect(component.editor.definition()!.series[0]).toMatchObject({ traceType: 'bar', label: 'Custom meter' });
+    expect(component.editor.definition()!.appearance.title).toBe('Current title');
+    expect(chart.rows()[0].form.controls.traceType.value).toBe('bar');
+  });
+  it('rejects chart callbacks from a superseded source configuration', () => {
+    const { component } = setup(utilityVisualizationFixture());
+    const old = component.chartContext();
+    const current = component.editor.definition()!;
+    component.editor.applyDefinition({ ...current, sources: current.sources.map(source => source.kind === 'utility' ? { ...source, measure: 'cost', settings: {} } : source), series: [] });
+    const superseded = component.editor.definition();
+    old.changed({ ...old.definition, series: old.definition.series.map(series => ({ ...series, traceType: 'bar' })) });
+    expect(component.editor.definition()).toEqual(superseded);
+  });
+  it('summarizes differently configured no-data item types as Combination', () => {
+    const original = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...original,
+      sources: original.sources.map(source => source.kind === 'utility' ? { ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } } : source),
+      series: [{ ...original.series[0], traceType: 'line' }, { ...original.series[0], id: 'energy-b', resourceGuid: 'meter-b', traceType: 'bar' }] };
+    const { component } = setup(definition);
+    expect(component.chartSummary()).toBe('Combination');
+  });
   it('reviews excluded facility bindings through the shell portal before committing the same identity', async () => {
     const definition = utilityVisualizationFixture();
     const { fixture, component, store, submit } = setup(definition);

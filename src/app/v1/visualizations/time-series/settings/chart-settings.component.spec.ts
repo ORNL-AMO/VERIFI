@@ -1,6 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
 import { vi } from 'vitest';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { visualizationEvidenceFixture } from '@domain/visualizations/testing/visualization-provider-fixtures';
@@ -10,6 +8,7 @@ import { TimeSeriesModule } from '../time-series.module';
 import type { VisualizationDefinition, VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
 import type { ResolvedVisualizationSeries } from '@domain/visualizations/visualization-source-provider';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
+import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 
 describe('saved chart settings', () => {
   afterEach(() => TestBed.resetTestingModule());
@@ -55,7 +54,52 @@ describe('saved chart settings', () => {
   it('retains live selection and untouched settings when switching chart type', () => {
     const { fixture, context, changed } = setup();
     fixture.componentInstance.chartForm.controls.type.setValue('bar');
-    expect(changed.mock.calls[0][0]).toEqual({ ...context.definition, chart: { kind: 'time-series', type: 'bar', interval: 'monthly', stack: 'none' } });
+    expect(changed.mock.calls[0][0]).toEqual({ ...context.definition, chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } });
+  });
+  it('edits a member trace type through a current-owner override and retains rapid sibling edits', () => {
+    const state = groupedSetup();
+    const electricity = state.fixture.componentInstance.rows().find(row => row.key === 'utility:source:Electricity')!;
+    const gas = state.fixture.componentInstance.rows().find(row => row.key === 'utility:source:Natural Gas')!;
+    electricity.form.controls.traceType.setValue('bar'); gas.form.controls.label.setValue('Delivered gas');
+    const saved = state.acknowledge();
+    expect(saved.series[0].overrides).toContainEqual(expect.objectContaining({ seriesId: electricity.key, accountGuid: 'account-a', traceType: 'bar' }));
+    expect(saved.series[0].overrides).toContainEqual(expect.objectContaining({ seriesId: gas.key, label: 'Delivered gas' }));
+    expect(electricity.form.controls.traceType.value).toBe('bar'); expect(gas.form.controls.traceType.value).toBe('line');
+    const type = state.fixture.nativeElement.querySelector('select[formcontrolname="traceType"]') as HTMLSelectElement;
+    expect(type.classList.contains('v1-select')).toBe(true); expect(type.value).toBe('bar');
+  });
+  it('stores an exact item trace type on its declaration without creating an override', () => {
+    const { fixture, context, changed } = setup();
+    const definition: VisualizationDefinition = { ...context.definition, series: [{ ...context.definition.series[0], resourceGuid: 'meter-a' }] };
+    fixture.componentRef.setInput('context', { ...context, definition }); fixture.detectChanges();
+    fixture.componentInstance.rows()[0].form.controls.traceType.setValue('bar');
+    expect(changed.mock.lastCall![0].series[0]).toMatchObject({ resourceGuid: 'meter-a', traceType: 'bar' });
+    expect(changed.mock.lastCall![0].series[0].overrides).toBeUndefined();
+  });
+  it('reapplies the existing default globally, clearing dormant local type exceptions while preserving style and foreign overrides', () => {
+    const foreign: VisualizationSeriesOverride = { seriesId: 'utility:source:Foreign', accountGuid: 'foreign-account', traceType: 'bar', color: '#123456' };
+    const state = groupedSetup([{ seriesId: 'utility:source:Electricity', traceType: 'bar', label: 'Electricity supply', order: 0 },
+      { seriesId: 'utility:source:Dormant', traceType: 'bar', visible: false, color: '#abcdef' }, foreign]);
+    state.hydrate({ ...state.context().definition, series: state.context().definition.series.map(series => ({ ...series, traceType: 'bar' })) });
+    const button = [...(state.fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button')]
+      .find(item => item.textContent?.trim() === 'Apply type to all items')!;
+    expect(state.fixture.componentInstance.chartForm.controls.type.value).toBe('line'); button.click();
+    const saved = state.acknowledge();
+    expect(saved.chart).toMatchObject({ defaultTraceType: 'line' }); expect(saved.series[0].traceType).toBeUndefined();
+    expect(saved.series[0].overrides).toEqual([
+      { seriesId: 'utility:source:Electricity', label: 'Electricity supply', order: 0 },
+      { seriesId: 'utility:source:Dormant', visible: false, color: '#abcdef' }, foreign
+    ]);
+    expect(state.fixture.componentInstance.rows().every(row => row.form.controls.traceType.value === 'line')).toBe(true);
+  });
+  it('preserves item type exceptions when only the interval changes', () => {
+    const state = groupedSetup([{ seriesId: 'utility:source:Electricity', traceType: 'bar' },
+      { seriesId: 'utility:source:Dormant', traceType: 'bar', label: 'Dormant' }]);
+    const before = state.context().definition;
+    state.fixture.componentInstance.chartForm.controls.interval.setValue('yearly');
+    const saved = state.acknowledge();
+    expect(saved.chart).toEqual({ ...before.chart, interval: 'yearly' }); expect(saved.series).toEqual(before.series);
+    expect(state.fixture.componentInstance.rows()[0].form.controls.traceType.value).toBe('bar');
   });
   it('disables saved changes in a read-only workspace and retains controls across acknowledgement', () => {
     const { fixture, context, changed } = setup();
@@ -86,6 +130,14 @@ describe('saved chart settings', () => {
     expect(gas.axis).toBe('left'); expect(gas.visible).toBeUndefined(); expect(gas.label).toBeUndefined(); expect(gas.color).toBeUndefined();
     expect(resolveVisualizationSeries(saved, state.metadata).map(item => item.metadata.label)).toEqual(['Natural Gas']);
     expect(saved.sources[0]).toMatchObject({ groupBy: 'source', selection: { kind: 'rule', resource: 'meter' } });
+  });
+  it('keeps an untouched item type inherited when editing presentation', () => {
+    const state = groupedSetup();
+    state.fixture.componentInstance.rows()[0].form.controls.label.setValue('Electricity supply');
+    const saved = state.acknowledge();
+    expect(saved.series[0].overrides?.[0].traceType).toBeUndefined();
+    state.hydrate({ ...saved, chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } });
+    expect(state.fixture.componentInstance.rows()[0].form.controls.traceType.value).toBe('bar');
   });
   it('orders category members without converting the wildcard and preserves dormant appearance plus new bucket defaults', () => {
     const dormant: VisualizationSeriesOverride = { seriesId: 'utility:source:Dormant', label: 'Archived label', color: '#aabbcc', visible: false };
@@ -150,4 +202,67 @@ describe('saved chart settings', () => {
     expect(effective.map(item => item.metadata.label)).toEqual(['Natural Gas', 'Electricity', 'Dormant A', 'Dormant B', 'Other Energy']);
     expect(effective[2].selected.label).toBe('Retained A'); expect(effective[3].selected.visible).toBe(false);
   });
+  it('moves the whole source at a boundary even when its last item is a separate declaration', () => {
+    const state = groupedSetup(), base = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...base, sources: [...base.sources, { ...base.sources[0], id: 'other' }], series: [
+      { id: 'first', sourceId: 'utility', metric: 'energy', resourceGuid: 'meter-a', axis: 'left', traceType: 'bar' },
+      { id: 'second', sourceId: 'utility', metric: 'energy', resourceGuid: 'meter-b', axis: 'left' },
+      { id: 'neighbor', sourceId: 'other', metric: 'energy', resourceGuid: 'meter-c', axis: 'right' }
+    ] };
+    const metadata: ResolvedVisualizationSeries[] = ['meter-a', 'meter-b', 'meter-c'].map(resourceGuid => ({ ...state.metadata[0],
+      id: resourceGuid, sourceId: resourceGuid === 'meter-c' ? 'other' : 'utility', resourceGuid }));
+    state.hydrate(definition, metadata);
+    state.fixture.componentInstance.move('meter-b', 1);
+    const moved = state.acknowledge();
+    expect(moved.series).toEqual([definition.series[2], definition.series[0], definition.series[1]]);
+    expect(resolveVisualizationSeries(moved, metadata, true).map(item => item.metadata.id)).toEqual(['meter-c', 'meter-a', 'meter-b']);
+  });
+  it('orders exact and wildcard declarations together without replacing provider appearance or foreign ranks', () => {
+    const state = groupedSetup(), base = utilityVisualizationFixture();
+    const foreign = { resourceGuid: 'meter-b', accountGuid: 'foreign-account', order: 0, color: '#abcdef' };
+    const definition: VisualizationDefinition = { ...base, series: [
+      { id: 'exact', sourceId: 'utility', metric: 'energy', resourceGuid: 'meter-a', axis: 'left', traceType: 'line',
+        overrides: [{ resourceGuid: 'meter-a', order: 1 }] },
+      { id: 'members', sourceId: 'utility', metric: 'energy', axis: 'left', overrides: [
+        { seriesId: 'utility:meter-b', order: 0, color: '#123456', traceType: 'bar' },
+        { resourceGuid: 'dormant', order: 5, label: 'Retained' }, foreign
+      ] }
+    ] };
+    const metadata: ResolvedVisualizationSeries[] = ['meter-a', 'meter-b'].map(resourceGuid => ({ ...state.metadata[0],
+      id: `utility:${resourceGuid}`, resourceGuid }));
+    state.hydrate(definition, metadata);
+    expect(state.fixture.componentInstance.rows().map(row => row.key)).toEqual(['utility:meter-b', 'utility:meter-a']);
+    state.fixture.componentInstance.move('utility:meter-b', 1);
+    const moved = state.acknowledge();
+    expect(decodeVisualizationDefinition(moved).state).toBe('valid');
+    expect(moved.series[0].overrides).toEqual([{ resourceGuid: 'meter-a', order: 0 }]);
+    expect(moved.series[1].overrides).toEqual([
+      { seriesId: 'utility:meter-b', order: 1, color: '#123456', traceType: 'bar' },
+      { resourceGuid: 'dormant', order: 2, label: 'Retained' }, foreign
+    ]);
+    const effective = resolveVisualizationSeries(moved, metadata, true);
+    expect(effective.map(item => item.metadata.resourceGuid)).toEqual(['meter-a', 'meter-b']);
+    expect(effective[1].selected).toMatchObject({ color: '#123456', traceType: 'bar' });
+  });
+  it('retains provider-owned item order and appearance when a trace type edit adds a resource override', () => {
+    const state = groupedSetup(), base = utilityVisualizationFixture();
+    const foreign: VisualizationSeriesOverride = { resourceGuid: 'meter-b', accountGuid: 'foreign-account', order: 99, label: 'Foreign B' };
+    const definition: VisualizationDefinition = { ...base, series: [
+      { id: 'members', sourceId: 'utility', metric: 'energy', axis: 'left', overrides: [
+        { seriesId: 'utility:meter-a', order: 1, label: 'Meter A' },
+        { seriesId: 'utility:meter-b', order: 0, traceType: 'line', color: '#123456', label: 'Meter B' }, foreign
+      ] }
+    ] };
+    const metadata: ResolvedVisualizationSeries[] = ['meter-a', 'meter-b'].map(resourceGuid => ({ ...state.metadata[0],
+      id: `utility:${resourceGuid}`, resourceGuid }));
+    state.hydrate(definition, metadata);
+    state.fixture.componentInstance.rows().find(row => row.key === 'utility:meter-b')!.form.controls.traceType.setValue('bar');
+    const saved = state.acknowledge();
+    expect(saved.series[0].overrides!.slice(0, 3)).toEqual(definition.series[0].overrides);
+    expect(saved.series[0].overrides).toContainEqual(expect.objectContaining({ resourceGuid: 'meter-b', accountGuid: base.accountGuid,
+      order: 0, traceType: 'bar', color: '#123456', label: 'Meter B' }));
+    expect(resolveVisualizationSeries(saved, metadata).map(item => item.metadata.resourceGuid)).toEqual(['meter-b', 'meter-a']);
+    expect(decodeVisualizationDefinition(saved).state).toBe('valid');
+  });
+
 });

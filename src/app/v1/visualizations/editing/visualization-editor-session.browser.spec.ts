@@ -123,11 +123,11 @@ describe('visualization editor session with native IndexedDB', () => {
   it('keeps an external ownership conflict unresolved when local configuration cannot use ordinary autosave', async () => {
     const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: account.guid,
       facilitySelection: { kind: 'fixed', facilityGuids: [facility.guid] }, sourceKinds: ['utility'],
-      chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' } });
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' } });
     const { session, commands, proposal } = await create(definition);
     const update = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'update');
     session.applyDefinition({ ...session.definition()!, chart: {
-      kind: 'time-series', type: 'bar', interval: 'yearly', stack: 'none'
+      kind: 'time-series', defaultTraceType: 'bar', interval: 'yearly', stack: 'none'
     } });
     session.form.controls.name.setValue('Retained local name');
     const local = structuredClone(session.definition());
@@ -146,7 +146,7 @@ describe('visualization editor session with native IndexedDB', () => {
     session.resolveConflicts({ configuration: 'saved' });
     expect(session.conflicts()).toEqual([]); expect(session.error()).toBeUndefined();
     expect(session.definition()).toMatchObject({ name: 'Retained local name', facilitySelection: { kind: 'all' },
-      chart: { type: 'line', interval: 'monthly' } });
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' } });
     expect(await session.flush()).toBe(true); expect(update).toHaveBeenCalledOnce();
     const records = await harness.getAll<IdbSavedVisualization & { [key: string]: unknown }>('savedVisualizations');
     expect(records[0]).toMatchObject({ guid: proposal.guid, revision: 3,

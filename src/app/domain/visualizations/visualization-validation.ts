@@ -102,8 +102,8 @@ const comparison = variant({
   custom: dateRange(object({ kind: enumeration('custom'), start: civilDate, end: civilDate }))
 });
 const chart = variant({
-  'time-series': object({ kind: enumeration('time-series'), type: enumeration('line', 'bar', 'area', 'combination'), interval: enumeration('monthly', 'yearly', 'native'),
-    stack: enumeration('none', 'absolute', 'percent'), seriesTypes: array(object({ seriesId: text, type: enumeration('line', 'bar', 'area') })) }, ['seriesTypes']),
+  'time-series': object({ kind: enumeration('time-series'), defaultTraceType: enumeration('line', 'bar', 'area'), interval: enumeration('monthly', 'yearly', 'native'),
+    stack: enumeration('none', 'absolute', 'percent') }),
   scatter: object({ kind: enumeration('scatter'), xSeriesId: text, ySeriesId: text, showFit: boolean }, ['xSeriesId', 'ySeriesId']),
   correlation: object({ kind: enumeration('correlation'), statistic: enumeration('r', 'r-squared'), scale: enumeration('raw', 'z-score') }),
   heatmap: object({ kind: enumeration('heatmap'), dimension: enumeration('month-year', 'series-period'), scale: enumeration('linear', 'diverging') }),
@@ -111,16 +111,16 @@ const chart = variant({
   treemap: object({ kind: enumeration('treemap'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment')), values: enumeration('absolute', 'percent') }),
   sankey: object({ kind: enumeration('sankey'), flow: enumeration('source-to-equipment', 'source-to-group', 'energy-balance') })
 }, true);
-const seriesFields = { id: text, sourceId: text, metric: text, resourceGuid: text, label: text, color: text,
+const seriesFields = { id: text, sourceId: text, metric: text, resourceGuid: text, label: text, color: text, traceType: enumeration('line', 'bar', 'area'),
   axis: enumeration('left', 'right'), lineStyle: enumeration('solid', 'dashed', 'dotted') };
-const seriesOptional = ['resourceGuid', 'label', 'color', 'lineStyle'];
+const seriesOptional = ['resourceGuid', 'label', 'color', 'lineStyle', 'traceType'];
 const seriesOverride: Check = (value, path, issues) => {
-  object({ resourceGuid: text, seriesId: text, accountGuid: text, label: text, color: text,
+  object({ resourceGuid: text, seriesId: text, accountGuid: text, label: text, color: text, traceType: enumeration('line', 'bar', 'area'),
     axis: enumeration('left', 'right'), lineStyle: enumeration('solid', 'dashed', 'dotted'), visible: boolean,
     order: (value, path, issues) => {
       if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) issue(issues, path, 'Enter a nonnegative safe integer for explicit series order.');
     } },
-    ['resourceGuid', 'seriesId', 'accountGuid', 'label', 'color', 'axis', 'lineStyle', 'visible', 'order'])(value, path, issues);
+    ['resourceGuid', 'seriesId', 'accountGuid', 'label', 'color', 'axis', 'lineStyle', 'visible', 'order', 'traceType'])(value, path, issues);
   if (value && typeof value === 'object') {
     const count = Number(Object.hasOwn(value, 'resourceGuid')) + Number(Object.hasOwn(value, 'seriesId'));
     if (count !== 1) issue(issues, path, 'Choose exactly one resource GUID or provider series identity for a presentation override.');
@@ -189,8 +189,6 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
   }
   if (value.chart?.kind === 'treemap' && (!value.chart.hierarchy.length || new Set(value.chart.hierarchy).size !== value.chart.hierarchy.length))
     need('$.chart.hierarchy', 'Choose non-repeated hierarchy levels.');
-  if (value.chart?.kind === 'time-series' && value.chart.seriesTypes?.some(entry => !value.series.some(series => series.id === entry.seriesId)))
-    need('$.chart.seriesTypes', 'Choose declared series for combination settings.');
   return issues;
 }
 
@@ -235,7 +233,9 @@ export function decodeVisualizationDefinition(value: unknown): VisualizationVali
     const keys = (series.overrides ?? []).map(override => JSON.stringify([override.accountGuid ?? decoded.accountGuid,
       override.resourceGuid !== undefined ? 'resource' : 'series', override.resourceGuid ?? override.seriesId]));
     if (new Set(keys).size !== keys.length) issue(issues, `$.series[${index}].overrides`, 'Presentation override selectors must be unique within an account.');
-    if (series.resourceGuid && series.overrides?.length) issue(issues, `$.series[${index}].overrides`, 'Resource overrides require a matching-set series.');
+    if (series.resourceGuid && series.overrides?.some(override => override.resourceGuid !== series.resourceGuid
+      || override.order === undefined || Object.keys(override).some(key => !['resourceGuid', 'accountGuid', 'order'].includes(key))))
+      issue(issues, `$.series[${index}].overrides`, 'Exact series overrides may only order that resource; edit presentation on the declared series.');
   });
   if (issues.length) return { state: 'invalid', issues };
   const incomplete = setupIssues(decoded);
