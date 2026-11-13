@@ -7,7 +7,7 @@ describe('visualization chart choices', () => {
   it.each(VISUALIZATION_CHART_CHOICES)('retains $label as coherent incomplete setup intent', choice => {
     const chart = createVisualizationChart(choice.value);
     const value = createVisualizationSetupDefinition({ name: choice.label, accountGuid: 'account-a',
-      scope: { kind: 'portfolio' }, chart, sourceKinds: ['utility', 'predictor'] });
+      facilitySelection: { kind: 'all' }, chart, sourceKinds: ['utility', 'predictor'] });
     const result = decodeVisualizationDefinition(JSON.parse(JSON.stringify(value)));
     expect(result.state).toBe('setup-required');
     expect('definition' in result && result.definition.chart).toEqual(chart);

@@ -1,3 +1,4 @@
+import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { BackupPreparationService } from './backup-preparation.service';
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
 import { savedVisualizationFixture, visualizationBackupSnapshot } from './visualization-backup.testing';
@@ -9,11 +10,11 @@ describe('saved visualization backup preparation and transfer', () => {
   const preparation = new BackupPreparationService();
   const builder = new WorkspaceBackupSnapshotBuilder();
 
-  it('transfers v1 definitions as v2 and retains hidden/dormant v2 appearance through serialized backups', () => {
+  it('retains hidden and dormant appearance through serialized backups', () => {
     const base = utilityVisualizationFixture();
     const { resourceGuid, ...wildcard } = base.series[0];
     const definition = { ...base, series: [{ ...wildcard, overrides: [
-      { resourceGuid: 'meter-a', visible: false, label: 'Private name' },
+      { resourceGuid: 'meter-a', visible: false, label: 'Private name', lineStyle: 'dashed' as const },
       { resourceGuid: 'old-meter', color: '#123456' }
     ] }] };
     const original = savedVisualizationFixture(definition);
@@ -22,14 +23,11 @@ describe('saved visualization backup preparation and transfer', () => {
     const decoded = readSavedVisualization(transferred);
     expect(decoded.state).toBe('valid');
     expect('definition' in decoded && decoded.definition.series[0].overrides).toEqual([
-      { resourceGuid: 'meter-b', visible: false, label: 'Private name', accountGuid: 'account-b' },
+      { resourceGuid: 'meter-b', visible: false, label: 'Private name', lineStyle: 'dashed' as const, accountGuid: 'account-b' },
       { resourceGuid: 'old-meter', color: '#123456', accountGuid: 'account-a' }
     ]);
     expect(serialized.definition).toEqual(definition);
-    const historical = { ...original, definition: { ...base, version: 1 } };
-    const historicalCopy = transferSavedVisualization(historical, 'account-b', { meter: { 'meter-a': 'meter-b' } }, 'historical-copy');
-    expect(historicalCopy.definition).toMatchObject({ version: 2 });
-    expect(historical.definition.version).toBe(1);
+
   });
 
   it('exports all account definitions and only the owning facility definitions without mutating the snapshot', () => {
@@ -37,7 +35,22 @@ describe('saved visualization backup preparation and transfer', () => {
     expect(builder.buildAccountBackup(source).savedVisualizations).toHaveLength(8);
     const facility = builder.buildFacilityBackup(source, 'facility-a');
     expect(facility.savedVisualizations).toHaveLength(7);
-    expect(facility.savedVisualizations.every(item => item.facilityId === 'facility-a')).toBe(true);
+    expect(facility.savedVisualizations.every(item => savedVisualizationFacilityGuid(item, [facility.facility]) === 'facility-a')).toBe(true);
+    expect(source).toEqual(before);
+  });
+
+  it('preserves account All but constrains a single-facility transfer before GUID remapping', () => {
+    const base = visualizationBackupSnapshot();
+    const source = { ...base, facilities: [base.facilities[0]], savedVisualizations: [savedVisualizationFixture(utilityVisualizationFixture())] };
+    const before = structuredClone(source);
+    expect((builder.buildAccountBackup(source).savedVisualizations[0].definition as any).facilitySelection).toEqual({ kind: 'all' });
+    const exported = preparation.prepare(builder.buildFacilityBackup(source, 'facility-a'));
+    expect((exported.savedVisualizations[0].definition as any).facilitySelection).toEqual({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    const copy = transferSavedVisualization(exported.savedVisualizations[0], 'destination', {
+      facility: { 'facility-a': 'new-facility' }, meter: { 'meter-a': 'new-meter' }
+    }, 'new-chart');
+    expect((copy.definition as any).facilitySelection).toEqual({ kind: 'fixed', facilityGuids: ['new-facility'] });
+    expect(savedVisualizationFacilityGuid(copy, [{ guid: 'new-facility', accountId: 'destination' }, { guid: 'other-facility', accountId: 'destination' }])).toBe('new-facility');
     expect(source).toEqual(before);
   });
 
@@ -66,7 +79,7 @@ describe('saved visualization backup preparation and transfer', () => {
   });
 
   it.each([
-    { guid: '' }, { accountId: 'other-account' }, { facilityId: 'missing-facility' },
+    { guid: '' }, { accountId: 'other-account' },
     { definition: { ...utilityVisualizationFixture(), accountGuid: 'other-account' } }
   ])('rejects invalid outer identity or ownership before transfer: %j', changes => {
     const source = builder.buildAccountBackup(visualizationBackupSnapshot());

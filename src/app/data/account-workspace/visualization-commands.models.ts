@@ -1,4 +1,4 @@
-import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { WorkspaceWriteError } from './workspace-commands.models';
@@ -35,8 +35,16 @@ export interface DeleteVisualizationCommand extends VisualizationCommandIdentity
   readonly expectedRevision: number;
 }
 
+export interface RetargetVisualizationCommand extends VisualizationCommandIdentity {
+  readonly kind: 'retarget';
+  readonly expectedRevision: number;
+  readonly targetFacilities: VisualizationFacilitySelection;
+  /** Confirmed semantic reset proposal; recomputed under the commit transaction. */
+  readonly reviewedDefinition: VisualizationDefinition;
+}
+
 export type VisualizationCommand = CreateVisualizationCommand | DuplicateVisualizationCommand
-  | UpdateVisualizationCommand | DeleteVisualizationCommand;
+  | UpdateVisualizationCommand | RetargetVisualizationCommand | DeleteVisualizationCommand;
 
 export type VisualizationCommandOutcome =
   | { readonly state: 'committed'; readonly command: VisualizationCommand; readonly value: IdbSavedVisualization | undefined;

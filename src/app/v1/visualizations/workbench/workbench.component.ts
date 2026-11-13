@@ -1,3 +1,6 @@
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
+import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
+import type { VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
@@ -32,6 +35,12 @@ export class WorkbenchComponent {
   private readonly container = inject(ViewContainerRef);
   private readonly destroy = inject(DestroyRef);
   private portal?: TemplatePortal;
+  private facilityPortal?: TemplatePortal;
+  readonly facilityError = signal('');
+  readonly facilityChange = signal<{ readonly selection: VisualizationFacilitySelection; readonly definition: VisualizationDefinition; readonly cleared: readonly string[]; readonly key: string; readonly revision: number; readonly snapshot: unknown } | undefined>(undefined);
+  readonly facilities = computed(() => this.workspace.facilities().filter(item => item.accountId === this.accountGuid()));
+  readonly facilityContext = computed(() => { const definition = this.editor.definition(); return definition ? resolveVisualizationFacilities(definition, this.facilities()) : undefined; });
+  readonly facilityChangeStale = computed(() => { const proposal = this.facilityChange(); return !!proposal && (proposal.key !== this.editor.key() || proposal.revision !== this.editor.localRevision() || proposal.snapshot !== this.workspace.snapshot()); });
   private leaveResolve?: (accepted: boolean) => void;
   private leaving?: Promise<boolean>;
   private leaveKey = '';
@@ -42,14 +51,13 @@ export class WorkbenchComponent {
   readonly hasInvalidFields = computed(() => Object.values(this.invalidEditors()).some(Boolean));
   readonly editorKey = computed(() => `${this.editor.key()}:${this.editorReset()}`);
   readonly recoveryChildDrafts: VisualizationChildDraftGuard = { invalid: this.hasInvalidFields, key: this.editorKey, discard: () => this.discardFields() };
+  @ViewChild('facilityDialog', { static: true }) private facilityDialog!: TemplateRef<unknown>;
   @ViewChild('leaveDialog', { static: true }) private leaveDialog!: TemplateRef<unknown>;
   @ViewChild(RecoveryActionsComponent) private recoveryActions?: RecoveryActionsComponent;
   readonly accountGuid = computed(() => this.navigation.routeState().accountGuid ?? '');
   readonly scopeLabel = computed(() => {
-    const record = this.editor.record();
-    if (!record) return 'Saved visualization';
-    return record.facilityId ? this.workspace.facilities().find(item => item.guid === record.facilityId)?.name ?? 'Unavailable facility'
-      : 'Portfolio';
+    const scope = this.facilityContext()?.scope;
+    return scope?.kind === 'facility' ? this.facilities().find(item => item.guid === scope.facilityGuid)?.name ?? 'Unavailable facility' : 'Portfolio';
   });
   readonly sourceSummary = computed(() => this.editor.definition()?.sources.map(source => ({ id: source.id,
     dataSourceLabel: VISUALIZATION_DATA_SOURCES.find(option => option.value === source.kind)!.label,
@@ -79,7 +87,7 @@ export class WorkbenchComponent {
   readonly periodContext = computed(() => this.editContext('periods'));
   readonly discoveredSeries = computed(() => {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
-    return definition && snapshot ? definition.sources.flatMap(source => source.kind === 'utility' ? discoverUtilitySeries(snapshot, definition.scope, source) : []) : [];
+    return definition && snapshot ? definition.sources.flatMap(source => source.kind === 'utility' ? discoverUtilitySeries(snapshot, resolveVisualizationFacilities(definition, snapshot.facilities).scope, source) : []) : [];
   });
   readonly chartContext = computed(() => ({ ...this.editContext('chart'), resolvedSeries: this.discoveredSeries(), identity: this.editorKey() }));
   readonly periodSummary = computed(() => {
@@ -106,7 +114,7 @@ export class WorkbenchComponent {
     const unloadFields = this.unsaved.protectBeforeUnload(this.hasInvalidFields);
     let priorKey = '';
     effect(() => { const key = this.editor.key(); if (key !== priorKey) { priorKey = key; untracked(() => { this.invalidEditors.set({}); this.sourceKindControl.setValue('utility', { emitEvent: false }); }); } });
-    this.destroy.onDestroy(() => { unregister(); unregisterFields(); unloadFields(); this.finishLeave(false); });
+    this.destroy.onDestroy(() => { unregister(); unregisterFields(); unloadFields(); this.finishLeave(false); this.cancelFacilities(); });
   }
 
   private editContext(id: string) {
@@ -124,13 +132,44 @@ export class WorkbenchComponent {
     const kind = this.sourceKindControl.value;
     if (!this.dataSources.some(option => option.value === kind)) return;
     let index = 1; while (definition.sources.some(source => source.id === `${kind}-${index}`)) index++;
-    const source = { ...createVisualizationDefinition('', definition.accountGuid, definition.scope, kind).sources[0], id: `${kind}-${index}` };
+    const source = { ...createVisualizationDefinition('', definition.accountGuid, definition.facilitySelection, kind).sources[0], id: `${kind}-${index}` };
     this.editor.applyDefinition({ ...definition, sources: [...definition.sources, source] });
   }
   removeSource(id: string): void {
     const definition = this.editor.definition(); if (!definition || !this.editor.canEdit() || definition.sources.length < 2) return;
     this.invalidEditors.update(state => Object.fromEntries(Object.entries(state).filter(([key]) => key !== id)));
     this.editor.applyDefinition({ ...definition, sources: definition.sources.filter(source => source.id !== id), series: definition.series.filter(series => series.sourceId !== id) });
+  }
+
+  async requestFacilities(selection: VisualizationFacilitySelection): Promise<void> {
+    if (!this.editor.canRetarget() || this.editor.saving() || this.facilityChange() || this.hasInvalidFields()) return;
+    this.facilityError.set('');
+    const ownerKey = this.editor.key();
+    if (!await this.editor.flush()) { this.facilityError.set('Save or resolve the current changes before reviewing facilities.'); return; }
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    if (ownerKey !== this.editor.key() || !definition || !snapshot || !this.editor.canRetarget()) return;
+    const review = prepareVisualizationFacilityChange(definition, selection, snapshot, this.editor.record()?.preservation?.references);
+    if (!review.cleared.length) { await this.editor.retarget(selection, review.definition); return; }
+    this.facilityChange.set({ selection, ...review, key: this.editor.key(), revision: this.editor.localRevision(), snapshot });
+    this.facilityPortal = new TemplatePortal(this.facilityDialog, this.container);
+    this.modal.show(this.facilityPortal, { blockWorkspace: true });
+  }
+
+  async confirmFacilities(): Promise<void> {
+    const proposal = this.facilityChange();
+    if (!proposal || this.facilityChangeStale() || this.editor.saving() || this.hasInvalidFields()) return;
+    if (await this.editor.retarget(proposal.selection, proposal.definition)) this.cancelFacilities();
+  }
+
+  async retryFacilities(): Promise<void> {
+    if (await this.editor.retry()) this.cancelFacilities();
+  }
+
+  cancelFacilities(): void {
+    if (this.editor.saving() || this.editor.state() === 'refresh-required') return;
+    if (this.facilityChange()) this.editor.discardRetarget();
+    if (this.facilityPortal && this.modal.activePortal() === this.facilityPortal) this.modal.hide();
+    this.facilityPortal = undefined; this.facilityChange.set(undefined);
   }
 
   back(): void { void this.journeys.returnToDashboard(this.accountGuid()); }
@@ -142,10 +181,10 @@ export class WorkbenchComponent {
   }
 
   private async prepareLeave(): Promise<boolean> {
-    if (this.recoveryActions?.blocksNavigation()) return false;
+    if (this.facilityChange() || this.recoveryActions?.blocksNavigation()) return false;
     if (!this.editor.needsProtection() && !this.hasInvalidFields()) return true;
     const flushed = !this.hasInvalidFields() && await this.editor.flush();
-    if (this.recoveryActions?.blocksNavigation()) return false;
+    if (this.facilityChange() || this.recoveryActions?.blocksNavigation()) return false;
     if (flushed && !this.hasInvalidFields()) return true;
     if (!this.editor.needsProtection() && !this.hasInvalidFields()) return true;
     this.leaveKey = this.editor.key(); this.leaveRevision = this.editor.localRevision();

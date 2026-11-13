@@ -1,3 +1,4 @@
+import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { Injectable, signal } from '@angular/core';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
@@ -475,13 +476,14 @@ export class BackupImportCommandService {
     const visualizations: IdbSavedVisualization[] = [];
     await this.transactions.runTransaction(FACILITY_RESTORE_STORES, 'readwrite', async transaction => {
       const importedBackups: Array<{ source: PreparedBackupFile; transferred: PreparedBackupFile }> = [];
+      const ownershipFacilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', selectedAccount.guid);
       let idx = 1;
       for (const { selectedFacility } of preparedFacilities) {
         const selection = facilityImportSelections[selectedFacility.name];
         if (selection.importAs === 'replace' && selection.replacedFacility) {
           const facilityToReplace = accountFacilities.find(item => item.name === selection.replacedFacility);
           if (facilityToReplace) {
-            idx = await this.deleteFacilityInTransaction(transaction, facilityToReplace, selectedAccount.guid, idx);
+            idx = await this.deleteFacilityInTransaction(transaction, facilityToReplace, selectedAccount.guid, idx, ownershipFacilities);
           }
         }
       }
@@ -751,15 +753,20 @@ export class BackupImportCommandService {
     transaction: IndexedDbTransactionContext,
     facility: IdbFacility,
     accountGuid: string,
-    currIdx: number
+    currIdx: number,
+    ownershipFacilities?: readonly IdbFacility[]
   ): Promise<number> {
     if (facility.id === undefined) {
       throw new Error('The facility to replace does not have a local IndexedDB key.');
     }
 
+    const facilities = ownershipFacilities ?? await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid);
     for (const storeDefinition of FACILITY_DELETION_CHILD_STORES) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      await transaction.deleteAllByIndex(storeDefinition.storeName, 'facilityId', facility.guid);
+      if (storeDefinition.storeName === 'savedVisualizations') {
+        const records = await transaction.getAllByIndex<IdbSavedVisualization>('savedVisualizations', 'accountId', accountGuid);
+        for (const record of records) if (savedVisualizationFacilityGuid(record, facilities) === facility.guid) await transaction.deleteByKey('savedVisualizations', record.id!);
+      } else await transaction.deleteAllByIndex(storeDefinition.storeName, 'facilityId', facility.guid);
     }
 
     const modifiedDate = new Date();

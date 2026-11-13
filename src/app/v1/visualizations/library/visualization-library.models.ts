@@ -1,3 +1,4 @@
+import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
@@ -56,7 +57,8 @@ export function buildVisualizationLibrary(snapshot: AccountWorkspaceSnapshot): V
       : read.state === 'invalid' || read.state === 'unsupported' ? 'unsupported'
       : read.state === 'setup-required' ? 'setup-required' : 'configured';
     const name = definition?.name || 'Unavailable visualization';
-    const ownerName = record.facilityId ? snapshot.facilities.find(item => item.guid === record.facilityId)?.name || 'Unavailable facility' : snapshot.account.name || 'Account';
+    const facilityGuid = savedVisualizationFacilityGuid(record, snapshot.facilities);
+    const ownerName = facilityGuid ? snapshot.facilities.find(item => item.guid === facilityGuid)?.name || 'Unavailable facility' : snapshot.account.name || 'Account';
     const sourceKinds = [...new Set(definition?.sources.map(source => source.kind) ?? [])];
     const dataSourceLabel = sourceKinds.map(kind => VISUALIZATION_DATA_SOURCES.find(option => option.value === kind)?.label).join(', ') || 'Unknown data source';
     const issues = [...read.issues.map(issue => issue.message), ...references.map(reference => `${reference.kind} ${reference.guid}: ${reference.reason}`)];
@@ -64,8 +66,8 @@ export function buildVisualizationLibrary(snapshot: AccountWorkspaceSnapshot): V
     const periodLabel = definition ? visualizationPeriodLabel(definition) : 'Period unavailable';
     const chartLabel = visualizationChartLabel(definition?.chart);
     const modified = new Date(record.modifiedDate).getTime();
-    return { record, definition, name, scope: record.facilityId ? 'facility' as const : 'portfolio' as const,
-      facilityGuid: record.facilityId, ownerName, sourceKinds, dataSourceLabel, status, statusLabel: STATUS_LABELS[status], periodLabel, chartLabel,
+    return { record, definition, name, scope: facilityGuid ? 'facility' as const : 'portfolio' as const,
+      facilityGuid, ownerName, sourceKinds, dataSourceLabel, status, statusLabel: STATUS_LABELS[status], periodLabel, chartLabel,
       modified: Number.isFinite(modified) ? modified : 0, issues, editable: supported,
       searchText: [name, ownerName, dataSourceLabel, periodLabel, chartLabel, STATUS_LABELS[status], ...labels].join(' ').toLocaleLowerCase() };
   });

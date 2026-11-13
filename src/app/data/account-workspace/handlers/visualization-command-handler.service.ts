@@ -2,14 +2,16 @@ import { Injectable } from '@angular/core';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { VerifiStoreName } from '@data/indexedDB/indexed-db-schema';
 import { getNewIdbSavedVisualization, IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
-import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
-import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { readSavedVisualization, savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
+import { normalizeVisualizationDefinition, VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
-import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
+import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
+import { sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
+import { VisualizationReference, VisualizationReferenceIssue, visualizationReferences } from '@domain/visualizations/visualization-references';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { CreateVisualizationCommand, DeleteVisualizationCommand, DuplicateVisualizationCommand,
-  UpdateVisualizationCommand, VisualizationConflictError } from '../visualization-commands.models';
-import { inspectVisualizationReferences, VisualizationCatalogResource, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
+  UpdateVisualizationCommand, RetargetVisualizationCommand, VisualizationConflictError } from '../visualization-commands.models';
+import { inspectVisualizationReferences, VisualizationCatalogResource, VisualizationReferenceCatalog, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
 
 const OWNER_STORES: readonly VerifiStoreName[] = ['accounts', 'facilities', 'savedVisualizations'];
 const CATALOG_STORES = VISUALIZATION_CATALOG_STORES;
@@ -23,7 +25,7 @@ export class VisualizationCommandHandler {
     return this.transactions.runTransaction(OWNER_STORES, 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
       this.assertDefinition(submitted.definition, submitted.accountGuid);
-      await this.assertScopeExists(tx, submitted.definition);
+      await this.assertFacilitiesExist(tx, submitted.definition);
       return this.addOnce(tx, submitted);
     });
   }
@@ -39,10 +41,10 @@ export class VisualizationCommandHandler {
       const source = await this.requireCurrent(tx, submitted.sourceGuid, submitted.accountGuid, submitted.expectedRevision);
       const decoded = readSavedVisualization(source);
       if (decoded.state !== 'valid' && decoded.state !== 'setup-required') this.invalid('Repair this visualization before duplicating it.');
-      if (!sameScope(source, submitted.definition)) this.invalid('Duplicate retains the original visualization scope.');
+      if (!sameVisualizationFacilitySelection(decoded.definition.facilitySelection, submitted.definition.facilitySelection)) this.invalid('Duplicate retains the original facility selection.');
       const expected = { ...decoded.definition, name: submitted.definition.name };
       if (!sameDefinitionIntent(expected, submitted.definition)) throw new VisualizationConflictError(source);
-      await this.assertScopeExists(tx, submitted.definition);
+      await this.assertFacilitiesExist(tx, submitted.definition);
       return this.addOnce(tx, submitted);
     });
   }
@@ -53,12 +55,17 @@ export class VisualizationCommandHandler {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
       this.assertDefinition(submitted.definition, submitted.accountGuid);
       const current = await this.requireCurrent(tx, submitted.guid, submitted.accountGuid, submitted.expectedRevision);
-      if (!sameScope(current, submitted.definition)) this.invalid('An existing visualization cannot change its owner or scope.');
       const state = readSavedVisualization(current);
+      const payload = decodeVisualizationDefinition(current.definition);
+      const readableCurrent = current.recordVersion === SAVED_VISUALIZATION_RECORD_VERSION && !current.preservation?.locked
+        && 'definition' in payload && payload.definition.accountGuid === current.accountId;
+      // Preserved resource issues block activation, not knowledge of the current inclusion intent.
+      if (readableCurrent && !sameVisualizationFacilitySelection(payload.definition.facilitySelection, submitted.definition.facilitySelection))
+        this.invalid('Use the reviewed facility selection command to change included facilities.');
       const blocked = current.preservation?.references ?? [];
       if (state.state === 'unsupported' && current.recordVersion !== SAVED_VISUALIZATION_RECORD_VERSION)
         this.invalid('This record needs a newer VERIFI version.');
-      const needsReplacement = current.preservation?.locked || state.state === 'invalid' || state.state === 'unsupported';
+      const needsReplacement = current.preservation?.locked || state.state === 'invalid' || state.state === 'unsupported' || !('definition' in payload);
       if (needsReplacement && !submitted.repair?.acknowledgeTransfer) this.invalid('Explicitly review the preserved payload before replacing it.');
       const acknowledged = new Set(submitted.repair?.referencePaths ?? []);
       const remaining = blocked.filter(ref => !acknowledged.has(ref.path));
@@ -69,8 +76,37 @@ export class VisualizationCommandHandler {
       }
       const next: IdbSavedVisualization = { ...current, revision: current.revision + 1,
         modifiedDate: new Date(), definition: submitted.definition };
+      delete next.facilityId;
       if (remaining.length) next.preservation = { references: remaining, transfers: current.preservation?.transfers ?? [] };
       else delete next.preservation;
+      await tx.put('savedVisualizations', next);
+      return next;
+    });
+  }
+
+  async retarget(command: RetargetVisualizationCommand, activeAccountGuid: string): Promise<IdbSavedVisualization> {
+    const submitted = structuredClone(command);
+    return this.transactions.runTransaction([...new Set([...OWNER_STORES, ...CATALOG_STORES])], 'readwrite', async tx => {
+      await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
+      const current = await this.requireCurrent(tx, submitted.guid, submitted.accountGuid, submitted.expectedRevision);
+      const decoded = decodeVisualizationDefinition(current.definition);
+      if (savedVisualizationEnvelopeError(current) || current.recordVersion !== SAVED_VISUALIZATION_RECORD_VERSION
+        || current.preservation?.locked || !('definition' in decoded)) this.invalid('Repair this visualization before changing its facilities.');
+      this.assertDefinition({ ...decoded.definition, facilitySelection: submitted.targetFacilities }, submitted.accountGuid);
+      this.assertDefinition(submitted.reviewedDefinition, submitted.accountGuid);
+      if (sameVisualizationFacilitySelection(decoded.definition.facilitySelection, submitted.targetFacilities)) {
+        if (!sameDefinitionIntent(normalizeVisualizationDefinition(decoded.definition), normalizeVisualizationDefinition(submitted.reviewedDefinition))) throw new VisualizationConflictError(current);
+        return current;
+      }
+      const catalog = await readVisualizationReferenceCatalog(tx);
+      await this.assertFacilitiesExist(tx, { ...decoded.definition, facilitySelection: submitted.targetFacilities }, decoded.definition.facilitySelection);
+      const definition = prepareVisualizationFacilityChange(decoded.definition, submitted.targetFacilities, catalog, current.preservation?.references).definition;
+      this.assertDefinition(definition, submitted.accountGuid);
+      if (!sameDefinitionIntent(normalizeVisualizationDefinition(definition), normalizeVisualizationDefinition(submitted.reviewedDefinition))) throw new VisualizationConflictError(current);
+      const next: IdbSavedVisualization = { ...current, revision: current.revision + 1, modifiedDate: new Date(), definition };
+      delete next.facilityId;
+      if (current.preservation) next.preservation = { ...current.preservation,
+        references: reconcileRetargetReferences(decoded.definition, definition, current.preservation.references, catalog) };
       await tx.put('savedVisualizations', next);
       return next;
     });
@@ -129,10 +165,20 @@ export class VisualizationCommandHandler {
     if (accounts.length !== 1 || accounts[0].deleteAccount) this.invalid('The visualization account is no longer available.');
   }
 
-  private async assertScopeExists(tx: IndexedDbTransactionContext, definition: VisualizationDefinition): Promise<void> {
-    if (definition.scope.kind !== 'facility') return;
-    const facilities = await tx.getAllByIndex<VisualizationCatalogResource>('facilities', 'guid', definition.scope.facilityGuid);
-    if (facilities.length !== 1 || facilities[0].accountId !== definition.accountGuid) this.invalid('The visualization facility does not belong to this account.');
+  private async assertFacilitiesExist(tx: IndexedDbTransactionContext, definition: VisualizationDefinition,
+    retainedSelection?: VisualizationFacilitySelection): Promise<void> {
+    const facilities = await tx.getAllByIndex<VisualizationCatalogResource>('facilities', 'accountId', definition.accountGuid);
+    if (definition.facilitySelection.kind === 'all') {
+      if (!facilities.length) this.invalid('Add a facility before choosing All Facilities.');
+      return;
+    }
+    for (const guid of definition.facilitySelection.facilityGuids) {
+      if (facilities.some(facility => facility.guid === guid)) continue;
+      const retained = retainedSelection?.kind === 'fixed' && retainedSelection.facilityGuids.includes(guid);
+      // Existing unresolved identities remain repairable intent, but a foreign record is never eligible.
+      if (retained && !(await tx.getAllByIndex<VisualizationCatalogResource>('facilities', 'guid', guid)).length) continue;
+      this.invalid('Included facilities must belong to the active account and be available.');
+    }
   }
 
   private assertDefinition(definition: unknown, accountGuid: string): asserts definition is VisualizationDefinition {
@@ -144,11 +190,35 @@ export class VisualizationCommandHandler {
   private invalid(message: string): never { throw new WorkspaceWriteError('validation-failed', message); }
 }
 
-function sameScope(record: Readonly<IdbSavedVisualization>, definition: VisualizationDefinition): boolean {
-  return record.accountId === definition.accountGuid && record.facilityId === (definition.scope.kind === 'facility' ? definition.scope.facilityGuid : undefined);
+/** Preserve repair identity across array pruning; ordinal paths are not source identities. */
+function reconcileRetargetReferences(before: VisualizationDefinition, after: VisualizationDefinition,
+  issues: readonly VisualizationReferenceIssue[], catalog: VisualizationReferenceCatalog): readonly VisualizationReferenceIssue[] {
+  const oldRefs = visualizationReferences(before), newRefs = visualizationReferences(after);
+  const selected = new Set(after.facilitySelection.kind === 'fixed' ? after.facilitySelection.facilityGuids
+    : catalog.facilities.filter(item => item.accountId === after.accountGuid).map(item => item.guid));
+  return issues.flatMap(issue => {
+    const old = oldRefs.find(ref => ref.path === issue.path && referenceIdentity(before, ref) === referenceIdentity(before, issue));
+    if (!old) return [issue]; // Unclassified preservation cannot be acknowledged by an unrelated inclusion edit.
+    const next = newRefs.find(ref => referenceIdentity(after, ref) === referenceIdentity(before, old));
+    const facilityChoice = old.path.startsWith('facilitySelection.facilityGuids.');
+    const resource = facilityChoice ? catalog.facilities.find(item => item.guid === old.guid) : undefined;
+    if (facilityChoice && (!next || resource?.accountId === after.accountGuid && selected.has(old.guid))) return [];
+    // Facility retargeting never acknowledges a protected source relationship,
+    // even if a coincident destination record appears in the excluded catalog.
+    return [{ ...issue, ...(next ? { path: next.path } : {}) }];
+  });
 }
 
-/** Historical payloads compare as current intent without rewriting either record. */
+function referenceIdentity(definition: VisualizationDefinition, ref: VisualizationReference): string {
+  const parts = ref.path.split('.');
+  const container = parts[0] === 'sources' ? ['source', definition.sources[Number(parts[1])]?.id]
+    : parts[0] === 'series' ? ['series', definition.series[Number(parts[1])]?.id] : ['definition'];
+  const fields = (parts[0] === 'sources' || parts[0] === 'series' ? parts.slice(2) : parts).filter(part => !/^\d+$/.test(part));
+  return JSON.stringify([container, fields, ref.kind, ref.guid, ref.parentGuid, ref.groupGuid,
+    ref.optional ? ref.accountGuid ?? definition.accountGuid : undefined]);
+}
+
+/** Compare current definition intent independently of JSON object-key order. */
 function sameDefinitionIntent(left: unknown, right: unknown): boolean {
   const a = decodeVisualizationDefinition(left), b = decodeVisualizationDefinition(right);
   return 'definition' in a && 'definition' in b && sameJson(a.definition, b.definition);

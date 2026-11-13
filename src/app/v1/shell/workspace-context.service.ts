@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { IdbAccount } from '@data/models/idbModels/account';
 import type { IdbFacility } from '@data/models/idbModels/facility';
+import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
 import { ALL_FACILITIES, FacilityScope, RouteState, WorkspaceRouteMotion, facilityScopeQuery, isAccountInventory, parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
@@ -62,8 +63,10 @@ export class WorkspaceContextService {
   readonly inventoryScope = computed<FacilityScope>(() => {
     const state = this.routeState();
     if (!isAccountInventory(state) || this.workspace.status() !== 'ready' || state.accountGuid !== this.workspace.account()?.guid) return ALL_FACILITIES;
-    if (this.isSingleSiteWorkspace()) return state.section === 'reports' || state.section === 'visualization' ? ALL_FACILITIES
-      : { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
+    if (this.isSingleSiteWorkspace()) {
+      if (state.section === 'reports') return ALL_FACILITIES;
+      if (state.section !== 'visualization') return { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
+    }
     const guid = this.router.parseUrl(this.currentUrl()).queryParamMap.get('facility');
     return guid && this.facilities().some(facility => facility.guid === guid && facility.accountId === state.accountGuid)
       ? { kind: 'facility', facilityGuid: guid } : ALL_FACILITIES;
@@ -76,7 +79,10 @@ export class WorkspaceContextService {
     const state = this.routeState();
     const visualization = state.section === 'visualization' && state.visualizationGuid
       ? this.workspace.savedVisualizations().find(item => item.guid === state.visualizationGuid && item.accountId === state.accountGuid) : undefined;
-    if (visualization) return visualization.facilityId ? { kind: 'facility', facilityGuid: visualization.facilityId } : ALL_FACILITIES;
+    if (visualization) {
+      const facilityGuid = savedVisualizationFacilityGuid(visualization, this.facilities());
+      return facilityGuid ? { kind: 'facility', facilityGuid } : ALL_FACILITIES;
+    }
     const facility = this.facilities().find(item => item.guid === state.facilityGuid && item.accountId === this.workspace.account()?.guid);
     if (facility) return { kind: 'facility', facilityGuid: facility.guid };
     if (this.isSingleSiteWorkspace()) return { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };

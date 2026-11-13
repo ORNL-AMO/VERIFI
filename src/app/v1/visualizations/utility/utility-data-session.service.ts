@@ -83,7 +83,7 @@ export class UtilityDataSession {
       subscription = this.calendarization.calendarizeBase().subscribe({ next: base => {
         if (signal.aborted) return;
         if (this.workspace.snapshot()?.account.guid !== identity.accountGuid || this.workspace.revision() !== identity.workspaceRevision) {
-          reject(new Error('The utility preview snapshot changed.')); return;
+          reject(new Error('The utility chart snapshot changed.')); return;
         }
         if (base.state === 'error') { this.failed = true; reject(new Error(base.error?.message ?? 'Utility calculation failed.')); }
         else if (base.state === 'ready' && base.accountGuid === identity.accountGuid

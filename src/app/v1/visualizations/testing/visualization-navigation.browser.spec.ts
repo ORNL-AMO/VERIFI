@@ -192,7 +192,7 @@ describe('visualization routed journeys in Chromium', () => {
       const decoded = readSavedVisualization(saved);
       expect(decoded.state).toBe('setup-required');
       if (!('definition' in decoded)) throw new Error('Expected readable setup intent.');
-      expect(decoded.definition).toMatchObject({ name: 'Weather and usage', scope: { kind: 'portfolio' }, chart: { kind: 'scatter', showFit: false },
+      expect(decoded.definition).toMatchObject({ name: 'Weather and usage', facilitySelection: { kind: 'all' }, chart: { kind: 'scatter', showFit: false },
         sources: [{ id: 'source-1', kind: 'utility' }, { id: 'source-2', kind: 'predictor' }], series: [] });
       expect(test.editor()?.editor.definition()).toEqual(decoded.definition);
       expect(test.root.textContent).toContain('Scatter'); expect(test.root.textContent).toContain('Predictors');
@@ -240,7 +240,7 @@ describe('visualization routed journeys in Chromium', () => {
       await userEvent.type(creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!, 'Plant usage');
       test.fixture.detectChanges(); await activate(test, 'Add visualization');
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/workbench/created-1`); });
-      expect(test.editor()?.editor.definition()?.scope).toEqual({ kind: 'facility', facilityGuid: 'facility-a' });
+      expect(test.editor()?.editor.definition()?.facilitySelection).toEqual({ kind: 'fixed', facilityGuids: ['facility-a'] });
       expect(test.store.snapshot()!.facilityAnalyses).toEqual([]); expect(test.store.snapshot()!.accountAnalyses).toEqual([]);
       expect(test.prepareCreate).toHaveBeenCalledOnce(); expect(test.submit).toHaveBeenCalledOnce();
     } finally { test.destroy(); }

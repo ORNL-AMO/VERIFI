@@ -37,7 +37,7 @@ describe('saved visualization reference inspection', () => {
     ['facility', 'facility-a'], ['meter', 'meter-a'], ['meter-group', 'group-a'], ['predictor', 'predictor-a'],
     ['equipment', 'equipment-a'], ['energy-use-group', 'energy-group-a']
   ] as const)('inspects %s fixed selections', (kind, guid) => {
-    const definition = { ...createVisualizationDefinition('Selections', 'account-a', { kind: 'portfolio' }, 'utility'),
+    const definition = { ...createVisualizationDefinition('Selections', 'account-a', { kind: 'all' }, 'utility'),
       sources: [{ ...utilityVisualizationFixture().sources[0], selection: { kind: 'fixed' as const, resource: kind, guids: [guid] } }], series: [] };
     expect(inspectVisualizationReferences(definition, catalog)).toEqual([]);
   });
@@ -74,7 +74,7 @@ describe('saved visualization reference inspection', () => {
   it('reports foreign ownership instead of returning a matching GUID as available', () => {
     const issues = inspectVisualizationReferences(utilityVisualizationFixture(), { ...catalog, meters: [{ ...resource, guid: 'meter-a', accountId: 'account-b' }] });
     expect(issues.map(ref => ref.reason)).toEqual(['foreign', 'foreign']);
-    const scoped = utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' });
+    const scoped = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
     expect(inspectVisualizationReferences(scoped, { ...catalog, meters: [{ ...resource, guid: 'meter-a', facilityId: 'facility-b' }] })
       .map(ref => ref.reason)).toEqual(['foreign', 'foreign']);
   });

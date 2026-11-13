@@ -1,5 +1,5 @@
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
+import { savedVisualizationEnvelopeError, savedVisualizationFacilityGuid, savedVisualizationForFacilityExport } from '@data/visualizations/saved-visualization-record';
 import { Injectable } from '@angular/core';
 import { BackupFile } from '@data/models/backup-file';
 import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '@data/indexedDB/data-migrations/data-migration.errors';
@@ -83,6 +83,8 @@ export class BackupPreparationService {
       equipment.utilityMeterGroupIds ??= [];
     }
     backup.dataVersion = CURRENT_DATA_VERSION;
+    if (backup.backupFileType === 'Facility') backup.savedVisualizations = (backup.savedVisualizations ?? []).map(record =>
+      savedVisualizationFacilityGuid(record, [backup.facility]) === backup.facility.guid ? savedVisualizationForFacilityExport(record, backup.facility.guid) : record);
     validateCoreRelationships(backup);
     return backup as PreparedBackupFile;
   }
@@ -106,7 +108,7 @@ export class BackupPreparationService {
       facilityReports: backup.facilityReports.filter(item => item.facilityId === facilityGuid),
       facilityEnergyUseGroups: backup.facilityEnergyUseGroups.filter(item => item.facilityId === facilityGuid),
       facilityEnergyUseEquipment: backup.facilityEnergyUseEquipment.filter(item => item.facilityId === facilityGuid),
-      savedVisualizations: backup.savedVisualizations.filter(item => item.facilityId === facilityGuid),
+      savedVisualizations: backup.savedVisualizations.filter(item => savedVisualizationFacilityGuid(item, backup.facilities) === facilityGuid).map(item => savedVisualizationForFacilityExport(item, facilityGuid)),
       accountReports: [], accountAnalysisItems: []
     });
   }
@@ -235,10 +237,8 @@ function validateCoreRelationships(backup: BackupFile): void {
     ...backup.predictorDataV2, ...backup.facilityAnalysisItems, ...backup.facilityReports,
     ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment
   ];
-  const scopedVisualizations = (backup.savedVisualizations ?? []).filter(item => item.facilityId !== undefined);
-  requireAll(scopedVisualizations, item => facilityIds.has(item.facilityId), 'A visualization references an owning facility that is not in the backup.');
-  if (backup.backupFileType === 'Facility' && scopedVisualizations.length !== (backup.savedVisualizations ?? []).length) {
-    throw new BackupRelationshipError('A facility backup cannot own portfolio visualizations.');
+  if (backup.backupFileType === 'Facility' && (backup.savedVisualizations ?? []).some(item => savedVisualizationFacilityGuid(item, facilities) !== backup.facility.guid)) {
+    throw new BackupRelationshipError('A facility backup cannot own account visualizations.');
   }
   requireAll(facilityOwned, item => facilityIds.has(item.facilityId), 'A record references a facility that is not in the backup.');
   requireAll(backup.meters, meter => !meter.groupId || groupIds.has(meter.groupId), 'A meter references a missing meter group.');

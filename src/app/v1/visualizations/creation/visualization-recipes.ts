@@ -1,5 +1,6 @@
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import { createVisualizationSetupDefinition, type UtilityVisualizationSource, type VisualizationScope } from '@domain/visualizations/visualization-definition';
+import { createVisualizationSetupDefinition, type UtilityVisualizationSource, type VisualizationScope, type VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { utilityMeterEligible } from '@domain/visualizations/utility/utility-catalog';
 import { utilityMeasureKey } from '@domain/visualizations/utility/utility-selection';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
@@ -23,7 +24,7 @@ export const UTILITY_RECIPES = [
 
 export function recipeMeters(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, recipe: VisualizationRecipe) {
   const measure = recipe === 'cost-trend' ? 'cost' : 'energy';
-  return snapshot.meters.filter(m => m.accountId === snapshot.account.guid && (scope.kind === 'portfolio' || m.facilityId === scope.facilityGuid)
+  return snapshot.meters.filter(m => m.accountId === snapshot.account.guid && scope.facilityGuids.includes(m.facilityId)
     && utilityMeterEligible(m, { measure } as UtilityVisualizationSource)
     && snapshot.meterData.some(r => r.meterId === m.guid && r.accountId === snapshot.account.guid && r.facilityId === m.facilityId));
 }
@@ -41,7 +42,7 @@ export function recipeResourceChoices(snapshot: AccountWorkspaceSnapshot, scope:
     return facility ? facility.name || 'Unnamed facility' : 'Unavailable facility';
   };
   if (grouping === 'groups') return snapshot.meterGroups.filter(group => group.accountId === snapshot.account.guid
-    && (scope.kind === 'portfolio' || group.facilityId === scope.facilityGuid)
+    && scope.facilityGuids.includes(group.facilityId)
     && meters.some(meter => meter.groupId === group.guid && meter.facilityId === group.facilityId))
     .map(group => ({ value: group.guid, label: group.name || 'Unnamed meter group', detail: facilityName(group.facilityId), icon: 'meterGroupItem' as const }));
   return meters.map(meter => ({ value: meter.guid, label: meter.name || 'Unnamed meter',
@@ -50,14 +51,15 @@ export function recipeResourceChoices(snapshot: AccountWorkspaceSnapshot, scope:
 
 /** Shipped recipes create independent intent only after an explicit resource binding. */
 export function createRecipeDefinition(snapshot: AccountWorkspaceSnapshot, recipe: Exclude<VisualizationRecipe, 'custom'>,
-  scope: VisualizationScope, selection: RecipeResourceSelection, name: string) {
+  facilitySelection: VisualizationFacilitySelection, selection: RecipeResourceSelection, name: string) {
+  const scope = resolveVisualizationFacilities({ accountGuid: snapshot.account.guid, facilitySelection }, snapshot.facilities).scope;
   if (!recipeGroupingChoices().some(choice => choice.value === selection.grouping)
     || recipe === 'cost-trend' && selection.grouping !== 'meters') throw new Error('Choose an available meter view.');
   const available = recipeResourceChoices(snapshot, scope, recipe, selection.grouping), selected = [...new Set(selection.ids)];
   if (!selected.length || selected.some(id => !available.some(choice => choice.value === id))) throw new Error('Choose available resources for this recipe.');
-  const definition = createVisualizationSetupDefinition({ name, accountGuid: snapshot.account.guid, scope,
+  const definition = createVisualizationSetupDefinition({ name, accountGuid: snapshot.account.guid, facilitySelection,
     chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' }, sourceKinds: ['utility'] });
-  const source: UtilityVisualizationSource = { id: 'source-1', kind: 'utility', measure: recipe === 'energy-trend' ? 'energy' : 'cost',
+  const source: UtilityVisualizationSource = { id: 'source-1', kind: 'utility', selectionMode: selection.grouping === 'sources' ? 'source' : selection.grouping === 'groups' ? 'group' : 'meter', measure: recipe === 'energy-trend' ? 'energy' : 'cost',
     selection: selection.grouping === 'sources' ? { kind: 'rule', resource: 'meter', filter: { utilitySources: selected } }
       : { kind: 'fixed', resource: selection.grouping === 'groups' ? 'meter-group' : 'meter', guids: selected },
     aggregation: 'sum', groupBy: selection.grouping === 'sources' ? 'source' : selection.grouping === 'groups' ? 'group' : 'meter', dataMode: 'calendarized',

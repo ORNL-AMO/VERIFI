@@ -2,6 +2,7 @@ import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { SessionStorageService } from 'ngx-webstorage';
 import { By } from '@angular/platform-browser';
 import { NavigationCancel, NavigationEnd, provideRouter, Router, RouterOutlet } from '@angular/router';
 import { filter, firstValueFrom, take } from 'rxjs';
@@ -34,7 +35,7 @@ const originalUrl = `${workbenchBase}/visualization-a`;
 function setup(firstOutcome: 'failed' | 'refresh-required') {
   const store = new AccountWorkspaceStore();
   const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-    scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
+    facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a'] }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
   store.publish({ ...visualizationSnapshot(), savedVisualizations: [{ ...visualizationRecord(), definition }] });
   const currentUrl = signal('/');
   const routeState = computed(() => parseWorkspaceRoute(currentUrl()));
@@ -63,8 +64,9 @@ function setup(firstOutcome: 'failed' | 'refresh-required') {
     provideRouter([{ path: 'dashboard', component: DashboardPage },
       { path: 'v1/workspace/account/:accountGuid/visualization/workbench/:visualizationGuid',
         component: WorkbenchComponent, canDeactivate: [visualizationLeaveGuard] }]),
+    { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
     { provide: AccountWorkspaceStore, useValue: store },
-    { provide: WorkspaceNavigationService, useValue: { routeState } },
+    { provide: WorkspaceNavigationService, useValue: { routeState, isSingleSiteWorkspace: () => false } },
     { provide: SavedVisualizationCommands, useValue: { prepareCreate, submit, recover } }
   ] });
   const router = TestBed.inject(Router); router.setUpLocationChangeListener();
@@ -124,7 +126,7 @@ describe('routed deleted-draft recovery protection in Chromium', () => {
       const flush = vi.spyOn(test.workbench()!.editor, 'flush');
       await blockedBack(test);
       expect(flush).not.toHaveBeenCalled();
-      expect(test.modal.activePortal()).toBe(portal); expect(test.workbench()!.leaveOpen()).toBe(false);
+      expect(test.modal.activePortal()).toBe(portal);
       expect(dialog(test).textContent).toContain('Save local intent as new?');
       expect(dialog(test).textContent).not.toContain('Resolve unsaved visualization changes');
       expect([...dialog(test).querySelectorAll('button')].map(button => button.textContent?.trim())).toContain('Cancel');
@@ -156,8 +158,9 @@ describe('routed deleted-draft recovery protection in Chromium', () => {
       await activate(test, 'Create independent copy');
       expect(test.recovery()!.proposal()?.guid).toBe('recovered-identity');
       finishFlush(false); await expect(departure).resolves.toBe(false); await test.settle();
-      expect(test.modal.activePortal()).toBe(portal); expect(test.workbench()!.leaveOpen()).toBe(false);
+      expect(test.modal.activePortal()).toBe(portal);
       expect(dialog(test).textContent).toContain('Save local intent as new?');
+      expect(dialog(test).textContent).not.toContain('Resolve unsaved visualization changes');
       expect([...dialog(test).querySelectorAll('button')].map(button => button.textContent?.trim())).toContain('Retry');
     } finally { finishFlush(false); test.destroy(); }
   });

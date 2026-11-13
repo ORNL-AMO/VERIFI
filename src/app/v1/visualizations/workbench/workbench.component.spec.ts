@@ -18,9 +18,89 @@ import { By } from '@angular/platform-browser';
 import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
 import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-actions.component';
 import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
+import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
+import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
+import { meter } from '@app/v1/data/meters/facility-meters.testing';
 
 describe('visualization workbench', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it('reviews excluded facility bindings through the shell portal before committing the same identity', async () => {
+    const definition = utilityVisualizationFixture();
+    const { fixture, component, store, submit } = setup(definition);
+    const snapshot = store.snapshot()!;
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
+      meters: [meter({ guid: 'meter-a', facilityId: 'facility-b' })] }); fixture.detectChanges();
+    const before = component.editor.definition()!;
+    await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] }); fixture.detectChanges();
+    expect(component.facilityChange()?.cleared).toContain('Excluded resource selections');
+    expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
+    expect(submit).not.toHaveBeenCalled(); expect(component.editor.definition()).toEqual(before);
+    await component.confirmFacilities(); fixture.detectChanges();
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ kind: 'retarget', guid: 'visualization-a',
+      targetFacilities: { kind: 'fixed', facilityGuids: ['facility-a'] } }));
+    expect(component.editor.definition()!.facilitySelection).toEqual({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    expect(component.facilityChange()).toBeUndefined();
+  });
+
+  it('passes imported preservation through the facility review before any destructive projection', async () => {
+    const definition = utilityVisualizationFixture(), { fixture, component, store, submit } = setup(definition);
+    const snapshot = store.snapshot()!, references = [
+      { path: 'sources.0.selection.guids.0', kind: 'meter' as const, guid: 'meter-a', reason: 'not-transferred' as const }
+    ];
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
+      meters: [meter({ guid: 'meter-a', facilityId: 'facility-b' })],
+      savedVisualizations: [{ ...snapshot.savedVisualizations[0], revision: snapshot.savedVisualizations[0].revision + 1, preservation: { references, transfers: [] } }] }); fixture.detectChanges();
+    await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] }); fixture.detectChanges();
+    expect(component.facilityChange()).toBeUndefined();
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ kind: 'retarget', reviewedDefinition: expect.objectContaining({
+      sources: definition.sources, series: definition.series
+    }) }));
+    expect(component.editor.record()!.preservation!.references).toEqual(references);
+  });
+
+  it.each(['failed', 'refresh-required'] as const)('cancels only rejected facility proposals, retaining %s publication protection', async state => {
+    const { fixture, component, store, submit } = setup(utilityVisualizationFixture());
+    const snapshot = store.snapshot()!;
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
+      meters: [meter({ guid: 'meter-a', facilityId: 'facility-b' })] }); fixture.detectChanges();
+    const original = structuredClone(component.editor.definition());
+    submit.mockImplementationOnce(async command => ({ state, command, error: new Error('Save needs recovery') } as any));
+    await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    await component.confirmFacilities(); fixture.detectChanges();
+    expect(component.editor.needsProtection()).toBe(true);
+    component.cancelFacilities(); fixture.detectChanges();
+    expect(component.editor.definition()).toEqual(original);
+    if (state === 'failed') {
+      expect(component.facilityChange()).toBeUndefined();
+      expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+      expect(component.editor.needsProtection()).toBe(false); expect(component.editor.canEdit()).toBe(true);
+      await expect(component.editor.retry()).resolves.toBe(true);
+      expect(submit).toHaveBeenCalledOnce();
+    } else {
+      expect(component.facilityChange()).toBeDefined();
+      expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
+      expect(component.editor.state()).toBe('refresh-required'); expect(component.editor.needsProtection()).toBe(true);
+      expect(submit).toHaveBeenCalledOnce();
+    }
+  });
+
+  it('keeps incomplete child input and rejects a catalog-changed facility review', async () => {
+    const { fixture, component, store, submit } = setup(utilityVisualizationFixture());
+    const snapshot = store.snapshot()!;
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
+      meters: [meter({ guid: 'meter-a', facilityId: 'facility-b' })] }); fixture.detectChanges();
+    const periods = fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
+    periods.form.controls.kind.setValue('fixed'); periods.form.controls.start.setValue('2026-01-01'); fixture.detectChanges();
+    await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    expect(component.facilityChange()).toBeUndefined(); expect(submit).not.toHaveBeenCalled();
+    expect(periods.form.controls.start.value).toBe('2026-01-01');
+    periods.useSaved(); fixture.detectChanges();
+    await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    store.publish({ ...store.snapshot()!, facilities: [...store.facilities(), { ...snapshot.facilities[0], guid: 'facility-c' }] }); fixture.detectChanges();
+    expect(component.facilityChangeStale()).toBe(true);
+    await component.confirmFacilities(); expect(submit).not.toHaveBeenCalled();
+    component.cancelFacilities();
+  });
   it('protects invalid child field drafts through metadata edits and explicitly discards them', async () => {
     const { component, fixture } = setup();
     const periods = fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
@@ -92,7 +172,9 @@ describe('visualization workbench', () => {
     const prepareCreate = vi.fn((value: VisualizationDefinition) => ({ kind: 'create' as const, accountGuid: value.accountGuid, guid: 'new-identity', definition: value, createdDate: '2026-11-12T00:00:00.000Z' }));
     const submit = vi.fn(async (command: any) => ({ state: 'committed', value: command.kind === 'create'
       ? { ...getNewIdbSavedVisualization(command.definition), guid: command.guid }
-      : { ...store.savedVisualizations()[0], definition: command.definition, revision: command.expectedRevision + 1 }, command, referenceIssues: [] }));
+      : { ...store.savedVisualizations()[0], definition: command.kind === 'retarget'
+        ? prepareVisualizationFacilityChange(store.savedVisualizations()[0].definition as VisualizationDefinition, command.targetFacilities, store.snapshot()!, store.savedVisualizations()[0].preservation?.references).definition
+        : command.definition, revision: command.expectedRevision + 1 }, command, referenceIssues: [] }));
     TestBed.configureTestingModule({ imports: [WorkbenchModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: store }, { provide: WorkspaceNavigationService, useValue: { routeState: route } },
       { provide: SavedVisualizationCommands, useValue: { submit, prepareCreate } }
@@ -109,7 +191,7 @@ describe('visualization workbench', () => {
     expect(component.editor.needsProtection()).toBe(false);
   });
   it.each(VISUALIZATION_CHART_CHOICES)('shows the saved $label chart choice and all selected data sources', choice => {
-    const definition = createVisualizationSetupDefinition({ name: 'Mixed chart', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+    const definition = createVisualizationSetupDefinition({ name: 'Mixed chart', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: createVisualizationChart(choice.value), sourceKinds: ['utility', 'predictor', 'analysis'] });
     const { fixture, component } = setup(definition);
     const root = fixture.nativeElement as HTMLElement;

@@ -7,13 +7,13 @@ describe('visualization reconciliation', () => {
     expect(visualizationIntentEqual([1, 2], [2, 1])).toBe(false);
   });
   it('normalizes metadata without changing source, scope, or date intent', () => {
-    const original = createVisualizationDefinition(' Original ', 'a', { kind: 'facility', facilityGuid: 'f' }, 'energy-use');
+    const original = createVisualizationDefinition(' Original ', 'a', { kind: 'fixed', facilityGuids: ['f'] }, 'energy-use');
     const normalized = normalizeVisualizationIntent({ ...original, appearance: { title: '   ', legend: false } });
     expect(normalized.name).toBe('Original'); expect(normalized.appearance).toEqual({ legend: false });
-    expect(normalized.sources).toEqual(original.sources); expect(normalized.period).toEqual(original.period); expect(normalized.scope).toEqual(original.scope);
+    expect(normalized.sources).toEqual(original.sources); expect(normalized.period).toEqual(original.period); expect(normalized.facilitySelection).toEqual(original.facilitySelection);
   });
   it('merges safe fields while retaining the unresolved conflict baseline', () => {
-    const base = createVisualizationDefinition('Original', 'a', { kind: 'portfolio' }, 'utility');
+    const base = createVisualizationDefinition('Original', 'a', { kind: 'all' }, 'utility');
     const local = { ...base, name: 'Mine', appearance: { legend: false } };
     const saved = { ...base, name: 'Saved', appearance: { legend: true, title: 'Saved title' } };
     const first = reconcileVisualizationIntent(base, local, saved);
@@ -23,9 +23,9 @@ describe('visualization reconciliation', () => {
     expect(second.conflicts).toEqual([]); expect(second.value.name).toBe('Saved'); expect(second.value.appearance.legend).toBe(false);
   });
   it('reviews interconnected configuration as one group instead of constructing a hybrid topology', () => {
-    const base = createVisualizationDefinition('Original', 'a', { kind: 'portfolio' }, 'utility');
+    const base = createVisualizationDefinition('Original', 'a', { kind: 'all' }, 'utility');
     const local = { ...base, period: { kind: 'rolling' as const, count: 12, unit: 'month' as const, anchor: 'latest-data' as const, basis: 'calendar' as const, includeIncomplete: false } };
-    const saved = { ...base, sources: createVisualizationDefinition('Original', 'a', { kind: 'portfolio' }, 'predictor').sources };
+    const saved = { ...base, sources: createVisualizationDefinition('Original', 'a', { kind: 'all' }, 'predictor').sources };
     const result = reconcileVisualizationIntent(base, local, saved);
     expect(result.conflicts.map(value => value.id)).toEqual(['configuration']);
     expect(result.value.sources).toEqual(local.sources);
@@ -34,7 +34,7 @@ describe('visualization reconciliation', () => {
     expect(selected.value).not.toHaveProperty('chart');
   });
   it('reconciles metadata independently while retaining the complete mixed-sourceKind chart setup', () => {
-    const base = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+    const base = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const local = { ...base, name: 'My name' };
     const saved = { ...base, appearance: { legend: false, title: 'Saved title' } };

@@ -18,7 +18,7 @@ export function librarySnapshot(): AccountWorkspaceSnapshot {
     facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: [] } as unknown as AccountWorkspaceSnapshot;
 }
 export function libraryRecord(name = 'Saved visualization', guid = 'visualization-a') {
-  return getNewIdbSavedVisualization(createVisualizationDefinition(name, 'account-a', { kind: 'portfolio' }, 'utility'),
+  return getNewIdbSavedVisualization(createVisualizationDefinition(name, 'account-a', { kind: 'all' }, 'utility'),
     { guid, createdDate: new Date('2026-01-01'), modifiedDate: new Date('2026-01-01') });
 }
 export function configureLibraryTest(imports: unknown[] = []) {

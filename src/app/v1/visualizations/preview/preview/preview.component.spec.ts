@@ -1,3 +1,5 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { visualizationSnapshot } from '../../testing/visualization-test-fixtures';
 import { Component, Input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { createVisualizationDefinition, createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
@@ -16,6 +18,10 @@ const identity: PreviewIdentity = { accountGuid: 'account-a', definitionGuid: 'v
 async function settle() { for (let i = 0; i < 8; i++) await Promise.resolve(); }
 
 describe('visualization preview presentation', () => {
+  beforeEach(() => { const store = new AccountWorkspaceStore(), snapshot = visualizationSnapshot();
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }] });
+    TestBed.configureTestingModule({ providers: [{ provide: AccountWorkspaceStore, useValue: store }] });
+  });
   it('pages dense underlying values without truncating print output or changing the saved definition', async () => {
     const definition = utilityVisualizationFixture(), evidence = visualizationEvidenceFixture(definition);
     const rows = Array.from({ length: 130 }, (_, index) => [`Observation ${index}`, String(index)]);
@@ -43,7 +49,7 @@ describe('visualization preview presentation', () => {
   it('explains incomplete setup without a fabricated chart', () => {
     TestBed.configureTestingModule({ imports: [PreviewModule] });
     const fixture = TestBed.createComponent(PreviewComponent);
-    fixture.componentRef.setInput('definition', createVisualizationDefinition('Utility setup', 'account-a', { kind: 'portfolio' }, 'utility'));
+    fixture.componentRef.setInput('definition', createVisualizationDefinition('Utility setup', 'account-a', { kind: 'all' }, 'utility'));
     fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Complete source and chart setup');
     expect(fixture.nativeElement.querySelector('table')).toBeNull();
@@ -61,7 +67,7 @@ describe('visualization preview presentation', () => {
     TestBed.configureTestingModule({ imports: [PreviewModule] });
     const fixture = TestBed.createComponent(PreviewComponent);
     fixture.componentRef.setInput('definition', createVisualizationSetupDefinition({ name: 'Usage versus temperature', accountGuid: 'account-a',
-      scope: { kind: 'portfolio' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] }));
+      facilitySelection: { kind: 'all' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] }));
     fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelector('[role="status"]')!.textContent).toContain('Scatter visualization');

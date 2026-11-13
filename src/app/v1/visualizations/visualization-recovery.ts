@@ -1,4 +1,5 @@
-import { VisualizationDefinition, VisualizationScope, VisualizationSource } from '@domain/visualizations/visualization-definition';
+import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
+import { VisualizationDefinition, VisualizationFacilitySelection, VisualizationSource } from '@domain/visualizations/visualization-definition';
 import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { inspectVisualizationReferences, VisualizationReferenceCatalog } from '@data/account-workspace/visualization-reference-inspection';
@@ -20,7 +21,7 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
       || issue.path.startsWith('series.') && definition.series[Number(issue.path.split('.')[1])]?.sourceId === source.id);
     if (!allSources && !sourceIssues) return source;
     affected.add(source.id);
-    cleared.push(`${source.kind}: selected resources, rule anchors, and dependent series`);
+    cleared.push(`${source.kind}: selected resources and dependent series`);
     const copy = { ...source };
     if ('selection' in copy) delete copy.selection;
     if (copy.kind === 'utility') delete copy.charge;
@@ -50,11 +51,12 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
   return { definition: result, cleared, referencePaths: issues.map(issue => issue.path) };
 }
 
-export function reviewVisualizationScopeCopy(definition: VisualizationDefinition, scope: VisualizationScope,
+export function reviewVisualizationFacilityCopy(definition: VisualizationDefinition, selection: VisualizationFacilitySelection,
   catalog: VisualizationReferenceCatalog): VisualizationResetReview {
-  const candidate = { ...structuredClone(definition), scope: structuredClone(scope), name: `${definition.name} (Copy)` };
-  const issues = inspectVisualizationReferences(candidate, catalog).filter(issue => issue.path !== 'scope.facilityGuid');
-  // Rules without explicit anchors intentionally follow the new scope, but this must be reviewed.
+  const changed = prepareVisualizationFacilityChange(definition, selection, catalog);
+  const candidate = { ...changed.definition, name: `${definition.name} (Copy)` };
+  const issues = inspectVisualizationReferences(candidate, catalog).filter(issue => !issue.path.startsWith('facilitySelection.'));
+  // Rules without explicit anchors intentionally follow the selected facilities, but this must be reviewed.
   const review = reviewVisualizationReset(candidate, issues);
-  return { ...review, cleared: ['New independent identity and explicitly selected scope', ...review.cleared] };
+  return { ...review, cleared: ['New independent identity and explicitly selected facilities', ...changed.cleared, ...review.cleared] };
 }

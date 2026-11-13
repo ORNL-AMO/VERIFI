@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { Component, DestroyRef, Input, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,7 +10,7 @@ import { EnergyUnitOptions, VolumeLiquidOptions, VolumeGasOptions, MassUnitOptio
 
 export interface UtilitySourceFormValue {
   measure: UtilityVisualizationSource['measure'];
-  mode: 'meters' | 'groups' | 'facilities' | 'rule';
+  mode: 'sources' | 'meters' | 'groups' | 'facilities' | 'rule';
   guids: string[];
   facilityGuids: string[];
   groupGuids: string[];
@@ -30,7 +31,7 @@ export interface UtilitySourceFormValue {
 
 export function utilitySourceFormValue(source: UtilityVisualizationSource): UtilitySourceFormValue {
   const selection = source.selection;
-  return { measure: source.measure, mode: selection?.kind === 'rule' ? 'rule' : selection?.resource === 'meter-group' ? 'groups'
+  return { measure: source.measure, mode: source.selectionMode === 'source' ? 'sources' : selection?.kind === 'rule' ? 'rule' : selection?.resource === 'meter-group' ? 'groups'
     : selection?.resource === 'facility' ? 'facilities' : 'meters', guids: selection?.kind === 'fixed' ? [...selection.guids] : [],
     facilityGuids: selection?.kind === 'rule' ? [...selection.filter.facilityGuids ?? []] : [],
     groupGuids: selection?.kind === 'rule' ? [...selection.filter.groupGuids ?? []] : [],
@@ -65,17 +66,18 @@ export function applyUtilitySourceForm(definition: VisualizationDefinition, sour
   if (value.measure === 'energy') settings.energyTreatment = value.treatmentBinding === 'owner' ? { kind: 'owner' }
     : { kind: 'pinned', value: value.treatment };
   else if (measureChanged) delete settings.energyTreatment;
-  const { charge: _charge, ...base } = original;
+  const { charge: _charge, selection: _selection, ...base } = original;
   const charge = value.measure === 'charge' && value.chargeMeter && value.chargeGuid
     ? { meterGuid: value.chargeMeter, chargeGuid: value.chargeGuid, measure: value.chargeMeasure } : undefined;
   const selection: UtilityVisualizationSource['selection'] = charge ? { kind: 'fixed', resource: 'meter', guids: [charge.meterGuid] }
+    : value.mode === 'sources' ? value.utilitySources.length ? { kind: 'rule', resource: 'meter', filter: { utilitySources: value.utilitySources } } : undefined
     : value.mode === 'rule' ? { kind: 'rule', resource: 'meter', filter: {
       ...(value.facilityGuids.length ? { facilityGuids: value.facilityGuids } : {}),
       ...(value.groupGuids.length ? { groupGuids: value.groupGuids } : {}),
       ...(value.utilitySources.length ? { utilitySources: value.utilitySources } : {}),
       ...(value.search.trim() ? { search: value.search.trim() } : {}), includeRetired: value.includeRetired } }
     : { kind: 'fixed', resource: value.mode === 'groups' ? 'meter-group' : value.mode === 'facilities' ? 'facility' : 'meter', guids: value.guids };
-  const source: UtilityVisualizationSource = { ...base, measure: value.measure, selection,
+  const source: UtilityVisualizationSource = { ...base, measure: value.measure, ...(selection ? { selection } : {}), selectionMode: charge ? 'meter' : value.mode === 'sources' ? 'source' : value.mode === 'rule' ? 'rule' : value.mode === 'groups' ? 'group' : value.mode === 'facilities' ? 'facility' : 'meter',
     dataMode: native ? 'billing-period' : 'calendarized', aggregation: native ? 'none' : value.aggregation,
     groupBy: native || value.aggregation === 'none' ? 'meter' : value.groupBy, settings, ...(charge ? { charge } : {}) };
   const metric = utilityMeasureKey(source);
@@ -140,12 +142,12 @@ export class UtilitySourceEditorComponent {
   readonly selectedSource = computed(() => this.contextValue()?.definition.sources.find(source => source.id === this.contextValue()?.sourceId));
   readonly ownerResources = computed(() => {
     const context = this.contextValue();
-    const scope = context?.definition.scope;
+    const scope = context ? resolveVisualizationFacilities(context.definition, this.store.facilities()).scope : undefined;
     const accountGuid = context?.definition.accountGuid;
     const eligible = (item: { accountId: string; facilityId?: string }) => item.accountId === accountGuid
-      && (scope?.kind !== 'facility' || item.facilityId === scope.facilityGuid);
+      && !!item.facilityId && !!scope?.facilityGuids.includes(item.facilityId);
     return { meters: this.store.meters().filter(eligible), groups: this.store.meterGroups().filter(eligible),
-      facilities: this.store.facilities().filter(item => item.accountId === accountGuid && (scope?.kind !== 'facility' || item.guid === scope.facilityGuid)) };
+      facilities: this.store.facilities().filter(item => item.accountId === accountGuid && !!scope?.facilityGuids.includes(item.guid)) };
   });
   readonly options = computed(() => {
     const value = this.value(), resources = this.ownerResources();
@@ -169,7 +171,7 @@ export class UtilitySourceEditorComponent {
     const source = context.definition.sources.find(item => item.id === context.sourceId);
     this.contextValue.set(context);
     if (source?.kind !== 'utility') return;
-    const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid, context.definition.scope, context.sourceId]);
+    const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid, context.sourceId]);
     const fingerprint = JSON.stringify(source);
     if (identity !== this.identity) {
       this.identity = identity; this.hydrate(source);

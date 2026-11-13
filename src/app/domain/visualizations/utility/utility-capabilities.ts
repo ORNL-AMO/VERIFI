@@ -16,7 +16,7 @@ export function utilityCapabilities(source: UtilityVisualizationSource): Visuali
 export function utilityChartSupport(source: UtilityVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
   if (source.selection?.kind === 'rule' && source.selection.resource !== 'meter') reasons.push('Use a matching meter rule with explicit facility or group anchors. Other rule resource kinds are unavailable.');
-  if (chart.kind !== 'time-series' || !['line', 'bar'].includes(chart.type) || chart.stack !== 'none') reasons.push('Utility previews currently support unstacked line and bar charts.');
+  if (chart.kind !== 'time-series' || !['line', 'bar'].includes(chart.type) || chart.stack !== 'none') reasons.push('Utility charts support unstacked line and bar traces.');
   if (source.measure === 'charge' && source.dataMode !== 'billing-period') reasons.push('Detailed charges are available as native bill observations only.');
   if (chart.kind === 'time-series' && ((source.dataMode === 'billing-period') !== (chart.interval === 'native'))) reasons.push('Choose Native for bill observations, or Monthly/Yearly for calendarized data.');
   if (source.dataMode === 'billing-period' && (source.aggregation !== 'none' || source.groupBy !== 'meter')) reasons.push('Native bills retain individual meter occurrences; grouped totals are unavailable.');

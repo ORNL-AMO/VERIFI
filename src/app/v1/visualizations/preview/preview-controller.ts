@@ -1,3 +1,5 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { inject, Injectable, signal, Type } from '@angular/core';
 import { checkVisualizationCompatibility } from '@domain/visualizations/visualization-capabilities';
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -16,6 +18,7 @@ let nextPreviewId = 0;
 /** Preview lifetime and evidence are independent of persistence and autosave acknowledgements. */
 @Injectable()
 export class PreviewController {
+  private readonly workspace = inject(AccountWorkspaceStore);
   private readonly instanceId = ++nextPreviewId;
   private readonly registry = inject(PreviewRegistry);
   private readonly value = signal<PreviewState>({ state: 'inactive', message: 'Preview is inactive.' });
@@ -70,6 +73,9 @@ export class PreviewController {
 
   private async resolve(definition: VisualizationDefinition, identity: PreviewIdentity, generation: number, abort: AbortController): Promise<void> {
     try {
+      const { scope, missingFacilityGuids } = resolveVisualizationFacilities(definition, this.workspace.facilities());
+      if (missingFacilityGuids.length) { this.value.set({ state: 'missing-source', message: 'Review the missing selected facilities.', reasons: missingFacilityGuids }); return; }
+      if (!scope.facilityGuids.length) { this.value.set({ state: 'empty', message: 'No facilities are included in this visualization.' }); return; }
       const dateContext = Object.freeze({ ...await this.registry.dates!.resolve(definition, identity, abort.signal) });
       if (!this.current(generation, abort)) return;
       if (!civilDate(dateContext.calendarDate) || dateContext.latestDataDate !== undefined && !civilDate(dateContext.latestDataDate)
@@ -81,7 +87,7 @@ export class PreviewController {
         const provider = this.registry.provider(source.kind)!;
         const chartSupport = provider.supportsChart(source, definition.chart!);
         const capabilities = provider.describe(source);
-        const request: VisualizationSourceRequest = { identity: { ...identity, requestId, scope: definition.scope, sourceId: source.id },
+        const request: VisualizationSourceRequest = { identity: { ...identity, requestId, scope, sourceId: source.id },
           source, chart: definition.chart!, period: definition.period, comparison: definition.comparison,
           series: definition.series.filter(series => series.sourceId === source.id), dateContext };
         // Unsupported transformations are not a request to perform a different calculation.

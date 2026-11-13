@@ -1,3 +1,4 @@
+import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { vi } from 'vitest';
 import { dbConfig } from '@data/indexedDB/_dbConfig';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
@@ -20,9 +21,34 @@ describe('saved visualization backup transactions in Chromium', () => {
   beforeEach(async () => { harness = await IndexedDbTestHarness.create('visualization-backup'); });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
 
+  it.each(['Account', 'Facility'] as const)('round trips resource-bearing provider appearance in a %s backup', async kind => {
+    const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    const { resourceGuid: _resource, ...series } = base.series[0];
+    const definition = { ...base, series: [{ ...series, overrides: [
+      { seriesId: 'utility:meter-a', visible: false, color: '#123456', lineStyle: 'dotted' as const, order: 0 }
+    ] }] };
+    const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)] };
+    const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account'
+      ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    const service = createService();
+    let accountGuid: string;
+    if (kind === 'Account') accountGuid = (await service.importAccountBackupFile(backup, 0)).guid;
+    else {
+      await harness.seed({ accounts: [{ guid: 'destination', name: 'Destination' }] });
+      accountGuid = 'destination'; await service.importFacilityBackupFile(backup, accountGuid, 0);
+    }
+    await harness.reopen();
+    const restored = await readSnapshot(accountGuid), decoded = readSavedVisualization(restored.savedVisualizations[0]);
+    expect(decoded.state).toBe('valid');
+    if (!('definition' in decoded)) throw new Error('Expected current restored intent.');
+    expect(decoded.definition.series[0].overrides).toEqual([{ seriesId: `utility:${restored.meters[0].guid}`,
+      visible: false, color: '#123456', lineStyle: 'dotted', order: 0, accountGuid }]);
+    expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(decoded.definition);
+  });
+
   it.each(['Account', 'Facility'] as const)('round trips incomplete mixed-family Scatter intent in a %s backup without fabricating bindings', async kind => {
     const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
+      facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a'] }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition, 'scatter-setup')] };
     const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account'
       ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
@@ -37,10 +63,10 @@ describe('saved visualization backup transactions in Chromium', () => {
     const restored = await readSnapshot(accountGuid); expect(restored.savedVisualizations).toHaveLength(1);
     const record = restored.savedVisualizations[0], decoded = readSavedVisualization(record);
     expect(record.guid).not.toBe('scatter-setup'); expect(record.accountId).toBe(accountGuid);
-    expect(record.facilityId).toBe(restored.facilities[0].guid); expect(record.recordVersion).toBe(1);
+    expect(record.facilityId).toBeUndefined(); expect(savedVisualizationFacilityGuid(record, restored.facilities)).toBe(restored.facilities[0].guid); expect(record.recordVersion).toBe(1);
     expect(record.preservation.references).toEqual([]); expect(decoded.state).toBe('setup-required');
     if (!('definition' in decoded)) throw new Error('Expected readable restored setup.');
-    expect(decoded.definition).toEqual({ ...definition, accountGuid, scope: { kind: 'facility', facilityGuid: restored.facilities[0].guid } });
+    expect(decoded.definition).toEqual({ ...definition, accountGuid, facilitySelection: { kind: 'fixed', facilityGuids: [restored.facilities[0].guid] } });
     expect(decoded.definition.chart).not.toHaveProperty('xSeriesId'); expect(decoded.definition.chart).not.toHaveProperty('ySeriesId');
     const reexported = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored))));
     expect(reexported.savedVisualizations[0].definition).toEqual(decoded.definition);
@@ -118,7 +144,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     snapshot.facilities = [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b', name: 'Facility B' }];
     snapshot.meterGroups = [...snapshot.meterGroups, { ...snapshot.meterGroups[0], guid: 'group-b', facilityId: 'facility-b' }];
     snapshot.meters = [...snapshot.meters, { ...snapshot.meters[0], guid: 'meter-b', facilityId: 'facility-b', groupId: 'group-b' }];
-    const definition = utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' });
+    const definition = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
     snapshot.savedVisualizations = [savedVisualizationFixture({ ...definition,
       sources: [{ ...definition.sources[0], selection: { kind: 'fixed', resource: 'meter', guids: ['meter-b'] } }],
       series: [{ ...definition.series[0], resourceGuid: 'meter-b' }] } as any)];
@@ -133,7 +159,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(decoded.state).toBe('repair-required');
     expect(restored.savedVisualizations[0].preservation.references.map(ref => ref.reason)).toEqual(['foreign', 'foreign']);
     const intent = restored.savedVisualizations[0].definition as ReturnType<typeof utilityVisualizationFixture>;
-    expect(intent.series[0].resourceGuid).toBe(restored.meters.find(item => item.facilityId !== restored.savedVisualizations[0].facilityId).guid);
+    expect(intent.series[0].resourceGuid).toBe(restored.meters.find(item => item.facilityId !== savedVisualizationFacilityGuid(restored.savedVisualizations[0], restored.facilities)).guid);
     expect(service.visualizationImportSummary()).toMatchObject({ repairRequired: 1 });
   });
 
@@ -145,7 +171,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     const prepared = preparation.prepare(JSON.parse(JSON.stringify(backup)));
     const foreign = { ...savedVisualizationFixture(utilityVisualizationFixture(), 'foreign-chart'), accountId: 'foreign-account',
       definition: { ...utilityVisualizationFixture(), accountGuid: 'foreign-account' } };
-    await harness.seed({ accounts: [{ ...snapshot.account }, { guid: 'foreign-account' }], facilities: [{ ...oldFacility }],
+    await harness.seed({ accounts: [{ ...snapshot.account }, { guid: 'foreign-account' }], facilities: snapshot.facilities.map(item => ({ ...item })),
       savedVisualizations: [...snapshot.savedVisualizations.map(item => ({ ...item })), { ...foreign }] });
     const before = await harness.getAll('savedVisualizations');
     const service = createService(), original = IndexedDbTransactionContext.prototype.add;
@@ -158,7 +184,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     await service.replaceFacilityBackupFile(prepared, snapshot.account.guid, { ...oldFacility, id: 1 }, 0);
     await harness.reopen();
     const retained = await harness.getAll('savedVisualizations');
-    const portfolio = snapshot.savedVisualizations.find(item => !item.facilityId)!;
+    const portfolio = snapshot.savedVisualizations.find(item => savedVisualizationFacilityGuid(item, snapshot.facilities) === undefined)!;
     expect(retained.map(item => item.guid)).toEqual([portfolio.guid, foreign.guid]);
     expect(retained[0].definition).toEqual(portfolio.definition);
     expect(service.visualizationImportSummary()).toMatchObject({ total: 0, locked: 0, repairRequired: 0 });
