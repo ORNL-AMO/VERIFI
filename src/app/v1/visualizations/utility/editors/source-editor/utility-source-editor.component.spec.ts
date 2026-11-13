@@ -6,10 +6,43 @@ import { utilityMeasureKey } from '@domain/visualizations/utility/utility-select
 import type { UtilityVisualizationSource, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { UtilityEditorsModule } from '../utility-editors.module';
 import { applyUtilitySourceForm, utilitySourceFormValue, UtilitySourceEditorComponent } from './utility-source-editor.component';
+import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
+import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 
 function source(definition = utilityVisualizationFixture()) { return definition.sources[0] as UtilityVisualizationSource; }
 
 describe('utility source editing', () => {
+  it.each([{ guids: ['meter-a', 'meter-b', 'meter-c'] }, { guids: ['meter-a'] }])('retains exact item types and owner-qualified order when resources change to $guids', ({ guids }) => {
+    const base = utilityVisualizationFixture();
+    const foreign = { resourceGuid: 'meter-a', accountGuid: 'foreign-account', order: 99 };
+    const definition: VisualizationDefinition = { ...base,
+      sources: [{ ...source(base), selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } }], series: [
+        { id: 'a', sourceId: source(base).id, metric: 'energy', resourceGuid: 'meter-a', traceType: 'bar', axis: 'left',
+          overrides: [{ resourceGuid: 'meter-a', order: 1 }, foreign] },
+        { id: 'b', sourceId: source(base).id, metric: 'energy', resourceGuid: 'meter-b', traceType: 'line', axis: 'left',
+          overrides: [{ resourceGuid: 'meter-b', order: 0 }] }
+      ] };
+    const changed = applyUtilitySourceForm(definition, source(definition).id, { ...utilitySourceFormValue(source(definition)), guids });
+    expect(decodeVisualizationDefinition(changed).state).toBe('valid');
+    expect(changed.series).toHaveLength(1); expect(changed.series[0].resourceGuid).toBeUndefined();
+    expect(changed.series[0].overrides).toEqual(expect.arrayContaining([
+      expect.objectContaining({ resourceGuid: 'meter-a', accountGuid: 'account-a', order: 1, traceType: 'bar' }),
+      expect.objectContaining({ resourceGuid: 'meter-b', accountGuid: 'account-a', order: 0, traceType: 'line' }), foreign
+    ]));
+  });
+  it('keeps explicitly ordered items before unordered exact siblings when folding them into matching intent', () => {
+    const base = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...base, series: [
+      { id: 'unordered', sourceId: source(base).id, metric: 'energy', resourceGuid: 'meter-b', axis: 'left' },
+      { id: 'ordered', sourceId: source(base).id, metric: 'energy', resourceGuid: 'meter-a', traceType: 'bar', axis: 'left', overrides: [{ resourceGuid: 'meter-a', order: 5 }] }
+    ] };
+    const metadata = ['meter-a', 'meter-b'].map(resourceGuid => ({ id: resourceGuid, sourceId: source(base).id, metric: 'energy', resourceGuid,
+      label: resourceGuid, dimension: 'energy', unit: 'kWh', additive: true }));
+    const changed = applyUtilitySourceForm(definition, source(definition).id,
+      { ...utilitySourceFormValue(source(definition)), guids: ['meter-a', 'meter-b', 'meter-c'] });
+    expect(resolveVisualizationSeries(changed, metadata).map(item => item.metadata.resourceGuid))
+      .toEqual(resolveVisualizationSeries(definition, metadata).map(item => item.metadata.resourceGuid));
+  });
   it('retains explicit Source selection and never broadens a cleared Source filter to all meters', () => {
     const base = utilityVisualizationFixture();
     const definition: VisualizationDefinition = { ...base, sources: [{ ...source(base), selectionMode: 'source',
