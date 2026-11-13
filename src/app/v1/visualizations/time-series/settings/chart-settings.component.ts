@@ -131,7 +131,11 @@ export class ChartSettingsComponent implements OnChanges {
     const effective = resolveVisualizationSeries(definition, this.context.resolvedSeries ?? [], true).find(item => item.metadata.id === row.key)?.selected ?? original;
     const customChanged = row.form.controls.customColor.dirty;
     const defaultType = definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line';
-    const traceType = value.traceType !== (effective.traceType ?? defaultType) ? value.traceType : effective.traceType;
+    const owned = (original.overrides ?? []).filter(item => (item.accountGuid ?? definition.accountGuid) === definition.accountGuid);
+    const explicit = owned.find(item => item.resourceGuid !== undefined && item.resourceGuid === row.resourceGuid)
+      ?? owned.find(item => item.seriesId !== undefined && item.seriesId === row.key);
+    const retainedType = original.resourceGuid ? original.traceType : explicit?.traceType;
+    const traceType = value.traceType !== (effective.traceType ?? defaultType) ? value.traceType : retainedType;
     const appearance = { ...(value.label.trim() ? { label: value.label.trim() } : {}), axis: value.axis, visible: value.visible,
       ...(traceType ? { traceType } : {}),
       ...(row.form.controls.lineStyle.dirty || effective.lineStyle ? { lineStyle: row.form.controls.lineStyle.dirty ? value.lineStyle : effective.lineStyle } : {}),
