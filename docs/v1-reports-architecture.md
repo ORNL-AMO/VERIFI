@@ -4,6 +4,8 @@ The Reports feature lives under [`src/app/v1/reports`](../src/app/v1/reports). I
 
 Account report Setup ends with a Delete report action using the existing report deletion command and shell confirmation portal. Confirmation pauses autosave and permits deletion of incomplete drafts. Cancel or failure preserves the draft; only a committed deletion discards it and returns to the account Reports dashboard. The workbench owns the deletion coordinator so removing the selected report can unmount Setup without interrupting the return navigation. Analyses, source data, and other reports remain unchanged.
 
+Account and facility workbench breadcrumbs show context names without a Reports suffix or the current report name; the report name stays in the heading. Account links open account Reports and facility links open that facility’s Reports dashboard. Single-facility workspaces retain the compact Reports breadcrumb.
+
 ## Ownership and extension pattern
 
 - `catalog/` owns static, scope-qualified report metadata: labels, icons, Other Impacts availability, applicable stages, implemented content, and analysis-return support. The [catalog](../src/app/v1/reports/catalog/report-catalog.ts) is exhaustive over the existing saved report types; it does not own calculations, validation policy, or persistence commands. Account Analysis and facility Analysis remain distinct definitions.
