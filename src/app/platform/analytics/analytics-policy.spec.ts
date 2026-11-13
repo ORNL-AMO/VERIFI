@@ -18,16 +18,16 @@ describe('analytics deployment policy', () => {
 describe('analytics route policy', () => {
   it.each([
     '/v1', '/v1/', '/v1/data/meters', '/v1?tab=home', '/v1#overview',
-    '/p1', '/p1/settings', '/p1;mode=preview', '/%76%31/data', '/v1(aux:help)',
-    '#/v1/data', 'file:///app/index.html#/p1?tab=home',
+    '/v1/settings', '/v1;mode=preview', '/%76%31/data', '/v1(aux:help)',
+    '#/v1/data', 'file:///app/index.html#/v1?tab=home',
     'https://verifi.ornl.gov/v1/data?tab=home#details', '/account/v1/data',
-    '/v1#/welcome', '/p1#/welcome', '/v1/data?tab=home#/welcome',
-    'https://verifi.ornl.gov/v1#/welcome', 'https://verifi.ornl.gov/p1#/welcome'
+    '/v1#/welcome', '/v1/data?tab=home#/welcome',
+    'https://verifi.ornl.gov/v1#/welcome'
   ])('excludes the route %s', path => {
     expect(isAnalyticsRouteAllowed(path)).toBe(false);
   });
 
-  it.each(['/welcome', '/', '/v10', '/p10', '/help/v1-guide', '/help?return=/v1', '/help#v1', '/welcome#/v1', 'https://verifi.ornl.gov/welcome#/p1'])('allows the legacy route %s', path => {
+  it.each(['/welcome', '/', '/v10', '/workspace-v1', '/help/v1-guide', '/help?return=/v1', '/help#v1', '/welcome#/v1', 'https://verifi.ornl.gov/welcome#/v1/settings'])('allows the legacy route %s', path => {
     expect(isAnalyticsRouteAllowed(path)).toBe(true);
   });
 
@@ -38,7 +38,7 @@ describe('analytics route policy', () => {
 
   it.each([
     ['/v1#/welcome', '/v1'],
-    ['/p1#/welcome', '/p1'],
+    ['https://verifi.ornl.gov/v1#/welcome', '/v1'],
     ['https://verifi.ornl.gov/account/abc123def#/welcome', '/account/abc123def'],
     ['#/account/abc123def?tab=home#details', '/account/abc123def'],
     ['file:///app/index.html#/account/abc123def?tab=home#details', '/account/abc123def']

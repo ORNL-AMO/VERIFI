@@ -172,9 +172,12 @@
   gap: .75rem;
 }
 
-.v1-welcome__action-grid,
-.v1-experience-switcher__options {
+.v1-welcome__action-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.v1-experience-switcher__options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .v1-welcome__action {

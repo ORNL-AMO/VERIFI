@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, NO_ERRORS_SCHEMA, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, RouterModule, UrlTree } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
@@ -16,7 +16,7 @@ import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 
 @NgModule({
   declarations: [HomePageComponent],
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule.forRoot([])],
   schemas: [NO_ERRORS_SCHEMA]
 })
 class HomePageComponentTestModule { }
@@ -33,9 +33,6 @@ describe('HomePageComponent', () => {
 
   beforeEach(() => {
     accountCatalog = signal([]);
-    router = {
-      navigateByUrl: vi.fn()
-    };
     backupImportCoordinator = {
       prepareTextBackup: vi.fn().mockReturnValue({}),
       importNewAccount: vi.fn().mockImplementation(async () => {
@@ -63,13 +60,13 @@ describe('HomePageComponent', () => {
         { provide: BackupImportCoordinator, useValue: backupImportCoordinator },
         { provide: ImportBackupModalService, useValue: { showModal: new BehaviorSubject(false) } },
         { provide: ToastNotificationsService, useValue: { showToast: vi.fn() } },
-        { provide: Router, useValue: router },
         { provide: Title, useValue: { setTitle: vi.fn() } },
         { provide: Meta, useValue: { updateTag: vi.fn() } },
         LoadingService
       ]
     });
 
+    router = { navigateByUrl: vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true) };
     loadingService = TestBed.inject(LoadingService);
     fixture = TestBed.createComponent(HomePageComponent);
     fixture.detectChanges();
@@ -78,6 +75,20 @@ describe('HomePageComponent', () => {
   afterEach(() => {
     fixture.destroy();
     vi.unstubAllGlobals();
+  });
+
+  it('offers only the unified workspace as an alternative to the current experience', () => {
+    const choices = fixture.nativeElement.querySelector('[aria-label="VERIFI experience options"]');
+    const links = choices.querySelectorAll('a');
+    expect(choices.children).toHaveLength(2);
+    expect(choices.querySelector('[aria-current="page"]')?.textContent).toContain('Current VERIFI');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute('href')).toBe('/v1');
+
+    links[0].click();
+
+    const destination = router.navigateByUrl.mock.calls.at(-1)?.[0] as UrlTree;
+    expect(TestBed.inject(Router).serializeUrl(destination)).toBe('/v1');
   });
 
   it('navigates to account home after example data loading completes', () => {

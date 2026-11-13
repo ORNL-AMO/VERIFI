@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule, UrlTree } from '@angular/router';
 import { signal } from '@angular/core';
 import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
@@ -51,6 +51,21 @@ describe('WelcomeComponent', () => {
 
   afterEach(() => {
     TestBed.inject(NotificationService).dismissAll();
+  });
+
+  it('offers only the established workspace as an alternative to v1', () => {
+    const choices = fixture.nativeElement.querySelector('[aria-label="VERIFI experience options"]');
+    const links = choices.querySelectorAll('a');
+    expect(choices.children).toHaveLength(2);
+    expect(choices.querySelector('[aria-current="page"]')?.textContent).toContain('You are in v1');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute('href')).toBe('/welcome');
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+
+    links[0].click();
+
+    expect(router.serializeUrl(navigate.mock.calls.at(-1)?.[0] as UrlTree)).toBe('/welcome');
   });
 
   it('opens the selected welcome panel from its graphic tile', () => {

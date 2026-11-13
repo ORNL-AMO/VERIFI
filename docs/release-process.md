@@ -49,7 +49,7 @@ Manual dispatch runs QA after the test gate. When dispatched from `develop` or `
 
 The [build template](../.github/workflows/template_build.yml) creates `web-dist` for the release web deployment and `dist` for QA. The deployment workflow only consumes the appropriate artifact; it never rebuilds the application.
 
-Build callers explicitly supply `build-configuration`: the release web flow uses `production` for `master` and `dev-srv` for `develop`; QA always uses `dev-srv`, even when manually dispatched from `master`. `dev-srv` keeps production Angular optimizations but sets `analyticsEnabled: false`, so neither the develop site nor the QA site loads the Google tag or sends analytics events. Production browser collection also requires HTTPS on `verifi.ornl.gov`; `/v1` and `/p1` route segments are excluded in every runtime. Released Electron analytics remain enabled on eligible routes.
+Build callers explicitly supply `build-configuration`: the release web flow uses `production` for `master` and `dev-srv` for `develop`; QA always uses `dev-srv`, even when manually dispatched from `master`. `dev-srv` keeps production Angular optimizations but sets `analyticsEnabled: false`, so neither the develop site nor the QA site loads the Google tag or sends analytics events. Production browser collection also requires HTTPS on `verifi.ornl.gov`; `/v1` route segments are excluded in every runtime. Released Electron analytics remain enabled on eligible routes.
 
 CI checks the build selection with `node --test .github/scripts/analytics-build.test.cjs`, exercising the reusable build step with a recording substitute for npm so these checks do not publish or compile artifacts.
 
