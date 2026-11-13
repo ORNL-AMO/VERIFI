@@ -199,6 +199,12 @@ export class VisualizationEditorSession {
     return this.flush();
   }
 
+  /** Cancel only a rejected inclusion proposal; a committed write still requires publication recovery. */
+  discardRetarget(): void {
+    if (!this.pendingRetarget() || this.saving() || this.unverified) return;
+    this.discard();
+  }
+
   discard(): void {
     if (this.saving() || this.unverified) return;
     this.clearTimer(); this.repair = undefined; this.pendingRetarget.set(undefined); this.conflictsValue.set([]); this.errorValue.set(undefined);
