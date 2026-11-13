@@ -91,11 +91,23 @@ export function applyUtilitySourceForm(definition: VisualizationDefinition, sour
     const wildcard = ownSeries.find(item => !item.resourceGuid);
     const basis: VisualizationSeries = wildcard ?? { id: ownSeries[0].id, sourceId, metric, axis: ownSeries[0].axis };
     const { overrides: priorOverrides, ...shared } = basis;
-    const overrides: readonly VisualizationSeriesOverride[] = groupingChanged ? [] : [...priorOverrides ?? [], ...ownSeries.filter(item => !!item.resourceGuid).map((item, index) => ({
-      resourceGuid: item.resourceGuid!, accountGuid: definition.accountGuid, axis: item.axis, ...(wildcard ? {} : { order: index }),
-      ...(item.label ? { label: item.label } : {}), ...(item.color ? { color: item.color } : {}),
-      ...(item.lineStyle ? { lineStyle: item.lineStyle } : {}), ...(item.visible !== undefined ? { visible: item.visible } : {})
-    }))];
+    const ownOrder = (item: VisualizationSeries) => item.overrides?.find(override => override.resourceGuid === item.resourceGuid
+      && (override.accountGuid ?? definition.accountGuid) === definition.accountGuid)?.order;
+    // Exact declarations used to order by explicit rank before declaration order.
+    // Preserve that effective sequence with compact ranks when folding all of them.
+    const exactOrder = wildcard ? [] : ownSeries.filter(item => !!item.resourceGuid).sort((left, right) => {
+      const a = ownOrder(left), b = ownOrder(right);
+      return a === b ? 0 : a === undefined ? 1 : b === undefined ? -1 : a - b;
+    });
+    const overrides: readonly VisualizationSeriesOverride[] = groupingChanged ? [] : [...priorOverrides ?? [], ...ownSeries.filter(item => !!item.resourceGuid).map(item => {
+      const order = wildcard ? ownOrder(item) : exactOrder.indexOf(item);
+      return { resourceGuid: item.resourceGuid!, accountGuid: definition.accountGuid, axis: item.axis,
+        ...(order !== undefined ? { order } : {}),
+        ...(item.traceType ? { traceType: item.traceType } : {}),
+        ...(item.label ? { label: item.label } : {}), ...(item.color ? { color: item.color } : {}),
+        ...(item.lineStyle ? { lineStyle: item.lineStyle } : {}), ...(item.visible !== undefined ? { visible: item.visible } : {}) };
+    }), ...ownSeries.filter(item => !!item.resourceGuid).flatMap(item => item.overrides ?? [])
+      .filter(override => (override.accountGuid ?? definition.accountGuid) !== definition.accountGuid)];
     const unique = [...new Map(overrides.map(item => [JSON.stringify([item.accountGuid ?? definition.accountGuid, item.resourceGuid !== undefined ? 'resource' : 'series', item.resourceGuid ?? item.seriesId]), item])).values()];
     const replacement = { ...shared, ...(unique.length ? { overrides: unique } : {}) };
     const firstIndex = series.findIndex(item => item.sourceId === sourceId);
