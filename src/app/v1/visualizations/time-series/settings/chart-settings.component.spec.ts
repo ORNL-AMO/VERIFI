@@ -131,6 +131,14 @@ describe('saved chart settings', () => {
     expect(resolveVisualizationSeries(saved, state.metadata).map(item => item.metadata.label)).toEqual(['Natural Gas']);
     expect(saved.sources[0]).toMatchObject({ groupBy: 'source', selection: { kind: 'rule', resource: 'meter' } });
   });
+  it('keeps an untouched item type inherited when editing presentation', () => {
+    const state = groupedSetup();
+    state.fixture.componentInstance.rows()[0].form.controls.label.setValue('Electricity supply');
+    const saved = state.acknowledge();
+    expect(saved.series[0].overrides?.[0].traceType).toBeUndefined();
+    state.hydrate({ ...saved, chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } });
+    expect(state.fixture.componentInstance.rows()[0].form.controls.traceType.value).toBe('bar');
+  });
   it('orders category members without converting the wildcard and preserves dormant appearance plus new bucket defaults', () => {
     const dormant: VisualizationSeriesOverride = { seriesId: 'utility:source:Dormant', label: 'Archived label', color: '#aabbcc', visible: false };
     const state = groupedSetup([dormant]);
