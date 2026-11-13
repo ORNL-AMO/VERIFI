@@ -37,7 +37,7 @@ function headingAnchors(markdown) {
     const plain = heading
       .replace(/!\[([^\]]*)\]\([^)]*\)/gu, '$1')
       .replace(/\[([^\]]*)\]\([^)]*\)/gu, '$1')
-      .replace(/<[^>]*>/gu, '')
+      .replace(/[<>]/gu, '')
       .replace(/&amp;/gu, '&')
       .replace(/&(?:lt|gt|quot|apos);/gu, '')
       .replace(/[`*_~]/gu, character => character === '_' ? '_' : '')
