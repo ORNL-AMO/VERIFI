@@ -11,7 +11,7 @@ import { VisualizationReference, VisualizationReferenceIssue, visualizationRefer
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { CreateVisualizationCommand, DeleteVisualizationCommand, DuplicateVisualizationCommand,
   UpdateVisualizationCommand, RetargetVisualizationCommand, VisualizationConflictError } from '../visualization-commands.models';
-import { inspectVisualizationReferences, VisualizationReferenceCatalog, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
+import { inspectVisualizationReferences, VisualizationCatalogResource, VisualizationReferenceCatalog, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
 
 const OWNER_STORES: readonly VerifiStoreName[] = ['accounts', 'facilities', 'savedVisualizations'];
 const CATALOG_STORES = VISUALIZATION_CATALOG_STORES;
