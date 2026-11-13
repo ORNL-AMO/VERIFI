@@ -42,6 +42,32 @@ describe('visualization workbench', () => {
     expect(component.facilityChange()).toBeUndefined();
   });
 
+  it.each(['failed', 'refresh-required'] as const)('cancels only rejected facility proposals, retaining %s publication protection', async state => {
+    const { fixture, component, store, submit } = setup(utilityVisualizationFixture());
+    const snapshot = store.snapshot()!;
+    store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
+      meters: [meter({ guid: 'meter-a', facilityId: 'facility-b' })] }); fixture.detectChanges();
+    const original = structuredClone(component.editor.definition());
+    submit.mockImplementationOnce(async command => ({ state, command, error: new Error('Save needs recovery') } as any));
+    await component.requestFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    await component.confirmFacilities(); fixture.detectChanges();
+    expect(component.editor.needsProtection()).toBe(true);
+    component.cancelFacilities(); fixture.detectChanges();
+    expect(component.editor.definition()).toEqual(original);
+    if (state === 'failed') {
+      expect(component.facilityChange()).toBeUndefined();
+      expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+      expect(component.editor.needsProtection()).toBe(false); expect(component.editor.canEdit()).toBe(true);
+      await expect(component.editor.retry()).resolves.toBe(true);
+      expect(submit).toHaveBeenCalledOnce();
+    } else {
+      expect(component.facilityChange()).toBeDefined();
+      expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
+      expect(component.editor.state()).toBe('refresh-required'); expect(component.editor.needsProtection()).toBe(true);
+      expect(submit).toHaveBeenCalledOnce();
+    }
+  });
+
   it('keeps incomplete child input and rejects a catalog-changed facility review', async () => {
     const { fixture, component, store, submit } = setup(utilityVisualizationFixture());
     const snapshot = store.snapshot()!;

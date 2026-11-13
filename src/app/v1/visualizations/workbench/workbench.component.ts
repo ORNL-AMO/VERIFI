@@ -167,6 +167,7 @@ export class WorkbenchComponent {
 
   cancelFacilities(): void {
     if (this.editor.saving() || this.editor.state() === 'refresh-required') return;
+    if (this.facilityChange()) this.editor.discardRetarget();
     if (this.facilityPortal && this.modal.activePortal() === this.facilityPortal) this.modal.hide();
     this.facilityPortal = undefined; this.facilityChange.set(undefined);
   }
