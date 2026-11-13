@@ -76,7 +76,10 @@ function patchItem(definition: VisualizationDefinition, source: UtilityVisualiza
       return result.axis ? result : { ...result, axis: 'left' };
     }
     const overrides = [...series.overrides ?? []], index = overrides.findIndex(entry => overrideMatches(entry, identity, definition.accountGuid));
-    const override = apply(index >= 0 ? overrides[index] : { ...identity, accountGuid: definition.accountGuid });
+    const provider = identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === utilitySeriesId(source.id, identity.resourceGuid!)
+      && (entry.accountGuid ?? definition.accountGuid) === definition.accountGuid) : undefined;
+    const { seriesId: _providerId, resourceGuid: _providerResource, ...retained } = provider ?? {};
+    const override = apply(index >= 0 ? overrides[index] : { ...retained, ...identity, accountGuid: definition.accountGuid });
     const hasValues = Object.keys(override).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key));
     if (index >= 0) { if (hasValues) overrides[index] = override; else overrides.splice(index, 1); }
     else if (hasValues) overrides.push(override);
