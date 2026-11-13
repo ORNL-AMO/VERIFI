@@ -115,6 +115,7 @@ Use this path only when a vital fix cannot wait for the normal `develop` promoti
 - A desktop build, packaging, signing, notarization, upload, tag/draft creation, or packaging-evidence failure prevents production web deployment. Published distributions are never replaced on a production rerun.
 - A development deployment does not depend on the skipped desktop job.
 - If the desktop gate fails, fix the underlying problem and rerun the failed jobs and their dependents. Confirm `web_deploy` runs only after the desktop caller reports success.
+- Desktop retries preserve existing distribution asset IDs. Identical retained packages may be reused; conflicting rebuilt files fail because uploads never overwrite. If rebuilding expired artifacts conflicts with an existing draft, a maintainer must review and discard only that unpublished draft before restarting the trusted release path. Keep its immutable version tag and never replace published assets.
 - If web deployment fails after the desktop gate succeeds, rerun the failed deployment while `web-dist` is retained. Rerun the full workflow after artifact expiration.
 - Never substitute an artifact from another workflow run or commit to bypass the gate.
 

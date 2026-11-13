@@ -360,6 +360,8 @@ test('production workflow retains attested evidence while the staged preview has
     assert.match(main.jobs.web_deploy.if, /needs\.desktop\.result == 'success'/);
     assert.equal(release.jobs.release.permissions['attestations'], 'write');
     const steps = release.jobs.release.steps;
+    const upload = steps.find(step => step.id === 'release');
+    assert.equal(upload.with.overwrite_files, false, 'Publishing during a retry must not let the uploader replace existing assets.');
     assert(steps.findIndex(step => step.run?.includes('production-evidence.cjs preflight')) < steps.findIndex(step => step.id === 'release'));
     assert(steps.findIndex(step => step.run?.includes('production-evidence.cjs ensure-tag')) < steps.findIndex(step => step.id === 'release'));
     assert(steps.findIndex(step => step.id === 'evidence') > steps.findIndex(step => step.id === 'release'));
