@@ -8,9 +8,7 @@ import { configureLibraryTest, libraryRecord } from './testing/library-testing';
 
 async function setup() {
   const context = configureLibraryTest([LibraryModule]);
-  const portfolio = libraryRecord('Portfolio trend');
-  portfolio.definition = { ...portfolio.definition as import('@domain/visualizations/visualization-definition').VisualizationDefinition, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a', 'missing-second'] } };
-  context.workspace.publish({ ...context.workspace.snapshot()!, savedVisualizations: [portfolio,
+  context.workspace.publish({ ...context.workspace.snapshot()!, savedVisualizations: [libraryRecord('Portfolio trend'),
     getNewIdbSavedVisualization(createVisualizationDefinition('Facility weather', 'account-a', { kind: 'fixed', facilityGuids: ['facility-a'] }, 'predictor'))] });
   await TestBed.compileComponents();
   const fixture = TestBed.createComponent(LibraryComponent); fixture.detectChanges();
@@ -47,21 +45,21 @@ describe('visualization library dashboard', () => {
     expect(component.filteredEntries()).toHaveLength(2);
     expect([...root.querySelectorAll('select')].every(select => select.classList.contains('v1-select'))).toBe(true);
   });
-  it('preserves single-facility portfolio cards while creation belongs to the sole facility', async () => {
+  it('derives facility ownership for All with one facility and preselects the originating context', async () => {
     const { component, fixture, workspace, facility } = await setup();
     workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true } }); facility.set('facility-a'); fixture.detectChanges();
     expect(component.entries()).toHaveLength(2); component.openCreate(); fixture.detectChanges();
-    expect(component.lifecycle.editor()?.fixedFacility).toBe('facility-a');
-    expect(component.lifecycle.form.controls.scope.value).toBe('facility');
+    expect(component.lifecycle.form.controls.facilitySelection.value).toEqual({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    expect(component.lifecycle.step()).toBe('chart');
   });
-  it('keeps the retained portfolio card and routes its Duplicate action through scope review for a single facility', async () => {
+  it('opens facility selection review for an explicit copy-with-different-facilities action', async () => {
     const { component, fixture, workspace, facility, commands, visualizations } = await setup();
     workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true } });
     facility.set('facility-a'); fixture.detectChanges();
-    const portfolio = component.entries().find(entry => entry.scope === 'portfolio')!;
+    const portfolio = component.entries().find(entry => entry.name === 'Portfolio trend')!;
     const original = structuredClone(portfolio.record.definition);
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    component.requestAction({ guid: portfolio.record.guid, action: 'copy' }); await fixture.whenStable(); fixture.detectChanges();
+    component.requestAction({ guid: portfolio.record.guid, action: 'copy-scope' }); await fixture.whenStable(); fixture.detectChanges();
     expect(component.entries()).toHaveLength(2);
     expect(navigate).toHaveBeenCalledWith(visualizations.workbenchRoute('account-a', portfolio.record.guid), { queryParams: { action: 'copy-scope' } });
     expect(commands.prepareDuplicate).not.toHaveBeenCalled(); expect(commands.submit).not.toHaveBeenCalled();
@@ -69,7 +67,7 @@ describe('visualization library dashboard', () => {
   });
   it('captures originating facility browse context before opening the exact saved item', async () => {
     const { component, fixture, facility, visualizations } = await setup(); facility.set('facility-a'); fixture.detectChanges();
-    expect(component.entries()).toHaveLength(1); const entry = component.entries()[0];
+    expect(component.entries()).toHaveLength(2); const entry = component.entries()[0];
     await component.openRoute(visualizations.workbenchRoute('account-a', entry.record.guid));
     expect(visualizations.rememberReturn).toHaveBeenCalledWith('account-a', 'facility-a'); expect(visualizations.open).toHaveBeenCalledWith('account-a', entry.record.guid);
   });

@@ -1,0 +1,12 @@
+:host { display: block; min-width: 0; }
+.resource-picker { min-width: 0; }
+.resource-picker__search { display: flex; align-items: center; gap: .4rem; margin-bottom: .5rem; }
+input { min-width: 0; width: 100%; font-size: .8rem; }
+.resource-picker__options { max-height: 20rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.resource-picker__all, .resource-picker__options p { grid-column: 1 / -1; }
+.resource-picker__options p { margin: 0; color: var(--v1-muted); font-size: .8rem; }
+.resource-picker__option > span { min-width: 0; }
+.resource-picker__option[aria-checked=true] > app-ui-icon:first-child, .resource-picker__all[aria-checked=true] > app-ui-icon:first-child { color: var(--v1-action); }
+.resource-picker__option--unavailable > app-ui-icon:nth-child(2) { color: var(--v1-warning); }
+.resource-picker__clear { margin-top: .3rem; font-size: .75rem; }
+.resource-picker__option small { display: block; color: var(--v1-muted); font-size: .72rem; font-weight: 400; }
