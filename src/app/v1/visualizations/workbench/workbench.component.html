@@ -1,79 +1,121 @@
 <section class="visualization-workbench" aria-labelledby="visualization-title">
-  <header class="v1-section-header v1-page-header">
-    <button type="button" class="v1-btn v1-btn--quiet" (click)="back()">Back to Dashboard</button>
-    <div><p>{{ workspace.account()?.name }} · {{ scopeLabel() }}</p><h1 id="visualization-title">{{ editor.definition()?.name || 'Visualization' }}</h1></div>
-    <p role="status" aria-live="polite">{{ saveLabel() }}</p>
-  </header>
+  <div class="v1-data-workbench-sticky visualization-workbench__sticky">
+    <header class="v1-data-workbench-header">
+      <nav class="v1-data-workbench-breadcrumb" aria-label="Visualization breadcrumb"><ol>
+        @for (crumb of breadcrumbs(); track $index) {
+          @if (!$first) { <li aria-hidden="true"><app-ui-icon name="chevronRight"/></li> }
+          <li [attr.aria-current]="$last && !crumb.route ? 'page' : null">@if (crumb.route) { <a [routerLink]="crumb.route" [queryParams]="crumb.queryParams">@if (crumb.icon) { <app-ui-icon [name]="crumb.icon"/> }{{ crumb.label }}</a> } @else { <span>{{ crumb.label }}</span> }</li>
+        }
+      </ol></nav>
+      <div class="v1-data-workbench-title-row">
+        <div class="v1-data-workbench-title"><h1 id="visualization-title"><app-ui-icon name="dataVisualization"/>{{ editor.definition()?.name || 'Visualization' }}</h1></div>
+        <div class="v1-data-workbench-actions" aria-label="Visualization summary and controls">
+          <span class="visualization-workbench__save-state" [class.visualization-workbench__save-state--saved]="editor.state() === 'saved' && !hasInvalidFields()" [class.visualization-workbench__save-state--error]="saveNeedsAttention()" role="status" aria-live="polite">
+            @if (saveInProgress()) { <app-ui-icon name="loading" spin/> }
+            @else if (saveNeedsAttention()) { <app-ui-icon name="warning"/> }
+            @else if (editor.state() === 'saved') { <app-ui-icon name="check"/> }
+            {{ saveLabel() }}
+          </span>
+          <span class="v1-chip">{{ chartSummary() }}</span>
+          <button #settingsToggle type="button" class="v1-btn v1-btn--quiet" aria-controls="visualization-settings" [disabled]="!editor.definition()" [attr.aria-expanded]="settingsExpanded.value" (click)="toggleSettings(settingsToggle)"><app-ui-icon name="settingsSliders"/>Settings</button>
+          <app-data-workbench-facts-toggle #factsToggle controls="visualization-workbench-facts"/>
+        </div>
+      </div>
+      <div id="visualization-workbench-facts" [hidden]="!factsToggle.expanded()"><dl class="visualization-workbench__facts" aria-label="Saved visualization configuration">
+        <div><dt>Scope</dt><dd>{{ scopeLabel() }}</dd></div>
+        <div><dt>Chart type</dt><dd>{{ chartSummary() }}</dd></div>
+        <div><dt>Period</dt><dd>{{ periodSummary() }}</dd></div>
+      </dl></div>
+    </header>
+  </div>
   @if (!workspace.isReady()) {
     <div class="v1-alert v1-alert--info" role="status">The account workspace is unavailable or loading. Saved intent and local input are retained.</div>
   }
+  @if (decisionError()) { <div class="v1-alert v1-alert--warning" role="alert">{{ decisionError() }}</div> }
   @if (editor.error()) { <div class="v1-alert v1-alert--warning" role="alert">{{ editor.error() }}</div> }
-  @if (hasInvalidFields()) { <p class="v1-alert v1-alert--warning" role="status">Correct the unsaved field input. Preview and saved data retain the last coherent settings.</p> }
+  @if (hasInvalidFields()) { <p class="v1-alert v1-alert--warning" role="status">Correct the unsaved field input. The chart and saved data retain the last coherent settings.</p> }
   <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()" (resolved)="editor.resolveConflicts($event)"/>
   <app-visualization-recovery-actions [childDrafts]="recoveryChildDrafts"/>
   @if (editor.state() === 'error' || editor.state() === 'refresh-required') {
     <button type="button" class="v1-btn v1-btn--secondary" [disabled]="editor.saving()" (click)="editor.retry()">Retry save or refresh</button>
   }
   @if (editor.definition(); as definition) {
-    <div class="visualization-workbench__layout">
-      <form class="visualization-workbench__controls" [formGroup]="editor.form" (ngSubmit)="$event.preventDefault()">
-        <section aria-labelledby="visualization-facilities"><h2 id="visualization-facilities">Facilities</h2>
-          <app-visualization-facility-picker [selection]="definition.facilitySelection" [facilities]="facilities()" [contextKey]="editorKey()" [disabled]="!editor.canRetarget() || hasInvalidFields() || !!facilityChange()" [busy]="editor.saving()" (selectionRequested)="requestFacilities($event)"/>
-          @if (hasInvalidFields()) { <p role="status">Resolve the incomplete field input before changing facilities.</p> }
-          @if (facilityError()) { <p role="alert">{{ facilityError() }}</p> }
-        </section>
-        <section aria-labelledby="visualization-sources"><h2 id="visualization-sources">Data Sources</h2>
-          <label>Name<input formControlName="name" type="text" aria-describedby="visualization-name-error"></label>
+    <div class="visualization-workbench__layout" [class.visualization-workbench__layout--settings-hidden]="!settingsExpanded.value">
+      <form #settingsPanel id="visualization-settings" class="visualization-workbench__controls" aria-label="Visualization settings" [hidden]="!settingsExpanded.value" [formGroup]="editor.form" (ngSubmit)="$event.preventDefault()">
+        <app-visualization-decision-section [nodeId]="rootNodes.facilities" label="Facilities" [summary]="facilitySummary()" icon="facility"
+          [attention]="facilitiesUnavailable()" [expanded]="expandedNodes().has(rootNodes.facilities)" (expandedChange)="setSection(rootNodes.facilities, $event)">
+          <app-visualization-facility-picker [contextKey]="editor.key()" [selection]="definition.facilitySelection" [facilities]="facilities()" [disabled]="facilityChoicesDisabled()" [busy]="decisionBusy()" (selectionRequested)="chooseFacilities($event)"/>
+        </app-visualization-decision-section>
+        <app-visualization-decision-section [nodeId]="rootNodes.chart" label="Chart" [summary]="chartSummary()" icon="dataVisualization"
+          [expanded]="expandedNodes().has(rootNodes.chart)" (expandedChange)="setSection(rootNodes.chart, $event)">
+          <div class="visualization-choices" role="group" aria-label="Chart type">
+            @for (chart of charts; track chart.value) {
+              <button type="button" class="visualization-choice" [disabled]="!editor.canEdit()" [attr.aria-pressed]="chartSummary() === chart.label" (click)="chooseChart(chart.value)"><app-ui-icon [name]="chart.icon"/>{{ chart.label }}</button>
+            }
+          </div>
+          @let savedChart = definition.chart;
+          @if (savedChart && savedChart.kind === 'time-series') {
+            <p class="visualization-workbench__default">Default for new items: {{ savedChart.defaultTraceType }}</p>
+            <span class="visualization-control-label">Interval</span>
+            <div class="visualization-buttons" role="group" aria-label="Chart interval">
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'yearly'" (click)="setInterval('yearly')">Yearly</button>
+            </div>
+            @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
+          }
+        </app-visualization-decision-section>
+        <app-visualization-decision-section [nodeId]="rootNodes.sources" label="Data Sources" [summary]="definition.sources.length + ' configured'" icon="database"
+          [expanded]="expandedNodes().has(rootNodes.sources)" (expandedChange)="setSection(rootNodes.sources, $event)">
+          <div class="visualization-choices" role="group" aria-label="Data source categories">
+            @for (option of dataSources(); track option.value) {
+              <button type="button" class="visualization-choice" [disabled]="option.disabled" [attr.aria-pressed]="option.selected" (click)="toggleDataSource(option.value)">
+                <app-ui-icon [name]="option.selected ? 'success' : 'circle'" [size]="16"/><app-ui-icon [name]="option.icon"/>{{ option.label }}
+              </button>
+            }
+          </div>
+        </app-visualization-decision-section>
+        @for (source of sourcePanels(); track source.id) {
+          <app-visualization-decision-section [nodeId]="source.nodeId" [label]="source.label" [summary]="source.summary" [icon]="source.icon" [attention]="source.attention"
+            [expanded]="expandedNodes().has(source.nodeId)" (expandedChange)="setSection(source.nodeId, $event)">
+            @if (source.kind === 'utility') { <app-utility-source-editor [context]="source.context"/> }
+            @else { <p role="status">Setup required. Data selection for {{ source.label }} is not available yet.</p> }
+          </app-visualization-decision-section>
+        }
+        <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates and comparison" [summary]="periodSummary()" icon="calendar"
+          [attention]="periodInvalid()" [expanded]="expandedNodes().has(rootNodes.period)" (expandedChange)="setSection(rootNodes.period, $event)">
+          <app-utility-period-settings [context]="periodContext()"/>
+        </app-visualization-decision-section>
+        <app-visualization-decision-section [nodeId]="rootNodes.appearance" label="Chart appearance" [summary]="editor.form.controls.title.value || definition.name" icon="paintRoller"
+          [attention]="editor.form.invalid" [expanded]="expandedNodes().has(rootNodes.appearance)" (expandedChange)="setSection(rootNodes.appearance, $event)">
+          <label>Visualization name<input formControlName="name" type="text" aria-describedby="visualization-name-error"></label>
           @if (editor.form.controls.name.invalid) { <p id="visualization-name-error" role="alert">Enter a name.</p> }
-          <p>Scope: {{ scopeLabel() }}</p>
-          @for (source of sourceSummary(); track source.id) {
-            <p>{{ source.dataSourceLabel }} · {{ source.measure }}</p>
-            @if (source.setupUnavailable) { <p role="status">Setup required. Data selection for {{ source.dataSourceLabel }} is not available yet.</p> }
-            @if (definition.sources.length > 1) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" (click)="removeSource(source.id)">Remove {{ source.dataSourceLabel }} source {{ source.id }}</button> }
-          }
-          @for (source of sourceEditors(); track source.id) {
-            <ng-container *ngComponentOutlet="source.component; inputs: source.inputs"/>
-          }
-          <fieldset class="visualization-workbench__add-source" [disabled]="!editor.canEdit()">
-            <label for="visualization-add-source">Data source</label>
-            <select id="visualization-add-source" class="v1-select" [formControl]="sourceKindControl">
-              @for (option of dataSources; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
-            </select>
-            <button type="button" class="v1-btn v1-btn--secondary" (click)="addDataSource()">Add data source</button>
-          </fieldset>
-          <p>Period: {{ periodSummary() }}</p><p>Comparison: {{ definition.comparison.kind }}</p>
-          <p>Chart: {{ chartSummary() }}</p>
-        </section>
-        <section><app-utility-period-settings [context]="periodContext()"/></section>
-        <section><app-visualization-chart-settings [context]="chartContext()"/></section>
-        <section aria-labelledby="visualization-appearance"><h2 id="visualization-appearance">Appearance</h2>
-          <label>Display title<input formControlName="title" type="text"></label>
+          <label>Chart title<input formControlName="title" type="text"></label>
           <label class="visualization-workbench__checkbox"><input formControlName="legend" type="checkbox">Show legend</label>
-        </section>
+        </app-visualization-decision-section>
       </form>
-      <section class="visualization-workbench__preview" aria-label="Visualization preview"><h2>Preview</h2>
+      <section class="visualization-workbench__chart" aria-label="Visualization">
         @if (previewActive()) { <app-visualization-preview [definition]="definition" [identity]="previewIdentity()" [active]="previewActive()"/> }
-        @else { <p role="status">Preview is paused while the owning workspace or saved source relationships are unavailable. Saved intent and local input are retained.</p> }
+        @else { <p role="status">Chart unavailable. Review the workspace or source relationships to continue.</p> }
       </section>
     </div>
   } @else {
     <div class="v1-empty-state" role="status"><h2>Visualization unavailable</h2><p>It may have been deleted, belong to another account, or use an unsupported format. Its saved content is preserved.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="back()">Return to Dashboard</button></div>
   }
 </section>
+<ng-template #decisionDialog>
+  @if (pendingDecision(); as pending) {
+    <app-confirmation-dialog [title]="pending.action.kind === 'facilities' ? 'Change included facilities?' : 'Reset dependent choices?'" titleId="visualization-decision-title"
+      cancelAriaLabel="Keep current choices" confirmLabel="Apply changes" [disabled]="decisionBusy() || editor.saving()" (confirmed)="confirmDecision()" (cancelled)="cancelDecision()">
+      <p>The following choices will be cleared. Other items and compatible settings are retained.</p>
+      <ul>@for (cleared of pending.result.cleared; track $index) { <li>{{ cleared }}</li> }</ul>
+      @if (pending.action.kind === 'facilities') { <p>Included facilities: <strong>{{ pendingFacilitiesLabel() }}</strong>. This updates the same saved visualization.</p> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
 <ng-template #leaveDialog>
   <app-confirmation-dialog title="Resolve unsaved visualization changes" titleId="visualization-leave-title" cancelAriaLabel="Stay in the visualization" confirmLabel="Discard and leave" [disabled]="editor.saving()" [confirmDisabled]="editor.state() === 'refresh-required'" (confirmed)="discardLeave()" (cancelled)="finishLeave(false)">
     <p>Your local input has not been fully saved. Stay to correct or review it, retry the save, or explicitly discard it.</p>
     @if (editor.error()) { <p role="alert">{{ editor.error() }}</p> }
     <button type="button" class="v1-btn v1-btn--secondary" [disabled]="hasInvalidFields() || editor.saving() || editor.state() === 'invalid' || editor.state() === 'conflict' || editor.isMissing()" (click)="retryLeave()">Retry and leave</button>
-  </app-confirmation-dialog>
-</ng-template>
-
-<ng-template #facilityDialog>
-  <app-confirmation-dialog title="Change included facilities?" titleId="visualization-facilities-title" cancelAriaLabel="Keep the current facilities" confirmLabel="Change facilities" [disabled]="editor.saving()" [confirmDisabled]="facilityChangeStale() || hasInvalidFields() || editor.state() === 'error' || editor.state() === 'refresh-required'" (confirmed)="confirmFacilities()" (cancelled)="cancelFacilities()">
-    <p>Compatible selections and presentation will be retained. These excluded settings will be removed:</p>
-    <ul>@for (item of facilityChange()?.cleared ?? []; track item) { <li>{{ item }}</li> }</ul>
-    @if (facilityChangeStale()) { <p role="alert">The visualization or catalog changed. Cancel and review the facility change again.</p> }
-    @if (editor.error()) { <p role="alert">{{ editor.error() }}</p> }
-    @if (editor.state() === 'error' || editor.state() === 'refresh-required') { <button type="button" class="v1-btn v1-btn--secondary" [disabled]="editor.saving()" (click)="retryFacilities()">Retry save or refresh</button> }
   </app-confirmation-dialog>
 </ng-template>

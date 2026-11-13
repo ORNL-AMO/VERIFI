@@ -2,169 +2,269 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
-import { utilityMeasureKey } from '@domain/visualizations/utility/utility-selection';
 import type { UtilityVisualizationSource, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { visualizationSnapshot } from '../../../testing/visualization-test-fixtures';
+import { meter } from '@app/v1/data/meters/facility-meters.testing';
 import { UtilityEditorsModule } from '../utility-editors.module';
-import { applyUtilitySourceForm, utilitySourceFormValue, UtilitySourceEditorComponent } from './utility-source-editor.component';
+import { decisionNodeId } from '../../../decisions/decision-tree';
+import { UtilitySourceEditorComponent } from './utility-source-editor.component';
+import type { UtilityEditorContext } from '../utility-editor-context';
 
-function source(definition = utilityVisualizationFixture()) { return definition.sources[0] as UtilityVisualizationSource; }
-
-describe('utility source editing', () => {
-  it('retains explicit Source selection and never broadens a cleared Source filter to all meters', () => {
-    const base = utilityVisualizationFixture();
-    const definition: VisualizationDefinition = { ...base, sources: [{ ...source(base), selectionMode: 'source',
-      selection: { kind: 'rule', resource: 'meter', filter: { utilitySources: ['Electricity'] } } }] };
-    const value = utilitySourceFormValue(source(definition));
-    expect(value.mode).toBe('sources');
-    const changed = applyUtilitySourceForm(definition, source(definition).id, { ...value, utilitySources: [] });
-    expect(source(changed).selectionMode).toBe('source');
-    expect(source(changed)).not.toHaveProperty('selection');
-    const restored = applyUtilitySourceForm(changed, source(changed).id, { ...value, utilitySources: ['Water'] });
-    expect(source(restored)).toMatchObject({ selectionMode: 'source', selection: { kind: 'rule', resource: 'meter', filter: { utilitySources: ['Water'] } } });
+describe('Meter decision branches', () => {
+  it('retains normalized-equivalent raw unit text through its own acknowledgement and replaces it on reset', () => {
+    const state = setup(), original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    state.component.settingsForm.controls.unit.setValue('  MWh  ');
+    expect(state.request).toHaveBeenLastCalledWith(expect.objectContaining({ settings: expect.objectContaining({ settings: expect.objectContaining({ unit: { kind: 'pinned', value: 'MWh' } }) }) }));
+    state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } }] } });
+    expect(state.component.settingsForm.controls.unit.value).toBe('  MWh  '); expect(state.component.conflict()).toBe(false);
+    state.update({ nodeResetKeys: { 'data-settings:utility': 1 } });
+    expect(state.component.settingsForm.controls.unit.value).toBe('MWh');
+  });
+  it('keeps newer incomplete unit input without an external conflict when acknowledging its prior coherent edit', () => {
+    const state = setup(), original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    state.component.settingsForm.controls.unit.setValue('MWh');
+    state.component.settingsForm.controls.unit.setValue('');
+    state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } }] } });
+    expect(state.component.settingsForm.controls.unit.value).toBe(''); expect(state.component.issue()).toBeDefined();
+    expect(state.component.conflict()).toBe(false); expect(state.invalid).toHaveBeenLastCalledWith('data-settings:utility', true);
+  });
+  it('finishes acknowledgement tracking when edits return to their saved value before a view update', () => {
+    const state = setup(), original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    state.component.settingsForm.controls.unit.setValue('MWh'); state.component.settingsForm.controls.unit.setValue('kWh');
+    state.update({ definition: { ...original } });
+    state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } }] } });
+    expect(state.component.settingsForm.controls.unit.value).toBe('MWh'); expect(state.component.conflict()).toBe(false);
+  });
+  it('places each selected item beside the source settings without an Items wrapper or movement buttons', () => {
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    const state = setup({ ...original, sources: [{ ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } }] });
+    const root = state.fixture.nativeElement as HTMLElement, sections = root.querySelector('.utility-editor')!;
+    const items = [...root.querySelectorAll('app-visualization-item-settings')];
+    expect(items).toHaveLength(2); expect(items.every(item => item.parentElement === sections)).toBe(true);
+    expect(items.map(item => item.querySelector('.decision-section__toggle strong')?.textContent)).toContain('Boiler meter');
+    expect([...sections.children].some(section => section.querySelector('strong')?.textContent === 'Data settings')).toBe(true);
+    expect(root.querySelector('[id^="items:"]')).toBeNull();
+    expect(root.querySelector('button[aria-label^="Move "]')).toBeNull();
+  });
+  it('shows the default-on calendarization switch inside Data settings and preserves drafts while a change is reviewed', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    const settings = root.querySelector('[id="data-settings:utility-body"]')!;
+    const toggle = [...settings.querySelectorAll<HTMLInputElement>('input[role="switch"]')]
+      .find(input => input.closest('label')?.textContent?.trim() === 'Use Calendarized Data')!;
+    expect(toggle.checked).toBe(true); expect(state.request).not.toHaveBeenCalled();
+    expect(root.querySelector('[id="observation:utility-heading"]')).toBeNull();
+    state.component.settingsForm.controls.unit.setValue(''); state.fixture.detectChanges();
+    toggle.click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenCalledExactlyOnceWith({ kind: 'source-settings', sourceId: 'utility', settings: { dataMode: 'billing-period' } });
+    expect(toggle.checked).toBe(true); expect(state.component.settingsForm.controls.unit.value).toBe('');
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    state.update({ definition: { ...original, sources: [{ ...source, dataMode: 'billing-period', aggregation: 'none', groupBy: 'meter' }] } });
+    expect(toggle.checked).toBe(false); expect(state.component.settingsForm.controls.unit.value).toBe('');
+    toggle.click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenLastCalledWith({ kind: 'source-settings', sourceId: 'utility', settings: { dataMode: 'calendarized' } });
+    expect(toggle.checked).toBe(false);
+  });
+  it.each([
+    { name: 'source totals', patch: { selectionMode: 'source' } },
+    { name: 'group totals', patch: { selectionMode: 'group' } },
+    { name: 'facility totals', patch: { aggregation: 'sum', groupBy: 'facility' } },
+    { name: 'multiple meters', patch: { selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } } },
+    { name: 'bill charges', patch: { measure: 'charge', dataMode: 'billing-period', aggregation: 'none' } }
+  ] satisfies readonly { name: string; patch: Partial<UtilityVisualizationSource> }[])('hides calendarization when $name require a fixed data view', ({ patch }) => {
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    const state = setup({ ...original, sources: [{ ...source, ...patch }] });
+    const root = state.fixture.nativeElement as HTMLElement;
+    expect(state.component.calendarizationChoiceVisible()).toBe(false);
+    expect([...root.querySelectorAll('input[role="switch"]')].some(input => input.closest('label')?.textContent?.includes('Use Calendarized Data'))).toBe(false);
+    expect(state.component.useCalendarizedData.disabled).toBe(true);
+    expect(state.request).not.toHaveBeenCalled();
+  });
+  it('offers default unit and energy switches with clear custom-setting labels', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    const units = root.querySelector<HTMLInputElement>('input[formcontrolname="useDefaultUnits"]')!;
+    const energy = root.querySelector<HTMLInputElement>('input[formcontrolname="useDefaultEnergySettings"]')!;
+    expect(units.getAttribute('role')).toBe('switch'); expect(energy.getAttribute('role')).toBe('switch');
+    expect(units.closest('label')?.textContent).toContain('Use facility units');
+    expect(energy.closest('label')?.textContent).toContain('Use facility energy settings');
+    expect(units.checked).toBe(false); expect(root.textContent).toContain('Chart units');
+    units.click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenCalledWith(expect.objectContaining({ kind: 'source-settings',
+      settings: expect.objectContaining({ settings: expect.objectContaining({ unit: { kind: 'owner' } }) }) }));
+    expect(root.querySelector('input[formcontrolname="unit"]')).toBeNull();
+    state.component.settingsForm.controls.useDefaultEnergySettings.setValue(false); state.fixture.detectChanges();
+    const energyChoices = root.querySelectorAll<HTMLButtonElement>('[aria-label="Site or source energy"] button');
+    expect([...energyChoices].map(button => button.textContent?.trim())).toEqual(['Site', 'Source']);
+    expect(energyChoices[0].getAttribute('aria-pressed')).toBe('true');
+    energyChoices[1].click(); state.fixture.detectChanges();
+    expect(energyChoices[1].getAttribute('aria-pressed')).toBe('true');
+    expect(state.request).toHaveBeenLastCalledWith(expect.objectContaining({ kind: 'source-settings',
+      settings: expect.objectContaining({ settings: expect.objectContaining({ energyTreatment: { kind: 'pinned', value: 'source' } }) }) }));
+  });
+  it('requests facility aggregation without discarding an incomplete units draft', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    state.component.settingsForm.controls.unit.setValue(''); state.fixture.detectChanges();
+    const toggle = [...root.querySelectorAll<HTMLInputElement>('input[role="switch"]')]
+      .find(input => input.closest('label')?.textContent?.includes('Aggregate by facility'))!;
+    expect(toggle.checked).toBe(false); toggle.click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenCalledExactlyOnceWith({ kind: 'source-settings', sourceId: 'utility', settings: { aggregation: 'sum', groupBy: 'facility' } });
+    expect(toggle.checked).toBe(false); expect(state.component.settingsForm.controls.unit.value).toBe('');
+    expect(state.component.issue()).toBeDefined();
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    state.update({ definition: { ...original, sources: [{ ...source, aggregation: 'sum', groupBy: 'facility' }] } });
+    expect(toggle.checked).toBe(true); expect(state.component.settingsForm.controls.unit.value).toBe('');
+    toggle.click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenLastCalledWith({ kind: 'source-settings', sourceId: 'utility', settings: { aggregation: 'sum', groupBy: 'meter' } });
+  });
+  it('disables facility aggregation for native bills', () => {
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    const state = setup({ ...original, sources: [{ ...source, dataMode: 'billing-period', aggregation: 'none', groupBy: 'meter' }] });
+    expect(state.component.aggregateByFacility.disabled).toBe(true);
+    state.component.aggregateByFacility.setValue(true);
+    expect(state.request).not.toHaveBeenCalled();
   });
   afterEach(() => TestBed.resetTestingModule());
   function setup(definition = utilityVisualizationFixture()) {
-    const changed = vi.fn(), validityChanged = vi.fn();
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule], providers: [AccountWorkspaceStore] });
-    const fixture = TestBed.createComponent(UtilitySourceEditorComponent);
-    const context = { definition, sourceId: source(definition).id, editorKey: 'chart-a', disabled: false, changed, validityChanged };
-    fixture.componentRef.setInput('context', context); fixture.detectChanges();
-    return { fixture, component: fixture.componentInstance, context, changed, validityChanged };
+    const store = new AccountWorkspaceStore(); store.publish({ ...visualizationSnapshot(), meters: [meter({ id: 1 }), meter({ id: 2, guid: 'meter-b', name: 'Boiler meter' })] });
+    const request = vi.fn(), invalid = vi.fn();
+    const expandedNodes = new Set(['measure', 'selection-mode', 'resources', 'data-settings', 'items'].map(kind => `${kind}:utility`));
+    let context: UtilityEditorContext = { definition, sourceId: 'utility', editorKey: 'saved-a', disabled: false, changed: vi.fn(),
+      request, expandedNodes, sectionChanged: vi.fn(), nodeValidityChanged: invalid };
+    TestBed.configureTestingModule({ imports: [UtilityEditorsModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }] });
+    const fixture = TestBed.createComponent(UtilitySourceEditorComponent); fixture.componentRef.setInput('context', context); fixture.detectChanges();
+    const update = (changes: Partial<UtilityEditorContext>) => { context = { ...context, ...changes }; fixture.componentRef.setInput('context', context); fixture.detectChanges(); };
+    return { fixture, component: fixture.componentInstance, store, request, invalid, update };
   }
-
-  it.each(['meter', 'group', 'source'] as const)('keeps the %s meter view selectable and saved in source settings', groupBy => {
-    const { fixture, component, changed } = setup();
-    const select = fixture.nativeElement.querySelector('select[formcontrolname="groupBy"]') as HTMLSelectElement;
-    expect([...select.options].map(option => option.value)).toEqual(expect.arrayContaining(['meter', 'group', 'source']));
-    if (groupBy === 'meter') component.form.controls.groupBy.setValue('group');
-    select.value = groupBy; select.dispatchEvent(new Event('change')); fixture.detectChanges();
-    expect(component.form.controls.groupBy.value).toBe(groupBy);
-    const saved = changed.mock.lastCall![0] as VisualizationDefinition;
-    expect(source(saved)).toMatchObject({ kind: 'utility', groupBy, dataMode: 'calendarized' });
-    expect(source(saved).selection).toEqual(source().selection);
+  it('shows emissions choices under Charted Data only while the account displays emissions', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    const labels = () => [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Charted Data"] button')].map(button => button.textContent?.trim());
+    expect(root.querySelector('[id="measure:utility-heading"] strong')?.textContent).toBe('Charted Data');
+    expect(labels()).toEqual(['Energy', 'Consumption / water', 'Cost', 'Bill charge']);
+    state.component.selectMeasure('location-emissions'); state.component.selectMeasure('market-emissions');
+    expect(state.request).not.toHaveBeenCalled();
+    const snapshot = state.store.snapshot()!;
+    state.store.publish({ ...snapshot, account: { ...snapshot.account, displayEmissions: true } }); state.fixture.detectChanges();
+    expect(labels()).toEqual(['Energy', 'Consumption / water', 'Cost', 'Location emissions', 'Market emissions', 'Bill charge']);
+    const market = [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Charted Data"] button')].find(button => button.textContent?.trim() === 'Market emissions')!;
+    market.click();
+    expect(state.request).toHaveBeenCalledWith({ kind: 'measure', sourceId: 'utility', measure: 'market-emissions' });
+    state.request.mockClear();
+    state.store.publish({ ...snapshot, account: { ...snapshot.account, displayEmissions: false } }); state.fixture.detectChanges();
+    expect(labels()).toEqual(['Energy', 'Consumption / water', 'Cost', 'Bill charge']);
+    expect(state.component.selectedSource()?.measure).toBe('energy'); expect(state.request).not.toHaveBeenCalled();
   });
-
-  it('hydrates saved unsupported native setup without changing its chart, source settings, or saving', () => {
-    const base = utilityVisualizationFixture();
-    const definition: VisualizationDefinition = { ...base, sources: [{ ...source(base), dataMode: 'billing-period' }] };
-    const { component, changed } = setup(definition);
-    expect(component.form.getRawValue().dataMode).toBe('billing-period');
-    expect(component.form.getRawValue().aggregation).toBe('sum');
-    expect(changed).not.toHaveBeenCalled();
-    expect(definition.chart?.kind === 'time-series' && definition.chart.interval).toBe('monthly');
+  it('retains an incomplete charge draft visibly when its meter is no longer included', () => {
+    const original = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...original, series: [], sources: original.sources.map(source => {
+      if (source.kind !== 'utility') return source;
+      const { selection: _selection, ...base } = source;
+      return { ...base, measure: 'charge', settings: {} };
+    }) };
+    const state = setup(definition);
+    state.component.settingsForm.controls.chargeMeter.setValue('meter-a');
+    state.update({ definition: { ...definition, facilitySelection: { kind: 'fixed', facilityGuids: ['missing-facility'] } } });
+    const meterControl = (state.fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('select[formcontrolname="chargeMeter"]')!;
+    expect(state.component.settingsForm.controls.chargeMeter.value).toBe('meter-a');
+    expect(meterControl.value).toBe('meter-a');
+    expect(meterControl.selectedOptions[0].textContent).toContain('Unavailable meter');
+    expect(meterControl.selectedOptions[0].disabled).toBe(true); expect(state.component.issue()).toBeDefined();
   });
-
-  it('retains an invalid pinned unit through metadata acknowledgement and protects it until corrected', () => {
-    const { fixture, component, changed, validityChanged, context } = setup();
-    component.form.controls.unit.setValue(''); fixture.detectChanges();
-    expect(changed).not.toHaveBeenCalled(); expect(validityChanged).toHaveBeenLastCalledWith(true);
-    fixture.componentRef.setInput('context', { ...context, definition: { ...context.definition, name: 'New title' } }); fixture.detectChanges();
-    expect(component.form.controls.unit.value).toBe('');
-    component.form.controls.unit.setValue('MMBtu');
-    expect(validityChanged).toHaveBeenLastCalledWith(false);
-    expect(changed).toHaveBeenCalledWith(expect.objectContaining({ name: 'New title', sources: [expect.objectContaining({ settings: expect.objectContaining({ unit: { kind: 'pinned', value: 'MMBtu' } }) })] }));
+  it('shows the three primary selection methods and requests changes without changing the current selection', () => {
+    const state = setup();
+    const root = state.fixture.nativeElement as HTMLElement;
+    const choices = root.querySelectorAll<HTMLButtonElement>('[aria-label="Meter selection method"] button');
+    expect([...choices].map(choice => choice.textContent?.trim())).toEqual(['Source', 'Meter group', 'Individual meters']);
+    choices[0].click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenCalledWith({ kind: 'selection-mode', sourceId: 'utility', mode: 'source' });
+    expect(state.component.selectedSource()?.selectionMode).toBe('meter');
   });
-
-  it('requires an explicit choice when a saved configuration changes under invalid local input', () => {
-    const { fixture, component, context, changed, validityChanged } = setup();
-    component.form.controls.unit.setValue('');
-    const incoming = { ...context.definition, name: 'External metadata', sources: [
-      { ...source(context.definition), groupBy: 'facility' as const, settings: { unit: { kind: 'pinned' as const, value: 'MMBtu' } } }
-    ] };
-    fixture.componentRef.setInput('context', { ...context, definition: incoming }); fixture.detectChanges();
-    expect(component.conflict()).toBe(true); expect(component.form.controls.unit.value).toBe('');
-    expect(validityChanged).toHaveBeenLastCalledWith(true);
-    component.form.controls.unit.setValue('GJ');
-    expect(component.form.valid).toBe(true); expect(changed).not.toHaveBeenCalled();
-    expect(validityChanged).toHaveBeenLastCalledWith(true);
-    component.keepLocal();
-    expect(component.conflict()).toBe(false);
-    expect(changed).toHaveBeenCalledWith(expect.objectContaining({ name: 'External metadata', sources: [expect.objectContaining({
-      groupBy: 'meter', settings: expect.objectContaining({ unit: { kind: 'pinned', value: 'GJ' } })
-    })] }));
-    expect(validityChanged).toHaveBeenLastCalledWith(false);
+  it('keeps a checkbox selected while its removal waits for parent review', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    const remove = root.querySelector<HTMLButtonElement>('app-visualization-resource-picker .resource-picker__option[aria-checked="true"]')!;
+    remove.click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenCalledWith({ kind: 'toggle-resource', sourceId: 'utility', resourceId: 'meter-a', selected: false });
+    expect(state.component.selected.value).toEqual(['meter-a']);
+    expect(remove.getAttribute('aria-checked')).toBe('true');
   });
-
-  it('uses the latest saved configuration only after explicit review and keeps incomplete local input protected after Keep local', () => {
-    const { fixture, component, context, changed, validityChanged } = setup();
-    component.form.controls.unit.setValue('');
-    const incoming = { ...context.definition, sources: [{ ...source(context.definition), settings: { unit: { kind: 'pinned' as const, value: 'MMBtu' } } }] };
-    fixture.componentRef.setInput('context', { ...context, definition: incoming }); fixture.detectChanges();
-    component.keepLocal();
-    expect(component.form.controls.unit.value).toBe(''); expect(component.conflict()).toBe(false);
-    expect(changed).not.toHaveBeenCalled(); expect(validityChanged).toHaveBeenLastCalledWith(true);
-    fixture.componentRef.setInput('context', { ...context, definition: { ...incoming, sources: [{ ...source(incoming), groupBy: 'facility' }] } }); fixture.detectChanges();
-    expect(component.conflict()).toBe(true);
-    component.useSaved();
-    expect(component.form.controls.unit.value).toBe('MMBtu'); expect(component.form.controls.groupBy.value).toBe('facility');
-    expect(component.conflict()).toBe(false); expect(changed).not.toHaveBeenCalled();
-    expect(validityChanged).toHaveBeenLastCalledWith(false);
+  it.each([
+    { mode: 'source', label: 'Sources' }, { mode: 'group', label: 'Meter groups' },
+    { mode: 'meter', label: 'Meters' }, { mode: 'facility', label: 'Facilities' }
+  ] as const)('names the resource section $label when selecting by $mode', ({ mode, label }) => {
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    const state = setup({ ...original, sources: [{ ...source, selectionMode: mode }] });
+    const root = state.fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[id="resources:utility-heading"] strong')?.textContent).toBe(label);
+    expect(root.querySelector('.resource-picker__options button')?.textContent?.trim()).toBe('Include All');
   });
-
-  it('shows missing selected identities instead of dropping them and resets drafts on explicit discard', () => {
-    const { fixture, component, context } = setup();
-    expect(fixture.nativeElement.textContent).toContain('Unavailable: meter-a');
-    component.form.controls.unit.setValue('');
-    fixture.componentRef.setInput('context', { ...context, resetKey: 1 }); fixture.detectChanges();
-    expect(component.form.controls.unit.value).toBe('kWh'); expect(component.form.valid).toBe(true);
+  it('requests Include All as one resource-selection change', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    root.querySelector<HTMLButtonElement>('.resource-picker__all')!.click(); state.fixture.detectChanges();
+    expect(state.request).toHaveBeenCalledExactlyOnceWith({ kind: 'set-resources', sourceId: 'utility', resourceIds: ['meter-a', 'meter-b'] });
+    expect(state.component.selected.value).toEqual(['meter-a']);
   });
-
-  it('makes group membership live explicitly and clears meters when switching resource namespaces', () => {
-    const { component, changed } = setup();
-    component.form.controls.mode.setValue('groups');
-    expect(component.form.controls.guids.value).toEqual([]);
-    component.form.controls.guids.setValue(['group-a']);
-    const next = changed.mock.lastCall![0] as VisualizationDefinition;
-    expect(source(next).selection).toEqual({ kind: 'fixed', resource: 'meter-group', guids: ['group-a'] });
+  it('preserves a saved filtered selection without exposing filter controls or publishing changes', () => {
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    const definition: VisualizationDefinition = { ...original, sources: [{ ...source, selectionMode: 'rule', selection: { kind: 'rule', resource: 'meter', filter: {
+      facilityGuids: ['facility-a'], groupGuids: ['group-a'], utilitySources: ['Electricity'], search: 'Main', includeRetired: false } } }] };
+    const state = setup(definition), root = state.fixture.nativeElement as HTMLElement;
+    expect(state.request).not.toHaveBeenCalled();
+    expect(state.component.selectedSource()).toEqual(definition.sources[0]);
+    expect(root.textContent).not.toMatch(/matching rule|matching selection|output grouping|retired meter history/i);
+    expect(root.querySelector('input[type="search"]')).toBeNull();
+    expect(root.textContent).toContain('Choose how to select meters first.');
   });
-
-  it('normalizes native mode only on real edits and keeps independent data sources and series', () => {
-    const base = utilityVisualizationFixture();
-    const mixed: VisualizationDefinition = { ...base, sources: [...base.sources, { id: 'weather', kind: 'predictor', measure: 'value', aggregation: 'none' }],
-      series: [...base.series, { id: 'weather-series', sourceId: 'weather', metric: 'value', axis: 'right' }] };
-    const next = applyUtilitySourceForm(mixed, source(mixed).id, { ...utilitySourceFormValue(source(mixed)), dataMode: 'billing-period' });
-    expect(source(next)).toMatchObject({ dataMode: 'billing-period', aggregation: 'none', groupBy: 'meter' });
-    expect(next.chart?.kind === 'time-series' && next.chart.interval).toBe('native');
-    expect(next.sources[1]).toEqual(mixed.sources[1]); expect(next.series[1]).toEqual(mixed.series[1]);
+  it('retains incomplete unit input through selection changes and resets only the explicitly affected node', () => {
+    const state = setup();
+    state.component.settingsForm.controls.unit.setValue(''); state.fixture.detectChanges();
+    expect(state.component.issue()).toContain('chart units');
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    state.update({ definition: { ...original, sources: [{ ...source, selection: { kind: 'fixed', resource: 'meter', guids: [] } }] } });
+    expect(state.component.settingsForm.controls.useDefaultUnits.value).toBe(false); expect(state.component.issue()).toBeDefined();
+    state.update({ nodeResetKeys: { [decisionNodeId({ kind: 'data-settings', sourceId: 'utility' })]: 1 } });
+    expect(state.component.settingsForm.controls.useDefaultUnits.value).toBe(false);
+    // A reset replaces raw input from the current coherent definition rather than another section's draft.
+    expect(state.component.settingsForm.controls.unit.value).toBe('kWh'); expect(state.component.issue()).toBeUndefined();
   });
-  it('retains every category appearance and explicit order when a live selection changes', () => {
-    const base = utilityVisualizationFixture();
-    const { resourceGuid: _resource, ...wildcard } = base.series[0];
-    const definition = { ...base, sources: base.sources.map(item => item.kind === 'utility' ? { ...item, groupBy: 'source' as const } : item), series: [{ ...wildcard, overrides: [
-      { seriesId: 'utility:source:Electricity', label: 'Electricity', order: 0 },
-      { seriesId: 'utility:source:Natural Gas', visible: false, order: 1 },
-      { seriesId: 'utility:source:Dormant', color: '#123456' }
-    ] }] };
-    const next = applyUtilitySourceForm(definition, source(definition).id, { ...utilitySourceFormValue(source(definition)), mode: 'rule', search: 'Main' });
-    expect(next.series[0].overrides).toEqual(definition.series[0].overrides);
+  it('keeps incomplete Energy input visible until explicitly adopting an external Cost measure', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    const unit = root.querySelector<HTMLInputElement>('input[formcontrolname="unit"]')!;
+    unit.value = ''; unit.dispatchEvent(new Event('input')); state.fixture.detectChanges();
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    const incoming: VisualizationDefinition = { ...original, sources: [{ ...source, measure: 'cost', settings: {} }] };
+    state.update({ definition: incoming });
+    expect(state.component.conflict()).toBe(true); expect(state.component.issue()).toContain('chart units');
+    expect(state.component.settingsForm.invalid).toBe(true); expect(state.invalid).toHaveBeenLastCalledWith('data-settings:utility', true);
+    expect(root.querySelector<HTMLInputElement>('input[formcontrolname="unit"]')?.value).toBe('');
+    expect(root.textContent).toContain('saved charted data changed to Cost');
+    expect([...root.querySelectorAll('button')].some(button => button.textContent?.trim() === 'Keep local input')).toBe(false);
+    // A later publication cannot turn this unresolved previous-measure draft into valid Cost input.
+    state.update({ definition: { ...incoming, name: 'Updated elsewhere' } });
+    state.component.keepLocal();
+    expect(state.component.conflict()).toBe(true); expect(state.request).not.toHaveBeenCalled();
+    const useSaved = [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Use saved settings')!;
+    useSaved.click(); state.fixture.detectChanges();
+    expect(state.component.conflict()).toBe(false); expect(state.component.issue()).toBeUndefined();
+    expect(root.querySelector('input[formcontrolname="unit"]')).toBeNull(); expect(root.textContent).toContain('Cost uses the recorded currency');
+    expect(state.invalid).toHaveBeenLastCalledWith('data-settings:utility', false); expect(state.request).not.toHaveBeenCalled();
   });
-
-  it('retargets an explicit resource edit without leaving an uneditable old series anchor', () => {
-    const definition = utilityVisualizationFixture();
-    const next = applyUtilitySourceForm(definition, source(definition).id, { ...utilitySourceFormValue(source(definition)), guids: ['new-meter'] });
-    expect(source(next).selection).toMatchObject({ guids: ['new-meter'] });
-    expect(next.series).toHaveLength(1); expect(next.series[0].resourceGuid).toBeUndefined();
-    expect(next.series[0].label).toBeUndefined();
-    expect(next.series[0].overrides).toContainEqual(expect.objectContaining({ resourceGuid: 'meter-a', accountGuid: definition.accountGuid, label: 'Electricity' }));
-    const grouped = applyUtilitySourceForm(next, source(next).id, { ...utilitySourceFormValue(source(next)), groupBy: 'facility' });
-    expect(grouped.series[0].overrides).toBeUndefined();
-    const separate = applyUtilitySourceForm(grouped, source(grouped).id, { ...utilitySourceFormValue(source(grouped)), aggregation: 'none' });
-    expect(source(separate).groupBy).toBe('meter');
+  it('allows corrected local units to be explicitly kept after a same-measure external change', () => {
+    const state = setup(), original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    state.component.settingsForm.controls.unit.setValue('');
+    state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'Btu' } } }] } });
+    state.component.settingsForm.controls.unit.setValue('MWh'); state.fixture.detectChanges();
+    expect(state.component.conflict()).toBe(true); expect(state.request).not.toHaveBeenCalled();
+    const keepLocal = [...(state.fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button')]
+      .find(button => button.textContent?.trim() === 'Keep local input')!;
+    keepLocal.click(); state.fixture.detectChanges();
+    expect(state.component.conflict()).toBe(false);
+    expect(state.request).toHaveBeenCalledWith(expect.objectContaining({ kind: 'source-settings', sourceId: 'utility',
+      settings: expect.objectContaining({ settings: expect.objectContaining({ unit: { kind: 'pinned', value: 'MWh' } }) }) }));
   });
-
-  it('clears irrelevant pinned settings on a real measure change and declares the new metric', () => {
-    const definition = utilityVisualizationFixture();
-    const next = applyUtilitySourceForm(definition, source(definition).id, { ...utilitySourceFormValue(source(definition)), measure: 'cost' });
-    expect(source(next).settings).toEqual({});
-    expect(next.series[0].metric).toBe(utilityMeasureKey(source(next)));
-    expect(source(definition).settings?.unit).toEqual({ kind: 'pinned', value: 'kWh' });
-  });
-
-  it('requires meter and charge together without inventing a charge identity', () => {
-    const definition = utilityVisualizationFixture(), value = utilitySourceFormValue(source(definition));
-    expect(applyUtilitySourceForm(definition, source(definition).id, { ...value, measure: 'charge', chargeMeter: 'meter-a' })).toBe(definition);
-    const next = applyUtilitySourceForm(definition, source(definition).id, { ...value, measure: 'charge', chargeMeter: 'meter-a', chargeGuid: 'charge-a', chargeMeasure: 'usage' });
-    expect(source(next)).toMatchObject({ dataMode: 'billing-period', charge: { meterGuid: 'meter-a', chargeGuid: 'charge-a', measure: 'usage' } });
-    expect(source(next).selection).toEqual({ kind: 'fixed', resource: 'meter', guids: ['meter-a'] });
+  it('hides the native-data choice for multiple selected meters and respects read-only controls', () => {
+    const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
+    const state = setup({ ...original, sources: [{ ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } }] });
+    expect(state.component.calendarizationChoiceVisible()).toBe(false);
+    state.update({ disabled: true });
+    const mode = state.fixture.nativeElement.querySelector('[aria-label="Meter selection method"] button') as HTMLButtonElement;
+    expect(mode.disabled).toBe(true); mode.click(); expect(state.request).not.toHaveBeenCalled();
   });
 });

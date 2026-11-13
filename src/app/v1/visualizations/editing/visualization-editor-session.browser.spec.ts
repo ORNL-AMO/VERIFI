@@ -127,7 +127,7 @@ describe('visualization editor session with native IndexedDB', () => {
     session.resolveConflicts({ configuration: 'saved' });
     expect(session.conflicts()).toEqual([]); expect(session.error()).toBeUndefined();
     expect(session.definition()).toMatchObject({ name: 'Retained local name', facilitySelection: { kind: 'all' },
-      chart: { type: 'line', interval: 'monthly' } });
+      chart: { defaultTraceType: 'line', interval: 'monthly' } });
     expect(await session.flush()).toBe(true); expect(update).toHaveBeenCalledOnce();
     const records = await harness.getAll<IdbSavedVisualization & { [key: string]: unknown }>('savedVisualizations');
     expect(records[0]).toMatchObject({ guid: proposal.guid, revision: 3,

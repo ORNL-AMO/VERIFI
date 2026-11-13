@@ -48,7 +48,9 @@ export function buildWorkspacePanelContent(input: WorkspacePanelInput): PanelCon
   const isData = input.route.section === 'data';
   const todos = input.accountTodos.filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
   const discardedWarnings = input.discardedItems.filter(item => single || !facility || item.entity.facilityGuid === facility.guid);
-  const help = single
+  const help = input.route.section === 'visualization' && input.route.detail === 'workbench'
+    ? buildVisualizationWorkbenchHelp()
+    : single
     ? [`Browse data, analyses, and reports for ${single.name}.`, 'Open an item to work with its saved data and settings.']
     : input.route.section === 'reports'
     ? ['Use Reports to browse, create, copy, rename, and delete saved reports. Account Reports includes reports from every facility.', 'Open a report name to view its saved configuration. Report-specific settings and previews are coming in later migrations.']
@@ -78,6 +80,20 @@ export function buildWorkspacePanelContent(input: WorkspacePanelInput): PanelCon
       { label: 'Support tab', value: input.activePanelTab }
     ]
   };
+}
+
+function buildVisualizationWorkbenchHelp(): ReadonlyArray<string> {
+  return [
+    'Add visualization and this workbench follow the same decisions. Open a completed section to inspect or change it; opening alone preserves later choices. Settings save automatically, and the Settings button gives the chart more space.',
+    'Changes that clear customized later choices show a confirmation first. Removing an item forgets its styling; adding or retaining other items keeps their choices. Facilities includes All Facilities or a selected subset. All includes future facilities; one selected facility owns the chart, while multiple facilities use account ownership. Double-click a facility card to select only that facility. Removing facilities retains compatible choices and reviews excluded selections. Pinned settings stay fixed; owner-relative units and fiscal periods follow the derived owner.',
+    'Each item can use Line or Bar with its own color, label, axis and visibility. The chart can mix both types. The chart-wide Line/Bar control applies to every item; its default also controls new items.',
+    'Fixed meters keep exact identities and retired history. Selected groups and facilities keep their identities while their meter membership updates. Missing selected identities require repair.',
+    'Calendarized data supports compatible totals by source, meter group or facility. Individual meters retain separate observations. Native bills keep individual observations and actual dates; grouped totals and comparisons are unavailable.',
+    'Named charges keep their owning meter and native bill observations. Monthly allocation, cross-meter charge totals, and summed demand are unavailable.',
+    'Units and site or source energy can follow the owning account or facility settings, or be pinned. Portfolio periods follow the account calendar; facility periods follow the owning facility. Native observations retain their whole original periods.',
+    'Series on the same axis must have compatible units and meaning. Combined source traces follow current meter membership. Individual appearance settings follow resource identity; moving across a source boundary moves that source’s series together.',
+    'Chart styling changes presentation without changing source values. Partial coverage and overlap notices identify interpretation limits; unavailable data is not treated as zero. Exact original periods, values and quality remain available to assistive technology.'
+  ];
 }
 
 function buildFacilityDataHelp(detail: string): ReadonlyArray<string> {

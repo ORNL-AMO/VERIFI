@@ -7,6 +7,6 @@
     </details>
   }
   @if (model.traces.length) {
-    <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)" role="img" [attr.aria-label]="model.title + '. Exact values and quality are available in Source data.'"></div>
-  } @else { <p role="status">No visible series. Turn on a series in Chart settings.</p> }
+    <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)" role="img" [attr.aria-label]="model.title + '. Exact values and quality follow in an accessible data table.'"></div>
+  } @else { <p role="status">No visible series. Open a data source’s item settings and turn on Show trace.</p> }
 }

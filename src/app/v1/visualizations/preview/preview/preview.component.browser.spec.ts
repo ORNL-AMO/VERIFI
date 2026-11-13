@@ -19,14 +19,13 @@ async function settle() { for (let i = 0; i < 10; i++) await Promise.resolve(); 
 function setup(resolveOverride?: (request: VisualizationSourceRequest, signal: AbortSignal) => Promise<VisualizationSourceResolution>) {
   const definition = utilityVisualizationFixture(), evidence = visualizationEvidenceFixture(definition);
   const resolve = resolveOverride ?? (async request => ({ ...evidence.resolution, identity: request.identity }));
-  const store = new AccountWorkspaceStore(), snapshot = visualizationSnapshot();
-  store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }] });
+  const store = new AccountWorkspaceStore(); store.publish(visualizationSnapshot());
   TestBed.configureTestingModule({ imports: [PreviewModule, BrowserPresenterFixture], providers: [
     { provide: AccountWorkspaceStore, useValue: store },
     { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: [{ kind: 'utility', describe: () => evidence.capabilities,
       supportsChart: () => evidence.chartSupport, resolve }] },
     { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: BrowserPresenterFixture,
-      prepare: () => ({ inputs: { label: 'Current monthly energy preview' }, details: {
+      prepare: () => ({ inputs: { label: 'Current monthly energy chart' }, details: {
         caption: 'Measured energy in kWh', columns: ['Period', 'Energy'], rows: [['January 2025', '0']] } }) }] },
     { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: { resolve: async () => ({ calendarDate: '2026-11-11', latestDataDate: '2025-12-31' }) } }
   ] });
@@ -36,14 +35,14 @@ function setup(resolveOverride?: (request: VisualizationSourceRequest, signal: A
 }
 
 describe('visualization preview in Chromium', () => {
-  it('mounts the presenter and exposes true zero values with keyboard-accessible details', async () => {
+  it('mounts a clean chart with true zero values available to assistive technology', async () => {
     const { fixture, root } = setup(); await settle(); fixture.detectChanges();
-    expect(root.querySelector('app-browser-preview-fixture')?.textContent).toContain('Current monthly energy preview');
-    const summary = root.querySelector<HTMLElement>('summary')!;
-    summary.focus(); await userEvent.keyboard('{Enter}');
-    expect(root.querySelector('details')!.open).toBe(true);
-    await userEvent.keyboard('{Tab}');
-    expect(document.activeElement).toBe(root.querySelector('[aria-label="Underlying preview values"]'));
+    expect(root.querySelector('app-browser-preview-fixture')?.textContent).toContain('Current monthly energy chart');
+    expect(root.querySelector('summary, details, app-pagination, h2, button')).toBeNull();
+    const accessibleData = root.querySelector<HTMLElement>('.visually-hidden')!;
+    expect(accessibleData.querySelector('table')).not.toBeNull();
+    expect(accessibleData.hasAttribute('aria-hidden')).toBe(false);
+    expect(accessibleData.getBoundingClientRect().height).toBeLessThanOrEqual(1);
     expect(root.querySelector('caption')!.textContent).toBe('Measured energy in kWh');
     expect(root.querySelector('tbody')!.textContent).toContain('January 20250');
     expect(root.querySelectorAll('th[scope="col"]')).toHaveLength(2);
@@ -77,7 +76,7 @@ describe('visualization preview in Chromium', () => {
     await settle(); expect(root.querySelector('[aria-busy="true"]')).not.toBeNull();
     fixture.componentRef.setInput('active', false); fixture.detectChanges();
     complete({ ...evidence.resolution, identity: request.identity }); await settle(); fixture.detectChanges();
-    expect(abort.aborted).toBe(true); expect(root.textContent).toContain('Preview is inactive.');
+    expect(abort.aborted).toBe(true); expect(root.textContent).toContain('Chart is inactive.');
     expect(root.querySelector('app-browser-preview-fixture')).toBeNull(); expect(root.querySelector('table')).toBeNull(); fixture.destroy();
   });
 });

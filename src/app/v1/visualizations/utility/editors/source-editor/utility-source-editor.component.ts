@@ -3,235 +3,215 @@ import { Component, DestroyRef, Input, computed, inject, signal } from '@angular
 import { FormControl, FormGroup } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import type { UtilityVisualizationSource, VisualizationDefinition, VisualizationSeries, VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
-import { utilityMeasureKey } from '@domain/visualizations/utility/utility-selection';
+import type { UtilitySelectionMode, UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { UtilityEditorContext } from '../utility-editor-context';
-import { EnergyUnitOptions, VolumeLiquidOptions, VolumeGasOptions, MassUnitOptions } from '@shared/unitOptions';
+import { decisionNodeId, meterResourceChoices, meterSelectionChoices, nativeObservationAvailable, prepareDecisionChange, projectMeterItems } from '../../../decisions/decision-tree';
+import type { VisualizationDecisionAction } from '../../../decisions/decision-types';
+import type { ResourceOption } from '../../../shared/resource-picker/resource-picker.component';
 
-export interface UtilitySourceFormValue {
-  measure: UtilityVisualizationSource['measure'];
-  mode: 'sources' | 'meters' | 'groups' | 'facilities' | 'rule';
-  guids: string[];
-  facilityGuids: string[];
-  groupGuids: string[];
-  utilitySources: string[];
-  search: string;
-  includeRetired: boolean;
-  dataMode: UtilityVisualizationSource['dataMode'];
-  aggregation: UtilityVisualizationSource['aggregation'];
-  groupBy: UtilityVisualizationSource['groupBy'];
-  unitBinding: 'owner' | 'pinned';
-  unit: string;
-  treatmentBinding: 'owner' | 'pinned';
-  treatment: 'site' | 'source';
-  chargeMeter: string;
-  chargeGuid: string;
-  chargeMeasure: 'cost' | 'usage';
-}
-
-export function utilitySourceFormValue(source: UtilityVisualizationSource): UtilitySourceFormValue {
-  const selection = source.selection;
-  return { measure: source.measure, mode: source.selectionMode === 'source' ? 'sources' : selection?.kind === 'rule' ? 'rule' : selection?.resource === 'meter-group' ? 'groups'
-    : selection?.resource === 'facility' ? 'facilities' : 'meters', guids: selection?.kind === 'fixed' ? [...selection.guids] : [],
-    facilityGuids: selection?.kind === 'rule' ? [...selection.filter.facilityGuids ?? []] : [],
-    groupGuids: selection?.kind === 'rule' ? [...selection.filter.groupGuids ?? []] : [],
-    utilitySources: selection?.kind === 'rule' ? [...selection.filter.utilitySources ?? []] : [],
-    search: selection?.kind === 'rule' ? selection.filter.search ?? '' : '',
-    includeRetired: selection?.kind !== 'rule' || selection.filter.includeRetired !== false,
-    dataMode: source.dataMode, aggregation: source.aggregation, groupBy: source.groupBy,
-    unitBinding: source.settings?.unit?.kind ?? 'owner', unit: source.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : '',
-    treatmentBinding: source.settings?.energyTreatment?.kind ?? 'owner',
-    treatment: source.settings?.energyTreatment?.kind === 'pinned' ? source.settings.energyTreatment.value : 'site',
-    chargeMeter: source.charge?.meterGuid ?? '', chargeGuid: source.charge?.chargeGuid ?? '', chargeMeasure: source.charge?.measure ?? 'cost' };
-}
-
-export function utilitySourceFormIssue(value: UtilitySourceFormValue): string | undefined {
-  if (['energy', 'consumption', 'location-emissions', 'market-emissions'].includes(value.measure)
-    && value.unitBinding === 'pinned' && !value.unit.trim()) return 'Enter a pinned unit or follow the owner setting.';
-  if (value.measure === 'charge' && (!!value.chargeMeter !== !!value.chargeGuid)) return 'Choose both the owning meter and a named charge, or clear both to leave setup incomplete.';
+interface DataSettingsValue { readonly useDefaultUnits: boolean; readonly unit: string; readonly chargeMeter: string; readonly chargeGuid: string; }
+function dataSettingsIssue(value: DataSettingsValue, measure?: UtilityVisualizationSource['measure']): string | undefined {
+  if (measure === 'charge' && (!!value.chargeMeter !== !!value.chargeGuid)) return 'Choose both an owning meter and a named charge.';
+  if (measure && ['energy', 'consumption', 'location-emissions', 'market-emissions'].includes(measure)
+    && !value.useDefaultUnits && !value.unit.trim()) return 'Enter chart units or use the default units.';
   return undefined;
 }
 
-/** Only explicit user edits normalize mode-dependent settings; hydration retains saved intent. */
-export function applyUtilitySourceForm(definition: VisualizationDefinition, sourceId: string, value: UtilitySourceFormValue): VisualizationDefinition {
-  const original = definition.sources.find(source => source.id === sourceId);
-  if (original?.kind !== 'utility' || utilitySourceFormIssue(value)) return definition;
-  const measureChanged = original.measure !== value.measure;
-  const modeChanged = original.dataMode !== value.dataMode || measureChanged && value.measure === 'charge';
-  const native = value.measure === 'charge' || value.dataMode === 'billing-period';
-  const settings = measureChanged ? {} : { ...original.settings };
-  if (['energy', 'consumption', 'location-emissions', 'market-emissions'].includes(value.measure)) {
-    settings.unit = value.unitBinding === 'owner' ? { kind: 'owner' } : { kind: 'pinned', value: value.unit.trim() };
-  } else if (measureChanged) delete settings.unit;
-  if (value.measure === 'energy') settings.energyTreatment = value.treatmentBinding === 'owner' ? { kind: 'owner' }
-    : { kind: 'pinned', value: value.treatment };
-  else if (measureChanged) delete settings.energyTreatment;
-  const { charge: _charge, selection: _selection, ...base } = original;
-  const charge = value.measure === 'charge' && value.chargeMeter && value.chargeGuid
-    ? { meterGuid: value.chargeMeter, chargeGuid: value.chargeGuid, measure: value.chargeMeasure } : undefined;
-  const selection: UtilityVisualizationSource['selection'] = charge ? { kind: 'fixed', resource: 'meter', guids: [charge.meterGuid] }
-    : value.mode === 'sources' ? value.utilitySources.length ? { kind: 'rule', resource: 'meter', filter: { utilitySources: value.utilitySources } } : undefined
-    : value.mode === 'rule' ? { kind: 'rule', resource: 'meter', filter: {
-      ...(value.facilityGuids.length ? { facilityGuids: value.facilityGuids } : {}),
-      ...(value.groupGuids.length ? { groupGuids: value.groupGuids } : {}),
-      ...(value.utilitySources.length ? { utilitySources: value.utilitySources } : {}),
-      ...(value.search.trim() ? { search: value.search.trim() } : {}), includeRetired: value.includeRetired } }
-    : { kind: 'fixed', resource: value.mode === 'groups' ? 'meter-group' : value.mode === 'facilities' ? 'facility' : 'meter', guids: value.guids };
-  const source: UtilityVisualizationSource = { ...base, measure: value.measure, ...(selection ? { selection } : {}), selectionMode: charge ? 'meter' : value.mode === 'sources' ? 'source' : value.mode === 'rule' ? 'rule' : value.mode === 'groups' ? 'group' : value.mode === 'facilities' ? 'facility' : 'meter',
-    dataMode: native ? 'billing-period' : 'calendarized', aggregation: native ? 'none' : value.aggregation,
-    groupBy: native || value.aggregation === 'none' ? 'meter' : value.groupBy, settings, ...(charge ? { charge } : {}) };
-  const metric = utilityMeasureKey(source);
-  let series = definition.series.filter(item => item.sourceId !== sourceId || item.metric === metric);
-  const groupingChanged = original.groupBy !== source.groupBy;
-  const selectionChanged = JSON.stringify(original.selection) !== JSON.stringify(source.selection);
-  const ownSeries = series.filter(item => item.sourceId === sourceId);
-  if (ownSeries.length && (groupingChanged || selectionChanged)) {
-    // Explicitly selecting a new resource set must not leave an old exact-series
-    // anchor impossible to edit. Preserve same-kind appearance as dormant overrides.
-    const wildcard = ownSeries.find(item => !item.resourceGuid);
-    const basis: VisualizationSeries = wildcard ?? { id: ownSeries[0].id, sourceId, metric, axis: ownSeries[0].axis };
-    const { overrides: priorOverrides, ...shared } = basis;
-    const overrides: readonly VisualizationSeriesOverride[] = groupingChanged ? [] : [...priorOverrides ?? [], ...ownSeries.filter(item => !!item.resourceGuid).map((item, index) => ({
-      resourceGuid: item.resourceGuid!, accountGuid: definition.accountGuid, axis: item.axis, ...(wildcard ? {} : { order: index }),
-      ...(item.label ? { label: item.label } : {}), ...(item.color ? { color: item.color } : {}),
-      ...(item.lineStyle ? { lineStyle: item.lineStyle } : {}), ...(item.visible !== undefined ? { visible: item.visible } : {})
-    }))];
-    const unique = [...new Map(overrides.map(item => [JSON.stringify([item.accountGuid ?? definition.accountGuid, item.resourceGuid !== undefined ? 'resource' : 'series', item.resourceGuid ?? item.seriesId]), item])).values()];
-    const replacement = { ...shared, ...(unique.length ? { overrides: unique } : {}) };
-    const firstIndex = series.findIndex(item => item.sourceId === sourceId);
-    series = series.filter(item => item.sourceId !== sourceId); series.splice(firstIndex, 0, replacement);
-  }
-  if (!series.some(item => item.sourceId === sourceId)) {
-    let id = `${sourceId}-series`, suffix = 1;
-    while (series.some(item => item.id === id)) id = `${sourceId}-series-${suffix++}`;
-    series.push({ id, sourceId, metric, axis: 'left' });
-  }
-  const chart = modeChanged && definition.chart?.kind === 'time-series'
-    ? { ...definition.chart, interval: native ? 'native' as const : 'monthly' as const } : definition.chart;
-  return { ...definition, sources: definition.sources.map(item => item.id === sourceId ? source : item), series, ...(chart ? { chart } : {}) };
-}
-
 @Component({ selector: 'app-utility-source-editor', standalone: false, templateUrl: './utility-source-editor.component.html',
-  styleUrls: ['./utility-source-editor.component.css'] })
+  styleUrls: ['./utility-source-editor.component.css', '../../../shared/compact-controls.css'] })
 export class UtilitySourceEditorComponent {
+  readonly emptyExpanded: ReadonlySet<string> = new Set();
   private readonly store = inject(AccountWorkspaceStore);
   private readonly destroy = inject(DestroyRef);
   private readonly contextValue = signal<UtilityEditorContext | undefined>(undefined);
   private identity = '';
-  private savedFingerprint = '';
-  private previous?: UtilitySourceFormValue;
+  private settingsFingerprint = '';
+  private readonly publishedSettings: string[] = [];
+  private settingsEpoch = 0;
+  private previousChargeMeter = '';
+  readonly settingsMeasure = signal<UtilityVisualizationSource['measure'] | undefined>(undefined);
   readonly conflict = signal(false);
+  readonly measureConflict = computed(() => this.conflict() && this.settingsMeasure() !== this.selectedSource()?.measure);
   readonly disabled = computed(() => this.contextValue()?.disabled ?? true);
-  readonly form = new FormGroup({
-    measure: new FormControl<UtilitySourceFormValue['measure']>('energy', { nonNullable: true }),
-    mode: new FormControl<UtilitySourceFormValue['mode']>('meters', { nonNullable: true }),
-    guids: new FormControl<string[]>([], { nonNullable: true }), facilityGuids: new FormControl<string[]>([], { nonNullable: true }),
-    groupGuids: new FormControl<string[]>([], { nonNullable: true }), utilitySources: new FormControl<string[]>([], { nonNullable: true }),
-    search: new FormControl('', { nonNullable: true }), includeRetired: new FormControl(true, { nonNullable: true }),
-    dataMode: new FormControl<UtilitySourceFormValue['dataMode']>('calendarized', { nonNullable: true }),
-    aggregation: new FormControl<UtilitySourceFormValue['aggregation']>('sum', { nonNullable: true }),
-    groupBy: new FormControl<UtilitySourceFormValue['groupBy']>('meter', { nonNullable: true }),
-    unitBinding: new FormControl<'owner' | 'pinned'>('owner', { nonNullable: true }), unit: new FormControl('', { nonNullable: true }),
-    treatmentBinding: new FormControl<'owner' | 'pinned'>('owner', { nonNullable: true }),
-    treatment: new FormControl<'site' | 'source'>('site', { nonNullable: true }),
+  readonly contextState = this.contextValue.asReadonly();
+  readonly selectedSource = computed(() => {
+    const context = this.contextValue();
+    const source = context?.definition.sources.find(item => item.id === context.sourceId);
+    return source?.kind === 'utility' ? source : undefined;
+  });
+  readonly measures = [
+    { value: 'energy', label: 'Energy', icon: 'energy' }, { value: 'consumption', label: 'Consumption / water', icon: 'droplet' },
+    { value: 'cost', label: 'Cost', icon: 'piggyBank' }, { value: 'location-emissions', label: 'Location emissions', icon: 'location' },
+    { value: 'market-emissions', label: 'Market emissions', icon: 'earth' }, { value: 'charge', label: 'Bill charge', icon: 'invoice' }
+  ] as const satisfies readonly { value: UtilityVisualizationSource['measure']; label: string; icon: IconName }[];
+  readonly visibleMeasures = computed(() => this.measures.filter(option => this.store.account()?.displayEmissions
+    || option.value !== 'location-emissions' && option.value !== 'market-emissions'));
+  readonly modes = meterSelectionChoices();
+  readonly measureLabel = computed(() => this.measures.find(measure => measure.value === this.selectedSource()?.measure)?.label ?? 'Choose charted data');
+  readonly settingsMeasureLabel = computed(() => this.measures.find(measure => measure.value === this.settingsMeasure())?.label ?? '');
+  readonly nodes = computed(() => {
+    const sourceId = this.contextValue()?.sourceId;
+    const id = (kind: 'measure' | 'selection-mode' | 'resources' | 'data-settings') => decisionNodeId({ kind, sourceId });
+    return { measure: id('measure'), mode: id('selection-mode'), resources: id('resources'), settings: id('data-settings') };
+  });
+  readonly items = computed(() => {
+    const context = this.contextValue(), snapshot = this.store.snapshot();
+    return context && snapshot ? projectMeterItems(context.definition, context.sourceId, snapshot).map(item => ({ ...item,
+      resetKey: context.nodeResetKeys?.[decisionNodeId({ kind: 'item', sourceId: context.sourceId, itemKey: item.key })] ?? 0 })) : [];
+  });
+  readonly choices = computed<readonly ResourceOption[]>(() => {
+    const source = this.selectedSource(), context = this.contextValue(), snapshot = this.store.snapshot();
+    if (!source?.selectionMode || !this.selectionSupported() || !context || !snapshot) return [];
+    return meterResourceChoices(snapshot, resolveVisualizationFacilities(context.definition, snapshot.facilities).scope, source.selectionMode, source.measure)
+      .map(option => ({ guid: option.value, label: option.label, icon: option.icon, detail: option.detail || (!option.available ? 'No usable readings yet' : '') }));
+  });
+  readonly selectionLabel = computed(() => this.modes.find(mode => mode.value === this.selectedSource()?.selectionMode)?.label
+    ?? (this.selectedSource()?.selectionMode === 'facility' ? 'Saved facility selection' : 'Choose a selection method'));
+  readonly selectionSupported = computed(() => this.selectedSource()?.selectionMode === 'facility' || this.modes.some(mode => mode.value === this.selectedSource()?.selectionMode));
+  readonly resourceLabel = computed(() => ({ source: 'Sources', group: 'Meter groups', meter: 'Meters', facility: 'Facilities', rule: 'Resources' })[this.selectedSource()?.selectionMode ?? 'meter']);
+  readonly calendarizationChoiceVisible = computed(() => {
+    const context = this.contextValue(), snapshot = this.store.snapshot(), source = this.selectedSource();
+    return !!context && !!snapshot && !!source && source.measure !== 'charge'
+      && (source.dataMode === 'billing-period' || nativeObservationAvailable(context.definition, context.sourceId, snapshot));
+  });
+  readonly selected = new FormControl<string[]>([], { nonNullable: true });
+  readonly useCalendarizedData = new FormControl(true, { nonNullable: true });
+  readonly aggregateByFacility = new FormControl(false, { nonNullable: true });
+  readonly aggregationDisabled = computed(() => this.disabled() || this.selectedSource()?.measure === 'charge' || this.selectedSource()?.dataMode !== 'calendarized');
+  readonly settingsOwner = computed(() => {
+    const context = this.contextValue(), snapshot = this.store.snapshot();
+    return context && snapshot && resolveVisualizationFacilities(context.definition, snapshot.facilities).scope.kind === 'facility' ? 'facility' : 'account';
+  });
+  readonly settingsForm = new FormGroup({
+    useDefaultUnits: new FormControl(true, { nonNullable: true }), unit: new FormControl('', { nonNullable: true }),
+    useDefaultEnergySettings: new FormControl(true, { nonNullable: true }), treatment: new FormControl<'site' | 'source'>('site', { nonNullable: true }),
     chargeMeter: new FormControl('', { nonNullable: true }), chargeGuid: new FormControl('', { nonNullable: true }),
     chargeMeasure: new FormControl<'cost' | 'usage'>('cost', { nonNullable: true })
-  }, { validators: control => utilitySourceFormIssue(control.getRawValue() as UtilitySourceFormValue) ? { utilitySetup: true } : null });
-  readonly value = signal(this.form.getRawValue());
-  readonly issue = computed(() => utilitySourceFormIssue(this.value()));
-  readonly selectedSource = computed(() => this.contextValue()?.definition.sources.find(source => source.id === this.contextValue()?.sourceId));
-  readonly ownerResources = computed(() => {
-    const context = this.contextValue();
-    const scope = context ? resolveVisualizationFacilities(context.definition, this.store.facilities()).scope : undefined;
-    const accountGuid = context?.definition.accountGuid;
-    const eligible = (item: { accountId: string; facilityId?: string }) => item.accountId === accountGuid
-      && !!item.facilityId && !!scope?.facilityGuids.includes(item.facilityId);
-    return { meters: this.store.meters().filter(eligible), groups: this.store.meterGroups().filter(eligible),
-      facilities: this.store.facilities().filter(item => item.accountId === accountGuid && !!scope?.facilityGuids.includes(item.guid)) };
+  }, { validators: control => dataSettingsIssue(control.getRawValue() as DataSettingsValue, this.settingsMeasure()) ? { dataSettings: true } : null });
+  readonly settingsValue = signal(this.settingsForm.getRawValue());
+  readonly issue = computed(() => dataSettingsIssue(this.settingsValue(), this.settingsMeasure()));
+  readonly scopeMeters = computed(() => {
+    const context = this.contextValue(), snapshot = this.store.snapshot();
+    const scope = context && snapshot ? resolveVisualizationFacilities(context.definition, snapshot.facilities).scope : undefined;
+    const eligible = (value: { accountId: string; facilityId?: string }) => value.accountId === context?.definition.accountGuid
+      && !!value.facilityId && !!scope?.facilityGuids.includes(value.facilityId);
+    return this.store.meters().filter(eligible);
   });
-  readonly options = computed(() => {
-    const value = this.value(), resources = this.ownerResources();
-    const owners = new Map(resources.facilities.map(item => [item.guid, item.name]));
-    const records = value.mode === 'groups' ? resources.groups : value.mode === 'facilities' ? resources.facilities : resources.meters;
-    return withMissing(records.map(item => ({ guid: item.guid, label: ('facilityId' in item ? `${owners.get(item.facilityId) ?? 'Facility'} / ` : '')
-      + item.name + ('source' in item ? ` · ${item.source}` : '') + ('noLongerInUse' in item && item.noLongerInUse ? ' (retired)' : '') })), value.guids);
+  readonly meterOptions = computed(() => {
+    const options = this.scopeMeters().map(value => ({ guid: value.guid, label: `${value.name} · ${value.source}`, unavailable: false }));
+    const guid = this.settingsValue().chargeMeter;
+    return guid && !options.some(item => item.guid === guid) ? [{ guid, label: `Unavailable meter: ${guid}`, unavailable: true }, ...options] : options;
   });
-  readonly facilityOptions = computed(() => withMissing(this.ownerResources().facilities.map(item => ({ guid: item.guid, label: item.name })), this.value().facilityGuids));
-  readonly groupOptions = computed(() => withMissing(this.ownerResources().groups.map(item => ({ guid: item.guid,
-    label: `${this.ownerResources().facilities.find(f => f.guid === item.facilityId)?.name ?? 'Facility'} / ${item.name}` })), this.value().groupGuids));
-  readonly meterOptions = computed(() => withMissing(this.ownerResources().meters.map(item => ({ guid: item.guid,
-    label: `${this.ownerResources().facilities.find(f => f.guid === item.facilityId)?.name ?? 'Facility'} / ${item.name} · ${item.source}` })), this.value().chargeMeter ? [this.value().chargeMeter] : []));
-  readonly pinnedUnitOptions = computed(() => this.value().measure.endsWith('emissions') ? [{ value: 'tonne CO2e', display: 'tonne CO2e' }]
-    : [...new Map([...EnergyUnitOptions, ...VolumeLiquidOptions, ...VolumeGasOptions, ...MassUnitOptions].map(option => [option.value, option])).values()]);
-  readonly sourceOptions = computed(() => [...new Set([...this.ownerResources().meters.map(item => item.source), ...this.value().utilitySources])].sort());
-  readonly chargeOptions = computed(() => withMissing((this.ownerResources().meters.find(meter => meter.guid === this.value().chargeMeter)?.charges ?? [])
-    .map(item => ({ guid: item.guid, label: `${item.name} (${item.chargeType})` })), this.value().chargeGuid ? [this.value().chargeGuid] : []));
+  readonly chargeOptions = computed(() => {
+    const options = (this.scopeMeters().find(meter => meter.guid === this.settingsValue().chargeMeter)?.charges ?? []).map(charge => ({ guid: charge.guid, label: charge.name, unavailable: false }));
+    const guid = this.settingsValue().chargeGuid;
+    return guid && !options.some(item => item.guid === guid) ? [{ guid, label: `Unavailable charge: ${guid}`, unavailable: true }, ...options] : options;
+  });
 
   @Input({ required: true }) set context(context: UtilityEditorContext) {
-    const source = context.definition.sources.find(item => item.id === context.sourceId);
     this.contextValue.set(context);
-    if (source?.kind !== 'utility') return;
-    const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid, context.sourceId]);
-    const fingerprint = JSON.stringify(source);
-    if (identity !== this.identity) {
-      this.identity = identity; this.hydrate(source);
-    } else if (fingerprint !== this.savedFingerprint) {
-      if (this.conflict() || utilitySourceFormIssue(this.form.getRawValue())) this.conflict.set(true);
-      else this.hydrate(source);
+    const source = this.selectedSource(); if (!source) return;
+    const identity = `${context.editorKey}:${context.sourceId}:${context.resetKey ?? 0}`;
+    const fingerprint = JSON.stringify([source.settings, source.charge, source.measure]);
+    const epoch = context.nodeResetKeys?.[this.nodes().settings] ?? 0;
+    if (identity !== this.identity || epoch !== this.settingsEpoch) {
+      this.identity = identity; this.settingsEpoch = epoch; this.hydrateSettings(source);
+    } else {
+      // An acknowledged coherent edit must not replace newer raw form input.
+      const acknowledgement = this.publishedSettings.lastIndexOf(fingerprint);
+      if (!this.conflict() && acknowledgement >= 0) {
+        this.settingsFingerprint = fingerprint;
+        this.publishedSettings.splice(0, acknowledgement + 1);
+      } else if (fingerprint !== this.settingsFingerprint) {
+        if (this.issue() || this.conflict()) {
+          this.publishedSettings.length = 0;
+          this.conflict.set(true);
+        } else this.hydrateSettings(source);
+      }
     }
-    context.disabled ? this.form.disable({ emitEvent: false }) : this.form.enable({ emitEvent: false });
-    context.validityChanged?.(this.conflict() || !!utilitySourceFormIssue(this.form.getRawValue()));
+    const filter = source.selection?.kind === 'rule' ? source.selection.filter : {};
+    const selected = source.selectionMode === 'source' ? [...filter.utilitySources ?? []] : source.selection?.kind === 'fixed' ? [...source.selection.guids] : [];
+    this.selected.setValue(selected, { emitEvent: false });
+    this.useCalendarizedData.setValue(source.dataMode === 'calendarized', { emitEvent: false });
+    context.disabled || !this.calendarizationChoiceVisible() ? this.useCalendarizedData.disable({ emitEvent: false }) : this.useCalendarizedData.enable({ emitEvent: false });
+    this.aggregateByFacility.setValue(source.aggregation === 'sum' && source.groupBy === 'facility', { emitEvent: false });
+    this.aggregationDisabled() ? this.aggregateByFacility.disable({ emitEvent: false }) : this.aggregateByFacility.enable({ emitEvent: false });
+    context.disabled ? this.settingsForm.disable({ emitEvent: false }) : this.settingsForm.enable({ emitEvent: false });
+    this.settingsForm.updateValueAndValidity({ emitEvent: false });
+    this.reportValidity();
   }
 
   constructor() {
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => {
-      const raw = this.form.getRawValue();
-      const changes: Partial<UtilitySourceFormValue> = {};
-      if (this.previous && raw.mode !== this.previous.mode) changes.guids = [];
-      if (this.previous && raw.measure !== this.previous.measure) {
-        changes.unitBinding = 'owner'; changes.unit = ''; changes.treatmentBinding = 'owner';
-      }
-      if (this.previous && raw.chargeMeter !== this.previous.chargeMeter) changes.chargeGuid = '';
-      if (raw.measure === 'charge' || raw.dataMode === 'billing-period') {
-        changes.dataMode = 'billing-period'; changes.aggregation = 'none'; changes.groupBy = 'meter';
-      }
-      if (Object.keys(changes).length) this.form.patchValue(changes, { emitEvent: false });
-      const value = this.form.getRawValue(); this.previous = value;
-      this.value.set(value);
-      this.publish();
+    this.useCalendarizedData.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(enabled => {
+      const source = this.selectedSource(); if (!source || this.disabled() || !this.calendarizationChoiceVisible()) return;
+      this.contextValue()?.draftChanged?.();
+      this.useCalendarizedData.setValue(source.dataMode === 'calendarized', { emitEvent: false });
+      this.request({ kind: 'source-settings', sourceId: source.id, settings: { dataMode: enabled ? 'calendarized' : 'billing-period' } });
     });
-    this.destroy.onDestroy(() => this.contextValue()?.validityChanged?.(false));
+    this.aggregateByFacility.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(enabled => {
+      const source = this.selectedSource(); if (!source || this.aggregationDisabled()) return;
+      this.contextValue()?.draftChanged?.();
+      const groupBy = enabled ? 'facility' : source.selectionMode === 'source' ? 'source' : source.selectionMode === 'group' ? 'group' : 'meter';
+      this.aggregateByFacility.setValue(source.aggregation === 'sum' && source.groupBy === 'facility', { emitEvent: false });
+      this.request({ kind: 'source-settings', sourceId: source.id, settings: { groupBy, aggregation: 'sum' } });
+    });
+    this.settingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => {
+      this.contextValue()?.draftChanged?.();
+      const value = this.settingsForm.getRawValue();
+      if (value.chargeMeter !== this.previousChargeMeter) { this.previousChargeMeter = value.chargeMeter; this.settingsForm.controls.chargeGuid.setValue('', { emitEvent: false }); }
+      this.settingsValue.set(this.settingsForm.getRawValue()); this.publishSettings();
+    });
+    this.destroy.onDestroy(() => { const context = this.contextValue(); context?.validityChanged?.(false); context?.nodeValidityChanged?.(this.nodes().settings, false); });
   }
 
-  useSaved(): void {
-    const context = this.contextValue(), source = context?.definition.sources.find(item => item.id === context.sourceId);
-    if (!context || context.disabled || source?.kind !== 'utility') return;
-    this.hydrate(source); context.validityChanged?.(false);
+  request(action: VisualizationDecisionAction): void { if (!this.disabled()) this.contextValue()?.request?.(action); }
+  selectMode(mode: UtilitySelectionMode): void { const source = this.selectedSource(); if (source && this.modes.some(choice => choice.value === mode)) this.request({ kind: 'selection-mode', sourceId: source.id, mode }); }
+  selectMeasure(measure: UtilityVisualizationSource['measure']): void {
+    const source = this.selectedSource();
+    if (source && this.visibleMeasures().some(option => option.value === measure)) this.request({ kind: 'measure', sourceId: source.id, measure });
   }
-
-  keepLocal(): void {
-    const context = this.contextValue(), source = context?.definition.sources.find(item => item.id === context.sourceId);
-    if (!context || context.disabled || source?.kind !== 'utility') return;
-    this.savedFingerprint = JSON.stringify(source); this.conflict.set(false); this.publish();
+  toggleResource(change: { readonly guid: string; readonly selected: boolean }): void {
+    const source = this.selectedSource(); if (source) this.request({ kind: 'toggle-resource', sourceId: source.id, resourceId: change.guid, selected: change.selected });
   }
-
-  private hydrate(source: UtilityVisualizationSource): void {
-    this.savedFingerprint = JSON.stringify(source); this.conflict.set(false);
-    this.form.reset(utilitySourceFormValue(source), { emitEvent: false });
-    this.previous = this.form.getRawValue(); this.value.set(this.previous);
+  setResources(resourceIds: readonly string[]): void {
+    const source = this.selectedSource(); if (source) this.request({ kind: 'set-resources', sourceId: source.id, resourceIds });
   }
+  setSection(id: string, expanded: boolean): void { this.contextValue()?.sectionChanged?.(id, expanded); }
+  chooseSetting<T>(control: FormControl<T>, value: T): void { if (!this.disabled() && control.value !== value) { control.markAsDirty(); control.setValue(value); } }
+  useSaved(): void { const source = this.selectedSource(); if (source) { this.hydrateSettings(source); this.reportValidity(); } }
+  keepLocal(): void { if (!this.disabled() && !this.measureConflict()) { this.conflict.set(false); this.publishSettings(); } }
 
-  private publish(): void {
-    const context = this.contextValue(), value = this.form.getRawValue();
-    const invalid = !!utilitySourceFormIssue(value);
-    context?.validityChanged?.(this.conflict() || invalid);
-    if (!context || context.disabled || invalid || this.conflict()) return;
-    const next = applyUtilitySourceForm(context.definition, context.sourceId, value);
-    this.savedFingerprint = JSON.stringify(next.sources.find(source => source.id === context.sourceId));
-    context.changed(next);
+  private hydrateSettings(source: UtilityVisualizationSource): void {
+    this.publishedSettings.length = 0;
+    this.settingsMeasure.set(source.measure);
+    this.settingsFingerprint = JSON.stringify([source.settings, source.charge, source.measure]); this.conflict.set(false);
+    const value = { useDefaultUnits: source.settings?.unit?.kind !== 'pinned', unit: source.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : '',
+      useDefaultEnergySettings: source.settings?.energyTreatment?.kind !== 'pinned', treatment: source.settings?.energyTreatment?.kind === 'pinned' ? source.settings.energyTreatment.value : 'site',
+      chargeMeter: source.charge?.meterGuid ?? '', chargeGuid: source.charge?.chargeGuid ?? '', chargeMeasure: source.charge?.measure ?? 'cost' } as const;
+    this.settingsForm.reset(value, { emitEvent: false }); this.settingsValue.set(this.settingsForm.getRawValue());
+    this.previousChargeMeter = value.chargeMeter;
   }
-}
-
-function withMissing(options: readonly { guid: string; label: string }[], selected: readonly string[]) {
-  return [...options, ...selected.filter(guid => !options.some(option => option.guid === guid)).map(guid => ({ guid, label: `Unavailable: ${guid}` }))];
+  private reportValidity(): void {
+    const context = this.contextValue(), invalid = this.conflict() || !!this.issue();
+    context?.validityChanged?.(invalid); context?.nodeValidityChanged?.(this.nodes().settings, invalid);
+  }
+  private publishSettings(): void {
+    const source = this.selectedSource(), context = this.contextValue();
+    this.reportValidity(); if (!source || !context || this.disabled() || this.issue() || this.conflict()) return;
+    const value = this.settingsValue(), settings = { ...source.settings };
+    if (['energy', 'consumption', 'location-emissions', 'market-emissions'].includes(source.measure)) settings.unit = value.useDefaultUnits
+      ? { kind: 'owner' } : { kind: 'pinned', value: value.unit.trim() };
+    if (source.measure === 'energy') settings.energyTreatment = value.useDefaultEnergySettings ? { kind: 'owner' } : { kind: 'pinned', value: value.treatment };
+    const action: VisualizationDecisionAction = { kind: 'source-settings', sourceId: source.id, settings: { settings,
+      ...(source.measure === 'charge' ? { charge: value.chargeMeter && value.chargeGuid ? { meterGuid: value.chargeMeter, chargeGuid: value.chargeGuid, measure: value.chargeMeasure } : undefined } : {}) } };
+    const snapshot = this.store.snapshot();
+    const result = snapshot ? prepareDecisionChange(context.definition, action, { snapshot }) : undefined;
+    if (result?.state === 'confirm') this.hydrateSettings(source);
+    else if (result?.state === 'apply') {
+      const published = result.definition.sources.find(item => item.id === source.id);
+      if (published?.kind === 'utility') this.publishedSettings.push(JSON.stringify([published.settings, published.charge, published.measure]));
+    }
+    this.request(action);
+  }
 }

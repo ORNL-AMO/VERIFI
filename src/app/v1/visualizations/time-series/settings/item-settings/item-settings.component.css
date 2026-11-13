@@ -1,0 +1,7 @@
+@import '../../../shared/compact-controls.css';
+:host { display: block; min-width: 0; }
+fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+label { display: grid; gap: .25rem; margin-bottom: .65rem; font-size: .8rem; }
+input[type=text] { width: 100%; min-width: 0; padding: .4rem; background: var(--v1-surface); color: var(--v1-text); border: 1px solid var(--v1-border); }
+.item-settings__check { display: flex; gap: .4rem; align-items: center; }
+p { font-size: .8rem; color: var(--v1-muted); overflow-wrap: anywhere; }
