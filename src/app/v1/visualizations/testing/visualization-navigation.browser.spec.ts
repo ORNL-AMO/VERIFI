@@ -13,6 +13,7 @@ import { SavedVisualizationCommands } from '@data/account-workspace/saved-visual
 import type { VisualizationCommand, VisualizationCommandOutcome } from '@data/account-workspace/visualization-commands.models';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
+import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -82,7 +83,7 @@ function setup(options: { singleFacility?: boolean; readyChart?: boolean } = {})
     }
     const saved = store.savedVisualizations().find(item => item.guid === command.guid)!;
     if (command.kind !== 'update' && command.kind !== 'retarget') throw new Error('Unsupported fixture command.');
-    const decoded = readSavedVisualization(saved);
+    const decoded = command.kind === 'retarget' ? decodeVisualizationDefinition(saved.definition) : readSavedVisualization(saved);
     if (!('definition' in decoded)) throw new Error('Fixture requires readable current intent.');
     const definition = command.kind === 'retarget' ? prepareVisualizationFacilityChange(decoded.definition, command.targetFacilities, store.snapshot()!, saved.preservation?.references).definition : command.definition;
     const { facilityId: _facilityId, ...current } = saved;
@@ -420,7 +421,7 @@ describe('visualization routed journeys in Chromium', () => {
       excluded.focus(); await userEvent.keyboard(' '); await waitForDialog(test);
       expect(workbench.pendingDecision()?.result.definition.series).toEqual([blocked]); expect(test.submit).not.toHaveBeenCalled();
       dialogButton(test.root, 'Apply changes').focus(); await userEvent.keyboard('{Enter}');
-      await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.submit).toHaveBeenCalledOnce(); expect(workbench.pendingDecision()).toBeUndefined(); expect(workbench.editor.saving()).toBe(false); });
+      await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.submit).toHaveBeenCalledOnce(); expect(workbench.pendingDecision()).toBeUndefined(); expect(workbench.editor.saving()).toBe(false); expect(workbench.editor.record()!.revision).toBe(saved.revision + 1); });
       expect(workbench.editor.definition()!.sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
       expect(workbench.editor.definition()!.series).toEqual([blocked]); expect(workbench.editor.record()!.preservation!.references).toEqual(references);
     } finally { test.destroy(); }
@@ -497,7 +498,7 @@ describe('visualization routed journeys in Chromium', () => {
         for (const mode of ['', 'v1-theme-dark', 'v1-contrast-strong', 'v1-theme-dark v1-contrast-strong']) {
           surface.className = `v1-root ${mode}`;
           expect(picker.scrollWidth).toBeLessThanOrEqual(picker.clientWidth);
-          expect(textContrast(rows.querySelector<HTMLElement>('.facility-picker__row')!)).toBeGreaterThanOrEqual(4.5);
+          expect(textContrast(rows.querySelector<HTMLElement>('.facility-picker__card')!)).toBeGreaterThanOrEqual(4.5);
         }
         await page.screenshot({ element: picker, path: `../../../../../.angular/vis3-alignment/facilities-checklist-${width}.png` });
       }
