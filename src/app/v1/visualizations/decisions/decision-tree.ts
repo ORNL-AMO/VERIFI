@@ -109,7 +109,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   };
   if (action.kind === 'facilities') {
     if (sameVisualizationFacilitySelection(definition.facilitySelection, action.selection)) return { state: 'unchanged' };
-    const review = prepareVisualizationFacilityChange(definition, action.selection, context.snapshot);
+    const review = prepareVisualizationFacilityChange(definition, action.selection, context.snapshot, context.preservedReferences);
     next = review.definition; cleared.push(...review.cleared); affect({ kind: 'facilities' });
     for (const source of definition.sources) {
       const changed = next.sources.find(item => item.id === source.id);

@@ -25,9 +25,36 @@ import { meter } from '@app/v1/data/meters/facility-meters.testing';
 import { UtilitySourceEditorComponent } from '../utility/editors/source-editor/utility-source-editor.component';
 import { ItemSettingsComponent } from '../time-series/settings/item-settings/item-settings.component';
 import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
+import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
 describe('visualization workbench', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it('reviews facility pruning with durable imported reference blocks despite excluded destination collisions', async () => {
+    const original = utilityVisualizationFixture();
+    const blocked = { ...original.series[0], id: 'blocked', traceType: 'bar' as const, label: 'Imported meter', overrides: [{ resourceGuid: 'meter-a', order: 3 }] };
+    const definition: VisualizationDefinition = { ...original,
+      sources: original.sources.map(source => source.kind === 'utility' ? { ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } } : source),
+      series: [blocked, { ...original.series[0], id: 'verified', resourceGuid: 'meter-b', label: 'Verified local meter' }] };
+    const { component, fixture, store, submit } = setup(definition);
+    const current = store.snapshot()!;
+    const references: readonly VisualizationReferenceIssue[] = [
+      { path: 'sources.0.selection.guids.0', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' },
+      { path: 'series.0.resourceGuid', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' }
+    ];
+    store.publish({ ...current, facilities: [...current.facilities, { ...current.facilities[0], guid: 'facility-b' }],
+      meters: [meter({ facilityId: 'facility-b' }), meter({ guid: 'meter-b', facilityId: 'facility-b' })],
+      savedVisualizations: [{ ...current.savedVisualizations[0], revision: current.savedVisualizations[0].revision + 1,
+        preservation: { references, transfers: [] } }] });
+    fixture.detectChanges();
+    expect(component.editor.canEdit()).toBe(false); expect(component.editor.canRetarget()).toBe(true);
+    await component.requestDecision({ kind: 'facilities', selection: { kind: 'fixed', facilityGuids: ['facility-a'] } });
+    expect(component.pendingDecision()?.result.definition.sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
+    expect(component.pendingDecision()?.result.definition.series).toEqual([blocked]); expect(submit).not.toHaveBeenCalled();
+    await component.confirmDecision(); fixture.detectChanges();
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ kind: 'retarget', reviewedDefinition: expect.objectContaining({ series: [blocked] }) }));
+    expect(component.editor.definition()!.sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
+    expect(component.editor.definition()!.series).toEqual([blocked]); expect(component.editor.record()!.preservation!.references).toEqual(references);
+  });
   it('retains consecutive period edits before the next view update without restoring stale metadata', () => {
     const { component, fixture } = setup();
     const periods = fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;

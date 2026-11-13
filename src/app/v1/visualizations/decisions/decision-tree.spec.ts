@@ -6,6 +6,7 @@ import { configuredChartSummary, decisionNodeId, meterResourceChoices, nativeObs
 import type { VisualizationDecisionAction } from './decision-types';
 import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
+import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
 const snapshot = () => ({ ...visualizationSnapshot(), meters: [meter({ groupId: 'group-a' }), meter({ guid: 'meter-b', groupId: 'group-a', source: 'Natural Gas' })],
   meterGroups: [group({ guid: 'group-a', name: 'Boilers' }), group({ guid: 'empty-group', name: 'Future equipment' })], meterData: [reading({})] });
@@ -24,6 +25,31 @@ function selected(mode: 'source' | 'group' | 'meter' | 'facility' | 'rule', ids:
 }
 
 describe('shared visualization decisions', () => {
+  it('retains blocked imported items and their style despite excluded GUID collisions while pruning verified siblings', () => {
+    const selectedBoth = selected('meter', ['meter-a', 'meter-b']);
+    const definition: VisualizationDefinition = { ...selectedBoth, series: [
+      { id: 'blocked', sourceId: 'source-1', metric: 'energy', resourceGuid: 'meter-a', axis: 'left', traceType: 'bar', color: '#123456' },
+      { id: 'verified', sourceId: 'source-1', metric: 'energy', resourceGuid: 'meter-b', axis: 'left', color: '#111111' },
+      { id: 'members', sourceId: 'source-1', metric: 'energy', axis: 'left', overrides: [
+        { seriesId: 'source-1:meter-a', label: 'Imported item', order: 2 },
+        { resourceGuid: 'meter-b', color: '#111111' }
+      ] }
+    ] };
+    const data = snapshot();
+    const catalog = { ...data, facilities: [...data.facilities, { ...data.facilities[0], guid: 'facility-b' }],
+      meters: data.meters.map(item => ({ ...item, facilityId: 'facility-b' })) };
+    const preservedReferences: readonly VisualizationReferenceIssue[] = [
+      { path: 'sources.0.selection.guids.0', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' },
+      { path: 'series.0.resourceGuid', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' }
+    ];
+    const result = prepareDecisionChange(definition, { kind: 'facilities', selection: { kind: 'fixed', facilityGuids: ['facility-a'] } },
+      { snapshot: catalog, preservedReferences });
+    expect(result.state).toBe('confirm');
+    if (result.state === 'unchanged') throw new Error('Expected a reviewed facility change.');
+    expect(result.definition.sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
+    expect(result.definition.series).toEqual([definition.series[0], { ...definition.series[2], overrides: [definition.series[2].overrides![0]] }]);
+    expect(result.cleared).toEqual(expect.arrayContaining(['Excluded resource selections', 'Excluded item presentation']));
+  });
   it('aggregates selected meters by facility without replacing their selection', () => {
     const original = selected('meter', ['meter-a', 'meter-b']);
     const grouped = apply(original, { kind: 'source-settings', sourceId: 'source-1', settings: { aggregation: 'sum', groupBy: 'facility' } });

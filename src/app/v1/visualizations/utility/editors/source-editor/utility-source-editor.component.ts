@@ -208,8 +208,9 @@ export class UtilitySourceEditorComponent {
     const snapshot = this.store.snapshot();
     const result = snapshot ? prepareDecisionChange(context.definition, action, { snapshot }) : undefined;
     if (result?.state === 'confirm') this.hydrateSettings(source);
-    else if (result?.state === 'apply') {
-      const published = result.definition.sources.find(item => item.id === source.id);
+    else if (result) {
+      // An unchanged endpoint against this rendered context can still replace a newer host draft.
+      const published = result.state === 'apply' ? result.definition.sources.find(item => item.id === source.id) : source;
       if (published?.kind === 'utility') this.publishedSettings.push(JSON.stringify([published.settings, published.charge, published.measure]));
     }
     this.request(action);

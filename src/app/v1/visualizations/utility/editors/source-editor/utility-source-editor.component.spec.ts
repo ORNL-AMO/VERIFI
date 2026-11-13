@@ -28,12 +28,16 @@ describe('Meter decision branches', () => {
     expect(state.component.settingsForm.controls.unit.value).toBe(''); expect(state.component.issue()).toBeDefined();
     expect(state.component.conflict()).toBe(false); expect(state.invalid).toHaveBeenLastCalledWith('data-settings:utility', true);
   });
-  it('finishes acknowledgement tracking when edits return to their saved value before a view update', () => {
+  it.each([
+    { edits: ['MWh', 'kWh'], acknowledged: 'kWh', external: 'MWh' },
+    { edits: ['MWh', 'kWh', 'MWh'], acknowledged: 'MWh', external: 'kWh' }
+  ])('finishes acknowledgement tracking for $edits before accepting an external update', ({ edits, acknowledged, external }) => {
     const state = setup(), original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
-    state.component.settingsForm.controls.unit.setValue('MWh'); state.component.settingsForm.controls.unit.setValue('kWh');
-    state.update({ definition: { ...original } });
-    state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } }] } });
-    expect(state.component.settingsForm.controls.unit.value).toBe('MWh'); expect(state.component.conflict()).toBe(false);
+    for (const unit of edits) state.component.settingsForm.controls.unit.setValue(unit);
+    expect(state.request).toHaveBeenLastCalledWith(expect.objectContaining({ settings: expect.objectContaining({ settings: expect.objectContaining({ unit: { kind: 'pinned', value: acknowledged } }) }) }));
+    state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: acknowledged } } }] } });
+    state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: external } } }] } });
+    expect(state.component.settingsForm.controls.unit.value).toBe(external); expect(state.component.conflict()).toBe(false);
   });
   it('places each selected item beside the source settings without an Items wrapper or movement buttons', () => {
     const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;

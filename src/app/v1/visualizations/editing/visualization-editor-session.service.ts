@@ -183,7 +183,7 @@ export class VisualizationEditorSession {
     }
     const snapshot = this.workspace.snapshot();
     if (!snapshot) return false;
-    const submitted = normalizeVisualizationIntent(prepareVisualizationFacilityChange(this.definition()!, selection, snapshot).definition);
+    const submitted = normalizeVisualizationIntent(prepareVisualizationFacilityChange(this.definition()!, selection, snapshot, this.record()?.preservation?.references).definition);
     if (!visualizationIntentEqual(submitted, normalizeVisualizationIntent(reviewedDefinition))) {
       this.errorValue.set('Facilities or source membership changed during review. Review the facility change again.'); return false;
     }

@@ -56,7 +56,7 @@ describe('saved visualization native commands', () => {
     const facilities = await harness.getAll('facilities'), meters = await harness.getAll('utilityMeter');
     const catalog = { facilities, meters, meterGroups: [], predictors: [], energyUseGroups: [], energyUseEquipment: [], facilityAnalyses: [], accountAnalyses: [] } as unknown as VisualizationFacilityCatalog;
     return { kind: 'retarget' as const, accountGuid: account.guid, guid: saved.guid, expectedRevision: saved.revision, targetFacilities,
-      reviewedDefinition: prepareVisualizationFacilityChange(saved.definition as VisualizationDefinition, targetFacilities, catalog).definition };
+      reviewedDefinition: prepareVisualizationFacilityChange(saved.definition as VisualizationDefinition, targetFacilities, catalog, saved.preservation?.references).definition };
   }
 
   it('accepts normalized review metadata without turning an inclusion edit into a rename', async () => {
@@ -145,6 +145,50 @@ describe('saved visualization native commands', () => {
       expect(retargeted.preservation).toEqual(preservation); expect(readSavedVisualization(retargeted).state).toBe('repair-required');
       expect(retargeted.revision).toBe(saved.revision + 1);
     }
+  });
+
+  it('retains imported identities and related style across destination collisions, prunes verified exclusions, and reopens protected', async () => {
+    const handler = TestBed.inject(VisualizationCommandHandler), base = proposal().definition;
+    const excludedFacility = { ...facility, id: 2, guid: 'facility-b' };
+    const blocked = 'retained-origin-guid', verified = 'verified-excluded';
+    const definition: VisualizationDefinition = { ...base, facilitySelection: { kind: 'all' },
+      sources: base.sources.map(source => source.kind === 'utility' ? { ...source,
+        selection: { kind: 'fixed', resource: 'meter', guids: [verified, blocked] } } : source),
+      series: [
+        { id: 'verified', sourceId: 'utility', metric: 'energy', resourceGuid: verified, axis: 'left', color: '#111111' },
+        { id: 'trace', sourceId: 'utility', metric: 'energy', resourceGuid: blocked, label: 'Original resource', axis: 'left', color: '#123456' },
+        { id: 'members', sourceId: 'utility', metric: 'energy', axis: 'left', overrides: [
+          { resourceGuid: blocked, label: 'Original member' }, { seriesId: `utility:${blocked}`, lineStyle: 'dashed' },
+          { resourceGuid: verified, color: '#111111' }, { seriesId: `utility:${verified}`, color: '#111111' }
+        ] }
+      ] };
+    const references = [
+      { path: 'sources.0.selection.guids.1', kind: 'meter' as const, guid: blocked, reason: 'not-transferred' as const },
+      { path: 'series.1.resourceGuid', kind: 'meter' as const, guid: blocked, reason: 'not-transferred' as const }
+    ];
+    const transfers = [{ accountId: 'origin', targetAccountId: account.guid, maps: {} }];
+    const original: IdbSavedVisualization = { guid: 'imported-collision', accountId: account.guid, recordVersion: 1, revision: 3,
+      createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-12T00:00:00.000Z'),
+      definition, preservation: { references, transfers } };
+    await harness.seed({ facilities: [excludedFacility], utilityMeter: [blocked, verified].map(guid => ({ guid, accountId: account.guid, facilityId: excludedFacility.guid })),
+      savedVisualizations: [{ ...original }] });
+    const saved = (await harness.getAll<IdbSavedVisualization & IndexedDbTestRecord>('savedVisualizations'))[0];
+    const reviewed = await inclusionCommand(saved, { kind: 'fixed', facilityGuids: [facility.guid] });
+    const committed = await handler.retarget(reviewed, account.guid);
+    expect(committed).toMatchObject({ id: saved.id, guid: saved.guid, createdDate: saved.createdDate, revision: saved.revision + 1 });
+    expect(committed.definition).toEqual(reviewed.reviewedDefinition);
+    expect((committed.definition as VisualizationDefinition).sources[0]).toMatchObject({ selection: { guids: [blocked] } });
+    expect((committed.definition as VisualizationDefinition).series).toEqual([definition.series[1], {
+      ...definition.series[2], overrides: definition.series[2].overrides!.slice(0, 2)
+    }]);
+    expect(committed.preservation).toEqual({ transfers, references: [
+      { ...references[0], path: 'sources.0.selection.guids.0' }, { ...references[1], path: 'series.0.resourceGuid' }
+    ] });
+    expect(readSavedVisualization(committed).state).toBe('repair-required');
+    expect((await handler.inspect(committed)).filter(ref => ref.reason === 'not-transferred')).toEqual(committed.preservation!.references);
+    await harness.reopen(); expect(await harness.getAll('savedVisualizations')).toEqual([committed]);
+    const reopened = (await harness.getAll<IdbSavedVisualization & IndexedDbTestRecord>('savedVisualizations'))[0];
+    expect(readSavedVisualization(reopened).state).toBe('repair-required');
   });
 
   it.each([false, true])('repairs reviewed facility inclusion and remaps unrelated preserved identities (unrelated source issue: %s)', async keepUnrelated => {

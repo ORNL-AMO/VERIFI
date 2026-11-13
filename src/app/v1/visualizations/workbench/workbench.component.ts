@@ -221,7 +221,8 @@ export class WorkbenchComponent {
     const snapshot = this.workspace.snapshot(); let definition = this.editor.definition();
     if (!snapshot || !definition || !(action.kind === 'facilities' ? this.editor.canRetarget() : this.editor.canEdit()) || this.pendingDecision() || this.decisionBusy()) return;
     this.decisionError.set('');
-    let result = prepareDecisionChange(definition, action, { snapshot, invalidNodeIds: Object.keys(this.invalidEditors()).filter(id => this.invalidEditors()[id]) });
+    let result = prepareDecisionChange(definition, action, { snapshot, preservedReferences: this.editor.record()?.preservation?.references,
+      invalidNodeIds: Object.keys(this.invalidEditors()).filter(id => this.invalidEditors()[id]) });
     if (result.state === 'unchanged') return;
     if (action.kind === 'facilities') {
       if (this.editor.form.invalid) { this.decisionError.set('Correct the visualization name before changing facilities.'); return; }
@@ -231,7 +232,8 @@ export class WorkbenchComponent {
       } finally { this.decisionBusy.set(false); }
       definition = this.editor.definition();
       const currentSnapshot = this.workspace.snapshot(); if (!definition || !currentSnapshot) return;
-      result = prepareDecisionChange(definition, action, { snapshot: currentSnapshot, invalidNodeIds: Object.keys(this.invalidEditors()).filter(id => this.invalidEditors()[id]) });
+      result = prepareDecisionChange(definition, action, { snapshot: currentSnapshot, preservedReferences: this.editor.record()?.preservation?.references,
+        invalidNodeIds: Object.keys(this.invalidEditors()).filter(id => this.invalidEditors()[id]) });
       if (result.state === 'unchanged') return;
     }
     if (result.state === 'confirm' && action.kind !== 'facilities' && this.editor.form.valid && (this.editor.state() === 'dirty' || this.editor.saving())) {
@@ -241,7 +243,8 @@ export class WorkbenchComponent {
       } finally { this.decisionBusy.set(false); }
       const current = this.editor.definition(), currentSnapshot = this.workspace.snapshot();
       if (!current || !currentSnapshot) return;
-      result = prepareDecisionChange(current, action, { snapshot: currentSnapshot, invalidNodeIds: Object.keys(this.invalidEditors()).filter(id => this.invalidEditors()[id]) });
+      result = prepareDecisionChange(current, action, { snapshot: currentSnapshot, preservedReferences: this.editor.record()?.preservation?.references,
+        invalidNodeIds: Object.keys(this.invalidEditors()).filter(id => this.invalidEditors()[id]) });
       if (result.state === 'unchanged') return;
     }
     if (result.state === 'confirm') {

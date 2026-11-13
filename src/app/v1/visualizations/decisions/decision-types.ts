@@ -2,6 +2,7 @@ import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-w
 import type { UtilitySelectionMode, UtilityVisualizationSource, VisualizationChart, VisualizationDefinition,
   VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
+import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
 export type DecisionKind = 'facilities' | 'chart' | 'sources' | 'source' | 'measure' | 'selection-mode' | 'resources'
   | 'data-settings' | 'item' | 'period' | 'appearance';
@@ -56,6 +57,7 @@ export type VisualizationDecisionAction =
 export interface DecisionChangeContext {
   readonly snapshot: AccountWorkspaceSnapshot;
   readonly invalidNodeIds?: readonly string[];
+  readonly preservedReferences?: readonly VisualizationReferenceIssue[];
 }
 export type DecisionChangeResult = { readonly state: 'unchanged' }
   | { readonly state: 'apply' | 'confirm'; readonly definition: VisualizationDefinition;

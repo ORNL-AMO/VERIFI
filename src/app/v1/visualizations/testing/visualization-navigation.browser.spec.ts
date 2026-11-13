@@ -7,6 +7,7 @@ import { NavigationEnd, provideRouter, Router, RouterOutlet } from '@angular/rou
 import { page, userEvent } from 'vitest/browser';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import type { VisualizationCommand, VisualizationCommandOutcome } from '@data/account-workspace/visualization-commands.models';
@@ -83,7 +84,7 @@ function setup(options: { singleFacility?: boolean; readyChart?: boolean } = {})
     if (command.kind !== 'update' && command.kind !== 'retarget') throw new Error('Unsupported fixture command.');
     const decoded = readSavedVisualization(saved);
     if (!('definition' in decoded)) throw new Error('Fixture requires readable current intent.');
-    const definition = command.kind === 'retarget' ? prepareVisualizationFacilityChange(decoded.definition, command.targetFacilities, store.snapshot()!).definition : command.definition;
+    const definition = command.kind === 'retarget' ? prepareVisualizationFacilityChange(decoded.definition, command.targetFacilities, store.snapshot()!, saved.preservation?.references).definition : command.definition;
     const { facilityId: _facilityId, ...current } = saved;
     const value = { ...current, revision: saved.revision + 1, definition };
     store.publishCommitted({ ...store.snapshot()!, savedVisualizations: store.savedVisualizations().map(item => item.guid === value.guid ? value : item) }, store.selections());
@@ -393,6 +394,35 @@ describe('visualization routed journeys in Chromium', () => {
       expect(workbench.editor.definition()!.sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
       expect(workbench.editor.definition()!.series[0].overrides).toEqual(definition.series[0].overrides);
       expect(test.submit).toHaveBeenCalledOnce();
+    } finally { test.destroy(); }
+  });
+
+  it('keeps blocked imported meter intent when Facilities excludes colliding destination records', async () => {
+    const test = setup();
+    try {
+      const original = utilityVisualizationFixture();
+      const blocked = { ...original.series[0], id: 'blocked', traceType: 'bar' as const, label: 'Imported meter', overrides: [{ resourceGuid: 'meter-a', order: 3 }] };
+      const definition = { ...original,
+        sources: original.sources.map(source => source.kind === 'utility' ? { ...source, selection: { kind: 'fixed' as const, resource: 'meter' as const, guids: ['meter-a', 'meter-b'] } } : source),
+        series: [blocked, { ...original.series[0], id: 'verified', resourceGuid: 'meter-b' }] };
+      const references: readonly VisualizationReferenceIssue[] = [
+        { path: 'sources.0.selection.guids.0', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' },
+        { path: 'series.0.resourceGuid', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' }
+      ];
+      const current = test.store.snapshot()!;
+      const saved = { ...current.savedVisualizations[0], definition, preservation: { references, transfers: [] } };
+      test.store.publish({ ...current, facilities: [...current.facilities, { ...current.facilities[0], guid: 'facility-b', name: 'Excluded plant' }],
+        meters: [meter({ facilityId: 'facility-b' }), meter({ guid: 'meter-b', facilityId: 'facility-b' })], savedVisualizations: [saved] });
+      await test.navigate(workbenchA); const workbench = test.editor()!;
+      expect(workbench.editor.canEdit()).toBe(false); expect(workbench.editor.canRetarget()).toBe(true);
+      await expandDecision(test, workbench.rootNodes.facilities);
+      const excluded = test.root.querySelector<HTMLInputElement>('[aria-label="Excluded plant"]')!;
+      excluded.focus(); await userEvent.keyboard(' '); await waitForDialog(test);
+      expect(workbench.pendingDecision()?.result.definition.series).toEqual([blocked]); expect(test.submit).not.toHaveBeenCalled();
+      dialogButton(test.root, 'Apply changes').focus(); await userEvent.keyboard('{Enter}');
+      await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.submit).toHaveBeenCalledOnce(); expect(workbench.pendingDecision()).toBeUndefined(); expect(workbench.editor.saving()).toBe(false); });
+      expect(workbench.editor.definition()!.sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
+      expect(workbench.editor.definition()!.series).toEqual([blocked]); expect(workbench.editor.record()!.preservation!.references).toEqual(references);
     } finally { test.destroy(); }
   });
 
