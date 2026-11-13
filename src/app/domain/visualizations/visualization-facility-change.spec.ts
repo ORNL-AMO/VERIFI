@@ -30,10 +30,11 @@ describe('reviewed visualization facility inclusion', () => {
     expect(changed.definition.series.map(item => item.id)).toEqual(['unknown']);
     expect(changed.cleared).toEqual(expect.arrayContaining(['Excluded resource selections', 'Excluded item presentation']));
   });
-  it.each(['meter', 'predictor', 'equipment', 'energy-use-group'] as const)('preserves blocked %s identities despite excluded destination collisions while pruning verified siblings', resource => {
+  it.each(['meter', 'meter-group', 'facility', 'predictor', 'equipment', 'energy-use-group'] as const)('preserves blocked %s identities despite excluded destination collisions while pruning verified siblings', resource => {
     const base = utilityVisualizationFixture({ kind: 'all' });
     const selection = { kind: 'fixed' as const, resource, guids: ['verified', 'blocked'] };
-    const source = resource === 'meter' ? { ...base.sources[0] as UtilityVisualizationSource, selection }
+    const source = resource === 'meter' || resource === 'meter-group' ? { ...base.sources[0] as UtilityVisualizationSource, selection,
+      groupBy: resource === 'meter' ? 'meter' as const : 'group' as const }
       : resource === 'predictor' ? { id: 'utility', kind: 'predictor' as const, measure: 'value' as const, aggregation: 'none' as const, selection }
       : { id: 'utility', kind: 'energy-use' as const, measure: 'consumption' as const, aggregation: 'sum' as const, denominator: 'facility' as const, selection };
     const definition: VisualizationDefinition = { ...base, sources: [source], series: [
@@ -50,7 +51,7 @@ describe('reviewed visualization facility inclusion', () => {
     ];
     const items = ['verified', 'blocked'].map(guid => ({ guid, accountId: 'account-a', facilityId: 'facility-b' }));
     const result = prepareVisualizationFacilityChange(definition, { kind: 'fixed', facilityGuids: ['facility-a'] },
-      { ...catalog, meters: items, predictors: items, energyUseEquipment: items, energyUseGroups: items }, references);
+      { ...catalog, facilities: [...catalog.facilities, ...items], meters: items, meterGroups: items, predictors: items, energyUseEquipment: items, energyUseGroups: items }, references);
     expect(result.definition.sources[0]).toMatchObject({ selection: { guids: ['blocked'] } });
     expect(result.definition.series).toEqual([definition.series[1], { ...definition.series[2], overrides: [definition.series[2].overrides![0],
       ...(resource === 'meter' ? [definition.series[2].overrides![2]] : [])] }]);
