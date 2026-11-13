@@ -19,7 +19,7 @@ Start from these areas when planning v1 work:
 ## Documentation Rules
 
 - Do not copy the full route tree into this document. Link to source when route reachability matters.
-- Add detailed notes only when a workflow enters prototype review, v1 planning, implementation, deferral, combination, or retirement.
+- Add detailed notes only when a workflow enters v1 planning, implementation, deferral, combination, or retirement.
 - Store workflow notes in the relevant issue or pull request. Add a link here only when the note becomes durable migration context.
 - Document components and services only when they affect migration decisions, shared-contract risk, or test coverage.
 - Do not guess whether a capability is common, advanced, or low-use. Use that label only when there is evidence from users, maintainers, analytics, or prior issue discussion.

@@ -9,7 +9,7 @@ export function analyticsRoutePath(path: string): string {
 export function isAnalyticsRouteAllowed(path: string): boolean {
   try {
     const segments = analyticsRoutePath(path).split(/[\/()]/).filter(Boolean);
-    return !segments.some(segment => ['v1', 'p1'].includes(decodeURIComponent(segment.split(';')[0])));
+    return !segments.some(segment => decodeURIComponent(segment.split(';')[0]) === 'v1');
   } catch {
     return false;
   }

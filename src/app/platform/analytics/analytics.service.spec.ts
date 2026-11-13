@@ -100,7 +100,7 @@ describe('analytics collection', () => {
     expect(dom.querySelector('script')).toBeNull();
   });
 
-  it.each(['/v1', '/v1/data?tab=meters#details', '/p1', '/p1/settings', '/v1#/welcome', '/p1#/welcome', 'file:///app/index.html#/v1'])('blocks initial loads and refreshes of %s, including custom events without a path', async path => {
+  it.each(['/v1', '/v1/data?tab=meters#details', '/v1/settings', '/v1;mode=preview', '/v1#/welcome', '/v1/data#/welcome', 'file:///app/index.html#/v1'])('blocks initial loads and refreshes of %s, including custom events without a path', async path => {
     navigate(path, '/');
     service.sendEvent('import_backup_file');
     expect(dom.querySelector('script')).toBeNull();
@@ -145,7 +145,7 @@ describe('analytics collection', () => {
     navigate('/welcome');
     const count = collectedEvents().length;
     service.sendEvent('page_view', '/v1/data');
-    service.sendEvent('page_view', '/p1');
+    service.sendEvent('page_view', '/%76%31/settings');
     expect(collectedEvents()).toHaveLength(count);
   });
 
@@ -241,7 +241,7 @@ describe('analytics collection', () => {
     navigate('/welcome');
     await service.sendAnalyticsEvent('create_account', { session_id: 'test' });
     post.mockClear();
-    service.postEventToMeasurementProtocol({ name: 'page_view', params: { page_path: '/p1', session_id: 'test' } });
+    service.postEventToMeasurementProtocol({ name: 'page_view', params: { page_path: '/v1/settings', session_id: 'test' } });
     expect(post).not.toHaveBeenCalled();
   });
 
@@ -273,7 +273,7 @@ describe('analytics collection', () => {
     ['https://verifi.ornl.gov/data-evaluation/account/abc123def?account=abc123def#/details', 'https://verifi.ornl.gov/data-evaluation/account/:id'],
     ['https://example.org/account/abc123def?account=abc123def#details', 'https://example.org/account/:id'],
     ['https://verifi.ornl.gov/v1#/welcome', ''],
-    ['https://verifi.ornl.gov/p1#/welcome', '']
+    ['https://verifi.ornl.gov/%76%31/settings#/welcome', '']
   ])('sanitizes the initial document referrer %s', (referrer, expected) => {
     service.ngOnDestroy();
     Object.defineProperty(dom, 'referrer', { value: referrer });
