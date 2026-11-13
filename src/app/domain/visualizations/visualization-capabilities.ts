@@ -1,5 +1,5 @@
 import { resolveVisualizationSeries } from './visualization-series';
-import type { VisualizationChart, VisualizationDefinition, VisualizationSource } from './visualization-definition';
+import type { VisualizationChart, VisualizationDefinition, VisualizationScope, VisualizationSource } from './visualization-definition';
 import { decodeVisualizationDefinition } from './visualization-validation';
 import {
   isCurrentVisualizationResponse, sameVisualizationScope, VisualizationControl, VisualizationDataShape,
@@ -58,8 +58,8 @@ function civilDate(value: string | undefined): boolean {
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
 
-function requiredReferences(source: VisualizationSource, definition: VisualizationDefinition): RequiredReference[] {
-  const required: RequiredReference[] = definition.scope.kind === 'facility' ? [{ kind: 'facility', id: definition.scope.facilityGuid }] : [];
+function requiredReferences(source: VisualizationSource): RequiredReference[] {
+  const required: RequiredReference[] = [];
   if ('selection' in source && source.selection) {
     const selection = source.selection;
     if (selection.kind === 'fixed') required.push(...selection.guids.map(id => ({ kind: selection.resource, id })));
@@ -94,7 +94,7 @@ function observations(data: VisualizationResolvedData['data']): readonly Visuali
 
 function explicitSourceFacilities(source: VisualizationSource): readonly string[] | undefined {
   const selection = 'selection' in source ? source.selection : undefined;
-  return selection?.kind === 'rule' ? selection.filter.facilityGuids
+  return selection?.kind === 'rule' ? selection.filter.facilityGuids?.length ? selection.filter.facilityGuids : undefined
     : selection?.kind === 'fixed' && selection.resource === 'facility' ? selection.guids : undefined;
 }
 
@@ -135,7 +135,7 @@ function seriesReferenceKinds(source: VisualizationSource, guid: string): readon
  * role's requested dates. Sparse coverage is valid; substituting another period is not.
  */
 function resolvedDataReasons(definition: VisualizationDefinition, source: VisualizationSource,
-  resolved: VisualizationResolvedData): VisualizationCompatibilityReason[] {
+  resolved: VisualizationResolvedData, scope: VisualizationScope): VisualizationCompatibilityReason[] {
   const reasons: VisualizationCompatibilityReason[] = [];
   const add = (code: 'period' | 'data' | 'series' | 'ownership', message: string) => reasons.push({ code, message, sourceId: source.id });
   const validRange = (range: { start: string; end: string }) => civilDate(range.start) && civilDate(range.end) && range.start <= range.end;
@@ -156,7 +156,7 @@ function resolvedDataReasons(definition: VisualizationDefinition, source: Visual
       add('period', 'Resolve the explicitly selected fiscal year.');
     const facilities = explicitSourceFacilities(source);
     if (period.facilityGuid !== undefined && (!period.facilityGuid.trim()
-      || definition.scope.kind === 'facility' && period.facilityGuid !== definition.scope.facilityGuid
+      || !scope.facilityGuids.includes(period.facilityGuid)
       || facilities !== undefined && !facilities.includes(period.facilityGuid)))
       add('ownership', 'Resolved period ownership contradicts the saved facility scope or selection.');
   }
@@ -187,6 +187,16 @@ function resolvedDataReasons(definition: VisualizationDefinition, source: Visual
   return reasons;
 }
 
+/** Runtime inclusion is resolved once from the current account catalog, never inferred from source output. */
+function scopeMatchesSelection(definition: VisualizationDefinition, scope: VisualizationScope): boolean {
+  const ids = scope.facilityGuids;
+  if (!ids.length || new Set(ids).size !== ids.length || ids.some(id => !id.trim())) return false;
+  const selected = definition.facilitySelection;
+  if (selected.kind === 'fixed' && (ids.length !== selected.facilityGuids.length || ids.some(id => !selected.facilityGuids.includes(id)))) return false;
+  const owner = selected.kind === 'fixed' ? selected.facilityGuids : ids;
+  return owner.length === 1 ? scope.kind === 'facility' && scope.facilityGuid === owner[0] : scope.kind === 'portfolio';
+}
+
 /** Pure eligibility decision. It neither alters intent nor implements provider calculations or alignment. */
 export function checkVisualizationCompatibility(definition: VisualizationDefinition,
   evidence: readonly VisualizationSourceEvidence[]): VisualizationCompatibilityResult {
@@ -205,13 +215,14 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     if (matches.length !== 1) { add('missing-source', 'Resolve this source exactly once before rendering.', source.id); continue; }
     const { request, capabilities, chartSupport, resolution } = matches[0];
     if (!isCurrentVisualizationResponse(request.identity, resolution)
-      || request.identity.accountGuid !== definition.accountGuid || !sameVisualizationScope(request.identity.scope, definition.scope)
+      || request.identity.accountGuid !== definition.accountGuid || !scopeMatchesSelection(definition, request.identity.scope)
       || request.identity.sourceId !== source.id || !sameIntent(source, request.source)
       || !sameIntent(chart, request.chart)
       || !sameIntent(definition.period, request.period) || !sameIntent(definition.comparison, request.comparison)
       || !sameIntent(definition.series.filter(series => series.sourceId === source.id), request.series)
       || firstRequest && (request.identity.workspaceRevision !== firstRequest.workspaceRevision || request.identity.definitionGuid !== firstRequest.definitionGuid
         || request.identity.definitionRevision !== firstRequest.definitionRevision || request.identity.requestId !== firstRequest.requestId)
+      || firstRequest && !sameVisualizationScope(request.identity.scope, firstRequest.scope)
       || !sameIntent(request.dateContext, evidence[0]?.request.dateContext)) {
       add('stale', 'Resolve the current definition against one current workspace revision.', source.id); continue;
     }
@@ -238,20 +249,22 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     const resolved = resolution.resolved;
     if (!capabilities.controls.includes('axes') && resolveVisualizationSeries(definition, resolved.series).some(entry => entry.selected.axis === 'right'))
       add('capability', 'This source does not support the requested axis override.', source.id);
-    reasons.push(...resolvedDataReasons(definition, source, resolved));
+    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope));
     if (!chartCapability.shapes.includes(resolved.data.kind) || !capabilities.shapes.includes(resolved.data.kind)
       || !capabilities.alignments.includes(resolved.alignment.kind))
       add('capability', 'This chart cannot preserve the resolved data shape.', source.id);
     if (source.kind === 'analysis' && resolved.analysisFreshness !== 'current')
       add('stale', 'Wait for current authoritative analysis results; stale results cannot be displayed.', source.id);
-    for (const reference of requiredReferences(source, definition)) {
+    for (const reference of requiredReferences(source)) {
       const candidates = resolved.references.filter(candidate => candidate.kind === reference.kind && candidate.id === reference.id);
       if (!candidates.length)
         add('missing-source', `Repair the missing ${reference.kind} reference: ${reference.id}.`, source.id);
       for (const candidate of candidates) reasons.push(...referenceSelectionReasons(source, candidate));
     }
-    if (resolved.references.some(reference => reference.accountGuid !== definition.accountGuid || definition.scope.kind === 'facility'
-      && (reference.kind === 'facility' ? reference.id !== definition.scope.facilityGuid : reference.facilityGuid !== definition.scope.facilityGuid)))
+    if (resolved.references.some(reference => reference.accountGuid !== definition.accountGuid
+      || (reference.kind === 'facility' ? !request.identity.scope.facilityGuids.includes(reference.id)
+        : reference.facilityGuid !== undefined ? !request.identity.scope.facilityGuids.includes(reference.facilityGuid)
+          : definition.facilitySelection.kind !== 'all' || request.identity.scope.kind === 'facility')))
       add('ownership', 'Resolved references must belong to the saved account and facility scope.', source.id);
     if (!resolved.periods.length) add('period', 'Resolve actual native period intervals before rendering.', source.id);
     if (observations(resolved.data).some(point => point.state === 'observed' && !Number.isFinite(point.value)))

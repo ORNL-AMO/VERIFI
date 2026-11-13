@@ -80,16 +80,17 @@ export function transferSavedVisualization(record: Readonly<IdbSavedVisualizatio
   const locked = record.preservation?.locked || record.recordVersion !== SAVED_VISUALIZATION_RECORD_VERSION
     || decoded.state === 'invalid' || decoded.state === 'unsupported';
   const transfers = [...(record.preservation?.transfers ?? []), { accountId: record.accountId, targetAccountId: accountGuid, maps: structuredClone(maps) }];
-  if (record.facilityId !== undefined) {
-    const mapped = Object.hasOwn(maps.facility ?? {}, record.facilityId) ? maps.facility[record.facilityId] : undefined;
-    if (!mapped) throw new Error('A visualization owning facility was not transferred.');
-    result.facilityId = mapped;
-  }
   if (locked || !('definition' in decoded)) {
+    if (record.facilityId !== undefined) {
+      const mapped = Object.hasOwn(maps.facility ?? {}, record.facilityId) ? maps.facility[record.facilityId] : undefined;
+      if (!mapped) throw new Error('A visualization owning facility was not transferred.');
+      result.facilityId = mapped;
+    }
     result.preservation = { locked: true, references: record.preservation?.references ?? [], transfers };
   } else {
     const remapped = remapVisualizationDefinition(decoded.definition, accountGuid, maps, record.preservation?.references ?? []);
     result.definition = remapped.definition;
+    delete result.facilityId;
     result.preservation = { references: remapped.issues, transfers };
   }
   return result;

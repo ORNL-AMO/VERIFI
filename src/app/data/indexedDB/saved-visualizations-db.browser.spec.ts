@@ -29,13 +29,13 @@ describe('saved visualization storage in Chromium', () => {
     expect(await harness.getAll('savedVisualizations')).toEqual([]);
   });
 
-  it('reads historical definitions without writes and preserves version2 overrides across native reopen', async () => {
+  it('reads current intent without writes and preserves trace overrides across native reopen', async () => {
     harness = await IndexedDbTestHarness.create('saved-visualizations-v2');
     const repository = () => new SavedVisualizationsDbService(harness.dbService, new IndexedDbAccessService(harness.dbService));
     const current = utilityVisualizationFixture();
     const { resourceGuid, ...wildcard } = current.series[0];
-    const definitions = [{ ...current, version: 1 }, { ...current, series: [{ ...wildcard, overrides: [
-      { resourceGuid: 'meter-a', visible: false, order: 0 }, { resourceGuid: 'absent-meter', color: '#123456', order: 2 },
+    const definitions = [current, { ...current, series: [{ ...wildcard, overrides: [
+      { resourceGuid: 'meter-a', lineStyle: 'dashed', visible: false, order: 0 }, { resourceGuid: 'absent-meter', color: '#123456', order: 2 },
       { seriesId: 'utility:source:Electricity', label: 'Category appearance', order: 1 }
     ] }] }];
     for (const [index, definition] of definitions.entries()) await firstValueFrom(repository().addWithObservable({

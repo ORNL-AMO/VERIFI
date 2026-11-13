@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -73,7 +74,7 @@ export class LibraryLifecycle {
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly canRetry = computed(() => !!this.proposal() && this.outcome() !== 'conflict' && this.canAct());
   readonly canDiscard = computed(() => !this.saving() && this.outcome() !== 'refresh-required');
-  readonly ownerValid = computed(() => this.draft().scope === 'portfolio' || this.facilities().some(item => item.guid === this.draft().facilityGuid));
+  readonly ownerValid = computed(() => this.draft().scope === 'portfolio' ? this.facilities().length > 0 : this.facilities().some(item => item.guid === this.draft().facilityGuid));
   readonly canEditDraft = computed(() => this.canAct() && !!this.editor() && !this.lockedProposal()
     && this.editor()!.accountGuid === this.workspace.account()?.guid);
   readonly selectedChart = computed(() => VISUALIZATION_CHART_CHOICES.find(choice => choice.value === this.draft().chart));
@@ -90,7 +91,7 @@ export class LibraryLifecycle {
   readonly recipeResources = computed(() => {
     const snapshot = this.workspace.snapshot(), draft = this.draft();
     return snapshot && draft.recipe !== 'custom' && draft.recipeGrouping
-      ? recipeResourceChoices(snapshot, draft.scope === 'facility' ? { kind: 'facility', facilityGuid: draft.facilityGuid } : { kind: 'portfolio' }, draft.recipe, draft.recipeGrouping) : [];
+      ? recipeResourceChoices(snapshot, this.creationScope(draft), draft.recipe, draft.recipeGrouping) : [];
   });
   readonly recipeResourceCards = computed(() => {
     const available = this.recipeResources(), draft = this.draft(), grouping = this.selectedRecipeGrouping();
@@ -166,6 +167,13 @@ export class LibraryLifecycle {
     this.form.reset(editor.initial, { emitEvent: false }); this.draft.set(this.form.getRawValue()); this.editor.set(editor);
     this.ownerChosen.set(!!editor.fixedFacility); this.step.set(editor.entry ? 'name' : editor.fixedFacility ? 'chart' : 'scope');
   }
+  private creationSelection(value: Pick<VisualizationCreationDraft, 'scope' | 'facilityGuid'>): import('@domain/visualizations/visualization-definition').VisualizationFacilitySelection {
+    return value.scope === 'facility' ? { kind: 'fixed', facilityGuids: [value.facilityGuid] } : { kind: 'all' };
+  }
+  private creationScope(value: Pick<VisualizationCreationDraft, 'scope' | 'facilityGuid'>) {
+    return resolveVisualizationFacilities({ accountGuid: this.workspace.account()?.guid ?? '', facilitySelection: this.creationSelection(value) }, this.facilities()).scope;
+  }
+
   selectScope(scope: 'portfolio' | 'facility'): void {
     if (!this.canEditDraft() || this.editor()?.entry || this.editor()?.fixedFacility || scope === 'facility' && !this.facilities().length) return;
     this.facilitySearch.setValue('');
@@ -238,9 +246,9 @@ export class LibraryLifecycle {
       kind: 'update', accountGuid: editor.accountGuid, guid: editor.entry.record.guid, expectedRevision: editor.entry.record.revision,
       definition: { ...editor.entry.definition!, name: value.name.trim() }
     } : this.commands.prepareCreate(value.recipe !== 'custom'
-      ? createRecipeDefinition(this.workspace.snapshot()!, value.recipe, value.scope === 'facility' ? { kind: 'facility', facilityGuid: value.facilityGuid } : { kind: 'portfolio' }, { grouping: value.recipeGrouping!, ids: value.recipeResourceIds }, value.name.trim())
+      ? createRecipeDefinition(this.workspace.snapshot()!, value.recipe, this.creationSelection(value), { grouping: value.recipeGrouping!, ids: value.recipeResourceIds }, value.name.trim())
       : createVisualizationSetupDefinition({ name: value.name.trim(), accountGuid: editor.accountGuid,
-      scope: value.scope === 'facility' ? { kind: 'facility', facilityGuid: value.facilityGuid } : { kind: 'portfolio' },
+      facilitySelection: this.creationSelection(value),
       chart: createVisualizationChart(value.chart!), sourceKinds: value.sourceKinds })); }
     catch (error) { this.error.set(message(error)); return; }
     this.proposal.set(command);

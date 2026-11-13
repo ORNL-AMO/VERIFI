@@ -1,5 +1,5 @@
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
+import { savedVisualizationEnvelopeError, savedVisualizationFacilityGuid, savedVisualizationForFacilityExport } from '@data/visualizations/saved-visualization-record';
 import { Injectable } from '@angular/core';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { CURRENT_DATA_VERSION } from '@data/indexedDB/data-migrations/data-migration.models';
@@ -62,7 +62,7 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
     const clonedFacility = structuredClone(facility);
     return {
       dataVersion: CURRENT_DATA_VERSION,
-      savedVisualizations: snapshot.savedVisualizations.filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
+      savedVisualizations: snapshot.savedVisualizations.filter(item => savedVisualizationFacilityGuid(item, snapshot.facilities) === facilityGuid).map(item => savedVisualizationForFacilityExport(item, facilityGuid)),
       account: undefined,
       facilities: [],
       facility: clonedFacility,
@@ -77,7 +77,7 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
         snapshot.facilityAnalyses.filter(item => item.facilityId === facilityGuid),
         [clonedFacility],
         new Set(snapshot.predictors.filter(p => p.facilityId === facilityGuid).map(p => p.guid)),
-        snapshot.savedVisualizations.filter(item => item.facilityId === facilityGuid)
+        snapshot.savedVisualizations.filter(item => savedVisualizationFacilityGuid(item, snapshot.facilities) === facilityGuid)
       ),
       predictorData: [],
       predictorDataV2: snapshot.predictorData.filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
@@ -180,8 +180,7 @@ function validateVisualizations(snapshot: AccountWorkspaceSnapshot): void {
   for (const record of snapshot.savedVisualizations) {
     const error = savedVisualizationEnvelopeError(record);
     if (error) throw new Error(error);
-    if (record.accountId !== snapshot.account.guid || (record.facilityId !== undefined
-      && !snapshot.facilities.some(facility => facility.guid === record.facilityId && facility.accountId === record.accountId))) {
+    if (record.accountId !== snapshot.account.guid) {
       throw new Error('A saved visualization does not belong to its backup owner.');
     }
   }

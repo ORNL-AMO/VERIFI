@@ -74,7 +74,7 @@ describe('visualization Dashboard lifecycle', () => {
     lifecycle.selectScope('portfolio'); lifecycle.selectChart('combination'); lifecycle.toggleSource('utility'); lifecycle.toggleSource('predictor');
     lifecycle.continueSources(); lifecycle.form.controls.name.setValue('Fresh name');
     await lifecycle.submit();
-    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ scope: { kind: 'portfolio' }, chart: { kind: 'time-series', type: 'combination' },
+    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ facilitySelection: { kind: 'all' }, chart: { kind: 'time-series', type: 'combination' },
       sources: [{ id: 'source-1', kind: 'utility' }, { id: 'source-2', kind: 'predictor' }] });
   });
   it.each(['energy-trend', 'cost-trend'] as const)('clears the %s path immediately when reopening the facility step', recipe => {
@@ -123,6 +123,7 @@ describe('visualization Dashboard lifecycle', () => {
   });
   it('reviews a retained portfolio visualization before copying it into a single-facility account', async () => {
     const { workspace, commands, visualizations } = configureLibraryTest(); const record = libraryRecord('Retained portfolio');
+    record.definition = { ...record.definition as import('@domain/visualizations/visualization-definition').VisualizationDefinition, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a', 'missing-second'] } };
     const original = structuredClone(record.definition);
     workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true }, savedVisualizations: [record] });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
@@ -143,14 +144,14 @@ describe('visualization Dashboard lifecycle', () => {
   });
   it('keeps ordinary facility-owned duplication available in a valid single-facility account', async () => {
     const { workspace, commands, visualizations } = configureLibraryTest();
-    const record = getNewIdbSavedVisualization(createVisualizationDefinition('Facility setup', 'account-a', { kind: 'facility', facilityGuid: 'facility-a' }, 'utility'));
+    const record = getNewIdbSavedVisualization(createVisualizationDefinition('Facility setup', 'account-a', { kind: 'fixed', facilityGuids: ['facility-a'] }, 'utility'));
     const original = structuredClone(record.definition);
     workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true }, savedVisualizations: [record] });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const lifecycle = TestBed.inject(LibraryLifecycle); await lifecycle.duplicate(buildVisualizationLibrary(workspace.snapshot()!)[0]);
     expect(commands.prepareDuplicate).toHaveBeenCalledWith(record);
     expect(commands.submit.mock.calls[0][0]).toMatchObject({ kind: 'duplicate', sourceGuid: record.guid,
-      definition: { scope: { kind: 'facility', facilityGuid: 'facility-a' } } });
+      definition: { facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a'] } } });
     expect(visualizations.open).toHaveBeenCalledWith('account-a', 'copy-1'); expect(navigate).not.toHaveBeenCalled();
     expect(record.definition).toEqual(original);
   });

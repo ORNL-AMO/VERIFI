@@ -10,16 +10,16 @@ import { SavedVisualizationCommands } from '@data/account-workspace/saved-visual
 import { CreateVisualizationCommand } from '@data/account-workspace/visualization-commands.models';
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
 import { SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
-import { VisualizationDefinition, VisualizationScope } from '@domain/visualizations/visualization-definition';
+import { VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { visualizationReferences, visualizationReferenceKey } from '@domain/visualizations/visualization-references';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { singleFacilityPresentation } from '@app/v1/shared/navigation/single-facility-presentation';
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { VisualizationEditorSession } from '../../editing/visualization-editor-session.service';
 import { normalizeVisualizationIntent } from '../../editing/visualization-reconciliation';
 import { VisualizationNavigationService } from '../../visualization-navigation.service';
-import { reviewVisualizationReset, reviewVisualizationScopeCopy, VisualizationResetReview } from '../../visualization-recovery';
+import { reviewVisualizationReset, reviewVisualizationFacilityCopy, VisualizationResetReview } from '../../visualization-recovery';
 
 /** Child forms retain incomplete input outside the last coherent saved definition. */
 export interface VisualizationChildDraftGuard {
@@ -57,28 +57,27 @@ export class RecoveryActionsComponent {
   readonly saving = signal(false);
   readonly proposal = signal<CreateVisualizationCommand | undefined>(undefined);
   private readonly refreshRequired = signal(false);
-  readonly scopeControl = new FormControl('portfolio', { nonNullable: true });
-  private readonly selectedScope = toSignal(this.scopeControl.valueChanges, { initialValue: 'portfolio' });
-  readonly singleFacility = computed(() => singleFacilityPresentation(this.workspace.account(), this.workspace.facilities(), this.workspace.isReady()));
+  readonly facilitySelectionControl = new FormControl<VisualizationFacilitySelection>({ kind: 'all' }, { nonNullable: true });
+  readonly selectedFacilities = toSignal(this.facilitySelectionControl.valueChanges, { initialValue: this.facilitySelectionControl.value });
+  readonly facilities = computed(() => orderFacilities(this.workspace.facilities().filter(facility => facility.accountId === this.workspace.account()?.guid), this.workspace.account()?.portfolioFacilityOrder));
   readonly issues = computed(() => {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot(), record = this.editor.record();
-    return definition && snapshot ? inspectVisualizationReferences(this.withEnvelopeOwner(definition), snapshot, record?.preservation?.references) : [];
+    return definition && snapshot ? inspectVisualizationReferences(this.withAccountOwner(definition), snapshot, record?.preservation?.references) : [];
   });
   readonly canReset = computed(() => !!this.editor.definition() && !!this.editor.record()
     && this.editor.record()!.recordVersion === SAVED_VISUALIZATION_RECORD_VERSION
     && (this.issues().length > 0 || this.editor.record()!.preservation?.locked)
-    && !this.issues().some(issue => issue.path === 'scope.facilityGuid' && !this.editor.record()?.preservation?.locked));
+    && !this.issues().some(issue => issue.path.startsWith('facilitySelection.') && !this.editor.record()?.preservation?.locked));
   readonly stale = computed(() => !!this.mode() && (this.editor.key() !== this.reviewedKey
     || this.editor.localRevision() !== this.reviewedRevision || this.workspace.snapshot() !== this.reviewedWorkspace));
   readonly review = computed<VisualizationResetReview | undefined>(() => {
     const base = this.base(), snapshot = this.workspace.snapshot(), mode = this.mode();
     if (!base || !snapshot || !mode) return undefined;
     if (mode === 'reset') return reviewVisualizationReset(base, this.issues(), !!this.editor.record()?.preservation?.locked);
-    const value = this.selectedScope();
-    const scope: VisualizationScope = value === 'portfolio' ? { kind: 'portfolio' } : { kind: 'facility', facilityGuid: value };
-    if (this.singleFacility() ? scope.kind !== 'facility' || scope.facilityGuid !== this.singleFacility()!.guid
-      : scope.kind === 'facility' && !snapshot.facilities.some(facility => facility.guid === scope.facilityGuid && facility.accountId === base.accountGuid)) return undefined;
-    return reviewVisualizationScopeCopy(base, scope, snapshot);
+    const selection = this.selectedFacilities();
+    if (!snapshot.facilities.some(facility => facility.accountId === base.accountGuid)
+      || selection.kind === 'fixed' && selection.facilityGuids.some(guid => !snapshot.facilities.some(facility => facility.guid === guid && facility.accountId === base.accountGuid))) return undefined;
+    return reviewVisualizationFacilityCopy(base, selection, snapshot);
   });
   readonly protected = computed(() => this.saving() || !!this.proposal() || !!this.childDraftDecision());
   readonly referencesForReview = computed(() => {
@@ -119,9 +118,6 @@ export class RecoveryActionsComponent {
   async start(mode: RecoveryMode): Promise<void> {
     if (this.saving() || !this.workspace.isReady()) return;
     if (this.proposal()) { this.blocksNavigation(); return; }
-    if (mode !== 'reset' && this.workspace.account()?.isSingleFacilityCompany && !this.singleFacility()) {
-      this.error.set('Restore the sole facility or convert this account to a portfolio before creating a copy.'); return;
-    }
     if (mode === 'reset' && !this.canReset() || mode === 'copy' && (!this.editor.canEdit() || this.editor.isMissing())
       || mode === 'new' && !this.editor.isMissing()) return;
     if (this.hasChildDrafts()) { this.requestChildDraftDecision(mode); return; }
@@ -133,10 +129,9 @@ export class RecoveryActionsComponent {
     if (decoded.state !== 'valid' && decoded.state !== 'setup-required') { this.error.set('Correct invalid input before reviewing recovery.'); return; }
     if (mode === 'reset' && !this.canReset() || mode === 'copy' && (!this.editor.canEdit() || this.editor.isMissing())
       || mode === 'new' && !this.editor.isMissing()) return;
-    const base = this.withEnvelopeOwner(decoded.definition);
-    const single = this.singleFacility();
-    this.scopeControl.enable({ emitEvent: false });
-    this.scopeControl.setValue(single?.guid ?? (base.scope.kind === 'facility' ? base.scope.facilityGuid : 'portfolio'));
+    const base = this.withAccountOwner(decoded.definition);
+    this.facilitySelectionControl.enable({ emitEvent: false });
+    this.facilitySelectionControl.setValue(structuredClone(base.facilitySelection));
     this.base.set(base); this.mode.set(mode); this.error.set('');
     this.reviewedKey = this.editor.key(); this.reviewedRevision = this.editor.localRevision(); this.reviewedWorkspace = this.workspace.snapshot();
     this.portal = new TemplatePortal(this.reviewDialog, this.view); this.modal.show(this.portal, { blockWorkspace: true });
@@ -158,7 +153,7 @@ export class RecoveryActionsComponent {
       return;
     }
     this.proposal.set(this.commands.prepareCreate(review.definition));
-    this.scopeControl.disable({ emitEvent: false });
+    this.facilitySelectionControl.disable({ emitEvent: false });
     await this.persistProposal();
   }
 
@@ -230,8 +225,8 @@ export class RecoveryActionsComponent {
     this.portal = undefined;
   }
 
-  private withEnvelopeOwner(definition: VisualizationDefinition): VisualizationDefinition {
+  private withAccountOwner(definition: VisualizationDefinition): VisualizationDefinition {
     const record = this.editor.record();
-    return record ? { ...definition, accountGuid: record.accountId, scope: record.facilityId ? { kind: 'facility', facilityGuid: record.facilityId } : { kind: 'portfolio' } } : definition;
+    return record ? { ...definition, accountGuid: record.accountId } : definition;
   }
 }

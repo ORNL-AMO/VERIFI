@@ -21,12 +21,12 @@ function reorderedKeys<T extends object>(value: T): T {
 }
 const faithful = { sourceIdentities: 'durable' as const, preserved: REQUIRED_CAPTURE_ASPECTS, omissions: [] };
 const context: VisualizationEmbeddingContext = { reference: { visualizationGuid: 'visualization-a', accountGuid: 'account-a' },
-  hostAccountGuid: 'account-a', hostScope: { kind: 'facility', facilityGuid: 'different-facility' } };
+  hostAccountGuid: 'account-a', hostScope: { kind: 'facility', facilityGuid: 'different-facility', facilityGuids: ['different-facility'] } };
 
 describe('visualization source/runtime contracts', () => {
   it.each([
     ['portfolio utility', utilityVisualizationFixture()],
-    ['single facility utility', utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' })],
+    ['single facility utility', utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] })],
     ['analysis results', analysisVisualizationFixture()], ['pinned model', analysisVisualizationFixture(true)],
     ['Energy Use treemap', energyUseVisualizationFixture()], ['Energy Use Sankey', energyUseVisualizationFixture(true)]
   ])('supports a declared %s without mutating its intent', async (_, definition) => {
@@ -48,7 +48,7 @@ describe('visualization source/runtime contracts', () => {
   });
 
   it.each(['Standard', 'Weather'] as const)('retains %s predictor provenance without a remote-data dependency', predictorType => {
-    const initial = createVisualizationDefinition('Temperature', 'account-a', { kind: 'portfolio' }, 'predictor');
+    const initial = createVisualizationDefinition('Temperature', 'account-a', { kind: 'all' }, 'predictor');
     const definition: VisualizationDefinition = { ...initial, sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
       selection: { kind: 'fixed', resource: 'predictor', guids: ['temperature-a'] } }],
       series: [{ id: 'temperature', sourceId: 'predictors', resourceGuid: 'temperature-a', metric: 'value', axis: 'left' }],
@@ -63,7 +63,7 @@ describe('visualization source/runtime contracts', () => {
 
   it('retains standard and weather observations within one predictor source', () => {
     const definition: VisualizationDefinition = {
-      ...createVisualizationDefinition('Predictors', 'account-a', { kind: 'portfolio' }, 'predictor'),
+      ...createVisualizationDefinition('Predictors', 'account-a', { kind: 'all' }, 'predictor'),
       sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
         selection: { kind: 'fixed', resource: 'predictor', guids: ['standard-a', 'weather-a'] } }],
       series: ['standard-a', 'weather-a'].map(resourceGuid => ({ id: resourceGuid, sourceId: 'predictors', resourceGuid, metric: 'value', axis: 'left' })),
@@ -117,6 +117,26 @@ describe('visualization source/runtime contracts', () => {
     expect(reasonCodes(definition, [{ ...changed, capabilities: { ...changed.capabilities, shapes: [] } }])).toContain('capability');
   });
 
+  it('rejects excluded facility output and different inclusion boundaries across requests', () => {
+    const definition = { ...utilityVisualizationFixture(), facilitySelection: { kind: 'fixed' as const, facilityGuids: ['facility-a', 'facility-b'] } };
+    const evidence = visualizationEvidenceFixture(definition);
+    const excluded = replaceResolved(evidence, { references: [...ready(evidence).references,
+      { kind: 'meter', id: 'excluded', accountGuid: 'account-a', facilityGuid: 'facility-c' }] });
+    expect(reasonCodes(definition, [excluded])).toContain('ownership');
+    const identity = { ...evidence.request.identity, scope: { kind: 'portfolio' as const, facilityGuids: ['facility-a', 'facility-c'] } };
+    expect(reasonCodes(definition, [{ ...evidence, request: { ...evidence.request, identity }, resolution: { ...evidence.resolution, identity } }])).toContain('stale');
+  });
+  it('does not present an account-wide precomputed result as a filtered facility subset', () => {
+    const definition = { ...analysisVisualizationFixture(), facilitySelection: { kind: 'fixed' as const, facilityGuids: ['facility-a', 'facility-b'] } };
+    const evidence = visualizationEvidenceFixture(definition);
+    const accountReferences = ready(evidence).references.map(reference => {
+      if (reference.kind !== 'analysis') return reference;
+      const { facilityGuid: _facility, ...accountReference } = reference;
+      return accountReference;
+    });
+    expect(reasonCodes(definition, [replaceResolved(evidence, { references: accountReferences })])).toContain('ownership');
+  });
+
   it.each(['loading', 'waiting', 'empty', 'missing-source', 'invalid-analysis', 'error', 'unsupported'] as const)
   ('blocks %s instead of publishing a ready chart', state => {
     const definition = utilityVisualizationFixture(); const evidence = visualizationEvidenceFixture(definition);
@@ -126,7 +146,7 @@ describe('visualization source/runtime contracts', () => {
 
   it.each([
     { accountGuid: 'another-account' }, { workspaceRevision: 2 }, { definitionGuid: 'another-chart' }, { definitionRevision: 2 },
-    { requestId: 'new-request' }, { sourceId: 'other-source' }, { scope: { kind: 'facility' as const, facilityGuid: 'facility-a' } }
+    { requestId: 'new-request' }, { sourceId: 'other-source' }, { scope: { kind: 'facility' as const, facilityGuid: 'facility-a', facilityGuids: ['facility-a'] } }
   ])('rejects a response from a different request context: %j', change => {
     const evidence = visualizationEvidenceFixture(utilityVisualizationFixture());
     expect(isCurrentVisualizationResponse({ ...evidence.request.identity, ...change }, evidence.resolution)).toBe(false);
@@ -170,7 +190,7 @@ describe('visualization source/runtime contracts', () => {
     const base = utilityVisualizationFixture(), source = base.sources[0];
     if (source.kind !== 'utility') throw new Error('Expected utility source');
     const definition: VisualizationDefinition = { ...base,
-      sources: [{ ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } }],
+      sources: [{  ...source, selectionMode: 'meter' as const, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } }],
       series: [...base.series, { ...base.series[0], id: 'energy-b', resourceGuid: 'meter-b' }] };
     const evidence = visualizationEvidenceFixture(definition);
     expect(checkVisualizationCompatibility(definition, [evidence]).state).toBe('compatible');
@@ -202,7 +222,7 @@ describe('visualization source/runtime contracts', () => {
     const base = utilityVisualizationFixture(), source = base.sources[0];
     if (source.kind !== 'utility') throw new Error('Expected utility source');
     const definition: VisualizationDefinition = { ...base,
-      sources: [{ ...source, groupBy, selection: { kind: 'rule', resource: 'meter', filter: {} } }],
+      sources: [{  ...source, groupBy, selectionMode: 'rule' as const, selection: { kind: 'rule', resource: 'meter', filter: {} } }],
       series: base.series.map(series => ({ ...series, resourceGuid: guid })) };
     const evidence = visualizationEvidenceFixture(definition);
     const reference = { id: guid, accountGuid: definition.accountGuid };
@@ -217,10 +237,10 @@ describe('visualization source/runtime contracts', () => {
   });
 
   it('validates kind and scoped ownership for every rule-expanded runtime resource', () => {
-    const base = utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' }), source = base.sources[0];
+    const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] }), source = base.sources[0];
     if (source.kind !== 'utility') throw new Error('Expected utility source');
     const definition: VisualizationDefinition = { ...base,
-      sources: [{ ...source, selection: { kind: 'rule', resource: 'meter', filter: {} } }],
+      sources: [{  ...source, selectionMode: 'rule' as const, selection: { kind: 'rule', resource: 'meter', filter: {} } }],
       series: base.series.map(({ resourceGuid, ...series }) => series) };
     const initial = visualizationEvidenceFixture(definition), resolved = ready(initial);
     const evidence = replaceResolved(initial, { series: resolved.series.map(series => ({ ...series, resourceGuid: 'meter-a' })) });
@@ -271,7 +291,7 @@ describe('visualization source/runtime contracts', () => {
     const base = utilityVisualizationFixture(), source = base.sources[0];
     if (source.kind !== 'utility') throw new Error('Expected utility source');
     const definition: VisualizationDefinition = { ...base,
-      sources: [{ ...source, selection: kind === 'rule'
+      sources: [{ ...source, selectionMode: kind === 'rule' ? 'rule' : 'facility', selection: kind === 'rule'
         ? { kind: 'rule', resource: 'meter', filter: { facilityGuids: ['facility-a'] } }
         : { kind: 'fixed', resource: 'facility', guids: ['facility-a'] } }],
       series: base.series.map(({ resourceGuid, ...series }) => series) };
@@ -294,8 +314,8 @@ describe('visualization source/runtime contracts', () => {
     const base = utilityVisualizationFixture(), source = base.sources[0];
     if (source.kind !== 'utility') throw new Error('Expected utility source');
     const definition: VisualizationDefinition = { ...base,
-      sources: [{ ...source, measure: 'charge', groupBy: 'total', dataMode: 'billing-period',
-        selection: { kind: 'fixed', resource: 'facility', guids: ['facility-a'] },
+      sources: [{  ...source, measure: 'charge', groupBy: 'total', dataMode: 'billing-period',
+        selectionMode: 'facility' as const, selection: { kind: 'fixed', resource: 'facility', guids: ['facility-a'] },
         charge: { meterGuid: 'meter-b', chargeGuid: 'charge-b', measure: 'usage' } }],
       series: [{ id: 'charge', sourceId: source.id, metric: 'charge', axis: 'left' }],
       chart: { kind: 'time-series', type: 'line', interval: 'native', stack: 'none' } };
@@ -343,7 +363,7 @@ describe('visualization source/runtime contracts', () => {
   it('allows multiple distinct fiscal years but rejects incompatible intervals within one fiscal slot', () => {
     const base = energyUseVisualizationFixture(), source = base.sources[0];
     if (source.kind !== 'energy-use') throw new Error('Expected Energy Use source');
-    const definition: VisualizationDefinition = { ...base, scope: { kind: 'portfolio' },
+    const definition: VisualizationDefinition = { ...base, facilitySelection: { kind: 'all' },
       sources: [{ ...source, selection: { kind: 'rule', resource: 'equipment', filter: {} } }] };
     const evidence = visualizationEvidenceFixture(definition);
     const first = ready(evidence).periods[0];
@@ -367,13 +387,13 @@ describe('visualization source/runtime contracts', () => {
     ['portfolio rule filter', (() => {
       const base = utilityVisualizationFixture(), source = base.sources[0];
       if (source.kind !== 'utility') throw new Error('Expected utility source');
-      return { ...base, sources: [{ ...source, selection: { kind: 'rule', resource: 'meter', filter: { facilityGuids: ['facility-a'] } } }],
+      return { ...base, sources: [{  ...source, selectionMode: 'rule' as const, selection: { kind: 'rule', resource: 'meter', filter: { facilityGuids: ['facility-a'] } } }],
         series: base.series.map(({ resourceGuid, ...series }) => series) } as VisualizationDefinition;
     })()],
     ['portfolio fixed facility', (() => {
       const base = utilityVisualizationFixture(), source = base.sources[0];
       if (source.kind !== 'utility') throw new Error('Expected utility source');
-      return { ...base, sources: [{ ...source, selection: { kind: 'fixed', resource: 'facility', guids: ['facility-a'] } }],
+      return { ...base, sources: [{  ...source, selectionMode: 'facility' as const, selection: { kind: 'fixed', resource: 'facility', guids: ['facility-a'] } }],
         series: base.series.map(({ resourceGuid, ...series }) => series) } as VisualizationDefinition;
     })()]
   ])('checks explicit resolved period owners against %s', (_, definition) => {
@@ -459,8 +479,8 @@ describe('resolved period and observation fidelity', () => {
 describe('mixed-source eligibility', () => {
   function additiveFixture(stack: 'none' | 'absolute' = 'absolute'): VisualizationDefinition {
     const base = utilityVisualizationFixture();
-    return { ...base, sources: [...base.sources, { ...base.sources[0], id: 'other', kind: 'utility', measure: 'energy',
-      aggregation: 'sum', dataMode: 'calendarized', groupBy: 'meter', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-b'] } }],
+    return { ...base, sources: [...base.sources, {  ...base.sources[0], id: 'other', kind: 'utility', measure: 'energy',
+      aggregation: 'sum', dataMode: 'calendarized', groupBy: 'meter', selectionMode: 'meter' as const, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-b'] } }],
       series: [...base.series, { id: 'other-energy', sourceId: 'other', metric: 'energy', resourceGuid: 'meter-b', axis: 'left' }],
       chart: { kind: 'time-series', type: 'area', interval: 'monthly', stack } };
   }
@@ -541,7 +561,7 @@ describe('capture and linked embedding contracts', () => {
     const definition = utilityVisualizationFixture(); const evidence = visualizationEvidenceFixture(definition);
     const result = resolveVisualizationEmbedding(definition, context, [evidence]);
     expect(result.state).toBe('configured');
-    if (result.state === 'configured') expect(result.definition.scope).toEqual({ kind: 'portfolio' });
+    if (result.state === 'configured') expect(result.definition.facilitySelection).toEqual({ kind: 'all' });
   });
   it('ignores dashboard filters unless date inheritance is explicitly selected', () => {
     const definition = utilityVisualizationFixture(); const evidence = visualizationEvidenceFixture(definition);

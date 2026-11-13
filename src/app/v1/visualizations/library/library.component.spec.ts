@@ -8,8 +8,10 @@ import { configureLibraryTest, libraryRecord } from './testing/library-testing';
 
 async function setup() {
   const context = configureLibraryTest([LibraryModule]);
-  context.workspace.publish({ ...context.workspace.snapshot()!, savedVisualizations: [libraryRecord('Portfolio trend'),
-    getNewIdbSavedVisualization(createVisualizationDefinition('Facility weather', 'account-a', { kind: 'facility', facilityGuid: 'facility-a' }, 'predictor'))] });
+  const portfolio = libraryRecord('Portfolio trend');
+  portfolio.definition = { ...portfolio.definition as import('@domain/visualizations/visualization-definition').VisualizationDefinition, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a', 'missing-second'] } };
+  context.workspace.publish({ ...context.workspace.snapshot()!, savedVisualizations: [portfolio,
+    getNewIdbSavedVisualization(createVisualizationDefinition('Facility weather', 'account-a', { kind: 'fixed', facilityGuids: ['facility-a'] }, 'predictor'))] });
   await TestBed.compileComponents();
   const fixture = TestBed.createComponent(LibraryComponent); fixture.detectChanges();
   return { ...context, fixture, component: fixture.componentInstance, root: fixture.nativeElement as HTMLElement };

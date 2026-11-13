@@ -18,7 +18,7 @@ import { RecoveryActionsComponent } from './recovery-actions.component';
 
 function mixedSetup(): VisualizationDefinition {
   return createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-    scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
+    facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a'] }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
 }
 
 describe('reviewed visualization recovery with native storage', () => {
@@ -33,7 +33,7 @@ describe('reviewed visualization recovery with native storage', () => {
   afterEach(async () => { TestBed.resetTestingModule(); await harness.destroy(); });
 
   it('unlocks a known transferred definition only after reviewing removal of its unverified relationships', async () => {
-    const definition = utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' });
+    const definition = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
     const locked: IdbSavedVisualization = { ...getNewIdbSavedVisualization(definition), guid: 'locked-chart',
       preservation: { locked: true, transfers: [], references: [{ path: 'sources.0.selection.guids.0', kind: 'meter', guid: 'meter-a', reason: 'not-transferred' }] } };
     await harness.seed({ savedVisualizations: [{ ...locked }] });
@@ -99,8 +99,8 @@ describe('reviewed visualization recovery with native storage', () => {
     const original = commands.prepareCreate(definition); await commands.submit(original);
     const editor = TestBed.inject(VisualizationEditorSession); editor.open('account-a', original.guid);
     const fixture = TestBed.createComponent(RecoveryActionsComponent); fixture.detectChanges();
-    await fixture.componentInstance.start('copy'); fixture.componentInstance.scopeControl.setValue('facility-b');
-    const expected = { ...definition, name: `${definition.name} (Copy)`, scope: { kind: 'facility', facilityGuid: 'facility-b' } };
+    await fixture.componentInstance.start('copy'); fixture.componentInstance.facilitySelectionControl.setValue({ kind: 'fixed', facilityGuids: ['facility-b'] });
+    const expected = { ...definition, name: `${definition.name} (Copy)`, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-b'] } };
     expect(fixture.componentInstance.review()!.definition).toEqual(expected);
     await fixture.componentInstance.confirm(); fixture.destroy();
     await harness.reopen();
@@ -108,7 +108,7 @@ describe('reviewed visualization recovery with native storage', () => {
     expect(records).toHaveLength(2);
     expect(records.find(record => record.guid === original.guid)!.definition).toEqual(definition);
     const copied = records.find(record => record.guid !== original.guid)!;
-    expect(copied.facilityId).toBe('facility-b'); expect(copied.definition).toEqual(expected);
+    expect(copied).not.toHaveProperty('facilityId'); expect(copied.definition).toEqual(expected);
     expect(readSavedVisualization(copied).state).toBe('setup-required');
   });
 
@@ -118,7 +118,7 @@ describe('reviewed visualization recovery with native storage', () => {
     }] });
     await TestBed.inject(AccountWorkspaceService).selectAccount('account-a');
     const commands = TestBed.inject(SavedVisualizationCommands);
-    const definition = kind === 'legacy' ? utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' }) : mixedSetup();
+    const definition = kind === 'legacy' ? utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] }) : mixedSetup();
     const proposal = commands.prepareCreate(definition);
     await commands.submit(proposal);
     const editor = TestBed.inject(VisualizationEditorSession); editor.open('account-a', proposal.guid);

@@ -11,7 +11,7 @@ describe('saved visualization command outcomes', () => {
   function setup() {
     const boundary = { execute: vi.fn(async (_options, persist) => ({ value: await persist() })), recoverCommittedPublication: vi.fn(async () => {}) };
     const handler = { create: vi.fn(async (_command: unknown, _account: string) => structuredClone(record)), update: vi.fn(async () => structuredClone(record)),
-      duplicate: vi.fn(async () => structuredClone(record)), delete: vi.fn(async () => {}), inspect: vi.fn(async () => []) };
+      duplicate: vi.fn(async () => structuredClone(record)), retarget: vi.fn(async () => structuredClone(record)), delete: vi.fn(async () => {}), inspect: vi.fn(async () => []) };
     const workspace = { account: () => ({ guid: 'account-a' }), isReady: () => true, savedVisualizations: () => [record], snapshot: () => undefined };
     return { boundary, handler, workspace, commands: new SavedVisualizationCommands(boundary as any, handler as any, workspace as any) };
   }
@@ -41,6 +41,34 @@ describe('saved visualization command outcomes', () => {
     handler.update.mockRejectedValueOnce(new VisualizationConflictError(current));
     const result = await commands.submit(command);
     expect(result).toMatchObject({ state: 'conflict', current, command });
+  });
+
+  it('publishes the complete committed update as a workspace patch', async () => {
+    const { commands, boundary, handler } = setup();
+    const updated = { ...record, revision: 2, definition: { ...utilityVisualizationFixture(), name: 'Updated' } };
+    handler.update.mockResolvedValueOnce(updated);
+    expect((await commands.submit({ kind: 'update', guid: record.guid, accountGuid: record.accountId,
+      expectedRevision: record.revision, definition: updated.definition })).state).toBe('committed');
+    const options = boundary.execute.mock.calls[0][0];
+    expect(options.publication.mode).toBe('patch');
+    expect(options.publication.buildPatch(updated)).toEqual({ collections: [{ collection: 'savedVisualizations', upsert: [updated] }] });
+    expect(options.notification.suppressSuccessToast).toBe(true);
+  });
+
+  it('publishes a retarget as one committed update and recovers publication without replaying it', async () => {
+    const { commands, handler, boundary } = setup();
+    const command = { kind: 'retarget' as const, guid: record.guid, accountGuid: record.accountId, expectedRevision: 1,
+      targetFacilities: { kind: 'fixed' as const, facilityGuids: ['facility-a'] },
+      reviewedDefinition: { ...utilityVisualizationFixture(), facilitySelection: { kind: 'fixed' as const, facilityGuids: ['facility-a'] } } };
+    boundary.execute.mockImplementationOnce(async (_options, persist) => {
+      await persist(); throw new WorkspaceWriteError('persistence-failed', 'Refresh failed', undefined, true);
+    });
+    expect(await commands.submit(command)).toMatchObject({ state: 'refresh-required' });
+    expect(await commands.submit(command)).toMatchObject({ state: 'refresh-required' });
+    const options = boundary.execute.mock.calls[0][0];
+    expect(options.changeKind).toBe('update'); expect(options.publication.mode).toBe('patch');
+    await commands.recover(record.accountId, record.guid);
+    expect(handler.retarget).toHaveBeenCalledOnce();
   });
 
   it('distinguishes committed publication failure and recovers without replaying the write', async () => {

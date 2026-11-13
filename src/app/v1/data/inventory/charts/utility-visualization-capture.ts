@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { CalanderizedMeter } from '@data/models/calanderization';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -34,15 +35,16 @@ export function captureInventoryUtility(input: InventoryUtilityCaptureInput): Vi
   if (!input.selection || input.selection.state !== 'supported') return unsupported(input.selection?.state === 'unsupported' ? input.selection.reason : 'This inventory has not supplied a supported saved selection rule.');
   if (input.selection.selection.resource !== 'meter') return unsupported('This chart requires an explicit matching-meter rule.');
   if (!['energy', 'water', 'cost'].includes(chart.id)) return unsupported('Choose an Energy, Water, or Cost chart before capture.');
-  const scope = context.facilityGuid ? { kind: 'facility' as const, facilityGuid: context.facilityGuid } : { kind: 'portfolio' as const };
+  const facilitySelection = context.facilityGuid ? { kind: 'fixed' as const, facilityGuids: [context.facilityGuid] } : { kind: 'all' as const };
+  const scope = resolveVisualizationFacilities({ accountGuid: snapshot.account.guid, facilitySelection }, snapshot.facilities).scope;
   const measure = chart.id === 'water' ? 'consumption' : chart.id as 'energy' | 'cost';
   const rule = structuredClone(input.selection.selection);
   const fullSelection = resolveUtilitySelection(snapshot, scope, { id: 'inventory-utility', kind: 'utility', measure, aggregation: 'sum', dataMode: 'calendarized', groupBy: 'meter', selection: rule });
-  if (fullSelection.missing.length || !sameSet(fullSelection.meters.map(meter => meter.guid), input.matchingGuids)) return unsupported('The inventory matching rule no longer identifies exactly the charted meter set. Refresh before capturing.');
+  if (fullSelection.missing.length || !sameSet(fullSelection.meters.map(meter => meter.guid), input.matchingGuids)) return unsupported('The inventory selection no longer identifies exactly the charted meter set. Refresh before capturing.');
   const waterSources = rule.filter.utilitySources?.length ? rule.filter.utilitySources.filter(source => ['Water Intake', 'Water Discharge'].includes(source)) : ['Water Intake', 'Water Discharge'];
   if (chart.id === 'water' && !waterSources.length) return unsupported('The saved selection rule excludes the displayed water source. Refresh the chart before capture.');
   const selection = chart.id === 'water' ? { ...rule, filter: { ...rule.filter, utilitySources: waterSources } } : rule;
-  const source: UtilityVisualizationSource = { id: 'inventory-utility', kind: 'utility', measure, aggregation: 'sum', dataMode: 'calendarized',
+  const source: UtilityVisualizationSource = { id: 'inventory-utility', kind: 'utility', selectionMode: 'rule', measure, aggregation: 'sum', dataMode: 'calendarized',
     groupBy: input.grouping === 'facilities' ? 'facility' : input.grouping === 'groups' ? 'group' : 'meter', selection,
     ...(measure === 'energy' ? { settings: { unit: { kind: 'owner' as const }, energyTreatment: { kind: 'owner' as const } } }
       : measure === 'consumption' ? { settings: { unit: { kind: 'owner' as const } } } : {}) };
@@ -57,7 +59,7 @@ export function captureInventoryUtility(input: InventoryUtilityCaptureInput): Vi
       ...(trace.color ? { color: trace.color } : {}), ...(trace.lineStyle ? { lineStyle: trace.lineStyle as 'solid' | 'dashed' | 'dotted' } : {}) });
   }
   if (!chart.metrics.some(trace => !input.view.hiddenGuids.includes(trace.id))) return unsupported('Show at least one trace before capturing this chart.');
-  const definition: VisualizationDefinition = { ...createVisualizationDefinition(`${input.contextLabel} · ${chart.title} trend`, snapshot.account.guid, scope, 'utility'),
+  const definition: VisualizationDefinition = { ...createVisualizationDefinition(`${input.contextLabel} · ${chart.title} trend`, snapshot.account.guid, facilitySelection, 'utility'),
     sources: [source], period: { kind: 'all-history' }, comparison: { kind: 'none' },
     series: [{ id: 'inventory-series', sourceId: source.id, metric: utilityMeasureKey(source), axis: 'left', overrides }],
     chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' }, appearance: { legend: false, title: `${chart.title} monthly data` } };

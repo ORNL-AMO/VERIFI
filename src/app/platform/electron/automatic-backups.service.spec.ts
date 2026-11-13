@@ -113,7 +113,7 @@ describe('AutomaticBackupsService', () => {
   it('includes supported and preserved saved definitions in automatic backup serialization through the existing gateway', async () => {
     const current = { ...snapshot('account-a'), savedVisualizations: [{ guid: 'chart-a', accountId: 'account-a', recordVersion: 1, revision: 2,
       createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'),
-      definition: createVisualizationDefinition('Saved chart', 'account-a', { kind: 'portfolio' }, 'utility') },
+      definition: createVisualizationDefinition('Saved chart', 'account-a', { kind: 'all' }, 'utility') },
     { guid: 'opaque-a', accountId: 'account-a', recordVersion: 1, revision: 1,
       createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'), definition: { version: 99, originalIntent: 'retain' },
       preservation: { locked: true, references: [], transfers: [] } }] };

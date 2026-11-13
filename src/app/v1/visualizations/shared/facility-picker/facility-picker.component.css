@@ -1,0 +1,7 @@
+:host { display: block; min-width: 0; }
+.facility-picker { min-width: 0; }
+.facility-picker__search { display: flex; gap: .4rem; align-items: center; margin: 0; padding-block: 0 .55rem; }
+.facility-picker__search input { width: 100%; min-width: 0; }
+.facility-picker__rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; max-height: 20rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 2px; }
+.facility-picker__rows p { grid-column: 1 / -1; }
+.facility-picker__rows p, .facility-picker__count { margin: 0; padding: .5rem 0; color: var(--v1-muted); font-size: .75rem; }

@@ -1,9 +1,16 @@
 /** Saved intent only. Record identity, revisions, and persistence belong to Vis2. */
 export const VISUALIZATION_DEFINITION_VERSION = 2;
 
+export type VisualizationFacilitySelection =
+  | { readonly kind: 'all' }
+  | { readonly kind: 'fixed'; readonly facilityGuids: readonly string[] };
+
+/** Runtime ownership and an explicit eligibility boundary; an empty list means no facilities. */
 export type VisualizationScope =
-  | { readonly kind: 'portfolio' }
-  | { readonly kind: 'facility'; readonly facilityGuid: string };
+  | { readonly kind: 'portfolio'; readonly facilityGuids: readonly string[] }
+  | { readonly kind: 'facility'; readonly facilityGuid: string; readonly facilityGuids: readonly string[] };
+
+export type UtilitySelectionMode = 'source' | 'group' | 'meter' | 'facility' | 'rule';
 
 export type SettingBinding<T> = { readonly kind: 'owner' } | { readonly kind: 'pinned'; readonly value: T };
 export type VisualizationResourceKind = 'facility' | 'meter' | 'meter-group' | 'predictor' | 'equipment' | 'energy-use-group';
@@ -30,6 +37,7 @@ interface SourceBase {
 
 export interface UtilityVisualizationSource extends SourceBase {
   readonly kind: 'utility';
+  readonly selectionMode?: UtilitySelectionMode;
   readonly measure: 'energy' | 'consumption' | 'cost' | 'location-emissions' | 'market-emissions' | 'charge';
   readonly selection?: ResourceSelection;
   readonly aggregation: 'none' | 'sum';
@@ -138,7 +146,7 @@ export interface VisualizationDefinition {
   readonly version: typeof VISUALIZATION_DEFINITION_VERSION;
   readonly name: string;
   readonly accountGuid: string;
-  readonly scope: VisualizationScope;
+  readonly facilitySelection: VisualizationFacilitySelection;
   readonly sources: readonly VisualizationSource[];
   readonly period: VisualizationPeriod;
   readonly comparison: VisualizationComparison;
@@ -149,7 +157,7 @@ export interface VisualizationDefinition {
 }
 
 /** Creation commits coherent but incomplete intent; source discovery belongs to the workbench. */
-export function createVisualizationDefinition(name: string, accountGuid: string, scope: VisualizationScope,
+export function createVisualizationDefinition(name: string, accountGuid: string, facilitySelection: VisualizationFacilitySelection,
   sourceKind: VisualizationSourceKind): VisualizationDefinition {
   const base = { id: 'source-1', settings: { unit: { kind: 'owner' as const } } };
   const source: VisualizationSource = sourceKind === 'utility'
@@ -158,7 +166,7 @@ export function createVisualizationDefinition(name: string, accountGuid: string,
     : sourceKind === 'energy-use' ? { ...base, kind: 'energy-use', measure: 'consumption', aggregation: 'sum', denominator: 'facility' }
     : sourceKind === 'analysis' ? { ...base, kind: 'analysis', mode: 'result', measure: 'actual', aggregation: 'none' }
     : { ...base, kind: sourceKind, measure: 'value', aggregation: 'none' };
-  return { version: VISUALIZATION_DEFINITION_VERSION, name, accountGuid, scope: { ...scope }, sources: [source],
+  return { version: VISUALIZATION_DEFINITION_VERSION, name, accountGuid, facilitySelection: structuredClone(facilitySelection), sources: [source],
     period: sourceKind === 'energy-use' ? { kind: 'latest-saved-year', basis: 'fiscal' } : { kind: 'all-history' },
     comparison: { kind: 'none' }, series: [], appearance: { legend: true } };
 }
@@ -167,7 +175,7 @@ export function createVisualizationDefinition(name: string, accountGuid: string,
 export interface VisualizationSetupInput {
   readonly name: string;
   readonly accountGuid: string;
-  readonly scope: VisualizationScope;
+  readonly facilitySelection: VisualizationFacilitySelection;
   readonly chart: VisualizationChart;
   readonly sourceKinds: readonly VisualizationSourceKind[];
 }
@@ -177,11 +185,20 @@ export function createVisualizationSetupDefinition(input: VisualizationSetupInpu
   if (!input.sourceKinds.length || new Set(input.sourceKinds).size !== input.sourceKinds.length)
     throw new Error('Choose one or more unique data sources.');
   const sources = input.sourceKinds.map((kind, index) => ({
-    ...createVisualizationDefinition(input.name, input.accountGuid, input.scope, kind).sources[0], id: `source-${index + 1}`
+    ...createVisualizationDefinition(input.name, input.accountGuid, input.facilitySelection, kind).sources[0], id: `source-${index + 1}`
   }));
   return { version: VISUALIZATION_DEFINITION_VERSION, name: input.name, accountGuid: input.accountGuid,
-    scope: { ...input.scope }, sources, chart: structuredClone(input.chart),
+    facilitySelection: structuredClone(input.facilitySelection), sources, chart: structuredClone(input.chart),
     period: input.sourceKinds.length === 1 && input.sourceKinds[0] === 'energy-use'
       ? { kind: 'latest-saved-year', basis: 'fiscal' } : { kind: 'all-history' },
     comparison: { kind: 'none' }, series: [], appearance: { legend: true } };
+}
+
+/** Coherent metadata and set-valued inclusion compare independently of raw editor text. */
+export function normalizeVisualizationDefinition(value: VisualizationDefinition): VisualizationDefinition {
+  const title = value.appearance.title?.trim();
+  return { ...structuredClone(value), name: value.name.trim(),
+    facilitySelection: value.facilitySelection.kind === 'fixed'
+      ? { kind: 'fixed', facilityGuids: [...value.facilitySelection.facilityGuids].sort() } : { kind: 'all' },
+    appearance: { legend: value.appearance.legend, ...(title ? { title } : {}) } };
 }

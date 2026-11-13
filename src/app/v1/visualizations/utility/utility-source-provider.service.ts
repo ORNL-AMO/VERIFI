@@ -36,7 +36,7 @@ export class UtilitySourceProvider implements VisualizationSourceProvider {
       if (result.state === 'error') return { identity: request.identity, state: 'unsupported', message: result.error?.message ?? 'The selected projection is unavailable.' };
       return resolveCalendarizedUtility(snapshot, request, result.meters, { includeEmissions: result.projection?.includeEmissions === true, emissionsRates });
     } catch (error) {
-      return { identity: request.identity, state: 'error', message: error instanceof Error ? error.message : 'The utility preview could not be prepared.' };
+      return { identity: request.identity, state: 'error', message: error instanceof Error ? error.message : 'The utility chart could not be prepared.' };
     }
   }
 }

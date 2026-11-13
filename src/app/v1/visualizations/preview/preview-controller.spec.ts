@@ -1,3 +1,5 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { visualizationSnapshot } from '../testing/visualization-test-fixtures';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
@@ -18,6 +20,12 @@ const dates: PreviewDateContextResolver = { resolve: async () => ({ calendarDate
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(r => { resolve = r; }); return { promise, resolve }; }
 async function settle() { for (let i = 0; i < 8; i++) await Promise.resolve(); }
 
+function workspace() {
+  const store = new AccountWorkspaceStore(), snapshot = visualizationSnapshot();
+  store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }] });
+  return store;
+}
+
 function setup(options: { provider?: Partial<VisualizationSourceProvider>; presenter?: Partial<VisualizationPreviewPresenter>;
   dates?: PreviewDateContextResolver; empty?: boolean } = {}) {
   const definition = utilityVisualizationFixture();
@@ -26,7 +34,7 @@ function setup(options: { provider?: Partial<VisualizationSourceProvider>; prese
     supportsChart: (_source, chart) => ({ state: 'supported', chart }),
     resolve: async request => ({ ...evidence.resolution, identity: request.identity }), ...options.provider };
   const presenter: VisualizationPreviewPresenter = { kind: 'time-series', component: TestChartComponent, prepare: () => presentation, ...options.presenter };
-  TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry,
+  TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry, { provide: AccountWorkspaceStore, useValue: workspace() },
     { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: options.empty ? [] : [provider] },
     { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: options.empty ? [] : [presenter] },
     { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: options.empty ? undefined : options.dates ?? dates }] });
@@ -48,7 +56,7 @@ function setupMixed(options: { definition?: VisualizationDefinition; providers?:
     resolve: vi.fn(async request => ({ ...entry.resolution, identity: request.identity })), ...options.providers?.[index] }));
   const prepare = vi.fn<VisualizationPreviewPresenter['prepare']>(() => presentation);
   const resolveDates = vi.fn(dates.resolve);
-  TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry,
+  TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry, { provide: AccountWorkspaceStore, useValue: workspace() },
     { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: providers },
     { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: TestChartComponent, prepare }] },
     { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: { resolve: resolveDates } }] });
@@ -59,7 +67,7 @@ describe('visualization preview orchestration', () => {
   it.each(VISUALIZATION_CHART_CHOICES)('retains $label mixed-sourceKind setup without requesting data or dates', ({ value, label }) => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve), describe = vi.fn(), supportsChart = vi.fn(), prepare = vi.fn();
     const { controller } = setup({ provider: { resolve, describe, supportsChart }, presenter: { prepare }, dates: { resolve: resolveDates } });
-    const definition = createVisualizationSetupDefinition({ name: 'Mixed setup', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+    const definition = createVisualizationSetupDefinition({ name: 'Mixed setup', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: createVisualizationChart(value), sourceKinds: ['utility', 'predictor', 'energy-use', 'analysis'] });
     const original = structuredClone(definition);
     controller.update(definition, identity);
@@ -127,7 +135,7 @@ describe('visualization preview orchestration', () => {
       submitted = request; signal = abort; return pending.promise;
     } }] });
     controller.update(definition, identity); await settle(); expect(controller.state().state).toBe('loading');
-    const next = createVisualizationSetupDefinition({ name: 'New Scatter setup', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+    const next = createVisualizationSetupDefinition({ name: 'New Scatter setup', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: createVisualizationChart('scatter'), sourceKinds: ['utility', 'predictor'] });
     controller.update(next, { ...identity, definitionRevision: 2 });
     expect(signal.aborted).toBe(true); pending.resolve({ ...evidence[1].resolution, identity: submitted.identity }); await settle();
@@ -157,7 +165,7 @@ describe('visualization preview orchestration', () => {
     controller.update(definition, identity); expect(controller.state().state).toBe('loading'); await settle();
     expect(controller.state().state).toBe('ready');
     const evidence = prepare.mock.calls[0][1];
-    expect(evidence[0].request.identity).toEqual({ ...identity, requestId: expect.any(String), sourceId: 'utility', scope: { kind: 'portfolio' } });
+    expect(evidence[0].request.identity).toEqual({ ...identity, requestId: expect.any(String), sourceId: 'utility', scope: { kind: 'portfolio', facilityGuids: ['facility-a', 'facility-b'] } });
     expect(evidence[0].request.dateContext).toEqual({ calendarDate: '2026-11-11', latestDataDate: '2025-12-31' });
     const resolution = evidence[0].resolution;
     if (resolution.state !== 'ready' || resolution.resolved.data.kind !== 'time-series') throw new Error('Expected ready time-series evidence.');

@@ -1,7 +1,19 @@
 import { AccountWorkspaceSnapshot } from './account-workspace.models';
 import { AccountWorkspaceStore } from './account-workspace.store';
+import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 
 describe('AccountWorkspaceStore', () => {
+  it('reclassifies live All from the facility catalog without rewriting saved intent or trusting stale facilityId', () => {
+    const store = new AccountWorkspaceStore(), snapshot = createSnapshot();
+    const record = { ...getNewIdbSavedVisualization(createVisualizationDefinition('Live', snapshot.account.guid, { kind: 'all' }, 'utility')), facilityId: 'stale-facility' };
+    const before = structuredClone(record);
+    store.publish({ ...snapshot, facilities: [snapshot.facilities[0]], savedVisualizations: [record] }, { facility: snapshot.facilities[0] });
+    expect(store.facilitySavedVisualizations()).toEqual([record]);
+    store.publishCommitted({ ...snapshot, savedVisualizations: [record] }, store.selections());
+    expect(store.facilitySavedVisualizations()).toEqual([]);
+    expect(store.savedVisualizations()).toEqual([before]); expect(record).toEqual(before);
+  });
   it('publishes saved definitions atomically and derives facility-owned definitions without changing selections', () => {
     const store = new AccountWorkspaceStore();
     const snapshot = createSnapshot();

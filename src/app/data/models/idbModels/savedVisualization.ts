@@ -20,6 +20,7 @@ export interface VisualizationPreservation {
 
 export interface IdbSavedVisualization extends IdbEntry {
   accountId: string;
+  /** Context for opaque preserved payloads only; current ownership derives from facilitySelection. */
   facilityId?: string;
   recordVersion: number;
   revision: number;
@@ -36,7 +37,6 @@ export function getNewIdbSavedVisualization(
   return {
     ...idbEntry,
     accountId: definition.accountGuid,
-    ...(definition.scope.kind === 'facility' ? { facilityId: definition.scope.facilityGuid } : {}),
     recordVersion: SAVED_VISUALIZATION_RECORD_VERSION,
     revision: 1,
     definition: structuredClone(definition)

@@ -6,8 +6,10 @@ import type { UpdateVisualizationCommand } from '@data/account-workspace/visuali
 import type { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
 import { readSavedVisualization, savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
-import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import type { VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
+import { sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
+import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { normalizeVisualizationIntent, reconcileVisualizationIntent, visualizationIntentEqual,
   VisualizationConflictChoices, VisualizationEditConflict } from './visualization-reconciliation';
@@ -38,7 +40,8 @@ export class VisualizationEditorSession {
   private baseline?: VisualizationDefinition;
   private latest?: VisualizationDefinition;
   private repair?: UpdateVisualizationCommand['repair'];
-  private unverified?: { readonly submitted: VisualizationDefinition; readonly repair?: UpdateVisualizationCommand['repair'] };
+  private unverified?: { readonly submitted: VisualizationDefinition; readonly repair?: UpdateVisualizationCommand['repair']; readonly retarget?: boolean };
+  private readonly pendingRetarget = signal<{ readonly selection: VisualizationFacilitySelection; readonly revision: number; readonly submitted: VisualizationDefinition } | undefined>(undefined);
   private authorityPublication?: unknown;
   private authorityPinned = false;
   private timer?: ReturnType<typeof setTimeout>;
@@ -66,8 +69,17 @@ export class VisualizationEditorSession {
     ? JSON.stringify([this.accountGuidValue(), this.guidValue()]) : '');
   readonly savedRevision = computed(() => this.record()?.revision ?? 0);
   readonly needsProtection = computed(() => this.dirty() || this.saving() || this.state() === 'refresh-required');
-  readonly canEdit = computed(() => this.editableValue() && this.workspace.isReady()
+  readonly canEdit = computed(() => this.editableValue() && !this.pendingRetarget() && this.workspace.isReady()
     && this.workspace.account()?.guid === this.accountGuidValue());
+  /** Readable transferred intent can repair its facility boundary without enabling ordinary edits. */
+  readonly canRetarget = computed(() => {
+    const record = this.record();
+    if (!record || record.recordVersion !== SAVED_VISUALIZATION_RECORD_VERSION || record.preservation?.locked
+      || savedVisualizationEnvelopeError(record)) return false;
+    const payload = decodeVisualizationDefinition(record.definition);
+    return 'definition' in payload && (!this.pendingRetarget() || this.saving()) && this.workspace.isReady()
+      && this.workspace.account()?.guid === this.accountGuidValue();
+  });
 
   constructor() {
     const subscription = this.form.valueChanges.subscribe(() => this.changed());
@@ -96,7 +108,7 @@ export class VisualizationEditorSession {
     this.clearTimer(); ++this.generation;
     this.accountGuidValue.set(accountGuid); this.guidValue.set(guid);
     this.recordValue.set(undefined); this.draft.set(undefined); this.baseline = undefined; this.latest = undefined;
-    this.repair = undefined; this.unverified = undefined; this.authorityPinned = false;
+    this.repair = undefined; this.unverified = undefined; this.pendingRetarget.set(undefined); this.authorityPinned = false;
     this.errorValue.set(undefined); this.conflictsValue.set([]); this.dirtyValue.set(false);
     this.savingValue.set(false); this.missingValue.set(true); this.editableValue.set(false);
     this.localRevisionValue.update(value => value + 1); this.stateValue.set('missing');
@@ -107,7 +119,7 @@ export class VisualizationEditorSession {
 
   /** Only committed publications are hydrated; failed-command snapshots remain authoritative until a new publication. */
   hydrate(record: Readonly<IdbSavedVisualization> | undefined): void {
-    if (this.disposed || this.saving() || this.unverified) return;
+    if (this.disposed || this.saving() || this.unverified || this.pendingRetarget()) return;
     if (this.authorityPinned && this.authorityPublication === this.workspace.snapshot()) return;
     this.authorityPinned = false;
     if (record && (record.accountId !== this.accountGuidValue() || record.guid !== this.guidValue())) return;
@@ -120,8 +132,8 @@ export class VisualizationEditorSession {
     if (this.disposed || !this.record() || this.unverified || !this.workspace.isReady()
       || this.workspace.account()?.guid !== this.accountGuidValue()) return;
     const owner = this.record()!;
-    if (definition.accountGuid !== owner.accountId || (definition.scope.kind === 'facility'
-      ? definition.scope.facilityGuid !== owner.facilityId : owner.facilityId !== undefined)) return;
+    if (definition.accountGuid !== owner.accountId || this.latest
+      && !sameVisualizationFacilitySelection(definition.facilitySelection, this.latest.facilitySelection)) return;
     const validation = decodeVisualizationDefinition(definition);
     if (validation.state !== 'valid' && validation.state !== 'setup-required') return;
     if (!this.editableValue() && !repair) return;
@@ -131,6 +143,10 @@ export class VisualizationEditorSession {
 
   resolveConflicts(choices: VisualizationConflictChoices): void {
     if (!this.baseline || !this.latest || !this.draft() || this.saving() || this.unverified) return;
+    if (choices.configuration === 'local' && !sameVisualizationFacilitySelection(this.draft()!.facilitySelection, this.latest.facilitySelection)) {
+      this.errorValue.set('Facility inclusion changed in another session. Use the saved configuration to resolve this conflict, then review any facility changes separately. Your local configuration is retained until you decide.');
+      return;
+    }
     const merged = reconcileVisualizationIntent(this.baseline, normalizeVisualizationIntent(this.draft()!), this.latest, choices);
     this.baseline = merged.baseline; this.conflictsValue.set(merged.conflicts);
     this.writeDraft(merged.value, true); this.refreshDirty();
@@ -145,12 +161,35 @@ export class VisualizationEditorSession {
     if (this.unverified) {
       if (!await this.recover()) return false;
     }
+    if (this.pendingRetarget()) return this.state() === 'error' ? false : this.saveRetarget();
     while (this.dirty()) {
       if (!this.saveable() || this.state() === 'error') return false;
       if (!await this.saveOnce()) return false;
       this.clearTimer();
     }
     return !this.saving() && !this.unverified;
+  }
+
+  /** Only a reviewed Facilities action changes inclusion; ordinary autosave keeps its saved boundary. */
+  async retarget(selection: VisualizationFacilitySelection, reviewedDefinition: VisualizationDefinition): Promise<boolean> {
+    if (!this.canRetarget() || this.isMissing() || this.pendingRetarget() || !this.definition()) return false;
+    if (sameVisualizationFacilitySelection(this.definition()!.facilitySelection, selection)) return true;
+    const generation = this.generation, revision = this.localRevision();
+    if (!await this.flush() || this.disposed || generation !== this.generation) return false;
+    if (!this.canRetarget() || this.isMissing() || this.pendingRetarget()) return false;
+    if (revision !== this.localRevision()) {
+      this.errorValue.set('The visualization changed while saving. Review the facility change again.');
+      return false;
+    }
+    const snapshot = this.workspace.snapshot();
+    if (!snapshot) return false;
+    const submitted = normalizeVisualizationIntent(prepareVisualizationFacilityChange(this.definition()!, selection, snapshot).definition);
+    if (!visualizationIntentEqual(submitted, normalizeVisualizationIntent(reviewedDefinition))) {
+      this.errorValue.set('Facilities or source membership changed during review. Review the facility change again.'); return false;
+    }
+    this.pendingRetarget.set({ selection: structuredClone(selection), revision: this.savedRevision(), submitted });
+    this.refreshDirty(); this.updateState(); this.setEnabled();
+    return this.saveRetarget();
   }
 
   async retry(): Promise<boolean> {
@@ -162,7 +201,7 @@ export class VisualizationEditorSession {
 
   discard(): void {
     if (this.saving() || this.unverified) return;
-    this.clearTimer(); this.repair = undefined; this.conflictsValue.set([]); this.errorValue.set(undefined);
+    this.clearTimer(); this.repair = undefined; this.pendingRetarget.set(undefined); this.conflictsValue.set([]); this.errorValue.set(undefined);
     this.baseline = this.latest ? structuredClone(this.latest) : undefined;
     this.writeDraft(this.isMissing() ? undefined : this.latest, false);
     this.dirtyValue.set(false); this.stateValue.set(this.isMissing() ? 'missing' : this.editableValue() ? 'saved' : 'readonly');
@@ -262,6 +301,48 @@ export class VisualizationEditorSession {
     return operation;
   }
 
+  private saveRetarget(): Promise<boolean> {
+    if (this.running) return this.running;
+    const pending = this.pendingRetarget();
+    if (!pending || this.disposed || !this.workspace.isReady() || this.workspace.account()?.guid !== this.accountGuidValue()
+      || this.workspace.hasPending() || this.unverified) return Promise.resolve(false);
+    const generation = this.generation;
+    this.clearTimer(); this.savingValue.set(true); this.stateValue.set('saving'); this.errorValue.set(undefined);
+    const operation = this.commands.submit({ kind: 'retarget', accountGuid: this.accountGuidValue(), guid: this.guidValue(),
+      expectedRevision: pending.revision, targetFacilities: pending.selection, reviewedDefinition: pending.submitted }).then(outcome => {
+      if (this.disposed || generation !== this.generation) return false;
+      if (outcome.state === 'committed') {
+        this.pendingRetarget.set(undefined);
+        this.acceptRecord(outcome.value);
+        return !this.conflicts().length;
+      }
+      this.pinAuthority();
+      if (outcome.state === 'refresh-required') {
+        this.unverified = { submitted: pending.submitted, retarget: true };
+        this.errorValue.set('Facility inclusion was saved, but the workspace could not refresh. Retry to recover the saved visualization.');
+        this.stateValue.set('refresh-required'); return false;
+      }
+      if (outcome.state === 'conflict') {
+        this.pendingRetarget.set(undefined); this.acceptRecord(outcome.current);
+        this.errorValue.set('The saved visualization changed. Review the facility change again.');
+      } else this.errorValue.set(errorMessage(outcome.error, 'Facility inclusion could not be saved. Retry or discard the proposed facility change.'));
+      this.refreshDirty(); this.stateValue.set('error'); return false;
+    }).catch(error => {
+      if (!this.disposed && generation === this.generation) {
+        this.errorValue.set(errorMessage(error, 'Facility inclusion could not be saved. Retry or discard the proposed facility change.'));
+        this.stateValue.set('error');
+      }
+      return false;
+    }).finally(() => {
+      if (this.disposed || generation !== this.generation) return;
+      this.running = undefined; this.savingValue.set(false); this.refreshDirty();
+      if (this.state() === 'saving') this.updateState();
+      this.setEnabled(); this.schedule();
+    });
+    this.running = operation;
+    return operation;
+  }
+
   private recover(): Promise<boolean> {
     if (this.recovering) return this.recovering;
     const operation = this.recoverPublication().finally(() => { if (this.recovering === operation) this.recovering = undefined; });
@@ -279,13 +360,17 @@ export class VisualizationEditorSession {
       const recovered = await this.commands.recover(this.accountGuidValue(), this.guidValue());
       if (this.disposed || generation !== this.generation) return false;
       this.unverified = undefined; this.authorityPinned = false;
+      if (pending.retarget) this.pendingRetarget.set(undefined);
       if (visualizationIntentEqual(this.repair, pending.repair)) this.repair = undefined;
-      this.acceptRecord(recovered?.record, pending.submitted);
+      this.acceptRecord(recovered?.record, pending.retarget ? undefined : pending.submitted);
       this.errorValue.set(undefined);
-      return !this.isMissing() && !this.conflicts().length && this.state() !== 'readonly';
+      return !this.isMissing() && !this.conflicts().length
+        && (this.state() !== 'readonly' || !!pending.retarget && !!this.definition());
     } catch (error) {
       if (!this.disposed && generation === this.generation) {
-        this.errorValue.set(errorMessage(error, 'The saved changes could not be recovered. Retry workspace refresh.'));
+        this.errorValue.set(pending.retarget
+          ? `Facility inclusion was saved, but workspace refresh is still required. Retry refresh to recover it. ${errorMessage(error, '')}`.trim()
+          : errorMessage(error, 'The saved changes could not be recovered. Retry workspace refresh.'));
         this.stateValue.set('refresh-required');
       }
       return false;
@@ -298,7 +383,7 @@ export class VisualizationEditorSession {
 
   private pinAuthority(): void { this.authorityPublication = this.workspace.snapshot(); this.authorityPinned = true; }
   private refreshDirty(): void {
-    this.dirtyValue.set(!!this.unverified || !!this.repair || !!this.conflicts().length
+    this.dirtyValue.set(!!this.unverified || !!this.pendingRetarget() || !!this.repair || !!this.conflicts().length
       || !!this.draft() && (!this.baseline || !visualizationIntentEqual(normalizeVisualizationIntent(this.draft()!), this.baseline)));
   }
   private saveable(): boolean {

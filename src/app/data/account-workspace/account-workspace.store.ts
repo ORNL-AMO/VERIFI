@@ -1,3 +1,4 @@
+import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 /**
  * Owns the active account workspace as one private signal and exposes readonly, derived signals.
  * Snapshot publication and selection validation occur atomically through this store.
@@ -73,7 +74,10 @@ export class AccountWorkspaceStore {
   readonly facilityEnergyUseGroups = computed(() => this.forSelectedFacility(this.energyUseGroups()));
   readonly facilityEnergyUseEquipment = computed(() => this.forSelectedFacility(this.energyUseEquipment()));
 
-  readonly facilitySavedVisualizations = computed(() => this.forSelectedFacility(this.savedVisualizations()));
+  readonly facilitySavedVisualizations = computed(() => {
+    const facilityGuid = this.selectedFacility()?.guid;
+    return facilityGuid ? this.savedVisualizations().filter(item => savedVisualizationFacilityGuid(item, this.facilities()) === facilityGuid) : [];
+  });
 
   readonly pendingOperations = computed(() => this.state().pendingOperations);
   readonly hasPending = computed(() => this.state().pendingOperations.length > 0);

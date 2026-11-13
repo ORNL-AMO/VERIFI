@@ -2,6 +2,8 @@ import type {
   VisualizationChart, VisualizationComparison, VisualizationPeriod, VisualizationResourceKind,
   VisualizationScope, VisualizationSeries, VisualizationSource, VisualizationSourceKind
 } from './visualization-definition';
+import { sameVisualizationScope } from './visualization-scope';
+export { sameVisualizationScope } from './visualization-scope';
 
 export type VisualizationChartKind = VisualizationChart['kind'];
 export type VisualizationDataShape = VisualizationData['kind'];
@@ -148,10 +150,6 @@ export interface VisualizationSourceEvidence {
   /** Exact-chart verdict from the feature adapter; a chart-kind declaration is insufficient. */
   readonly chartSupport: VisualizationChartSupport;
   readonly resolution: VisualizationSourceResolution;
-}
-
-export function sameVisualizationScope(left: VisualizationScope, right: VisualizationScope): boolean {
-  return left.kind === right.kind && (left.kind !== 'facility' || right.kind === 'facility' && left.facilityGuid === right.facilityGuid);
 }
 
 /** Consumers call again against their current identity after await, never just the submitted identity. */

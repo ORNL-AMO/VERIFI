@@ -25,10 +25,15 @@
       <p>Charges retain their native bill observations. Monthly allocation, cross-meter charge totals, and summed demand are unavailable.</p>
     } @else {
       <label>Selection<select class="v1-select" formControlName="mode">
-        <option value="meters">Fixed meters</option><option value="groups">Fixed meter groups, live membership</option>
+        <option value="sources">Utility sources, live membership</option><option value="meters">Fixed meters</option><option value="groups">Fixed meter groups, live membership</option>
         <option value="facilities">Fixed facilities, live membership</option><option value="rule">Matching rule, including future matches</option>
       </select></label>
-      @if (current.mode === 'rule') {
+      @if (current.mode === 'sources') {
+        <label>Utility sources<select class="v1-select" multiple formControlName="utilitySources">
+          @for (source of sourceOptions(); track source) { <option [value]="source">{{ source }}</option> }
+        </select></label>
+        <p>Choose one or more utility sources. Clearing the selection leaves setup incomplete.</p>
+      } @else if (current.mode === 'rule') {
         <label>Facilities (none means all in this scope)<select class="v1-select" multiple formControlName="facilityGuids">
           @for (option of facilityOptions(); track option.guid) { <option [value]="option.guid">{{ option.label }}</option> }
         </select></label>
@@ -49,7 +54,7 @@
           <p>The selected identities stay fixed; their current meter membership updates this chart. Retired historical data remains included.</p>
         } @else { <p>Only these exact meters are selected, including their retired history. Missing selected meters require repair.</p> }
       }
-      @if (!options().length && current.mode !== 'rule') { <p role="status">No resources are available in this saved scope. Add saved utility data or complete setup later.</p> }
+      @if (!options().length && current.mode !== 'rule' && current.mode !== 'sources') { <p role="status">No resources are available in this saved scope. Add saved utility data or complete setup later.</p> }
       <label>Observation view<select class="v1-select" formControlName="dataMode"><option value="calendarized">Calendarized months / years</option><option value="billing-period">Native bills</option></select></label>
       @if (current.dataMode === 'calendarized') {
         <label>Aggregation<select class="v1-select" formControlName="aggregation"><option value="sum">Add compatible contributions</option><option value="none">Separate meter observations</option></select></label>

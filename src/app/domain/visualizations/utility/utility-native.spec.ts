@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities } from '../visualization-facilities';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { UtilityVisualizationSource } from '../visualization-definition';
 import type { VisualizationSourceRequest, VisualizationSourceResolution } from '../visualization-source-provider';
@@ -18,12 +19,12 @@ describe('native utility observations', () => {
       settings: { unit: { kind: 'owner' }, energyTreatment: { kind: 'pinned', value: 'site' } }, ...options };
     const snapshot = visualizationSnapshot();
     const saved: AccountWorkspaceSnapshot = { ...snapshot, account: { ...snapshot.account, energyUnit: 'kWh', volumeLiquidUnit: 'gal' },
-      facilities: snapshot.facilities.map(facility => ({ ...facility, eGridSubregion: 'US' })),
+      facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }].map(facility => ({ ...facility, eGridSubregion: 'US' })),
       customEmissions: [{ ...getNewAccountEmissionsItem('account-a'), subregion: 'US',
         locationEmissionRates: [{ year: 2026, CO2: 0, CH4: 0, N2O: 0, co2Emissions: 0 }], residualEmissionRates: [{ year: 2026, CO2: 0, CH4: 0, N2O: 0, co2Emissions: 0 }] }],
       meters: [meter({})], meterData: [reading({})], ...overrides };
     const request: VisualizationSourceRequest = { identity: { accountGuid: saved.account.guid, workspaceRevision: 3, definitionGuid: 'visualization-a', definitionRevision: 2,
-      requestId: 'native-a', scope: definition.scope, sourceId: source.id }, source,
+      requestId: 'native-a', scope: resolveVisualizationFacilities(definition, saved.facilities).scope, sourceId: source.id }, source,
       chart: { kind: 'time-series', type: 'line', interval: 'native', stack: 'none' }, period: { kind: 'all-history' }, comparison: { kind: 'none' },
       series: [{ id: 'display', sourceId: source.id, metric: utilityMeasureKey(source), axis: 'left' }], dateContext: { calendarDate: '2026-11-12', latestDataDate: '2026-01-01' } };
     return { source, saved, request };

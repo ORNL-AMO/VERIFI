@@ -10,6 +10,18 @@ import { applyUtilitySourceForm, utilitySourceFormValue, UtilitySourceEditorComp
 function source(definition = utilityVisualizationFixture()) { return definition.sources[0] as UtilityVisualizationSource; }
 
 describe('utility source editing', () => {
+  it('retains explicit Source selection and never broadens a cleared Source filter to all meters', () => {
+    const base = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...base, sources: [{ ...source(base), selectionMode: 'source',
+      selection: { kind: 'rule', resource: 'meter', filter: { utilitySources: ['Electricity'] } } }] };
+    const value = utilitySourceFormValue(source(definition));
+    expect(value.mode).toBe('sources');
+    const changed = applyUtilitySourceForm(definition, source(definition).id, { ...value, utilitySources: [] });
+    expect(source(changed).selectionMode).toBe('source');
+    expect(source(changed)).not.toHaveProperty('selection');
+    const restored = applyUtilitySourceForm(changed, source(changed).id, { ...value, utilitySources: ['Water'] });
+    expect(source(restored)).toMatchObject({ selectionMode: 'source', selection: { kind: 'rule', resource: 'meter', filter: { utilitySources: ['Water'] } } });
+  });
   afterEach(() => TestBed.resetTestingModule());
   function setup(definition = utilityVisualizationFixture()) {
     const changed = vi.fn(), validityChanged = vi.fn();

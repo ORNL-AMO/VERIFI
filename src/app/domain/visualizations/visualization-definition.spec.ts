@@ -3,18 +3,9 @@ import { decodeVisualizationDefinition } from './visualization-validation';
 import { analysisVisualizationFixture, energyUseVisualizationFixture, utilityVisualizationFixture } from './testing/visualization-fixtures';
 
 describe('visualization saved intent', () => {
-  it('reads v1 into equivalent v2 intent without changing the supplied historical payload', () => {
-    const current = utilityVisualizationFixture();
-    const historical = { ...current, version: 1 };
-    const before = structuredClone(historical);
-    const decoded = decodeVisualizationDefinition(historical);
-    expect(decoded.state).toBe('valid');
-    expect('definition' in decoded && decoded.definition).toEqual(current);
-    expect(historical).toEqual(before);
-    expect('definition' in decoded && decodeVisualizationDefinition(decoded.definition)).toEqual(decoded);
-  });
 
-  it('allows v2 visibility and dormant presentation overrides, but never accepts them as v1 fields', () => {
+
+  it('allows visibility and dormant presentation overrides with unique selectors', () => {
     const base = utilityVisualizationFixture();
     const { resourceGuid, ...wildcard } = base.series[0];
     const definition = { ...base, series: [{ ...wildcard, visible: true, overrides: [
@@ -22,7 +13,6 @@ describe('visualization saved intent', () => {
       { resourceGuid: 'retired-meter', label: 'Retained name', axis: 'right' }
     ] }] };
     expect(decodeVisualizationDefinition(definition).state).toBe('valid');
-    expect(decodeVisualizationDefinition({ ...definition, version: 1 }).state).toBe('invalid');
     expect(decodeVisualizationDefinition({ ...definition, series: [{ ...definition.series[0], overrides: [
       { resourceGuid: 'meter-a' }, { resourceGuid: 'meter-a', visible: false }
     ] }] }).state).toBe('invalid');
@@ -31,7 +21,7 @@ describe('visualization saved intent', () => {
 
   it.each([
     ['portfolio utility', utilityVisualizationFixture()],
-    ['single facility utility', utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' })],
+    ['single facility utility', utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] })],
     ['analysis result', analysisVisualizationFixture()], ['pinned saved model', analysisVisualizationFixture(true)],
     ['equipment treemap', energyUseVisualizationFixture()], ['equipment Sankey', energyUseVisualizationFixture(true)]
   ])('round-trips %s without changing source or presentation meaning', (_, original) => {
@@ -43,7 +33,7 @@ describe('visualization saved intent', () => {
   });
 
   it.each<VisualizationSourceKind>(['utility', 'predictor', 'energy-use', 'analysis'])('creates recoverable incomplete %s intent', kind => {
-    const value = createVisualizationDefinition('New chart', 'account-a', { kind: 'portfolio' }, kind);
+    const value = createVisualizationDefinition('New chart', 'account-a', { kind: 'all' }, kind);
     const result = decodeVisualizationDefinition(value);
     expect(result.state).toBe('setup-required');
     expect('definition' in result && result.definition.sources[0].kind).toBe(kind);
@@ -51,7 +41,7 @@ describe('visualization saved intent', () => {
   });
 
   it('defaults Analysis to result intent and validates result and model settings independently', () => {
-    expect(createVisualizationDefinition('Analysis', 'account-a', { kind: 'portfolio' }, 'analysis').sources[0])
+    expect(createVisualizationDefinition('Analysis', 'account-a', { kind: 'all' }, 'analysis').sources[0])
       .toMatchObject({ kind: 'analysis', mode: 'result', measure: 'actual', aggregation: 'none' });
     const result = analysisVisualizationFixture(), model = analysisVisualizationFixture(true);
     expect(decodeVisualizationDefinition(result).state).toBe('valid');
@@ -75,7 +65,7 @@ describe('visualization saved intent', () => {
   it('creates independent setup sources and retains chart intent without inventing series', () => {
     const chart = { kind: 'scatter' as const, showFit: false };
     const value = createVisualizationSetupDefinition({ name: 'Usage versus production', accountGuid: 'account-a',
-      scope: { kind: 'portfolio' }, chart, sourceKinds: ['utility', 'predictor', 'analysis'] });
+      facilitySelection: { kind: 'all' }, chart, sourceKinds: ['utility', 'predictor', 'analysis'] });
     expect(value.sources.map(source => source.kind)).toEqual(['utility', 'predictor', 'analysis']);
     expect(value.sources.map(source => source.id)).toEqual(['source-1', 'source-2', 'source-3']);
     expect(value.series).toEqual([]);
@@ -104,7 +94,7 @@ describe('visualization saved intent', () => {
 
   it('uses the latest saved fiscal year only for Energy Use alone', () => {
     const create = (sourceKinds: readonly VisualizationSourceKind[]) => createVisualizationSetupDefinition({
-      name: 'New chart', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+      name: 'New chart', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: { kind: 'treemap', hierarchy: [], values: 'absolute' }, sourceKinds });
     expect(create(['energy-use']).period).toEqual({ kind: 'latest-saved-year', basis: 'fiscal' });
     expect(create(['energy-use', 'utility']).period).toEqual({ kind: 'all-history' });
@@ -157,7 +147,7 @@ describe('visualization saved intent', () => {
   });
 
   it.each<VisualizationChart>([
-    { kind: 'time-series', type: 'combination', interval: 'monthly', stack: 'absolute', seriesTypes: [{ seriesId: 'energy', type: 'bar' }] },
+    { kind: 'time-series', type: 'bar', interval: 'monthly', stack: 'absolute' },
     { kind: 'scatter', xSeriesId: 'energy', ySeriesId: 'energy', showFit: false },
     { kind: 'correlation', statistic: 'r-squared', scale: 'z-score' },
     { kind: 'heatmap', dimension: 'series-period', scale: 'diverging' },
@@ -172,8 +162,8 @@ describe('visualization saved intent', () => {
 
   it('preserves rule anchors and owner bindings rather than resolving ambient selection', () => {
     const base = utilityVisualizationFixture();
-    const value: VisualizationDefinition = { ...base, sources: [{ ...base.sources[0], kind: 'utility', measure: 'energy', aggregation: 'sum',
-      dataMode: 'calendarized', groupBy: 'group', selection: { kind: 'rule', resource: 'meter', filter: {
+    const value: VisualizationDefinition = { ...base, sources: [{  ...base.sources[0], kind: 'utility', measure: 'energy', aggregation: 'sum',
+      dataMode: 'calendarized', groupBy: 'group', selectionMode: 'rule' as const, selection: { kind: 'rule', resource: 'meter', filter: {
         facilityGuids: ['facility-a'], groupGuids: ['group-a'], utilitySources: ['Electricity'], search: 'main', includeRetired: false
       } }, settings: { unit: { kind: 'owner' }, energyTreatment: { kind: 'owner' } } }] };
     const result = decodeVisualizationDefinition(JSON.parse(JSON.stringify(value)));
@@ -216,7 +206,7 @@ describe('visualization saved intent', () => {
     const source = value.sources[0];
     if (source.kind !== 'utility') throw new Error('Expected utility fixture');
     expect(decodeVisualizationDefinition({ ...value, sources: [{ ...source, measure: 'charge' }] }).state).toBe('setup-required');
-    expect(decodeVisualizationDefinition({ ...value, sources: [{ ...source, selection: { kind: 'fixed', resource: 'equipment', guids: ['equipment-a'] } }] }).state).toBe('setup-required');
+    expect(decodeVisualizationDefinition({ ...value, sources: [{ ...source, selection: { kind: 'fixed', resource: 'equipment', guids: ['equipment-a'] } }] }).state).toBe('invalid');
     expect(decodeVisualizationDefinition({ ...value, chart: { kind: 'scatter', xSeriesId: 'absent', ySeriesId: 'energy', showFit: true } }).state).toBe('setup-required');
   });
 
@@ -238,7 +228,7 @@ describe('visualization saved intent', () => {
     ['reversed range', { comparison: { kind: 'custom', start: '2024-12-01', end: '2024-01-01' } }],
     ['fractional window', { period: { kind: 'rolling', count: 1.5, unit: 'month', anchor: 'latest-data', basis: 'calendar', includeIncomplete: true } }],
     ['infinite window', { period: { kind: 'rolling', count: Infinity, unit: 'month', anchor: 'latest-data', basis: 'calendar', includeIncomplete: true } }],
-    ['numeric resource key', { scope: { kind: 'facility', facilityGuid: 3 } }]
+    ['numeric resource key', { facilitySelection: { kind: 'fixed', facilityGuids: [3] } }]
   ])('rejects %s without coercion', (_, replacement) => {
     expect(decodeVisualizationDefinition({ ...utilityVisualizationFixture(), ...replacement }).state).toBe('invalid');
   });
@@ -249,7 +239,7 @@ describe('visualization saved intent', () => {
     expect(decodeVisualizationDefinition({ ...value, series: [...value.series, ...value.series] }).state).toBe('invalid');
     const source = value.sources[0];
     if (source.kind !== 'utility') throw new Error('Expected utility fixture');
-    expect(decodeVisualizationDefinition({ ...value, sources: [{ ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-a'] } }] }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...value, sources: [{  ...source, selectionMode: 'meter' as const, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-a'] } }] }).state).toBe('invalid');
   });
 
   it('distinguishes unsupported versions and providers without altering caller data', () => {
@@ -291,4 +281,13 @@ describe('visualization saved intent', () => {
   it('rejects huge sparse arrays without walking every missing index', () => {
     expect(decodeVisualizationDefinition({ ...utilityVisualizationFixture(), sources: new Array(0xffffffff) }).state).toBe('invalid');
   });
+  it('requires current explicit facility inclusion and rejects empty or duplicate fixed identities', () => {
+    const definition = utilityVisualizationFixture();
+    for (const facilitySelection of [{ kind: 'fixed', facilityGuids: [] }, { kind: 'fixed', facilityGuids: ['a', 'a'] }, { kind: 'fixed', facilityGuids: [3] }])
+      expect(decodeVisualizationDefinition({ ...definition, facilitySelection }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...definition, facilitySelection: { kind: 'fixed', facilityGuids: ['missing'] } }).state).toBe('valid');
+    const { facilitySelection: _selection, ...without } = definition;
+    expect(decodeVisualizationDefinition({ ...without, scope: { kind: 'portfolio' } }).state).toBe('invalid');
+  });
+
 });
