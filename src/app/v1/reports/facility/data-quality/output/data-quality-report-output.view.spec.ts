@@ -1,5 +1,6 @@
 import { buildMeterDataQualityReport } from '@domain/calculations/data-quality/meter-data-quality';
 import { buildPredictorDataQualityReport } from '@domain/calculations/data-quality/predictor-data-quality';
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import { ReportSection } from '@shared/report-output/report-section.model';
 import { dataQualityPdfSnapshot } from '../testing/data-quality-report-test-fixtures';
 import { METER_CONTENT_FLAGS, PREDICTOR_CONTENT_FLAGS } from '../data-quality-report-settings';
@@ -138,6 +139,33 @@ describe('Data Quality PDF content', () => {
     expect(output.document.sections).toContainEqual(expect.objectContaining({
       content: 'No readings have valid months and years for the time series.'
     }));
+  });
+
+  it.each([
+    ['ft&#179;', 'ft³'], ['m&#x00B2;', 'm²'], ['ft&#X0000b3;', 'ft³'],
+    ['&#176;F', '°F'], ['CO&#x2082;e', 'CO2e'],
+    ['&#x2103;', '℃'], ['&#x2109;', '℉'], ['&#x212a;', 'K'],
+    ['&deg;F &sup2; &sup3;&nbsp;kWh', '°F ² ³ kWh'],
+    ['<script', '<script'], ['<sup>3</sup>', '<sup>3</sup>'],
+    ['&#60;script&#62;payload&#60;/script&#62;', '&#60;script&#62;payload&#60;/script&#62;'],
+    ['&#x3c;script&#x3e;', '&#x3c;script&#x3e;'], ['&lt;script&gt;', '&lt;script&gt;'],
+    ['&#38;#60;script&#38;#62;', '&#38;#60;script&#38;#62;'],
+    ['&#0; &#xD800; &#x110000;', '&#0; &#xD800; &#x110000;'],
+    ['&#179 &#xZZ; &unknown;', '&#179 &#xZZ; &unknown;']
+  ])('formats PDF unit label %s as literal text %s', (display, expected) => {
+    const snapshot = dataQualityPdfSnapshot();
+    const definition = new ConvertValue(undefined, undefined, undefined).getUnit('ft3');
+    const lookup = vi.spyOn(ConvertValue.prototype, 'getUnit').mockReturnValue({ ...definition,
+      unit: { ...definition.unit, name: { ...definition.unit.name, display } }
+    });
+    try {
+      snapshot.results.annualTotals[0].columns = [{ key: 'energyUse', label: 'Energy', unit: 'test-unit' }];
+      const { document } = dataQualityPdfDocument(snapshot);
+      const table = document.sections.find(section => section.title === 'Annual Totals');
+      if (table?.type !== 'table') throw new Error('Missing annual table');
+      expect(table.headers).toEqual([`Energy (${expected})`]);
+      expect(table.rows.map(row => row[0])).toEqual(['130', '130']);
+    } finally { lookup.mockRestore(); }
   });
 
   it.each([

@@ -88,7 +88,7 @@ export function dataQualityPdfDocument(snapshot: DataQualityReportSnapshot): {
         const columns = dataQualityAnnualColumns(totals);
         const rows = dataQualityAnnualRows(totals.columns, [...totals.rows].sort((a, b) => a.year - b.year));
         table('Annual Totals', columns.map(column => {
-          const unit = column.unitHtml ? plainUnit(column.unitHtml) : column.unit;
+          const unit = column.unitHtml ? pdfUnitLabel(column.unitHtml) : column.unit;
           return unit ? `${column.label} (${unit})` : column.label;
         }), rows.map(row => row.cells.map(cell => cell.text)));
       }
@@ -129,13 +129,21 @@ export function dataQualityPdfDocument(snapshot: DataQualityReportSnapshot): {
   };
 }
 
-function plainUnit(html: string): string {
-  return html.replace(/<sup>(.*?)<\/sup>/gi, '^$1').replace(/<[^>]*>/g, '')
-    .replace(/&#(x[\da-f]+|\d+);?/gi, (entity, code: string) => {
-      const value = code.toLowerCase().startsWith('x') ? parseInt(code.slice(1), 16) : Number(code);
-      return value <= 0x10ffff ? String.fromCodePoint(value) : entity;
-    })
-    .replace(/&deg;/g, '°').replace(/&sup2;/g, '²').replace(/&sup3;/g, '³').replace(/&nbsp;/g, ' ');
+const PDF_UNIT_CHARACTERS: ReadonlyMap<number, string> = new Map([
+  [0x00b0, '°'], [0x00b2, '²'], [0x00b3, '³'], [0x2082, '₂'],
+  [0x2103, '℃'], [0x2109, '℉'], [0x212a, 'K']
+]);
+const PDF_UNIT_NAMED_CHARACTERS: Readonly<Record<string, string>> = {
+  '&deg;': '°', '&sup2;': '²', '&sup3;': '³', '&nbsp;': ' '
+};
+
+/** Decode the unit registry's display characters for PDF text, without interpreting or sanitizing HTML. */
+function pdfUnitLabel(label: string): string {
+  return label.replace(/&#(x[\da-f]+|\d+);/gi, (entity, code: string) => {
+    const value = code.toLowerCase().startsWith('x') ? parseInt(code.slice(1), 16) : Number(code);
+    return PDF_UNIT_CHARACTERS.get(value) ?? entity;
+  })
+    .replace(/&(?:deg|sup2|sup3|nbsp);/g, entity => PDF_UNIT_NAMED_CHARACTERS[entity]);
 }
 
 function pdfText(value: string): string {
