@@ -71,9 +71,9 @@ const settings = object({ unit: binding(text), energyTreatment: binding(enumerat
 const base = { id: text, settings };
 const source = variant({
   utility: object({ ...base, kind: enumeration('utility'), measure: enumeration('energy', 'consumption', 'cost', 'location-emissions', 'market-emissions', 'charge'),
-    selection, aggregation: enumeration('none', 'sum'), dataMode: enumeration('billing-period', 'calendarized'),
+    selection, selectionMode: enumeration('source', 'group', 'meter', 'facility', 'rule'), aggregation: enumeration('none', 'sum'), dataMode: enumeration('billing-period', 'calendarized'),
     groupBy: enumeration('total', 'facility', 'group', 'meter', 'source'),
-    charge: object({ meterGuid: text, chargeGuid: text, measure: enumeration('cost', 'usage') }) }, ['settings', 'selection', 'charge']),
+    charge: object({ meterGuid: text, chargeGuid: text, measure: enumeration('cost', 'usage') }) }, ['settings', 'selection', 'selectionMode', 'charge']),
   predictor: object({ ...base, kind: enumeration('predictor'), measure: enumeration('value'), selection, aggregation: enumeration('none', 'sum', 'mean') }, ['settings', 'selection']),
   'energy-use': object({ ...base, kind: enumeration('energy-use'), measure: enumeration('consumption', 'cost', 'emissions', 'balance'), selection,
     aggregation: enumeration('none', 'sum'), denominator: enumeration('selected', 'facility', 'account', 'metered-consumption') }, ['settings', 'selection']),
@@ -126,12 +126,11 @@ const seriesOverride: Check = (value, path, issues) => {
     if (count !== 1) issue(issues, path, 'Choose exactly one resource GUID or provider series identity for a presentation override.');
   }
 };
-const definition = (version: 1 | 2): Check => object({
-  version: enumeration(version), name: text, accountGuid: text,
-  scope: variant({ portfolio: object({ kind: enumeration('portfolio') }), facility: object({ kind: enumeration('facility'), facilityGuid: text }) }),
+const definition: Check = object({
+  version: enumeration(VISUALIZATION_DEFINITION_VERSION), name: text, accountGuid: text,
+  facilitySelection: variant({ all: object({ kind: enumeration('all') }), fixed: object({ kind: enumeration('fixed'), facilityGuids: array(text) }) }),
   sources: array(source), period, comparison,
-  series: array(version === 1 ? object(seriesFields, seriesOptional)
-    : object({ ...seriesFields, visible: boolean, overrides: array(seriesOverride) }, [...seriesOptional, 'visible', 'overrides'])),
+  series: array(object({ ...seriesFields, visible: boolean, overrides: array(seriesOverride) }, [...seriesOptional, 'visible', 'overrides'])),
   chart, appearance: object({ legend: boolean, title: text }, ['title'])
 }, ['chart']);
 
@@ -170,13 +169,16 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
     const path = `$.sources[${index}]`;
     if ('selection' in selected || ['utility', 'predictor', 'energy-use'].includes(selected.kind)) {
       const picked = 'selection' in selected ? selected.selection : undefined;
-      if (!picked || picked.kind === 'fixed' && !picked.guids.length) need(`${path}.selection`, 'Select resources or an explicit filter rule.');
+      if (!picked || picked.kind === 'fixed' && !picked.guids.length) need(`${path}.selection`, 'Select resources.');
       if (picked && !sourceResources(selected.kind).includes(picked.resource)) need(`${path}.selection.resource`, 'Choose a resource kind supported by this source.');
     }
     if (selected.kind === 'analysis' && !selected.analysisGuid) need(`${path}.analysisGuid`, 'Select a saved analysis.');
     if (selected.kind === 'analysis' && selected.mode === 'model' && (!selected.modelId || !selected.groupGuid)) need(path, 'Select a saved group and durable model identity.');
     if (selected.kind === 'utility' && selected.measure === 'charge' && !selected.charge) need(`${path}.charge`, 'Select a meter and charge definition.');
     if (selected.kind === 'utility' && selected.measure !== 'charge' && selected.charge) need(`${path}.charge`, 'Charge settings require the charge measure.');
+    if (selected.kind === 'utility' && selected.selectionMode === 'source'
+      && (selected.selection?.kind !== 'rule' || !selected.selection.filter.utilitySources?.length))
+      need(`${path}.selection`, 'Choose at least one utility source.');
   }
   if (!value.series.length) need('$.series', 'Choose the series to display.');
   for (const [index, series] of value.series.entries()) if (!value.sources.some(selected => selected.id === series.sourceId))
@@ -197,20 +199,22 @@ function sourceResources(kind: VisualizationSourceKind): readonly string[] {
     : kind === 'energy-use' ? ['facility', 'equipment', 'energy-use-group'] : [];
 }
 
-/** Decode supported versions into current intent without mutation or persistence writes. */
+/** Decode the current greenfield contract without mutation or persistence writes. */
 export function decodeVisualizationDefinition(value: unknown): VisualizationValidationResult {
   const issues: VisualizationIssue[] = [];
   checkJson(value, '$', issues);
   if (issues.length) return { state: 'invalid', issues };
   if (value && typeof value === 'object' && !Array.isArray(value) && Object.hasOwn(value, 'version')) {
     const version = (value as { version: unknown }).version;
-    if (typeof version === 'number' && Number.isSafeInteger(version) && version > 0 && version !== 1 && version !== VISUALIZATION_DEFINITION_VERSION)
+    if (typeof version === 'number' && Number.isSafeInteger(version) && version > 0 && version !== VISUALIZATION_DEFINITION_VERSION)
       return { state: 'unsupported', issues: [{ path: '$.version', code: 'unsupported', message: `Unsupported definition version: ${version}.` }] };
   }
-  const sourceVersion = (value as { version?: unknown })?.version === 1 ? 1 : VISUALIZATION_DEFINITION_VERSION;
-  definition(sourceVersion)(value, '$', issues);
+  definition(value, '$', issues);
   if (issues.length) return { state: issues.some(entry => entry.code === 'invalid') ? 'invalid' : 'unsupported', issues };
-  const decoded: VisualizationDefinition = { ...structuredClone(value as VisualizationDefinition), version: VISUALIZATION_DEFINITION_VERSION };
+  const decoded = structuredClone(value as VisualizationDefinition);
+  if (decoded.facilitySelection.kind === 'fixed' && (!decoded.facilitySelection.facilityGuids.length
+    || new Set(decoded.facilitySelection.facilityGuids).size !== decoded.facilitySelection.facilityGuids.length))
+    issue(issues, '$.facilitySelection.facilityGuids', 'Choose one or more unique facility GUIDs.');
   for (const [key, entries] of [['sources', decoded.sources], ['series', decoded.series]] as const) {
     const ids = entries.map(entry => entry.id);
     if (new Set(ids).size !== ids.length) issue(issues, `$.${key}`, 'Definition-local IDs must be unique.');
@@ -218,6 +222,14 @@ export function decodeVisualizationDefinition(value: unknown): VisualizationVali
   for (const [index, selected] of decoded.sources.entries()) {
     if ('selection' in selected && selected.selection?.kind === 'fixed' && new Set(selected.selection.guids).size !== selected.selection.guids.length)
       issue(issues, `$.sources[${index}].selection.guids`, 'Fixed selections cannot contain duplicate GUIDs.');
+    if (selected.kind === 'utility' && selected.selection) {
+      const picked = selected.selection, mode = selected.selectionMode;
+      const matches = mode === 'source' ? picked.kind === 'rule' && picked.resource === 'meter'
+          && Object.keys(picked.filter).every(key => key === 'utilitySources')
+        : mode === 'rule' ? picked.kind === 'rule' && picked.resource === 'meter'
+        : picked.kind === 'fixed' && picked.resource === (mode === 'group' ? 'meter-group' : mode === 'facility' ? 'facility' : mode === 'meter' ? 'meter' : undefined);
+      if (!matches) issue(issues, `$.sources[${index}].selectionMode`, 'Choose an explicit selection method matching these meter bindings.');
+    }
   }
   decoded.series.forEach((series, index) => {
     const keys = (series.overrides ?? []).map(override => JSON.stringify([override.accountGuid ?? decoded.accountGuid,

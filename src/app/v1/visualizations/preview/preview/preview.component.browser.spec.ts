@@ -1,3 +1,5 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { visualizationSnapshot } from '../../testing/visualization-test-fixtures';
 import { Component, Input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { userEvent } from 'vitest/browser';
@@ -17,7 +19,10 @@ async function settle() { for (let i = 0; i < 10; i++) await Promise.resolve(); 
 function setup(resolveOverride?: (request: VisualizationSourceRequest, signal: AbortSignal) => Promise<VisualizationSourceResolution>) {
   const definition = utilityVisualizationFixture(), evidence = visualizationEvidenceFixture(definition);
   const resolve = resolveOverride ?? (async request => ({ ...evidence.resolution, identity: request.identity }));
+  const store = new AccountWorkspaceStore(), snapshot = visualizationSnapshot();
+  store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }] });
   TestBed.configureTestingModule({ imports: [PreviewModule, BrowserPresenterFixture], providers: [
+    { provide: AccountWorkspaceStore, useValue: store },
     { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: [{ kind: 'utility', describe: () => evidence.capabilities,
       supportsChart: () => evidence.chartSupport, resolve }] },
     { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: BrowserPresenterFixture,

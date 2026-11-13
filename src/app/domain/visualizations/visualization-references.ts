@@ -32,7 +32,7 @@ export function visualizationReferences(definition: VisualizationDefinition): re
     parentGuid?: string, groupGuid?: string) => {
     if (guid !== undefined) refs.push({ path, kind, guid, ...(parentGuid ? { parentGuid } : {}), ...(groupGuid ? { groupGuid } : {}) });
   };
-  if (definition.scope.kind === 'facility') add('scope.facilityGuid', 'facility', definition.scope.facilityGuid);
+  if (definition.facilitySelection.kind === 'fixed') definition.facilitySelection.facilityGuids.forEach((guid, index) => add(`facilitySelection.facilityGuids.${index}`, 'facility', guid));
   definition.sources.forEach((source, index) => {
     const path = `sources.${index}`;
     if ('selection' in source && source.selection) {
@@ -60,12 +60,12 @@ export function visualizationReferences(definition: VisualizationDefinition): re
   definition.series.forEach((series, i) => {
     const source = definition.sources.find(item => item.id === series.sourceId);
     if (series.resourceGuid) {
-      const reference = seriesReference(source, series.resourceGuid, definition.scope);
+      const reference = visualizationSeriesReference(source, series.resourceGuid, definition.facilitySelection);
       add(`series.${i}.resourceGuid`, reference.kind, series.resourceGuid, reference.parentGuid, reference.groupGuid);
     }
     series.overrides?.forEach((override, overrideIndex) => {
       if (override.resourceGuid === undefined) return;
-      const reference = seriesReference(source, override.resourceGuid, definition.scope);
+      const reference = visualizationSeriesReference(source, override.resourceGuid, definition.facilitySelection);
       refs.push({ path: `series.${i}.overrides.${overrideIndex}.resourceGuid`, ...reference, guid: override.resourceGuid,
         optional: true, accountGuid: override.accountGuid ?? definition.accountGuid });
     });
@@ -73,7 +73,7 @@ export function visualizationReferences(definition: VisualizationDefinition): re
   return refs;
 }
 
-function seriesReference(source: VisualizationSource | undefined, guid: string, scope: VisualizationDefinition['scope']):
+export function visualizationSeriesReference(source: VisualizationSource | undefined, guid: string, facilities: VisualizationDefinition['facilitySelection']):
   Pick<VisualizationReference, 'kind' | 'parentGuid' | 'groupGuid'> {
   if (source?.kind === 'utility') {
     if (source.groupBy === 'facility') return { kind: 'facility' };
@@ -86,7 +86,7 @@ function seriesReference(source: VisualizationSource | undefined, guid: string, 
     if (guid === source.groupGuid) return { kind: 'meter-group', parentGuid: source.analysisGuid };
     if (source.mode === 'model' && (guid === source.modelId || guid === source.comparisonModelId))
       return { kind: 'model', parentGuid: source.analysisGuid, groupGuid: source.groupGuid };
-    if (scope.kind === 'facility' && guid === scope.facilityGuid) return { kind: 'facility' };
+    if (facilities.kind === 'fixed' && facilities.facilityGuids.includes(guid)) return { kind: 'facility' };
     // Other analysis series may identify a facility or an analysis group. Do not guess the namespace.
     return { kind: 'unknown' };
   }
@@ -109,17 +109,23 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
     if (owner !== definition.accountGuid) return; // Foreign appearances must never reconnect.
     const path = `series.${seriesIndex}.overrides.${overrideIndex}`;
     const source = definition.sources.find(source => source.id === series.sourceId);
-    const unassignedPrefix = source?.kind === 'utility' && source.groupBy === 'group' ? `${source.id}:unassigned:` : undefined;
-    if (unassignedPrefix && override.seriesId.startsWith(unassignedPrefix) && override.seriesId.length > unassignedPrefix.length) {
-      const facilityGuid = override.seriesId.slice(unassignedPrefix.length);
-      const mapped = maps.facility && Object.hasOwn(maps.facility, facilityGuid) ? maps.facility[facilityGuid] : undefined;
+    const prefix = source?.kind === 'utility' ? `${source.id}:` : undefined;
+    const suffix = prefix && override.seriesId.startsWith(prefix) ? override.seriesId.slice(prefix.length) : undefined;
+    const unassigned = source?.kind === 'utility' && source.groupBy === 'group' && suffix?.startsWith('unassigned:')
+      ? suffix.slice('unassigned:'.length) : undefined;
+    // Resource-bearing utility IDs follow the same namespace as explicit GUID selectors.
+    // Source and total categories retain provider-local identity; unknown providers are opaque.
+    const resource = source?.kind === 'utility' && ['meter', 'group', 'facility'].includes(source.groupBy) && suffix && suffix !== 'total' && !suffix.startsWith('source:')
+      && !suffix.startsWith('unassigned:') ? visualizationSeriesReference(source, suffix, definition.facilitySelection) : undefined;
+    const kind = unassigned ? 'facility' : resource?.kind;
+    const guid = unassigned ?? (resource && resource.kind !== 'unknown' ? suffix : undefined);
+    if (guid && kind) {
+      const map = maps[kind];
+      const mapped = map && Object.hasOwn(map, guid) ? map[guid] : undefined;
       if (mapped) {
-        setPath(result, `${path}.seriesId`, `${unassignedPrefix}${mapped}`);
+        setPath(result, `${path}.seriesId`, `${prefix}${unassigned ? 'unassigned:' : ''}${mapped}`);
         setPath(result, `${path}.accountGuid`, accountGuid);
-      } else {
-        // Retain unmapped cosmetic identity without making it a required source anchor.
-        setPath(result, `${path}.accountGuid`, owner);
-      }
+      } else setPath(result, `${path}.accountGuid`, owner);
     } else setPath(result, `${path}.accountGuid`, accountGuid);
   }));
   for (const ref of visualizationReferences(definition)) {

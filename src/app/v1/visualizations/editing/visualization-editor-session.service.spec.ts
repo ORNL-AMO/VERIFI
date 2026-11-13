@@ -77,7 +77,7 @@ describe('VisualizationEditorSession', () => {
 
   it('retains mixed-sourceKind Scatter setup through autosave acknowledgements and newer metadata input', async () => {
     vi.useFakeTimers();
-    const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+    const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor', 'analysis'] });
     const test = setup(record(definition)), pending = deferred<VisualizationCommandOutcome>();
     test.submit.mockImplementationOnce(() => pending.promise);
@@ -101,7 +101,7 @@ describe('VisualizationEditorSession', () => {
   });
 
   it('retains incomplete mixed-source chart intent when an invalid metadata draft blocks navigation', async () => {
-    const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', scope: { kind: 'portfolio' },
+    const definition = createVisualizationSetupDefinition({ name: 'Original', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const test = setup(record(definition));
     test.session.form.controls.name.setValue('');
@@ -205,6 +205,18 @@ describe('VisualizationEditorSession', () => {
     expect(test.submit.mock.calls[0][0].repair).toEqual({ acknowledgeTransfer: true, referencePaths: [] });
   });
 
+  it('allows a reviewed facility repair while keeping ordinary transferred edits disabled', () => {
+    const transferred = record(createVisualizationDefinition('Original', 'account-a', { kind: 'fixed', facilityGuids: ['facility-a', 'missing'] }, 'utility'));
+    transferred.preservation = { references: [{ kind: 'facility', guid: 'missing', path: 'facilitySelection.facilityGuids.1', reason: 'not-transferred' }], transfers: [] };
+    const test = setup(transferred);
+    expect(test.session.canEdit()).toBe(false); expect(test.session.form.disabled).toBe(true);
+    expect(test.session.canRetarget()).toBe(true); expect(test.submit).not.toHaveBeenCalled();
+    test.publish({ ...transferred, revision: 2, preservation: { ...transferred.preservation, locked: true } });
+    expect(test.session.canRetarget()).toBe(false);
+    test.account.set({ guid: 'account-b' }); TestBed.tick();
+    expect(test.session.canRetarget()).toBe(false);
+  });
+
   it('does not switch identities with a protected draft or save into another account', async () => {
     const test = setup(); test.session.form.controls.name.setValue('Keep me');
     test.session.open('account-b', 'visualization-b');
@@ -223,14 +235,14 @@ describe('VisualizationEditorSession', () => {
   });
 });
 
-function record(definition = createVisualizationDefinition('Original', 'account-a', { kind: 'portfolio' }, 'utility'), revision = 1): IdbSavedVisualization {
+function record(definition = createVisualizationDefinition('Original', 'account-a', { kind: 'all' }, 'utility'), revision = 1): IdbSavedVisualization {
   return { ...getNewIdbSavedVisualization(definition), guid: 'visualization-a', revision, id: 1 };
 }
 function committed(command: UpdateVisualizationCommand, revision = command.expectedRevision + 1): VisualizationCommandOutcome {
   return { state: 'committed', command, value: record(command.definition, revision), referenceIssues: [] };
 }
 function setup(original = record()) {
-  const definition = createVisualizationDefinition('Original', 'account-a', { kind: 'portfolio' }, 'utility');
+  const definition = createVisualizationDefinition('Original', 'account-a', { kind: 'all' }, 'utility');
   const account = signal({ guid: 'account-a' }), records = signal<readonly IdbSavedVisualization[]>([original]);
   const hasPending = signal(false), snapshot = signal<unknown>({ revision: 1 }), ready = signal(true);
   const submit = vi.fn<(command: UpdateVisualizationCommand) => Promise<VisualizationCommandOutcome>>().mockImplementation(async command => committed(command));

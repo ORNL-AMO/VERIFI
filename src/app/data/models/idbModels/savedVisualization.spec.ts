@@ -18,7 +18,7 @@ describe('saved visualization model factory', () => {
   });
 
   it('retains a prepared identity and the declared facility scope', () => {
-    const definition = utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' });
+    const definition = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
     const entry = {
       guid: 'prepared-identity',
       createdDate: new Date('2026-11-11T00:00:00.000Z'),
@@ -27,7 +27,8 @@ describe('saved visualization model factory', () => {
 
     const record = getNewIdbSavedVisualization(definition, entry);
 
-    expect(record).toMatchObject({ ...entry, accountId: definition.accountGuid, facilityId: 'facility-a' });
+    expect(record).toMatchObject({ ...entry, accountId: definition.accountGuid });
+    expect(record.facilityId).toBeUndefined();
     expect(record.definition).toEqual(definition);
   });
 });

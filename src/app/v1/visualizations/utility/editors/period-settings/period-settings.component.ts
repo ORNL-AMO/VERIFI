@@ -75,7 +75,7 @@ export class PeriodSettingsComponent {
 
   @Input({ required: true }) set context(context: PeriodSettingsContext) {
     this.contextValue = context; this.disabled.set(context.disabled);
-    const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid, context.definition.scope]);
+    const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid]);
     const fingerprint = JSON.stringify([context.definition.period, context.definition.comparison]);
     if (identity !== this.identity) {
       this.identity = identity; this.hydrate(context.definition);

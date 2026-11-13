@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities } from '../visualization-facilities';
 import type { VisualizationDefinition, VisualizationSource } from '../visualization-definition';
 import type { IdbPredictor } from '@data/models/idbModels/predictor';
 import type {
@@ -11,10 +12,12 @@ export const observed = (value: number): VisualizationObservation => ({ state: '
 export function visualizationEvidenceFixture(definition: VisualizationDefinition, sourceIndex = 0,
   predictors: readonly Pick<IdbPredictor, 'guid' | 'predictorType'>[] = []): VisualizationSourceEvidence {
   const source = definition.sources[sourceIndex];
-  const facilityGuid = definition.scope.kind === 'facility' ? definition.scope.facilityGuid : 'facility-a';
+  const fixtureFacilities = definition.facilitySelection.kind === 'fixed' ? definition.facilitySelection.facilityGuids : ['facility-a', 'facility-b'];
+  const scope = resolveVisualizationFacilities(definition, fixtureFacilities.map(guid => ({ guid, accountId: definition.accountGuid }))).scope;
+  const facilityGuid = scope.kind === 'facility' ? scope.facilityGuid : 'facility-a';
   const reference = (kind: VisualizationResolvedReference['kind'], id: string): VisualizationResolvedReference =>
-    ({ kind, id, accountGuid: definition.accountGuid, facilityGuid });
-  const references: VisualizationResolvedReference[] = definition.scope.kind === 'facility' ? [reference('facility', facilityGuid)] : [];
+    ({ kind, id, accountGuid: definition.accountGuid, facilityGuid: kind === 'facility' ? id : facilityGuid });
+  const references: VisualizationResolvedReference[] = scope.kind === 'facility' ? [reference('facility', facilityGuid)] : [];
   if ('selection' in source && source.selection) {
     const selection = source.selection;
     if (selection.kind === 'fixed') references.push(...selection.guids.map(id => reference(selection.resource, id)));
@@ -66,7 +69,7 @@ export function visualizationEvidenceFixture(definition: VisualizationDefinition
     alignments: ['civil-month', 'fiscal-interval', 'hierarchy', 'flow', 'category', 'provider-paired', 'provider-matrix', 'civil-year', 'billing-occurrence'],
     settings: ['unit', 'energyTreatment'], controls: ['series', 'appearance', 'axes', 'stacking', 'fit', 'normalization', 'hierarchy', 'denominator'], allowDateOverride: true };
   const identity = { accountGuid: definition.accountGuid, workspaceRevision: 1, definitionGuid: 'visualization-a', definitionRevision: 1,
-    requestId: 'preview-a', scope: definition.scope, sourceId: source.id };
+    requestId: 'preview-a', scope, sourceId: source.id };
   return { request: { identity, source, chart: definition.chart!, period: definition.period, comparison: definition.comparison, series,
       dateContext: { calendarDate: '2026-11-11', latestDataDate: '2025-12-31' } }, capabilities,
     chartSupport: { state: 'supported', chart: definition.chart! },

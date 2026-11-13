@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { VisualizationReference, VisualizationReferenceIssue, visualizationReferences } from '@domain/visualizations/visualization-references';
 import type { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transaction.service';
@@ -35,12 +36,13 @@ export async function readVisualizationReferenceCatalog(tx: IndexedDbTransaction
 /** No calculations, weather retrieval, label matching, or mutation. Missing sources remain exact GUID intent. */
 export function inspectVisualizationReferences(definition: VisualizationDefinition, catalog: VisualizationReferenceCatalog,
   preserved: readonly VisualizationReferenceIssue[] = []): readonly VisualizationReferenceIssue[] {
+  const included = new Set(resolveVisualizationFacilities(definition, catalog.facilities).scope.facilityGuids);
   return visualizationReferences(definition).filter(ref => !ref.optional).flatMap(ref => {
     const blocked = preserved.find(item => item.path === ref.path);
     if (blocked) return [blocked];
     const resource = findReference(ref, catalog);
     const foreign = resource && (resource.accountId !== definition.accountGuid
-      || (definition.scope.kind === 'facility' && (ref.kind === 'facility' ? resource.guid : resource.facilityId) !== definition.scope.facilityGuid));
+      || (ref.kind === 'facility' ? !included.has(resource.guid) : resource.facilityId !== undefined && !included.has(resource.facilityId)));
     if (foreign) return [{ ...ref, reason: 'foreign' as const }];
     return resource ? [] : [{ ...ref, reason: ref.kind === 'unknown' ? 'unclassified' as const : 'missing' as const }];
   });

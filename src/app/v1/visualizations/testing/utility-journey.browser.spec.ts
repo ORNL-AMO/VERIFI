@@ -81,7 +81,7 @@ describe('saved utility journey across native browser boundaries', () => {
   });
 
   function definition(accountGuid = accountA.guid): VisualizationDefinition {
-    const original = utilityVisualizationFixture({ kind: 'facility', facilityGuid: accountGuid === accountA.guid ? facilityA.guid : facilityB.guid });
+    const original = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: [accountGuid === accountA.guid ? facilityA.guid : facilityB.guid] });
     const meterGuid = accountGuid === accountA.guid ? 'meter-a' : 'meter-b';
     const source = original.sources[0] as UtilityVisualizationSource;
     const { resourceGuid: _fixedResource, ...allMatching } = original.series[0];

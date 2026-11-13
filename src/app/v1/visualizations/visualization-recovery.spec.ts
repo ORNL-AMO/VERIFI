@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { utilityVisualizationFixture, analysisVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
-import { reviewVisualizationReset, reviewVisualizationScopeCopy } from './visualization-recovery';
+import { reviewVisualizationReset, reviewVisualizationFacilityCopy } from './visualization-recovery';
 
 describe('reviewed visualization recovery', () => {
   it('clears the entire broken fixed selection without silently dropping one contribution', () => {
@@ -26,13 +26,13 @@ describe('reviewed visualization recovery', () => {
   });
   it('retains an unassigned Scatter choice through reset and scope copy', () => {
     const original = createVisualizationSetupDefinition({ name: 'Setup', accountGuid: 'account-a',
-      scope: { kind: 'portfolio' }, sourceKinds: ['utility', 'predictor'], chart: { kind: 'scatter', showFit: false } });
+      facilitySelection: { kind: 'all' }, sourceKinds: ['utility', 'predictor'], chart: { kind: 'scatter', showFit: false } });
     const reset = reviewVisualizationReset(original, [], true);
     expect(reset.definition.chart).toEqual(original.chart);
     expect(reset.definition.sources.map(source => source.id)).toEqual(['source-1', 'source-2']);
     expect(reset.definition.series).toEqual([]);
     const catalog = { facilities: [{ guid: 'facility-b', accountId: 'account-a' }], meters: [], meterGroups: [], predictors: [], energyUseGroups: [], energyUseEquipment: [], facilityAnalyses: [], accountAnalyses: [] };
-    const copy = reviewVisualizationScopeCopy(original, { kind: 'facility', facilityGuid: 'facility-b' }, catalog);
+    const copy = reviewVisualizationFacilityCopy(original, { kind: 'fixed', facilityGuids: ['facility-b'] }, catalog);
     expect(copy.definition.chart).toEqual(original.chart);
     expect(decodeVisualizationDefinition(copy.definition).state).toBe('setup-required');
   });
@@ -52,10 +52,10 @@ describe('reviewed visualization recovery', () => {
   it('retains compatible GUIDs and resets incompatible sources during a reviewed scope copy', () => {
     const original = utilityVisualizationFixture();
     const catalog = { facilities: [{ guid: 'facility-b', accountId: 'account-a' }], meters: [{ guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a' }], meterGroups: [], predictors: [], energyUseGroups: [], energyUseEquipment: [], facilityAnalyses: [], accountAnalyses: [] };
-    const result = reviewVisualizationScopeCopy(original, { kind: 'facility', facilityGuid: 'facility-b' }, catalog);
-    expect(result.definition.scope).toEqual({ kind: 'facility', facilityGuid: 'facility-b' });
+    const result = reviewVisualizationFacilityCopy(original, { kind: 'fixed', facilityGuids: ['facility-b'] }, catalog);
+    expect(result.definition.facilitySelection).toEqual({ kind: 'fixed', facilityGuids: ['facility-b'] });
     expect(result.definition.series).toEqual([]);
     expect(result.definition.name).toBe('Monthly energy (Copy)');
-    expect(original.scope.kind).toBe('portfolio');
+    expect(original.facilitySelection.kind).toBe('all');
   });
 });

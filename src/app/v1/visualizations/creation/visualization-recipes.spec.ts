@@ -7,18 +7,18 @@ import { createRecipeDefinition, recipeMeters, recipeResourceChoices } from './v
 describe('utility visualization recipes', () => {
   const snapshot = { ...visualizationSnapshot(), meters: [meter({ meterReadingDataApplication: 'fullMonth' }), meter({ guid: 'water', source: 'Water Intake', startingUnit: 'gal' })],
     meterData: [reading({}), reading({ guid: 'water-bill', meterId: 'water' })] };
-  const scope = { kind: 'portfolio' as const };
+  const scope = { kind: 'portfolio' as const, facilityGuids: ['facility-a'] };
   it('requires explicit owned meter binding and never changes the shipped recipe or records', () => {
-    expect(() => createRecipeDefinition(snapshot, 'energy-trend', scope, { grouping: 'meters', ids: [] }, 'Energy')).toThrow();
-    expect(() => createRecipeDefinition(snapshot, 'energy-trend', scope, { grouping: 'meters', ids: ['foreign'] }, 'Energy')).toThrow();
-    const before = structuredClone(snapshot), first = createRecipeDefinition(snapshot, 'energy-trend', scope, { grouping: 'meters', ids: ['meter-a'] }, 'Energy');
-    const second = createRecipeDefinition(snapshot, 'energy-trend', scope, { grouping: 'meters', ids: ['meter-a'] }, 'Another');
+    expect(() => createRecipeDefinition(snapshot, 'energy-trend', { kind: 'all' }, { grouping: 'meters', ids: [] }, 'Energy')).toThrow();
+    expect(() => createRecipeDefinition(snapshot, 'energy-trend', { kind: 'all' }, { grouping: 'meters', ids: ['foreign'] }, 'Energy')).toThrow();
+    const before = structuredClone(snapshot), first = createRecipeDefinition(snapshot, 'energy-trend', { kind: 'all' }, { grouping: 'meters', ids: ['meter-a'] }, 'Energy');
+    const second = createRecipeDefinition(snapshot, 'energy-trend', { kind: 'all' }, { grouping: 'meters', ids: ['meter-a'] }, 'Another');
     expect(first).not.toBe(second); expect(first.sources[0]).not.toBe(second.sources[0]); expect(snapshot).toEqual(before);
     expect(first.series).toEqual([{ id: 'series-1', sourceId: 'source-1', metric: 'energy', axis: 'left' }]);
   });
   it('offers energy only for energy-capable resources and costs for supported utility types', () => {
     expect(recipeMeters(snapshot, scope, 'energy-trend').map(m => m.guid)).toEqual(['meter-a']);
-    const cost = createRecipeDefinition(snapshot, 'cost-trend', scope, { grouping: 'meters', ids: ['water'] }, 'Water spending');
+    const cost = createRecipeDefinition(snapshot, 'cost-trend', { kind: 'all' }, { grouping: 'meters', ids: ['water'] }, 'Water spending');
     expect(cost.sources[0]).toMatchObject({ measure: 'cost', selection: { guids: ['water'] }, settings: {} });
   });
 
@@ -29,7 +29,7 @@ describe('utility visualization recipes', () => {
   ])('saves $grouping intent and preserves its membership behavior', choice => {
     const grouped = { ...snapshot, meters: snapshot.meters.map(item => ({ ...item, groupId: 'group-a' })),
       meterGroups: [group({ guid: 'group-a', name: 'Production' })] };
-    const definition = createRecipeDefinition(grouped, 'energy-trend', scope, { grouping: choice.grouping, ids: [choice.id] }, 'Energy');
+    const definition = createRecipeDefinition(grouped, 'energy-trend', { kind: 'all' }, { grouping: choice.grouping, ids: [choice.id] }, 'Energy');
     expect(definition.sources[0]).toMatchObject({ groupBy: choice.groupBy, selection: choice.selection });
     const decoded = decodeVisualizationDefinition(JSON.parse(JSON.stringify(definition)));
     expect(decoded.state).toBe('valid'); expect('definition' in decoded && decoded.definition).toEqual(definition);
@@ -46,7 +46,7 @@ describe('utility visualization recipes', () => {
         group({ guid: 'foreign-group', accountId: 'foreign' }), group({ guid: 'empty-group' })],
       meterData: [...snapshot.meterData, reading({ guid: 'elsewhere-bill', meterId: 'elsewhere', facilityId: 'elsewhere' }),
         reading({ guid: 'foreign-bill', meterId: 'foreign', accountId: 'foreign' })] };
-    const facilityScope = { kind: 'facility' as const, facilityGuid: 'facility-a' };
+    const facilityScope = { kind: 'facility' as const, facilityGuid: 'facility-a', facilityGuids: ['facility-a'] };
     expect(recipeResourceChoices(available, facilityScope, 'energy-trend', 'sources')).toEqual([
       { value: 'Electricity', label: 'Electricity', detail: '', icon: 'electricity' }
     ]);
@@ -54,8 +54,8 @@ describe('utility visualization recipes', () => {
       { value: 'group-a', label: 'Production', detail: '', icon: 'meterGroupItem' }
     ]);
     expect(recipeResourceChoices(available, facilityScope, 'energy-trend', 'meters').map(choice => choice.value)).toEqual(['meter-a']);
-    expect(() => createRecipeDefinition(available, 'energy-trend', facilityScope, { grouping: 'groups', ids: ['elsewhere-group'] }, 'Energy')).toThrow();
-    expect(() => createRecipeDefinition(available, 'energy-trend', facilityScope, { grouping: 'sources', ids: ['Water Intake'] }, 'Energy')).toThrow();
-    expect(() => createRecipeDefinition(available, 'cost-trend', scope, { grouping: 'groups', ids: ['group-a'] }, 'Cost')).toThrow();
+    expect(() => createRecipeDefinition(available, 'energy-trend', { kind: 'fixed', facilityGuids: ['facility-a'] }, { grouping: 'groups', ids: ['elsewhere-group'] }, 'Energy')).toThrow();
+    expect(() => createRecipeDefinition(available, 'energy-trend', { kind: 'fixed', facilityGuids: ['facility-a'] }, { grouping: 'sources', ids: ['Water Intake'] }, 'Energy')).toThrow();
+    expect(() => createRecipeDefinition(available, 'cost-trend', { kind: 'all' }, { grouping: 'groups', ids: ['group-a'] }, 'Cost')).toThrow();
   });
 });

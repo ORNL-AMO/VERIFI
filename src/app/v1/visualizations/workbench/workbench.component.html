@@ -17,6 +17,11 @@
   @if (editor.definition(); as definition) {
     <div class="visualization-workbench__layout">
       <form class="visualization-workbench__controls" [formGroup]="editor.form" (ngSubmit)="$event.preventDefault()">
+        <section aria-labelledby="visualization-facilities"><h2 id="visualization-facilities">Facilities</h2>
+          <app-visualization-facility-picker [selection]="definition.facilitySelection" [facilities]="facilities()" [contextKey]="editorKey()" [disabled]="!editor.canRetarget() || hasInvalidFields() || !!facilityChange()" [busy]="editor.saving()" (selectionRequested)="requestFacilities($event)"/>
+          @if (hasInvalidFields()) { <p role="status">Resolve the incomplete field input before changing facilities.</p> }
+          @if (facilityError()) { <p role="alert">{{ facilityError() }}</p> }
+        </section>
         <section aria-labelledby="visualization-sources"><h2 id="visualization-sources">Data Sources</h2>
           <label>Name<input formControlName="name" type="text" aria-describedby="visualization-name-error"></label>
           @if (editor.form.controls.name.invalid) { <p id="visualization-name-error" role="alert">Enter a name.</p> }
@@ -60,5 +65,15 @@
     <p>Your local input has not been fully saved. Stay to correct or review it, retry the save, or explicitly discard it.</p>
     @if (editor.error()) { <p role="alert">{{ editor.error() }}</p> }
     <button type="button" class="v1-btn v1-btn--secondary" [disabled]="hasInvalidFields() || editor.saving() || editor.state() === 'invalid' || editor.state() === 'conflict' || editor.isMissing()" (click)="retryLeave()">Retry and leave</button>
+  </app-confirmation-dialog>
+</ng-template>
+
+<ng-template #facilityDialog>
+  <app-confirmation-dialog title="Change included facilities?" titleId="visualization-facilities-title" cancelAriaLabel="Keep the current facilities" confirmLabel="Change facilities" [disabled]="editor.saving()" [confirmDisabled]="facilityChangeStale() || hasInvalidFields() || editor.state() === 'error' || editor.state() === 'refresh-required'" (confirmed)="confirmFacilities()" (cancelled)="cancelFacilities()">
+    <p>Compatible selections and presentation will be retained. These excluded settings will be removed:</p>
+    <ul>@for (item of facilityChange()?.cleared ?? []; track item) { <li>{{ item }}</li> }</ul>
+    @if (facilityChangeStale()) { <p role="alert">The visualization or catalog changed. Cancel and review the facility change again.</p> }
+    @if (editor.error()) { <p role="alert">{{ editor.error() }}</p> }
+    @if (editor.state() === 'error' || editor.state() === 'refresh-required') { <button type="button" class="v1-btn v1-btn--secondary" [disabled]="editor.saving()" (click)="retryFacilities()">Retry save or refresh</button> }
   </app-confirmation-dialog>
 </ng-template>

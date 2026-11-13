@@ -17,7 +17,7 @@ import { RecoveryModule } from '../recovery.module';
 
 describe('reviewed visualization recovery actions', () => {
   afterEach(() => TestBed.resetTestingModule());
-  function setup(definition: VisualizationDefinition = utilityVisualizationFixture({ kind: 'facility', facilityGuid: 'facility-a' })) {
+  function setup(definition: VisualizationDefinition = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] })) {
     const store = new AccountWorkspaceStore();
     const record = { ...visualizationRecord(), definition };
     store.publish({ ...visualizationSnapshot(), facilities: [visualizationFacility, { ...visualizationFacility, guid: 'facility-b', name: 'Plant B' }], savedVisualizations: [record] });
@@ -46,8 +46,8 @@ describe('reviewed visualization recovery actions', () => {
   });
   it('copies to an explicitly reviewed scope without using same-scope duplicate commands', async () => {
     const { component, prepareCreate, submit, open, editor } = setup();
-    await component.start('copy'); component.scopeControl.setValue('facility-b');
-    expect(component.review()!.definition.scope).toEqual({ kind: 'facility', facilityGuid: 'facility-b' });
+    await component.start('copy'); component.facilitySelectionControl.setValue({ kind: 'fixed', facilityGuids: ['facility-b'] });
+    expect(component.review()!.definition.facilitySelection).toEqual({ kind: 'fixed', facilityGuids: ['facility-b'] });
     await component.confirm();
     expect(prepareCreate).toHaveBeenCalledOnce();
     expect(submit).toHaveBeenCalledWith(expect.objectContaining({ kind: 'create', guid: 'new-identity' }));
@@ -56,12 +56,12 @@ describe('reviewed visualization recovery actions', () => {
   });
   it('retains mixed-sourceKind Scatter intent in one retried proposal and recovers publication without replay', async () => {
     const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
+      facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a'] }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const { component, prepareCreate, submit, recover, open } = setup(definition);
     submit.mockResolvedValueOnce({ state: 'failed' }).mockResolvedValueOnce({ state: 'refresh-required' });
-    await component.start('copy'); component.scopeControl.setValue('facility-b'); await component.confirm();
+    await component.start('copy'); component.facilitySelectionControl.setValue({ kind: 'fixed', facilityGuids: ['facility-b'] }); await component.confirm();
     const proposal = component.proposal()!;
-    expect(proposal.definition).toEqual({ ...definition, name: `${definition.name} (Copy)`, scope: { kind: 'facility', facilityGuid: 'facility-b' } });
+    expect(proposal.definition).toEqual({ ...definition, name: `${definition.name} (Copy)`, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-b'] } });
     await component.confirm();
     expect(prepareCreate).toHaveBeenCalledOnce();
     component.cancel(); expect(component.proposal()).toBeDefined();
