@@ -1,0 +1,11 @@
+:host { display: block; min-width: 0; }
+h2 { margin: 0 0 1.5rem; font-size: 1rem; font-weight: 900; color: var(--v1-text); }
+.annual-totals-scroller { overflow-x: auto; max-width: 100%; }
+table { width: 100%; border-collapse: collapse; color: var(--v1-text); font-size: .875rem; }
+th, td { padding: .65rem .75rem; border: 1px solid var(--v1-border); text-align: right; vertical-align: middle; }
+thead th { background: var(--v1-content-block); text-align: center; }
+tbody th { font-weight: 600; text-align: left; }
+button { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .25rem; width: 100%; min-width: 6rem; padding: .15rem; background: transparent; color: inherit; border: 0; font: inherit; font-weight: 700; cursor: pointer; }
+.annual-unit { flex-basis: 100%; font-weight: 400; white-space: nowrap; }
+button:focus-visible, .annual-totals-scroller:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: 2px; }
+td { white-space: nowrap; }

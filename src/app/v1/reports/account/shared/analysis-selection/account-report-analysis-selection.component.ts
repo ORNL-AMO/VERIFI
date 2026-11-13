@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AnalysisInventoryWorkspaceService } from '@app/v1/analysis/inventory/analysis-inventory-workspace.service';
@@ -14,6 +14,7 @@ import { ACCOUNT_ANALYSIS_EDITOR } from '../../workbench/editing/account-report-
   templateUrl: './account-report-analysis-selection.component.html', styleUrls: ['./account-report-analysis-selection.component.css'],
   providers: [AnalysisInventoryResultsService] })
 export class AccountReportAnalysisSelectionComponent {
+  readonly sectioned = input(false);
   readonly context = inject(AccountReportWorkbenchContext);
   readonly editor = inject(ACCOUNT_ANALYSIS_EDITOR);
   readonly analyses = inject(AnalysisInventoryWorkspaceService);

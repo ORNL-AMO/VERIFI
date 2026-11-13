@@ -1,0 +1,127 @@
+@let state = results.state();
+@let draft = editor.draft();
+@let meterSections = meters();
+@let predictorSections = predictors();
+@if (state.state !== 'ready') {
+  <section class="report-section report-document" aria-labelledby="data-quality-report-heading">
+    <h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2>
+    @if (state.state === 'error') {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <p>{{ state.message }}</p>
+        <button type="button" class="v1-btn v1-btn--secondary" (click)="results.retry()">Retry</button>
+      </div>
+    } @else {
+      <p role="status">{{ state.message || 'Preparing the report…' }}</p>
+    }
+  </section>
+} @else {
+  @for (meter of meterSections; track meter.report.meter.guid; let first = $first) {
+    <article class="report-document meter-report" [attr.aria-labelledby]="meter.idPrefix + '-heading'">
+      @if (first) {
+        <header class="document-title"><h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2></header>
+      }
+      <div class="document-section">
+        <h3 [id]="meter.idPrefix + '-heading'">{{ meter.report.meter.name }}</h3>
+        @if (!meter.report.hasData) {
+          <p role="status">{{ messages.noMeterReadings }}</p>
+        } @else {
+          @if (meter.evidence.length) {
+            <aside class="v1-alert v1-alert--warning reading-quality" aria-label="Reading quality">
+              <ul role="list">@for (evidence of meter.evidence; track evidence) { <li>{{ evidence }}</li> }</ul>
+            </aside>
+          }
+          @if (meter.content.statistics) {
+            <app-meter-quality-presentation [report]="meter.report" [idPrefix]="meter.idPrefix" [reportStatistics]="true" [headingLevel]="4"
+              [showConsumptionChart]="false" [showCostChart]="false"/>
+            <hr class="report-component-divider">
+          }
+          @if (meter.content.consumptionTimeseries) {
+            <app-meter-quality-presentation [report]="meter.report" [idPrefix]="meter.idPrefix + '-consumption'" [headingLevel]="4"
+              chartHeading="Total Consumption" [chartFileName]="meter.report.meter.name + '-consumption-readings'"
+              [showStatistics]="false" [includeExcludedConsumption]="true" [showCostChart]="false" [showExpectedRangeLabel]="false"/>
+            <hr class="report-component-divider">
+          }
+          @if (meter.content.costTimeseries) {
+            <app-meter-quality-presentation [report]="meter.report" [idPrefix]="meter.idPrefix + '-cost'" [headingLevel]="4"
+              chartHeading="Total Cost" [chartFileName]="meter.report.meter.name + '-cost-readings'"
+              [showStatistics]="false" [showConsumptionChart]="false" [showExpectedRangeLabel]="false"/>
+            <hr class="report-component-divider">
+          }
+          @if (meter.consumptionDotPlot; as plot) {
+            <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="meter.idPrefix + '-consumption-dot-plot'"
+              heading="Consumption distribution" [chartFileName]="meter.report.meter.name + '-consumption-dot-plot'"/>
+            <hr class="report-component-divider">
+          }
+          @if (meter.content.excludedConsumption) {
+            <p class="report-note">{{ messages.excludedConsumption }}</p>
+          }
+          @if (meter.costDotPlot; as plot) {
+            <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="meter.idPrefix + '-cost-dot-plot'"
+              heading="Cost distribution" [chartFileName]="meter.report.meter.name + '-cost-dot-plot'"/>
+            <hr class="report-component-divider">
+          }
+          @if (meter.content.costUnavailable) {
+            <aside class="v1-alert v1-alert--info cost-chart-notice" role="note" [attr.aria-labelledby]="meter.idPrefix + '-cost-notice-heading'">
+              <div class="cost-chart-notice__heading">
+                <app-ui-icon name="info" aria-hidden="true"/>
+                <strong [id]="meter.idPrefix + '-cost-notice-heading'">{{ messages.costUnavailableTitle }}</strong>
+              </div>
+              <p>{{ messages.costUnavailable }}</p>
+            </aside>
+          }
+        }
+        @if (meter.content.annualTotals && meter.annualTotals) {
+          <app-data-quality-annual-totals [totals]="meter.annualTotals" [idPrefix]="meter.idPrefix"/>
+          <hr class="report-component-divider">
+        }
+      </div>
+    </article>
+  }
+  @for (predictor of predictorSections; track predictor.report.predictor.guid; let first = $first) {
+    <article class="report-document predictor-report" [attr.aria-labelledby]="predictor.idPrefix + '-heading'">
+      @if (first && !meterSections.length) {
+        <header class="document-title"><h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2></header>
+      }
+      <div class="document-section">
+        <h3 [id]="predictor.idPrefix + '-heading'">{{ predictor.report.predictor.name }}</h3>
+        @if (predictor.weatherDescription) { <p class="predictor-description">{{ predictor.weatherDescription }}</p> }
+        @if (!predictor.report.hasData) {
+          <p role="status">{{ messages.noPredictorReadings }}</p>
+        } @else {
+          @if (predictor.evidence.length) {
+            <aside class="v1-alert v1-alert--warning reading-quality" aria-label="Reading quality">
+              <ul role="list">@for (evidence of predictor.evidence; track evidence) { <li>{{ evidence }}</li> }</ul>
+            </aside>
+          }
+          @if (!predictor.report.hasUsableData) {
+            <p role="status">{{ messages.noPredictorValues }}</p>
+          } @else {
+            @if (predictor.content.statistics) {
+              <app-predictor-quality-presentation [report]="predictor.report" [idPrefix]="predictor.idPrefix"
+                [reportStatistics]="true" [headingLevel]="4" [showChart]="false"/>
+              <hr class="report-component-divider">
+            }
+            @if (predictor.content.timeseries) {
+              <app-predictor-quality-presentation [report]="predictor.report" [idPrefix]="predictor.idPrefix + '-readings'"
+                [headingLevel]="4" [showStatistics]="false" [showExpectedRangeLabel]="false" chartHeading="Predictor Readings"
+                [chartFileName]="predictor.report.predictor.name + '-readings'"/>
+              <hr class="report-component-divider">
+              @if (!predictor.report.chartRows.length) { <p role="status">{{ messages.noPredictorPeriods }}</p> }
+            }
+            @if (predictor.dotPlot; as plot) {
+              <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="predictor.idPrefix + '-dot-plot'"
+                heading="Predictor value distribution" [chartFileName]="predictor.report.predictor.name + '-dot-plot'"/>
+              <hr class="report-component-divider">
+            }
+          }
+        }
+      </div>
+    </article>
+  }
+  @if (!meterSections.length && !predictorSections.length) {
+    <section class="report-section report-document" aria-labelledby="data-quality-report-heading">
+      <h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2>
+      <p role="status">{{ messages.noContent }}</p>
+    </section>
+  }
+}

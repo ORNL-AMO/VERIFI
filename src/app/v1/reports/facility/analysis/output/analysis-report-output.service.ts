@@ -1,12 +1,14 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { PdfReportWriter } from '@platform/reports/pdf-report-writer';
 import { PptReportWriter } from '@platform/reports/ppt-report-writer';
-import { ReportExportContext, ReportExportSource, reportArtifact } from '@shared/report-output/report-output.models';
+import {
+  ReportExportContext, ReportExportFormat, ReportExportSource, reportArtifact
+} from '@shared/report-output/report-output.models';
 import { ReportDocument } from '@shared/report-output/report-document.model';
 import { ReportSection } from '@shared/report-output/report-section.model';
 import { PptDocument } from '@shared/report-output/ppt-document';
 import { PptSlide } from '@shared/report-output/ppt-slide';
-import { EChartsImageService } from '@app/v1/shared/charts/echarts-image.service';
+import { EChartsImageService, PDF_CHART_IMAGE_OPTIONS } from '@app/v1/shared/charts/echarts-image.service';
 import { ReportExportController } from '@app/v1/reports/shared/output/report-export-controller';
 import { FacilityAnalysisReportService } from '../analysis-report.service';
 import { FacilityAnalysisDocument, buildFacilityAnalysisDocument } from '../analysis-report-document';
@@ -34,7 +36,7 @@ export class AnalysisReportOutputService {
     formats: ['pdf', 'pptx'], source: this.source, flush: () => this.report.editor.flush(),
     build: async (format, snapshot, context) => {
       const blocks = facilityAnalysisOutputBlocks(snapshot);
-      const providers = imageProviders(blocks, this.images, context, format === 'pptx');
+      const providers = imageProviders(blocks, this.images, context, format);
       context.progress('Building report…');
       const name = `${snapshot.name} — ${snapshot.facility.name} — ${snapshot.results.reportYear ?? snapshot.settings.reportYear}`;
       if (format === 'pdf') return reportArtifact(await this.pdf.build(analysisPdfDocument(snapshot, blocks, providers), {
@@ -50,13 +52,15 @@ export class AnalysisReportOutputService {
 
 type ImageProviders = ReadonlyMap<AnalysisOutputFigure, () => Promise<string>>;
 
-function imageProviders(blocks: readonly AnalysisOutputBlock[], images: EChartsImageService, context: ReportExportContext, native: boolean): ImageProviders {
-  const figures = blocks.flatMap(block => block.entries).filter((entry): entry is AnalysisOutputFigure => entry.kind === 'figure' && (!native || !entry.native));
+function imageProviders(blocks: readonly AnalysisOutputBlock[], images: EChartsImageService,
+  context: ReportExportContext, format: ReportExportFormat): ImageProviders {
+  const figures = blocks.flatMap(block => block.entries).filter((entry): entry is AnalysisOutputFigure =>
+    entry.kind === 'figure' && (format !== 'pptx' || !entry.native));
   let completed = 0;
   return new Map(figures.map(figure => [figure, async () => {
     context.signal.throwIfAborted();
     context.progress('Rendering report charts…', completed, figures.length);
-    const image = await images.capture(figure.option, undefined, context.signal);
+    const image = await images.capture(figure.option, format === 'pdf' ? PDF_CHART_IMAGE_OPTIONS : undefined, context.signal);
     context.progress('Rendering report charts…', ++completed, figures.length);
     return image;
   }]));

@@ -43,8 +43,10 @@ describe('single-facility Analysis entry from report status', () => {
     expect(await open()).toBe(true); expect(ensurePairs).not.toHaveBeenCalled();
     expect(store.snapshot()).toEqual(snapshot); expect(store.committedRevision()).toBeUndefined();
   });
-  it('accepts owned facility-report inspection origins without pair repair and rejects different facilities', async () => {
+  it.each(['analysis', 'dataQuality'] as const)('accepts owned facility %s inspection origins without pair repair and rejects different facilities', async type => {
     const { ensurePairs, open, store } = setup();
+    const snapshot = store.snapshot()!;
+    store.publish({ ...snapshot, facilityReports: snapshot.facilityReports.map(report => ({ ...report, facilityReportType: type })) });
     const before = store.snapshot();
     const query = '?returnReportAccountGuid=account-a&returnReportGuid=report-a&returnReportScope=facility&returnReportFacilityGuid=facility-a';
     expect(await open('/v1/workspace/facility/facility-a/analysis/workbench/facility-analysis/setup' + query)).toBe(true);

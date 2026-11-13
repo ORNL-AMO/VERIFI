@@ -28,7 +28,7 @@ describe('facility report workbench browser layout', () => {
     const panels = [...host.querySelectorAll<HTMLElement>('.report-section')];
     expect(panels).toHaveLength(1);
     expect(getComputedStyle(panels[0]).borderTopLeftRadius).toBe('0px');
-    expect(getComputedStyle(panels.at(-1)!).borderBottomLeftRadius).not.toBe('0px');
+    expect(getComputedStyle(panels.at(-1)!).borderBottomLeftRadius).toBe('0px');
     const header = host.querySelector<HTMLElement>('header')!;
     const stages = host.querySelector<HTMLElement>('app-analysis-stage-navigation')!;
     expect(panels[0].getBoundingClientRect().top).toBeCloseTo(stages.getBoundingClientRect().bottom, 0);

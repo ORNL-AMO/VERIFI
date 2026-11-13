@@ -1,4 +1,6 @@
 import { CommonModule } from '@angular/common';
+import { By } from '@angular/platform-browser';
+import { MeterQualityPresentationComponent } from '@app/v1/shared/data-quality/meter-quality-presentation/meter-quality-presentation.component';
 import { Directive, EventEmitter, Input, Output, forwardRef, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -22,8 +24,8 @@ describe('MeterWorkbenchQualityReportComponent', () => {
     });
     expect(fixture.componentInstance.report()?.energyOutlierCount).toBeGreaterThan(0);
     expect(fixture.componentInstance.issueSummaries()).toEqual([]);
-    expect(JSON.stringify(fixture.componentInstance.qualityChartOption())).toContain('Outliers');
-    expect(fixture.componentInstance.statisticRows().some(row => row.cells.some(cell => cell.id === 'outliers' && cell.tone === 'warning'))).toBe(true);
+    expect(JSON.stringify(presentation(fixture).qualityChartOption())).toContain('Outliers');
+    expect(presentation(fixture).statisticRows().some(row => row.cells.some(cell => cell.id === 'outliers' && cell.tone === 'warning'))).toBe(true);
   });
 
   it('renders an empty state and routes users to readings when no meter readings exist', () => {
@@ -60,7 +62,6 @@ describe('MeterWorkbenchQualityReportComponent', () => {
           reading({ guid: 'reading-d', month: 3, year: 2026, totalEnergyUse: 100, totalCost: 100 })
         ]
       });
-      const component = fixture.componentInstance;
 
       fixture.detectChanges();
 
@@ -82,7 +83,7 @@ describe('MeterWorkbenchQualityReportComponent', () => {
       expect(content.indexOf('Months with Multiple Readings')).toBeLessThan(content.indexOf('Total Consumption and Cost Statistics'));
       expect(element.textContent).not.toContain('Time Series');
       expect(element.querySelectorAll('.v1-meter-quality__chart')).toHaveLength(1);
-      const chartOption = component.qualityChartOption() as Record<string, any>;
+      const chartOption = presentation(fixture).qualityChartOption() as Record<string, any>;
       expect(chartOption.grid).toHaveLength(2);
       expect(chartOption.xAxis).toEqual([
         expect.objectContaining({ gridIndex: 0, axisLabel: { show: false } }),
@@ -167,7 +168,7 @@ describe('MeterWorkbenchQualityReportComponent', () => {
       ]
     });
 
-    const option = fixture.componentInstance.qualityChartOption() as Record<string, any>;
+    const option = presentation(fixture).qualityChartOption() as Record<string, any>;
     const meterDataSeries = option.series.find((series: { name: string }) => series.name === 'Total Consumption');
 
     expect(meterDataSeries.markArea.data).toEqual([[{ name: 'Expected range', yAxis: 6 }, { yAxis: 16 }]]);
@@ -200,7 +201,7 @@ describe('MeterWorkbenchQualityReportComponent', () => {
       ]
     });
 
-    const option = fixture.componentInstance.qualityChartOption() as Record<string, any>;
+    const option = presentation(fixture).qualityChartOption() as Record<string, any>;
     const xAxis = option.xAxis as Array<Record<string, unknown>>;
 
     expect(option.axisPointer).toEqual({ link: [{ xAxisIndex: 'all' }] });
@@ -262,7 +263,7 @@ function setup(options: {
   if (!options.statusFindings && qualityReport.costOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.cost-outlier', 'warning', 'quality', entity, { count: qualityReport.costOutlierCount })));
 
   TestBed.configureTestingModule({
-    declarations: [MeterWorkbenchQualityReportComponent],
+    declarations: [MeterWorkbenchQualityReportComponent, MeterQualityPresentationComponent],
     imports: [CommonModule, IconComponent, EChartsStubDirective],
     providers: [
       {
@@ -299,4 +300,9 @@ function setup(options: {
   });
 
   return TestBed.createComponent(MeterWorkbenchQualityReportComponent);
+}
+
+function presentation(fixture: ComponentFixture<MeterWorkbenchQualityReportComponent>): MeterQualityPresentationComponent {
+  fixture.detectChanges();
+  return fixture.debugElement.query(By.directive(MeterQualityPresentationComponent)).componentInstance;
 }

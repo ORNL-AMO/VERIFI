@@ -1,0 +1,26 @@
+@import '../../../shared/workbench/report-workbench-stage.css';
+@import '../../../shared/editing/report-setup.css';
+@import '../../../shared/editing/report-content.css';
+
+.selection-mode { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem 2rem; margin-bottom: 1.25rem; }
+.selection-mode .report-setup-option { display: inline-flex; align-items: center; justify-content: center; gap: .75rem; }
+.selection-mode input[type='radio'] { margin: 0; }
+fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.source-sections { display: grid; gap: 1.5rem; }
+.source-section { min-width: 0; }
+.source-heading { margin-bottom: .5rem; }
+.source-heading h3 { display: flex; align-items: baseline; flex-wrap: wrap; gap: .6rem; margin: 0; color: var(--v1-text); font-size: 1rem; font-weight: 700; line-height: 1.35; }
+.source-count { color: var(--v1-muted); font-size: .85rem; font-weight: 500; }
+.source-tag-list { display: flex; flex-wrap: wrap; align-content: flex-start; gap: .5rem; max-height: 18rem; overflow-y: auto; scrollbar-gutter: stable; padding: .4rem; }
+.source-tag { display: inline-grid; grid-template-columns: max(1rem, 16px) minmax(0, 1fr) max(1rem, 16px); align-items: center; justify-items: center; column-gap: .75rem; max-width: 100%; min-width: 0; min-height: var(--v1-control-height-sm); padding: .4rem .75rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); font: inherit; font-weight: 600; line-height: 1.35; text-align: center; cursor: pointer; }
+.source-tag:hover:not(:disabled) { border-color: var(--v1-content-control); }
+.source-tag--selected { border-color: var(--v1-content-control); background: color-mix(in srgb, var(--v1-content-control) 12%, var(--v1-surface)); box-shadow: inset 0 0 0 1px var(--v1-content-control); }
+.source-tag:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: 2px; }
+.source-tag:disabled { cursor: default; opacity: var(--v1-disabled-opacity); }
+.source-tag-check { display: inline-flex; align-items: center; justify-content: center; line-height: 0; color: var(--v1-content-control); }
+.source-tag-check--hidden { visibility: hidden; }
+.source-tag-name { min-width: 0; overflow-wrap: anywhere; }
+.report-setup-option { overflow-wrap: anywhere; }
+.report-content .report-setup-option input { margin: 0; }
+.report-setup > .v1-alert { margin: 1rem clamp(1rem, 3vw, 1.5rem); }
+@media (pointer: coarse) { .source-tag { min-height: 2.75rem; } }

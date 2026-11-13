@@ -10,6 +10,16 @@ import { evaluateWorkspaceStatus, isOlderThanThreshold } from './status.evaluato
 import { StatusRuleCode } from './status.models';
 
 describe('v1 workspace status evaluator', () => {
+  it('derives Data Quality selection readiness from owned records rather than a stale saved missingSelection flag', () => {
+    const report = { ...getNewIdbFacilityReport('facility-a', 'account-a', 'dataQuality', []), guid: 'quality-report' };
+    report.dataQualityReportSettings = { ...report.dataQualityReportSettings,
+      selectedMode: 'manual', selectedMeterIds: ['meter-a'], missingSelection: true };
+    const value = snapshot({ facilityReports: [report] });
+    expect(entityCodes(evaluate(value), report.guid)).not.toContain('report.data.incomplete');
+    report.dataQualityReportSettings.missingSelection = false;
+    expect(entityCodes(evaluate({ ...value, meters: [] }), report.guid)).toContain('report.data.incomplete');
+    expect(report.dataQualityReportSettings.missingSelection).toBe(false);
+  });
   it('suppresses only range findings and restores them when re-enabled or overridden', () => {
     const amounts = [10, 10, 11, 12, 100];
     const value = snapshot({

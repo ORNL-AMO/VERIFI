@@ -1,0 +1,28 @@
+@let plot = view();
+@let prefix = idPrefix();
+<section class="quality-dot-plot" [attr.aria-labelledby]="prefix + '-heading'">
+  <div class="quality-dot-plot__heading">
+    <h2 [id]="prefix + '-heading'" aria-level="4">{{ heading() }}</h2>
+    <button type="button" class="v1-icon-btn" title="Download PNG" [attr.aria-label]="'Download ' + heading() + ' as PNG'"
+      [disabled]="!plot.chartOption" (click)="downloadChart()"><app-ui-icon name="download"/></button>
+  </div>
+  @if (plot.chartOption; as option) {
+    <div #chart class="quality-dot-plot__chart" [style.height.px]="plot.height" [appV1ECharts]="option"
+      role="img" [attr.aria-label]="heading() + '. ' + plot.summary" [attr.aria-describedby]="prefix + '-summary'"></div>
+    <p class="quality-dot-plot__summary" [id]="prefix + '-summary'">{{ plot.summary }}</p>
+    <p class="quality-dot-plot__note">
+      @if (plot.rangeVisible) { Shading shows the expected range. }
+      Repeated values are stacked vertically; height does not represent a measured value.
+    </p>
+    @if (data().notice; as notice) { <p class="quality-dot-plot__note" role="note">{{ notice }}</p> }
+    <div class="visually-hidden">
+      <table>
+        <caption>{{ heading() }} readings</caption>
+        <thead><tr><th scope="col">Reading date</th><th scope="col">Value</th><th scope="col">Outlier</th></tr></thead>
+        <tbody>@for (point of plot.points; track point.id) {
+          <tr><td>{{ point.label }}</td><td>{{ point.valueLabel }}</td><td>{{ point.outlier ? 'Yes' : 'No' }}</td></tr>
+        }</tbody>
+      </table>
+    </div>
+  } @else { <p role="status">{{ plot.message }}</p> }
+</section>

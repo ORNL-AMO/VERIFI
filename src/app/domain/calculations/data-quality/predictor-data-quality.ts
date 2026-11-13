@@ -150,7 +150,7 @@ function buildPredictorDataQualityChartRows(
     });
 }
 
-function isPredictorDataQualityOutlier(
+export function isPredictorDataQualityOutlier(
   value: number,
   statistics: PredictorDataQualityStatistics
 ): boolean {

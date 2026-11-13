@@ -19,6 +19,29 @@ function setup() {
 }
 
 describe('shared report analysis selection', () => {
+  it.each([false, true])('keeps a single accessible analysis heading and working filters with section presentation: %s', sectioned => {
+    const { fixture, component, control, root } = setup();
+    fixture.componentRef.setInput('sectioned', sectioned); fixture.detectChanges();
+    expect(root.querySelectorAll('#test-report-analysis-title')).toHaveLength(1);
+    expect(root.querySelector('section')!.classList.contains('report-setup-section')).toBe(sectioned);
+    expect(root.querySelector('.setup-section-heading') !== null).toBe(sectioned);
+    expect(root.querySelector('[role=radiogroup]')!.getAttribute('aria-labelledby')).toBe('test-report-analysis-title');
+    if (sectioned) {
+      expect(root.querySelector('.report-analysis-filters')!.closest('.report-setup-body')).not.toBeNull();
+      expect(root.querySelector('fieldset')!.closest('.report-setup-body')).not.toBeNull();
+    }
+    component.form.controls.category.setValue('water'); fixture.detectChanges();
+    expect(root.querySelectorAll('input[type=radio]')).toHaveLength(1);
+    expect(control.value).toBe('energy');
+  });
+  it('allows reports without inspection or data checks to supply their own empty-state guidance', () => {
+    const { fixture, root } = setup();
+    fixture.componentRef.setInput('showInspection', false); fixture.detectChanges();
+    expect(root.querySelector('button[title="Inspect analysis"]')).toBeNull();
+    fixture.componentRef.setInput('cards', []);
+    fixture.componentRef.setInput('emptyMessage', 'Choose manual source data or create an analysis.'); fixture.detectChanges();
+    expect(root.textContent).toContain('Choose manual source data or create an analysis.');
+  });
   it('filters and clears browsing without changing the linked analysis', () => {
     const { fixture, control, component, root } = setup(), changed = vi.fn(); control.valueChanges.subscribe(changed);
     component.form.controls.category.setValue('water'); fixture.detectChanges();

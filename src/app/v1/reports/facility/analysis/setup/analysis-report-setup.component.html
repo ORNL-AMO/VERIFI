@@ -1,86 +1,89 @@
 @let settings = editor.form.controls.settings.controls;
 <section class="report-section report-setup" aria-label="Report setup">
-  <div class="report-setup-section report-setup-top report-setup-top--with-period">
-    <div>
-      <h2>Report information</h2>
+  <section class="report-setup-section" aria-labelledby="report-information-heading">
+    <h2 id="report-information-heading" class="setup-section-heading">Report information</h2>
+    <div class="report-setup-body report-setup-body--with-period">
       <div class="report-setup-field report-setup-name">
         <label for="report-workbench-name">Name <span class="report-setup-required" aria-hidden="true">*</span></label>
         <input id="report-workbench-name" class="v1-input" [formControl]="editor.name" autocomplete="off" required
           [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" [attr.aria-describedby]="editor.state() === 'invalid' ? 'report-name-help' : null">
         @if (editor.state() === 'invalid') { <p id="report-name-help" class="report-setup-help v1-field-error">Enter a nonblank report name.</p> }
       </div>
-    </div>
-    <div class="report-period">
-      <h2>Reporting period</h2>
-      <div class="report-setup-field">
-        <label for="facility-analysis-report-year">Report year <span class="report-setup-required" aria-hidden="true">*</span></label>
-        <select id="facility-analysis-report-year" class="v1-select" [formControl]="settings.reportYear" required
-          [attr.aria-invalid]="unavailableYear() ? true : null" [attr.aria-describedby]="unavailableYear() ? 'facility-report-year-help' : null">
-          <option [ngValue]="null">Not selected</option>
-          @if (unavailableYear()) { <option [ngValue]="settings.reportYear.value">{{ settings.reportYear.value }} — saved year unavailable</option> }
-          @for (year of report.periods(); track year) { <option [ngValue]="year">{{ context.facility()?.fiscalYear === 'nonCalendarYear' ? 'FY ' : '' }}{{ year }}</option> }
-        </select>
+      <div class="report-period">
+        <div class="report-setup-field">
+          <label for="facility-analysis-report-year">Report year <span class="report-setup-required" aria-hidden="true">*</span></label>
+          <select id="facility-analysis-report-year" class="v1-select" [formControl]="settings.reportYear" required
+            [attr.aria-invalid]="unavailableYear() ? true : null" [attr.aria-describedby]="unavailableYear() ? 'facility-report-year-help' : null">
+            <option [ngValue]="null">Not selected</option>
+            @if (unavailableYear()) { <option [ngValue]="settings.reportYear.value">{{ settings.reportYear.value }} — saved year unavailable</option> }
+            @for (year of report.periods(); track year) { <option [ngValue]="year">{{ context.facility()?.fiscalYear === 'nonCalendarYear' ? 'FY ' : '' }}{{ year }}</option> }
+          </select>
+        </div>
+        @if (unavailableYear()) { <p id="facility-report-year-help" class="report-setup-help v1-field-error">Choose an available report year.</p> }
+        @if (report.calendarizationState() === 'evaluating' || report.calendarizationState() === 'idle') { <p class="report-setup-help" role="status">Finding complete reporting years…</p> }
+        @if (report.calendarizationState() === 'error') { <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="report.retry()">Retry reporting years</button> }
+        @if (report.calendarizationState() === 'ready' && !report.periods().length) { <p class="v1-alert v1-alert--warning" role="status">No complete reporting years are available.</p> }
       </div>
-      @if (unavailableYear()) { <p id="facility-report-year-help" class="report-setup-help v1-field-error">Choose an available report year.</p> }
-      @if (report.calendarizationState() === 'evaluating' || report.calendarizationState() === 'idle') { <p class="report-setup-help" role="status">Finding complete reporting years…</p> }
-      @if (report.calendarizationState() === 'error') { <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="report.retry()">Retry reporting years</button> }
-      @if (report.calendarizationState() === 'ready' && !report.periods().length) { <p class="v1-alert v1-alert--warning" role="status">No complete reporting years are available.</p> }
     </div>
-  </div>
-  <div class="report-setup-section">
-    <app-report-analysis-selection [cards]="analysisCards()" [selectionControl]="editor.form.controls.analysis"
+  </section>
+  <app-report-analysis-selection [cards]="analysisCards()" [selectionControl]="editor.form.controls.analysis"
       [selectedValue]="editor.draft().analysis ?? null" [resetKey]="context.key()" idPrefix="facility-report"
-      [canEdit]="editor.canEdit()" [showTypeFilter]="showCategory()" (inspected)="inspect($event)"/>
+      [canEdit]="editor.canEdit()" [showTypeFilter]="showCategory()" [sectioned]="true" (inspected)="inspect($event)">
     @if (unavailableSelection()) { <p class="v1-alert v1-alert--warning" role="status">The saved analysis is unavailable. Its reference is preserved until you choose a replacement.</p> }
-  </div>
-  <div class="report-setup-section report-content">
-    <h2 id="report-content-heading">Included content</h2>
-    <div class="content-presets" role="group" aria-label="Content presets">
-      @for (option of contentPresets; track option.id) {
-        <button type="button" class="content-preset v1-segmented__btn" [attr.aria-pressed]="presetControl.value === option.id"
-          [disabled]="presetControl.disabled" (click)="presetControl.setValue(option.id)">{{ option.label }}</button>
-      }
-      <button type="button" class="content-preset v1-segmented__btn" [attr.aria-pressed]="presetControl.value === 'custom'"
-        [disabled]="presetControl.disabled" (click)="presetControl.setValue('custom')">Custom</button>
+  </app-report-analysis-selection>
+  <section class="report-setup-section report-content" aria-labelledby="report-content-heading">
+    <h2 id="report-content-heading" class="setup-section-heading">Included content</h2>
+    <div class="report-setup-body">
+      <div class="content-presets" role="group" aria-label="Content presets">
+        @for (option of contentPresets; track option.id) {
+          <button type="button" class="content-preset v1-segmented__btn" [attr.aria-pressed]="presetControl.value === option.id"
+            [disabled]="presetControl.disabled" (click)="presetControl.setValue(option.id)">{{ option.label }}</button>
+        }
+        <button type="button" class="content-preset v1-segmented__btn" [attr.aria-pressed]="presetControl.value === 'custom'"
+          [disabled]="presetControl.disabled" (click)="presetControl.setValue('custom')">Custom</button>
+      </div>
+      <table class="content-matrix" aria-labelledby="report-content-heading">
+        <colgroup><col class="content-section-column"><col class="content-format-column"><col class="content-format-column"><col></colgroup>
+        <thead><tr><th scope="col">Section</th><th scope="col" class="content-format">Tables</th><th scope="col" class="content-format">Charts</th><th scope="col">Monthly table periods</th></tr></thead>
+        @for (group of contentGroups; track group.id) {
+          <tbody>
+            <tr class="content-scope"><th colspan="4" scope="rowgroup">
+              @if (group.key) { <label class="report-setup-option"><input type="checkbox" [formControl]="settings[group.key]"><span>{{ group.label }}</span></label> }
+              @else { {{ group.label }} }
+            </th></tr>
+            @for (row of group.rows; track row.key) {
+              <tr [attr.data-content-section]="row.key">
+                <th scope="row"><label class="report-setup-option"><input type="checkbox" [formControl]="settings[row.key]" [attr.aria-label]="'Include ' + group.label + ': ' + row.label"><span>{{ row.label }}</span></label></th>
+                @if (row.table && row.charts) {
+                  <td class="content-format"><label class="report-setup-option"><input type="checkbox" [formControl]="settings[row.table]" [attr.aria-label]="group.label + ': ' + row.label + ' table'"><span class="content-mobile-label">Tables</span></label></td>
+                  <td class="content-format"><label class="report-setup-option"><input type="checkbox" [formControl]="settings[row.charts]" [attr.aria-label]="group.label + ': ' + row.label + ' charts'"><span class="content-mobile-label">Charts</span></label></td>
+                  <td class="content-period-cell">
+                    @if (row.periods.length && settings[row.table].value) {
+                      <div class="content-periods">@for (period of row.periods; track period.key) {
+                        <label class="report-setup-option content-period"><input type="checkbox" [formControl]="settings[period.key]" [attr.aria-label]="group.label + ': ' + row.label + ' ' + period.label + ' period'"><span>{{ period.label }}</span></label>
+                      }</div>
+                    } @else { <span class="report-setup-help">—</span> }
+                  </td>
+                } @else {
+                  <td class="content-format content-not-applicable report-setup-help" aria-label="Not applicable">—</td><td class="content-format content-not-applicable report-setup-help" aria-label="Not applicable">—</td><td class="content-not-applicable report-setup-help" aria-label="Not applicable">—</td>
+                }
+              </tr>
+            }
+          </tbody>
+        }
+      </table>
     </div>
-    <table class="content-matrix" aria-labelledby="report-content-heading">
-      <colgroup><col class="content-section-column"><col class="content-format-column"><col class="content-format-column"><col></colgroup>
-      <thead><tr><th scope="col">Section</th><th scope="col" class="content-format">Tables</th><th scope="col" class="content-format">Charts</th><th scope="col">Monthly table periods</th></tr></thead>
-      @for (group of contentGroups; track group.id) {
-        <tbody>
-          <tr class="content-scope"><th colspan="4" scope="rowgroup">
-            @if (group.key) { <label class="report-setup-option"><input type="checkbox" [formControl]="settings[group.key]"><span>{{ group.label }}</span></label> }
-            @else { {{ group.label }} }
-          </th></tr>
-          @for (row of group.rows; track row.key) {
-            <tr [attr.data-content-section]="row.key">
-              <th scope="row"><label class="report-setup-option"><input type="checkbox" [formControl]="settings[row.key]" [attr.aria-label]="'Include ' + group.label + ': ' + row.label"><span>{{ row.label }}</span></label></th>
-              @if (row.table && row.charts) {
-                <td class="content-format"><label class="report-setup-option"><input type="checkbox" [formControl]="settings[row.table]" [attr.aria-label]="group.label + ': ' + row.label + ' table'"><span class="content-mobile-label">Tables</span></label></td>
-                <td class="content-format"><label class="report-setup-option"><input type="checkbox" [formControl]="settings[row.charts]" [attr.aria-label]="group.label + ': ' + row.label + ' charts'"><span class="content-mobile-label">Charts</span></label></td>
-                <td class="content-period-cell">
-                  @if (row.periods.length && settings[row.table].value) {
-                    <div class="content-periods">@for (period of row.periods; track period.key) {
-                      <label class="report-setup-option content-period"><input type="checkbox" [formControl]="settings[period.key]" [attr.aria-label]="group.label + ': ' + row.label + ' ' + period.label + ' period'"><span>{{ period.label }}</span></label>
-                    }</div>
-                  } @else { <span class="report-setup-help">—</span> }
-                </td>
-              } @else {
-                <td class="content-format content-not-applicable report-setup-help" aria-label="Not applicable">—</td><td class="content-format content-not-applicable report-setup-help" aria-label="Not applicable">—</td><td class="content-not-applicable report-setup-help" aria-label="Not applicable">—</td>
-              }
-            </tr>
-          }
-        </tbody>
-      }
-    </table>
-  </div>
+  </section>
   @if (hasIncludedTables()) {
-    <div class="report-setup-section report-table-columns" aria-labelledby="report-table-columns-heading">
-      <h2 id="report-table-columns-heading">Table columns</h2><p class="report-setup-help column-summary">{{ columnSummary() }}</p>
-      <app-analysis-column-options [sections]="columnOptionSections()" [inline]="true" [sectionActions]="true" [canEdit]="editor.canEdit()" defaultsLabel="Reset columns"
-        (showAllRequested)="setAllColumns(true)" (hideAllRequested)="setAllColumns(false)" (defaultsRequested)="resetColumns()"
-        (sectionVisibilityRequested)="setColumnSection($event.id, $event.visible)"/>
-    </div>
+    <section class="report-setup-section report-table-columns" aria-labelledby="report-table-columns-heading">
+      <h2 id="report-table-columns-heading" class="setup-section-heading">Table columns</h2>
+      <div class="report-setup-body">
+        <p class="report-setup-help column-summary">{{ columnSummary() }}</p>
+        <app-analysis-column-options [sections]="columnOptionSections()" [inline]="true" [sectionActions]="true" [canEdit]="editor.canEdit()" defaultsLabel="Reset columns"
+          (showAllRequested)="setAllColumns(true)" (hideAllRequested)="setAllColumns(false)" (defaultsRequested)="resetColumns()"
+          (sectionVisibilityRequested)="setColumnSection($event.id, $event.visible)"/>
+      </div>
+    </section>
   }
 </section>
 @if (inspected(); as entry) { @if (entry.scope === 'facility') { <app-analysis-details-slideout [card]="entry.card" [evaluation]="inventories.statusState()" [meterGroups]="inventories.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay" [showCategory]="showCategory()" actionLabel="Select for report" actionIcon="check" [actionDisabled]="!editor.canEdit() || openingAnalysis()" secondaryActionLabel="Go To Analysis" [secondaryActionDisabled]="openingAnalysis()" (secondaryActionSelected)="goToAnalysis()" (closed)="closeInspection()" (opened)="selectInspected()"/> } }

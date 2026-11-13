@@ -1,0 +1,87 @@
+@let currentReport = report();
+@let predictor = currentReport.predictor;
+@let statistics = statisticCells();
+@let chartOption = qualityChartOption();
+@let accessibleRows = accessibleChartRows();
+@if (showStatistics()) {
+    <section class="predictor-quality__panel" [attr.aria-labelledby]="idPrefix() + '-statistics-heading'">
+      <div class="predictor-quality__panel-heading">
+        <h2 [attr.aria-level]="headingLevel()" [id]="idPrefix() + '-statistics-heading'">Predictor consumption statistics</h2>
+      </div>
+      <div class="predictor-quality__scroller" tabindex="0" role="region" [attr.aria-labelledby]="idPrefix() + '-statistics-heading'">
+        <table #statisticsTable class="predictor-quality__table" [class.copying-table]="copyingStatisticsTable()">
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              @for (cell of statistics; track cell.id) {
+                <th scope="col" class="predictor-quality__number">{{ cell.label }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">{{ predictor.name }} @if (currentReport.unit) { ({{ currentReport.unit }}) }</th>
+              @for (cell of statistics; track cell.id) {
+                <td class="predictor-quality__number">
+                  @if (cell.tone) {
+                    <span class="v1-badge v1-badge--{{ cell.tone }}">{{ cell.valueLabel }}</span>
+                  } @else {
+                    {{ cell.valueLabel }}
+                  }
+                </td>
+              }
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="predictor-quality__footer">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="copyStatisticsTable()">
+          <app-ui-icon name="copy"></app-ui-icon>
+          Copy Table
+        </button>
+      </footer>
+    </section>
+
+}
+    @if (chartOption) {
+      <section class="predictor-quality__panel predictor-quality__chart-panel" [attr.aria-labelledby]="idPrefix() + '-chart-heading'">
+        <div class="predictor-quality__panel-heading">
+          <h2 [attr.aria-level]="headingLevel()" [id]="idPrefix() + '-chart-heading'">{{ chartHeading() }}</h2>
+          <button type="button" class="v1-icon-btn" title="Download PNG" aria-label="Download Predictor readings chart as PNG" (click)="downloadQualityChart()">
+            <app-ui-icon name="download"></app-ui-icon>
+          </button>
+        </div>
+        <div
+          #qualityChart
+          class="predictor-quality__chart"
+          [appV1ECharts]="chartOption"
+          role="img"
+          [attr.aria-label]="'Reading quality chart for ' + predictor.name">
+        </div>
+        <div class="visually-hidden predictor-quality__accessible-data">
+          <table>
+            <caption>Predictor reading quality chart data</caption>
+            <thead>
+              <tr>
+                <th scope="col">Month</th>
+                <th scope="col">Value</th>
+                <th scope="col">Expected range status</th>
+                <th scope="col">Negative value</th>
+                <th scope="col">Weather source status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of accessibleRows; track row.id) {
+                <tr>
+                  <th scope="row">{{ row.dateLabel }}</th>
+                  <td>{{ row.valueLabel }}</td>
+                  <td>{{ row.expectedRangeLabel }}</td>
+                  <td>{{ row.negativeLabel }}</td>
+                  <td>{{ row.weatherStatusLabel }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }

@@ -56,7 +56,7 @@ describe('report return from analysis', () => {
 
   it.each([
     ['analysis', true], ['overview', false], ['emissionFactors', false], ['savings', false],
-    ['modeling', false], ['costSavings', false], ['dataQuality', false]
+    ['modeling', false], ['costSavings', false], ['dataQuality', true]
   ] as const)('resolves facility %s returns only when that workflow supports analysis inspection', (type, supported) => {
     const snapshot = accountReportSnapshot();
     const report = { ...snapshot.facilityReports[0], facilityReportType: type };

@@ -1,43 +1,79 @@
 @let identity = ids();
-<div class="report-setup">
-  <div class="report-analysis-heading">
-    <h2 [id]="identity.heading">Analysis <span class="report-setup-required" aria-hidden="true">*</span></h2>
-    <div class="report-analysis-filters" [formGroup]="form" role="group" aria-label="Filter analyses">
-      <span class="report-analysis-filters__label"><app-ui-icon name="filter"/>Filter analyses</span>
-      @if (showTypeFilter()) {
+<section class="report-setup" [class.report-setup-section]="sectioned()" [attr.aria-labelledby]="identity.heading">
+  @if (sectioned()) {
+    <h2 class="setup-section-heading" [id]="identity.heading">
+      Analysis <span class="report-setup-required" aria-hidden="true">*</span>
+    </h2>
+  }
+  <div [class.report-setup-body]="sectioned()">
+    <div class="report-analysis-heading">
+      @if (!sectioned()) {
+        <h2 [id]="identity.heading">Analysis <span class="report-setup-required" aria-hidden="true">*</span></h2>
+      }
+      <div class="report-analysis-filters" [formGroup]="form" role="group" aria-label="Filter analyses">
+        <span class="report-analysis-filters__label"><app-ui-icon name="filter"/>Filter analyses</span>
+        @if (showTypeFilter()) {
+          <div class="report-setup-field">
+            <label [for]="identity.type" class="visually-hidden">Type</label>
+            <select [id]="identity.type" class="v1-select" formControlName="category">
+              <option value="all">All types</option>
+              <option value="energy">Energy</option>
+              <option value="water">Water</option>
+            </select>
+          </div>
+        }
         <div class="report-setup-field">
-          <label [for]="identity.type" class="visually-hidden">Type</label>
-          <select [id]="identity.type" class="v1-select" formControlName="category"><option value="all">All types</option><option value="energy">Energy</option><option value="water">Water</option></select>
+          <label [for]="identity.baseline" class="visually-hidden">Baseline year</label>
+          <select [id]="identity.baseline" class="v1-select" formControlName="baselineYear">
+            <option [ngValue]="null">All baseline years</option>
+            @for (year of baselineYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
+          </select>
         </div>
-      }
-      <div class="report-setup-field">
-        <label [for]="identity.baseline" class="visually-hidden">Baseline year</label>
-        <select [id]="identity.baseline" class="v1-select" formControlName="baselineYear">
-          <option [ngValue]="null">All baseline years</option>
-          @for (year of baselineYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
-        </select>
+        @if (filtersActive()) {
+          <button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button>
+        }
       </div>
-      @if (filtersActive()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="clearFilters()">Clear filters</button> }
     </div>
-  </div>
-  <fieldset [id]="identity.selection" class="report-analysis-selection" role="radiogroup" aria-required="true" tabindex="-1" [attr.aria-labelledby]="identity.heading" [disabled]="!canEdit()">
-    @if (hiddenSelection(); as selected) { <p class="report-setup-help" role="status">Selected analysis: <strong>{{ selected.name }}</strong>. Hidden by the current filters.</p> }
-    @if (cards().length && !filteredCards().length) { <p class="report-setup-help" role="status">No analyses match these filters. Clear the filters to see all available analyses.</p> }
-    <div class="report-analysis-grid">
-      @for (analysis of filteredCards(); track analysis.value) {
-        <div class="report-analysis-card">
-          <label class="report-analysis-card__selection">
-            <input type="radio" name="analysis" required [formControl]="selectionControl()" [value]="analysis.value">
-            <span class="report-analysis-card__content">
-              <strong>{{ analysis.name }}</strong>
-              <span class="report-analysis-card__metadata">{{ analysis.category }} · Baseline {{ analysis.baseline }}</span>
-              <span class="v1-chip report-analysis-card__status" [class]="'v1-chip--' + analysis.statusTone" role="status"><app-ui-icon [name]="analysis.statusIcon"/>{{ analysis.statusLabel }}</span>
-            </span>
-          </label>
-          <button type="button" class="v1-icon-btn report-analysis-card__inspect" [attr.aria-label]="'Inspect ' + analysis.name" title="Inspect analysis" (click)="inspected.emit(analysis.value)"><app-ui-icon name="monocle"/></button>
-        </div>
+    <fieldset [id]="identity.selection" class="report-analysis-selection" role="radiogroup" aria-required="true"
+      tabindex="-1" [attr.aria-labelledby]="identity.heading" [disabled]="!canEdit()">
+      @if (hiddenSelection(); as selected) {
+        <p class="report-setup-help" role="status">
+          Selected analysis: <strong>{{ selected.name }}</strong>. Hidden by the current filters.
+        </p>
       }
-    </div>
-    @if (!cards().length) { <p class="report-setup-help" role="status">No eligible analyses are available. Create an analysis before continuing to data checks.</p> }
-  </fieldset>
-</div>
+      @if (cards().length && !filteredCards().length) {
+        <p class="report-setup-help" role="status">
+          No analyses match these filters. Clear the filters to see all available analyses.
+        </p>
+      }
+      <div class="report-analysis-grid">
+        @for (analysis of filteredCards(); track analysis.value) {
+          <div class="report-analysis-card">
+            <label class="report-analysis-card__selection">
+              <input type="radio" name="analysis" required [formControl]="selectionControl()" [value]="analysis.value">
+              <span class="report-analysis-card__content">
+                <strong>{{ analysis.name }}</strong>
+                <span class="report-analysis-card__metadata">
+                  {{ analysis.category }} · Baseline {{ analysis.baseline }}
+                </span>
+                <span class="v1-chip report-analysis-card__status" [class]="'v1-chip--' + analysis.statusTone"
+                  role="status">
+                  <app-ui-icon [name]="analysis.statusIcon"/>{{ analysis.statusLabel }}
+                </span>
+              </span>
+            </label>
+            @if (showInspection()) {
+              <button type="button" class="v1-icon-btn report-analysis-card__inspect"
+                [attr.aria-label]="'Inspect ' + analysis.name" title="Inspect analysis"
+                (click)="inspected.emit(analysis.value)">
+                <app-ui-icon name="monocle"/>
+              </button>
+            }
+          </div>
+        }
+      </div>
+      @if (!cards().length) { <p class="report-setup-help" role="status">{{ emptyMessage() }}</p> }
+    </fieldset>
+    <ng-content/>
+  </div>
+</section>

@@ -1,0 +1,6 @@
+:host { display: block; min-width: 0; }
+.quality-dot-plot__heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
+.quality-dot-plot__heading h2 { margin: 0; color: var(--v1-text); font-size: 1rem; font-weight: 900; overflow-wrap: anywhere; }
+.quality-dot-plot__chart { width: 100%; min-width: 0; background: var(--v1-surface); }
+.quality-dot-plot__summary { margin: .75rem 0 .4rem; text-align: center; color: var(--v1-text); overflow-wrap: anywhere; }
+.quality-dot-plot__note { margin: .4rem 0; text-align: center; color: var(--v1-muted); }

@@ -1,15 +1,20 @@
 @if (context.entry(); as entry) {
   <section class="report-section report-setup" aria-label="Report setup">
-    <div class="report-setup-section">
-      <h2>Report information</h2>
-      <div class="report-setup-field report-setup-name">
-        <label for="account-report-name">Name <span aria-hidden="true">*</span></label>
-        <input id="account-report-name" class="v1-input" [formControl]="editor.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" aria-describedby="account-report-name-help">
-        @if (editor.state() === 'invalid') { <p id="account-report-name-help" class="v1-field-error">Enter a nonblank report name.</p> }
+    <section class="report-setup-section" aria-labelledby="account-report-information-heading">
+      <h2 id="account-report-information-heading" class="setup-section-heading">Report information</h2>
+      <div class="report-setup-body">
+        <div class="report-setup-field report-setup-name">
+          <label for="account-report-name">Name <span aria-hidden="true">*</span></label>
+          <input id="account-report-name" class="v1-input" [formControl]="editor.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" aria-describedby="account-report-name-help">
+          @if (editor.state() === 'invalid') { <p id="account-report-name-help" class="v1-field-error">Enter a nonblank report name.</p> }
+        </div>
       </div>
-    </div>
-    @if (context.usesAnalysis()) { <div class="report-setup-section"><app-account-report-analysis-selection/></div> }
-    <div class="report-setup-section"><h2>Report-specific settings</h2><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
+    </section>
+    @if (context.usesAnalysis()) { <app-account-report-analysis-selection [sectioned]="true"/> }
+    <section class="report-setup-section" aria-labelledby="account-report-settings-heading">
+      <h2 id="account-report-settings-heading" class="setup-section-heading">Report-specific settings</h2>
+      <div class="report-setup-body"><p>{{ entry.typeLabel }} settings are pending migration. Saved reporting periods, options, and analysis references are preserved.</p><p>{{ entry.snapshot.scopeLabel }}</p></div>
+    </section>
     <app-account-report-delete/>
   </section>
 }
