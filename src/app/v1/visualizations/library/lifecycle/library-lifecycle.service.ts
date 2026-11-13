@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -8,19 +9,20 @@ import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { createVisualizationSetupDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { VisualizationNavigationService } from '../../visualization-navigation.service';
 import { VisualizationLibraryEntry } from '../visualization-library.models';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { VISUALIZATION_CHART_CHOICES, VisualizationChartChoiceId, createVisualizationChart } from '../../visualization-charts';
-import { VISUALIZATION_FAMILIES } from '../../visualization-families';
-import { createRecipeDefinition, recipeMeters, UTILITY_RECIPES, VisualizationRecipe } from '../../creation/visualization-recipes';
+import { VISUALIZATION_DATA_SOURCES } from '../../visualization-data-sources';
+import { createRecipeDefinition, recipeGroupingChoices, recipeResourceChoices, RecipeGrouping, RecipeResourceChoice, UTILITY_RECIPES, VisualizationRecipe } from '../../creation/visualization-recipes';
 
-export type VisualizationCreationStep = 'scope' | 'facility' | 'chart' | 'families' | 'recipe-resources' | 'name';
+export type VisualizationCreationStep = 'scope' | 'facility' | 'chart' | 'sources' | 'recipe-grouping' | 'recipe-resources' | 'name';
 export interface VisualizationCreationDraft {
   name: string; scope: 'portfolio' | 'facility'; facilityGuid: string;
-  chart: VisualizationChartChoiceId | null; families: readonly VisualizationSourceKind[];
-  recipe: VisualizationRecipe; meterGuids: readonly string[];
+  chart: VisualizationChartChoiceId | null; sourceKinds: readonly VisualizationSourceKind[];
+  recipe: VisualizationRecipe; recipeGrouping: RecipeGrouping | null; recipeResourceIds: readonly string[];
 }
 interface CreationSelection { readonly step: VisualizationCreationStep; readonly label: string; readonly icon: IconName; readonly editable: boolean; }
 interface LibraryEditor { readonly initial: VisualizationCreationDraft; readonly accountGuid: string; readonly fixedFacility?: string; readonly entry?: VisualizationLibraryEntry; }
@@ -49,12 +51,22 @@ export class LibraryLifecycle {
     scope: new FormControl<'portfolio' | 'facility'>('portfolio', { nonNullable: true }),
     facilityGuid: new FormControl('', { nonNullable: true }),
     chart: new FormControl<VisualizationChartChoiceId | null>(null),
-    families: new FormControl<readonly VisualizationSourceKind[]>([], { nonNullable: true }),
+    sourceKinds: new FormControl<readonly VisualizationSourceKind[]>([], { nonNullable: true }),
     recipe: new FormControl<VisualizationRecipe>('custom', { nonNullable: true }),
-    meterGuids: new FormControl<readonly string[]>([], { nonNullable: true })
+    recipeGrouping: new FormControl<RecipeGrouping | null>(null),
+    recipeResourceIds: new FormControl<readonly string[]>([], { nonNullable: true })
   });
   private readonly draft = signal(this.form.getRawValue());
-  readonly facilities = computed(() => this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid));
+  readonly facilitySearch = new FormControl('', { nonNullable: true });
+  private readonly search = toSignal(this.facilitySearch.valueChanges, { initialValue: '' });
+  readonly selectedScope = computed(() => this.ownerChosen() ? this.draft().scope : null);
+  readonly facilities = computed(() => orderFacilities(
+    this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid),
+    this.workspace.account()?.portfolioFacilityOrder));
+  readonly matchingFacilities = computed(() => {
+    const search = this.search().trim().toLocaleLowerCase();
+    return this.facilities().filter(item => (item.name || 'Unnamed facility').toLocaleLowerCase().includes(search));
+  });
   readonly lockedProposal = computed(() => !!this.proposal());
   readonly draftChanged = computed(() => !!this.editor() && JSON.stringify(this.draft()) !== JSON.stringify(this.editor()!.initial));
   readonly needsProtection = computed(() => this.saving() || this.draftChanged() || !!this.proposal());
@@ -65,26 +77,34 @@ export class LibraryLifecycle {
   readonly canEditDraft = computed(() => this.canAct() && !!this.editor() && !this.lockedProposal()
     && this.editor()!.accountGuid === this.workspace.account()?.guid);
   readonly selectedChart = computed(() => VISUALIZATION_CHART_CHOICES.find(choice => choice.value === this.draft().chart));
-  readonly selectedFamilies = computed(() => VISUALIZATION_FAMILIES.filter(family => this.draft().families.includes(family.value)));
-  readonly familiesValid = computed(() => this.draft().families.length > 0
-    && new Set(this.draft().families).size === this.draft().families.length
-    && this.selectedFamilies().length === this.draft().families.length);
-  readonly canContinueFamilies = computed(() => this.canEditDraft() && this.ownerValid() && !!this.selectedChart() && this.familiesValid());
+  readonly selectedDataSources = computed(() => VISUALIZATION_DATA_SOURCES.filter(sourceKind => this.draft().sourceKinds.includes(sourceKind.value)));
+  readonly dataSourcesValid = computed(() => this.draft().sourceKinds.length > 0
+    && new Set(this.draft().sourceKinds).size === this.draft().sourceKinds.length
+    && this.selectedDataSources().length === this.draft().sourceKinds.length);
+  readonly canContinueSources = computed(() => this.canEditDraft() && this.ownerValid() && !!this.selectedChart() && this.dataSourcesValid());
   readonly recipes = UTILITY_RECIPES;
+  readonly recipeGroupings = recipeGroupingChoices();
+  readonly selectedRecipeGrouping = computed(() => this.recipeGroupings.find(choice => choice.value === this.draft().recipeGrouping));
+  readonly recipeResourcePrompt = computed(() => this.draft().recipeGrouping === 'sources' ? 'Choose one or more utility sources.'
+    : this.draft().recipeGrouping === 'groups' ? 'Choose one or more meter groups.' : 'Choose one or more meters.');
   readonly recipeResources = computed(() => {
     const snapshot = this.workspace.snapshot(), draft = this.draft();
-    return snapshot ? recipeMeters(snapshot, draft.scope === 'facility' ? { kind: 'facility', facilityGuid: draft.facilityGuid } : { kind: 'portfolio' }, draft.recipe) : [];
+    return snapshot && draft.recipe !== 'custom' && draft.recipeGrouping
+      ? recipeResourceChoices(snapshot, draft.scope === 'facility' ? { kind: 'facility', facilityGuid: draft.facilityGuid } : { kind: 'portfolio' }, draft.recipe, draft.recipeGrouping) : [];
   });
-  readonly recipeResourceOptions = computed(() => {
-    const facilities = new Map(this.facilities().map(facility => [facility.guid, facility.name || 'Unnamed facility']));
-    return this.recipeResources().map(meter => ({ guid: meter.guid,
-      label: `${facilities.get(meter.facilityId) ?? meter.facilityId} / ${meter.name || 'Unnamed meter'} · ${meter.source}${meter.noLongerInUse ? ' · Retired' : ''}` }));
+  readonly recipeResourceCards = computed(() => {
+    const available = this.recipeResources(), draft = this.draft(), grouping = this.selectedRecipeGrouping();
+    const missing: RecipeResourceChoice[] = draft.recipeResourceIds.filter(id => !available.some(choice => choice.value === id))
+      .map(value => ({ value, label: 'Unavailable selection', detail: 'Select to remove', icon: grouping?.icon ?? 'meter' }));
+    return [...available, ...missing];
   });
-  readonly recipeValid = computed(() => this.draft().recipe === 'custom' || this.draft().meterGuids.length > 0
-    && this.draft().meterGuids.every(guid => this.recipeResources().some(m => m.guid === guid)));
-  readonly canContinueRecipe = computed(() => this.canEditDraft() && this.ownerValid() && this.recipeValid());
+  readonly recipeValid = computed(() => this.draft().recipe === 'custom' || !!this.selectedRecipeGrouping()
+    && (this.draft().recipe === 'energy-trend' || this.draft().recipeGrouping === 'meters')
+    && this.draft().recipeResourceIds.length > 0
+    && this.draft().recipeResourceIds.every(id => this.recipeResources().some(choice => choice.value === id)));
+  readonly canContinueRecipe = computed(() => this.canEditDraft() && this.ownerValid() && this.step() === 'recipe-resources' && this.recipeValid());
   readonly canSubmit = computed(() => this.canEditDraft() && !!this.draft().name.trim() && this.ownerValid()
-    && (!!this.editor()?.entry || this.step() === 'name' && !!this.selectedChart() && this.familiesValid() && this.recipeValid()));
+    && (!!this.editor()?.entry || this.step() === 'name' && !!this.selectedChart() && this.dataSourcesValid() && this.recipeValid()));
   readonly selections = computed(() => {
     const selections: CreationSelection[] = [];
     const editor = this.editor(), value = this.draft();
@@ -96,9 +116,18 @@ export class LibraryLifecycle {
         label: facility ? facility.name || 'Unnamed facility' : 'Facility unavailable', icon: 'facility', editable: !editor.fixedFacility });
     }
     const chart = this.selectedChart();
-    if (chart) selections.push({ step: 'chart', label: chart.label, icon: 'dataVisualization', editable: true });
-    if (value.recipe !== 'custom') selections.push({ step: 'recipe-resources', label: UTILITY_RECIPES.find(r => r.id === value.recipe)?.label ?? 'Recipe', icon: 'database', editable: true });
-    else if (this.selectedFamilies().length) selections.push({ step: 'families', label: this.selectedFamilies().map(family => family.label).join(', '), icon: 'database', editable: true });
+    if (chart) selections.push({ step: 'chart', label: chart.label, icon: chart.icon, editable: true });
+    if (value.recipe !== 'custom') {
+      selections.push({ step: value.recipe === 'energy-trend' ? 'recipe-grouping' : 'recipe-resources',
+        label: UTILITY_RECIPES.find(recipe => recipe.id === value.recipe)?.label ?? 'Pre-configured', icon: 'chartTimeSeries', editable: true });
+      const grouping = this.selectedRecipeGrouping();
+      if (value.recipe === 'energy-trend' && grouping) {
+        const names = this.recipeResourceCards().filter(choice => value.recipeResourceIds.includes(choice.value)).map(choice => choice.label);
+        selections.push({ step: 'recipe-resources', label: grouping.label + (names.length ? ': ' + names.join(', ') : ''), icon: grouping.icon, editable: true });
+      }
+    }
+    else if (this.selectedDataSources().length) selections.push({ step: 'sources', label: this.selectedDataSources().map(sourceKind => sourceKind.label).join(', '),
+      icon: this.selectedDataSources().length === 1 ? this.selectedDataSources()[0].icon : 'database', editable: true });
     return selections;
   });
   private running?: Promise<void>;
@@ -122,22 +151,24 @@ export class LibraryLifecycle {
     const accountGuid = this.workspace.account()?.guid;
     if (!accountGuid) return;
     const fixedFacility = this.navigation.isSingleSiteWorkspace() ? this.facilities()[0]?.guid : this.navigation.inventoryFacilityGuid();
-    const initial: VisualizationCreationDraft = { name: '', scope: fixedFacility ? 'facility' : 'portfolio', facilityGuid: fixedFacility ?? '', chart: null, families: [], recipe: 'custom', meterGuids: [] };
+    const initial: VisualizationCreationDraft = { name: '', scope: fixedFacility ? 'facility' : 'portfolio', facilityGuid: fixedFacility ?? '', chart: null, sourceKinds: [], recipe: 'custom', recipeGrouping: null, recipeResourceIds: [] };
     this.startEditor({ initial, fixedFacility, accountGuid });
   }
   rename(entry: VisualizationLibraryEntry): void {
     if (!this.canAct() || this.editor() || !entry.editable) return;
     this.startEditor({ accountGuid: entry.record.accountId, entry, initial: {
-      name: entry.name, scope: entry.scope, facilityGuid: entry.facilityGuid ?? '', chart: null, families: entry.families, recipe: 'custom', meterGuids: []
+      name: entry.name, scope: entry.scope, facilityGuid: entry.facilityGuid ?? '', chart: null, sourceKinds: entry.sourceKinds, recipe: 'custom', recipeGrouping: null, recipeResourceIds: []
     } });
   }
   private startEditor(editor: LibraryEditor): void {
     this.error.set(undefined); this.outcome.set(undefined); this.conflictCurrent.set(undefined);
+    this.facilitySearch.setValue('');
     this.form.reset(editor.initial, { emitEvent: false }); this.draft.set(this.form.getRawValue()); this.editor.set(editor);
     this.ownerChosen.set(!!editor.fixedFacility); this.step.set(editor.entry ? 'name' : editor.fixedFacility ? 'chart' : 'scope');
   }
   selectScope(scope: 'portfolio' | 'facility'): void {
     if (!this.canEditDraft() || this.editor()?.entry || this.editor()?.fixedFacility || scope === 'facility' && !this.facilities().length) return;
+    this.facilitySearch.setValue('');
     this.form.controls.scope.setValue(scope); this.ownerChosen.set(true);
     this.step.set(scope === 'facility' ? 'facility' : 'chart');
   }
@@ -148,23 +179,50 @@ export class LibraryLifecycle {
   }
   selectChart(chart: VisualizationChartChoiceId): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.ownerValid() || !VISUALIZATION_CHART_CHOICES.some(choice => choice.value === chart)) return;
-    this.form.controls.recipe.setValue('custom'); this.form.controls.chart.setValue(chart); this.step.set('families');
+    this.form.controls.recipe.setValue('custom'); this.form.controls.chart.setValue(chart); this.step.set('sources');
   }
   selectRecipe(recipe: Exclude<VisualizationRecipe, 'custom'>): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.ownerValid()) return;
-    this.form.controls.recipe.setValue(recipe); this.form.controls.chart.setValue('line'); this.form.controls.families.setValue(['utility']);
+    if (this.form.controls.recipe.value !== recipe) {
+      this.form.controls.recipeGrouping.setValue(recipe === 'energy-trend' ? null : 'meters');
+      this.form.controls.recipeResourceIds.setValue([]);
+    }
+    this.form.controls.recipe.setValue(recipe); this.form.controls.chart.setValue('line'); this.form.controls.sourceKinds.setValue(['utility']);
     if (!this.form.controls.name.value.trim()) this.form.controls.name.setValue(UTILITY_RECIPES.find(r => r.id === recipe)!.label);
-    this.step.set('recipe-resources');
+    this.step.set(recipe === 'energy-trend' ? 'recipe-grouping' : 'recipe-resources');
+  }
+  selectRecipeGrouping(grouping: RecipeGrouping): void {
+    if (!this.canEditDraft() || this.editor()?.entry || this.draft().recipe !== 'energy-trend' || !this.recipeGroupings.some(choice => choice.value === grouping)) return;
+    if (this.draft().recipeGrouping !== grouping) this.form.controls.recipeResourceIds.setValue([]);
+    this.form.controls.recipeGrouping.setValue(grouping); this.step.set('recipe-resources');
+  }
+  toggleRecipeResource(id: string): void {
+    if (!this.canEditDraft() || this.editor()?.entry || !this.recipeResourceCards().some(choice => choice.value === id)) return;
+    const selected = this.form.controls.recipeResourceIds.value;
+    this.form.controls.recipeResourceIds.setValue(selected.includes(id) ? selected.filter(value => value !== id) : [...selected, id]);
   }
   continueRecipe(): void { if (this.canContinueRecipe()) this.step.set('name'); }
-  toggleFamily(kind: VisualizationSourceKind): void {
-    if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_FAMILIES.some(family => family.value === kind)) return;
-    const selected = this.form.controls.families.value;
-    this.form.controls.families.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]);
+  toggleSource(kind: VisualizationSourceKind): void {
+    if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(sourceKind => sourceKind.value === kind)) return;
+    const selected = this.form.controls.sourceKinds.value;
+    this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]);
   }
-  continueFamilies(): void { if (this.canContinueFamilies()) this.step.set('name'); }
+  continueSources(): void { if (this.canContinueSources()) this.step.set('name'); }
   editSelection(step: VisualizationCreationStep): void {
-    if (this.canEditDraft() && this.selections().some(selection => selection.step === step && selection.editable)) this.step.set(step);
+    if (!this.canEditDraft() || !this.selections().some(selection => selection.step === step && selection.editable)) return;
+    const cleared: Partial<VisualizationCreationDraft> = { name: '' };
+    if (step === 'scope' || step === 'facility' || step === 'chart') {
+      cleared.sourceKinds = [];
+      cleared.recipe = 'custom';
+      cleared.recipeGrouping = null;
+      cleared.recipeResourceIds = [];
+      if (step !== 'chart') cleared.chart = null;
+      if (step === 'scope') cleared.facilityGuid = '';
+    } else if (step === 'recipe-grouping') cleared.recipeResourceIds = [];
+    this.form.patchValue(cleared);
+    this.form.controls.name.markAsUntouched();
+    this.error.set(undefined);
+    this.step.set(step);
   }
   async submit(): Promise<void> {
     const editor = this.editor();
@@ -180,10 +238,10 @@ export class LibraryLifecycle {
       kind: 'update', accountGuid: editor.accountGuid, guid: editor.entry.record.guid, expectedRevision: editor.entry.record.revision,
       definition: { ...editor.entry.definition!, name: value.name.trim() }
     } : this.commands.prepareCreate(value.recipe !== 'custom'
-      ? createRecipeDefinition(this.workspace.snapshot()!, value.recipe, value.scope === 'facility' ? { kind: 'facility', facilityGuid: value.facilityGuid } : { kind: 'portfolio' }, value.meterGuids, value.name.trim())
+      ? createRecipeDefinition(this.workspace.snapshot()!, value.recipe, value.scope === 'facility' ? { kind: 'facility', facilityGuid: value.facilityGuid } : { kind: 'portfolio' }, { grouping: value.recipeGrouping!, ids: value.recipeResourceIds }, value.name.trim())
       : createVisualizationSetupDefinition({ name: value.name.trim(), accountGuid: editor.accountGuid,
       scope: value.scope === 'facility' ? { kind: 'facility', facilityGuid: value.facilityGuid } : { kind: 'portfolio' },
-      chart: createVisualizationChart(value.chart!), sourceKinds: value.families })); }
+      chart: createVisualizationChart(value.chart!), sourceKinds: value.sourceKinds })); }
     catch (error) { this.error.set(message(error)); return; }
     this.proposal.set(command);
     await this.execute();

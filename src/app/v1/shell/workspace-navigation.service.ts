@@ -187,7 +187,7 @@ export class WorkspaceNavigationService {
       route = this.facilityDataToolRoute(facilityGuid, 'meter-grouping'); query = {};
     } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
     else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
-    else if (state.section === 'visualization') route = routes.visualizationLibraryRoute(account.guid);
+    else if (state.section === 'visualization') route = routes.visualizationDashboardRoute(account.guid);
     else if (state.portfolioTab === 'facilities' && facilityGuid) route = this.accountPortfolioRoute(account.guid, 'meters');
     else {
       const tab = state.portfolioTab ?? (state.detail === 'energy-uses' ? 'energy-uses' : state.detail === 'predictors' ? 'predictors'
@@ -315,7 +315,7 @@ export class WorkspaceNavigationService {
       if (account) {
         const scope = this.headerScope();
         const route = sectionId === 'data' ? scope.kind === 'facility' ? this.accountPortfolioRoute(account.guid, 'meters') : this.accountDataRoute(account.guid)
-          : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : sectionId === 'visualization' ? routes.visualizationLibraryRoute(account.guid) : this.accountReportsRoute(account.guid);
+          : sectionId === 'analysis' ? this.accountAnalysisRoute(account.guid) : sectionId === 'visualization' ? routes.visualizationDashboardRoute(account.guid) : this.accountReportsRoute(account.guid);
         await this.navigateScopeDestination(route, this.isSingleSiteWorkspace() ? {} : facilityScopeQuery(scope));
       }
       return;
@@ -363,7 +363,7 @@ export class WorkspaceNavigationService {
       if (detail === 'energy-uses') return this.accountPortfolioRoute(accountGuid, 'energy-uses');
       return this.accountDataRoute(accountGuid, this.resolveAccountDataDetail(detail));
     }
-    if (section === 'visualization') return routes.visualizationLibraryRoute(accountGuid);
+    if (section === 'visualization') return routes.visualizationDashboardRoute(accountGuid);
     if (section === 'imports') return this.accountImportsRoute(accountGuid);
     if (section === 'reports') return this.accountReportsRoute(accountGuid);
     if (section === 'analysis') return this.accountAnalysisRoute(accountGuid);
@@ -371,7 +371,7 @@ export class WorkspaceNavigationService {
   }
 
   private facilityDestination(facilityGuid: string, section: SectionId, detail: string): { route: string[]; queryParams?: Params } {
-    if (section === 'visualization' && this.account()) return { route: routes.visualizationLibraryRoute(this.account()!.guid), queryParams: { facility: facilityGuid } };
+    if (section === 'visualization' && this.account()) return { route: routes.visualizationDashboardRoute(this.account()!.guid), queryParams: { facility: facilityGuid } };
     if (section === 'settings') return { route: this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail)) };
     if (section === 'analysis' || section === 'reports') return this.facilityInventoryLink(facilityGuid, section);
     if (section === 'data') return ['meter-grouping', 'custom-grid-factors', 'custom-fuels', 'custom-gwps'].includes(detail)

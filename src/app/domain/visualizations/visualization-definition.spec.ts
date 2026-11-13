@@ -42,7 +42,7 @@ describe('visualization saved intent', () => {
     expect(JSON.stringify(original)).toBe(before);
   });
 
-  it.each<VisualizationSourceKind>(['utility', 'predictor', 'weather', 'energy-use', 'analysis-result', 'analysis-model'])('creates recoverable incomplete %s intent', kind => {
+  it.each<VisualizationSourceKind>(['utility', 'predictor', 'energy-use', 'analysis'])('creates recoverable incomplete %s intent', kind => {
     const value = createVisualizationDefinition('New chart', 'account-a', { kind: 'portfolio' }, kind);
     const result = decodeVisualizationDefinition(value);
     expect(result.state).toBe('setup-required');
@@ -50,11 +50,33 @@ describe('visualization saved intent', () => {
     expect(value.period.kind).toBe(kind === 'energy-use' ? 'latest-saved-year' : 'all-history');
   });
 
+  it('defaults Analysis to result intent and validates result and model settings independently', () => {
+    expect(createVisualizationDefinition('Analysis', 'account-a', { kind: 'portfolio' }, 'analysis').sources[0])
+      .toMatchObject({ kind: 'analysis', mode: 'result', measure: 'actual', aggregation: 'none' });
+    const result = analysisVisualizationFixture(), model = analysisVisualizationFixture(true);
+    expect(decodeVisualizationDefinition(result).state).toBe('valid');
+    expect(decodeVisualizationDefinition(model).state).toBe('valid');
+    expect(decodeVisualizationDefinition({ ...result, sources: [{ ...result.sources[0], measure: 'residual' }] }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...model, sources: [{ ...model.sources[0], measure: 'savings' }] }).state).toBe('invalid');
+    expect(decodeVisualizationDefinition({ ...result, sources: [{ ...result.sources[0], modelId: 'model-a' }] }).state).toBe('invalid');
+    const resultSource = result.sources[0], modelSource = model.sources[0];
+    if (resultSource.kind !== 'analysis' || modelSource.kind !== 'analysis') throw new Error('Expected Analysis sources');
+    const { groupGuid, ...missingGroup } = modelSource;
+    expect(decodeVisualizationDefinition({ ...model, sources: [missingGroup] }).state).toBe('setup-required');
+    const { mode, ...missingMode } = resultSource;
+    expect(decodeVisualizationDefinition({ ...result, sources: [missingMode] }).state).toBe('invalid');
+  });
+
+  it.each(['weather', 'analysis-result', 'analysis-model'])('does not convert obsolete %s source kinds', kind => {
+    const base = utilityVisualizationFixture();
+    expect(decodeVisualizationDefinition({ ...base, sources: [{ ...base.sources[0], kind }] }).state).toBe('unsupported');
+  });
+
   it('creates independent setup sources and retains chart intent without inventing series', () => {
     const chart = { kind: 'scatter' as const, showFit: false };
     const value = createVisualizationSetupDefinition({ name: 'Usage versus production', accountGuid: 'account-a',
-      scope: { kind: 'portfolio' }, chart, sourceKinds: ['utility', 'predictor', 'weather'] });
-    expect(value.sources.map(source => source.kind)).toEqual(['utility', 'predictor', 'weather']);
+      scope: { kind: 'portfolio' }, chart, sourceKinds: ['utility', 'predictor', 'analysis'] });
+    expect(value.sources.map(source => source.kind)).toEqual(['utility', 'predictor', 'analysis']);
     expect(value.sources.map(source => source.id)).toEqual(['source-1', 'source-2', 'source-3']);
     expect(value.series).toEqual([]);
     expect(value.chart).toEqual(chart);
@@ -87,8 +109,8 @@ describe('visualization saved intent', () => {
     expect(create(['energy-use']).period).toEqual({ kind: 'latest-saved-year', basis: 'fiscal' });
     expect(create(['energy-use', 'utility']).period).toEqual({ kind: 'all-history' });
     expect(create(['utility', 'energy-use']).period).toEqual({ kind: 'all-history' });
-    expect(() => create([])).toThrow('unique source families');
-    expect(() => create(['utility', 'utility'])).toThrow('unique source families');
+    expect(() => create([])).toThrow('unique data sources');
+    expect(() => create(['utility', 'utility'])).toThrow('unique data sources');
   });
 
   it('keeps unassigned Scatter axes incomplete while accepting existing assigned axes', () => {
@@ -161,9 +183,9 @@ describe('visualization saved intent', () => {
 
   it('accepts a complete predictor and weather source without retrieving or inventing values', () => {
     const base = utilityVisualizationFixture();
-    for (const kind of ['predictor', 'weather'] as const) {
+    for (const guid of ['predictor-a', 'weather-a']) {
       const value: VisualizationDefinition = { ...base,
-        sources: [{ id: 'utility', kind, measure: 'value', aggregation: 'none', selection: { kind: 'fixed', resource: 'predictor', guids: ['predictor-a'] } }],
+        sources: [{ id: 'utility', kind: 'predictor', measure: 'value', aggregation: 'none', selection: { kind: 'fixed', resource: 'predictor', guids: [guid] } }],
         series: [{ id: 'value', sourceId: 'utility', metric: 'value', axis: 'left' }] };
       expect(decodeVisualizationDefinition(value).state).toBe('valid');
     }
@@ -182,7 +204,7 @@ describe('visualization saved intent', () => {
   it('does not substitute a selected model for a missing pin', () => {
     const value = analysisVisualizationFixture(true);
     const model = value.sources[0];
-    if (model.kind !== 'analysis-model') throw new Error('Expected model fixture');
+    if (model.kind !== 'analysis' || model.mode !== 'model') throw new Error('Expected model fixture');
     const { modelId, ...withoutPin } = model;
     const result = decodeVisualizationDefinition({ ...value, sources: [withoutPin] });
     expect(result.state).toBe('setup-required');

@@ -22,7 +22,7 @@ describe('saved visualization backup transactions in Chromium', () => {
 
   it.each(['Account', 'Facility'] as const)('round trips incomplete mixed-family Scatter intent in a %s backup without fabricating bindings', async kind => {
     const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition, 'scatter-setup')] };
     const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account'
       ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));

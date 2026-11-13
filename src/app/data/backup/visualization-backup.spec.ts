@@ -115,7 +115,7 @@ describe('saved visualization backup preparation and transfer', () => {
     expect(maps['energy-use-group']['energy-group-a']).toBe('energy-group-a-new');
     expect(Object.values(maps.charge)).toEqual(['charge-a']);
     expect(Object.values(maps.model)).toEqual(['model-a', 'model-b']);
-    const model = source.savedVisualizations.find(item => (item.definition as any).sources[0].kind === 'analysis-model');
+    const model = source.savedVisualizations.find(item => (item.definition as any).sources[0].mode === 'model');
     const transferred = transferSavedVisualization(model, 'new-account', maps, 'copy');
     expect(transferred.definition).toMatchObject({ sources: [{ analysisGuid: 'analysis-a-new', groupGuid: 'group-a-new', modelId: 'model-a', comparisonModelId: 'model-b' }] });
     expect(transferred.preservation.references).toEqual([]);

@@ -1,6 +1,6 @@
 # V1 visualization contracts
 
-This reference owns saved visualization meaning, runtime contracts, and planned embedding semantics. Use [persistence](v1-visualization-persistence.md) for durable ownership and transfers, [workbench](v1-visualization-workbench.md) for editing/navigation, and [utility visualizations](v1-utility-visualizations.md) for implemented providers, line/bar editing, recipes, and inventory capture. Remaining source families, chart breadth, capture locations, and Home implementation are tracked in the [phase plan](v1-visualizations-and-home-plan.md).
+This reference owns saved visualization meaning, runtime contracts, and planned embedding semantics. Use [persistence](v1-visualization-persistence.md) for durable ownership and transfers, [workbench](v1-visualization-workbench.md) for editing/navigation, and [utility visualizations](v1-utility-visualizations.md) for implemented providers, line/bar editing, recipes, and inventory capture. Remaining data-source adapters, chart breadth, capture locations, and Home implementation are tracked in the [phase plan](v1-visualizations-and-home-plan.md).
 
 ## Ownership and saved intent
 
@@ -20,7 +20,7 @@ Definition validity, configuration completeness/compatibility, and runtime avail
 
 Utility setup uses all saved history unless an explicit rule replaces it. Fixed dates retain exact civil dates; rolling periods declare calendar or latest-data anchoring and show resolved intervals. Latest-data means the newest eligible observation across selected sources, with lagging sources retaining gaps and partial notices. Calendar windows do not establish that saved observations exist.
 
-Energy Use-only setup declares latest saved fiscal year, optionally pinned to one fiscal year. Mixed-family setup starts with all saved history, subject to adapter review. Annual values with the same label cannot roll up across incompatible fiscal intervals. Never invent monthly observations from annual estimates.
+Energy Use-only setup declares latest saved fiscal year, optionally pinned to one fiscal year. Mixed-source setup starts with all saved history, subject to adapter review. Annual values with the same label cannot roll up across incompatible fiscal intervals. Never invent monthly observations from annual estimates.
 
 Comparisons use previous periods, calendar/fiscal years, or explicit dates only when supported. Alignment preserves original dates and actual period meaning. Visualization dates do not edit analysis baselines. Result sources follow the named analysis's current saved calculation; model inspection pins durable model identity. Missing pinned models require repair, and unsaved candidates cannot become durable sources.
 
@@ -39,6 +39,8 @@ Providers preserve measured values, predictor observations, saved weather, estim
 
 Version-neutral contracts live under [`domain/visualizations`](../src/app/domain/visualizations/). Source owns exact field shapes: definition/validation, source-provider capabilities, chart compatibility, capture outcomes, and embedding context. Serializable definitions have no Angular, browser, ECharts, database, or Worker dependency. Typed variants do not admit arbitrary executable chart options. Unknown versions/providers remain unsupported without destructive normalization; persistence preserves durable payloads.
 
+The source catalog uses `utility`, `predictor`, `energy-use`, and `analysis`. Predictor resources preserve standard/weather provenance; Analysis distinguishes result/model modes and retains mode-specific measures and pinned model references. New Analysis setup is result/actual with no selected resources. Obsolete source kinds have no compatibility aliases or migration.
+
 Runtime evidence includes resolved periods, sources/series, settings, provenance, quality, unavailable reasons, and account/workspace/definition/input/request identity. Cancel or reject evidence after any relevant identity changes. Establish one calendar date and latest-data anchor across sources, then pass shared date context and requested chart projection to providers. Chart registration alone is insufficient approval. Requested source, settings, series, periods, and comparison must match the returned evidence.
 
 Periods contain ordered real civil dates and primary/comparison roles. Fixed/custom windows accept overlapping native intervals, including partial months, while retaining original dates. Rows fit declared intervals and overlap the requested role's dates. Every selected table series supplies an observation or explicit missing/excluded/padding value for each requested role; metadata alone is insufficient. Empty payloads use an empty state. Relative/fiscal calculations stay with authoritative providers.
@@ -49,7 +51,7 @@ Additive totals require declared nonoverlapping contribution identities and comp
 
 Only the utility inventory capture described by its owner is implemented. Extend other capture adapters at their source feature, preserving these meanings:
 
-| Source family | Meaning an adapter must preserve |
+| Data source | Meaning an adapter must preserve |
 | --- | --- |
 | Meter monthly/fiscal views | Meter GUID, canonical calendarization, measures, axes, selected years, fiscal alignment, and explicit native/monthly interpretation. |
 | Predictor/weather | Saved histories, units, duplicates, and observation pairing. Preserve the existing raw “Units ignored” comparison explicitly or block it; do not fetch weather. |

@@ -54,9 +54,9 @@ describe('reviewed visualization recovery actions', () => {
     expect(open).toHaveBeenCalledWith('account-a', 'new-identity');
     expect(editor.record()!.guid).toBe('visualization-a');
   });
-  it('retains mixed-family Scatter intent in one retried proposal and recovers publication without replay', async () => {
+  it('retains mixed-sourceKind Scatter intent in one retried proposal and recovers publication without replay', async () => {
     const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
-      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] });
+      scope: { kind: 'facility', facilityGuid: 'facility-a' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
     const { component, prepareCreate, submit, recover, open } = setup(definition);
     submit.mockResolvedValueOnce({ state: 'failed' }).mockResolvedValueOnce({ state: 'refresh-required' });
     await component.start('copy'); component.scopeControl.setValue('facility-b'); await component.confirm();

@@ -57,7 +57,7 @@ const VALID_SECTION_IDS: ReadonlyArray<SectionId> = ['home', 'data', 'visualizat
 const DEFAULT_DETAILS: Record<SectionId, string> = {
   home: 'overview',
   data: 'portfolio',
-  visualization: 'library',
+  visualization: 'dashboard',
   analysis: 'dashboard',
   reports: 'dashboard',
   settings: 'profile',
@@ -71,11 +71,11 @@ const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
 export function isAccountInventory(state: RouteState): boolean {
   return state.contextMode === 'account' && ((state.section === 'data' && state.detail === 'portfolio')
     || ((state.section === 'analysis' || state.section === 'reports') && state.detail === 'dashboard')
-    || (state.section === 'visualization' && state.detail === 'library'));
+    || (state.section === 'visualization' && state.detail === 'dashboard'));
 }
 
-export function visualizationLibraryRoute(accountGuid: string): string[] {
-  return ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'library'];
+export function visualizationDashboardRoute(accountGuid: string): string[] {
+  return ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'dashboard'];
 }
 
 export function visualizationWorkbenchRoute(accountGuid: string, visualizationGuid: string): string[] {

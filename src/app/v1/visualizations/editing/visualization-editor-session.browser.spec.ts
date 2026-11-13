@@ -37,10 +37,10 @@ describe('visualization editor session with native IndexedDB', () => {
   }
 
   it.each([
-    { label: 'existing single-family setup', definition: createVisualizationDefinition('Original', account.guid,
+    { label: 'existing single-sourceKind setup', definition: createVisualizationDefinition('Original', account.guid,
       { kind: 'facility', facilityGuid: facility.guid }, 'utility') },
-    { label: 'mixed-family Scatter setup', definition: createVisualizationSetupDefinition({ name: 'Original', accountGuid: account.guid,
-      scope: { kind: 'facility', facilityGuid: facility.guid }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'weather'] }) }
+    { label: 'mixed-sourceKind Scatter setup', definition: createVisualizationSetupDefinition({ name: 'Original', accountGuid: account.guid,
+      scope: { kind: 'facility', facilityGuid: facility.guid }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] }) }
   ])('saves metadata and rehydrates $label from the durable record after database reopen', async ({ definition }) => {
     const { session, proposal } = await create(definition);
     session.form.patchValue({ name: ' Durable name ', title: 'Current utility use', legend: false });

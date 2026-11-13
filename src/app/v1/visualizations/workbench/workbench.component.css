@@ -12,3 +12,4 @@ h2 { font-size: 1.1rem; }
 .visualization-workbench__preview { padding: 1rem; min-width: 0; }
 @media (max-width: 850px) { .visualization-workbench__layout { grid-template-columns: minmax(0, 1fr); } .visualization-workbench__controls { border-right: 0; border-bottom: 1px solid var(--v1-border); } }
 @media print { button { display: none; } .visualization-workbench__layout { display: block; } }
+:host .visualization-workbench__add-source { min-width: 0; margin: 1rem 0; padding: 0; border: 0; display: grid; gap: .5rem; }

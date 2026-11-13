@@ -20,6 +20,18 @@ describe('utility source editing', () => {
     return { fixture, component: fixture.componentInstance, context, changed, validityChanged };
   }
 
+  it.each(['meter', 'group', 'source'] as const)('keeps the %s meter view selectable and saved in source settings', groupBy => {
+    const { fixture, component, changed } = setup();
+    const select = fixture.nativeElement.querySelector('select[formcontrolname="groupBy"]') as HTMLSelectElement;
+    expect([...select.options].map(option => option.value)).toEqual(expect.arrayContaining(['meter', 'group', 'source']));
+    if (groupBy === 'meter') component.form.controls.groupBy.setValue('group');
+    select.value = groupBy; select.dispatchEvent(new Event('change')); fixture.detectChanges();
+    expect(component.form.controls.groupBy.value).toBe(groupBy);
+    const saved = changed.mock.lastCall![0] as VisualizationDefinition;
+    expect(source(saved)).toMatchObject({ kind: 'utility', groupBy, dataMode: 'calendarized' });
+    expect(source(saved).selection).toEqual(source().selection);
+  });
+
   it('hydrates saved unsupported native setup without changing its chart, source settings, or saving', () => {
     const base = utilityVisualizationFixture();
     const definition: VisualizationDefinition = { ...base, sources: [{ ...source(base), dataMode: 'billing-period' }] };
@@ -94,9 +106,9 @@ describe('utility source editing', () => {
     expect(source(next).selection).toEqual({ kind: 'fixed', resource: 'meter-group', guids: ['group-a'] });
   });
 
-  it('normalizes native mode only on real edits and keeps independent source families and series', () => {
+  it('normalizes native mode only on real edits and keeps independent data sources and series', () => {
     const base = utilityVisualizationFixture();
-    const mixed: VisualizationDefinition = { ...base, sources: [...base.sources, { id: 'weather', kind: 'weather', measure: 'value', aggregation: 'none' }],
+    const mixed: VisualizationDefinition = { ...base, sources: [...base.sources, { id: 'weather', kind: 'predictor', measure: 'value', aggregation: 'none' }],
       series: [...base.series, { id: 'weather-series', sourceId: 'weather', metric: 'value', axis: 'right' }] };
     const next = applyUtilitySourceForm(mixed, source(mixed).id, { ...utilitySourceFormValue(source(mixed)), dataMode: 'billing-period' });
     expect(source(next)).toMatchObject({ dataMode: 'billing-period', aggregation: 'none', groupBy: 'meter' });

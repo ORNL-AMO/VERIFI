@@ -51,7 +51,7 @@ First complete the working saved utility journey, then remaining sources/charts/
 
 ## Recipes and Home content
 
-Energy usage trend and Utility cost trend recipes are implemented with explicit saved-meter binding. Remaining utility/source breakdown recipes depend on applicable Vis4/Vis8 adapters; usage versus production/weather requires Vis5/Vis6/Vis7; analysis comparison requires applicable Vis5/Vis6/Vis7 adapters. Recipes must retain scope, dates, units/provenance, save/reopen behavior, and useful unavailable explanations.
+Energy usage trend is implemented with explicit utility-source, meter-group, or exact-meter binding; Utility cost trend binds exact meters. Remaining utility/source breakdown recipes depend on applicable Vis4/Vis8 adapters; usage versus production/weather requires Vis5/Vis6/Vis7; analysis comparison requires applicable Vis5/Vis6/Vis7 adapters. Recipes must retain scope, dates, units/provenance, save/reopen behavior, and useful unavailable explanations.
 
 Home1 defines these templates using existing data: Overview (totals/readiness/recent performance/next actions), Goals & Performance (energy/water goals, baselines/improvement/savings), Energy Use (trends/breakdowns/year/equipment comparisons), Costs (spending/charges/facility comparisons), Emissions (existing trends/breakdowns), Water (usage/costs/goals/comparisons), and Blank. Template names introduce no new goal types or calculation methods.
 

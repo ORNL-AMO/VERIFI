@@ -9,10 +9,10 @@ export function utilityVisualizationFixture(scope: VisualizationScope = { kind: 
 }
 
 export function analysisVisualizationFixture(pinnedModel = false): VisualizationDefinition {
-  return { ...createVisualizationDefinition('Analysis result', 'account-a', { kind: 'facility', facilityGuid: 'facility-a' }, pinnedModel ? 'analysis-model' : 'analysis-result'),
+  return { ...createVisualizationDefinition('Analysis result', 'account-a', { kind: 'facility', facilityGuid: 'facility-a' }, 'analysis'),
     sources: pinnedModel
-      ? [{ id: 'analysis', kind: 'analysis-model', analysisGuid: 'analysis-a', groupGuid: 'group-a', modelId: 'model-a', comparisonModelId: 'model-b', measure: 'modeled', aggregation: 'none' }]
-      : [{ id: 'analysis', kind: 'analysis-result', analysisGuid: 'analysis-a', groupGuid: 'group-a', measure: 'actual', aggregation: 'none' }],
+      ? [{ id: 'analysis', kind: 'analysis', mode: 'model', analysisGuid: 'analysis-a', groupGuid: 'group-a', modelId: 'model-a', comparisonModelId: 'model-b', measure: 'modeled', aggregation: 'none' }]
+      : [{ id: 'analysis', kind: 'analysis', mode: 'result', analysisGuid: 'analysis-a', groupGuid: 'group-a', measure: 'actual', aggregation: 'none' }],
     series: [{ id: 'result', sourceId: 'analysis', metric: pinnedModel ? 'modeled' : 'actual', axis: 'left' }],
     chart: { kind: 'time-series', type: 'line', interval: 'monthly', stack: 'none' } };
 }

@@ -1,12 +1,12 @@
-<article class="portfolio-tile" [class.portfolio-tile--scoped]="showOwnership && (!!tile.owner || !!tile.analysisSnapshot || !!tile.reportSnapshot)" [class.portfolio-tile--selecting]="selecting" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--reading-snapshot]="(!!tile.meterSnapshot || !!tile.predictorSnapshot) && level !== 'simple'" [class.portfolio-tile--predictor-snapshot]="!!tile.predictorSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-analysis-scope]="tile.analysisSnapshot?.scope" [attr.data-report-scope]="tile.reportSnapshot?.scope" [attr.data-detail]="level" [attr.aria-label]="tileLabel" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
+<article class="portfolio-tile" [class.portfolio-tile--scoped]="showOwnership && (!!tile.owner || !!tile.analysisSnapshot || !!tile.reportSnapshot || !!tile.visualizationSnapshot)" [class.portfolio-tile--selecting]="selecting" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--reading-snapshot]="(!!tile.meterSnapshot || !!tile.predictorSnapshot) && level !== 'simple'" [class.portfolio-tile--predictor-snapshot]="!!tile.predictorSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-analysis-scope]="tile.analysisSnapshot?.scope" [attr.data-report-scope]="tile.reportSnapshot?.scope" [attr.data-visualization-scope]="tile.visualizationSnapshot?.scope" [attr.data-detail]="level" [attr.aria-label]="tileLabel" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
   @if (selecting && !print) { <input class="portfolio-tile__selection" type="checkbox" [formControl]="selectionControl" [attr.aria-label]="'Select ' + tile.name"> }
   @if (showOwnership) {
   @if (tile.owner; as owner) {
-    <app-inventory-card-header scope="facility" [resource]="tile.reportSnapshot ? 'report' : tile.analysisSnapshot ? 'analysis' : undefined">
+    <app-inventory-card-header scope="facility" [resource]="tile.reportSnapshot ? 'report' : tile.analysisSnapshot ? 'analysis' : tile.visualizationSnapshot ? 'visualization' : undefined">
       <a class="portfolio-tile__owner portfolio-tile__header-owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="'Filter by facility ' + owner.label" [title]="owner.label" (click)="filterFacility($event)">{{ owner.label }}</a>
     </app-inventory-card-header>
-  } @else if (tile.analysisSnapshot || tile.reportSnapshot; as snapshot) {
-    <app-inventory-card-header [scope]="snapshot.scope" [resource]="tile.reportSnapshot ? 'report' : 'analysis'"/>
+  } @else if (tile.analysisSnapshot || tile.reportSnapshot || tile.visualizationSnapshot; as snapshot) {
+    <app-inventory-card-header [scope]="snapshot.scope" [resource]="tile.reportSnapshot ? 'report' : tile.visualizationSnapshot ? 'visualization' : 'analysis'"/>
   }
   }
   <div class="portfolio-tile__heading">
@@ -35,7 +35,15 @@
   }
   @if (stationLabel && (level === 'simple' || !tile.stationLink)) { <p class="portfolio-tile__station">{{ stationLabel }}</p> }
   <div class="portfolio-tile__context">
-    @if (chipLabel) { <span class="portfolio-tile__chip">@if (tile.chipIcon) { <app-ui-icon [name]="tile.chipIcon"/> }{{ chipLabel }}</span> }
+    @if (tile.visualizationSnapshot; as visualization) {
+      @if (visualization.dataSources.length) {
+        <ul class="portfolio-tile__data-sources" aria-label="Data sources">
+          @for (source of visualization.dataSources; track source.label) {
+            <li><app-ui-icon [name]="source.icon" [size]="22" [decorative]="false" [label]="source.label" [title]="source.label"/></li>
+          }
+        </ul>
+      }
+    } @else if (chipLabel) { <span class="portfolio-tile__chip">@if (tile.chipIcon) { <app-ui-icon [name]="tile.chipIcon"/> }{{ chipLabel }}</span> }
     @if (tile.energyUseGroupSnapshot; as group) {
       @if (group.equipmentTypes.length) {
         <ul class="portfolio-tile__equipment-types" aria-label="Equipment types in this group">
@@ -49,7 +57,7 @@
   </div>
   </div>
   @if (tile.visualizationSnapshot; as visualization) {
-    @if (level !== 'simple') { <app-visualization-snapshot [snapshot]="visualization" [detailed]="level === 'detailed'"/> }
+    @if (level !== 'simple') { <app-visualization-snapshot [snapshot]="visualization" [detailed]="level === 'detailed'" [showScope]="!showOwnership"/> }
   } @else if (tile.reportSnapshot; as report) {
     @if (report.contentPending !== false) { <p class="portfolio-tile__report-pending"><app-ui-icon name="info" [size]="18"/>Report content pending</p> }
     @if (level !== 'simple') { <app-report-snapshot [snapshot]="report" [detailed]="level === 'detailed'" [resourceName]="tile.name" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }

@@ -39,7 +39,8 @@ export interface UtilityVisualizationSource extends SourceBase {
 }
 
 export interface PredictorVisualizationSource extends SourceBase {
-  readonly kind: 'predictor' | 'weather';
+  /** Standard/weather identity belongs to selected predictor records, not this source category. */
+  readonly kind: 'predictor';
   readonly measure: 'value';
   readonly selection?: ResourceSelection;
   readonly aggregation: 'none' | 'sum' | 'mean';
@@ -54,7 +55,8 @@ export interface EnergyUseVisualizationSource extends SourceBase {
 }
 
 export interface AnalysisResultVisualizationSource extends SourceBase {
-  readonly kind: 'analysis-result';
+  readonly kind: 'analysis';
+  readonly mode: 'result';
   readonly analysisGuid?: string;
   readonly groupGuid?: string;
   readonly measure: 'actual' | 'calculated' | 'savings' | 'losses' | 'annual-improvement' | 'total-improvement' | 'banked-savings' | 'banked-losses';
@@ -62,7 +64,8 @@ export interface AnalysisResultVisualizationSource extends SourceBase {
 }
 
 export interface AnalysisModelVisualizationSource extends SourceBase {
-  readonly kind: 'analysis-model';
+  readonly kind: 'analysis';
+  readonly mode: 'model';
   readonly analysisGuid?: string;
   readonly groupGuid?: string;
   /** Saved model identity, never an unsaved candidate or a fallback to selectedModelId. */
@@ -72,8 +75,8 @@ export interface AnalysisModelVisualizationSource extends SourceBase {
   readonly aggregation: 'none';
 }
 
-export type VisualizationSource = UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource
-  | AnalysisResultVisualizationSource | AnalysisModelVisualizationSource;
+export type AnalysisVisualizationSource = AnalysisResultVisualizationSource | AnalysisModelVisualizationSource;
+export type VisualizationSource = UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource | AnalysisVisualizationSource;
 export type VisualizationSourceKind = VisualizationSource['kind'];
 
 /** Civil ISO dates are inclusive at both ends; adapters resolve their native periods explicitly. */
@@ -153,8 +156,7 @@ export function createVisualizationDefinition(name: string, accountGuid: string,
     ? { ...base, kind: 'utility', measure: 'energy', aggregation: 'sum', dataMode: 'calendarized', groupBy: 'meter',
       settings: { ...base.settings, energyTreatment: { kind: 'owner' } } }
     : sourceKind === 'energy-use' ? { ...base, kind: 'energy-use', measure: 'consumption', aggregation: 'sum', denominator: 'facility' }
-    : sourceKind === 'analysis-result' ? { ...base, kind: 'analysis-result', measure: 'actual', aggregation: 'none' }
-    : sourceKind === 'analysis-model' ? { ...base, kind: 'analysis-model', measure: 'modeled', aggregation: 'none' }
+    : sourceKind === 'analysis' ? { ...base, kind: 'analysis', mode: 'result', measure: 'actual', aggregation: 'none' }
     : { ...base, kind: sourceKind, measure: 'value', aggregation: 'none' };
   return { version: VISUALIZATION_DEFINITION_VERSION, name, accountGuid, scope: { ...scope }, sources: [source],
     period: sourceKind === 'energy-use' ? { kind: 'latest-saved-year', basis: 'fiscal' } : { kind: 'all-history' },
@@ -170,10 +172,10 @@ export interface VisualizationSetupInput {
   readonly sourceKinds: readonly VisualizationSourceKind[];
 }
 
-/** Every selected family starts independently; the workbench assigns actual resources and series. */
+/** Every selected data source starts independently; the workbench assigns actual resources and series. */
 export function createVisualizationSetupDefinition(input: VisualizationSetupInput): VisualizationDefinition {
   if (!input.sourceKinds.length || new Set(input.sourceKinds).size !== input.sourceKinds.length)
-    throw new Error('Choose one or more unique source families.');
+    throw new Error('Choose one or more unique data sources.');
   const sources = input.sourceKinds.map((kind, index) => ({
     ...createVisualizationDefinition(input.name, input.accountGuid, input.scope, kind).sources[0], id: `source-${index + 1}`
   }));

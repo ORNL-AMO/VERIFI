@@ -37,7 +37,7 @@ export function configureLibraryTest(imports: unknown[] = []) {
     isSingleSiteWorkspace: computed(() => workspace.account()?.isSingleFacilityCompany === true && workspace.facilities().length === 1) };
   const visualizations = { rememberReturn: vi.fn(), open: vi.fn(async () => true),
     workbenchRoute: (accountGuid: string, guid: string) => ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'workbench', guid],
-    libraryRoute: (accountGuid: string) => ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'library'] };
+    dashboardRoute: (accountGuid: string) => ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'dashboard'] };
   TestBed.configureTestingModule({ imports, providers: [provideRouter([]), LibraryLifecycle,
     { provide: AccountWorkspaceService, useValue: { selectAccount: vi.fn(async () => 'published') } },
     { provide: AccountWorkspaceStore, useValue: workspace }, { provide: SavedVisualizationCommands, useValue: commands },

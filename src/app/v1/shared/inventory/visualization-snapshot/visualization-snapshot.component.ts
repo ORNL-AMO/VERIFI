@@ -6,4 +6,5 @@ import type { InventoryVisualizationSnapshot } from '../inventory.models';
 export class VisualizationSnapshotComponent {
   readonly snapshot = input.required<InventoryVisualizationSnapshot>();
   readonly detailed = input(false);
+  readonly showScope = input(true);
 }

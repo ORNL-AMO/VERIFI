@@ -17,7 +17,7 @@
   } @else {
     <div class="visualization-preview__notice" [attr.role]="view.state === 'error' || view.state === 'invalid' ? 'alert' : null">
       @if (view.reasons?.length) { <ul>@for (reason of view.reasons; track $index) { <li>{{ reason }}</li> }</ul> }
-      @if (view.state === 'setup-required' || view.state === 'unsupported') { <p>Choose resources in Sources and review periods and chart settings. Some source families and chart types are not supported yet. You can save and reopen this setup now.</p> }
+      @if (view.state === 'setup-required' || view.state === 'unsupported') { <p>Choose resources in Sources and review periods and chart settings. Some data sources and chart types are not supported yet. You can save and reopen this setup now.</p> }
       @if (view.state === 'missing-source') { <p>Review the missing references in Sources. No replacement source has been selected.</p> }
       @if (canRetry()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="preview.retry()">Retry preview</button> }
     </div>

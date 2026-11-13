@@ -115,7 +115,7 @@ export function normalizeVisualizationAnalysisGroup(group: AnalysisGroup, analys
     if (record.preservation?.locked) return [];
     const decoded = decodeVisualizationDefinition(record.definition);
     if (!('definition' in decoded)) return [];
-    return decoded.definition.sources.flatMap(source => source.kind === 'analysis-model'
+    return decoded.definition.sources.flatMap(source => source.kind === 'analysis' && source.mode === 'model'
       && source.analysisGuid === analysisGuid && source.groupGuid === group.idbGroupId
       ? [source.modelId, source.comparisonModelId].filter(Boolean) : []);
   }));
