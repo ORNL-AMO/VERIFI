@@ -1,5 +1,7 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { SubregionEmissions } from '@data/models/eGridEmissions';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
@@ -12,7 +14,7 @@ import { DataQualityAnnualTotalsComponent } from './data-quality-annual-totals.c
 
 async function setup(snapshot = annualTotalsSnapshot()) {
   const view = await setupReportWorkbench(snapshot.facilityReports, [WorkspaceCalendarizationService,
-    { provide: EGridService, useValue: { excelCo2Emissions: ANNUAL_TEST_EMISSIONS } }], snapshot);
+    { provide: EGridService, useValue: { builtinEmissions: signal(ANNUAL_TEST_EMISSIONS) } }], snapshot);
   const workbench = await view.open('report-a', 'report');
   const service = workbench.workbench.session()!.injector.get(DataQualityReportService);
   await vi.waitFor(() => { view.harness.detectChanges(); expect(service.state().state).toBe('ready'); });
@@ -61,24 +63,27 @@ describe('Annual Totals in the report workbench', () => {
     const { root } = await setup(snapshot);
     expect(root.textContent).toContain('No calendarized readings are available for annual totals.');
   });
-  it('starts calendarization only on Report, reports rate-loading failures, and retries current inputs', async () => {
+  it('starts calendarization only on Report and refreshes when bundled rates arrive', async () => {
     const snapshot = annualTotalsSnapshot();
-    const rates = { excelCo2Emissions: undefined as typeof ANNUAL_TEST_EMISSIONS | undefined,
-      parseEGridData: vi.fn().mockRejectedValueOnce(new Error('Unavailable')).mockImplementationOnce(async () => {
-        rates.excelCo2Emissions = ANNUAL_TEST_EMISSIONS;
-      }) };
+    const builtinEmissions = signal<readonly SubregionEmissions[] | undefined>(undefined);
     const view = await setupReportWorkbench(snapshot.facilityReports, [WorkspaceCalendarizationService,
-      { provide: EGridService, useValue: rates }], snapshot);
-    await view.open('report-a', 'setup'); view.harness.detectChanges();
-    expect(rates.parseEGridData).not.toHaveBeenCalled();
+      { provide: EGridService, useValue: { builtinEmissions } }], snapshot);
+    await view.open('report-a', 'setup');
+    const calendarization = TestBed.inject(WorkspaceCalendarizationService);
+    const calendarize = vi.spyOn(calendarization, 'calendarizeBase');
+    view.harness.detectChanges();
+    expect(calendarize).not.toHaveBeenCalled();
     const workbench = await view.open('report-a', 'report');
     const service = workbench.workbench.session()!.injector.get(DataQualityReportService);
-    await vi.waitFor(() => { view.harness.detectChanges(); expect(service.state().state).toBe('error'); });
-    expect(service.state().message).toContain('Emissions rates could not be loaded');
-    expect(service.state().value).toBeUndefined(); service.retry();
     await vi.waitFor(() => { view.harness.detectChanges(); expect(service.state().state).toBe('ready'); });
-    expect(rates.parseEGridData).toHaveBeenCalledTimes(2);
-    expect(service.state().value!.annualTotals[0].rows[0].totalWithLocationEmissions).toBeGreaterThan(0);
+    expect(calendarize).toHaveBeenCalledOnce();
+    expect(service.state().value!.annualTotals[0].rows[0].totalWithLocationEmissions).toBe(0);
+    builtinEmissions.set(ANNUAL_TEST_EMISSIONS);
+    await vi.waitFor(() => {
+      view.harness.detectChanges();
+      expect(service.state().state).toBe('ready');
+      expect(service.state().value!.annualTotals[0].rows[0].totalWithLocationEmissions).toBeGreaterThan(0);
+    });
   });
   it.each(['electricity', 'gas', 'stationary fuel', 'mobile fuel', 'water', 'REC', 'fugitive', 'process'] as const)('matches direct v0 facility calendarization for %s with fiscal and source settings', async kind => {
     const snapshot = annualTotalsSnapshot();

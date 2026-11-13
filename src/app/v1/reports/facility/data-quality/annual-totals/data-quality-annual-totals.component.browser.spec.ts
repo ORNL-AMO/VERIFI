@@ -1,3 +1,5 @@
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { page, userEvent } from 'vitest/browser';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
@@ -31,7 +33,7 @@ describe('Annual Totals with native calendarization', () => {
     snapshot.predictorData = predictorSnapshot.predictorData;
     Object.assign(snapshot.predictors[1], { predictorType: 'Weather', weatherDataType: 'HDD', heatingBaseTemperature: 65, unit: undefined });
     const view = await setupReportWorkbench(snapshot.facilityReports, [WorkspaceCalendarizationService,
-      { provide: EGridService, useValue: { excelCo2Emissions: ANNUAL_TEST_EMISSIONS } }], snapshot);
+      { provide: EGridService, useValue: { builtinEmissions: signal(ANNUAL_TEST_EMISSIONS) } }], snapshot);
     const workbench = await view.open();
     const host = view.harness.fixture.nativeElement as HTMLElement;
     host.classList.add('v1-root', ...classes);
@@ -111,7 +113,7 @@ describe('Annual Totals with native calendarization', () => {
     await page.viewport(width, 1200);
     const snapshot = annualTotalsSnapshot();
     const view = await setupReportWorkbench(snapshot.facilityReports, [WorkspaceCalendarizationService,
-      { provide: EGridService, useValue: { excelCo2Emissions: ANNUAL_TEST_EMISSIONS } }], snapshot);
+      { provide: EGridService, useValue: { builtinEmissions: signal(ANNUAL_TEST_EMISSIONS) } }], snapshot);
     const workbench = await view.open('report-a', 'report');
     const service = workbench.workbench.session()!.injector.get(DataQualityReportService);
     const host = view.harness.fixture.nativeElement as HTMLElement;
@@ -139,9 +141,10 @@ describe('Annual Totals with native calendarization', () => {
     await page.screenshot({ element: host.querySelector<HTMLElement>('.meter-report')!,
       path: `../../../../../../../.angular/data-quality-annual-totals-${theme}.png` });
   });
-  it('loads the bundled eGRID rates before calculating standard electricity emissions', async () => {
+  it('uses the bundled eGRID rates loaded by workspace initialization for electricity emissions', async () => {
     const snapshot = annualTotalsSnapshot(); snapshot.facilities[0].eGridSubregion = 'CAMX';
     const view = await setupReportWorkbench(snapshot.facilityReports, [WorkspaceCalendarizationService], snapshot);
+    await TestBed.inject(EGridService).parseEGridData();
     const workbench = await view.open('report-a', 'report');
     const service = workbench.workbench.session()!.injector.get(DataQualityReportService);
     // Loading/parsing the workbook and starting a native Worker can exceed one second in the full suite.
