@@ -8,6 +8,7 @@ import { TimeSeriesModule } from '../time-series.module';
 import type { VisualizationDefinition, VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
 import type { ResolvedVisualizationSeries } from '@domain/visualizations/visualization-source-provider';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
+import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 
 describe('saved chart settings', () => {
   afterEach(() => TestBed.resetTestingModule());
@@ -192,5 +193,47 @@ describe('saved chart settings', () => {
     const effective = resolveVisualizationSeries(moved, [...restored, ...state.metadata], true);
     expect(effective.map(item => item.metadata.label)).toEqual(['Natural Gas', 'Electricity', 'Dormant A', 'Dormant B', 'Other Energy']);
     expect(effective[2].selected.label).toBe('Retained A'); expect(effective[3].selected.visible).toBe(false);
+  });
+  it('moves the whole source at a boundary even when its last item is a separate declaration', () => {
+    const state = groupedSetup(), base = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...base, sources: [...base.sources, { ...base.sources[0], id: 'other' }], series: [
+      { id: 'first', sourceId: 'utility', metric: 'energy', resourceGuid: 'meter-a', axis: 'left', traceType: 'bar' },
+      { id: 'second', sourceId: 'utility', metric: 'energy', resourceGuid: 'meter-b', axis: 'left' },
+      { id: 'neighbor', sourceId: 'other', metric: 'energy', resourceGuid: 'meter-c', axis: 'right' }
+    ] };
+    const metadata: ResolvedVisualizationSeries[] = ['meter-a', 'meter-b', 'meter-c'].map(resourceGuid => ({ ...state.metadata[0],
+      id: resourceGuid, sourceId: resourceGuid === 'meter-c' ? 'other' : 'utility', resourceGuid }));
+    state.hydrate(definition, metadata);
+    state.fixture.componentInstance.move('meter-b', 1);
+    const moved = state.acknowledge();
+    expect(moved.series).toEqual([definition.series[2], definition.series[0], definition.series[1]]);
+    expect(resolveVisualizationSeries(moved, metadata, true).map(item => item.metadata.id)).toEqual(['meter-c', 'meter-a', 'meter-b']);
+  });
+  it('orders exact and wildcard declarations together without replacing provider appearance or foreign ranks', () => {
+    const state = groupedSetup(), base = utilityVisualizationFixture();
+    const foreign = { resourceGuid: 'meter-b', accountGuid: 'foreign-account', order: 0, color: '#abcdef' };
+    const definition: VisualizationDefinition = { ...base, series: [
+      { id: 'exact', sourceId: 'utility', metric: 'energy', resourceGuid: 'meter-a', axis: 'left', traceType: 'line',
+        overrides: [{ resourceGuid: 'meter-a', order: 1 }] },
+      { id: 'members', sourceId: 'utility', metric: 'energy', axis: 'left', overrides: [
+        { seriesId: 'utility:meter-b', order: 0, color: '#123456', traceType: 'bar' },
+        { resourceGuid: 'dormant', order: 5, label: 'Retained' }, foreign
+      ] }
+    ] };
+    const metadata: ResolvedVisualizationSeries[] = ['meter-a', 'meter-b'].map(resourceGuid => ({ ...state.metadata[0],
+      id: `utility:${resourceGuid}`, resourceGuid }));
+    state.hydrate(definition, metadata);
+    expect(state.fixture.componentInstance.rows().map(row => row.key)).toEqual(['utility:meter-b', 'utility:meter-a']);
+    state.fixture.componentInstance.move('utility:meter-b', 1);
+    const moved = state.acknowledge();
+    expect(decodeVisualizationDefinition(moved).state).toBe('valid');
+    expect(moved.series[0].overrides).toEqual([{ resourceGuid: 'meter-a', order: 0 }]);
+    expect(moved.series[1].overrides).toEqual([
+      { seriesId: 'utility:meter-b', order: 1, color: '#123456', traceType: 'bar' },
+      { resourceGuid: 'dormant', order: 2, label: 'Retained' }, foreign
+    ]);
+    const effective = resolveVisualizationSeries(moved, metadata, true);
+    expect(effective.map(item => item.metadata.resourceGuid)).toEqual(['meter-a', 'meter-b']);
+    expect(effective[1].selected).toMatchObject({ color: '#123456', traceType: 'bar' });
   });
 });
