@@ -159,6 +159,13 @@ describe('Data Quality report Setup', () => {
       .find(button => button.textContent?.trim() === label)!;
     expect(root.querySelector('.content-matrix')?.getAttribute('aria-labelledby')).toBe('data-quality-content-heading');
     expect(root.querySelector('#data-quality-content-heading')?.textContent).toBe('Included Content');
+    expect(root.textContent).toContain('Consumption distribution');
+    expect(root.textContent).toContain('Cost distribution');
+    expect(root.textContent).not.toMatch(/histogram|Number of bins/i);
+    const consumptionPlot = root.querySelector<HTMLInputElement>('[aria-label="Meter Details: Consumption distribution chart"]')!;
+    expect(consumptionPlot.checked).toBe(editor.draft().settings.includeMeterConsumptionHistogram);
+    consumptionPlot.click(); harness.detectChanges();
+    expect(editor.draft().settings.includeMeterConsumptionHistogram).toBe(consumptionPlot.checked);
     preset('Tables only').click(); harness.detectChanges();
     expect(editor.draft().settings).toMatchObject({ includeMeterStatisticsTable: true, includePredictorStatisticsTable: true,
       includeAnnualTotalsTable: true, includeMeterConsumptionTimeseriesGraph: false, includeMeterCostHistogram: false,

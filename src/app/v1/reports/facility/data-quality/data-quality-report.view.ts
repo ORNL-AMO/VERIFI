@@ -1,21 +1,19 @@
 import type { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import type { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictor, WeatherDataType } from '@data/models/idbModels/predictor';
-import { getConsumptionData } from '@domain/calculations/data-quality/meter-data-quality';
-import { predictorDataQualityUnit } from '@domain/calculations/data-quality/predictor-data-quality';
-import { DEFAULT_QUALITY_HISTOGRAM_BINS } from '@domain/calculations/data-quality/data-quality-histogram';
 import type { DataQualityReportResult } from './data-quality-report.service';
 import type { DataQualitySettingsDraft } from './data-quality-report-settings';
+import { meterDotPlotInput, predictorDotPlotInput } from './dot-plot/data-quality-report-dot-plot.view';
 
 /** Only structured-cloneable inputs; the shared export controller will detach them before generation. */
 export function buildDataQualityReportSnapshot(
   report: IdbFacilityReport, facility: Pick<IdbFacility, 'name'>, settings: DataQualitySettingsDraft,
-  results: DataQualityReportResult, histogramBinCounts: Readonly<Record<string, number>>
+  results: DataQualityReportResult
 ) {
   return {
     identity: { scope: 'facility' as const, accountGuid: report.accountId,
       facilityGuid: report.facilityId, reportGuid: report.guid },
-    name: report.name, facility: { name: facility.name }, settings, results, histogramBinCounts
+    name: report.name, facility: { name: facility.name }, settings, results
   };
 }
 
@@ -36,18 +34,10 @@ export function dataQualityReportMessages() {
   } as const;
 }
 
-export function dataQualityHistogramKey(kind: 'consumption' | 'cost' | 'predictor', guid: string): string {
-  return kind === 'predictor' ? `predictor-${guid}` : `meter-${guid}-${kind}`;
-}
-
-/** Preview and file preparation share source order, visibility, evidence, and histogram inputs. */
+/** Preview and file preparation share source order, visibility, evidence, and dot-plot inputs. */
 export function dataQualityReportView(
-  result: DataQualityReportResult, settings: DataQualitySettingsDraft,
-  binCounts: Readonly<Record<string, number>> = {}
+  result: DataQualityReportResult, settings: DataQualitySettingsDraft
 ) {
-  const histogram = (key: string, values: readonly unknown[]) => ({
-    key, values, binCount: binCounts[key] ?? DEFAULT_QUALITY_HISTOGRAM_BINS
-  });
   return {
     meters: result.meters.map(report => {
       const annualTotals = result.annualTotals.find(totals => totals.meterGuid === report.meter.guid);
@@ -58,17 +48,16 @@ export function dataQualityReportView(
           statistics: settings.includeMeterStatisticsTable,
           consumptionTimeseries: settings.includeMeterConsumptionTimeseriesGraph,
           costTimeseries: settings.includeMeterCostTimeseriesGraph && costChartIncluded,
-          consumptionHistogram: settings.includeMeterConsumptionHistogram && report.showConsumption,
-          costHistogram: settings.includeMeterCostHistogram && costChartIncluded,
+          consumptionDotPlot: settings.includeMeterConsumptionHistogram && report.showConsumption,
+          costDotPlot: settings.includeMeterCostHistogram && costChartIncluded,
           annualTotals: !!settings.includeAnnualTotalsTable && !!annualTotals,
           excludedConsumption: settings.includeMeterConsumptionHistogram && !report.showConsumption,
           costUnavailable: (settings.includeMeterCostTimeseriesGraph || settings.includeMeterCostHistogram)
             && !costChartIncluded
         },
-        consumptionHistogram: histogram(dataQualityHistogramKey('consumption', report.meter.guid),
-          getConsumptionData([...report.meterData], report.meter)),
-        costHistogram: histogram(dataQualityHistogramKey('cost', report.meter.guid),
-          report.meterData.map(reading => reading.totalCost)),
+        consumptionDotPlot: settings.includeMeterConsumptionHistogram && report.showConsumption
+          ? meterDotPlotInput(report, 'consumption') : undefined,
+        costDotPlot: settings.includeMeterCostHistogram && costChartIncluded ? meterDotPlotInput(report, 'cost') : undefined,
         evidence: [
           ...(report.showConsumption && report.energyOutlierCount
             ? [`${report.energyOutlierCount} consumption reading(s) outside the expected range.`] : []),
@@ -86,12 +75,9 @@ export function dataQualityReportView(
       content: {
         statistics: settings.includePredictorStatisticsTable,
         timeseries: settings.includePredictorTimeseriesGraph,
-        histogram: settings.includePredictorHistogram
+        dotPlot: settings.includePredictorHistogram
       },
-      histogram: histogram(dataQualityHistogramKey('predictor', report.predictor.guid),
-        report.readings.map(reading => reading.amount)),
-      histogramUnit: report.predictor.predictorType === 'Weather'
-        ? predictorDataQualityUnit({ ...report.predictor, unit: undefined }) : report.unit,
+      dotPlot: settings.includePredictorHistogram ? predictorDotPlotInput(report) : undefined,
       evidence: [
         ...(report.outlierCount ? [`${report.outlierCount} predictor reading(s) outside the expected range.`] : []),
         ...(report.duplicateMonths.length

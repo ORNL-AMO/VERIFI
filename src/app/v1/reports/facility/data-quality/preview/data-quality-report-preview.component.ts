@@ -15,15 +15,7 @@ export class DataQualityReportPreviewComponent {
     const result = this.results.state().value;
     return result ? dataQualityReportView(result, this.editor.draft().settings) : undefined;
   });
-  readonly meters = computed(() => this.view()?.meters.map(meter => ({ ...meter,
-    consumptionHistogram: this.histogram(meter.consumptionHistogram),
-    costHistogram: this.histogram(meter.costHistogram)
-  })) ?? []);
-  readonly predictors = computed(() => this.view()?.predictors.map(predictor => ({ ...predictor,
-    histogram: this.histogram(predictor.histogram)
-  })) ?? []);
+  readonly meters = computed(() => this.view()?.meters ?? []);
+  readonly predictors = computed(() => this.view()?.predictors ?? []);
   readonly messages = dataQualityReportMessages();
-  private histogram(input: { readonly key: string; readonly values: readonly unknown[] }) {
-    return { ...input, binCount: this.results.histogramBinCount(input.key) };
-  }
 }

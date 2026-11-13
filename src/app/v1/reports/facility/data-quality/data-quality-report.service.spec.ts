@@ -26,7 +26,7 @@ async function ready(service: DataQualityReportService) {
 }
 describe('Data Quality meter result session', () => {
   afterEach(() => vi.restoreAllMocks());
-  it('prepares cloneable export inputs with current bins without recalculating or modifying the draft', async () => {
+  it('prepares cloneable export inputs with current settings without recalculating or modifying the draft', async () => {
     const { service, snapshot, draft, stage, pending } = setup();
     snapshot.set(dataQualityPredictorReadingsSnapshot());
     expect(service.exportSnapshot()).toBeUndefined();
@@ -34,15 +34,8 @@ describe('Data Quality meter result session', () => {
     const result = service.state().value, savedDraft = draft();
     expect(service.exportSnapshot()!.identity).toEqual({ scope: 'facility', accountGuid: 'account-a',
       facilityGuid: 'facility-a', reportGuid: 'report-a' });
-    expect(service.exportSnapshot()!.histogramBinCounts).toEqual({
-      'meter-meter-a-consumption': 50, 'meter-meter-a-cost': 50, 'predictor-predictor-a': 50
-    });
-    service.setHistogramBinCount('meter-meter-a-consumption', 7);
-    service.setHistogramBinCount('predictor-predictor-a', 12);
-    service.setHistogramBinCount('predictor-predictor-a', 0);
     const prepared = service.exportSnapshot()!;
-    expect(prepared.histogramBinCounts['meter-meter-a-consumption']).toBe(7);
-    expect(prepared.histogramBinCounts['predictor-predictor-a']).toBe(12);
+    expect(prepared).not.toHaveProperty('histogramBinCounts');
     expect(service.state().value).toBe(result);
     expect(draft()).toBe(savedDraft);
     const cloned = structuredClone(prepared);
@@ -62,7 +55,6 @@ describe('Data Quality meter result session', () => {
     expect(service.exportSnapshot()).toBeUndefined();
     stage.set('report');
     await ready(service);
-    expect(service.exportSnapshot()!.histogramBinCounts['predictor-predictor-a']).toBe(12);
   });
   it('calculates full-history statistics, units, zero-MAD outliers, and duplicate months in both selection modes', async () => {
     const { service, draft } = setup(); await ready(service);
@@ -134,17 +126,6 @@ describe('Data Quality meter result session', () => {
     draft.update(value => ({ ...value, settings: { ...value.settings, includePredictorStatisticsTable: false, includePredictorTimeseriesGraph: false,
       includePredictorHistogram: false } }));
     await ready(service); expect(service.state().value!.predictors).toEqual([]);
-  });
-  it('retains independent, validated histogram preferences across stages without invalidating results or saving settings', async () => {
-    const { service, stage, draft } = setup(); await ready(service);
-    const original = service.state().value, settings = draft();
-    const consumption = service.histogramBinCount('meter-a-consumption'), cost = service.histogramBinCount('meter-a-cost');
-    expect(consumption()).toBe(50); service.setHistogramBinCount('meter-a-consumption', 7);
-    expect(consumption()).toBe(7); expect(cost()).toBe(50);
-    service.setHistogramBinCount('meter-a-consumption', 0); expect(consumption()).toBe(7);
-    expect(service.state().value).toBe(original); expect(draft()).toBe(settings);
-    stage.set('setup'); TestBed.tick(); stage.set('report'); await ready(service);
-    expect(service.histogramBinCount('meter-a-consumption')()).toBe(7);
   });
   it('cancels scheduled calculation work when leaving Report before it finishes', () => {
     vi.useFakeTimers();

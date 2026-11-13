@@ -1,17 +1,16 @@
-import { Injectable, Injector, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, computed, inject } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { buildDataQualityAnnualTotals, dataQualityAnnualEmissionsMultiplier, DataQualityAnnualTotals } from '@domain/reports/data-quality-report-annual-totals';
 import { CalanderizedMeter } from '@data/models/calanderization';
-import { DEFAULT_QUALITY_HISTOGRAM_BINS, isValidQualityHistogramBinCount } from '@domain/calculations/data-quality/data-quality-histogram';
 import { asyncScheduler, map, of, scheduled, switchMap, toArray } from 'rxjs';
 import { buildDataQualityMeterInputs, buildDataQualityPredictorInputs, DataQualityMeterInput, DataQualityPredictorInput } from '@domain/reports/data-quality-report-inputs';
 import { buildMeterDataQualityReport, MeterDataQualityReport } from '@domain/calculations/data-quality/meter-data-quality';
 import { buildPredictorDataQualityReport, PredictorDataQualityReport } from '@domain/calculations/data-quality/predictor-data-quality';
 import { ReportResultController, ReportResultRequest } from '@app/v1/reports/shared/calculation/report-result-controller';
 import { DataQualityReportEditor } from './editing/data-quality-report-editor.service';
-import { buildDataQualityReportSnapshot, dataQualityHistogramKey } from './data-quality-report.view';
+import { buildDataQualityReportSnapshot } from './data-quality-report.view';
 
 export interface DataQualityReportResult { 
   readonly meters: readonly MeterDataQualityReport[]; 
@@ -35,20 +34,6 @@ export class DataQualityReportService {
   private readonly calendarization = toSignal(toObservable(this.annualEnabled).pipe(switchMap(enabled => enabled
     ? this.injector.get(WorkspaceCalendarizationService).calendarizeBase() : of(IDLE_WORKSPACE_CALENDARIZATION))),
     { initialValue: IDLE_WORKSPACE_CALENDARIZATION });
-  private readonly histogramPreferences = new Map<string, WritableSignal<number>>();
-  histogramBinCount(key: string): Signal<number> {
-    let preference = this.histogramPreferences.get(key);
-    if (!preference) {
-      preference = signal(DEFAULT_QUALITY_HISTOGRAM_BINS);
-      this.histogramPreferences.set(key, preference);
-    }
-    return preference.asReadonly();
-  }
-  setHistogramBinCount(key: string, count: number): void {
-    if (!isValidQualityHistogramBinCount(count)) return;
-    this.histogramBinCount(key);
-    this.histogramPreferences.get(key)!.set(count);
-  }
   private readonly request = computed<ReportResultRequest<DataQualityReportResult, readonly QualityInput[]>>(() => {
     const context = this.context, workspace = context.workspace, report = context.report();
     const key = `${context.key()}:${context.stage()}`;
@@ -116,13 +101,7 @@ export class DataQualityReportService {
     if (state.state !== 'ready' || !state.value || !report) return undefined;
     const facility = this.context.workspace.snapshot()?.facilities.find(item => item.guid === report.facilityId);
     if (!facility) return undefined;
-    const keys = [
-      ...state.value.meters.flatMap(item => [dataQualityHistogramKey('consumption', item.meter.guid),
-        dataQualityHistogramKey('cost', item.meter.guid)]),
-      ...state.value.predictors.map(item => dataQualityHistogramKey('predictor', item.predictor.guid))
-    ];
-    const histogramBinCounts = Object.fromEntries(keys.map(key => [key, this.histogramBinCount(key)()]));
-    return buildDataQualityReportSnapshot(report, facility, this.editor.draft().settings, state.value, histogramBinCounts);
+    return buildDataQualityReportSnapshot(report, facility, this.editor.draft().settings, state.value);
   });
   retry(): void {
     if (this.annualEnabled()) this.injector.get(WorkspaceCalendarizationService).retry();

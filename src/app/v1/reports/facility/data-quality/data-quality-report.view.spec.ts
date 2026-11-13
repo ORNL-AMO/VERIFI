@@ -13,7 +13,6 @@ import { dataQualityReportView, dataQualityReportMessages } from './data-quality
 import { dataQualitySettingsDraft } from './data-quality-report-settings';
 import { dataQualityPredictorReadingsSnapshot } from './testing/data-quality-report-test-fixtures';
 import { dataQualityAnnualColumns, dataQualityAnnualRows } from './annual-totals/data-quality-annual-totals.view';
-import { dataQualityHistogramView } from './histogram/data-quality-report-histogram.view';
 import { DataQualityReportModule } from './data-quality-report.module';
 import { DataQualityAnnualTotalsComponent } from './annual-totals/data-quality-annual-totals.component';
 import { DataQualityReportPreviewComponent } from './preview/data-quality-report-preview.component';
@@ -33,19 +32,16 @@ function inputs() {
 }
 
 describe('Data Quality report presentation without mounted components', () => {
-  it('retains source order, units, evidence, histogram values, and per-source bin counts', () => {
+  it('retains source order, units, evidence, dot-plot readings and existing flags', () => {
     const { settings, result } = inputs();
-    const view = dataQualityReportView(result, settings, {
-      'meter-meter-a-consumption': 7, 'predictor-predictor-b': 12
-    });
+    const view = dataQualityReportView(result, settings);
     expect(view.meters.map(meter => meter.report.meter.guid)).toEqual(['meter-a', 'meter-b']);
     expect(view.predictors.map(predictor => predictor.report.predictor.guid)).toEqual(['predictor-a', 'predictor-b']);
-    expect(view.meters[0].consumptionHistogram).toMatchObject({ binCount: 7, values: [10, 10, 10, 100] });
-    expect(view.meters[1].costHistogram.binCount).toBe(50);
-    expect(view.predictors[1].histogram.binCount).toBe(12);
+    expect(view.meters[0].consumptionDotPlot!.readings.map(reading => reading.value)).toEqual([10, 10, 10, 100]);
+    expect(view.meters[0].consumptionDotPlot!.readings.filter(reading => reading.outlier)).toHaveLength(1);
     expect(view.meters[0].evidence).toContain('1 consumption reading(s) outside the expected range.');
     expect(view.predictors[0].evidence).toContain('Missing months: Feb 2024.');
-    expect(view.predictors[0].histogramUnit).toBe('tons');
+    expect(view.predictors[0].dotPlot!.unit).toBe('tons');
     expect(meterQualityStatisticRows(result.meters[0], true)[0].cells[2].valueLabel).toBe('32.5');
     expect(predictorQualityStatistics(result.predictors[0], true)[2].valueLabel).toBe('28.6');
     expect(meterQualityChartOption(result.meters[0], { showExpectedRangeLabel: false })).toBeDefined();
@@ -66,8 +62,8 @@ describe('Data Quality report presentation without mounted components', () => {
       meterGuid: meter.guid, columns: [{ key: 'year', label: 'Year' }], rows: []
     }];
     const view = dataQualityReportView(result, settings).meters[0];
-    expect(view.content).toMatchObject({ consumptionTimeseries: true, consumptionHistogram: false,
-      costTimeseries: false, costHistogram: false, excludedConsumption: true,
+    expect(view.content).toMatchObject({ consumptionTimeseries: true, consumptionDotPlot: false,
+      costTimeseries: false, costDotPlot: false, excludedConsumption: true,
       costUnavailable: true, annualTotals: true });
     expect(meterQualityStatisticRows(report, true)).toEqual([]);
     expect(meterQualityChartOption(report)).toBeUndefined();
@@ -77,28 +73,16 @@ describe('Data Quality report presentation without mounted components', () => {
     expect(dataQualityReportView(result, settings).meters[0].content.costUnavailable).toBe(false);
   });
 
-  it('retains weather descriptions and evidence separately from histogram units', () => {
+  it('retains weather descriptions and evidence alongside dot-plot units', () => {
     const { settings, result } = inputs();
     const predictor = { ...result.predictors[0].predictor, predictorType: 'Weather' as const,
       weatherDataType: 'HDD' as const, heatingBaseTemperature: 60, unit: 'custom unit', canBeNegative: false };
     result.predictors = [buildPredictorDataQualityReport(result.predictors[0].readings, predictor)];
     const view = dataQualityReportView(result, settings).predictors[0];
     expect(view.weatherDescription).toBe('Heating Degree Days (Base Temperature: 60 °F)');
-    expect(view.histogramUnit).not.toBe('custom unit');
+    expect(view.dotPlot!.unit).toBe(view.report.unit);
     expect(view.evidence).toContain('Incomplete weather source data: Jan 2024.');
     expect(view.evidence).toContain('Revised weather source data: May 2024.');
-  });
-
-  it('keeps histogram range labels, frequencies, and unavailable-state explanations independent of Angular', () => {
-    const view = dataQualityHistogramView([0, 1, 2, 3, 4, 5], 2, 'Total Consumption', 'MMBtu');
-    expect(view.bins.map(bin => ({ label: bin.label, count: bin.count })))
-      .toEqual([{ label: '0 – 3', count: 3 }, { label: '3 – 6', count: 3 }]);
-    expect(view.binSizeLabel).toBe('3');
-    expect(view.chartOption).toBeDefined();
-    expect(dataQualityHistogramView([5, 5], 50, 'Cost').bins[0].count).toBe(2);
-    const empty = dataQualityHistogramView([NaN, Infinity], 50, 'Cost');
-    expect(empty.chartOption).toBeUndefined();
-    expect(empty.message).toBe('No usable numeric readings are available for this distribution.');
   });
 
   it('formats annual units, currency, precision, and years without changing row order or values', () => {

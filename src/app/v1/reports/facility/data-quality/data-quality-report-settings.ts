@@ -1,6 +1,7 @@
 import { FormControl, FormGroup } from '@angular/forms';
 import { DataQualityReportSettings, getDataQualityReportSettings } from '@data/models/idbModels/facilityReport';
 
+// Legacy Histogram keys remain the persisted distribution switches; v1 presents them as dot plots.
 export const METER_CONTENT_FLAGS = [
   'includeMeterStatisticsTable',
   'includeMeterConsumptionTimeseriesGraph',

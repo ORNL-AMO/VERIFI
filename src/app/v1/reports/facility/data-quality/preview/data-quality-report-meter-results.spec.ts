@@ -63,21 +63,21 @@ describe('Data Quality meter report presentation', () => {
     expect(notices[0].textContent).toContain('No cost chart is available because the average cost is zero or unavailable.');
   });
   it.each([[false, false], [true, false], [false, true], [true, true]])(
-    'shows one unavailable-cost notice only when requested: time series=%s, histogram=%s', async (timeSeries, histogram) => {
+    'shows one unavailable-cost notice only when requested: time series=%s, dot plot=%s', async (timeSeries, dotPlot) => {
       const snapshot = dataQualityReadingsSnapshot();
       snapshot.meterData = snapshot.meterData.map(reading => ({ ...reading, totalCost: 0 }));
       Object.assign(snapshot.facilityReports[0].dataQualityReportSettings, {
-        includeMeterCostTimeseriesGraph: timeSeries, includeMeterCostHistogram: histogram
+        includeMeterCostTimeseriesGraph: timeSeries, includeMeterCostHistogram: dotPlot
       });
       const { root } = await setup(snapshot);
-      expect(root.querySelectorAll('.cost-chart-notice')).toHaveLength(timeSeries || histogram ? 1 : 0);
+      expect(root.querySelectorAll('.cost-chart-notice')).toHaveLength(timeSeries || dotPlot ? 1 : 0);
     });
   it('renders reading evidence independently of global status, statistics, pending sections, copy, and chart downloads', async () => {
     const { root, copyTable, presentation, harness } = await setup();
     expect(root.textContent).toContain('Meter a'); expect(root.textContent).toContain('32.5');
     expect(root.textContent).toContain('1 consumption reading(s) outside the expected range.');
     expect(root.textContent).toContain('Months with multiple readings: Jan 2024');
-    expect(root.textContent).toContain('Distribution of Total Consumption');
+    expect(root.textContent).toContain('Consumption distribution');
     expect(root.querySelector('.cost-chart-notice')).toBeNull();
     expect(root.textContent).not.toContain('Sections being implemented');
     expect(root.textContent).not.toContain('Reading quality evidence');

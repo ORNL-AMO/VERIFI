@@ -8,7 +8,7 @@ import {
   predictorQualityChartOption, predictorQualityStatistics
 } from '@app/v1/shared/data-quality/predictor-quality-presentation/predictor-quality-presentation.view';
 import { dataQualityAnnualColumns, dataQualityAnnualRows } from '../annual-totals/data-quality-annual-totals.view';
-import { dataQualityHistogramView } from '../histogram/data-quality-report-histogram.view';
+import { DataQualityDotPlotInput, dataQualityDotPlotView } from '../dot-plot/data-quality-report-dot-plot.view';
 import {
   DataQualityReportSnapshot, dataQualityReportMessages, dataQualityReportView
 } from '../data-quality-report.view';
@@ -33,7 +33,7 @@ export function dataQualityPdfDocument(snapshot: DataQualityReportSnapshot): {
 } {
   const sections: ReportSection[] = [], charts: DataQualityPdfChart[] = [];
   const messages = dataQualityReportMessages();
-  const view = dataQualityReportView(snapshot.results, snapshot.settings, snapshot.histogramBinCounts);
+  const view = dataQualityReportView(snapshot.results, snapshot.settings);
   const text = (content: string, title?: string) => sections.push({ type: 'text', title, content });
   const heading = (title: string, kind: 'Meter' | 'Predictor') => sections.push({
     type: 'heading', title, pageBreakBefore: true, tocInclude: true, tocLabel: `${kind}: ${title}`, bookmarkLevel: 0
@@ -47,14 +47,11 @@ export function dataQualityPdfDocument(snapshot: DataQualityReportSnapshot): {
     sections.push(section);
     charts.push({ section, option });
   };
-  const histogram = (
-    title: string, input: { readonly values: readonly unknown[]; readonly binCount: number },
-    metric: string, unit: string
-  ) => {
-    const distribution = dataQualityHistogramView(input.values, input.binCount, metric, unit);
-    if (!distribution.chartOption) { text(distribution.message!, title); return; }
-    chart(`${title} - Number of bins: ${input.binCount}; Bin Size: ${distribution.binSizeLabel}`,
-      distribution.chartOption, distribution.message ?? 'No distribution is available.');
+  const dotPlot = (title: string, input: DataQualityDotPlotInput | undefined) => {
+    if (!input) return;
+    const distribution = dataQualityDotPlotView(input);
+    if (distribution.chartOption && input.notice) text(input.notice);
+    chart(title, distribution.chartOption, distribution.message ?? 'No distribution is available.');
   };
 
   for (const meter of view.meters) {
@@ -79,10 +76,9 @@ export function dataQualityPdfDocument(snapshot: DataQualityReportSnapshot): {
       if (content.costTimeseries) chart('Total Cost', meterQualityChartOption(report, {
         consumption: false, showExpectedRangeLabel: false
       }), 'No readings have usable costs and valid dates for the time series.');
-      if (content.consumptionHistogram) histogram('Distribution of Total Consumption',
-        meter.consumptionHistogram, 'Total Consumption', report.unit);
+      dotPlot('Consumption distribution', meter.consumptionDotPlot);
       if (content.excludedConsumption) text(messages.excludedConsumption);
-      if (content.costHistogram) histogram('Distribution of Total Cost', meter.costHistogram, 'Total Cost', '$');
+      dotPlot('Cost distribution', meter.costDotPlot);
       if (content.costUnavailable) text(messages.costUnavailable, messages.costUnavailableTitle);
     }
     if (snapshot.settings.includeAnnualTotalsTable) {
@@ -114,8 +110,7 @@ export function dataQualityPdfDocument(snapshot: DataQualityReportSnapshot): {
     }
     if (content.timeseries) chart('Predictor Readings', predictorQualityChartOption(report, false),
       messages.noPredictorPeriods);
-    if (content.histogram) histogram('Distribution of Predictors', predictor.histogram,
-      report.predictor.name, predictor.histogramUnit);
+    dotPlot('Predictor value distribution', predictor.dotPlot);
   }
   // The shared PDF font supports Latin characters; spell out subscripts and normalize typographic dashes.
   for (const section of sections) {

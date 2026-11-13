@@ -9,13 +9,13 @@ export const DATA_QUALITY_CONTENT_GROUPS: readonly {
     { id: 'meter-statistics', label: 'Consumption and cost statistics', table: 'includeMeterStatisticsTable' },
     { id: 'meter-consumption', label: 'Consumption', charts: 'includeMeterConsumptionTimeseriesGraph' },
     { id: 'meter-cost', label: 'Cost', charts: 'includeMeterCostTimeseriesGraph' },
-    { id: 'meter-consumption-distribution', label: 'Distribution of consumption', charts: 'includeMeterConsumptionHistogram' },
-    { id: 'meter-cost-distribution', label: 'Distribution of cost', charts: 'includeMeterCostHistogram' }
+    { id: 'meter-consumption-distribution', label: 'Consumption distribution', charts: 'includeMeterConsumptionHistogram' },
+    { id: 'meter-cost-distribution', label: 'Cost distribution', charts: 'includeMeterCostHistogram' }
   ] },
   { id: 'predictors', label: 'Predictor Details', key: 'includePredictors', rows: [
     { id: 'predictor-statistics', label: 'Statistics', table: 'includePredictorStatisticsTable' },
     { id: 'predictor-timeseries', label: 'Time series', charts: 'includePredictorTimeseriesGraph' },
-    { id: 'predictor-distribution', label: 'Distribution', charts: 'includePredictorHistogram' }
+    { id: 'predictor-distribution', label: 'Predictor value distribution', charts: 'includePredictorHistogram' }
   ] },
   { id: 'annual', label: 'Annual totals', rows: [
     { id: 'annual-totals', label: 'Meter annual totals', table: 'includeAnnualTotalsTable', tableLabel: 'Annual Totals Table' }

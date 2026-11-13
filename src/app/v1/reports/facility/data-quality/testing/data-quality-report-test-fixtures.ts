@@ -56,7 +56,7 @@ export function dataQualityPredictorReadingsSnapshot(reports = [dataQualityRepor
   }))) };
 }
 
-export function dataQualityHistogramSnapshot() {
+export function dataQualityDistributionSnapshot() {
   const snapshot = dataQualityPredictorReadingsSnapshot();
   Object.assign(snapshot.facilityReports[0].dataQualityReportSettings, {
     includeMeterStatisticsTable: false, includeMeterConsumptionTimeseriesGraph: false, includeMeterCostTimeseriesGraph: false,
@@ -83,7 +83,5 @@ export function dataQualityPdfSnapshot() {
     ], rows: [2025, 2024].map(year => ({ ...getZeroEmissionsResults(), year,
       energyConsumption: 130, energyUse: 130, energyCost: year === 2025 ? 260 : 250 })) }]
   };
-  return { ...buildDataQualityReportSnapshot(report, workspace.facilities[0], settings, results, {
-    'meter-meter-a-consumption': 7, 'meter-meter-a-cost': 12, 'predictor-predictor-a': 9
-  }), results };
+  return { ...buildDataQualityReportSnapshot(report, workspace.facilities[0], settings, results), results };
 }

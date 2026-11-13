@@ -47,21 +47,17 @@
               [showStatistics]="false" [showConsumptionChart]="false" [showExpectedRangeLabel]="false"/>
             <hr class="report-component-divider">
           }
-          @if (meter.content.consumptionHistogram) {
-            <app-data-quality-report-histogram [values]="meter.consumptionHistogram.values" [idPrefix]="meter.idPrefix + '-consumption-histogram'"
-              heading="Distribution of Total Consumption" metric="Total Consumption" [unit]="meter.report.unit"
-              [chartFileName]="meter.report.meter.name + '-consumption-distribution'" [numberOfBins]="meter.consumptionHistogram.binCount()"
-              (numberOfBinsChange)="results.setHistogramBinCount(meter.consumptionHistogram.key, $event)"/>
+          @if (meter.consumptionDotPlot; as plot) {
+            <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="meter.idPrefix + '-consumption-dot-plot'"
+              heading="Consumption distribution" [chartFileName]="meter.report.meter.name + '-consumption-dot-plot'"/>
             <hr class="report-component-divider">
           }
           @if (meter.content.excludedConsumption) {
             <p class="report-note">{{ messages.excludedConsumption }}</p>
           }
-          @if (meter.content.costHistogram) {
-            <app-data-quality-report-histogram [values]="meter.costHistogram.values" [idPrefix]="meter.idPrefix + '-cost-histogram'"
-              heading="Distribution of Total Cost" metric="Total Cost" unit="$"
-              [chartFileName]="meter.report.meter.name + '-cost-distribution'" [numberOfBins]="meter.costHistogram.binCount()"
-              (numberOfBinsChange)="results.setHistogramBinCount(meter.costHistogram.key, $event)"/>
+          @if (meter.costDotPlot; as plot) {
+            <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="meter.idPrefix + '-cost-dot-plot'"
+              heading="Cost distribution" [chartFileName]="meter.report.meter.name + '-cost-dot-plot'"/>
             <hr class="report-component-divider">
           }
           @if (meter.content.costUnavailable) {
@@ -112,11 +108,9 @@
               <hr class="report-component-divider">
               @if (!predictor.report.chartRows.length) { <p role="status">{{ messages.noPredictorPeriods }}</p> }
             }
-            @if (predictor.content.histogram) {
-              <app-data-quality-report-histogram [values]="predictor.histogram.values" [idPrefix]="predictor.idPrefix + '-histogram'"
-                heading="Distribution of Predictors" [metric]="predictor.report.predictor.name" [unit]="predictor.histogramUnit"
-                [chartFileName]="predictor.report.predictor.name + '-distribution'" [numberOfBins]="predictor.histogram.binCount()"
-                (numberOfBinsChange)="results.setHistogramBinCount(predictor.histogram.key, $event)"/>
+            @if (predictor.dotPlot; as plot) {
+              <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="predictor.idPrefix + '-dot-plot'"
+                heading="Predictor value distribution" [chartFileName]="predictor.report.predictor.name + '-dot-plot'"/>
               <hr class="report-component-divider">
             }
           }

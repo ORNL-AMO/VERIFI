@@ -80,7 +80,8 @@ describe('Data Quality PDF in Chromium', () => {
       expect(raw).toContain('/Outlines');
       const sections = writer.mock.calls[0][0].sections;
       expect(sections.some(section => section.title === 'Cost charts unavailable')).toBe(true);
-      expect(sections.some(section => section.title?.includes('Number of bins: 7'))).toBe(true);
+      expect(sections.some(section => section.title === 'Consumption distribution')).toBe(true);
+      expect(sections.some(section => section.title?.includes('Number of bins'))).toBe(false);
       expect(document.querySelector('[data-report-chart-capture]')).toBeNull();
       expect(output.formats).toEqual(['pdf']);
       await savePdfArtifact(artifact.blob, `data-quality-${mode}`);

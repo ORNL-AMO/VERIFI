@@ -109,7 +109,7 @@ describe('Data Quality PDF lifecycle', () => {
     const view = setup(), pending = deferred<string>(), workspace = dataQualityPredictorReadingsSnapshot();
     const report = workspace.facilityReports[0], facility = workspace.facilities[0], prepared = dataQualityPdfSnapshot();
     const snapshot = () => buildDataQualityReportSnapshot(
-      report, facility, prepared.settings, prepared.results, prepared.histogramBinCounts);
+      report, facility, prepared.settings, prepared.results);
     view.snapshot.set(snapshot());
     const originalKey = view.service.source();
     view.capture.mockImplementationOnce(() => pending.promise);
@@ -128,7 +128,7 @@ describe('Data Quality PDF lifecycle', () => {
     expect(view.build.mock.calls[0][1]!.signal!.aborted).toBe(false);
   });
 
-  it.each(['name', 'facility-name', 'bins', 'readings', 'settings', 'identity', 'stage', 'selection'] as const)(
+  it.each(['name', 'facility-name', 'readings', 'settings', 'identity', 'stage', 'selection'] as const)(
     'suppresses stale delivery when %s changes', async change => {
       const view = setup(), pending = deferred<string>();
       view.capture.mockImplementationOnce(() => pending.promise);
@@ -137,9 +137,6 @@ describe('Data Quality PDF lifecycle', () => {
       const snapshot = structuredClone(view.snapshot()!);
       if (change === 'name') snapshot.name = 'Another name';
       if (change === 'facility-name') snapshot.facility.name = 'Another facility name';
-      if (change === 'bins') {
-        snapshot.histogramBinCounts = { ...snapshot.histogramBinCounts, 'predictor-predictor-a': 3 };
-      }
       if (change === 'readings') snapshot.results.meters[0].meterData[0].totalCost = 999;
       if (change === 'settings') snapshot.settings.includeMeterStatisticsTable = false;
       if (change === 'identity') snapshot.identity.reportGuid = 'another-report';

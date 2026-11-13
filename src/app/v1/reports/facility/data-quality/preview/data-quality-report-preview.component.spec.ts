@@ -7,11 +7,10 @@ import { DataQualityReportEditor } from '../editing/data-quality-report-editor.s
 function setup(reports = [dataQualityReport()]) { return setupReportWorkbench(reports, [], dataQualitySnapshot(reports)); }
 
 describe('Data Quality report foundation', () => {
-  it('cleans up facility sessions and deleted reports without carrying session preferences or writing settings', async () => {
+  it('cleans up facility sessions and deleted reports without carrying report state or writing settings', async () => {
     const { open, harness, router, store, updateSetup } = await setup();
     const workbench = await open();
     const first = workbench.workbench.session()!;
-    first.injector.get(DataQualityReportService).setHistogramBinCount('preference', 9);
     const snapshot = store.snapshot()!;
     const other = dataQualityReport({ id: 20, guid: 'report-b', facilityId: 'facility-b' });
     store.publish({ ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'facility-b' }],
@@ -20,7 +19,6 @@ describe('Data Quality report foundation', () => {
     harness.detectChanges();
     const second = workbench.workbench.session()!;
     expect(first.injector.destroyed).toBe(true);
-    expect(second.injector.get(DataQualityReportService).histogramBinCount('preference')()).toBe(50);
     expect(second.injector.get(DataQualityReportEditor).selection().meters).toEqual([]);
     store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', deleteGuids: ['report-b'] }] });
     harness.detectChanges();
@@ -52,7 +50,6 @@ describe('Data Quality report foundation', () => {
     const workbench = await open();
     const oldSession = workbench.workbench.session()!, oldEditor = oldSession.injector.get(DataQualityReportEditor);
     const oldResults = oldSession.injector.get(DataQualityReportService);
-    oldResults.setHistogramBinCount('session-preference', 7);
     let resolve!: (report: ReturnType<typeof dataQualityReport>) => void;
     updateSetup.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
     oldEditor.name.setValue('Pending old save'); const saving = oldEditor.flush();
@@ -69,7 +66,6 @@ describe('Data Quality report foundation', () => {
     const currentSession = currentWorkbench.workbench.session()!, currentEditor = currentSession.injector.get(DataQualityReportEditor);
     resolve(dataQualityReport({ name: 'Pending old save' })); expect(await saving).toBe(false); harness.detectChanges();
     expect(currentEditor.name.value).toBe(second.name);
-    expect(currentSession.injector.get(DataQualityReportService).histogramBinCount('session-preference')()).toBe(50);
     expect(store.account()?.guid).toBe('account-b');
     expect(updateSetup).toHaveBeenCalledOnce();
   });

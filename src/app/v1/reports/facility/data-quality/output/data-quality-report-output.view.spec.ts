@@ -4,10 +4,12 @@ import { ReportSection } from '@shared/report-output/report-section.model';
 import { dataQualityPdfSnapshot } from '../testing/data-quality-report-test-fixtures';
 import { METER_CONTENT_FLAGS, PREDICTOR_CONTENT_FLAGS } from '../data-quality-report-settings';
 import { dataQualityHasPdfContent, dataQualityPdfDocument } from './data-quality-report-output.view';
+import { dataQualityDotPlotView } from '../dot-plot/data-quality-report-dot-plot.view';
+import { dataQualityReportView } from '../data-quality-report.view';
 
 function titles(sections: readonly ReportSection[]) { return sections.map(section => section.title); }
 describe('Data Quality PDF content', () => {
-  it('shares report values and source order, formats annual years chronologically, and retains session bins', () => {
+  it('shares report values and source order, formats annual years chronologically, and includes dot plots', () => {
     const snapshot = dataQualityPdfSnapshot(), before = structuredClone(snapshot);
     const { document, charts } = dataQualityPdfDocument(snapshot);
     expect(document.sections.filter(section => section.type === 'heading').map(section => section.title))
@@ -18,9 +20,14 @@ describe('Data Quality PDF content', () => {
     expect(statistics.rows[1]).toContain('$65');
     expect(charts).toHaveLength(6);
     expect(titles(document.sections)).toEqual(expect.arrayContaining([
-      'Distribution of Total Consumption - Number of bins: 7; Bin Size: 13',
-      expect.stringContaining('Number of bins: 12'), expect.stringContaining('Number of bins: 9')
+      'Consumption distribution', 'Cost distribution', 'Predictor value distribution'
     ]));
+    const preview = dataQualityReportView(snapshot.results, snapshot.settings);
+    const dot = charts.find(chart => chart.section.title === 'Consumption distribution')!;
+    expect(dot.option.series).toEqual(dataQualityDotPlotView(preview.meters[0].consumptionDotPlot!).chartOption!.series);
+    expect((dot.option.series as { type: string }[]).map(series => series.type))
+      .toEqual(['scatter', 'scatter', 'line']);
+    expect(titles(document.sections).join(' ')).not.toMatch(/histogram|Number of bins|Bin Size/i);
     const annual = document.sections.find(section => section.title === 'Annual Totals')!;
     if (annual.type !== 'table') throw new Error('Missing annual table');
     expect(annual.rows.map(row => row[0])).toEqual(['2024', '2025']);
@@ -35,12 +42,12 @@ describe('Data Quality PDF content', () => {
     ['includeMeterStatisticsTable', 'Total Consumption and Cost Statistics'],
     ['includeMeterConsumptionTimeseriesGraph', 'Total Consumption'],
     ['includeMeterCostTimeseriesGraph', 'Total Cost'],
-    ['includeMeterConsumptionHistogram', 'Distribution of Total Consumption'],
-    ['includeMeterCostHistogram', 'Distribution of Total Cost'],
+    ['includeMeterConsumptionHistogram', 'Consumption distribution'],
+    ['includeMeterCostHistogram', 'Cost distribution'],
     ['includeAnnualTotalsTable', 'Annual Totals'],
     ['includePredictorStatisticsTable', 'Predictor Consumption Statistics'],
     ['includePredictorTimeseriesGraph', 'Predictor Readings'],
-    ['includePredictorHistogram', 'Distribution of Predictors']
+    ['includePredictorHistogram', 'Predictor value distribution']
   ] as const;
   it.each(options)('honors the independent %s content option', (flag, title) => {
     const snapshot = dataQualityPdfSnapshot();
@@ -74,7 +81,7 @@ describe('Data Quality PDF content', () => {
     snapshot.results.meters = [buildMeterDataQualityReport(readings, report.meter)];
     const { document, charts } = dataQualityPdfDocument(snapshot);
     expect(charts.map(chart => chart.section.title)).not.toContain('Total Cost');
-    expect(charts.some(chart => chart.section.title?.startsWith('Distribution of Total Cost'))).toBe(false);
+    expect(charts.some(chart => chart.section.title?.startsWith('Cost distribution'))).toBe(false);
     expect(titles(document.sections).filter(title => title === 'Cost charts unavailable')).toHaveLength(1);
     snapshot.settings.includeMeterCostTimeseriesGraph = false;
     snapshot.settings.includeMeterCostHistogram = false;
@@ -100,7 +107,7 @@ describe('Data Quality PDF content', () => {
     output = dataQualityPdfDocument(snapshot);
     expect(output.charts.some(chart => chart.section.title === 'Total Consumption')).toBe(true);
     expect(output.charts.some(chart => chart.section.title
-      ?.startsWith('Distribution of Total Consumption'))).toBe(false);
+      ?.startsWith('Consumption distribution'))).toBe(false);
     expect(output.document.sections.some(section => section.type === 'text'
       && section.content.includes('excluded from energy totals'))).toBe(true);
   });
@@ -120,14 +127,14 @@ describe('Data Quality PDF content', () => {
     expect(charts).toHaveLength(2);
   });
 
-  it('keeps finite values in histograms when their dates cannot be plotted in time series', () => {
+  it('keeps finite values in dot plots when their dates cannot be plotted in time series', () => {
     const snapshot = dataQualityPdfSnapshot(), predictor = snapshot.results.predictors[0];
     snapshot.results.meters = [];
     snapshot.results.predictors = [buildPredictorDataQualityReport(
       predictor.readings.map(row => ({ ...row, year: NaN, amount: 5 })), predictor.predictor)];
     const output = dataQualityPdfDocument(snapshot);
     expect(output.charts).toHaveLength(1);
-    expect(output.charts[0].section.title).toContain('Distribution of Predictors');
+    expect(output.charts[0].section.title).toContain('Predictor value distribution');
     expect(output.document.sections).toContainEqual(expect.objectContaining({
       content: 'No readings have valid months and years for the time series.'
     }));

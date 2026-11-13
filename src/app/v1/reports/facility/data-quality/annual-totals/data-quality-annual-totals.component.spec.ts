@@ -25,7 +25,7 @@ describe('Annual Totals in the report workbench', () => {
   it('renders annual-only content, sorts by year and cost with v0 direction behavior, and enables PDF', async () => {
     const { root, harness, table } = await setup();
     expect(root.querySelectorAll('app-data-quality-annual-totals')).toHaveLength(1);
-    expect(root.querySelector('app-meter-quality-presentation, app-data-quality-report-histogram')).toBeNull();
+    expect(root.querySelector('app-meter-quality-presentation, app-data-quality-report-dot-plot')).toBeNull();
     expect(table().rows().map(row => row.year)).toEqual([2023, 2024]);
     const buttons = root.querySelectorAll<HTMLButtonElement>('app-data-quality-annual-totals button');
     buttons[0].click(); harness.detectChanges();

@@ -64,7 +64,7 @@ describe('Annual Totals with native calendarization', () => {
     expect(preview().querySelectorAll('.v1-meter-quality__statistics-panel')).toHaveLength(2);
     expect(preview().querySelectorAll('.predictor-quality__table')).toHaveLength(2);
     expect(preview().querySelectorAll('app-data-quality-annual-totals')).toHaveLength(2);
-    expect(preview().querySelectorAll('app-data-quality-report-histogram')).toHaveLength(6);
+    expect(preview().querySelectorAll('app-data-quality-report-dot-plot')).toHaveLength(6);
     expect(preview().querySelectorAll('.report-component-divider')).toHaveLength(18);
     expect(preview().querySelectorAll('#data-quality-report-heading')).toHaveLength(1);
     expect(preview().querySelector('h2')!.textContent).toBe('Complete Data Quality Report');
@@ -73,7 +73,7 @@ describe('Annual Totals with native calendarization', () => {
     expect(results.state().value!.meters[0].energyStats.average).toBe(250);
     expect(results.state().value!.predictors[0].statistics.average).toBe(28.6);
     expect(results.state().value!.annualTotals[0].rows.map(row => [row.year, row.energyCost])).toEqual([[2023, 30], [2024, 70]]);
-    const charts = [...preview().querySelectorAll<HTMLElement>('.v1-meter-quality__chart, .predictor-quality__chart, .quality-histogram__chart')];
+    const charts = [...preview().querySelectorAll<HTMLElement>('.v1-meter-quality__chart, .predictor-quality__chart, .quality-dot-plot__chart')];
     expect(charts).toHaveLength(12);
     await vi.waitFor(() => charts.forEach(chart => expect(echarts.getInstanceByDom(chart)?.getOption().series).toBeDefined()), { timeout: 5000 });
     expect((echarts.getInstanceByDom(charts[0])!.getOption().xAxis as { axisLabel: { hideOverlap: boolean } }[])[0].axisLabel.hideOverlap).toBe(true);
@@ -102,7 +102,7 @@ describe('Annual Totals with native calendarization', () => {
     await activate([...host.querySelectorAll<HTMLButtonElement>('.content-presets button')].find(button => button.textContent?.trim() === 'Tables only')!);
     await activate(host.querySelector<HTMLAnchorElement>('footer a.v1-btn--action')!);
     await vi.waitFor(() => { view.harness.detectChanges(); expect(results.state().state).toBe('ready'); });
-    expect(preview().querySelectorAll('.v1-meter-quality__chart, .predictor-quality__chart, app-data-quality-report-histogram')).toHaveLength(0);
+    expect(preview().querySelectorAll('.v1-meter-quality__chart, .predictor-quality__chart, app-data-quality-report-dot-plot')).toHaveLength(0);
     expect(preview().querySelectorAll('table')).toHaveLength(6);
   }, 15000);
   it.each([
