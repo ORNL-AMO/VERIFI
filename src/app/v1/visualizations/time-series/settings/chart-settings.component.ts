@@ -145,7 +145,7 @@ export class ChartSettingsComponent implements OnChanges {
       const target = overrideTarget(row);
       if (!series.resourceGuid && target) {
         const overrides = [...(series.overrides ?? [])], index = overrides.findIndex(item => overrideKey(item) === overrideKey(target) && (item.accountGuid ?? definition.accountGuid) === definition.accountGuid);
-        const order = index >= 0 ? overrides[index].order : undefined;
+        const order = explicit?.order;
         const override: VisualizationSeriesOverride = { ...target, accountGuid: definition.accountGuid, ...(order !== undefined ? { order } : {}), ...appearance };
         if (index < 0) overrides.push(override); else overrides[index] = override;
         return { ...series, overrides };
