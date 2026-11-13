@@ -10,14 +10,14 @@ export const FACILITY_DATA_QUALITY_REPORT: ReportFeatureDefinition = {
   type: 'dataQuality',
   providers: [DataQualityReportEditor, DataQualityReportService, DataQualityReportOutputService, {
     provide: REPORT_RUNTIME,
-    useFactory: () => ({ 
-      editor: inject(DataQualityReportEditor), 
-      gateSetup: true, 
+    useFactory: () => ({
+      editor: inject(DataQualityReportEditor),
+      gateSetup: true,
       output: inject(DataQualityReportOutputService).output
     })
   }],
-  stages: { 
-    setup: DataQualityReportSetupComponent, 
-    report: DataQualityReportPreviewComponent 
+  stages: {
+    setup: DataQualityReportSetupComponent,
+    report: DataQualityReportPreviewComponent
   }
 };

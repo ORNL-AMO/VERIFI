@@ -12,8 +12,8 @@ import { ReportResultController, ReportResultRequest } from '@app/v1/reports/sha
 import { DataQualityReportEditor } from './editing/data-quality-report-editor.service';
 import { buildDataQualityReportSnapshot } from './data-quality-report.view';
 
-export interface DataQualityReportResult { 
-  readonly meters: readonly MeterDataQualityReport[]; 
+export interface DataQualityReportResult {
+  readonly meters: readonly MeterDataQualityReport[];
   readonly predictors: readonly PredictorDataQualityReport[];
   readonly annualTotals: readonly DataQualityAnnualTotals[];
 }
