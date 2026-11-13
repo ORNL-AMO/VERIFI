@@ -129,4 +129,3 @@ export function configuredChartSummary(definition: VisualizationDefinition, snap
   const types = new Set(items.length ? items.map(item => item.appearance.traceType) : [definition.chart.defaultTraceType]);
   return types.size > 1 ? 'Combination' : types.has('bar') ? 'Bar' : types.has('line') ? 'Line' : undefined;
 }
-
