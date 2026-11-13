@@ -6,7 +6,7 @@ const path = require('node:path');
 const { gunzipSync } = require('node:zlib');
 const { createHash } = require('node:crypto');
 const yaml = require('js-yaml');
-const { artifactPath, describe, finalizeMetadata, darwinMinimum } = require('./update-metadata.cjs');
+const { artifactPath, describe, finalizeMetadata, verifyEmbeddedBlockmap, darwinMinimum } = require('./update-metadata.cjs');
 const { publisherFromCertificate } = require('./package-windows.cjs');
 
 test('rejects metadata pointing outside the artifact directory', () => {
@@ -75,4 +75,65 @@ test('preserves baseline defaults and applies the selected source Mac minimum', 
     assert.equal((await finalizeMetadata(directory, 'latest-mac.yml', false, '22.0.0')).minimumSystemVersion, '22.0.0');
     assert.equal(darwinMinimum('10.13'), '17.0.0');
     assert.throws(() => darwinMinimum('macOS 13'));
+});
+
+async function embeddedFixture(directory, mutate = value => value) {
+    const version = '0.17.0-beta', name = `VERIFI-${version}.AppImage`, file = path.join(directory, name);
+    const payload = Buffer.alloc(32769, 7), sizes = [12345, payload.length - 12345];
+    const { blake2b } = require('@noble/hashes/blake2.js');
+    let offset = 0;
+    const checksums = sizes.map(size => {
+        const result = Buffer.from(blake2b(payload.subarray(offset, offset + size), { dkLen: 18 })).toString('base64');
+        offset += size; return result;
+    });
+    const map = mutate({ version: '2', files: [{ name: 'file', offset: 0, sizes, checksums }] });
+    const compressed = require('node:zlib').deflateRawSync(JSON.stringify(map)), trailer = Buffer.alloc(4);
+    trailer.writeUInt32BE(compressed.length);
+    await fs.writeFile(file, Buffer.concat([payload, compressed, trailer]));
+    const actual = await describe(file);
+    const info = { version, files: [{ url: name, ...actual, blockMapSize: compressed.length }], path: name, sha512: actual.sha512 };
+    await fs.writeFile(path.join(directory, 'latest-linux.yml'), yaml.dump(info));
+    return { file, version, info, payload, map, compressed };
+}
+
+test('verifies AppImage embedded map chunks/trailer and preserves the final bytes and metadata', async t => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'verifi-embedded-map-'));
+    t.after(() => fs.rm(directory, { recursive: true, force: true }));
+    const value = await embeddedFixture(directory);
+    const before = await fs.readFile(value.file), metadata = await fs.readFile(path.join(directory, 'latest-linux.yml'));
+    await verifyEmbeddedBlockmap(value.file, value.compressed.length);
+    await finalizeMetadata(directory, 'latest-linux.yml', false, undefined, { expectedVersion: value.version });
+    assert.deepEqual(await fs.readFile(value.file), before);
+    assert.deepEqual(await fs.readFile(path.join(directory, 'latest-linux.yml')), metadata);
+    await assert.rejects(verifyEmbeddedBlockmap(value.file, value.compressed.length + 1), /trailer\/metadata mismatch/);
+    await assert.rejects(verifyEmbeddedBlockmap(value.file, undefined), /Invalid embedded/);
+    const mutated = Buffer.from(before); mutated[0] ^= 1; await fs.writeFile(value.file, mutated);
+    await assert.rejects(verifyEmbeddedBlockmap(value.file, value.compressed.length), /checksum mismatch/);
+});
+
+test('rejects corrupt embedded checksums, chunk coverage and trailer even when full-file metadata was refreshed', async t => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'verifi-corrupt-embedded-'));
+    t.after(() => fs.rm(directory, { recursive: true, force: true }));
+    for (const mutate of [map => { map.files[0].checksums[0] = 'incorrect'; return map; }, map => { map.files[0].sizes[0]++; return map; }, map => { map.files[0].offset = 10; return map; }]) {
+        const value = await embeddedFixture(directory, mutate);
+        await assert.rejects(finalizeMetadata(directory, 'latest-linux.yml', false, undefined, { expectedVersion: value.version }), /blockmap|Blockmap/);
+    }
+    const value = await embeddedFixture(directory), bytes = await fs.readFile(value.file);
+    bytes.writeUInt32BE(value.compressed.length + 1, bytes.length - 4); await fs.writeFile(value.file, bytes);
+    await assert.rejects(verifyEmbeddedBlockmap(value.file, value.compressed.length), /trailer\/metadata mismatch/);
+});
+
+test('production metadata requires the exact version, references and legacy primary path', async t => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'verifi-metadata-contract-'));
+    t.after(() => fs.rm(directory, { recursive: true, force: true }));
+    const value = await embeddedFixture(directory);
+    for (const mutate of [info => info.version = '0.18.0-beta', info => info.files.push({ ...info.files[0] }), info => info.files[0].url = 'untracked.AppImage', info => delete info.path, info => info.path = 'another.AppImage', info => delete info.files[0].blockMapSize]) {
+        const changed = structuredClone(value.info); mutate(changed);
+        await fs.writeFile(path.join(directory, 'latest-linux.yml'), yaml.dump(changed));
+        await assert.rejects(finalizeMetadata(directory, 'latest-linux.yml', false, undefined, { expectedVersion: value.version }));
+    }
+    for (const [manifest, refs] of [['latest.yml', [`VERIFI-Setup-${value.version}.exe`]], ['latest-mac.yml', [`VERIFI-${value.version}-universal-mac.zip`, `VERIFI-${value.version}-universal.dmg`]]]) {
+        await fs.writeFile(path.join(directory, manifest), yaml.dump({ version: value.version, files: [], path: refs[0], sha512: 'placeholder' }));
+        await assert.rejects(finalizeMetadata(directory, manifest, false, undefined, { expectedVersion: value.version }), /Invalid update metadata/);
+    }
 });

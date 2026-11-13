@@ -11,7 +11,7 @@ Tests ─┬─ Web build ───────────────┐
        └─ Desktop release ─────────┴─ Production web deploy
 ```
 
-The desktop gate includes the Electron renderer build, macOS packaging and notarization, Windows and Linux packaging, Windows signing, release-artifact collection, and creation of the draft GitHub Release. A failure or cancellation anywhere in that chain prevents production web deployment. The already-deployed production site is not modified.
+The desktop gate includes the Electron renderer build, macOS packaging and notarization, Windows and Linux packaging, Windows signing, release-artifact collection, immutable tag/draft creation, and attachment of attested packaging evidence. A failure or cancellation anywhere in that chain prevents production web deployment. The already-deployed production site is not modified.
 
 Development web deployment does not depend on Electron packaging because desktop releases run only from `master`.
 
@@ -52,6 +52,8 @@ On-demand desktop QA uses the separate [desktop pre-release workflow](desktop-pr
 The [build template](../.github/workflows/template_build.yml) creates `web-dist` for the release web deployment and `dist` for QA. The deployment workflow only consumes the appropriate artifact; it never rebuilds the application.
 
 The desktop workflow owns its renderer and installer artifacts. Refer to its upload steps for the current platform outputs rather than copying that changing inventory into documentation.
+
+Production packaging evidence remains attached to the draft after those artifacts expire. The [production draft audit](production-draft-audit.md) describes its provenance, the read-only manual preview, approved historical baselines, report locations and retries. Stage one does not yet make the preview a deployment/publication gate; enabling the required audit is a subsequent rollout change after a complete real-draft trial and maintainer review.
 
 Artifacts expire according to the `retention-days` values on their upload steps. When retrying a deployment, first confirm its required artifacts are still available in the workflow run. If they have expired, rerun the full workflow so deployment cannot consume output from a different commit.
 
@@ -110,9 +112,10 @@ Use this path only when a vital fix cannot wait for the normal `develop` promoti
 
 - A test or web-build failure prevents all web deployment for that run.
 - A missing or mismatched preceding release tag, or a failed or incomplete preceding CI/CD run, prevents a later production release from building or deploying.
-- A desktop build, packaging, signing, notarization, upload, or draft-release failure prevents production web deployment.
+- A desktop build, packaging, signing, notarization, upload, tag/draft creation, or packaging-evidence failure prevents production web deployment. Published distributions are never replaced on a production rerun.
 - A development deployment does not depend on the skipped desktop job.
 - If the desktop gate fails, fix the underlying problem and rerun the failed jobs and their dependents. Confirm `web_deploy` runs only after the desktop caller reports success.
+- Desktop retries preserve existing distribution asset IDs. Identical retained packages may be reused; conflicting rebuilt files fail because uploads never overwrite. If rebuilding expired artifacts conflicts with an existing draft, a maintainer must review and discard only that unpublished draft before restarting the trusted release path. Keep its immutable version tag and never replace published assets.
 - If web deployment fails after the desktop gate succeeds, rerun the failed deployment while `web-dist` is retained. Rerun the full workflow after artifact expiration.
 - Never substitute an artifact from another workflow run or commit to bypass the gate.
 

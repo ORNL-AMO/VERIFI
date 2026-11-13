@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "repository": "ORNL-AMO/VERIFI",
+  "legacyBaselines": [
+    {
+      "releaseId": 405069113,
+      "tag": "v0.16.4-beta",
+      "sourceSha": "b8c20e1152ec3f8a639afb8413629c40ea8198e7"
+    }
+  ]
+}
