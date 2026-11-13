@@ -72,6 +72,19 @@ describe('shared visualization decisions', () => {
     expect(prepareDecisionChange(definition, { kind: 'set-resources', sourceId: 'source-1', resourceIds: ['meter-a', 'foreign-meter'] }, { snapshot: snapshot() }))
       .toEqual({ state: 'unchanged' });
   });
+  it('retains provider presentation when an item edit creates a stronger resource selector', () => {
+    const base = selected('meter', ['meter-a', 'meter-b']);
+    const provider = { seriesId: 'source-1:meter-b', label: 'Saved B', color: '#123456', order: 0 };
+    const definition: VisualizationDefinition = { ...base, series: base.series.map(series => ({ ...series, overrides: [
+      provider, { seriesId: 'source-1:meter-a', order: 1 }
+    ] })) };
+    const edited = apply(definition, { kind: 'item-style', sourceId: 'source-1', item: { resourceGuid: 'meter-b' }, changes: { traceType: 'bar' } });
+    expect(edited.series[0].overrides).toContainEqual(provider);
+    expect(edited.series[0].overrides).toContainEqual({ resourceGuid: 'meter-b', accountGuid: 'account-a', label: 'Saved B', color: '#123456', order: 0, traceType: 'bar' });
+    const data = snapshot(), scope = resolveVisualizationFacilities(edited, data.facilities).scope;
+    const metadata = discoverUtilitySeries(data, scope, edited.sources[0] as UtilityVisualizationSource);
+    expect(resolveVisualizationSeries(edited, metadata, true).map(item => item.metadata.resourceGuid)).toEqual(['meter-b', 'meter-a']);
+  });
   it('reviews clearing Include All once and leaves an empty Source selection unconfigured', () => {
     let definition = selected('source', ['Electricity', 'Natural Gas']);
     definition = { ...definition, series: definition.series.map(series => ({ ...series, color: '#123456' })) };
