@@ -11,7 +11,7 @@ import { VisualizationReference, VisualizationReferenceIssue, visualizationRefer
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { CreateVisualizationCommand, DeleteVisualizationCommand, DuplicateVisualizationCommand,
   UpdateVisualizationCommand, RetargetVisualizationCommand, VisualizationConflictError } from '../visualization-commands.models';
-import { inspectVisualizationReferences, VisualizationCatalogResource, VisualizationReferenceCatalog, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
+import { inspectVisualizationReferences, VisualizationReferenceCatalog, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
 
 const OWNER_STORES: readonly VerifiStoreName[] = ['accounts', 'facilities', 'savedVisualizations'];
 const CATALOG_STORES = VISUALIZATION_CATALOG_STORES;
@@ -100,7 +100,7 @@ export class VisualizationCommandHandler {
       }
       const catalog = await readVisualizationReferenceCatalog(tx);
       await this.assertFacilitiesExist(tx, { ...decoded.definition, facilitySelection: submitted.targetFacilities }, decoded.definition.facilitySelection);
-      const definition = prepareVisualizationFacilityChange(decoded.definition, submitted.targetFacilities, catalog).definition;
+      const definition = prepareVisualizationFacilityChange(decoded.definition, submitted.targetFacilities, catalog, current.preservation?.references).definition;
       this.assertDefinition(definition, submitted.accountGuid);
       if (!sameDefinitionIntent(normalizeVisualizationDefinition(definition), normalizeVisualizationDefinition(submitted.reviewedDefinition))) throw new VisualizationConflictError(current);
       const next: IdbSavedVisualization = { ...current, revision: current.revision + 1, modifiedDate: new Date(), definition };
@@ -196,25 +196,15 @@ function reconcileRetargetReferences(before: VisualizationDefinition, after: Vis
   const oldRefs = visualizationReferences(before), newRefs = visualizationReferences(after);
   const selected = new Set(after.facilitySelection.kind === 'fixed' ? after.facilitySelection.facilityGuids
     : catalog.facilities.filter(item => item.accountId === after.accountGuid).map(item => item.guid));
-  const resourceFor = (ref: VisualizationReference): VisualizationCatalogResource | undefined => {
-    const resources = ref.kind === 'facility' ? catalog.facilities : ref.kind === 'meter' || ref.kind === 'charge' ? catalog.meters
-      : ref.kind === 'meter-group' ? catalog.meterGroups : ref.kind === 'predictor' ? catalog.predictors
-      : ref.kind === 'energy-use-group' ? catalog.energyUseGroups : ref.kind === 'equipment' ? catalog.energyUseEquipment
-      : ref.kind === 'model' ? catalog.facilityAnalyses : ref.kind === 'analysis' ? [...catalog.facilityAnalyses, ...catalog.accountAnalyses] : [];
-    const guid = ref.kind === 'model' || ref.kind === 'charge' ? ref.parentGuid : ref.guid;
-    return resources.find(item => item.guid === guid);
-  };
   return issues.flatMap(issue => {
     const old = oldRefs.find(ref => ref.path === issue.path && referenceIdentity(before, ref) === referenceIdentity(before, issue));
     if (!old) return [issue]; // Unclassified preservation cannot be acknowledged by an unrelated inclusion edit.
     const next = newRefs.find(ref => referenceIdentity(after, ref) === referenceIdentity(before, old));
     const facilityChoice = old.path.startsWith('facilitySelection.facilityGuids.');
-    const resource = resourceFor(old);
+    const resource = facilityChoice ? catalog.facilities.find(item => item.guid === old.guid) : undefined;
     if (facilityChoice && (!next || resource?.accountId === after.accountGuid && selected.has(old.guid))) return [];
-    const excluded = resource?.accountId === after.accountGuid
-      && (!old.accountGuid || old.accountGuid === after.accountGuid)
-      && (old.kind === 'facility' ? !selected.has(resource.guid) : resource.facilityId !== undefined && !selected.has(resource.facilityId));
-    if (!next && excluded) return [];
+    // Facility retargeting never acknowledges a protected source relationship,
+    // even if a coincident destination record appears in the excluded catalog.
     return [{ ...issue, ...(next ? { path: next.path } : {}) }];
   });
 }

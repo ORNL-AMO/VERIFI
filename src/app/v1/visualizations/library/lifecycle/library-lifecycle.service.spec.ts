@@ -213,7 +213,7 @@ describe('visualization Dashboard lifecycle', () => {
     expect(lifecycle.editor()?.fixedFacility).toBe('facility-a'); lifecycle.form.controls.name.setValue('  '); await lifecycle.submit();
     expect(commands.submit).not.toHaveBeenCalled(); lifecycle.form.patchValue({ name: 'Attempt portfolio', scope: 'portfolio' }); await lifecycle.submit();
     expect(commands.submit).not.toHaveBeenCalled(); lifecycle.form.controls.scope.setValue('facility'); await lifecycle.submit();
-    expect(commands.prepareCreate.mock.calls[0][0].scope).toEqual({ kind: 'facility', facilityGuid: 'facility-a' });
+    expect(commands.prepareCreate.mock.calls[0][0].facilitySelection).toEqual({ kind: 'fixed', facilityGuids: ['facility-a'] });
   });
   it('uses portal-driven Stay and Discard decisions before leaving a changed draft', async () => {
     configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle); lifecycle.form.controls.name.setValue('Protected');

@@ -1,6 +1,7 @@
 import { analysisVisualizationFixture, utilityVisualizationFixture } from './testing/visualization-fixtures';
 import type { UtilityVisualizationSource, VisualizationDefinition } from './visualization-definition';
 import { prepareVisualizationFacilityChange } from './visualization-facility-change';
+import type { VisualizationReferenceIssue } from './visualization-references';
 import type { VisualizationFacilityCatalog } from './visualization-facilities';
 
 const catalog: VisualizationFacilityCatalog = {
@@ -29,6 +30,61 @@ describe('reviewed visualization facility inclusion', () => {
     expect(changed.definition.series.map(item => item.id)).toEqual(['unknown']);
     expect(changed.cleared).toEqual(expect.arrayContaining(['Excluded resource selections', 'Excluded item presentation']));
   });
+  it.each(['meter', 'predictor', 'equipment', 'energy-use-group'] as const)('preserves blocked %s identities despite excluded destination collisions while pruning verified siblings', resource => {
+    const base = utilityVisualizationFixture({ kind: 'all' });
+    const selection = { kind: 'fixed' as const, resource, guids: ['verified', 'blocked'] };
+    const source = resource === 'meter' ? { ...base.sources[0] as UtilityVisualizationSource, selection }
+      : resource === 'predictor' ? { id: 'utility', kind: 'predictor' as const, measure: 'value' as const, aggregation: 'none' as const, selection }
+      : { id: 'utility', kind: 'energy-use' as const, measure: 'consumption' as const, aggregation: 'sum' as const, denominator: 'facility' as const, selection };
+    const definition: VisualizationDefinition = { ...base, sources: [source], series: [
+      { id: 'verified', sourceId: source.id, metric: source.measure, resourceGuid: 'verified', axis: 'left', color: '#111111' },
+      { id: 'blocked', sourceId: source.id, metric: source.measure, resourceGuid: 'blocked', axis: 'left', label: 'Original resource', color: '#123456' },
+      { id: 'members', sourceId: source.id, metric: source.measure, axis: 'left', overrides: [
+        { resourceGuid: 'blocked', label: 'Original member' }, { resourceGuid: 'verified', color: '#111111' },
+        ...(resource === 'meter' ? [{ seriesId: 'utility:blocked', lineStyle: 'dashed' as const }, { seriesId: 'utility:verified', color: '#111111' }] : [])
+      ] }
+    ] };
+    const references: readonly VisualizationReferenceIssue[] = [
+      { path: 'sources.0.selection.guids.1', kind: resource, guid: 'blocked', reason: 'not-transferred' },
+      { path: 'series.1.resourceGuid', kind: resource, guid: 'blocked', reason: 'not-transferred' }
+    ];
+    const items = ['verified', 'blocked'].map(guid => ({ guid, accountId: 'account-a', facilityId: 'facility-b' }));
+    const result = prepareVisualizationFacilityChange(definition, { kind: 'fixed', facilityGuids: ['facility-a'] },
+      { ...catalog, meters: items, predictors: items, energyUseEquipment: items, energyUseGroups: items }, references);
+    expect(result.definition.sources[0]).toMatchObject({ selection: { guids: ['blocked'] } });
+    expect(result.definition.series).toEqual([definition.series[1], { ...definition.series[2], overrides: [definition.series[2].overrides![0],
+      ...(resource === 'meter' ? [definition.series[2].overrides![2]] : [])] }]);
+    expect(result.cleared).toEqual(expect.arrayContaining(['Excluded resource selections', 'Excluded item presentation']));
+  });
+
+  it.each(['facility', 'meter-group'] as const)('preserves blocked rule %s anchors and does not broaden an exhausted other dimension', kind => {
+    const base = utilityVisualizationFixture({ kind: 'all' });
+    const filter = kind === 'facility' ? { facilityGuids: ['facility-b'], groupGuids: ['verified-group'] }
+      : { facilityGuids: ['facility-b'], groupGuids: ['blocked-group'] };
+    const definition: VisualizationDefinition = { ...base, sources: [{ ...base.sources[0] as UtilityVisualizationSource,
+      selectionMode: 'rule', selection: { kind: 'rule', resource: 'meter', filter } }] };
+    const blockedGuid = kind === 'facility' ? 'facility-b' : 'blocked-group';
+    const path = kind === 'facility' ? 'facilityGuids' : 'groupGuids';
+    const result = prepareVisualizationFacilityChange(definition, { kind: 'fixed', facilityGuids: ['facility-a'] },
+      { ...catalog, meterGroups: ['verified-group', 'blocked-group'].map(guid => ({ guid, accountId: 'account-a', facilityId: 'facility-b' })) },
+      [{ path: `sources.0.selection.filter.${path}.0`, kind, guid: blockedGuid, reason: 'not-transferred' }]);
+    expect(result.definition.sources).toEqual(definition.sources);
+    expect(result.definition.series).toEqual(definition.series);
+    expect(result.cleared).toEqual([]);
+  });
+
+  it.each(['analysis', 'meter-group', 'model'] as const)('retains an Analysis binding and styling protected by a blocked %s relationship', kind => {
+    const base = analysisVisualizationFixture(true);
+    const source = base.sources[0];
+    if (source.kind !== 'analysis' || source.mode !== 'model') throw new Error('Expected model fixture');
+    const references: readonly VisualizationReferenceIssue[] = [{ path: `sources.0.${kind === 'analysis' ? 'analysisGuid' : kind === 'model' ? 'modelId' : 'groupGuid'}`,
+      kind, guid: kind === 'analysis' ? source.analysisGuid! : kind === 'model' ? source.modelId! : source.groupGuid!,
+      ...(kind !== 'analysis' ? { parentGuid: source.analysisGuid } : {}), reason: 'not-transferred' }];
+    const result = prepareVisualizationFacilityChange({ ...base, facilitySelection: { kind: 'all' } }, { kind: 'fixed', facilityGuids: ['facility-a'] },
+      { ...catalog, facilityAnalyses: [{ guid: source.analysisGuid!, accountId: 'account-a', facilityId: 'facility-b' }] }, references);
+    expect(result.definition.sources).toEqual(base.sources); expect(result.definition.series).toEqual(base.series); expect(result.cleared).toEqual([]);
+  });
+
   it.each([false, true])('prunes proven Analysis facility items without guessing group or model identities (model: %s)', model => {
     const base = analysisVisualizationFixture(model);
     const definition: VisualizationDefinition = { ...base, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a', 'facility-b'] },

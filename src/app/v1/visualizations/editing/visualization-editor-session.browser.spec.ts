@@ -1,3 +1,4 @@
+import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import type { VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
@@ -41,7 +42,7 @@ describe('visualization editor session with native IndexedDB', () => {
 
   function changeFacilities(session: VisualizationEditorSession, selection: VisualizationFacilitySelection): Promise<boolean> {
     const snapshot = TestBed.inject(AccountWorkspaceStore).snapshot()!;
-    return session.retarget(selection, prepareVisualizationFacilityChange(session.definition()!, selection, snapshot).definition);
+    return session.retarget(selection, prepareVisualizationFacilityChange(session.definition()!, selection, snapshot, session.record()?.preservation?.references).definition);
   }
 
   it.each([
@@ -85,6 +86,24 @@ describe('visualization editor session with native IndexedDB', () => {
     await harness.reopen();
     const records = await harness.getAll<IdbSavedVisualization & { [key: string]: unknown }>('savedVisualizations');
     expect(records).toHaveLength(1); expect(records[0]).toMatchObject({ guid: proposal.guid, definition: { facilitySelection: { kind: 'all' } } });
+  });
+
+  it('rechecks a reviewed collision without erasing protected imported source intent', async () => {
+    const base = utilityVisualizationFixture({ kind: 'all' }), excluded = { ...facility, id: 2, guid: 'facility-b' };
+    const original = { ...getNewIdbSavedVisualization(base), id: 1, preservation: { transfers: [], references: [
+      { path: 'sources.0.selection.guids.0', kind: 'meter' as const, guid: 'meter-a', reason: 'not-transferred' as const }
+    ] } };
+    await harness.seed({ facilities: [excluded], utilityMeter: [{ guid: 'meter-a', accountId: account.guid, facilityId: excluded.guid }], savedVisualizations: [original] });
+    await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace();
+    const session = TestBed.runInInjectionContext(() => new VisualizationEditorSession());
+    session.open(account.guid, original.guid); TestBed.tick();
+    expect(await changeFacilities(session, { kind: 'fixed', facilityGuids: [facility.guid] })).toBe(true);
+    expect(session.definition()!.sources).toEqual(base.sources); expect(session.definition()!.series).toEqual(base.series);
+    expect(session.record()!.preservation).toEqual(original.preservation);
+    expect(session.record()!.revision).toBe(original.revision + 1);
+    expect(session.canEdit()).toBe(false); expect(session.canRetarget()).toBe(true);
+    await harness.reopen();
+    expect(await harness.getAll('savedVisualizations')).toEqual([session.record()]);
   });
 
   it('retains a rejected ownership proposal for retry or discard while keeping the current scope visible', async () => {

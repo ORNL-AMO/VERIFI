@@ -1,10 +1,10 @@
-import { visualizationSeriesReference } from './visualization-references';
+import { visualizationSeriesReference, type VisualizationReferenceIssue } from './visualization-references';
 import type { ResourceSelection, VisualizationDefinition, VisualizationFacilitySelection, VisualizationSeries, VisualizationSource } from './visualization-definition';
 import { resolveVisualizationFacilities, sameVisualizationFacilitySelection, type VisualizationFacilityCatalog, type VisualizationFacilityResource } from './visualization-facilities';
 
 /** Shared review/commit policy. Unknown identities remain exact repairable intent. */
 export function prepareVisualizationFacilityChange(definition: VisualizationDefinition, targetFacilities: VisualizationFacilitySelection,
-  catalog: VisualizationFacilityCatalog): { readonly definition: VisualizationDefinition; readonly cleared: readonly string[] } {
+  catalog: VisualizationFacilityCatalog, preserved: readonly VisualizationReferenceIssue[] = []): { readonly definition: VisualizationDefinition; readonly cleared: readonly string[] } {
   if (sameVisualizationFacilitySelection(definition.facilitySelection, targetFacilities)) return { definition, cleared: [] };
   targetFacilities = targetFacilities.kind === 'fixed' ? { kind: 'fixed', facilityGuids: [...targetFacilities.facilityGuids].sort() } : targetFacilities;
   const scope = resolveVisualizationFacilities({ ...definition, facilitySelection: targetFacilities }, catalog.facilities).scope;
@@ -15,21 +15,45 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
   const resources = (kind: string) => kind === 'facility' ? catalog.facilities : kind === 'meter' ? catalog.meters
     : kind === 'meter-group' ? catalog.meterGroups : kind === 'predictor' ? catalog.predictors
     : kind === 'equipment' ? catalog.energyUseEquipment : kind === 'energy-use-group' ? catalog.energyUseGroups : [];
-  const excluded = (kind: string, guid: string) => knownExcluded(resources(kind).find(item => item.guid === guid), kind === 'facility');
+  // A destination GUID collision cannot verify an imported source. Facility
+  // selection itself is explicitly reviewed, but source blocks require source repair.
+  const sourceForPath = (path: string) => {
+    const parts = path.split('.');
+    return parts[0] === 'sources' ? definition.sources[Number(parts[1])]?.id
+      : parts[0] === 'series' ? definition.series[Number(parts[1])]?.sourceId : undefined;
+  };
+  const protectedReferences = preserved.filter(ref => !ref.path.startsWith('facilitySelection.'));
+  const protectedIdentity = (source: VisualizationSource | undefined, kind: string, guid: string) => protectedReferences.some(ref => {
+    const owner = sourceForPath(ref.path);
+    if (owner !== undefined && owner !== source?.id) return false;
+    return ref.guid === guid && (ref.kind === kind || ref.kind === 'unknown')
+      || source?.kind === 'analysis' && ref.kind === 'analysis' && ref.guid === source.analysisGuid
+        && (kind === 'meter-group' && guid === source.groupGuid
+          || kind === 'model' && source.mode === 'model' && (guid === source.modelId || guid === source.comparisonModelId))
+      || ref.parentGuid === guid && (kind === 'meter' && ref.kind === 'charge' || kind === 'analysis' && ['model', 'meter-group'].includes(ref.kind));
+  });
+  const excluded = (kind: string, guid: string, source: VisualizationSource | undefined) => !protectedIdentity(source, kind, guid)
+    && knownExcluded(resources(kind).find(item => item.guid === guid), kind === 'facility');
+  const selectionProtected = (selection: ResourceSelection, source: VisualizationSource) => selection.kind === 'fixed'
+    ? selection.guids.some(guid => protectedIdentity(source, selection.resource, guid))
+    : !!selection.filter.facilityGuids?.some(guid => protectedIdentity(source, 'facility', guid))
+      || !!selection.filter.groupGuids?.some(guid => protectedIdentity(source, source.kind === 'energy-use' ? 'energy-use-group' : 'meter-group', guid));
   const pruneSelection = (selection: ResourceSelection, source: VisualizationSource): ResourceSelection | undefined => {
     if (selection.kind === 'fixed') {
-      const guids = selection.guids.filter(guid => !excluded(selection.resource, guid));
+      const guids = selection.guids.filter(guid => !excluded(selection.resource, guid, source));
       if (guids.length === selection.guids.length) return selection;
       cleared.add('Excluded resource selections');
       return guids.length ? { ...selection, guids } : undefined;
     }
     const filter = { ...selection.filter };
-    const facilities = filter.facilityGuids?.filter(guid => !excluded('facility', guid));
-    const groups = filter.groupGuids?.filter(guid => !excluded(source.kind === 'energy-use' ? 'energy-use-group' : 'meter-group', guid));
+    const facilities = filter.facilityGuids?.filter(guid => !excluded('facility', guid, source));
+    const groups = filter.groupGuids?.filter(guid => !excluded(source.kind === 'energy-use' ? 'energy-use-group' : 'meter-group', guid, source));
     const lostFacilities = !!filter.facilityGuids?.length && facilities?.length !== filter.facilityGuids.length;
     const lostGroups = !!filter.groupGuids?.length && groups?.length !== filter.groupGuids.length;
+    // Removing the final anchor must not convert a restrictive rule into All or
+    // erase a different anchor whose imported identity still requires repair.
+    if ((lostFacilities && !facilities?.length || lostGroups && !groups?.length) && selectionProtected(selection, source)) return selection;
     if (lostFacilities || lostGroups) cleared.add('Selections outside the included facilities');
-    // Removing the final anchor must not convert a restrictive rule into All.
     if (lostFacilities && !facilities?.length || lostGroups && !groups?.length) return undefined;
     if (facilities) filter.facilityGuids = facilities;
     if (groups) filter.groupGuids = groups;
@@ -38,7 +62,7 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
   const sources = definition.sources.map(source => {
     if (source.kind === 'analysis') {
       const analysis = [...catalog.facilityAnalyses, ...catalog.accountAnalyses].find(item => item.guid === source.analysisGuid);
-      if (!knownExcluded(analysis)) return source;
+      if (protectedIdentity(source, 'analysis', source.analysisGuid ?? '') || !knownExcluded(analysis)) return source;
       cleared.add('Excluded analysis bindings'); resetSources.add(source.id);
       const { analysisGuid: _analysis, groupGuid: _group, ...base } = source;
       if (base.mode === 'model') { const { modelId: _model, comparisonModelId: _comparison, ...unbound } = base; return unbound; }
@@ -47,23 +71,28 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
     const { selection: _selection, ...base } = source;
     const selection = source.selection ? pruneSelection(source.selection, source) : undefined;
     if (source.selection && !selection) resetSources.add(source.id);
-    if (source.kind === 'utility' && source.charge && excluded('meter', source.charge.meterGuid)) {
+    if (source.kind === 'utility' && source.charge && excluded('meter', source.charge.meterGuid, source)) {
       cleared.add('Excluded named charge'); resetSources.add(source.id);
       const { charge: _charge, ...unbound } = base as Extract<VisualizationSource, { kind: 'utility' }>;
-      return unbound;
+      return { ...unbound, ...(selection ? { selection } : {}) };
     }
     return { ...base, ...(selection ? { selection } : {}) };
   });
   const itemExcluded = (source: VisualizationSource | undefined, guid: string) => {
     if (!source) return false;
     const kind = visualizationSeriesReference(source, guid, definition.facilitySelection).kind;
-    return !!kind && excluded(kind, guid);
+    return !!kind && excluded(kind, guid, source);
   };
   const custom = (series: VisualizationSeries) => !!series.label || !!series.color || series.axis === 'right'
     || series.lineStyle !== undefined || series.visible === false || !!series.overrides?.length;
-  const series = definition.series.flatMap(series => {
+  const series = definition.series.flatMap((series, index) => {
     const source = definition.sources.find(source => source.id === series.sourceId);
-    if (resetSources.has(series.sourceId) || series.resourceGuid && itemExcluded(source, series.resourceGuid)) {
+    const seriesProtected = protectedReferences.some(ref => ref.path.startsWith(`series.${index}.`)
+      || sourceForPath(ref.path) === series.sourceId)
+      || !!series.resourceGuid && protectedIdentity(source, visualizationSeriesReference(source, series.resourceGuid, definition.facilitySelection).kind, series.resourceGuid)
+      || !!series.overrides?.some(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid && override.resourceGuid !== undefined
+        && protectedIdentity(source, visualizationSeriesReference(source, override.resourceGuid, definition.facilitySelection).kind, override.resourceGuid));
+    if (resetSources.has(series.sourceId) && !seriesProtected || series.resourceGuid && itemExcluded(source, series.resourceGuid)) {
       if (custom(series)) cleared.add('Excluded item presentation');
       return [];
     }
@@ -72,7 +101,7 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
       const providerResource = source?.kind === 'utility' && override.seriesId?.startsWith(`${source.id}:`) ? override.seriesId.slice(`${source.id}:`.length) : undefined;
       const excludedIdentity = override.resourceGuid !== undefined ? itemExcluded(source, override.resourceGuid)
         : providerResource && itemExcluded(source, providerResource) || source?.kind === 'utility' && source.groupBy === 'group' && override.seriesId.startsWith(`${source.id}:unassigned:`)
-          && excluded('facility', override.seriesId.slice(`${source.id}:unassigned:`.length));
+          && excluded('facility', override.seriesId.slice(`${source.id}:unassigned:`.length), source);
       if (excludedIdentity) cleared.add('Excluded item presentation');
       return !excludedIdentity;
     });
