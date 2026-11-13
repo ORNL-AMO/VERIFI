@@ -1,3 +1,8 @@
+import { TransferEnergyUseComponent } from './energy-use-workbench/transfer-energy-use/transfer-energy-use.component';
+import { ExportEnergyUsesComponent } from './export-energy-uses/export-energy-uses.component';
+import { BalanceFactsComponent } from './energy-use-workbench/balance-facts/balance-facts.component';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
+import { SaveStatusComponent } from './forms/save-status/save-status.component';
 import { AnnualYearFieldsComponent } from './forms/annual-year-fields/annual-year-fields.component';
 import { AddYearDrawerComponent } from './energy-use-workbench/setup-group/add-year-drawer/add-year-drawer.component';
 import { SetupGroupComponent } from './energy-use-workbench/setup-group/setup-group.component';
@@ -5,7 +10,12 @@ import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.direc
 import { InventoryChartDockComponent } from '@app/v1/shared/charts/inventory-chart-dock/inventory-chart-dock.component';
 import { InventoryChartSheetComponent } from '@app/v1/shared/charts/inventory-chart-sheet/inventory-chart-sheet.component';
 import { EnergyUseChartsComponent } from './inventory/charts/energy-use-charts.component';
-import { EnergyUseHistoryComponent } from './energy-use-workbench/history/energy-use-history.component';
+import { ResultsGraphsComponent } from './energy-use-workbench/results/graphs/results-graphs.component';
+import { FootprintTableComponent } from './energy-use-workbench/results/footprint-table/footprint-table.component';
+import { SummaryTableComponent } from './energy-use-workbench/results/summary-table/summary-table.component';
+import { FacilityFootprintComponent } from './energy-use-workbench/results/facility-footprint/facility-footprint.component';
+import { ResultsControlsComponent } from './energy-use-workbench/results/controls/results-controls.component';
+import { SourceDetailsComponent } from './energy-use-workbench/results/source-details/source-details.component';
 import { EquipmentTableComponent } from './energy-use-workbench/setup-group/equipment-table/equipment-table.component';
 import { LifecycleActionsComponent } from './energy-use-workbench/lifecycle-actions/lifecycle-actions.component';
 import { SetupCalculatorComponent } from './forms/setup-calculator/setup-calculator.component';
@@ -35,10 +45,11 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
 
 @NgModule({
   declarations: [
-    EnergyUsesInventoryComponent, EquipmentTableComponent, LifecycleActionsComponent, EnergyUseChartsComponent, EnergyUseHistoryComponent,
-    EnergyUseWorkbenchComponent, SetupGroupComponent,
+    TransferEnergyUseComponent, ExportEnergyUsesComponent, EnergyUsesInventoryComponent, EquipmentTableComponent, LifecycleActionsComponent, EnergyUseChartsComponent,
+    ResultsGraphsComponent, FootprintTableComponent, SummaryTableComponent, FacilityFootprintComponent, ResultsControlsComponent, SourceDetailsComponent,
+    EnergyUseWorkbenchComponent, SetupGroupComponent, BalanceFactsComponent,
     AnnualDataFieldsComponent, AnnualYearFieldsComponent, AddYearDrawerComponent, SetupCalculatorComponent,
-    SettingsFieldsComponent, UtilitiesSlideoutComponent, MeterGroupsSlideoutComponent, CreateEnergyUseDrawerComponent, EnergyUseSettingsComponent,
+    SettingsFieldsComponent, SaveStatusComponent, UtilitiesSlideoutComponent, MeterGroupsSlideoutComponent, CreateEnergyUseDrawerComponent, EnergyUseSettingsComponent,
   ],
   imports: [
     CommonModule, EChartsChartDirective, InventoryChartDockComponent, InventoryChartSheetComponent,
@@ -47,7 +58,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
     PageIdentityComponent,
     BrowseHeaderDirective,
     DataWorkbenchTabsComponent,
-    DataWorkbenchResourceSwitcherComponent,
+    DataWorkbenchResourceSwitcherComponent, DataWorkbenchFactsToggleComponent,
     ReactiveFormsModule,
     InventoryGridComponent,
     BrowsePositionDirective,
@@ -55,7 +66,7 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
     DataEmptyStateModule
   ],
   exports: [
-    EnergyUseChartsComponent, EnergyUseHistoryComponent,
+    EnergyUseChartsComponent,
     EnergyUsesInventoryComponent,
     EnergyUseWorkbenchComponent,
     AnnualDataFieldsComponent,

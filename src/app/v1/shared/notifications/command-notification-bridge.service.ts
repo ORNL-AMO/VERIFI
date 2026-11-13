@@ -5,6 +5,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { NotificationService } from './notification.service';
 
 const ENTITY_LABELS: Record<WorkspaceEntityKind, string> = {
+  savedVisualization: 'Visualization',
   account: 'Account',
   facility: 'Facility',
   meter: 'Meter',

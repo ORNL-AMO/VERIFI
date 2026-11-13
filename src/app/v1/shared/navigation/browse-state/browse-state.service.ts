@@ -6,8 +6,10 @@ import type { PredictorInventoryFilters } from '@app/v1/data/predictors/inventor
 import type { FacilitySort, FacilityStatusFilter } from '@app/v1/data/facilities/inventory/facility-inventory.view';
 import type { MeterInventorySort, MeterInventoryStatusFilter } from '@app/v1/data/meters/inventory/meter-inventory.view';
 import { InventoryView } from '@app/v1/shared/inventory/inventory.models';
+import type { VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 
 export interface BrowseFilters {
+  visualizations: { search: string; scope: 'all' | 'portfolio' | 'facility'; family: 'all' | VisualizationSourceKind; status: 'all' | 'setup-required' | 'repair-required' | 'unsupported' | 'configured'; sort: 'modified' | 'name' | 'attention' };
   'energy-uses': EnergyUseInventoryFilters;
   reports: ReportInventoryFilters;
   analyses: { search: string; scope: 'all' | 'account' | 'facility'; category: 'all' | 'energy' | 'water'; status: 'all' | 'ready' | 'warning' | 'error' | 'active'; sort: 'account-first' | 'attention' | 'modified' | 'name' | 'baseline' };
@@ -18,7 +20,7 @@ export interface BrowseFilters {
 export type BrowseKind = keyof BrowseFilters;
 export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; readonly energyUseGroupGuid?: string; }
 export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
-export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
+export type InventoryBrowseKind = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports' | 'visualizations';
 
 /** UI-only journey state. Nothing is written to storage or domain records. */
 @Injectable({ providedIn: 'root' })

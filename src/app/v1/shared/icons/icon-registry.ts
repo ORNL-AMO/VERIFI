@@ -15,6 +15,7 @@ import Apple01Icon from '@hugeicons/core-free-icons/Apple01Icon';
 import AsteriskIcon from '@hugeicons/core-free-icons/AsteriskIcon';
 import Attachment01Icon from '@hugeicons/core-free-icons/Attachment01Icon';
 import BarChartIcon from '@hugeicons/core-free-icons/BarChartIcon';
+import BarChartHorizontalIcon from '@hugeicons/core-free-icons/BarChartHorizontalIcon';
 import BankIcon from '@hugeicons/core-free-icons/BankIcon';
 import BadgeAlertIcon from '@hugeicons/core-free-icons/BadgeAlertIcon';
 import BriefcaseBusinessIcon from '@hugeicons/core-free-icons/BriefcaseBusinessIcon';
@@ -131,6 +132,7 @@ export const ICON_REGISTRY = {
   arrowRight: ArrowRight01Icon,
   attachment: Attachment01Icon,
   barChart: BarChartIcon,
+  barChartHorizontal: BarChartHorizontalIcon,
   bank: BankIcon,
   badgeAlert: BadgeAlertIcon,
   portfolio: BriefcaseBusinessIcon,

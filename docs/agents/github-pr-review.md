@@ -1,80 +1,13 @@
-# GitHub PR review guide
+# GitHub PR review
 
-Use this guide when reviewing VERIFI pull requests in GitHub. It extends the [Reviewer mode](personas.md#reviewer) with GitHub-specific expectations.
+1. Read current PR metadata and resolve its exact base/head comparison. Follow [review-code-changes](../../.agents/skills/review-code-changes/SKILL.md), the Reviewer mode, and relevant subsystem guidance. Use [fresh review](local-fresh-review.md) at the pre-PR checkpoint or when explicitly requested for an existing PR. An independently started reviewer performs the review directly and must not delegate recursively.
+2. Inspect the complete diff, surrounding contracts/consumers, tests, and validation evidence. If instructions are absent from an older PR snapshot, identify any current equivalents used while keeping source review pinned to the captured commits. Distinguish independently run checks from author claims.
+3. Return prioritized findings in chat with exact path/line, triggering conditions, impact, evidence, and correction direction. Report no actionable findings explicitly and list validation gaps. Use these severities:
 
-## Start
+   - P0: immediate severe data loss, security exposure, or unusable application behavior.
+   - P1: should block merge; likely regression, compatibility break, or incorrect result.
+   - P2: consequential edge case, accessibility, maintainability, or coverage gap worth fixing.
+   - P3: optional cleanup or follow-up; do not block on taste.
 
-Use `review-code-changes`. Read the pull request diff, changed files, tests provided by the author, and the matching row in the [task context index](context-index.md). Load only the linked architecture sections, subsystem skills, and local source needed to understand the changed contract. Trace affected entry points, owners, consumers, and compatibility paths before treating a changed line as locally correct.
-
-For v1 UI migration work, include the [Angular template guidance](angular-template-guidance.md), [Unified UI/UX migration guide](../unified-ux-migration.md), and [P1 selected prototype baseline](p1-selected-prototype-baseline.md) when they are relevant to the changed files.
-
-## Responding to an existing review
-
-Use [`address-pr-review`](../../.agents/skills/address-pr-review/SKILL.md) when evaluating and addressing feedback already left on a PR. It covers complete comment/thread collection, evidence-based dispositions, warranted fixes and validation, replies, and verified resolution. A new code review remains under `review-code-changes`; an assessment-only request does not authorize edits or GitHub mutations. Preserve existing session authorization and the publication requirements in the [PR creation guide](github-pr-creation.md).
-
-## What to prioritize
-
-Lead with actionable findings. Prioritize:
-
-- data preservation, IndexedDB migrations, backup compatibility, and GUID relationships;
-- calculation, report, import/export, and Web Worker contract changes;
-- Electron preload, IPC, filesystem, dialog, updater, and context-isolation boundaries;
-- v0/v1 separation, shared-layer imports, route stability, and workspace state correctness;
-- Angular component, service, and route-context ownership, including lifecycle cleanup and reactive state flow;
-- user-visible regressions in loading, empty, validation, error, disabled, success, keyboard, responsive, print, and accessibility states;
-- reuse of existing components, presentation builders, semantic classes, and style layers where the changed behavior has the same contract;
-- test quality and whether validation matches the actual risk.
-
-For new Worker-backed queues or dashboard fan-out, inspect lifecycle and workload as separate contracts: timeout and teardown, stale-work cancellation, queue progress after one job fails or stalls, concurrency, total requested history, and structured-clone response size. A concurrency limit does not by itself bound total work or prevent queue starvation.
-
-Perform a reuse pass across changed TypeScript, templates, and CSS plus the nearest shared and neighboring implementations. Repeated semantic markup, data shaping, interaction behavior, or complete style blocks can justify consolidation. Matching individual declarations usually do not. Prefer an existing shared component or semantic class over a new abstraction, and mark cleanup comments as non-blocking when they do not affect behavior.
-
-## V1 Angular review checklist
-
-For production `src/app/v1/` changes, check that the PR:
-
-- keeps v1 production code separate from P1 prototypes and v0 UI;
-- avoids `@v0/*` imports from production v1 code;
-- organizes code by feature folder rather than broad `pages` or `components` buckets;
-- avoids routine `V1` or `v1-` prefixes except at real version boundaries;
-- keeps route and interaction orchestration in the owning component or context while placing reusable behavior in services, deterministic builders, helpers, pipes, or shared components;
-- reads workspace and lifecycle state from existing signals instead of maintaining duplicate component copies;
-- uses `computed()` for reusable or non-trivial derived state;
-- uses `@let` for repeated object signal reads in a single template view when it improves clarity;
-- avoids repeated ordinary method calls, allocations, sorting, filtering, or business logic inside template bindings;
-- uses typed reactive forms for editable state, search, filtering, paging, and preferences;
-- passes typed values and semantic intents across component boundaries instead of raw DOM events;
-- preserves cleanup for subscriptions, Workers, timers, listeners, portals, and other lifecycle-owned resources;
-- reuses established shared components, presentation patterns, and semantic style classes when behavior and ownership match;
-- includes meaningful behavior tests instead of creation-only tests;
-- renders every supported value of a closed analysis-method or state union, including retained legacy-compatible variants, when a template condition changes;
-- covers labels, roles, announcements, focus behavior, keyboard operation, responsive layout, and theme states relevant to the change.
-
-Repeated direct signal reads such as `appearance.settings().palette` across several bindings are usually a non-blocking maintainability comment: suggest a local alias like `@let settings = appearance.settings();`. Escalate only when the repeated expression is expensive, unstable, or hides important state.
-
-## Commenting in GitHub
-
-Use precise file and line comments for localized issues. Keep each comment focused on one problem and one expected fix. Group broad architectural or validation concerns in the overall review comment.
-
-Use this severity language:
-
-- `P0`: must fix immediately; severe data loss, security exposure, or unusable application behavior.
-- `P1`: should block merge; likely regression, compatibility break, incorrect result, or missing required validation.
-- `P2`: should fix before merge when practical; meaningful edge-case, maintainability, accessibility, or test gap.
-- `P3`: optional cleanup, consistency, naming, or follow-up suggestion.
-
-Prefer direct wording:
-
-```text
-[P2] Alias repeated settings signal reads
-
-This template reads `appearance.settings()` several times to compare fields from the same settings object. Please introduce `@let settings = appearance.settings();` at the top of this view and reuse `settings.palette` so future theme options are easier to review.
-```
-
-Do not block a PR on taste alone. If a comment is a nit or follow-up, label it that way.
-
-## Validation review
-
-Check the author's evidence against [testing guidance](../testing.md). For ordinary docs-only changes, link and command inspection can be enough. For production Angular templates, routing, styles, or modules, expect the validation plan to consider `npm run build-prod`; for logic changes, expect focused specs first. Add browser or Electron validation only when the changed boundary requires it.
-
-When there are no actionable findings, say so explicitly and name any validation you did not perform.
+4. Post only when explicitly authorized. Before posting, confirm the PR base/head still match the reviewed commits and verify every inline comment's path, side, and line against the current diff. Publish through the connected GitHub account, then verify the submitted review/comments and return links. Do not silently post stale findings; review changes first.
+5. Keep implementation fixes, comment publication, approval/request-changes decisions, and merge actions within their separately authorized scope. A request to review does not authorize edits or GitHub mutations; posting findings does not imply approval or merge authorization.

@@ -1,3 +1,4 @@
+import { EnergyUsesImportStateService } from './energy-uses-import-state.service';
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterStateSnapshot } from '@angular/router';
@@ -18,6 +19,7 @@ import { ImportWizardStateService } from './import-wizard-state.service';
   imports: [CommonModule, RouterOutlet, IconComponent],
   providers: [
     ImportWizardDraftStore,
+    EnergyUsesImportStateService,
     ImportMeterReviewStateService,
     ImportPredictorReviewStateService,
     ImportWizardStateService

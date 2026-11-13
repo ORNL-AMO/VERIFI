@@ -63,7 +63,7 @@ export class AnalysisReviewCommandHandler {
         tx.getAllByIndex<IdbPredictorData>('predictorData', 'accountId', accountGuid)
       ]);
       const snapshot: AccountWorkspaceSnapshot = { account, facilities, accountAnalyses, facilityAnalyses, meters, meterData, predictors, predictorData,
-        meterGroups: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] };
+        meterGroups: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: [] };
       const current = prepare(snapshot);
       if (years.some((year, index) => analysisReviewContent(current, year) !== contents[index])) {
         throw new WorkspaceWriteError('validation-failed', 'Analysis inputs changed during review. Run Data Checks again before confirming.');

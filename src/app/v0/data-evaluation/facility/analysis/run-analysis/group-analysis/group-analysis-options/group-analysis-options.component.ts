@@ -1,9 +1,8 @@
-import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, computed, inject, Signal } from '@angular/core';
+import { DestroyRef, Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { AnalysisCommandHandler, AnalysisGroupChanges } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from '@data/models/analysis';
@@ -17,6 +16,7 @@ import { AccountStatusCheckService } from '@shared/helper-services/account-statu
 import { GroupAnalysisErrors } from '@data/models/validation';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { isBankedGroupConfigurationComplete } from '@shared/shared-analysis/banking-configuration';
 
 @Component({
@@ -26,8 +26,8 @@ import { isBankedGroupConfigurationComplete } from '@shared/shared-analysis/bank
   standalone: false
 })
 export class GroupAnalysisOptionsComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly destroyRef = inject(DestroyRef);
   private analysisService: AnalysisService = inject(AnalysisService);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -175,44 +175,62 @@ export class GroupAnalysisOptionsComponent {
   });
 
   //METHODS
-  async saveItem() {
-    let analysisItem: IdbAnalysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
-    analysisItem.isAnalysisVisited = false;
-    const _group = this.group();
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == _group.idbGroupId });
-    analysisItem.groups[groupIndex] = _group;
-    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+  async saveItem(changes: AnalysisGroupChanges | ((group: AnalysisGroup) => AnalysisGroupChanges)): Promise<boolean> {
+    const analysisGuid = this.analysisItem()?.guid;
+    const groupGuid = this.group()?.idbGroupId;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    if (!analysisGuid || !groupGuid) { return false; }
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
-      () => this.analysisHandler.updateFacilityAnalysis(analysisItem, activeAccountGuid)
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Save Facility Analysis',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) } },
+      () => {
+        const current = this.accountWorkspaceStore.facilityAnalyses().find(item => item.guid === analysisGuid)
+          ?.groups.find(group => group.idbGroupId === groupGuid);
+        if (!current) { throw new WorkspaceWriteError('validation-failed', 'The analysis group is no longer available.'); }
+        return this.analysisHandler.updateFacilityAnalysisGroup(
+          analysisGuid, groupGuid, typeof changes === 'function' ? changes(current) : changes, accountGuid
+        );
+      }
     );
-    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
-    this.analysisService.selectedGroup.next({ ..._group });
+    return this.isCurrentOwner(accountGuid, analysisGuid, groupGuid);
   }
 
-  setAnalysisType() {
-    if (this.group().analysisType != 'regression') {
-      this.group().predictorVariables.forEach(variable => {
-        if (!variable.production) {
-          variable.productionInAnalysis = false;
-        }
-      });
-    }
-    this.changeModelType();
+  private isCurrentOwner(accountGuid: string, analysisGuid: string, groupGuid: string): boolean {
+    return !this.destroyRef.destroyed && this.accountWorkspaceStore.account()?.guid === accountGuid
+      && this.analysisItem()?.guid === analysisGuid && this.group()?.idbGroupId === groupGuid;
   }
 
-  setExcludeGroup(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.group().analysisType = checked ? 'skip' : 'regression';
-    this.setAnalysisType();
+  setAnalysisType(analysisType: AnalysisGroup['analysisType']) {
+    return this.saveItem(group => ({
+      analysisType,
+      models: undefined,
+      selectedModelId: undefined,
+      dateModelsGenerated: undefined,
+      ...(analysisType !== 'regression' ? {
+        predictorVariables: group.predictorVariables.filter(variable => !variable.production)
+          .map(variable => ({ id: variable.id, productionInAnalysis: false }))
+      } : {})
+    }));
   }
 
-  changeModelType() {
-    this.group().models = undefined;
-    this.group().selectedModelId = undefined;
-    this.group().dateModelsGenerated = undefined;
-    this.saveItem();
+  setExcludeGroup(checked: boolean) {
+    return this.setAnalysisType(checked ? 'skip' : 'regression');
+  }
+
+  setProductionInAnalysis(id: string, productionInAnalysis: boolean) {
+    return this.saveItem({ predictorVariables: [{ id, productionInAnalysis }] });
+  }
+
+  setMonthlyPercentBaseload(monthNum: number, percent: number) {
+    return this.saveItem(group => ({
+      monthlyPercentBaseload: group.monthlyPercentBaseload.map(month => month.monthNum === monthNum ? { ...month, percent } : month)
+    }));
+  }
+
+  setAdjustment(field: 'dataAdjustments' | 'baselineAdjustmentsV2', year: number, amount: number) {
+    return this.saveItem(group => ({
+      [field]: group[field].map(adjustment => adjustment.year === year ? { ...adjustment, amount } : adjustment)
+    }));
   }
 
   goToPredictors() {
@@ -238,18 +256,15 @@ export class GroupAnalysisOptionsComponent {
   }
 
   async confirmEnableForm() {
-    this.analysisItem().groups.forEach(group => {
-      group.models = [];
-      group.selectedModelId = undefined;
-      group.regressionConstant = undefined;
-      group.regressionModelYear = undefined;
-      group.regressionConstant = undefined;
-      group.predictorVariables.forEach(variable => {
-        variable.regressionCoefficient = undefined;
-      })
-    });
-    await this.saveItem();
-    this.cancelEnableForm();
+    const analysisGuid = this.analysisItem()?.guid;
+    const groupGuid = this.group()?.idbGroupId;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisGuid, label: 'Clear Facility Analysis Models',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) } },
+      () => this.analysisHandler.clearFacilityAnalysisModels(analysisGuid, accountGuid)
+    );
+    if (this.isCurrentOwner(accountGuid, analysisGuid, groupGuid)) { this.cancelEnableForm(); }
   }
 
   //DATA ADJUSTMENT
@@ -263,14 +278,12 @@ export class GroupAnalysisOptionsComponent {
   }
 
   async addDataAdjustments() {
-    this.dataAdjustmentYearOptions().forEach(yearOption => {
-      if (yearOption.selected) {
-        this.group().dataAdjustments.push({ year: yearOption.value, amount: 0 });
-      }
-    });
-    this.group().dataAdjustments.sort((a, b) => a.year - b.year);
-    await this.saveItem();
-    this.closeDataAdjustmentModal();
+    const years = this.dataAdjustmentYearOptions().filter(option => option.selected).map(option => option.value);
+    const saved = await this.saveItem(group => ({
+      dataAdjustments: [...group.dataAdjustments, ...years.filter(year => !group.dataAdjustments.some(item => item.year === year))
+        .map(year => ({ year, amount: 0 }))].sort((a, b) => a.year - b.year)
+    }));
+    if (saved) { this.closeDataAdjustmentModal(); }
   }
 
   //REMOVE DATA ADJUSTMENT
@@ -281,8 +294,9 @@ export class GroupAnalysisOptionsComponent {
 
   async closeRemoveDataAdjustment(removeAdjustment: boolean) {
     if (removeAdjustment) {
-      this.group().dataAdjustments = this.group().dataAdjustments.filter(adjustment => adjustment.year != this.deleteDataAdjustmentYear);
-      await this.saveItem();
+      const year = this.deleteDataAdjustmentYear;
+      const saved = await this.saveItem(group => ({ dataAdjustments: group.dataAdjustments.filter(adjustment => adjustment.year !== year) }));
+      if (!saved) { return; }
     }
     this.deleteDataAdjustmentYear = undefined;
   }
@@ -298,14 +312,12 @@ export class GroupAnalysisOptionsComponent {
   }
 
   async addBaselineAdjustments() {
-    this.baselineAdjustmentYearOptions().forEach(yearOption => {
-      if (yearOption.selected) {
-        this.group().baselineAdjustmentsV2.push({ year: yearOption.value, amount: 0 });
-      }
-    });
-    this.group().baselineAdjustmentsV2.sort((a, b) => a.year - b.year);
-    await this.saveItem();
-    this.closeBaselineAdjustmentModal();
+    const years = this.baselineAdjustmentYearOptions().filter(option => option.selected).map(option => option.value);
+    const saved = await this.saveItem(group => ({
+      baselineAdjustmentsV2: [...group.baselineAdjustmentsV2, ...years.filter(year => !group.baselineAdjustmentsV2.some(item => item.year === year))
+        .map(year => ({ year, amount: 0 }))].sort((a, b) => a.year - b.year)
+    }));
+    if (saved) { this.closeBaselineAdjustmentModal(); }
   }
 
   //REMOVE BASELINE ADJUSTMENT
@@ -316,8 +328,9 @@ export class GroupAnalysisOptionsComponent {
 
   async closeRemoveBaselineAdjustment(removeAdjustment: boolean) {
     if (removeAdjustment) {
-      this.group().baselineAdjustmentsV2 = this.group().baselineAdjustmentsV2.filter(adjustment => adjustment.year != this.deleteBaselineAdjustmentYear);
-      await this.saveItem();
+      const year = this.deleteBaselineAdjustmentYear;
+      const saved = await this.saveItem(group => ({ baselineAdjustmentsV2: group.baselineAdjustmentsV2.filter(adjustment => adjustment.year !== year) }));
+      if (!saved) { return; }
     }
     this.deleteBaselineAdjustmentYear = undefined;
   }

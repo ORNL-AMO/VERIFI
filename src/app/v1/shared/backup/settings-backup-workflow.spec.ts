@@ -42,7 +42,7 @@ describe('header backup with live Settings drafts', () => {
     const snapshot: AccountWorkspaceSnapshot = {
       account, facilities: [facility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []
     };
     store.publish(snapshot, { facility });
     exports = {

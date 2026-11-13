@@ -1,3 +1,5 @@
+import { energyUseItem } from '@app/v1/data/energy-uses/energy-uses.testing';
+import { EnergyUsesImportStateService } from './energy-uses-import-state.service';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -16,6 +18,8 @@ import { ImportMeterReviewStateService } from './import-meter-review-state.servi
 import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';
 import { ImportWizardDraftStore } from './import-wizard-draft.store';
 import { ImportWizardStateService } from './import-wizard-state.service';
+
+type ExistingImportDraft = Exclude<ImportFileDraft, { kind: 'energy-uses-template' }>;
 
 describe('ImportWizardStateService', () => {
   let service: ImportWizardStateService;
@@ -68,6 +72,7 @@ describe('ImportWizardStateService', () => {
     TestBed.configureTestingModule({
       providers: [
         ImportWizardStateService,
+        { provide: EnergyUsesImportStateService, useValue: { needsRefresh: () => false } },
         ImportWizardDraftStore,
         ImportMeterReviewStateService,
         ImportPredictorReviewStateService,
@@ -109,6 +114,25 @@ describe('ImportWizardStateService', () => {
       ]
     });
     service = TestBed.inject(ImportWizardStateService);
+  });
+
+  it('applies reviewed footprint links by source and categories only to the draft, and invalidates later review', () => {
+    const items = [energyUseItem({ accountId: 'account-1' }), energyUseItem({ guid: 'gas-item', accountId: 'account-1', utilityData: [{ energySource: 'Natural Gas' } as never] })];
+    workspaceMeterGroups.set([group({ guid: 'electric', accountId: 'account-1', facilityId: 'facility-a', groupType: 'Energy' }), group({ guid: 'gas', accountId: 'account-1', facilityId: 'facility-a', groupType: 'Energy' })]);
+    workspaceMeters.set([meter({ guid: 'electric-meter', accountId: 'account-1', facilityId: 'facility-a', groupId: 'electric', source: 'Electricity' }), meter({ guid: 'gas-meter', accountId: 'account-1', facilityId: 'facility-a', groupId: 'gas', source: 'Natural Gas' })]);
+    const draft = templateDraft({ kind: 'footprint-tool', selectedFacilityId: 'facility-a', facilityEnergyUseEquipment: items, completedSteps: ['facility', 'equipment', 'review'] });
+    service.initialize(draft);
+    const originalValues = structuredClone(items.map(item => item.utilityData));
+    expect(service.setFootprintEquipmentMapping(structuredClone(items), { meterGroupIds: ['electric', 'gas'] })).toBe(true);
+    expect(items.map(item => item.utilityMeterGroupIds)).toEqual([['electric'], ['gas']]);
+    expect(items.map(item => item.utilityData)).toEqual(originalValues);
+    expect(draft.completedSteps).toEqual(['facility']);
+    expect(service.setFootprintEquipmentMapping([structuredClone(items[1])], { category: 'Steam' })).toBe(true);
+    expect(items[1].equipmentType).toBe('Steam'); expect(items[0].equipmentType).toBe('Pump');
+    expect(commandCommit).not.toHaveBeenCalled();
+    const stale = structuredClone(items); items[0].notes = 'Changed after opening';
+    expect(service.setFootprintEquipmentMapping(stale, { meterGroupIds: [] })).toBe(false);
+    expect(items[0].utilityMeterGroupIds).toEqual(['electric']);
   });
 
   it('blocks a deep link beyond the first incomplete child route', () => {
@@ -499,7 +523,7 @@ describe('ImportWizardStateService', () => {
     expect(service.completeCurrentStep()).toBe('predictors');
   });
 
-  it.each<ImportFileDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'general-workbook'])(
+  it.each<ExistingImportDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'general-workbook'])(
     'prepares the same meter-reading review contract for %s drafts',
     kind => {
       const selectedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a' });
@@ -759,7 +783,7 @@ describe('ImportWizardStateService', () => {
     expect(summary?.overview.find(item => item.key === 'meterReadings')?.count).toBe(1);
   });
 
-  it.each<ImportFileDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'energy-treasure-hunt', 'general-workbook'])(
+  it.each<ExistingImportDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'energy-treasure-hunt', 'general-workbook'])(
     'prepares the same predictor-reading review contract for %s drafts',
     kind => {
       service.initialize({
@@ -773,7 +797,7 @@ describe('ImportWizardStateService', () => {
   );
 });
 
-function generalDraft(): ImportFileDraft {
+function generalDraft(): ExistingImportDraft {
   return {
     ...getEmptyFileReference(),
     id: 'draft-1',
@@ -790,7 +814,7 @@ function generalDraft(): ImportFileDraft {
   };
 }
 
-function templateDraft(values: Partial<ImportFileDraft> = {}): ImportFileDraft {
+function templateDraft(values: Partial<ExistingImportDraft> = {}): ExistingImportDraft {
   return {
     ...generalDraft(),
     kind: 'verifi-v2',

@@ -1,0 +1,18 @@
+:host { display: block; min-width: 0; }
+.energy-use-balance-facts__heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: .75rem; }
+h2, h3 { margin: 0; font-size: .9rem; font-weight: 800; }
+.energy-use-balance-facts__context, small { color: var(--v1-muted); font-size: .8rem; }
+.energy-use-balance-facts__over-allocated dd { color: var(--v1-danger); }
+.energy-use-balance-facts__sources { margin-top: .75rem; }
+summary { cursor: pointer; font-size: .85rem; color: var(--v1-link); font-weight: 700; }
+summary:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: 2px; }
+.energy-use-balance-facts__sources section { padding-top: .65rem; margin-top: .65rem; border-top: 1px solid var(--v1-divider); }
+.energy-use-balance-facts__sources h3 { margin-bottom: .5rem; }
+small { display: block; }
+
+.energy-use-balance-facts__status { min-width: 6.5rem; justify-content: center; gap: .3rem; font-size: .78rem; line-height: 1.2; }
+@media (max-width: 40rem) {
+  .energy-use-balance-facts__heading h2 { flex: 1; }
+  .energy-use-balance-facts__context { order: 1; flex-basis: 100%; }
+  .energy-use-balance-facts__status { flex-shrink: 0; }
+}

@@ -18,6 +18,7 @@ export class InventoryChartSheetComponent {
   private readonly injector = inject(Injector);
   readonly content = input<TemplateRef<unknown>>();
   readonly customTitle = input('');
+  readonly closeBlocked = input(false);
   readonly singleTrace = input(false);
   readonly traceChoices = computed(() => this.singleTrace() ? this.charts().flatMap(chart => chart.metrics) : this.activeChart()?.metrics ?? []);
   readonly traceHiddenGuids = computed(() => this.singleTrace() ? this.traceChoices().filter(trace => trace.id !== this.activeChart()?.id).map(trace => trace.id) : this.view().hiddenGuids);

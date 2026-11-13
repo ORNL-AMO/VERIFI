@@ -14,6 +14,7 @@ import {
 } from './data-migration.models';
 
 const COLLECTION_STORES: Readonly<Record<MigrationCollectionName, VerifiStoreName>> = {
+  savedVisualizations: 'savedVisualizations',
   accounts: 'accounts',
   facilities: 'facilities',
   meters: 'utilityMeter',

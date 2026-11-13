@@ -1,28 +1,47 @@
 <app-inventory-chart-dock [open]="open()" [disabled]="!ready()" (opened)="show()"/>
 <ng-template #sheet>
-  <app-inventory-chart-sheet [charts]="[]" facilityName="Energy Uses" customTitle="Energy Uses · Annual consumption" [content]="content" (closed)="close()"/>
+  <app-inventory-chart-sheet [charts]="[]" facilityName="Energy Uses" [customTitle]="title()" [content]="content" (closed)="close()"/>
 </ng-template>
 <ng-template #content>
   <div class="energy-use-charts">
-    <header><h2>Energy Uses · {{ unit() }}</h2><label>Fiscal year<select class="v1-select" [formControl]="yearControl">@for (year of years(); track year) { <option [ngValue]="year">{{ year }}</option> }</select></label><button type="button" class="v1-btn v1-btn--quiet" (click)="nodeId.set('')">Reset drilldown</button></header>
-    <p>Earlier saved values carry forward until a newer entry replaces them. Totals and percentages apply within each actual fiscal period.</p>
+    <h2 #levelTitle tabindex="-1" class="visually-hidden">{{ title() }}</h2>
+    <p id="energy-use-treemap-description" class="visually-hidden">Energy use in {{ unit() }}/year. Tiles show each item's share within its actual fiscal period. Click a group to explore it, its heading to go back, or the context band to reset. With the chart focused, Backspace goes back and Home resets. Complete values and keyboard navigation follow the chart.</p>
     @if (!ready()) { <p role="status">Loading saved energy uses…</p> }
-    @else if (!years().length) { <p role="status">No saved annual data. Enter a fiscal year in Setup to begin.</p> }
+    @else if (!years().length) { <p role="status">No saved annual data. Enter a fiscal year in Energy Use Items to begin.</p> }
     @else if (!entries().length) { <p role="status">No energy uses match the dashboard filters.</p> }
     @else {
-      @if (active(); as node) { <h3>{{ node.name }}</h3> }
-      <div class="energy-use-charts__plot" [appV1ECharts]="option()" (chartPointClicked)="clicked($event)" role="img" aria-label="Energy use treemap. Values and navigation are available below."></div>
-      <nav aria-label="Treemap navigation"><ul>@for (node of links(); track node.id) {
-        <li><strong>{{ node.name }}</strong>: {{ node.value | number:'1.0-6' }} {{ unit() }} · {{ node.percentOfPeriod | number:'1.0-1' }}% of this period
-          @if (node.carried) { <span> · Includes carried-forward values</span> } @if (node.partial) { <span> · Partial coverage</span> }
-          @if (node.children?.length) { <button type="button" class="v1-btn v1-btn--quiet" (click)="drill(node.id)">Explore {{ node.name }}</button> }
-          @if (node.route) { <a [routerLink]="node.route">Open {{ node.name }}</a> }
-        </li>
-      }</ul></nav>
-      @if (unavailable().length) { <p class="v1-alert v1-alert--warning" role="alert">{{ unavailable().length }} items cannot be charted because their fiscal calendar is unavailable.</p> }
-      <details><summary>Source values and projection details ({{ details().length }})</summary><div class="energy-use-charts__table"><table><caption>Annual source consumption for FY {{ year() }}. Zero values remain listed.</caption><thead><tr><th>Facility / energy use</th><th>Actual fiscal period</th><th>Source</th><th>Consumption ({{ unit() }})</th><th>Saved value</th><th>Provenance</th></tr></thead><tbody>
-        @for (row of details(); track row.id) { <tr><td>{{ row.facilityName }} · <a [routerLink]="row.route">{{ row.itemName }}</a><br>{{ row.retirement }}</td><td>{{ row.period }}</td><td>{{ row.source }} ({{ row.sourceIndex + 1 }})</td><td>{{ row.amount === null ? 'Unavailable' : (row.amount | number:'1.0-6') }}</td><td>{{ row.originalAmount | number:'1.0-6' }} {{ row.originalUnit }}</td><td>{{ row.description }}</td></tr> }
-      </tbody></table></div></details>
+      @if (positive()) {
+        <div #plot class="energy-use-charts__plot" [appV1ECharts]="option()" (chartPointClicked)="clicked($event)" (keydown)="keydown($event)" tabindex="0" role="img" [attr.aria-label]="'Energy use treemap for ' + title()" aria-describedby="energy-use-treemap-description" aria-keyshortcuts="Backspace Home"></div>
+      } @else { <p role="status">No positive consumption to chart at this level. Zero and unavailable values remain available in the chart data.</p> }
+      <section class="visually-hidden-focusable energy-use-charts__accessible" aria-label="Chart data and keyboard navigation">
+        <nav aria-label="Treemap path">
+          <button class="v1-btn v1-btn--quiet" type="button" (click)="drill('')">All matching energy uses</button>
+          @for (node of path(); track node.id) { <button class="v1-btn v1-btn--quiet" type="button" [attr.aria-current]="node.id === nodeId() ? 'location' : null" (click)="drill(node.id)">{{ node.name }}</button> }
+          @if (active()) { <button class="v1-btn v1-btn--quiet" type="button" (click)="parent()">Back one level</button> }
+        </nav>
+        @if (partial()) { <p>Partial coverage · totals and percentages show known values only.</p> }
+        <nav aria-label="Treemap navigation"><ul>
+          @for (node of links(); track node.id) {
+            <li><strong>{{ node.name }}</strong>: {{ node.value | number:'1.0-6' }} {{ unit() }}
+              @if (node.facilityUsageLabel) { <span> · {{ node.facilityUsageLabel }}</span> } · {{ node.accountUsageLabel }}
+              @if (node.carried) { <span> · Includes carried-forward values</span> } @if (node.partial || node.sharesPartial) { <span> · Partial coverage</span> }
+              @if (node.children?.length) { <button type="button" class="v1-btn v1-btn--quiet" (click)="drill(node.id)">Explore {{ node.name }}</button> }
+              @if (node.route) { <a [routerLink]="node.route">Open {{ node.name }}</a> }
+            </li>
+          }
+        </ul></nav>
+        @if (unavailable().length) { <p>{{ unavailable().length }} items cannot be charted because their fiscal calendar is unavailable.</p>
+          <ul>@for (entry of unavailable(); track entry.guid) { <li><a [routerLink]="entry.route">{{ entry.name }}</a></li> }</ul>
+        }
+      </section>
+      <div class="visually-hidden">
+        <table><caption>Annual source consumption for FY {{ year() }}. Zero and unavailable values remain listed.</caption>
+          <thead><tr><th scope="col">Facility / energy use</th><th scope="col">Actual fiscal period</th><th scope="col">Source</th><th scope="col">Consumption ({{ unit() }})</th><th scope="col">Saved value</th><th scope="col">Provenance</th></tr></thead>
+          <tbody>@for (row of details(); track row.id) {
+            <tr><th scope="row">{{ row.facilityName }} · {{ row.itemName }} {{ row.retirement }}</th><td>{{ row.period }}</td><td>{{ row.source }} ({{ row.sourceIndex + 1 }})</td><td>{{ row.amount === null ? 'Unavailable' : (row.amount | number:'1.0-6') }}</td><td>{{ row.savedAmount }} {{ row.originalUnit }}</td><td>{{ row.description }}</td></tr>
+          }</tbody>
+        </table>
+      </div>
     }
   </div>
 </ng-template>

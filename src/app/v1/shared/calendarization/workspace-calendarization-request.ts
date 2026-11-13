@@ -1,7 +1,7 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { CalanderizationOptions } from '@data/models/calanderization';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
+import { SubregionEmissions } from '@data/models/eGridEmissions';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -19,7 +19,7 @@ export interface WorkspaceCalendarizationWorkerPayload {
   readonly accountOrFacility: IdbAccount;
   readonly monthDisplayShort: false;
   readonly calanderizationOptions: CalanderizationOptions;
-  readonly co2Emissions: IdbCustomEmissionsItem[];
+  readonly co2Emissions: SubregionEmissions[];
   readonly customFuels: IdbCustomFuel[];
   readonly facilities: IdbFacility[];
   readonly assessmentReportVersion: IdbAccount['assessmentReportVersion'];
@@ -34,7 +34,8 @@ export interface BuiltWorkspaceCalendarizationRequest {
 
 /** Build the single v1 request without display-only preferences. */
 export function buildWorkspaceCalendarizationRequest(
-  snapshot: AccountWorkspaceSnapshot
+  snapshot: AccountWorkspaceSnapshot,
+  builtin: readonly SubregionEmissions[] = []
 ): BuiltWorkspaceCalendarizationRequest {
   const meters = [...snapshot.meters]
     .sort(compareByGuid)
@@ -65,7 +66,7 @@ export function buildWorkspaceCalendarizationRequest(
     accountOrFacility: canonicalAccount,
     monthDisplayShort: false,
     calanderizationOptions: { energyIsSource: false, neededUnits: CANONICAL_ENERGY_UNIT },
-    co2Emissions: snapshot.customEmissions.map(item => ({ ...item })),
+    co2Emissions: workspaceEmissionsRates(snapshot, builtin),
     customFuels: snapshot.customFuels.map(item => ({ ...item })),
     facilities,
     assessmentReportVersion: snapshot.account.assessmentReportVersion,
@@ -76,6 +77,15 @@ export function buildWorkspaceCalendarizationRequest(
     inputFingerprint: fingerprintCalendarizationInputs(payload),
     payload
   };
+}
+
+/** Preserve canonical bundled-then-custom precedence with fully detached rate arrays. */
+export function workspaceEmissionsRates(snapshot: AccountWorkspaceSnapshot,
+  builtin: readonly SubregionEmissions[] = []): SubregionEmissions[] {
+  return [...builtin, ...snapshot.customEmissions].map(item => ({ ...item,
+    locationEmissionRates: item.locationEmissionRates.map(rate => ({ ...rate })),
+    residualEmissionRates: item.residualEmissionRates.map(rate => ({ ...rate }))
+  }));
 }
 
 function cloneMeterWithoutDisplayPreferences(meter: IdbUtilityMeter): IdbUtilityMeter {
@@ -101,7 +111,7 @@ function fingerprintCalendarizationInputs(payload: WorkspaceCalendarizationWorke
       accountId: facility.accountId,
       eGridSubregion: facility.eGridSubregion
     })),
-    customEmissions: payload.co2Emissions,
+    emissionsRates: payload.co2Emissions,
     customFuels: payload.customFuels,
     customGWPs: payload.customGWPs
   });

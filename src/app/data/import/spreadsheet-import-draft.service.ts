@@ -17,6 +17,7 @@ import {
   getSiteToSource
 } from '@shared/sharedHelperFunctions';
 import { setPredictorDateDataFromDate } from '@shared/dateHelperFunctions';
+import { isEnergyUsesTemplateWorkbook, parseEnergyUsesWorkbook } from './energy-uses/energy-uses-excel-import.service';
 import * as XLSX from 'xlsx';
 import { applyMeterMultipliers } from './meter-import-defaults';
 import { likelyGeneralWorkbookDateColumn, parseGeneralWorkbookDate } from './general-workbook-column-profile';
@@ -61,13 +62,14 @@ export class SpreadsheetImportDraftService {
 
   createDraft(file: File, workbook: XLSX.WorkBook): ImportFileDraft {
     const version = this.detectVersion(workbook.SheetNames);
-    const kind = importKindForTemplateVersion(version);
+    const standaloneEnergyUses = version === 'Non-template' && isEnergyUsesTemplateWorkbook(workbook);
+    const energyUsesWorkbook = standaloneEnergyUses ? parseEnergyUsesWorkbook(workbook, file.name) : undefined;
     const parsed = version === 'Non-template' ? this.emptyParsed() : this.parseTemplate(workbook, version);
     const facilities = version === 'Non-template' || version === 'Footprint-tool'
       ? this.store.facilities().map(facility => ({ ...facility }))
       : parsed.importFacilities;
     const selectedWorksheetName = this.visibleWorksheetNames(workbook)[0] ?? workbook.SheetNames[0];
-    const draft: ImportFileDraft = {
+    const base = {
       name: file.name,
       file,
       dataSubmitted: false,
@@ -96,7 +98,6 @@ export class SpreadsheetImportDraftService {
       selectedFacilityId: facilities.length === 1 ? facilities[0].guid : undefined,
       facilityEnergyUseGroups: parsed.energyUseGroups,
       facilityEnergyUseEquipment: parsed.energyUseEquipment,
-      kind,
       status: 'ready',
       findings: [],
       completedSteps: [],
@@ -106,8 +107,11 @@ export class SpreadsheetImportDraftService {
       invalidPredictorReadingsAcknowledged: false,
       excludedPredictorReadingIds: []
     };
+    const draft: ImportFileDraft = energyUsesWorkbook
+      ? { ...base, status: 'ready', kind: 'energy-uses-template', energyUses: { workbook: energyUsesWorkbook, year: energyUsesWorkbook.year, skippedRows: [] } }
+      : { ...base, status: 'ready', kind: importKindForTemplateVersion(version) };
     this.applyImportedWeatherSemantics(draft);
-    if (version === 'Non-template') this.selectWorksheet(draft, selectedWorksheetName);
+    if (version === 'Non-template' && !standaloneEnergyUses) this.selectWorksheet(draft, selectedWorksheetName);
     if (version === 'Footprint-tool' && draft.selectedFacilityId) this.footprintParser.setSelectedFacility(draft);
     return draft;
   }

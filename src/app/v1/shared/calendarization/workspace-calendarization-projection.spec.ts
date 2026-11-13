@@ -62,7 +62,7 @@ function workspaceSnapshot(): AccountWorkspaceSnapshot {
     meters: [meter({ guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a', siteToSource: 3 }),
       meter({ guid: 'meter-b', accountId: 'account-a', facilityId: 'facility-b' })],
     meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [],
-    accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []
   };
 }
 

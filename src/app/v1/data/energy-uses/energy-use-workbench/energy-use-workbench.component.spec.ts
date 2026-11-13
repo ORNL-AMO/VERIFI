@@ -1,3 +1,4 @@
+import { SessionStorageService } from 'ngx-webstorage';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -14,6 +15,7 @@ import { EnergyUseWorkbenchComponent } from './energy-use-workbench.component';
 import { EnergyUseSettingsComponent } from './settings/energy-use-settings.component';
 import { EnergyUseSetupValues, energyUseSetup } from '../models/energy-use-setup.models';
 import { EnergyUseActionsService } from '../energy-use-actions.service';
+import { EnergyUseResultsService } from './results/energy-use-results.service';
 
 @Component({ standalone: true, template: 'Inventory' })
 class InventoryDestination {}
@@ -29,6 +31,7 @@ describe('energy use workbench routes', () => {
     const actions = { updateSetup: vi.fn(async (_identity, value: EnergyUseSetupValues) => value) };
     const changes = { confirmDiscard: vi.fn(() => false), register: () => () => {}, protectBeforeUnload: () => () => {}, hasUnsavedChanges: () => false };
     TestBed.configureTestingModule({ imports: [EnergyUsesModule], providers: [
+      { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
       { provide: AccountWorkspaceStore, useValue: store },
       { provide: EnergyUseActionsService, useValue: actions },
       { provide: WorkspaceNavigationService, useValue: { accountPortfolioRoute: () => ['/inventory'], isSingleSiteWorkspace: singleSite } },
@@ -100,10 +103,42 @@ describe('energy use workbench routes', () => {
     singleSite.set(false); harness.detectChanges();
     expect(workbench.breadcrumbs()).toEqual(portfolio);
   });
+  it('opens results directly without the item rail, shares preferences across tabs and preserves the tab when switching groups', async () => {
+    const { harness, store, snapshot, router } = await setup();
+    store.publish({ ...snapshot, energyUseGroups: [...snapshot.energyUseGroups, energyUseGroup({ guid: 'other' })] });
+    const workbench = await harness.navigateByUrl(`${groupPath()}/group-footprint`, EnergyUseWorkbenchComponent);
+    await harness.fixture.whenStable(); harness.detectChanges();
+    expect(workbench.context.activeTab()).toBe('group-footprint');
+    expect(workbench.tabs.filter(tab => ['group-summary', 'group-footprint', 'facility-footprint'].includes(tab.id))).toEqual([
+      { id: 'group-summary', label: 'Group Summary', icon: 'barChartHorizontal' },
+      { id: 'group-footprint', label: 'Group Footprint', icon: 'groupEnergyFootprint' },
+      { id: 'facility-footprint', label: 'Facility Footprint', icon: 'facilityEnergyFootprint' }
+    ]);
+    expect(harness.routeNativeElement?.querySelector('.v1-member-rail')).toBeNull();
+    const results = harness.routeDebugElement!.injector.get(EnergyUseResultsService);
+    results.historyControl.setValue(true);
+    workbench.context.openTab('group-summary'); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(router.url).toBe(`${groupPath()}/group-summary`);
+    expect(results.history()).toBe(true);
+    workbench.context.switchResource('other'); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(router.url).toBe(`${groupPath('other')}/group-summary`);
+    expect(results.history()).toBe(false);
+    expect(harness.routeNativeElement?.textContent).toContain('No energy uses in this group');
+    workbench.context.switchResource('group-a'); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(results.history()).toBe(true);
+    workbench.context.openTab('facility-footprint'); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(router.url).toBe(`${groupPath()}/facility-footprint`);
+    workbench.context.switchResource('other'); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(router.url).toBe(`${groupPath('other')}/facility-footprint`);
+    expect(harness.routeNativeElement?.querySelector('.v1-member-rail')).toBeNull();
+    await router.navigateByUrl(`${groupPath()}/table-results`); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(router.url).toBe(`${groupPath()}/group-summary`);
+    expect(workbench.tabs.some(tab => tab.id === 'table-results')).toBe(false);
+  });
   it('opens the existing combined Setup form beside the item sidebar without a finder or repeated item title', async () => {
     const { harness, router } = await setup();
     const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
-    expect(workbench.tabs.map(tab => tab.label)).toEqual(['Setup Group', 'Energy Use Items']);
+    expect(workbench.tabs.map(tab => tab.label)).toEqual(['Setup Group', 'Energy Use Items', 'Group Summary', 'Group Footprint', 'Facility Footprint']);
     expect(harness.routeNativeElement?.querySelector('app-energy-use-annual-data-fields')).not.toBeNull();
     expect(harness.routeNativeElement?.querySelector('input[type=search]')).toBeNull();
     expect(harness.routeNativeElement?.querySelector('.energy-use-workbench__chips')).toBeNull();
@@ -128,7 +163,7 @@ describe('energy use workbench routes', () => {
     expect(workbench.context.entry()).toBeUndefined(); expect(harness.routeNativeElement?.textContent).not.toContain('Pump A');
     expect(harness.routeNativeElement?.textContent).toContain('Your draft has been retained');
   });
-  it('keeps header save feedback visible through its own refresh without loading or read-only alerts', async () => {
+  it('keeps form save feedback visible through its own refresh and group header independent of the editor', async () => {
     const { harness, store, snapshot, actions } = await setup();
     let finish!: (value: EnergyUseSetupValues) => void;
     actions.updateSetup.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
@@ -140,13 +175,14 @@ describe('energy use workbench routes', () => {
     store.beginLoad(false); harness.detectChanges();
     expect(workbench.context.entry()?.guid).toBe('energy-a');
     expect(harness.routeNativeElement!.querySelector('.v1-data-workbench-sticky')).toBe(header);
-    expect(header?.textContent).toContain('Saving…');
+    expect(header?.textContent).not.toContain('Saving');
+    expect(harness.routeNativeElement!.querySelector('app-energy-use-save-status')?.textContent).toContain('Saving setup');
     expect(harness.routeNativeElement!.textContent).not.toContain('Loading energy-use group');
     expect(harness.routeNativeElement!.textContent).not.toContain('Setup is read-only');
     const saved = { ...snapshot.energyUseEquipment[0], name: 'Changed' };
     store.publish({ ...snapshot, energyUseEquipment: [saved, ...snapshot.energyUseEquipment.slice(1)] });
     finish(energyUseSetup(saved)); await saving; harness.detectChanges();
-    expect(header?.textContent).toContain('Saved');
+    expect(harness.routeNativeElement!.querySelector('app-energy-use-save-status')?.textContent).toContain('Saved.');
     expect(harness.routeNativeElement!.querySelector('footer')?.textContent).not.toContain('Save setup');
   });
   it('selects new copies and neighbors after deletion while preserving the group', async () => {
@@ -177,6 +213,18 @@ describe('energy use workbench routes', () => {
     store.publish({ ...snapshot, energyUseEquipment: [...snapshot.energyUseEquipment, created] });
     await workbench.openCreated(created); await harness.fixture.whenStable(); harness.detectChanges();
     expect(workbench.creating()).toBe(false); expect(router.url).toBe(path('new-member'));
+  });
+  it('opens a created item in its new group when creation started in another group', async () => {
+    const { harness, store, snapshot, router } = await setup();
+    const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
+    workbench.openCreation(); harness.detectChanges();
+    const group = energyUseGroup({ guid: 'new-group', name: 'Roasting' });
+    const created = energyUseItem({ guid: 'new-member', energyUseGroupId: group.guid });
+    store.publish({ ...snapshot, energyUseGroups: [...snapshot.energyUseGroups, group], energyUseEquipment: [...snapshot.energyUseEquipment, created] });
+    await workbench.openCreated(created); await harness.fixture.whenStable(); harness.detectChanges();
+    expect(workbench.creating()).toBe(false);
+    expect(router.url).toBe(path('new-member', 'new-group'));
+    expect(harness.routeDebugElement!.query(By.directive(EnergyUseSettingsComponent))).toBeTruthy();
   });
   it('opens the first item created in an empty group without a competing default navigation', async () => {
     const { harness, store, snapshot, router } = await setup();
@@ -209,6 +257,9 @@ describe('energy use workbench routes', () => {
     const dirty = vi.spyOn(panel, 'hasUnsavedChanges').mockReturnValue(true);
     expect(await router.navigateByUrl('/inventory')).toBe(false);
     expect(await router.navigateByUrl(path('energy-b'))).toBe(false);
+    expect(await router.navigateByUrl(`${groupPath()}/group-footprint`)).toBe(false);
+    expect(await router.navigateByUrl(`${groupPath()}/group-summary`)).toBe(false);
+    expect(await router.navigateByUrl(`${groupPath()}/facility-footprint`)).toBe(false);
     expect(workbench.context.energyUseGuid()).toBe('energy-a');
     expect(changes.confirmDiscard).toHaveBeenCalled();
     dirty.mockReturnValue(false);

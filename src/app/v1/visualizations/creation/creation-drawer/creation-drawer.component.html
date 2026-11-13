@@ -1,0 +1,113 @@
+@let currentStep = lifecycle.step();
+@if (lifecycle.editor(); as editor) {
+  <app-workspace-slideout [title]="editor.entry ? 'Rename visualization' : 'Add visualization'" [saving]="lifecycle.saving()" [hasFooter]="true"
+    [initialFocus]="editor.entry || currentStep === 'name' ? '#visualization-name' : '#visualization-choice-heading'" (closed)="lifecycle.requestClose()">
+    @if (lifecycle.selections().length) {
+      <div class="creation-selections" aria-label="Visualization selections">
+        @for (selection of lifecycle.selections(); track selection.step) {
+          <button type="button" class="creation-selection" [class.creation-selection--active]="currentStep === selection.step"
+            [disabled]="!selection.editable || !lifecycle.canEditDraft()" [attr.aria-label]="selection.editable ? 'Change ' + selection.label : selection.label"
+            [attr.aria-expanded]="selection.editable ? currentStep === selection.step : null" [title]="selection.label" (click)="lifecycle.editSelection(selection.step)">
+            <app-ui-icon [name]="selection.icon"/><span>{{ selection.label }}</span><app-ui-icon [name]="selection.editable ? 'edit' : 'check'"/>
+          </button>
+        }
+      </div>
+    }
+    <form id="visualization-creation-form" [formGroup]="lifecycle.form" (ngSubmit)="lifecycle.submit()">
+      <fieldset [disabled]="!lifecycle.canEditDraft()">
+        @if (editor.entry || currentStep === 'name') {
+          <label for="visualization-name">Visualization name</label>
+          <input #visualizationName id="visualization-name" class="form-control v1-input" formControlName="name" autocomplete="off" required
+            [attr.aria-invalid]="lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched"
+            [attr.aria-describedby]="lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched ? 'visualization-name-error' : null">
+          @if (lifecycle.form.controls.name.invalid && lifecycle.form.controls.name.touched) { <p id="visualization-name-error" class="v1-alert v1-alert--danger" role="alert">Enter a visualization name.</p> }
+          @if (editor.entry) { <p>{{ editor.entry.familyLabel }} · {{ editor.entry.ownerName }}</p> }
+          @else { <p class="creation-choice-help">Add this visualization to open its autosaving workbench. Supported utility line and bar charts preview your saved data.</p> }
+        } @else {
+          @switch (currentStep) {
+            @case ('scope') {
+              <legend><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Ownership</h3></legend>
+              <div class="creation-choices creation-choices--scope" aria-label="Visualization ownership">
+                <button type="button" class="creation-choice" [attr.aria-pressed]="lifecycle.form.controls.scope.value === 'portfolio'" (click)="lifecycle.selectScope('portfolio')"><app-ui-icon name="account" [size]="28"/><strong>Portfolio</strong></button>
+                <button type="button" class="creation-choice" [disabled]="!lifecycle.facilities().length" [attr.aria-pressed]="lifecycle.form.controls.scope.value === 'facility'" (click)="lifecycle.selectScope('facility')"><app-ui-icon name="facility" [size]="28"/><strong>Facility</strong></button>
+              </div>
+              @if (!lifecycle.facilities().length) { <p class="creation-choice-help">Add a facility before choosing facility ownership.</p> }
+            }
+            @case ('facility') {
+              <legend><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Facility</h3></legend>
+              <div class="creation-choices" aria-label="Facility">
+                @for (facility of lifecycle.facilities(); track facility.guid) {
+                  <button type="button" class="creation-choice" [attr.aria-pressed]="lifecycle.form.controls.facilityGuid.value === facility.guid" (click)="lifecycle.selectFacility(facility.guid)"><app-ui-icon name="facility" [size]="28"/><strong>{{ facility.name || 'Unnamed facility' }}</strong></button>
+                } @empty { <p role="status">No facilities are available. Change ownership or add a facility.</p> }
+              </div>
+            }
+            @case ('chart') {
+              <legend><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Chart type</h3></legend>
+              <h4>Start from a recipe</h4>
+              <div class="creation-choices" aria-label="Visualization recipes">
+                @for (recipe of lifecycle.recipes; track recipe.id) {
+                  <button type="button" class="creation-choice" (click)="lifecycle.selectRecipe(recipe.id)"><app-ui-icon name="dataVisualization" [size]="28"/><strong>{{ recipe.label }}</strong><span>Choose saved meters next</span></button>
+                }
+              </div>
+              <h4>Custom visualization</h4>
+              <div class="creation-choices" aria-label="Chart type">
+                @for (chart of charts; track chart.value) {
+                  <button type="button" class="creation-choice" [attr.aria-pressed]="lifecycle.form.controls.chart.value === chart.value" (click)="lifecycle.selectChart(chart.value)"><app-ui-icon name="dataVisualization" [size]="28"/><strong>{{ chart.label }}</strong><span class="creation-choice__pending">Setup item</span></button>
+                }
+              </div>
+              <p class="creation-choice-help">Choose a chart to configure. Utility line and bar previews are supported; other types retain setup intent for future support.</p>
+            }
+            @case ('recipe-resources') {
+              <legend><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Bind recipe to saved meters</h3></legend>
+              <p>Choose exact meters for this independent saved visualization. Their future saved readings update the chart.</p>
+              <label for="visualization-recipe-meters">Meters</label>
+              <select id="visualization-recipe-meters" class="v1-select" multiple size="8" formControlName="meterGuids">
+                @for (meter of lifecycle.recipeResourceOptions(); track meter.guid) { <option [value]="meter.guid">{{ meter.label }}</option> }
+              </select>
+              @if (!lifecycle.recipeResources().length) { <p role="status">No supported saved meter history is available in this scope. Choose Custom or add meter readings first.</p> }
+            }
+            @case ('families') {
+              <legend><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Source families</h3></legend>
+              <p>Choose one or more source families, then continue.</p>
+              <div class="creation-choices" aria-label="Source families">
+                @for (family of families; track family.value) {
+                  <button type="button" class="creation-choice" [attr.aria-pressed]="lifecycle.form.controls.families.value.includes(family.value)" (click)="lifecycle.toggleFamily(family.value)"><app-ui-icon name="database" [size]="28"/><strong>{{ family.label }}</strong></button>
+                }
+              </div>
+              <p class="creation-choice-help">Each family starts with one setup source. Select actual resources in the workbench as support arrives. Selecting families does not establish chart compatibility.</p>
+            }
+          }
+        }
+      </fieldset>
+      @if (!lifecycle.ownerValid()) { <div class="v1-alert v1-alert--warning" role="status">Choose an available facility.</div> }
+      @if (!lifecycle.canAct() && !lifecycle.saving()) { <p class="v1-alert v1-alert--info" role="status">Visualization changes are unavailable while the workspace is not ready.</p> }
+      @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+      @if (lifecycle.outcome() === 'conflict' && lifecycle.conflictCurrent()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="lifecycle.useSavedConflict()">Use saved name</button><button type="button" class="v1-btn v1-btn--quiet" (click)="lifecycle.keepLocalConflict()">Keep my name</button> }
+    </form>
+    <div slideoutFooter class="creation-draft-actions">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="lifecycle.saving()" (click)="lifecycle.requestClose()">Cancel</button>
+      @if (lifecycle.lockedProposal() && !lifecycle.saving()) { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canRetry()" (click)="lifecycle.retry()">{{ lifecycle.outcome() === 'refresh-required' ? 'Retry refresh' : 'Retry save' }}</button> }
+      @else if (!editor.entry && currentStep === 'families') { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canContinueFamilies()" (click)="lifecycle.continueFamilies()">Continue</button> }
+      @else if (!editor.entry && currentStep === 'recipe-resources') { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canContinueRecipe()" (click)="lifecycle.continueRecipe()">Continue</button> }
+      @else if (editor.entry || currentStep === 'name') { <button type="submit" form="visualization-creation-form" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canSubmit()">{{ lifecycle.saving() ? editor.entry ? 'Saving…' : 'Adding…' : editor.entry ? 'Save name' : 'Add visualization' }}</button> }
+    </div>
+  </app-workspace-slideout>
+}
+<ng-template #deleteConfirmation>
+  @if (lifecycle.deleteCandidate(); as candidate) {
+    <app-confirmation-dialog title="Delete visualization?" titleId="delete-visualization-title" cancelAriaLabel="Cancel visualization deletion" confirmLabel="Delete visualization" confirmClass="v1-btn--danger" confirmIcon="delete" [busy]="lifecycle.saving()" [disabled]="lifecycle.saving()" [confirmDisabled]="!!lifecycle.proposal()" (confirmed)="lifecycle.confirmDelete()" (cancelled)="lifecycle.cancelConfirmation()">
+      <p>Permanently delete <strong>{{ candidate.name }}</strong> belonging to <strong>{{ candidate.ownerName }}</strong>? Source records remain available.</p>
+      @if (lifecycle.outcome() === 'conflict') { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="lifecycle.saving()" (click)="lifecycle.reloadSavedConflict()">Reload saved state and discard proposal</button> }
+      @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+      @if (lifecycle.proposal()) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!lifecycle.canRetry()" (click)="lifecycle.retry()">{{ lifecycle.outcome() === 'refresh-required' ? 'Retry refresh' : 'Retry deletion' }}</button><button type="button" class="v1-btn v1-btn--quiet" [disabled]="!lifecycle.canDiscard()" (click)="lifecycle.discard()">Discard proposal</button> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
+<ng-template #discardConfirmation>
+  <app-confirmation-dialog [title]="lifecycle.outcome() === 'refresh-required' ? 'Refresh saved visualization' : 'Discard proposed visualization changes?'" titleId="discard-visualization-title" cancelAriaLabel="Stay with visualization changes" confirmLabel="Discard changes" [busy]="lifecycle.saving()" [disabled]="lifecycle.saving()" [confirmDisabled]="!lifecycle.canDiscard()" (confirmed)="lifecycle.discard()" (cancelled)="lifecycle.cancelConfirmation()">
+    @if (lifecycle.outcome() === 'refresh-required') { <p>Your change is already committed. Retry refresh before leaving so the saved identity can be acknowledged safely.</p> }
+    @else { <p>Your unsaved proposed changes will be discarded.</p> }
+    @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+    @if (lifecycle.canRetry()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="lifecycle.retry()">{{ lifecycle.outcome() === 'refresh-required' ? 'Retry refresh' : 'Retry save' }}</button> }
+  </app-confirmation-dialog>
+</ng-template>

@@ -21,6 +21,8 @@ export interface NotificationRequest {
   readonly message?: string;
   readonly durationMs?: number;
   readonly dismissible?: boolean;
+  /** Critical account notices remain visible when ordinary notifications fill the queue. */
+  readonly retainOnOverflow?: boolean;
   readonly action?: NotificationAction;
 }
 
@@ -55,9 +57,9 @@ export class NotificationService implements OnDestroy {
 
     this.writableNotifications.update(current => {
       const next = [...current, notification];
-      const removed = next.slice(0, Math.max(0, next.length - MAX_VISIBLE_NOTIFICATIONS));
+      const removed = next.filter(item => !item.retainOnOverflow).slice(0, Math.max(0, next.length - MAX_VISIBLE_NOTIFICATIONS));
       removed.forEach(item => this.clearDismissTimer(item.id));
-      return next.slice(-MAX_VISIBLE_NOTIFICATIONS);
+      return next.filter(item => !removed.includes(item));
     });
     this.scheduleDismiss(notification);
     return notification;

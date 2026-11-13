@@ -1,0 +1,32 @@
+/* Shared result-table foundation, extracted from Analysis and aligned with Data workbenches. */
+.v1-table-scroll { max-width: 100%; overflow: auto; background: var(--v1-surface); }
+.v1-table-scroll:focus-visible { outline: 2px solid var(--v1-content-control); outline-offset: -2px; }
+.v1-results-table,
+.v1-analysis-results-table { width: 100%; border-collapse: collapse; color: var(--v1-text); font-size: .88rem; }
+.v1-results-table th,
+.v1-results-table td,
+.v1-analysis-results-table th,
+.v1-analysis-results-table td { padding: .6rem .7rem; border-bottom: 1px solid var(--v1-divider); text-align: right; vertical-align: middle; }
+.v1-results-table thead th,
+.v1-analysis-results-table thead th { background: var(--v1-content-block); color: var(--v1-muted); font-size: .76rem; font-weight: 900; line-height: 1.25; overflow-wrap: break-word; text-transform: uppercase; white-space: normal; }
+.v1-results-table th:first-child,
+.v1-results-table td:first-child,
+.v1-analysis-results-table th:first-child,
+.v1-analysis-results-table td:first-child { text-align: left; }
+.v1-results-table tbody th,
+.v1-results-table td,
+.v1-analysis-results-table tbody th,
+.v1-analysis-results-table td { white-space: nowrap; }
+.v1-results-table td,
+.v1-analysis-results-table td { font-variant-numeric: tabular-nums; }
+.v1-results-table tbody tr:not(.v1-analysis-results__missing):hover > *,
+.v1-analysis-results-table tbody tr:not(.v1-analysis-results__missing):hover > * { background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); }
+.v1-results-table tbody tr:last-child > *,
+.v1-analysis-results-table tbody tr:last-child > * { border-bottom: 0; }
+.v1-results-table tfoot { background: var(--v1-content-block); font-weight: 800; }
+.v1-results-table caption,
+.v1-analysis-results-table caption { caption-side: top; padding: .65rem .75rem; color: var(--v1-text); font-weight: 800; }
+.v1-results-table__sort { display: inline-flex; align-items: center; justify-content: inherit; gap: var(--v1-space-1); padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-transform: inherit; text-align: inherit; }
+.v1-results-table__sort:focus-visible { outline: 2px solid var(--v1-content-control); outline-offset: 2px; }
+.v1-results-table [aria-sort="ascending"] .v1-results-table__sort,
+.v1-results-table [aria-sort="descending"] .v1-results-table__sort { color: var(--v1-content-control); }

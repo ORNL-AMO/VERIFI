@@ -1,0 +1,25 @@
+@let view = preview.state();
+<section class="visualization-preview" aria-label="Visualization preview" [attr.aria-busy]="view.state === 'loading'">
+  <header><h2>Preview</h2><p role="status" aria-live="polite">{{ view.message }}</p></header>
+  @if (view.state === 'ready') {
+    <div class="visualization-preview__chart"><ng-container *ngComponentOutlet="view.component; inputs: view.presentation.inputs"/></div>
+    <details class="visualization-preview__details" [open]="printing()">
+      <summary>Underlying values</summary>
+      <div class="visualization-preview__table-scroll" tabindex="0" role="region" aria-label="Underlying preview values">
+        <table class="v1-table">
+          <caption>{{ view.presentation.details.caption }}</caption>
+          <thead><tr>@for (column of view.presentation.details.columns; track $index) { <th scope="col">{{ column }}</th> }</tr></thead>
+          <tbody>@for (row of visibleRows(); track $index) { <tr>@for (value of row; track $index) { <td>{{ value }}</td> }</tr> }</tbody>
+        </table>
+      </div>
+      <app-pagination ariaLabel="Underlying visualization value pages" [collectionSize]="detailRows().length" [pageSize]="pageSize" [page]="currentPage()" (pageChange)="page.set($event)"/>
+    </details>
+  } @else {
+    <div class="visualization-preview__notice" [attr.role]="view.state === 'error' || view.state === 'invalid' ? 'alert' : null">
+      @if (view.reasons?.length) { <ul>@for (reason of view.reasons; track $index) { <li>{{ reason }}</li> }</ul> }
+      @if (view.state === 'setup-required' || view.state === 'unsupported') { <p>Choose resources in Sources and review periods and chart settings. Some source families and chart types are not supported yet. You can save and reopen this setup now.</p> }
+      @if (view.state === 'missing-source') { <p>Review the missing references in Sources. No replacement source has been selected.</p> }
+      @if (canRetry()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="preview.retry()">Retry preview</button> }
+    </div>
+  }
+</section>

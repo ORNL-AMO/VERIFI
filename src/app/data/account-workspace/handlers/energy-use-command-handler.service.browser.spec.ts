@@ -29,6 +29,142 @@ describe('Energy Uses native commands', () => {
     harness = await IndexedDbTestHarness.create('energy-use-commands'); await harness.seed({ accounts: [account], facilities: [facility] });
   });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
+  it('transfers an item within its facility, publishing once and preserving all history, links, and identity after reopening', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler);
+    const saved = await handler.createItem(owner, { ...item, utilityMeterGroupIds: ['retained-meter-link'], notes: 'Retain setup', noLongerInUse: { isNoLongerInUse: true, year: 2024 } }, group, false);
+    const target = { ...group, guid: 'destination', name: 'Destination' };
+    await harness.seed({ facilityEnergyUseGroups: [target] });
+    await TestBed.inject(AccountWorkspaceService).selectAccount(account.guid);
+    const store = TestBed.inject(AccountWorkspaceStore), actions = TestBed.inject(EnergyUseActionsService);
+    const committed = vi.fn(), sub = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      const destination = store.energyUseGroups().find(group => group.guid === target.guid)!;
+      const result = await actions.transfer(identity, saved, destination);
+      expect(result).toEqual({ ...saved, energyUseGroupId: target.guid, modifiedDate: expect.any(Date) });
+      expect(committed).toHaveBeenCalledTimes(1);
+      expect(store.energyUseEquipment()).toEqual([result]);
+      await harness.reopen();
+      expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([result]);
+      expect((await harness.getAll<any>('facilityEnergyUseGroups')).map(row => row.guid).sort()).toEqual([target.guid, group.guid].sort());
+    } finally { sub.unsubscribe(); }
+  });
+  it.each(['item', 'target', 'foreign', 'same', 'missing'] as const)('rejects an invalid or changed transfer: %s', async change => {
+    const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
+    await harness.seed({ facilityEnergyUseGroups: [{ ...group, guid: 'destination', facilityId: change === 'foreign' ? 'foreign-facility' : facility.guid }] });
+    const groups = await harness.getAll<any>('facilityEnergyUseGroups');
+    const target = groups.find(group => group.guid === 'destination');
+    if (change === 'item') await handler.saveItem(identity, saved, { ...saved, notes: 'Changed' }, false);
+    if (change === 'target') await handler.saveGroupSettings({ ...owner, energyUseGroupGuid: target.guid }, target, { name: 'Renamed', notes: '' });
+    const before = await harness.getAll('facilityEnergyUseEquipment');
+    await expect(handler.transferItem(identity, saved, change === 'same' ? groups.find(row => row.guid === group.guid) : change === 'missing' ? { ...target, guid: 'missing' } : target)).rejects.toThrow();
+    await harness.reopen(); expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(before);
+  });
+  it('recovers a committed transfer without repeating the move', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
+    await harness.seed({ facilityEnergyUseGroups: [{ ...group, guid: 'destination' }] });
+    const workspace = TestBed.inject(AccountWorkspaceService); await workspace.selectAccount(account.guid);
+    const store = TestBed.inject(AccountWorkspaceStore), actions = TestBed.inject(EnergyUseActionsService);
+    const target = store.energyUseGroups().find(group => group.guid === 'destination')!;
+    vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Refresh failed'));
+    const write = vi.spyOn(handler, 'transferItem');
+    await expect(actions.transfer(identity, saved, target)).rejects.toMatchObject({ persistenceCommitted: true });
+    await actions.recoverPublication(account.guid);
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(store.energyUseEquipment()[0]).toMatchObject({ ...saved, energyUseGroupId: target.guid, modifiedDate: expect.any(Date) });
+  });
+  it.each(['success', 'stale', 'rollback'] as const)('deletes groups across facilities as one reviewed batch: %s', async result => {
+    const handler = TestBed.inject(EnergyUseCommandHandler);
+    const otherFacility = { ...facility, id: 3, guid: 'facility-b' };
+    await harness.seed({ facilities: [otherFacility] });
+    const otherGroup = { ...group, guid: 'group-b', facilityId: otherFacility.guid };
+    await handler.createItem(owner, item, group);
+    await handler.createItem({ ...owner, facilityGuid: otherFacility.guid }, { ...item, guid: 'item-b', facilityId: otherFacility.guid, energyUseGroupId: otherGroup.guid }, otherGroup);
+    const retained = await handler.createItem(owner, { ...item, guid: 'retained-item', energyUseGroupId: 'retained-group' }, { ...group, guid: 'retained-group' });
+    const workspace = TestBed.inject(AccountWorkspaceService); await workspace.selectAccount(account.guid);
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const reviewed = store.energyUseGroups().filter(row => row.guid !== 'retained-group').map(group => ({ group: structuredClone(group), items: structuredClone(store.energyUseEquipment().filter(item => item.energyUseGroupId === group.guid)) }));
+    if (result === 'stale') await handler.createItem({ ...owner, facilityGuid: otherFacility.guid }, { ...item, guid: 'added-later', facilityId: otherFacility.guid, energyUseGroupId: otherGroup.guid });
+    const beforeGroups = await harness.getAll('facilityEnergyUseGroups'), beforeItems = await harness.getAll('facilityEnergyUseEquipment');
+    if (result === 'rollback') {
+      const original = IndexedDbTransactionContext.prototype.deleteByKey;
+      vi.spyOn(IndexedDbTransactionContext.prototype, 'deleteByKey').mockImplementation(function(store, key) {
+        return store === 'facilityEnergyUseGroups' && key === reviewed[1].group.id ? Promise.reject(new Error('Final delete failed')) : original.call(this, store, key);
+      });
+    }
+    const committed = vi.fn(), sub = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      const operation = TestBed.inject(EnergyUseActionsService).deleteGroups(account.guid, reviewed);
+      if (result === 'success') {
+        await operation; expect(committed).toHaveBeenCalledTimes(1);
+        expect(store.energyUseGroups().map(group => group.guid)).toEqual(['retained-group']);
+      } else { await expect(operation).rejects.toThrow(); expect(committed).not.toHaveBeenCalled(); }
+      await harness.reopen();
+      expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(result === 'success' ? [retained] : beforeItems);
+      expect(await harness.getAll('facilityEnergyUseGroups')).toEqual(result === 'success' ? beforeGroups.filter((group: any) => group.guid === 'retained-group') : beforeGroups);
+    } finally { sub.unsubscribe(); }
+  });
+  it.each([false, true])('deletes an entire reviewed group atomically, including an empty group=%s', async empty => {
+    const handler = TestBed.inject(EnergyUseCommandHandler);
+    if (empty) await harness.seed({ facilityEnergyUseGroups: [group] });
+    else {
+      await handler.createItem(owner, item, group);
+      await handler.createItem(owner, { ...item, guid: 'second-item' });
+    }
+    const otherGroup = { ...group, guid: 'other-group', name: 'Other' };
+    const otherItem = await handler.createItem(owner, { ...item, guid: 'other-item', energyUseGroupId: otherGroup.guid }, otherGroup);
+    const service = TestBed.inject(AccountWorkspaceService); await service.selectAccount(account.guid);
+    const store = TestBed.inject(AccountWorkspaceStore), actions = TestBed.inject(EnergyUseActionsService);
+    const reviewed = store.energyUseGroups().find(row => row.guid === group.guid)!;
+    const members = store.energyUseEquipment().filter(row => row.energyUseGroupId === group.guid);
+    const committed = vi.fn(), subscription = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    try {
+      await actions.deleteGroup({ ...owner, energyUseGroupGuid: group.guid }, reviewed, members);
+      expect(committed).toHaveBeenCalledTimes(1);
+      expect(store.energyUseGroups().map(row => row.guid)).toEqual([otherGroup.guid]);
+      expect(store.energyUseEquipment()).toEqual([otherItem]);
+      await harness.reopen();
+      expect((await harness.getAll<any>('facilityEnergyUseGroups')).map(row => row.guid)).toEqual([otherGroup.guid]);
+      expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([otherItem]);
+      expect(await harness.getAll('facilities')).toEqual([facility]);
+    } finally { subscription.unsubscribe(); }
+  });
+  it.each(['group', 'item', 'membership', 'foreign'] as const)('rejects a group deletion when its %s review is stale or invalid', async change => {
+    const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
+    const reviewed = (await harness.getAll<any>('facilityEnergyUseGroups'))[0];
+    if (change === 'group') await handler.saveGroupSettings({ ...owner, energyUseGroupGuid: group.guid }, reviewed, { name: 'Updated', notes: '' });
+    if (change === 'item') await handler.saveItem(identity, saved, { ...saved, notes: 'Updated' }, false);
+    if (change === 'membership') await handler.createItem(owner, { ...item, guid: 'added-later' });
+    const groups = await harness.getAll('facilityEnergyUseGroups'), items = await harness.getAll('facilityEnergyUseEquipment');
+    await expect(handler.deleteGroupWithItems({ ...owner, accountGuid: change === 'foreign' ? 'wrong-account' : owner.accountGuid, energyUseGroupGuid: group.guid }, reviewed, [saved])).rejects.toThrow();
+    await harness.reopen();
+    expect(await harness.getAll('facilityEnergyUseGroups')).toEqual(groups);
+    expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(items);
+  });
+  it('rolls back member deletions when the final group delete fails', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
+    const groups = await harness.getAll<any>('facilityEnergyUseGroups');
+    const original = IndexedDbTransactionContext.prototype.deleteByKey;
+    vi.spyOn(IndexedDbTransactionContext.prototype, 'deleteByKey').mockImplementation(function(store, key) {
+      return store === 'facilityEnergyUseGroups' ? Promise.reject(new Error('Group delete failed')) : original.call(this, store, key);
+    });
+    await expect(handler.deleteGroupWithItems({ ...owner, energyUseGroupGuid: group.guid }, groups[0], [saved])).rejects.toThrow('Group delete failed');
+    await harness.reopen();
+    expect(await harness.getAll('facilityEnergyUseGroups')).toEqual(groups);
+    expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([saved]);
+  });
+  it('recovers a committed group deletion without repeating persistence', async () => {
+    const handler = TestBed.inject(EnergyUseCommandHandler); await handler.createItem(owner, item, group);
+    const workspace = TestBed.inject(AccountWorkspaceService); await workspace.selectAccount(account.guid);
+    const store = TestBed.inject(AccountWorkspaceStore), actions = TestBed.inject(EnergyUseActionsService);
+    const reload = vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication failed'));
+    const write = vi.spyOn(handler, 'deleteGroupWithItems');
+    await expect(actions.deleteGroup({ ...owner, energyUseGroupGuid: group.guid }, store.energyUseGroups()[0], store.energyUseEquipment())).rejects.toMatchObject({ persistenceCommitted: true });
+    await actions.recoverPublication(account.guid);
+    expect(write).toHaveBeenCalledTimes(1); expect(reload).toHaveBeenCalledTimes(2);
+    await harness.reopen();
+    expect(await harness.getAll('facilityEnergyUseGroups')).toEqual([]);
+    expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([]);
+  });
   it('creates a group and its first item together and survives reopening', async () => {
     const saved = await TestBed.inject(EnergyUseCommandHandler).createItem(owner, item, group);
     await harness.reopen();

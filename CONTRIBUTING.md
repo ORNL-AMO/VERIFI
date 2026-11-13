@@ -50,6 +50,10 @@ Be sure to periodically synchronize the upstream develop branch into your featur
 
 ## Pull Requests
 
+All PRs use the general [PR template](.github/pull_request_template.md) for summary, validation, and related issues. PRs prepared without an agent follow the contribution, testing, and review rules below; they do not require agent review records.
+
+For agent-assisted PR preparation, follow the six-step [agent workflow](docs/agents/pr-workflow.md): scope, implement/validate, context-aware self-review, fresh review/evaluation, publish, and human review/QA. The agent appends separate [review records](docs/agents/pr-review-record.md) for both stages. Existing PRs can also request a fresh review. Findings stay in chat unless posting to GitHub is explicitly requested.
+
 Pull requests must be made for all changes. Most pull requests should be made against the develop
 branch unless patching a bug that needs to be addressed immediately, and only core developers should
 make pull requests to the main branch.
@@ -77,7 +81,7 @@ base. Be sure to write a complete description of these changes in the pull reque
 All tests must pass. Pull requests will be rejected or have changes requested if tests do not pass,
 or cannot pass with changes. Run the relevant checks locally before submission.
 
-VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs. Run `npm run test:all:ci` before opening a pull request. Install the local browser dependency once with `npx playwright install chromium`.
+VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs. Run `npm run test:all:ci` before opening a code-change pull request. Documentation-only changes follow the [testing guide's documentation exception](docs/testing.md#what-a-change-requires): validate links, commands, and relevant workflow behavior rather than adding artificial tests or running unrelated application suites. Install the local browser dependency once with `npx playwright install chromium` when browser tests require it.
 
 Every behavior-changing pull request must record its testing decision. Add or update the lowest-cost automated test that protects the changed behavior, or explain why useful automation is disproportionate and provide focused manual evidence. Bug fixes require a regression test when the failure can be reproduced at an existing tier; exceptions require a linked follow-up issue. Creation-only tests such as `should create` are not sufficient coverage.
 

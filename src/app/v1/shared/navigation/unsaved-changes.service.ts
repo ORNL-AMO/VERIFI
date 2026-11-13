@@ -11,6 +11,8 @@ interface UnsavedChangesRegistration {
 @Injectable({ providedIn: 'root' })
 export class UnsavedChangesService {
   private readonly registrations = new Set<UnsavedChangesRegistration>();
+  private readonly navigationPreflights = new Set<() => Promise<boolean>>();
+  private navigationPreflight?: Promise<boolean>;
   private readonly window = inject(DOCUMENT).defaultView;
   private readonly unloadSources = signal<readonly { readonly when: Signal<boolean> }[]>([]);
   private readonly unloadProtected = computed(() => this.unloadSources().some(source => source.when()));
@@ -45,6 +47,23 @@ export class UnsavedChangesService {
     const registration = { isDirty, discard, isBlocked, flush };
     this.registrations.add(registration);
     return () => this.registrations.delete(registration);
+  }
+
+  /** Feature-owned async review before routing or publishing a different account. */
+  registerNavigationPreflight(resolve: () => Promise<boolean>): () => void {
+    this.navigationPreflights.add(resolve);
+    return () => this.navigationPreflights.delete(resolve);
+  }
+
+  resolveNavigationPreflight(): Promise<boolean> {
+    if (this.navigationPreflight) return this.navigationPreflight;
+    this.navigationPreflight = (async () => {
+      for (const resolve of [...this.navigationPreflights]) {
+        if (!await resolve()) return false;
+      }
+      return true;
+    })().finally(() => this.navigationPreflight = undefined);
+    return this.navigationPreflight;
   }
 
   async flushPendingChanges(): Promise<boolean> {

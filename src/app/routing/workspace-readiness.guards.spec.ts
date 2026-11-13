@@ -27,7 +27,7 @@ describe('workspace readiness guards', () => {
     selectFacility: ReturnType<typeof vi.fn>;
   };
   let facilities: { getStoredByGuid: ReturnType<typeof vi.fn> };
-  let router: { createUrlTree: ReturnType<typeof vi.fn> };
+  let router: { createUrlTree: ReturnType<typeof vi.fn>; currentNavigation: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     store = new AccountWorkspaceStore();
@@ -48,6 +48,7 @@ describe('workspace readiness guards', () => {
     };
     facilities = { getStoredByGuid: vi.fn() };
     router = {
+      currentNavigation: vi.fn(() => null),
       createUrlTree: vi.fn(commands => ({ commands }))
     };
     TestBed.configureTestingModule({
@@ -104,6 +105,21 @@ describe('workspace readiness guards', () => {
     lifecycle.initialize.mockResolvedValueOnce({ status: 'error' });
     await expect(invoke(accountReadyGuard, route(), state('/data-evaluation/account')))
       .resolves.toBe(false);
+  });
+
+  it('loads the requested account from typed navigation state for evaluation routes', async () => {
+    store.publish(createSnapshot('account-a'));
+    router.currentNavigation.mockReturnValue({ extras: { state: { workspaceAccountGuid: 'account-b' } } });
+    await expect(invoke(accountReadyGuard, route(), state('/data-evaluation/account/home'))).resolves.toBe(true);
+    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
+  });
+
+  it('ignores a non-string account request in navigation state', async () => {
+    store.publish(createSnapshot('account-a'));
+    router.currentNavigation.mockReturnValue({ extras: { state: { workspaceAccountGuid: { guid: 'account-b' } } } });
+    await expect(invoke(accountReadyGuard, route(), state('/data-evaluation/account/home'))).resolves.toBe(true);
+    expect(workspace.selectAccount).not.toHaveBeenCalled();
+    expect(store.account().guid).toBe('account-a');
   });
 
   it('loads an inactive account GUID before activating data management', async () => {
@@ -277,6 +293,6 @@ function createSnapshot(accountGuid: string, facilityGuid?: string): AccountWork
     facilities: facilityGuid ? [{ id: 20, guid: facilityGuid, accountId: accountGuid, name: facilityGuid }] : [],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot;
 }

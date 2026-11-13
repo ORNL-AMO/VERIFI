@@ -13,6 +13,22 @@ describe('UnsavedChangesService', () => {
 
   afterEach(() => { TestBed.resetTestingModule(); vi.restoreAllMocks(); });
 
+  it('serializes shared async preflight and preserves cancellation without native confirmation', async () => {
+    let finish!: (accepted: boolean) => void;
+    const resolver = vi.fn(() => new Promise<boolean>(resolve => finish = resolve));
+    const release = service.registerNavigationPreflight(resolver);
+    const confirm = vi.spyOn(window, 'confirm');
+    const first = service.resolveNavigationPreflight();
+    const second = service.resolveNavigationPreflight();
+    expect(first).toBe(second);
+    finish(false);
+    await expect(first).resolves.toBe(false);
+    expect(resolver).toHaveBeenCalledOnce();
+    expect(confirm).not.toHaveBeenCalled();
+    release();
+    await expect(service.resolveNavigationPreflight()).resolves.toBe(true);
+  });
+
   it('discards registered dirty editors after confirmation', () => {
     const discard = vi.fn();
     service.register(() => true, discard);

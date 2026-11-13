@@ -25,7 +25,11 @@
 .queue-list { list-style: none; margin: 0; padding: 0; }
 .queue-list li { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .85rem 0; border-top: 1px solid var(--v1-divider); }
 .queue-list li:first-child { border-top: 0; }
-.queue-list li div { display: grid; gap: .15rem; min-width: 0; }
+.queue-file { display: grid; gap: .15rem; min-width: 0; }
+.queue-entry { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.queue-remove { flex: 0 0 auto; width: 1.75rem; height: 1.75rem; padding: .2rem; border: 0; background: transparent; color: var(--v1-muted); opacity: .7; }
+.queue-remove:hover, .queue-remove:focus-visible { color: var(--v1-text); opacity: 1; }
+.queue-remove:focus-visible { outline: 2px solid var(--v1-content-control); outline-offset: 1px; }
 .queue-list li strong { overflow-wrap: anywhere; }
 .queue-list span { color: var(--v1-muted); font-size: .88rem; }
 

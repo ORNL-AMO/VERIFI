@@ -1,4 +1,8 @@
-import { Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
+import { FacilityEnergyUseResultsService } from './results/facility-footprint/facility-energy-use-results.service';
+import { FacilityEnergyUseBalanceService } from './results/facility-footprint/facility-energy-use-balance.service';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
@@ -11,6 +15,9 @@ import { DataWorkbenchTab } from '@app/v1/shared/data-workbench/data-workbench-t
 import { EnergyUseWorkbenchHeaderService } from './energy-use-workbench-header.service';
 import { EnergyUsesWorkspaceService } from '../energy-uses-workspace.service';
 import { EnergyUseWorkbenchContextService } from './energy-use-workbench-context.service';
+import { EnergyUseResultsService } from './results/energy-use-results.service';
+import { energyUseGroupHeader } from './energy-use-group-header.models';
+import { facilityEnergyUseRoute } from '@app/v1/routing/workspace-route';
 
 @Component({
   selector: 'app-energy-use-workbench',
@@ -18,30 +25,27 @@ import { EnergyUseWorkbenchContextService } from './energy-use-workbench-context
   templateUrl: './energy-use-workbench.component.html',
   styleUrls: ['./energy-use-workbench.component.css'],
   standalone: false,
-  providers: [EnergyUsesWorkspaceService, EnergyUseWorkbenchContextService, EnergyUseWorkbenchHeaderService]
+  providers: [EnergyUsesWorkspaceService, EnergyUseWorkbenchContextService, EnergyUseWorkbenchHeaderService, EnergyUseResultsService, FacilityEnergyUseResultsService, FacilityEnergyUseBalanceService]
 })
 export class EnergyUseWorkbenchComponent {
+  private readonly stickyHeader = viewChild(BrowseHeaderDirective);
+  private readonly factsToggle = viewChild(DataWorkbenchFactsToggleComponent);
   readonly context = inject(EnergyUseWorkbenchContextService);
   private readonly header = inject(EnergyUseWorkbenchHeaderService);
   readonly editor = computed(() => {
+    if (this.context.activeTab() !== 'setup' && this.context.activeTab() !== 'items') return undefined;
     const account = this.context.workspace.account(), editor = this.header.editor();
     const target = this.context.activeTab() === 'setup' ? `group:${this.context.energyUseGroupGuid()}` : this.context.energyUseGuid();
     return account && editor?.key() === `${account.guid}:${this.context.facilityGuid()}:${target}` ? editor : undefined;
   });
-  readonly saveFeedback = computed(() => {
-    const editor = this.editor();
-    if (!editor) return undefined;
-    const state = editor.state();
-    return { state, label: state === 'saving' ? 'Saving…' : state === 'error' ? 'Save failed' : state === 'invalid' ? 'Check inputs'
-      : state === 'conflict' ? 'Review conflicts' : state === 'dirty' ? 'Unsaved changes' : state === 'saved' ? 'Saved' : 'Changes save automatically',
-      icon: state === 'saving' ? 'loading' as const : ['error', 'invalid', 'conflict'].includes(state) ? 'warning' as const : state === 'saved' ? 'check' as const : 'info' as const,
-      tone: ['error', 'invalid', 'conflict'].includes(state) ? 'warning' : state === 'saved' ? 'success' : 'info',
-      detail: ['error', 'invalid', 'conflict'].includes(state) ? editor.message() : '' };
-  });
+  readonly summary = computed(() => energyUseGroupHeader(this.context.group()));
   readonly navigation = inject(WorkspaceNavigationService);
   readonly tabs: readonly DataWorkbenchTab[] = [
     { id: 'setup', label: 'Setup Group', icon: 'settings' },
-    { id: 'items', label: 'Energy Use Items', icon: 'tools' }
+    { id: 'items', label: 'Energy Use Items', icon: 'tools' },
+    { id: 'group-summary', label: 'Group Summary', icon: 'barChartHorizontal' },
+    { id: 'group-footprint', label: 'Group Footprint', icon: 'groupEnergyFootprint' },
+    { id: 'facility-footprint', label: 'Facility Footprint', icon: 'facilityEnergyFootprint' }
   ];
   private readonly store = inject(AccountWorkspaceStore);
   private readonly modal = inject(ModalPortalService);
@@ -60,6 +64,7 @@ export class EnergyUseWorkbenchComponent {
   @ViewChild('itemNavigation', { read: ElementRef }) private readonly itemNavigation?: ElementRef<HTMLElement>;
 
   constructor() {
+    effect(() => { if (this.stickyHeader()?.collapsed()) untracked(() => this.factsToggle()?.collapse()); });
     this.destroy.onDestroy(this.header.registerCreation({ canCreate: this.canCreate, create: () => this.openCreation() }));
     effect(() => {
       const key = this.context.key();
@@ -86,9 +91,9 @@ export class EnergyUseWorkbenchComponent {
     if (restoreFocus && this.opener?.isConnected) this.opener.focus();
   }
   async openCreated(item: IdbFacilityEnergyUseEquipment): Promise<void> {
-    if (this.creationKey !== this.context.key() || item.accountId !== this.store.account()?.guid || item.facilityId !== this.context.facilityGuid() || item.energyUseGroupId !== this.context.energyUseGroupGuid()) return;
+    if (this.creationKey !== this.context.key() || item.accountId !== this.store.account()?.guid || item.facilityId !== this.context.facilityGuid()) return;
     this.closeCreation();
-    if (!await this.context.navigate(this.context.itemRoute(item.guid))) this.context.navigationError.set('Energy use added. Select it in Energy Use Items to open it.');
+    if (!await this.context.navigate(facilityEnergyUseRoute(item.facilityId, item.energyUseGroupId, item.guid))) this.context.navigationError.set('Energy use added. Select it in Energy Use Items to open it.');
   }
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const account = this.context.workspace.account(), group = this.context.group();

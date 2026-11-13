@@ -31,7 +31,7 @@ export function analysisReportFixture(category: 'energy' | 'water' = 'energy'): 
   const report = { ...getNewIdbAccountReport(account, [facility], []), id: 50, guid: 'report', reportType: 'betterPlants' as const, reportYear: 2023, baselineYear: 2022 };
   report.betterPlantsReportSetup.analysisItemId = rollup.guid;
   return { account, facilities: [facility], meters: [meter], meterData, meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [analysis], accountAnalyses: [rollup],
-    accountReports: [report], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [] };
+    accountReports: [report], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: [] };
 }
 
 /** Distinct predictor series and coefficients expose changes to GUID-to-coefficient mapping. */

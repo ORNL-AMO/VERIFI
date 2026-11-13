@@ -19,7 +19,13 @@ export interface EnergyUseTreemapNode {
   readonly id: string; readonly name: string; readonly kind: 'period' | 'facility' | 'group' | 'item';
   readonly value: number; readonly periodKey: string; readonly partial: boolean; readonly carried: boolean;
   readonly facilityGuid?: string; readonly groupGuid?: string; readonly itemGuid?: string;
-  readonly children?: readonly EnergyUseTreemapNode[]; readonly percentOfPeriod: number;
+  readonly children?: readonly EnergyUseTreemapNode[]; readonly percentOfPeriod: number | null;
+}
+export function knownEnergyUseAmount(row: ProjectedEnergyUse): number | null {
+  return row.sources.some(source => source.amount !== null) ? row.amount : null;
+}
+export function energyUsePercent(amount: number | null, total: number): number | null {
+  return amount !== null && total > 0 ? amount / total * 100 : null;
 }
 const validYear = (year: number): boolean => Number.isInteger(year) && year >= 1 && year <= 9999;
 export function savedEnergyUseYears(items: readonly IdbFacilityEnergyUseEquipment[]): number[] {
@@ -57,9 +63,10 @@ export function projectEnergyUseSource(item: IdbFacilityEnergyUseEquipment, sour
   if (originYear !== year && retired && year > item.noLongerInUse.year) return { ...base, state: 'inactive', amount: 0, description: `Inactive after FY ${item.noLongerInUse.year}; no carry-forward.` };
   if (!rows.length) return { ...base, state: 'missing', amount: null, description: 'No earlier saved consumption; no backward projection.' };
   const row = rows[0];
-  if (row.energyUse == null || !Number.isFinite(row.energyUse) || row.energyUse < 0 || !row.energyUseUnit || !unit) return invalid(`Invalid saved consumption in FY ${originYear}.`);
+  const provenance = { originYear, originalAmount: row.energyUse, originalUnit: row.energyUseUnit, override: !!row.overrideEnergyUse };
+  if (row.energyUse == null || !Number.isFinite(row.energyUse) || row.energyUse < 0 || !row.energyUseUnit || !unit) return { ...invalid(`Invalid saved consumption in FY ${originYear}.`), ...provenance };
   const converted = new ConvertValue(row.energyUse, row.energyUseUnit, unit);
-  if (converted.hasError || !Number.isFinite(converted.convertedValue) || converted.convertedValue < 0) return invalid(`Cannot convert saved ${row.energyUseUnit} to ${unit}.`);
+  if (converted.hasError || !Number.isFinite(converted.convertedValue) || converted.convertedValue < 0) return { ...invalid(`Cannot convert saved ${row.energyUseUnit} to ${unit}.`), ...provenance };
   return { ...base, originYear, originalAmount: row.energyUse, originalUnit: row.energyUseUnit, override: !!row.overrideEnergyUse,
     state: originYear === year ? 'entered' : 'carried', amount: converted.convertedValue,
     description: `${originYear === year ? `Entered in FY ${year}` : `Carried forward from FY ${originYear}`}${row.overrideEnergyUse ? ' · Manual override' : ''}` };
@@ -75,7 +82,7 @@ export function buildEnergyUseTreemap(rows: readonly ProjectedEnergyUse[], group
   for (const row of rows) { const bucket = periods.get(row.period.key) ?? []; bucket.push(row); periods.set(row.period.key, bucket); }
   const node = (id: string, name: string, kind: EnergyUseTreemapNode['kind'], periodKey: string, children: EnergyUseTreemapNode[], total: number,
     owner: Partial<EnergyUseTreemapNode> = {}): EnergyUseTreemapNode => ({ id, name, kind, periodKey, children, value: children.reduce((sum, child) => sum + child.value, 0),
-      partial: children.some(child => child.partial), carried: children.some(child => child.carried), percentOfPeriod: total > 0 ? children.reduce((sum, child) => sum + child.value, 0) / total * 100 : 0, ...owner });
+      partial: children.some(child => child.partial), carried: children.some(child => child.carried), percentOfPeriod: energyUsePercent(children.reduce((sum, child) => sum + child.value, 0), total), ...owner });
   const result = [...periods].sort(([a], [b]) => a.localeCompare(b)).map(([periodKey, periodRows]) => {
     const total = periodRows.reduce((sum, row) => sum + row.amount, 0);
     const facilities = [...new Set(periodRows.map(row => row.facility.guid))].map(ownerGuid => {
@@ -88,7 +95,7 @@ export function buildEnergyUseTreemap(rows: readonly ProjectedEnergyUse[], group
       const groupNodes = [...grouped].map(([guid, members]) => {
         const group = groups.find(group => group.guid === guid && group.facilityId === ownerGuid);
         const items: EnergyUseTreemapNode[] = members.map(row => ({ id: `item:${row.item.guid}`, name: row.item.name || 'Untitled energy use', kind: 'item',
-          value: row.amount, periodKey, partial: row.partial, carried: row.carried, percentOfPeriod: total > 0 ? row.amount / total * 100 : 0,
+          value: row.amount, periodKey, partial: row.partial, carried: row.carried, percentOfPeriod: energyUsePercent(knownEnergyUseAmount(row), total),
           facilityGuid: ownerGuid, groupGuid: guid, itemGuid: row.item.guid }));
         return node(JSON.stringify(['group', ownerGuid, guid]), group?.name || 'Group unavailable', 'group', periodKey, items, total, { facilityGuid: ownerGuid, groupGuid: guid });
       });
@@ -97,6 +104,6 @@ export function buildEnergyUseTreemap(rows: readonly ProjectedEnergyUse[], group
     return node(`period:${periodKey}`, periodRows[0].period.label, 'period', periodKey, facilities, total);
   });
   if (groupGuid) return result.flatMap(period => period.children!.flatMap(facility => facility.children ?? []));
-  if (facilityGuid) return result.flatMap(period => period.children ?? []);
+  if (facilityGuid) return result.flatMap(period => period.children!.flatMap(facility => facility.children ?? []));
   return result;
 }

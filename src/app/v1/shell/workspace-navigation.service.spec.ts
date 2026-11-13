@@ -37,6 +37,7 @@ describe('WorkspaceNavigationService', () => {
     accountReports: ReturnType<typeof vi.fn>;
     selectedFacilityReports: ReturnType<typeof vi.fn>;
     facilityAnalyses: ReturnType<typeof vi.fn>; facilityReports: ReturnType<typeof vi.fn>;
+    savedVisualizations: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -68,7 +69,7 @@ describe('WorkspaceNavigationService', () => {
       selectedFacilityAnalyses: vi.fn(() => []),
       accountReports: vi.fn(() => []),
       selectedFacilityReports: vi.fn(() => []),
-      facilityAnalyses: vi.fn(() => []), facilityReports: vi.fn(() => [])
+      facilityAnalyses: vi.fn(() => []), facilityReports: vi.fn(() => []), savedVisualizations: vi.fn(() => [])
     };
 
     TestBed.configureTestingModule({
@@ -90,6 +91,29 @@ describe('WorkspaceNavigationService', () => {
       ]
     });
     service = TestBed.inject(WorkspaceNavigationService);
+  });
+
+  it('resolves async protected navigation before selecting or publishing another account', async () => {
+    let resolve!: (value: boolean) => void;
+    const release = TestBed.inject(UnsavedChangesService).registerNavigationPreflight(() => new Promise<boolean>(done => resolve = done));
+    const opening = service.openWorkspace('account-b');
+    expect(workspaceService.selectAccount).not.toHaveBeenCalled();
+    resolve(false); await opening;
+    expect(workspaceService.selectAccount).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+    release();
+    await service.openWorkspace('account-b');
+    expect(workspaceService.selectAccount).toHaveBeenCalledWith('account-b');
+  });
+
+  it('switches from a visualization workbench to the target library without retargeting saved identity', async () => {
+    router.url = '/v1/workspace/account/account-a/visualization/workbench/chart-a';
+    router.events.next(new NavigationEnd(1, router.url, router.url));
+    workspaceStore.savedVisualizations.mockReturnValue([{ guid: 'chart-a', accountId: 'account-a', facilityId: 'facility-a' }]);
+    await service.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' });
+    expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'visualization', 'library'], { queryParams: { facility: 'facility-b' } });
+    expect(service.activeVisualizationGuid()).toBe('chart-a');
+    expect(service.headerScope()).toEqual({ kind: 'facility', facilityGuid: 'facility-a' });
   });
 
   it.each([true, false])('toggles from effective visibility %s rather than the default open preference', visible => {

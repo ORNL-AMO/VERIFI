@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-export interface EnergyUseChartView { readonly year: number | null; readonly nodeId: string; }
+export interface EnergyUseChartView { readonly nodeId: string; }
 /** Session-only preferences, independently keyed by account/facility/group. */
 @Injectable({ providedIn: 'root' })
 export class EnergyUseChartSessionService {

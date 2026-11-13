@@ -86,7 +86,7 @@ describe('account deletion in Chromium', () => {
 
     for (const { storeName } of ACCOUNT_DELETION_STORES) {
       const records = await harness.getAll(storeName);
-      expect(records).toEqual(accountBFixture.seed[storeName]);
+      expect(records).toEqual(accountBFixture.seed[storeName] ?? []);
       expect(records.some(record => record.accountId === accountAFixture.account.guid)).toBe(false);
     }
 
@@ -101,7 +101,7 @@ describe('account deletion in Chromium', () => {
       accountBFixture.account
     ]);
     for (const { storeName } of ACCOUNT_DELETION_STORES) {
-      expect(await harness.getAll(storeName)).toEqual(twoAccountPersistenceSeed[storeName]);
+      expect(await harness.getAll(storeName)).toEqual(twoAccountPersistenceSeed[storeName] ?? []);
     }
     for (const storeName of GLOBAL_PERSISTENCE_STORES) {
       expect(await harness.getAll(storeName)).toEqual(globalPersistenceSeed[storeName]);

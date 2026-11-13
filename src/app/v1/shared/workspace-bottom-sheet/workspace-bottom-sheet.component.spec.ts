@@ -19,4 +19,16 @@ describe('Workspace bottom sheet', () => {
     pointer('pointerdown', 100); pointer('pointerup', 50); handle.click(); expect(fixture.componentInstance.closing()).toBe(false);
     pointer('pointerdown', 100); pointer('pointerup', 150); vi.advanceTimersByTime(360); expect(closed).toHaveBeenCalledOnce();
   });
+  it('keeps an opt-in protected proposal visible instead of animating it out', () => {
+    vi.useFakeTimers(); const fixture = setup(), closed = vi.fn(); fixture.componentInstance.closed.subscribe(closed);
+    fixture.componentRef.setInput('closeBlocked', true); fixture.detectChanges();
+    fixture.componentInstance.requestClose(); vi.advanceTimersByTime(360);
+    expect(fixture.componentInstance.closing()).toBe(false); expect(closed).not.toHaveBeenCalled();
+    expect((fixture.nativeElement.querySelector('.workspace-bottom-sheet__handle') as HTMLButtonElement).disabled).toBe(true);
+    fixture.componentRef.setInput('closeBlocked', false); fixture.detectChanges(); fixture.componentInstance.requestClose();
+    fixture.componentRef.setInput('closeBlocked', true); fixture.detectChanges(); vi.advanceTimersByTime(360);
+    expect(closed).not.toHaveBeenCalled(); expect(fixture.componentInstance.closing()).toBe(false);
+    fixture.componentRef.setInput('closeBlocked', false); fixture.detectChanges(); fixture.componentInstance.requestClose(); vi.advanceTimersByTime(360);
+    expect(closed).toHaveBeenCalledOnce(); fixture.destroy();
+  });
 });

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { SectionNavComponent } from './section-nav.component';
+import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { setupSectionNavTest, meterNav } from './section-nav-test.helpers';
 
 describe('SectionNavComponent', () => {
@@ -20,6 +21,20 @@ describe('SectionNavComponent', () => {
     expect(root.textContent).not.toContain('Account Meters');
     expect(root.querySelector('app-workspace-context a')).toBeNull();
     expect(root.querySelector('[aria-current="page"]')?.textContent).toContain('Group A');
+  });
+
+  it('labels the visualization listing Dashboard while preserving its route, scope and active state', () => {
+    state.activeSection.set('visualization'); state.activeDetail.set('library');
+    vi.spyOn(TestBed.inject(WorkspaceNavigationService), 'inventoryScopeQuery').mockReturnValue({ facility: 'facility-a' });
+    const fixture = TestBed.createComponent(SectionNavComponent); fixture.detectChanges();
+    const link = fixture.nativeElement.querySelector('[aria-labelledby="visualizations-nav-title"] a') as HTMLAnchorElement;
+    expect(link.textContent?.trim()).toBe('Dashboard');
+    expect(link.getAttribute('href')).toBe('/v1/workspace/account/account-a/visualization/library?facility=facility-a');
+    expect(link.getAttribute('aria-current')).toBe('page');
+    state.activeDetail.set('workbench'); fixture.detectChanges();
+    expect(link.getAttribute('aria-current')).toBeNull();
+    state.isSingleSiteWorkspace.set(true); fixture.detectChanges();
+    expect(link.getAttribute('href')).toBe('/v1/workspace/account/account-a/visualization/library');
   });
 
   it('shows home navigation only when the Home rail section is active', () => {

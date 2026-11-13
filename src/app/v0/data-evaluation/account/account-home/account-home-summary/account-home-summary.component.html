@@ -53,6 +53,12 @@
               Export Account <br> Utility Data
             </button>
           </div>
+          <div class="p-1">
+            <button class="btn btn-outline m-0" (click)="openEmailModal()">
+              <span class="fa fa-share-square"></span><br>
+              Email Account <br> Data
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -75,7 +81,7 @@
   }
 </div>
 
-<div [ngClass]="{'windowOverlay': showExportModal}">
+<div [ngClass]="{'windowOverlay': showExportModal }">
 </div>
 
 <div class="popup" [class.open]="showExportModal">
@@ -95,3 +101,7 @@
     </div>
   </div>
 </div>
+
+@if (showEmailModal) {
+  <app-email-data-modal [isAccount]="true" (cancel)="closeEmailModal()"></app-email-data-modal>
+}

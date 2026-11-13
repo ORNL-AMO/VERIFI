@@ -70,7 +70,8 @@
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist-nopublish": "electron-builder --publish never",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "docs:check": "node .github/scripts/check-agent-docs.cjs"
   },
   "private": true,
   "dependencies": {

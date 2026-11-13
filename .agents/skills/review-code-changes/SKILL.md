@@ -1,20 +1,17 @@
 ---
 name: review-code-changes
-description: Review VERIFI code changes or pull requests for correctness, architecture, Angular design, reuse, tests, and validation. Use for implementation reviews and risk assessments; do not use for design-only feedback without code.
+description: Review VERIFI code changes or pull requests for correctness, architecture, compatibility, tests, and validation. Does not authorize implementing findings or posting a GitHub review.
 ---
 
 # Review code changes
 
-For responding to feedback already left on a PR, start with [`address-pr-review`](../address-pr-review/SKILL.md). Use this skill to assess the findings and review any resulting diff; it does not independently authorize implementing suggestions or posting replies.
+For agent-assisted PR preparation, complete the context-aware self-review before following the [fresh local review workflow](../../../docs/agents/local-fresh-review.md). The [PR workflow](../../../docs/agents/pr-workflow.md) owns sequencing, comparison freshness, authorization, and evidence records. An independently started reviewer performs this review directly without recursive delegation.
 
-1. Read the [Reviewer](../../../docs/agents/personas.md#reviewer) mode and the matching row in the [task context index](../../../docs/agents/context-index.md). For a pull request, also read the [GitHub PR review guide](../../../docs/agents/github-pr-review.md). Load the affected architecture sections and subsystem skills before judging the implementation.
-2. Establish the complete comparison and the intended behavior. Read the changed tests, documentation, and validation evidence, then trace affected entry points, owners, consumers, shared contracts, and compatibility paths beyond the changed lines.
-3. Review in focused passes:
-   - **Correctness and architecture:** Check data and control flow, ownership, lifecycle, cancellation, error handling, compatibility, and whether the implementation preserves documented boundaries and invariants.
-   - **Angular and UI:** For Angular changes, apply the [Angular template guidance](../../../docs/agents/angular-template-guidance.md) and `implement-angular-feature`. Check component, service, and route-context responsibilities; signals and derived state; typed reactive forms and semantic outputs; accessibility; responsive behavior; and shared-layer imports.
-   - **Reuse and maintainability:** Compare changed TypeScript, templates, and styles with neighboring features, shared components, and global style layers. Identify repeated semantic presentation, interaction, or data-shaping patterns that should reuse or extend an existing abstraction. Treat matching low-level declarations as coincidental until shared meaning and a stable ownership boundary justify extraction.
-   - **Tests and validation:** Use `design-and-write-tests` to assess observable behavior and regression coverage. Use `validate-web-and-electron` to judge whether the evidence matches the changed runtime boundaries, and run focused checks when they are needed to verify a finding.
-4. Inspect CSS as code. Flag copied component style blocks, repeated semantic selectors, or feature rules that duplicate an established shared component or class. Do not request a global rule merely because a few declarations match; prefer shared components or semantic classes only when the behavior and visual contract are intentionally common.
-5. Report only findings supported by precise evidence. Prioritize defects and regression risks before non-blocking cleanup, state the impact and expected correction, and avoid comments based only on taste. Explicitly report when no actionable findings remain and list validation not performed.
+1. Read the [Reviewer](../../../docs/agents/personas.md#reviewer) mode and matching [task context](../../../docs/agents/context-index.md). For a PR, read the [GitHub review guide](../../../docs/agents/github-pr-review.md). Load only relevant architecture sections and subsystem skills.
+2. Establish the exact comparison and intended behavior. Inspect changed tests, documentation, and validation evidence; trace entrypoints, owners, consumers, shared contracts, and compatibility paths beyond changed lines.
+3. Review correctness and architecture: deterministic calculations, units, aggregation, Worker contracts/lifecycle/cancellation, durable data, GUID relationships, backup/import compatibility, errors, and Electron boundaries. Apply affected subsystem skills.
+4. For Angular/UI changes, use `implement-angular-feature`. Check component/service ownership, reactive flow, lifecycle cleanup, forms, state handling, keyboard/focus/accessibility, and relevant responsive/print/theme behavior. Compare changed TypeScript, templates, and styles with neighboring/shared implementations; prefer semantic reuse without demanding abstractions for coincidental duplication.
+5. Use `design-and-write-tests` and `validate-web-and-electron` to assess meaningful coverage and whether evidence matches the changed boundaries. Run focused checks only when needed to verify a finding. Never describe author-reported or skipped checks as independently passing.
+6. Report only evidence-supported findings, prioritized by impact, with path/line, trigger, consequence, and correction direction. Separate optional cleanup. Explicitly report no actionable findings and list unperformed checks and residual uncertainty.
 
-Do not edit the reviewed implementation unless the user separately requests fixes. Do not post or approve a review in GitHub without authorization.
+Do not edit implementation, publish comments/reviews, approve, or merge without the corresponding authorization. Save the full fresh-review report and verify comparison freshness before publication as described in the [PR creation guide](../../../docs/agents/github-pr-creation.md).

@@ -1,109 +1,29 @@
-# V1 Reports: phased implementation roadmap
+# V1 Reports remaining work
 
-Tracking document for [issue #2790 — Build v1 Reports navigation, dashboards, and report lifecycle](https://github.com/ORNL-AMO/VERIFI/issues/2790).
+Active delivery reference for [Reports foundation #2790](https://github.com/ORNL-AMO/VERIFI/issues/2790) and its report migrations. [Report architecture](v1-reports-architecture.md) owns current contracts and extension patterns; the [scope-qualified catalog](../src/app/v1/reports/catalog/report-catalog.ts) owns implemented/pending capabilities. Issue bodies own detailed acceptance, not this document.
 
-This document defines the implementation sequence only. Each phase will be planned, implemented, validated, and reviewed separately. Creating this document does not implement any phase.
+## Current foundation and decisions
 
-## Phase 1 — Facility report dashboard
+The unified inventory and saved-report lifecycle are implemented. Account/facility hosts share Setup, applicable Data Checks, Report stages, typed editing, guarded navigation, status destinations, and runtime registration. Pending content is distinct from saved-configuration status; opening an existing report preserves settings/GUIDs and does not reconcile ownership on browse. Single-facility presentation retains account-backed reports through explicit hidden analysis pairs.
 
-- [x] Enable facility Reports navigation.
-- [x] Display saved reports with search, filtering, sorting, and status.
-- [x] Support creating, opening, copying, and deleting reports.
-- [x] Provide a minimal selected-report landing until the workbench is implemented.
-- [x] Clearly identify report-specific content that is pending migration.
+Better Plants has energy/water setup, explicit analysis review, in-app official-form content, direct PDF, and template-compatible Excel. Facility Analysis has typed setup, selected-year checks/review, continuous in-app content, PDF, and PowerPoint. Their outputs share snapshot/readiness and delivery infrastructure; other report content remains pending. Existing calculations, v0 behavior, persisted relationships, templates, and known compatibility quirks remain authoritative.
 
-**Completion checkpoint:** facility reports can be discovered and managed without losing existing settings.
+Build each remaining report as a feature-owned runtime using shared editing/check/result/output capabilities. Do not add report-type branches to the workbench. Output support is explicit per format. In-app completion does not establish output or release acceptance.
 
-Phase 1 initially shipped with a limited account Reports landing and facility dashboard links; phase 3 replaces that landing with the combined inventory. The account report inventory and lifecycle actions remain in phase 3. Emission Factors reports are available only when account Other Impacts is enabled; apply the shared rule to account Emission Factors and Better Climate in phase 3.
+## Remaining migrations and dependencies
 
-## Phase 2 — Facility report workbench
-
-- [x] Establish the selected-report layout, header, switching, and return navigation.
-- [x] Provide shared Setup, applicable Data Checks, and Report stages.
-- [x] Establish integration points for individual report migrations.
-- [x] Include save feedback, error recovery, and unsaved-navigation protection.
-
-**Completion checkpoint:** individual facility report issues can supply their settings, checks, and previews within the shared workbench.
-
-## Phase 3 — Account report dashboard
-
-- [x] Enable account Reports navigation and lifecycle actions.
-- [x] Connect the portfolio Reports inventory across account and facility scopes.
-- [x] Provide a minimal selected-account-report landing.
-- [x] Make account-required reports accessible from single-facility workspaces.
-
-**Completion checkpoint:** account and facility reports are discoverable and route to the correct owning workspace.
-
-Implemented with a combined account inventory and shared Simple/Summary/Detailed cards on both dashboards. Scope headers, workspace insets, title/action placement, and browse returns follow Analysis. Account reports open a minimal saved-configuration landing; account report workbench stages are supplied by phase 4. Both scopes support create, copy, rename, and delete through the existing command boundary. Single-facility workspaces retain explicit Account Reports access and existing hidden analysis references without report-entry reconciliation. Report content remains pending independently of setup status.
-
-## Phase 4 — Account report workbench
-
-- [x] Apply the shared workbench structure to account reports.
-- [x] Preserve account-specific settings and analysis references.
-- [x] Support single-facility workflows through the existing hidden account-analysis pairing.
-- [x] Provide integration points for individual account report migrations.
-
-**Completion checkpoint:** account report issues can add their content without rebuilding common workflow infrastructure or requiring redundant analysis setup.
-
-Implemented with shared report header/stage presentation and autosave scheduling, with scope-specific account and facility contexts. Account Setup edits the name and the linked analysis for Better Plants, Performance, Analysis, and Savings. Data Checks applies to Better Plants, Performance, and Savings; other account types use Setup and Report. Checks and previews remain pending integration points. Single-facility choices use facility analyses while retaining account-analysis GUID references: explicit selection or refresh reuses/creates only the required hidden pair and commits it with the report in one transaction. Browsing performs no reconciliation. Dates, report-specific settings, calculations, and output remain with their report migrations.
-
-## Phase 5 — Shared workflow wrapup
-
-- [x] Audit the remaining acceptance criteria in [#2790](https://github.com/ORNL-AMO/VERIFI/issues/2790), with the deferrals below.
-- [x] Connect actionable report status destinations to existing common Setup controls and linked analyses.
-- [x] Verify navigation, ownership, saved-report compatibility, and lifecycle behavior through automated coverage.
-- [x] Cover keyboard/focus, light/dark/high-contrast themes, narrow layouts, and practical renderer widths in Chromium.
-- [x] Record report-specific work under its owning issues.
-- [ ] Analysis Used By integration — explicitly deferred to a later maintainer update; screens, counts, and links are unchanged.
-- [ ] Native Electron interaction/manual screen-reader verification — not exercised by this change.
-
-**Completion checkpoint:** the scoped status-link and foundation-audit work is implemented. Do not describe all of #2790 as complete or automatically close it: Used By integration remains deferred, and native manual validation remains a gap.
-
-Report names open common Setup for either scope. Account report analysis findings open the existing selector; linked-analysis warnings open the owned analysis Setup, using only an existing saved pair for single-facility accounts. Dates, reporting periods, data selection, and facility-report analysis selection stay unavailable until their editors migrate. Mixed name/settings findings offer **Review name** while identifying the remaining settings as pending. One workspace-aware presentation projection serves active findings, Todos, entity findings, discarded warnings, and report-card findings without changing validation or dismissal identities.
-
-### Acceptance audit for #2790
-
-| Acceptance criterion | Evidence and remaining work |
+| Owner | Work |
 | --- | --- |
-| Account/facility navigation and combined inventory | Existing [inventory](../src/app/v1/reports/inventory/reports-inventory.component.spec.ts), [route](../src/app/v1/v1.routes.spec.ts), and [browser journey](../src/app/v1/reports/inventory/reports-inventory.browser.spec.ts) coverage verifies scope ownership, controls, pagination, breadcrumbs, and browse returns. |
-| Create, open, copy, rename, delete through command boundaries | Existing [account lifecycle](../src/app/v1/reports/account/account-report-actions.service.browser.spec.ts) and [facility lifecycle](../src/app/v1/reports/facility/facility-report-actions.service.browser.spec.ts) coverage verifies writes, failures, isolation, and reopen behavior. |
-| Shared Setup, applicable Data Checks, and Report stages | Account/facility workbench specs cover every supported report type and pending stages; report-specific editors and output remain outside this foundation. |
-| Open existing reports without recreation or lost settings | Lifecycle/reopen specs and [setup transactions](../src/app/v1/reports/account/account-report-setup.browser.spec.ts) preserve settings and GUID links. Status browser journeys additionally use real repositories and transactions, assert no navigation writes, and reopen the stored records. |
-| Analysis Used By references | Deferred by maintainer direction. Existing informational screens and dependency presentation remain unchanged. |
-| Single-facility account-required reports | Existing route/setup coverage and the status browser journeys retain account Reports access and saved hidden-pair GUIDs without navigation reconciliation. |
-| Persisted shapes, backups, ownership, and v0 compatibility | No models, schema, migrations, backup formats, calculation contracts, or v0 sources change. Existing lifecycle/setup tests exercise durable GUID relationships; destination tests cover missing/foreign owners, duplicate GUIDs across scopes, and Other Impacts availability. |
-| Loading, empty, invalid, disabled, pending, success, error, and unsaved protection | Existing workbench/inventory tests plus status journeys cover these states, pending/failed saves, browser Back, retries/discard, and unchanged pending-content distinctions. |
-| Typed forms, shared UI, keyboard/focus, themes, and responsive windows | Existing reactive editors and shared navigation/modal conventions remain. Chromium checks cover status-link keyboard activation, resource focus and scroll restoration, contrast, and 1024/640/390 px layouts. The shared inventory now uses CSS-owned rows and container-qualified expanded spans, removing the stale measured-span path that previously created an implicit second column after narrowing. Browse restoration follows feature readiness and Angular rendering, without a grid measurement signal. Native Electron interaction and manual screen-reader checks remain unperformed. |
+| Facility reports | Data Overview [#2792](https://github.com/ORNL-AMO/VERIFI/issues/2792), Savings [#2794](https://github.com/ORNL-AMO/VERIFI/issues/2794), Modeling [#2795](https://github.com/ORNL-AMO/VERIFI/issues/2795), Cost Savings [#2796](https://github.com/ORNL-AMO/VERIFI/issues/2796), Data Quality [#2797](https://github.com/ORNL-AMO/VERIFI/issues/2797), Emission Factors [#2798](https://github.com/ORNL-AMO/VERIFI/issues/2798). Reuse current lifecycle and report adapters. |
+| Account reports | Data Overview [#2799](https://github.com/ORNL-AMO/VERIFI/issues/2799), Savings [#2800](https://github.com/ORNL-AMO/VERIFI/issues/2800), Analysis/Modeling [#2801](https://github.com/ORNL-AMO/VERIFI/issues/2801), Performance [#2802](https://github.com/ORNL-AMO/VERIFI/issues/2802), Emission Factors [#2803](https://github.com/ORNL-AMO/VERIFI/issues/2803), Other Impacts [#2805](https://github.com/ORNL-AMO/VERIFI/issues/2805). |
+| Implemented reports | Better Plants [#2804](https://github.com/ORNL-AMO/VERIFI/issues/2804) and Facility Analysis [#2793](https://github.com/ORNL-AMO/VERIFI/issues/2793) retain issue-owned remaining acceptance; implementation is not automatic issue closure. |
+| Shared output | [#2791](https://github.com/ORNL-AMO/VERIFI/issues/2791) supplies the implemented PDF/PPTX/XLSX foundation; later reports provide their own adapters. Final cross-report output verification belongs to [#2806](https://github.com/ORNL-AMO/VERIFI/issues/2806). |
 
-Validation completed for this change: focused status/report/shell specs, `npm run test:all:ci`, `npx tsc -p tsconfig.app.json --noEmit`, the agent validation planner, `npm run build-prod`, local documentation-link checks, and `git diff --check`. The production build retains existing browser-support, component-style budget, and CommonJS warnings. No Electron runtime boundary changed; native Electron and screen-reader manual checks remain deferred as recorded above.
+## Acceptance gaps
 
-### Remaining report migrations
+- Analysis Used By integration remains explicitly deferred under #2790; informational references/screens were not completed by the foundation audit.
+- Native Electron interaction and manual screen-reader verification remain unperformed for the Reports foundation. Chromium keyboard/layout checks do not satisfy these manual gaps.
+- Browser printing, presentation mode, remaining report content/formats, and final cross-report release verification remain separate work.
+- Preserve explicit unavailable fixes for settings/content that have not migrated. Do not represent a saved configuration or working status link as implemented report content.
 
-Facility report content stays in Data Overview [#2792](https://github.com/ORNL-AMO/VERIFI/issues/2792), Analysis [#2793](https://github.com/ORNL-AMO/VERIFI/issues/2793), Savings [#2794](https://github.com/ORNL-AMO/VERIFI/issues/2794), Modeling [#2795](https://github.com/ORNL-AMO/VERIFI/issues/2795), Cost Savings [#2796](https://github.com/ORNL-AMO/VERIFI/issues/2796), Data Quality [#2797](https://github.com/ORNL-AMO/VERIFI/issues/2797), and Emission Factors [#2798](https://github.com/ORNL-AMO/VERIFI/issues/2798).
-
-Account report content stays in Data Overview [#2799](https://github.com/ORNL-AMO/VERIFI/issues/2799), Savings [#2800](https://github.com/ORNL-AMO/VERIFI/issues/2800), Analysis/Modeling [#2801](https://github.com/ORNL-AMO/VERIFI/issues/2801), Performance [#2802](https://github.com/ORNL-AMO/VERIFI/issues/2802), Emission Factors [#2803](https://github.com/ORNL-AMO/VERIFI/issues/2803), and Other Impacts [#2805](https://github.com/ORNL-AMO/VERIFI/issues/2805). Printing/export infrastructure stays in #2791 and final output verification in #2806.
-
-## First report migration — Better Plants (#2804)
-
-Better Plants now owns its typed energy/water setup, explicit shared analysis-review workflow, and in-app official-form display. See [V1 report architecture](v1-reports-architecture.md) for the reusable calculation, review, and presentation boundaries. Per maintainer direction, individual report migrations focus on setup and in-app display; printing/export implementation and output verification remain separate work. Do not interpret the in-app migration as completion of the original issue’s output acceptance criteria.
-
-Validation: `npm run test:all:ci`, app TypeScript checking, and the production web build passed. Additional focused backup/copy compatibility assertions passed after the full run. Native Chromium journeys cover energy/water Workers, explicit keyboard confirmation, shared reuse, dependency invalidation, and 1024/640/390 px light/dark/high-contrast layouts. Full form captures were visually inspected. Build warnings remain informational. No Electron runtime boundary changed; native Electron interaction and manual screen-reader checks were not performed. Known legacy performance-band and water-count presentation quirks remain documented in the architecture guide.
-
-## Facility Analysis in-app migration (#2793)
-
-Facility Analysis now implements typed setup, selected-year shared checks and review, and a continuous in-app document. Facility Annual and Monthly sections are followed by every group’s regression model details and annual/monthly results, with paper-style section spacing shared with Better Plants and viewport-delayed chart canvases. Site/source energy, water, baseline-only periods, existing visibility/column options, and saved GUID links are retained. See [V1 report architecture](v1-reports-architecture.md#facility-analysis-report) for the direct facility input and confirmation contracts.
-
-This covers the in-app workflow. Printing, PDF, PowerPoint, presentation mode, and final output verification remain with the separate output work; do not represent the original issue's output acceptance criteria as complete. Account Analysis and the other facility report types retain their pending content.
-
-## Report export foundation (#2791)
-
-The [export roadmap](v1-report-exports-plan.md) follows these in-app migrations. Better Plants adds direct official-form PDF and template-compatible Excel; facility Analysis adds PDF and PowerPoint. Their adapters share a session export lifecycle, neutral writers, and independent ECharts capture. Browser printing, presentation mode, other reports, and final cross-report verification remain separate. See [output architecture](v1-reports-architecture.md#file-output-and-extension-pattern).
-
-## Boundaries and working rules
-
-- Complete and review one phase before starting the next.
-- Allow lifecycle actions for existing report types while clearly marking unfinished settings and previews.
-- Include focused validation and documentation in each implementation phase.
-- Preserve persisted records, GUID relationships, backups, and v0 compatibility.
-- Keep report-specific content in its individual migration issue.
-- Keep export infrastructure in [#2791](https://github.com/ORNL-AMO/VERIFI/issues/2791) and final cross-report output verification in [#2806](https://github.com/ORNL-AMO/VERIFI/issues/2806).
+Apply [testing policy](testing.md) and the [validation workflow](../.agents/skills/validate-web-and-electron/SKILL.md) to each implementation. Report-specific checks protect authoritative values, lifecycle/cancellation, generated-file structure and layout, GUID/backup relationships, and scoped navigation; integrated output acceptance does not defer each report's focused checks.

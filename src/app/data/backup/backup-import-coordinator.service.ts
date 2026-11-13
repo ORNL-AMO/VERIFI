@@ -33,6 +33,10 @@ export class BackupImportCoordinator {
     private readonly analytics: AnalyticsService
   ) { }
 
+  get visualizationImportSummary() { return this.backupImportCommand.visualizationImportSummary; }
+
+  clearVisualizationImportSummary(): void { this.backupImportCommand.clearVisualizationImportSummary(); }
+
   prepareParsedBackup(input: unknown): PreparedBackupFile {
     return this.backupPreparation.prepare(input);
   }

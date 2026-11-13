@@ -2,7 +2,7 @@
   <div class="p-0">
     @if (analysisDisplay == 'table') {
       <app-analysis-summary-table-filter [tableContext]="'monthAccount'"
-      [analysisItem]="accountAnalysisItem"></app-analysis-summary-table-filter>
+      [analysisItem]="accountAnalysisItem()"></app-analysis-summary-table-filter>
     }
   </div>
 
@@ -31,18 +31,18 @@
   <div class="w-100 x-scroll">
     @if (analysisDisplay == 'graph') {
       <app-monthly-analysis-summary-graph
-        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem()"
         [facilityOrAccount]="account">
       </app-monthly-analysis-summary-graph>
     }
     @if (analysisDisplay == 'table') {
       <app-monthly-analysis-summary-table
-        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem" [isAccount]="true"
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem()" [isAccount]="true"
         [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
       </app-monthly-analysis-summary-table>
     }
     @if (analysisDisplay == 'graph') {
-      <app-monthly-analysis-summary-savings-graph [analysisItem]="accountAnalysisItem"
+      <app-monthly-analysis-summary-savings-graph [analysisItem]="accountAnalysisItem()"
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [facilityOrAccount]="account">
       </app-monthly-analysis-summary-savings-graph>
     }

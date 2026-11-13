@@ -1,8 +1,6 @@
-.v1-table-scroll { max-width: 100%; overflow: auto; background: var(--v1-surface); }
-.v1-analysis-results-table { width: 100%; min-width: 65rem; border-collapse: collapse; color: var(--v1-text); font-size: .88rem; }
-.v1-analysis-results-table th,
-.v1-analysis-results-table td { padding: .6rem .7rem; border-bottom: 1px solid var(--v1-divider); text-align: right; vertical-align: middle; }
-.v1-analysis-results-table thead th { background: var(--v1-content-block); color: var(--v1-muted); font-size: .76rem; font-weight: 900; line-height: 1.25; overflow-wrap: break-word; text-transform: uppercase; white-space: normal; }
+@import '../../data-workbench/results-table.css';
+
+.v1-analysis-results-table { min-width: 65rem; }
 .v1-analysis-results-table thead tr:not(.v1-analysis-results-table__section-row) th { width: 8.5rem; min-width: 7rem; max-width: 10rem; }
 .v1-analysis-results-table thead tr:not(.v1-analysis-results-table__section-row) th:first-child,
 .v1-analysis-results-table--monthly thead tr:not(.v1-analysis-results-table__section-row) th:nth-child(2) { width: 6rem; min-width: 6rem; }
@@ -24,21 +22,12 @@
 .v1-analysis-results-table__group--improvement { --analysis-results-section-accent: var(--v1-action); }
 .v1-analysis-results-table th.v1-analysis-results-table__column-hover,
 .v1-analysis-results-table td.v1-analysis-results-table__column-hover { background: color-mix(in srgb, var(--analysis-results-section-accent) 11%, var(--v1-surface)); }
-.v1-analysis-results-table th:first-child,
-.v1-analysis-results-table td:first-child { text-align: left; }
 .v1-analysis-results-table tbody th { color: var(--v1-text); font-weight: 800; text-transform: none; }
-.v1-analysis-results-table tbody th,
-.v1-analysis-results-table td { white-space: nowrap; }
-.v1-analysis-results-table tbody tr:not(.v1-analysis-results__missing):hover > * { background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); }
 .v1-analysis-results-table tbody tr:not(.v1-analysis-results__missing):hover > .v1-analysis-results-table__column-hover { background: color-mix(in srgb, var(--analysis-results-section-accent) 18%, var(--v1-surface)); }
 .v1-analysis-results-table tbody tr.v1-analysis-results__missing > .v1-analysis-results-table__column-hover { background: color-mix(in srgb, var(--v1-warning) 18%, var(--v1-surface)); }
-.v1-analysis-results-table tbody tr:last-child > * { border-bottom: 0; }
 .v1-analysis-results-table tbody tr.v1-analysis-results__fiscal-year-end > * { border-bottom: 2px solid color-mix(in srgb, var(--v1-action) 48%, var(--v1-border)); }
-.v1-analysis-results-table td { font-variant-numeric: tabular-nums; }
 .v1-analysis-results__missing { background: color-mix(in srgb, var(--v1-warning) 12%, var(--v1-surface)); }
 
 
 .v1-analysis-results-table--monthly { min-width: 82rem; }
-.v1-table-scroll:focus-visible { outline: 2px solid var(--v1-content-control); outline-offset: -2px; }
-caption { caption-side: top; padding: .65rem .75rem; color: var(--v1-text); font-weight: 800; }
 .negative { color: var(--v1-danger); }

@@ -84,6 +84,21 @@ export const MotorIcon = [
   ['path', { d: 'M8 8.5h7m-7 3.5h7m-7 3.5h7', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
 ] as const satisfies IconSvgObject;
 
+/** Design source: src/assets/icons/group-energy-footprint.svg. Keep geometry in sync. */
+export const GroupEnergyFootprintIcon = [
+  ['path', { d: 'M7 2.5H5a2.5 2.5 0 0 0-2.5 2.5v2m14-4.5h2A2.5 2.5 0 0 1 21.5 5v2M2.5 17v2A2.5 2.5 0 0 0 5 21.5h2m10 0h2a2.5 2.5 0 0 0 2.5-2.5v-2', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 9.72 14.28 h 3.42 c 0.95 0 1.444 -0.38 1.672 -1.292 l 0.836 -3.648 C 16.332 6.528 14.888 4.4 12.152 4.4 9.112 4.4 7.06 6.68 7.592 9.34 l 0.684 3.648 C 8.428 13.9 8.77 14.28 9.72 14.28 Z M 9.72 16.56 h 3.04 c 0.646 0 0.988 0.342 0.988 0.912 v 0.456 c 0 0.988 -0.95 1.672 -2.508 1.672 s -2.508 -0.684 -2.508 -1.672 v -0.456 c 0 -0.57 0.342 -0.912 0.988 -0.912 Z', stroke: 'currentColor', strokeWidth: 1.33, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 12.456 6.756 9.796 10.1 h 1.748 l -0.38 2.584 2.66 -3.42 h -1.748 l 0.38 -2.508 Z', stroke: 'currentColor', strokeWidth: 0.836, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/facility-energy-footprint.svg. Keep geometry in sync. */
+export const FacilityEnergyFootprintIcon = [
+  ['path', { d: 'M 4.73 16.85 h 3.015 c 0.8375 0 1.273 -0.335 1.474 -1.139 l 0.737 -3.216 C 10.559 10.016 9.286 8.14 6.874 8.14 4.194 8.14 2.385 10.15 2.854 12.495 l 0.603 3.216 C 3.591 16.515 3.8925 16.85 4.73 16.85 Z M 4.73 18.86 h 2.68 c 0.5695 0 0.871 0.3015 0.871 0.804 v 0.402 c 0 0.871 -0.8375 1.474 -2.211 1.474 s -2.211 -0.603 -2.211 -1.474 v -0.402 c 0 -0.5025 0.3015 -0.804 0.871 -0.804 Z', stroke: 'currentColor', strokeWidth: 1.1725, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 7.142 10.217 4.797 13.165 h 1.541 l -0.335 2.278 2.345 -3.015 h -1.541 l 0.335 -2.211 Z', stroke: 'currentColor', strokeWidth: 0.737, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 14.83 10.35 h 3.015 c 0.8375 0 1.273 -0.335 1.474 -1.139 l 0.737 -3.216 C 20.659 3.516 19.386 1.64 16.974 1.64 14.294 1.64 12.485 3.65 12.954 5.995 l 0.603 3.216 C 13.691 10.015 13.9925 10.35 14.83 10.35 Z M 14.83 12.36 h 2.68 c 0.5695 0 0.871 0.3015 0.871 0.804 v 0.402 c 0 0.871 -0.8375 1.474 -2.211 1.474 s -2.211 -0.603 -2.211 -1.474 v -0.402 c 0 -0.5025 0.3015 -0.804 0.871 -0.804 Z', stroke: 'currentColor', strokeWidth: 1.1725, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M16.9 3.6C17.05 4.9 15.1 5.4 15.1 7.1C15.1 8.15 15.85 8.8 16.9 8.8C17.95 8.8 18.7 8.1 18.7 7.05C18.7 6.05 18.25 5.35 17.6 4.75C17.7 5.45 17.35 5.9 17 6.15C17.2 5.1 17.15 4.2 16.9 3.6Z', stroke: 'currentColor', strokeWidth: 0.737, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
 export const CUSTOM_ICONS = {
   dataVisualization: VerifiChartIcon,
   betterPlantsReport: BetterPlantsReportIcon,
@@ -95,5 +110,7 @@ export const CUSTOM_ICONS = {
   steam: SteamIcon,
   compressedAir: CompressedAirIcon,
   energyUseGroup: EnergyUseGroupIcon,
-  motor: MotorIcon
+  motor: MotorIcon,
+  groupEnergyFootprint: GroupEnergyFootprintIcon,
+  facilityEnergyFootprint: FacilityEnergyFootprintIcon
 };

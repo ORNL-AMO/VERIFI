@@ -35,6 +35,7 @@ export class WorkspaceContextService {
   readonly activeEnergyUseGuid = computed(() => this.routeState().energyUseGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
   readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
+  readonly activeVisualizationGuid = computed(() => this.routeState().visualizationGuid);
   readonly activeReportGuid = computed(() => this.routeState().reportGuid);
   readonly activeAnalysisGuid = computed(() => this.routeState().analysisGuid);
   readonly activeAnalysisGroupGuid = computed(() => this.routeState().analysisGroupGuid);
@@ -61,7 +62,7 @@ export class WorkspaceContextService {
   readonly inventoryScope = computed<FacilityScope>(() => {
     const state = this.routeState();
     if (!isAccountInventory(state) || this.workspace.status() !== 'ready' || state.accountGuid !== this.workspace.account()?.guid) return ALL_FACILITIES;
-    if (this.isSingleSiteWorkspace()) return state.section === 'reports' ? ALL_FACILITIES
+    if (this.isSingleSiteWorkspace()) return state.section === 'reports' || state.section === 'visualization' ? ALL_FACILITIES
       : { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
     const guid = this.router.parseUrl(this.currentUrl()).queryParamMap.get('facility');
     return guid && this.facilities().some(facility => facility.guid === guid && facility.accountId === state.accountGuid)
@@ -73,6 +74,9 @@ export class WorkspaceContextService {
   });
   readonly headerScope = computed<FacilityScope>(() => {
     const state = this.routeState();
+    const visualization = state.section === 'visualization' && state.visualizationGuid
+      ? this.workspace.savedVisualizations().find(item => item.guid === state.visualizationGuid && item.accountId === state.accountGuid) : undefined;
+    if (visualization) return visualization.facilityId ? { kind: 'facility', facilityGuid: visualization.facilityId } : ALL_FACILITIES;
     const facility = this.facilities().find(item => item.guid === state.facilityGuid && item.accountId === this.workspace.account()?.guid);
     if (facility) return { kind: 'facility', facilityGuid: facility.guid };
     if (this.isSingleSiteWorkspace()) return { kind: 'facility', facilityGuid: this.singleFacilityContext()!.guid };
@@ -156,6 +160,7 @@ export class WorkspaceContextService {
 
     const depth = (route: RouteState, url: string): number | undefined => {
       if (route.view !== 'workspace') return undefined;
+      if (route.section === 'visualization') return route.visualizationGuid ? 1 : 0;
       if (route.section === 'reports') return route.contextMode === 'account' ? route.reportGuid ? 1 : 0 : route.reportGuid ? 2 : 1;
       if (route.section === 'analysis') return route.contextMode === 'account' ? route.analysisGuid ? 1 : 0 : route.analysisGuid ? 2 : 1;
       if (route.section !== 'data') return undefined;
@@ -173,7 +178,7 @@ export class WorkspaceContextService {
     if (!accountGuid || accountGuid !== accountFor(previous)) return 'none';
     if (previous.facilityGuid && current.facilityGuid && previous.facilityGuid !== current.facilityGuid) return 'peer';
     if (after !== before) return after > before ? 'drill-in' : 'drill-out';
-    if (previous.reportGuid !== current.reportGuid || previous.analysisGuid !== current.analysisGuid || previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.energyUseGuid !== current.energyUseGuid || previous.energyUseGroupGuid !== current.energyUseGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
+    if (previous.visualizationGuid !== current.visualizationGuid || previous.reportGuid !== current.reportGuid || previous.analysisGuid !== current.analysisGuid || previous.meterGuid !== current.meterGuid || previous.meterGroupGuid !== current.meterGroupGuid || previous.energyUseGuid !== current.energyUseGuid || previous.energyUseGroupGuid !== current.energyUseGroupGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
     return 'none';
   }
 }

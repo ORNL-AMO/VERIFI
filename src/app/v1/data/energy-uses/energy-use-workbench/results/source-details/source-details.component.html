@@ -1,0 +1,11 @@
+<ul aria-label="Annual source details">
+  @for (source of rows(); track source.id + ':' + source.year) {
+    <li><strong>FY {{ source.year }} · {{ source.source }} ({{ source.sourceIndex + 1 }})</strong>
+      <span>{{ source.amount === null ? 'Unavailable' : (source.amount | number:'1.0-6') + ' ' + source.unit }}</span>
+      @if (source.originalAmount !== undefined) {
+        <span>Saved: {{ source.savedAmount }} {{ source.originalUnit }} · FY {{ source.originYear }}</span>
+      }
+      <span>{{ source.description }}</span>
+    </li>
+  } @empty { <li>No saved energy sources.</li> }
+</ul>

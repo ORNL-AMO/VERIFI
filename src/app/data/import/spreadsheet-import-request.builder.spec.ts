@@ -4,6 +4,8 @@ import {
   hasSpreadsheetImportRecords
 } from './spreadsheet-import-request.builder';
 
+type ExistingImportDraft = Exclude<ImportFileDraft, { kind: 'energy-uses-template' }>;
+
 describe('spreadsheet import request builder', () => {
   it('filters skipped records and remaps index-qualified exclusions', () => {
     const draft = importDraft({
@@ -34,7 +36,7 @@ describe('spreadsheet import request builder', () => {
   });
 });
 
-function importDraft(overrides: Partial<ImportFileDraft> = {}): ImportFileDraft {
+function importDraft(overrides: Partial<ExistingImportDraft> = {}): ExistingImportDraft {
   return {
     ...getEmptyFileReference(),
     id: 'draft-a',

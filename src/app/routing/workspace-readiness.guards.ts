@@ -19,7 +19,8 @@ export const persistenceReadyGuard: CanActivateFn = async () => {
 };
 
 export const accountReadyGuard: CanActivateFn = async () => {
-  return ensureActiveAccountWorkspace();
+  const requestedAccountGuid = inject(Router).currentNavigation()?.extras.state?.['workspaceAccountGuid'];
+  return ensureActiveAccountWorkspace(typeof requestedAccountGuid === 'string' ? requestedAccountGuid : undefined);
 };
 
 export const accountGuidReadyGuard: CanActivateFn = async route => {

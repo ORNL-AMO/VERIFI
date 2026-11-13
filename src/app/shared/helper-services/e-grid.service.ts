@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Injectable, inject, computed } from '@angular/core';
+import { Injectable, inject, computed, signal } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { SubRegionData, SubregionEmissions } from '@data/models/eGridEmissions';
 import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
@@ -10,6 +10,9 @@ import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
 })
 export class EGridService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly builtinEmissionsValue = signal<readonly SubregionEmissions[] | undefined>(undefined);
+  /** Parsed bundled rates only; account customizations remain owned by the current snapshot. */
+  readonly builtinEmissions = this.builtinEmissionsValue.asReadonly();
 
   subRegionsByZipcode: Array<SubRegionData>;
 
@@ -78,6 +81,10 @@ export class EGridService {
     });
 
     this.excelCo2Emissions = subregionEmissions;
+    this.builtinEmissionsValue.set(subregionEmissions.map(item => ({ ...item,
+      locationEmissionRates: item.locationEmissionRates.map(rate => ({ ...rate })),
+      residualEmissionRates: item.residualEmissionRates.map(rate => ({ ...rate }))
+    })));
     this.combineExcelAndCustomEmissions();
   }
 

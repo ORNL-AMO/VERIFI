@@ -26,7 +26,8 @@ export type WorkspaceEntityKind =
   | 'customFuel'
   | 'customGWP'
   | 'energyUseGroup'
-  | 'energyUseEquipment';
+  | 'energyUseEquipment'
+  | 'savedVisualization';
 
 export type WorkspaceChangeKind = 'add' | 'update' | 'delete' | 'bulk';
 

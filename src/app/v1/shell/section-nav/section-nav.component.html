@@ -24,6 +24,9 @@
     @case ('data') { <app-data-nav></app-data-nav> }
     @case ('imports') { <app-imports-nav></app-imports-nav> }
     @case ('reports') { <app-reports-nav></app-reports-nav> }
+    @case ('visualization') {
+      @if (account) { <section class="v1-nav__group" aria-labelledby="visualizations-nav-title"><span id="visualizations-nav-title" class="v1-nav__label">Visualizations</span><a class="v1-nav__link" [class.active]="navigation.activeDetail() === 'library'" [attr.aria-current]="navigation.activeDetail() === 'library' ? 'page' : null" [routerLink]="['/v1', 'workspace', 'account', account.guid, 'visualization', 'library']" [queryParams]="navigation.isSingleSiteWorkspace() ? {} : navigation.inventoryScopeQuery()"><app-ui-icon name="dataVisualization"/>Dashboard</a></section> }
+    }
     @case ('analysis') { <app-analysis-nav></app-analysis-nav> }
     @default {
       <section class="v1-nav__group" aria-labelledby="v1-future-nav-title">

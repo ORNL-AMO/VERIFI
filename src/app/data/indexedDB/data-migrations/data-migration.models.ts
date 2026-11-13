@@ -1,3 +1,4 @@
+import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
@@ -20,6 +21,7 @@ import { VerifiStoreName } from '../indexed-db-schema';
 export const CURRENT_DATA_VERSION = 2;
 
 export interface MigrationData {
+  savedVisualizations: Array<IdbSavedVisualization>;
   accounts: Array<IdbAccount>;
   facilities: Array<IdbFacility>;
   meters: Array<IdbUtilityMeter>;
@@ -56,6 +58,7 @@ export interface DataMigration {
 
 export function emptyMigrationData(): MigrationData {
   return {
+    savedVisualizations: [],
     accounts: [], facilities: [], meters: [], meterData: [], meterGroups: [],
     deprecatedPredictorData: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],

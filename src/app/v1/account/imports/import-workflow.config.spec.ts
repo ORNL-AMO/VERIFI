@@ -9,6 +9,9 @@ describe('import workflow configuration', () => {
       'worksheet', 'columns', 'map-meters', 'meters', 'meter-readings',
       'map-predictors', 'predictors', 'predictor-readings', 'review'
     ]);
+    expect(stepsForDraft({ kind: 'energy-uses-template' } as any).map(step => step.id)).toEqual([
+      'review'
+    ]);
     expect(stepsForDraft({ kind: 'footprint-tool' } as any).map(step => step.id)).toEqual([
       'facility', 'equipment', 'review'
     ]);

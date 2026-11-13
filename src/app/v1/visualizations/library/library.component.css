@@ -1,0 +1,11 @@
+:host { display: block; min-width: 0; }
+.visualization-library { position: relative; }
+.visualization-library__marker { position: absolute; top: 0; width: 1px; height: 1px; pointer-events: none; }
+.visualization-library__toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; }
+.visualization-library__toolbar > label { flex: 1 1 8rem; min-width: 0; }
+.visualization-library__search { flex: 3 1 18rem; min-width: 0; }
+.visualization-library__search p { margin: 0 0 .4rem; color: var(--v1-muted); }
+.visualization-library__sticky { margin-bottom: var(--v1-space-3); }
+.visualization-library__workspace.v1-data-dashboard-workspace { padding-top: 0; }
+@media (max-width: 640px) { .visualization-library__search { flex-basis: 100%; } }
+@media print { .visualization-library__toolbar,.visualization-library .v1-btn { display: none; } .visualization-library__sticky { position: static; } }

@@ -77,6 +77,7 @@ export interface InventoryTile {
   readonly owner?: InventoryFacilityLink;
   readonly analysisSnapshot?: InventoryAnalysisSnapshot;
   readonly reportSnapshot?: InventoryReportSnapshot;
+  readonly visualizationSnapshot?: InventoryVisualizationSnapshot;
   readonly location?: string;
   readonly chip?: string;
   readonly chipIcon?: IconName;
@@ -125,7 +126,7 @@ export interface InventoryAnalysisSnapshot {
   readonly findings: readonly Pick<InventoryFindingPreview, 'id' | 'title' | 'description' | 'severity'>[];
   readonly modified: string;
 }
-export interface InventoryTileMenuAction { readonly id: 'readings' | 'quality' | 'copy' | 'delete' | 'details' | 'active' | 'compare' | 'rename'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; readonly disabledReason?: string; }
+export interface InventoryTileMenuAction { readonly id: 'readings' | 'quality' | 'copy' | 'copy-scope' | 'delete' | 'details' | 'active' | 'compare' | 'rename'; readonly label: string; readonly icon: IconName; readonly disabled?: boolean; readonly disabledReason?: string; }
 export interface InventoryTileActionRequest { readonly guid: string; readonly action: InventoryTileMenuAction['id']; }
 export const INVENTORY_DETAIL_LEVELS: readonly InventoryDetailLevel[] = ['simple', 'summary', 'detailed'];
 export const INVENTORY_PAGE_SIZE = 24;
@@ -146,3 +147,12 @@ export interface InventoryReportSnapshot {
 }
 
 export interface InventoryView { readonly page: number; readonly detail?: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; }
+
+export interface InventoryVisualizationSnapshot {
+  readonly typeLabel: string;
+  readonly scopeLabel: string;
+  readonly periodLabel: string;
+  readonly chartLabel: string;
+  readonly modified: string;
+  readonly issues: readonly string[];
+}

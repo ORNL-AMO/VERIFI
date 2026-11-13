@@ -11,7 +11,8 @@ export type BackupDifference =
   | 'Meters'
   | 'Meter Data'
   | 'Predictors'
-  | 'Predictor Data';
+  | 'Predictor Data'
+  | 'Saved Visualizations';
 
 export interface FacilityBackupDifference {
   readonly facilityName: string;
@@ -80,6 +81,15 @@ export class BackupComparisonService {
       ) {
         differences.push('Predictor Data');
       }
+
+      const backupVisualizations = backup.savedVisualizations?.filter(item => item.facilityId === facility.guid) ?? [];
+      const savedVisualizations = this.workspaceStore.savedVisualizations().filter(item => item.facilityId === accountFacility.guid);
+      // Identity, intent and repair state determine whether replacement changes saved charts.
+      const signature = (item: typeof backupVisualizations[number]) => JSON.stringify({ guid: item.guid,
+        recordVersion: item.recordVersion, definition: item.definition, preservation: item.preservation });
+      const backupSignatures = backupVisualizations.map(signature).sort();
+      const savedSignatures = savedVisualizations.map(signature).sort();
+      if (JSON.stringify(backupSignatures) !== JSON.stringify(savedSignatures)) differences.push('Saved Visualizations');
 
       return { facilityName: facility.name, differences };
     });

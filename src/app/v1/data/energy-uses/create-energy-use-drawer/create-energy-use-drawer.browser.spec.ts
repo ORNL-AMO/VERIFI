@@ -33,11 +33,12 @@ describe('simple Energy Use creation in Chromium', () => {
       expect(view.root.querySelector('#energy-use-name')).toBeNull();
       await dialog.getByRole('button', { name: 'North plant', exact: true }).click(); await settle(view.fixture);
       await dialog.getByRole('button', { name: 'Production', exact: true }).click(); await settle(view.fixture);
+      await dialog.getByRole('button', { name: 'Pump', exact: true }).click(); await settle(view.fixture);
       expect(document.activeElement?.id).toBe('energy-use-name');
       await dialog.getByRole('textbox', { name: 'Energy use name', exact: true }).fill('Process pump');
       await userEvent.keyboard('{Enter}'); await settle(view.fixture);
       expect(view.actions.create).toHaveBeenCalledTimes(1);
-      expect(view.actions.create.mock.calls[0]).toEqual([expect.objectContaining({ group: { kind: 'existing', guid: 'group-a' }, settings: expect.objectContaining({ name: 'Process pump' }) }), 'account-a', 'facility-a', expect.any(Object)]);
+      expect(view.actions.create.mock.calls[0]).toEqual([expect.objectContaining({ group: { kind: 'existing', guid: 'group-a' }, settings: expect.objectContaining({ name: 'Process pump', equipmentType: 'Pump' }) }), 'account-a', 'facility-a', expect.any(Object)]);
     } finally { view.fixture.destroy(); view.root.remove(); }
   });
 
@@ -50,8 +51,10 @@ describe('simple Energy Use creation in Chromium', () => {
       await dialog.getByRole('button', { name: 'Create energy-use group', exact: true }).click(); await settle(view.fixture);
       expect(document.activeElement?.id).toBe('energy-use-group-name');
       await dialog.getByRole('textbox', { name: 'Group name', exact: true }).fill('Roasting');
-      await userEvent.keyboard('{Enter}'); await settle(view.fixture);
+      await dialog.getByRole('button', { name: 'Add Group', exact: true }).click(); await settle(view.fixture);
       expect(view.actions.create).not.toHaveBeenCalled();
+      expect(view.root.querySelector('#energy-use-name')).toBeNull();
+      await dialog.getByRole('button', { name: 'Process Heating', exact: true }).click(); await settle(view.fixture);
       await dialog.getByRole('textbox', { name: 'Energy use name', exact: true }).fill('Burner train');
       await userEvent.keyboard('{Escape}'); await settle(view.fixture);
       const discard = page.getByRole('dialog', { name: 'Discard energy use?', exact: true });
@@ -63,7 +66,7 @@ describe('simple Energy Use creation in Chromium', () => {
       expect((dialog.getByRole('textbox', { name: 'Energy use name', exact: true }).element() as HTMLInputElement).value).toBe('Burner train');
       await dialog.getByRole('button', { name: 'Create energy use', exact: true }).click(); await settle(view.fixture);
       expect(view.actions.create).toHaveBeenCalledTimes(1);
-      expect(view.actions.create.mock.calls[0][0]).toMatchObject({ group: { kind: 'new', name: 'Roasting' }, settings: { name: 'Burner train' } });
+      expect(view.actions.create.mock.calls[0][0]).toMatchObject({ group: { kind: 'new', name: 'Roasting' }, settings: { name: 'Burner train', equipmentType: 'Process Heating' } });
     } finally { view.fixture.destroy(); view.root.remove(); }
   });
 
@@ -74,12 +77,13 @@ describe('simple Energy Use creation in Chromium', () => {
       try {
         await settle(view.fixture);
         const dialog = page.getByRole('dialog', { name: 'Add energy use', exact: true });
-        for (const step of ['facility', 'group', 'name'] as const) {
+        for (const step of ['facility', 'group', 'category', 'name'] as const) {
           const panel = dialog.element() as HTMLElement;
           expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
           expect(view.root.querySelectorAll('select,input[type="number"],textarea,app-energy-use-settings-fields')).toHaveLength(0);
-          await page.screenshot({ element: panel, path: `./__screenshots__/creation-${step}-${width}-${label}.png` });
+          await page.screenshot({ element: panel, path: `../../../../../../tmp/energy-use-results/creation-${step}-${width}-${label}.png` });
           if (step === 'facility') await dialog.getByRole('button', { name: 'North plant', exact: true }).click();
+          if (step === 'category') await dialog.getByRole('button', { name: 'Pump', exact: true }).click();
           if (step === 'group') await dialog.getByRole('button', { name: 'Production', exact: true }).click();
           await settle(view.fixture);
         }

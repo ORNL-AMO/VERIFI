@@ -17,4 +17,13 @@ describe('energy use group route contract', () => {
     expect(ENERGY_USE_WORKBENCH_ROUTES).toHaveLength(1);
     expect(ENERGY_USE_WORKBENCH_ROUTES[0].children?.some(child => child.path === 'history')).toBe(false);
   });
+  it('redirects the removed table destination to Group Summary', () => {
+    expect(ENERGY_USE_WORKBENCH_ROUTES[0].children?.find(child => child.path === 'table-results'))
+      .toMatchObject({ redirectTo: 'group-summary', pathMatch: 'full' });
+  });
+  it.each(['group-summary', 'group-footprint', 'facility-footprint'])('retains group ownership without selecting an item on %s', tab => {
+    const route = [...facilityEnergyUseGroupRoute('facility-a', 'group-a'), tab];
+    expect(parseWorkspaceRoute(route.join('/'))).toMatchObject({ facilityGuid: 'facility-a', energyUseGroupGuid: 'group-a', energyUseGuid: undefined });
+    expect(ENERGY_USE_WORKBENCH_ROUTES[0].children?.find(child => child.path === tab)?.component).toBeDefined();
+  });
 });

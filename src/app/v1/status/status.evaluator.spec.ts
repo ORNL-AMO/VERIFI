@@ -347,7 +347,7 @@ function snapshot(overrides: Partial<AccountWorkspaceSnapshot> = {}): AccountWor
     customFuels: [],
     customGWPs: [],
     energyUseGroups: [],
-    energyUseEquipment: [],
+    savedVisualizations: [], energyUseEquipment: [],
     ...overrides
   };
 }

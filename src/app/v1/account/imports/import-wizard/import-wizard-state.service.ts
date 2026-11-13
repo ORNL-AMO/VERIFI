@@ -1,3 +1,7 @@
+import { ENERGY_USE_CATEGORIES } from '@data/models/energy-use-options';
+import type { EquipmentType, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { footprintMeterGroupOptions, footprintMeterGroupError, footprintEquipmentLinks } from './footprint-equipment-mapping';
+import { EnergyUsesImportStateService } from './energy-uses-import-state.service';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
@@ -45,6 +49,7 @@ export class ImportWizardStateService {
   readonly meters = inject(ImportMeterReviewStateService);
   readonly predictors = inject(ImportPredictorReviewStateService);
 
+  readonly energyUses = inject(EnergyUsesImportStateService);
   readonly draft = this.draftStore.draft;
   readonly currentStepId = signal('');
   readonly error = signal<string | undefined>(undefined);
@@ -140,7 +145,7 @@ export class ImportWizardStateService {
     : []);
   readonly reviewSummary = computed(() => {
     const draft = this.draft();
-    if (!draft) return undefined;
+    if (!draft || draft.kind === 'energy-uses-template') return undefined;
     return buildImportReviewSummary({
       kind: draft.kind,
       selectedFacilityId: draft.selectedFacilityId,
@@ -165,6 +170,8 @@ export class ImportWizardStateService {
   }
 
   allowedStep(requestedStep: string | undefined): string {
+    if (this.energyUses.needsRefresh()) return 'review';
+    if (this.session.pending() && this.currentStepId()) return this.currentStepId();
     const steps = this.steps();
     const draft = this.draft();
     const requestedIndex = steps.findIndex(step => step.id === requestedStep);
@@ -197,6 +204,7 @@ export class ImportWizardStateService {
   }
 
   completeCurrentStep(): string | undefined {
+    if (this.isNavigationBlocked()) return undefined;
     const issue = this.validationMessage();
     if (issue) {
       this.error.set(issue);
@@ -216,7 +224,8 @@ export class ImportWizardStateService {
   }
 
   async commit(): Promise<ImportFileDraft | undefined> {
-    const issue = this.validationMessage();
+    if (this.session.pending()) return undefined;
+    const issue = this.energyUses.needsRefresh() ? undefined : this.validationMessage();
     if (issue) {
       this.error.set(issue);
       return undefined;
@@ -225,7 +234,9 @@ export class ImportWizardStateService {
     this.session.setPending(true);
     this.session.updateDraft(draft.id, current => current.status = 'importing');
     try {
-      const summary = await this.commands.commit(this.commitRequest(draft));
+      const summary = draft.kind === 'energy-uses-template'
+        ? await this.energyUses.commit()
+        : await this.commands.commit(this.commitRequest(draft));
       this.session.complete(draft.id, summary);
       this.committed.set(true);
       return this.session.nextReady(draft.id);
@@ -373,39 +384,37 @@ export class ImportWizardStateService {
   }
 
   setFootprintFacility(facilityId: string): void {
-    this.drafts.applyFootprintFacility(this.draft(), facilityId);
-    this.changed();
-  }
-
-  compatibleMeterGroups(equipmentIndex: number) {
     const draft = this.draft();
-    const equipment = draft.facilityEnergyUseEquipment[equipmentIndex];
-    const equipmentSources = new Set(equipment.utilityData.map(value => value.energySource));
-    return this.workspace.meterGroups().filter(group => group.facilityId === draft.selectedFacilityId &&
-      this.workspace.meters().some(meter => meter.groupId === group.guid && equipmentSources.has(meter.source)));
-  }
-
-  meterGroupSourceConflict(equipmentIndex: number, groupId: string): boolean {
-    const equipment = this.draft().facilityEnergyUseEquipment[equipmentIndex];
-    if (equipment.utilityMeterGroupIds.includes(groupId)) return false;
-    const selectedSources = new Set(this.workspace.meters()
-      .filter(meter => equipment.utilityMeterGroupIds.includes(meter.groupId))
-      .map(meter => meter.source));
-    return this.workspace.meters().some(meter => meter.groupId === groupId && selectedSources.has(meter.source));
-  }
-
-  toggleEquipmentMeterGroup(equipmentIndex: number, groupId: string, checked: boolean): void {
-    const equipment = this.draft().facilityEnergyUseEquipment[equipmentIndex];
-    if (checked && !equipment.utilityMeterGroupIds.includes(groupId)) equipment.utilityMeterGroupIds.push(groupId);
-    if (!checked) equipment.utilityMeterGroupIds = equipment.utilityMeterGroupIds.filter(id => id !== groupId);
+    if (draft.kind !== 'footprint-tool' || this.session.pending() || draft.selectedFacilityId === facilityId || !this.workspace.facilities().some(facility => facility.guid === facilityId && facility.accountId === this.workspace.account()?.guid)) return;
+    this.drafts.applyFootprintFacility(draft, facilityId);
+    for (const item of draft.facilityEnergyUseEquipment) item.utilityMeterGroupIds = [];
+    this.invalidateFromStep('facility');
     this.changed();
+  }
+
+  setFootprintEquipmentMapping(reviewed: readonly IdbFacilityEnergyUseEquipment[], mapping: { meterGroupIds: readonly string[] } | { category: EquipmentType }): boolean {
+    const draft = this.draft();
+    if (draft.kind !== 'footprint-tool' || this.session.pending() || !reviewed.length) return false;
+    const items = reviewed.map(before => draft.facilityEnergyUseEquipment.find(item => item.guid === before.guid));
+    if (items.some((item, index) => !item || JSON.stringify(item) !== JSON.stringify(reviewed[index]))) return false;
+    const current = items as IdbFacilityEnergyUseEquipment[];
+    const options = footprintMeterGroupOptions(this.workspace.account()?.guid ?? '', draft.selectedFacilityId, current, this.workspace.meterGroups(), this.workspace.meters());
+    if ('meterGroupIds' in mapping && footprintMeterGroupError(mapping.meterGroupIds, options)) return false;
+    if ('category' in mapping && !ENERGY_USE_CATEGORIES.includes(mapping.category)) return false;
+    for (const item of current) {
+      if ('meterGroupIds' in mapping) item.utilityMeterGroupIds = footprintEquipmentLinks(item, mapping.meterGroupIds, options);
+      else item.equipmentType = mapping.category;
+    }
+    this.invalidateFromStep('equipment');
+    this.changed();
+    return true;
   }
 
   hasUnsavedChanges(): boolean {
     return !this.committed() && this.session.hasUnsavedChanges();
   }
 
-  isNavigationBlocked(): boolean { return this.session.pending(); }
+  isNavigationBlocked(): boolean { return this.session.navigationBlocked(); }
 
   viewImportedData(): void {
     const draft = this.draft();
@@ -415,12 +424,16 @@ export class ImportWizardStateService {
       accountGuid,
       this.workspace.facilities().map(facility => facility.guid)
     );
-    if (returnUrl) {
+    if (returnUrl && draft.kind !== 'energy-uses-template') {
       void this.router.navigateByUrl(returnUrl);
       return;
     }
     const affected = this.session.summary(draft.id)?.affectedFacilityGuids ?? [];
-    if (draft.kind === 'footprint-tool' && draft.selectedFacilityId) {
+    if (draft.kind === 'energy-uses-template') {
+      void this.router.navigate(['/v1/workspace/account', accountGuid, 'data', 'portfolio', 'energy-uses'], {
+        queryParams: affected.length === 1 && this.workspace.account()?.isSingleFacilityCompany !== true ? { facility: affected[0] } : {}
+      });
+    } else if (draft.kind === 'footprint-tool' && draft.selectedFacilityId) {
       void this.router.navigate(['/v1/workspace/facility', draft.selectedFacilityId, 'data', 'energy-uses']);
     } else if (affected.length === 1) {
       const detail = draft.predictors.length && !draft.meters.length ? 'predictors' : 'meters';
@@ -440,6 +453,7 @@ export class ImportWizardStateService {
     const draft = this.draft();
     const step = this.currentStepId();
     if (!draft) return 'The upload session is no longer available.';
+    if (draft.kind === 'energy-uses-template') return this.energyUses.validationMessage();
     if (step === 'review' && !hasSpreadsheetImportRecords(this.commitRequest(draft))) {
       return 'Include at least one record before uploading this file.';
     }

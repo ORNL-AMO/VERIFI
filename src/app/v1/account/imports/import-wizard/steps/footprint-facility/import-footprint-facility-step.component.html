@@ -1,9 +1,12 @@
-<label class="field">
-  <span>Upload energy uses into</span>
-  <select class="v1-select" [ngModel]="state.draft().selectedFacilityId" (ngModelChange)="state.setFootprintFacility($event)">
-    <option value="">Select a facility</option>
-    @for (facility of state.workspace.facilities(); track facility.guid) {
-      <option [value]="facility.guid">{{ facility.name }}</option>
+<section aria-labelledby="footprint-facility-heading">
+  <h3 id="footprint-facility-heading">Upload energy uses into</h3>
+  <label class="visually-hidden" for="footprint-facility-search">Find facility</label>
+  <input id="footprint-facility-search" class="v1-input creation-search" type="search" [formControl]="search" placeholder="Find facility">
+  <div class="creation-choices">
+    @for (owner of matchingFacilities(); track owner.guid) {
+      <button type="button" class="creation-choice" [disabled]="state.session.pending()" [attr.aria-pressed]="facility.value === owner.guid" (click)="facility.setValue(owner.guid)"><app-ui-icon name="facility" [size]="28"/><strong>{{ owner.name || 'Unnamed facility' }}</strong></button>
+    } @empty {
+      <div class="creation-search-empty" role="status"><p>{{ facilities().length ? 'No matching facilities.' : 'Add a facility before importing energy uses.' }}</p>@if (facilities().length) { <button type="button" class="v1-btn v1-btn--quiet" (click)="search.setValue('')">Clear search</button> }</div>
     }
-  </select>
-</label>
+  </div>
+</section>

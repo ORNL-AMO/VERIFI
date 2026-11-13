@@ -1,5 +1,6 @@
+import { TransferEnergyUseComponent } from '../transfer-energy-use/transfer-energy-use.component';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, HostListener, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, viewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -44,6 +45,8 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly modal = inject(ModalPortalService);
   private readonly view = inject(ViewContainerRef);
+  private readonly transferPanel = viewChild(TransferEnergyUseComponent);
+  readonly transferActive = computed(() => this.transferPanel()?.blocked() ?? false);
   readonly form = signal<EnergyUseSetupForm | undefined>(undefined);
   readonly refreshKey = signal(0);
   readonly busy = signal(false);
@@ -69,7 +72,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   readonly saved = computed(() => { const item = this.item(); return item ? energyUseSetup(item) : undefined; });
   readonly facility = computed(() => this.workspace.facilities().find(facility => facility.guid === this.identity().facilityGuid));
   readonly editor = injectSettingsEditSession<EnergyUseSetupValues>({
-    key: this.key, saved: this.saved, canWrite: computed(() => this.workspace.canWrite() && !this.busy() && !this.review() && !this.yearDrawer()),
+    key: this.key, saved: this.saved, canWrite: computed(() => this.workspace.canWrite() && !this.busy() && !this.review() && !this.yearDrawer() && !this.transferActive()),
     pendingOwners: computed(() => this.workspace.pendingOperations().map(operation => operation.ownerId)), changes: this.changes,
     read: () => this.forms.read(this.form()!), normalize: normalizeEnergyUseSetup, valid: () => !!this.form()?.valid,
     reconcile: reconcileEnergyUseSetup, hydrate: (value, mode) => this.hydrate(value, mode),
@@ -77,9 +80,10 @@ export class EnergyUseSettingsComponent implements OnDestroy {
     setEnabled: enabled => { const form = this.form(); if (form) enabled ? form.enable({ emitEvent: false }) : form.disable({ emitEvent: false }); }
   });
   readonly canCommand = computed(() => !!this.item() && this.workspace.canWrite() && !this.workspace.hasPending() && !this.editor.saving() && !this.busy() && !this.deletionRecovery());
-  readonly canManageYears = computed(() => this.canCommand() && this.editor.canEdit() && !!this.facility() && !this.review() && !this.yearDrawer());
+  readonly canManageYears = computed(() => this.canCommand() && this.editor.canEdit() && !!this.facility() && !this.review() && !this.yearDrawer() && !this.transferActive());
   readonly showReadOnlyNotice = computed(() => !this.workspace.canWrite() && !this.editor.saving());
   readonly canLifecycle = computed(() => this.canCommand() && !this.editor.dirty() && ['idle', 'saved'].includes(this.editor.state()) && !!this.form()?.valid && !this.review() && !this.yearDrawer());
+  readonly canTransfer = computed(() => this.canCopy() && ['idle', 'saved'].includes(this.editor.state()) && !this.yearDrawer());
   readonly canCopy = computed(() => this.canCommand() && !this.editor.dirty() && !this.review());
   readonly removedSources = computed(() => {
     this.refreshKey();
@@ -143,7 +147,7 @@ export class EnergyUseSettingsComponent implements OnDestroy {
   @ViewChild('confirmation') private readonly confirmation?: TemplateRef<unknown>;
   constructor() {
     const unregisterHeader = this.header?.register({ key: this.key, state: this.editor.state, dirty: this.editor.dirty,
-      blocked: computed(() => this.busy() || !!this.review() || !!this.yearDrawer() || !!this.deletionRecovery()), message: this.saveMessage,
+      blocked: computed(() => this.busy() || !!this.review() || !!this.yearDrawer() || !!this.deletionRecovery() || this.transferActive()), message: this.saveMessage,
       canRetry: computed(() => !this.editor.saving() && !!this.item() && this.workspace.canWrite()),
       retry: () => this.editor.retry() });
     if (unregisterHeader) inject(DestroyRef).onDestroy(unregisterHeader);
@@ -305,6 +309,11 @@ export class EnergyUseSettingsComponent implements OnDestroy {
     if (!opened && this.alive && key === this.key()) {
       this.actionError.set('Energy use deleted. Use Back to energy uses to return to the inventory.');
     }
+  }
+  async openTransferred(item: IdbFacilityEnergyUseEquipment): Promise<void> {
+    this.editor.discard();
+    const opened = await this.context.navigate(facilityEnergyUseRoute(item.facilityId, item.energyUseGroupId, item.guid));
+    if (!opened && this.alive) this.context.navigationError.set('Energy use transferred. Select its destination group to open it.');
   }
   async copy(): Promise<void> {
     if (!this.canCopy()) return;

@@ -1,3 +1,6 @@
+import { EnergyUsesExcelExportService } from '@shared/energy-uses-excel/energy-uses-excel-export.service';
+import * as XLSX from 'xlsx';
+import { SessionStorageService } from 'ngx-webstorage';
 import { EquipmentTableComponent } from '../energy-use-workbench/setup-group/equipment-table/equipment-table.component';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
@@ -35,7 +38,10 @@ const itemUrl = `${groupUrl()}/items/energy-00`;
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule, SectionNavModule], template: '<main class="v1-root" style="height:560px;min-height:0;overflow:auto;width:100%">@if (showNav()) { <div style="width:16rem;max-width:100%"><app-section-nav/></div> }<router-outlet/><ng-template [cdkPortalOutlet]="modal.activePortal()"/></main>' })
 class EnergyUsesBrowserHost { readonly showNav = signal(false); readonly modal = inject(ModalPortalService); }
 
-function setup(single = false) {
+@Component({ standalone: true, imports: [RouterOutlet], template: '@if (ready()) { <router-outlet/> }' })
+class DeferredFacilityOutlet { readonly ready = signal(false); }
+
+function setup(single = false, deferredFacility = false) {
   const store = new AccountWorkspaceStore();
   const initial = energyUsesSnapshot(Array.from({ length: 50 }, (_, index) => energyUseItem({
     guid: `energy-${String(index).padStart(2, '0')}`, name: `Pump ${String(index).padStart(2, '0')}`,
@@ -48,15 +54,16 @@ function setup(single = false) {
   store.publish(snapshot);
   const pairService = { ensurePairs: vi.fn(async () => true) };
   const workspaceService = { selectAccount: vi.fn(), selectFacility: vi.fn() };
-  const actions = { updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
+  const actions = { transfer: vi.fn<EnergyUseActionsService['transfer']>(), deleteGroups: vi.fn<EnergyUseActionsService['deleteGroups']>(), recoverPublication: vi.fn(async () => {}), create: vi.fn<EnergyUseActionsService['create']>(), deleteGroup: vi.fn<EnergyUseActionsService['deleteGroup']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
     store.publish({ ...store.snapshot()!, energyUseGroups: store.energyUseGroups().map(group => group.guid === identity.energyUseGroupGuid ? { ...group, ...value } : group) }); return value;
   }) };
   const account = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
   const facility = V1Routes[0].children!.find(route => route.path === 'workspace/facility/:facilityGuid')!;
   TestBed.configureTestingModule({ imports: [DataModule, EnergyUsesBrowserHost], providers: [
+    { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
     provideRouter([
       { path: 'v1/workspace/account/:accountGuid', canActivateChild: account.canActivateChild, children: account.children!.filter(route => route.path === 'data') },
-      { path: 'v1/workspace/facility/:facilityGuid', children: facility.children!.filter(route => route.path === 'data') }
+      { path: 'v1/workspace/facility/:facilityGuid', ...(deferredFacility ? { component: DeferredFacilityOutlet } : {}), children: facility.children!.filter(route => route.path === 'data') }
     ]),
     { provide: AccountWorkspaceStore, useValue: store }, { provide: AccountWorkspaceService, useValue: workspaceService },
     { provide: EnergyUseActionsService, useValue: actions },
@@ -79,6 +86,241 @@ async function settle(view: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('energy uses browser journeys', () => {
+  it('adds from the item-rail plus with its group selected and transfers the saved item through a group-card slideout', async () => {
+    const view = setup(); await view.router.navigateByUrl(itemUrl); await settle(view);
+    const add = page.getByRole('button', { name: 'Add energy use', exact: true });
+    await add.click(); await settle(view);
+    const creation = page.getByRole('dialog', { name: 'Add energy use', exact: true });
+    expect(creation.element().textContent).toContain('Pump 00');
+    expect(creation.element().textContent).toContain('North plant');
+    expect(creation.element().textContent).toContain('Energy use category');
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(document.activeElement).toBe(add.element());
+    const transfer = page.getByRole('button', { name: 'Transfer energy use', exact: true });
+    await transfer.click(); await settle(view);
+    let dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
+    expect(dialog.element().textContent).toContain('North plant');
+    expect([...dialog.element().querySelectorAll('.creation-choice')].some(button => button.textContent?.trim() === 'Pump 00')).toBe(false);
+    expect([...dialog.element().querySelectorAll('.creation-choice')].some(button => button.textContent?.trim() === 'Pump 49')).toBe(false);
+    await dialog.getByRole('button', { name: 'Pump 01', exact: true }).click(); await settle(view);
+    expect(dialog.getByRole('button', { name: 'Transfer energy use', exact: true }).element()).toHaveProperty('disabled', false);
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
+      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/phase5/transfer-energy-use-${width}.png` });
+    }
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(document.activeElement).toBe(transfer.element()); expect(view.actions.transfer).not.toHaveBeenCalled();
+    await transfer.click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
+    await dialog.getByRole('button', { name: 'Pump 01', exact: true }).click(); await settle(view);
+    const original = structuredClone(view.store.energyUseEquipment().find(item => item.guid === 'energy-00')!);
+    view.actions.transfer.mockImplementationOnce(async (_identity, before, target) => {
+      const saved = { ...before, energyUseGroupId: target.guid };
+      view.store.publish({ ...view.store.snapshot()!, energyUseEquipment: view.store.energyUseEquipment().map(item => item.guid === saved.guid ? saved : item) });
+      return saved;
+    });
+    await dialog.getByRole('button', { name: 'Transfer energy use', exact: true }).click(); await settle(view);
+    expect(view.actions.transfer).toHaveBeenCalledTimes(1);
+    expect(view.store.energyUseEquipment().find(item => item.guid === original.guid)).toEqual({ ...original, energyUseGroupId: 'group-01' });
+    expect(view.router.url).toBe(`${groupUrl('group-01')}/items/energy-00`);
+    await expect.element(dialog).not.toBeInTheDocument();
+    expect(view.root.querySelector('[aria-current="page"].v1-member-rail__item')?.textContent).toContain('Pump 00');
+    view.fixture.destroy();
+  });
+
+  it('selects groups across matching pages and offers individual deletion from card options', async () => {
+    const view = setup(); await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    const select = page.getByRole('button', { name: 'Select groups', exact: true });
+    expect(view.root.querySelector('.v1-account-portfolio__header-actions')?.firstElementChild).toBe(select.element());
+    await select.click(); await settle(view);
+    await page.getByRole('checkbox', { name: 'Select Pump 00', exact: true }).click(); await settle(view);
+    await page.getByRole('button', { name: 'Next', exact: true }).click(); await settle(view);
+    await page.getByRole('checkbox', { name: 'Select Pump 24', exact: true }).click(); await settle(view);
+    expect(view.inventory().selection.selected()).toHaveLength(2);
+    await page.getByRole('button', { name: 'Select all', exact: true }).click(); await settle(view);
+    expect(view.inventory().selection.selected()).toHaveLength(50);
+    await page.getByRole('button', { name: 'Delete selected', exact: true }).click(); await settle(view);
+    let dialog = page.getByRole('dialog', { name: 'Delete selected groups?', exact: true });
+    expect(dialog.element().textContent).toContain('50 groups and 50 energy use items');
+    expect(await view.navigation.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' })).toBe(false);
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(view.actions.deleteGroups).not.toHaveBeenCalled();
+    await page.getByRole('button', { name: 'Cancel selection', exact: true }).click(); await settle(view);
+    view.inventory().inventory.selectPage(0); await settle(view);
+    await page.getByRole('button', { name: 'Options for Pump 00', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Delete group', exact: true }).click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Delete group?', exact: true });
+    expect(dialog.element().textContent).toContain('Pump 00: 1 item');
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
+      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/phase5/group-delete-${width}.png` });
+    }
+    view.actions.deleteGroups.mockImplementationOnce(async (_accountGuid, rows) => {
+      const ids = new Set(rows.map(row => row.group.guid));
+      view.store.publish({ ...view.store.snapshot()!, energyUseGroups: view.store.energyUseGroups().filter(group => !ids.has(group.guid)), energyUseEquipment: view.store.energyUseEquipment().filter(item => !ids.has(item.energyUseGroupId)) });
+    });
+    await dialog.getByRole('button', { name: 'Delete group', exact: true }).click(); await settle(view);
+    expect(view.actions.deleteGroups).toHaveBeenCalledTimes(1);
+    expect(view.actions.deleteGroups.mock.calls[0][1]).toHaveLength(1);
+    await expect.element(dialog).not.toBeInTheDocument();
+    expect(view.router.url).toBe(inventoryUrl);
+    view.fixture.destroy();
+  });
+
+  it('exports committed annual rows from the inventory regardless of filters, with keyboard focus return', async () => {
+    const view = setup();
+    await view.router.navigateByUrl(`${inventoryUrl}?facility=facility-b`);
+    await settle(view);
+    view.inventory().filtersForm.controls.search.setValue('No matching cards');
+    await settle(view);
+    const exportButton = page.getByRole('button', { name: 'Export Excel', exact: true });
+    await exportButton.click();
+    await settle(view);
+    const dialog = page.getByRole('dialog', { name: 'Export Energy Uses' });
+    await expect.element(dialog).toBeVisible();
+    expect(dialog.element().textContent).toContain('1 equipment row');
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850);
+      view.root.className = `v1-root ${theme}`;
+      await settle(view);
+      const panel = dialog.element();
+      expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
+      await page.screenshot({ element: panel, path: `../../../../../../.angular/phase5/export-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
+    }
+    await userEvent.keyboard('{Escape}');
+    await settle(view);
+    await expect.element(dialog).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(exportButton.element());
+    await exportButton.click(); await settle(view);
+    const exporter = TestBed.inject(EnergyUsesExcelExportService);
+    const download = vi.spyOn(exporter, 'download').mockImplementation(() => {});
+    await page.getByRole('dialog', { name: 'Export Energy Uses' }).getByRole('button', { name: 'Export Excel', exact: true }).click();
+    await vi.waitFor(() => expect(download).toHaveBeenCalledTimes(1));
+    const [blob, year] = download.mock.calls[0];
+    expect(year).toBe(2024);
+    const workbook = XLSX.read(await blob.arrayBuffer(), { type: 'array' });
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets['Energy Uses'], { header: 1, blankrows: false });
+    expect(rows).toHaveLength(2);
+    expect(rows[1][2]).toBe('Pump 49');
+    expect(rows[1][14]).toBe(0);
+    view.fixture.destroy();
+  });
+
+  it('matches the header background to rounded corners and clips lower workbench edges using the appearance setting', async () => {
+    const view = setup();
+    await view.router.navigateByUrl(`${groupUrl()}/setup`); await settle(view);
+    view.root.style.background = 'linear-gradient(135deg, #236f91, #c1d8df)';
+    for (const [width, theme, name] of [[1200, '', 'rounded-light'], [390, 'v1-theme-dark', 'rounded-dark'],
+      [390, 'v1-theme-dark v1-contrast-strong v1-corners-square', 'square-contrast']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      const sticky = view.root.querySelector<HTMLElement>('.v1-data-workbench-sticky')!;
+      const header = sticky.querySelector<HTMLElement>('.v1-data-workbench-header')!;
+      const workspace = view.root.querySelector<HTMLElement>('.energy-use-workbench__workspace')!;
+      expect(getComputedStyle(sticky).borderTopLeftRadius).toBe(getComputedStyle(header).borderTopLeftRadius);
+      expect(parseFloat(getComputedStyle(sticky).borderTopLeftRadius)).toBeGreaterThan(0);
+      expect(getComputedStyle(workspace).borderBottomRightRadius).toBe(getComputedStyle(header).borderTopRightRadius);
+      expect(getComputedStyle(workspace).overflow).toBe('hidden');
+      expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
+      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-results/workbench-corners-${name}.png` });
+    }
+    view.fixture.destroy();
+  });
+
+  it('reviews group deletion in the shell, restores cancel focus, blocks stale/busy deletes, and returns to the facility dashboard', async () => {
+    const view = setup();
+    await view.router.navigateByUrl(`${groupUrl()}/setup`); await settle(view);
+    const opener = page.getByRole('button', { name: 'Delete Group', exact: true });
+    await opener.click(); await settle(view);
+    let dialog = page.getByRole('dialog', { name: 'Delete Group?', exact: true });
+    expect(dialog.element().textContent).toContain('1 energy use item');
+    expect(dialog.element().contains(document.activeElement)).toBe(true);
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(document.activeElement).toBe(opener.element()); expect(view.actions.deleteGroup).not.toHaveBeenCalled();
+    await opener.click(); await settle(view);
+    view.store.publish({ ...view.store.snapshot()!, energyUseEquipment: view.store.energyUseEquipment().map(item => item.energyUseGroupId === 'group-00' ? { ...item, notes: 'Updated after review' } : item) });
+    await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Delete Group?', exact: true });
+    expect(dialog.getByRole('button', { name: 'Delete Group', exact: true }).element()).toHaveProperty('disabled', true);
+    await dialog.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view);
+    await page.viewport(390, 850); view.root.classList.add('v1-theme-dark', 'v1-contrast-strong');
+    await opener.click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Delete Group?', exact: true });
+    expect((dialog.element() as HTMLElement).scrollWidth).toBeLessThanOrEqual((dialog.element() as HTMLElement).clientWidth + 1);
+    await page.screenshot({ element: dialog.element(), path: '../../../../../../tmp/energy-use-results/delete-group-narrow-contrast.png' });
+    let finish!: () => void;
+    view.actions.deleteGroup.mockImplementationOnce(async (_identity, group, items) => {
+      await new Promise<void>(resolve => finish = resolve);
+      view.store.publish({ ...view.store.snapshot()!, energyUseGroups: view.store.energyUseGroups().filter(row => row.guid !== group.guid), energyUseEquipment: view.store.energyUseEquipment().filter(row => !items.some(item => item.guid === row.guid)) });
+    });
+    await dialog.getByRole('button', { name: 'Delete Group', exact: true }).click(); await settle(view);
+    expect(dialog.getByRole('button', { name: 'Cancel', exact: true }).element()).toHaveProperty('disabled', true);
+    await userEvent.keyboard('{Escape}'); await settle(view);
+    expect(view.root.querySelector('[role="dialog"]')).not.toBeNull();
+    finish(); await settle(view);
+    expect(view.actions.deleteGroup).toHaveBeenCalledTimes(1);
+    expect(view.router.url).toBe(`${inventoryUrl}?facility=facility-a`);
+    expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+    expect(view.store.energyUseGroups()).toHaveLength(49); expect(view.store.energyUseEquipment()).toHaveLength(49);
+    view.fixture.destroy();
+  });
+
+  it('selects an item when opening a group card and restores the last visited member on return', async () => {
+    const view = setup(false, true);
+    view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup()], energyUseEquipment: [
+      energyUseItem({ guid: 'member-b', name: 'B Fan' }), energyUseItem({ guid: 'member-a', name: 'A Pump' })] });
+    await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__name')!.click(); await settle(view);
+    const revealFacility = () => {
+      view.fixture.debugElement.query(By.directive(DeferredFacilityOutlet)).componentInstance.ready.set(true);
+    };
+    revealFacility(); await settle(view);
+    expect(view.router.url).toBe(`${groupUrl('group-a')}/items/member-a`);
+    expect(view.root.querySelector('[aria-label="Energy-use items"] [aria-current="page"]')?.textContent).toContain('A Pump');
+    expect(view.fixture.debugElement.query(By.directive(EnergyUseSettingsComponent))).toBeTruthy();
+    await page.getByRole('button', { name: 'B Fan', exact: true }).click(); await settle(view);
+    await view.router.navigateByUrl(inventoryUrl); await settle(view);
+    view.root.querySelector<HTMLAnchorElement>('.portfolio-tile__name')!.click(); await settle(view);
+    revealFacility(); await settle(view);
+    expect(view.router.url).toBe(`${groupUrl('group-a')}/items/member-b`);
+    expect(view.root.querySelector('[aria-label="Energy-use items"] [aria-current="page"]')?.textContent).toContain('B Fan');
+    view.fixture.destroy();
+  });
+
+  it.each([[true, false], [true, true], [false, false], [false, true]] as const)(
+    'opens the created item after a workspace reload in single-site=%s, new-group=%s creation', async (single, newGroup) => {
+      const view = setup(single);
+      const url = single ? inventoryUrl : `${inventoryUrl}?facility=facility-a`;
+      await view.router.navigateByUrl(url); await settle(view);
+      const created = energyUseItem({ guid: 'created-item', energyUseGroupId: newGroup ? 'created-group' : 'group-00', name: 'Created pump', equipmentType: 'Pump' });
+      let finish!: () => void;
+      view.actions.create.mockImplementationOnce(async () => {
+        view.store.beginLoad(false);
+        await new Promise<void>(resolve => finish = resolve);
+        view.store.publish({ ...view.snapshot, energyUseGroups: newGroup ? [...view.snapshot.energyUseGroups, energyUseGroup({ guid: 'created-group', name: 'New group' })] : view.snapshot.energyUseGroups,
+          energyUseEquipment: [...view.snapshot.energyUseEquipment, created] });
+        return created;
+      });
+      view.inventory().openCreation(); await settle(view);
+      const dialog = page.getByRole('dialog', { name: 'Add energy use', exact: true });
+      await dialog.getByRole('button', { name: newGroup ? 'Create energy-use group' : 'Pump 00', exact: true }).click(); await settle(view);
+      if (newGroup) {
+        await dialog.getByRole('textbox', { name: 'Group name', exact: true }).fill('New group');
+        await dialog.getByRole('button', { name: 'Add Group', exact: true }).click(); await settle(view);
+      }
+      await dialog.getByRole('button', { name: 'Pump', exact: true }).click(); await settle(view);
+      await dialog.getByRole('textbox', { name: 'Energy use name', exact: true }).fill('Created pump');
+      await dialog.getByRole('button', { name: 'Create energy use', exact: true }).click(); await settle(view);
+      try { expect(view.root.querySelector('[role="dialog"]')).not.toBeNull(); }
+      finally { finish(); }
+      await settle(view);
+      expect(view.router.url).toBe(`${groupUrl(created.energyUseGroupId)}/items/created-item`);
+      expect(view.fixture.debugElement.query(By.directive(EnergyUseSettingsComponent))).toBeTruthy();
+      expect(TestBed.inject(ModalPortalService).activePortal()).toBeNull();
+      view.fixture.destroy();
+    });
+
   it('shows distinct group type icons, makes Summary an item-link list, and opens a workbench directly', async () => {
     const view = setup();
     view.store.publish({ ...view.snapshot, energyUseGroups: [energyUseGroup(), energyUseGroup({ guid: 'empty', name: 'Unused group' })], energyUseEquipment: [
@@ -110,7 +352,7 @@ describe('energy uses browser journeys', () => {
     const view = setup();
     await view.router.navigateByUrl(itemUrl); await settle(view);
     const beforeItems = structuredClone(view.store.energyUseEquipment());
-    expect([...view.root.querySelectorAll('[aria-label="Energy-use group sections"] button')].map(button => button.textContent?.trim())).toEqual(['Setup Group', 'Energy Use Items']);
+    expect([...view.root.querySelectorAll('[aria-label="Energy-use group sections"] button')].map(button => button.textContent?.trim())).toEqual(['Setup Group', 'Energy Use Items', 'Group Summary', 'Group Footprint', 'Facility Footprint']);
     await page.getByRole('button', { name: 'Setup Group', exact: true }).click(); await settle(view);
     expect(view.router.url).toBe(`${groupUrl()}/setup`);
     expect(view.root.querySelector('[aria-label="Energy-use items"]')).toBeNull();
@@ -120,7 +362,8 @@ describe('energy uses browser journeys', () => {
     await vi.waitFor(() => expect(view.store.energyUseGroups().find(group => group.guid === 'group-00')?.name).toBe('Packaging')); await settle(view);
     expect(view.root.querySelector('.v1-data-workbench-header h1')?.textContent).toContain('Packaging');
     expect(view.store.energyUseEquipment()).toEqual(beforeItems);
-    expect(view.root.querySelector('.v1-data-workbench-header [role=status]')).not.toBeNull();
+    expect(view.root.querySelector('app-setup-group app-energy-use-save-status')?.textContent).toContain('Saved.');
+    expect(view.root.querySelector('.v1-data-workbench-header [aria-label="Group validation"]')).not.toBeNull();
     for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
@@ -389,7 +632,7 @@ describe('energy uses browser journeys', () => {
     expect(view.root.querySelectorAll('[aria-label="Energy-use items"] button')).toHaveLength(49);
     await page.getByRole('button', { name: 'Setup Group', exact: true }).click(); await settle(view);
     await page.getByRole('button', { name: 'Add energy use', exact: true }).click(); await settle(view);
-    expect(view.root.querySelector('app-create-energy-use-drawer #energy-use-name')).not.toBeNull();
+    expect(view.root.querySelector('app-create-energy-use-drawer #energy-use-choice-heading')?.textContent).toBe('Energy use category');
     await page.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(view);
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toContain('/items/')); await settle(view);
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(outer)); await settle(view);

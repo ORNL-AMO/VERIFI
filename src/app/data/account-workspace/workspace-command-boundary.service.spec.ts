@@ -660,7 +660,7 @@ function makeSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
     customFuels: [],
     customGWPs: [],
     energyUseGroups: [],
-    energyUseEquipment: []
+    energyUseEquipment: [], savedVisualizations: []
   };
 }
 

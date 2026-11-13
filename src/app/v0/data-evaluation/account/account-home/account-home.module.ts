@@ -11,8 +11,9 @@ import { AccountEnergyReductionGoalComponent } from '@v0/data-evaluation/account
 import { AccountEnergyCardComponent } from '@v0/data-evaluation/account/account-home/account-energy-card/account-energy-card.component';
 import { AccountWaterCardComponent } from '@v0/data-evaluation/account/account-home/account-water-card/account-water-card.component';
 import { DataOverviewModule } from '@v0/shared/data-overview/data-overview.module';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AccountStatusCheckComponent } from '@v0/data-evaluation/account/account-home/account-status-check/account-status-check.component';
+import { EmailVerifiBackupModule } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.module';
 
 
 
@@ -33,7 +34,9 @@ import { AccountStatusCheckComponent } from '@v0/data-evaluation/account/account
     SharedAnalysisModule,
     CalculatingSpinnerModule,
     DataOverviewModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule,
+    EmailVerifiBackupModule
   ]
 })
 export class AccountHomeModule { }

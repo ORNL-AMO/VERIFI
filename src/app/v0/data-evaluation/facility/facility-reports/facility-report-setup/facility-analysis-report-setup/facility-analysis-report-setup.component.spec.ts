@@ -43,7 +43,7 @@ describe('FacilityAnalysisReportSetupComponent', () => {
       facilities: [facility],
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [report],
-      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
     } as unknown as AccountWorkspaceSnapshot;
     store.publish(snapshot, { facility, facilityReport: report });
 
@@ -96,7 +96,7 @@ describe('FacilityAnalysisReportSetupComponent', () => {
       facilities: [facility],
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [report],
-      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
     } as unknown as AccountWorkspaceSnapshot;
     store.publish(snapshot, { facility, facilityReport: report });
     const calanderizedMeters = new BehaviorSubject([]);

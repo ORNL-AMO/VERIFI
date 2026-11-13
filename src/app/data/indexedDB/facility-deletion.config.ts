@@ -6,6 +6,7 @@ export interface FacilityDeletionStoreDefinition {
 }
 
 export const FACILITY_DELETION_CHILD_STORES = [
+  { storeName: 'savedVisualizations', message: 'Deleting Facility Visualizations' },
   { storeName: 'predictors', message: 'Deleting Facility Predictors' },
   { storeName: 'predictor', message: 'Deleting Facility Predictors' },
   { storeName: 'predictorData', message: 'Deleting Facility Predictor Data' },

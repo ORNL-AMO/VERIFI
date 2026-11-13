@@ -1,0 +1,14 @@
+:host { display: block; min-width: 0; height: 100%; }
+.visualization-preview { min-height: 20rem; min-width: 0; background: var(--v1-surface); color: var(--v1-text); }
+header, .visualization-preview__notice, .visualization-preview__details { padding: 1rem; }
+header { border-bottom: 1px solid var(--v1-border); }
+h2 { font-size: 1rem; margin: 0 0 .5rem; }
+p { margin: 0 0 .5rem; }
+.visualization-preview__chart { min-width: 0; }
+.visualization-preview__details { border-top: 1px solid var(--v1-border); }
+summary { cursor: pointer; font-weight: 600; }
+.visualization-preview__table-scroll { overflow: auto; margin-top: .75rem; max-height: 24rem; }
+table { width: 100%; border-collapse: collapse; }
+caption { color: var(--v1-muted); caption-side: top; }
+th, td { border-bottom: 1px solid var(--v1-border); padding: .5rem; text-align: left; }
+@media print { details { display: block; } .visualization-preview__table-scroll { max-height: none; overflow: visible; } button { display: none; } }

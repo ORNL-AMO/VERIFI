@@ -55,7 +55,14 @@ export class MetersInventoryComponent {
   readonly toolsSource: InventoryToolsSource = {
     context: computed(() => ({ accountGuid: this.workspace.account()?.guid,
       facilityGuid: this.navigation.inventoryFacilityGuid(), resource: 'meters' as const })),
-    matchingGuids: this.matchingGuids, scopeGuids: this.scopeGuids, filtersKey: this.toolsFiltersKey
+    matchingGuids: this.matchingGuids, scopeGuids: this.scopeGuids, filtersKey: this.toolsFiltersKey,
+    captureSelection: computed(() => {
+      const filters = this.filters(), facilityGuid = this.navigation.inventoryFacilityGuid();
+      return filters.search.trim() || filters.status !== 'all'
+        ? { state: 'unsupported' as const, reason: 'Clear search and Status filters before capturing this chart. Their current matching meaning cannot be preserved in a saved visualization.' }
+        : { state: 'supported' as const, selection: { kind: 'rule' as const, resource: 'meter' as const,
+          filter: { ...(facilityGuid ? { facilityGuids: [facilityGuid] } : {}), includeRetired: true } } };
+    })
   };
   readonly selection = new InventorySelectionController(this.toolsSource);
   readonly chart = new InventoryChartController(this.toolsSource);

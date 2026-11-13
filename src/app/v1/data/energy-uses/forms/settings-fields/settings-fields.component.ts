@@ -1,6 +1,7 @@
 import { Component, DestroyRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import type { SettingsEditState } from '@app/v1/data/editing/settings-edit-session';
 import { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
 import { ENERGY_USE_CATEGORIES } from '@data/models/energy-use-options';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -12,6 +13,10 @@ import { PowerUnitOptions } from '@shared/unitOptions';
 @Component({ selector: 'app-energy-use-settings-fields', templateUrl: './settings-fields.component.html',
   styleUrls: ['./settings-fields.component.css'], standalone: false })
 export class SettingsFieldsComponent {
+  readonly saveState = input<SettingsEditState>('idle');
+  readonly saveMessage = input('');
+  readonly canRetry = input(false);
+  readonly retryRequested = output<void>();
   private readonly modal = inject(ModalPortalService);
   private readonly view = inject(ViewContainerRef);
   private portal?: TemplatePortal;

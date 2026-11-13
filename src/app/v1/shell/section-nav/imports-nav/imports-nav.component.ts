@@ -12,6 +12,6 @@ export class ImportsNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly importSession = inject(ImportSessionService);
   readonly importFiles = computed(() => buildImportNavigationFiles(
-    this.importSession.drafts(), this.navigation.activeImportFileId(), this.navigation.activeImportStep(), this.importSession.pending()
+    this.importSession.drafts(), this.navigation.activeImportFileId(), this.navigation.activeImportStep(), this.importSession.navigationBlocked()
   ));
 }

@@ -260,6 +260,8 @@ export function createImportWizardStateStub() {
   const wizardState = {
     draft,
     workspace,
+    session: { pending: signal(false) },
+    setFootprintEquipmentMapping: vi.fn<ImportWizardStateService['setFootprintEquipmentMapping']>(() => true),
     newFacilityName: signal(''),
     worksheetNames: signal(['Visible']),
     allColumns: signal([{ id: 'column-1', value: 'Date' }]),
@@ -314,10 +316,7 @@ export function createImportWizardStateStub() {
     moveFacilityMappingItems: vi.fn(),
     moveSelectedFacilityMappingItems: vi.fn(),
     addFacility: vi.fn(),
-    setFootprintFacility: vi.fn(),
-    compatibleMeterGroups: vi.fn(() => [{ guid: 'group-1', name: 'Natural Gas Meters' }]),
-    meterGroupSourceConflict: vi.fn(() => false),
-    toggleEquipmentMeterGroup: vi.fn()
+    setFootprintFacility: vi.fn<ImportWizardStateService['setFootprintFacility']>()
   };
 
   return { ...wizardState, wizardState, meterState, predictorState };

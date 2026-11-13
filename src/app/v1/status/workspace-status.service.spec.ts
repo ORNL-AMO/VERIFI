@@ -264,6 +264,6 @@ function workspaceSnapshot(overrides: Partial<AccountWorkspaceSnapshot> = {}): A
   return {
     account: account(), facilities: [facility()], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [],
-    customGWPs: [], energyUseGroups: [], energyUseEquipment: [], ...overrides
+    customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: [], ...overrides
   };
 }

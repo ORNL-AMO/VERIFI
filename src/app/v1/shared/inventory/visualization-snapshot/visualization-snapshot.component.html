@@ -1,0 +1,11 @@
+@let item = snapshot();
+<dl>
+  <div><dt>Scope</dt><dd>{{ item.scopeLabel }}</dd></div>
+  <div><dt>Sources</dt><dd>{{ item.typeLabel }}</dd></div>
+  <div><dt>Period</dt><dd>{{ item.periodLabel }}</dd></div>
+  <div><dt>Chart</dt><dd>{{ item.chartLabel }}</dd></div>
+  <div><dt>Updated</dt><dd>{{ item.modified }}</dd></div>
+</dl>
+@if (detailed() && item.issues.length) {
+  <ul aria-label="Setup and source findings">@for (issue of item.issues; track $index) { <li>{{ issue }}</li> }</ul>
+}

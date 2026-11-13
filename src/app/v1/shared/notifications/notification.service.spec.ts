@@ -30,6 +30,14 @@ describe('NotificationService', () => {
     expect(service.danger('Could not save').durationMs).toBe(8000);
   });
 
+  it('retains explicitly persistent notices while newer ordinary notifications replace one another', () => {
+    const persistent = service.warning('Imported sources need repair', { durationMs: 0, retainOnOverflow: true });
+    for (const title of ['One', 'Two', 'Three', 'Four']) service.success(title, { durationMs: 0 });
+    expect(service.notifications().map(item => item.title)).toEqual(['Imported sources need repair', 'Three', 'Four']);
+    service.dismiss(persistent.id);
+    expect(service.notifications().map(item => item.title)).toEqual(['Three', 'Four']);
+  });
+
   it('dismisses notifications automatically after their duration', async () => {
     const notification = service.success('Saved', { durationMs: 1500 });
 

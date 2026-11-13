@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 import { MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
     selector: 'app-account-analysis-facilities-summary',
@@ -21,7 +20,7 @@ export class AccountAnalysisFacilitiesSummaryComponent {
   calculatingSub: Subscription;
 
   facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>;
-  analysisItem: IdbAccountAnalysisItem;
+  readonly analysisItem = this.accountWorkspaceStore.selectedAccountAnalysis;
   constructor(
     private accountAnalysisService: AccountAnalysisService
   ) {
@@ -29,7 +28,6 @@ export class AccountAnalysisFacilitiesSummaryComponent {
   }
 
   ngOnInit() {
-    this.analysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
 
     this.calculatingSub = this.accountAnalysisService.calculating.subscribe(val => {
       this.calculating = val;

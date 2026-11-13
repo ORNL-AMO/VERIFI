@@ -48,6 +48,8 @@
             <i class="fa fa-circle-check text-success" title="Valid"></i>
             } @else if (isSkipped) {
             <i class="fa fa-forward-step text-muted" title="Skipped"></i>
+            } @else {
+            <i class="fa fa-circle-question text-muted" title="Status unavailable"></i>
             }
           </span>
         </button>
@@ -63,6 +65,15 @@
         This analysis is used in one or more reports. Changes to this analysis may effect the results of the
         corresponding reports.
       </div>
+      }
+      @if (!accountStatusCheck()) {
+        @if (calendarizationState()?.status === 'error') {
+          <div class="alert alert-danger" role="alert">Data checks could not finish.
+            <button type="button" class="btn btn-outline-danger btn-sm ms-2" (click)="retryDataChecks()">Retry</button>
+          </div>
+        } @else {
+          <p class="text-muted" role="status">Checking analysis data…</p>
+        }
       }
       <app-select-item-table></app-select-item-table>
     </div>

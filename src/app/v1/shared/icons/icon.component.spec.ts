@@ -35,6 +35,10 @@ import { join } from 'path';
     <app-ui-icon name="energyUseGroup" [size]="16" [strokeWidth]="2" [decorative]="false" label="Energy-use group override"></app-ui-icon>
     <app-ui-icon name="motor" [size]="24" [decorative]="false" label="Motor"></app-ui-icon>
     <app-ui-icon name="motor" [size]="16" [strokeWidth]="2" [decorative]="false" label="Motor override"></app-ui-icon>
+    <app-ui-icon name="groupEnergyFootprint" [size]="24" [decorative]="false" label="Group energy footprint"></app-ui-icon>
+    <app-ui-icon name="groupEnergyFootprint" [size]="16" [strokeWidth]="2" [decorative]="false" label="Group energy footprint override"></app-ui-icon>
+    <app-ui-icon name="facilityEnergyFootprint" [size]="24" [decorative]="false" label="Facility energy footprint"></app-ui-icon>
+    <app-ui-icon name="facilityEnergyFootprint" [size]="16" [strokeWidth]="2" [decorative]="false" label="Facility energy footprint override"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -56,8 +60,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(22);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(22);
+    expect(icons.length).toBe(26);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(26);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -109,7 +113,11 @@ describe('IconComponent', () => {
     { file: 'energy-use-group.svg', index: 18, label: 'Energy-use group', size: '24', stroke: undefined },
     { file: 'energy-use-group.svg', index: 19, label: 'Energy-use group override', size: '16', stroke: '2' },
     { file: 'motor.svg', index: 20, label: 'Motor', size: '24', stroke: undefined },
-    { file: 'motor.svg', index: 21, label: 'Motor override', size: '16', stroke: '2' }
+    { file: 'motor.svg', index: 21, label: 'Motor override', size: '16', stroke: '2' },
+    { file: 'group-energy-footprint.svg', index: 22, label: 'Group energy footprint', size: '24', stroke: undefined },
+    { file: 'group-energy-footprint.svg', index: 23, label: 'Group energy footprint override', size: '16', stroke: '2' },
+    { file: 'facility-energy-footprint.svg', index: 24, label: 'Facility energy footprint', size: '24', stroke: undefined },
+    { file: 'facility-energy-footprint.svg', index: 25, label: 'Facility energy footprint override', size: '16', stroke: '2' }
   ])('renders $file through the same themed, accessible icon API', ({ file, index, label, size, stroke }) => {
     const source = readFileSync(join(process.cwd(), 'src/assets/icons', file), 'utf8');
     const document = new DOMParser().parseFromString(source, 'image/svg+xml');

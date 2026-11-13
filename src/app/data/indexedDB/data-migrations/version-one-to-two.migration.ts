@@ -7,7 +7,7 @@ import {
 export const VERSION_ONE_TO_TWO_MIGRATION: DataMigration = {
   fromVersion: 1,
   toVersion: 2,
-  description: 'Default account company scale for single-facility prototype support.',
+  description: 'Default account company scale for single-facility account support.',
   affectedStores: ['accounts'],
   migrate(input: MigrationData) {
     const data = structuredClone(input);

@@ -45,6 +45,13 @@
     </div>
   </div>
   }
+  @if (autosave.error(); as saveError) {
+  <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+    <span>{{saveError}}</span>
+    <button type="button" class="btn btn-outline-danger btn-sm" (click)="flushChanges()" [disabled]="autosave.saving() || !form.valid">Retry</button>
+  </div>
+  }
+  @if (autosave.saving()) { <div class="small text-muted mb-2" role="status">Saving changes…</div> }
   <form [formGroup]="form">
     <div class="row">
       <div class="col-6">
@@ -104,7 +111,7 @@
           </div>
         </div>
         }
-        @if (_facilityAnalysisItems?.length > 0) {
+        @if (_facilityAnalysisItems?.length > 0 || form.controls.hasBanking.value) {
         <div class="form-group row">
           <label class="col-5 col-form-label" for="hasBanking">Has Banking</label>
           <div class="col-6">

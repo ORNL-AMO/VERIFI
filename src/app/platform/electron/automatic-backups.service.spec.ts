@@ -17,6 +17,7 @@ import { ToastNotificationsService } from '@shared/notifications/toast-notificat
 import { ElectronBackupsDbService } from '@data/indexedDB/electron-backups-db.service';
 import { AutomaticBackupsService } from './automatic-backups.service';
 import { ElectronBackupFileGateway } from './electron-backup-file.gateway';
+import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 
 describe('AutomaticBackupsService', () => {
   let store: AccountWorkspaceStore;
@@ -107,6 +108,30 @@ describe('AutomaticBackupsService', () => {
     expect(gateway.write).toHaveBeenCalledTimes(1);
     expect(exportCoordinator.buildActiveAccountBackup).toHaveBeenCalledTimes(1);
     expect(service.status.value).toBe('ready');
+  });
+
+  it('includes supported and preserved saved definitions in automatic backup serialization through the existing gateway', async () => {
+    const current = { ...snapshot('account-a'), savedVisualizations: [{ guid: 'chart-a', accountId: 'account-a', recordVersion: 1, revision: 2,
+      createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'),
+      definition: createVisualizationDefinition('Saved chart', 'account-a', { kind: 'portfolio' }, 'utility') },
+    { guid: 'opaque-a', accountId: 'account-a', recordVersion: 1, revision: 1,
+      createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'), definition: { version: 99, originalIntent: 'retain' },
+      preservation: { locked: true, references: [], transfers: [] } }] };
+    const exporter = new WorkspaceBackupSnapshotBuilder();
+    const serializer = new JsonBackupSerializer();
+    exportCoordinator.buildActiveAccountBackup.mockImplementation(() => exporter.buildAccountBackup(store.snapshot()!));
+    store.publish(current);
+    service.subscribeData();
+    await flushAsync();
+    expect(gateway.write).not.toHaveBeenCalled();
+    store.publishCommitted(current, {});
+    await flushAsync();
+    await vi.advanceTimersByTimeAsync(3000);
+    await flushAsync();
+    expect(gateway.write).toHaveBeenCalledOnce();
+    const serialized = JSON.parse(serializer.serialize(gateway.write.mock.calls[0][1]));
+    expect(serialized.savedVisualizations).toEqual(JSON.parse(JSON.stringify(current.savedVisualizations)));
+    expect(serialized.savedVisualizations[1].preservation.locked).toBe(true);
   });
 
   it('backs up the latest committed value after publication repair without reusing the previously observed revision', async () => {
@@ -384,7 +409,7 @@ function snapshot(
     },
     facilities: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
-    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: [], savedVisualizations: []
   } as unknown as AccountWorkspaceSnapshot;
 }
 
