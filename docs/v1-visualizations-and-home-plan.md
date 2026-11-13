@@ -40,12 +40,12 @@ Dependencies below describe implementation prerequisites. Slices can overlap whe
 
 ## Visualization starter recipes
 
-**Status: planned downstream; not implemented by Vis3.** Deliver a recipe chooser alongside Custom once the first Vis4 utility provider and Vis6 time-series editor can render real saved charts. The Custom path uses Vis3's chart-first workflow. Recipes prefill ordinary editable visualization intent and require explicit account/facility resource binding before adding an independent saved visualization. Editing an instance never changes the shipped recipe. Do not automatically populate accounts or facilities.
+**Status: Energy usage trend and Utility cost trend implemented with the first Vis4/Vis6 utility path; other recipes remain planned.** The recipe chooser appears alongside Custom and binds exact saved meters before creation. The Custom path uses Vis3's chart-first workflow. Recipes prefill ordinary editable visualization intent and require explicit account/facility resource binding before adding an independent saved visualization. Editing an instance never changes the shipped recipe. Do not automatically populate accounts or facilities.
 
 | Recipe | Delivery dependency |
 | --- | --- |
-| Energy usage trend | First working Vis4/Vis6 utility path |
-| Utility cost trend | First working Vis4/Vis6 utility path |
+| Energy usage trend | Implemented with the first Vis4/Vis6 utility path |
+| Utility cost trend | Implemented with the first Vis4/Vis6 utility path |
 | Utility/source breakdown | Applicable Vis4/Vis8 composition adapter |
 | Usage versus production or weather | Vis5 with compatible Vis6/Vis7 editing |
 | Analysis comparisons | Applicable Vis5 analysis and Vis6/Vis7 adapters |
@@ -73,12 +73,12 @@ Home1 defines the detailed widget composition and dispositions for applicable ma
 | Vis1 | [#2901 Define the visualization workflow and reusable configuration contract](https://github.com/ORNL-AMO/VERIFI/issues/2901) | Implemented locally; review/QA pending | None |
 | Vis2 | [#2903 Persist saved visualizations and preserve them through backup and restore](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Implemented locally; review/QA pending | Vis1 |
 | Vis3 | [#2904 Build the Visualizations Dashboard and workbench](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Framework and alignment implemented locally; review/QA pending | Vis1, Vis2 |
-| Vis4 | [#2905 Build utility cost emissions and charge data selection](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Not started | Vis1, Vis3 |
+| Vis4 | [#2905 Build utility cost emissions and charge data selection](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Implemented locally; review/QA pending | Vis1, Vis3 |
 | Vis5 | [#2906 Add predictor weather Energy Use and analysis result sources](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Not started | Vis1, Vis3, Vis4 |
-| Vis6 | [#2907 Build time series and comparison chart editing](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Not started | Vis3, Vis4 |
+| Vis6 | [#2907 Build time series and comparison chart editing](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Initial utility line/bar slice implemented; broader issue remains open | Vis3, Vis4 |
 | Vis7 | [#2908 Build correlation and heatmap exploration](https://github.com/ORNL-AMO/VERIFI/issues/2908) | Not started | Vis5, Vis6 |
 | Vis8 | [#2909 Build composition hierarchy and flow visualizations](https://github.com/ORNL-AMO/VERIFI/issues/2909) | Not started | Vis5, Vis6 |
-| Vis9 | [#2910 Add Visualize capture actions throughout v1](https://github.com/ORNL-AMO/VERIFI/issues/2910) | Not started | Vis2, Vis3, Vis4, Vis5, Vis6, Vis7, Vis8 |
+| Vis9 | [#2910 Add Visualize capture actions throughout v1](https://github.com/ORNL-AMO/VERIFI/issues/2910) | Initial inventory utility capture implemented; broader issue remains open | Vis2, Vis3, Vis4, Vis5, Vis6, Vis7, Vis8 |
 | Vis10 | [#2911 Complete visualization integration and release acceptance](https://github.com/ORNL-AMO/VERIFI/issues/2911) | Not started | Vis1, Vis2, Vis3, Vis4, Vis5, Vis6, Vis7, Vis8, Vis9 |
 | Home1 | [#2912 Define Home templates and map existing v0 content](https://github.com/ORNL-AMO/VERIFI/issues/2912) | Not started | Vis1 |
 | Home2 | [#2913 Persist dashboards and template instances](https://github.com/ORNL-AMO/VERIFI/issues/2913) | Not started | Home1, Vis2 |
@@ -169,7 +169,9 @@ Enable the Visualizations rail destination and provide the main place to create,
 
 ### Vis4 Build utility cost emissions and charge data selection
 
-**Issue:** [#2905](https://github.com/ORNL-AMO/VERIFI/issues/2905) · **Status:** Not started
+**Issue:** [#2905](https://github.com/ORNL-AMO/VERIFI/issues/2905) · **Status:** Implemented locally; review/QA pending
+
+The [utility specification](v1-utility-visualizations.md) records fixed/live membership, conservative quality, supported periods and charges, v2 display overrides, and the eight-slice stack. Initial Vis6 line/bar editing and Vis9 inventory capture are partial contributions to their broader issues.
 
 Provide consistent exploration inputs for utility usage, costs, emissions, water, and detailed bill charges.
 
@@ -505,3 +507,7 @@ The tables above track local implementation progress. Keep each status aligned w
 | 2026-11-11 | Vis1 contracts | Added strict serializable definitions, incomplete/unsupported validation, provider/capability/capture/embedding contracts, and fake-provider behavior examples. Actual UI, persistence and source adapters remain downstream. Local stack targets `unified-ux`; publication and QA remain pending. |
 | 2026-11-11 | Vis3 framework | Implemented the six-slice library/workbench stack, guarded autosave/navigation, reviewed repair/copy recovery, and cancellable preview registrations. Full fast suite: 4,297 tests; Chromium: 533 tests. Concrete source/chart adapters and real-data preview acceptance remain downstream; issue #2904 is not closed by this framework delivery. |
 | 2026-11-11 | Vis3 alignment | Added Dashboard/Add naming, stepped chart-first creation with multiple source families, explicit incomplete Scatter bindings, retained recovery intent and the downstream starter recipe plan. Final focused validation: 334 unit tests, 35 Chromium tests, app/spec type checks and production web compilation passed; existing build warnings remain. Ownership, feature-registration and recovery-navigation review findings have regression coverage. No Electron boundary changed. Wide/narrow theme and keyboard checks passed. Real-data adapters, recipes, human review and QA remain downstream. |
+
+| 2026-11-12 | Vis4 utility journey | Implemented utility discovery/selection, calendarized and native projections, v2 presentation intent, protected editors, energy/cost recipes, initial line/bar controls (partial Vis6), and faithful unfiltered inventory capture (partial Vis9). Focused domain tests (302), a final 88-test projection rerun including 12 additional actual-input sign cases, affected UI tests (80), final source/chart controls (18), and focused shared-input/recovery/capture checks (54), native command/storage/Worker checks (11), override/order reopen checks (3), and final factor-input/real-Worker checks (8), app/spec/browser type checks and production web build passed. Broader related focused suites also passed during integration. Full suites and Electron builds omitted per maintainer direction. Production-shell manual verification and human review/QA remain pending; issues stay open. |
+
+| 2026-11-12 | Vis4 review decisions | Maintainer approved repairing the shared monthly calculation’s bundled-grid-factor input wiring with scientific formulas unchanged. Native and monthly emissions now use explicit actual catalogs; unavailable factors and invalid saved units do not become measured zeros. Unassigned category transfer, incomplete recovery drafts and captured trace order have focused regression coverage. Nonfinite canonical compressed-air emissions remain unavailable. |

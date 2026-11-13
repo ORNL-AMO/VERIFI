@@ -4,6 +4,8 @@ Accepted implementation specification for [Vis3 / #2904](https://github.com/ORNL
 
 ## Dashboard and creation
 
+The [Vis4 utility extension](v1-utility-visualizations.md) now supplies real utility source/period editors, protected invalid-field review, line/bar rendering and settings, explicitly bound energy/cost recipes, and faithful inventory capture. Other chart/source combinations retain the framework's setup/unavailable behavior. Definition v2 adds display visibility/overrides while retaining v1 decoding; storage envelopes and routes remain unchanged.
+
 Use the Reports/Analysis card dashboard, shared inventory detail levels, paging, sticky filters, and session browse restoration. Show ownership, all selected source families, concrete chart/period summaries, modified date, and setup/reference status without calculating Dashboard items. Search names, owners and saved source labels; filter scope, family and setup/attention status; sort modified (default), name or attention. No folders, tags, favorites, thumbnails, bulk actions or Recents.
 
 Add visualization collects ownership, concrete chart type, one or more source families, then name in stepped selection cards. Reuse Meter/Predictor editable selection chips and step-specific focus: single choices advance immediately, while the multiple-family step requires Continue. Returning to a completed step retains other choices. A named facility entry keeps its current preselected/locked ownership; single-facility accounts skip ownership selection. The section remains Visualizations; the sidebar destination and return actions say Dashboard. Existing `/library` routes and internal branch names remain unchanged.

@@ -497,6 +497,13 @@ Shared account/facility presentation lives under the v1 shared analysis-results 
 - **Charts and layout:** Independent ECharts capture uses explicit dimensions, document colors, completion/abort/timeout handling, and cleanup. PowerPoint keeps editable text/tables and finite native chart series, using images for gaps and complex figures. PDF/PPT table continuations retain identifying columns and headers. Better Plants PDF retains form artwork and continued notes.
 - **Compatibility:** Source templates, workbook formulas/mappings, calculations, units, rounding, stored records, and review ownership remain unchanged. Excel yearly worksheet models are independent. Export never acknowledges checks or creates calculation demand. See [the roadmap](v1-report-exports-plan.md) and [output architecture](v1-reports-architecture.md#file-output-and-extension-pattern).
 
+### Utility visualization exploration and inventory capture
+
+- **Workflow:** Existing utility overview/monthly and bill-inspection calculations feed v1 saved Visualizations. The inventory chart sheet provides the first feature-owned capture entry point.
+- **Decision and parity:** Reuse canonical calendarization, conversion, emissions, bill/charge and fiscal semantics; build typed v1 exploration controls and ECharts line/bar presentation. Preserve genuine zero/gaps and actual native dates. Unsupported or ambiguous combinations explain unavailability without changing v0 behavior.
+- **Shared contracts:** Definition v2 adds presentation-only visibility and owner-qualified resource overrides. Version 1 remains readable without migration writes; database/backup envelopes remain unchanged. Native charges do not acquire invented monthly allocation. Inventory capture retains matching-rule membership and rejects changed quality interpretations.
+- **Tests:** Focused projection/definition, editor/capture lifecycle, native IndexedDB/Worker and Chromium canvas checks, plus web type/build and responsive/theme/keyboard/print checks. See [Utility visualizations](v1-utility-visualizations.md) for capabilities and delivery boundaries.
+
 ## Validation
 
 - For develop foundation changes, run `npx tsc -p tsconfig.app.json --noEmit` after each module or folder move.

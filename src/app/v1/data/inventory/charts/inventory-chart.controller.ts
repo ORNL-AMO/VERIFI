@@ -14,6 +14,12 @@ import {
 } from '@app/v1/data/predictors/inventory/charts/predictor-inventory-charts';
 import { InventoryChartSessionService } from './inventory-chart-session.service';
 import { InventoryToolsSource, inventoryToolsContextKey } from '../inventory-tools.models';
+import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { VisualizationNavigationService } from '@app/v1/visualizations/visualization-navigation.service';
+import { civilDate } from '@domain/visualizations/utility/utility-periods';
+import { captureInventoryUtility } from './utility-visualization-capture';
+import { UtilityCaptureSession } from './utility-capture-session';
 
 /** Chart demand and session state share the routed inventory lifetime without owning DOM or navigation. */
 export class InventoryChartController {
@@ -100,6 +106,24 @@ export class InventoryChartController {
     }
     return this.multiplePredictors() ? combinePredictorCharts(this.predictorCharts()) : this.predictorCharts();
   });
+  readonly captureSupport = computed(() => {
+    const snapshot = this.workspace.snapshot(), charts = this.charts(), chart = charts.find(item => item.id === this.view().metric) ?? charts[0];
+    if (!this.open() || this.resource() !== 'meters' || this.state() !== 'ready' || !snapshot || !chart || !this.projection()?.meters)
+      return { state: 'unsupported' as const, reasons: ['Wait for a ready Energy, Water, or Cost chart before capture.'] };
+    return captureInventoryUtility({ snapshot, context: this.source.context(), contextLabel: this.contextLabel(), selection: this.source.captureSelection?.(),
+      matchingGuids: this.source.matchingGuids(), chart, grouping: this.grouping(), view: this.view(), projectedMeters: this.projection()!.meters,
+      workspaceRevision: this.workspace.revision(), calendarDate: civilDate(new Date()) });
+  });
+  readonly capture = new UtilityCaptureSession(() => {
+    const commands = this.injector.get(SavedVisualizationCommands), navigation = this.injector.get(VisualizationNavigationService), unsaved = this.injector.get(UnsavedChangesService);
+    return { prepare: definition => commands.prepareCreate(definition), submit: command => commands.submit(command), recover: (accountGuid, guid) => commands.recover(accountGuid, guid),
+      open: (accountGuid, guid) => { navigation.rememberReturn(accountGuid, this.source.context().facilityGuid); return navigation.open(accountGuid, guid); },
+      accountGuid: () => this.workspace.account()?.guid, ready: () => this.workspace.isReady(),
+      registerProtection: (dirty, saving, refreshRequired, discard, preventLeave) => {
+        const unregister = unsaved.register(dirty, discard, () => saving() || refreshRequired()), unregisterLeave = unsaved.registerNavigationPreflight(preventLeave), unregisterUnload = unsaved.protectBeforeUnload(dirty);
+        return () => { unregister(); unregisterLeave(); unregisterUnload(); };
+      } };
+  });
 
   constructor(readonly source: InventoryToolsSource) {
     let previous = '';
@@ -146,6 +170,7 @@ export class InventoryChartController {
     inject(DestroyRef).onDestroy(() => {
       save();
       subscription.unsubscribe();
+      this.capture.dispose();
     });
   }
 
@@ -153,7 +178,15 @@ export class InventoryChartController {
     this.openValue.set(true);
   }
 
-  close(): void {
+  close(): boolean {
+    if (this.capture.needsProtection()) { void this.capture.resolveLeave(); return false; }
     this.openValue.set(false);
+    return true;
+  }
+
+  captureVisualization(): Promise<void> {
+    const support = this.captureSupport();
+    if (support.state !== 'supported') { this.capture.message.set(support.reasons.join(' ')); return Promise.resolve(); }
+    return this.capture.start(support.definition);
   }
 }

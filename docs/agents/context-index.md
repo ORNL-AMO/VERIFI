@@ -4,6 +4,8 @@ Use one row to start a task. Load only the linked sections and add another subsy
 
 For the Visualizations and Home phase, start with the [V1 Visualizations and Home plan](../v1-visualizations-and-home-plan.md). It records accepted product decisions, issue dependencies, and local implementation progress. The [Vis1 foundation specification](../v1-visualization-foundation.md) defines workflow, chart dispositions, contract boundaries, and downstream handoffs; use the subsystem rows below as each issue reaches implementation.
 
+Concrete utility visualizations start with [Utility visualizations](../v1-utility-visualizations.md), `domain/visualizations/utility`, and `v1/visualizations/utility`. Use calculation, Angular and persistence/import guidance together when changing projection meaning, saved definition versions or GUID presentation overrides. Inventory capture belongs to `v1/data/inventory/charts`; preserve fidelity and retained command identity. First checks are focused pure projections, typed editor/presenter behavior, and native storage/Worker acceptance; no Electron checks are required without an Electron boundary change.
+
 For an explicitly requested UI feedback loop, use [`$ui-iterate`](../../.agents/skills/ui-iterate/SKILL.md) alongside the relevant UI skill. It defers validation until the user is ready to test the accumulated changes and asks whether to continue editing after each change. Do not activate it automatically for ordinary UI work.
 
 | Task | Stable starting points | Read | Mode and skill | Cross-boundary triggers | First validation |
