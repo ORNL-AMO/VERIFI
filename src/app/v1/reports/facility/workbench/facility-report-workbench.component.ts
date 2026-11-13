@@ -14,8 +14,8 @@ function facilityReportHost(): ReportHostAdapter {
       const report = context.report(), presentation = context.presentation(), facility = context.facility();
       if (!report || !presentation || !facility) return undefined;
       const breadcrumbs = context.navigation.isSingleSiteWorkspace() ? [{ label: 'Reports', icon: 'reports' as const, ...context.inventoryLink() }] : [
-        { label: `${context.workspace.account()?.name || 'Account'} Reports`, route: context.navigation.accountReportsRoute(report.accountId) },
-        { label: `${facility.name || 'Facility'} Reports`, ...context.inventoryLink() }, { label: report.name || 'Untitled facility report' }
+        { label: context.workspace.account()?.name || 'Account', route: context.navigation.accountReportsRoute(report.accountId) },
+        { label: facility.name || 'Facility', ...context.inventoryLink() }
       ];
       return { name: report.name || 'Untitled facility report', typeLabel: context.typeLabel(), breadcrumbs,
         breadcrumbLabel: 'Facility report breadcrumb', titleId: 'facility-report-workbench-title', resources: context.resources(), selectedId: report.guid,

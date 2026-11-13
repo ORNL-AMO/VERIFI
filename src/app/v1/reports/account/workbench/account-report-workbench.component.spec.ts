@@ -49,6 +49,8 @@ describe('account report workbench', () => {
     expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
     expect(!!harness.routeNativeElement!.querySelector('#account-report-analysis')).toBe(['betterPlants', 'performance', 'analysis', 'accountSavings'].includes(value));
     expect(harness.routeNativeElement!.querySelector('nav a')?.getAttribute('href')).toContain('/account-a/reports/dashboard');
+    expect(harness.routeNativeElement!.querySelector('nav a')?.textContent?.trim()).toBe(snapshot.account.name);
+    expect(harness.routeNativeElement!.querySelector('nav[aria-label="Account report breadcrumb"]')?.textContent?.trim()).toBe(snapshot.account.name);
     expect(harness.routeNativeElement!.querySelector('footer app-report-output-actions')).toBeNull();
     await open('account-report', 'report');
     expect(workbench.context.stage()).toBe('report');
