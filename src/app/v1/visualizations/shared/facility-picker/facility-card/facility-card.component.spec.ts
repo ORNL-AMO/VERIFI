@@ -70,4 +70,31 @@ describe('facility card pointer and keyboard choices', () => {
     expect(state.only).toHaveBeenCalledOnce(); vi.advanceTimersByTime(FACILITY_POINTER_CLICK_DELAY);
     expect(state.changed).not.toHaveBeenCalled(); state.fixture.destroy();
   });
+  it('offers an independent Only button, cancels a pending pointer toggle, and retains button focus', () => {
+    vi.useFakeTimers(); const state = setup();
+    expect(state.fixture.nativeElement.querySelector('button')).toBeNull();
+    state.fixture.componentRef.setInput('showOnly', true); state.fixture.detectChanges();
+    state.pointer(1);
+    const only = state.fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(only.getAttribute('aria-label')).toBe('Select only Roasting'); expect(only.closest('label')).toBeNull();
+    only.focus(); only.click();
+    expect(state.only).toHaveBeenCalledOnce(); expect(document.activeElement).toBe(only);
+    vi.advanceTimersByTime(FACILITY_POINTER_CLICK_DELAY); expect(state.changed).not.toHaveBeenCalled();
+    state.fixture.destroy();
+  });
+  it('keeps Only available for a locked checkbox while honoring disabled and busy guards', () => {
+    const state = setup(); state.fixture.componentRef.setInput('showOnly', true);
+    state.fixture.componentRef.setInput('uncheckLocked', true); state.fixture.detectChanges();
+    const only = state.fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(state.checkbox.disabled).toBe(true); expect(only.disabled).toBe(false); only.click();
+    expect(state.only).toHaveBeenCalledOnce(); state.only.mockClear();
+    for (const guard of ['disabled', 'busy'] as const) {
+      state.fixture.componentRef.setInput(guard, true); state.fixture.detectChanges();
+      expect(only.disabled).toBe(true); only.click(); state.fixture.componentInstance.requestOnly();
+      expect(state.only).not.toHaveBeenCalled(); expect(state.changed).not.toHaveBeenCalled();
+      state.fixture.componentRef.setInput(guard, false); state.fixture.detectChanges();
+    }
+    state.fixture.destroy();
+  });
+
 });

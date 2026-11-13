@@ -1,5 +1,10 @@
-<label #cardLabel tabindex="-1" class="facility-picker__row" [class.facility-picker__row--selected]="selected()" [class.facility-picker__row--disabled]="disabled()" (click)="pointerClick($event)" (dblclick)="doubleClick($event)">
-  <input #checkbox type="checkbox" role="checkbox" [formControl]="checked" [attr.aria-label]="label()" [attr.aria-checked]="selected()" [attr.aria-description]="description() || null">
-  <app-ui-icon [name]="icon()"/>
-  <span><strong>{{ label() }}</strong>@if (description()) { <small>{{ description() }}</small> }</span>
-</label>
+<div class="facility-picker__card" [class.facility-picker__card--selected]="selected()" [class.facility-picker__card--disabled]="disabled()">
+  <label #cardLabel tabindex="-1" class="facility-picker__row" [class.facility-picker__row--disabled]="disabled()" (click)="pointerClick($event)" (dblclick)="doubleClick($event)">
+    <input #checkbox type="checkbox" role="checkbox" [formControl]="checked" [attr.aria-label]="label()" [attr.aria-checked]="selected()" [attr.aria-description]="description() || null">
+    <app-ui-icon [name]="icon()"/>
+    <span><strong>{{ label() }}</strong>@if (description()) { <small>{{ description() }}</small> }</span>
+  </label>
+  @if (showOnly()) {
+    <button class="facility-picker__only" type="button" [attr.aria-label]="'Select only ' + label()" [disabled]="disabled() || busy()" (click)="requestOnly()">Only</button>
+  }
+</div>
