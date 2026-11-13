@@ -44,7 +44,7 @@ export class AccountReportWorkbenchContext {
     ['/v1', 'workspace', 'account', entry.report.accountId, 'reports', 'workbench', entry.report.guid], entry.typeLabel, this.stage(), hasAccountReportDataChecks(entry.report.reportType), entry.status, reportIcon(entry.report)) : []; });
   readonly resources = computed(() => this.reports().map(report => ({ id: report.guid, label: report.name || 'Untitled account report', icon: reportIcon(report) })));
   readonly dashboardRoute = computed(() => this.navigation.accountReportsRoute(this.accountGuid() ?? ''));
-  readonly breadcrumbs = computed(() => this.navigation.isSingleSiteWorkspace() ? [{ label: 'Reports', icon: 'reports' as const, route: this.dashboardRoute() }] : [{ label: `${this.workspace.account()?.name || 'Account'} Reports`, route: this.dashboardRoute() }, { label: this.report()?.name || 'Report' }]);
+  readonly breadcrumbs = computed(() => this.navigation.isSingleSiteWorkspace() ? [{ label: 'Reports', icon: 'reports' as const, route: this.dashboardRoute() }] : [{ label: this.workspace.account()?.name || 'Account', route: this.dashboardRoute() }]);
   readonly usesAnalysis = computed(() => !!this.report() && !!accountReportAnalysisSetupKey(this.report()!.reportType));
   readonly analysisOptions = computed(() => { const snapshot = this.workspace.snapshot(), report = this.report(); return snapshot && report && this.usesAnalysis() ? reportAnalysisOptions(report, snapshot) : []; });
   readonly savedAnalysisValue = computed(() => {

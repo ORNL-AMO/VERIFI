@@ -62,7 +62,7 @@ describe('facility report workbench navigation', () => {
   });
 
   it('uses report context, linked breadcrumbs, collapsible facts, and validation badges', async () => {
-    const { open, harness, status } = await setupReportWorkbench([reportFixture({ facilityReportType: 'overview' })]);
+    const { open, harness, status, store } = await setupReportWorkbench([reportFixture({ facilityReportType: 'overview' })]);
     await open();
     const host = harness.routeNativeElement!;
     const stageIcons = () => harness.routeDebugElement!.query(By.css('app-analysis-stage-navigation')).queryAll(By.directive(IconComponent)).map(icon => (icon.componentInstance as IconComponent).name);
@@ -70,7 +70,9 @@ describe('facility report workbench navigation', () => {
     const crumbs = host.querySelectorAll('nav[aria-label="Facility report breadcrumb"] a');
     expect(crumbs[0].getAttribute('href')).toBe('/v1/workspace/account/account-a/reports/dashboard');
     expect(crumbs).toHaveLength(2);
-    expect(host.querySelector('nav[aria-label="Facility report breadcrumb"] [aria-current="page"]')?.textContent).toBe('Saved report');
+    expect([...crumbs].map(crumb => crumb.textContent?.trim())).toEqual([store.account()!.name, store.facilities()[0].name]);
+    expect(host.querySelector('nav[aria-label="Facility report breadcrumb"] [aria-current="page"]')).toBeNull();
+    expect(host.querySelector('nav[aria-label="Facility report breadcrumb"]')?.textContent).not.toContain('Saved report');
     expect(crumbs[1].getAttribute('href')).toBe('/v1/workspace/account/account-a/reports/dashboard?facility=facility-a');
     expect(host.querySelector('header')?.textContent).toContain('No Issues');
     expect(stageIcons()).toContain('checkmarkBadge');
