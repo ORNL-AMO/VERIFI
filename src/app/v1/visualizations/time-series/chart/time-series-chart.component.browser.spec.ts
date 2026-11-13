@@ -64,7 +64,7 @@ describe('saved time-series canvas in Chromium', () => {
         await vi.waitFor(() => expect(chart.getWidth()).toBe(280));
         expect(canvasHost.scrollWidth).toBeLessThanOrEqual(281);
       }
-      expect(canvasHost.getAttribute('aria-label')).toContain('accessible data table');
+      expect(canvasHost.getAttribute('aria-label')).toContain('Exact values and quality');
       fixture.destroy(); expect(chart.isDisposed()).toBe(true);
     } finally { fixture.destroy(); }
   });

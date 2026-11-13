@@ -156,34 +156,53 @@ export class ChartSettingsComponent implements OnChanges {
     if (!this.context || this.context.disabled) return;
     const rows = [...this.rows()], index = rows.findIndex(row => row.key === key), target = index + direction;
     if (index < 0 || target < 0 || target >= rows.length) return;
-    if (rows[index].selectedId !== rows[target].selectedId) {
-      const series = [...this.definition!.series];
-      const left = series.findIndex(item => item.id === rows[index].selectedId), right = series.findIndex(item => item.id === rows[target].selectedId);
-      [series[left], series[right]] = [series[right], series[left]];
-      this.publish({ ...this.definition!, series });
+    const definition = this.definition!;
+    const sourceOf = (row: SeriesEditorRow) => definition.series.find(selected => selected.id === row.selectedId)!.sourceId;
+    const sourceId = sourceOf(rows[index]), neighborSource = sourceOf(rows[target]);
+    if (sourceId !== neighborSource) {
+      const sources = [...new Set(definition.series.map(selected => selected.sourceId))];
+      const left = sources.indexOf(sourceId), right = sources.indexOf(neighborSource);
+      [sources[left], sources[right]] = [sources[right], sources[left]];
+      const series = sources.flatMap(source => definition.series.filter(selected => selected.sourceId === source));
+      this.rows.set(sources.flatMap(source => rows.filter(row => sourceOf(row) === source)));
+      this.publish({ ...definition, series });
       return;
     }
     [rows[index], rows[target]] = [rows[target], rows[index]];
-    const definition = this.definition!;
-    const series = definition.series.map(selected => {
-      if (selected.resourceGuid) return selected;
-      const targets = rows.filter(row => row.selectedId === selected.id).flatMap(row => { const target = overrideTarget(row); return target ? [target] : []; });
-      if (!targets.length) return selected;
-      const existing = selected.overrides ?? [];
-      const keys = new Set(targets.map(overrideKey));
-      const overrides = targets.map((target, order) => ({ ...(existing.find(item => overrideKey(item) === overrideKey(target) && (item.accountGuid ?? definition.accountGuid) === definition.accountGuid)
-        ?? { ...target, accountGuid: definition.accountGuid }), order }));
-      const dormant = existing.filter(item => !keys.has(overrideKey(item)) || (item.accountGuid ?? definition.accountGuid) !== definition.accountGuid);
-      // A move orders the current members first. Retain dormant appearance and its relative
-      // explicit order after them, without creating ranks for appearance-only/foreign entries.
-      const orderedDormant = dormant.filter(item => (item.accountGuid ?? definition.accountGuid) === definition.accountGuid && item.order !== undefined)
-        .sort((left, right) => left.order! - right.order!);
-      const retained = dormant.map(item => {
-        const rank = orderedDormant.indexOf(item);
-        return rank < 0 ? item : { ...item, order: targets.length + rank };
-      });
-      return { ...selected, overrides: [...overrides, ...retained] };
+    const activeRows = rows.filter(row => sourceOf(row) === sourceId);
+    const updates = new Map<string, VisualizationSeriesOverride[]>();
+    const used = new Set<VisualizationSeriesOverride>();
+    activeRows.forEach((row, order) => {
+      const selected = definition.series.find(item => item.id === row.selectedId)!;
+      const target = overrideTarget(row);
+      if (!target) return;
+      const local = (selected.overrides ?? []).filter(item => (item.accountGuid ?? definition.accountGuid) === definition.accountGuid);
+      // Keep an existing provider selector when it carries appearance; introducing a
+      // stronger resource selector with order alone would hide that appearance.
+      const previous = local.find(item => overrideKey(item) === overrideKey(target))
+        ?? local.find(item => item.seriesId === row.key);
+      if (previous) used.add(previous);
+      const members = updates.get(selected.id) ?? [];
+      members.push({ ...(previous ?? { ...target, accountGuid: definition.accountGuid }), order });
+      updates.set(selected.id, members);
     });
+    // Saved order spans declarations in this source. Dormant current-owner ranks
+    // follow active items in their previous order; foreign ranks remain untouched.
+    const dormant = definition.series.filter(selected => selected.sourceId === sourceId)
+      .flatMap(selected => selected.overrides ?? []).filter(item => !used.has(item)
+        && (item.accountGuid ?? definition.accountGuid) === definition.accountGuid && item.order !== undefined)
+      .sort((left, right) => left.order! - right.order!);
+    const series = definition.series.map(selected => {
+      if (selected.sourceId !== sourceId) return selected;
+      const retained = (selected.overrides ?? []).filter(item => !used.has(item)).map(item => {
+        const rank = dormant.indexOf(item);
+        return rank < 0 ? item : { ...item, order: activeRows.length + rank };
+      });
+      const overrides = [...updates.get(selected.id) ?? [], ...retained];
+      const { overrides: _old, ...base } = selected;
+      return { ...base, ...(overrides.length ? { overrides } : {}) };
+    });
+    this.rows.set(rows);
     this.publish({ ...definition, series });
   }
 }
