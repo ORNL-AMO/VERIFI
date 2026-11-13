@@ -266,3 +266,9 @@ Before completing facility-analysis work:
 - verify loading, waiting, empty, error, blocked, and ready states;
 - keep result tables and formulas readable rather than over-generalizing them; and
 - update this document when an ownership boundary, data flow, or invariant changes.
+
+### Shared user-defined inspection projection
+
+The neutral [user-defined inspection calculation](../src/app/domain/calculations/analysis-calculations/user-defined-inspection-calculation.ts) supplies its dedicated [Worker](../src/app/platform/web-workers/user-defined-inspection.worker.ts) and synchronous fallback. It preserves ordinary monthly actual/modeled points and adds only selected model-period months absent from those rows, using the same regression expression and nonnegative boundary. Added points are chart-only: they create no savings/baseline rollups, alter no saved analysis baseline or SEP validation input, and do not change the ordinary monthly-group Worker contract.
+
+Inspection input identity excludes analysis annotations such as notes/status timestamps but includes coefficients, periods, units, predictors/readings, and banking dependencies. Metadata changes therefore reuse numerical work; input changes cancel/supersede it. Validate account/request/current-input identity before synchronizing Worker results into Angular state. Interactive Worker timeout and retry follow the shared [Worker lifecycle](../ARCHITECTURE.md#calculations-workers-and-reports).

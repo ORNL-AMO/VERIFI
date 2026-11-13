@@ -1,106 +1,52 @@
 # VERIFI Agent Guide
 
-This file contains repository-wide instructions for coding agents. Keep it concise and route detailed context to linked sources.
+## Start with the smallest context
 
-## Sources of truth
+Executable configuration and source are authoritative, followed by this guide, [architecture](ARCHITECTURE.md), the relevant [task workflow](.agents/skills), and its current feature reference. Use the [task router](docs/agents/context-index.md) to select those references. Read only affected sections and neighboring source; stop once owners, consumers, compatibility risks, and validation are understood.
 
-Use sources in this order when they disagree:
+This guide is supplied automatically. Do not reopen it, preload complete guides, or read unrelated skills. Inspect `package.json` first; read the lockfile only for a specific dependency investigation. Skip dependencies, caches, generated output, and binary assets unless relevant. Do not hide tracked source through ignore files.
 
-1. Executable configuration and source code.
-2. This file for required agent behavior.
-3. [ARCHITECTURE.md](ARCHITECTURE.md) for system boundaries and data flow.
-4. Task-specific skills under [`.agents/skills`](.agents/skills).
-5. [Agent task modes](docs/agents/personas.md) for the perspective to apply.
-6. [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [CODING_STYLE.md](CODING_STYLE.md) for their existing domains.
+## Repository boundaries
 
-Do not copy volatile package versions, scripts, database versions, or implementation inventories into new documents when a link to the source is clearer.
+VERIFI shares one Angular renderer between web and Electron. On `unified-ux`, root navigation opens `/v1`; legacy entry is `/welcome`. Versioned UI lives in `src/app/v0/` and `src/app/v1/`. Production v1 never imports `@v0/*`.
 
-## Project orientation
+Use feature folders, NgModules, and non-standalone components unless the owning feature deliberately differs. Each component has its own folder with class, template, styles, and meaningful specs together. Ordinary v1 names do not need `V1`/`v1-` prefixes; retain versioning for route/module, theme, and storage boundaries.
 
-VERIFI's Angular renderer ships for web and Electron. Use the [task context index](docs/agents/context-index.md) to choose entrypoints, minimum documentation, skill, mode, and first validation tier. Prefer established neighboring code over a new pattern.
-
-The current production UI lives under `src/app/v0/`. On unified-ux work, root navigation opens the production v1 workspace at `/v1`; legacy entry remains at `/welcome`. Organize production v1 by feature folders under `src/app/v1/`, not broad `pages` or `components` buckets. Do not prepend `V1` or `v1-` to ordinary v1 components, services, selectors, filenames, interfaces, types, or helper constants; keep versioning only for real boundaries such as `/v1`, `V1Module`, `V1Routes`, v1 route files, v1 theme classes, and v1 local storage keys. Use configured aliases for cross-boundary imports where appropriate: `@app/*` for app/v1 boundaries, `@v0/shared/*` for legacy-only shared UI, and `@shared/*`, `@data/*`, `@domain/*`, or `@platform/*` for version-neutral shared helpers and contracts. Keep relative imports for files in the same feature/component folder. Shared contracts live under `src/app/data/`, `src/app/domain/`, and `src/app/platform/`. Do not import `@v0/*` from root shared, data, domain, platform, or production v1 code. For unified UI/UX migration work, use the [Unified UI/UX Migration Guide](docs/unified-ux-migration.md), [Current-State Notes Guide](docs/unified-ux-current-state.md); add workflow notes just-in-time rather than building exhaustive feature or current-state registers.
-
-## Context discipline
-
-- This guide is supplied automatically; reopen it only to verify exact text.
-- Use targeted searches and narrow excerpts. Load only relevant linked headings, not whole documents.
-- Do not preload `README.md`, `CONTRIBUTING.md`, unrelated skills, or complete guides.
-- Stop broad exploration after identifying the affected contract, consumers, neighboring pattern, material risks, and test tier.
-- Inspect `package.json` first. Query `package-lock.json` only for a specific dependency, integrity record, upgrade, or security investigation.
-- Skip dependencies, generated output, caches, and binary assets unless relevant. `.gitignore` is not a context or security boundary.
-- Do not add `.codexignore` or hide tracked source through `.ignore`.
-
-## Setup and commands
-
-Use Node.js 24.10.0 and npm 11.6.1 as declared in `package.json`. Treat `package.json` as authoritative and update this line with it when the supported toolchain changes.
-
-```bash
-npm ci
-npm start
-```
-
-Use non-watch commands for verification:
-
-| Check | Command | Use it for |
-| --- | --- | --- |
-| Fast unit tests | `npm run test:ci` | Pure TypeScript, Angular components, services, pipes, and ordinary utilities |
-| Browser tests | `npm run test:browser:ci` | IndexedDB, Web Workers, and behavior requiring native browser APIs |
-| Full test suite | `npm run test:all:ci` | Final verification before a pull request |
-| Informational coverage | `npm run test:coverage` | Scoped calculation, IndexedDB, and Web Worker coverage; not a gate |
-| Agent validation plan | `npm run validate:agent -- --mode plan` | Risk-based check selection from the current diff |
-| Development build | `npm run build` | General Angular/Electron renderer changes |
-| Production web build | `npm run build-prod` | Web deployment behavior and final validation |
-| Production Electron build | `npm run build-prod-electron` | Electron runtime boundaries, Electron environment/config, desktop release validation |
-
-Install Chromium once with `npx playwright install chromium` when browser tests cannot find it. For interactive Electron development, run `npm run build-watch` and `npm run electron` in separate terminals.
-
-`npm run lint` is not a valid gate at present: it references the removed `@angular-devkit/build-angular:tslint` builder and fails before linting. Follow `CODING_STYLE.md`, tests, and builds until the lint configuration is repaired.
-
-## Task routing
-
-Use the mode and discoverable skill selected by the [task context index](docs/agents/context-index.md). Combine skills only when the task crosses their stated boundaries. Use Designer with Implementer for UI implementation; design-only work does not authorize code changes.
-
-For agent-assisted PR preparation, follow the [agent PR workflow](docs/agents/pr-workflow.md) and [creation guide](docs/agents/github-pr-creation.md). Review in two stages: the context-aware development agent self-reviews first, then a subagent reviews with conversation-history inheritance explicitly disabled and the development agent's model/effort. Pass only pinned comparison facts, neutral requirements, validation evidence, and repository guidance to the fresh reviewer, excluding self-review conclusions. Append both [review records](docs/agents/pr-review-record.md) to the general PR description; human-only PRs do not need them. Neither stage grants merge approval. Honor existing session authorization, and obtain decisions on new findings or material validation gaps before publication.
+Use configured aliases across boundaries: `@app/*` for app/v1, `@v0/shared/*` for legacy-only UI, and `@shared/*`, `@data/*`, `@domain/*`, `@platform/*` for neutral contracts and helpers. Keep same-feature imports relative. Shared records, persistence, calculations, and runtime contracts belong outside versioned UI. Prefer established neighboring patterns over new frameworks.
 
 ## Working rules
 
-- Diagnose before editing when the request asks for analysis, investigation, or review only.
-- Keep changes scoped to the issue and preserve unrelated worktree changes.
-- Use the repository's NgModule-based Angular pattern; components are non-standalone unless the surrounding feature has deliberately migrated.
-- Put each Angular component in its own folder with its template, styles, and spec beside the component class. Do not place multiple child component file sets side by side in a parent feature folder.
-- For Angular templates, follow the [Angular template guidance](docs/agents/angular-template-guidance.md) for signal reads, `@let`, computed state, and template-expression review expectations.
-- Production v1 editable workflows use typed reactive forms. Never read form values through `event.target`, `$event.target`, or `$any($event.target)`, and never pass a raw DOM `Event` through a component output, facade, or service. Pass typed values at component boundaries and `FileList | null` for file selection; keep native events only when browser mechanics such as focus, drag/drop, or pointer behavior require them.
-- Follow the risk-based policy in [docs/testing.md](docs/testing.md): protect changed behavior with the lowest-cost valuable automated test, or document why automation is disproportionate and provide focused manual evidence. Do not rely on creation-only `should create` tests.
-- Use `npm run validate:agent -- --mode plan` before final validation to avoid over-running broad or Electron checks for routine web changes.
-- Treat stored user data as durable. Make migrations idempotent and preserve older backups and import formats where supported.
-- Preserve GUID-based domain relationships. Do not confuse IndexedDB's local numeric `id` with cross-record identifiers.
-- Keep calculations deterministic and verify every consumer when changing a shared result, unit, payload, or report field.
-- Treat Web Worker messages as contracts: update payloads, results, errors, call sites, and browser tests together.
-- Keep Electron `contextIsolation` intact. Expose only explicit IPC channels through `preload.js`; never expose unrestricted Node or `ipcRenderer` access.
-- Reuse the correct shared layer, Bootstrap/ng-bootstrap conventions, and existing style layers. Legacy reusable UI belongs behind `@v0/shared/*`; only version-neutral helpers and contracts belong behind `@shared/*`. Cover loading, empty, validation, error, disabled, and success states.
-- Every native `<select>` in production v1 templates must include the shared `v1-select` class so its surface, text, border, focus, disabled, and dropdown indicator remain theme-aware and consistent in light, dark, and high-contrast modes. Feature-specific select classes may supplement `v1-select`, but must not replace it.
-- Check responsive behavior, keyboard access, focus, labels, contrast, screen-reader semantics, printing, charts, and Electron window constraints when relevant.
-- For v1 workbench tabs, stack primary content sections with connected borders, square outer corners, and no vertical gaps. Do not use floating, rounded top-level cards in workbench tab content unless a workflow explicitly calls for a different pattern.
-- Render every v1 confirmation opened from routed workspace content through `ModalPortalService` with a `TemplatePortal`, and compose it with the shared `ConfirmationDialogComponent`. The workspace creates an isolated stacking context, so feature-local modal layers can appear behind shell headers or navigation regardless of their local `z-index`. Use the shared `v1-modal*` structure and theme tokens; do not add feature-specific backdrop, dialog, or stacking overrides.
-- Do not edit `node_modules/`, `dist/`, or `output/`. Treat spreadsheets, images, and other binary assets under `src/assets/` as deliberate source artifacts.
-- Do not add secrets, credentials, private deployment details, or machine-specific paths to documentation or source.
+- Diagnose without editing for analysis/review-only requests. Preserve unrelated worktree changes.
+- Treat stored user data as durable. Preserve supported backups/imports, idempotent migrations, and GUID relationships; IndexedDB numeric `id` is not a domain GUID.
+- Read active state through workspace signals; persist through the command boundary. Multi-store invariants require one native transaction and one committed publication. Recovery after commit must not replay persistence.
+- Keep calculations deterministic. Update every consumer of changed inputs, outputs, units, aggregations, report values, and Worker request/result/error contracts together.
+- Preserve Electron context isolation and the preload channel allowlist. Never expose unrestricted Node or `ipcRenderer` access.
+- Production v1 editable workflows use typed reactive forms. Pass typed values and `FileList | null`; never extract editable values from DOM events or pass raw events through outputs/services. Native focus, pointer, keyboard, and drag/drop mechanics may retain events locally. Follow [template guidance](docs/agents/angular-template-guidance.md).
+- Reuse shared presentation and semantic theme tokens. Native v1 selects include `v1-select`. Workbench sections have connected borders, square outer corners, and no vertical gaps.
+- Routed workspace confirmations use `ModalPortalService`, `TemplatePortal`, and `ConfirmationDialogComponent`. Feature-local backdrop/stacking overrides cannot reliably escape the workspace stacking context.
+- Cover relevant loading, empty, invalid, disabled, saving, error/recovery, and success states; check keyboard/focus, labels, contrast, responsive layouts, printing, and chart alternatives when affected.
+- Do not edit `node_modules/`, `dist/`, or `output/`. Binary assets under `src/assets/` are deliberate source. Never add secrets or machine-specific paths.
 
-## Communication
+## Commands and validation
 
-- Lead with the outcome. Send one- or two-sentence updates only when state changes.
-- Final responses give the result, validation, unresolved risks, and required next action.
-- Omit repeated summaries, unchanged status, generic reassurance, and step-by-step tool narration.
-- Never omit failures, test results, compatibility risks, destructive-action warnings, or required decisions.
+Use the Node/npm toolchain declared in `package.json`. Install with `npm ci`; develop with `npm start`. The [testing guide](docs/testing.md) owns validation policy; the [validation workflow](.agents/skills/validate-web-and-electron/SKILL.md) explains execution.
 
-## Documentation maintenance
+| Purpose | Command |
+| --- | --- |
+| Select checks | `npm run validate:agent -- --mode plan` |
+| Fast tests | `npm run test:ci` |
+| Native browser tests | `npm run test:browser:ci` |
+| Explicit pre-PR/release test gate | `npm run test:all:ci` |
+| App type-check | `npx tsc -p tsconfig.app.json --noEmit` |
+| Production web / Electron | `npm run build-prod` / `npm run build-prod-electron` |
+| Documentation | `npm run docs:check` |
 
-Update documentation in the same change when behavior or workflow changes:
+Use focused non-watch checks while iterating and the planner before final validation. In a dirty checkout, pass only this task's files to the planner. Install Chromium with `npx playwright install chromium` only when missing. `npm run lint` is not a valid gate while its removed TSLint builder remains configured. Do not add creation-only tests or artificial tests for prose/style edits.
 
-- Update `ARCHITECTURE.md` for changed boundaries, data flows, or invariants.
-- Update the matching skill for a changed repeatable workflow.
-- Update this file only for durable repository-wide rules, routing, commands, or recurring mistakes.
-- Update the task context index when stable entrypoints, routing, cross-boundary triggers, or validation tiers change.
-- Update `docs/agents/personas.md` when task-mode responsibilities change.
+## PRs, communication, and maintenance
 
-Validate every new link and command. If a fact is uncertain, verify it in source or label the uncertainty rather than presenting an assumption as current behavior.
+Follow the [PR workflow](docs/agents/pr-workflow.md): context-aware self-review, then an independent subagent without inherited conversation, with both records against current commits. It owns review/publication procedure; completion does not grant merge approval. Honor authorization already given and surface new findings or material gaps.
+
+Lead updates with changed outcomes. Final responses give results, actual validation, unresolved risks, and required action. Disclose failed/unperformed checks; do not repeat unchanged status.
+
+Keep one owner per contract: architecture for boundaries, feature references for current behavior, skills for repeatable procedure, and issues for pending delivery. Update those owners with changes. Convert or delete completed plans after preserving unique invariants and open acceptance; retain history in Git/PRs. Do not append implementation inventories, chronological evidence, or test counts to current references. Validate links and commands; document uncertain facts explicitly.

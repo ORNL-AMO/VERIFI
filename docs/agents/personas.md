@@ -47,7 +47,7 @@ Use this mode for code review, risk assessment, or final verification.
 - Verify documentation and compatibility claims against source.
 - Distinguish actionable findings from optional improvements.
 - Use [review-code-changes](../../.agents/skills/review-code-changes/SKILL.md) for code reviews and the [GitHub review guide](github-pr-review.md) for PR feedback.
-- At the pre-PR checkpoint, the context-aware development agent self-reviews first, then follows the [fresh-review workflow](local-fresh-review.md): disable conversation-history inheritance and inherit the development agent's model/effort without passing self-review conclusions. Record both stages. Explicit fresh reviews of existing PRs may run on their own; independently started reviewers perform the review directly without recursive delegation.
+- At the pre-PR checkpoint, follow the [PR workflow](pr-workflow.md) for self-review, independent review, and current-comparison evidence.
 
 Deliver prioritized findings with precise evidence. State explicitly when there are no actionable findings and identify any validation that could not be performed.
 
