@@ -133,3 +133,32 @@ test('tarball extraction refuses path traversal and changed payloads fail before
     const file = path.join(directory, 'VERIFI.exe'); await fs.writeFile(file, 'changed installer');
     await assert.rejects(inspectPackage({ platform: 'windows', directory, manifest: { platform: 'windows', qa: false, role: 'production', files: [{ name: 'VERIFI.exe', size: 10, sha256: '0'.repeat(64) }] }, sourcePackage, expectedEntrypointSha256: entrypointSha256, outputDirectory: path.join(directory, 'extracted') }, async () => { throw new Error('must not extract mismatched bytes'); }), /hash\/size mismatch/);
 });
+
+test('desktop source checkout bytes match immutable blobs even with Windows CRLF defaults', async t => {
+    const action = yaml.load(await fs.readFile(path.join(__dirname, '../../.github/actions/desktop-source/action.yml'), 'utf8'));
+    const checkouts = action.runs.steps.filter(value => value.uses?.startsWith('actions/checkout@'));
+    assert.deepEqual(checkouts.map(value => value.with.path).sort(), ['source', 'tooling']);
+    const directory = await temporary(t), binary = Buffer.from([0, 13, 10, 255]);
+    const { execFileSync } = require('node:child_process');
+    for (const name of ['source', 'tooling']) {
+        const repository = path.join(directory, name); await fs.mkdir(repository);
+        const git = (...args) => execFileSync('git', ['-C', repository, ...args]);
+        git('init', '--quiet');
+        await fs.writeFile(path.join(repository, 'main.js'), 'const identity = "VERIFI";\nmodule.exports = identity;\n');
+        await fs.writeFile(path.join(repository, 'asset.bin'), binary);
+        git('-c', 'core.autocrlf=false', 'add', '--', 'main.js', 'asset.bin');
+        git('config', 'core.autocrlf', 'true');
+        await fs.rm(path.join(repository, 'main.js'));
+        git('checkout-index', '--force', '--all');
+        assert((await fs.readFile(path.join(repository, 'main.js'), 'utf8')).includes('\r\n'));
+    }
+    for (const checkout of checkouts) {
+        const repository = path.join(directory, checkout.with.path);
+        await fs.rm(path.join(repository, 'main.js'));
+        execFileSync('git', ['-C', repository, 'checkout-index', '--force', '--all'], { env: { ...process.env, ...checkout.env } });
+        const blob = execFileSync('git', ['-C', repository, 'show', ':main.js']);
+        assert.deepEqual(await fs.readFile(path.join(repository, 'main.js')), blob);
+        assert.deepEqual(await fs.readFile(path.join(repository, 'asset.bin')), binary);
+        assert.equal(execFileSync('git', ['-C', repository, 'config', 'core.autocrlf'], { encoding: 'utf8' }).trim(), 'true');
+    }
+});

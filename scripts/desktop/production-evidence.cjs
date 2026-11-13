@@ -143,8 +143,7 @@ async function attachEvidence(client, releaseId, evidenceFile, bundleFile, verif
     const names = evidenceNames(evidence.run.id, evidence.run.attempt);
     assert(path.basename(evidenceFile) === names.evidence && path.basename(bundleFile) === names.bundle, 'Evidence filenames do not match their invocation.');
     await verify(evidenceFile, bundleFile, { workflow: '.github/workflows/release_desktop.yml', sourceSha: evidence.workflowSha, sourceRef: 'refs/heads/master', runId: evidence.run.id, runAttempt: evidence.run.attempt });
-    const release = await client.api(`/releases/${evidence.releaseId}`);
-    release.sourceSha = evidence.sourceSha;
+    const release = { id: evidence.releaseId, tag_name: evidence.tag, sourceSha: evidence.sourceSha };
     const assets = await inventory(client, release.id);
     for (const expected of evidence.assets) {
         const asset = assets.find(item => item.id === expected.id);

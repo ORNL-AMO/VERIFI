@@ -27,6 +27,8 @@ Start a fresh dispatch for each audit retry, using the same IDs when retrying th
 
 Preparation downloads assets by ID, resolves tags to immutable commits, verifies attestation provenance, and binds all downloaded bytes to the retained native manifests. Native jobs statically extract the NSIS payload, DMG/ZIP, and AppImage/tarball without installing or launching VERIFI. They inspect ASAR identity and entrypoint bytes, platform identity, public GitHub updater configuration and Windows publisher expectations, then verify updater versions, referenced files, checksums and blockmaps. Existing native signing/notarization evidence is reused only when its final-file hashes match.
 
+Shared desktop source checkout pins LF behavior with action-scoped Git configuration before files are materialized. Windows CRLF defaults therefore cannot change the entrypoint relative to its immutable Git blob; no global Git setting or retained artifact is rewritten. Final checks compare the draft's pinned ID, tag, source and production flags again, rather than accepting its current identity as a new expectation.
+
 GitHub production updater configuration may omit `channel` or explicitly specify `latest`. A `-beta` version is not itself a GitHub prerelease flag. The audit preserves the current updater behavior rather than changing production channel selection.
 
 ## Evidence and reports

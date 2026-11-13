@@ -169,8 +169,7 @@ async function collectAudit(client, directory, resultsDirectory) {
             const result = JSON.parse(await fs.readFile(path.join(resultsDirectory, platform, 'inspection.json'), 'utf8'));
             report.inspections.push(validateInspection(plan, result, platform));
         }
-        const release = await client.api(`/releases/${plan.target.id}`);
-        release.sourceSha = plan.target.sourceSha;
+        const release = { id: plan.target.id, tag_name: plan.target.tag, sourceSha: plan.target.sourceSha };
         await assertUnchanged(client, release, plan.inventory);
         await checkPublicBaseline(client, plan.baseline, plan.baselineInventory);
         report.status = 'passed';

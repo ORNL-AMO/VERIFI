@@ -237,6 +237,21 @@ test('the production writer recovers only empty starter evidence from a failed m
     assert.equal(deleted.length, 1);
 });
 
+test('evidence attachment keeps its prepared release ID/tag and production flags pinned', async t => {
+    const directory = await temporary(t), data = fixture(), names = evidenceNames(901, 1);
+    const subject = path.join(directory, names.evidence), bundle = path.join(directory, names.bundle);
+    await fs.writeFile(subject, JSON.stringify(data.evidence)); await fs.writeFile(bundle, '{"verified":"bundle"}');
+    const client = { ...data.client, api: async route => route.startsWith('/releases/50/assets') ? structuredClone(data.targetFiles) : data.api(route) };
+    let uploads = 0;
+    t.mock.method(globalThis, 'fetch', async () => { uploads++; throw new Error('Changed draft must never receive evidence.'); });
+    const original = structuredClone(data.target);
+    for (const change of [{ tag_name: 'v0.17.0-beta-alias' }, { prerelease: true }, { draft: false }, { id: 51 }]) {
+        Object.assign(data.target, original, change);
+        await assert.rejects(attachEvidence(client, 50, subject, bundle, async () => {}), /Draft identity/);
+    }
+    assert.equal(uploads, 0);
+});
+
 test('an older public release without evidence cannot silently become an unapproved legacy baseline', async t => {
     const directory = await temporary(t), data = fixture();
     t.mock.method(globalThis, 'fetch', async url => new Response(data.payloads.get(Number(url.split('/').at(-1)))));
@@ -324,6 +339,13 @@ test('a complete preview passes only while the exact draft and pinned production
     }
     const report = await collectAudit(data.client, directory, results);
     assert.equal(report.status, 'passed'); assert.equal(report.publicationEligible, false);
+    const pinnedTag = data.target.tag_name;
+    data.target.tag_name = 'v0.17.0-beta-alias';
+    await assert.rejects(collectAudit(data.client, directory, results), /Draft identity/);
+    data.target.tag_name = pinnedTag;
+    data.target.prerelease = true;
+    await assert.rejects(collectAudit(data.client, directory, results), /Draft identity/);
+    data.target.prerelease = false;
     data.baseline.id = 41;
     await assert.rejects(collectAudit(data.client, directory, results), /Production latest changed/);
     assert.equal(JSON.parse(await fs.readFile(path.join(directory, 'audit-preview.json'))).status, 'failed');

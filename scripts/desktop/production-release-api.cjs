@@ -125,7 +125,7 @@ async function verifyAttestation(file, bundle, { workflow, sourceSha, sourceRef,
 
 async function assertUnchanged(client, release, assets) {
     const latest = await client.api(`/releases/${release.id}`);
-    assert(latest.draft === true && latest.tag_name === release.tag_name && await resolveTag(client, latest.tag_name) === release.sourceSha, 'Draft identity or tag changed during verification.');
+    assert(latest.id === release.id && latest.draft === true && latest.prerelease === false && latest.tag_name === release.tag_name && await resolveTag(client, latest.tag_name) === release.sourceSha, 'Draft identity, production flags or tag changed during verification.');
     const after = await inventory(client, release.id);
     const normalize = values => values.map(asset => ({ ...assetIdentity(asset), digest: asset.digest || null })).sort((a, b) => a.id - b.id);
     assert(JSON.stringify(normalize(assets)) === JSON.stringify(normalize(after)), 'Release assets changed during verification.');
