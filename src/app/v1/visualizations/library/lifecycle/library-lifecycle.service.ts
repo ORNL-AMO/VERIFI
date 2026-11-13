@@ -1,6 +1,4 @@
-import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -8,7 +6,8 @@ import { SavedVisualizationCommands } from '@data/account-workspace/saved-visual
 import { VisualizationCommand, VisualizationCommandOutcome } from '@data/account-workspace/visualization-commands.models';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
-import { createVisualizationSetupDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
+import { createVisualizationSetupDefinition, type UtilitySelectionMode, type VisualizationDefinition, type VisualizationFacilitySelection, type VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
+import { resolveVisualizationFacilities, sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -17,16 +16,18 @@ import { VisualizationLibraryEntry } from '../visualization-library.models';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { VISUALIZATION_CHART_CHOICES, VisualizationChartChoiceId, createVisualizationChart } from '../../visualization-charts';
 import { VISUALIZATION_DATA_SOURCES } from '../../visualization-data-sources';
-import { createRecipeDefinition, recipeGroupingChoices, recipeResourceChoices, RecipeGrouping, RecipeResourceChoice, UTILITY_RECIPES, VisualizationRecipe } from '../../creation/visualization-recipes';
+import { UTILITY_RECIPES, type VisualizationRecipe } from '../../creation/visualization-recipes';
+import { meterResourceChoices, meterSelectionChoices, nativeObservationAvailable, prepareDecisionChange } from '../../decisions/decision-tree';
+import type { DecisionChangeResult } from '../../decisions/decision-types';
 
-export type VisualizationCreationStep = 'scope' | 'facility' | 'chart' | 'sources' | 'recipe-grouping' | 'recipe-resources' | 'name';
+export type VisualizationCreationStep = 'facilities' | 'chart' | 'sources' | 'selection-mode' | 'resources' | 'observation' | 'name';
 export interface VisualizationCreationDraft {
-  name: string; scope: 'portfolio' | 'facility'; facilityGuid: string;
+  name: string; facilitySelection: VisualizationFacilitySelection;
   chart: VisualizationChartChoiceId | null; sourceKinds: readonly VisualizationSourceKind[];
-  recipe: VisualizationRecipe; recipeGrouping: RecipeGrouping | null; recipeResourceIds: readonly string[];
+  recipe: VisualizationRecipe; selectionMode: UtilitySelectionMode | null; resourceIds: readonly string[]; dataMode: 'calendarized' | 'billing-period';
 }
 interface CreationSelection { readonly step: VisualizationCreationStep; readonly label: string; readonly icon: IconName; readonly editable: boolean; }
-interface LibraryEditor { readonly initial: VisualizationCreationDraft; readonly accountGuid: string; readonly fixedFacility?: string; readonly entry?: VisualizationLibraryEntry; }
+interface LibraryEditor { readonly initial: VisualizationCreationDraft; readonly accountGuid: string; readonly entry?: VisualizationLibraryEntry; }
 
 /** Owns one live creation/rename proposal; retry never allocates a second saved identity. */
 @Injectable()
@@ -39,34 +40,34 @@ export class LibraryLifecycle {
   private readonly destroy = inject(DestroyRef);
   readonly editor = signal<LibraryEditor | undefined>(undefined);
   readonly saving = signal(false);
-  readonly step = signal<VisualizationCreationStep>('scope');
+  readonly step = signal<VisualizationCreationStep>('facilities');
   private readonly ownerChosen = signal(false);
   readonly error = signal<string | undefined>(undefined);
-  readonly confirmation = signal<'delete' | 'discard' | undefined>(undefined);
+  readonly confirmation = signal<'delete' | 'discard' | 'decision' | undefined>(undefined);
+  readonly decisionCleared = signal<readonly string[]>([]);
+  private pendingDecision?: { readonly fingerprint: string; readonly editor: LibraryEditor; readonly workspaceRevision: number; readonly apply: () => void };
   readonly deleteCandidate = signal<VisualizationLibraryEntry | undefined>(undefined);
   readonly proposal = signal<VisualizationCommand | undefined>(undefined);
   readonly outcome = signal<VisualizationCommandOutcome['state'] | undefined>(undefined);
   readonly conflictCurrent = signal<Readonly<IdbSavedVisualization> | undefined>(undefined);
   readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
-    scope: new FormControl<'portfolio' | 'facility'>('portfolio', { nonNullable: true }),
-    facilityGuid: new FormControl('', { nonNullable: true }),
+    facilitySelection: new FormControl<VisualizationFacilitySelection>({ kind: 'all' }, { nonNullable: true }),
     chart: new FormControl<VisualizationChartChoiceId | null>(null),
     sourceKinds: new FormControl<readonly VisualizationSourceKind[]>([], { nonNullable: true }),
     recipe: new FormControl<VisualizationRecipe>('custom', { nonNullable: true }),
-    recipeGrouping: new FormControl<RecipeGrouping | null>(null),
-    recipeResourceIds: new FormControl<readonly string[]>([], { nonNullable: true })
+    selectionMode: new FormControl<UtilitySelectionMode | null>(null),
+    resourceIds: new FormControl<readonly string[]>([], { nonNullable: true }),
+    dataMode: new FormControl<'calendarized' | 'billing-period'>('calendarized', { nonNullable: true })
   });
   private readonly draft = signal(this.form.getRawValue());
-  readonly facilitySearch = new FormControl('', { nonNullable: true });
-  private readonly search = toSignal(this.facilitySearch.valueChanges, { initialValue: '' });
-  readonly selectedScope = computed(() => this.ownerChosen() ? this.draft().scope : null);
   readonly facilities = computed(() => orderFacilities(
     this.workspace.facilities().filter(item => item.accountId === this.workspace.account()?.guid),
     this.workspace.account()?.portfolioFacilityOrder));
-  readonly matchingFacilities = computed(() => {
-    const search = this.search().trim().toLocaleLowerCase();
-    return this.facilities().filter(item => (item.name || 'Unnamed facility').toLocaleLowerCase().includes(search));
+  readonly facilitySummary = computed(() => {
+    const selection = this.draft().facilitySelection;
+    return selection.kind === 'all' ? 'All Facilities' : selection.facilityGuids.length === 1
+      ? this.facilities().find(item => item.guid === selection.facilityGuids[0])?.name || 'Unavailable facility' : `${selection.facilityGuids.length} facilities`;
   });
   readonly lockedProposal = computed(() => !!this.proposal());
   readonly draftChanged = computed(() => !!this.editor() && JSON.stringify(this.draft()) !== JSON.stringify(this.editor()!.initial));
@@ -74,9 +75,10 @@ export class LibraryLifecycle {
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly canRetry = computed(() => !!this.proposal() && this.outcome() !== 'conflict' && this.canAct());
   readonly canDiscard = computed(() => !this.saving() && this.outcome() !== 'refresh-required');
-  readonly ownerValid = computed(() => this.draft().scope === 'portfolio' ? this.facilities().length > 0 : this.facilities().some(item => item.guid === this.draft().facilityGuid));
+  readonly ownerValid = computed(() => { const context = resolveVisualizationFacilities({ accountGuid: this.workspace.account()?.guid ?? '', facilitySelection: this.draft().facilitySelection }, this.facilities()); return context.scope.facilityGuids.length > 0 && !context.missingFacilityGuids.length; });
   readonly canEditDraft = computed(() => this.canAct() && !!this.editor() && !this.lockedProposal()
     && this.editor()!.accountGuid === this.workspace.account()?.guid);
+  readonly canContinueFacilities = computed(() => this.canEditDraft() && this.ownerValid());
   readonly selectedChart = computed(() => VISUALIZATION_CHART_CHOICES.find(choice => choice.value === this.draft().chart));
   readonly selectedDataSources = computed(() => VISUALIZATION_DATA_SOURCES.filter(sourceKind => this.draft().sourceKinds.includes(sourceKind.value)));
   readonly dataSourcesValid = computed(() => this.draft().sourceKinds.length > 0
@@ -84,51 +86,45 @@ export class LibraryLifecycle {
     && this.selectedDataSources().length === this.draft().sourceKinds.length);
   readonly canContinueSources = computed(() => this.canEditDraft() && this.ownerValid() && !!this.selectedChart() && this.dataSourcesValid());
   readonly recipes = UTILITY_RECIPES;
-  readonly recipeGroupings = recipeGroupingChoices();
-  readonly selectedRecipeGrouping = computed(() => this.recipeGroupings.find(choice => choice.value === this.draft().recipeGrouping));
-  readonly recipeResourcePrompt = computed(() => this.draft().recipeGrouping === 'sources' ? 'Choose one or more utility sources.'
-    : this.draft().recipeGrouping === 'groups' ? 'Choose one or more meter groups.' : 'Choose one or more meters.');
-  readonly recipeResources = computed(() => {
-    const snapshot = this.workspace.snapshot(), draft = this.draft();
-    return snapshot && draft.recipe !== 'custom' && draft.recipeGrouping
-      ? recipeResourceChoices(snapshot, this.creationScope(draft), draft.recipe, draft.recipeGrouping) : [];
+  readonly selectionModes = meterSelectionChoices();
+  readonly selectedMode = computed(() => this.selectionModes.find(choice => choice.value === this.draft().selectionMode));
+  readonly hasMeters = computed(() => this.draft().sourceKinds.includes('utility'));
+  readonly sourceMeasure = computed(() => this.draft().recipe === 'cost-trend' ? 'cost' as const : 'energy' as const);
+  readonly resourceChoices = computed(() => {
+    const snapshot = this.workspace.snapshot(), value = this.draft();
+    return snapshot && value.selectionMode ? meterResourceChoices(snapshot, this.scope(value), value.selectionMode, this.sourceMeasure()) : [];
   });
-  readonly recipeResourceCards = computed(() => {
-    const available = this.recipeResources(), draft = this.draft(), grouping = this.selectedRecipeGrouping();
-    const missing: RecipeResourceChoice[] = draft.recipeResourceIds.filter(id => !available.some(choice => choice.value === id))
-      .map(value => ({ value, label: 'Unavailable selection', detail: 'Select to remove', icon: grouping?.icon ?? 'meter' }));
-    return [...available, ...missing];
+  readonly resourceCards = computed(() => {
+    const choices = this.resourceChoices();
+    return [...choices, ...this.draft().resourceIds.filter(value => !choices.some(choice => choice.value === value))
+      .map(value => ({ value, label: 'Unavailable selection', detail: 'Select to remove', icon: this.selectedMode()?.icon ?? 'meter', available: false }))];
   });
-  readonly recipeValid = computed(() => this.draft().recipe === 'custom' || !!this.selectedRecipeGrouping()
-    && (this.draft().recipe === 'energy-trend' || this.draft().recipeGrouping === 'meters')
-    && this.draft().recipeResourceIds.length > 0
-    && this.draft().recipeResourceIds.every(id => this.recipeResources().some(choice => choice.value === id)));
-  readonly canContinueRecipe = computed(() => this.canEditDraft() && this.ownerValid() && this.step() === 'recipe-resources' && this.recipeValid());
-  readonly canSubmit = computed(() => this.canEditDraft() && !!this.draft().name.trim() && this.ownerValid()
-    && (!!this.editor()?.entry || this.step() === 'name' && !!this.selectedChart() && this.dataSourcesValid() && this.recipeValid()));
+  readonly resourcePrompt = computed(() => `Choose one or more ${this.selectedMode()?.label.toLowerCase() ?? 'resources'}.`);
+  readonly resourcesValid = computed(() => {
+    const value = this.draft();
+    if (!this.hasMeters()) return true;
+    if (!this.selectedMode()) return false;
+    return value.resourceIds.length > 0 && value.resourceIds.every(id => this.resourceChoices().some(choice => choice.value === id));
+  });
+  readonly draftDefinition = computed(() => this.buildDefinition());
+  readonly nativeAvailable = computed(() => { const definition = this.draftDefinition(); const source = definition?.sources.find(source => source.kind === 'utility'); return !!definition && !!source && nativeObservationAvailable(definition, source.id, this.workspace.snapshot()!); });
+  readonly canContinueResources = computed(() => this.canEditDraft() && this.ownerValid() && this.resourcesValid());
+  readonly canContinueObservation = computed(() => this.canContinueResources() && (this.draft().dataMode === 'calendarized' || this.nativeAvailable()));
+  readonly canSubmit = computed(() => this.canEditDraft() && !!this.draft().name.trim() && this.form.controls.name.valid
+    && (!!this.editor()?.entry || this.ownerValid() && this.step() === 'name' && !!this.selectedChart() && this.dataSourcesValid() && this.canContinueObservation()));
   readonly selections = computed(() => {
-    const selections: CreationSelection[] = [];
-    const editor = this.editor(), value = this.draft();
-    const facility = this.facilities().find(item => item.guid === value.facilityGuid);
+    const selections: CreationSelection[] = [], editor = this.editor(), value = this.draft();
     if (!editor || editor.entry) return selections;
-    if (this.ownerChosen()) {
-      if (!editor.fixedFacility) selections.push({ step: 'scope', label: value.scope === 'portfolio' ? 'Portfolio' : 'Facility', icon: value.scope === 'portfolio' ? 'account' : 'facility', editable: !editor.fixedFacility });
-      if (value.scope === 'facility' && value.facilityGuid) selections.push({ step: 'facility',
-        label: facility ? facility.name || 'Unnamed facility' : 'Facility unavailable', icon: 'facility', editable: !editor.fixedFacility });
-    }
+    if (this.ownerChosen()) selections.push({ step: 'facilities', label: this.facilitySummary(), icon: 'facility', editable: true });
     const chart = this.selectedChart();
     if (chart) selections.push({ step: 'chart', label: chart.label, icon: chart.icon, editable: true });
-    if (value.recipe !== 'custom') {
-      selections.push({ step: value.recipe === 'energy-trend' ? 'recipe-grouping' : 'recipe-resources',
-        label: UTILITY_RECIPES.find(recipe => recipe.id === value.recipe)?.label ?? 'Pre-configured', icon: 'chartTimeSeries', editable: true });
-      const grouping = this.selectedRecipeGrouping();
-      if (value.recipe === 'energy-trend' && grouping) {
-        const names = this.recipeResourceCards().filter(choice => value.recipeResourceIds.includes(choice.value)).map(choice => choice.label);
-        selections.push({ step: 'recipe-resources', label: grouping.label + (names.length ? ': ' + names.join(', ') : ''), icon: grouping.icon, editable: true });
-      }
+    if (this.selectedDataSources().length) selections.push({ step: 'sources', label: this.selectedDataSources().map(source => source.label).join(', '), icon: this.selectedDataSources().length === 1 ? this.selectedDataSources()[0].icon : 'database', editable: true });
+    if (this.hasMeters() && this.selectedMode()) selections.push({ step: 'selection-mode', label: this.selectedMode()!.label, icon: this.selectedMode()!.icon, editable: true });
+    if (this.hasMeters() && this.resourcesValid()) {
+      const names = this.resourceCards().filter(choice => value.resourceIds.includes(choice.value)).map(choice => choice.label);
+      selections.push({ step: 'resources', label: names.join(', '), icon: 'checklist', editable: true });
+      if (this.step() === 'observation' || this.step() === 'name') selections.push({ step: 'observation', label: value.dataMode === 'calendarized' ? 'Calendarized months' : 'Native bills', icon: value.dataMode === 'calendarized' ? 'calendar' : 'invoice', editable: true });
     }
-    else if (this.selectedDataSources().length) selections.push({ step: 'sources', label: this.selectedDataSources().map(sourceKind => sourceKind.label).join(', '),
-      icon: this.selectedDataSources().length === 1 ? this.selectedDataSources()[0].icon : 'database', editable: true });
     return selections;
   });
   private running?: Promise<void>;
@@ -146,133 +142,146 @@ export class LibraryLifecycle {
   }
   openCreate(): void {
     if (!this.canAct() || this.editor() || this.proposal()) return;
-    if (this.workspace.account()?.isSingleFacilityCompany && !this.navigation.isSingleSiteWorkspace()) {
-      this.error.set('Restore the sole facility or convert this account to a portfolio before creating a visualization.'); return;
-    }
     const accountGuid = this.workspace.account()?.guid;
     if (!accountGuid) return;
-    const fixedFacility = this.navigation.isSingleSiteWorkspace() ? this.facilities()[0]?.guid : this.navigation.inventoryFacilityGuid();
-    const initial: VisualizationCreationDraft = { name: '', scope: fixedFacility ? 'facility' : 'portfolio', facilityGuid: fixedFacility ?? '', chart: null, sourceKinds: [], recipe: 'custom', recipeGrouping: null, recipeResourceIds: [] };
-    this.startEditor({ initial, fixedFacility, accountGuid });
+    const fixedFacility = this.navigation.inventoryFacilityGuid();
+    const initial: VisualizationCreationDraft = { name: '', facilitySelection: fixedFacility ? { kind: 'fixed', facilityGuids: [fixedFacility] } : { kind: 'all' }, chart: null, sourceKinds: [], recipe: 'custom', ...this.initialMeterChoices() };
+    this.startEditor({ initial, accountGuid });
   }
   rename(entry: VisualizationLibraryEntry): void {
     if (!this.canAct() || this.editor() || !entry.editable) return;
     this.startEditor({ accountGuid: entry.record.accountId, entry, initial: {
-      name: entry.name, scope: entry.scope, facilityGuid: entry.facilityGuid ?? '', chart: null, sourceKinds: entry.sourceKinds, recipe: 'custom', recipeGrouping: null, recipeResourceIds: []
+      name: entry.name, facilitySelection: entry.definition?.facilitySelection ?? { kind: 'all' }, chart: null, sourceKinds: entry.sourceKinds, recipe: 'custom', ...this.initialMeterChoices()
     } });
   }
   private startEditor(editor: LibraryEditor): void {
     this.error.set(undefined); this.outcome.set(undefined); this.conflictCurrent.set(undefined);
-    this.facilitySearch.setValue('');
+    this.pendingDecision = undefined; this.decisionCleared.set([]);
     this.form.reset(editor.initial, { emitEvent: false }); this.draft.set(this.form.getRawValue()); this.editor.set(editor);
-    this.ownerChosen.set(!!editor.fixedFacility); this.step.set(editor.entry ? 'name' : editor.fixedFacility ? 'chart' : 'scope');
+    const preselected = !editor.entry && editor.initial.facilitySelection.kind === 'fixed'
+      && editor.initial.facilitySelection.facilityGuids.length === 1
+      && this.facilities().some(item => editor.initial.facilitySelection.kind === 'fixed' && item.guid === editor.initial.facilitySelection.facilityGuids[0]);
+    this.ownerChosen.set(preselected); this.step.set(editor.entry ? 'name' : preselected ? 'chart' : 'facilities');
   }
-  private creationSelection(value: Pick<VisualizationCreationDraft, 'scope' | 'facilityGuid'>): import('@domain/visualizations/visualization-definition').VisualizationFacilitySelection {
-    return value.scope === 'facility' ? { kind: 'fixed', facilityGuids: [value.facilityGuid] } : { kind: 'all' };
+  private initialMeterChoices() {
+    return { selectionMode: null as UtilitySelectionMode | null, resourceIds: [] as readonly string[], dataMode: 'calendarized' as const };
   }
-  private creationScope(value: Pick<VisualizationCreationDraft, 'scope' | 'facilityGuid'>) {
-    return resolveVisualizationFacilities({ accountGuid: this.workspace.account()?.guid ?? '', facilitySelection: this.creationSelection(value) }, this.facilities()).scope;
+  private scope(value: VisualizationCreationDraft) { return resolveVisualizationFacilities({ accountGuid: this.workspace.account()?.guid ?? '', facilitySelection: value.facilitySelection }, this.facilities()).scope; }
+  private buildDefinition(): VisualizationDefinition | undefined {
+    const editor = this.editor(), value = this.draft(), snapshot = this.workspace.snapshot();
+    if (!editor || !snapshot || !value.chart || !value.sourceKinds.length || !this.ownerValid()) return undefined;
+    let definition = createVisualizationSetupDefinition({ name: value.name.trim() || 'Visualization', accountGuid: editor.accountGuid,
+      facilitySelection: value.facilitySelection, chart: createVisualizationChart(value.chart), sourceKinds: value.sourceKinds });
+    const sourceId = definition.sources.find(source => source.kind === 'utility')?.id;
+    if (!sourceId) return definition;
+    const change = (action: Parameters<typeof prepareDecisionChange>[1]) => { const result = prepareDecisionChange(definition, action, { snapshot }); if (result.state !== 'unchanged') definition = result.definition; };
+    if (this.sourceMeasure() === 'cost') change({ kind: 'measure', sourceId, measure: 'cost' });
+    if (value.selectionMode && this.selectedMode()) {
+      change({ kind: 'selection-mode', sourceId, mode: value.selectionMode });
+      for (const resourceId of value.resourceIds) change({ kind: 'toggle-resource', sourceId, resourceId, selected: true });
+      change({ kind: 'source-settings', sourceId, settings: { dataMode: value.dataMode } });
+    }
+    return definition;
   }
-
-  selectScope(scope: 'portfolio' | 'facility'): void {
-    if (!this.canEditDraft() || this.editor()?.entry || this.editor()?.fixedFacility || scope === 'facility' && !this.facilities().length) return;
-    this.facilitySearch.setValue('');
-    this.form.controls.scope.setValue(scope); this.ownerChosen.set(true);
-    this.step.set(scope === 'facility' ? 'facility' : 'chart');
+  private requestDecision(result: DecisionChangeResult, apply: () => void): void {
+    if (result.state === 'confirm') {
+      this.pendingDecision = { fingerprint: JSON.stringify(this.form.getRawValue()), editor: this.editor()!, workspaceRevision: this.workspace.revision(), apply };
+      this.decisionCleared.set(result.cleared); this.confirmation.set('decision');
+    } else apply();
   }
-  selectFacility(guid: string): void {
-    if (!this.canEditDraft() || this.editor()?.entry || this.editor()?.fixedFacility
-      || this.form.controls.scope.value !== 'facility' || !this.facilities().some(facility => facility.guid === guid)) return;
-    this.form.controls.facilityGuid.setValue(guid); this.step.set('chart');
+  confirmDecision(): void {
+    const pending = this.pendingDecision;
+    if (!pending || !this.canEditDraft()) return;
+    if (pending.editor !== this.editor() || pending.workspaceRevision !== this.workspace.revision() || pending.fingerprint !== JSON.stringify(this.form.getRawValue())) { this.error.set('Choices changed during review. Select the decision again.'); this.cancelConfirmation(); return; }
+    this.pendingDecision = undefined; this.confirmation.set(undefined); this.decisionCleared.set([]); pending.apply();
   }
+  private resetBindings(): void {
+    this.form.patchValue({ resourceIds: [], dataMode: 'calendarized' });
+  }
+  selectFacilities(selection: VisualizationFacilitySelection): void {
+    if (!this.canEditDraft() || this.editor()?.entry || sameVisualizationFacilitySelection(selection, this.draft().facilitySelection)) return;
+    const definition = this.draftDefinition();
+    if (!definition) { this.form.controls.facilitySelection.setValue(selection); return; }
+    const result = prepareDecisionChange(definition, { kind: 'facilities', selection }, { snapshot: this.workspace.snapshot()! });
+    this.requestDecision(result, () => {
+      this.form.controls.facilitySelection.setValue(selection);
+      if (result.state === 'unchanged') return;
+      const source = result.definition.sources.find(source => source.kind === 'utility');
+      if (source?.kind !== 'utility') return;
+      const rule = source.selection?.kind === 'rule' ? source.selection.filter : undefined;
+      this.form.patchValue({
+        resourceIds: source.selectionMode === 'source' ? [...rule?.utilitySources ?? []] : source.selection?.kind === 'fixed' ? [...source.selection.guids] : [],
+        dataMode: source.dataMode
+      });
+    });
+  }
+  continueFacilities(): void { if (this.canContinueFacilities()) { this.ownerChosen.set(true); this.step.set('chart'); } }
   selectChart(chart: VisualizationChartChoiceId): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.ownerValid() || !VISUALIZATION_CHART_CHOICES.some(choice => choice.value === chart)) return;
-    this.form.controls.recipe.setValue('custom'); this.form.controls.chart.setValue(chart); this.step.set('sources');
+    this.form.controls.chart.setValue(chart); this.step.set('sources');
   }
   selectRecipe(recipe: Exclude<VisualizationRecipe, 'custom'>): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.ownerValid()) return;
-    if (this.form.controls.recipe.value !== recipe) {
-      this.form.controls.recipeGrouping.setValue(recipe === 'energy-trend' ? null : 'meters');
-      this.form.controls.recipeResourceIds.setValue([]);
-    }
-    this.form.controls.recipe.setValue(recipe); this.form.controls.chart.setValue('line'); this.form.controls.sourceKinds.setValue(['utility']);
-    if (!this.form.controls.name.value.trim()) this.form.controls.name.setValue(UTILITY_RECIPES.find(r => r.id === recipe)!.label);
-    this.step.set(recipe === 'energy-trend' ? 'recipe-grouping' : 'recipe-resources');
+    this.form.patchValue({ recipe, chart: 'line', sourceKinds: this.form.controls.sourceKinds.value.includes('utility') ? this.form.controls.sourceKinds.value : [...this.form.controls.sourceKinds.value, 'utility'] });
+    if (!this.form.controls.name.value.trim()) this.form.controls.name.setValue(UTILITY_RECIPES.find(item => item.id === recipe)!.label);
+    this.step.set('selection-mode');
   }
-  selectRecipeGrouping(grouping: RecipeGrouping): void {
-    if (!this.canEditDraft() || this.editor()?.entry || this.draft().recipe !== 'energy-trend' || !this.recipeGroupings.some(choice => choice.value === grouping)) return;
-    if (this.draft().recipeGrouping !== grouping) this.form.controls.recipeResourceIds.setValue([]);
-    this.form.controls.recipeGrouping.setValue(grouping); this.step.set('recipe-resources');
+  selectMeterMode(mode: UtilitySelectionMode): void {
+    if (!this.canEditDraft() || !this.hasMeters() || !this.selectionModes.some(choice => choice.value === mode)) return;
+    const definition = this.draftDefinition(), sourceId = definition?.sources.find(source => source.kind === 'utility')?.id;
+    if (!definition || !sourceId) return;
+    this.requestDecision(prepareDecisionChange(definition, { kind: 'selection-mode', sourceId, mode }, { snapshot: this.workspace.snapshot()! }), () => {
+      if (mode !== this.form.controls.selectionMode.value) this.resetBindings();
+      this.form.controls.selectionMode.setValue(mode); this.step.set('resources');
+    });
   }
-  toggleRecipeResource(id: string): void {
-    if (!this.canEditDraft() || this.editor()?.entry || !this.recipeResourceCards().some(choice => choice.value === id)) return;
-    const selected = this.form.controls.recipeResourceIds.value;
-    this.form.controls.recipeResourceIds.setValue(selected.includes(id) ? selected.filter(value => value !== id) : [...selected, id]);
+  toggleResource(id: string): void {
+    if (!this.canEditDraft() || !this.resourceCards().some(choice => choice.value === id)) return;
+    const selected = this.form.controls.resourceIds.value;
+    this.form.controls.resourceIds.setValue(selected.includes(id) ? selected.filter(value => value !== id) : [...selected, id]);
   }
-  continueRecipe(): void { if (this.canContinueRecipe()) this.step.set('name'); }
+  selectObservation(dataMode: 'calendarized' | 'billing-period'): void {
+    if (!this.canEditDraft() || dataMode === 'billing-period' && !this.nativeAvailable()) return;
+    this.form.controls.dataMode.setValue(dataMode); this.step.set('name');
+  }
   toggleSource(kind: VisualizationSourceKind): void {
-    if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(sourceKind => sourceKind.value === kind)) return;
+    if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(source => source.value === kind)) return;
     const selected = this.form.controls.sourceKinds.value;
-    this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]);
+    const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } };
+    if (kind === 'utility' && selected.includes(kind) && this.resourcesValid()) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Meter resource selections'], affectedNodeIds: [] }, apply); else apply();
   }
-  continueSources(): void { if (this.canContinueSources()) this.step.set('name'); }
+  continueSources(): void { if (this.canContinueSources()) this.step.set(this.hasMeters() ? 'selection-mode' : 'name'); }
+  continueResources(): void { if (this.canContinueResources()) this.step.set('observation'); }
+  continueObservation(): void { if (this.canContinueObservation()) this.step.set('name'); }
   editSelection(step: VisualizationCreationStep): void {
     if (!this.canEditDraft() || !this.selections().some(selection => selection.step === step && selection.editable)) return;
-    const cleared: Partial<VisualizationCreationDraft> = { name: '' };
-    if (step === 'scope' || step === 'facility' || step === 'chart') {
-      cleared.sourceKinds = [];
-      cleared.recipe = 'custom';
-      cleared.recipeGrouping = null;
-      cleared.recipeResourceIds = [];
-      if (step !== 'chart') cleared.chart = null;
-      if (step === 'scope') cleared.facilityGuid = '';
-    } else if (step === 'recipe-grouping') cleared.recipeResourceIds = [];
-    this.form.patchValue(cleared);
-    this.form.controls.name.markAsUntouched();
-    this.error.set(undefined);
-    this.step.set(step);
+    this.error.set(undefined); this.step.set(step);
   }
   async submit(): Promise<void> {
     const editor = this.editor();
     if (!editor || !this.canSubmit()) { this.form.markAllAsTouched(); return; }
-    if (!editor.entry && this.workspace.account()?.isSingleFacilityCompany && !this.navigation.isSingleSiteWorkspace()) {
-      this.error.set('The sole facility is unavailable. Resolve account setup before creating this visualization.'); return;
-    }
     const value = this.form.getRawValue();
-    if (editor.fixedFacility && (value.scope !== 'facility' || value.facilityGuid !== editor.fixedFacility)) return;
-    if (this.navigation.isSingleSiteWorkspace() && !editor.entry && value.scope !== 'facility') return;
     let command: VisualizationCommand;
     try { command = editor.entry ? {
       kind: 'update', accountGuid: editor.accountGuid, guid: editor.entry.record.guid, expectedRevision: editor.entry.record.revision,
       definition: { ...editor.entry.definition!, name: value.name.trim() }
-    } : this.commands.prepareCreate(value.recipe !== 'custom'
-      ? createRecipeDefinition(this.workspace.snapshot()!, value.recipe, this.creationSelection(value), { grouping: value.recipeGrouping!, ids: value.recipeResourceIds }, value.name.trim())
-      : createVisualizationSetupDefinition({ name: value.name.trim(), accountGuid: editor.accountGuid,
-      facilitySelection: this.creationSelection(value),
-      chart: createVisualizationChart(value.chart!), sourceKinds: value.sourceKinds })); }
+    } : this.commands.prepareCreate({ ...this.draftDefinition()!, name: value.name.trim() }); }
     catch (error) { this.error.set(message(error)); return; }
     this.proposal.set(command);
     await this.execute();
   }
   async duplicate(entry: VisualizationLibraryEntry): Promise<void> {
-    if (!this.canAct() || this.editor() || this.proposal() || !entry.editable || !this.copyOwnerAvailable()) return;
-    if (this.workspace.account()?.isSingleFacilityCompany && entry.scope === 'portfolio') {
-      await this.duplicateToScope(entry); return;
-    }
+    if (!this.canAct() || this.editor() || this.proposal() || !entry.editable) return;
     try { this.proposal.set(this.commands.prepareDuplicate(entry.record)); await this.execute(); }
     catch (error) { this.error.set(message(error)); }
   }
   async duplicateToScope(entry: VisualizationLibraryEntry): Promise<void> {
-    if (!this.canAct() || this.needsProtection() || this.editor() || !entry.editable || !this.copyOwnerAvailable()) return;
+    if (!this.canAct() || this.needsProtection() || this.editor() || !entry.editable) return;
     this.visualizations.rememberReturn(entry.record.accountId, this.navigation.inventoryFacilityGuid());
     try { if (!await this.router.navigate(this.visualizations.workbenchRoute(entry.record.accountId, entry.record.guid), { queryParams: { action: 'copy-scope' } })) this.error.set('The visualization could not be opened.'); }
     catch { this.error.set('The visualization could not be opened. Please try again.'); }
   }
-  private copyOwnerAvailable(): boolean {
-    if (!this.workspace.account()?.isSingleFacilityCompany || this.navigation.isSingleSiteWorkspace()) return true;
-    this.error.set('Restore the sole facility or convert this account to a portfolio before duplicating a visualization.');
-    return false;
-  }
+
   requestDelete(entry: VisualizationLibraryEntry): void {
     if (!this.canAct() || this.editor() || this.proposal()) return;
     this.error.set(undefined); this.deleteCandidate.set(entry); this.confirmation.set('delete');
@@ -328,7 +337,8 @@ export class LibraryLifecycle {
     this.finishLeave(true);
     if (!callerOwnsNavigation && (proposal.kind === 'create' || proposal.kind === 'duplicate')) {
       this.visualizations.rememberReturn(proposal.accountGuid, this.navigation.inventoryFacilityGuid());
-      if (!await this.visualizations.open(proposal.accountGuid, proposal.guid)) this.error.set('Saved successfully. Open the visualization from Dashboard to continue.');
+      const opened = await this.visualizations.open(proposal.accountGuid, proposal.guid);
+      if (!opened) this.error.set('Saved successfully. Open the visualization from Dashboard to continue.');
     }
   }
   useSavedConflict(): void { this.resolveRenameConflict('saved'); }
@@ -351,12 +361,13 @@ export class LibraryLifecycle {
   }
   discard(): void {
     if (!this.canDiscard()) return;
+    this.pendingDecision = undefined; this.decisionCleared.set([]);
     this.editor.set(undefined); this.proposal.set(undefined); this.outcome.set(undefined); this.error.set(undefined);
     this.conflictCurrent.set(undefined); this.deleteCandidate.set(undefined); this.confirmation.set(undefined); this.finishLeave(true);
   }
   cancelConfirmation(): void {
     if (this.saving()) return;
-    this.confirmation.set(undefined);
+    this.confirmation.set(undefined); this.pendingDecision = undefined; this.decisionCleared.set([]);
     // A retained deletion proposal moves to the library's visible recovery alert.
     this.deleteCandidate.set(undefined);
     this.finishLeave(false);

@@ -1,0 +1,12 @@
+<section class="decision-section" [class.decision-section--attention]="attention()">
+  <button #toggleButton type="button" class="decision-section__toggle" [id]="nodeId() + '-heading'"
+    [attr.aria-expanded]="expanded()" [attr.aria-controls]="nodeId() + '-body'" (click)="toggle(toggleButton)">
+    <app-ui-icon [name]="icon()"/>
+    <span class="decision-section__text"><strong>{{ label() }}</strong>@if (summary()) { <span>{{ summary() }}</span> }</span>
+    @if (attention()) { <app-ui-icon name="warning"/><span class="visually-hidden">Needs attention</span> }
+    <app-ui-icon [name]="expanded() ? 'chevronUp' : 'chevronDown'"/>
+  </button>
+  <div #body class="decision-section__body" [id]="nodeId() + '-body'" [hidden]="!expanded()" [attr.aria-labelledby]="nodeId() + '-heading'">
+    <ng-content/>
+  </div>
+</section>

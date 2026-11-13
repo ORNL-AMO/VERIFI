@@ -10,13 +10,14 @@ import { visualizationDataSourceChoices } from '../../visualization-data-sources
 export class CreationComponent implements OnDestroy {
   readonly lifecycle = inject(LibraryLifecycle);
   readonly dataSources = visualizationDataSourceChoices();
-  readonly charts = VISUALIZATION_CHART_CHOICES.filter(chart => !['area', 'combination', 'breakdown-bar'].includes(chart.value));
+  readonly charts = VISUALIZATION_CHART_CHOICES.filter(chart => !['area', 'breakdown-bar'].includes(chart.value));
   private readonly stepHeading = viewChild<ElementRef<HTMLElement>>('stepHeading');
   private readonly visualizationName = viewChild<ElementRef<HTMLInputElement>>('visualizationName');
   private readonly modal = inject(ModalPortalService);
   private readonly container = inject(ViewContainerRef);
   @ViewChild('deleteConfirmation', { static: true }) private deleteConfirmation!: TemplateRef<unknown>;
   @ViewChild('discardConfirmation', { static: true }) private discardConfirmation!: TemplateRef<unknown>;
+  @ViewChild('decisionConfirmation', { static: true }) private decisionConfirmation!: TemplateRef<unknown>;
   private portal?: TemplatePortal;
   constructor() {
     let focusedStep: string | undefined;
@@ -33,7 +34,7 @@ export class CreationComponent implements OnDestroy {
       untracked(() => {
         this.hide();
         if (confirmation) {
-          this.portal = new TemplatePortal(confirmation === 'delete' ? this.deleteConfirmation : this.discardConfirmation, this.container);
+          this.portal = new TemplatePortal(confirmation === 'delete' ? this.deleteConfirmation : confirmation === 'decision' ? this.decisionConfirmation : this.discardConfirmation, this.container);
           this.modal.show(this.portal, { blockWorkspace: true });
         }
       });
