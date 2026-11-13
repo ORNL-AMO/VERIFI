@@ -179,6 +179,15 @@ describe('saved utility journey across native browser boundaries', () => {
     expect((first.nativeElement as HTMLElement).querySelector('tbody')?.textContent).toContain('Factory main');
     const workerCount = workerMessages.mock.calls.length;
 
+    const styled = decoded(saved);
+    const itemTypeEdit: VisualizationDefinition = { ...styled, series: styled.series.map(series => ({ ...series,
+      overrides: series.overrides?.map(override => ({ ...override, traceType: 'bar' as const })) })) };
+    render(first, { ...saved, definition: itemTypeEdit });
+    await expectValue(first, 10);
+    const typedView = first.componentInstance.preview.state();
+    expect(typedView.state === 'ready' && (typedView.presentation.inputs.model as import('../time-series/time-series.models').TimeSeriesModel).traces[0].type).toBe('bar');
+    expect(workerMessages.mock.calls.length).toBe(workerCount);
+
     const beforeEdit = decoded(saved);
     const edited: VisualizationDefinition = { ...beforeEdit, appearance: { ...beforeEdit.appearance, title: 'Saved source energy' },
       sources: beforeEdit.sources.map(source => source.kind === 'utility' ? { ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } } : source),

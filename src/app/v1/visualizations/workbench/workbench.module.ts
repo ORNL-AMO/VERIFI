@@ -9,6 +9,10 @@ import { PreviewModule } from '../preview/preview.module';
 import { RecoveryModule } from '../recovery/recovery.module';
 import { UtilityEditorsModule } from '../utility/editors/utility-editors.module';
 import { TimeSeriesModule } from '../time-series/time-series.module';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
+import { RouterLink } from '@angular/router';
+import { DecisionSectionModule } from '../shared/decision-section/decision-section.module';
 
-@NgModule({ declarations: [WorkbenchComponent], imports: [FacilityPickerModule, CommonModule, ReactiveFormsModule, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule, TimeSeriesModule], exports: [WorkbenchComponent] })
+@NgModule({ declarations: [WorkbenchComponent], imports: [FacilityPickerModule, CommonModule, ReactiveFormsModule, RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule, TimeSeriesModule, DecisionSectionModule], exports: [WorkbenchComponent] })
 export class WorkbenchModule { }

@@ -50,6 +50,10 @@ export function applyPeriodForm(definition: VisualizationDefinition, value: Peri
   return { ...definition, period, comparison };
 }
 
+function periodSettingsFingerprint(definition: VisualizationDefinition): string {
+  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison]);
+}
+
 @Component({ selector: 'app-utility-period-settings', standalone: false, templateUrl: './period-settings.component.html',
   styleUrls: ['./period-settings.component.css'] })
 export class PeriodSettingsComponent {
@@ -76,7 +80,7 @@ export class PeriodSettingsComponent {
   @Input({ required: true }) set context(context: PeriodSettingsContext) {
     this.contextValue = context; this.disabled.set(context.disabled);
     const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid]);
-    const fingerprint = JSON.stringify([context.definition.period, context.definition.comparison]);
+    const fingerprint = periodSettingsFingerprint(context.definition);
     if (identity !== this.identity) {
       this.identity = identity; this.hydrate(context.definition);
     } else if (fingerprint !== this.savedFingerprint) {
@@ -89,10 +93,17 @@ export class PeriodSettingsComponent {
 
   constructor() {
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => {
+      this.contextValue?.draftChanged?.();
       const value = this.form.getRawValue(); this.value.set(value);
       this.publish();
     });
     this.destroy.onDestroy(() => this.contextValue?.validityChanged?.(false));
+  }
+
+  selectChoice<T>(control: FormControl<T>, value: T): void {
+    if (this.disabled() || control.disabled || control.value === value) return;
+    control.markAsDirty();
+    control.setValue(value);
   }
 
   useSaved(): void {
@@ -104,12 +115,12 @@ export class PeriodSettingsComponent {
   keepLocal(): void {
     const context = this.contextValue;
     if (!context || context.disabled) return;
-    this.savedFingerprint = JSON.stringify([context.definition.period, context.definition.comparison]);
+    this.savedFingerprint = periodSettingsFingerprint(context.definition);
     this.conflict.set(false); this.publish();
   }
 
   private hydrate(definition: VisualizationDefinition): void {
-    this.savedFingerprint = JSON.stringify([definition.period, definition.comparison]); this.conflict.set(false);
+    this.savedFingerprint = periodSettingsFingerprint(definition); this.conflict.set(false);
     this.form.reset(periodFormValue(definition), { emitEvent: false }); this.value.set(this.form.getRawValue());
   }
 
@@ -118,6 +129,7 @@ export class PeriodSettingsComponent {
     context?.validityChanged?.(this.conflict() || invalid);
     if (!context || context.disabled || invalid || this.conflict()) return;
     const next = applyPeriodForm(context.definition, value);
-    this.savedFingerprint = JSON.stringify([next.period, next.comparison]); context.changed(next);
+    this.savedFingerprint = periodSettingsFingerprint(next);
+    context.changed({ period: next.period, comparison: next.comparison });
   }
 }

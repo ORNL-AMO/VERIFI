@@ -35,34 +35,18 @@ export interface VisualizationPreviewPresenter {
     PreviewPresentation | Promise<PreviewPresentation>;
 }
 
-/** Source editor components accept a typed context input; changes remain local until the workbench saves. */
-export interface VisualizationSourceEditorContext {
-  readonly definition: VisualizationDefinition;
-  readonly sourceId: string;
-  readonly disabled: boolean;
-  readonly changed: (definition: VisualizationDefinition) => void;
-}
-export interface VisualizationSourceEditorRegistration {
-  readonly kind: VisualizationSourceKind;
-  readonly component: Type<unknown>;
-}
-
-/** Feature adapters may supply multi providers. No concrete adapters are registered by Vis3. */
+/** Feature adapters supply calculation and presentation registrations. */
 export const VISUALIZATION_SOURCE_PROVIDERS = new InjectionToken<readonly VisualizationSourceProvider[]>(
   'Visualization source providers', { providedIn: 'root', factory: () => [] });
 export const VISUALIZATION_PREVIEW_PRESENTERS = new InjectionToken<readonly VisualizationPreviewPresenter[]>(
   'Visualization preview presenters', { providedIn: 'root', factory: () => [] });
 export const VISUALIZATION_DATE_CONTEXT_RESOLVER = new InjectionToken<PreviewDateContextResolver | undefined>(
   'Visualization shared date context resolver', { providedIn: 'root', factory: () => undefined });
-export const VISUALIZATION_SOURCE_EDITORS = new InjectionToken<readonly VisualizationSourceEditorRegistration[]>(
-  'Visualization source editors', { providedIn: 'root', factory: () => [] });
-
 /** Resolve feature registrations from the injector that imports PreviewModule. */
 @Injectable()
 export class PreviewRegistry {
   private readonly providers = inject(VISUALIZATION_SOURCE_PROVIDERS);
   private readonly presenters = inject(VISUALIZATION_PREVIEW_PRESENTERS);
-  private readonly editors = inject(VISUALIZATION_SOURCE_EDITORS);
   readonly dates = inject(VISUALIZATION_DATE_CONTEXT_RESOLVER);
 
   provider(kind: VisualizationSourceKind): VisualizationSourceProvider | undefined {
@@ -73,8 +57,5 @@ export class PreviewRegistry {
     const matches = this.presenters.filter(presenter => presenter.kind === kind);
     return matches.length === 1 ? matches[0] : undefined;
   }
-  editor(kind: VisualizationSourceKind): VisualizationSourceEditorRegistration | undefined {
-    const matches = this.editors.filter(editor => editor.kind === kind);
-    return matches.length === 1 ? matches[0] : undefined;
-  }
+
 }

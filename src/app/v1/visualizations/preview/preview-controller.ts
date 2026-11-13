@@ -10,7 +10,7 @@ import { PreviewIdentity, PreviewPresentation, PreviewRegistry } from './preview
 
 export type PreviewState =
   | { readonly state: 'inactive' | 'setup-required' | 'invalid' | 'unsupported' | 'loading' | 'empty' | 'missing-source' | 'error' | 'incompatible'; readonly message: string; readonly reasons?: readonly string[] }
-  | { readonly state: 'ready'; readonly message: string; readonly component: Type<unknown>; readonly presentation: PreviewPresentation;
+  | { readonly state: 'ready'; readonly component: Type<unknown>; readonly presentation: PreviewPresentation;
       readonly definition: VisualizationDefinition; readonly evidence: readonly VisualizationSourceEvidence[] };
 
 let nextPreviewId = 0;
@@ -18,10 +18,10 @@ let nextPreviewId = 0;
 /** Preview lifetime and evidence are independent of persistence and autosave acknowledgements. */
 @Injectable()
 export class PreviewController {
-  private readonly workspace = inject(AccountWorkspaceStore);
   private readonly instanceId = ++nextPreviewId;
+  private readonly workspace = inject(AccountWorkspaceStore);
   private readonly registry = inject(PreviewRegistry);
-  private readonly value = signal<PreviewState>({ state: 'inactive', message: 'Preview is inactive.' });
+  private readonly value = signal<PreviewState>({ state: 'inactive', message: 'Chart is inactive.' });
   readonly state = this.value.asReadonly();
   private generation = 0;
   private abort?: AbortController;
@@ -32,30 +32,30 @@ export class PreviewController {
     this.cancel();
     if (this.destroyed) return;
     this.context = { definition: definition ? structuredClone(definition) : undefined, identity: identity ? { ...identity } : undefined, active };
-    if (!active) { this.value.set({ state: 'inactive', message: 'Preview is inactive.' }); return; }
-    if (!definition || !identity) { this.value.set({ state: 'setup-required', message: 'Open a saved visualization to preview it.' }); return; }
+    if (!active) { this.value.set({ state: 'inactive', message: 'Chart is inactive.' }); return; }
+    if (!definition || !identity) { this.value.set({ state: 'setup-required', message: 'Open a saved visualization.' }); return; }
     const decoded = decodeVisualizationDefinition(this.context.definition);
     if (decoded.state !== 'valid') {
       this.value.set({ state: decoded.state === 'unsupported' ? 'unsupported' : decoded.state === 'invalid' ? 'invalid' : 'setup-required',
         message: decoded.state === 'setup-required'
           ? decoded.definition.chart
             ? `Complete source selection and the remaining settings for this ${visualizationChartLabel(decoded.definition.chart)} visualization.`
-            : 'Complete source and chart setup to preview this visualization.'
-          : 'This saved configuration cannot be previewed.',
+            : 'Complete source and chart setup.'
+          : 'This saved configuration cannot be displayed.',
         reasons: decoded.issues.map(issue => issue.message) });
       return;
     }
     if (identity.accountGuid !== decoded.definition.accountGuid || !identity.definitionGuid.trim()) {
-      this.value.set({ state: 'invalid', message: 'The preview does not belong to the current saved account and visualization.' }); return;
+      this.value.set({ state: 'invalid', message: 'The chart does not belong to the current account and visualization.' }); return;
     }
     const providers = decoded.definition.sources.map(source => this.registry.provider(source.kind));
     const presenter = this.registry.presenter(decoded.definition.chart!.kind);
     if (providers.some(provider => !provider) || !presenter || !this.registry.dates) {
-      this.value.set({ state: 'unsupported', message: 'Preview support for these sources and chart settings is not available yet. Your saved setup is preserved.' }); return;
+      this.value.set({ state: 'unsupported', message: 'These data sources or chart settings are not supported yet. Your saved setup is preserved.' }); return;
     }
     const abort = this.abort = new AbortController();
     const generation = this.generation;
-    this.value.set({ state: 'loading', message: 'Preparing current preview…' });
+    this.value.set({ state: 'loading', message: 'Preparing chart…' });
     void this.resolve(decoded.definition, this.context.identity!, generation, abort);
   }
 
@@ -74,13 +74,15 @@ export class PreviewController {
   private async resolve(definition: VisualizationDefinition, identity: PreviewIdentity, generation: number, abort: AbortController): Promise<void> {
     try {
       const { scope, missingFacilityGuids } = resolveVisualizationFacilities(definition, this.workspace.facilities());
-      if (missingFacilityGuids.length) { this.value.set({ state: 'missing-source', message: 'Review the missing selected facilities.', reasons: missingFacilityGuids }); return; }
-      if (!scope.facilityGuids.length) { this.value.set({ state: 'empty', message: 'No facilities are included in this visualization.' }); return; }
+      if (missingFacilityGuids.length) {
+        this.value.set({ state: 'missing-source', message: 'Review the missing selected facilities.', reasons: missingFacilityGuids }); return;
+      }
+      if (!scope.facilityGuids.length) { this.value.set({ state: 'empty', message: 'No included facilities are available.' }); return; }
       const dateContext = Object.freeze({ ...await this.registry.dates!.resolve(definition, identity, abort.signal) });
       if (!this.current(generation, abort)) return;
       if (!civilDate(dateContext.calendarDate) || dateContext.latestDataDate !== undefined && !civilDate(dateContext.latestDataDate)
         || definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate) {
-        this.value.set({ state: 'incompatible', message: 'Resolve a real shared calendar date and any required latest-data anchor before previewing.' }); return;
+        this.value.set({ state: 'incompatible', message: 'The selected period has no valid calendar date or latest-data anchor.' }); return;
       }
       const requestId = `visualization-preview-${this.instanceId}-${generation}`;
       const evidence = await Promise.all(definition.sources.map(async source => {
@@ -98,7 +100,7 @@ export class PreviewController {
       }));
       if (!this.current(generation, abort)) return;
       if (evidence.some(entry => !isCurrentVisualizationResponse(entry.request.identity, entry.resolution, abort.signal))) {
-        this.value.set({ state: 'error', message: 'The preview response no longer matches this request. Retry the current preview.' }); return;
+        this.value.set({ state: 'error', message: 'The chart response is out of date. Retry the chart.' }); return;
       }
       const unsupportedChart = evidence.find(entry => entry.chartSupport.state === 'unsupported');
       if (unsupportedChart) {
@@ -112,7 +114,7 @@ export class PreviewController {
       }
       const compatibility = checkVisualizationCompatibility(definition, evidence);
       if (compatibility.state !== 'compatible') {
-        this.value.set({ state: 'incompatible', message: 'Review the sources and settings before previewing this configuration.',
+        this.value.set({ state: 'incompatible', message: 'Review the data sources and chart settings.',
           reasons: compatibility.reasons.map(reason => reason.message) }); return;
       }
       const presenter = this.registry.presenter(definition.chart!.kind)!;
@@ -120,14 +122,14 @@ export class PreviewController {
       if (!this.current(generation, abort)) return;
       if (!presentation.details?.caption?.trim() || !presentation.details.columns.length
         || presentation.details.rows.some(row => row.length !== presentation.details.columns.length)) {
-        this.value.set({ state: 'error', message: 'The preview does not provide complete accessible underlying values.' }); return;
+        this.value.set({ state: 'error', message: 'The chart does not provide complete accessible values.' }); return;
       }
-      this.value.set({ state: 'ready', message: 'Preview uses the current local configuration.', component: presenter.component,
+      this.value.set({ state: 'ready', component: presenter.component,
         presentation, definition, evidence });
     } catch (error) {
       if (!this.current(generation, abort)) return;
       abort.abort();
-      this.value.set({ state: 'error', message: error instanceof Error ? error.message : 'The preview could not be prepared. Retry to try again.' });
+      this.value.set({ state: 'error', message: error instanceof Error ? error.message : 'The chart could not be prepared. Retry the chart.' });
     }
   }
 }
