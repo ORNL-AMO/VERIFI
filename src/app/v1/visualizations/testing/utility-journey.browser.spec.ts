@@ -194,7 +194,9 @@ describe('saved utility journey across native browser boundaries', () => {
     const reopened = store.savedVisualizations().find(record => record.guid === saved.guid)!;
     const second = mount(reopened);
     await expectValue(second, 0.01);
-    expect(decoded(reopened)).toMatchObject({ version: 2, chart: { type: 'bar' }, series: [{ overrides: [{ resourceGuid: 'meter-a', visible: true, label: 'Factory main' }] }] });
+    expect(decoded(reopened)).toMatchObject({ version: 2,
+      chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' },
+      series: [{ overrides: [{ resourceGuid: 'meter-a', visible: true, label: 'Factory main' }] }] });
     const beforeReadingWorkerCount = workerMessages.mock.calls.length;
 
     const bill = store.meterData().find(item => item.guid === 'reading-a')!;
