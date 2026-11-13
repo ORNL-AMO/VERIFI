@@ -244,4 +244,25 @@ describe('saved chart settings', () => {
     expect(effective.map(item => item.metadata.resourceGuid)).toEqual(['meter-a', 'meter-b']);
     expect(effective[1].selected).toMatchObject({ color: '#123456', traceType: 'bar' });
   });
+  it('retains provider-owned item order and appearance when a trace type edit adds a resource override', () => {
+    const state = groupedSetup(), base = utilityVisualizationFixture();
+    const foreign: VisualizationSeriesOverride = { resourceGuid: 'meter-b', accountGuid: 'foreign-account', order: 99, label: 'Foreign B' };
+    const definition: VisualizationDefinition = { ...base, series: [
+      { id: 'members', sourceId: 'utility', metric: 'energy', axis: 'left', overrides: [
+        { seriesId: 'utility:meter-a', order: 1, label: 'Meter A' },
+        { seriesId: 'utility:meter-b', order: 0, traceType: 'line', color: '#123456', label: 'Meter B' }, foreign
+      ] }
+    ] };
+    const metadata: ResolvedVisualizationSeries[] = ['meter-a', 'meter-b'].map(resourceGuid => ({ ...state.metadata[0],
+      id: `utility:${resourceGuid}`, resourceGuid }));
+    state.hydrate(definition, metadata);
+    state.fixture.componentInstance.rows().find(row => row.key === 'utility:meter-b')!.form.controls.traceType.setValue('bar');
+    const saved = state.acknowledge();
+    expect(saved.series[0].overrides!.slice(0, 3)).toEqual(definition.series[0].overrides);
+    expect(saved.series[0].overrides).toContainEqual(expect.objectContaining({ resourceGuid: 'meter-b', accountGuid: base.accountGuid,
+      order: 0, traceType: 'bar', color: '#123456', label: 'Meter B' }));
+    expect(resolveVisualizationSeries(saved, metadata).map(item => item.metadata.resourceGuid)).toEqual(['meter-b', 'meter-a']);
+    expect(decodeVisualizationDefinition(saved).state).toBe('valid');
+  });
+
 });
