@@ -19,13 +19,17 @@ jobs:
     secrets: inherit
 
   # Production web deployment still waits for packaging, signing, verification,
-  # artifact collection, and immutable draft release creation to finish.
+  # artifact collection, immutable draft creation, and durable packaging evidence.
+  # The audit gate is enabled in the second rollout change after the real-draft trial.
   release:
     if: github.ref_name == 'master'
     runs-on: ubuntu-24.04
     needs: package
     permissions:
+      actions: read
       contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,7 +37,23 @@ jobs:
           persist-credentials: false
       - name: Read release version
         id: version
-        run: node -p '"version=" + require("./package.json").version' >> "$GITHUB_OUTPUT"
+        run: |
+          node -p '"version=" + require("./package.json").version' >> "$GITHUB_OUTPUT"
+          node -p '"node=" + require("./package.json").engines.node' >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.version.outputs.node }}
+          cache: npm
+      - name: Install audit tooling dependencies
+        run: npm ci
+      - name: Refuse replacement of published distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/desktop/production-evidence.cjs preflight
+      - name: Create or verify the immutable production tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/desktop/production-evidence.cjs ensure-tag
       - name: Get verified distributions
         uses: actions/download-artifact@v4
         with:
@@ -41,6 +61,7 @@ jobs:
           path: release/
           merge-multiple: true
       - name: Create draft release
+        id: release
         uses: softprops/action-gh-release@v2
         with:
           name: VERIFI v${{ steps.version.outputs.version }}
@@ -50,3 +71,24 @@ jobs:
           generate_release_notes: true
           files: release/*
           fail_on_unmatched_files: true
+      - name: Preserve original packaging evidence
+        id: evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ steps.release.outputs.id }}
+        run: node scripts/desktop/production-evidence.cjs prepare "$RELEASE_ID" production-evidence
+      - name: Attest packaging evidence
+        id: attestation
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ steps.evidence.outputs.evidence }}
+      - name: Attach durable evidence and verification bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ steps.release.outputs.id }}
+          EVIDENCE_FILE: ${{ steps.evidence.outputs.evidence }}
+          BUNDLE_FILE: ${{ steps.evidence.outputs.bundle }}
+          GENERATED_BUNDLE: ${{ steps.attestation.outputs.bundle-path }}
+        run: |
+          cp "$GENERATED_BUNDLE" "$BUNDLE_FILE"
+          node scripts/desktop/production-evidence.cjs attach "$RELEASE_ID" "$EVIDENCE_FILE" "$BUNDLE_FILE"

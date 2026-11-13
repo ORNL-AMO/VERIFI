@@ -1,0 +1,192 @@
+name: Production draft audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: Exact unpublished production release ID
+        type: string
+        required: true
+      release_run_id:
+        description: Successful master CI/CD run that uploaded the draft
+        type: string
+        required: true
+
+# Stage one is read-only. It cannot attach an authoritative audit or publish.
+permissions: {}
+
+concurrency:
+  group: production-draft-audit-${{ inputs.release_id }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Require default-branch audit tooling
+        if: github.ref != format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          echo 'Start this read-only audit from the repository default branch.' >&2
+          exit 1
+      - name: Require a fresh audit dispatch
+        if: github.run_attempt != 1
+        run: |
+          echo 'Start a fresh audit dispatch against the same release IDs; do not rerun individual audit jobs.' >&2
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Read tooling Node version
+        id: node
+        run: node -p '"version=" + require("./package.json").engines.node' >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          cache: npm
+      - run: npm ci
+      - name: Download and bind exact draft and baseline files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ inputs.release_id }}
+          RELEASE_RUN_ID: ${{ inputs.release_run_id }}
+        run: node scripts/desktop/audit-production-draft.cjs prepare "$RELEASE_ID" "$RELEASE_RUN_ID" audit
+      - name: Retain preview inputs and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-draft-audit-inputs
+          path: |
+            audit/audit-plan.json
+            audit/audit-preview.json
+            audit/audit-preview.md
+            audit/evidence/*
+            audit/baseline-evidence/*
+          retention-days: 90
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-draft-audit-windows-payload
+          path: audit/windows/*
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-draft-audit-mac-payload
+          path: audit/mac/*
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-draft-audit-linux-payload
+          path: audit/linux/*
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
+  inspect:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-2025
+          - platform: mac
+            os: macos-26
+          - platform: linux
+            os: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - name: Require a fresh audit dispatch
+        if: github.run_attempt != 1
+        shell: bash
+        run: exit 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Read tooling Node version
+        id: node
+        shell: bash
+        run: node -p '"version=" + require("./package.json").engines.node' >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-draft-audit-${{ matrix.platform }}-payload
+          path: audit-payload
+      - name: Inspect exact packaged production configuration
+        shell: bash
+        env:
+          AUDIT_PLATFORM: ${{ matrix.platform }}
+        run: node scripts/desktop/audit-production-draft.cjs inspect "$AUDIT_PLATFORM" audit-payload audit-result/inspection.json
+      - name: Retain inspection result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-draft-audit-${{ matrix.platform }}-inspection
+          path: audit-result/inspection.json
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: [prepare, inspect]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Read tooling Node version
+        id: node
+        run: node -p '"version=" + require("./package.json").engines.node' >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-draft-audit-inputs
+          path: audit
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: production-draft-audit-*-inspection
+          path: inspection-results
+      - name: Recheck draft and baseline and summarize
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p results
+          for platform in windows mac linux; do
+            mkdir -p "results/$platform"
+            if [[ -f "inspection-results/production-draft-audit-$platform-inspection/inspection.json" ]]; then
+              cp "inspection-results/production-draft-audit-$platform-inspection/inspection.json" "results/$platform/inspection.json"
+            fi
+          done
+          node scripts/desktop/audit-production-draft.cjs collect audit results
+      - name: Retain readable and machine-readable preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-draft-audit-preview
+          path: |
+            audit/audit-preview.json
+            audit/audit-preview.md
+          retention-days: 90
+          if-no-files-found: error
