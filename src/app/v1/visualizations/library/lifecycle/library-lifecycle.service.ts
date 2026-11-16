@@ -1,3 +1,4 @@
+import { isAllPredictors } from '@domain/visualizations/predictor/predictor-source';
 import { predictorResourceChoices } from '../../predictor/predictor-items';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -25,7 +26,7 @@ export type VisualizationCreationStep = 'facilities' | 'chart' | 'sources' | 'se
 export interface VisualizationCreationDraft {
   name: string; facilitySelection: VisualizationFacilitySelection;
   chart: VisualizationChartChoiceId | null; sourceKinds: readonly VisualizationSourceKind[];
-  predictorGuids: readonly string[];
+  predictorGuids: readonly string[]; predictorAll: boolean;
   recipe: VisualizationRecipe; selectionMode: UtilitySelectionMode | null; resourceIds: readonly string[]; dataMode: 'calendarized' | 'billing-period';
 }
 interface CreationSelection { readonly step: VisualizationCreationStep; readonly label: string; readonly icon: IconName; readonly editable: boolean; }
@@ -57,6 +58,7 @@ export class LibraryLifecycle {
     facilitySelection: new FormControl<VisualizationFacilitySelection>({ kind: 'all' }, { nonNullable: true }),
     chart: new FormControl<VisualizationChartChoiceId | null>(null),
     sourceKinds: new FormControl<readonly VisualizationSourceKind[]>([], { nonNullable: true }),
+    predictorAll: new FormControl(false, { nonNullable: true }),
     predictorGuids: new FormControl<readonly string[]>([], { nonNullable: true }),
     recipe: new FormControl<VisualizationRecipe>('custom', { nonNullable: true }),
     selectionMode: new FormControl<UtilitySelectionMode | null>(null),
@@ -93,7 +95,8 @@ export class LibraryLifecycle {
   readonly selectedMode = computed(() => this.selectionModes.find(choice => choice.value === this.draft().selectionMode));
   readonly hasPredictors = computed(() => this.draft().sourceKinds.includes('predictor'));
   readonly predictorChoices = computed(() => { const snapshot = this.workspace.snapshot(); return snapshot ? predictorResourceChoices(snapshot, this.scope(this.draft())) : []; });
-  readonly predictorSelectionValid = computed(() => !this.hasPredictors() || this.draft().predictorGuids.every(guid => this.predictorChoices().some(choice => choice.value === guid)));
+  readonly predictorSelectionValid = computed(() => !this.hasPredictors() || this.draft().predictorAll || this.draft().predictorGuids.every(guid => this.predictorChoices().some(choice => choice.value === guid)));
+  readonly predictorSelectedGuids = computed(() => this.draft().predictorAll ? this.predictorChoices().map(choice => choice.value) : this.draft().predictorGuids);
   readonly hasMeters = computed(() => this.draft().sourceKinds.includes('utility'));
   readonly sourceMeasure = computed(() => this.draft().recipe === 'cost-trend' ? 'cost' as const : 'energy' as const);
   readonly resourceChoices = computed(() => {
@@ -131,8 +134,8 @@ export class LibraryLifecycle {
       selections.push({ step: 'resources', label: names.join(', '), icon: 'checklist', editable: true });
       if (this.step() === 'observation' || this.step() === 'predictor' || this.step() === 'name') selections.push({ step: 'observation', label: value.dataMode === 'calendarized' ? 'Calendarized months' : 'Native bills', icon: value.dataMode === 'calendarized' ? 'calendar' : 'invoice', editable: true });
     }
-    if (this.hasPredictors() && (value.predictorGuids.length || this.step() === 'name')) selections.push({ step: 'predictor',
-      label: value.predictorGuids.length ? value.predictorGuids.map(guid => this.predictorChoices().find(choice => choice.value === guid)?.label ?? 'Unavailable predictor').join(', ') : 'Choose predictors later', icon: 'predictor', editable: true });
+    if (this.hasPredictors() && (value.predictorAll || value.predictorGuids.length || this.step() === 'name')) selections.push({ step: 'predictor',
+      label: value.predictorAll ? 'All Predictors' : value.predictorGuids.length ? value.predictorGuids.map(guid => this.predictorChoices().find(choice => choice.value === guid)?.label ?? 'Unavailable predictor').join(', ') : 'Choose predictors later', icon: 'predictor', editable: true });
     return selections;
   });
   private running?: Promise<void>;
@@ -172,7 +175,7 @@ export class LibraryLifecycle {
     this.ownerChosen.set(preselected); this.step.set(editor.entry ? 'name' : preselected ? 'chart' : 'facilities');
   }
   private initialSourceChoices() {
-    return { predictorGuids: [] as readonly string[], selectionMode: null as UtilitySelectionMode | null, resourceIds: [] as readonly string[], dataMode: 'calendarized' as const };
+    return { predictorAll: false, predictorGuids: [] as readonly string[], selectionMode: null as UtilitySelectionMode | null, resourceIds: [] as readonly string[], dataMode: 'calendarized' as const };
   }
   private scope(value: VisualizationCreationDraft) { return resolveVisualizationFacilities({ accountGuid: this.workspace.account()?.guid ?? '', facilitySelection: value.facilitySelection }, this.facilities()).scope; }
   private buildDefinition(): VisualizationDefinition | undefined {
@@ -183,7 +186,7 @@ export class LibraryLifecycle {
     const sourceId = definition.sources.find(source => source.kind === 'utility')?.id;
     const change = (action: Parameters<typeof prepareDecisionChange>[1]) => { const result = prepareDecisionChange(definition, action, { snapshot }); if (result.state !== 'unchanged') definition = result.definition; };
     const predictorSourceId = definition.sources.find(source => source.kind === 'predictor')?.id;
-    if (predictorSourceId && value.predictorGuids.length) change({ kind: 'predictor-selection', sourceId: predictorSourceId, predictorGuids: value.predictorGuids });
+    if (predictorSourceId && (value.predictorAll || value.predictorGuids.length)) change({ kind: 'predictor-selection', sourceId: predictorSourceId, predictorGuids: value.predictorGuids, ...(value.predictorAll ? { all: true } : {}) });
     if (sourceId && this.sourceMeasure() === 'cost') change({ kind: 'measure', sourceId, measure: 'cost' });
     if (sourceId && value.selectionMode && this.selectedMode()) {
       change({ kind: 'selection-mode', sourceId, mode: value.selectionMode });
@@ -216,6 +219,7 @@ export class LibraryLifecycle {
       this.form.controls.facilitySelection.setValue(selection);
       if (result.state === 'unchanged') return;
       const predictor = result.definition.sources.find(source => source.kind === 'predictor');
+      this.form.controls.predictorAll.setValue(predictor?.kind === 'predictor' && isAllPredictors(predictor));
       this.form.controls.predictorGuids.setValue(predictor?.kind === 'predictor' && predictor.selection?.kind === 'fixed' ? predictor.selection.guids : []);
       const source = result.definition.sources.find(source => source.kind === 'utility');
       if (source?.kind !== 'utility') return;
@@ -258,8 +262,8 @@ export class LibraryLifecycle {
   toggleSource(kind: VisualizationSourceKind): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(source => source.value === kind)) return;
     const selected = this.form.controls.sourceKinds.value;
-    const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } if (kind === 'predictor' && selected.includes(kind)) this.form.controls.predictorGuids.setValue([]); };
-    if (kind === 'predictor' && selected.includes(kind) && this.form.controls.predictorGuids.value.length) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Predictor selection'], affectedNodeIds: [] }, apply);
+    const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } if (kind === 'predictor' && selected.includes(kind)) { this.form.controls.predictorGuids.setValue([]); this.form.controls.predictorAll.setValue(false); } };
+    if (kind === 'predictor' && selected.includes(kind) && (this.form.controls.predictorAll.value || this.form.controls.predictorGuids.value.length)) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Predictor selection'], affectedNodeIds: [] }, apply);
     else if (kind === 'utility' && selected.includes(kind) && this.resourcesValid()) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Meter resource selections'], affectedNodeIds: [] }, apply); else apply();
   }
   continueSources(): void { if (this.canContinueSources()) this.step.set(this.hasMeters() ? 'selection-mode' : this.hasPredictors() ? 'predictor' : 'name'); }
@@ -267,8 +271,14 @@ export class LibraryLifecycle {
   continueObservation(): void { if (this.canContinueObservation()) this.step.set(this.hasPredictors() ? 'predictor' : 'name'); }
   togglePredictor(predictorGuid: string): void {
     if (!this.canEditDraft() || !this.hasPredictors() || !this.predictorChoices().some(choice => choice.value === predictorGuid)) return;
-    const selected = this.form.controls.predictorGuids.value;
+    const selected = this.predictorSelectedGuids();
+    this.form.controls.predictorAll.setValue(false);
     this.form.controls.predictorGuids.setValue(selected.includes(predictorGuid) ? selected.filter(guid => guid !== predictorGuid) : [...selected, predictorGuid]);
+  }
+  toggleAllPredictors(): void {
+    if (!this.canEditDraft()) return;
+    this.form.controls.predictorAll.setValue(!this.form.controls.predictorAll.value);
+    this.form.controls.predictorGuids.setValue([]);
   }
   continuePredictors(): void {
     if (this.canEditDraft() && this.hasPredictors() && this.predictorSelectionValid()) this.step.set('name');

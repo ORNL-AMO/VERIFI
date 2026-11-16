@@ -12,6 +12,17 @@ import { FacilityPickerComponent } from '../../shared/facility-picker/facility-p
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
 describe('visualization creation drawer', () => {
+  it('offers All Predictors as an explicit card even with an empty catalog', async () => {
+    const { workspace } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
+    workspace.publish({ ...workspace.snapshot()!, predictors: [] });
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('predictor'); lifecycle.continueSources(); fixture.detectChanges();
+    const all = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.predictor-all-choice')!;
+    expect(all.disabled).toBe(false); all.click(); fixture.detectChanges();
+    expect(all.getAttribute('aria-pressed')).toBe('true');
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'rule', resource: 'predictor', filter: {} } });
+    fixture.destroy();
+  });
   it('toggles multiple predictor cards, waits for Continue, and saves both bindings with left-axis defaults', async () => {
     const { commands, workspace } = configureLibraryTest([LibraryModule]);
     const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'production', name: 'Production', unit: 'widgets' };

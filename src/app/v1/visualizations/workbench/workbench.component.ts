@@ -1,3 +1,4 @@
+import { resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, ElementRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
@@ -63,8 +64,8 @@ export class WorkbenchComponent {
     if (!this.workspace.isReady() || !snapshot || definition?.accountGuid !== this.accountGuid()
       || snapshot.account.guid !== this.accountGuid() || this.editor.record()?.guid !== this.navigation.routeState().visualizationGuid) return [];
     const included = this.facilityContext()?.scope.facilityGuids ?? [];
-    const selected = new Set(definition.sources.flatMap(source => source.kind === 'predictor' && source.selection?.kind === 'fixed'
-      ? source.selection.guids : []));
+    const selected = new Set(definition.sources.flatMap(source => source.kind === 'predictor'
+      ? resolvePredictorSelection(snapshot, this.facilityContext()!.scope, source) : []));
     return snapshot.predictors.filter(predictor => predictor.accountId === snapshot.account.guid
       && included.includes(predictor.facilityId) && selected.has(predictor.guid)).map(predictor => predictor.guid);
   });

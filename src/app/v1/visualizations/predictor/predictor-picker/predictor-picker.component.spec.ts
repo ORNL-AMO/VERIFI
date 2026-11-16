@@ -15,9 +15,10 @@ describe('predictor picker', () => {
     fixture.componentInstance.selectionRequested.subscribe(selected); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     fixture.componentInstance.search.setValue('station b'); fixture.detectChanges();
-    expect(root.querySelectorAll('button')).toHaveLength(1);
-    root.querySelector<HTMLButtonElement>('button')!.click(); expect(selected).toHaveBeenCalledExactlyOnceWith('weather');
+    expect(root.querySelectorAll('.predictor-choice')).toHaveLength(1);
+    expect(root.querySelector('.predictor-all-choice')).not.toBeNull();
+    root.querySelector<HTMLButtonElement>('.predictor-choice')!.click(); expect(selected).toHaveBeenCalledExactlyOnceWith('weather');
     fixture.componentRef.setInput('disabled', true); fixture.detectChanges();
-    expect(root.querySelector<HTMLButtonElement>('button')!.disabled).toBe(true);
+    expect(root.querySelector<HTMLButtonElement>('.predictor-choice')!.disabled).toBe(true);
   });
 });

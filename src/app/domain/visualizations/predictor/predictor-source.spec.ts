@@ -4,7 +4,7 @@ import { visualizationSnapshot } from '@app/v1/visualizations/testing/visualizat
 import { createVisualizationDefinition, type PredictorVisualizationSource, type VisualizationDefinition } from '../visualization-definition';
 import type { VisualizationSourceRequest } from '../visualization-source-provider';
 import { checkVisualizationCompatibility } from '../visualization-capabilities';
-import { predictorCatalog, predictorCapabilities, predictorChartSupport, latestPredictorDate, resolvePredictor } from './predictor-source';
+import { predictorCatalog, predictorCapabilities, predictorChartSupport, latestPredictorDate, resolvePredictor, resolvePredictorSelection, predictorHistoryRange } from './predictor-source';
 
 function setup() {
   const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'predictor-a', name: 'Production', unit: 'widgets' };
@@ -23,6 +23,35 @@ function setup() {
 }
 
 describe('saved monthly predictor projection', () => {
+  it('resolves live All within owned facilities without rewriting intent; fixed selections remain exact', () => {
+    const { snapshot, predictor, source, reading, request } = setup();
+    const all: PredictorVisualizationSource = { ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } };
+    const original = structuredClone(all);
+    snapshot.predictors = [];
+    expect(resolvePredictorSelection(snapshot, request.identity.scope, all)).toEqual([]);
+    expect(resolvePredictor(snapshot, { ...request, source: all }).state).toBe('empty');
+    snapshot.predictors = [predictor, { ...predictor, guid: 'new', name: 'Weather', predictorType: 'Weather', noLongerInUse: true },
+      { ...predictor, guid: 'math', predictorType: 'Math' }, { ...predictor, guid: 'foreign', accountId: 'other' }, { ...predictor, guid: 'outside', facilityId: 'other' }];
+    snapshot.predictorData = [reading(1, 4), { ...reading(4, 0, 'new-zero'), predictorId: 'new', weatherDataWarning: true }];
+    expect(resolvePredictorSelection(snapshot, request.identity.scope, all)).toEqual(['predictor-a', 'new']);
+    expect(resolvePredictorSelection(snapshot, request.identity.scope, source)).toEqual(['predictor-a']);
+    expect(latestPredictorDate(snapshot, request.identity.scope, all)).toBe('2024-04-30');
+    expect(predictorHistoryRange(snapshot, request.identity.scope, all)).toEqual({ start: '2024-01-01', end: '2024-04-30' });
+    expect(all).toEqual(original);
+  });
+  it('supplies resolved gaps for an empty All catalog and excluded histories when a companion supplies a window', () => {
+    const { snapshot, request, source, reading } = setup();
+    const dateContext = { ...request.dateContext, monthlyRange: { start: '2024-01-01', end: '2024-03-31' } };
+    snapshot.predictors = [];
+    expect(resolvePredictor(snapshot, { ...request, dateContext, source: { ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } } }))
+      .toMatchObject({ state: 'empty', resolved: { series: [], alignment: { key: 'YYYY-MM' } } });
+    const restored = setup();
+    restored.snapshot.predictorData = [reading(1, 2, 'a'), reading(1, 3, 'b'), reading(3, NaN)];
+    const result = resolvePredictor(restored.snapshot, { ...request, dateContext });
+    expect(result).toMatchObject({ state: 'empty', resolved: { series: [{ resourceGuid: 'predictor-a' }], quality: { omissions: expect.any(Array) } } });
+    if (result.state !== 'empty' || result.resolved?.data.kind !== 'time-series') throw new Error('Expected gap evidence');
+    expect(result.resolved.data.rows.map(row => Object.values(row.values)[0].state)).toEqual(['excluded', 'missing', 'excluded']);
+  });
   it.each([
     ['HDD', 'days', 'Heating base not set'], ['CDD', 'days', 'Cooling base not set'], ['relativeHumidity', '%', 'relativeHumidity'],
     ['dryBulbTemp', '°F', 'dryBulbTemp'], ['wetBulbTemp', '°F', 'wetBulbTemp'], ['dewPointTemp', '°F', 'dewPointTemp'], ['precipitation', 'in', 'precipitation']
@@ -183,7 +212,7 @@ describe('saved monthly predictor projection', () => {
   });
   it('rejects rules, aggregation, conversions, comparisons, fiscal windows and nonmonthly charts', () => {
     const { snapshot, request, source } = setup();
-    for (const change of [{ source: { ...source, aggregation: 'sum' as const } }, { source: { ...source, selection: { kind: 'rule' as const, resource: 'predictor' as const, filter: {} } } },
+    for (const change of [{ source: { ...source, aggregation: 'sum' as const } }, { source: { ...source, selection: { kind: 'rule' as const, resource: 'predictor' as const, filter: { search: 'unimplemented' } } } },
       { source: { ...source, settings: { unit: { kind: 'pinned' as const, value: 'kg' } } } }, { comparison: { kind: 'previous-period' as const } },
       { period: { kind: 'fiscal-year' as const, year: 2024 } }, { chart: { kind: 'time-series' as const, defaultTraceType: 'line' as const, interval: 'yearly' as const, stack: 'none' as const } }]) {
       expect(resolvePredictor(snapshot, { ...request, ...change }).state).toBe('unsupported');

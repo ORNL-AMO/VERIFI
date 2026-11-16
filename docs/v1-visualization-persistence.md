@@ -28,6 +28,8 @@ Account transfers include all definitions. Facility exports/extraction include o
 
 Missing/excluded sources retain original intent and durable reference blocks so coincident destination records cannot satisfy them, including after repeated transfers. Explicit repair replaces or acknowledges affected intent. Renames preserve identity; ordinary source deletion does not rewrite definitions. Live membership retains its declared behavior. Known utility presentation references use the mapping/dormancy rules in the utility owner.
 
+Known resource-bearing meter and predictor presentation IDs use the same typed GUID namespace as resource selectors, including source IDs containing colons. Verified mappings update both selector and owner; unmapped, foreign, unknown-format predictor appearances, and appearances attached to blocked or unclassified source identities retain their original ownership and remain dormant. A destination GUID collision cannot verify them, including on repeated transfers. Reviewed facility changes use the same presentation-identity parsing, pruning only verified excluded resources. Source-local categories retain their existing category semantics.
+
 Unreadable payloads remain opaque and preserved. Transfers lock unreadable records and retain ordered transfer maps; later format recognition does not automatically verify relationships. Re-export retains original payload and context. Contradictory outer identity/ownership, duplicate identities, and malformed preservation metadata reject preparation before replacement deletion or writes.
 
 ## Deletion and restore

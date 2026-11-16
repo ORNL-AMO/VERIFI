@@ -7,6 +7,43 @@ import { VisualizationDefinition } from './visualization-definition';
 import { remapVisualizationDefinition, visualizationReferenceKey, visualizationReferences } from './visualization-references';
 
 describe('saved visualization reference mapping', () => {
+  it('maps predictor presentation IDs through verified GUIDs, retaining dormant and unknown appearances across transfers', () => {
+    const base = utilityVisualizationFixture(), sourceId = 'predictors:weather';
+    const original: VisualizationDefinition = { ...base, sources: [{ id: sourceId, kind: 'predictor', measure: 'value', aggregation: 'none', selection: { kind: 'rule', resource: 'predictor', filter: {} } }],
+      series: [{ id: 'values', sourceId, metric: 'value', axis: 'left', overrides: [
+        { seriesId: `${sourceId}:predictor:old`, color: '#123456', label: 'Saved label', axis: 'right', traceType: 'bar', lineStyle: 'dotted', visible: false, order: 2 },
+        { resourceGuid: 'old', lineStyle: 'dashed' }, { seriesId: `${sourceId}:predictor:missing`, label: 'Dormant' },
+        { seriesId: `${sourceId}:predictor:foreign`, accountGuid: 'foreign-account', color: '#654321' },
+        { seriesId: `${sourceId}:unknown:old`, label: 'Opaque' }
+      ] }] };
+    const before = structuredClone(original);
+    const first = remapVisualizationDefinition(original, 'account-b', { predictor: { old: 'new' } });
+    expect(first.definition.series[0].overrides).toEqual([
+      { ...original.series[0].overrides![0], seriesId: `${sourceId}:predictor:new`, accountGuid: 'account-b' },
+      { resourceGuid: 'new', lineStyle: 'dashed', accountGuid: 'account-b' },
+      { ...original.series[0].overrides![2], accountGuid: 'account-a' }, original.series[0].overrides![3],
+      { ...original.series[0].overrides![4], accountGuid: 'account-a' }
+    ]);
+    const second = remapVisualizationDefinition(first.definition, 'account-c', { predictor: { new: 'newer', missing: 'collision', foreign: 'collision' } });
+    expect(second.definition.series[0].overrides![0]).toMatchObject({ seriesId: `${sourceId}:predictor:newer`, accountGuid: 'account-c', visible: false, order: 2 });
+    expect(second.definition.series[0].overrides!.slice(2)).toEqual(first.definition.series[0].overrides!.slice(2));
+    const metadata = ['newer', 'missing', 'foreign'].map(resourceGuid => ({ id: `${sourceId}:predictor:${resourceGuid}`, sourceId, metric: 'value', resourceGuid,
+      label: resourceGuid, unit: 'widgets', dimension: 'predictor', additive: false }));
+    expect(resolveVisualizationSeries(second.definition, metadata).map(item => item.selected)).toEqual([
+      expect.objectContaining({ lineStyle: 'dashed' }), expect.objectContaining({ axis: 'left' }), expect.objectContaining({ axis: 'left' })
+    ]);
+    expect(original).toEqual(before);
+  });
+  it.each(['predictor', 'unknown'] as const)('keeps both predictor appearance selectors dormant for a %s transfer block despite a destination collision', kind => {
+    const base = utilityVisualizationFixture(), sourceId = 'predictors';
+    const definition: VisualizationDefinition = { ...base, sources: [{ id: sourceId, kind: 'predictor', measure: 'value', aggregation: 'none', selection: { kind: 'fixed', resource: 'predictor', guids: ['blocked'] } }],
+      series: [{ id: 'values', sourceId, metric: 'value', axis: 'left', overrides: [{ seriesId: `${sourceId}:predictor:blocked`, visible: false }, { resourceGuid: 'blocked', color: '#123456' }] }] };
+    const result = remapVisualizationDefinition(definition, 'account-b', { predictor: { blocked: 'collision' } }, [
+      { path: 'sources.0.selection.guids.0', kind, guid: 'blocked', reason: 'not-transferred' }
+    ]);
+    expect(result.definition.sources[0]).toMatchObject({ selection: { guids: ['blocked'] } });
+    expect(result.definition.series[0].overrides).toEqual(definition.series[0].overrides!.map(item => ({ ...item, accountGuid: 'account-a' })));
+  });
   it.each(['meter', 'group', 'facility'] as const)('transfers resource-bearing %s provider selectors without losing hidden styling', groupBy => {
     const base = utilityVisualizationFixture(), sourceId = 'utility:main';
     const { resourceGuid: _resource, ...series } = base.series[0];

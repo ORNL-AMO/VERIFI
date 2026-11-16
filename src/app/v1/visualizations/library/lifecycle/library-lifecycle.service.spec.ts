@@ -25,6 +25,20 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it('saves All with an empty catalog and tracks future predictors until an individual is deselected', () => {
+    const { workspace } = configureLibraryTest();
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
+    selectSetup(lifecycle, ['predictor']); lifecycle.editSelection('predictor'); lifecycle.toggleAllPredictors();
+    lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('All history');
+    expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'rule', resource: 'predictor', filter: {} } });
+    const first = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'first' };
+    workspace.publish({ ...workspace.snapshot()!, predictors: [first, { ...first, guid: 'future' }] });
+    expect(lifecycle.predictorSelectedGuids()).toEqual(['first', 'future']);
+    lifecycle.editSelection('predictor'); lifecycle.togglePredictor('first');
+    expect(lifecycle.form.controls.predictorAll.value).toBe(false);
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'fixed', guids: ['future'] } });
+  });
   it('hands an exact predictor through Add and Back, retains it on compatible scope changes, and saves explicit empty setup', () => {
     const { workspace } = configureLibraryTest();
     const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'production', name: 'Production' };

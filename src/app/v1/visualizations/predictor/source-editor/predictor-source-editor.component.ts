@@ -1,4 +1,5 @@
-import { Component, Input, computed, inject, signal } from '@angular/core';
+import { isAllPredictors, resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
+import { Component, Input, computed, effect, inject, signal } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
@@ -17,11 +18,25 @@ export class PredictorSourceEditorComponent {
 
   @Input({ required: true }) set context(context: UtilityEditorContext) {
     this.contextState.set(context);
-    const source = context.definition.sources.find(source => source.id === context.sourceId);
-    this.selected.setValue(source?.kind === 'predictor' && source.selection?.kind === 'fixed' && source.selection.resource === 'predictor' ? [...source.selection.guids] : [], { emitEvent: false });
     context.disabled ? this.selected.disable({ emitEvent: false }) : this.selected.enable({ emitEvent: false });
   }
 
+  readonly allMode = computed(() => {
+    const context = this.contextState(), source = context?.definition.sources.find(source => source.id === context.sourceId);
+    return source?.kind === 'predictor' && isAllPredictors(source);
+  });
+  constructor() {
+    effect(() => {
+      const context = this.contextState(), snapshot = this.workspace.snapshot();
+      const source = context?.definition.sources.find(source => source.id === context.sourceId);
+      const scope = context && snapshot ? resolveVisualizationFacilities(context.definition, snapshot.facilities).scope : undefined;
+      this.selected.setValue(source?.kind === 'predictor' && snapshot && scope ? [...resolvePredictorSelection(snapshot, scope, source)] : []);
+    });
+  }
+  selectAll(all: boolean): void {
+    const context = this.contextState();
+    if (context && !context.disabled) context.request?.({ kind: 'predictor-selection', sourceId: context.sourceId, predictorGuids: [], ...(all ? { all: true } : {}) });
+  }
   readonly items = computed(() => {
     const snapshot = this.workspace.snapshot(), context = this.contextState();
     return snapshot && context ? projectPredictorItems(context.definition, context.sourceId, snapshot).map(item => ({ ...item,

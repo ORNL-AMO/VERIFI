@@ -1,3 +1,4 @@
+import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { allowsMixedAxisUnits } from './visualization-source-provider';
 import { resolveVisualizationSeries } from './visualization-series';
 import type { VisualizationChart, VisualizationDefinition, VisualizationScope, VisualizationSource } from './visualization-definition';
@@ -136,7 +137,7 @@ function seriesReferenceKinds(source: VisualizationSource, guid: string): readon
  * role's requested dates. Sparse coverage is valid; substituting another period is not.
  */
 function resolvedDataReasons(definition: VisualizationDefinition, source: VisualizationSource,
-  resolved: VisualizationResolvedData, scope: VisualizationScope): VisualizationCompatibilityReason[] {
+  resolved: VisualizationResolvedData, scope: VisualizationScope, allowEmpty = false): VisualizationCompatibilityReason[] {
   const reasons: VisualizationCompatibilityReason[] = [];
   const add = (code: 'period' | 'data' | 'series' | 'ownership', message: string) => reasons.push({ code, message, sourceId: source.id });
   const validRange = (range: { start: string; end: string }) => civilDate(range.start) && civilDate(range.end) && range.start <= range.end;
@@ -166,7 +167,7 @@ function resolvedDataReasons(definition: VisualizationDefinition, source: Visual
     add('series', 'Resolved series IDs must be nonempty and unique.');
   const selectedMetadata = resolveVisualizationSeries(definition, resolved.series).map(entry => entry.metadata);
   const data = resolved.data;
-  if (!observations(data).length) add('data', 'Use an empty source resolution when no explicit observations are available.');
+  if (!observations(data).length && !allowEmpty) add('data', 'Use an empty source resolution when no explicit observations are available.');
   if (data.kind === 'time-series') {
     for (const row of data.rows) {
       const role = row.role ?? 'primary';
@@ -246,13 +247,16 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       || chart.kind === 'scatter' && chart.showFit && !capabilities.controls.includes('fit')
       || chart.kind === 'correlation' && chart.scale === 'z-score' && !capabilities.controls.includes('normalization'))
       add('capability', 'This source does not support the requested chart transformation.', source.id);
-    if (resolution.state !== 'ready') {
+    if (resolution.state !== 'ready' && !(isMixedPredictorSourceSet(definition.sources) && resolution.state === 'empty' && resolution.resolved)) {
       add(resolution.state === 'missing-source' ? 'missing-source' : 'data', resolution.message, source.id); continue;
     }
-    const resolved = resolution.resolved;
+    const resolved = 'resolved' in resolution ? resolution.resolved : undefined;
+    if (!resolved) { add('data', 'Resolve source evidence before rendering.', source.id); continue; }
+    if (resolution.state === 'empty' && observations(resolved.data).some(point => point.state === 'observed'))
+      add('data', 'Empty source evidence cannot contain observed values.', source.id);
     if (!capabilities.controls.includes('axes') && resolveVisualizationSeries(definition, resolved.series).some(entry => entry.selected.axis === 'right'))
       add('capability', 'This source does not support the requested axis override.', source.id);
-    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope));
+    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope, resolution.state === 'empty' && isMixedPredictorSourceSet(definition.sources)));
     if (!chartCapability.shapes.includes(resolved.data.kind) || !capabilities.shapes.includes(resolved.data.kind)
       || !capabilities.alignments.includes(resolved.alignment.kind))
       add('capability', 'This chart cannot preserve the resolved data shape.', source.id);
@@ -283,7 +287,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   for (const series of definition.series) {
     const available = allMetadata.some(metadata => metadata.sourceId === series.sourceId && metadata.metric === series.metric
       && (series.resourceGuid === undefined || metadata.resourceGuid === series.resourceGuid));
-    if (!available && series.visible !== false) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
+    if (!available && series.visible !== false && !(isMixedPredictorSourceSet(definition.sources) && evidence.some(entry => entry.request.source.id === series.sourceId && entry.resolution.state === 'empty' && entry.resolution.resolved?.series.length === 0) && !series.resourceGuid)) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
   }
   for (const { selected: series, metadata } of selected) {
     const entry = resolvedSources.find(entry => entry.source.id === series.sourceId)!;
@@ -324,7 +328,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     for (const axis of ['left', 'right'] as const) {
       const axisSeries = selected.filter(entry => chart.kind !== 'time-series' || entry.selected.axis === axis);
       const axisCapabilities = [...new Set(axisSeries.map(entry => entry.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
-      if (!allowsMixedAxisUnits(chart, axisCapabilities) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
+      if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
         add('units', 'Use compatible units and currency on each axis; composition totals require one meaning.');
     }
   }

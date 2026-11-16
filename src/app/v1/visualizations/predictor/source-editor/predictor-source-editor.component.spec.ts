@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
-import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, type VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { visualizationSnapshot } from '../../testing/visualization-test-fixtures';
 import { decisionNodeId, prepareDecisionChange } from '../../decisions/decision-tree';
@@ -9,6 +9,48 @@ import { PredictorEditorsModule } from '../predictor-editors.module';
 import { PredictorSourceEditorComponent } from './predictor-source-editor.component';
 
 describe('predictor source decisions and editor', () => {
+  it('preserves provider fallback, dormant and foreign appearances while converting exact declarations into All', () => {
+    const { snapshot, definition } = setup(), sourceId = 'source-1';
+    const exact: VisualizationDefinition = { ...definition, series: [{ id: 'exact', sourceId, metric: 'value', resourceGuid: 'predictor-a', label: 'My production', axis: 'right' as const, overrides: [
+      { seriesId: `${sourceId}:predictor:predictor-a`, color: '#abcdef', traceType: 'bar' as const, lineStyle: 'dotted' as const },
+      { resourceGuid: 'predictor-b', label: 'Dormant hours', axis: 'right' as const },
+      { resourceGuid: 'predictor-b', accountGuid: 'foreign-account', label: 'Foreign dormant' }
+    ] }] };
+    const before = structuredClone(exact);
+    const result = prepareDecisionChange(exact, { kind: 'predictor-selection', sourceId, predictorGuids: [], all: true }, { snapshot });
+    if (result.state === 'unchanged') throw new Error('Expected All');
+    expect(projectPredictorItems(result.definition, sourceId, snapshot).find(item => item.identity.resourceGuid === 'predictor-a')?.appearance)
+      .toMatchObject({ label: 'My production', axis: 'right', color: '#abcdef', traceType: 'bar', lineStyle: 'dotted' });
+    expect(projectPredictorItems(result.definition, sourceId, snapshot).find(item => item.identity.resourceGuid === 'predictor-b')?.appearance.label).toBe('Dormant hours');
+    expect(result.definition.series[0].overrides).toContainEqual(exact.series[0].overrides![2]);
+    expect(exact).toEqual(before);
+  });
+  it('turns exact presentation declarations into dormant GUID overrides when choosing All', () => {
+    const { snapshot, definition } = setup();
+    const exact = { ...definition, series: [{ id: 'exact', sourceId: 'source-1', metric: 'value', resourceGuid: 'predictor-a', axis: 'right' as const, label: 'Pinned name' }] };
+    const result = prepareDecisionChange(exact, { kind: 'predictor-selection', sourceId: 'source-1', predictorGuids: [], all: true }, { snapshot });
+    if (result.state === 'unchanged') throw new Error('Expected All');
+    expect(result.definition.series.every(series => !series.resourceGuid)).toBe(true);
+    expect(projectPredictorItems(result.definition, 'source-1', snapshot).find(item => item.identity.resourceGuid === 'predictor-a')?.appearance).toMatchObject({ label: 'Pinned name', axis: 'right' });
+  });
+  it('preserves sibling styles and drafts when entering All, and reviews explicit removal when returning to fixed picks', () => {
+    const { snapshot, definition } = setup(), sourceId = 'source-1';
+    const styled = prepareDecisionChange(definition, { kind: 'item-style', sourceId, item: { resourceGuid: 'predictor-a' }, changes: { label: 'Custom', axis: 'right' } }, { snapshot });
+    if (styled.state === 'unchanged') throw new Error('Expected styling');
+    const node = decisionNodeId({ kind: 'item', sourceId, itemKey: 'resource:predictor-a' });
+    const all = prepareDecisionChange(styled.definition, { kind: 'predictor-selection', sourceId, predictorGuids: [], all: true }, { snapshot, invalidNodeIds: [node] });
+    if (all.state === 'unchanged') throw new Error('Expected live All');
+    expect(all.state).toBe('apply'); expect(all.affectedNodeIds).not.toContain(node);
+    expect(projectPredictorItems(all.definition, sourceId, snapshot).find(item => item.identity.resourceGuid === 'predictor-a')?.appearance).toMatchObject({ label: 'Custom', axis: 'right' });
+    const changed = { ...snapshot, predictors: [...snapshot.predictors, { ...snapshot.predictors[0], guid: 'future', name: 'Future' }] };
+    expect(projectPredictorItems(all.definition, sourceId, changed).find(item => item.identity.resourceGuid === 'future')?.appearance.axis).toBe('left');
+    expect(projectPredictorItems(all.definition, sourceId, { ...snapshot, predictors: [snapshot.predictors[1]] })).toHaveLength(1);
+    expect(projectPredictorItems(all.definition, sourceId, snapshot).find(item => item.identity.resourceGuid === 'predictor-a')?.appearance.label).toBe('Custom');
+    const fixed = prepareDecisionChange(all.definition, { kind: 'predictor-selection', sourceId, predictorGuids: ['predictor-b'] }, { snapshot, invalidNodeIds: [node] });
+    expect(fixed.state).toBe('confirm');
+    if (fixed.state === 'unchanged') throw new Error('Expected removal');
+    expect(fixed.definition.sources[0]).toMatchObject({ selection: { kind: 'fixed', guids: ['predictor-b'] } });
+  });
   afterEach(() => TestBed.resetTestingModule());
   function setup() {
     const p = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'predictor-a', name: 'Production', unit: 'widgets' };

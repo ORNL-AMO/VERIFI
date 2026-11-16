@@ -2,7 +2,7 @@
 
 Development guide for [VIS5 #2906](https://github.com/ORNL-AMO/VERIFI/issues/2906), under the [Visualizations and Home plan](v1-visualizations-and-home-plan.md). Work through predictors and saved weather first, then Energy Uses, then analysis results and saved models. Each slice is a separate development chat with its own acceptance checkpoint.
 
-P1 and P2 are complete under their agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
+P1–P4 are complete under their agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
 
 ## Working one chat at a time
 
@@ -27,8 +27,8 @@ Completed behavior belongs in the owning feature references, not a growing imple
 
 - [x] **P1 — Saved predictor selection: Complete**
 - [x] **P2 — Weather and quality hardening: Complete**
-- [ ] **P3 — Compatible combinations: Not started**
-- [ ] **P4 — Predictor acceptance: Not started**
+- [x] **P3 — Compatible combinations: Complete**
+- [x] **P4 — Predictor acceptance: Complete**
 - [ ] **E1 — Equipment history: Not started**
 - [ ] **E2 — Groups and facilities: Not started**
 - [ ] **E3 — Energy Uses acceptance: Not started**
@@ -59,33 +59,19 @@ Finish P1–P4 before starting Energy Uses. These are working checkpoints within
 
 ### P3 Compatible combinations
 
-**Outcome:** Chart multiple predictors and compatible predictor/utility combinations using existing monthly line/bar capability.
+**Outcome:** Complete P1's multiple-exact-predictor support with explicit All Predictors and compatible monthly meter/predictor rendering. Current behavior belongs to [predictor observations](v1-visualization-foundation.md#predictor-observations), [predictor setup](v1-visualization-workbench.md#predictor-setup), and [utility visualizations](v1-utility-visualizations.md).
 
-**Start with:** P1/P2, [utility visualizations](v1-utility-visualizations.md), [runtime contracts](v1-visualization-foundation.md#runtime-boundaries), and [preview registration](../src/app/v1/visualizations/preview/preview-registry.ts). Inspect the utility date-context resolver and time-series presenter rather than introducing a second date boundary.
+**Agreed boundaries:** All follows future Standard/Weather predictors within included facilities without a filter builder or exclusions. Individual picks remain fixed; deselection leaves All. Existing appearance and drafts survive compatible mode changes, and automatic membership changes retain dormant GUID overrides. Support one calendarized utility configuration with one predictor configuration in monthly unstacked line/bar charts without comparison. Keep independent source measures, values, and units; add no predictor conversion or cross-source totals. New traces start left; mixed-unit axes omit unit labels. Share one whole-month window and latest eligible anchor across both categories. Valid empty selections contribute gaps while usable siblings render; missing bindings/errors still require repair. Keep saved formats and meter-only behavior unchanged.
 
-**Work and boundaries:**
-
-- Add live predictor selection rules to the implemented multiple-exact-predictor selection; refine rule filters and saved-contract implications in P3. Preserve compatible siblings and independent incomplete drafts when decisions change.
-- Establish one calendar date/latest eligible observation anchor across participating sources. Lagging sources retain gaps; each provider must use the shared context.
-- Preserve the implemented predictor shared-axis policy and per-trace units. Settle cross-source compatibility before enabling meter/predictor rendering; no unit conversion or aggregation is implied.
-- Keep aggregation disabled without authoritative quantity semantics. Do not imply duplicate occurrence pairing or a valid combined total merely because dates match.
-- Cancel obsolete work and reject results after relevant source, date, definition, workspace, or account changes.
-
-**Acceptance:** Supported multi-predictor and predictor/utility charts save and reopen with correct dates, units, axes, and quality. Incompatible units, alignment, or periods explain unavailability. Unsupported aggregation and duplicate pairing never fabricate values.
-
-**Validation:** Pure compatibility/date-anchor tests and focused editor/preview lifecycle tests. Cover lagging histories, real-zero anchors, incompatible axes, rapid changes, and account switching; use native coverage where Worker demand/lifecycle changes.
+**Acceptance:** Focused selection, creation/editor, projection/date, compatibility, and preview-lifecycle checks cover agreed combinations and unavailable states. Native save/reopen journeys cover live additions and mixed date/axis edits, keyboard access, themed narrow layouts, accessible values, and calculation-session reuse. Broader regressions and release validation remain with PR review and CI/CD.
 
 ### P4 Predictor acceptance
 
-**Outcome:** Close the predictor/weather milestone before starting E1.
+**Outcome:** The predictor/weather milestone is complete under focused acceptance. Current identity, transfer, and recovery behavior belongs to [persistence](v1-visualization-persistence.md), [predictor observations](v1-visualization-foundation.md#predictor-observations), and [workbench recovery](v1-visualization-workbench.md#repair-and-deleted-draft-recovery).
 
-**Start with:** P1–P3, [persistence/transfer contracts](v1-visualization-persistence.md), and [workbench recovery](v1-visualization-workbench.md#repair-and-deleted-draft-recovery).
+**Accepted invariants:** Fixed identities never retarget by name. All membership can leave and return without rewriting saved intent or losing dormant appearance. Reviewed facility changes and copies retain compatible configuration; predictor resource/provider presentation selectors use verified GUID mappings, keeping unknown, blocked, and foreign identities dormant across repeated transfers. Standard/Weather values, provenance, units, and quality evidence survive account/facility backups. Protected drafts survive rejected saves, conflicts, navigation cancellation, and deletion; copy/Save as new retain one proposal identity and recover committed publication without replaying creation. No saved-format migration, weather retrieval, or source-writing preview behavior was introduced.
 
-**Work and boundaries:** Verify renames, deletion and repair, reviewed facility inclusion changes, copy/backup/restore, and appearance-reference remapping. Verify incomplete drafts, rejected saves, retry, conflicts, and committed-publication recovery. Address predictor-related gaps without expanding into later charts/capture.
-
-**Acceptance:** Required bindings never silently retarget; protected drafts survive recovery; transferred references remain verified or explicitly repairable. Complete saved journeys pass human review, including keyboard/focus, labels, themes, narrow layouts, accessible values, and printing. Update the appropriate current references.
-
-**Validation:** Focused regression cases plus native storage/transfer/reopen journeys. Record any unmet acceptance in continuation and keep P4 open until resolved.
+**Acceptance:** Focused reference, scope, presentation, backup, and recovery checks plus native save/restore/preview journeys pass. Restored charts retain accessible values and were inspected in wide/narrow, light/dark, and print layouts. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell acceptance remains separately tracked.
 
 ## Energy Uses outline
 
@@ -145,10 +131,10 @@ Do not defer deterministic source tests to acceptance slices or VIS10. Acceptanc
 
 ## Continuation
 
-- **Next slice:** P3 — Compatible combinations.
-- **Current state:** P1 and P2 are complete. Current behavior is owned by the foundation and workbench references linked above.
-- **Decisions for the next chat:** Refine live predictor rules and compatible meter/predictor rendering, shared date anchors, and cross-source units against the implemented behavior. Math/Conversion support is excluded.
+- **Next slice:** E1 — Equipment history.
+- **Current state:** P1–P4 are complete; the predictor/weather milestone is closed under focused acceptance. Current behavior is owned by the foundation and workbench references linked above.
+- **Decisions for the next chat:** Refine E1 against the authoritative annual Energy Use projection, including source-year precedence, carry-forward provenance, units, retirement, and fiscal periods. Keep monthly resampling and viewing-time history creation unsupported.
 - **Blockers:** None identified. Later slices require refinement when reached.
-- **Outstanding acceptance:** P3/P4 and later source checkpoints remain open. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan.
+- **Outstanding acceptance:** Energy Uses and analysis/model source checkpoints remain open. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan.
 
-To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on P3 only. Inspect current source, refine compatible combinations and live-rule behavior, implement and validate the agreed slice, update the handoff, and stop before P4.”
+To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on E1 only. Inspect the annual Energy Use projection, refine equipment-history behavior, implement and validate the agreed slice, update the handoff, and stop before E2.”

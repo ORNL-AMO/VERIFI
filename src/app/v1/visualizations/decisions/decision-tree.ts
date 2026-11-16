@@ -1,4 +1,4 @@
-import { predictorSeriesId } from '@domain/visualizations/predictor/predictor-source';
+import { predictorSeriesId, isAllPredictors, resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { predictorResourceChoices, projectPredictorItems } from '../predictor/predictor-items';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { createVisualizationDefinition, type ResourceSelection, type UtilityVisualizationSource, type PredictorVisualizationSource,
@@ -179,12 +179,12 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     if (source?.kind === 'predictor') {
       if (action.kind === 'predictor-selection') {
         const choices = predictorResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope);
-        const previous = source.selection?.kind === 'fixed' && source.selection.resource === 'predictor' ? source.selection.guids : [];
-        const guids = [...new Set(action.predictorGuids)], added = guids.filter(guid => !previous.includes(guid)), removed = previous.filter(guid => !guids.includes(guid));
+        const previous = resolvePredictorSelection(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, source);
+        const guids = action.all ? choices.map(choice => choice.value) : [...new Set(action.predictorGuids)], added = guids.filter(guid => !previous.includes(guid)), removed = previous.filter(guid => !guids.includes(guid));
         if (added.some(guid => !choices.some(choice => choice.value === guid))) return { state: 'unchanged' };
-        const selection: ResourceSelection | undefined = guids.length ? { kind: 'fixed', resource: 'predictor', guids } : undefined;
+        const selection: ResourceSelection | undefined = action.all ? { kind: 'rule', resource: 'predictor', filter: {} } : guids.length ? { kind: 'fixed', resource: 'predictor', guids } : undefined;
         if (visualizationIntentEqual(source.selection, selection)) return { state: 'unchanged' };
-        if (source.selection && !(source.selection.kind === 'fixed' && source.selection.resource === 'predictor')) {
+        if (source.selection && !isAllPredictors(source) && !(source.selection.kind === 'fixed' && source.selection.resource === 'predictor')) {
           clearItems(source.id, true); cleared.push('Previous predictor selection'); affect({ kind: 'source', sourceId: source.id });
           next = pruneChart({ ...next, series: next.series.filter(series => series.sourceId !== source.id) });
         }
@@ -195,13 +195,33 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
           affect({ kind: 'item', sourceId: source.id, itemKey: itemKey({ resourceGuid: guid }) });
           next = withoutItem(next, source, { resourceGuid: guid });
         }
-        if (!guids.length) {
+        if (!selection) {
           if (hasSourcePresentation(definition, source.id)) cleared.push('Customized item presentation');
           next = pruneChart({ ...next, series: next.series.filter(series => series.sourceId !== source.id) });
         }
         const { selection: _selection, ...base } = source;
         next = { ...next, sources: next.sources.map(item => item.id === source.id ? { ...base, ...(selection ? { selection } : {}) } : item) };
         if (selection) next = ensureSeries(next, { ...base, selection });
+        if (action.all) {
+          // Exact declarations become dormant-capable overrides under the live declaration.
+          const live = next.series.find(series => series.sourceId === source.id && series.metric === 'value' && !series.resourceGuid)!;
+          const exact = next.series.filter(series => series.sourceId === source.id && series.metric === 'value' && series.resourceGuid);
+          const overrides = [...live.overrides ?? []];
+          for (const series of exact) {
+            const { id: _id, sourceId: _source, metric: _metric, overrides: own, ...appearance } = series;
+            for (const item of own ?? []) {
+              if (!overrides.some(existing => (existing.accountGuid ?? definition.accountGuid) === (item.accountGuid ?? definition.accountGuid)
+                && (item.resourceGuid !== undefined ? existing.resourceGuid === item.resourceGuid : existing.seriesId === item.seriesId))) overrides.push(item);
+            }
+            const override = own?.find(item => overrideMatches(item, { resourceGuid: series.resourceGuid! }, definition.accountGuid))
+              ?? own?.find(item => overrideMatches(item, { seriesId: predictorSeriesId(source.id, series.resourceGuid!) }, definition.accountGuid));
+            const { seriesId: _seriesId, resourceGuid: _resourceGuid, accountGuid: _accountGuid, ...custom } = override ?? {};
+            const index = overrides.findIndex(item => overrideMatches(item, { resourceGuid: series.resourceGuid! }, definition.accountGuid));
+            const retained = { ...appearance, ...custom, resourceGuid: series.resourceGuid!, accountGuid: definition.accountGuid };
+            if (index < 0) overrides.push(retained); else overrides[index] = retained;
+          }
+          next = { ...next, series: next.series.filter(series => !exact.includes(series)).map(series => series.id === live.id ? { ...series, ...(overrides.length ? { overrides } : {}) } : series) };
+        }
         affect({ kind: 'resources', sourceId: source.id });
         nextSection = { kind: 'source', sourceId: source.id };
       } else if (action.kind === 'item-style' && projectPredictorItems(definition, source.id, context.snapshot)

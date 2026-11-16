@@ -1,3 +1,4 @@
+import { predictorCombinationSupported, isMixedPredictorSourceSet } from '@domain/visualizations/visualization-monthly-combination';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { inject, Injectable, signal, Type } from '@angular/core';
@@ -53,9 +54,17 @@ export class PreviewController {
     if (providers.some(provider => !provider) || !presenter || !this.registry.dates) {
       this.value.set({ state: 'unsupported', message: 'These data sources or chart settings are not supported yet. Your saved setup is preserved.' }); return;
     }
-    if (decoded.definition.sources.length > 1 && decoded.definition.sources.some((source, index) => providers[index]!.describe(source).allowMultipleSources === false)) {
-      this.value.set({ state: 'unsupported', message: 'A selected source supports one source configuration at a time. Mixed-source charts are not supported yet. Your saved setup is preserved.' }); return;
+    if (!predictorCombinationSupported(decoded.definition)) {
+      this.value.set({ state: 'unsupported', message: 'Use monthly calendarized meters and predictors without comparison. Your saved setup is preserved.' }); return;
     }
+    if (decoded.definition.sources.length > 1 && decoded.definition.sources.some((source, index) => providers[index]!.describe(source).allowMultipleSources === false)) {
+      this.value.set({ state: 'unsupported', message: 'A selected source does not support combinations. Your saved setup is preserved.' }); return;
+    }
+    const unsupported = decoded.definition.sources.flatMap((source, index) => {
+      const support = providers[index]!.supportsChart(source, decoded.definition.chart!);
+      return support.state === 'unsupported' ? support.reasons : [];
+    });
+    if (unsupported.length) { this.value.set({ state: 'incompatible', message: unsupported.join(' ') }); return; }
     const abort = this.abort = new AbortController();
     const generation = this.generation;
     this.value.set({ state: 'loading', message: 'Preparing chart…' });
@@ -83,8 +92,12 @@ export class PreviewController {
       if (!scope.facilityGuids.length) { this.value.set({ state: 'empty', message: 'No included facilities are available.' }); return; }
       const dateContext = Object.freeze({ ...await this.registry.dates!.resolve(definition, identity, abort.signal) });
       if (!this.current(generation, abort)) return;
+      if (definition.sources.some(source => source.kind === 'predictor') && definition.period.kind === 'rolling'
+        && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate && dateContext.emptyReasons) {
+        this.value.set({ state: 'empty', message: 'No eligible saved value is available for the latest-data range.', reasons: dateContext.emptyReasons }); return;
+      }
       if (!civilDate(dateContext.calendarDate) || dateContext.latestDataDate !== undefined && !civilDate(dateContext.latestDataDate)
-        || definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate && !definition.sources.every(source => source.kind === 'predictor')) {
+        || definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate && !definition.sources.some(source => source.kind === 'predictor')) {
         this.value.set({ state: 'incompatible', message: 'The selected period has no valid calendar date or latest-data anchor.' }); return;
       }
       const requestId = `visualization-preview-${this.instanceId}-${generation}`;
@@ -109,7 +122,15 @@ export class PreviewController {
       if (unsupportedChart) {
         this.value.set({ state: 'incompatible', message: unsupportedChart.resolution.state === 'ready' ? 'These chart settings are not supported.' : unsupportedChart.resolution.message }); return;
       }
-      const unavailable = evidence.find(entry => entry.resolution.state !== 'ready');
+      if (definition.sources.some(source => source.kind === 'predictor') && evidence.every(entry => entry.resolution.state === 'ready' || entry.resolution.state === 'empty') && !evidence.some(entry => {
+        const result = entry.resolution;
+        return (result.state === 'ready' || result.state === 'empty') && result.resolved?.data.kind === 'time-series'
+          && result.resolved.data.rows.some(row => Object.values(row.values).some(value => value.state === 'observed'));
+      })) {
+        this.value.set({ state: 'empty', message: 'No usable values in the selected month range.', reasons: evidence.flatMap(entry =>
+          entry.resolution.state === 'empty' ? entry.resolution.reasons ?? [entry.resolution.message] : []) }); return;
+      }
+      const unavailable = evidence.find(entry => entry.resolution.state === 'missing-source' || entry.resolution.state === 'error') ?? evidence.find(entry => entry.resolution.state !== 'ready' && !(isMixedPredictorSourceSet(definition.sources) && entry.resolution.state === 'empty' && entry.resolution.resolved));
       if (unavailable && unavailable.resolution.state !== 'ready') {
         const resolution = unavailable.resolution;
         this.value.set({ state: resolution.state === 'waiting' ? 'loading' : resolution.state === 'invalid-analysis' ? 'error' : resolution.state,

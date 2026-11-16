@@ -131,7 +131,7 @@ describe('saved predictor native journey', () => {
       source.componentRef.setInput('context', { definition: multiple.definition, sourceId: 'source-1', disabled: false, changed: () => {}, request }); source.detectChanges();
       expect(sourceRoot.querySelectorAll('.resource-picker__option[aria-checked="true"]')).toHaveLength(2);
       sourceRoot.querySelector<HTMLButtonElement>('.resource-picker__all')!.focus(); await userEvent.keyboard('{Enter}');
-      expect(new Set(request.mock.calls.at(-1)![0].predictorGuids)).toEqual(new Set([predictor.guid, 'cdd', 'hdd', 'roasting']));
+      expect(request).toHaveBeenLastCalledWith({ kind: 'predictor-selection', sourceId: 'source-1', predictorGuids: [], all: true });
       expect(sourceRoot.querySelectorAll('.resource-picker__option[aria-checked="true"]')).toHaveLength(2);
       const start = periodRoot.querySelector<HTMLInputElement>('input[formcontrolname="start"]')!;
       expect(start.type).toBe('month'); expect(periodRoot.querySelector('input[type="date"]')).toBeNull();

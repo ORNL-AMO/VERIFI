@@ -1,4 +1,5 @@
 import { visualizationSeriesReference, type VisualizationReferenceIssue } from './visualization-references';
+import { visualizationPresentationReference } from './visualization-presentation-reference';
 import type { ResourceSelection, VisualizationDefinition, VisualizationFacilitySelection, VisualizationSeries, VisualizationSource } from './visualization-definition';
 import { resolveVisualizationFacilities, sameVisualizationFacilitySelection, type VisualizationFacilityCatalog, type VisualizationFacilityResource } from './visualization-facilities';
 
@@ -98,10 +99,9 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
     }
     const overrides = series.overrides?.filter(override => {
       if (override.accountGuid && override.accountGuid !== definition.accountGuid) return true;
-      const providerResource = source?.kind === 'utility' && override.seriesId?.startsWith(`${source.id}:`) ? override.seriesId.slice(`${source.id}:`.length) : undefined;
+      const providerResource = override.seriesId ? visualizationPresentationReference(source, override.seriesId) : undefined;
       const excludedIdentity = override.resourceGuid !== undefined ? itemExcluded(source, override.resourceGuid)
-        : providerResource && itemExcluded(source, providerResource) || source?.kind === 'utility' && source.groupBy === 'group' && override.seriesId.startsWith(`${source.id}:unassigned:`)
-          && excluded('facility', override.seriesId.slice(`${source.id}:unassigned:`.length), source);
+        : providerResource && excluded(providerResource.kind, providerResource.guid, source);
       if (excludedIdentity) cleared.add('Excluded item presentation');
       return !excludedIdentity;
     });

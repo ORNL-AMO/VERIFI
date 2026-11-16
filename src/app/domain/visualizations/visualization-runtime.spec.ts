@@ -512,9 +512,9 @@ describe('mixed-source eligibility', () => {
     const stacked: VisualizationDefinition = { ...definition, chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'absolute' } };
     expect(reasonCodes(stacked, [visualizationEvidenceFixture(stacked), visualizationEvidenceFixture(stacked, 1)])).toContain('units');
   });
-  it('rejects mixed units/currencies on one axis and nonadditive stacking', () => {
+  it('allows original mixed units on one monthly axis and rejects nonadditive stacking', () => {
     const base = mixedFixture(); const definition = { ...base, series: base.series.map(series => ({ ...series, axis: 'left' as const })) };
-    expect(reasonCodes(definition, mixedEvidence(definition))).toContain('units');
+    expect(checkVisualizationCompatibility(definition, mixedEvidence(definition)).state).toBe('compatible');
     const stacked = { ...base, chart: { kind: 'time-series' as const, defaultTraceType: 'area' as const, interval: 'monthly' as const, stack: 'absolute' as const } };
     expect(reasonCodes(stacked, mixedEvidence(stacked))).toContain('units');
   });

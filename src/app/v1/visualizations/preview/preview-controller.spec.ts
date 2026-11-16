@@ -120,12 +120,12 @@ describe('visualization preview orchestration', () => {
     expect(definition).toEqual(original); expect(resolve).not.toHaveBeenCalled(); expect(resolveDates).not.toHaveBeenCalled();
   });
 
-  it('rejects incompatible mixed-source units on one axis before mounting the presenter', async () => {
+  it('allows unconverted mixed-source units on one axis in the supported monthly chart', async () => {
     const base = mixedDefinition();
     const { controller, definition, prepare } = setupMixed({ definition: { ...base, series: base.series.map(series => ({ ...series, axis: 'left' })) } });
     controller.update(definition, identity); await settle();
-    expect(controller.state()).toMatchObject({ state: 'incompatible', reasons: expect.arrayContaining([expect.stringContaining('compatible units')]) });
-    expect(prepare).not.toHaveBeenCalled();
+    expect(controller.state()).toMatchObject({ state: 'ready' });
+    expect(prepare).toHaveBeenCalledOnce();
   });
 
   it('rejects mixed-source observations with different declared alignment', async () => {

@@ -2,6 +2,7 @@ import type {
   VisualizationChart, VisualizationComparison, VisualizationPeriod, VisualizationResourceKind,
   VisualizationScope, VisualizationSeries, VisualizationSource, VisualizationSourceKind
 } from './visualization-definition';
+import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { sameVisualizationScope } from './visualization-scope';
 export { sameVisualizationScope } from './visualization-scope';
 
@@ -30,9 +31,10 @@ export interface VisualizationSourceCapabilities {
   readonly allowMixedAxisUnits?: boolean;
 }
 
-export function allowsMixedAxisUnits(chart: VisualizationChart, capabilities: readonly VisualizationSourceCapabilities[]): boolean {
+export function allowsMixedAxisUnits(chart: VisualizationChart, capabilities: readonly VisualizationSourceCapabilities[], sources: readonly VisualizationSource[] = []): boolean {
   return chart.kind === 'time-series' && chart.stack === 'none' && capabilities.length > 0
-    && capabilities.every(capability => capability.allowMixedAxisUnits === true);
+    && (capabilities.every(capability => capability.allowMixedAxisUnits === true)
+      || chart.interval === 'monthly' && isMixedPredictorSourceSet(sources));
 }
 
 export interface VisualizationRequestIdentity {
@@ -54,7 +56,7 @@ export interface VisualizationSourceRequest {
   readonly comparison: VisualizationComparison;
   readonly series: readonly VisualizationSeries[];
   /** Consumer resolves this once across the selected sources; providers must not substitute local clocks/last dates. */
-  readonly dateContext: { readonly calendarDate: string; readonly latestDataDate?: string };
+  readonly dateContext: { readonly calendarDate: string; readonly latestDataDate?: string; readonly emptyReasons?: readonly string[]; readonly monthlyRange?: { readonly start: string; readonly end: string } };
 }
 
 export type VisualizationProvenance = 'measured' | 'predictor' | 'weather' | 'estimated' | 'carried-forward' | 'modeled' | 'savings';
@@ -142,7 +144,7 @@ export interface VisualizationResolvedData {
 
 export type VisualizationSourceResolution = { readonly identity: VisualizationRequestIdentity } & (
   | { readonly state: 'ready'; readonly resolved: VisualizationResolvedData }
-  | { readonly state: 'empty'; readonly periods: readonly ResolvedVisualizationPeriod[]; readonly message: string; readonly reasons?: readonly string[] }
+  | { readonly state: 'empty'; readonly periods: readonly ResolvedVisualizationPeriod[]; readonly message: string; readonly reasons?: readonly string[]; readonly resolved?: VisualizationResolvedData }
   | { readonly state: 'loading' | 'waiting'; readonly message: string }
   | { readonly state: 'missing-source'; readonly references: readonly { readonly kind: VisualizationResolvedReference['kind']; readonly id: string }[]; readonly message: string }
   | { readonly state: 'invalid-analysis' | 'error' | 'unsupported'; readonly message: string }

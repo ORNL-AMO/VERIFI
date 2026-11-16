@@ -1,6 +1,6 @@
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { VisualizationDefinition, VisualizationScope } from '@domain/visualizations/visualization-definition';
-import { predictorCatalog, predictorContext, predictorSeriesId, predictorUnit } from '@domain/visualizations/predictor/predictor-source';
+import { predictorCatalog, predictorContext, predictorSeriesId, predictorUnit, resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import type { DecisionResourceChoice, VisualizationDecisionItem } from '../decisions/decision-types';
 import { visualizationSeriesStyle } from '../shared/series-style';
@@ -20,12 +20,12 @@ export function predictorResourceChoices(snapshot: AccountWorkspaceSnapshot, sco
 }
 export function projectPredictorItems(definition: VisualizationDefinition, sourceId: string, snapshot: AccountWorkspaceSnapshot): readonly VisualizationDecisionItem[] {
   const source = definition.sources.find(s => s.id === sourceId);
-  if (source?.kind !== 'predictor' || source.selection?.kind !== 'fixed' || source.selection.resource !== 'predictor') return [];
+  if (source?.kind !== 'predictor') return [];
   const scope = resolveVisualizationFacilities(definition, snapshot.facilities).scope;
   const choices = predictorResourceChoices(snapshot, scope);
   const predictors = snapshot.predictors.filter(p => p.accountId === definition.accountGuid && scope.facilityGuids.includes(p.facilityId)
     && snapshot.facilities.some(f => f.guid === p.facilityId && f.accountId === definition.accountGuid));
-  return source.selection.guids.map(guid => {
+  return resolvePredictorSelection(snapshot, scope, source).map(guid => {
     const choice = choices.find(c => c.value === guid), identity = { resourceGuid: guid }, id = predictorSeriesId(sourceId, guid);
     const series = definition.series.find(s => s.sourceId === sourceId && s.metric === 'value' && s.resourceGuid === guid)
       ?? definition.series.find(s => s.sourceId === sourceId && s.metric === 'value' && !s.resourceGuid);

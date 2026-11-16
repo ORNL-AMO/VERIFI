@@ -28,7 +28,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   const chart = definition.chart;
   if (chart?.kind !== 'time-series' || !['line', 'bar'].includes(chart.defaultTraceType) || chart.stack !== 'none') throw new Error('Choose unstacked line or bar traces.');
   const resolved = evidence.map(entry => {
-    if (entry.resolution.state !== 'ready' || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Resolve compatible time-series sources before preparing a chart.');
+    if ((entry.resolution.state !== 'ready' && entry.resolution.state !== 'empty') || !entry.resolution.resolved || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Resolve compatible time-series sources before preparing a chart.');
     return { evidence: entry, result: entry.resolution.resolved, data: entry.resolution.resolved.data };
   });
   const selected = resolveVisualizationSeries(definition, resolved.flatMap(entry => entry.result.series));
@@ -38,7 +38,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
     const axisSeries = selected.filter(item => item.selected.axis === axis);
     const axisCapabilities = [...new Set(axisSeries.map(item => item.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
     const signatures = axisSeries.map(item => `${item.metadata.dimension}:${item.metadata.unit}:${item.metadata.currency ?? ''}:${item.metadata.energyTreatment ?? ''}`);
-    if (!allowsMixedAxisUnits(chart, axisCapabilities) && new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
+    if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
   }
   const warnings = new Set(resolved.flatMap(entry => entry.result.quality.warnings));
   const showPartialNotice = resolved.some(entry => entry.evidence.request.source.kind !== 'predictor' && entry.result.quality.partial);

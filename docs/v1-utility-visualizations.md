@@ -14,6 +14,8 @@ Native observations retain bill identity and actual dates without invented prora
 
 Partial totals show valid isolated contributions and omitted-input reasons. No valid observations means unavailable, never zero. Ambiguous/invalid normalized inputs cannot justify computed observations. Preserve missing, excluded, retired, estimated/mixed, duplicate, partial, and alignment-padding meanings. Separate sources may compare overlapping contributions; totals deduplicate meters and block double counting. Scientific formulas and source records remain authoritative.
 
+A monthly calendarized utility configuration can also render with one predictor configuration under the [predictor combination contract](v1-visualization-foundation.md#predictor-observations). That path shares whole-month bounds and the newest eligible anchor across both categories, retains valid empty contributions, and permits different original units on an unstacked axis with no unit label. Meter-only selection, dates, warnings, aggregation, and unit compatibility retain their existing behavior.
+
 ## Definition compatibility and display overrides
 
 Current greenfield intent includes saved visibility and owner-qualified appearance overrides. Each selects exactly one resource GUID or stable provider-local series ID. Provider IDs identify generated series, including categories and known resource-bearing utility IDs; presentation selectors never become required source anchors. Resource overrides win over category overrides resolving to the same series. Explicit nonnegative integer order precedes new/unordered matches; appearance-only edits preserve provider ordering, and absent order never moves a member.

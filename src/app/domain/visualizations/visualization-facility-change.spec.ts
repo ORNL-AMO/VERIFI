@@ -11,6 +11,25 @@ const catalog: VisualizationFacilityCatalog = {
 };
 
 describe('reviewed visualization facility inclusion', () => {
+  it('keeps All live while pruning only verified excluded predictor appearances in either selector form', () => {
+    const base = utilityVisualizationFixture(), sourceId = 'p:weather';
+    const original: VisualizationDefinition = { ...base, sources: [{ id: sourceId, kind: 'predictor', measure: 'value', aggregation: 'none', selection: { kind: 'rule', resource: 'predictor', filter: {} } }],
+      series: [{ id: 'values', sourceId, metric: 'value', axis: 'left', overrides: [
+        { seriesId: `${sourceId}:predictor:a`, label: 'Keep' }, { seriesId: `${sourceId}:predictor:b`, visible: false },
+        { resourceGuid: 'b', color: '#123456' }, { seriesId: `${sourceId}:predictor:missing`, label: 'Dormant' },
+        { seriesId: `${sourceId}:predictor:b`, accountGuid: 'foreign-account', label: 'Foreign' }, { seriesId: `${sourceId}:unknown:b`, label: 'Opaque' }
+      ] }] };
+    const resources = { ...catalog, predictors: [{ guid: 'a', accountId: 'account-a', facilityId: 'facility-a' }, { guid: 'b', accountId: 'account-a', facilityId: 'facility-b' }] };
+    const changed = prepareVisualizationFacilityChange(original, { kind: 'fixed', facilityGuids: ['facility-a'] }, resources);
+    expect(changed.definition.sources).toEqual(original.sources);
+    expect(changed.definition.series[0].overrides).toEqual([original.series[0].overrides![0], ...original.series[0].overrides!.slice(3)]);
+    expect(changed.cleared).toContain('Excluded item presentation');
+    expect(original.series[0].overrides).toHaveLength(6);
+    const protectedChange = prepareVisualizationFacilityChange(original, { kind: 'fixed', facilityGuids: ['facility-a'] }, resources, [
+      { path: 'sources.0.selection.guids.0', kind: 'predictor', guid: 'b', reason: 'not-transferred' }
+    ]);
+    expect(protectedChange.definition.series).toEqual(original.series);
+  });
   it.each(['predictor', 'facility', 'equipment', 'energy-use-group'] as const)('prunes known excluded %s resources and retains unknown intent', resource => {
     const base = utilityVisualizationFixture();
     const source = resource === 'predictor'

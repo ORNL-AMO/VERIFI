@@ -1,3 +1,4 @@
+import { emptyMonthlySource, civilMonthRange as predictorMonthRange } from '../visualization-monthly-combination';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { isStandardPredictor, type IdbPredictor } from '@data/models/idbModels/predictor';
 import type { IdbPredictorData } from '@data/models/idbModels/predictorData';
@@ -15,6 +16,19 @@ export function predictorCatalog(snapshot: AccountWorkspaceSnapshot, scope: Visu
   const facilities = new Set(snapshot.facilities.filter(f => f.accountId === snapshot.account.guid && scope.facilityGuids.includes(f.guid)).map(f => f.guid));
   return snapshot.predictors.filter(p => p.accountId === snapshot.account.guid && facilities.has(p.facilityId) && supportedPredictor(p))
     .sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid));
+}
+export function isAllPredictors(source: PredictorVisualizationSource): boolean {
+  return source.selection?.kind === 'rule' && source.selection.resource === 'predictor' && Object.keys(source.selection.filter).length === 0;
+}
+export function resolvePredictorSelection(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, source: PredictorVisualizationSource): readonly string[] {
+  return isAllPredictors(source) ? predictorCatalog(snapshot, scope).map(predictor => predictor.guid)
+    : source.selection?.kind === 'fixed' && source.selection.resource === 'predictor' ? source.selection.guids : [];
+}
+export function predictorHistoryRange(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, source: PredictorVisualizationSource): { start: string; end: string } | undefined {
+  const selected = new Set(resolvePredictorSelection(snapshot, scope, source));
+  const months = predictorCatalog(snapshot, scope).filter(record => selected.has(record.guid))
+    .flatMap(record => ownedReadings(snapshot, record).filter(validPredictorMonth).map(indexOf));
+  return months.length ? { start: predictorMonthRange(Math.min(...months)).start, end: predictorMonthRange(Math.max(...months)).end } : undefined;
 }
 export function predictorContext(predictor: IdbPredictor): string {
   const stationName = predictor.weatherStationName?.trim(), stationId = predictor.weatherStationId?.trim();
@@ -34,18 +48,12 @@ export function validPredictorMonth(reading: Pick<IdbPredictorData, 'year' | 'mo
     && Number.isInteger(reading.month) && reading.month >= 1 && reading.month <= 12;
 }
 const indexOf = (reading: Pick<IdbPredictorData, 'year' | 'month'>) => reading.year * 12 + reading.month - 1;
-export function predictorMonthRange(index: number): { start: string; end: string } {
-  const year = Math.floor(index / 12), month = index % 12 + 1;
-  const prefix = `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}`;
-  const date = new Date(0); date.setUTCFullYear(year, month, 0);
-  return { start: `${prefix}-01`, end: `${prefix}-${String(date.getUTCDate()).padStart(2, '0')}` };
-}
+export { civilMonthRange as predictorMonthRange } from '../visualization-monthly-combination';
 function ownedReadings(snapshot: AccountWorkspaceSnapshot, predictor: IdbPredictor): readonly IdbPredictorData[] {
   return snapshot.predictorData.filter(r => r.accountId === snapshot.account.guid && r.facilityId === predictor.facilityId && r.predictorId === predictor.guid);
 }
 export function latestPredictorDate(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, source: PredictorVisualizationSource): string | undefined {
-  if (source.selection?.kind !== 'fixed' || source.selection.resource !== 'predictor') return undefined;
-  const catalog = predictorCatalog(snapshot, scope), selected = source.selection.guids.map(guid => catalog.find(p => p.guid === guid));
+  const catalog = predictorCatalog(snapshot, scope), selected = resolvePredictorSelection(snapshot, scope, source).map(guid => catalog.find(p => p.guid === guid));
   if (selected.some(p => !p)) return undefined;
   let latest: number | undefined;
   for (const predictor of selected) {
@@ -61,15 +69,15 @@ function groupReadings(readings: readonly IdbPredictorData[]): Map<number, IdbPr
 }
 export function predictorCapabilities(): VisualizationSourceCapabilities {
   return { kind: 'predictor', measures: ['value'], aggregations: ['none'], periods: ['all-history', 'fixed', 'rolling'], comparisons: ['none'],
-    chartKinds: ['time-series'], shapes: ['time-series'], alignments: ['civil-month'], settings: ['unit'], controls: ['series', 'appearance', 'axes'], allowDateOverride: true, allowMultipleSources: false, allowMixedAxisUnits: true };
+    chartKinds: ['time-series'], shapes: ['time-series'], alignments: ['civil-month'], settings: ['unit'], controls: ['series', 'appearance', 'axes'], allowDateOverride: true, allowMultipleSources: true, allowMixedAxisUnits: true };
 }
 export function predictorChartSupport(source: PredictorVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
   if (chart.kind !== 'time-series' || chart.interval !== 'monthly' || chart.stack !== 'none' || !['line', 'bar'].includes(chart.defaultTraceType))
     reasons.push('Predictors support monthly, unstacked line or bar charts.');
   if (source.aggregation !== 'none') reasons.push('Predictor aggregation is not supported.');
-  if (source.selection?.kind !== 'fixed' || source.selection.resource !== 'predictor' || !source.selection.guids.length)
-    reasons.push('Select saved Standard or Weather predictors. Live rules are not supported yet.');
+  if (!isAllPredictors(source) && (source.selection?.kind !== 'fixed' || source.selection.resource !== 'predictor' || !source.selection.guids.length))
+    reasons.push('Select saved Standard or Weather predictors. Only exact selections and All Predictors are supported.');
   if (source.settings?.energyTreatment || source.settings?.unit?.kind === 'pinned') reasons.push('Predictors use their saved units without conversion.');
   return reasons.length ? { chart, state: 'unsupported', reasons } : { chart, state: 'supported' };
 }
@@ -117,7 +125,7 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
   if (request.comparison.kind !== 'none' || !['all-history', 'fixed', 'rolling'].includes(period.kind)
     || 'basis' in period && period.basis !== 'calendar') return unsupported('Predictors support calendar month ranges without comparison.');
   if (snapshot.account.guid !== identity.accountGuid) return unsupported('The predictors do not belong to the current account.');
-  const guids = source.selection?.kind === 'fixed' ? source.selection.guids : [];
+  const guids = resolvePredictorSelection(snapshot, identity.scope, source);
   const owned = snapshot.predictors.filter(p => p.accountId === identity.accountGuid && identity.scope.facilityGuids.includes(p.facilityId)
     && snapshot.facilities.some(f => f.guid === p.facilityId && f.accountId === identity.accountGuid));
   const missing = guids.filter(guid => !owned.some(p => p.guid === guid));
@@ -141,11 +149,14 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
     const months = [...grouped.keys()].sort((a, b) => a - b);
     return { record, grouped, first: months[0], last: months.at(-1) };
   });
-  const empty = (message: string): VisualizationSourceResolution => ({ identity, state: 'empty', periods: [], message,
-    reasons: omissions.map(group => `${group.label} · ${group.issue}: ${group.readings.join('; ')}`) });
+  const series = records.map(record => ({ id: predictorSeriesId(source.id, record.guid), sourceId: source.id, metric: 'value', resourceGuid: record.guid,
+    label: record.name, unit: predictorUnit(record), dimension: 'predictor', additive: false }));
+  const references = records.map(record => ({ kind: 'predictor' as const, id: record.guid, accountGuid: record.accountId, facilityGuid: record.facilityId }));
+  const empty = (message: string): VisualizationSourceResolution => emptyMonthlySource(request, message, series, references,
+    omissions.map(group => `${group.label} · ${group.issue}: ${group.readings.join('; ')}`));
   const months = histories.flatMap(history => history.first === undefined ? [] : [history.first, history.last!]);
-  if (!months.length) return empty('No usable saved predictor periods are available.');
-  let start = predictorMonthRange(Math.min(...months)).start, end = predictorMonthRange(Math.max(...months)).end;
+  if (!months.length && !request.dateContext.monthlyRange) return empty('No usable saved predictor periods are available.');
+  let start = request.dateContext.monthlyRange?.start ?? predictorMonthRange(Math.min(...months)).start, end = request.dateContext.monthlyRange?.end ?? predictorMonthRange(Math.max(...months)).end;
   if (period.kind === 'fixed') { start = period.start; end = period.end; }
   if (period.kind === 'rolling') {
     if (period.includeIncomplete) return unsupported('Choose completed months for the predictor rolling range.');
@@ -160,8 +171,10 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
     if (first < 12 || last > 119999 || !Number.isSafeInteger(count) || count < 1) return unsupported('Choose a rolling range within years 1–9999.');
     start = predictorMonthRange(first).start; end = predictorMonthRange(last).end;
   }
+  if (request.dateContext.monthlyRange) ({ start, end } = request.dateContext.monthlyRange);
   const first = Number(start.slice(0, 4)) * 12 + Number(start.slice(5, 7)) - 1;
   const last = Number(end.slice(0, 4)) * 12 + Number(end.slice(5, 7)) - 1;
+  if (last - first + 1 > 12000 || (last - first + 1) * Math.max(1, records.length) > 250000) return unsupported('Narrow the month range or predictor selection.');
   const rows: { periodKey: string; start: string; end: string; values: Record<string, VisualizationObservation> }[] = [];
   for (let month = first; month <= last; month++) {
     const range = predictorMonthRange(month);
@@ -177,14 +190,13 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
     }
     rows.push({ periodKey: range.start.slice(0, 7), ...range, values });
   }
-  if (!rows.some(row => Object.values(row.values).some(value => value.state === 'observed')))
-    return empty(`No usable saved values in the selected month range (${start.slice(0, 7)} – ${end.slice(0, 7)}).`);
-  return { identity, state: 'ready', resolved: {
-    data: { kind: 'time-series', rows }, alignment: { kind: 'civil-month', key: 'civil-month' },
-    series: records.map(record => ({ id: predictorSeriesId(source.id, record.guid), sourceId: source.id, metric: 'value', resourceGuid: record.guid,
-      label: record.name, unit: predictorUnit(record), dimension: 'predictor', additive: false })),
+  if (!rows.length) return empty('No whole months are contained in the selected range.');
+  const hasValues = rows.some(row => Object.values(row.values).some(value => value.state === 'observed'));
+  if (!hasValues && !request.dateContext.monthlyRange) return empty(`No usable saved values in the selected month range (${start.slice(0, 7)} – ${end.slice(0, 7)}).`);
+  return { identity, ...(hasValues ? { state: 'ready' as const } : { state: 'empty' as const, message: 'No usable saved predictor values in this range.', periods: [], reasons: omissions.map(group => `${group.label} · ${group.issue}: ${group.readings.join('; ')}`) }), resolved: {
+    data: { kind: 'time-series', rows }, alignment: { kind: 'civil-month', key: 'YYYY-MM' },
+    series, references,
     periods: [{ role: 'primary', start: rows[0].start, end: rows.at(-1)!.end, basis: 'calendar', interval: 'monthly' }],
-    references: records.map(record => ({ kind: 'predictor', id: record.guid, accountGuid: record.accountId, facilityGuid: record.facilityId })),
     provenance: [...new Set(records.map(record => record.predictorType === 'Weather' ? 'weather' as const : 'predictor' as const))],
     quality: { partial: rows.some(row => Object.values(row.values).some(value => value.state !== 'observed')), warnings: [], omissions }
   } };
