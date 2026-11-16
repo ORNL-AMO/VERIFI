@@ -3,8 +3,7 @@ import type { VisualizationDefinition, VisualizationScope } from '@domain/visual
 import { accountAnalysisInclusionIssue, analysisMeasureLabels, analysisSeriesId, analysisUnit } from '@domain/visualizations/analysis/facility-analysis-source';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import type { VisualizationDecisionItem } from '../decisions/decision-types';
-import { visualizationSeriesStyle } from '../shared/series-style';
-import { itemKey, isCustomized, overrideMatches } from '../shared/item-appearance';
+import { itemKey, isCustomized, resolveItemPresentation } from '../shared/item-appearance';
 
 /** Choices inspect saved identities only; never request calculation work. */
 export function facilityAnalysisChoices(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope) {
@@ -36,13 +35,11 @@ export function projectAnalysisItems(definition: VisualizationDefinition, source
     && (!source.groupGuid || analysisGroupChoices(snapshot, analysis.guid).some(item => item.value === source.groupGuid))
     : !source.groupGuid && !accountAnalysisInclusionIssue((accountAnalysis!.facilityAnalysisItems ?? []).filter(link => link.analysisItemId && link.analysisItemId !== 'skip').map(link => link.facilityId), scope.facilityGuids));
   const identity = { resourceGuid: source.groupGuid ?? source.analysisGuid }, id = analysisSeriesId(source.id);
-  const series = definition.series.find(item => item.sourceId === source.id && item.metric === source.measure && item.resourceGuid === identity.resourceGuid)
-    ?? definition.series.find(item => item.sourceId === source.id && item.metric === source.measure && !item.resourceGuid);
-  const override = series?.overrides?.find(item => overrideMatches(item, identity, definition.accountGuid));
-  const appearance = { ...visualizationSeriesStyle(id), ...series, ...override };
+  const { series, override, appearance } = resolveItemPresentation(definition,
+    { sourceId, metric: source.measure, identity, providerSeriesId: id });
   return [{ key: itemKey(identity), identity, sourceId, selectedId: series?.id ?? `${sourceId}-series`,
     label: analysis?.name ?? `Unavailable: ${source.analysisGuid}`, detail: `${source.groupGuid ? analysisGroupChoices(snapshot, source.analysisGuid).find(item => item.value === source.groupGuid)?.label ?? 'Unavailable group' : accountAnalysis ? 'Account total' : 'Facility total'} · ${analysisMeasureLabels[source.measure]}`,
     unit: analysis ? analysisUnit(analysis, source.measure) : '', available, missing: !available,
     customized: !!series && isCustomized(series) || !!override && isCustomized(override, true), customColor: series?.color !== undefined || override?.color !== undefined,
-    appearance: { ...appearance, traceType: appearance.traceType ?? (definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line'), axis: appearance.axis ?? 'left', visible: appearance.visible !== false } }];
+    appearance }];
 }

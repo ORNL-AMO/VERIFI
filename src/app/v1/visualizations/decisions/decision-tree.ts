@@ -15,17 +15,12 @@ import { resolveUtilitySelection, utilityMeasureKey, utilitySeriesId } from '@do
 import { resolveVisualizationFacilities, sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
-import { meterResourceChoices, nativeObservationAvailable, projectMeterItems, itemKey, overrideMatches, sourceSeries, isCustomized } from '../utility/utility-items';
-export { meterSelectionChoices, meterResourceChoices, nativeObservationAvailable, projectMeterItems, configuredChartSummary } from '../utility/utility-items';
+import { meterResourceChoices, nativeObservationAvailable } from '../utility/utility-items';
+import { itemKey, overrideMatches, findItemSeries, isCustomized } from '../shared/item-appearance';
+import { projectDecisionItems } from '../shared/configured-items';
+export { meterSelectionChoices, meterResourceChoices, nativeObservationAvailable, projectMeterItems } from '../utility/utility-items';
 import type { DecisionChangeContext, DecisionChangeResult, DecisionItemIdentity, DecisionItemPatch,
   DecisionRef, VisualizationDecisionAction } from './decision-types';
-
-export function projectDecisionItems(definition: VisualizationDefinition, sourceId: string, snapshot: AccountWorkspaceSnapshot) {
-  if (definition.sources.find(source => source.id === sourceId)?.kind === 'analysis') return projectAnalysisItems(definition, sourceId, snapshot);
-  if (definition.sources.find(source => source.id === sourceId)?.kind === 'energy-use') return projectEquipmentItems(definition, sourceId, snapshot);
-  return definition.sources.find(source => source.id === sourceId)?.kind === 'predictor'
-    ? projectPredictorItems(definition, sourceId, snapshot) : projectMeterItems(definition, sourceId, snapshot);
-}
 
 export function decisionNodeId(ref: DecisionRef): string {
   return [ref.kind, ref.sourceId, ref.itemKey].filter(value => value !== undefined).map(value => encodeURIComponent(value!)).join(':');
@@ -83,7 +78,9 @@ function cleanJson<T>(value: T): T {
   return value;
 }
 function patchItem(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource | AnalysisResultVisualizationSource, identity: DecisionItemIdentity, changes: DecisionItemPatch): VisualizationDefinition {
-  const prepared = ensureSeries(definition, source), selected = sourceSeries(prepared, source, identity);
+  const prepared = ensureSeries(definition, source);
+  const metric = source.kind === 'analysis' ? source.measure : source.kind === 'predictor' ? 'value' : source.kind === 'energy-use' ? 'consumption' : utilityMeasureKey(source);
+  const selected = findItemSeries(prepared, source.id, metric, identity);
   if (!selected) return definition;
   const apply = <T extends object>(value: T): T => {
     const result = { ...value } as Record<string, unknown>;

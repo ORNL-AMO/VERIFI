@@ -29,6 +29,7 @@ import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-
 import { utilityMeasureKey } from '@domain/visualizations/utility/utility-selection';
 import type { UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
+import { analysisDefinition, analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
 import { meter } from '@app/v1/data/meters/facility-meters.testing';
 import { UtilitySourceEditorComponent } from '../utility/editors/source-editor/utility-source-editor.component';
 import { ItemSettingsComponent } from '../time-series/settings/item-settings/item-settings.component';
@@ -480,6 +481,18 @@ describe('visualization workbench', () => {
     expect(root.textContent).toContain('Meters'); expect(root.textContent).toContain('Predictors'); expect(root.textContent).toContain('Analysis');
     expect(root.querySelector('nav[aria-label="Visualization breadcrumb"] a')?.textContent).toContain('Account A');
     expect(component.editor.definition()).toEqual(definition);
+  });
+  it('reports the Analysis result item type in its summary and selected Chart control', () => {
+    const base = analysisDefinition();
+    const definition = { ...base, series: base.series.map(series => ({ ...series, traceType: 'bar' as const })) };
+    const { fixture, component } = setup(definition, false, false, analysisFixture().snapshot);
+    component.setSection(component.rootNodes.chart, true); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('.v1-chip')?.textContent).toContain('Bar');
+    const choices = [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Chart type"] button')];
+    expect(choices.find(button => button.textContent?.trim() === 'Bar')?.getAttribute('aria-pressed')).toBe('true');
+    expect(choices.find(button => button.textContent?.trim() === 'Line')?.getAttribute('aria-pressed')).toBe('false');
+    expect(component.editor.definition()!.chart).toMatchObject({ defaultTraceType: 'line' });
   });
   it('toggles summary facts with the shared preference and omits workbench duplication', () => {
     const { fixture } = setup();

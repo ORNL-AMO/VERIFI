@@ -5,8 +5,7 @@ import type { EnergyUseSelectionMode, VisualizationDefinition, VisualizationScop
 import { equipmentCatalog, equipmentUnit } from '@domain/visualizations/energy-use/equipment-source';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import type { DecisionItemIdentity, DecisionResourceChoice, VisualizationDecisionItem } from '../decisions/decision-types';
-import { visualizationSeriesStyle } from '../shared/series-style';
-import { isCustomized, itemKey, overrideMatches } from '../shared/item-appearance';
+import { isCustomized, itemKey, resolveItemPresentation } from '../shared/item-appearance';
 
 export function energyUseSelectionChoices() { return [
   { value: 'group', label: 'Energy use group', icon: 'energyUseGroup' },
@@ -34,16 +33,12 @@ export function projectEquipmentItems(definition: VisualizationDefinition, sourc
   return selectedEnergyUseIds(source).map(guid => {
     const choice = choices.find(c => c.value === guid), id = energyUseSeriesId(source, guid);
     const identity: DecisionItemIdentity = energyUseSelectionMode(source) === 'equipment-type' ? { seriesId: id } : { resourceGuid: guid };
-    const series = definition.series.find(s => s.sourceId === sourceId && s.metric === 'consumption' && identity.resourceGuid !== undefined && s.resourceGuid === identity.resourceGuid)
-      ?? definition.series.find(s => s.sourceId === sourceId && s.metric === 'consumption' && !s.resourceGuid);
-    const override = series?.overrides?.find(o => overrideMatches(o, identity, definition.accountGuid))
-      ?? series?.overrides?.find(o => overrideMatches(o, { seriesId: id }, definition.accountGuid));
-    const appearance = { ...visualizationSeriesStyle(id), ...series, ...override };
+    const { series, override, appearance } = resolveItemPresentation(definition,
+      { sourceId, metric: 'consumption', identity, providerSeriesId: id });
     return { key: itemKey(identity), sourceId, selectedId: series?.id ?? `${sourceId}-series`, identity,
       label: choice?.label ?? `Unavailable: ${guid}`, detail: choice?.detail ?? 'Saved equipment is unavailable', unit: equipmentUnit(snapshot, scope, source),
       available: !!choice, missing: !choice, customized: !!series && isCustomized(series) || !!override && isCustomized(override, true),
       customColor: series?.color !== undefined || override?.color !== undefined,
-      appearance: { ...appearance, traceType: appearance.traceType ?? (definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line'),
-        axis: appearance.axis ?? 'left', visible: appearance.visible !== false } };
+      appearance };
   });
 }

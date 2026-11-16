@@ -1,6 +1,6 @@
 import type { VisualizationDefinition } from './visualization-definition';
-import { utilityVisualizationFixture } from './testing/visualization-fixtures';
-import { resolveVisualizationSeries } from './visualization-series';
+import { analysisVisualizationFixture, utilityVisualizationFixture } from './testing/visualization-fixtures';
+import { findVisualizationSeriesOverride, resolveVisualizationSeries } from './visualization-series';
 import type { ResolvedVisualizationSeries } from './visualization-source-provider';
 
 const resolved: readonly ResolvedVisualizationSeries[] = ['meter-a', 'meter-b', 'new-meter'].map(resourceGuid => ({
@@ -19,6 +19,23 @@ function matchingDefinition() {
 }
 
 describe('effective visualization series', () => {
+  it('shares Analysis resource-only override precedence with configured item presentation', () => {
+    const base = analysisVisualizationFixture();
+    const target = { ...resolved[0], id: 'analysis:result', sourceId: 'analysis', metric: 'actual', resourceGuid: 'group-a' };
+    const provider = { seriesId: target.id, label: 'Dormant provider', traceType: 'bar' as const };
+    const resource = { resourceGuid: target.resourceGuid, label: 'Durable group', traceType: 'bar' as const };
+    const dormant: VisualizationDefinition = { ...base, series: [{ ...base.series[0], overrides: [provider] }] };
+    expect(findVisualizationSeriesOverride(dormant, dormant.series[0], target)).toBeUndefined();
+    expect(resolveVisualizationSeries(dormant, [target])[0].selected).toMatchObject({ traceType: 'line' });
+    expect(resolveVisualizationSeries(dormant, [target])[0].selected.label).toBeUndefined();
+    const configured: VisualizationDefinition = { ...dormant, series: [{ ...dormant.series[0], overrides: [
+      { ...resource, label: 'Foreign group', accountGuid: 'other-account' }, provider, resource
+    ] }] };
+    expect(findVisualizationSeriesOverride(configured, configured.series[0], target)).toBe(resource);
+    expect(resolveVisualizationSeries(configured, [target])[0].selected).toMatchObject({ label: 'Durable group', traceType: 'bar' });
+    expect(configured.series[0].overrides).toHaveLength(3);
+  });
+
   it('resolves item type before declared series type and the chart default, without using foreign exceptions', () => {
     const base = matchingDefinition();
     const definition: VisualizationDefinition = { ...base, chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' },
