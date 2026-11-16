@@ -1,5 +1,5 @@
 import { analysisMeasureLabels, analysisSeriesId, analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
-import { projectAnalysisItems, facilityAnalysisChoices, analysisGroupChoices } from '../analysis/analysis-items';
+import { projectAnalysisItems, analysisChoices, analysisGroupChoices } from '../analysis/analysis-items';
 import { energyUseSelectionMode, energyUseResourceKind, energyUseSeriesId, selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
 import type { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { useEquipmentHistorySettings } from '@domain/visualizations/energy-use/equipment-source';
@@ -206,7 +206,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     if (source?.kind === 'analysis') {
       if (action.kind === 'analysis-binding') {
         const scope = resolveVisualizationFacilities(definition, context.snapshot.facilities).scope;
-        if (action.analysisGuid && !facilityAnalysisChoices(context.snapshot, scope).some(item => item.value === action.analysisGuid)) return { state: 'unchanged' };
+        if (action.analysisGuid && !analysisChoices(context.snapshot, scope, definition.facilitySelection.kind === 'all').some(item => item.value === action.analysisGuid)) return { state: 'unchanged' };
         if (action.groupGuid && !analysisGroupChoices(context.snapshot, action.analysisGuid).some(item => item.value === action.groupGuid)) return { state: 'unchanged' };
         if (source.mode === 'result' && source.analysisGuid === action.analysisGuid && source.groupGuid === action.groupGuid) return { state: 'unchanged' };
         clearItems(source.id, true); affect({ kind: 'source', sourceId: source.id });
@@ -224,9 +224,13 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         const measure = action.kind === 'analysis-defaults' || interval === 'yearly' && !['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(source.measure)
           || interval === 'monthly' && ['annual-improvement', 'total-improvement'].includes(source.measure) ? 'actual' : source.measure;
         if (measure !== source.measure) cleared.push('Incompatible analysis measure');
-        const changed = { ...source, measure, ...(action.kind === 'analysis-defaults' ? { settings: { unit: { kind: 'owner' as const } } } : {}) };
+        const accountTarget = context.snapshot.accountAnalyses.some(item => item.guid === source.analysisGuid && item.accountId === definition.accountGuid);
+        const { groupGuid, ...accountSource } = source;
+        const repairAccountGroup = action.kind === 'analysis-defaults' && accountTarget && !!groupGuid;
+        if (repairAccountGroup) { clearItems(source.id, true); cleared.push('Unsupported account group target'); }
+        const changed = { ...(repairAccountGroup ? accountSource : source), measure, ...(action.kind === 'analysis-defaults' ? { settings: { unit: { kind: 'owner' as const } } } : {}) };
         next = { ...definition, chart: { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' && definition.chart.defaultTraceType === 'bar' ? 'bar' : 'line', interval, stack: 'none' },
-          sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.map(item => item.sourceId === source.id ? { ...item, metric: measure } : item) };
+          sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.filter(item => !repairAccountGroup || item.sourceId !== source.id).map(item => item.sourceId === source.id ? { ...item, metric: measure } : item) };
         if (action.kind === 'analysis-defaults' || analysisPeriodIssue({ chart: next.chart!, period: next.period, comparison: next.comparison })) {
           if (next.period.kind !== 'all-history' || next.comparison.kind !== 'none') cleared.push('Incompatible period or comparison');
           next = { ...next, period: { kind: 'all-history' }, comparison: { kind: 'none' } };

@@ -1,3 +1,4 @@
+import { analysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { AnalysisInventoryWorkspaceService } from '@app/v1/analysis/inventory/analysis-inventory-workspace.service';
 import { reportAnalysisSelectionCard } from '@app/v1/reports/shared/analysis-selection/report-analysis-selection.models';
 import { Component, DestroyRef, Input, computed, effect, inject, input, signal } from '@angular/core';
@@ -5,11 +6,11 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
-import { analysisMeasureLabels, analysisPeriodIssue, facilityAnalysisChartSupport } from '@domain/visualizations/analysis/facility-analysis-source';
+import { accountAnalysisInclusionIssue, analysisMeasureLabels, analysisPeriodIssue, facilityAnalysisChartSupport } from '@domain/visualizations/analysis/facility-analysis-source';
 import type { AnalysisResultVisualizationSource } from '@domain/visualizations/visualization-definition';
 import type { UtilityEditorContext } from '../../utility/editors/utility-editor-context';
 import { decisionNodeId } from '../../decisions/decision-tree';
-import { analysisGroupChoices, facilityAnalysisChoices, projectAnalysisItems } from '../analysis-items';
+import { analysisGroupChoices, analysisChoices, projectAnalysisItems } from '../analysis-items';
 
 @Component({ selector: 'app-analysis-source-editor', standalone: false, templateUrl: './analysis-source-editor.component.html',
   styleUrls: ['../../shared/compact-controls.css', './analysis-source-editor.component.css'] })
@@ -25,25 +26,28 @@ export class AnalysisSourceEditorComponent {
     measure: new FormControl<AnalysisResultVisualizationSource['measure']>('actual', { nonNullable: true }), interval: new FormControl<'monthly' | 'yearly'>('monthly', { nonNullable: true }) });
   readonly emptyNodes: ReadonlySet<string> = new Set();
   readonly source = computed(() => { const view = this.view(); const source = view?.definition.sources.find(item => item.id === view.sourceId); return source?.kind === 'analysis' ? source : undefined; });
-  readonly choices = computed(() => { const snapshot = this.workspace.snapshot(), view = this.view(); return snapshot && view ? facilityAnalysisChoices(snapshot, resolveVisualizationFacilities(view.definition, snapshot.facilities).scope) : []; });
+  readonly choices = computed(() => { const snapshot = this.workspace.snapshot(), view = this.view(); return snapshot && view ? analysisChoices(snapshot, resolveVisualizationFacilities(view.definition, snapshot.facilities).scope, view.definition.facilitySelection.kind === 'all') : []; });
   readonly pickerId = computed(() => `visualization-analysis-${encodeURIComponent(this.view()?.sourceId ?? '')}`);
   readonly pickerKey = computed(() => JSON.stringify([this.view()?.editorKey, this.view()?.resetKey, this.view()?.sourceId, this.view()?.definition.facilitySelection]));
   readonly entries = computed(() => {
     const available = new Set(this.choices().map(choice => choice.value));
-    return this.inventories.entries().filter(entry => entry.scope === 'facility' && available.has(entry.card.analysis.guid));
+    return this.inventories.entries().filter(entry => available.has(entry.card.analysis.guid));
   });
   readonly analysisCards = computed(() => {
     const snapshot = this.workspace.snapshot(), view = this.view();
-    const showOwner = !!snapshot && !!view && resolveVisualizationFacilities(view.definition, snapshot.facilities).scope.facilityGuids.length > 1;
+    const showOwner = this.entries().some(entry => entry.scope === 'account') || !!snapshot && !!view && resolveVisualizationFacilities(view.definition, snapshot.facilities).scope.facilityGuids.length > 1;
     return this.entries().map(entry => ({
       ...reportAnalysisSelectionCard(entry.card.analysis.guid, entry.card.analysis, entry.card.status, this.inventories.statusState()),
-      ...(showOwner ? { ownerName: entry.ownerName } : {})
+      ...(showOwner ? { ownerName: entry.scope === 'account' ? 'Account analysis' : `Facility · ${entry.ownerName}` } : {})
     }));
   });
   readonly showTypeFilter = computed(() => new Set(this.analysisCards().map(card => card.categoryValue)).size > 1);
   readonly inspected = computed(() => this.entries().find(entry => entry.card.analysis.guid === this.inspectedGuid()));
+  readonly accountAnalysis = computed(() => this.workspace.accountAnalyses().find(item => item.guid === this.source()?.analysisGuid && item.accountId === this.workspace.account()?.guid));
+  readonly isAccount = computed(() => !!this.accountAnalysis());
+  readonly inspectedOutcome = computed(() => analysisOutcomeDisplay({ state: 'blocked', message: 'Results not requested' }, this.inspected()?.card.category ?? 'energy'));
   readonly groups = computed(() => { const snapshot = this.workspace.snapshot(); return snapshot ? analysisGroupChoices(snapshot, this.source()?.analysisGuid) : []; });
-  readonly missingAnalysis = computed(() => !!this.source()?.analysisGuid && !this.choices().some(item => item.value === this.source()?.analysisGuid));
+  readonly missingAnalysis = computed(() => !!this.source()?.analysisGuid && !this.isAccount() && !this.choices().some(item => item.value === this.source()?.analysisGuid));
   readonly missingGroup = computed(() => !!this.source()?.groupGuid && !this.groups().some(item => item.value === this.source()?.groupGuid));
   readonly measures = computed(() => {
     const source = this.source(), definition = this.view()?.definition;
@@ -60,6 +64,13 @@ export class AnalysisSourceEditorComponent {
   readonly issue = computed(() => {
     const source = this.source(), definition = this.view()?.definition;
     if (!source || !definition?.chart) return 'Complete source and chart setup.';
+    const accountAnalysis = this.accountAnalysis();
+    if (accountAnalysis) {
+      if (source.groupGuid || source.mode === 'result' && source.measure.startsWith('banked-')) return 'Account totals do not support group targets or separate banked measures.';
+      const snapshot = this.workspace.snapshot();
+      const inclusion = snapshot && accountAnalysisInclusionIssue((accountAnalysis.facilityAnalysisItems ?? []).filter(link => link.analysisItemId && link.analysisItemId !== 'skip').map(link => link.facilityId), resolveVisualizationFacilities(definition, snapshot.facilities).scope.facilityGuids);
+      if (inclusion) return inclusion;
+    }
     const support = facilityAnalysisChartSupport(source, definition.chart);
     return support.state === 'unsupported' ? support.reasons.join(' ') : analysisPeriodIssue({ chart: definition.chart, period: definition.period, comparison: definition.comparison });
   });

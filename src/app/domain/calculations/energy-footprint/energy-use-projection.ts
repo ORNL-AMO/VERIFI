@@ -29,7 +29,7 @@ export function energyUseChartYears(items: readonly IdbFacilityEnergyUseEquipmen
   return years.length ? Array.from({ length: years[years.length - 1] - years[0] + 1 }, (_, index) => years[0] + index) : [];
 }
 /** Mirrors the existing fiscal label convention; period keys use actual inclusive dates. */
-export function energyUseFiscalPeriod(facility: IdbFacility, year: number): EnergyUseFiscalPeriod | undefined {
+export function energyUseFiscalPeriod(facility: Pick<IdbFacility, 'fiscalYear' | 'fiscalYearMonth' | 'fiscalYearCalendarEnd'>, year: number): EnergyUseFiscalPeriod | undefined {
   if (!validYear(year)) return undefined;
   const calendar = facility.fiscalYear === 'calendarYear';
   const month = calendar ? 0 : facility.fiscalYearMonth;

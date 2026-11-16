@@ -1,4 +1,6 @@
 import type { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import type { IdbAccount } from '@data/models/idbModels/account';
+import type { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import type { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import type { IdbFacility } from '@data/models/idbModels/facility';
 import { annualAnalysisChartValues, monthlyAnalysisSavingsValues, monthlyAnalysisUseValues } from '@domain/calculations/analysis-calculations/analysis-chart-values';
@@ -9,6 +11,7 @@ import type { AnalysisResultVisualizationSource, VisualizationChart, Visualizati
 import type { ResolvedVisualizationPeriod, VisualizationChartSupport, VisualizationData, VisualizationObservation, VisualizationSourceCapabilities, VisualizationSourceRequest, VisualizationSourceResolution } from '../visualization-source-provider';
 
 export interface FacilityVisualizationResults {
+  readonly scope: 'facility';
   readonly analysis: IdbAnalysisItem;
   readonly facility: IdbFacility;
   readonly monthly: readonly MonthlyAnalysisSummaryData[];
@@ -18,13 +21,27 @@ export interface FacilityVisualizationResults {
   readonly groupOnly: boolean;
   readonly groupLabel?: string;
 }
+export interface AccountVisualizationResults {
+  readonly scope: 'account';
+  readonly analysis: IdbAccountAnalysisItem;
+  readonly account: IdbAccount;
+  readonly selectedFacilityGuids: readonly string[];
+  readonly monthly: readonly MonthlyAnalysisSummaryData[];
+  readonly annual: readonly AnnualAnalysisSummary[];
+  readonly reportYear?: number;
+}
+export type AnalysisVisualizationResults = FacilityVisualizationResults | AccountVisualizationResults;
+export function accountAnalysisInclusionIssue(selectedFacilityGuids: readonly string[], includedFacilityGuids: readonly string[]): string | undefined {
+  return selectedFacilityGuids.some(guid => !includedFacilityGuids.includes(guid))
+    ? 'Include every selected facility to display this saved account analysis, or choose another analysis.' : undefined;
+}
 export const analysisMeasureLabels: Readonly<Record<AnalysisResultVisualizationSource['measure'], string>> = {
   actual: 'Actual use', calculated: 'Calculated use', savings: 'Rolling 12-month savings (%)', losses: 'Rolling 12-month losses (%)',
   'banked-savings': 'Banked savings (%)', 'banked-losses': 'Banked losses (%)',
   'annual-improvement': 'Annual improvement (%)', 'total-improvement': 'Total improvement (%)'
 };
 export const analysisSeriesId = (sourceId: string): string => `${sourceId}:result`;
-export function analysisUnit(analysis: IdbAnalysisItem, measure: AnalysisResultVisualizationSource['measure']): string {
+export function analysisUnit(analysis: Pick<IdbAnalysisItem, 'analysisCategory' | 'waterUnit' | 'energyUnit'>, measure: AnalysisResultVisualizationSource['measure']): string {
   return measure === 'actual' || measure === 'calculated' ? analysis.analysisCategory === 'water' ? analysis.waterUnit : analysis.energyUnit : '%';
 }
 export function facilityAnalysisCapabilities(): VisualizationSourceCapabilities {
@@ -35,7 +52,7 @@ export function facilityAnalysisCapabilities(): VisualizationSourceCapabilities 
 export function facilityAnalysisChartSupport(source: VisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
   if (source.kind !== 'analysis' || source.mode !== 'result') reasons.push('Saved model visualizations are not supported in this slice.');
-  if (chart.kind !== 'time-series' || !['monthly', 'yearly'].includes(chart.interval) || chart.stack !== 'none' || !['line', 'bar'].includes(chart.defaultTraceType)) reasons.push('Facility analysis results support monthly or yearly, unstacked line/bar charts.');
+  if (chart.kind !== 'time-series' || !['monthly', 'yearly'].includes(chart.interval) || chart.stack !== 'none' || !['line', 'bar'].includes(chart.defaultTraceType)) reasons.push('Analysis results support monthly or yearly, unstacked line/bar charts.');
   if (source.kind === 'analysis' && source.mode === 'result') {
     if (chart.kind === 'time-series') {
       if (chart.interval === 'yearly' && !['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(source.measure)) reasons.push('Savings and losses use monthly rolling percentage results.');
@@ -48,7 +65,7 @@ export function facilityAnalysisChartSupport(source: VisualizationSource, chart:
 }
 export function analysisPeriodIssue(request: Pick<VisualizationSourceRequest, 'chart' | 'period' | 'comparison'>): string | undefined {
   const { chart, period, comparison } = request;
-  if (comparison.kind !== 'none') return 'Facility analysis results do not support comparisons.';
+  if (comparison.kind !== 'none') return 'Analysis results do not support comparisons.';
   if (chart.kind !== 'time-series') return 'Choose a time-series chart.';
   if (chart.interval === 'yearly') return ['all-history', 'latest-saved-year', 'fiscal-year'].includes(period.kind) ? undefined : 'Choose all history, latest complete result fiscal year or one fiscal year.';
   if (!['all-history', 'fixed', 'rolling'].includes(period.kind) || 'basis' in period && period.basis !== 'calendar') return 'Monthly analysis results require calendar months.';
@@ -58,34 +75,50 @@ export function analysisPeriodIssue(request: Pick<VisualizationSourceRequest, 'c
   return undefined;
 }
 function monthNumber(value: string): number { return Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7)) - 1; }
-export function latestAnalysisMonth(value: FacilityVisualizationResults): string | undefined {
+export function latestAnalysisMonth(value: Pick<AnalysisVisualizationResults, 'monthly'>): string | undefined {
   return value.monthly.map(row => new Date(row.date)).filter(date => Number.isFinite(date.getTime()))
     .map(date => predictorMonthRange(date.getFullYear() * 12 + date.getMonth()).end).sort().at(-1);
 }
 /** Projects current authoritative results only; never changes calculation periods or saved analyses. */
 export function resolveFacilityAnalysisResults(value: FacilityVisualizationResults, request: VisualizationSourceRequest): VisualizationSourceResolution {
+  return resolveAnalysisResults(value, request);
+}
+export function resolveAccountAnalysisResults(value: AccountVisualizationResults, request: VisualizationSourceRequest): VisualizationSourceResolution {
+  return resolveAnalysisResults(value, request);
+}
+function resolveAnalysisResults(value: AnalysisVisualizationResults, request: VisualizationSourceRequest): VisualizationSourceResolution {
   const { source, identity, period, chart } = request;
   const unsupported = (message: string): VisualizationSourceResolution => ({ identity, state: 'unsupported', message });
   const support = facilityAnalysisChartSupport(source, chart), periodIssue = analysisPeriodIssue(request);
   if (support.state === 'unsupported') return unsupported(support.reasons.join(' '));
   if (periodIssue) return unsupported(periodIssue);
-  if (source.kind !== 'analysis' || source.mode !== 'result' || chart.kind !== 'time-series') return unsupported('Choose facility analysis results.');
-  const { analysis, facility } = value;
-  if (analysis.guid !== source.analysisGuid || analysis.accountId !== identity.accountGuid || facility.guid !== analysis.facilityId
-    || facility.accountId !== identity.accountGuid || !identity.scope.facilityGuids.includes(facility.guid)) return { identity, state: 'missing-source', references: [{ kind: 'analysis', id: source.analysisGuid ?? '' }], message: 'The named analysis is unavailable within the included facilities.' };
-  const group = source.groupGuid ? analysis.groups.find(group => group.idbGroupId === source.groupGuid) : undefined;
+  if (source.kind !== 'analysis' || source.mode !== 'result' || chart.kind !== 'time-series') return unsupported('Choose analysis results.');
+  const { analysis } = value;
+  const facility = value.scope === 'facility' ? value.facility : undefined;
+  const owner = value.scope === 'account' ? value.account : value.facility;
+  if (analysis.guid !== source.analysisGuid || analysis.accountId !== identity.accountGuid
+    || (value.scope === 'account' ? value.account.guid !== identity.accountGuid
+      : value.facility.guid !== value.analysis.facilityId || value.facility.accountId !== identity.accountGuid || !identity.scope.facilityGuids.includes(value.facility.guid))) {
+    return { identity, state: 'missing-source', references: [{ kind: 'analysis', id: source.analysisGuid ?? '' }], message: 'The named analysis is unavailable within the included facilities.' };
+  }
+  if (value.scope === 'account') {
+    if (source.groupGuid || source.measure.startsWith('banked-')) return unsupported('Account totals do not support group targets or separate banked measures.');
+    const inclusion = accountAnalysisInclusionIssue(value.selectedFacilityGuids, identity.scope.facilityGuids);
+    if (inclusion) return unsupported(inclusion);
+  }
+  const group = value.scope === 'facility' && source.groupGuid ? value.analysis.groups.find(group => group.idbGroupId === source.groupGuid) : undefined;
   if (source.groupGuid && (!group || ['skip', 'skipAnalysis'].includes(group.analysisType))) return { identity, state: 'missing-source', references: [{ kind: 'analysis-group', id: source.groupGuid }], message: 'Choose an applicable group from the named analysis.' };
-  if (source.measure.startsWith('banked-') && !(analysis.hasBanking && group?.applyBanking)) return unsupported('This group has no applicable banking.');
+  if (source.measure.startsWith('banked-') && !(value.scope === 'facility' && value.analysis.hasBanking && group?.applyBanking)) return unsupported('This group has no applicable banking.');
   const id = analysisSeriesId(source.id), unit = analysisUnit(analysis, source.measure), percentage = unit === '%';
   if (!unit) return unsupported('The named analysis has no saved display unit.');
   const resourceGuid = source.groupGuid ?? analysis.guid;
-  const series = [{ id, sourceId: source.id, metric: source.measure, resourceGuid, label: `${analysis.name} · ${source.groupGuid ? value.groupLabel ?? source.groupGuid : 'Facility total'} · ${analysisMeasureLabels[source.measure]}`,
+  const series = [{ id, sourceId: source.id, metric: source.measure, resourceGuid, label: `${analysis.name} · ${source.groupGuid && value.scope === 'facility' ? value.groupLabel ?? source.groupGuid : value.scope === 'account' ? 'Account total' : 'Facility total'} · ${analysisMeasureLabels[source.measure]}`,
     unit, dimension: percentage ? 'percentage' : analysis.analysisCategory, additive: false,
     ...(!percentage && analysis.analysisCategory === 'energy' ? { energyTreatment: analysis.energyIsSource ? 'source' as const : 'site' as const } : {}) }];
   const periods: ResolvedVisualizationPeriod[] = [], rows: Extract<VisualizationData, { kind: 'time-series' }>['rows'][number][] = [];
-  const intermediateYears = new Set(value.groups.flatMap(group => group.annualAnalysisSummaryData.filter(row => row.isIntermediateBanked).map(row => row.year)));
-  const intermediateMonths = new Set(value.groups.flatMap(group => group.monthlyAnalysisSummaryData.filter(row => row.isIntermediateBanked && Number.isFinite(new Date(row.date).getTime())).map(row => monthNumber(civilDate(new Date(row.date))))));
-  const warnings: string[] = value.groupOnly ? ['Selected-group results end at its latest complete fiscal year while another group blocks facility results.'] : [];
+  const intermediateYears = new Set((value.scope === 'facility' ? value.groups : []).flatMap(group => group.annualAnalysisSummaryData.filter(row => row.isIntermediateBanked).map(row => row.year)));
+  const intermediateMonths = new Set((value.scope === 'facility' ? value.groups : []).flatMap(group => group.monthlyAnalysisSummaryData.filter(row => row.isIntermediateBanked && Number.isFinite(new Date(row.date).getTime())).map(row => monthNumber(civilDate(new Date(row.date))))));
+  const warnings: string[] = value.scope === 'facility' && value.groupOnly ? ['Selected-group results end at its latest complete fiscal year while another group blocks facility results.'] : [];
   const point = (amount: number | null | undefined, partial: boolean, notes: string[], excluded = false): VisualizationObservation =>
     excluded ? { state: 'excluded', value: null, reason: 'Calculated/annual improvement is unavailable during this banking transition.' }
       : amount == null || !Number.isFinite(amount) ? { state: 'missing', value: null, reason: 'No finite analysis result is available for this period.' }
@@ -94,15 +127,15 @@ export function resolveFacilityAnalysisResults(value: FacilityVisualizationResul
     const available = value.annual.filter(row => Number.isInteger(row.year) && (value.reportYear === undefined || row.year <= value.reportYear));
     const years = period.kind === 'fiscal-year' ? [period.year] : period.kind === 'latest-saved-year' ? available.map(row => row.year).sort((a, b) => a - b).slice(-1) : available.map(row => row.year);
     for (const year of years) {
-      const fiscal = energyUseFiscalPeriod(facility, year), row = available.find(row => row.year === year);
-      if (!fiscal) return unsupported('Repair the facility fiscal calendar.');
+      const fiscal = energyUseFiscalPeriod(owner, year), row = available.find(row => row.year === year);
+      if (!fiscal) return unsupported('Repair the analysis owner’s fiscal calendar.');
       const [start, end] = fiscal.key.split(' / ');
       if (![start, end].every(validCivil)) return unsupported('The fiscal interval falls outside supported civil dates.');
       const intermediate = row?.isIntermediateBanked || !source.groupGuid && intermediateYears.has(year);
       const projected = row ? annualAnalysisChartValues({ ...row, isIntermediateBanked: !!intermediate }) : {};
       const metric = source.measure === 'annual-improvement' ? 'annualImprovement' : source.measure === 'total-improvement' ? 'totalImprovement' : source.measure;
       const partial = !!row?.missingPredictorValue;
-      periods.push({ role: 'primary', start, end, basis: 'fiscal', interval: 'yearly', facilityGuid: facility.guid, fiscalYear: year });
+      periods.push({ role: 'primary', start, end, basis: 'fiscal', interval: 'yearly', ...(facility ? { facilityGuid: facility.guid } : {}), fiscalYear: year });
       rows.push({ periodKey: `FY ${year}`, start, end, values: { [id]: point(projected[metric], partial, partial ? [`Missing predictor inputs: ${row.missingPredictors?.join(', ') || 'unknown'}`] : [], !!intermediate && ['calculated', 'annual-improvement'].includes(source.measure)) } });
     }
   } else {
@@ -125,14 +158,14 @@ export function resolveFacilityAnalysisResults(value: FacilityVisualizationResul
       const invalidImprovement = row && !['actual', 'calculated'].includes(source.measure) && !Number.isFinite(row.rolling12MonthImprovement);
       const partial = !!row?.missingValueWarning || !!row?.missingPredictors?.length;
       const notes = [row?.isBanked ? 'Banked result' : '', intermediate ? 'Banking transition' : '', partial ? `Missing inputs: ${row?.missingPredictors?.join(', ') || 'analysis input warning'}` : ''].filter(Boolean);
-      periods.push({ role: 'primary', ...range, basis: 'calendar', interval: 'monthly', facilityGuid: facility.guid });
+      periods.push({ role: 'primary', ...range, basis: 'calendar', interval: 'monthly', ...(facility ? { facilityGuid: facility.guid } : {}) });
       rows.push({ periodKey: range.start.slice(0, 7), ...range, values: { [id]: point(invalidImprovement ? null : numeric, partial, notes, !!intermediate && source.measure === 'calculated') } });
     }
   }
   const resolved = { data: { kind: 'time-series' as const, rows }, series, periods,
     alignment: { kind: chart.interval === 'yearly' ? 'fiscal-interval' as const : 'civil-month' as const, key: chart.interval === 'yearly' ? 'actual-annual-interval' : 'civil-month' },
-    references: [{ kind: 'analysis' as const, id: analysis.guid, accountGuid: analysis.accountId, facilityGuid: facility.guid },
-      ...(source.groupGuid ? [{ kind: 'analysis-group' as const, id: source.groupGuid, accountGuid: analysis.accountId, facilityGuid: facility.guid }] : [])],
+    references: [{ kind: 'analysis' as const, id: analysis.guid, accountGuid: analysis.accountId, ...(facility ? { facilityGuid: facility.guid } : {}) },
+      ...(source.groupGuid ? [{ kind: 'analysis-group' as const, id: source.groupGuid, accountGuid: analysis.accountId, ...(facility ? { facilityGuid: facility.guid } : {}) }] : [])],
     provenance: [source.measure === 'actual' ? 'measured' as const : source.measure === 'calculated' ? 'modeled' as const : 'savings' as const],
     quality: { partial: rows.some(row => Object.values(row.values).some(point => point.state !== 'observed' || point.partial)), warnings }, analysisFreshness: 'current' as const };
   return rows.some(row => Object.values(row.values).some(point => point.state === 'observed')) ? { identity, state: 'ready', resolved }

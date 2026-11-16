@@ -1,8 +1,14 @@
+import { presentFindings } from '@app/v1/status/status.catalog';
+import type { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { calculateAccountAnalysisResults } from '@domain/calculations/analysis-calculations/account-analysis-results-calculation';
+import type { AccountAnalysisResultsWorkerRequest, AccountAnalysisResultsWorkerResponse } from '@platform/web-workers/account-analysis-results-worker.contract';
+import { buildAccountAnalysisResultsRequest, accountAnalysisResultsFingerprint } from '@app/v1/analysis/account/results/account-analysis-results-request';
+import { buildFacilitySelectionItems } from '@app/v1/analysis/account/workbench/select-facility-items/account-analysis-facility-selection.models';
 import { DestroyRef, Injectable, effect, inject } from '@angular/core';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { VisualizationSourceRequest, VisualizationSourceResolution } from '@domain/visualizations/visualization-source-provider';
-import type { FacilityVisualizationResults } from '@domain/visualizations/analysis/facility-analysis-source';
+import { accountAnalysisInclusionIssue, type AccountVisualizationResults, type AnalysisVisualizationResults, type FacilityVisualizationResults } from '@domain/visualizations/analysis/facility-analysis-source';
 import { calculateFacilityAnalysisResults } from '@domain/calculations/analysis-calculations/facility-analysis-results-calculation';
 import { calculateFacilityAnalysisGroupResults } from '@domain/calculations/analysis-calculations/facility-analysis-group-results-calculation';
 import type { FacilityAnalysisResultsWorkerRequest, FacilityAnalysisResultsWorkerResponse } from '@platform/web-workers/facility-analysis-results-worker.contract';
@@ -16,7 +22,7 @@ import { facilityAnalysisGroupResultsFingerprint, projectAnalysisGroupDependenci
 import { UtilityDataSession } from '../utility/utility-data-session.service';
 
 type Unavailable = Exclude<VisualizationSourceResolution, { readonly state: 'ready' | 'empty' }>;
-export type AnalysisPreviewResult = { readonly state: 'ready'; readonly value: FacilityVisualizationResults } | Unavailable;
+export type AnalysisPreviewResult = { readonly state: 'ready'; readonly value: AnalysisVisualizationResults } | Unavailable;
 
 /** Only active previews acquire full results. Date resolution and projection share one acquisition. */
 @Injectable()
@@ -25,7 +31,7 @@ export class AnalysisDataSession {
   private readonly data = inject(UtilityDataSession);
   private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly pending = new WeakMap<AbortSignal, Promise<AnalysisPreviewResult>>();
-  private readonly cache = new Map<string, { readonly fingerprint: string; readonly value: FacilityVisualizationResults }>();
+  private readonly cache = new Map<string, { readonly fingerprint: string; readonly value: AnalysisVisualizationResults }>();
   private readonly cancellations = new Set<() => void>();
   private session = 0;
   private lastSnapshot?: AccountWorkspaceSnapshot;
@@ -54,8 +60,9 @@ export class AnalysisDataSession {
     const current = () => !!snapshot && snapshot === this.workspace.snapshot() && !signal.aborted && this.workspace.isReady() && this.workspace.account()?.guid === identity.accountGuid && this.workspace.revision() === identity.workspaceRevision;
     if (!snapshot || !current()) return unavailable('error', 'Analysis preview canceled or superseded.');
     if (source.kind !== 'analysis' || source.mode !== 'result') return unavailable('unsupported', 'Saved model visualizations are not supported yet.');
+    const accountAnalysis = snapshot.accountAnalyses.find(item => item.guid === source.analysisGuid && item.accountId === identity.accountGuid);
+    if (accountAnalysis) return this.calculateAccount(accountAnalysis, snapshot, request, signal);
     const analysis = snapshot.facilityAnalyses.find(item => item.guid === source.analysisGuid && item.accountId === identity.accountGuid);
-    if (!analysis && snapshot.accountAnalyses.some(item => item.guid === source.analysisGuid)) return unavailable('unsupported', 'Account analysis visualizations are not supported yet.');
     const facility = snapshot.facilities.find(item => item.guid === analysis?.facilityId && item.accountId === identity.accountGuid);
     const missing = (kind: 'analysis' | 'analysis-group', id: string): Unavailable => ({ identity, state: 'missing-source', references: [{ kind, id }], message: 'Repair the named analysis/group within the included facilities.' });
     if (!analysis || !facility || !identity.scope.facilityGuids.includes(facility.guid)) return missing('analysis', source.analysisGuid ?? '');
@@ -105,7 +112,7 @@ export class AnalysisDataSession {
       const cached = this.cache.get(key);
       // Target identity is projection intent; full facility work can serve a different selected group.
       let value: FacilityVisualizationResults;
-      if (cached?.fingerprint === fingerprint) value = { ...cached.value, analysis, facility };
+      if (cached?.fingerprint === fingerprint && cached.value.scope === 'facility') value = { ...cached.value, analysis, facility };
       else {
         const runSession = this.session;
         const result = await this.run(fullRequest, groupRequest, signal);
@@ -115,8 +122,8 @@ export class AnalysisDataSession {
         if (result.value.itemId !== analysis.guid) return unavailable('error', 'The calculation returned a mismatched analysis.');
         if ('groupGuid' in result.value) {
           if (result.value.groupGuid !== source.groupGuid) return unavailable('error', 'The calculation returned a mismatched group.');
-          value = { analysis, facility, annual: result.value.annualAnalysisSummaryData, monthly: result.value.monthlyAnalysisSummaryData, groups: [], reportYear: result.value.reportYear, groupOnly: true };
-        } else value = { analysis, facility, annual: result.value.annualAnalysisSummaries, monthly: result.value.monthlyAnalysisSummaryData, groups: result.value.groupSummaries ?? [], reportYear: result.value.reportYear, groupOnly: false };
+          value = { scope: 'facility', analysis, facility, annual: result.value.annualAnalysisSummaryData, monthly: result.value.monthlyAnalysisSummaryData, groups: [], reportYear: result.value.reportYear, groupOnly: true };
+        } else value = { scope: 'facility', analysis, facility, annual: result.value.annualAnalysisSummaries, monthly: result.value.monthlyAnalysisSummaryData, groups: result.value.groupSummaries ?? [], reportYear: result.value.reportYear, groupOnly: false };
         this.cache.clear();
         this.cache.set(key, { fingerprint, value });
       }
@@ -129,11 +136,84 @@ export class AnalysisDataSession {
       return { state: 'ready', value: { ...value, groupLabel: snapshot.meterGroups.find(item => item.guid === source.groupGuid && item.facilityId === facility.guid)?.name } };
     } catch (error) { return unavailable('error', error instanceof Error ? error.message : 'Analysis calculation failed. Retry from current inputs.'); }
   }
+  private async calculateAccount(analysis: IdbAccountAnalysisItem, snapshot: AccountWorkspaceSnapshot, request: VisualizationSourceRequest, signal: AbortSignal): Promise<AnalysisPreviewResult> {
+    const { identity, source } = request;
+    const unavailable = (state: 'unsupported' | 'invalid-analysis' | 'error', message: string): Unavailable => ({ identity, state, message });
+    const current = () => snapshot === this.workspace.snapshot() && !signal.aborted && this.workspace.isReady()
+      && this.workspace.account()?.guid === identity.accountGuid && this.workspace.revision() === identity.workspaceRevision;
+    if (source.kind !== 'analysis' || source.mode !== 'result' || source.groupGuid || source.measure.startsWith('banked-')) {
+      return unavailable('unsupported', 'Account totals do not support group targets or separate banked measures.');
+    }
+    const facilities = snapshot.facilities.filter(item => item.accountId === identity.accountGuid);
+    const links = analysis.facilityAnalysisItems ?? [];
+    if (new Set(links.map(link => link.facilityId)).size !== links.length || links.some(link => !facilities.some(item => item.guid === link.facilityId))) {
+      return unavailable('invalid-analysis', 'A saved facility selection is invalid or unavailable. Review Analysis selections.');
+    }
+    const selected = links.filter(link => link.analysisItemId && link.analysisItemId !== 'skip');
+    const selectedFacilityGuids = selected.map(link => link.facilityId);
+    const inclusion = accountAnalysisInclusionIssue(selectedFacilityGuids, identity.scope.facilityGuids);
+    if (inclusion) return unavailable('unsupported', inclusion);
+    const analyses = snapshot.facilityAnalyses.filter(item => item.accountId === identity.accountGuid);
+    for (const link of selected) {
+      let dependency = analyses.find(item => item.guid === link.analysisItemId && item.facilityId === link.facilityId);
+      const visited = new Set<string>();
+      if (!dependency) return unavailable('invalid-analysis', 'A selected facility analysis is unavailable. Review Analysis selections.');
+      while (dependency) {
+        if (visited.has(dependency.guid)) return unavailable('invalid-analysis', 'The analysis banking dependencies contain a cycle.');
+        visited.add(dependency.guid);
+        if (!dependency.hasBanking) break;
+        const next = analyses.find(item => item.guid === dependency!.bankedAnalysisItemId && item.facilityId === link.facilityId);
+        if (!next) return unavailable('invalid-analysis', 'A banked analysis is unavailable. Review Analysis setup.');
+        dependency = next;
+      }
+    }
+    try {
+      const acquired = await this.data.acquire(identity, signal, true);
+      if (!current()) return unavailable('error', 'Analysis inputs changed. Preparing current results.');
+      const base = acquired.base;
+      if (!base || base.state !== 'ready' || base.inputFingerprint !== this.calendarization.currentInputFingerprint()) return unavailable('error', 'Current calculation data is unavailable.');
+      const evaluation = evaluateWorkspaceStatus({ snapshot, calendarizedMeters: base.meters, revision: identity.workspaceRevision, asOfDate: new Date() });
+      const selections = buildFacilitySelectionItems(analysis, facilities, analyses, presentFindings(evaluation.findings), 'ready');
+      const blocked = evaluation.findings.some(item => item.severity === 'error' && item.entity.kind === 'account-analysis' && item.entity.guid === analysis.guid);
+      if (blocked || !selections.length || selections.some(item => !item.assigned || item.state === 'error')) {
+        return unavailable('invalid-analysis', 'Analysis setup or facility selections are invalid. Review Analysis setup.');
+      }
+      const metadata = { scope: 'account' as const, analysis, account: snapshot.account, selectedFacilityGuids };
+      if (!selected.length) return { state: 'ready', value: { ...metadata, monthly: [], annual: [] } };
+      const built = buildAccountAnalysisResultsRequest(analysis, snapshot);
+      const fingerprint = accountAnalysisResultsFingerprint(built), key = `${identity.accountGuid}:${identity.definitionGuid}`;
+      const cached = this.cache.get(key);
+      let value: AccountVisualizationResults;
+      if (cached?.fingerprint === fingerprint && cached.value.scope === 'account') value = { ...cached.value, ...metadata };
+      else {
+        const runSession = this.session;
+        const result = await this.runAccount(built, signal);
+        if (!current() || runSession !== this.session) return unavailable('error', 'Analysis preview canceled or superseded.');
+        if (result.ok === false) return unavailable('error', result.message);
+        if (result.value.itemId !== analysis.guid || !Array.isArray(result.value.facilitySummaries)
+          || result.value.facilitySummaries.length !== selected.length
+          || selected.some(link => !result.value.facilitySummaries!.some(item => item.facilityGuid === link.facilityId && item.analysisGuid === link.analysisItemId))) {
+          return unavailable('error', 'The calculation returned mismatched account results.');
+        }
+        value = { ...metadata, monthly: result.value.monthlyAnalysisSummaryData, annual: result.value.annualAnalysisSummaries, reportYear: result.value.reportYear };
+        this.cache.clear(); this.cache.set(key, { fingerprint, value });
+      }
+      return current() ? { state: 'ready', value } : unavailable('error', 'Analysis preview canceled or superseded.');
+    } catch (error) { return unavailable('error', error instanceof Error ? error.message : 'Analysis calculation failed. Retry from current inputs.'); }
+  }
+  private runAccount(request: AccountAnalysisResultsWorkerRequest, signal: AbortSignal): Promise<AccountAnalysisResultsWorkerResponse> {
+    const response = typeof Worker === 'undefined' ? of({ ok: true as const, value: calculateAccountAnalysisResults(request) })
+      : runWorker<AccountAnalysisResultsWorkerResponse>(new Worker(new URL('../../../platform/web-workers/account-analysis-workbench-results.worker', import.meta.url)), request);
+    return this.consume(response, signal);
+  }
   private run(full: FacilityAnalysisResultsWorkerRequest | undefined, group: FacilityAnalysisGroupResultsWorkerRequest | undefined, signal: AbortSignal): Promise<FacilityAnalysisResultsWorkerResponse | FacilityAnalysisGroupResultsWorkerResponse> {
     const response: Observable<FacilityAnalysisResultsWorkerResponse | FacilityAnalysisGroupResultsWorkerResponse> = typeof Worker === 'undefined'
       ? of(group ? { ok: true as const, value: calculateFacilityAnalysisGroupResults(group) } : { ok: true as const, value: calculateFacilityAnalysisResults(full!) })
       : group ? runWorker<FacilityAnalysisGroupResultsWorkerResponse>(new Worker(new URL('../../../platform/web-workers/facility-analysis-group-results.worker', import.meta.url)), group)
         : runWorker<FacilityAnalysisResultsWorkerResponse>(new Worker(new URL('../../../platform/web-workers/facility-analysis-results.worker', import.meta.url)), full);
+    return this.consume(response, signal);
+  }
+  private consume<T>(response: Observable<T>, signal: AbortSignal): Promise<T> {
     return new Promise((resolve, reject) => {
       let subscription: Subscription | undefined;
       const cancel = () => { subscription?.unsubscribe(); cleanup(); reject(new DOMException('Analysis preview canceled', 'AbortError')); };

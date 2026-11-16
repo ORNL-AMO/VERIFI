@@ -1,4 +1,4 @@
-import { analysisGroupChoices, facilityAnalysisChoices } from '../../analysis/analysis-items';
+import { analysisGroupChoices, analysisChoices } from '../../analysis/analysis-items';
 import type { UtilityEditorContext } from '../../utility/editors/utility-editor-context';
 import { selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
 import { energyUseSelectionChoices, equipmentResourceChoices } from '../../energy-use/equipment-items';
@@ -117,7 +117,7 @@ export class LibraryLifecycle {
   readonly analysisSelectionValid = computed(() => {
     if (!this.hasAnalysis()) return true;
     const source = this.draft().analysisSetup?.sources.find(item => item.kind === 'analysis'), snapshot = this.workspace.snapshot();
-    return !source?.analysisGuid || !!snapshot && facilityAnalysisChoices(snapshot, this.scope(this.draft())).some(item => item.value === source.analysisGuid)
+    return !source?.analysisGuid || !!snapshot && analysisChoices(snapshot, this.scope(this.draft()), this.draft().facilitySelection.kind === 'all').some(item => item.value === source.analysisGuid)
       && (!source.groupGuid || analysisGroupChoices(snapshot, source.analysisGuid).some(item => item.value === source.groupGuid));
   });
   readonly analysisContext = computed<UtilityEditorContext | undefined>(() => {
@@ -176,7 +176,7 @@ export class LibraryLifecycle {
     if (this.hasEquipment() && (value.energyUseResourceIds.length || this.step() === 'name')) selections.push({ step: 'equipment', label: value.energyUseResourceIds.length ? value.energyUseResourceIds.map(guid => this.equipmentChoices().find(choice => choice.guid === guid)?.label ?? 'Unavailable equipment').join(', ') : 'Choose equipment later', icon: 'energyUseGroup', editable: true });
     if (this.hasAnalysis() && this.analysisSelected()) {
       const source = value.analysisSetup?.sources.find(item => item.kind === 'analysis');
-      selections.push({ step: 'analysis', label: source?.kind === 'analysis' && source.analysisGuid ? this.workspace.facilityAnalyses().find(item => item.guid === source.analysisGuid)?.name ?? 'Unavailable analysis' : 'Select analysis', icon: 'analysis', editable: true });
+      selections.push({ step: 'analysis', label: source?.kind === 'analysis' && source.analysisGuid ? [...this.workspace.accountAnalyses(), ...this.workspace.facilityAnalyses()].find(item => item.guid === source.analysisGuid)?.name ?? 'Unavailable analysis' : 'Select analysis', icon: 'analysis', editable: true });
     }
     return selections;
   });

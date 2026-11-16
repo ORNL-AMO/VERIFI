@@ -9,7 +9,7 @@ import { analysisPeriodIssue, facilityAnalysisCapabilities, facilityAnalysisChar
 
 function results(): FacilityVisualizationResults {
   const fixture = analysisFixture(), result = calculateFacilityAnalysisResults(fixture.request);
-  return { analysis: fixture.analysis, facility: fixture.facility, monthly: result.monthlyAnalysisSummaryData, annual: result.annualAnalysisSummaries, groups: result.groupSummaries, reportYear: result.reportYear, groupOnly: false };
+  return { scope: 'facility', analysis: fixture.analysis, facility: fixture.facility, monthly: result.monthlyAnalysisSummaryData, annual: result.annualAnalysisSummaries, groups: result.groupSummaries, reportYear: result.reportYear, groupOnly: false };
 }
 function ready(value: FacilityVisualizationResults, request = analysisSourceRequest()) {
   const result = resolveFacilityAnalysisResults(value, request);

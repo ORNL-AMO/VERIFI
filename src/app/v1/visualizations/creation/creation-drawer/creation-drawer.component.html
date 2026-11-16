@@ -89,7 +89,7 @@
               <app-visualization-resource-picker [label]="lifecycle.selectedEnergyUseMode()?.label ?? 'Energy Uses'" icon="energyUseGroup" allLabel="Select current choices" [control]="lifecycle.form.controls.energyUseResourceIds" [options]="lifecycle.equipmentChoices()" [disabled]="!lifecycle.canEditDraft()"/>
             }
             @case ('analysis') {
-              <legend class="visually-hidden"><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Select facility analysis results</h3></legend>
+              <legend class="visually-hidden"><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Select analysis results</h3></legend>
               @if (lifecycle.analysisContext(); as context) { <app-analysis-source-editor [context]="context" [selectionOnly]="true"/> }
             }
             @case ('predictor') {
