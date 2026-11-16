@@ -9,6 +9,34 @@ import { PredictorEditorsModule } from '../predictor-editors.module';
 import { PredictorSourceEditorComponent } from './predictor-source-editor.component';
 
 describe('predictor source decisions and editor', () => {
+  it.each([
+    { field: 'label' as const, value: 'Saved name', promoted: false },
+    { field: 'color' as const, value: '#123456', promoted: false },
+    { field: 'label' as const, value: 'Saved name', promoted: true },
+    { field: 'color' as const, value: '#123456', promoted: true }
+  ])('clears the final provider $field preference after promotion=$promoted without reviving it', ({ field, value, promoted }) => {
+    const { snapshot, definition } = setup(), sourceId = 'source-1';
+    const foreign = { seriesId: `${sourceId}:predictor:predictor-a`, accountGuid: 'foreign', label: 'Foreign' };
+    const sibling = { resourceGuid: 'predictor-b', label: 'Dormant sibling' };
+    let saved: VisualizationDefinition = { ...definition, series: [{ id: 'wildcard', sourceId, metric: 'value', axis: 'left', overrides: [
+      { seriesId: `${sourceId}:predictor:predictor-a`, [field]: value }, foreign, sibling
+    ] }] };
+    if (promoted) {
+      const changed = prepareDecisionChange(saved, { kind: 'item-style', sourceId, item: { resourceGuid: 'predictor-a' }, changes: { traceType: 'bar' } }, { snapshot });
+      if (changed.state === 'unchanged') throw new Error('Expected resource preference');
+      saved = changed.definition;
+    }
+    const before = structuredClone(saved);
+    const result = prepareDecisionChange(saved, { kind: 'item-style', sourceId, item: { resourceGuid: 'predictor-a' }, changes: { [field]: null } }, { snapshot });
+    expect(result.state).toBe('apply');
+    if (result.state === 'unchanged') throw new Error('Expected reset');
+    const item = projectPredictorItems(result.definition, sourceId, snapshot)[0];
+    expect(item.appearance[field]).not.toBe(value);
+    if (field === 'color') expect(item.customColor).toBe(false);
+    expect(result.definition.series[0].overrides).toEqual(expect.arrayContaining([foreign, sibling]));
+    expect(result.definition.sources).toEqual(saved.sources);
+    expect(saved).toEqual(before);
+  });
   it('preserves provider fallback, dormant and foreign appearances while converting exact declarations into All', () => {
     const { snapshot, definition } = setup(), sourceId = 'source-1';
     const exact: VisualizationDefinition = { ...definition, series: [{ id: 'exact', sourceId, metric: 'value', resourceGuid: 'predictor-a', label: 'My production', axis: 'right' as const, overrides: [

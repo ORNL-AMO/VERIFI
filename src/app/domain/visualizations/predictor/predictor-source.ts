@@ -56,15 +56,25 @@ export function validPredictorMonth(reading: Pick<IdbPredictorData, 'year' | 'mo
 }
 const indexOf = (reading: Pick<IdbPredictorData, 'year' | 'month'>) => reading.year * 12 + reading.month - 1;
 export { civilMonthRange as predictorMonthRange } from '../visualization-monthly-combination';
-function ownedReadings(snapshot: AccountWorkspaceSnapshot, predictor: IdbPredictor): readonly IdbPredictorData[] {
-  return snapshot.predictorData.filter(r => r.accountId === snapshot.account.guid && r.facilityId === predictor.facilityId && r.predictorId === predictor.guid);
+function indexOwnedReadings(snapshot: AccountWorkspaceSnapshot, predictors: readonly IdbPredictor[]): ReadonlyMap<string, readonly IdbPredictorData[]> {
+  const owners = new Map(predictors.map(predictor => [predictor.guid, predictor.facilityId]));
+  const readings = new Map<string, IdbPredictorData[]>();
+  for (const reading of snapshot.predictorData) {
+    const facilityId = owners.get(reading.predictorId);
+    if (facilityId === undefined || reading.accountId !== snapshot.account.guid || reading.facilityId !== facilityId) continue;
+    const history = readings.get(reading.predictorId) ?? [];
+    history.push(reading); readings.set(reading.predictorId, history);
+  }
+  return readings;
 }
 export function latestPredictorDate(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, source: PredictorVisualizationSource): string | undefined {
-  const catalog = predictorCatalog(snapshot, scope), selected = resolvePredictorSelection(snapshot, scope, source).map(guid => catalog.find(p => p.guid === guid));
-  if (selected.some(p => !p)) return undefined;
+  const guids = new Set(resolvePredictorSelection(snapshot, scope, source));
+  const selected = predictorCatalog(snapshot, scope).filter(predictor => guids.has(predictor.guid));
+  if (selected.length !== guids.size) return undefined;
+  const readings = indexOwnedReadings(snapshot, selected);
   let latest: number | undefined;
   for (const predictor of selected) {
-    const grouped = groupReadings(ownedReadings(snapshot, predictor!).filter(validPredictorMonth));
+    const grouped = groupReadings((readings.get(predictor.guid) ?? []).filter(validPredictorMonth));
     for (const [month, rows] of grouped) if (rows.length === 1 && Number.isFinite(rows[0].amount) && (latest === undefined || month > latest)) latest = month;
   }
   return latest === undefined ? undefined : predictorMonthRange(latest).end;
@@ -135,9 +145,10 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
   const guids = resolvePredictorSelection(snapshot, identity.scope, source);
   const owned = snapshot.predictors.filter(p => p.accountId === identity.accountGuid && identity.scope.facilityGuids.includes(p.facilityId)
     && snapshot.facilities.some(f => f.guid === p.facilityId && f.accountId === identity.accountGuid));
-  const missing = guids.filter(guid => !owned.some(p => p.guid === guid));
+  const byGuid = new Map(owned.map(predictor => [predictor.guid, predictor]));
+  const missing = guids.filter(guid => !byGuid.has(guid));
   if (missing.length) return { identity, state: 'missing-source', references: missing.map(id => ({ kind: 'predictor', id })), message: 'Repair the selected predictor references.' };
-  const records = guids.map(guid => owned.find(p => p.guid === guid)!);
+  const records = guids.map(guid => byGuid.get(guid)!);
   if (records.some(record => !supportedPredictor(record))) return unsupported('Math and Conversion predictors are placeholders and are not supported.');
   const omissions: { resourceGuid: string; label: string; issue: string; readings: string[] }[] = [];
   const omit = (record: IdbPredictor, issue: string, readings: readonly IdbPredictorData[]) => {
@@ -149,8 +160,9 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
     if (readings.length > 1) omit(record, 'Duplicate month', readings);
     else if (readings.length && !Number.isFinite(readings[0].amount)) omit(record, 'Nonfinite saved amount', readings);
   };
+  const indexed = indexOwnedReadings(snapshot, records);
   const histories = records.map(record => {
-    const readings = ownedReadings(snapshot, record), grouped = groupReadings(readings.filter(validPredictorMonth));
+    const readings = indexed.get(record.guid) ?? [], grouped = groupReadings(readings.filter(validPredictorMonth));
     const invalid = readings.filter(reading => !validPredictorMonth(reading));
     if (invalid.length) omit(record, 'Invalid saved month', invalid);
     const months = [...grouped.keys()].sort((a, b) => a - b);

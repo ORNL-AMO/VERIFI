@@ -90,8 +90,15 @@ function patchItem(definition: VisualizationDefinition, source: UtilityVisualiza
     const hasValues = Object.keys(override).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key));
     if (index >= 0) { if (hasValues) overrides[index] = override; else overrides.splice(index, 1); }
     else if (hasValues) overrides.push(override);
+    // A cleared preference must not return through the weaker provider selector.
+    const retainedOverrides = overrides.flatMap(entry => {
+      if (entry !== provider) return [entry];
+      const retained = { ...entry };
+      for (const [key, value] of Object.entries(changes)) if (value === null || value === '') delete (retained as Record<string, unknown>)[key];
+      return Object.keys(retained).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key)) ? [retained] : [];
+    });
     const { overrides: _old, ...base } = series;
-    return { ...base, ...(overrides.length ? { overrides } : {}) };
+    return { ...base, ...(retainedOverrides.length ? { overrides: retainedOverrides } : {}) };
   }) };
 }
 function withoutItem(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource, identity: DecisionItemIdentity): VisualizationDefinition {

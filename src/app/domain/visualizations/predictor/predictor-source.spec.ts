@@ -29,8 +29,17 @@ describe('saved monthly predictor projection', () => {
     snapshot.predictorData = snapshot.predictors.flatMap(record => Array.from({ length: 60 }, (_, index) => ({
       ...reading(index % 12 + 1, index), guid: `${record.guid}-${index}`, predictorId: record.guid, year: 2020 + Math.floor(index / 12)
     })));
-    expect(predictorHistoryRange(snapshot, request.identity.scope, { ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } }))
+    const all: PredictorVisualizationSource = { ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } };
+    expect(predictorHistoryRange(snapshot, request.identity.scope, all))
       .toEqual({ start: '2020-01-01', end: '2024-12-31' });
+    expect(latestPredictorDate(snapshot, request.identity.scope, all)).toBe('2024-12-31');
+    const result = resolvePredictor(snapshot, { ...request, source: all });
+    expect(result.state).toBe('ready');
+    if (result.state !== 'ready' || result.resolved.data.kind !== 'time-series') throw new Error('Expected large saved history');
+    expect(result.resolved.series).toHaveLength(2500);
+    expect(result.resolved.data.rows).toHaveLength(60);
+    expect(result.resolved.data.rows[0]).toMatchObject({ start: '2020-01-01', values: { 'predictor:predictor:predictor-0': { state: 'observed', value: 0 } } });
+    expect(result.resolved.data.rows.at(-1)).toMatchObject({ end: '2024-12-31', values: { 'predictor:predictor:predictor-2499': { state: 'observed', value: 59 } } });
   });
   it('keeps history bounds separate from eligible latest values and excludes unowned or invalid months', () => {
     const { snapshot, predictor, source, request, reading } = setup();

@@ -30,10 +30,11 @@ export class UtilityDateContextResolver implements PreviewDateContextResolver {
     const current = () => !signal.aborted && this.workspace.isReady() && this.workspace.account()?.guid === identity.accountGuid
       && this.workspace.revision() === identity.workspaceRevision && (!sources.length || this.data.isCurrent(identity));
     if (!snapshot || !current()) throw new DOMException('Date context superseded', 'AbortError');
-    let latestDataDate = predictors.flatMap(source => latestPredictorDate(snapshot, scope, source) ?? []).sort().at(-1);
+    const needsLatest = definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data';
+    let latestDataDate = needsLatest ? predictors.flatMap(source => latestPredictorDate(snapshot, scope, source) ?? []).sort().at(-1) : undefined;
     const emptyReasons: string[] = [];
     let sourceUnavailable = false;
-    const histories = predictors.flatMap(source => predictorHistoryRange(snapshot, scope, source) ?? []);
+    const histories = definition.period.kind === 'all-history' ? predictors.flatMap(source => predictorHistoryRange(snapshot, scope, source) ?? []) : [];
     if (definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' || predictors.length && definition.period.kind === 'all-history') for (const source of sources) {
       // Use the same ownership, allocation, retirement and measure-quality gates as the preview.
       const result = await this.provider.resolve({ identity: { ...identity, scope, sourceId: source.id, requestId: 'date-context' }, source,
