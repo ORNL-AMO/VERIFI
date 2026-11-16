@@ -32,7 +32,7 @@ h2 { font-size: 1.1rem; }
 @media (max-width: 760px) { .visualization-workbench__save-state { flex-basis: 100%; justify-content: flex-start; min-width: 0; white-space: normal; } }
 @media print {
   :host(.visualization-workbench-host), .visualization-workbench { height: auto; overflow: visible; }
-  button, .visualization-workbench__controls { display: none; }
+  button, .v1-data-workbench-actions, .visualization-workbench__controls { display: none; }
   .visualization-workbench__layout { display: block; overflow: visible; }
   .visualization-workbench__chart { overflow: visible; }
   #visualization-workbench-facts, .visualization-workbench > app-visualization-recovery-actions { max-height: none; overflow: visible; }
