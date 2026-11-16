@@ -745,6 +745,7 @@ describe('visualization routed journeys in Chromium', () => {
       expect(creationDialog(test).querySelector('input[formcontrolname="name"]')).toBeNull();
       await activate(test, 'Continue');
       await bindMeterForCreation(test);
+      await activate(test, 'Skip for now');
       const name = creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
       expect(document.activeElement).toBe(name);
       await userEvent.type(name, 'Weather and usage'); test.fixture.detectChanges();

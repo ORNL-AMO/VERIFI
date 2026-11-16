@@ -34,7 +34,7 @@ export class WorkbenchComponent {
     return VISUALIZATION_DATA_SOURCES.map(choice => ({ ...choice, selected: kinds.has(choice.value),
       disabled: !this.editor.canEdit() || !!this.pendingDecision() || this.decisionBusy() || kinds.size === 1 && kinds.has(choice.value) }));
   });
-  readonly charts = VISUALIZATION_CHART_CHOICES;
+  get charts() { return VISUALIZATION_CHART_CHOICES; }
   readonly expandedNodes = signal<ReadonlySet<string>>(new Set());
   readonly nodeResetKeys = signal<Readonly<Record<string, number>>>({});
   readonly decisionError = signal('');
