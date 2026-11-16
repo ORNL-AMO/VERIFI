@@ -90,7 +90,10 @@
             }
             @case ('analysis') {
               <legend class="visually-hidden"><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Select analysis results</h3></legend>
-              @if (lifecycle.analysisContext(); as context) { <app-analysis-source-editor [context]="context" [selectionOnly]="true"/> }
+              <app-visualization-analysis-picker [accountGuid]="lifecycle.editor()?.accountGuid ?? ''" [scope]="lifecycle.analysisScope()"
+                [allFacilities]="lifecycle.form.controls.facilitySelection.value.kind === 'all'" [selectedGuid]="lifecycle.form.controls.analysisGuid.value"
+                [disabled]="!lifecycle.canEditDraft()" [resetKey]="lifecycle.analysisPickerKey()" idPrefix="creation-analysis"
+                (selected)="lifecycle.selectAnalysis($event)"/>
             }
             @case ('predictor') {
               <legend class="visually-hidden"><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Select predictor</h3></legend>
@@ -114,7 +117,7 @@
           }
         }
       </fieldset>
-      @if (!lifecycle.analysisSelectionValid()) { <p role="alert">The selected analysis or group is unavailable. Review the Analysis selection.</p> }
+      @if (!lifecycle.analysisSelectionValid()) { <p role="alert">The selected analysis is unavailable. Review the Analysis selection.</p> }
       @if (!lifecycle.equipmentSelectionValid()) { <p role="alert">A selected Energy Use resource is no longer available. Review the selection.</p><button type="button" class="v1-btn v1-btn--quiet" [disabled]="!lifecycle.canEditDraft()" (click)="lifecycle.editSelection('equipment')">Review Energy Use selection</button> }
       @if (!lifecycle.predictorSelectionValid()) {
         <p role="alert">A selected predictor is no longer available. Update your selection to continue.</p>

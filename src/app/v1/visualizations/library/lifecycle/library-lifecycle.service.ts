@@ -1,5 +1,5 @@
-import { analysisGroupChoices, analysisChoices } from '../../analysis/analysis-items';
-import type { UtilityEditorContext } from '../../utility/editors/utility-editor-context';
+import { analysisChoices } from '../../analysis/analysis-items';
+import { replaceAnalysisBinding } from '../../analysis/analysis-binding';
 import { selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
 import { energyUseSelectionChoices, equipmentResourceChoices } from '../../energy-use/equipment-items';
 import { useEquipmentHistorySettings } from '@domain/visualizations/energy-use/equipment-source';
@@ -32,7 +32,7 @@ export interface VisualizationCreationDraft {
   name: string; facilitySelection: VisualizationFacilitySelection;
   chart: VisualizationChartChoiceId | null; sourceKinds: readonly VisualizationSourceKind[];
   energyUseResourceIds: string[]; energyUseMode: EnergyUseSelectionMode | null;
-  analysisSetup: VisualizationDefinition | null;
+  analysisGuid: string | null;
   predictorGuids: readonly string[]; predictorAll: boolean;
   recipe: VisualizationRecipe; selectionMode: UtilitySelectionMode | null; resourceIds: readonly string[]; dataMode: 'calendarized' | 'billing-period';
 }
@@ -67,7 +67,7 @@ export class LibraryLifecycle {
     sourceKinds: new FormControl<readonly VisualizationSourceKind[]>([], { nonNullable: true }),
     energyUseResourceIds: new FormControl<string[]>([], { nonNullable: true }),
     energyUseMode: new FormControl<EnergyUseSelectionMode | null>(null),
-    analysisSetup: new FormControl<VisualizationDefinition | null>(null),
+    analysisGuid: new FormControl<string | null>(null),
     predictorAll: new FormControl(false, { nonNullable: true }),
     predictorGuids: new FormControl<readonly string[]>([], { nonNullable: true }),
     recipe: new FormControl<VisualizationRecipe>('custom', { nonNullable: true }),
@@ -113,24 +113,23 @@ export class LibraryLifecycle {
   readonly predictorSelectionValid = computed(() => !this.hasPredictors() || this.draft().predictorAll || this.draft().predictorGuids.every(guid => this.predictorChoices().some(choice => choice.value === guid)));
   readonly predictorSelectedGuids = computed(() => this.draft().predictorAll ? this.predictorChoices().map(choice => choice.value) : this.draft().predictorGuids);
   readonly hasAnalysis = computed(() => this.draft().sourceKinds.includes('analysis'));
-  readonly analysisSelected = computed(() => this.draft().analysisSetup?.sources.some(source => source.kind === 'analysis' && !!source.analysisGuid) ?? false);
+  readonly analysisScope = computed(() => this.scope(this.draft()));
+  readonly analysisPickerKey = computed(() => JSON.stringify([this.editor()?.accountGuid, this.draft().facilitySelection]));
+  readonly analysisSelected = computed(() => !!this.draft().analysisGuid);
   readonly analysisSelectionValid = computed(() => {
     if (!this.hasAnalysis()) return true;
-    const source = this.draft().analysisSetup?.sources.find(item => item.kind === 'analysis'), snapshot = this.workspace.snapshot();
-    return !source?.analysisGuid || !!snapshot && analysisChoices(snapshot, this.scope(this.draft()), this.draft().facilitySelection.kind === 'all').some(item => item.value === source.analysisGuid)
-      && (!source.groupGuid || analysisGroupChoices(snapshot, source.analysisGuid).some(item => item.value === source.groupGuid));
+    const guid = this.draft().analysisGuid, snapshot = this.workspace.snapshot();
+    return !guid || !!snapshot && analysisChoices(snapshot, this.analysisScope(), this.draft().facilitySelection.kind === 'all')
+      .some(item => item.value === guid);
   });
-  readonly analysisContext = computed<UtilityEditorContext | undefined>(() => {
-    const definition = this.draftDefinition(), source = definition?.sources.find(item => item.kind === 'analysis');
-    if (!definition || !source) return undefined;
-    return { definition, sourceId: source.id, disabled: !this.canEditDraft(), editorKey: `creation:${this.editor()?.accountGuid}`,
-      changed: () => {}, request: action => {
-        if (!this.canEditDraft() || this.draftDefinition() !== definition) return;
-        const snapshot = this.workspace.snapshot(); if (!snapshot) return;
-        const result = prepareDecisionChange(definition, action, { snapshot });
-        this.requestDecision(result, () => { if (result.state !== 'unchanged') this.form.controls.analysisSetup.setValue(result.definition); });
-      } };
-  });
+  selectAnalysis(analysisGuid: string): void {
+    const definition = this.draftDefinition(), snapshot = this.workspace.snapshot();
+    const source = definition?.sources.find(item => item.kind === 'analysis');
+    if (!this.canEditDraft() || !definition || !snapshot || !source) return;
+    const result = prepareDecisionChange(definition, { kind: 'analysis-binding', sourceId: source.id, analysisGuid }, { snapshot });
+    if (result.state === 'unchanged') return;
+    this.requestDecision(result, () => this.form.controls.analysisGuid.setValue(analysisGuid));
+  }
   readonly canContinueAnalysis = computed(() => this.canEditDraft() && this.hasAnalysis() && this.analysisSelected() && this.analysisSelectionValid());
   continueAnalysis(): void { if (this.canContinueAnalysis()) this.step.set('name'); }
   readonly hasMeters = computed(() => this.draft().sourceKinds.includes('utility'));
@@ -175,8 +174,8 @@ export class LibraryLifecycle {
     if (this.hasEquipment() && this.selectedEnergyUseMode()) selections.push({ step: 'energy-use-selection-mode', label: this.selectedEnergyUseMode()!.label, icon: this.selectedEnergyUseMode()!.icon, editable: true });
     if (this.hasEquipment() && (value.energyUseResourceIds.length || this.step() === 'name')) selections.push({ step: 'equipment', label: value.energyUseResourceIds.length ? value.energyUseResourceIds.map(guid => this.equipmentChoices().find(choice => choice.guid === guid)?.label ?? 'Unavailable equipment').join(', ') : 'Choose equipment later', icon: 'energyUseGroup', editable: true });
     if (this.hasAnalysis() && this.analysisSelected()) {
-      const source = value.analysisSetup?.sources.find(item => item.kind === 'analysis');
-      selections.push({ step: 'analysis', label: source?.kind === 'analysis' && source.analysisGuid ? [...this.workspace.accountAnalyses(), ...this.workspace.facilityAnalyses()].find(item => item.guid === source.analysisGuid)?.name ?? 'Unavailable analysis' : 'Select analysis', icon: 'analysis', editable: true });
+      selections.push({ step: 'analysis', label: [...this.workspace.accountAnalyses(), ...this.workspace.facilityAnalyses()]
+        .find(item => item.guid === value.analysisGuid)?.name ?? 'Unavailable analysis', icon: 'analysis', editable: true });
     }
     return selections;
   });
@@ -217,7 +216,7 @@ export class LibraryLifecycle {
     this.ownerChosen.set(preselected); this.step.set(editor.entry ? 'name' : preselected ? 'chart' : 'facilities');
   }
   private initialSourceChoices() {
-    return { analysisSetup: null as VisualizationDefinition | null, energyUseResourceIds: [] as string[], energyUseMode: null as EnergyUseSelectionMode | null, predictorAll: false, predictorGuids: [] as readonly string[], selectionMode: null as UtilitySelectionMode | null, resourceIds: [] as readonly string[], dataMode: 'calendarized' as const };
+    return { analysisGuid: null as string | null, energyUseResourceIds: [] as string[], energyUseMode: null as EnergyUseSelectionMode | null, predictorAll: false, predictorGuids: [] as readonly string[], selectionMode: null as UtilitySelectionMode | null, resourceIds: [] as readonly string[], dataMode: 'calendarized' as const };
   }
   private scope(value: VisualizationCreationDraft) { return resolveVisualizationFacilities({ accountGuid: this.workspace.account()?.guid ?? '', facilitySelection: value.facilitySelection }, this.facilities()).scope; }
   private buildDefinition(): VisualizationDefinition | undefined {
@@ -239,13 +238,8 @@ export class LibraryLifecycle {
       for (const resourceId of value.resourceIds) change({ kind: 'toggle-resource', sourceId, resourceId, selected: true });
       change({ kind: 'source-settings', sourceId, settings: { dataMode: value.dataMode } });
     }
-    const analysis = value.analysisSetup?.sources.find(item => item.kind === 'analysis');
     const target = definition.sources.find(item => item.kind === 'analysis');
-    if (analysis && target) {
-      definition = { ...definition, sources: definition.sources.map(item => item.id === target.id ? { ...analysis, id: target.id } : item),
-        series: [...definition.series, ...value.analysisSetup!.series.filter(item => item.sourceId === analysis.id).map(item => ({ ...item, sourceId: target.id }))],
-        ...(definition.sources.length === 1 ? { chart: value.analysisSetup!.chart, period: value.analysisSetup!.period, comparison: value.analysisSetup!.comparison } : {}) };
-    }
+    if (target && value.analysisGuid) definition = replaceAnalysisBinding(definition, target.id, { analysisGuid: value.analysisGuid });
     return definition;
   }
   private requestDecision(result: DecisionChangeResult, apply: () => void): void {
@@ -271,7 +265,8 @@ export class LibraryLifecycle {
     this.requestDecision(result, () => {
       this.form.controls.facilitySelection.setValue(selection);
       if (result.state === 'unchanged') return;
-      if (result.definition.sources.some(item => item.kind === 'analysis')) this.form.controls.analysisSetup.setValue(result.definition);
+      const analysis = result.definition.sources.find(item => item.kind === 'analysis');
+      if (analysis?.kind === 'analysis') this.form.controls.analysisGuid.setValue(analysis.analysisGuid ?? null);
       const equipment = result.definition.sources.find(source => source.kind === 'energy-use');
       this.form.controls.energyUseResourceIds.setValue(equipment?.kind === 'energy-use' ? [...selectedEnergyUseIds(equipment)] : []);
       const predictor = result.definition.sources.find(source => source.kind === 'predictor');
@@ -318,9 +313,9 @@ export class LibraryLifecycle {
   toggleSource(kind: VisualizationSourceKind): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(source => source.value === kind)) return;
     const selected = this.form.controls.sourceKinds.value;
-    const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'analysis' && selected.includes(kind)) this.form.controls.analysisSetup.setValue(null); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } if (kind === 'energy-use' && selected.includes(kind)) this.form.patchValue({ energyUseResourceIds: [], energyUseMode: null }); if (kind === 'predictor' && selected.includes(kind)) { this.form.controls.predictorGuids.setValue([]); this.form.controls.predictorAll.setValue(false); } };
+    const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'analysis' && selected.includes(kind)) this.form.controls.analysisGuid.setValue(null); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } if (kind === 'energy-use' && selected.includes(kind)) this.form.patchValue({ energyUseResourceIds: [], energyUseMode: null }); if (kind === 'predictor' && selected.includes(kind)) { this.form.controls.predictorGuids.setValue([]); this.form.controls.predictorAll.setValue(false); } };
     if (kind === 'predictor' && selected.includes(kind) && (this.form.controls.predictorAll.value || this.form.controls.predictorGuids.value.length)) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Predictor selection'], affectedNodeIds: [] }, apply);
-    else if (kind === 'analysis' && selected.includes(kind) && this.form.controls.analysisSetup.value) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Analysis selection'], affectedNodeIds: [] }, apply);
+    else if (kind === 'analysis' && selected.includes(kind) && this.form.controls.analysisGuid.value) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Analysis selection'], affectedNodeIds: [] }, apply);
     else if (kind === 'energy-use' && selected.includes(kind) && this.form.controls.energyUseResourceIds.value.length) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Equipment selection'], affectedNodeIds: [] }, apply);
     else if (kind === 'utility' && selected.includes(kind) && this.resourcesValid()) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Meter resource selections'], affectedNodeIds: [] }, apply); else apply();
   }

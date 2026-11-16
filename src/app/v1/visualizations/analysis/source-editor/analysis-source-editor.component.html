@@ -1,11 +1,11 @@
 @if (view(); as context) {
   <div class="analysis-settings" [formGroup]="form">
-    <app-report-analysis-selection [cards]="analysisCards()" [selectionControl]="selectedAnalysisControl"
-      [selectedValue]="source()?.analysisGuid ?? null" [resetKey]="pickerKey()" [idPrefix]="pickerId()"
-      [canEdit]="!context.disabled" [showTypeFilter]="showTypeFilter()"
-      emptyMessage="No saved analyses are available." (inspected)="inspectedGuid.set($event)"/>
+    @if (scope(); as scope) {
+      <app-visualization-analysis-picker [accountGuid]="context.definition.accountGuid" [scope]="scope"
+        [allFacilities]="context.definition.facilitySelection.kind === 'all'" [selectedGuid]="source()?.analysisGuid ?? null"
+        [disabled]="context.disabled" [resetKey]="pickerKey()" [idPrefix]="pickerId()" (selected)="selectAnalysis($event)"/>
+    }
     @if (missingAnalysis()) { <p role="status">The selected analysis is unavailable or unsupported.</p> }
-    @if (!selectionOnly()) {
     @if (isAccount()) { <p>Account total</p> }
     @else if (source()?.analysisGuid && !missingAnalysis()) {
       <label>Result scope
@@ -29,23 +29,10 @@
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="context.disabled" (click)="defaults()">Use monthly actual results without comparison</button>
       }
     } @else { <p role="status">Saved model visualizations are not supported yet. Choose an analysis to replace this binding explicitly.</p> }
-    }
   </div>
-  @if (!selectionOnly()) {
   @for (item of items(); track item.key) {
     <app-visualization-item-settings [item]="item" [disabled]="context.disabled" [editorKey]="context.editorKey ?? ''"
       [expandedNodes]="context.expandedNodes ?? emptyNodes" [resetKey]="item.resetKey"
       (requested)="context.request?.($event)" (sectionChanged)="context.sectionChanged?.($event.id, $event.expanded)"/>
   }
-  }
-  @if (inspected(); as entry) { @if (entry.scope === 'facility') {
-    <app-analysis-details-slideout [card]="entry.card" [meterGroups]="inventories.meterGroups()" [evaluation]="inventories.statusState()"
-      actionLabel="Select analysis" actionIcon="check" [actionDisabled]="context.disabled"
-      (closed)="inspectedGuid.set(undefined)" (opened)="selectInspected()"/>
-  } @else {
-    <app-account-analysis-details-slideout [card]="entry.card" [outcomeDisplay]="inspectedOutcome()" [evaluation]="inventories.statusState()"
-      [facilityInputs]="inventories.facilityInputs()" [facilityFindings]="inventories.statusItems()"
-      actionLabel="Select analysis" actionIcon="check" [actionDisabled]="context.disabled"
-      (closed)="inspectedGuid.set(undefined)" (actionSelected)="selectInspected()"/>
-  } }
 }

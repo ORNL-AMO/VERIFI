@@ -1,3 +1,4 @@
+import { replaceAnalysisBinding } from '../analysis/analysis-binding';
 import { analysisMeasureLabels, analysisSeriesId, analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
 import { projectAnalysisItems, analysisChoices, analysisGroupChoices } from '../analysis/analysis-items';
 import { energyUseSelectionMode, energyUseResourceKind, energyUseSeriesId, selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
@@ -207,10 +208,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         if (action.groupGuid && !analysisGroupChoices(context.snapshot, action.analysisGuid).some(item => item.value === action.groupGuid)) return { state: 'unchanged' };
         if (source.mode === 'result' && source.analysisGuid === action.analysisGuid && source.groupGuid === action.groupGuid) return { state: 'unchanged' };
         clearItems(source.id, true); affect({ kind: 'source', sourceId: source.id });
-        const measure = source.mode === 'result' && !source.measure.startsWith('banked-') ? source.measure : 'actual';
-        const changed: AnalysisResultVisualizationSource = { id: source.id, kind: 'analysis', mode: 'result', measure, aggregation: 'none', settings: source.settings,
-          ...(action.analysisGuid ? { analysisGuid: action.analysisGuid } : {}), ...(action.groupGuid ? { groupGuid: action.groupGuid } : {}) };
-        next = ensureSeries({ ...definition, sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.filter(item => item.sourceId !== source.id) }, changed);
+        next = replaceAnalysisBinding(definition, source.id, action);
       } else if (source.mode === 'result' && action.kind === 'analysis-measure') {
         if (!Object.hasOwn(analysisMeasureLabels, action.measure)) return { state: 'unchanged' };
         const changed = { ...source, measure: action.measure };

@@ -10,6 +10,7 @@ import { configureLibraryTest, libraryRecord } from '../../library/testing/libra
 import { CreationComponent } from './creation-drawer.component';
 import { FacilityPickerComponent } from '../../shared/facility-picker/facility-picker.component';
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
+import { analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
 
 describe('visualization creation drawer', () => {
   it('removes a disappeared predictor through Add while retaining the surviving fixed selection', async () => {
@@ -38,6 +39,29 @@ describe('visualization creation drawer', () => {
       expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ sources: [{ selection: { kind: 'fixed', guids: ['second'] } }] });
     } finally { fixture.destroy(); }
   });
+  it('selects only a named analysis and saves a later chart choice through the shared picker', async () => {
+    const { workspace, commands } = configureLibraryTest([LibraryModule]); workspace.publish(analysisFixture().snapshot);
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    try {
+      lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources(); fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const button = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.trim() === label)!;
+      expect(root.querySelector('app-visualization-analysis-picker')).not.toBeNull();
+      expect(root.querySelector('[formcontrolname=groupGuid]')).toBeNull();
+      expect(root.querySelector('[formcontrolname=measure]')).toBeNull();
+      expect(root.querySelector('[formcontrolname=interval]')).toBeNull();
+      expect(button('Continue').disabled).toBe(true);
+      root.querySelector<HTMLInputElement>('input[type=radio]')!.click(); fixture.detectChanges();
+      expect(button('Continue').disabled).toBe(false); button('Continue').click(); fixture.detectChanges();
+      lifecycle.editSelection('chart'); fixture.detectChanges(); button('Bar').click(); fixture.detectChanges();
+      button('Continue').click(); fixture.detectChanges(); button('Continue').click(); fixture.detectChanges();
+      lifecycle.form.controls.name.setValue('Changed chart'); await lifecycle.submit();
+      expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly' },
+        sources: [{ analysisGuid: 'analysis-a', mode: 'result', measure: 'actual' }] });
+      expect(commands.prepareCreate.mock.calls[0][0].sources[0]).not.toHaveProperty('groupGuid');
+    } finally { fixture.destroy(); }
+  });
+
   it('saves a facility Energy Use selection through Add, including a facility with no equipment', async () => {
     const { workspace, commands } = configureLibraryTest([LibraryModule]);
     const snapshot = workspace.snapshot()!;
