@@ -17,6 +17,7 @@ import { CALCULATION_WORKER_TIMEOUT_MS, runWorker } from '@platform/web-workers/
 import { of, timeout, type Observable, type Subscription } from 'rxjs';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { evaluateWorkspaceStatus } from '@app/v1/status/status.evaluator';
+import { evaluateBankingSource } from '@shared/shared-analysis/banking-configuration';
 import { buildFacilityDashboardResultsRequest, facilityAnalysisResultsFingerprint } from '@app/v1/analysis/facility/workbench/results/calculation/facility-analysis-results-request';
 import { facilityAnalysisGroupResultsFingerprint, projectAnalysisGroupDependencies, projectAnalysisGroupPredictorInputs } from '@app/v1/analysis/facility/workbench/group/results/calculation/facility-analysis-group-results-request';
 import { UtilityDataSession } from '../utility/utility-data-session.service';
@@ -70,16 +71,11 @@ export class AnalysisDataSession {
     if (source.groupGuid && (!group || ['skip', 'skipAnalysis'].includes(group.analysisType))) return missing('analysis-group', source.groupGuid);
     if (source.measure.startsWith('banked-') && !(analysis.hasBanking && group?.applyBanking)) return unavailable('unsupported', 'Choose a group with applicable banking.');
     // Reject broken closure explicitly before any recursive calculation can run.
-    const visited = new Set<string>();
-    let dependency = analysis;
-    while (dependency) {
-      if (visited.has(dependency.guid)) return unavailable('invalid-analysis', 'The analysis banking dependencies contain a cycle.');
-      visited.add(dependency.guid);
-      if (!dependency.hasBanking) break;
-      const next = snapshot.facilityAnalyses.find(item => item.guid === dependency.bankedAnalysisItemId && item.accountId === identity.accountGuid && item.facilityId === facility.guid);
-      if (!next) return unavailable('invalid-analysis', 'A banked analysis is unavailable. Review Analysis setup.');
-      dependency = next;
-    }
+    const bankingIssue = analysis.hasBanking ? evaluateBankingSource(analysis,
+      snapshot.facilityAnalyses.filter(item => item.accountId === identity.accountGuid && item.facilityId === facility.guid)).issue : undefined;
+    if (bankingIssue === 'cycle') return unavailable('invalid-analysis', 'The analysis banking dependencies contain a cycle.');
+    if (bankingIssue === 'missing' || bankingIssue === 'dependency-missing') return unavailable('invalid-analysis', 'A banked analysis is unavailable. Review Analysis setup.');
+    if (bankingIssue) return unavailable('invalid-analysis', 'Analysis setup or the selected results are invalid. Review Analysis setup.');
     try {
       const acquired = await this.data.acquire(identity, signal, true);
       if (!current()) return unavailable('error', 'Analysis inputs changed. Preparing current results.');
@@ -155,17 +151,13 @@ export class AnalysisDataSession {
     if (inclusion) return unavailable('unsupported', inclusion);
     const analyses = snapshot.facilityAnalyses.filter(item => item.accountId === identity.accountGuid);
     for (const link of selected) {
-      let dependency = analyses.find(item => item.guid === link.analysisItemId && item.facilityId === link.facilityId);
-      const visited = new Set<string>();
-      if (!dependency) return unavailable('invalid-analysis', 'A selected facility analysis is unavailable. Review Analysis selections.');
-      while (dependency) {
-        if (visited.has(dependency.guid)) return unavailable('invalid-analysis', 'The analysis banking dependencies contain a cycle.');
-        visited.add(dependency.guid);
-        if (!dependency.hasBanking) break;
-        const next = analyses.find(item => item.guid === dependency!.bankedAnalysisItemId && item.facilityId === link.facilityId);
-        if (!next) return unavailable('invalid-analysis', 'A banked analysis is unavailable. Review Analysis setup.');
-        dependency = next;
-      }
+      const selectedAnalysis = analyses.find(item => item.guid === link.analysisItemId && item.facilityId === link.facilityId);
+      if (!selectedAnalysis) return unavailable('invalid-analysis', 'A selected facility analysis is unavailable. Review Analysis selections.');
+      const bankingIssue = selectedAnalysis.hasBanking ? evaluateBankingSource(selectedAnalysis,
+        analyses.filter(item => item.facilityId === link.facilityId)).issue : undefined;
+      if (bankingIssue === 'cycle') return unavailable('invalid-analysis', 'The analysis banking dependencies contain a cycle.');
+      if (bankingIssue === 'missing' || bankingIssue === 'dependency-missing') return unavailable('invalid-analysis', 'A banked analysis is unavailable. Review Analysis setup.');
+      if (bankingIssue) return unavailable('invalid-analysis', 'Analysis setup or facility selections are invalid. Review Analysis setup.');
     }
     try {
       const acquired = await this.data.acquire(identity, signal, true);

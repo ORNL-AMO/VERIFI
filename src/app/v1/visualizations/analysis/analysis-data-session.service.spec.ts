@@ -82,7 +82,7 @@ describe('active facility analysis preview results', () => {
     const retry = provider.resolve(request, new AbortController().signal), second = await worker(1);
     second.emit({ ok: true, value: calculateFacilityAnalysisResults(fixture.request) }); expect((await retry).state).toBe('ready');
   });
-  it('rejects missing/cyclic dependency closure and account/model modes without requesting results', async () => {
+  it('rejects missing/cyclic dependency closure without requesting results', async () => {
     const { fixture, store, acquire, provider, request } = setup();
     for (const bankedAnalysisItemId of ['missing', fixture.analysis.guid]) {
       store.publishCommitted({ ...fixture.snapshot, facilityAnalyses: [{ ...fixture.analysis, hasBanking: true, bankedAnalysisItemId }] }, {});
@@ -90,4 +90,28 @@ describe('active facility analysis preview results', () => {
     }
     expect(acquire).not.toHaveBeenCalled(); expect(ControlledWorker.instances).toHaveLength(0);
   });
+  it.each(['missing-id', 'transitive-missing', 'transitive-missing-id', 'transitive-cycle', 'foreign-account', 'foreign-facility', 'category', 'basis'] as const)(
+    'rejects a %s banking source before acquiring calculation data', async scenario => {
+      const { fixture, store, acquire, provider, request } = setup();
+      const analysis = { ...fixture.analysis, hasBanking: true, bankedAnalysisItemId: 'banked-source' };
+      const source = { ...fixture.analysis, guid: 'banked-source' };
+      switch (scenario) {
+        case 'missing-id': analysis.bankedAnalysisItemId = undefined; break;
+        case 'transitive-missing': source.hasBanking = true; source.bankedAnalysisItemId = 'missing'; break;
+        case 'transitive-missing-id': source.hasBanking = true; source.bankedAnalysisItemId = undefined; break;
+        case 'transitive-cycle': source.hasBanking = true; source.bankedAnalysisItemId = analysis.guid; break;
+        case 'foreign-account': source.accountId = 'other-account'; break;
+        case 'foreign-facility': source.facilityId = 'other-facility'; break;
+        case 'category': source.analysisCategory = 'water'; break;
+        case 'basis': source.energyIsSource = !analysis.energyIsSource; break;
+      }
+      store.publishCommitted({ ...fixture.snapshot, facilityAnalyses: [analysis, source] }, {});
+      const message = scenario === 'transitive-cycle' ? 'The analysis banking dependencies contain a cycle.'
+        : scenario === 'category' || scenario === 'basis' ? 'Analysis setup or the selected results are invalid. Review Analysis setup.'
+          : 'A banked analysis is unavailable. Review Analysis setup.';
+      expect(await provider.resolve({ ...request, identity: { ...request.identity, workspaceRevision: store.revision() } }, new AbortController().signal))
+        .toMatchObject({ state: 'invalid-analysis', message });
+      expect(acquire).not.toHaveBeenCalled(); expect(ControlledWorker.instances).toHaveLength(0);
+    }
+  );
 });

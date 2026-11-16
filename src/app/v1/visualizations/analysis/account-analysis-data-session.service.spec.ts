@@ -81,6 +81,30 @@ describe('active saved account analysis preview', () => {
     expect((await provider.resolve({ ...group, source: { ...accountAnalysisDefinition().sources[0] as AnalysisResultVisualizationSource, groupGuid: 'group-a' } }, new AbortController().signal)).state).toBe('unsupported');
     expect(ControlledWorker.instances).toHaveLength(0);
   });
+  it.each(['missing-id', 'transitive-missing', 'transitive-missing-id', 'transitive-cycle', 'foreign-account', 'foreign-facility', 'category', 'basis'] as const)(
+    'rejects a selected facility\'s %s banking source before acquiring calculation data', async scenario => {
+      const { fixture, store, acquire, provider, request } = setup(), snapshot = structuredClone(fixture.snapshot);
+      const analysis = snapshot.facilityAnalyses[0];
+      analysis.hasBanking = true; analysis.bankedAnalysisItemId = 'banked-source';
+      const source = { ...analysis, guid: 'banked-source', hasBanking: false, bankedAnalysisItemId: undefined };
+      switch (scenario) {
+        case 'missing-id': analysis.bankedAnalysisItemId = undefined; break;
+        case 'transitive-missing': source.hasBanking = true; source.bankedAnalysisItemId = 'missing'; break;
+        case 'transitive-missing-id': source.hasBanking = true; source.bankedAnalysisItemId = undefined; break;
+        case 'transitive-cycle': source.hasBanking = true; source.bankedAnalysisItemId = analysis.guid; break;
+        case 'foreign-account': source.accountId = 'other-account'; break;
+        case 'foreign-facility': source.facilityId = 'facility-b'; break;
+        case 'category': source.analysisCategory = 'water'; break;
+        case 'basis': source.energyIsSource = !analysis.energyIsSource; break;
+      }
+      snapshot.facilityAnalyses.push(source); store.publishCommitted(snapshot, {});
+      const message = scenario === 'transitive-cycle' ? 'The analysis banking dependencies contain a cycle.'
+        : scenario === 'category' || scenario === 'basis' ? 'Analysis setup or facility selections are invalid. Review Analysis setup.'
+          : 'A banked analysis is unavailable. Review Analysis setup.';
+      expect(await provider.resolve(request(), new AbortController().signal)).toMatchObject({ state: 'invalid-analysis', message });
+      expect(acquire).not.toHaveBeenCalled(); expect(ControlledWorker.instances).toHaveLength(0);
+    }
+  );
   it('supports new-facility baseline exceptions and differing fiscal calendars', async () => {
     const { fixture, store, provider, request } = setup(), snapshot = structuredClone(fixture.snapshot);
     snapshot.facilities[0].isNewFacility = true; snapshot.facilityAnalyses[0].baselineYear = 2021;
