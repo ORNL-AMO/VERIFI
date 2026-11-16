@@ -1,4 +1,5 @@
 import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
+import { remapDataQualityBackupReferences } from './data-quality-backup-relations';
 import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { Injectable, signal } from '@angular/core';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
@@ -349,6 +350,7 @@ export class BackupImportCommandService {
         facilityReport.accountId = accountGUIDs.newId;
         facilityReport.facilityId = this.getNewId(facilityReport.facilityId, facilityGUIDs);
         facilityReport.analysisItemId = this.getNewId(facilityReport.analysisItemId, facilityAnalysisGUIDs);
+        remapDataQualityBackupReferences(facilityReport, facilityAnalysisGUIDs, meterGUIDs, predictorGUIDs);
         await this.addRecord(transaction, 'facilityReports', facilityReport);
       }
 
@@ -702,6 +704,7 @@ export class BackupImportCommandService {
       facilityReport.accountId = accountGUID;
       facilityReport.facilityId = newFacilityGUID;
       facilityReport.analysisItemId = this.getNewId(facilityReport.analysisItemId, facilityAnalysisGUIDs);
+      remapDataQualityBackupReferences(facilityReport, facilityAnalysisGUIDs, meterGUIDs, predictorGUIDs);
       await this.addRecord(transaction, 'facilityReports', facilityReport);
     }
 

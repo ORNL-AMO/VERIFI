@@ -6,6 +6,11 @@ describe('facility report Setup', () => {
     const { open, harness, updateName } = await setupReportWorkbench([reportFixture({ facilityReportType: 'overview' })]);
     const workbench = await open();
     const content: HTMLElement = harness.routeNativeElement!.querySelector('app-facility-report-setup')!;
+    expect([...content.querySelectorAll('.setup-section-heading')].map(heading => heading.textContent))
+      .toEqual(['Report information', 'Report-specific settings']);
+    for (const heading of content.querySelectorAll('.setup-section-heading')) {
+      expect(heading.parentElement!.getAttribute('aria-labelledby')).toBe(heading.id);
+    }
     expect(content.querySelector('label')?.getAttribute('for')).toBe('report-workbench-name');
     expect(content.querySelector('input')?.value).toBe('Saved report');
     expect(content.querySelector('select')).toBeNull();

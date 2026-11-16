@@ -1,23 +1,38 @@
 /* Shared setup presentation, scoped by the importing report component. */
+.report-section.report-setup { padding: 0; border-radius: 0; }
+
 .report-setup-section {
   min-width: 0;
-  padding-block: 1.25rem;
-  border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
+  padding: 0;
+  border-top: 1px solid var(--v1-border);
 }
 
-.report-setup-section:first-child {
+.report-setup > .report-setup-section:first-of-type {
   border-top: 0;
-  padding-top: 0;
 }
 
-.report-setup-section:last-child { padding-bottom: 0; }
-
-.report-setup-section h2 {
-  margin: 0 0 1rem;
-  color: var(--v1-ink);
-  font-size: 1.02rem;
+.report-setup-section > .setup-section-heading {
+  margin: 0;
+  padding: .85rem clamp(1rem, 3vw, 1.5rem);
+  border-bottom: 1px solid var(--v1-border);
+  background: var(--v1-content-block);
+  color: var(--v1-text);
+  font-size: 1.1rem;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.35;
+}
+
+.report-setup-body { min-width: 0; padding: clamp(1rem, 3vw, 1.5rem); }
+
+.report-setup-body--with-period {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 1fr);
+  align-items: start;
+  gap: 1.75rem;
+}
+
+@media (max-width: 992px) {
+  .report-setup-body--with-period { grid-template-columns: minmax(0, 1fr); }
 }
 
 .report-setup-field {
@@ -80,14 +95,3 @@
 }
 
 .report-setup-name { max-width: 42rem; }
-
-.report-setup-top--with-period {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 1fr);
-  align-items: start;
-  gap: 1.75rem;
-}
-
-@media (max-width: 992px) {
-  .report-setup-top--with-period { grid-template-columns: minmax(0, 1fr); }
-}

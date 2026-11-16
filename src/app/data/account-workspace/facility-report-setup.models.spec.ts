@@ -1,6 +1,21 @@
-import { getAnalysisReportSettings } from '@data/models/idbModels/facilityReport';
-import { mergeFacilityAnalysisSettings } from './facility-report-setup.models';
+import { getAnalysisReportSettings, getDataQualityReportSettings } from '@data/models/idbModels/facilityReport';
+import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings } from './facility-report-setup.models';
 describe('facility report setup patches', () => {
+  it('merges Data Quality edits without defaulting absent optional flags or mutating GUID arrays', () => {
+    const saved = getDataQualityReportSettings();
+    saved.selectedAnalysisItemId = 'analysis-a'; saved.selectedMeterIds = ['meter-a'];
+    delete saved.includeAnnualTotalsTable;
+    const merged = mergeFacilityDataQualitySettings(saved, { selectedMode: 'manual', selectedAnalysisItemId: null,
+      selectedPredictorIds: ['predictor-a', 'predictor-a'], includeMeterCostHistogram: false });
+    expect(merged).toMatchObject({ selectedMode: 'manual', selectedMeterIds: ['meter-a'], selectedPredictorIds: ['predictor-a'], includeMeterCostHistogram: false });
+    expect(merged.selectedAnalysisItemId).toBeUndefined(); expect(merged.includeAnnualTotalsTable).toBeUndefined();
+    expect(saved.selectedAnalysisItemId).toBe('analysis-a'); expect(saved.includeMeterCostHistogram).toBe(true);
+    merged.selectedMeterIds!.push('changed'); expect(saved.selectedMeterIds).toEqual(['meter-a']);
+  });
+  it.each([{ selectedMode: 'other' }, { selectedMeterIds: [1] }, { selectedPredictorIds: null },
+    { selectedAnalysisItemId: '' }, { includeMeter: 'true' }, { missingSelection: false }, { unknown: true }])('rejects malformed Data Quality patches: %j', changes => {
+    expect(() => mergeFacilityDataQualitySettings(getDataQualityReportSettings(), changes as never)).toThrow('invalid');
+  });
   it('merges nested edits and explicit year clearing without mutating durable settings', () => {
     const saved = getAnalysisReportSettings(); saved.reportYear = 2024; saved.facilityAnnualResultsGraphs = false;
     saved.analysisTableColumns.bankedSavings = true;

@@ -1,5 +1,5 @@
 import { AnalysisTableColumns } from '@data/models/analysis';
-import { AnalysisReportSettings, getAnalysisReportSettings } from '@data/models/idbModels/facilityReport';
+import { AnalysisReportSettings, DataQualityReportSettings, getAnalysisReportSettings, getDataQualityReportSettings } from '@data/models/idbModels/facilityReport';
 import { WorkspaceWriteError } from './workspace-commands.models';
 
 /** Omitted fields survive concurrent edits; null explicitly clears a selection. */
@@ -10,6 +10,38 @@ export interface FacilityReportSetupChanges {
     readonly reportYear?: number | null;
     readonly analysisTableColumns?: Partial<AnalysisTableColumns>;
   };
+  readonly dataQualityReportSettings?: DataQualityReportSetupChanges;
+}
+
+export type DataQualityReportSetupChanges = Partial<Omit<DataQualityReportSettings,
+  'missingSelection' | 'selectedAnalysisItemId' | 'selectedMeterIds' | 'selectedPredictorIds'>> & {
+  readonly selectedAnalysisItemId?: string | null;
+  readonly selectedMeterIds?: readonly string[];
+  readonly selectedPredictorIds?: readonly string[];
+};
+
+export function mergeFacilityDataQualitySettings(saved: DataQualityReportSettings,
+  changes: DataQualityReportSetupChanges): DataQualityReportSettings {
+  const settings = structuredClone(saved ?? getDataQualityReportSettings());
+  const defaults = getDataQualityReportSettings();
+  for (const [key, value] of Object.entries(changes ?? {})) {
+    if (value === undefined) continue;
+    const invalidSetting = () => { throw new WorkspaceWriteError('validation-failed', 'A Data Quality report setting is invalid.'); };
+    if (key === 'selectedAnalysisItemId') {
+      if (value !== null && (typeof value !== 'string' || !value.trim())) invalidSetting();
+      settings.selectedAnalysisItemId = value === null ? undefined : value as string;
+    } else if (key === 'selectedMeterIds' || key === 'selectedPredictorIds') {
+      if (!Array.isArray(value) || value.some(id => typeof id !== 'string' || !id.trim())) invalidSetting();
+      settings[key] = [...new Set(value as string[])];
+    } else if (key === 'selectedMode') {
+      if (value !== 'analysis' && value !== 'manual') invalidSetting();
+      settings.selectedMode = value as DataQualityReportSettings['selectedMode'];
+    } else {
+      if (!Object.hasOwn(defaults, key) || key === 'missingSelection' || typeof value !== 'boolean') invalidSetting();
+      Object.assign(settings, { [key]: value });
+    }
+  }
+  return settings;
 }
 
 export function mergeFacilityAnalysisSettings(saved: AnalysisReportSettings, changes: FacilityReportSetupChanges['analysisReportSettings']): AnalysisReportSettings {

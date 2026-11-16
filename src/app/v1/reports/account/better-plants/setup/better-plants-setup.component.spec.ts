@@ -11,6 +11,19 @@ describe('Better Plants settings', () => {
     snapshot.accountAnalyses[0].analysisCategory = category;
     const { open, harness, updateSetup } = await setupAccountReportWorkbench(snapshot);
     const workbench = await open();
+    const headings = [...harness.routeNativeElement!.querySelectorAll('.setup-section-heading')];
+    expect(headings.map(heading => heading.textContent?.trim())).toEqual([
+      'Report information', 'Analysis *', 'Included content',
+      `${category === 'water' ? 'Water' : 'Energy'} report notes`,
+      ...(category === 'water' ? ['Water Savings Pilot metric'] : [])
+    ]);
+    expect(harness.routeNativeElement!.querySelector('#account-report-name')!.closest('section'))
+      .toBe(harness.routeNativeElement!.querySelector('#better-plants-report-year')!.closest('section'));
+    expect(harness.routeNativeElement!.querySelector('#better-plants-period-title')).toBeNull();
+    for (const heading of headings) {
+      expect(heading.parentElement!.getAttribute('aria-labelledby')).toBe(heading.id);
+      expect(heading.nextElementSibling!.classList.contains('report-setup-body')).toBe(true);
+    }
     expect(!!harness.routeNativeElement!.querySelector('#better-plants-methodology')).toBe(category === 'water');
     expect(!!harness.routeNativeElement!.querySelector('#better-plants-baseline-metric')).toBe(category === 'water');
     expect(updateSetup).not.toHaveBeenCalled();

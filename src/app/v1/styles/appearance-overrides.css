@@ -54,6 +54,6 @@
   .v1-drawer,
   .v1-modal,
   [class*="v1-"]
-) {
+):not(.report-setup, .report-setup-section) {
   border-radius: var(--v1-radius-sm) !important;
 }

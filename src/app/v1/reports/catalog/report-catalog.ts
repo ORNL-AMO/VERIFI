@@ -31,7 +31,7 @@ const FACILITY_REPORT_CATALOG = {
   savings: { label: 'Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: false },
   modeling: { label: 'Modeling', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
   costSavings: { label: 'Cost Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: false },
-  dataQuality: { label: 'Data Quality', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false }
+  dataQuality: { label: 'Data Quality', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: true, supportsAnalysisReturn: true }
 } as const satisfies Readonly<Record<FacilityReportType, ReportDefinition>>;
 
 export const ACCOUNT_REPORT_TYPES: ReadonlyArray<{ readonly value: ReportType; readonly label: string }> =

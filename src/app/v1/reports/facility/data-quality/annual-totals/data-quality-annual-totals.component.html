@@ -1,0 +1,29 @@
+<section [attr.aria-labelledby]="idPrefix() + '-annual-heading'">
+  <h2 [id]="idPrefix() + '-annual-heading'" aria-level="4">Annual Totals</h2>
+  @if (rows().length) {
+    <div class="annual-totals-scroller" tabindex="0" role="region" [attr.aria-labelledby]="idPrefix() + '-annual-heading'">
+      <table>
+        <caption class="visually-hidden">Annual meter totals by calendar year. Activate a column heading to sort.</caption>
+        <thead><tr>
+          @for (column of columns(); track column.key) {
+            <th scope="col" [attr.aria-sort]="column.sort">
+              <button type="button" (click)="sort(column.key)">
+                {{ column.label }} <span aria-hidden="true">{{ column.direction }}</span>
+                @if (column.unit) {
+                  <span class="annual-unit">(@if (column.unitHtml) {<span [innerHTML]="column.unitHtml"></span>} @else {<span>{{ column.unit }}</span>})</span>
+                }
+              </button>
+            </th>
+          }
+        </tr></thead>
+        <tbody>
+          @for (row of rows(); track row.year) {
+            <tr>@for (cell of row.cells; track cell.key) {
+              @if (cell.key === 'year') { <th scope="row">{{ cell.text }}</th> } @else { <td>{{ cell.text }}</td> }
+            }</tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else { <p role="status">No calendarized readings are available for annual totals.</p> }
+</section>

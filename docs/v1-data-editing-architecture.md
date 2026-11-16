@@ -43,6 +43,10 @@ Weather Setup has typed station/range controls and definition groups; identity i
 
 Energy Use combines settings/all fiscal years in one form. Reconcile annual conditions by year and consumption by unambiguous source/year; retain imported duplicate buckets and unrelated/sparse history. Derived consumption stays outside equality. Metadata edits preserve history; capacity/quantity/unit changes recalculate only affected non-overridden values. Copy/preview share an amount projection: pending inputs copy their current calculated result, unchanged inputs keep stored amounts, and copied snapshots include units for later conversion. Silent hydration clears omitted optional calculator fields. The [feature reference](v1-energy-uses-architecture.md) owns reviewed source/year edits and meter-link identity.
 
+## Quality presentation
+
+Meter and Predictor Quality pages compose the shared [distribution plot](../src/app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.component.ts) below their time-series charts. Inputs come from the existing full-history quality results; no extra calculation or persistence lifecycle is introduced. Meter consumption and cost follow workbench visibility, while Standard and Weather predictors share the same presentation through their quality context. Plot evidence remains independent of workspace warning suppression, including the predictor zero-MAD exception. Reports and PDF preparation reuse the same pure plot adapters and options with their own inclusion policies.
+
 ## Derived Weather station workbenches
 
 Weather predictors route to the Weather workbench before a standard Predictor editor is created. Creation hands off included Weather types/range through allowlisted query values captured once per account/facility creation identity; query-only changes never replace an edited draft, and no Weather record is written until reviewed commit. A station group is derived from the owning facility's saved Weather predictors sharing a nonempty `weatherStationId`; it is not a persisted group record. Group membership/source/reading/analysis-reference reconciliation commits in one transaction and publishes once.
