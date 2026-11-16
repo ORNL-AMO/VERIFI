@@ -13,7 +13,7 @@ export function equipmentCatalog(snapshot: AccountWorkspaceSnapshot, scope: Visu
 export function energyUseSelectionMode(source: EnergyUseVisualizationSource): EnergyUseSelectionMode | undefined {
   return source.selectionMode ?? (source.selection?.kind === 'fixed' && source.selection.resource === 'equipment' ? 'equipment' : undefined);
 }
-export const energyUseResourceKind = (mode: EnergyUseSelectionMode): VisualizationResourceKind => mode === 'group' ? 'energy-use-group' : mode === 'linked-meter-group' ? 'meter-group' : 'equipment';
+export const energyUseResourceKind = (mode: EnergyUseSelectionMode): VisualizationResourceKind => mode === 'facility' ? 'facility' : mode === 'group' ? 'energy-use-group' : mode === 'linked-meter-group' ? 'meter-group' : 'equipment';
 export function selectedEnergyUseIds(source: EnergyUseVisualizationSource): readonly string[] {
   return energyUseSelectionMode(source) === 'equipment-type' ? source.equipmentTypes ?? [] : source.selection?.kind === 'fixed' ? source.selection.guids : [];
 }
@@ -34,6 +34,13 @@ export function energyUseBuckets(snapshot: AccountWorkspaceSnapshot, scope: Visu
   const catalog = mode === 'group' ? snapshot.energyUseGroups.filter(owned) : mode === 'linked-meter-group' ? snapshot.meterGroups.filter(owned) : items;
   const buckets = [...new Set(selectedEnergyUseIds(source))].flatMap<EnergyUseBucket>(key => {
     if (mode === 'equipment-type') return [{ key, label: key, detail: 'Matching equipment across included facilities', items: items.filter(item => item.equipmentType === key) }];
+    if (mode === 'facility') {
+      const facility = snapshot.facilities.find(f => f.guid === key && f.accountId === snapshot.account.guid && scope.facilityGuids.includes(f.guid));
+      if (!facility) { missing.push({ kind: 'facility', id: key }); return []; }
+      references.push({ kind: 'facility', id: key, accountGuid: facility.accountId, facilityGuid: key });
+      return [{ key, label: facility.name || 'Unnamed facility', detail: '', resourceGuid: key, facilityGuid: key,
+        items: [...new Map(items.filter(item => item.facilityId === key).map(item => [item.guid, item])).values()] }];
+    }
     const record = catalog.find(item => item.guid === key);
     const kind = energyUseResourceKind(mode ?? 'equipment');
     if (!record) { missing.push({ kind, id: key }); return []; }

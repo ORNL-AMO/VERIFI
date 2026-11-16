@@ -22,7 +22,7 @@ function snapshot() {
 function definition(mode: EnergyUseSelectionMode, ids: string[]): VisualizationDefinition {
   const base = equipmentDefinition();
   const source: EnergyUseVisualizationSource = { id: 'source-1', kind: 'energy-use', measure: 'consumption', denominator: 'selected', selectionMode: mode,
-    aggregation: mode === 'equipment' ? 'none' : 'sum', ...(mode === 'equipment-type' ? { equipmentTypes: ids as EquipmentType[] } : { selection: { kind: 'fixed', resource: mode === 'group' ? 'energy-use-group' : mode === 'linked-meter-group' ? 'meter-group' : 'equipment', guids: ids } }) };
+    aggregation: mode === 'equipment' ? 'none' : 'sum', ...(mode === 'equipment-type' ? { equipmentTypes: ids as EquipmentType[] } : { selection: { kind: 'fixed', resource: mode === 'facility' ? 'facility' : mode === 'group' ? 'energy-use-group' : mode === 'linked-meter-group' ? 'meter-group' : 'equipment', guids: ids } }) };
   return { ...base, sources: [source] };
 }
 function resolve(value: ReturnType<typeof snapshot>, def: VisualizationDefinition) {
@@ -37,7 +37,7 @@ function resolve(value: ReturnType<typeof snapshot>, def: VisualizationDefinitio
 describe('Energy Use selection modes', () => {
   it.each([
     ['group', ['group-a'], [30]], ['equipment', ['equipment-a', 'b'], [10, 20]],
-    ['equipment-type', ['Pump'], [30]], ['linked-meter-group', ['linked-a', 'linked-b'], [30, 10]]
+    ['equipment-type', ['Pump'], [30]], ['linked-meter-group', ['linked-a', 'linked-b'], [30, 10]], ['facility', ['facility-a'], [30]]
   ] as const)('renders independent annual traces by %s, including deduplicated saved links', (mode, ids, amounts) => {
     const value = snapshot(), before = structuredClone(value), def = definition(mode, [...ids]);
     expect(decodeVisualizationDefinition(JSON.parse(JSON.stringify(def))).state).toBe('valid');
@@ -47,12 +47,12 @@ describe('Energy Use selection modes', () => {
     expect(Object.values(result.resolved.data.rows[0].values).map(point => point.value)).toEqual(amounts);
     expect(value).toEqual(before);
   });
-  it.each(['group', 'equipment-type', 'linked-meter-group'] as const)('follows current %s membership without rewriting saved selections or inventing zero for empty selections', mode => {
-    const value = snapshot(), ids = mode === 'group' ? ['group-a', 'empty'] : mode === 'equipment-type' ? ['Pump', 'Fan'] : ['linked-a', 'linked-b'];
+  it.each(['group', 'equipment-type', 'linked-meter-group', 'facility'] as const)('follows current %s membership without rewriting saved selections or inventing zero for empty selections', mode => {
+    const value = snapshot(), ids = mode === 'facility' ? ['facility-a'] : mode === 'group' ? ['group-a', 'empty'] : mode === 'equipment-type' ? ['Pump', 'Fan'] : ['linked-a', 'linked-b'];
     const def = definition(mode, ids), before = structuredClone(def);
     const first = resolve(value, def);
     if (first.state !== 'ready' || first.resolved.data.kind !== 'time-series') throw new Error('Expected combined trace');
-    if (mode !== 'linked-meter-group') expect(Object.values(first.resolved.data.rows[0].values)[1]).toMatchObject({ state: 'missing', value: null });
+    if (mode === 'group' || mode === 'equipment-type') expect(Object.values(first.resolved.data.rows[0].values)[1]).toMatchObject({ state: 'missing', value: null });
     const changed = { ...value, energyUseEquipment: [...value.energyUseEquipment, equipmentFixture({ guid: 'new', equipmentType: 'Pump', utilityMeterGroupIds: ['linked-a'] })] };
     const next = resolve(changed, def);
     if (next.state !== 'ready' || next.resolved.data.kind !== 'time-series') throw new Error('Expected live membership');
@@ -69,7 +69,7 @@ describe('Energy Use selection modes', () => {
   });
   it('keeps group and linked-group identity namespaces separate through mapping and scope changes', () => {
     const value = snapshot();
-    for (const [mode, kind, id] of [['group', 'energy-use-group', 'group-a'], ['linked-meter-group', 'meter-group', 'linked-a']] as const) {
+    for (const [mode, kind, id] of [['group', 'energy-use-group', 'group-a'], ['linked-meter-group', 'meter-group', 'linked-a'], ['facility', 'facility', 'facility-a']] as const) {
       const base = definition(mode, [id]);
       const def: VisualizationDefinition = { ...base, series: [{ ...base.series[0], overrides: [{ seriesId: energyUseSeriesId(base.sources[0] as EnergyUseVisualizationSource, id), color: '#123456' }] }] };
       const mapped = remapVisualizationDefinition(def, 'destination', { [kind]: { [id]: 'new-guid' } });

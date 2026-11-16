@@ -28,7 +28,7 @@ describe('saved equipment history native journey', () => {
   let harness: IndexedDbTestHarness | undefined;
   let fixture: ComponentFixture<PreviewComponent> | undefined;
   afterEach(async () => { fixture?.destroy(); fixture = undefined; vi.restoreAllMocks(); if (harness) await harness.destroy(); harness = undefined; TestBed.resetTestingModule(); });
-  it.each(['group', 'equipment-type', 'linked-meter-group'] as const)('saves and reopens a combined %s trace with current membership', async mode => {
+  it.each(['group', 'equipment-type', 'linked-meter-group', 'facility'] as const)('saves and reopens a combined %s trace with current membership', async mode => {
     TestBed.configureTestingModule({ imports: [VisualizationsModule], providers: [{ provide: LocalStorageService, useValue: { retrieve: () => null, store: () => {}, clear: () => {} } }] });
     harness = await IndexedDbTestHarness.create(`energy-use-${mode}`);
     const snapshot = equipmentSnapshot(), group = { ...getNewIdbFacilityEnergyUseGroup('account-a', 'facility-a'), id: 1, guid: 'group-a', name: 'Production' };
@@ -37,8 +37,9 @@ describe('saved equipment history native journey', () => {
     await harness.seed({ accounts: [{ ...snapshot.account }], facilities: [{ ...snapshot.facilities[0] }], facilityEnergyUseGroups: [group], utilityMeterGroups: [meterGroup, { ...meterGroup, id: 2, guid: 'shared', name: 'Shared equipment' }], facilityEnergyUseEquipment: equipment.map(item => ({ ...item })) });
     await TestBed.inject(AccountWorkspaceService).selectAccount('account-a');
     const store = TestBed.inject(AccountWorkspaceStore), commands = TestBed.inject(SavedVisualizationCommands);
+    const meterDemand = vi.spyOn(TestBed.inject(UtilityDataSession), 'acquire');
     let definition: VisualizationDefinition = { ...equipmentDefinition([]), sources: equipmentDefinition([]).sources.map(source => { const { selection: _selection, ...base } = source as EnergyUseVisualizationSource; return base; }) };
-    const id = mode === 'group' ? group.guid : mode === 'equipment-type' ? 'Pump' : meterGroup.guid;
+    const id = mode === 'facility' ? 'facility-a' : mode === 'group' ? group.guid : mode === 'equipment-type' ? 'Pump' : meterGroup.guid;
     for (const action of [{ kind: 'energy-use-selection-mode' as const, sourceId: 'source-1', mode }, { kind: 'energy-use-resources' as const, sourceId: 'source-1', ids: mode === 'linked-meter-group' ? [id, 'shared'] : [id] }]) {
       const changed = prepareDecisionChange(definition, action, { snapshot: store.snapshot()! });
       if (changed.state === 'unchanged') throw new Error('Expected selection change'); definition = changed.definition;
@@ -61,6 +62,45 @@ describe('saved equipment history native journey', () => {
       expect((view.presentation.inputs['model'] as { warnings: string[] }).warnings).toContain('These separate series overlap underlying equipment contributions. They are comparisons, not a combined total.');
     }
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(before);
+    expect(meterDemand).not.toHaveBeenCalled();
+    if (mode === 'facility') {
+      await harness.seed({ facilityEnergyUseEquipment: [{ ...equipmentFixture({ id: 3, guid: 'orphan', name: 'Unassigned equipment', energyUseGroupId: 'missing-group' }) }] });
+      const seeded = await harness.getAll('facilityEnergyUseEquipment');
+      await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(true);
+      fixture.componentRef.setInput('identity', { accountGuid: 'account-a', workspaceRevision: store.revision(), definitionGuid: saved.value.guid, definitionRevision: 1 });
+      await vi.waitFor(() => { fixture!.detectChanges(); expect((fixture!.nativeElement as HTMLElement).querySelector('table')?.textContent).toContain('30 kWh'); });
+      let edited = reopened.definition;
+      for (const action of [
+        { kind: 'equipment-unit' as const, sourceId: 'source-1', unit: { kind: 'pinned' as const, value: 'MJ' } },
+        { kind: 'item-style' as const, sourceId: 'source-1', item: { resourceGuid: id }, changes: { label: 'Facility equipment', color: '#23684d', traceType: 'bar' as const } }
+      ]) {
+        const changed = prepareDecisionChange(edited, action, { snapshot: store.snapshot()! });
+        if (changed.state === 'unchanged') throw new Error('Expected facility edit'); edited = changed.definition;
+      }
+      const updated = await commands.submit({ kind: 'update', accountGuid: 'account-a', guid: saved.value.guid, expectedRevision: saved.value.revision, definition: edited });
+      if (updated.state !== 'committed') throw new Error('Expected saved facility edit');
+      const read = readSavedVisualization((await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.value.guid))!);
+      if (read.state !== 'valid') throw new Error('Expected valid facility edit');
+      fixture.componentRef.setInput('definition', read.definition);
+      fixture.componentRef.setInput('identity', { accountGuid: 'account-a', workspaceRevision: store.revision(), definitionGuid: saved.value.guid, definitionRevision: 2 });
+      const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root'; root.style.width = '100%';
+      await vi.waitFor(() => { fixture!.detectChanges(); expect(root.querySelector('table')?.textContent).toContain('108 MJ'); });
+      expect(root.querySelector('table')!.textContent).toContain('Facility equipment');
+      for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+        await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)'; fixture.detectChanges();
+        await page.screenshot({ element: root, path: `../../../../../.angular/equipment-e2-facility-chart-${label}.png` });
+      }
+      await page.viewport(1100, 850); root.className = 'v1-root';
+      const printSession = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
+      await printSession.send('Emulation.setEmulatedMedia', { media: 'print' });
+      try {
+        expect(getComputedStyle(root.querySelector('.time-series-actions')!).display).toBe('none');
+        await page.screenshot({ element: root, path: '../../../../../.angular/equipment-e2-facility-print.png' });
+      } finally { await printSession.send('Emulation.setEmulatedMedia', { media: '' }); }
+      expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(seeded);
+      expect(seeded.slice(0, 2)).toEqual(before);
+      expect(meterDemand).not.toHaveBeenCalled();
+    }
   });
   it('saves, renders, reopens and edits annual equipment without source writes or meter calculations', async () => {
     TestBed.configureTestingModule({ imports: [VisualizationsModule], providers: [
@@ -133,11 +173,12 @@ describe('saved equipment history native journey', () => {
     fixture!.componentInstance.preview.update({ ...edited, sources: edited.sources.map(source => ({ ...source, selection: { kind: 'fixed', resource: 'equipment', guids: ['deleted-equipment'] } })) }, { accountGuid: account.guid, workspaceRevision: store.revision(), definitionGuid: reopened.guid, definitionRevision: 3 });
     await vi.waitFor(() => expect(fixture!.componentInstance.preview.state().state).toBe('missing-source'));
   });
-  it('supports keyboard equipment selection, typed annual controls and disabled states at narrow widths', async () => {
+  it.each(['equipment', 'facility'] as const)('supports keyboard %s selection, typed annual controls and disabled states at narrow widths', async mode => {
     const store = new AccountWorkspaceStore(); store.publish(equipmentSnapshot());
     TestBed.configureTestingModule({ imports: [EquipmentEditorsModule, UtilityEditorsModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }] });
     const source = TestBed.createComponent(EquipmentSourceEditorComponent), period = TestBed.createComponent(PeriodSettingsComponent);
-    const requested = vi.fn(), changed = vi.fn(), definition = equipmentDefinition([]);
+    const requested = vi.fn(), changed = vi.fn(), base = equipmentDefinition([]);
+    const definition = mode === 'equipment' ? base : { ...base, sources: [{ ...base.sources[0] as EnergyUseVisualizationSource, selectionMode: 'facility' as const, aggregation: 'sum' as const, selection: { kind: 'fixed' as const, resource: 'facility' as const, guids: [] } }] };
     source.componentRef.setInput('context', { definition, sourceId: 'source-1', disabled: false, expandedNodes: new Set(['selection-mode:source-1', 'resources:source-1', 'data-settings:source-1']), changed: () => {}, request: requested });
     period.componentRef.setInput('context', { definition, disabled: false, changed }); source.detectChanges(); period.detectChanges();
     const host = document.createElement('section'); host.className = 'v1-root'; document.body.append(host); host.append(source.nativeElement, period.nativeElement);
@@ -147,7 +188,7 @@ describe('saved equipment history native journey', () => {
       expect(requested).toHaveBeenLastCalledWith({ kind: 'energy-use-selection-mode', sourceId: 'source-1', mode: 'group' });
       const button = (source.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.resource-picker__option')!;
       button.focus(); await userEvent.keyboard('{Enter}');
-      expect(requested).toHaveBeenLastCalledWith({ kind: 'energy-use-resources', sourceId: 'source-1', ids: ['equipment-a'] });
+      expect(requested).toHaveBeenLastCalledWith({ kind: 'energy-use-resources', sourceId: 'source-1', ids: [mode === 'equipment' ? 'equipment-a' : 'facility-a'] });
       const pin = [...(period.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.includes('Pinned fiscal year'))!;
       pin.focus(); await userEvent.keyboard('{Enter}'); period.detectChanges();
       await userEvent.fill((period.nativeElement as HTMLElement).querySelector<HTMLInputElement>('input[formcontrolname="year"]')!, '2029');
@@ -155,7 +196,7 @@ describe('saved equipment history native journey', () => {
       for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
         await page.viewport(width, 850); host.className = `v1-root ${theme}`; host.style.background = 'var(--v1-bg)'; host.style.padding = '12px';
         expect(host.scrollWidth).toBeLessThanOrEqual(host.clientWidth + 1);
-        await page.screenshot({ element: host, path: `../../../../../.angular/equipment-e1-controls-${label}.png` });
+        await page.screenshot({ element: host, path: `../../../../../.angular/equipment-${mode === 'equipment' ? 'e1' : 'e2-facility'}-controls-${label}.png` });
       }
       source.componentRef.setInput('context', { definition, sourceId: 'source-1', disabled: true, changed: () => {}, request: requested }); source.detectChanges();
       expect((source.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('select')!.disabled).toBe(true);

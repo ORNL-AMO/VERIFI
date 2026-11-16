@@ -23,9 +23,9 @@ describe('saved visualization backup transactions in Chromium', () => {
   beforeEach(async () => { harness = await IndexedDbTestHarness.create('visualization-backup'); });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
 
-  it.each((['Account', 'Facility'] as const).flatMap(kind => (['group', 'equipment-type', 'linked-meter-group'] as const).map(mode => ({ kind, mode }))))('round trips $mode selection and appearance in a $kind backup', async ({ kind, mode }) => {
-    const base = equipmentDefinition(), id = mode === 'group' ? 'energy-group-a' : mode === 'equipment-type' ? 'Pump' : 'group-a';
-    const resource = mode === 'group' ? 'energy-use-group' as const : 'meter-group' as const;
+  it.each((['Account', 'Facility'] as const).flatMap(kind => (['group', 'equipment-type', 'linked-meter-group', 'facility'] as const).map(mode => ({ kind, mode }))))('round trips $mode selection and appearance in a $kind backup', async ({ kind, mode }) => {
+    const base = equipmentDefinition(), id = mode === 'facility' ? 'facility-a' : mode === 'group' ? 'energy-group-a' : mode === 'equipment-type' ? 'Pump' : 'group-a';
+    const resource = mode === 'facility' ? 'facility' as const : mode === 'group' ? 'energy-use-group' as const : 'meter-group' as const;
     const source: EnergyUseVisualizationSource = { id: 'source-1', kind: 'energy-use', selectionMode: mode, measure: 'consumption', aggregation: 'sum', denominator: 'selected',
       ...(mode === 'equipment-type' ? { equipmentTypes: ['Pump'] } : { selection: { kind: 'fixed', resource, guids: [id] } }) };
     const prefix = `source-1:${mode === 'equipment-type' ? 'equipment-type' : resource}:`;
@@ -40,7 +40,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     const restored = await readSnapshot(accountGuid), decoded = readSavedVisualization(restored.savedVisualizations[0]);
     expect(decoded.state).toBe('valid'); if (!('definition' in decoded)) throw new Error('Expected readable grouped selection');
     const restoredSource = decoded.definition.sources[0] as EnergyUseVisualizationSource;
-    const mappedId = mode === 'group' ? restored.energyUseGroups[0].guid : mode === 'equipment-type' ? 'Pump' : restored.meterGroups[0].guid;
+    const mappedId = mode === 'facility' ? restored.facilities[0].guid : mode === 'group' ? restored.energyUseGroups[0].guid : mode === 'equipment-type' ? 'Pump' : restored.meterGroups[0].guid;
     expect(restoredSource.selectionMode).toBe(mode);
     if (mode === 'equipment-type') expect(restoredSource.equipmentTypes).toEqual(['Pump']);
     else expect(restoredSource.selection).toEqual({ kind: 'fixed', resource, guids: [mappedId] });

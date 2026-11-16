@@ -20,7 +20,7 @@ export function equipmentChartSupport(source: EnergyUseVisualizationSource, char
   const reasons: string[] = [];
   if (chart.kind !== 'time-series' || chart.interval !== 'yearly' || chart.stack !== 'none' || !['line', 'bar'].includes(chart.defaultTraceType)) reasons.push('Equipment history supports yearly, unstacked line or bar charts.');
   const mode = energyUseSelectionMode(source);
-  if (source.measure !== 'consumption' || source.aggregation !== (mode === 'equipment' ? 'none' : 'sum')) reasons.push('Use annual consumption with one trace per selected item, group or type.');
+  if (source.measure !== 'consumption' || source.aggregation !== (mode === 'equipment' ? 'none' : 'sum')) reasons.push('Use annual consumption with one trace per selected item, group, type or facility.');
   if (!mode || !selectedEnergyUseIds(source).length) reasons.push('Choose how to select Energy Uses, then select resources.');
   if (mode === 'equipment-type' ? source.selection !== undefined || !source.equipmentTypes?.length || source.equipmentTypes.some(type => !EQUIPMENT_TYPES.includes(type))
     : mode && (source.equipmentTypes !== undefined || source.selection?.kind !== 'fixed' || source.selection.resource !== energyUseResourceKind(mode))) reasons.push('Repair the selection to match the Energy Use selection method.');
@@ -40,6 +40,7 @@ export function useEquipmentHistorySettings(definition: VisualizationDefinition,
 function observation(row: ProjectedEnergyUse): VisualizationObservation {
   const amount = knownEnergyUseAmount(row);
   const notes = row.sources.map(source => `${source.source} · occurrence ${source.sourceIndex + 1} (${source.id}) · ${source.description}${source.originYear !== undefined ? ` · Source FY ${source.originYear}` : ''}${source.originalAmount !== undefined ? ` · Saved ${source.originalAmount} ${source.originalUnit}` : ''}`);
+  if (!row.sources.length) notes.push('No saved utility sources.');
   if (row.partial) notes.unshift('Partial coverage · known source values only');
   if (row.item.noLongerInUse?.isNoLongerInUse && Number.isInteger(row.item.noLongerInUse.year) && row.sources.some(source => source.state === 'entered' && source.year > row.item.noLongerInUse.year)) notes.push(`Explicit saved history after retirement FY ${row.item.noLongerInUse.year}`);
   if (amount !== null && !Number.isFinite(amount)) notes.unshift('The annual total is nonfinite and cannot be displayed.');

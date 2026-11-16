@@ -12,11 +12,14 @@ export function energyUseSelectionChoices() { return [
   { value: 'group', label: 'Energy use group', icon: 'energyUseGroup' },
   { value: 'equipment', label: 'Equipment', icon: 'energy' },
   { value: 'equipment-type', label: 'Equipment type', icon: 'filter' },
-  { value: 'linked-meter-group', label: 'Linked meter group', icon: 'meterGroupItem' }
+  { value: 'linked-meter-group', label: 'Linked meter group', icon: 'meterGroupItem' },
+  { value: 'facility', label: 'Facility', icon: 'facility' }
 ] as const; }
 
 export function equipmentResourceChoices(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, mode: EnergyUseSelectionMode = 'equipment'): readonly DecisionResourceChoice[] {
   const items = equipmentCatalog(snapshot, scope);
+  if (mode === 'facility') return snapshot.facilities.filter(f => f.accountId === snapshot.account.guid && scope.facilityGuids.includes(f.guid))
+    .map(f => ({ value: f.guid, label: f.name || 'Unnamed facility', icon: 'facility', available: true, detail: `${new Set(items.filter(item => item.facilityId === f.guid).map(item => item.guid)).size} equipment items` }));
   if (mode === 'equipment-type') return EQUIPMENT_TYPES.map(type => ({ value: type, label: type, icon: energyUseIcon(type), available: true, detail: `${items.filter(item => item.equipmentType === type).length} equipment items` }));
   if (mode !== 'equipment') return (mode === 'group' ? snapshot.energyUseGroups : snapshot.meterGroups).filter(group => group.accountId === snapshot.account.guid && scope.facilityGuids.includes(group.facilityId) && snapshot.facilities.some(f => f.guid === group.facilityId && f.accountId === snapshot.account.guid)).map(group => ({ value: group.guid, label: group.name || 'Unnamed group', icon: mode === 'group' ? 'energyUseGroup' : 'meterGroupItem', available: true, detail: [snapshot.facilities.find(f => f.guid === group.facilityId)?.name, `${items.filter(item => item.facilityId === group.facilityId && (mode === 'group' ? item.energyUseGroupId === group.guid : item.utilityMeterGroupIds?.includes(group.guid))).length} equipment items`].filter(Boolean).join(' · ') }));
   return equipmentCatalog(snapshot, scope).map(item => ({ value: item.guid, label: item.name || 'Unnamed equipment', icon: 'energyUseGroup', available: true,

@@ -38,6 +38,26 @@ describe('visualization creation drawer', () => {
       expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ sources: [{ selection: { kind: 'fixed', guids: ['second'] } }] });
     } finally { fixture.destroy(); }
   });
+  it('saves a facility Energy Use selection through Add, including a facility with no equipment', async () => {
+    const { workspace, commands } = configureLibraryTest([LibraryModule]);
+    const snapshot = workspace.snapshot()!;
+    workspace.publish({ ...snapshot, energyUseEquipment: [], facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'empty', name: 'Empty facility' }] });
+    await TestBed.compileComponents();
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    try {
+      lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('bar'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources(); fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const button = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.trim() === label)!;
+      button('Facility').click(); fixture.detectChanges();
+      const empty = [...root.querySelectorAll<HTMLButtonElement>('.resource-picker__option')].find(item => item.textContent?.includes('Empty facility'))!;
+      expect(empty.disabled).toBe(false); empty.click(); fixture.detectChanges();
+      expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['empty']);
+      button('Continue').click(); fixture.detectChanges();
+      lifecycle.form.controls.name.setValue('Facility equipment'); await lifecycle.submit();
+      expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { defaultTraceType: 'bar', interval: 'yearly' },
+        sources: [{ selectionMode: 'facility', aggregation: 'sum', selection: { kind: 'fixed', resource: 'facility', guids: ['empty'] } }] });
+    } finally { fixture.destroy(); }
+  });
   it('offers All Predictors as an explicit card even with an empty catalog', async () => {
     const { workspace } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
     workspace.publish({ ...workspace.snapshot()!, predictors: [] });

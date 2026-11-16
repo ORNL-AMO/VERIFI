@@ -31,7 +31,7 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
 describe('visualization Dashboard lifecycle', () => {
   it.each([
     ['group', 'energy-group', 'energy-use-group'], ['equipment', 'equipment-a', 'equipment'],
-    ['equipment-type', 'Pump', undefined], ['linked-meter-group', 'linked-group', 'meter-group']
+    ['equipment-type', 'Pump', undefined], ['linked-meter-group', 'linked-group', 'meter-group'], ['facility', 'facility-a', 'facility']
   ] as const)('collects %s selection before resources and reviews switching methods', (mode, id, resource) => {
     const { workspace } = configureLibraryTest();
     workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [equipmentFixture({ energyUseGroupId: 'energy-group', equipmentType: 'Pump', utilityMeterGroupIds: ['linked-group'] })],

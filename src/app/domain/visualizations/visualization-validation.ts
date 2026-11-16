@@ -77,7 +77,7 @@ const source = variant({
     charge: object({ meterGuid: text, chargeGuid: text, measure: enumeration('cost', 'usage') }) }, ['settings', 'selection', 'selectionMode', 'charge']),
   predictor: object({ ...base, kind: enumeration('predictor'), measure: enumeration('value'), selection, aggregation: enumeration('none', 'sum', 'mean') }, ['settings', 'selection']),
   'energy-use': object({ ...base, kind: enumeration('energy-use'), measure: enumeration('consumption', 'cost', 'emissions', 'balance'), selection,
-    selectionMode: enumeration('group', 'equipment', 'equipment-type', 'linked-meter-group'), equipmentTypes: array(enumeration(...EQUIPMENT_TYPES)),
+    selectionMode: enumeration('group', 'equipment', 'equipment-type', 'linked-meter-group', 'facility'), equipmentTypes: array(enumeration(...EQUIPMENT_TYPES)),
     aggregation: enumeration('none', 'sum'), denominator: enumeration('selected', 'facility', 'account', 'metered-consumption') }, ['settings', 'selection', 'selectionMode', 'equipmentTypes']),
   analysis: variant({
     result: object({ ...base, kind: enumeration('analysis'), mode: enumeration('result'), analysisGuid: text, groupGuid: text,

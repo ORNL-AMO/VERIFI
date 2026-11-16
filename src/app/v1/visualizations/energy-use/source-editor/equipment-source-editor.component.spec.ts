@@ -10,6 +10,30 @@ import { useEquipmentHistorySettings } from '@domain/visualizations/energy-use/e
 
 describe('equipment history editor', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it('requests a reviewed facility mode change and selects owned facilities while retaining missing facility intent', () => {
+    const snapshot = equipmentSnapshot(), store = new AccountWorkspaceStore();
+    store.publish({ ...snapshot, facilities: [{ ...snapshot.facilities[0], name: 'Production' }, { ...snapshot.facilities[0], guid: 'empty', name: 'Empty facility' }, { ...snapshot.facilities[0], guid: 'foreign', accountId: 'another-account', name: 'Foreign' }] });
+    TestBed.configureTestingModule({ imports: [EquipmentEditorsModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }] });
+    const fixture = TestBed.createComponent(EquipmentSourceEditorComponent), request = vi.fn(), definition = equipmentDefinition();
+    const context = { definition, sourceId: 'source-1', disabled: false, changed: vi.fn(), request, expandedNodes: new Set(['selection-mode:source-1', 'resources:source-1']) };
+    fixture.componentRef.setInput('context', context); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Energy Use selection method"] button')].find(button => button.textContent?.trim() === 'Facility')!.click();
+    expect(request).toHaveBeenLastCalledWith({ kind: 'energy-use-selection-mode', sourceId: 'source-1', mode: 'facility' });
+    const change = prepareDecisionChange(definition, request.mock.lastCall![0], { snapshot: store.snapshot()! });
+    expect(change.state).toBe('confirm'); if (change.state === 'unchanged') throw new Error('Expected reviewed mode change');
+    fixture.componentRef.setInput('context', { ...context, definition: change.definition }); fixture.detectChanges();
+    const choices = [...root.querySelectorAll<HTMLButtonElement>('.resource-picker__option')];
+    expect(choices).toHaveLength(2);
+    choices.find(button => button.textContent?.includes('Empty facility'))!.click();
+    expect(request).toHaveBeenLastCalledWith({ kind: 'energy-use-resources', sourceId: 'source-1', ids: ['empty'] });
+    const selected = prepareDecisionChange(change.definition, request.mock.lastCall![0], { snapshot: store.snapshot()! });
+    if (selected.state === 'unchanged') throw new Error('Expected facility selection');
+    store.publish(snapshot);
+    fixture.componentRef.setInput('context', { ...context, definition: selected.definition }); fixture.detectChanges();
+    expect(root.textContent).toContain('Unavailable: empty'); expect(fixture.componentInstance.selected.value).toEqual(['empty']);
+    expect(context.changed).not.toHaveBeenCalled(); fixture.destroy();
+  });
   it('keeps the history toggle in Data settings, reviews enabling it, and preserves current settings when switched off', () => {
     const store = new AccountWorkspaceStore(); store.publish(equipmentSnapshot());
     TestBed.configureTestingModule({ imports: [EquipmentEditorsModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }] });

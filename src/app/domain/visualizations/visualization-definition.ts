@@ -14,7 +14,7 @@ export type VisualizationScope =
 
 export type VisualizationTraceType = 'line' | 'bar' | 'area';
 export type UtilitySelectionMode = 'source' | 'group' | 'meter' | 'facility' | 'rule';
-export type EnergyUseSelectionMode = 'group' | 'equipment' | 'equipment-type' | 'linked-meter-group';
+export type EnergyUseSelectionMode = 'group' | 'equipment' | 'equipment-type' | 'linked-meter-group' | 'facility';
 
 export type SettingBinding<T> = { readonly kind: 'owner' } | { readonly kind: 'pinned'; readonly value: T };
 export type VisualizationResourceKind = 'facility' | 'meter' | 'meter-group' | 'predictor' | 'equipment' | 'energy-use-group';

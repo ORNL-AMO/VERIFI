@@ -12,7 +12,7 @@ export function visualizationPresentationReference(source: VisualizationSource |
   readonly kind: VisualizationResourceKind; readonly guid: string; readonly prefix: string;
 } | undefined {
   if (source?.kind === 'energy-use') {
-    for (const kind of ['equipment', 'energy-use-group', 'meter-group'] as const) {
+    for (const kind of ['equipment', 'energy-use-group', 'meter-group', 'facility'] as const) {
       const prefix = `${source.id}:${kind}:`;
       if (seriesId.startsWith(prefix) && seriesId.length > prefix.length) return { kind, guid: seriesId.slice(prefix.length), prefix };
     }
