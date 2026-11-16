@@ -10,15 +10,17 @@ import { PredictorSourceEditorComponent } from './predictor-source-editor.compon
 
 describe('predictor source decisions and editor', () => {
   it.each([
-    { field: 'label' as const, value: 'Saved name', promoted: false },
-    { field: 'color' as const, value: '#123456', promoted: false },
-    { field: 'label' as const, value: 'Saved name', promoted: true },
-    { field: 'color' as const, value: '#123456', promoted: true }
-  ])('clears the final provider $field preference after promotion=$promoted without reviving it', ({ field, value, promoted }) => {
+    ...[false, true].flatMap(exact => [
+      { field: 'label' as const, value: 'Saved name', promoted: false, exact },
+      { field: 'color' as const, value: '#123456', promoted: false, exact },
+      { field: 'label' as const, value: 'Saved name', promoted: true, exact },
+      { field: 'color' as const, value: '#123456', promoted: true, exact }
+    ])
+  ])('clears provider $field after promotion=$promoted in exact=$exact declarations', ({ field, value, promoted, exact }) => {
     const { snapshot, definition } = setup(), sourceId = 'source-1';
     const foreign = { seriesId: `${sourceId}:predictor:predictor-a`, accountGuid: 'foreign', label: 'Foreign' };
     const sibling = { resourceGuid: 'predictor-b', label: 'Dormant sibling' };
-    let saved: VisualizationDefinition = { ...definition, series: [{ id: 'wildcard', sourceId, metric: 'value', axis: 'left', overrides: [
+    let saved: VisualizationDefinition = { ...definition, series: [{ id: 'selected', sourceId, metric: 'value', axis: 'left', ...(exact ? { resourceGuid: 'predictor-a' } : {}), overrides: [
       { seriesId: `${sourceId}:predictor:predictor-a`, [field]: value }, foreign, sibling
     ] }] };
     if (promoted) {

@@ -27,7 +27,9 @@ describe('predictor preview snapshot boundary', () => {
     const definition = { ...initial, sources: [source] };
     const identity = { accountGuid: 'account-a', definitionGuid: 'saved', workspaceRevision: store.revision(), definitionRevision: 1 };
     const abort = new AbortController(), dates = TestBed.inject(UtilityDateContextResolver);
-    expect((await dates.resolve(definition, identity, abort.signal)).latestDataDate).toBe('2024-02-29');
+    expect(await dates.resolve(definition, identity, abort.signal)).toMatchObject({ monthlyRange: { start: '2024-02-01', end: '2024-02-29' } });
+    expect((await dates.resolve({ ...definition, period: { kind: 'rolling', basis: 'calendar', count: 1, unit: 'month',
+      anchor: 'latest-data', includeIncomplete: false } }, identity, abort.signal)).latestDataDate).toBe('2024-02-29');
     expect(acquire).not.toHaveBeenCalled(); expect(meterResolve).not.toHaveBeenCalled();
     const provider = TestBed.inject(PredictorSourceProvider);
     const request = { identity: { ...identity, sourceId: source.id, requestId: 'test', scope: { kind: 'facility' as const, facilityGuid: 'facility-a', facilityGuids: ['facility-a'] } },

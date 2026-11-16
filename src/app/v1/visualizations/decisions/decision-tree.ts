@@ -78,13 +78,19 @@ function patchItem(definition: VisualizationDefinition, source: UtilityVisualiza
   };
   return { ...prepared, series: prepared.series.map(series => {
     if (series.id !== selected.id) return series;
-    if (series.resourceGuid && series.resourceGuid === identity.resourceGuid && changes.order === undefined) {
-      const result = apply(series);
-      return result.axis ? result : { ...result, axis: 'left' };
-    }
     const overrides = [...series.overrides ?? []], index = overrides.findIndex(entry => overrideMatches(entry, identity, definition.accountGuid));
     const provider = identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === (source.kind === 'predictor' ? predictorSeriesId : utilitySeriesId)(source.id, identity.resourceGuid!)
       && (entry.accountGuid ?? definition.accountGuid) === definition.accountGuid) : undefined;
+    if (series.resourceGuid && series.resourceGuid === identity.resourceGuid && changes.order === undefined) {
+      const { overrides: _old, ...result } = apply(series);
+      const retained = overrides.flatMap(entry => {
+        if (entry !== provider && !overrideMatches(entry, identity, definition.accountGuid)) return [entry];
+        const preference = { ...entry } as Record<string, unknown>;
+        for (const [key, value] of Object.entries(changes)) if (value !== undefined) delete preference[key];
+        return Object.keys(preference).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key)) ? [preference as typeof entry] : [];
+      });
+      return { ...result, axis: result.axis ?? 'left', ...(retained.length ? { overrides: retained } : {}) };
+    }
     const { seriesId: _providerId, resourceGuid: _providerResource, ...retained } = provider ?? {};
     const override = apply(index >= 0 ? overrides[index] : { ...retained, ...identity, accountGuid: definition.accountGuid });
     const hasValues = Object.keys(override).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key));
