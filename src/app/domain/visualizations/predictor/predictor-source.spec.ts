@@ -23,6 +23,29 @@ function setup() {
 }
 
 describe('saved monthly predictor projection', () => {
+  it('resolves 150,000 saved months without an argument-count limit', () => {
+    const { snapshot, predictor, source, request, reading } = setup();
+    snapshot.predictors = Array.from({ length: 2500 }, (_, index) => ({ ...predictor, guid: `predictor-${index}` }));
+    snapshot.predictorData = snapshot.predictors.flatMap(record => Array.from({ length: 60 }, (_, index) => ({
+      ...reading(index % 12 + 1, index), guid: `${record.guid}-${index}`, predictorId: record.guid, year: 2020 + Math.floor(index / 12)
+    })));
+    expect(predictorHistoryRange(snapshot, request.identity.scope, { ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } }))
+      .toEqual({ start: '2020-01-01', end: '2024-12-31' });
+  });
+  it('keeps history bounds separate from eligible latest values and excludes unowned or invalid months', () => {
+    const { snapshot, predictor, source, request, reading } = setup();
+    snapshot.predictors.push({ ...predictor, guid: 'unselected' }, { ...predictor, guid: 'foreign', accountId: 'other' });
+    snapshot.predictorData = [reading(1, 2), reading(1, 3, 'duplicate'), reading(3, NaN),
+      { ...reading(1, 1, 'foreign-account'), year: 2010, accountId: 'other' },
+      { ...reading(1, 1, 'foreign-facility'), year: 2011, facilityId: 'other' },
+      { ...reading(1, 1, 'foreign-predictor'), year: 2012, predictorId: 'foreign' },
+      { ...reading(1, 1, 'unselected'), year: 2013, predictorId: 'unselected' },
+      { ...reading(13, 1), year: 2014 }, { ...reading(1, 1), year: 0 }];
+    expect(predictorHistoryRange(snapshot, request.identity.scope, source)).toEqual({ start: '2024-01-01', end: '2024-03-31' });
+    expect(latestPredictorDate(snapshot, request.identity.scope, source)).toBeUndefined();
+    snapshot.predictorData = [];
+    expect(predictorHistoryRange(snapshot, request.identity.scope, source)).toBeUndefined();
+  });
   it('resolves live All within owned facilities without rewriting intent; fixed selections remain exact', () => {
     const { snapshot, predictor, source, reading, request } = setup();
     const all: PredictorVisualizationSource = { ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } };

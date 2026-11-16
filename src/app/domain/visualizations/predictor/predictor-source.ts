@@ -26,9 +26,16 @@ export function resolvePredictorSelection(snapshot: AccountWorkspaceSnapshot, sc
 }
 export function predictorHistoryRange(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, source: PredictorVisualizationSource): { start: string; end: string } | undefined {
   const selected = new Set(resolvePredictorSelection(snapshot, scope, source));
-  const months = predictorCatalog(snapshot, scope).filter(record => selected.has(record.guid))
-    .flatMap(record => ownedReadings(snapshot, record).filter(validPredictorMonth).map(indexOf));
-  return months.length ? { start: predictorMonthRange(Math.min(...months)).start, end: predictorMonthRange(Math.max(...months)).end } : undefined;
+  const facilities = new Map(predictorCatalog(snapshot, scope).filter(record => selected.has(record.guid))
+    .map(record => [record.guid, record.facilityId]));
+  let first = Infinity, last = -Infinity;
+  for (const reading of snapshot.predictorData) {
+    if (reading.accountId !== snapshot.account.guid || !facilities.has(reading.predictorId)
+      || facilities.get(reading.predictorId) !== reading.facilityId || !validPredictorMonth(reading)) continue;
+    const month = indexOf(reading);
+    first = Math.min(first, month); last = Math.max(last, month);
+  }
+  return Number.isFinite(first) ? { start: predictorMonthRange(first).start, end: predictorMonthRange(last).end } : undefined;
 }
 export function predictorContext(predictor: IdbPredictor): string {
   const stationName = predictor.weatherStationName?.trim(), stationId = predictor.weatherStationId?.trim();
@@ -154,9 +161,12 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
   const references = records.map(record => ({ kind: 'predictor' as const, id: record.guid, accountGuid: record.accountId, facilityGuid: record.facilityId }));
   const empty = (message: string): VisualizationSourceResolution => emptyMonthlySource(request, message, series, references,
     omissions.map(group => `${group.label} · ${group.issue}: ${group.readings.join('; ')}`));
-  const months = histories.flatMap(history => history.first === undefined ? [] : [history.first, history.last!]);
-  if (!months.length && !request.dateContext.monthlyRange) return empty('No usable saved predictor periods are available.');
-  let start = request.dateContext.monthlyRange?.start ?? predictorMonthRange(Math.min(...months)).start, end = request.dateContext.monthlyRange?.end ?? predictorMonthRange(Math.max(...months)).end;
+  let earliest = Infinity, latest = -Infinity;
+  for (const history of histories) if (history.first !== undefined) {
+    earliest = Math.min(earliest, history.first); latest = Math.max(latest, history.last!);
+  }
+  if (!Number.isFinite(earliest) && !request.dateContext.monthlyRange) return empty('No usable saved predictor periods are available.');
+  let start = request.dateContext.monthlyRange?.start ?? predictorMonthRange(earliest).start, end = request.dateContext.monthlyRange?.end ?? predictorMonthRange(latest).end;
   if (period.kind === 'fixed') { start = period.start; end = period.end; }
   if (period.kind === 'rolling') {
     if (period.includeIncomplete) return unsupported('Choose completed months for the predictor rolling range.');
