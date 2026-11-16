@@ -50,7 +50,7 @@
         @for (analysis of filteredCards(); track analysis.value) {
           <div class="report-analysis-card">
             <label class="report-analysis-card__selection">
-              <input type="radio" name="analysis" required [formControl]="selectionControl()" [value]="analysis.value">
+              <input type="radio" [name]="identity.selection" required [formControl]="selectionControl()" [value]="analysis.value">
               <span class="report-analysis-card__content">
                 <strong>{{ analysis.name }}</strong>
                 <span class="report-analysis-card__metadata">

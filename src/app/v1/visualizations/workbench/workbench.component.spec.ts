@@ -319,7 +319,7 @@ describe('visualization workbench', () => {
     expect(button.getAttribute('aria-pressed')).toBe('true');
     if (choice.value === 'predictor') expect(root.querySelector('app-predictor-source-editor')).not.toBeNull();
     else if (choice.value === 'energy-use') expect(root.querySelector('app-equipment-source-editor')).not.toBeNull();
-    else expect(root.textContent).toContain(`Data selection for ${choice.label} is not available yet.`);
+    else if (choice.value === 'analysis') expect(root.querySelector('app-analysis-source-editor')).not.toBeNull();
     button.click(); fixture.detectChanges();
     expect(button.getAttribute('aria-pressed')).toBe('false');
     expect(component.editor.definition()!.sources).toEqual(original.sources);

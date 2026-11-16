@@ -1,3 +1,4 @@
+import { analysisDefinition } from '@domain/visualizations/testing/analysis-fixtures';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { visualizationSnapshot } from '../testing/visualization-test-fixtures';
 import { Component } from '@angular/core';
@@ -295,5 +296,26 @@ describe('visualization preview orchestration', () => {
     const { controller, definition } = setup({ provider: { resolve }, dates: { resolve: () => pending.promise } });
     controller.update(definition, identity); controller.update(undefined, undefined); pending.resolve({ calendarDate: '2026-11-11' }); await settle();
     expect(resolve).not.toHaveBeenCalled(); expect(controller.state().state).toBe('setup-required');
+  });
+});
+
+describe('analysis preview publication freshness', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  it('rejects evidence if committed inputs change during asynchronous presentation', async () => {
+    const definition = analysisDefinition(), evidence = visualizationEvidenceFixture(definition), store = workspace();
+    const pending = deferred<PreviewPresentation>(), prepare = vi.fn(() => pending.promise);
+    const provider: VisualizationSourceProvider = { kind: 'analysis', describe: () => evidence.capabilities,
+      supportsChart: (_source, chart) => ({ state: 'supported', chart }), resolve: async request => ({ ...evidence.resolution, identity: request.identity }) };
+    TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry, { provide: AccountWorkspaceStore, useValue: store },
+      { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: [provider] },
+      { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: TestChartComponent, prepare }] },
+      { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: dates }] });
+    const controller = TestBed.inject(PreviewController);
+    controller.update(definition, { ...identity, workspaceRevision: store.revision() });
+    await settle(); expect(prepare).toHaveBeenCalledOnce();
+    store.publishCommitted(store.snapshot()!, {});
+    pending.resolve(presentation); await settle();
+    expect(controller.state()).toMatchObject({ state: 'error', message: expect.stringContaining('Analysis inputs changed') });
+    controller.destroy();
   });
 });

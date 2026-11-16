@@ -1,3 +1,4 @@
+import { analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
 import { equipmentFixture } from '@domain/visualizations/testing/equipment-fixtures';
 import { getNewIdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
@@ -26,9 +27,30 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
   }
   if (sourceKinds.includes('predictor')) lifecycle.continuePredictors();
   if (sourceKinds.includes('energy-use')) { lifecycle.selectEnergyUseMode('equipment'); lifecycle.continueEquipment(); }
+  if (sourceKinds.includes('analysis')) {
+    const workspace = TestBed.inject(AccountWorkspaceStore);
+    if (!workspace.facilityAnalyses().length) workspace.publish({ ...workspace.snapshot()!, facilityAnalyses: [analysisFixture().analysis] });
+    lifecycle.analysisContext()!.request!({ kind: 'analysis-binding', sourceId: lifecycle.draftDefinition()!.sources.find(source => source.kind === 'analysis')!.id, analysisGuid: workspace.facilityAnalyses()[0].guid });
+    lifecycle.continueAnalysis();
+  }
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it('collects an exact analysis/group and measure in Add, reviews target changes and preserves invalid selections for repair', () => {
+    const { workspace } = configureLibraryTest(); workspace.publish(analysisFixture().snapshot);
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('analysis');
+    lifecycle.analysisContext()!.request!({ kind: 'analysis-binding', sourceId: 'source-1', analysisGuid: 'analysis-a', groupGuid: 'group-a' });
+    lifecycle.analysisContext()!.request!({ kind: 'analysis-measure', sourceId: 'source-1', measure: 'calculated' });
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a', groupGuid: 'group-a', measure: 'calculated' });
+    lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue('Production'); expect(lifecycle.canSubmit()).toBe(true);
+    workspace.publishCommitted({ ...workspace.snapshot()!, facilityAnalyses: [] }, {}); expect(lifecycle.canSubmit()).toBe(false);
+    lifecycle.editSelection('analysis'); expect(lifecycle.form.controls.analysisSetup.value!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a' });
+    lifecycle.analysisContext()!.request!({ kind: 'analysis-binding', sourceId: 'source-1' }); expect(lifecycle.confirmation()).toBe('decision');
+    lifecycle.confirmDecision(); lifecycle.continueAnalysis(); expect(lifecycle.canSubmit()).toBe(false); expect(lifecycle.step()).toBe('analysis');
+    expect(lifecycle.draftDefinition()!.series).toEqual([]);
+  });
+
   it.each([
     ['group', 'energy-group', 'energy-use-group'], ['equipment', 'equipment-a', 'equipment'],
     ['equipment-type', 'Pump', undefined], ['linked-meter-group', 'linked-group', 'meter-group'], ['facility', 'facility-a', 'facility']

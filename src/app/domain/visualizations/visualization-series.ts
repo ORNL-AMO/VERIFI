@@ -11,7 +11,7 @@ export interface EffectiveVisualizationSeries {
  * take precedence over a wildcard; owner-qualified overrides supply presentation only.
  */
 export function resolveVisualizationSeries(
-  definition: Pick<VisualizationDefinition, 'accountGuid' | 'series'> & Partial<Pick<VisualizationDefinition, 'chart'>>,
+  definition: Pick<VisualizationDefinition, 'accountGuid' | 'series'> & Partial<Pick<VisualizationDefinition, 'chart' | 'sources'>>,
   resolved: readonly ResolvedVisualizationSeries[],
   includeHidden = false
 ): readonly EffectiveVisualizationSeries[] {
@@ -21,7 +21,11 @@ export function resolveVisualizationSeries(
       && (selected.resourceGuid === undefined || selected.resourceGuid === candidate.resourceGuid)
       && (selected.resourceGuid !== undefined || !definition.series.some(exact => exact.sourceId === candidate.sourceId
         && exact.metric === candidate.metric && exact.resourceGuid !== undefined && exact.resourceGuid === candidate.resourceGuid)));
-    const overrides = (selected.overrides ?? []).filter(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid);
+    const source = definition.sources?.find(source => source.id === selected.sourceId);
+    // Result appearance is qualified by the durable analysis/group GUID. Unknown
+    // provider-local selectors remain dormant, including after a transfer.
+    const overrides = (selected.overrides ?? []).filter(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid
+      && !(source?.kind === 'analysis' && source.mode === 'result' && override.seriesId !== undefined));
     const matchingOverride = (metadata: ResolvedVisualizationSeries) => {
       // Domain resource identity wins over a provider-local category selector.
       const resource = overrides.find(override => override.resourceGuid !== undefined && override.resourceGuid === metadata.resourceGuid);

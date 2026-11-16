@@ -13,6 +13,7 @@ export class ReportAnalysisSelectionComponent {
   readonly resetKey = input.required<string>();
   readonly idPrefix = input.required<string>();
   readonly canEdit = input(true);
+  readonly emptyMessage = input('No eligible analyses are available. Create an analysis before continuing to data checks.');
   readonly showTypeFilter = input(false);
   readonly showInspection = input(true);
   readonly sectioned = input(false);

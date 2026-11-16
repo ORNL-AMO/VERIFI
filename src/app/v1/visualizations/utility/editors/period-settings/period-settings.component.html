@@ -1,12 +1,16 @@
 @let current = value();
 <fieldset [formGroup]="form" class="period-settings">
-  <legend>{{ annualOnly() ? 'Equipment fiscal years' : monthOnly() ? 'Month range' : 'Periods and comparisons' }}</legend>
+  <legend>{{ annualOnly() ? analysis() ? 'Analysis fiscal years' : 'Equipment fiscal years' : monthOnly() ? 'Month range' : 'Periods and comparisons' }}</legend>
   @if (conflict()) {
     <div role="alert">
       <p>Saved settings changed while your local input was incomplete. Review which settings to keep before continuing.</p>
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useSaved()">Use saved settings</button>
       <button type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled()" (click)="keepLocal()">Keep local input</button>
     </div>
+  }
+  @if (unsupportedAnalysisPeriod()) {
+    <p role="status">This period or comparison is unsupported for analysis results. The saved intent is retained.</p>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useAnalysisDefaults()">Use all history without comparison</button>
   }
   @if (unsupportedEquipmentPeriod()) {
     <p role="status">The saved period or comparison is unsupported for equipment history. Its intent is retained.</p>
@@ -26,7 +30,7 @@
     }
     @if (!monthOnly() || annualOnly()) {
     <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'fiscal-year'" (click)="selectChoice(form.controls.kind, 'fiscal-year')"><app-ui-icon name="calendar"/>Pinned fiscal year</button>
-    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'latest-saved-year'" (click)="selectChoice(form.controls.kind, 'latest-saved-year')"><app-ui-icon name="calendarCheck"/>Latest fiscal year</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'latest-saved-year'" (click)="selectChoice(form.controls.kind, 'latest-saved-year')"><app-ui-icon name="calendarCheck"/>{{ analysis() ? 'Latest complete result fiscal year' : 'Latest fiscal year' }}</button>
     }
   </div>
   @if (!annualOnly() && current.kind === 'fixed') {

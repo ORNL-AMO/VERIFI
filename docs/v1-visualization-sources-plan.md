@@ -2,7 +2,7 @@
 
 Development guide for [VIS5 #2906](https://github.com/ORNL-AMO/VERIFI/issues/2906), under the [Visualizations and Home plan](v1-visualizations-and-home-plan.md). Work through predictors and saved weather first, then Energy Uses, then analysis results and saved models. Each slice is a separate development chat with its own acceptance checkpoint.
 
-P1–P4 and E1–E3 are complete under their agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
+P1–P4, E1–E3 and A1 are complete under their agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
 
 ## Working one chat at a time
 
@@ -32,7 +32,7 @@ Completed behavior belongs in the owning feature references, not a growing imple
 - [x] **E1 — Equipment history: Complete**
 - [x] **E2 — Groups and facilities: Complete**
 - [x] **E3 — Energy Uses acceptance: Complete**
-- [ ] **A1 — Facility analysis results: Not started**
+- [x] **A1 — Facility analysis results: Complete**
 - [ ] **A2 — Account analysis results: Not started**
 - [ ] **A3 — Saved models: Not started**
 - [ ] **A4 — Analysis acceptance: Not started**
@@ -107,9 +107,11 @@ Refine each remaining slice when reached. Start with [facility analysis architec
 
 ### A1 Facility analysis results
 
-**Outcome and boundaries:** Bind a named saved facility analysis and applicable group; project supported existing monthly/annual measures. Keep analysis baseline/adjustment/banking rules authoritative and independent of visualization date filtering.
+**Outcome:** One named saved facility analysis and its facility total or one non-skipped group, one measure per unstacked monthly/yearly line/bar chart. Current meaning belongs to [facility analysis results](v1-visualization-foundation.md#facility-analysis-results), editing to [facility analysis setup](v1-visualization-workbench.md#facility-analysis-setup), and orchestration to [facility analysis architecture](v1-facility-analysis-architecture.md#saved-visualization-consumption).
 
-**Acceptance and validation:** Only current, valid matching results render. Distinguish actual, calculated, improvement, savings, and losses. Test readiness, periods, gaps, errors, input freshness, and active-preview demand; include native coverage for changed Worker lifecycle/contracts.
+**Agreed boundaries:** Add requires a selection through the report analysis selector; scope, result period, measure and appearance are workbench configuration. Actual/calculated monthly or yearly; annual/total improvement yearly; rolling percentage savings/losses monthly, with banked variants only for applicable groups. Follow saved analysis units/basis and existing workbench readiness/horizon, including selected-group fallback. Whole-month all/fixed/rolling controls and yearly all/latest-complete/explicit fiscal year filter fully calculated results without changing baselines, adjustments or banking. Preserve current-only evidence, zeros, warnings, partial values and banking gaps. No account analyses, saved models, comparisons, conversions, multiple targets or mixed sources; no saved-format migration or source writes.
+
+**Acceptance:** Focused measure/period, readiness/dependency, timeout/retry/cancellation, freshness, reference/appearance and Add/workbench checks pass. Native facility and selected-group Workers, save/reopen/edit, result reuse and Account/Facility backup restores pass without source writes. Keyboard/focus, accessible values, wide/light, narrow/dark and print-media presentation were checked. App type-check, production web build and documentation checks pass; existing build warnings remain. Broader regression/release gates remain with PR review and CI/CD. A2 was not started.
 
 ### A2 Account analysis results
 
@@ -137,10 +139,10 @@ Do not defer deterministic source tests to acceptance slices or VIS10. Acceptanc
 
 ## Continuation
 
-- **Next slice:** A1 — Facility analysis results. Stop before A2.
-- **Current state:** P1–P4 and E1–E3 are complete under focused acceptance. Equipment, group/type/linked-group and facility visualizations reuse the neutral annual projection; the foundation, workbench, Energy Uses architecture and persistence references own current behavior, including composed recovery and restored-chart acceptance.
-- **Decisions for the next chat:** Inspect current facility analysis result contracts and dependency closure before choosing supported measures, periods, groups and settings. Refine readiness/freshness and unavailable behavior against authoritative calculations; do not treat the Analysis outline or saved schema as implemented provider support. Preserve completed predictor/Energy Use semantics and calculation-free catalogs.
+- **Next slice:** A2 — Account analysis results. Stop before A3.
+- **Current state:** P1–P4, E1–E3 and A1 are complete under focused acceptance. Current source meaning, editing, identities and orchestration belong to the foundation, workbench, persistence, Energy Uses and facility-analysis references. A1 reuses full facility results or the existing selected-group fallback and its complete-year horizon; dates never change analysis calculation inputs.
+- **Decisions for the next chat:** Inspect authoritative account-analysis results, selected-facility/skip rules, dependency closure, readiness and fiscal periods before choosing supported account measures and inclusion behavior. A1's result provider does not establish account-analysis or saved-model support. Preserve completed source semantics, current-only result evidence and calculation-free catalogs.
 - **Blockers:** None identified. Later slices require refinement when reached.
-- **Outstanding acceptance:** Analysis/model checkpoints remain open. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan. Electron and native OS print-dialog checks were not performed for E3; no Electron or OS integration changed.
+- **Outstanding acceptance:** A2–A4 remain open, including composed account/model and recovery acceptance. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan. Electron and native OS print-dialog checks were not performed for A1; no Electron or OS integration changed.
 
-To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on A1 only. Inspect existing facility analysis results and dependency closure, refine supported measures, periods, scope and freshness behavior, implement and validate the agreed slice, update the handoff, and stop before A2.”
+To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on A2 only. Inspect existing account analysis results and dependency closure, refine supported measures, periods, inclusion and freshness behavior, implement and validate the agreed slice, update the handoff, and stop before A3.”

@@ -3,7 +3,7 @@ import { itemKey, overrideMatches, isCustomized } from '../shared/item-appearanc
 export { itemKey, overrideMatches, isCustomized } from '../shared/item-appearance';
 import { projectPredictorItems } from '../predictor/predictor-items';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import type { UtilitySelectionMode, UtilityVisualizationSource, PredictorVisualizationSource, EnergyUseVisualizationSource, VisualizationDefinition, VisualizationScope,
+import type { UtilitySelectionMode, UtilityVisualizationSource, PredictorVisualizationSource, EnergyUseVisualizationSource, AnalysisResultVisualizationSource, VisualizationDefinition, VisualizationScope,
   VisualizationSeries } from '@domain/visualizations/visualization-definition';
 import { discoverUtilitySeries, utilityMeterEligible } from '@domain/visualizations/utility/utility-catalog';
 import { resolveUtilitySelection, utilityBuckets, utilityMeasureKey, utilitySeriesId } from '@domain/visualizations/utility/utility-selection';
@@ -61,8 +61,8 @@ export function nativeObservationAvailable(definition: VisualizationDefinition, 
   return selection.meters.length === 1 && !selection.missing.length;
 }
 
-export function sourceSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource, identity: DecisionItemIdentity): VisualizationSeries | undefined {
-  const metric = source.kind === 'predictor' ? 'value' : source.kind === 'energy-use' ? 'consumption' : utilityMeasureKey(source);
+export function sourceSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource | AnalysisResultVisualizationSource, identity: DecisionItemIdentity): VisualizationSeries | undefined {
+  const metric = source.kind === 'analysis' ? source.measure : source.kind === 'predictor' ? 'value' : source.kind === 'energy-use' ? 'consumption' : utilityMeasureKey(source);
   return definition.series.find(series => series.sourceId === source.id && series.metric === metric && identity.resourceGuid !== undefined && series.resourceGuid === identity.resourceGuid)
     ?? definition.series.find(series => series.sourceId === source.id && series.metric === metric && !series.resourceGuid);
 }

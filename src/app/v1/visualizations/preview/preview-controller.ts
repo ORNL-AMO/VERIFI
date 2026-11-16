@@ -103,6 +103,7 @@ export class PreviewController {
 
   private async resolve(definition: VisualizationDefinition, identity: PreviewIdentity, generation: number, abort: AbortController): Promise<void> {
     try {
+      const analysisSnapshot = definition.sources.some(source => source.kind === 'analysis') ? this.workspace.snapshot() : undefined;
       const { scope, missingFacilityGuids } = resolveVisualizationFacilities(definition, this.workspace.facilities());
       if (missingFacilityGuids.length) {
         this.value.set({ state: 'missing-source', message: 'Review the missing selected facilities.', reasons: missingFacilityGuids }); return;
@@ -115,7 +116,7 @@ export class PreviewController {
         this.value.set({ state: 'empty', message: 'No eligible saved value is available for the latest-data range.', reasons: dateContext.emptyReasons }); return;
       }
       if (!civilDate(dateContext.calendarDate) || dateContext.latestDataDate !== undefined && !civilDate(dateContext.latestDataDate)
-        || definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate && !definition.sources.some(source => source.kind === 'predictor')) {
+        || definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate && !definition.sources.some(source => source.kind === 'predictor' || source.kind === 'analysis')) {
         this.value.set({ state: 'incompatible', message: 'The selected period has no valid calendar date or latest-data anchor.' }); return;
       }
       const requestId = `visualization-preview-${this.instanceId}-${generation}`;
@@ -161,6 +162,9 @@ export class PreviewController {
       const presenter = this.registry.presenter(definition.chart!.kind)!;
       const presentation = await presenter.prepare(definition, evidence, abort.signal);
       if (!this.current(generation, abort)) return;
+      if (analysisSnapshot && (!this.workspace.isReady() || this.workspace.snapshot() !== analysisSnapshot)) {
+        abort.abort(); this.value.set({ state: 'error', message: 'Analysis inputs changed while preparing the chart. Retry current results.' }); return;
+      }
       if (!presentation.details?.caption?.trim() || !presentation.details.columns.length
         || presentation.details.rows.some(row => row.length !== presentation.details.columns.length)) {
         this.value.set({ state: 'error', message: 'The chart does not provide complete accessible values.' }); return;

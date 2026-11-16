@@ -1,3 +1,4 @@
+import { analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
 import { predictorMonthRange } from '@domain/visualizations/predictor/predictor-source';
 import { Component, DestroyRef, Input, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -11,9 +12,11 @@ export interface PeriodFormValue {
   comparison: VisualizationComparison['kind']; comparisonBasis: 'calendar' | 'fiscal'; comparisonStart: string; comparisonEnd: string;
 }
 
+function usesMonthRange(definition: VisualizationDefinition): boolean { return definition.sources.some(source => source.kind === 'predictor') || definition.sources.some(source => source.kind === 'analysis') && definition.chart?.kind === 'time-series' && definition.chart.interval === 'monthly'; }
+
 export function periodFormValue(definition: VisualizationDefinition): PeriodFormValue {
   const period = definition.period, comparison = definition.comparison;
-  const monthly = definition.sources.some(source => source.kind === 'predictor');
+  const monthly = usesMonthRange(definition);
   return { kind: period.kind, basis: 'basis' in period ? period.basis : 'calendar',
     start: period.kind === 'fixed' ? monthly ? period.start.slice(0, 7) : period.start : '', end: period.kind === 'fixed' ? monthly ? period.end.slice(0, 7) : period.end : '',
     count: period.kind === 'rolling' ? period.count : 12, unit: period.kind === 'rolling' ? period.unit : 'month',
@@ -46,7 +49,7 @@ export function periodFormIssue(value: PeriodFormValue, monthly = false): string
 }
 
 export function applyPeriodForm(definition: VisualizationDefinition, value: PeriodFormValue): VisualizationDefinition {
-  const monthly = definition.sources.some(source => source.kind === 'predictor');
+  const monthly = usesMonthRange(definition);
   if (periodFormIssue(value, monthly)) return definition;
   const monthRange = (value: string) => predictorMonthRange(Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7)) - 1);
   const period: VisualizationPeriod = value.kind === 'fixed' ? { kind: 'fixed', start: monthly ? monthRange(value.start).start : value.start, end: monthly ? monthRange(value.end).end : value.end, basis: value.basis }
@@ -60,7 +63,7 @@ export function applyPeriodForm(definition: VisualizationDefinition, value: Peri
 }
 
 function periodSettingsFingerprint(definition: VisualizationDefinition): string {
-  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor'), definition.sources.some(source => source.kind === 'energy-use')]);
+  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor'), definition.sources.some(source => source.kind === 'energy-use'), definition.sources.some(source => source.kind === 'analysis') ? definition.chart : undefined]);
 }
 
 @Component({ selector: 'app-utility-period-settings', standalone: false, templateUrl: './period-settings.component.html',
@@ -73,6 +76,8 @@ export class PeriodSettingsComponent {
   readonly conflict = signal(false);
   readonly disabled = signal(true);
   readonly monthOnly = signal(false);
+  readonly analysis = signal(false);
+  readonly unsupportedAnalysisPeriod = signal(false);
   readonly annualOnly = signal(false);
   readonly unsupportedEquipmentPeriod = signal(false);
   readonly retainedPartial = signal(false);
@@ -94,13 +99,15 @@ export class PeriodSettingsComponent {
   @Input({ required: true }) set context(context: PeriodSettingsContext) {
     const hadInvalidInput = !!periodFormIssue(this.form.getRawValue(), this.monthOnly());
     this.contextValue = context; this.disabled.set(context.disabled);
-    this.monthOnly.set(context.definition.sources.some(source => source.kind === 'predictor'));
-    this.annualOnly.set(context.definition.sources.some(source => source.kind === 'energy-use'));
-    this.unsupportedEquipmentPeriod.set(this.annualOnly() && (context.definition.comparison.kind !== 'none' || !['all-history', 'latest-saved-year', 'fiscal-year'].includes(context.definition.period.kind)));
+    this.monthOnly.set(usesMonthRange(context.definition));
+    this.analysis.set(context.definition.sources.some(source => source.kind === 'analysis'));
+    this.annualOnly.set(context.definition.sources.some(source => source.kind === 'energy-use') || this.analysis() && context.definition.chart?.kind === 'time-series' && context.definition.chart.interval === 'yearly');
+    this.unsupportedAnalysisPeriod.set(this.analysis() && !!context.definition.chart && !!analysisPeriodIssue({ chart: context.definition.chart, period: context.definition.period, comparison: context.definition.comparison }));
+    this.unsupportedEquipmentPeriod.set(context.definition.sources.some(source => source.kind === 'energy-use') && (context.definition.comparison.kind !== 'none' || !['all-history', 'latest-saved-year', 'fiscal-year'].includes(context.definition.period.kind)));
     const period = context.definition.period;
     this.retainedPartial.set(this.monthOnly() && period.kind === 'fixed' && (period.start !== period.start.slice(0, 7) + '-01'
       || period.end !== predictorMonthRange(Number(period.end.slice(0, 4)) * 12 + Number(period.end.slice(5, 7)) - 1).end));
-    this.unsupportedPredictorPeriod.set(this.monthOnly() && (context.definition.comparison.kind !== 'none'
+    this.unsupportedPredictorPeriod.set(this.monthOnly() && !this.analysis() && (context.definition.comparison.kind !== 'none'
       || 'basis' in period && period.basis !== 'calendar' || !['all-history', 'fixed', 'rolling'].includes(period.kind)
       || period.kind === 'rolling' && period.includeIncomplete));
     const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid]);
@@ -128,10 +135,15 @@ export class PeriodSettingsComponent {
     if (this.disabled() || control.disabled || control.value === value) return;
     control.markAsDirty();
     if (this.annualOnly() && (control as unknown) === this.form.controls.kind) {
-      this.form.patchValue({ kind: value as VisualizationPeriod['kind'], comparison: 'none' });
+      this.form.patchValue({ kind: value as VisualizationPeriod['kind'], comparison: 'none', basis: 'fiscal' });
     } else if (this.monthOnly() && (control as unknown) === this.form.controls.kind) {
       this.form.patchValue({ kind: value as VisualizationPeriod['kind'], basis: 'calendar', includeIncomplete: false, comparison: 'none' });
     } else control.setValue(value);
+  }
+
+  useAnalysisDefaults(): void {
+    if (this.disabled()) return;
+    this.form.patchValue({ kind: 'all-history', basis: this.annualOnly() ? 'fiscal' : 'calendar', includeIncomplete: false, comparison: 'none' });
   }
 
   useEquipmentDefaults(): void {

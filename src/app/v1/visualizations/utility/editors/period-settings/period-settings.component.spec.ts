@@ -1,3 +1,4 @@
+import { analysisDefinition } from '@domain/visualizations/testing/analysis-fixtures';
 import { equipmentDefinition } from '@domain/visualizations/testing/equipment-fixtures';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { TestBed } from '@angular/core/testing';
@@ -7,6 +8,16 @@ import { UtilityEditorsModule } from '../utility-editors.module';
 import { applyPeriodForm, periodFormIssue, periodFormValue, PeriodSettingsComponent } from './period-settings.component';
 
 describe('utility period editing', () => {
+  it('explicitly removes an unsupported Analysis comparison even when all history is already selected', () => {
+    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();
+    fixture.componentRef.setInput('context', { definition: { ...analysisDefinition(), comparison: { kind: 'previous-period' } }, disabled: false, changed }); fixture.detectChanges();
+    expect(changed).not.toHaveBeenCalled();
+    const button = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(button => button.textContent?.includes('Use all history without comparison'))!;
+    button.click();
+    expect(changed).toHaveBeenCalledExactlyOnceWith({ period: { kind: 'all-history' }, comparison: { kind: 'none' } });
+  });
+
   it('offers only annual equipment periods and protects incomplete pinned years through saved changes', () => {
     TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();

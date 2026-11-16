@@ -102,6 +102,7 @@
             [expanded]="expandedNodes().has(source.nodeId)" (expandedChange)="setSection(source.nodeId, $event)">
             @if (source.kind === 'utility') { <app-utility-source-editor [context]="source.context"/> }
             @else if (source.kind === 'energy-use') { <app-equipment-source-editor [context]="source.context"/> }
+            @else if (source.kind === 'analysis') { <app-analysis-source-editor [context]="source.context"/> }
             @else if (source.kind === 'predictor') { <app-predictor-source-editor [context]="source.context"/> }
             @else { <p role="status">Setup required. Data selection for {{ source.label }} is not available yet.</p> }
           </app-visualization-decision-section>
