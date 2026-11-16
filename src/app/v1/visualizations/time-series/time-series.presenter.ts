@@ -41,7 +41,8 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
     if (!allowsMixedAxisUnits(chart, axisCapabilities) && new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
   }
   const warnings = new Set(resolved.flatMap(entry => entry.result.quality.warnings));
-  if (resolved.some(entry => entry.result.quality.partial)) warnings.add('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
+  const showPartialNotice = resolved.some(entry => entry.evidence.request.source.kind !== 'predictor' && entry.result.quality.partial);
+  if (showPartialNotice) warnings.add('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
   const contributionOwners = new Map<string, Set<string>>();
   for (const item of selected) for (const key of item.metadata.contributionKeys ?? []) {
     const owners = contributionOwners.get(key) ?? new Set<string>(); owners.add(item.metadata.id); contributionOwners.set(key, owners);
@@ -82,6 +83,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   for (const trace of traces) duplicateLabels.set(trace.label, (duplicateLabels.get(trace.label) ?? 0) + 1);
   return { title: definition.appearance.title ?? definition.name, chart, legend: definition.appearance.legend,
     partial: resolved.some(entry => entry.result.quality.partial),
+    showPartialNotice, omissions: resolved.flatMap(entry => entry.result.quality.omissions ?? []),
     slots: [...slots.values()].sort((a, b) => a.order - b.order || a.key.localeCompare(b.key)),
     traces: traces.map((trace, index) => duplicateLabels.get(trace.label)! > 1 ? { ...trace, label: `${trace.label} (series ${index + 1})` } : trace), warnings: [...warnings] };
 }

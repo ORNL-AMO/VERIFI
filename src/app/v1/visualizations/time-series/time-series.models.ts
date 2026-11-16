@@ -1,5 +1,5 @@
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
-import type { VisualizationObservation } from '@domain/visualizations/visualization-source-provider';
+import type { VisualizationObservation, VisualizationOmission } from '@domain/visualizations/visualization-source-provider';
 
 export interface TimeSeriesPoint {
   readonly slot: string;
@@ -26,4 +26,6 @@ export interface TimeSeriesModel {
   readonly traces: readonly TimeSeriesTrace[];
   readonly warnings: readonly string[];
   readonly partial?: boolean;
+  readonly showPartialNotice?: boolean;
+  readonly omissions?: readonly VisualizationOmission[];
 }

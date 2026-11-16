@@ -17,11 +17,16 @@ export function predictorCatalog(snapshot: AccountWorkspaceSnapshot, scope: Visu
     .sort((a, b) => (a.name || '').localeCompare(b.name || '') || a.guid.localeCompare(b.guid));
 }
 export function predictorContext(predictor: IdbPredictor): string {
+  const stationName = predictor.weatherStationName?.trim(), stationId = predictor.weatherStationId?.trim();
+  const station = stationName && stationId && stationName !== stationId ? `${stationName} (${stationId})` : stationName || stationId || 'Station not set';
+  const base = predictor.weatherDataType === 'HDD'
+    ? Number.isFinite(predictor.heatingBaseTemperature) ? `${predictor.heatingBaseTemperature}°F heating base` : 'Heating base not set'
+    : predictor.weatherDataType === 'CDD'
+      ? Number.isFinite(predictor.coolingBaseTemperature) ? `${predictor.coolingBaseTemperature}°F cooling base` : 'Cooling base not set'
+      : '';
   return [isStandardPredictor(predictor) ? 'Standard' : predictor.predictorType,
     predictorUnit(predictor) || 'Unit not specified', predictor.noLongerInUse ? 'Retired' : '',
-    ...(predictor.predictorType === 'Weather' ? [predictor.weatherDataType, predictor.weatherStationName || predictor.weatherStationId,
-      predictor.weatherDataType === 'HDD' && Number.isFinite(predictor.heatingBaseTemperature) ? `${predictor.heatingBaseTemperature}°F heating base` : '',
-      predictor.weatherDataType === 'CDD' && Number.isFinite(predictor.coolingBaseTemperature) ? `${predictor.coolingBaseTemperature}°F cooling base` : ''] : [])]
+    ...(predictor.predictorType === 'Weather' ? [predictor.weatherDataType || 'Weather measure not set', station, base] : [])]
     .filter(Boolean).join(' · ');
 }
 export function validPredictorMonth(reading: Pick<IdbPredictorData, 'year' | 'month'>): boolean {
@@ -71,12 +76,19 @@ export function predictorChartSupport(source: PredictorVisualizationSource, char
 function readingNotes(predictor: IdbPredictor, reading: IdbPredictorData): string[] {
   const notes: string[] = [];
   if (reading.amount < 0) notes.push('Negative saved amount');
-  if (reading.weatherDataWarning) notes.push('Saved weather warning');
+  if (reading.weatherDataWarning || predictor.weatherDataWarning) notes.push('Saved weather warning');
   if (reading.weatherDataChanged) notes.push('Saved weather data changed');
   if (reading.weatherOverride) notes.push('Manual weather override');
-  if (predictor.noLongerInUse && validPredictorMonth({ year: predictor.noLongerInUseYear, month: predictor.noLongerInUseMonth })
+  if (predictor.noLongerInUse && validPredictorMonth(reading) && validPredictorMonth({ year: predictor.noLongerInUseYear, month: predictor.noLongerInUseMonth })
     && indexOf(reading) > predictor.noLongerInUseYear * 12 + predictor.noLongerInUseMonth - 1) notes.push('Saved reading after retirement');
+  if (predictor.predictorType === 'Weather') notes.push(predictorContext(predictor));
+  else if (!predictorUnit(predictor)) notes.push('Unit not specified');
   return notes;
+}
+
+function readingEvidence(record: IdbPredictor, reading: IdbPredictorData): string {
+  const notes = readingNotes(record, reading);
+  return `${reading.guid}: ${String(reading.amount)} (${reading.year}-${String(reading.month).padStart(2, '0')})${notes.length ? ` · ${notes.join(' · ')}` : ''}`;
 }
 
 function monthlyObservation(record: IdbPredictor, entries: readonly IdbPredictorData[], month: number): VisualizationObservation {
@@ -89,7 +101,7 @@ function monthlyObservation(record: IdbPredictor, entries: readonly IdbPredictor
   }
   if (!entries.length) return { state: 'missing', value: null, reason: 'No saved reading for this month.' };
   const reading = entries[0];
-  if (!Number.isFinite(reading.amount)) return { state: 'excluded', value: null, reason: `Reading ${reading.guid} has nonfinite saved amount ${String(reading.amount)}.` };
+  if (!Number.isFinite(reading.amount)) return { state: 'excluded', value: null, reason: `Nonfinite saved amount: ${readingEvidence(record, reading)}.` };
   const notes = readingNotes(record, reading);
   return { state: 'observed', value: reading.amount, provenance: record.predictorType === 'Weather' ? 'weather' : 'predictor', partial: false,
     ...(notes.length ? { notes } : {}) };
@@ -112,18 +124,25 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
   if (missing.length) return { identity, state: 'missing-source', references: missing.map(id => ({ kind: 'predictor', id })), message: 'Repair the selected predictor references.' };
   const records = guids.map(guid => owned.find(p => p.guid === guid)!);
   if (records.some(record => !supportedPredictor(record))) return unsupported('Math and Conversion predictors are placeholders and are not supported.');
-  const warnings: string[] = [];
+  const omissions: { resourceGuid: string; label: string; issue: string; readings: string[] }[] = [];
+  const omit = (record: IdbPredictor, issue: string, readings: readonly IdbPredictorData[]) => {
+    let group = omissions.find(item => item.resourceGuid === record.guid && item.issue === issue);
+    if (!group) { group = { resourceGuid: record.guid, label: record.name, issue, readings: [] }; omissions.push(group); }
+    group.readings.push(...[...readings].sort((a, b) => a.guid.localeCompare(b.guid)).map(reading => readingEvidence(record, reading)));
+  };
+  const omitExcluded = (record: IdbPredictor, readings: readonly IdbPredictorData[]) => {
+    if (readings.length > 1) omit(record, 'Duplicate month', readings);
+    else if (readings.length && !Number.isFinite(readings[0].amount)) omit(record, 'Nonfinite saved amount', readings);
+  };
   const histories = records.map(record => {
     const readings = ownedReadings(snapshot, record), grouped = groupReadings(readings.filter(validPredictorMonth));
-    for (const r of readings.filter(r => !validPredictorMonth(r))) warnings.push(`${record.name}: omitted reading ${r.guid}: invalid saved month ${r.year}-${r.month}, amount ${String(r.amount)}.`);
-    if (record.predictorType === 'Weather') warnings.push(`Saved weather history: ${record.name} · ${predictorContext(record)}. Viewing does not retrieve or regenerate weather.`);
-    if (record.weatherDataWarning) warnings.push(`${record.name}: saved weather warning.`);
-    if (!predictorUnit(record)) warnings.push(`${record.name}: unit not specified. Values are shown as saved.`);
+    const invalid = readings.filter(reading => !validPredictorMonth(reading));
+    if (invalid.length) omit(record, 'Invalid saved month', invalid);
     const months = [...grouped.keys()].sort((a, b) => a - b);
-    if (!months.length) warnings.push(`${record.name}: no usable saved monthly history.`);
     return { record, grouped, first: months[0], last: months.at(-1) };
   });
-  const empty = (message: string): VisualizationSourceResolution => ({ identity, state: 'empty', periods: [], message, reasons: warnings });
+  const empty = (message: string): VisualizationSourceResolution => ({ identity, state: 'empty', periods: [], message,
+    reasons: omissions.map(group => `${group.label} · ${group.issue}: ${group.readings.join('; ')}`) });
   const months = histories.flatMap(history => history.first === undefined ? [] : [history.first, history.last!]);
   if (!months.length) return empty('No usable saved predictor periods are available.');
   let start = predictorMonthRange(Math.min(...months)).start, end = predictorMonthRange(Math.max(...months)).end;
@@ -132,10 +151,7 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
     if (period.includeIncomplete) return unsupported('Choose completed months for the predictor rolling range.');
     const anchor = period.anchor === 'latest-data' ? request.dateContext.latestDataDate : request.dateContext.calendarDate;
     if (!anchor) {
-      for (const { record, grouped } of histories) for (const [month, entries] of grouped) {
-        const observation = monthlyObservation(record, entries, month);
-        if (observation.state !== 'observed') warnings.push(`${record.name}: ${observation.reason}`);
-      }
+      for (const { record, grouped } of histories) for (const entries of grouped.values()) omitExcluded(record, entries);
       return empty('No eligible saved predictor observation is available for the rolling anchor.');
     }
     let last = Number(anchor.slice(0, 4)) * 12 + Number(anchor.slice(5, 7)) - 1;
@@ -157,8 +173,7 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
         ? { state: 'alignment-padding', value: null, reason: 'Outside this predictor’s saved monthly history.' }
         : monthlyObservation(record, grouped.get(month) ?? [], month);
       values[predictorSeriesId(source.id, record.guid)] = observation;
-      if (observation.state === 'observed') observation.notes?.forEach(note => warnings.push(`${record.name} · ${range.start.slice(0, 7)}: ${note}.`));
-      else if (observation.state !== 'alignment-padding') warnings.push(`${record.name} · ${range.start.slice(0, 7)}: ${observation.reason}`);
+      if (observation.state === 'excluded') omitExcluded(record, grouped.get(month) ?? []);
     }
     rows.push({ periodKey: range.start.slice(0, 7), ...range, values });
   }
@@ -171,6 +186,6 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
     periods: [{ role: 'primary', start: rows[0].start, end: rows.at(-1)!.end, basis: 'calendar', interval: 'monthly' }],
     references: records.map(record => ({ kind: 'predictor', id: record.guid, accountGuid: record.accountId, facilityGuid: record.facilityId })),
     provenance: [...new Set(records.map(record => record.predictorType === 'Weather' ? 'weather' as const : 'predictor' as const))],
-    quality: { partial: rows.some(row => Object.values(row.values).some(value => value.state !== 'observed')), warnings }
+    quality: { partial: rows.some(row => Object.values(row.values).some(value => value.state !== 'observed')), warnings: [], omissions }
   } };
 }

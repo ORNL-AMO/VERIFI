@@ -1,3 +1,4 @@
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -101,6 +102,7 @@ function setup(options: { singleFacility?: boolean; readyChart?: boolean } = {})
       { path: 'outside', component: OutsidePage }]),
     { provide: AccountWorkspaceStore, useValue: store },
     { provide: AccountWorkspaceService, useValue: { selectAccount: vi.fn(async () => 'published') } },
+    { provide: WorkspaceStatusService, useValue: { state: signal('idle'), evaluation: signal(undefined) } },
     { provide: WorkspaceNavigationService, useValue: navigation },
     { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
     { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } },

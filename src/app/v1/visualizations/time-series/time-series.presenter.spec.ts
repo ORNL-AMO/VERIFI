@@ -13,6 +13,20 @@ function appendSeries(evidence: VisualizationSourceEvidence, metadata: ResolvedV
 }
 
 describe('saved time-series presentation', () => {
+  it('retains coverage and omission evidence without predictor alerts, while preserving meter notices', () => {
+    const definition = utilityVisualizationFixture(), evidence = ready(definition);
+    if (evidence.resolution.state !== 'ready') throw new Error('Expected ready evidence');
+    const omissions = [{ resourceGuid: 'predictor-a', label: 'Weather', issue: 'Invalid saved month', readings: ['invalid: 12 (2024-13) · Manual weather override'] }];
+    const partial: VisualizationSourceEvidence = { ...evidence, resolution: { ...evidence.resolution,
+      resolved: { ...evidence.resolution.resolved, quality: { partial: true, warnings: [], omissions } } } };
+    const predictor: VisualizationSourceEvidence = { ...partial, request: { ...partial.request, source: { id: partial.request.source.id,
+      kind: 'predictor', measure: 'value', aggregation: 'none' } } };
+    const model = prepareTimeSeries(definition, [predictor]);
+    expect(model).toMatchObject({ partial: true, showPartialNotice: false, omissions, warnings: [] });
+    const meter = prepareTimeSeries(definition, [partial]);
+    expect(meter.showPartialNotice).toBe(true);
+    expect(meter.warnings).toContain('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
+  });
   it('permits unconverted mixed-unit traces only when their adapter explicitly supports shared axes', () => {
     const base = utilityVisualizationFixture();
     const definition: VisualizationDefinition = { ...base, sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',

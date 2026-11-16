@@ -20,6 +20,9 @@ import type { DecisionChangeResult, DecisionRef, VisualizationDecisionAction } f
 import type { PeriodSettingsContext, UtilityEditorContext } from '../utility/editors/utility-editor-context';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 import type { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import type { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
+import { predictorStatusPresentation } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false, host: { class: 'visualization-workbench-host' },
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -54,6 +57,39 @@ export class WorkbenchComponent {
   readonly settingsExpanded = new FormControl(true, { nonNullable: true });
   readonly workspace = inject(AccountWorkspaceStore);
   readonly navigation = inject(WorkspaceNavigationService);
+  private readonly status = inject(WorkspaceStatusService);
+  readonly selectedPredictorGuids = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    if (!this.workspace.isReady() || !snapshot || definition?.accountGuid !== this.accountGuid()
+      || snapshot.account.guid !== this.accountGuid() || this.editor.record()?.guid !== this.navigation.routeState().visualizationGuid) return [];
+    const included = this.facilityContext()?.scope.facilityGuids ?? [];
+    const selected = new Set(definition.sources.flatMap(source => source.kind === 'predictor' && source.selection?.kind === 'fixed'
+      ? source.selection.guids : []));
+    return snapshot.predictors.filter(predictor => predictor.accountId === snapshot.account.guid
+      && included.includes(predictor.facilityId) && selected.has(predictor.guid)).map(predictor => predictor.guid);
+  });
+  readonly predictorStatusState = computed<StatusEvaluationState>(() => {
+    const state = this.status.state(), evaluation = this.status.evaluation();
+    return state === 'ready' && (evaluation?.accountGuid !== this.accountGuid() || evaluation.revision !== this.workspace.revision()) ? 'evaluating' : state;
+  });
+  readonly predictorStatusIssues = computed(() => {
+    if (this.predictorStatusState() !== 'ready') return [];
+    const selected = new Set(this.selectedPredictorGuids());
+    return this.status.items().filter(item => item.entity.kind === 'predictor' && item.entity.accountGuid === this.accountGuid()
+      && selected.has(item.entity.guid) && (item.severity === 'error' || item.severity === 'warning'));
+  });
+  readonly predictorHeaderStatus = computed(() => {
+    const issues = this.predictorStatusIssues();
+    return predictorStatusPresentation(issues.some(issue => issue.severity === 'error') ? 'danger' : issues.length ? 'warning' : 'success', this.predictorStatusState());
+  });
+  readonly predictorStatusSummaries = computed(() => this.predictorStatusIssues().slice(0, 2));
+  readonly remainingPredictorIssues = computed(() => this.predictorStatusIssues().slice(2));
+
+  openPredictorIssue(item: StatusItem): void {
+    // Recheck a rendered action against the current account, selection, and active findings.
+    const current = this.predictorStatusIssues().find(issue => issue.id === item.id);
+    if (current) this.status.navigateTo(current);
+  }
   readonly journeys = inject(VisualizationNavigationService);
   private readonly unsaved = inject(UnsavedChangesService);
   private readonly modal = inject(ModalPortalService);

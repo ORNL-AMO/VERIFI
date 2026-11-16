@@ -1,3 +1,4 @@
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -66,6 +67,7 @@ function setup(firstOutcome: 'failed' | 'refresh-required') {
         component: WorkbenchComponent, canDeactivate: [visualizationLeaveGuard] }]),
     { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
     { provide: AccountWorkspaceStore, useValue: store },
+    { provide: WorkspaceStatusService, useValue: { state: signal('idle'), evaluation: signal(undefined) } },
     { provide: WorkspaceNavigationService, useValue: { routeState, isSingleSiteWorkspace: () => false } },
     { provide: SavedVisualizationCommands, useValue: { prepareCreate, submit, recover } }
   ] });

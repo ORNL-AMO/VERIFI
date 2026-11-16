@@ -2,7 +2,7 @@
 
 Development guide for [VIS5 #2906](https://github.com/ORNL-AMO/VERIFI/issues/2906), under the [Visualizations and Home plan](v1-visualizations-and-home-plan.md). Work through predictors and saved weather first, then Energy Uses, then analysis results and saved models. Each slice is a separate development chat with its own acceptance checkpoint.
 
-P1 is complete under its agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
+P1 and P2 are complete under their agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
 
 ## Working one chat at a time
 
@@ -26,7 +26,7 @@ Completed behavior belongs in the owning feature references, not a growing imple
 ## Slice checklist
 
 - [x] **P1 — Saved predictor selection: Complete**
-- [ ] **P2 — Weather and quality hardening: Not started**
+- [x] **P2 — Weather and quality hardening: Complete**
 - [ ] **P3 — Compatible combinations: Not started**
 - [ ] **P4 — Predictor acceptance: Not started**
 - [ ] **E1 — Equipment history: Not started**
@@ -51,13 +51,11 @@ Finish P1–P4 before starting Energy Uses. These are working checkpoints within
 
 ### P2 Weather and quality hardening
 
-**Outcome:** Extend representative weather/quality acceptance beyond P1's implemented support, preserving its saved-only and duplicate-gap policy.
+**Outcome:** Saved weather context and omitted-input evidence are retained without routine chart warning noise. Existing selected-predictor data/status findings appear in the workbench header. Current behavior belongs to [predictor observations](v1-visualization-foundation.md#predictor-observations) and [predictor setup](v1-visualization-workbench.md#predictor-setup).
 
-**Start with:** P1's implementation, [predictor feature models](../src/app/v1/data/predictors/models/), [predictor quality logic](../src/app/domain/calculations/data-quality/predictor-data-quality.ts), and [predictor observations](v1-visualization-foundation.md#predictor-observations).
+**Agreed boundaries:** Reuse existing status rules, preferences, dismissals, and full-history scope. Preserve saved units and all seven weather-measure fallbacks; missing context never blocks finite values. Group omissions while retaining each reading's identity, date, amount, and flags. Duplicates remain explained gaps. Viewing never retrieves/regenerates weather, writes source records, or adds calculation demand. No saved-format change or additional source/chart capability.
 
-**Work and boundaries:** Refine the remaining gaps before editing. Inspect representative saved weather measures/units, incomplete station/base-temperature context, combined saved warnings/changes/overrides, invalid histories, and omitted-input explanations. Keep Standard/Weather in the existing predictor category. No weather retrieval/regeneration, Math/Conversion support, or chart redesign. Duplicate months remain gaps with retained evidence; any change to that policy requires an explicit new decision.
-
-**Acceptance and validation:** Focused cases and rendered review cover the agreed remaining gaps. Notices preserve missing/zero distinctions and do not imply that every warning invalidates a saved value. Viewing continues to cause no source writes or weather retrieval.
+**Acceptance:** Focused projection, header, shared presentation, and native saved-workbench checks cover weather variants, invalid histories, grouped evidence, status lifecycle, and keyboard/themed/narrow presentation. Broader regression/release validation remains with PR review and CI/CD.
 
 ### P3 Compatible combinations
 
@@ -147,10 +145,10 @@ Do not defer deterministic source tests to acceptance slices or VIS10. Acceptanc
 
 ## Continuation
 
-- **Next slice:** P2 — Weather and quality hardening.
-- **Current state:** P1 is complete. Current behavior is owned by the foundation and workbench references linked above.
-- **Decisions for the next chat:** Refine remaining P2 weather/quality cases against implemented P1 behavior. Live rules and meter/predictor combinations remain P3; Math/Conversion support is excluded.
+- **Next slice:** P3 — Compatible combinations.
+- **Current state:** P1 and P2 are complete. Current behavior is owned by the foundation and workbench references linked above.
+- **Decisions for the next chat:** Refine live predictor rules and compatible meter/predictor rendering, shared date anchors, and cross-source units against the implemented behavior. Math/Conversion support is excluded.
 - **Blockers:** None identified. Later slices require refinement when reached.
-- **Outstanding acceptance:** P2–P4 and later source checkpoints remain open. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan.
+- **Outstanding acceptance:** P3/P4 and later source checkpoints remain open. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan.
 
-To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on P2 only. Inspect current source, refine the remaining weather/quality gaps, implement and validate the agreed slice, update the handoff, and stop before P3.”
+To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on P3 only. Inspect current source, refine compatible combinations and live-rule behavior, implement and validate the agreed slice, update the handoff, and stop before P4.”

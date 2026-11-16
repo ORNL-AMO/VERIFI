@@ -97,6 +97,14 @@ export interface VisualizationResolvedReference {
   readonly facilityGuid?: string;
 }
 
+/** Factual omitted-input evidence, grouped by resource and issue; never persisted or treated as a status finding. */
+export interface VisualizationOmission {
+  readonly resourceGuid: string;
+  readonly label: string;
+  readonly issue: string;
+  readonly readings: readonly string[];
+}
+
 export type VisualizationData =
   | { readonly kind: 'time-series'; readonly rows: readonly {
       readonly periodKey: string; readonly start: string; readonly end: string;
@@ -128,7 +136,7 @@ export interface VisualizationResolvedData {
   readonly periods: readonly ResolvedVisualizationPeriod[];
   readonly references: readonly VisualizationResolvedReference[];
   readonly provenance: readonly VisualizationProvenance[];
-  readonly quality: { readonly partial: boolean; readonly warnings: readonly string[] };
+  readonly quality: { readonly partial: boolean; readonly warnings: readonly string[]; readonly omissions?: readonly VisualizationOmission[] };
   readonly analysisFreshness?: 'current' | 'stale';
 }
 
