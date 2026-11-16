@@ -57,4 +57,22 @@ describe('workspace support-panel presentation', () => {
     const content = buildWorkspacePanelContent(input({ facility: { guid: 'facility-a', name: 'Plant A' }, route: { section: 'data', detail } }));
     expect(content.help[0]).toContain(detail === 'meters' ? 'Use Meters' : 'Use Meter Grouping');
   });
+
+  it.each([undefined, { name: 'Only plant' }])('provides visualization workbench guidance before generic workspace help (%j)', singleFacility => {
+    const content = buildWorkspacePanelContent(input({ route: { section: 'visualization', detail: 'workbench' }, singleFacility }));
+    const help = content.help.join(' ');
+    expect(help).toContain('Settings save automatically');
+    expect(help).toContain('Selected groups and facilities keep their identities');
+    expect(help).not.toMatch(/matching rule|rule anchors|empty .* filter/i);
+    expect(help).toContain('Portfolio periods follow the account calendar');
+    expect(help).toContain('Series on the same axis');
+    expect(help).toContain('Exact original periods, values and quality');
+    expect(help).not.toContain('Preview');
+  });
+
+  it('keeps detailed visualization guidance out of other workspace help', () => {
+    const dashboard = buildWorkspacePanelContent(input({ route: { section: 'visualization', detail: 'dashboard' }, singleFacility: { name: 'Only plant' } }));
+    expect(dashboard.help[0]).toContain('Only plant');
+    expect(dashboard.help.join(' ')).not.toContain('Matching rules');
+  });
 });

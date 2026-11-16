@@ -9,7 +9,7 @@ import { InventoryViewState } from '@app/v1/shared/inventory/inventory-view-stat
 import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { inventoryScopeBreadcrumbs } from '@app/v1/shared/page-identity/page-identity.component';
 import { VisualizationNavigationService } from '../visualization-navigation.service';
-import { visualizationFamilyChoices } from '../visualization-families';
+import { visualizationDataSourceChoices } from '../visualization-data-sources';
 import { LibraryLifecycle } from './lifecycle/library-lifecycle.service';
 import { DEFAULT_VISUALIZATION_FILTERS, VisualizationLibraryFilters,
   buildVisualizationLibrary, filterVisualizationLibrary, visualizationLibraryTile } from './visualization-library.models';
@@ -22,7 +22,7 @@ export class LibraryComponent {
   readonly lifecycle = inject(LibraryLifecycle);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly visualizations = inject(VisualizationNavigationService);
-  readonly families = visualizationFamilyChoices();
+  readonly dataSources = visualizationDataSourceChoices();
   readonly singleFacility = this.navigation.isSingleSiteWorkspace;
   readonly scopedFacilityGuid = computed(() => this.singleFacility() ? undefined : this.navigation.inventoryFacilityGuid());
   readonly facilityOnly = computed(() => !!this.scopedFacilityGuid());
@@ -34,7 +34,7 @@ export class LibraryComponent {
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
     scope: new FormControl<VisualizationLibraryFilters['scope']>('all', { nonNullable: true }),
-    family: new FormControl<VisualizationLibraryFilters['family']>('all', { nonNullable: true }),
+    sourceKind: new FormControl<VisualizationLibraryFilters['sourceKind']>('all', { nonNullable: true }),
     status: new FormControl<VisualizationLibraryFilters['status']>('all', { nonNullable: true }),
     sort: new FormControl<VisualizationLibraryFilters['sort']>('modified', { nonNullable: true })
   });
@@ -48,7 +48,7 @@ export class LibraryComponent {
   });
   readonly filteredEntries = computed(() => filterVisualizationLibrary(this.entries(), this.filters()));
   readonly tiles = computed(() => this.filteredEntries().map(entry => visualizationLibraryTile(entry,
-    this.visualizations.workbenchRoute(entry.record.accountId, entry.record.guid), this.visualizations.libraryRoute(entry.record.accountId))));
+    this.visualizations.workbenchRoute(entry.record.accountId, entry.record.guid), this.visualizations.dashboardRoute(entry.record.accountId))));
   readonly inventory = new InventoryViewState(this.browseKey, this.tiles, computed(() => this.entries().map(entry => entry.record.guid)),
     computed(() => ({ ...this.filters(), facilityGuid: this.scopedFacilityGuid() })), this.workspace.isReady);
   readonly browseReady = computed(() => !!this.browseKey() && this.inventory.ready());

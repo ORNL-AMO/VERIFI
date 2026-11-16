@@ -8,7 +8,7 @@ export const visualizationAccount = { ...getNewIdbAccount(), id: 1, guid: 'accou
 export const visualizationFacility = { ...getNewIdbFacility(visualizationAccount), id: 1, guid: 'facility-a', name: 'Plant A' };
 export function visualizationRecord() {
   return { ...getNewIdbSavedVisualization(createVisualizationDefinition('My energy', visualizationAccount.guid,
-    { kind: 'facility', facilityGuid: visualizationFacility.guid }, 'utility')), id: 1, guid: 'visualization-a' };
+    { kind: 'fixed', facilityGuids: [visualizationFacility.guid] }, 'utility')), id: 1, guid: 'visualization-a' };
 }
 export function visualizationSnapshot(): AccountWorkspaceSnapshot {
   return { account: visualizationAccount, facilities: [visualizationFacility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],

@@ -81,7 +81,7 @@ describe('saved utility journey across native browser boundaries', () => {
   });
 
   function definition(accountGuid = accountA.guid): VisualizationDefinition {
-    const original = utilityVisualizationFixture({ kind: 'facility', facilityGuid: accountGuid === accountA.guid ? facilityA.guid : facilityB.guid });
+    const original = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: [accountGuid === accountA.guid ? facilityA.guid : facilityB.guid] });
     const meterGuid = accountGuid === accountA.guid ? 'meter-a' : 'meter-b';
     const source = original.sources[0] as UtilityVisualizationSource;
     const { resourceGuid: _fixedResource, ...allMatching } = original.series[0];
@@ -157,7 +157,7 @@ describe('saved utility journey across native browser boundaries', () => {
     const series = [{ ...base.series[0], metric: 'location-emissions' }];
     const workerMessages = vi.spyOn(Worker.prototype, 'postMessage');
     const native = await createSaved({ ...base, sources: [{ ...emissions, dataMode: 'billing-period', aggregation: 'none' }], series,
-      chart: { kind: 'time-series', type: 'line', interval: 'native', stack: 'none' } });
+      chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'native', stack: 'none' } });
     const nativePreview = mount(native); await expectValue(nativePreview, expected);
     expect(workerMessages).not.toHaveBeenCalled(); nativePreview.destroy();
     const monthly = await createSaved({ ...base, sources: [emissions], series });
@@ -179,10 +179,19 @@ describe('saved utility journey across native browser boundaries', () => {
     expect((first.nativeElement as HTMLElement).querySelector('tbody')?.textContent).toContain('Factory main');
     const workerCount = workerMessages.mock.calls.length;
 
+    const styled = decoded(saved);
+    const itemTypeEdit: VisualizationDefinition = { ...styled, series: styled.series.map(series => ({ ...series,
+      overrides: series.overrides?.map(override => ({ ...override, traceType: 'bar' as const })) })) };
+    render(first, { ...saved, definition: itemTypeEdit });
+    await expectValue(first, 10);
+    const typedView = first.componentInstance.preview.state();
+    expect(typedView.state === 'ready' && (typedView.presentation.inputs.model as import('../time-series/time-series.models').TimeSeriesModel).traces[0].type).toBe('bar');
+    expect(workerMessages.mock.calls.length).toBe(workerCount);
+
     const beforeEdit = decoded(saved);
     const edited: VisualizationDefinition = { ...beforeEdit, appearance: { ...beforeEdit.appearance, title: 'Saved source energy' },
       sources: beforeEdit.sources.map(source => source.kind === 'utility' ? { ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } } : source),
-      chart: { kind: 'time-series', type: 'bar', interval: 'monthly', stack: 'none' } };
+      chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } };
     // Local presentation/unit edits reproject existing canonical results before any durable workspace reload.
     render(first, { ...saved, definition: edited });
     await expectValue(first, 0.01);
@@ -194,7 +203,9 @@ describe('saved utility journey across native browser boundaries', () => {
     const reopened = store.savedVisualizations().find(record => record.guid === saved.guid)!;
     const second = mount(reopened);
     await expectValue(second, 0.01);
-    expect(decoded(reopened)).toMatchObject({ version: 2, chart: { type: 'bar' }, series: [{ overrides: [{ resourceGuid: 'meter-a', visible: true, label: 'Factory main' }] }] });
+    expect(decoded(reopened)).toMatchObject({ version: 2,
+      chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' },
+      series: [{ overrides: [{ resourceGuid: 'meter-a', visible: true, label: 'Factory main' }] }] });
     const beforeReadingWorkerCount = workerMessages.mock.calls.length;
 
     const bill = store.meterData().find(item => item.guid === 'reading-a')!;

@@ -14,7 +14,7 @@ export function resolveUtilitySelection(snapshot: AccountWorkspaceSnapshot, scop
   source: UtilityVisualizationSource): UtilitySelection {
   const references: VisualizationResolvedReference[] = [], missing: UtilitySelection['missing'][number][] = [];
   const owned = (item: { accountId: string; facilityId?: string }) => item.accountId === snapshot.account.guid
-    && (scope.kind === 'portfolio' || item.facilityId === scope.facilityGuid);
+    && !!item.facilityId && scope.facilityGuids.includes(item.facilityId);
   const add = (kind: VisualizationResolvedReference['kind'], id: string, facilityGuid?: string) => {
     if (!references.some(ref => ref.kind === kind && ref.id === id)) references.push({ kind, id, accountGuid: snapshot.account.guid, ...(facilityGuid ? { facilityGuid } : {}) });
   };
@@ -25,10 +25,12 @@ export function resolveUtilitySelection(snapshot: AccountWorkspaceSnapshot, scop
   const selection = source.selection;
   let meters = snapshot.meters.filter(owned);
   if (!selection) return { meters: [], references, missing };
+  if (source.selectionMode === 'source' && (selection.kind !== 'rule' || !selection.filter.utilitySources?.length))
+    return { meters: [], references, missing };
   const requireResources = (kind: 'facility' | 'meter' | 'meter-group', ids: readonly string[]) => {
     for (const id of new Set(ids)) {
       const item = kind === 'facility' ? snapshot.facilities.find(f => f.guid === id && f.accountId === snapshot.account.guid
-        && (scope.kind === 'portfolio' || f.guid === scope.facilityGuid))
+        && scope.facilityGuids.includes(f.guid))
         : (kind === 'meter' ? snapshot.meters : snapshot.meterGroups).find(item => item.guid === id && owned(item));
       if (!item) missing.push({ kind, id }); else add(kind, id, kind === 'facility' ? id : (item as IdbUtilityMeter).facilityId);
     }

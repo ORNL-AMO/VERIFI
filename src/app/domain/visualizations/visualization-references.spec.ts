@@ -7,7 +7,29 @@ import { VisualizationDefinition } from './visualization-definition';
 import { remapVisualizationDefinition, visualizationReferenceKey, visualizationReferences } from './visualization-references';
 
 describe('saved visualization reference mapping', () => {
-  it('preserves the resource namespace declared by a legacy grouping even when the configuration is unavailable', () => {
+  it.each(['meter', 'group', 'facility'] as const)('transfers resource-bearing %s provider selectors without losing hidden styling', groupBy => {
+    const base = utilityVisualizationFixture(), sourceId = 'utility:main';
+    const { resourceGuid: _resource, ...series } = base.series[0];
+    const kind = groupBy === 'group' ? 'meter-group' : groupBy;
+    const original: VisualizationDefinition = { ...base, sources: base.sources.map(source => source.kind === 'utility'
+      ? { ...source, id: sourceId, groupBy } : source), series: [{ ...series, sourceId, overrides: [
+        { seriesId: `${sourceId}:old`, visible: false, color: '#123456', lineStyle: 'dotted', order: 0 },
+        { seriesId: `${sourceId}:missing`, visible: false },
+        { seriesId: `${sourceId}:foreign`, accountGuid: 'foreign-account', visible: false }
+      ] }] };
+    const first = remapVisualizationDefinition(original, 'account-b', { [kind]: { old: 'new' } });
+    expect(first.definition.series[0].overrides).toEqual([
+      { ...original.series[0].overrides![0], seriesId: `${sourceId}:new`, accountGuid: 'account-b' },
+      { ...original.series[0].overrides![1], accountGuid: 'account-a' }, original.series[0].overrides![2]
+    ]);
+    const metadata = [{ id: `${sourceId}:new`, sourceId, resourceGuid: 'new', metric: 'energy', label: 'New', unit: 'kWh', dimension: 'energy', additive: true }];
+    expect(resolveVisualizationSeries(first.definition, metadata)).toEqual([]);
+    expect(resolveVisualizationSeries(first.definition, metadata, true)[0].selected).toMatchObject({ visible: false, color: '#123456', lineStyle: 'dotted' });
+    const second = remapVisualizationDefinition(first.definition, 'account-c', { [kind]: { new: 'newer', missing: 'collision', foreign: 'collision' } });
+    expect(second.definition.series[0].overrides?.[0]).toMatchObject({ seriesId: `${sourceId}:newer`, accountGuid: 'account-c' });
+    expect(second.definition.series[0].overrides?.slice(1)).toEqual(first.definition.series[0].overrides?.slice(1));
+  });
+  it('preserves the resource namespace declared by its grouping even when the configuration is unavailable', () => {
     const base = utilityVisualizationFixture();
     const definition: VisualizationDefinition = { ...base, sources: base.sources.map(source => source.kind === 'utility'
       ? { ...source, aggregation: 'none', groupBy: 'group' } : source), series: [{ ...base.series[0], resourceGuid: 'group-a' }] };
@@ -64,7 +86,7 @@ describe('saved visualization reference mapping', () => {
     const base = utilityVisualizationFixture();
     const { resourceGuid, ...wildcard } = base.series[0];
     const sourceId = 'utility:main';
-    const original: VisualizationDefinition = { ...base, sources: [{ id: sourceId, kind: 'utility', measure: 'energy',
+    const original: VisualizationDefinition = { ...base, sources: [{ selectionMode: 'rule' as const, id: sourceId, kind: 'utility', measure: 'energy',
       aggregation: 'sum', dataMode: 'calendarized', groupBy: 'group', selection: { kind: 'rule', resource: 'meter', filter: {} } }],
       series: [{ ...wildcard, sourceId, overrides: [{ seriesId: `${sourceId}:unassigned:facility-a`,
         visible: false, color: '#123456', label: 'Hidden other meters', axis: 'right', lineStyle: 'dashed', order: 0 }] }] };
@@ -93,7 +115,7 @@ describe('saved visualization reference mapping', () => {
   it('keeps unmapped or foreign Unassigned utility appearances dormant through later transfers', () => {
     const base = utilityVisualizationFixture();
     const { resourceGuid, ...wildcard } = base.series[0];
-    const original: VisualizationDefinition = { ...base, sources: [{ id: 'utility', kind: 'utility', measure: 'energy',
+    const original: VisualizationDefinition = { ...base, sources: [{ selectionMode: 'rule' as const, id: 'utility', kind: 'utility', measure: 'energy',
       aggregation: 'sum', dataMode: 'calendarized', groupBy: 'group', selection: { kind: 'rule', resource: 'meter', filter: {} } }],
       series: [{ ...wildcard, overrides: [
         { seriesId: 'utility:unassigned:facility-a', visible: false, order: 0 },

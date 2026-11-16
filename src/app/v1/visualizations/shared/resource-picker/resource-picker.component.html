@@ -1,0 +1,20 @@
+<section class="resource-picker" [attr.aria-label]="label()">
+  @if (showSearch()) {
+    <label class="resource-picker__search"><span class="visually-hidden">Find {{ label() }}</span>
+      <app-ui-icon name="search"/><input type="search" class="v1-input" [formControl]="filter" [placeholder]="'Find ' + label().toLowerCase()" autocomplete="off">
+    </label>
+  }
+  <div class="visualization-choices resource-picker__options" role="group" [attr.aria-label]="'Choose ' + label().toLowerCase()">
+    <button type="button" class="visualization-choice resource-picker__all" role="checkbox" [disabled]="disabled() || control.disabled || !options().length" [attr.aria-checked]="allSelected()" (click)="toggleAll()">
+      <app-ui-icon [name]="allSelected() ? 'success' : 'circle'" [size]="16"/><app-ui-icon name="checklist"/><span>Include All</span>
+    </button>
+    @for (option of filtered(); track option.guid) {
+      <button type="button" class="visualization-choice resource-picker__option" role="checkbox" [class.resource-picker__option--unavailable]="option.unavailable" [disabled]="disabled() || control.disabled" [attr.aria-checked]="option.selected" (click)="toggle(option.guid)">
+        <app-ui-icon [name]="option.selected ? 'success' : 'circle'" [size]="16"/><app-ui-icon [name]="option.unavailable ? 'warning' : (option.icon ?? icon())"/><span>{{ option.label }}@if (option.detail) { <small>{{ option.detail }}</small> }</span>
+      </button>
+    } @empty {
+      <p role="status">{{ query() ? 'No matching resources.' : 'No resources available in this scope.' }}</p>
+    }
+  </div>
+  @if (query()) { <button type="button" class="v1-btn v1-btn--quiet resource-picker__clear" (click)="filter.setValue('')">Clear search</button> }
+</section>

@@ -6,13 +6,14 @@ import type { PreviewPresentation, VisualizationPreviewPresenter } from '../prev
 import { TimeSeriesChartComponent } from './chart/time-series-chart.component';
 import type { TimeSeriesModel, TimeSeriesPoint, TimeSeriesTrace } from './time-series.models';
 import { observationText } from './time-series-options';
+import { visualizationSeriesStyle } from '../shared/series-style';
 
 @Injectable()
 export class TimeSeriesPresenter implements VisualizationPreviewPresenter {
   readonly kind = 'time-series' as const;
   readonly component = TimeSeriesChartComponent;
   prepare(definition: VisualizationDefinition, evidence: readonly VisualizationSourceEvidence[], signal: AbortSignal): PreviewPresentation {
-    if (signal.aborted) throw new Error('Preview canceled.');
+    if (signal.aborted) throw new Error('Chart canceled.');
     const model = prepareTimeSeries(definition, evidence);
     const details = { caption: `${model.title}: original saved-data periods, values and quality`,
       columns: ['Series', 'Role', 'Start', 'End', 'Value / quality'],
@@ -24,18 +25,20 @@ export class TimeSeriesPresenter implements VisualizationPreviewPresenter {
 /** Align declared comparison intervals, retaining every observation's original civil dates. */
 export function prepareTimeSeries(definition: VisualizationDefinition, evidence: readonly VisualizationSourceEvidence[]): TimeSeriesModel {
   const chart = definition.chart;
-  if (chart?.kind !== 'time-series' || !['line', 'bar'].includes(chart.type) || chart.stack !== 'none') throw new Error('Choose an unstacked line or bar chart.');
+  if (chart?.kind !== 'time-series' || !['line', 'bar'].includes(chart.defaultTraceType) || chart.stack !== 'none') throw new Error('Choose unstacked line or bar traces.');
   const resolved = evidence.map(entry => {
     if (entry.resolution.state !== 'ready' || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Resolve compatible time-series sources before preparing a chart.');
     return { evidence: entry, result: entry.resolution.resolved, data: entry.resolution.resolved.data };
   });
   const selected = resolveVisualizationSeries(definition, resolved.flatMap(entry => entry.result.series));
+  if (selected.some(item => !['line', 'bar'].includes(item.selected.traceType ?? chart.defaultTraceType)))
+    throw new Error('Choose unstacked line or bar traces.');
   for (const axis of ['left', 'right'] as const) {
     const signatures = selected.filter(item => item.selected.axis === axis).map(item => `${item.metadata.dimension}:${item.metadata.unit}:${item.metadata.currency ?? ''}:${item.metadata.energyTreatment ?? ''}`);
     if (new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
   }
   const warnings = new Set(resolved.flatMap(entry => entry.result.quality.warnings));
-  if (resolved.some(entry => entry.result.quality.partial)) warnings.add('This chart includes partial coverage. Inspect the original periods and omitted contributions in Source data.');
+  if (resolved.some(entry => entry.result.quality.partial)) warnings.add('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
   const contributionOwners = new Map<string, Set<string>>();
   for (const item of selected) for (const key of item.metadata.contributionKeys ?? []) {
     const owners = contributionOwners.get(key) ?? new Set<string>(); owners.add(item.metadata.id); contributionOwners.set(key, owners);
@@ -44,7 +47,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   const starts = (role: 'primary' | 'comparison') => resolved.flatMap(entry => entry.result.periods.filter(period => period.role === role).map(period => period.start)).sort();
   const primaryStart = starts('primary')[0], comparisonStart = starts('comparison')[0];
   if (definition.comparison.kind !== 'none' && (!primaryStart || !comparisonStart || chart.interval === 'native')) throw new Error('These native periods cannot be aligned safely for comparison.');
-  if (definition.comparison.kind !== 'none') warnings.add(`Comparison observations beginning ${comparisonStart} are aligned by period offset to ${primaryStart}. Source data retains their original dates.`);
+  if (definition.comparison.kind !== 'none') warnings.add(`Comparison observations beginning ${comparisonStart} are aligned by period offset to ${primaryStart}. Accessible values retain their original dates.`);
   const monthIndex = (value: string) => Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7)) - 1;
   const primaryMonth = primaryStart ? monthIndex(primaryStart) : 0, comparisonMonth = comparisonStart ? monthIndex(comparisonStart) : 0;
   const slots = new Map<string, { key: string; label: string; order: number }>();
@@ -65,9 +68,9 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
         return { slot: key, start: row.start, end: row.end, observation };
       });
       if (!points.length) continue;
-      const style = stableSeriesStyle(item.metadata.id);
+      const style = visualizationSeriesStyle(item.metadata.id);
       const label = item.selected.label ?? item.metadata.label;
-      traces.push({ id: `${item.metadata.id}:${role}`, label: role === 'comparison' ? `${label} (comparison)` : label,
+      traces.push({ id: `${item.metadata.id}:${role}`, type: (item.selected.traceType ?? chart.defaultTraceType) as 'line' | 'bar', label: role === 'comparison' ? `${label} (comparison)` : label,
         unit: item.metadata.unit, axis: item.selected.axis, color: item.selected.color ?? style.color,
         lineStyle: item.selected.lineStyle ?? style.lineStyle, role, points });
     }
@@ -83,11 +86,4 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
 function monthLabel(index: number, yearly: boolean): string {
   const year = Math.floor(index / 12), month = index % 12;
   return yearly ? `${year}-${String(month + 1).padStart(2, '0')}` : new Date(year, month, 1, 12).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-}
-
-/** Identity-derived slots remain stable when a live selection gains an earlier-sorting GUID. */
-function stableSeriesStyle(identity: string): { color: string; lineStyle: 'solid' | 'dashed' | 'dotted' } {
-  let hash = 2166136261;
-  for (let index = 0; index < identity.length; index++) hash = Math.imul(hash ^ identity.charCodeAt(index), 16777619) >>> 0;
-  return { color: `var(--v1-chart-series-${hash % 12 + 1})`, lineStyle: (['solid', 'dashed', 'dotted'] as const)[Math.floor(hash / 12) % 3] };
 }

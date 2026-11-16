@@ -4,12 +4,12 @@ import { utilityCapabilities, utilityChartSupport } from './utility-capabilities
 
 describe('utility capability boundaries', () => {
   const source = utilityVisualizationFixture().sources[0] as UtilityVisualizationSource;
-  const chart = { kind: 'time-series' as const, type: 'line' as const, interval: 'monthly' as const, stack: 'none' as const };
+  const chart = { kind: 'time-series' as const, defaultTraceType: 'line' as const, interval: 'monthly' as const, stack: 'none' as const };
   it('advertises only implemented shapes and exact chart settings', () => {
     expect(utilityCapabilities(source).shapes).toEqual(['time-series']);
     expect(utilityChartSupport(source, chart).state).toBe('supported');
     expect(utilityChartSupport(source, { ...chart, stack: 'absolute' }).state).toBe('unsupported');
-    expect(utilityChartSupport(source, { ...chart, type: 'area' }).state).toBe('unsupported');
+    expect(utilityChartSupport(source, { ...chart, defaultTraceType: 'area' }).state).toBe('unsupported');
   });
   it('requires native individual charge observations and disallows calendarized charges', () => {
     const charge = { ...source, measure: 'charge' as const };

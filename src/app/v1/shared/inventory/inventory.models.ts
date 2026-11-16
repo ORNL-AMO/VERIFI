@@ -149,7 +149,8 @@ export interface InventoryReportSnapshot {
 export interface InventoryView { readonly page: number; readonly detail?: InventoryDetailLevel; readonly overrides: Readonly<Record<string, InventoryDetailLevel>>; }
 
 export interface InventoryVisualizationSnapshot {
-  readonly typeLabel: string;
+  readonly scope: 'account' | 'facility';
+  readonly dataSources: readonly { readonly label: string; readonly icon: IconName }[];
   readonly scopeLabel: string;
   readonly periodLabel: string;
   readonly chartLabel: string;

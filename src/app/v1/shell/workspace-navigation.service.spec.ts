@@ -106,12 +106,12 @@ describe('WorkspaceNavigationService', () => {
     expect(workspaceService.selectAccount).toHaveBeenCalledWith('account-b');
   });
 
-  it('switches from a visualization workbench to the target library without retargeting saved identity', async () => {
+  it('switches from a visualization workbench to the target Dashboard without retargeting saved identity', async () => {
     router.url = '/v1/workspace/account/account-a/visualization/workbench/chart-a';
     router.events.next(new NavigationEnd(1, router.url, router.url));
     workspaceStore.savedVisualizations.mockReturnValue([{ guid: 'chart-a', accountId: 'account-a', facilityId: 'facility-a' }]);
     await service.changeFacilityScope({ kind: 'facility', facilityGuid: 'facility-b' });
-    expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'visualization', 'library'], { queryParams: { facility: 'facility-b' } });
+    expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'account', 'account-a', 'visualization', 'dashboard'], { queryParams: { facility: 'facility-b' } });
     expect(service.activeVisualizationGuid()).toBe('chart-a');
     expect(service.headerScope()).toEqual({ kind: 'facility', facilityGuid: 'facility-a' });
   });

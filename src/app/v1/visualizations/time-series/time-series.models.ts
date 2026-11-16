@@ -9,6 +9,7 @@ export interface TimeSeriesPoint {
 }
 export interface TimeSeriesTrace {
   readonly id: string;
+  readonly type: 'line' | 'bar';
   readonly label: string;
   readonly unit: string;
   readonly axis: 'left' | 'right';

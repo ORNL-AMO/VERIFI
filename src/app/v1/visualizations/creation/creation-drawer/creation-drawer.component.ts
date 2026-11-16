@@ -3,20 +3,21 @@ import { Component, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainer
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { VISUALIZATION_CHART_CHOICES } from '../../visualization-charts';
 import { LibraryLifecycle } from '../../library/lifecycle/library-lifecycle.service';
-import { visualizationFamilyChoices } from '../../visualization-families';
+import { visualizationDataSourceChoices } from '../../visualization-data-sources';
 
 @Component({ selector: 'app-visualization-creation', standalone: false,
   templateUrl: './creation-drawer.component.html', styleUrls: ['./creation-drawer.component.css', '../../../shared/creation-flow/creation-flow.css'] })
 export class CreationComponent implements OnDestroy {
   readonly lifecycle = inject(LibraryLifecycle);
-  readonly families = visualizationFamilyChoices();
-  get charts(): typeof VISUALIZATION_CHART_CHOICES { return VISUALIZATION_CHART_CHOICES; }
+  readonly dataSources = visualizationDataSourceChoices();
+  readonly charts = VISUALIZATION_CHART_CHOICES.filter(chart => !['area', 'breakdown-bar'].includes(chart.value));
   private readonly stepHeading = viewChild<ElementRef<HTMLElement>>('stepHeading');
   private readonly visualizationName = viewChild<ElementRef<HTMLInputElement>>('visualizationName');
   private readonly modal = inject(ModalPortalService);
   private readonly container = inject(ViewContainerRef);
   @ViewChild('deleteConfirmation', { static: true }) private deleteConfirmation!: TemplateRef<unknown>;
   @ViewChild('discardConfirmation', { static: true }) private discardConfirmation!: TemplateRef<unknown>;
+  @ViewChild('decisionConfirmation', { static: true }) private decisionConfirmation!: TemplateRef<unknown>;
   private portal?: TemplatePortal;
   constructor() {
     let focusedStep: string | undefined;
@@ -33,7 +34,7 @@ export class CreationComponent implements OnDestroy {
       untracked(() => {
         this.hide();
         if (confirmation) {
-          this.portal = new TemplatePortal(confirmation === 'delete' ? this.deleteConfirmation : this.discardConfirmation, this.container);
+          this.portal = new TemplatePortal(confirmation === 'delete' ? this.deleteConfirmation : confirmation === 'decision' ? this.decisionConfirmation : this.discardConfirmation, this.container);
           this.modal.show(this.portal, { blockWorkspace: true });
         }
       });

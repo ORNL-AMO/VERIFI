@@ -1,37 +1,62 @@
 @let current = value();
 <fieldset [formGroup]="form" class="period-settings">
   <legend>Periods and comparisons</legend>
-    @if (conflict()) {
-      <div role="alert">
-        <p>Saved settings changed while your local input was incomplete. Review which settings to keep before continuing.</p>
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useSaved()">Use saved settings</button>
-        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled()" (click)="keepLocal()">Keep local input</button>
-      </div>
-    }
-  <label>Saved period<select class="v1-select" formControlName="kind">
-    <option value="all-history">All saved history</option><option value="fixed">Fixed dates</option><option value="rolling">Rolling period</option>
-    <option value="fiscal-year">Pinned fiscal year</option><option value="latest-saved-year">Latest saved fiscal year</option>
-  </select></label>
+  @if (conflict()) {
+    <div role="alert">
+      <p>Saved settings changed while your local input was incomplete. Review which settings to keep before continuing.</p>
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useSaved()">Use saved settings</button>
+      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled()" (click)="keepLocal()">Keep local input</button>
+    </div>
+  }
+  <span class="visualization-control-label">Saved period</span>
+  <div class="visualization-choices" role="group" aria-label="Saved period">
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'all-history'" (click)="selectChoice(form.controls.kind, 'all-history')"><app-ui-icon name="calendar"/>All history</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'fixed'" (click)="selectChoice(form.controls.kind, 'fixed')"><app-ui-icon name="calendarCheck"/>Fixed dates</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'rolling'" (click)="selectChoice(form.controls.kind, 'rolling')"><app-ui-icon name="clock"/>Rolling period</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'fiscal-year'" (click)="selectChoice(form.controls.kind, 'fiscal-year')"><app-ui-icon name="calendar"/>Pinned fiscal year</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'latest-saved-year'" (click)="selectChoice(form.controls.kind, 'latest-saved-year')"><app-ui-icon name="calendarCheck"/>Latest fiscal year</button>
+  </div>
   @if (current.kind === 'fixed') {
     <label>Start date<input type="date" formControlName="start"></label><label>End date<input type="date" formControlName="end"></label>
   }
   @if (current.kind === 'fixed' || current.kind === 'rolling') {
-    <label>Calendar basis<select class="v1-select" formControlName="basis"><option value="calendar">Calendar</option><option value="fiscal">Owner's fiscal calendar</option></select></label>
+  <span class="visualization-control-label">Calendar basis</span>
+  <div class="visualization-buttons" role="group" aria-label="Calendar basis">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.basis === 'calendar'" (click)="selectChoice(form.controls.basis, 'calendar')">Calendar</button>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.basis === 'fiscal'" (click)="selectChoice(form.controls.basis, 'fiscal')">Owner’s fiscal calendar</button>
+  </div>
   }
   @if (current.kind === 'rolling') {
     <label>Number of periods<input type="number" min="1" step="1" formControlName="count"></label>
-    <label>Period unit<select class="v1-select" formControlName="unit"><option value="month">Months</option><option value="year">Years</option></select></label>
-    <label>Anchor<select class="v1-select" formControlName="anchor"><option value="latest-data">Newest eligible selected data</option><option value="calendar">Current calendar date</option></select></label>
+  <span class="visualization-control-label">Period unit</span>
+  <div class="visualization-buttons" role="group" aria-label="Period unit">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.unit === 'month'" (click)="selectChoice(form.controls.unit, 'month')">Months</button>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.unit === 'year'" (click)="selectChoice(form.controls.unit, 'year')">Years</button>
+  </div>
+  <span class="visualization-control-label">Anchor</span>
+  <div class="visualization-buttons" role="group" aria-label="Anchor">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.anchor === 'latest-data'" (click)="selectChoice(form.controls.anchor, 'latest-data')">Newest selected data</button>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.anchor === 'calendar'" (click)="selectChoice(form.controls.anchor, 'calendar')">Current date</button>
+  </div>
     <label class="period-settings__check"><input type="checkbox" formControlName="includeIncomplete">Include the incomplete current period</label>
   }
   @if (current.kind === 'fiscal-year') { <label>Fiscal year<input type="number" min="1" max="9999" step="1" formControlName="year"></label> }
-  <label>Comparison<select class="v1-select" formControlName="comparison"><option value="none">None</option><option value="previous-period">Previous period</option><option value="previous-year">Previous year</option><option value="custom">Custom dates</option></select></label>
+  <span class="visualization-control-label">Comparison</span>
+  <div class="visualization-choices" role="group" aria-label="Comparison">
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'none'" (click)="selectChoice(form.controls.comparison, 'none')"><app-ui-icon name="circle"/>None</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'previous-period'" (click)="selectChoice(form.controls.comparison, 'previous-period')"><app-ui-icon name="arrowLeft"/>Previous period</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'previous-year'" (click)="selectChoice(form.controls.comparison, 'previous-year')"><app-ui-icon name="calendar"/>Previous year</button>
+    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'custom'" (click)="selectChoice(form.controls.comparison, 'custom')"><app-ui-icon name="calendarCheck"/>Custom dates</button>
+  </div>
   @if (current.comparison === 'previous-year') {
-    <label>Comparison calendar<select class="v1-select" formControlName="comparisonBasis"><option value="calendar">Calendar year</option><option value="fiscal">Owner's fiscal year</option></select></label>
+  <span class="visualization-control-label">Comparison calendar</span>
+  <div class="visualization-buttons" role="group" aria-label="Comparison calendar">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.comparisonBasis === 'calendar'" (click)="selectChoice(form.controls.comparisonBasis, 'calendar')">Calendar year</button>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.comparisonBasis === 'fiscal'" (click)="selectChoice(form.controls.comparisonBasis, 'fiscal')">Owner’s fiscal year</button>
+  </div>
   }
   @if (current.comparison === 'custom') {
     <label>Comparison start<input type="date" formControlName="comparisonStart"></label><label>Comparison end<input type="date" formControlName="comparisonEnd"></label>
   }
   @if (issue(); as message) { <p role="alert">{{ message }} Your input is retained until corrected or discarded.</p> }
-  <p>Portfolio charts follow the account calendar; facility charts follow the owning facility. The preview shows resolved dates and retains whole native observations. Unsupported comparisons remain explained.</p>
 </fieldset>

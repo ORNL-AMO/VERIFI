@@ -6,12 +6,11 @@ import { PreviewRegistry } from '../preview/preview-registry';
 import { VisualizationsModule } from '../visualizations.module';
 import { visualizationSnapshot } from '../testing/visualization-test-fixtures';
 import { UtilitySourceProvider } from './utility-source-provider.service';
-import { UtilitySourceEditorComponent } from './editors/source-editor/utility-source-editor.component';
 import { TimeSeriesPresenter } from '../time-series/time-series.presenter';
 
 describe('production utility feature composition', () => {
   afterEach(() => TestBed.resetTestingModule());
-  it('registers provider, source editor, dates and chart presenter without calculation demand', () => {
+  it('registers provider, dates and chart presenter without calculation demand', () => {
     const store = new AccountWorkspaceStore(); store.publish(visualizationSnapshot());
     const calendarizeBase = vi.fn();
     TestBed.configureTestingModule({ imports: [VisualizationsModule], providers: [
@@ -19,7 +18,6 @@ describe('production utility feature composition', () => {
     ] });
     const registry = TestBed.inject(PreviewRegistry);
     expect(registry.provider('utility')).toBeInstanceOf(UtilitySourceProvider);
-    expect(registry.editor('utility')?.component).toBe(UtilitySourceEditorComponent);
     expect(registry.presenter('time-series')).toBeInstanceOf(TimeSeriesPresenter);
     expect(registry.dates).toBeDefined(); expect(calendarizeBase).not.toHaveBeenCalled();
   });

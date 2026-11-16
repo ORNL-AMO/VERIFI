@@ -1,4 +1,4 @@
-import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { normalizeVisualizationDefinition, type VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 
 export type VisualizationConflictChoice = 'local' | 'saved';
 export type VisualizationConflictChoices = Readonly<Record<string, VisualizationConflictChoice>>;
@@ -19,10 +19,7 @@ export function visualizationIntentEqual(left: unknown, right: unknown): boolean
 }
 
 export function normalizeVisualizationIntent(value: VisualizationDefinition): VisualizationDefinition {
-  const title = value.appearance.title?.trim();
-  return { ...structuredClone(value), name: value.name.trim(), appearance: {
-    legend: value.appearance.legend, ...(title ? { title } : {})
-  } };
+  return normalizeVisualizationDefinition(value);
 }
 
 /** Configuration is one group: merging its source/series topology piecemeal can invent meaning. */
@@ -35,8 +32,8 @@ export function reconcileVisualizationIntent(base: VisualizationDefinition, loca
     { id: 'name' as const, label: 'Name', get: (value: VisualizationDefinition) => value.name },
     { id: 'title' as const, label: 'Display title', get: (value: VisualizationDefinition) => value.appearance.title },
     { id: 'legend' as const, label: 'Legend', get: (value: VisualizationDefinition) => value.appearance.legend },
-    { id: 'configuration' as const, label: 'Sources, periods, series, and chart settings', get: (value: VisualizationDefinition) => ({
-      sources: value.sources, period: value.period, comparison: value.comparison, series: value.series, chart: value.chart
+    { id: 'configuration' as const, label: 'Facilities, sources, periods, series, and chart settings', get: (value: VisualizationDefinition) => ({
+      facilitySelection: value.facilitySelection, sources: value.sources, period: value.period, comparison: value.comparison, series: value.series, chart: value.chart
     }) }
   ];
   const selected = new Map<string, unknown>();
@@ -55,7 +52,7 @@ export function reconcileVisualizationIntent(base: VisualizationDefinition, loca
     selected.set(group.id, chosen); baselines.set(group.id, baseline);
   }
   const compose = (values: Map<string, unknown>): VisualizationDefinition => {
-    const configuration = values.get('configuration') as Pick<VisualizationDefinition, 'sources' | 'period' | 'comparison' | 'series' | 'chart'>;
+    const configuration = values.get('configuration') as Pick<VisualizationDefinition, 'facilitySelection' | 'sources' | 'period' | 'comparison' | 'series' | 'chart'>;
     const { chart: _oldChart, ...owner } = saved;
     const { chart, ...settings } = configuration;
     const title = values.get('title') as string | undefined;

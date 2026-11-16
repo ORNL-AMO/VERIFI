@@ -35,6 +35,13 @@ describe('saved visualization owner deletion in Chromium', () => {
     expect(await harness.getAll('facilities')).toEqual([accountBFixture.facility]);
   });
 
+  it('derives live All ownership from the pre-delete catalog instead of stale envelope metadata', async () => {
+    const single = { ...saved('live-all', 'account-a'), facilityId: 'facility-b', definition: { ...utilityVisualizationFixture(), facilitySelection: { kind: 'all' as const } } };
+    await harness.seed({ savedVisualizations: [single] });
+    await deletion.deleteFacility(accountAFixture.facility as unknown as IdbFacility, 'account-a');
+    expect((await harness.getAll('savedVisualizations')).some(item => item.guid === 'live-all')).toBe(false);
+  });
+
   it('deletes all account-owned charts without touching another account', async () => {
     await deletion.deleteAccount(accountAFixture.account as unknown as IdbAccount);
     await harness.reopen();
@@ -62,6 +69,6 @@ describe('saved visualization owner deletion in Chromium', () => {
 function saved(guid: string, accountId: string, facilityId?: string): IdbSavedVisualization {
   return { guid, accountId, ...(facilityId ? { facilityId } : {}), recordVersion: 1, revision: 1,
     createdDate: new Date('2026-11-11T00:00:00.000Z'), modifiedDate: new Date('2026-11-11T00:00:00.000Z'),
-    definition: facilityId ? createVisualizationDefinition(guid, accountId, { kind: 'facility', facilityGuid: facilityId }, 'utility')
-      : { ...utilityVisualizationFixture(), accountGuid: accountId } };
+    definition: facilityId ? createVisualizationDefinition(guid, accountId, { kind: 'fixed', facilityGuids: [facilityId] }, 'utility')
+      : { ...utilityVisualizationFixture(), accountGuid: accountId, facilitySelection: { kind: 'fixed', facilityGuids: [accountId === 'account-a' ? 'facility-a' : 'facility-b', 'missing-second-facility'] } } };
 }

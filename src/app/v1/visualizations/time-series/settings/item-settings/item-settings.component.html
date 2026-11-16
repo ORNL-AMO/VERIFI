@@ -1,0 +1,33 @@
+@if (itemValue(); as item) {
+  @let id = nodeId();
+  @let current = value();
+  <app-visualization-decision-section [nodeId]="id" [label]="item.label" [summary]="item.detail" icon="chartLine"
+    [attention]="item.missing" [expanded]="expandedNodes().has(id)" (expandedChange)="sectionChanged.emit({ id: id, expanded: $event })">
+    @if (item.missing) { <p role="status">This selected item is missing. Its choices are retained until you remove it.</p> }
+    @else if (!item.available) { <p role="status">No usable observations yet. This item will appear when compatible data is available.</p> }
+    <fieldset [formGroup]="form" [disabled]="disabled()">
+      <span class="visualization-control-label">Trace type</span>
+      <div class="visualization-buttons" role="group" [attr.aria-label]="item.label + ' trace type'">
+        <button type="button" class="v1-icon-btn" aria-label="Line" title="Line" [disabled]="disabled()" [attr.aria-pressed]="current.traceType === 'line'" (click)="choose(form.controls.traceType, 'line')"><app-ui-icon name="chartLine"/></button>
+        <button type="button" class="v1-icon-btn" aria-label="Bar" title="Bar" [disabled]="disabled()" [attr.aria-pressed]="current.traceType === 'bar'" (click)="choose(form.controls.traceType, 'bar')"><app-ui-icon name="barChart"/></button>
+      </div>
+      <span class="visualization-control-label">Axis</span>
+      <div class="visualization-buttons" role="group" [attr.aria-label]="item.label + ' axis'">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.axis === 'left'" (click)="choose(form.controls.axis, 'left')">Left</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.axis === 'right'" (click)="choose(form.controls.axis, 'right')">Right</button>
+      </div>
+      <label class="item-settings__check"><input type="checkbox" formControlName="visible" [attr.aria-label]="'Show ' + item.label">Show trace</label>
+      <label>Display label<input type="text" formControlName="label" [placeholder]="item.label"></label>
+      <label class="item-settings__check"><input type="checkbox" formControlName="customColor">Custom color</label>
+      @if (current.customColor) { <label>Color<input type="color" formControlName="color"></label> }
+      @if (current.traceType !== 'bar') {
+        <span class="visualization-control-label">Line pattern</span>
+        <div class="visualization-buttons" role="group" [attr.aria-label]="item.label + ' line pattern'">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.lineStyle === 'solid'" (click)="choose(form.controls.lineStyle, 'solid')">Solid</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.lineStyle === 'dashed'" (click)="choose(form.controls.lineStyle, 'dashed')">Dashed</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.lineStyle === 'dotted'" (click)="choose(form.controls.lineStyle, 'dotted')">Dotted</button>
+        </div>
+      }
+    </fieldset>
+  </app-visualization-decision-section>
+}

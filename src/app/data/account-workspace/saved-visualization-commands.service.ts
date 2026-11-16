@@ -53,11 +53,16 @@ export class SavedVisualizationCommands {
     try {
       if (this.workspace.account()?.guid !== submitted.accountGuid) throw new WorkspaceWriteError('cross-account-entity', 'Select the owning account before saving this visualization.');
       const result = await this.boundary.execute({ entityKind: 'savedVisualization', entityGuid: submitted.guid,
-        changeKind: submitted.kind === 'delete' ? 'delete' : submitted.kind === 'update' ? 'update' : 'add',
-        label: submitted.kind === 'delete' ? 'Deleting visualization' : 'Saving visualization', notification: { suppressSuccessToast: true } }, async () => {
+        changeKind: submitted.kind === 'delete' ? 'delete' : submitted.kind === 'update' || submitted.kind === 'retarget' ? 'update' : 'add',
+        label: submitted.kind === 'delete' ? 'Deleting visualization' : 'Saving visualization', notification: { suppressSuccessToast: true },
+        ...(submitted.kind === 'update' || submitted.kind === 'retarget' ? { publication: { mode: 'patch' as const, buildPatch: (value: IdbSavedVisualization | undefined) => {
+          if (!value) throw new WorkspaceWriteError('validation-failed', 'The committed visualization is unavailable for publication.');
+          return { collections: [{ collection: 'savedVisualizations' as const, upsert: [value] }] };
+        } } } : {}) }, async () => {
           committed = submitted.kind === 'create' ? await this.handler.create(submitted, submitted.accountGuid)
             : submitted.kind === 'duplicate' ? await this.handler.duplicate(submitted, submitted.accountGuid)
             : submitted.kind === 'update' ? await this.handler.update(submitted, submitted.accountGuid)
+            : submitted.kind === 'retarget' ? await this.handler.retarget(submitted, submitted.accountGuid)
             : (await this.handler.delete(submitted, submitted.accountGuid), undefined);
           persistenceFinished = true;
           return committed;

@@ -23,6 +23,25 @@ Icons are decorative by default. For a meaningful standalone icon, set
 `[decorative]="false"` and supply `label`; labeled buttons normally keep their
 icons decorative.
 
+## Visualization icons
+
+The [chart catalog](../../visualizations/visualization-charts.ts) owns the mapping
+used by Dashboard cards, creation choices, and pinned chart selections. Use
+`chartTimeSeries` (`ChartLineData02Icon`) for Line, Area, Combination, and trend
+recipes; `chartBar` (`ChartColumnIncreasingIcon`) for both bar choices;
+`chartScatter` (`ChartScatterIcon`) for Scatter; `covariate` (`CovariateIcon`) for
+Correlation; and `chartDonut` (`DoughnutIcon`) for Donut. Definitions without a
+recognized chart retain the generic `dataVisualization` icon.
+
+Use `name="heatmap"` for the regular grid with varying cell intensity, and
+`name="treemap"` for unequal, nested rectangular areas. Their design sources are
+[`heatmap.svg`](../../../../assets/icons/heatmap.svg) and
+[`treemap.svg`](../../../../assets/icons/treemap.svg). Both use `currentColor`
+with translucent fills so the intensity differences follow the surrounding theme.
+
+Use `name="sankey"` for weighted flow ribbons branching from a source to multiple
+destinations. Its source is [`sankey.svg`](../../../../assets/icons/sankey.svg).
+
 ## Energy-use icons
 
 Use `name="pump"` for the open-center pump and `name="fan"` for the scroll fan

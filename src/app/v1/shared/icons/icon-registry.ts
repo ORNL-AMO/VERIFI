@@ -26,8 +26,11 @@ import CalendarCheckIcon from '@hugeicons/core-free-icons/CalendarCheckIcon';
 import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon';
 import CancelCircleIcon from '@hugeicons/core-free-icons/CancelCircleIcon';
 import ChartColumnIcon from '@hugeicons/core-free-icons/ChartColumnIcon';
+import ChartColumnIncreasingIcon from '@hugeicons/core-free-icons/ChartColumnIncreasingIcon';
 import ChartAnalysisIcon from '@hugeicons/core-free-icons/ChartAnalysisIcon';
 import ChartLineData01Icon from '@hugeicons/core-free-icons/ChartLineData01Icon';
+import ChartLineData02Icon from '@hugeicons/core-free-icons/ChartLineData02Icon';
+import ChartScatterIcon from '@hugeicons/core-free-icons/ChartScatterIcon';
 import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon';
 import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon';
 import CheckmarkBadge01Icon from '@hugeicons/core-free-icons/CheckmarkBadge01Icon';
@@ -37,6 +40,7 @@ import ChevronLeftIcon from '@hugeicons/core-free-icons/ChevronLeftIcon';
 import ChevronRightIcon from '@hugeicons/core-free-icons/ChevronRightIcon';
 import ChevronUpIcon from '@hugeicons/core-free-icons/ChevronUpIcon';
 import CircleArrowRightDoubleIcon from '@hugeicons/core-free-icons/CircleArrowRightDoubleIcon';
+import CircleIcon from '@hugeicons/core-free-icons/CircleIcon';
 import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon';
 import CloudRainIcon from '@hugeicons/core-free-icons/CloudRainIcon';
 import CombineIcon from '@hugeicons/core-free-icons/CombineIcon';
@@ -47,6 +51,7 @@ import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon';
 import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon';
 import Download04Icon from '@hugeicons/core-free-icons/Download04Icon';
 import DragDropIcon from '@hugeicons/core-free-icons/DragDropIcon';
+import DoughnutIcon from '@hugeicons/core-free-icons/DoughnutIcon';
 import DropletOffIcon from '@hugeicons/core-free-icons/DropletOffIcon';
 import DropletIcon from '@hugeicons/core-free-icons/DropletIcon';
 import EarthIcon from '@hugeicons/core-free-icons/EarthIcon';
@@ -140,6 +145,10 @@ export const ICON_REGISTRY = {
   calendar: Calendar03Icon,
   calendarCheck: CalendarCheckIcon,
   chartLine: ChartLineData01Icon,
+  chartTimeSeries: ChartLineData02Icon,
+  chartScatter: ChartScatterIcon,
+  chartBar: ChartColumnIncreasingIcon,
+  chartDonut: DoughnutIcon,
   chartAnalysis: ChartAnalysisIcon,
   check: CheckmarkSquare02Icon,
   chevronDown: ChevronDownIcon,
@@ -149,6 +158,7 @@ export const ICON_REGISTRY = {
   clearFilter: FilterRemoveIcon,
   filter: FilterIcon,
   checklist: CheckListIcon,
+  circle: CircleIcon,
   checkmarkBadge: CheckmarkBadge01Icon,
   close: Cancel01Icon,
   clock: Clock01Icon,

@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities, type VisualizationFacilityRecord } from '@domain/visualizations/visualization-facilities';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition, VisualizationIssue } from '@domain/visualizations/visualization-validation';
 import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
@@ -48,8 +49,7 @@ export function savedVisualizationEnvelopeError(value: unknown): string | undefi
   const decoded = decodeVisualizationDefinition(record.definition);
   // Opaque transferred payloads intentionally retain their original owner; the lock prevents use.
   if ((decoded.state === 'valid' || decoded.state === 'setup-required') && !record.preservation?.locked) {
-    if (decoded.definition.accountGuid !== record.accountId || (decoded.definition.scope.kind === 'facility'
-      ? decoded.definition.scope.facilityGuid !== record.facilityId : record.facilityId !== undefined))
+    if (decoded.definition.accountGuid !== record.accountId)
       return 'Saved visualization payload contradicts its outer ownership.';
   }
   return undefined;
@@ -75,4 +75,29 @@ function isJsonValue(value: unknown, ancestors = new Set<object>(), depth = 0): 
       && isJsonValue(value[key], ancestors, depth + 1));
   ancestors.delete(value);
   return valid;
+}
+
+/** Current ownership is a projection, never the persisted facilityId index. */
+export function savedVisualizationFacilityGuid(record: Readonly<IdbSavedVisualization>, facilities: readonly VisualizationFacilityRecord[]): string | undefined {
+  const decoded = decodeVisualizationDefinition(record.definition);
+  if (!record.preservation?.locked && record.recordVersion === SAVED_VISUALIZATION_RECORD_VERSION && 'definition' in decoded
+    && decoded.definition.accountGuid === record.accountId) {
+    if (record.preservation?.references.some(ref => ref.path.startsWith('facilitySelection.'))) return undefined;
+    const scope = resolveVisualizationFacilities(decoded.definition, facilities).scope;
+    return scope.kind === 'facility' ? scope.facilityGuid : undefined;
+  }
+  return record.facilityId;
+}
+
+/** A facility transfer never turns its one-facility All into destination-wide All. */
+export function savedVisualizationForFacilityExport(record: Readonly<IdbSavedVisualization>, facilityGuid: string): IdbSavedVisualization {
+  const result: IdbSavedVisualization = { ...structuredClone(record) };
+  const decoded = decodeVisualizationDefinition(record.definition);
+  if (!record.preservation?.locked && record.recordVersion === SAVED_VISUALIZATION_RECORD_VERSION && 'definition' in decoded
+    && decoded.definition.accountGuid === record.accountId
+    && !record.preservation?.references.some(ref => ref.path.startsWith('facilitySelection.'))) {
+    result.definition = { ...decoded.definition, facilitySelection: { kind: 'fixed', facilityGuids: [facilityGuid] } };
+    delete result.facilityId;
+  }
+  return result;
 }

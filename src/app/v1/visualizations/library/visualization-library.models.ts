@@ -1,25 +1,25 @@
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
+import { readSavedVisualization, savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { VisualizationDefinition, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { visualizationReferences } from '@domain/visualizations/visualization-references';
 import { InventoryTile } from '@app/v1/shared/inventory/inventory.models';
-import { visualizationChartLabel } from '../visualization-charts';
-import { VISUALIZATION_FAMILIES } from '../visualization-families';
+import { visualizationChartIcon, visualizationDefinitionChartLabel } from '../visualization-charts';
+import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 
-export { VISUALIZATION_FAMILIES } from '../visualization-families';
+export { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 export type VisualizationLibraryStatus = 'setup-required' | 'repair-required' | 'unsupported' | 'configured';
 export interface VisualizationLibraryFilters {
   readonly search: string;
   readonly scope: 'all' | 'portfolio' | 'facility';
-  readonly family: 'all' | VisualizationSourceKind;
+  readonly sourceKind: 'all' | VisualizationSourceKind;
   readonly status: 'all' | VisualizationLibraryStatus;
   readonly sort: 'modified' | 'name' | 'attention';
 }
 export const DEFAULT_VISUALIZATION_FILTERS: VisualizationLibraryFilters = {
-  search: '', scope: 'all', family: 'all', status: 'all', sort: 'modified'
+  search: '', scope: 'all', sourceKind: 'all', status: 'all', sort: 'modified'
 };
 export interface VisualizationLibraryEntry {
   readonly record: Readonly<IdbSavedVisualization>;
@@ -28,8 +28,8 @@ export interface VisualizationLibraryEntry {
   readonly scope: 'portfolio' | 'facility';
   readonly facilityGuid?: string;
   readonly ownerName: string;
-  readonly familyLabel: string;
-  readonly families: readonly VisualizationSourceKind[];
+  readonly dataSourceLabel: string;
+  readonly sourceKinds: readonly VisualizationSourceKind[];
   readonly status: VisualizationLibraryStatus;
   readonly statusLabel: string;
   readonly periodLabel: string;
@@ -40,7 +40,7 @@ export interface VisualizationLibraryEntry {
   readonly editable: boolean;
 }
 const STATUS_LABELS: Record<VisualizationLibraryStatus, string> = {
-  'setup-required': 'Setup required', 'repair-required': 'Sources need review', unsupported: 'Read-only · unavailable format', configured: 'Configured · preview support pending'
+  'setup-required': 'Setup required', 'repair-required': 'Sources need review', unsupported: 'Read-only · unavailable format', configured: 'Configured'
 };
 export function buildVisualizationLibrary(snapshot: AccountWorkspaceSnapshot): VisualizationLibraryEntry[] {
   const sourceRecords = [...snapshot.facilities, ...snapshot.meters, ...snapshot.meterGroups, ...snapshot.predictors,
@@ -56,18 +56,19 @@ export function buildVisualizationLibrary(snapshot: AccountWorkspaceSnapshot): V
       : read.state === 'invalid' || read.state === 'unsupported' ? 'unsupported'
       : read.state === 'setup-required' ? 'setup-required' : 'configured';
     const name = definition?.name || 'Unavailable visualization';
-    const ownerName = record.facilityId ? snapshot.facilities.find(item => item.guid === record.facilityId)?.name || 'Unavailable facility' : snapshot.account.name || 'Account';
-    const families = [...new Set(definition?.sources.map(source => source.kind) ?? [])];
-    const familyLabel = families.map(kind => VISUALIZATION_FAMILIES.find(option => option.value === kind)?.label).join(', ') || 'Unknown source family';
+    const facilityGuid = savedVisualizationFacilityGuid(record, snapshot.facilities);
+    const ownerName = facilityGuid ? snapshot.facilities.find(item => item.guid === facilityGuid)?.name || 'Unavailable facility' : snapshot.account.name || 'Account';
+    const sourceKinds = [...new Set(definition?.sources.map(source => source.kind) ?? [])];
+    const dataSourceLabel = sourceKinds.map(kind => VISUALIZATION_DATA_SOURCES.find(option => option.value === kind)?.label).join(', ') || 'Unknown data source';
     const issues = [...read.issues.map(issue => issue.message), ...references.map(reference => `${reference.kind} ${reference.guid}: ${reference.reason}`)];
     const labels = definition && supported ? visualizationReferences(definition).filter(reference => !reference.optional).map(reference => sourceRecords.find(item => item.guid === reference.guid)?.name || reference.guid) : [];
     const periodLabel = definition ? visualizationPeriodLabel(definition) : 'Period unavailable';
-    const chartLabel = visualizationChartLabel(definition?.chart);
+    const chartLabel = visualizationDefinitionChartLabel(definition, snapshot);
     const modified = new Date(record.modifiedDate).getTime();
-    return { record, definition, name, scope: record.facilityId ? 'facility' as const : 'portfolio' as const,
-      facilityGuid: record.facilityId, ownerName, families, familyLabel, status, statusLabel: STATUS_LABELS[status], periodLabel, chartLabel,
+    return { record, definition, name, scope: facilityGuid ? 'facility' as const : 'portfolio' as const,
+      facilityGuid, ownerName, sourceKinds, dataSourceLabel, status, statusLabel: STATUS_LABELS[status], periodLabel, chartLabel,
       modified: Number.isFinite(modified) ? modified : 0, issues, editable: supported,
-      searchText: [name, ownerName, familyLabel, periodLabel, chartLabel, STATUS_LABELS[status], ...labels].join(' ').toLocaleLowerCase() };
+      searchText: [name, ownerName, dataSourceLabel, periodLabel, chartLabel, STATUS_LABELS[status], ...labels].join(' ').toLocaleLowerCase() };
   });
 }
 export function visualizationPeriodLabel(definition: VisualizationDefinition): string {
@@ -83,7 +84,7 @@ export function visualizationPeriodLabel(definition: VisualizationDefinition): s
 export function filterVisualizationLibrary(entries: readonly VisualizationLibraryEntry[], filters: VisualizationLibraryFilters): VisualizationLibraryEntry[] {
   const search = filters.search.trim().toLocaleLowerCase();
   return entries.filter(entry => (!search || entry.searchText.includes(search)) && (filters.scope === 'all' || entry.scope === filters.scope)
-    && (filters.family === 'all' || entry.families.includes(filters.family)) && (filters.status === 'all' || entry.status === filters.status))
+    && (filters.sourceKind === 'all' || entry.sourceKinds.includes(filters.sourceKind)) && (filters.status === 'all' || entry.status === filters.status))
     .sort((left, right) => {
       if (filters.sort === 'attention') {
         const priority: Record<VisualizationLibraryStatus, number> = { 'repair-required': 0, unsupported: 1, 'setup-required': 2, configured: 3 };
@@ -94,14 +95,16 @@ export function filterVisualizationLibrary(entries: readonly VisualizationLibrar
         || left.name.localeCompare(right.name) || left.record.guid.localeCompare(right.record.guid);
     });
 }
-export function visualizationLibraryTile(entry: VisualizationLibraryEntry, route: readonly string[], libraryRoute: readonly string[]): InventoryTile {
-  return { guid: entry.record.guid, name: entry.name, icon: 'dataVisualization', route,
-    owner: entry.facilityGuid ? { facilityGuid: entry.facilityGuid, label: entry.ownerName, route: libraryRoute, queryParams: { facility: entry.facilityGuid } } : undefined,
-    location: entry.scope === 'portfolio' ? `${entry.ownerName} · Portfolio` : entry.ownerName,
-    chip: entry.familyLabel, simpleChip: entry.familyLabel,
-    status: { tone: entry.status === 'repair-required' ? 'danger' : entry.status === 'configured' ? 'neutral' : 'warning',
-      icon: entry.status === 'configured' ? 'dataVisualization' : 'warning', label: entry.statusLabel },
-    visualizationSnapshot: { typeLabel: entry.familyLabel, scopeLabel: entry.scope === 'portfolio' ? 'Portfolio' : `Facility: ${entry.ownerName}`,
+export function visualizationLibraryTile(entry: VisualizationLibraryEntry, route: readonly string[], dashboardRoute: readonly string[]): InventoryTile {
+  const icon = entry.definition?.chart?.kind === 'time-series' ? entry.chartLabel === 'Bar' ? 'chartBar' : 'chartTimeSeries'
+    : visualizationChartIcon(entry.definition?.chart);
+  return { guid: entry.record.guid, name: entry.name, icon, route,
+    owner: entry.facilityGuid ? { facilityGuid: entry.facilityGuid, label: entry.ownerName, route: dashboardRoute, queryParams: { facility: entry.facilityGuid } } : undefined,
+    status: { tone: entry.status === 'repair-required' ? 'danger' : entry.status === 'configured' ? 'success' : 'warning',
+      icon: entry.status === 'configured' ? 'success' : 'warning', label: entry.status === 'configured' ? 'Setup valid' : entry.statusLabel },
+    visualizationSnapshot: { scope: entry.scope === 'portfolio' ? 'account' : 'facility',
+      dataSources: VISUALIZATION_DATA_SOURCES.filter(option => entry.sourceKinds.includes(option.value)).map(({ label, icon }) => ({ label, icon })),
+      scopeLabel: entry.scope === 'portfolio' ? 'Portfolio' : `Facility: ${entry.ownerName}`,
       periodLabel: entry.periodLabel, chartLabel: entry.chartLabel,
       modified: entry.modified ? new Date(entry.modified).toLocaleDateString() : 'Date unavailable', issues: entry.issues }
   };

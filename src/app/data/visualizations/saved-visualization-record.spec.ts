@@ -1,6 +1,6 @@
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { readSavedVisualization, savedVisualizationEnvelopeError } from './saved-visualization-record';
+import { readSavedVisualization, savedVisualizationEnvelopeError, savedVisualizationFacilityGuid } from './saved-visualization-record';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 
 function record(): IdbSavedVisualization {
@@ -17,13 +17,14 @@ describe('saved visualization envelope and version routing', () => {
     expect(input).toEqual(before);
   });
 
-  it('decodes historical definitions repeatedly without rewriting the stored envelope or revision', () => {
-    const current = utilityVisualizationFixture();
-    const input = { ...record(), definition: { ...current, version: 1 } }, before = structuredClone(input);
-    const first = readSavedVisualization(input), second = readSavedVisualization(input);
-    expect(first.state).toBe('valid');
-    expect('definition' in first && first.definition).toEqual(current);
-    expect(second).toEqual(first);
+
+
+  it('ignores stale current facilityId and derives live ownership without rewriting the record', () => {
+    const input = { ...record(), facilityId: 'stale' }, before = structuredClone(input);
+    const facilities = [{ guid: 'facility-a', accountId: 'account-a' }];
+    expect(readSavedVisualization(input).state).toBe('valid');
+    expect(savedVisualizationFacilityGuid(input, facilities)).toBe('facility-a');
+    expect(savedVisualizationFacilityGuid(input, [...facilities, { guid: 'facility-b', accountId: 'account-a' }])).toBeUndefined();
     expect(input).toEqual(before);
   });
 
@@ -36,7 +37,7 @@ describe('saved visualization envelope and version routing', () => {
   });
 
   it('accepts coherent incomplete intent as setup required', () => {
-    const input = { ...record(), definition: createVisualizationDefinition('New chart', 'account-a', { kind: 'portfolio' }, 'utility') };
+    const input = { ...record(), definition: createVisualizationDefinition('New chart', 'account-a', { kind: 'all' }, 'utility') };
     expect(readSavedVisualization(input).state).toBe('setup-required');
     expect(savedVisualizationEnvelopeError(input)).toBeUndefined();
   });
@@ -70,7 +71,7 @@ describe('saved visualization envelope and version routing', () => {
 
   it.each([
     { guid: '' }, { accountId: '' }, { facilityId: '' }, { revision: 0 }, { recordVersion: 0 }, { createdDate: 'not a date' },
-    { accountId: 'other-account' }, { facilityId: 'other-facility' }, { preservation: { references: [], transfers: 'invalid' } }
+    { accountId: 'other-account' }, { preservation: { references: [], transfers: 'invalid' } }
   ])('rejects malformed or contradictory outer fields %j', changes => {
     expect(savedVisualizationEnvelopeError({ ...record(), ...changes })).toBeDefined();
   });

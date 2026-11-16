@@ -6,6 +6,8 @@ import { Subject } from 'rxjs';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { reportFixture, reportSnapshot } from '@app/v1/reports/facility/testing/report-test-fixtures';
 import { WorkspaceContextService } from './workspace-context.service';
 
@@ -35,6 +37,28 @@ function setup(url = metersUrl) {
 }
 
 describe('WorkspaceContextService', () => {
+  it('derives visualization shell ownership from inclusion and the live catalog instead of stale envelope metadata', () => {
+    const { context, store, snapshot } = setup('/v1/workspace/account/account-a/visualization/workbench/chart-a');
+    const definition = createVisualizationDefinition('Chart', 'account-a', { kind: 'all' }, 'utility');
+    const record = { ...getNewIdbSavedVisualization(definition), guid: 'chart-a', facilityId: 'facility-b' };
+    store.publish({ ...snapshot, facilities: [snapshot.facilities[0]], savedVisualizations: [record] });
+    expect(context.headerFacility()?.guid).toBe('facility-a');
+    store.publish({ ...snapshot, savedVisualizations: [record] });
+    expect(context.headerScope()).toEqual({ kind: 'all' });
+    store.publish({ ...snapshot, savedVisualizations: [{ ...record,
+      definition: { ...definition, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a'] } } }] });
+    expect(context.headerFacility()?.guid).toBe('facility-a');
+    expect(store.savedVisualizations()[0].facilityId).toBe('facility-b');
+  });
+
+  it('retains explicit visualization facility entry for a single-facility account without changing account entry', () => {
+    const { context, store, snapshot, accept } = setup('/v1/workspace/account/account-a/visualization/dashboard?facility=facility-a');
+    store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true }, facilities: [snapshot.facilities[0]] });
+    expect(context.inventoryFacilityGuid()).toBe('facility-a');
+    accept('/v1/workspace/account/account-a/visualization/dashboard');
+    expect(context.inventoryFacilityGuid()).toBeUndefined();
+  });
+
   it('distinguishes group drill-in, item drill-in, peer groups, and canceled group navigation', () => {
     const { context, accept, events } = setup('/v1/workspace/account/account-a/data/portfolio/energy-uses');
     const group = '/v1/workspace/facility/facility-a/data/energy-uses/groups/group-a';

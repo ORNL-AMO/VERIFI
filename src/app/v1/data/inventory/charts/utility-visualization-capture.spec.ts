@@ -1,3 +1,4 @@
+import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { visualizationSnapshot } from '@app/v1/visualizations/testing/visualization-test-fixtures';
 import { calendarizedMeter, group, meter, monthlyData, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { buildInventoryMeterCharts } from '@app/v1/data/meters/inventory/charts/meter-inventory-charts';
@@ -55,7 +56,7 @@ describe('inventory utility capture fidelity', () => {
     const definition = result.definition, source = definition.sources[0] as UtilityVisualizationSource;
     if (input.selection?.state !== 'supported') throw new Error('Expected a matching-rule fixture.');
     expect(source.selection).toEqual(input.selection.selection);
-    const discovery = discoverUtilitySeries(snapshot, definition.scope, source);
+    const discovery = discoverUtilitySeries(snapshot, resolveVisualizationFacilities(definition, snapshot.facilities).scope, source);
     expect(discovery.map(series => series.resourceGuid)).toEqual(['meter-a', 'meter-m', 'meter-z']);
     const all = resolveVisualizationSeries(definition, discovery, true);
     expect(all.map(item => item.metadata.resourceGuid)).toEqual(chart.metrics.map(trace => trace.id));

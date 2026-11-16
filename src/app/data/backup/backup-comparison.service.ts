@@ -1,3 +1,4 @@
+import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { Injectable } from '@angular/core';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -82,8 +83,8 @@ export class BackupComparisonService {
         differences.push('Predictor Data');
       }
 
-      const backupVisualizations = backup.savedVisualizations?.filter(item => item.facilityId === facility.guid) ?? [];
-      const savedVisualizations = this.workspaceStore.savedVisualizations().filter(item => item.facilityId === accountFacility.guid);
+      const backupVisualizations = backup.savedVisualizations?.filter(item => savedVisualizationFacilityGuid(item, backup.backupFileType === 'Account' ? backup.facilities : [backup.facility]) === facility.guid) ?? [];
+      const savedVisualizations = this.workspaceStore.savedVisualizations().filter(item => savedVisualizationFacilityGuid(item, this.workspaceStore.facilities()) === accountFacility.guid);
       // Identity, intent and repair state determine whether replacement changes saved charts.
       const signature = (item: typeof backupVisualizations[number]) => JSON.stringify({ guid: item.guid,
         recordVersion: item.recordVersion, definition: item.definition, preservation: item.preservation });

@@ -39,6 +39,12 @@ import { join } from 'path';
     <app-ui-icon name="groupEnergyFootprint" [size]="16" [strokeWidth]="2" [decorative]="false" label="Group energy footprint override"></app-ui-icon>
     <app-ui-icon name="facilityEnergyFootprint" [size]="24" [decorative]="false" label="Facility energy footprint"></app-ui-icon>
     <app-ui-icon name="facilityEnergyFootprint" [size]="16" [strokeWidth]="2" [decorative]="false" label="Facility energy footprint override"></app-ui-icon>
+    <app-ui-icon name="heatmap" [size]="24" [decorative]="false" label="Heatmap"></app-ui-icon>
+    <app-ui-icon name="heatmap" [size]="16" [strokeWidth]="2" [decorative]="false" label="Heatmap override"></app-ui-icon>
+    <app-ui-icon name="treemap" [size]="24" [decorative]="false" label="Treemap"></app-ui-icon>
+    <app-ui-icon name="treemap" [size]="16" [strokeWidth]="2" [decorative]="false" label="Treemap override"></app-ui-icon>
+    <app-ui-icon name="sankey" [size]="24" [decorative]="false" label="Sankey"></app-ui-icon>
+    <app-ui-icon name="sankey" [size]="16" [strokeWidth]="2" [decorative]="false" label="Sankey override"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -60,8 +66,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(26);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(26);
+    expect(icons.length).toBe(32);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(32);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -117,7 +123,13 @@ describe('IconComponent', () => {
     { file: 'group-energy-footprint.svg', index: 22, label: 'Group energy footprint', size: '24', stroke: undefined },
     { file: 'group-energy-footprint.svg', index: 23, label: 'Group energy footprint override', size: '16', stroke: '2' },
     { file: 'facility-energy-footprint.svg', index: 24, label: 'Facility energy footprint', size: '24', stroke: undefined },
-    { file: 'facility-energy-footprint.svg', index: 25, label: 'Facility energy footprint override', size: '16', stroke: '2' }
+    { file: 'facility-energy-footprint.svg', index: 25, label: 'Facility energy footprint override', size: '16', stroke: '2' },
+    { file: 'heatmap.svg', index: 26, label: 'Heatmap', size: '24', stroke: undefined },
+    { file: 'heatmap.svg', index: 27, label: 'Heatmap override', size: '16', stroke: '2' },
+    { file: 'treemap.svg', index: 28, label: 'Treemap', size: '24', stroke: undefined },
+    { file: 'treemap.svg', index: 29, label: 'Treemap override', size: '16', stroke: '2' },
+    { file: 'sankey.svg', index: 30, label: 'Sankey', size: '24', stroke: undefined },
+    { file: 'sankey.svg', index: 31, label: 'Sankey override', size: '16', stroke: '2' }
   ])('renders $file through the same themed, accessible icon API', ({ file, index, label, size, stroke }) => {
     const source = readFileSync(join(process.cwd(), 'src/assets/icons', file), 'utf8');
     const document = new DOMParser().parseFromString(source, 'image/svg+xml');
@@ -139,10 +151,12 @@ describe('IconComponent', () => {
       .toEqual(sourceShapes.map(shape => [shape.tagName, ...geometryAttributes.map(attribute => shape.getAttribute(attribute))]));
     expect(renderedShapes.map(shape => shape.getAttribute('stroke-width')))
       .toEqual(sourceShapes.map(shape => stroke ?? shape.getAttribute('stroke-width') ?? document.documentElement.getAttribute('stroke-width')));
-    for (const shape of renderedShapes) {
-      expect(shape.getAttribute('stroke')).toBe('currentColor');
-      expect(shape.getAttribute('fill')).toBe('none');
-    }
+    renderedShapes.forEach((shape, index) => {
+      const sourceShape = sourceShapes[index];
+      expect(shape.getAttribute('stroke')).toBe(sourceShape.getAttribute('stroke') ?? document.documentElement.getAttribute('stroke') ?? 'currentColor');
+      expect(shape.getAttribute('fill')).toBe(sourceShape.getAttribute('fill') ?? document.documentElement.getAttribute('fill') ?? 'none');
+      expect(shape.getAttribute('opacity')).toBe(sourceShape.getAttribute('opacity'));
+    });
   });
 
   it('maps the spreadsheet columns icon to LayoutTable01Icon', () => {

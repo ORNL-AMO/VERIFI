@@ -59,15 +59,15 @@ describe('utility preview calculation demand', () => {
   it('waits for bundled factors only for emissions that need them and cancels without a Worker', async () => {
     const { data, calendar, identity, store } = setup();
     const definition = utilityVisualizationFixture(), source = definition.sources[0] as UtilityVisualizationSource;
-    expect(data.requiresGrid([source], definition.scope)).toBe(false);
-    expect(data.requiresGrid([{ ...source, measure: 'location-emissions' }], definition.scope)).toBe(true);
+    expect(data.requiresGrid([source], { kind: 'facility', facilityGuid: 'facility-a', facilityGuids: ['facility-a'] })).toBe(false);
+    expect(data.requiresGrid([{ ...source, measure: 'location-emissions' }], { kind: 'facility', facilityGuid: 'facility-a', facilityGuids: ['facility-a'] })).toBe(true);
     const abort = new AbortController(), pending = data.acquire(identity, abort.signal, true, true);
     expect(calendar.calendarizeBase).not.toHaveBeenCalled();
     const rejected = expect(pending).rejects.toMatchObject({ name: 'AbortError' }); abort.abort(); await rejected;
     TestBed.inject(EGridService).setCo2Emissions([]); TestBed.flushEffects();
     expect(calendar.calendarizeBase).not.toHaveBeenCalled();
     store.publishCommitted({ ...store.snapshot()!, meters: store.meters().map(meter => ({ ...meter, source: 'Natural Gas' as const })) }, {});
-    expect(data.requiresGrid([{ ...source, measure: 'location-emissions' }], definition.scope)).toBe(false);
+    expect(data.requiresGrid([{ ...source, measure: 'location-emissions' }], { kind: 'facility', facilityGuid: 'facility-a', facilityGuids: ['facility-a'] })).toBe(false);
   });
   it('releases a shared waiting request after factor readiness and attaches the actual canonical catalog', async () => {
     const { data, calendar, result, identity } = setup(), abort = new AbortController();
@@ -85,6 +85,17 @@ describe('utility preview calculation demand', () => {
     const loaded = await data.acquire(identity, abort.signal, false, true);
     expect(loaded.emissionsRates).toEqual([expect.objectContaining({ subregion: 'US', locationEmissionRates: [expect.objectContaining({ CO2: 1000 })] })]);
     expect(calendar.calendarizeBase).not.toHaveBeenCalled(); abort.abort();
+  });
+
+  it('does not request grid factors for meters outside the facility inclusion boundary', () => {
+    const { data, store } = setup();
+    const before = store.snapshot()!;
+    store.publishCommitted({ ...before, facilities: [...before.facilities, { ...before.facilities[0], guid: 'excluded-facility', eGridSubregion: 'US' }],
+      meters: [meter({ guid: 'excluded-meter', facilityId: 'excluded-facility' })] }, {});
+    const source: UtilityVisualizationSource = { ...utilityVisualizationFixture().sources[0] as UtilityVisualizationSource,
+      measure: 'location-emissions', selectionMode: 'rule', selection: { kind: 'rule', resource: 'meter', filter: {} } };
+    expect(data.requiresGrid([source], { kind: 'facility', facilityGuid: 'facility-a', facilityGuids: ['facility-a'] })).toBe(false);
+    expect(data.requiresGrid([source], { kind: 'facility', facilityGuid: 'excluded-facility', facilityGuids: ['excluded-facility'] })).toBe(true);
   });
 
 });
