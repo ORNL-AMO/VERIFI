@@ -1,0 +1,13 @@
+@if (showSearch()) { <input type="search" class="form-control v1-input creation-search" [formControl]="search" aria-label="Search predictors" placeholder="Search predictors"> }
+<div class="creation-choices" role="group" aria-label="Saved predictors">
+  @for (choice of filtered(); track choice.value) {
+    @let isSelected = selected().includes(choice.value);
+    <button type="button" class="creation-choice predictor-choice" [disabled]="disabled()" [attr.aria-pressed]="isSelected"
+      [title]="choice.detail" [attr.aria-label]="choice.label + ' · ' + choice.detail" (click)="selectionRequested.emit(choice.value)">
+      <app-ui-icon class="creation-choice__selection" [name]="isSelected ? 'success' : 'circle'" [size]="20"/>
+      <app-ui-icon [name]="choice.icon" [size]="32"/>
+      <strong>{{ choice.label }}</strong>
+      @if (choice.cardDetail) { <span class="creation-choice__description">{{ choice.cardDetail }}</span> }
+    </button>
+  } @empty { <p class="creation-search-empty" role="status">No predictors found.</p> }
+</div>

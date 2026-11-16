@@ -4,12 +4,16 @@ import type { TimeSeriesModel, TimeSeriesPoint } from './time-series.models';
 export function observationText(point: TimeSeriesPoint, unit: string): string {
   const observation = point.observation;
   if (observation.state !== 'observed') return `${observation.state}: ${observation.reason}`;
-  return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(observation.value)} ${unit} · ${observation.provenance}${observation.partial ? ' · partial subtotal' : ''}`;
+  return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(observation.value)} ${unit} · ${observation.provenance}${observation.partial ? ' · partial subtotal' : ''}${observation.notes?.length ? ' · ' + observation.notes.join(' · ') : ''}`;
 }
 
 /** Options are runtime presentation only; a missing observation remains an explicit gap. */
 export function timeSeriesOption(model: TimeSeriesModel, zoom: V1EChartsDataZoomRange = { start: 0, end: 100 }): V1EChartsOption {
   const axes = (['left', 'right'] as const).filter(axis => model.traces.some(trace => trace.axis === axis));
+  const axisUnit = (axis: 'left' | 'right') => {
+    const units = new Set(model.traces.filter(trace => trace.axis === axis).map(trace => trace.unit));
+    return units.size === 1 ? [...units][0] : '';
+  };
   const labels = new Map(model.slots.map(slot => [slot.key, slot.label]));
   const points = new Map(model.traces.map(trace => [trace.id, new Map(trace.points.map(point => [point.slot, point]))]));
   return {
@@ -18,7 +22,7 @@ export function timeSeriesOption(model: TimeSeriesModel, zoom: V1EChartsDataZoom
     legend: { show: model.legend, type: 'scroll', top: 0, data: model.traces.map(trace => trace.label), selectedMode: false },
     grid: { top: model.legend ? 64 : 28, left: 20, right: 20, bottom: 72, containLabel: true },
     xAxis: { type: 'category', data: model.slots.map(slot => slot.key), axisLabel: { formatter: (key: string) => labels.get(key) ?? key } },
-    yAxis: axes.length ? axes.map(axis => ({ type: 'value' as const, position: axis, name: model.traces.find(trace => trace.axis === axis)?.unit,
+    yAxis: axes.length ? axes.map(axis => ({ type: 'value' as const, position: axis, name: axisUnit(axis),
       scale: !model.traces.some(trace => trace.axis === axis && trace.type === 'bar') })) : [{ type: 'value' as const }],
     tooltip: { trigger: 'axis', renderMode: 'richText', confine: true, formatter: (value: unknown) => {
       const items = (Array.isArray(value) ? value : [value]) as { seriesId?: string; axisValue?: string }[];

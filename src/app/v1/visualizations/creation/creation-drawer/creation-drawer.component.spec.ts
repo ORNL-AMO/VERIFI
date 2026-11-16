@@ -1,3 +1,4 @@
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -11,6 +12,24 @@ import { FacilityPickerComponent } from '../../shared/facility-picker/facility-p
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
 describe('visualization creation drawer', () => {
+  it('toggles multiple predictor cards, waits for Continue, and saves both bindings with left-axis defaults', async () => {
+    const { commands, workspace } = configureLibraryTest([LibraryModule]);
+    const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'production', name: 'Production', unit: 'widgets' };
+    workspace.publish({ ...workspace.snapshot()!, predictors: [predictor, { ...predictor, guid: 'hdd', name: 'HDD', predictorType: 'Weather', weatherDataType: 'HDD', unit: 'days' }] });
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('predictor'); lifecycle.continueSources(); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const card = (name: string) => [...root.querySelectorAll<HTMLButtonElement>('.predictor-choice')].find(button => button.querySelector('strong')?.textContent === name)!;
+    card('Production').click(); fixture.detectChanges(); card('HDD').click(); fixture.detectChanges();
+    expect(lifecycle.step()).toBe('predictor');
+    expect(card('Production').getAttribute('aria-pressed')).toBe('true'); expect(card('HDD').getAttribute('aria-pressed')).toBe('true');
+    card('HDD').click(); fixture.detectChanges(); expect(card('Production').getAttribute('aria-pressed')).toBe('true');
+    card('HDD').click(); fixture.detectChanges();
+    [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Continue')!.click(); fixture.detectChanges();
+    expect(lifecycle.step()).toBe('name'); lifecycle.form.controls.name.setValue('Production and weather'); await lifecycle.submit();
+    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ sources: [{ selection: { kind: 'fixed', resource: 'predictor', guids: ['production', 'hdd'] } }], series: [{ axis: 'left' }] });
+    fixture.destroy();
+  });
   it.each(['energy-trend', 'cost-trend'] as const)('distinguishes same-named portfolio meters by facility when binding %s', async recipe => {
     const { commands, workspace } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
     const snapshot = workspace.snapshot()!;
@@ -90,6 +109,7 @@ describe('visualization creation drawer', () => {
     expect(lifecycle.step()).toBe('sources'); expect(button('Continue').disabled).toBe(false);
     button('Continue').click(); fixture.detectChanges(); await fixture.whenStable();
     lifecycle.selectMeterMode('source'); lifecycle.toggleResource('Electricity'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized'); fixture.detectChanges(); await fixture.whenStable();
+    expect(lifecycle.step()).toBe('predictor'); button('Skip for now').click(); fixture.detectChanges(); await fixture.whenStable();
     expect(root.querySelector('label[for="visualization-name"]')).not.toBeNull(); await lifecycle.submit(); fixture.detectChanges();
     expect(root.textContent).toContain('Enter a visualization name.'); expect(commands.submit).not.toHaveBeenCalled();
     lifecycle.form.controls.name.setValue('Weather and usage'); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();

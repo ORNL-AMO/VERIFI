@@ -46,6 +46,7 @@ export type VisualizationDecisionAction =
   | { readonly kind: 'chart-type'; readonly traceType: 'line' | 'bar' }
   | { readonly kind: 'add-source'; readonly sourceKind: VisualizationSourceKind }
   | { readonly kind: 'remove-source-kind'; readonly sourceKind: VisualizationSourceKind }
+  | { readonly kind: 'predictor-selection'; readonly sourceId: string; readonly predictorGuids: readonly string[] }
   | { readonly kind: 'measure'; readonly sourceId: string; readonly measure: UtilityVisualizationSource['measure'] }
   | { readonly kind: 'selection-mode'; readonly sourceId: string; readonly mode: UtilitySelectionMode }
   | { readonly kind: 'toggle-resource'; readonly sourceId: string; readonly resourceId: string; readonly selected: boolean }

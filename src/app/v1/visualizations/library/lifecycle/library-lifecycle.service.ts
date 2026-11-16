@@ -1,3 +1,4 @@
+import { predictorResourceChoices } from '../../predictor/predictor-items';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,10 +21,11 @@ import { UTILITY_RECIPES, type VisualizationRecipe } from '../../creation/visual
 import { meterResourceChoices, meterSelectionChoices, nativeObservationAvailable, prepareDecisionChange } from '../../decisions/decision-tree';
 import type { DecisionChangeResult } from '../../decisions/decision-types';
 
-export type VisualizationCreationStep = 'facilities' | 'chart' | 'sources' | 'selection-mode' | 'resources' | 'observation' | 'name';
+export type VisualizationCreationStep = 'facilities' | 'chart' | 'sources' | 'selection-mode' | 'resources' | 'observation' | 'predictor' | 'name';
 export interface VisualizationCreationDraft {
   name: string; facilitySelection: VisualizationFacilitySelection;
   chart: VisualizationChartChoiceId | null; sourceKinds: readonly VisualizationSourceKind[];
+  predictorGuids: readonly string[];
   recipe: VisualizationRecipe; selectionMode: UtilitySelectionMode | null; resourceIds: readonly string[]; dataMode: 'calendarized' | 'billing-period';
 }
 interface CreationSelection { readonly step: VisualizationCreationStep; readonly label: string; readonly icon: IconName; readonly editable: boolean; }
@@ -55,6 +57,7 @@ export class LibraryLifecycle {
     facilitySelection: new FormControl<VisualizationFacilitySelection>({ kind: 'all' }, { nonNullable: true }),
     chart: new FormControl<VisualizationChartChoiceId | null>(null),
     sourceKinds: new FormControl<readonly VisualizationSourceKind[]>([], { nonNullable: true }),
+    predictorGuids: new FormControl<readonly string[]>([], { nonNullable: true }),
     recipe: new FormControl<VisualizationRecipe>('custom', { nonNullable: true }),
     selectionMode: new FormControl<UtilitySelectionMode | null>(null),
     resourceIds: new FormControl<readonly string[]>([], { nonNullable: true }),
@@ -88,6 +91,9 @@ export class LibraryLifecycle {
   readonly recipes = UTILITY_RECIPES;
   readonly selectionModes = meterSelectionChoices();
   readonly selectedMode = computed(() => this.selectionModes.find(choice => choice.value === this.draft().selectionMode));
+  readonly hasPredictors = computed(() => this.draft().sourceKinds.includes('predictor'));
+  readonly predictorChoices = computed(() => { const snapshot = this.workspace.snapshot(); return snapshot ? predictorResourceChoices(snapshot, this.scope(this.draft())) : []; });
+  readonly predictorSelectionValid = computed(() => !this.hasPredictors() || this.draft().predictorGuids.every(guid => this.predictorChoices().some(choice => choice.value === guid)));
   readonly hasMeters = computed(() => this.draft().sourceKinds.includes('utility'));
   readonly sourceMeasure = computed(() => this.draft().recipe === 'cost-trend' ? 'cost' as const : 'energy' as const);
   readonly resourceChoices = computed(() => {
@@ -111,7 +117,7 @@ export class LibraryLifecycle {
   readonly canContinueResources = computed(() => this.canEditDraft() && this.ownerValid() && this.resourcesValid());
   readonly canContinueObservation = computed(() => this.canContinueResources() && (this.draft().dataMode === 'calendarized' || this.nativeAvailable()));
   readonly canSubmit = computed(() => this.canEditDraft() && !!this.draft().name.trim() && this.form.controls.name.valid
-    && (!!this.editor()?.entry || this.ownerValid() && this.step() === 'name' && !!this.selectedChart() && this.dataSourcesValid() && this.canContinueObservation()));
+    && (!!this.editor()?.entry || this.ownerValid() && this.step() === 'name' && !!this.selectedChart() && this.dataSourcesValid() && this.predictorSelectionValid() && this.canContinueObservation()));
   readonly selections = computed(() => {
     const selections: CreationSelection[] = [], editor = this.editor(), value = this.draft();
     if (!editor || editor.entry) return selections;
@@ -123,8 +129,10 @@ export class LibraryLifecycle {
     if (this.hasMeters() && this.resourcesValid()) {
       const names = this.resourceCards().filter(choice => value.resourceIds.includes(choice.value)).map(choice => choice.label);
       selections.push({ step: 'resources', label: names.join(', '), icon: 'checklist', editable: true });
-      if (this.step() === 'observation' || this.step() === 'name') selections.push({ step: 'observation', label: value.dataMode === 'calendarized' ? 'Calendarized months' : 'Native bills', icon: value.dataMode === 'calendarized' ? 'calendar' : 'invoice', editable: true });
+      if (this.step() === 'observation' || this.step() === 'predictor' || this.step() === 'name') selections.push({ step: 'observation', label: value.dataMode === 'calendarized' ? 'Calendarized months' : 'Native bills', icon: value.dataMode === 'calendarized' ? 'calendar' : 'invoice', editable: true });
     }
+    if (this.hasPredictors() && (value.predictorGuids.length || this.step() === 'name')) selections.push({ step: 'predictor',
+      label: value.predictorGuids.length ? value.predictorGuids.map(guid => this.predictorChoices().find(choice => choice.value === guid)?.label ?? 'Unavailable predictor').join(', ') : 'Choose predictors later', icon: 'predictor', editable: true });
     return selections;
   });
   private running?: Promise<void>;
@@ -145,13 +153,13 @@ export class LibraryLifecycle {
     const accountGuid = this.workspace.account()?.guid;
     if (!accountGuid) return;
     const fixedFacility = this.navigation.inventoryFacilityGuid();
-    const initial: VisualizationCreationDraft = { name: '', facilitySelection: fixedFacility ? { kind: 'fixed', facilityGuids: [fixedFacility] } : { kind: 'all' }, chart: null, sourceKinds: [], recipe: 'custom', ...this.initialMeterChoices() };
+    const initial: VisualizationCreationDraft = { name: '', facilitySelection: fixedFacility ? { kind: 'fixed', facilityGuids: [fixedFacility] } : { kind: 'all' }, chart: null, sourceKinds: [], recipe: 'custom', ...this.initialSourceChoices() };
     this.startEditor({ initial, accountGuid });
   }
   rename(entry: VisualizationLibraryEntry): void {
     if (!this.canAct() || this.editor() || !entry.editable) return;
     this.startEditor({ accountGuid: entry.record.accountId, entry, initial: {
-      name: entry.name, facilitySelection: entry.definition?.facilitySelection ?? { kind: 'all' }, chart: null, sourceKinds: entry.sourceKinds, recipe: 'custom', ...this.initialMeterChoices()
+      name: entry.name, facilitySelection: entry.definition?.facilitySelection ?? { kind: 'all' }, chart: null, sourceKinds: entry.sourceKinds, recipe: 'custom', ...this.initialSourceChoices()
     } });
   }
   private startEditor(editor: LibraryEditor): void {
@@ -163,8 +171,8 @@ export class LibraryLifecycle {
       && this.facilities().some(item => editor.initial.facilitySelection.kind === 'fixed' && item.guid === editor.initial.facilitySelection.facilityGuids[0]);
     this.ownerChosen.set(preselected); this.step.set(editor.entry ? 'name' : preselected ? 'chart' : 'facilities');
   }
-  private initialMeterChoices() {
-    return { selectionMode: null as UtilitySelectionMode | null, resourceIds: [] as readonly string[], dataMode: 'calendarized' as const };
+  private initialSourceChoices() {
+    return { predictorGuids: [] as readonly string[], selectionMode: null as UtilitySelectionMode | null, resourceIds: [] as readonly string[], dataMode: 'calendarized' as const };
   }
   private scope(value: VisualizationCreationDraft) { return resolveVisualizationFacilities({ accountGuid: this.workspace.account()?.guid ?? '', facilitySelection: value.facilitySelection }, this.facilities()).scope; }
   private buildDefinition(): VisualizationDefinition | undefined {
@@ -173,10 +181,11 @@ export class LibraryLifecycle {
     let definition = createVisualizationSetupDefinition({ name: value.name.trim() || 'Visualization', accountGuid: editor.accountGuid,
       facilitySelection: value.facilitySelection, chart: createVisualizationChart(value.chart), sourceKinds: value.sourceKinds });
     const sourceId = definition.sources.find(source => source.kind === 'utility')?.id;
-    if (!sourceId) return definition;
     const change = (action: Parameters<typeof prepareDecisionChange>[1]) => { const result = prepareDecisionChange(definition, action, { snapshot }); if (result.state !== 'unchanged') definition = result.definition; };
-    if (this.sourceMeasure() === 'cost') change({ kind: 'measure', sourceId, measure: 'cost' });
-    if (value.selectionMode && this.selectedMode()) {
+    const predictorSourceId = definition.sources.find(source => source.kind === 'predictor')?.id;
+    if (predictorSourceId && value.predictorGuids.length) change({ kind: 'predictor-selection', sourceId: predictorSourceId, predictorGuids: value.predictorGuids });
+    if (sourceId && this.sourceMeasure() === 'cost') change({ kind: 'measure', sourceId, measure: 'cost' });
+    if (sourceId && value.selectionMode && this.selectedMode()) {
       change({ kind: 'selection-mode', sourceId, mode: value.selectionMode });
       for (const resourceId of value.resourceIds) change({ kind: 'toggle-resource', sourceId, resourceId, selected: true });
       change({ kind: 'source-settings', sourceId, settings: { dataMode: value.dataMode } });
@@ -206,6 +215,8 @@ export class LibraryLifecycle {
     this.requestDecision(result, () => {
       this.form.controls.facilitySelection.setValue(selection);
       if (result.state === 'unchanged') return;
+      const predictor = result.definition.sources.find(source => source.kind === 'predictor');
+      this.form.controls.predictorGuids.setValue(predictor?.kind === 'predictor' && predictor.selection?.kind === 'fixed' ? predictor.selection.guids : []);
       const source = result.definition.sources.find(source => source.kind === 'utility');
       if (source?.kind !== 'utility') return;
       const rule = source.selection?.kind === 'rule' ? source.selection.filter : undefined;
@@ -242,17 +253,26 @@ export class LibraryLifecycle {
   }
   selectObservation(dataMode: 'calendarized' | 'billing-period'): void {
     if (!this.canEditDraft() || dataMode === 'billing-period' && !this.nativeAvailable()) return;
-    this.form.controls.dataMode.setValue(dataMode); this.step.set('name');
+    this.form.controls.dataMode.setValue(dataMode); this.step.set(this.hasPredictors() ? 'predictor' : 'name');
   }
   toggleSource(kind: VisualizationSourceKind): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(source => source.value === kind)) return;
     const selected = this.form.controls.sourceKinds.value;
-    const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } };
-    if (kind === 'utility' && selected.includes(kind) && this.resourcesValid()) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Meter resource selections'], affectedNodeIds: [] }, apply); else apply();
+    const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } if (kind === 'predictor' && selected.includes(kind)) this.form.controls.predictorGuids.setValue([]); };
+    if (kind === 'predictor' && selected.includes(kind) && this.form.controls.predictorGuids.value.length) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Predictor selection'], affectedNodeIds: [] }, apply);
+    else if (kind === 'utility' && selected.includes(kind) && this.resourcesValid()) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Meter resource selections'], affectedNodeIds: [] }, apply); else apply();
   }
-  continueSources(): void { if (this.canContinueSources()) this.step.set(this.hasMeters() ? 'selection-mode' : 'name'); }
+  continueSources(): void { if (this.canContinueSources()) this.step.set(this.hasMeters() ? 'selection-mode' : this.hasPredictors() ? 'predictor' : 'name'); }
   continueResources(): void { if (this.canContinueResources()) this.step.set('observation'); }
-  continueObservation(): void { if (this.canContinueObservation()) this.step.set('name'); }
+  continueObservation(): void { if (this.canContinueObservation()) this.step.set(this.hasPredictors() ? 'predictor' : 'name'); }
+  togglePredictor(predictorGuid: string): void {
+    if (!this.canEditDraft() || !this.hasPredictors() || !this.predictorChoices().some(choice => choice.value === predictorGuid)) return;
+    const selected = this.form.controls.predictorGuids.value;
+    this.form.controls.predictorGuids.setValue(selected.includes(predictorGuid) ? selected.filter(guid => guid !== predictorGuid) : [...selected, predictorGuid]);
+  }
+  continuePredictors(): void {
+    if (this.canEditDraft() && this.hasPredictors() && this.predictorSelectionValid()) this.step.set('name');
+  }
   editSelection(step: VisualizationCreationStep): void {
     if (!this.canEditDraft() || !this.selections().some(selection => selection.step === step && selection.editable)) return;
     this.error.set(undefined); this.step.set(step);

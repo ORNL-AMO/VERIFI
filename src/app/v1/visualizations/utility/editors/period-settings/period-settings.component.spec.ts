@@ -1,3 +1,4 @@
+import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
@@ -6,6 +7,24 @@ import { applyPeriodForm, periodFormIssue, periodFormValue, PeriodSettingsCompon
 
 describe('utility period editing', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it('uses inclusive month inputs for predictors, preserves partial-month saved intent on hydration, and retains invalid input', () => {
+    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
+    const definition = { ...createVisualizationDefinition('Predictor', 'account-a', { kind: 'all' }, 'predictor'),
+      period: { kind: 'fixed' as const, start: '2024-01-15', end: '2024-03-10', basis: 'calendar' as const } };
+    fixture.componentRef.setInput('context', { definition, changed, validityChanged, disabled: false, editorKey: 'predictor' }); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement, component = fixture.componentInstance;
+    expect(root.querySelectorAll('input[type="month"]')).toHaveLength(2);
+    expect(root.querySelector('input[type="date"]')).toBeNull();
+    expect(root.querySelector('input[formcontrolname="includeIncomplete"]')).toBeNull();
+    expect(changed).not.toHaveBeenCalled();
+    component.form.controls.start.setValue('2024-02');
+    expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fixed', start: '2024-02-01', end: '2024-03-31', basis: 'calendar' }, comparison: { kind: 'none' } });
+    component.form.controls.end.setValue(''); expect(validityChanged).toHaveBeenLastCalledWith(true);
+    expect(component.form.controls.end.value).toBe('');
+    component.selectChoice(component.form.controls.kind, 'rolling');
+    expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'rolling', count: 12, unit: 'month', anchor: 'latest-data', basis: 'calendar', includeIncomplete: false }, comparison: { kind: 'none' } });
+  });
   it.each([
     { kind: 'fixed' as const, start: '2023-02-29', end: '2024-01-01' },
     { kind: 'fixed' as const, start: '2024-12-01', end: '2024-01-01' },

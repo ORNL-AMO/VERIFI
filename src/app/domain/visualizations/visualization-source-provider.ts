@@ -24,6 +24,15 @@ export interface VisualizationSourceCapabilities {
   readonly settings: readonly ('unit' | 'energyTreatment')[];
   readonly controls: readonly VisualizationControl[];
   readonly allowDateOverride: boolean;
+  /** False limits this adapter to a single source configuration; omitted leaves combinations to runtime compatibility. */
+  readonly allowMultipleSources?: boolean;
+  /** Original, unconverted values may share an unstacked axis. Never authorizes totals. */
+  readonly allowMixedAxisUnits?: boolean;
+}
+
+export function allowsMixedAxisUnits(chart: VisualizationChart, capabilities: readonly VisualizationSourceCapabilities[]): boolean {
+  return chart.kind === 'time-series' && chart.stack === 'none' && capabilities.length > 0
+    && capabilities.every(capability => capability.allowMixedAxisUnits === true);
 }
 
 export interface VisualizationRequestIdentity {
@@ -50,7 +59,7 @@ export interface VisualizationSourceRequest {
 
 export type VisualizationProvenance = 'measured' | 'predictor' | 'weather' | 'estimated' | 'carried-forward' | 'modeled' | 'savings';
 export type VisualizationObservation =
-  | { readonly state: 'observed'; readonly value: number; readonly provenance: VisualizationProvenance; readonly partial: boolean }
+  | { readonly state: 'observed'; readonly value: number; readonly provenance: VisualizationProvenance; readonly partial: boolean; readonly notes?: readonly string[] }
   | { readonly state: 'missing' | 'alignment-padding' | 'excluded'; readonly value: null; readonly reason: string };
 
 /** Actual inclusive civil intervals, not just fiscal-year labels. */
@@ -125,7 +134,7 @@ export interface VisualizationResolvedData {
 
 export type VisualizationSourceResolution = { readonly identity: VisualizationRequestIdentity } & (
   | { readonly state: 'ready'; readonly resolved: VisualizationResolvedData }
-  | { readonly state: 'empty'; readonly periods: readonly ResolvedVisualizationPeriod[]; readonly message: string }
+  | { readonly state: 'empty'; readonly periods: readonly ResolvedVisualizationPeriod[]; readonly message: string; readonly reasons?: readonly string[] }
   | { readonly state: 'loading' | 'waiting'; readonly message: string }
   | { readonly state: 'missing-source'; readonly references: readonly { readonly kind: VisualizationResolvedReference['kind']; readonly id: string }[]; readonly message: string }
   | { readonly state: 'invalid-analysis' | 'error' | 'unsupported'; readonly message: string }

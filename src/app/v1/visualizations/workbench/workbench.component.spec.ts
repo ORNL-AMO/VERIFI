@@ -309,7 +309,8 @@ describe('visualization workbench', () => {
     button.click(); fixture.detectChanges();
     expect(component.editor.definition()!.sources.filter(source => source.kind === choice.value)).toHaveLength(1);
     expect(button.getAttribute('aria-pressed')).toBe('true');
-    expect(root.textContent).toContain(`Data selection for ${choice.label} is not available yet.`);
+    if (choice.value === 'predictor') expect(root.querySelector('app-predictor-source-editor')).not.toBeNull();
+    else expect(root.textContent).toContain(`Data selection for ${choice.label} is not available yet.`);
     button.click(); fixture.detectChanges();
     expect(button.getAttribute('aria-pressed')).toBe('false');
     expect(component.editor.definition()!.sources).toEqual(original.sources);

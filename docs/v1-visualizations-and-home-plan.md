@@ -34,7 +34,7 @@ These are implementation/acceptance relationships, not claims about remote issue
 | Vis2: persistence | [#2903](https://github.com/ORNL-AMO/VERIFI/issues/2903) | Implemented after Vis1; durable visualization ownership, transfers and backup. |
 | Vis3: Dashboard/workbench | [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Implemented framework after Vis1/Vis2; broader real-data acceptance remains issue-owned. |
 | Vis4: utility sources | [#2905](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Implemented initial utility journey after Vis1/Vis3; production-shell review/QA remains pending. |
-| Vis5: other sources | [#2906](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Predictor/weather, Energy Uses, and analysis/model sources after Vis1/Vis3/Vis4. |
+| Vis5: other sources | [#2906](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Predictor/weather, Energy Uses, and analysis/model sources after Vis1/Vis3/Vis4; follow the [source development slices](v1-visualization-sources-plan.md) one chat at a time. |
 | Vis6: time series/comparison | [#2907](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Initial utility line/bar slice exists; broader editing follows Vis3/Vis4. |
 | Vis7: correlation/heatmap | [#2908](https://github.com/ORNL-AMO/VERIFI/issues/2908) | After Vis5/Vis6. |
 | Vis8: composition/flow | [#2909](https://github.com/ORNL-AMO/VERIFI/issues/2909) | After Vis5/Vis6. |

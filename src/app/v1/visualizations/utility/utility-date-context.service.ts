@@ -1,3 +1,4 @@
+import { latestPredictorDate } from '@domain/visualizations/predictor/predictor-source';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { Injectable, inject } from '@angular/core';
@@ -15,6 +16,14 @@ export class UtilityDateContextResolver implements PreviewDateContextResolver {
   async resolve(definition: VisualizationDefinition, identity: PreviewIdentity, signal: AbortSignal): Promise<PreviewDateContext> {
     const scope = resolveVisualizationFacilities(definition, this.workspace.facilities()).scope;
     const sources = definition.sources.filter((s): s is UtilityVisualizationSource => s.kind === 'utility');
+    if (!sources.length) {
+      if (signal.aborted || !this.workspace.isReady() || this.workspace.account()?.guid !== identity.accountGuid || this.workspace.revision() !== identity.workspaceRevision)
+        throw new DOMException('Date context superseded', 'AbortError');
+      const snapshot = this.workspace.snapshot();
+      const latest = snapshot ? definition.sources.flatMap(source => source.kind === 'predictor'
+        ? latestPredictorDate(snapshot, scope, source) ?? [] : []).sort().at(-1) : undefined;
+      return { calendarDate: civilDate(new Date()), ...(latest ? { latestDataDate: latest } : {}) };
+    }
     // Establish shared calculation demand before any native or calendarized provider uses this signal.
     await this.data.acquire(identity, signal, sources.some(s => s.dataMode === 'calendarized'), this.data.requiresGrid(sources, scope));
     const calendarDate = civilDate(new Date());

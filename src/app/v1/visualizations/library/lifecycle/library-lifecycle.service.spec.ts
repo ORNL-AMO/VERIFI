@@ -1,3 +1,4 @@
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { Router } from '@angular/router';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -20,9 +21,28 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
     if (!workspace.meters().some(item => item.guid === 'meter-a')) workspace.publish({ ...workspace.snapshot()!, meters: [...workspace.meters(), meter({})] });
     lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized');
   }
+  if (sourceKinds.includes('predictor')) lifecycle.continuePredictors();
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it('hands an exact predictor through Add and Back, retains it on compatible scope changes, and saves explicit empty setup', () => {
+    const { workspace } = configureLibraryTest();
+    const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'production', name: 'Production' };
+    workspace.publish({ ...workspace.snapshot()!, predictors: [predictor] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
+    lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('predictor');
+    lifecycle.togglePredictor(predictor.guid); expect(lifecycle.step()).toBe('predictor'); lifecycle.continuePredictors(); expect(lifecycle.step()).toBe('name');
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'fixed', resource: 'predictor', guids: ['production'] } });
+    lifecycle.editSelection('predictor'); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
+    lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Production');
+    workspace.publish({ ...workspace.snapshot()!, predictors: [] });
+    expect(lifecycle.canSubmit()).toBe(false); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
+    lifecycle.editSelection('predictor');
+    lifecycle.form.controls.predictorGuids.setValue([]); lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Set up later');
+    expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('selection');
+  });
   it.each((['energy-trend', 'cost-trend'] as const).flatMap(recipe => [
     { mode: 'source' as const, resource: 'Electricity' },
     { mode: 'group' as const, resource: 'group-a' },

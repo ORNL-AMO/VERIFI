@@ -15,7 +15,7 @@ import { RecoveryActionsComponent, VisualizationChildDraftGuard } from '../recov
 import { VisualizationFacilitySelection, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
-import { decisionNodeId, prepareDecisionChange, projectMeterItems, configuredChartSummary } from '../decisions/decision-tree';
+import { decisionNodeId, prepareDecisionChange, projectDecisionItems, configuredChartSummary } from '../decisions/decision-tree';
 import type { DecisionChangeResult, DecisionRef, VisualizationDecisionAction } from '../decisions/decision-types';
 import type { PeriodSettingsContext, UtilityEditorContext } from '../utility/editors/utility-editor-context';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
@@ -105,7 +105,7 @@ export class WorkbenchComponent {
             // Continuous form edits can arrive before the next render. Apply typed patches
             // to current intent, while rejecting removed items and superseded measure forms.
             if (action.kind === 'item-style') {
-              if (!projectMeterItems(current, action.sourceId, snapshot).some(item => action.item.resourceGuid !== undefined
+              if (!projectDecisionItems(current, action.sourceId, snapshot).some(item => action.item.resourceGuid !== undefined
                 ? item.identity.resourceGuid === action.item.resourceGuid : item.identity.seriesId === action.item.seriesId)) return;
             } else if (action.kind === 'source-settings') {
               const currentSource = current.sources.find(item => item.id === action.sourceId);
@@ -119,7 +119,8 @@ export class WorkbenchComponent {
         draftChanged: () => this.childRevision.update(value => value + 1),
         changed: next => { if (this.editor.key() === key && this.editor.localRevision() === revision) this.editor.applyDefinition(next); } };
       return { id: source.id, kind: source.kind, label: choice.label, icon: choice.icon, nodeId,
-        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}` : source.measure,
+        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}`
+          : source.kind === 'predictor' ? '' : source.measure,
         context, attention: this.invalidEditors()[nodeId] || Object.entries(this.invalidEditors()).some(([id, invalid]) => invalid && id.split(':')[1] === encodeURIComponent(source.id)) };
     });
   });
@@ -142,7 +143,8 @@ export class WorkbenchComponent {
     const period = this.editor.definition()?.period;
     if (!period) return 'Unavailable';
     if (period.kind === 'all-history') return 'All saved history';
-    if (period.kind === 'fixed') return `${period.start} – ${period.end} (${period.basis})`;
+    if (period.kind === 'fixed') return this.editor.definition()?.sources.some(source => source.kind === 'predictor')
+      ? `${period.start.slice(0, 7)} – ${period.end.slice(0, 7)} (${period.basis})` : `${period.start} – ${period.end} (${period.basis})`;
     if (period.kind === 'rolling') return `Rolling ${period.count} ${period.unit}(s), ${period.anchor} anchor (${period.basis})`;
     return period.kind === 'fiscal-year' ? `Fiscal year ${period.year}` : 'Latest saved fiscal year';
   });

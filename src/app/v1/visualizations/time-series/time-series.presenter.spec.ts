@@ -13,6 +13,23 @@ function appendSeries(evidence: VisualizationSourceEvidence, metadata: ResolvedV
 }
 
 describe('saved time-series presentation', () => {
+  it('permits unconverted mixed-unit traces only when their adapter explicitly supports shared axes', () => {
+    const base = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...base, sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
+      selection: { kind: 'fixed', resource: 'predictor', guids: ['a', 'b'] } }], series: [
+      { id: 'a', sourceId: 'predictors', metric: 'value', resourceGuid: 'a', axis: 'left' },
+      { id: 'b', sourceId: 'predictors', metric: 'value', resourceGuid: 'b', axis: 'left' }
+    ] };
+    const original = ready(definition);
+    if (original.resolution.state !== 'ready') throw new Error('Expected ready evidence');
+    const evidence: VisualizationSourceEvidence = { ...original, capabilities: { ...original.capabilities, allowMixedAxisUnits: true },
+      resolution: { ...original.resolution, resolved: { ...original.resolution.resolved,
+        series: original.resolution.resolved.series.map((series, index) => ({ ...series, unit: index ? 'widgets' : 'days' })) } } };
+    const presentation = new TimeSeriesPresenter().prepare(definition, [evidence], new AbortController().signal);
+    expect(presentation.details.rows.map(row => row[4])).toEqual(['0 days · predictor', '0 widgets · predictor']);
+    expect(prepareTimeSeries(definition, [evidence]).traces.map(trace => trace.axis)).toEqual(['left', 'left']);
+    expect(() => prepareTimeSeries(definition, [{ ...evidence, capabilities: { ...evidence.capabilities, allowMixedAxisUnits: false } }])).toThrow('compatible units');
+  });
   it('keeps observed zero, original comparison dates and actual quality in accessible details', () => {
     const definition = { ...utilityVisualizationFixture(), comparison: { kind: 'previous-year' as const, basis: 'calendar' as const } };
     const presentation = new TimeSeriesPresenter().prepare(definition, [ready(definition)], new AbortController().signal);

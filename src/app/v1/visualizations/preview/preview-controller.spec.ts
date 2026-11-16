@@ -89,6 +89,15 @@ describe('visualization preview orchestration', () => {
     for (const provider of providers) expect(provider.resolve).not.toHaveBeenCalled();
   });
 
+  it('preserves mixed setup without requesting dates or data when a production adapter disallows combinations', () => {
+    const entry = visualizationEvidenceFixture(mixedDefinition(), 1);
+    const { controller, definition, providers, resolveDates } = setupMixed({ providers: [{}, { describe: () => ({ ...entry.capabilities, allowMultipleSources: false }) }] });
+    controller.update(definition, identity);
+    expect(controller.state()).toMatchObject({ state: 'unsupported' });
+    expect(resolveDates).not.toHaveBeenCalled();
+    for (const provider of providers) expect(provider.resolve).not.toHaveBeenCalled();
+  });
+
   it('resolves compatible utility and predictor series against one shared date context and presents both', async () => {
     const { controller, definition, providers, prepare, resolveDates } = setupMixed();
     controller.update(definition, identity); await settle();

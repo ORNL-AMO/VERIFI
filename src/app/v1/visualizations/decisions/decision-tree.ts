@@ -1,5 +1,7 @@
+import { predictorSeriesId } from '@domain/visualizations/predictor/predictor-source';
+import { predictorResourceChoices, projectPredictorItems } from '../predictor/predictor-items';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import { createVisualizationDefinition, type ResourceSelection, type UtilityVisualizationSource,
+import { createVisualizationDefinition, type ResourceSelection, type UtilityVisualizationSource, type PredictorVisualizationSource,
   type VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { utilityUnit } from '@domain/visualizations/utility/utility-catalog';
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
@@ -11,6 +13,11 @@ import { meterResourceChoices, nativeObservationAvailable, projectMeterItems, it
 export { meterSelectionChoices, meterResourceChoices, nativeObservationAvailable, projectMeterItems, configuredChartSummary } from '../utility/utility-items';
 import type { DecisionChangeContext, DecisionChangeResult, DecisionItemIdentity, DecisionItemPatch,
   DecisionRef, VisualizationDecisionAction } from './decision-types';
+
+export function projectDecisionItems(definition: VisualizationDefinition, sourceId: string, snapshot: AccountWorkspaceSnapshot) {
+  return definition.sources.find(source => source.id === sourceId)?.kind === 'predictor'
+    ? projectPredictorItems(definition, sourceId, snapshot) : projectMeterItems(definition, sourceId, snapshot);
+}
 
 export function decisionNodeId(ref: DecisionRef): string {
   return [ref.kind, ref.sourceId, ref.itemKey].filter(value => value !== undefined).map(value => encodeURIComponent(value!)).join(':');
@@ -34,9 +41,9 @@ function compatiblePinnedUnit(definition: VisualizationDefinition, source: Utili
   });
 }
 
-function ensureSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource): VisualizationDefinition {
+function ensureSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource): VisualizationDefinition {
   if (!source.selection) return definition;
-  const metric = utilityMeasureKey(source);
+  const metric = source.kind === 'predictor' ? 'value' : utilityMeasureKey(source);
   const declared = definition.series.filter(series => series.sourceId === source.id && series.metric === metric);
   if (declared.some(series => !series.resourceGuid)) return definition;
   if (source.selection.kind === 'fixed' && source.selection.guids.every(guid => declared.some(series => series.resourceGuid === guid))) return definition;
@@ -61,7 +68,7 @@ function cleanJson<T>(value: T): T {
     .filter(([, entry]) => entry !== undefined).map(([key, entry]) => [key, cleanJson(entry)])) as T;
   return value;
 }
-function patchItem(definition: VisualizationDefinition, source: UtilityVisualizationSource, identity: DecisionItemIdentity, changes: DecisionItemPatch): VisualizationDefinition {
+function patchItem(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource, identity: DecisionItemIdentity, changes: DecisionItemPatch): VisualizationDefinition {
   const prepared = ensureSeries(definition, source), selected = sourceSeries(prepared, source, identity);
   if (!selected) return definition;
   const apply = <T extends object>(value: T): T => {
@@ -76,7 +83,7 @@ function patchItem(definition: VisualizationDefinition, source: UtilityVisualiza
       return result.axis ? result : { ...result, axis: 'left' };
     }
     const overrides = [...series.overrides ?? []], index = overrides.findIndex(entry => overrideMatches(entry, identity, definition.accountGuid));
-    const provider = identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === utilitySeriesId(source.id, identity.resourceGuid!)
+    const provider = identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === (source.kind === 'predictor' ? predictorSeriesId : utilitySeriesId)(source.id, identity.resourceGuid!)
       && (entry.accountGuid ?? definition.accountGuid) === definition.accountGuid) : undefined;
     const { seriesId: _providerId, resourceGuid: _providerResource, ...retained } = provider ?? {};
     const override = apply(index >= 0 ? overrides[index] : { ...retained, ...identity, accountGuid: definition.accountGuid });
@@ -87,8 +94,8 @@ function patchItem(definition: VisualizationDefinition, source: UtilityVisualiza
     return { ...base, ...(overrides.length ? { overrides } : {}) };
   }) };
 }
-function withoutItem(definition: VisualizationDefinition, source: UtilityVisualizationSource, identity: DecisionItemIdentity): VisualizationDefinition {
-  const providerIdentity: DecisionItemIdentity = identity.resourceGuid !== undefined ? { seriesId: utilitySeriesId(source.id, identity.resourceGuid) } : identity;
+function withoutItem(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource, identity: DecisionItemIdentity): VisualizationDefinition {
+  const providerIdentity: DecisionItemIdentity = identity.resourceGuid !== undefined ? { seriesId: (source.kind === 'predictor' ? predictorSeriesId : utilitySeriesId)(source.id, identity.resourceGuid) } : identity;
   return pruneChart({ ...definition, series: definition.series.filter(series => !(series.sourceId === source.id && identity.resourceGuid !== undefined && series.resourceGuid === identity.resourceGuid))
     .map(series => {
       if (series.sourceId !== source.id || !series.overrides) return series;
@@ -104,7 +111,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   let nextSection: DecisionRef | undefined;
   const affect = (ref: DecisionRef) => affected.add(decisionNodeId(ref));
   const clearItems = (sourceId: string, allBindings = false) => {
-    const items = projectMeterItems(definition, sourceId, context.snapshot);
+    const items = projectDecisionItems(definition, sourceId, context.snapshot);
     if (allBindings && items.length) cleared.push(`${items.length} selected item${items.length === 1 ? '' : 's'}`);
     if (items.some(item => item.customized) || hasSourcePresentation(definition, sourceId)) cleared.push('Customized item presentation');
     affect({ kind: 'resources', sourceId });
@@ -118,8 +125,8 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       const changed = next.sources.find(item => item.id === source.id);
       if (!visualizationIntentEqual('selection' in source ? source.selection : undefined, changed && 'selection' in changed ? changed.selection : undefined)) affect({ kind: 'resources', sourceId: source.id });
       if (source.kind === 'utility' && changed?.kind === 'utility' && !visualizationIntentEqual(source.charge, changed.charge)) affect({ kind: 'data-settings', sourceId: source.id });
-      const retained = new Set(projectMeterItems(next, source.id, context.snapshot).map(item => item.key));
-      for (const item of projectMeterItems(definition, source.id, context.snapshot)) if (!retained.has(item.key)) {
+      const retained = new Set(projectDecisionItems(next, source.id, context.snapshot).map(item => item.key));
+      for (const item of projectDecisionItems(definition, source.id, context.snapshot)) if (!retained.has(item.key)) {
         affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
       }
     }
@@ -145,7 +152,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     if (definition.chart?.kind !== action.chart.kind) for (const source of definition.sources) {
       const ownSeries = definition.series.filter(series => series.sourceId === source.id);
       if (ownSeries.some(series => series.traceType !== undefined || series.overrides?.some(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid && override.traceType !== undefined))) cleared.push('Per-item trace types');
-      for (const item of projectMeterItems(definition, source.id, context.snapshot)) affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
+      for (const item of projectDecisionItems(definition, source.id, context.snapshot)) affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
       next = { ...next, series: next.series.map(series => {
         if (series.sourceId !== source.id) return series;
         const { traceType: _type, overrides: prior, ...base } = series;
@@ -169,7 +176,41 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     nextSection = { kind: 'sources' };
   } else {
     const source = definition.sources.find(source => source.id === action.sourceId);
+    if (source?.kind === 'predictor') {
+      if (action.kind === 'predictor-selection') {
+        const choices = predictorResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope);
+        const previous = source.selection?.kind === 'fixed' && source.selection.resource === 'predictor' ? source.selection.guids : [];
+        const guids = [...new Set(action.predictorGuids)], added = guids.filter(guid => !previous.includes(guid)), removed = previous.filter(guid => !guids.includes(guid));
+        if (added.some(guid => !choices.some(choice => choice.value === guid))) return { state: 'unchanged' };
+        const selection: ResourceSelection | undefined = guids.length ? { kind: 'fixed', resource: 'predictor', guids } : undefined;
+        if (visualizationIntentEqual(source.selection, selection)) return { state: 'unchanged' };
+        if (source.selection && !(source.selection.kind === 'fixed' && source.selection.resource === 'predictor')) {
+          clearItems(source.id, true); cleared.push('Previous predictor selection'); affect({ kind: 'source', sourceId: source.id });
+          next = pruneChart({ ...next, series: next.series.filter(series => series.sourceId !== source.id) });
+        }
+        const items = projectPredictorItems(definition, source.id, context.snapshot);
+        for (const guid of removed) {
+          const item = items.find(item => item.identity.resourceGuid === guid);
+          if (item?.customized) cleared.push(`${item.label} presentation`);
+          affect({ kind: 'item', sourceId: source.id, itemKey: itemKey({ resourceGuid: guid }) });
+          next = withoutItem(next, source, { resourceGuid: guid });
+        }
+        if (!guids.length) {
+          if (hasSourcePresentation(definition, source.id)) cleared.push('Customized item presentation');
+          next = pruneChart({ ...next, series: next.series.filter(series => series.sourceId !== source.id) });
+        }
+        const { selection: _selection, ...base } = source;
+        next = { ...next, sources: next.sources.map(item => item.id === source.id ? { ...base, ...(selection ? { selection } : {}) } : item) };
+        if (selection) next = ensureSeries(next, { ...base, selection });
+        affect({ kind: 'resources', sourceId: source.id });
+        nextSection = { kind: 'source', sourceId: source.id };
+      } else if (action.kind === 'item-style' && projectPredictorItems(definition, source.id, context.snapshot)
+        .some(item => item.identity.resourceGuid === action.item.resourceGuid && action.item.resourceGuid !== undefined)) {
+        next = patchItem(definition, source, action.item, action.changes);
+      } else return { state: 'unchanged' };
+    } else {
     if (source?.kind !== 'utility') return { state: 'unchanged' };
+
     if (action.kind === 'selection-mode') {
       if (source.selectionMode === action.mode) return { state: 'unchanged' };
       clearItems(source.id, true);
@@ -194,7 +235,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       const added = ids.filter(id => !selected.includes(id)), removed = selected.filter(id => !ids.includes(id));
       const available = new Set(meterResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, mode, source.measure).map(choice => choice.value));
       if (added.some(id => !available.has(id))) return { state: 'unchanged' };
-      const items = removed.length ? projectMeterItems(definition, source.id, context.snapshot) : [];
+      const items = removed.length ? projectDecisionItems(definition, source.id, context.snapshot) : [];
       for (const resourceId of removed) {
         const identity: DecisionItemIdentity = mode === 'source' ? { seriesId: utilitySeriesId(source.id, `source:${resourceId}`) } : { resourceGuid: resourceId };
         const item = items.find(item => item.key === itemKey(identity));
@@ -252,11 +293,12 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         clearItems(source.id); next = { ...next, series: next.series.filter(series => series.sourceId !== source.id) };
       }
       next = replaceSource(next, changed);
-      const firstItem = projectMeterItems(next, source.id, context.snapshot)[0];
+      const firstItem = projectDecisionItems(next, source.id, context.snapshot)[0];
       nextSection = firstItem ? { kind: 'item', sourceId: source.id, itemKey: firstItem.key } : { kind: 'data-settings', sourceId: source.id };
     } else if (action.kind === 'item-style') {
       next = patchItem(definition, source, action.item, action.changes);
     }
+  }
   }
   if ('sourceId' in action && ['toggle-resource', 'set-resources', 'selection-mode'].includes(action.kind) && !visualizationIntentEqual(next, definition)) {
     const source = next.sources.find(source => source.id === action.sourceId);

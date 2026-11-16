@@ -1,0 +1,4 @@
+:host { display: block; }
+.predictor-choice { position: relative; padding-top: 1.75rem; }
+.creation-choice > .creation-choice__selection { position: absolute; top: .65rem; left: .65rem; color: var(--v1-muted); }
+.creation-choice[aria-pressed="true"] > .creation-choice__selection { color: var(--v1-action); }

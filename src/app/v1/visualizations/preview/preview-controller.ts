@@ -53,6 +53,9 @@ export class PreviewController {
     if (providers.some(provider => !provider) || !presenter || !this.registry.dates) {
       this.value.set({ state: 'unsupported', message: 'These data sources or chart settings are not supported yet. Your saved setup is preserved.' }); return;
     }
+    if (decoded.definition.sources.length > 1 && decoded.definition.sources.some((source, index) => providers[index]!.describe(source).allowMultipleSources === false)) {
+      this.value.set({ state: 'unsupported', message: 'A selected source supports one source configuration at a time. Mixed-source charts are not supported yet. Your saved setup is preserved.' }); return;
+    }
     const abort = this.abort = new AbortController();
     const generation = this.generation;
     this.value.set({ state: 'loading', message: 'Preparing chart…' });
@@ -81,7 +84,7 @@ export class PreviewController {
       const dateContext = Object.freeze({ ...await this.registry.dates!.resolve(definition, identity, abort.signal) });
       if (!this.current(generation, abort)) return;
       if (!civilDate(dateContext.calendarDate) || dateContext.latestDataDate !== undefined && !civilDate(dateContext.latestDataDate)
-        || definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate) {
+        || definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate && !definition.sources.every(source => source.kind === 'predictor')) {
         this.value.set({ state: 'incompatible', message: 'The selected period has no valid calendar date or latest-data anchor.' }); return;
       }
       const requestId = `visualization-preview-${this.instanceId}-${generation}`;
@@ -110,7 +113,7 @@ export class PreviewController {
       if (unavailable && unavailable.resolution.state !== 'ready') {
         const resolution = unavailable.resolution;
         this.value.set({ state: resolution.state === 'waiting' ? 'loading' : resolution.state === 'invalid-analysis' ? 'error' : resolution.state,
-          message: resolution.message }); return;
+          message: resolution.message, ...('reasons' in resolution ? { reasons: resolution.reasons } : {}) }); return;
       }
       const compatibility = checkVisualizationCompatibility(definition, evidence);
       if (compatibility.state !== 'compatible') {

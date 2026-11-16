@@ -1,3 +1,4 @@
+import { allowsMixedAxisUnits } from './visualization-source-provider';
 import { resolveVisualizationSeries } from './visualization-series';
 import type { VisualizationChart, VisualizationDefinition, VisualizationScope, VisualizationSource } from './visualization-definition';
 import { decodeVisualizationDefinition } from './visualization-validation';
@@ -236,6 +237,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('capability', 'This source does not support the requested measure, aggregation, period, comparison, or chart.', source.id);
     if (!sameIntent(chart, chartSupport.chart) || chartSupport.state !== 'supported')
       add('capability', chartSupport.state === 'unsupported' ? chartSupport.reasons.join(' ') : 'Review support for these exact chart settings.', source.id);
+    if (capabilities.allowMultipleSources === false && definition.sources.length > 1)
+      add('capability', 'This source supports only one source configuration at a time.', source.id);
     if (Object.keys(source.settings ?? {}).some(key => !capabilities.settings.includes(key as 'unit' | 'energyTreatment')))
       add('capability', 'This source cannot preserve the requested setting binding.', source.id);
     if (chart.kind === 'time-series' && chart.stack !== 'none' && !capabilities.controls.includes('stacking')
@@ -320,7 +323,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   if (chart.kind !== 'scatter' && chart.kind !== 'correlation') {
     for (const axis of ['left', 'right'] as const) {
       const axisSeries = selected.filter(entry => chart.kind !== 'time-series' || entry.selected.axis === axis);
-      if (new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
+      const axisCapabilities = [...new Set(axisSeries.map(entry => entry.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
+      if (!allowsMixedAxisUnits(chart, axisCapabilities) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
         add('units', 'Use compatible units and currency on each axis; composition totals require one meaning.');
     }
   }

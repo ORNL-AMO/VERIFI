@@ -1,3 +1,4 @@
+import { allowsMixedAxisUnits } from '@domain/visualizations/visualization-source-provider';
 import { Injectable } from '@angular/core';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import type { VisualizationSourceEvidence, VisualizationObservation } from '@domain/visualizations/visualization-source-provider';
@@ -34,8 +35,10 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   if (selected.some(item => !['line', 'bar'].includes(item.selected.traceType ?? chart.defaultTraceType)))
     throw new Error('Choose unstacked line or bar traces.');
   for (const axis of ['left', 'right'] as const) {
-    const signatures = selected.filter(item => item.selected.axis === axis).map(item => `${item.metadata.dimension}:${item.metadata.unit}:${item.metadata.currency ?? ''}:${item.metadata.energyTreatment ?? ''}`);
-    if (new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
+    const axisSeries = selected.filter(item => item.selected.axis === axis);
+    const axisCapabilities = [...new Set(axisSeries.map(item => item.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
+    const signatures = axisSeries.map(item => `${item.metadata.dimension}:${item.metadata.unit}:${item.metadata.currency ?? ''}:${item.metadata.energyTreatment ?? ''}`);
+    if (!allowsMixedAxisUnits(chart, axisCapabilities) && new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
   }
   const warnings = new Set(resolved.flatMap(entry => entry.result.quality.warnings));
   if (resolved.some(entry => entry.result.quality.partial)) warnings.add('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
