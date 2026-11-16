@@ -13,6 +13,20 @@ import { projectAnalysisItems } from '../analysis-items';
 
 describe('facility analysis source editing', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it('edits wildcard Analysis presentation without activating dormant provider preferences', () => {
+    const { snapshot } = analysisFixture(), initial = analysisDefinition();
+    const dormant = { seriesId: 'source-1:result', label: 'Dormant label', visible: false };
+    const definition = { ...initial, series: [{ id: 'wildcard', sourceId: 'source-1', metric: 'actual', axis: 'left' as const, overrides: [dormant] }] };
+    const before = structuredClone(definition);
+    const result = prepareDecisionChange(definition, { kind: 'item-style', sourceId: 'source-1', item: { resourceGuid: 'analysis-a' }, changes: { color: '#123456' } }, { snapshot });
+    expect(result.state).toBe('apply');
+    if (result.state === 'unchanged') throw new Error('Expected color change');
+    expect(projectAnalysisItems(result.definition, 'source-1', snapshot)[0].appearance).toMatchObject({ color: '#123456', visible: true });
+    expect(projectAnalysisItems(result.definition, 'source-1', snapshot)[0].appearance.label).not.toBe('Dormant label');
+    expect(result.definition.series[0].overrides).toContainEqual(dormant);
+    expect(result.definition.sources).toEqual(definition.sources);
+    expect(definition).toEqual(before);
+  });
   it('emits typed bindings, measures and interval requests; hydration and disabled controls do not edit intent', () => {
     const workspace = new AccountWorkspaceStore(); workspace.publish(analysisFixture().snapshot);
     TestBed.configureTestingModule({ imports: [AnalysisEditorsModule], providers: [provideRouter([]), analysisPickerTestProvider(), { provide: AccountWorkspaceStore, useValue: workspace }] });

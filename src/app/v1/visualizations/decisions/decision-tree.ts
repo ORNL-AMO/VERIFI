@@ -91,7 +91,7 @@ function patchItem(definition: VisualizationDefinition, source: UtilityVisualiza
   return { ...prepared, series: prepared.series.map(series => {
     if (series.id !== selected.id) return series;
     const overrides = [...series.overrides ?? []], index = overrides.findIndex(entry => overrideMatches(entry, identity, definition.accountGuid));
-    const provider = identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === (source.kind === 'analysis' ? analysisSeriesId : source.kind === 'predictor' ? predictorSeriesId : source.kind === 'energy-use' ? (id: string, key: string) => energyUseSeriesId(source, key) : utilitySeriesId)(source.id, identity.resourceGuid!)
+    const provider = source.kind !== 'analysis' && identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === (source.kind === 'predictor' ? predictorSeriesId : source.kind === 'energy-use' ? (id: string, key: string) => energyUseSeriesId(source, key) : utilitySeriesId)(source.id, identity.resourceGuid!)
       && (entry.accountGuid ?? definition.accountGuid) === definition.accountGuid) : undefined;
     if (series.resourceGuid && series.resourceGuid === identity.resourceGuid && changes.order === undefined) {
       const { overrides: _old, ...result } = apply(series);
