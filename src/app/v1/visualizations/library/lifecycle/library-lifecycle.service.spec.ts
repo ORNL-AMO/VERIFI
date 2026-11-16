@@ -1,3 +1,6 @@
+import { equipmentFixture } from '@domain/visualizations/testing/equipment-fixtures';
+import { getNewIdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { Router } from '@angular/router';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
@@ -22,9 +25,51 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
     lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized');
   }
   if (sourceKinds.includes('predictor')) lifecycle.continuePredictors();
+  if (sourceKinds.includes('energy-use')) { lifecycle.selectEnergyUseMode('equipment'); lifecycle.continueEquipment(); }
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it.each([
+    ['group', 'energy-group', 'energy-use-group'], ['equipment', 'equipment-a', 'equipment'],
+    ['equipment-type', 'Pump', undefined], ['linked-meter-group', 'linked-group', 'meter-group']
+  ] as const)('collects %s selection before resources and reviews switching methods', (mode, id, resource) => {
+    const { workspace } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [equipmentFixture({ energyUseGroupId: 'energy-group', equipmentType: 'Pump', utilityMeterGroupIds: ['linked-group'] })],
+      energyUseGroups: [{ ...getNewIdbFacilityEnergyUseGroup('account-a', 'facility-a'), guid: 'energy-group' }],
+      meterGroups: [{ ...getNewIdbUtilityMeterGroup('Energy', 'Linked group', 'facility-a', 'account-a'), guid: 'linked-group' }] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('energy-use-selection-mode'); lifecycle.selectEnergyUseMode(mode);
+    expect(lifecycle.equipmentChoices().some(choice => choice.guid === id)).toBe(true);
+    lifecycle.form.controls.energyUseResourceIds.setValue([id]); lifecycle.continueEquipment(); lifecycle.form.controls.name.setValue('Saved selection');
+    expect(lifecycle.canSubmit()).toBe(true);
+    const source = lifecycle.draftDefinition()!.sources[0];
+    expect(source).toMatchObject({ selectionMode: mode, aggregation: mode === 'equipment' ? 'none' : 'sum',
+      ...(resource ? { selection: { kind: 'fixed', resource, guids: [id] } } : { equipmentTypes: ['Pump'] }) });
+    const next = mode === 'equipment' ? 'group' : 'equipment';
+    lifecycle.selectEnergyUseMode(next); expect(lifecycle.confirmation()).toBe('decision');
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual([id]); lifecycle.cancelConfirmation();
+    expect(lifecycle.form.controls.energyUseMode.value).toBe(mode);
+    lifecycle.selectEnergyUseMode(next); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual([]); expect(lifecycle.form.controls.energyUseMode.value).toBe(next);
+    expect(lifecycle.form.controls.name.value).toBe('Saved selection');
+  });
+  it('collects exact equipment in Add with annual defaults and protects missing and removed selections', () => {
+    const { workspace } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [equipmentFixture()] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
+    lifecycle.continueFacilities(); lifecycle.selectChart('bar'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('energy-use-selection-mode'); lifecycle.selectEnergyUseMode('equipment'); expect(lifecycle.step()).toBe('equipment'); lifecycle.form.controls.energyUseResourceIds.setValue(['equipment-a']); lifecycle.continueEquipment();
+    lifecycle.form.controls.name.setValue('Equipment'); expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()).toMatchObject({ chart: { defaultTraceType: 'bar', interval: 'yearly', stack: 'none' }, sources: [{ aggregation: 'none', selection: { kind: 'fixed', resource: 'equipment', guids: ['equipment-a'] } }], period: { kind: 'latest-saved-year' } });
+    lifecycle.editSelection('equipment'); expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
+    workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [] }); expect(lifecycle.equipmentSelectionValid()).toBe(false);
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
+    lifecycle.toggleSource('energy-use'); expect(lifecycle.confirmation()).toBe('decision'); lifecycle.cancelConfirmation();
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
+    lifecycle.form.controls.energyUseResourceIds.setValue([]); lifecycle.continueEquipment(); expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('selection');
+  });
+
   it('saves All with an empty catalog and tracks future predictors until an individual is deselected', () => {
     const { workspace } = configureLibraryTest();
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();

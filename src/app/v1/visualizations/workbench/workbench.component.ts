@@ -144,6 +144,8 @@ export class WorkbenchComponent {
             if (action.kind === 'item-style') {
               if (!projectDecisionItems(current, action.sourceId, snapshot).some(item => action.item.resourceGuid !== undefined
                 ? item.identity.resourceGuid === action.item.resourceGuid : item.identity.seriesId === action.item.seriesId)) return;
+            } else if (action.kind === 'equipment-unit') {
+              if (source.kind !== 'energy-use' || current.sources.find(item => item.id === source.id)?.kind !== 'energy-use') return;
             } else if (action.kind === 'source-settings') {
               const currentSource = current.sources.find(item => item.id === action.sourceId);
               if (source.kind !== 'utility' || currentSource?.kind !== 'utility' || currentSource.measure !== source.measure) return;
@@ -165,6 +167,7 @@ export class WorkbenchComponent {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : 'Chart not selected';
   });
+  readonly annualEquipment = computed(() => this.editor.definition()?.sources.some(source => source.kind === 'energy-use') ?? false);
   readonly calendarizedOnly = computed(() => !this.editor.definition()?.sources.some(source => source.kind === 'utility' && source.dataMode === 'billing-period'));
   readonly previewIdentity = computed(() => ({ accountGuid: this.accountGuid(), workspaceRevision: this.workspace.revision(),
     definitionGuid: this.navigation.routeState().visualizationGuid ?? '', definitionRevision: this.editor.localRevision() }));

@@ -2,7 +2,7 @@
 
 Development guide for [VIS5 #2906](https://github.com/ORNL-AMO/VERIFI/issues/2906), under the [Visualizations and Home plan](v1-visualizations-and-home-plan.md). Work through predictors and saved weather first, then Energy Uses, then analysis results and saved models. Each slice is a separate development chat with its own acceptance checkpoint.
 
-P1–P4 are complete under their agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
+P1–P4 and E1 are complete under their agreed focused acceptance. Later slices remain planned work; their outlines do not establish source support.
 
 ## Working one chat at a time
 
@@ -29,8 +29,8 @@ Completed behavior belongs in the owning feature references, not a growing imple
 - [x] **P2 — Weather and quality hardening: Complete**
 - [x] **P3 — Compatible combinations: Complete**
 - [x] **P4 — Predictor acceptance: Complete**
-- [ ] **E1 — Equipment history: Not started**
-- [ ] **E2 — Groups and facilities: Not started**
+- [x] **E1 — Equipment history: Complete**
+- [ ] **E2 — Groups and facilities: In progress**
 - [ ] **E3 — Energy Uses acceptance: Not started**
 - [ ] **A1 — Facility analysis results: Not started**
 - [ ] **A2 — Account analysis results: Not started**
@@ -73,21 +73,25 @@ Finish P1–P4 before starting Energy Uses. These are working checkpoints within
 
 **Acceptance:** Focused reference, scope, presentation, backup, and recovery checks plus native save/restore/preview journeys pass. Restored charts retain accessible values and were inspected in wide/narrow, light/dark, and print layouts. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell acceptance remains separately tracked.
 
-## Energy Uses outline
+## Energy Uses
 
-Refine these slices after P4. Start with [Energy Uses architecture](v1-energy-uses-architecture.md), its [annual projection](../src/app/v1/data/energy-uses/models/energy-use-projection.models.ts), and the visualization contracts. Reuse existing projections/calculations; unsupported measures need explicit explanations rather than new formulas.
+E1 is complete. The requested Meter-style selection refinement also delivers E2 group selection; facility projections and remaining E2 acceptance are still pending. Start with [Energy Uses architecture](v1-energy-uses-architecture.md), its [annual projection](../src/app/domain/calculations/energy-footprint/energy-use-projection.ts), and the visualization contracts. Reuse existing projections/calculations; unsupported measures need explicit explanations rather than new formulas.
 
 ### E1 Equipment history
 
-**Outcome and boundaries:** Select saved equipment and project existing annual values into yearly line/bar charts. Preserve explicit-year precedence, source occurrence identity, carry-forward provenance, retirement, and unavailable/invalid newer data. Keep latest saved/pinned fiscal-year behavior explicit. Never create history while viewing or fabricate monthly observations.
+**Outcome:** Exact saved equipment selections render independent annual consumption traces in yearly, unstacked line/bar charts. Current projection meaning belongs to [equipment annual history](v1-visualization-foundation.md#equipment-annual-history), editing to [equipment history setup](v1-visualization-workbench.md#equipment-history-setup), and presentation identity to [persistence](v1-visualization-persistence.md#references-and-transfer-rules).
 
-**Acceptance and validation:** Match the authoritative annual projection, including source year/unit and partial coverage. Test explicit versus carried-forward values, invalid/ambiguous rows, retirement, zero, fiscal intervals, and unchanged annual records.
+**Agreed boundaries:** Latest saved fiscal year is the default; selected equipment’s saved consumption/operating-condition years define latest/all-history bounds, including intervening years. Pinned years may explicitly project beyond those bounds. Reuse source occurrence precedence, original year/unit/override evidence, carry-forward, retirement, known partial totals and explicit later history. Require matching actual fiscal intervals. Follow facility/account owner energy units or pin compatible energy units. Keep exact identities and appearance through saved edits and verified mappings. No history writes, consumption recalculation, monthly resampling, live All resource selection, source-level traces, mixed sources, facility projections, composition or capture. The later requested selector refinement adds group/type/linked-group traces as described in E2.
+
+**Acceptance:** Focused projection, selection/editor, reference/transfer mapping, preview-lifecycle and existing Energy Uses regressions pass. Native save/reopen/edit and keyboard journeys preserve annual records without meter calculation demand; chart/control presentation was inspected in wide/light, narrow/dark and print media. Broader native backup/recovery acceptance remains E3; regression/release gates remain with PR review and CI/CD.
 
 ### E2 Groups and facilities
 
-**Outcome and boundaries:** Add group/facility projections with explicit membership, compatible units, actual fiscal periods, and nonoverlapping contribution identities. Keep Energy Use groups distinct from utility meter-group links. Composition, hierarchy/flow editing, and capture stay in later phases.
+**Current delivery:** The requested Meter-style Select by flow supports Energy use group, Equipment, Equipment type and Linked meter group in Add and the workbench. Groups/types have one combined annual trace using current matching equipment; exact Equipment mode remains independent traces. Preserve empty selections as gaps, partial coverage, source occurrence evidence, typed group namespaces and duplicate-link deduplication. Linked groups can share equipment; overlapping contribution identities produce a comparison notice instead of a combined total. Source records remain unchanged. Focused selection, saved journeys and account/facility backup round trips cover these modes.
 
-**Acceptance and validation:** Projections match existing results; partial coverage stays visible and incompatible fiscal rollups are unavailable. Test membership, orphan/empty groups, double counting, unit differences, and same-label/different-interval years.
+**Remaining outcome and boundaries:** Refine facility projections and the remaining composed group/facility acceptance, including actual fiscal intervals, compatible units, orphan/empty groups and scope changes. Do not treat selection-mode delivery as completed facility rollup support. Keep Energy Use groups distinct from utility meter-group links. Composition, hierarchy/flow editing and capture stay in later phases.
+
+**Remaining acceptance:** Verify pending facility projections against existing results, fiscal compatibility, cross-facility membership and nonoverlapping totals. Retain the selector refinement’s existing checks rather than duplicating them.
 
 ### E3 Energy Uses acceptance
 
@@ -131,10 +135,10 @@ Do not defer deterministic source tests to acceptance slices or VIS10. Acceptanc
 
 ## Continuation
 
-- **Next slice:** E1 — Equipment history.
-- **Current state:** P1–P4 are complete; the predictor/weather milestone is closed under focused acceptance. Current behavior is owned by the foundation and workbench references linked above.
-- **Decisions for the next chat:** Refine E1 against the authoritative annual Energy Use projection, including source-year precedence, carry-forward provenance, units, retirement, and fiscal periods. Keep monthly resampling and viewing-time history creation unsupported.
+- **Next slice:** Remaining E2 — facility projections and composed acceptance. No facility rollups were implemented in the selector refinement.
+- **Current state:** P1–P4 and E1 are complete under focused acceptance. Equipment visualizations reuse the neutral annual projection; the foundation, workbench, Energy Uses architecture and persistence references own current behavior. The subsequent requested selector refinement implements four selection modes and combined group/type traces; E2 remains in progress.
+- **Decisions for the next chat:** Refine remaining E2 facility totals and composed acceptance against existing results. Preserve the implemented group/type/linked-group selection meaning, owner/pinned units and actual fiscal-period compatibility. Keep Energy Use groups distinct from utility meter-group links; bulk current resource selection does not establish live All resource support.
 - **Blockers:** None identified. Later slices require refinement when reached.
-- **Outstanding acceptance:** Energy Uses and analysis/model source checkpoints remain open. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan.
+- **Outstanding acceptance:** E2–E3 and analysis/model checkpoints remain open. Broader native equipment backup/recovery journeys belong to E3. Broader regression/release validation remains with PR review and CI/CD. VIS4 production-shell QA remains separately tracked in the parent plan. Native OS print-dialog checks were not performed.
 
-To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on E1 only. Inspect the annual Energy Use projection, refine equipment-history behavior, implement and validate the agreed slice, update the handoff, and stop before E2.”
+To start the next chat: “Use `docs/v1-visualization-sources-plan.md` and work on E2 only. Inspect existing group/facility annual results, refine membership, units and fiscal-period behavior, implement and validate the agreed slice, update the handoff, and stop before E3.”

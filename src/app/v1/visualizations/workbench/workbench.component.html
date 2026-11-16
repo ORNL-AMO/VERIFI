@@ -80,9 +80,10 @@
             <p class="visualization-workbench__default">Default for new items: {{ savedChart.defaultTraceType }}</p>
             <span class="visualization-control-label">Interval</span>
             <div class="visualization-buttons" role="group" aria-label="Chart interval">
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly() || annualEquipment()" [attr.aria-pressed]="savedChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
               <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'yearly'" (click)="setInterval('yearly')">Yearly</button>
             </div>
+            @if (annualEquipment()) { <p>Equipment consumption uses annual fiscal periods.</p> }
             @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
           }
         </app-visualization-decision-section>
@@ -100,6 +101,7 @@
           <app-visualization-decision-section [nodeId]="source.nodeId" [label]="source.label" [summary]="source.summary" [icon]="source.icon" [attention]="source.attention"
             [expanded]="expandedNodes().has(source.nodeId)" (expandedChange)="setSection(source.nodeId, $event)">
             @if (source.kind === 'utility') { <app-utility-source-editor [context]="source.context"/> }
+            @else if (source.kind === 'energy-use') { <app-equipment-source-editor [context]="source.context"/> }
             @else if (source.kind === 'predictor') { <app-predictor-source-editor [context]="source.context"/> }
             @else { <p role="status">Setup required. Data selection for {{ source.label }} is not available yet.</p> }
           </app-visualization-decision-section>

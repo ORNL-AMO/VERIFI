@@ -60,7 +60,7 @@ export function applyPeriodForm(definition: VisualizationDefinition, value: Peri
 }
 
 function periodSettingsFingerprint(definition: VisualizationDefinition): string {
-  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor')]);
+  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor'), definition.sources.some(source => source.kind === 'energy-use')]);
 }
 
 @Component({ selector: 'app-utility-period-settings', standalone: false, templateUrl: './period-settings.component.html',
@@ -73,6 +73,8 @@ export class PeriodSettingsComponent {
   readonly conflict = signal(false);
   readonly disabled = signal(true);
   readonly monthOnly = signal(false);
+  readonly annualOnly = signal(false);
+  readonly unsupportedEquipmentPeriod = signal(false);
   readonly retainedPartial = signal(false);
   readonly unsupportedPredictorPeriod = signal(false);
   readonly form = new FormGroup({
@@ -93,6 +95,8 @@ export class PeriodSettingsComponent {
     const hadInvalidInput = !!periodFormIssue(this.form.getRawValue(), this.monthOnly());
     this.contextValue = context; this.disabled.set(context.disabled);
     this.monthOnly.set(context.definition.sources.some(source => source.kind === 'predictor'));
+    this.annualOnly.set(context.definition.sources.some(source => source.kind === 'energy-use'));
+    this.unsupportedEquipmentPeriod.set(this.annualOnly() && (context.definition.comparison.kind !== 'none' || !['all-history', 'latest-saved-year', 'fiscal-year'].includes(context.definition.period.kind)));
     const period = context.definition.period;
     this.retainedPartial.set(this.monthOnly() && period.kind === 'fixed' && (period.start !== period.start.slice(0, 7) + '-01'
       || period.end !== predictorMonthRange(Number(period.end.slice(0, 4)) * 12 + Number(period.end.slice(5, 7)) - 1).end));
@@ -123,9 +127,16 @@ export class PeriodSettingsComponent {
   selectChoice<T>(control: FormControl<T>, value: T): void {
     if (this.disabled() || control.disabled || control.value === value) return;
     control.markAsDirty();
-    if (this.monthOnly() && (control as unknown) === this.form.controls.kind) {
+    if (this.annualOnly() && (control as unknown) === this.form.controls.kind) {
+      this.form.patchValue({ kind: value as VisualizationPeriod['kind'], comparison: 'none' });
+    } else if (this.monthOnly() && (control as unknown) === this.form.controls.kind) {
       this.form.patchValue({ kind: value as VisualizationPeriod['kind'], basis: 'calendar', includeIncomplete: false, comparison: 'none' });
     } else control.setValue(value);
+  }
+
+  useEquipmentDefaults(): void {
+    if (this.disabled()) return;
+    this.form.patchValue({ kind: 'latest-saved-year', comparison: 'none' });
   }
 
   usePredictorDefaults(): void {

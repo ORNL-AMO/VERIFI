@@ -47,7 +47,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   for (const item of selected) for (const key of item.metadata.contributionKeys ?? []) {
     const owners = contributionOwners.get(key) ?? new Set<string>(); owners.add(item.metadata.id); contributionOwners.set(key, owners);
   }
-  if ([...contributionOwners.values()].some(owners => owners.size > 1)) warnings.add('These separate series overlap underlying meter contributions. They are comparisons, not a combined total.');
+  if ([...contributionOwners.values()].some(owners => owners.size > 1)) warnings.add(`These separate series overlap underlying ${definition.sources.some(source => source.kind === 'energy-use') ? 'equipment' : 'meter'} contributions. They are comparisons, not a combined total.`);
   const starts = (role: 'primary' | 'comparison') => resolved.flatMap(entry => entry.result.periods.filter(period => period.role === role).map(period => period.start)).sort();
   const primaryStart = starts('primary')[0], comparisonStart = starts('comparison')[0];
   if (definition.comparison.kind !== 'none' && (!primaryStart || !comparisonStart || chart.interval === 'native')) throw new Error('These native periods cannot be aligned safely for comparison.');
@@ -65,7 +65,9 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
         const dateIndex = chart.interval === 'native' ? row.start : String(monthIndex(row.start) + (role === 'comparison' ? primaryMonth - comparisonMonth : 0));
         const key = `${chart.interval}:${dateIndex}`;
         const order = chart.interval === 'native' ? Date.parse(`${row.start}T12:00:00Z`) : Number(dateIndex);
-        const alignedDate = chart.interval === 'native' ? row.start : monthLabel(Number(dateIndex), chart.interval === 'yearly');
+        const fiscal = source.result.periods.find(period => period.role === role && period.start === row.start && period.end === row.end && period.basis === 'fiscal');
+        const equipmentYear = source.evidence.request.source.kind === 'energy-use' ? fiscal?.fiscalYear : undefined;
+        const alignedDate = equipmentYear !== undefined ? `FY ${equipmentYear}` : chart.interval === 'native' ? row.start : monthLabel(Number(dateIndex), chart.interval === 'yearly');
         slots.set(key, { key, order, label: alignedDate });
         const observation: VisualizationObservation = row.values[item.metadata.id] ?? { state: 'alignment-padding', value: null, reason: 'This series has no native observation at this alignment slot.' };
         if (observation.state === 'observed' && !Number.isFinite(observation.value)) throw new Error('Nonfinite values cannot be rendered as valid observations.');
