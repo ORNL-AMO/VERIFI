@@ -26,6 +26,18 @@ function setup() {
 }
 
 describe('Shared predictor quality presentation', () => {
+  it('uses the compact MAD heading with an accessible definition only for report statistics', () => {
+    const { fixture } = setup();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('.statistics-definition')).toBeNull();
+    fixture.componentRef.setInput('reportStatistics', true); fixture.detectChanges();
+    expect([...root.querySelectorAll('thead th')].some(cell => cell.textContent?.trim() === 'MAD')).toBe(true);
+    const definition = root.querySelector('.statistics-definition')!;
+    expect(definition.textContent).toContain('MAD');
+    expect(definition.textContent).toContain('Median Absolute Deviation');
+    expect(root.querySelector('table')!.getAttribute('aria-describedby')).toBe(definition.id);
+    expect(root.querySelector('table')!.contains(definition)).toBe(false);
+  });
   it('copies the mounted table once and delegates chart PNG actions using the surface filename', () => {
     vi.useFakeTimers();
     try {

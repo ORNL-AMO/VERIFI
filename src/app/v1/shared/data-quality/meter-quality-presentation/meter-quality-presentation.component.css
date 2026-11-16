@@ -1,3 +1,5 @@
 @import '../meter-quality.css';
 :host { display: block; min-width: 0; }
 :host(.report-statistics) .v1-meter-quality__statistics-panel { row-gap: 1.5rem; }
+.statistics-content { display: grid; gap: .375rem; min-width: 0; }
+.statistics-definition { margin: 0; color: var(--v1-info); font-size: .8125rem; font-style: italic; font-weight: 600; line-height: 1.4; }

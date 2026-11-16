@@ -4,6 +4,7 @@ import { MeterDataQualityReport, buildMeterDataQualityReport } from '@domain/cal
 import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { meterDotPlotInput } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.view';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 @Component({ selector: 'app-meter-workbench-quality-report', standalone: false,
   templateUrl: './meter-workbench-quality-report.component.html', styleUrls: ['./meter-workbench-quality-report.component.css'] })
@@ -39,6 +40,13 @@ export class MeterWorkbenchQualityReportComponent {
       .filter(finding => this.expectedRangeEnabled() || !['meter.quality.consumption-outlier', 'meter.quality.cost-outlier'].includes(finding.code))
       .filter(finding => finding.category === 'quality' || finding.code === 'meter.data.duplicate-date')
       .map(finding => finding.description);
+  });
+  readonly distributions = computed(() => {
+    const report = this.report();
+    return {
+      consumption: report?.hasData && report.showConsumption ? meterDotPlotInput(report, 'consumption') : undefined,
+      cost: report?.hasData && report.includeCosts ? meterDotPlotInput(report, 'cost') : undefined
+    };
   });
   openReadings(): void {
     const facility = this.facility();

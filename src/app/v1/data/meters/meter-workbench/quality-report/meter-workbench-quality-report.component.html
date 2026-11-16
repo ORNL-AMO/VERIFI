@@ -51,5 +51,14 @@
     }
 
     <app-meter-quality-presentation [report]="currentReport" idPrefix="meter-quality"/>
+    @let plots = distributions();
+    @if (plots.consumption; as plot) {
+      <app-data-quality-dot-plot [data]="plot" [idPrefix]="'meter-quality-' + currentMeter.guid + '-consumption-distribution'"
+        heading="Consumption distribution" [chartFileName]="currentMeter.name + '-consumption-distribution'"/>
+    }
+    @if (plots.cost; as plot) {
+      <app-data-quality-dot-plot [data]="plot" [idPrefix]="'meter-quality-' + currentMeter.guid + '-cost-distribution'"
+        heading="Cost distribution" [chartFileName]="currentMeter.name + '-cost-distribution'"/>
+    }
   }
 </section>

@@ -131,7 +131,7 @@ export function dataQualityDotPlotView(input: DataQualityDotPlotInput) {
   };
   return {
     points: points.map(point => ({ ...point, valueLabel: formattedValue(point.value, input.unit) })),
-    chartOption: option, message, rangeVisible: range && input.lower < input.upper,
+    chartOption: option, message,
     height: Math.max(260, Math.min(560, levels * 12 + 130)),
     summary: `Median: ${formattedValue(input.median)} · Expected range: ${range
       ? `${formattedValue(input.lower)} to ${formattedValue(input.upper)}` : 'Unavailable'} · `

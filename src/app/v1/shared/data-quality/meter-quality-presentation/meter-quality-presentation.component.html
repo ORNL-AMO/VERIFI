@@ -7,37 +7,44 @@
         <h2 [id]="idPrefix() + '-statistics-heading'" [attr.aria-level]="headingLevel()">Total Consumption and Cost Statistics</h2>
       </div>
 
-      <div class="v1-meter-quality__scroller" tabindex="0" role="region" [attr.aria-labelledby]="idPrefix() + '-statistics-heading'">
-        <table #statisticsTable class="v1-meter-quality__table" [class.copying-table]="copyingStatisticsTable()">
-          <thead>
-            <tr>
-              <th scope="col">Metric</th>
-              @for (column of statistics[0]?.cells ?? []; track column.id) {
-                <th scope="col" class="v1-meter-quality__number">{{ column.label }}</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of statistics; track row.id) {
+      <div class="statistics-content">
+        <div class="v1-meter-quality__scroller" tabindex="0" role="region" [attr.aria-labelledby]="idPrefix() + '-statistics-heading'">
+          <table #statisticsTable class="v1-meter-quality__table" [class.copying-table]="copyingStatisticsTable()"
+            [attr.aria-describedby]="reportStatistics() ? idPrefix() + '-mad-definition' : null">
+            <thead>
               <tr>
-                <th scope="row">{{ row.label }}</th>
-                @for (cell of row.cells; track cell.id) {
-                  <td class="v1-meter-quality__number">
-                    @if (cell.tone) {
-                      <span class="v1-badge v1-badge--{{ cell.tone }}">{{ cell.valueLabel }}</span>
-                    } @else {
-                      {{ cell.valueLabel }}
-                    }
-                  </td>
+                <th scope="col">Metric</th>
+                @for (column of statistics[0]?.cells ?? []; track column.id) {
+                  <th scope="col" class="v1-meter-quality__number">{{ reportStatistics() && column.id === 'medianAbsDev' ? 'MAD' : column.label }}</th>
                 }
               </tr>
-            } @empty {
-              <tr>
-                <td [attr.colspan]="statisticTableColspan">No statistics are available for this meter.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (row of statistics; track row.id) {
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  @for (cell of row.cells; track cell.id) {
+                    <td class="v1-meter-quality__number">
+                      @if (cell.tone) {
+                        <span class="v1-badge v1-badge--{{ cell.tone }}">{{ cell.valueLabel }}</span>
+                      } @else {
+                        {{ cell.valueLabel }}
+                      }
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr>
+                  <td [attr.colspan]="statisticTableColspan">No statistics are available for this meter.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (reportStatistics()) {
+          <p class="statistics-definition" [id]="idPrefix() + '-mad-definition'">MAD: Median Absolute Deviation</p>
+        }
       </div>
 
       <footer class="v1-meter-quality__footer">

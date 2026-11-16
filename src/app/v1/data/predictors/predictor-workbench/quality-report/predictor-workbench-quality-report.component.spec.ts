@@ -1,4 +1,5 @@
-import { signal } from '@angular/core';
+import { WritableSignal, signal } from '@angular/core';
+import { DataQualityDotPlotComponent } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { PredictorQualityPresentationComponent } from '@app/v1/shared/data-quality/predictor-quality-presentation/predictor-quality-presentation.component';
@@ -15,6 +16,33 @@ import { PredictorWorkbenchQualityReportComponent } from './predictor-workbench-
 
 describe('PredictorWorkbenchQualityReportComponent', () => {
   afterEach(() => vi.restoreAllMocks());
+  it.each(['Standard', 'Weather'] as const)('adds a distribution with existing flags and units for %s predictors', predictorType => {
+    const fixture = setup({ selectedPredictor: predictor({ predictorType, weatherDataType: 'HDD', unit: 'units' }),
+      readings: [10, 10, 11, 12, 100].map((amount, index) => reading({ guid: `r-${index}`, month: index + 1, amount })) });
+    const plot = distribution(fixture)!;
+    expect(plot.heading()).toBe('Predictor value distribution');
+    expect(plot.headingLevel()).toBe(2);
+    expect(plot.data().unit).toBe('units');
+    expect(plot.view().points.filter(point => point.outlier)).toHaveLength(1);
+    expect(plot.chartFileName()).toBe('production-value-distribution');
+  });
+  it('replaces source data, retains zero-MAD behavior, and clears distributions for unusable or empty readings', () => {
+    const fixture = setup();
+    const context = TestBed.inject(PREDICTOR_QUALITY_CONTEXT);
+    (context.predictor as WritableSignal<IdbPredictor>).set(predictor({ guid: 'predictor-b', name: 'Other production' }));
+    (context.readings as WritableSignal<IdbPredictorData[]>).set([10, 10, 10, 100].map((amount, index) =>
+      reading({ guid: `r-${index}`, predictorId: 'predictor-b', month: index + 1, amount })));
+    const plot = distribution(fixture)!;
+    expect(plot.idPrefix()).toContain('predictor-b');
+    expect(plot.chartFileName()).toBe('other-production-value-distribution');
+    expect(plot.view().points.every(point => !point.outlier)).toBe(true);
+    expect(plot.data().notice).toContain('MAD is zero');
+    (context.readings as WritableSignal<IdbPredictorData[]>).set([reading({ amount: NaN })]);
+    expect(distribution(fixture)).toBeUndefined();
+    expect(fixture.nativeElement.textContent).toContain('No usable values');
+    (context.readings as WritableSignal<IdbPredictorData[]>).set([]);
+    expect(distribution(fixture)).toBeUndefined();
+  });
   it.each(['ready', 'evaluating', 'error'] as const)('retains outlier details but suppresses range alerts in %s state', statusState => {
     const fixture = setup({ statusState, expectedRangeEnabled: false,
       readings: [10, 10, 11, 12, 100].map((amount, index) => reading({ guid: `r${index}`, month: index + 1, amount }))
@@ -23,6 +51,7 @@ describe('PredictorWorkbenchQualityReportComponent', () => {
     expect(fixture.componentInstance.findings().some(finding => finding.code === 'predictor.quality.outlier')).toBe(false);
     expect(presentation(fixture).accessibleChartRows().some(row => row.expectedRangeLabel === 'Outlier')).toBe(true);
     expect(JSON.stringify(presentation(fixture).qualityChartOption())).toContain('Outliers');
+    expect(distribution(fixture)!.view().points.some(point => point.outlier)).toBe(true);
   });
 
   it('renders an empty state and routes users to Readings', () => {
@@ -220,4 +249,8 @@ function reading(overrides: Partial<IdbPredictorData> = {}): IdbPredictorData {
 function presentation(fixture: ComponentFixture<PredictorWorkbenchQualityReportComponent>): PredictorQualityPresentationComponent {
   fixture.detectChanges();
   return fixture.debugElement.query(By.directive(PredictorQualityPresentationComponent)).componentInstance;
+}
+function distribution(fixture: ComponentFixture<PredictorWorkbenchQualityReportComponent>): DataQualityDotPlotComponent | undefined {
+  fixture.detectChanges();
+  return fixture.debugElement.query(By.directive(DataQualityDotPlotComponent))?.componentInstance;
 }

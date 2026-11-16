@@ -173,5 +173,9 @@
     }
 
     <app-predictor-quality-presentation [report]="currentReport" [idPrefix]="context.idPrefix()" [chartFileName]="chartFileName()"/>
+    @if (distribution(); as plot) {
+      <app-data-quality-dot-plot [data]="plot" [idPrefix]="context.idPrefix() + '-' + predictor.guid + '-distribution'"
+        heading="Predictor value distribution" [chartFileName]="distributionFileName()"/>
+    }
   }
 </section>

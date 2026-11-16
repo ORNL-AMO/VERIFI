@@ -7,11 +7,10 @@ import { ReportsSharedModule } from '@app/v1/reports/shared/reports-shared.modul
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataQualityReportPreviewComponent } from './preview/data-quality-report-preview.component';
 import { DataQualityReportSetupComponent } from './setup/data-quality-report-setup.component';
-import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { DataQualityAnnualTotalsComponent } from './annual-totals/data-quality-annual-totals.component';
-import { DataQualityReportDotPlotComponent } from './dot-plot/data-quality-report-dot-plot.component';
+import { DataQualityDotPlotModule } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.module';
 
 @NgModule({ declarations: [DataQualityReportPreviewComponent, DataQualityReportSetupComponent,
-    DataQualityAnnualTotalsComponent, DataQualityReportDotPlotComponent],
-  imports: [ReactiveFormsModule, ReportsSharedModule, IconComponent, MeterQualityModule, PredictorQualityModule, EChartsChartDirective, AnalysisDetailsSlideoutComponent] })
+    DataQualityAnnualTotalsComponent],
+  imports: [ReactiveFormsModule, ReportsSharedModule, IconComponent, MeterQualityModule, PredictorQualityModule, DataQualityDotPlotModule, AnalysisDetailsSlideoutComponent] })
 export class DataQualityReportModule {}

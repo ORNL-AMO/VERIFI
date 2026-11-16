@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { MeterQualityModule } from '@app/v1/shared/data-quality/meter-quality.module';
-import { DataQualityReportModule } from '../data-quality-report.module';
+import { DataQualityDotPlotModule } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.module';
 import { MeterQualityPresentationComponent } from '@app/v1/shared/data-quality/meter-quality-presentation/meter-quality-presentation.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
@@ -18,7 +18,7 @@ class ChartStub {
 }
 async function setup(snapshot = dataQualityReadingsSnapshot()) {
   TestBed.overrideModule(MeterQualityModule, { remove: { imports: [EChartsChartDirective] }, add: { imports: [ChartStub] } });
-  TestBed.overrideModule(DataQualityReportModule, { remove: { imports: [EChartsChartDirective] }, add: { imports: [ChartStub] } });
+  TestBed.overrideModule(DataQualityDotPlotModule, { remove: { imports: [EChartsChartDirective] }, add: { imports: [ChartStub] } });
   const copyTable = vi.fn();
   const view = await setupReportWorkbench(snapshot.facilityReports, [{ provide: CopyTableService, useValue: { copyTable } }], snapshot);
   const workbench = await view.open('report-a', 'report');

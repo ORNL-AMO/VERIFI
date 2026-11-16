@@ -3,7 +3,7 @@ import type { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictor, WeatherDataType } from '@data/models/idbModels/predictor';
 import type { DataQualityReportResult } from './data-quality-report.service';
 import type { DataQualitySettingsDraft } from './data-quality-report-settings';
-import { meterDotPlotInput, predictorDotPlotInput } from './dot-plot/data-quality-report-dot-plot.view';
+import { meterDotPlotInput, predictorDotPlotInput } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.view';
 
 /** Only structured-cloneable inputs; the shared export controller will detach them before generation. */
 export function buildDataQualityReportSnapshot(

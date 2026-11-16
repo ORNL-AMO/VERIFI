@@ -5,7 +5,7 @@ import { ReportSection } from '@shared/report-output/report-section.model';
 import { dataQualityPdfSnapshot } from '../testing/data-quality-report-test-fixtures';
 import { METER_CONTENT_FLAGS, PREDICTOR_CONTENT_FLAGS } from '../data-quality-report-settings';
 import { dataQualityHasPdfContent, dataQualityPdfDocument } from './data-quality-report-output.view';
-import { dataQualityDotPlotView } from '../dot-plot/data-quality-report-dot-plot.view';
+import { dataQualityDotPlotView } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.view';
 import { dataQualityReportView } from '../data-quality-report.view';
 
 function titles(sections: readonly ReportSection[]) { return sections.map(section => section.title); }

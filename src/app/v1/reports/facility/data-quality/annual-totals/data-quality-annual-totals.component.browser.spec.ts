@@ -8,6 +8,8 @@ import { annualTotalsSnapshot, ANNUAL_TEST_EMISSIONS } from '../testing/data-qua
 import { DataQualityReportService } from '../data-quality-report.service';
 import { dataQualityPredictorReadingsSnapshot } from '../testing/data-quality-report-test-fixtures';
 import { echarts } from '@app/v1/shared/charts/echarts';
+import { getZeroEmissionsResults } from '@domain/calculations/emissions-calculations/emissions';
+import { DataQualityAnnualTotalsComponent } from './data-quality-annual-totals.component';
 
 describe('Annual Totals with native calendarization', () => {
   beforeEach(() => {
@@ -66,7 +68,7 @@ describe('Annual Totals with native calendarization', () => {
     expect(preview().querySelectorAll('.v1-meter-quality__statistics-panel')).toHaveLength(2);
     expect(preview().querySelectorAll('.predictor-quality__table')).toHaveLength(2);
     expect(preview().querySelectorAll('app-data-quality-annual-totals')).toHaveLength(2);
-    expect(preview().querySelectorAll('app-data-quality-report-dot-plot')).toHaveLength(6);
+    expect(preview().querySelectorAll('app-data-quality-dot-plot')).toHaveLength(6);
     expect(preview().querySelectorAll('.report-component-divider')).toHaveLength(18);
     expect(preview().querySelectorAll('#data-quality-report-heading')).toHaveLength(1);
     expect(preview().querySelector('h2')!.textContent).toBe('Complete Data Quality Report');
@@ -104,7 +106,7 @@ describe('Annual Totals with native calendarization', () => {
     await activate([...host.querySelectorAll<HTMLButtonElement>('.content-presets button')].find(button => button.textContent?.trim() === 'Tables only')!);
     await activate(host.querySelector<HTMLAnchorElement>('footer a.v1-btn--action')!);
     await vi.waitFor(() => { view.harness.detectChanges(); expect(results.state().state).toBe('ready'); });
-    expect(preview().querySelectorAll('.v1-meter-quality__chart, .predictor-quality__chart, app-data-quality-report-dot-plot')).toHaveLength(0);
+    expect(preview().querySelectorAll('.v1-meter-quality__chart, .predictor-quality__chart, app-data-quality-dot-plot')).toHaveLength(0);
     expect(preview().querySelectorAll('table')).toHaveLength(6);
   }, 15000);
   it.each([
@@ -151,4 +153,36 @@ describe('Annual Totals with native calendarization', () => {
     await vi.waitFor(() => { view.harness.detectChanges(); expect(service.state().state, service.state().message).toBe('ready'); }, { timeout: 5000 });
     expect(service.state().value!.annualTotals[0].rows[0].totalWithLocationEmissions).toBeGreaterThan(0);
   }, 10000);
+});
+
+describe('Annual Totals scrolling', () => {
+  afterEach(async () => { TestBed.resetTestingModule(); await page.viewport(1280, 720); });
+
+  it.each([1400, 320])('expands for every year without a vertical table scrollbar at %s pixels', async width => {
+    await page.viewport(width, 720);
+    TestBed.configureTestingModule({ declarations: [DataQualityAnnualTotalsComponent] });
+    const fixture = TestBed.createComponent(DataQualityAnnualTotalsComponent);
+    fixture.componentRef.setInput('idPrefix', 'annual-scroll');
+    fixture.componentRef.setInput('totals', {
+      meterGuid: 'meter-a',
+      columns: [{ key: 'year', label: 'Year' }, { key: 'energyUse', label: 'Total Energy', unit: 'kWh' },
+        { key: 'energyCost', label: 'Total Cost', unit: '$' }],
+      rows: Array.from({ length: 20 }, (_, index) => ({ ...getZeroEmissionsResults(), year: 2005 + index,
+        energyConsumption: 1000, energyUse: 1000, energyCost: 100 }))
+    });
+    const host = fixture.nativeElement as HTMLElement;
+    host.classList.add('v1-root');
+    Object.assign(host.style, { display: 'block', width: `${width}px`, height: '240px', overflow: 'auto' });
+    fixture.detectChanges();
+    const scroller = host.querySelector<HTMLElement>('.annual-totals-scroller')!;
+    const rows = host.querySelectorAll<HTMLElement>('tbody tr');
+    expect(rows).toHaveLength(20);
+    expect(getComputedStyle(scroller).overflowY).toBe('hidden');
+    expect(scroller.scrollHeight - scroller.clientHeight).toBeLessThanOrEqual(1);
+    expect(rows[19].getBoundingClientRect().bottom).toBeLessThanOrEqual(scroller.getBoundingClientRect().bottom + 1);
+    rows[19].scrollIntoView({ block: 'end' });
+    expect(host.scrollTop).toBeGreaterThan(0);
+    expect(rows[19].getBoundingClientRect().bottom).toBeLessThanOrEqual(host.getBoundingClientRect().bottom + 1);
+    expect(rows[19].textContent).toContain('2024');
+  });
 });

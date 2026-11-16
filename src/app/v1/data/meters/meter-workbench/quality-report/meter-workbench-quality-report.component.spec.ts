@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { DataQualityDotPlotComponent } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.component';
 import { By } from '@angular/platform-browser';
 import { MeterQualityPresentationComponent } from '@app/v1/shared/data-quality/meter-quality-presentation/meter-quality-presentation.component';
-import { Directive, EventEmitter, Input, Output, forwardRef, signal } from '@angular/core';
+import { Directive, EventEmitter, Input, Output, WritableSignal, forwardRef, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
@@ -18,6 +19,42 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 
 describe('MeterWorkbenchQualityReportComponent', () => {
+  it.each([
+    { included: true, costs: [10, 20], headings: ['Consumption distribution', 'Cost distribution'] },
+    { included: true, costs: [0, 0], headings: ['Consumption distribution'] },
+    { included: true, costs: [-10, 10], headings: ['Consumption distribution', 'Cost distribution'] },
+    { included: false, costs: [10, 20], headings: ['Cost distribution'] },
+    { included: false, costs: [0, 0], headings: [] }
+  ])('respects workbench consumption and cost visibility for $included / $costs', ({ included, costs, headings }) => {
+    const fixture = setup({ selectedMeter: meter({ includeInEnergy: included }),
+      meterData: costs.map((totalCost, index) => reading({ guid: `r-${index}`, month: index + 1, totalEnergyUse: 10, totalCost })) });
+    const distributions = plots(fixture);
+    expect(distributions.map(plot => plot.heading())).toEqual(headings);
+    expect(distributions.every(plot => plot.headingLevel() === 2)).toBe(true);
+    const names = distributions.map(plot => plot.chartFileName());
+    expect(new Set(names).size).toBe(names.length);
+    expect(new Set(distributions.map(plot => plot.idPrefix())).size).toBe(distributions.length);
+    if (costs[0] < 0) expect(distributions[1].view().points.map(point => point.value)).toEqual([-10, 10]);
+  });
+
+  it('updates distribution values and identity on reading/source changes and clears empty charts', () => {
+    const fixture = setup();
+    const state = TestBed.inject(FacilityMetersWorkspaceService) as unknown as {
+      selectedMeter: WritableSignal<ReturnType<typeof meter>>;
+      selectedMeterData: WritableSignal<ReturnType<typeof reading>[]>;
+    };
+    expect(plots(fixture)[0].view().points.map(point => point.value)).toEqual([10, 12]);
+    state.selectedMeter.set(meter({ guid: 'meter-b', name: 'Other meter' }));
+    state.selectedMeterData.set([reading({ guid: 'new-reading', meterId: 'meter-b', totalEnergyUse: 99, totalCost: 0 })]);
+    expect(plots(fixture)).toHaveLength(1);
+    expect(plots(fixture)[0].idPrefix()).toContain('meter-b');
+    expect(plots(fixture)[0].view().points.map(point => point.value)).toEqual([99]);
+    state.selectedMeterData.set([reading({ totalEnergyUse: NaN, totalCost: NaN })]);
+    expect(plots(fixture)[0].view().message).toContain('No usable numeric readings');
+    state.selectedMeterData.set([]);
+    expect(plots(fixture)).toHaveLength(0);
+  });
+
   it.each(['ready', 'evaluating', 'error'] as const)('keeps outlier statistics and charts while suppressing range alerts in %s state', statusState => {
     const fixture = setup({ statusState, expectedRangeEnabled: false,
       meterData: [10, 10, 11, 12, 100].map((amount, index) => reading({ guid: `r${index}`, month: index + 1, totalEnergyUse: amount, totalCost: amount * 2 }))
@@ -26,6 +63,7 @@ describe('MeterWorkbenchQualityReportComponent', () => {
     expect(fixture.componentInstance.issueSummaries()).toEqual([]);
     expect(JSON.stringify(presentation(fixture).qualityChartOption())).toContain('Outliers');
     expect(presentation(fixture).statisticRows().some(row => row.cells.some(cell => cell.id === 'outliers' && cell.tone === 'warning'))).toBe(true);
+    expect(plots(fixture)[0].view().points.some(point => point.outlier)).toBe(true);
   });
 
   it('renders an empty state and routes users to readings when no meter readings exist', () => {
@@ -263,7 +301,7 @@ function setup(options: {
   if (!options.statusFindings && qualityReport.costOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.cost-outlier', 'warning', 'quality', entity, { count: qualityReport.costOutlierCount })));
 
   TestBed.configureTestingModule({
-    declarations: [MeterWorkbenchQualityReportComponent, MeterQualityPresentationComponent],
+    declarations: [MeterWorkbenchQualityReportComponent, MeterQualityPresentationComponent, DataQualityDotPlotComponent],
     imports: [CommonModule, IconComponent, EChartsStubDirective],
     providers: [
       {
@@ -305,4 +343,8 @@ function setup(options: {
 function presentation(fixture: ComponentFixture<MeterWorkbenchQualityReportComponent>): MeterQualityPresentationComponent {
   fixture.detectChanges();
   return fixture.debugElement.query(By.directive(MeterQualityPresentationComponent)).componentInstance;
+}
+function plots(fixture: ComponentFixture<MeterWorkbenchQualityReportComponent>): DataQualityDotPlotComponent[] {
+  fixture.detectChanges();
+  return fixture.debugElement.queryAll(By.directive(DataQualityDotPlotComponent)).map(element => element.componentInstance);
 }

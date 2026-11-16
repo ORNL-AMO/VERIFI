@@ -8,7 +8,7 @@ import {
   predictorQualityChartOption, predictorQualityStatistics
 } from '@app/v1/shared/data-quality/predictor-quality-presentation/predictor-quality-presentation.view';
 import { dataQualityAnnualColumns, dataQualityAnnualRows } from '../annual-totals/data-quality-annual-totals.view';
-import { DataQualityDotPlotInput, dataQualityDotPlotView } from '../dot-plot/data-quality-report-dot-plot.view';
+import { DataQualityDotPlotInput, dataQualityDotPlotView } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.view';
 import {
   DataQualityReportSnapshot, dataQualityReportMessages, dataQualityReportView
 } from '../data-quality-report.view';

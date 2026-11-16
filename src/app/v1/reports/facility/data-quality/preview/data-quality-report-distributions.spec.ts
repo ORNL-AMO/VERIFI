@@ -7,9 +7,9 @@ import { PredictorQualityModule } from '@app/v1/shared/data-quality/predictor-qu
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 import { dataQualityDistributionSnapshot as distributionSnapshot, dataQualityReport } from '../testing/data-quality-report-test-fixtures';
-import { DataQualityReportModule } from '../data-quality-report.module';
 import { DataQualityReportService } from '../data-quality-report.service';
-import { DataQualityReportDotPlotComponent } from '../dot-plot/data-quality-report-dot-plot.component';
+import { DataQualityDotPlotComponent } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.component';
+import { DataQualityDotPlotModule } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.module';
 
 @Directive({ selector: '[appV1ECharts]', standalone: true,
   providers: [{ provide: EChartsChartDirective, useExisting: forwardRef(() => ChartStub) }] })
@@ -18,15 +18,15 @@ class ChartStub {
   readonly downloadPng = vi.fn();
 }
 async function setup(snapshot = distributionSnapshot()) {
-  for (const module of [DataQualityReportModule, MeterQualityModule, PredictorQualityModule]) {
+  for (const module of [DataQualityDotPlotModule, MeterQualityModule, PredictorQualityModule]) {
     TestBed.overrideModule(module, { remove: { imports: [EChartsChartDirective] }, add: { imports: [ChartStub] } });
   }
   const view = await setupReportWorkbench(snapshot.facilityReports, [{ provide: CopyTableService, useValue: { copyTable: vi.fn() } }], snapshot);
   const workbench = await view.open('report-a', 'report');
   const results = workbench.workbench.session()!.injector.get(DataQualityReportService);
   await vi.waitFor(() => { view.harness.detectChanges(); expect(results.state().state).toBe('ready'); });
-  const plots = () => view.harness.routeDebugElement!.queryAll(By.directive(DataQualityReportDotPlotComponent))
-    .map(element => element.componentInstance as DataQualityReportDotPlotComponent);
+  const plots = () => view.harness.routeDebugElement!.queryAll(By.directive(DataQualityDotPlotComponent))
+    .map(element => element.componentInstance as DataQualityDotPlotComponent);
   return { ...view, results, plots, root: view.harness.routeNativeElement! };
 }
 
@@ -37,7 +37,7 @@ describe('Data Quality dot-plot report sections', () => {
       selectedAnalysisItemId: selectedMode === 'analysis' ? 'analysis-a' : undefined });
     const { plots, root, results } = await setup(snapshot);
     expect(plots()).toHaveLength(selectedMode === 'manual' ? 3 : 6);
-    expect(root.querySelectorAll('app-data-quality-report-dot-plot')).toHaveLength(plots().length);
+    expect(root.querySelectorAll('app-data-quality-dot-plot')).toHaveLength(plots().length);
     expect(plots()[0].data().readings.map(reading => reading.value)).toEqual([10, 10, 10, 100]);
     expect(plots().every(component => component.view().points.length > 0)).toBe(true);
     expect(plots().map(component => component.data().unit)).toContain('$');
@@ -56,7 +56,7 @@ describe('Data Quality dot-plot report sections', () => {
       ...(consumption ? ['Consumption distribution'] : []), ...(cost ? ['Cost distribution'] : []),
       ...(predictor ? ['Predictor value distribution'] : [])
     ]);
-    expect(root.querySelectorAll('app-data-quality-report-dot-plot')).toHaveLength(plots().length);
+    expect(root.querySelectorAll('app-data-quality-dot-plot')).toHaveLength(plots().length);
     if (!consumption && !cost && !predictor) expect(root.textContent).toContain('No report content is enabled');
   });
   it.each([0, undefined, 'zero-average'] as const)('preserves cost visibility for %s readings and excludes consumption for excluded electricity', async cost => {

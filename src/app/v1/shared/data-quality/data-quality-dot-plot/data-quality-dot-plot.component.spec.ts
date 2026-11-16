@@ -5,15 +5,26 @@ import { buildMeterDataQualityReport } from '@domain/calculations/data-quality/m
 import { buildPredictorDataQualityReport } from '@domain/calculations/data-quality/predictor-data-quality';
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { dataQualityPdfSnapshot } from '../testing/data-quality-report-test-fixtures';
-import { DataQualityReportDotPlotComponent } from './data-quality-report-dot-plot.component';
-import { dataQualityDotPlotView, meterDotPlotInput, predictorDotPlotInput } from './data-quality-report-dot-plot.view';
+import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { getNewIdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
+import { DataQualityDotPlotComponent } from './data-quality-dot-plot.component';
+import { dataQualityDotPlotView, meterDotPlotInput, predictorDotPlotInput } from './data-quality-dot-plot.view';
 
 function meter(values: readonly number[]) {
-  const base = dataQualityPdfSnapshot().results.meters[0];
-  return buildMeterDataQualityReport(values.map((value, index) => ({ ...base.meterData[0],
-    guid: `reading-${index}`, month: index % 12 + 1, totalEnergyUse: value, totalCost: value * 2
-  })), base.meter);
+  const selectedMeter = { ...getNewIdbUtilityMeter('facility-a', 'account-a', true, 'kWh'),
+    guid: 'meter-a', source: 'Electricity' as const, energyUnit: 'kWh', includeInEnergy: true };
+  return buildMeterDataQualityReport(values.map((value, index) => ({ ...getNewIdbUtilityMeterData(selectedMeter, []),
+    guid: 'reading-' + index, year: 2024, month: index % 12 + 1, day: 1, totalEnergyUse: value, totalCost: value * 2
+  })), selectedMeter);
+}
+
+function predictorReport() {
+  const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'predictor-a', unit: 'tons' };
+  return buildPredictorDataQualityReport([10, 10, 11, 12, 100].map((amount, index) => ({
+    ...getNewIdbPredictorData(predictor, []), guid: 'reading-' + index, year: 2024, month: index + 1, amount
+  })), predictor);
 }
 
 describe('Data Quality dot plot presentation', () => {
@@ -33,7 +44,6 @@ describe('Data Quality dot plot presentation', () => {
     expect(view.points[0].valueLabel).toBe('$-40');
     expect(view.points.some(point => point.value === 0)).toBe(true);
     expect(view.points.filter(point => point.outlier)).toHaveLength(report.costOutlierCount);
-    expect(view.rangeVisible).toBe(true);
     expect(view.chartOption!.series).toEqual(expect.arrayContaining([
       expect.objectContaining({ markArea: expect.objectContaining({
         data: [[{ xAxis: input.lower }, { xAxis: input.upper }]]
@@ -42,7 +52,7 @@ describe('Data Quality dot plot presentation', () => {
   });
 
   it('keeps finite predictor values with invalid months and reuses predictor outlier rules', () => {
-    const base = dataQualityPdfSnapshot().results.predictors[0];
+    const base = predictorReport();
     const report = buildPredictorDataQualityReport(base.readings.map(row => ({ ...row, month: 0 })), base.predictor);
     const view = dataQualityDotPlotView(predictorDotPlotInput(report));
     expect(report.chartRows).toHaveLength(0);
@@ -53,13 +63,15 @@ describe('Data Quality dot plot presentation', () => {
   });
 
   it('does not imply predictor outliers when the existing zero-MAD exception applies', () => {
-    const base = dataQualityPdfSnapshot().results.predictors[0];
+    const base = predictorReport();
     const report = buildPredictorDataQualityReport(base.readings.map((row, index) => ({ ...row,
       amount: index === 4 ? 100 : 10 })), base.predictor);
     const input = predictorDotPlotInput(report), view = dataQualityDotPlotView(input);
     expect(report.statistics.medianAbsDev).toBe(0);
     expect(view.points.every(point => !point.outlier)).toBe(true);
-    expect(view.rangeVisible).toBe(false);
+    expect(view.chartOption!.series).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ markArea: expect.anything() })
+    ]));
     expect(input.notice).toContain('MAD is zero');
   });
 
@@ -108,14 +120,17 @@ class ChartStub {
 describe('Data Quality dot plot component', () => {
   afterEach(() => TestBed.resetTestingModule());
   it('provides accessible readings and PNG download, then clears the chart for unusable data', async () => {
-    await TestBed.configureTestingModule({ declarations: [DataQualityReportDotPlotComponent],
+    await TestBed.configureTestingModule({ declarations: [DataQualityDotPlotComponent],
       imports: [ChartStub, IconComponent] }).compileComponents();
-    const fixture = TestBed.createComponent(DataQualityReportDotPlotComponent);
+    const fixture = TestBed.createComponent(DataQualityDotPlotComponent);
     fixture.componentRef.setInput('data', meterDotPlotInput(meter([10, 10, 100]), 'consumption'));
     fixture.componentRef.setInput('heading', 'Consumption distribution');
     fixture.componentRef.setInput('idPrefix', 'consumption');
     fixture.componentRef.setInput('chartFileName', 'meter-dot-plot'); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('h2')!.getAttribute('aria-level')).toBe('2');
+    fixture.componentRef.setInput('headingLevel', 4); fixture.detectChanges();
+    expect(root.querySelector('h2')!.getAttribute('aria-level')).toBe('4');
     expect(root.querySelectorAll('tbody tr')).toHaveLength(3);
     expect(root.querySelector('[role="img"]')!.getAttribute('aria-describedby')).toBe('consumption-summary');
     const chart = fixture.debugElement.query(By.directive(ChartStub)).injector.get(ChartStub);

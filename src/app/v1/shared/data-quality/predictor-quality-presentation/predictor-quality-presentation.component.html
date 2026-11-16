@@ -8,31 +8,37 @@
       <div class="predictor-quality__panel-heading">
         <h2 [attr.aria-level]="headingLevel()" [id]="idPrefix() + '-statistics-heading'">Predictor consumption statistics</h2>
       </div>
-      <div class="predictor-quality__scroller" tabindex="0" role="region" [attr.aria-labelledby]="idPrefix() + '-statistics-heading'">
-        <table #statisticsTable class="predictor-quality__table" [class.copying-table]="copyingStatisticsTable()">
-          <thead>
-            <tr>
-              <th scope="col">Metric</th>
-              @for (cell of statistics; track cell.id) {
-                <th scope="col" class="predictor-quality__number">{{ cell.label }}</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">{{ predictor.name }} @if (currentReport.unit) { ({{ currentReport.unit }}) }</th>
-              @for (cell of statistics; track cell.id) {
-                <td class="predictor-quality__number">
-                  @if (cell.tone) {
-                    <span class="v1-badge v1-badge--{{ cell.tone }}">{{ cell.valueLabel }}</span>
-                  } @else {
-                    {{ cell.valueLabel }}
-                  }
-                </td>
-              }
-            </tr>
-          </tbody>
-        </table>
+      <div class="statistics-content">
+        <div class="predictor-quality__scroller" tabindex="0" role="region" [attr.aria-labelledby]="idPrefix() + '-statistics-heading'">
+          <table #statisticsTable class="predictor-quality__table" [class.copying-table]="copyingStatisticsTable()"
+            [attr.aria-describedby]="reportStatistics() ? idPrefix() + '-mad-definition' : null">
+            <thead>
+              <tr>
+                <th scope="col">Metric</th>
+                @for (cell of statistics; track cell.id) {
+                  <th scope="col" class="predictor-quality__number">{{ reportStatistics() && cell.id === 'medianAbsDev' ? 'MAD' : cell.label }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">{{ predictor.name }} @if (currentReport.unit) { ({{ currentReport.unit }}) }</th>
+                @for (cell of statistics; track cell.id) {
+                  <td class="predictor-quality__number">
+                    @if (cell.tone) {
+                      <span class="v1-badge v1-badge--{{ cell.tone }}">{{ cell.valueLabel }}</span>
+                    } @else {
+                      {{ cell.valueLabel }}
+                    }
+                  </td>
+                }
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        @if (reportStatistics()) {
+          <p class="statistics-definition" [id]="idPrefix() + '-mad-definition'">MAD: Median Absolute Deviation</p>
+        }
       </div>
       <footer class="predictor-quality__footer">
         <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="copyStatisticsTable()">

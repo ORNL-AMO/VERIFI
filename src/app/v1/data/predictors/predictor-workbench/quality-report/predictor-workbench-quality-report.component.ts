@@ -5,6 +5,8 @@ import {
   buildPredictorDataQualityReport
 } from '@domain/calculations/data-quality/predictor-data-quality';
 import { PredictorQualityModule } from '@app/v1/shared/data-quality/predictor-quality.module';
+import { DataQualityDotPlotModule } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.module';
+import { predictorDotPlotInput } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.view';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -33,7 +35,7 @@ const QUALITY_FINDING_CODES = new Set([
   templateUrl: './predictor-workbench-quality-report.component.html',
   styleUrls: ['./predictor-workbench-quality-report.component.css'],
   standalone: true,
-  imports: [PredictorQualityModule, IconComponent]
+  imports: [PredictorQualityModule, DataQualityDotPlotModule, IconComponent]
 })
 export class PredictorWorkbenchQualityReportComponent {
   private readonly focusMonitor = inject(FocusMonitor);
@@ -70,6 +72,11 @@ export class PredictorWorkbenchQualityReportComponent {
     return localFindings(report, this.context.expectedRangeEnabled());
   });
   readonly chartFileName = computed(() => `${slugify(this.predictor()?.name || 'predictor')}-data-quality-readings`);
+  readonly distribution = computed(() => {
+    const report = this.report();
+    return report?.hasData && report.hasUsableData ? predictorDotPlotInput(report) : undefined;
+  });
+  readonly distributionFileName = computed(() => `${slugify(this.predictor()?.name || 'predictor')}-value-distribution`);
 
   openReadings(): void {
     this.context.openReadings();

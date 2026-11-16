@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { MeterQualityModule } from '@app/v1/shared/data-quality/meter-quality.module';
+import { DataQualityDotPlotModule } from '@app/v1/shared/data-quality/data-quality-dot-plot/data-quality-dot-plot.module';
 import { EditorConflictReviewComponent } from '@app/v1/data/editing/editor-conflict-review/editor-conflict-review.component';
 import { MeterWorkbenchComponent } from './meter-workbench/meter-workbench.component';
 import { MeterWorkbenchSettingsComponent } from './meter-workbench/settings/meter-workbench-settings.component';
@@ -73,6 +74,7 @@ import { MeterActionsService } from './meter-actions.service';
   ],
   imports: [
     MeterQualityModule,
+    DataQualityDotPlotModule,
     EditorConflictReviewComponent,
     PageIdentityComponent,
     BrowseHeaderDirective,

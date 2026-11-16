@@ -1,4 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
+import { predictorIcon } from '@app/v1/data/predictors/models/predictor-card.models';
+import { meterSourceIcon } from '@app/v1/shared/icons/meter-source-icon';
 import { DataQualityReportService } from '../data-quality-report.service';
 import { dataQualityReportView, dataQualityReportMessages } from '../data-quality-report.view';
 
@@ -15,7 +17,11 @@ export class DataQualityReportPreviewComponent {
     const result = this.results.state().value;
     return result ? dataQualityReportView(result, this.editor.draft().settings) : undefined;
   });
-  readonly meters = computed(() => this.view()?.meters ?? []);
-  readonly predictors = computed(() => this.view()?.predictors ?? []);
+  readonly meters = computed(() => this.view()?.meters.map(meter => ({
+    ...meter, icon: meterSourceIcon(meter.report.meter.source)
+  })) ?? []);
+  readonly predictors = computed(() => this.view()?.predictors.map(predictor => ({
+    ...predictor, icon: predictorIcon(predictor.report.predictor)
+  })) ?? []);
   readonly messages = dataQualityReportMessages();
 }

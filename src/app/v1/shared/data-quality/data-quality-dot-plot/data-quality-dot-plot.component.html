@@ -2,7 +2,7 @@
 @let prefix = idPrefix();
 <section class="quality-dot-plot" [attr.aria-labelledby]="prefix + '-heading'">
   <div class="quality-dot-plot__heading">
-    <h2 [id]="prefix + '-heading'" aria-level="4">{{ heading() }}</h2>
+    <h2 [id]="prefix + '-heading'" [attr.aria-level]="headingLevel()">{{ heading() }}</h2>
     <button type="button" class="v1-icon-btn" title="Download PNG" [attr.aria-label]="'Download ' + heading() + ' as PNG'"
       [disabled]="!plot.chartOption" (click)="downloadChart()"><app-ui-icon name="download"/></button>
   </div>
@@ -10,10 +10,6 @@
     <div #chart class="quality-dot-plot__chart" [style.height.px]="plot.height" [appV1ECharts]="option"
       role="img" [attr.aria-label]="heading() + '. ' + plot.summary" [attr.aria-describedby]="prefix + '-summary'"></div>
     <p class="quality-dot-plot__summary" [id]="prefix + '-summary'">{{ plot.summary }}</p>
-    <p class="quality-dot-plot__note">
-      @if (plot.rangeVisible) { Shading shows the expected range. }
-      Repeated values are stacked vertically; height does not represent a measured value.
-    </p>
     @if (data().notice; as notice) { <p class="quality-dot-plot__note" role="note">{{ notice }}</p> }
     <div class="visually-hidden">
       <table>

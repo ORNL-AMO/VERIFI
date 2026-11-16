@@ -1,6 +1,6 @@
 :host { display: block; min-width: 0; }
 h2 { margin: 0 0 1.5rem; font-size: 1rem; font-weight: 900; color: var(--v1-text); }
-.annual-totals-scroller { overflow-x: auto; max-width: 100%; }
+.annual-totals-scroller { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
 table { width: 100%; border-collapse: collapse; color: var(--v1-text); font-size: .875rem; }
 th, td { padding: .65rem .75rem; border: 1px solid var(--v1-border); text-align: right; vertical-align: middle; }
 thead th { background: var(--v1-content-block); text-align: center; }

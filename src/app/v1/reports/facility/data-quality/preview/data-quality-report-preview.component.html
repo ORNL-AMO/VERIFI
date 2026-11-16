@@ -21,7 +21,10 @@
         <header class="document-title"><h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2></header>
       }
       <div class="document-section">
-        <h3 [id]="meter.idPrefix + '-heading'">{{ meter.report.meter.name }}</h3>
+        <h3 class="source-heading" [id]="meter.idPrefix + '-heading'">
+          <app-ui-icon [name]="meter.icon" [size]="24"/>
+          <span>{{ meter.report.meter.name }}</span>
+        </h3>
         @if (!meter.report.hasData) {
           <p role="status">{{ messages.noMeterReadings }}</p>
         } @else {
@@ -48,7 +51,7 @@
             <hr class="report-component-divider">
           }
           @if (meter.consumptionDotPlot; as plot) {
-            <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="meter.idPrefix + '-consumption-dot-plot'"
+            <app-data-quality-dot-plot [headingLevel]="4" [data]="plot" [idPrefix]="meter.idPrefix + '-consumption-dot-plot'"
               heading="Consumption distribution" [chartFileName]="meter.report.meter.name + '-consumption-dot-plot'"/>
             <hr class="report-component-divider">
           }
@@ -56,7 +59,7 @@
             <p class="report-note">{{ messages.excludedConsumption }}</p>
           }
           @if (meter.costDotPlot; as plot) {
-            <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="meter.idPrefix + '-cost-dot-plot'"
+            <app-data-quality-dot-plot [headingLevel]="4" [data]="plot" [idPrefix]="meter.idPrefix + '-cost-dot-plot'"
               heading="Cost distribution" [chartFileName]="meter.report.meter.name + '-cost-dot-plot'"/>
             <hr class="report-component-divider">
           }
@@ -83,7 +86,10 @@
         <header class="document-title"><h2 id="data-quality-report-heading" class="report-title">{{ draft.name || 'Data Quality Report' }}</h2></header>
       }
       <div class="document-section">
-        <h3 [id]="predictor.idPrefix + '-heading'">{{ predictor.report.predictor.name }}</h3>
+        <h3 class="source-heading" [id]="predictor.idPrefix + '-heading'">
+          <app-ui-icon [name]="predictor.icon" [size]="24"/>
+          <span>{{ predictor.report.predictor.name }}</span>
+        </h3>
         @if (predictor.weatherDescription) { <p class="predictor-description">{{ predictor.weatherDescription }}</p> }
         @if (!predictor.report.hasData) {
           <p role="status">{{ messages.noPredictorReadings }}</p>
@@ -109,7 +115,7 @@
               @if (!predictor.report.chartRows.length) { <p role="status">{{ messages.noPredictorPeriods }}</p> }
             }
             @if (predictor.dotPlot; as plot) {
-              <app-data-quality-report-dot-plot [data]="plot" [idPrefix]="predictor.idPrefix + '-dot-plot'"
+              <app-data-quality-dot-plot [headingLevel]="4" [data]="plot" [idPrefix]="predictor.idPrefix + '-dot-plot'"
                 heading="Predictor value distribution" [chartFileName]="predictor.report.predictor.name + '-dot-plot'"/>
               <hr class="report-component-divider">
             }
