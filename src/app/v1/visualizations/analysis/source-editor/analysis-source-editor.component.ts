@@ -5,7 +5,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { accountAnalysisInclusionIssue, analysisMeasureLabels, analysisPeriodIssue, facilityAnalysisChartSupport } from '@domain/visualizations/analysis/facility-analysis-source';
 import type { AnalysisResultVisualizationSource } from '@domain/visualizations/visualization-definition';
-import type { UtilityEditorContext } from '../../utility/editors/utility-editor-context';
+import type { VisualizationSourceEditorContext } from '../../shared/source-editor-context';
 import { decisionNodeId } from '../../decisions/decision-tree';
 import { analysisGroupChoices, analysisChoices, projectAnalysisItems } from '../analysis-items';
 
@@ -14,7 +14,7 @@ import { analysisGroupChoices, analysisChoices, projectAnalysisItems } from '../
 export class AnalysisSourceEditorComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly destroy = inject(DestroyRef);
-  readonly view = signal<UtilityEditorContext | undefined>(undefined);
+  readonly view = signal<VisualizationSourceEditorContext | undefined>(undefined);
   readonly form = new FormGroup({ groupGuid: new FormControl('', { nonNullable: true }),
     measure: new FormControl<AnalysisResultVisualizationSource['measure']>('actual', { nonNullable: true }), interval: new FormControl<'monthly' | 'yearly'>('monthly', { nonNullable: true }) });
   readonly emptyNodes: ReadonlySet<string> = new Set();
@@ -58,7 +58,7 @@ export class AnalysisSourceEditorComponent {
     return snapshot && view ? projectAnalysisItems(view.definition, view.sourceId, snapshot).map(item => ({ ...item,
       resetKey: view.nodeResetKeys?.[decisionNodeId({ kind: 'item', sourceId: view.sourceId, itemKey: item.key })] ?? 0 })) : [];
   });
-  @Input({ required: true }) set context(context: UtilityEditorContext) {
+  @Input({ required: true }) set context(context: VisualizationSourceEditorContext) {
     this.view.set(context); this.hydrate(); context.disabled ? this.form.disable({ emitEvent: false }) : this.form.enable({ emitEvent: false });
   }
   constructor() {

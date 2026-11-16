@@ -109,7 +109,7 @@
         }
         <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates and comparison" [summary]="periodSummary()" icon="calendar"
           [attention]="periodInvalid()" [expanded]="expandedNodes().has(rootNodes.period)" (expandedChange)="setSection(rootNodes.period, $event)">
-          <app-utility-period-settings [context]="periodContext()"/>
+          <app-visualization-period-settings [context]="periodContext()"/>
         </app-visualization-decision-section>
         <app-visualization-decision-section [nodeId]="rootNodes.appearance" label="Chart appearance" [summary]="editor.form.controls.title.value || definition.name" icon="paintRoller"
           [attention]="editor.form.invalid" [expanded]="expandedNodes().has(rootNodes.appearance)" (expandedChange)="setSection(rootNodes.appearance, $event)">

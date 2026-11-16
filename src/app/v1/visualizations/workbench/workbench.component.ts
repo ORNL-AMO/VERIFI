@@ -19,7 +19,7 @@ import { resolveVisualizationFacilities } from '@domain/visualizations/visualiza
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { decisionNodeId, prepareDecisionChange } from '../decisions/decision-tree';
 import type { DecisionChangeResult, DecisionRef, VisualizationDecisionAction } from '../decisions/decision-types';
-import type { PeriodSettingsContext, UtilityEditorContext } from '../utility/editors/utility-editor-context';
+import type { PeriodSettingsContext, VisualizationSourceEditorContext } from '../shared/source-editor-context';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 import type { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -133,7 +133,7 @@ export class WorkbenchComponent {
     return definition.sources.map(source => {
       const choice = VISUALIZATION_DATA_SOURCES.find(item => item.value === source.kind)!;
       const nodeId = decisionNodeId({ kind: 'source', sourceId: source.id });
-      const context: UtilityEditorContext = { definition, sourceId: source.id, editorKey: this.editorKey(),
+      const context: VisualizationSourceEditorContext = { definition, sourceId: source.id, editorKey: this.editorKey(),
         disabled: !this.editor.canEdit(), expandedNodes: this.expandedNodes(), nodeResetKeys: this.nodeResetKeys(),
         request: action => {
           if (this.editor.key() !== key) return;

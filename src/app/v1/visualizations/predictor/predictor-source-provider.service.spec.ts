@@ -5,7 +5,7 @@ import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { visualizationSnapshot } from '../testing/visualization-test-fixtures';
-import { UtilityDateContextResolver } from '../utility/utility-date-context.service';
+import { VisualizationDateContextResolver } from '../preview/visualization-date-context.service';
 import { UtilityDataSession } from '../utility/utility-data-session.service';
 import { UtilitySourceProvider } from '../utility/utility-source-provider.service';
 import { PredictorSourceProvider } from './predictor-source-provider.service';
@@ -18,7 +18,7 @@ describe('predictor preview snapshot boundary', () => {
     const reading = { ...getNewIdbPredictorData(predictor), year: 2024, month: 2, amount: 0 };
     store.publish({ ...visualizationSnapshot(), predictors: [predictor], predictorData: [reading] });
     const acquire = vi.fn(), meterResolve = vi.fn();
-    TestBed.configureTestingModule({ providers: [PredictorSourceProvider, UtilityDateContextResolver,
+    TestBed.configureTestingModule({ providers: [PredictorSourceProvider, VisualizationDateContextResolver,
       { provide: AccountWorkspaceStore, useValue: store }, { provide: UtilityDataSession, useValue: { acquire } },
       { provide: UtilitySourceProvider, useValue: { resolve: meterResolve } }] });
     const initial = createVisualizationDefinition('Predictor', 'account-a', { kind: 'all' }, 'predictor');
@@ -26,7 +26,7 @@ describe('predictor preview snapshot boundary', () => {
       selection: { kind: 'fixed' as const, resource: 'predictor' as const, guids: [predictor.guid] } };
     const definition = { ...initial, sources: [source] };
     const identity = { accountGuid: 'account-a', definitionGuid: 'saved', workspaceRevision: store.revision(), definitionRevision: 1 };
-    const abort = new AbortController(), dates = TestBed.inject(UtilityDateContextResolver);
+    const abort = new AbortController(), dates = TestBed.inject(VisualizationDateContextResolver);
     expect(await dates.resolve(definition, identity, abort.signal)).toMatchObject({ monthlyRange: { start: '2024-02-01', end: '2024-02-29' } });
     expect((await dates.resolve({ ...definition, period: { kind: 'rolling', basis: 'calendar', count: 1, unit: 'month',
       anchor: 'latest-data', includeIncomplete: false } }, identity, abort.signal)).latestDataDate).toBe('2024-02-29');

@@ -1,4 +1,4 @@
-@import '../../../shared/compact-controls.css';
+@import '../compact-controls.css';
 
 :host { display:block; min-width:0; }
 .period-settings { margin:0; padding:0; border:0; min-width:0; }

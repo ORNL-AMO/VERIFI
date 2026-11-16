@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { UtilitySelectionMode, UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
-import type { UtilityEditorContext } from '../utility-editor-context';
+import type { VisualizationSourceEditorContext } from '../../../shared/source-editor-context';
 import { decisionNodeId, meterResourceChoices, meterSelectionChoices, nativeObservationAvailable, prepareDecisionChange, projectMeterItems } from '../../../decisions/decision-tree';
 import type { VisualizationDecisionAction } from '../../../decisions/decision-types';
 import type { ResourceOption } from '../../../shared/resource-picker/resource-picker.component';
@@ -24,7 +24,7 @@ export class UtilitySourceEditorComponent {
   readonly emptyExpanded: ReadonlySet<string> = new Set();
   private readonly store = inject(AccountWorkspaceStore);
   private readonly destroy = inject(DestroyRef);
-  private readonly contextValue = signal<UtilityEditorContext | undefined>(undefined);
+  private readonly contextValue = signal<VisualizationSourceEditorContext | undefined>(undefined);
   private identity = '';
   private settingsFingerprint = '';
   private readonly publishedSettings: string[] = [];
@@ -109,7 +109,7 @@ export class UtilitySourceEditorComponent {
     return guid && !options.some(item => item.guid === guid) ? [{ guid, label: `Unavailable charge: ${guid}`, unavailable: true }, ...options] : options;
   });
 
-  @Input({ required: true }) set context(context: UtilityEditorContext) {
+  @Input({ required: true }) set context(context: VisualizationSourceEditorContext) {
     this.contextValue.set(context);
     const source = this.selectedSource(); if (!source) return;
     const identity = `${context.editorKey}:${context.sourceId}:${context.resetKey ?? 0}`;

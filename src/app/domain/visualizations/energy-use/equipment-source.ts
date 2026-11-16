@@ -27,6 +27,10 @@ export function equipmentChartSupport(source: EnergyUseVisualizationSource, char
   if (source.settings?.energyTreatment) reasons.push('Equipment history retains saved energy meaning without site/source treatment changes.');
   return reasons.length ? { chart, state: 'unsupported', reasons } : { chart, state: 'supported' };
 }
+export function equipmentPeriodIssue(request: Pick<VisualizationSourceRequest, 'period' | 'comparison'>): string | undefined {
+  return request.comparison.kind !== 'none' || !['all-history', 'latest-saved-year', 'fiscal-year'].includes(request.period.kind)
+    ? 'Equipment history supports all history, latest saved fiscal year, or one pinned fiscal year without comparison.' : undefined;
+}
 /** An explicit user action, also used for fresh Energy Use-only line/bar setup. */
 export function useEquipmentHistorySettings(definition: VisualizationDefinition, sourceId: string): VisualizationDefinition {
   const chart = definition.chart;
@@ -55,7 +59,8 @@ export function resolveEquipment(snapshot: AccountWorkspaceSnapshot, request: Vi
   const support = equipmentChartSupport(source, request.chart);
   if (support.state === 'unsupported') return unsupported(support.reasons.join(' '));
   if (snapshot.account.guid !== identity.accountGuid) return unsupported('The equipment does not belong to this account.');
-  if (request.comparison.kind !== 'none' || !['all-history', 'latest-saved-year', 'fiscal-year'].includes(period.kind)) return unsupported('Equipment history supports all history, latest saved fiscal year, or one pinned fiscal year without comparison.');
+  const periodIssue = equipmentPeriodIssue(request);
+  if (periodIssue) return unsupported(periodIssue);
   const selection = energyUseBuckets(snapshot, identity.scope, source), buckets = selection.buckets;
   if (selection.missing.length) return { identity, state: 'missing-source', references: selection.missing, message: 'Repair the selected Energy Use references.' };
   const items = [...new Map(buckets.flatMap(bucket => bucket.items).map(item => [item.guid, item])).values()];

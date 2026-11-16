@@ -1,3 +1,4 @@
+import { civilMonthIndex } from '@domain/visualizations/visualization-periods';
 import { allowsMixedAxisUnits } from '@domain/visualizations/visualization-source-provider';
 import { Injectable } from '@angular/core';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -52,8 +53,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   const primaryStart = starts('primary')[0], comparisonStart = starts('comparison')[0];
   if (definition.comparison.kind !== 'none' && (!primaryStart || !comparisonStart || chart.interval === 'native')) throw new Error('These native periods cannot be aligned safely for comparison.');
   if (definition.comparison.kind !== 'none') warnings.add(`Comparison observations beginning ${comparisonStart} are aligned by period offset to ${primaryStart}. Accessible values retain their original dates.`);
-  const monthIndex = (value: string) => Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7)) - 1;
-  const primaryMonth = primaryStart ? monthIndex(primaryStart) : 0, comparisonMonth = comparisonStart ? monthIndex(comparisonStart) : 0;
+  const primaryMonth = primaryStart ? civilMonthIndex(primaryStart) : 0, comparisonMonth = comparisonStart ? civilMonthIndex(comparisonStart) : 0;
   const slots = new Map<string, { key: string; label: string; order: number }>();
   const traces: TimeSeriesTrace[] = [];
   for (const item of selected) {
@@ -62,7 +62,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
     const roles = definition.comparison.kind === 'none' ? ['primary'] as const : ['primary', 'comparison'] as const;
     for (const role of roles) {
       const points: TimeSeriesPoint[] = source.data.rows.filter(row => (row.role ?? 'primary') === role).map(row => {
-        const dateIndex = chart.interval === 'native' ? row.start : String(monthIndex(row.start) + (role === 'comparison' ? primaryMonth - comparisonMonth : 0));
+        const dateIndex = chart.interval === 'native' ? row.start : String(civilMonthIndex(row.start) + (role === 'comparison' ? primaryMonth - comparisonMonth : 0));
         const key = `${chart.interval}:${dateIndex}`;
         const order = chart.interval === 'native' ? Date.parse(`${row.start}T12:00:00Z`) : Number(dateIndex);
         const fiscal = source.result.periods.find(period => period.role === role && period.start === row.start && period.end === row.end && period.basis === 'fiscal');

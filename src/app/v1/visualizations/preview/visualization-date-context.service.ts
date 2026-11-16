@@ -1,18 +1,18 @@
 import { AnalysisDataSession } from '../analysis/analysis-data-session.service';
 import { analysisPeriodIssue, latestAnalysisMonth } from '@domain/visualizations/analysis/facility-analysis-source';
-import { wholeMonthWindow } from '@domain/visualizations/visualization-monthly-combination';
-import { latestPredictorDate, predictorHistoryRange, predictorMonthRange, resolvePredictor } from '@domain/visualizations/predictor/predictor-source';
+import { civilMonthIndex, civilMonthRange, wholeMonthWindow } from '@domain/visualizations/visualization-periods';
+import { latestPredictorDate, predictorHistoryRange, resolvePredictor } from '@domain/visualizations/predictor/predictor-source';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { Injectable, inject } from '@angular/core';
 import type { VisualizationDefinition, UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';
 import { civilDate, validCivil } from '@domain/visualizations/utility/utility-periods';
-import type { PreviewDateContextResolver, PreviewIdentity, PreviewDateContext } from '../preview/preview-registry';
-import { UtilityDataSession } from './utility-data-session.service';
-import { UtilitySourceProvider } from './utility-source-provider.service';
+import type { PreviewDateContextResolver, PreviewIdentity, PreviewDateContext } from './preview-registry';
+import { UtilityDataSession } from '../utility/utility-data-session.service';
+import { UtilitySourceProvider } from '../utility/utility-source-provider.service';
 
 @Injectable()
-export class UtilityDateContextResolver implements PreviewDateContextResolver {
+export class VisualizationDateContextResolver implements PreviewDateContextResolver {
   private readonly analysisData = inject(AnalysisDataSession, { optional: true });
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly data = inject(UtilityDataSession);
@@ -70,9 +70,9 @@ export class UtilityDateContextResolver implements PreviewDateContextResolver {
       if (period.kind === 'rolling') {
         const anchor = period.anchor === 'latest-data' ? latestDataDate : calendarDate;
         if (anchor) {
-          const last = Number(anchor.slice(0, 4)) * 12 + Number(anchor.slice(5, 7)) - 1 - (period.anchor === 'calendar' ? 1 : 0);
+          const last = civilMonthIndex(anchor) - (period.anchor === 'calendar' ? 1 : 0);
           const first = last - period.count * (period.unit === 'year' ? 12 : 1) + 1;
-          if (first >= 12 && last <= 119999) monthlyRange = { start: predictorMonthRange(first).start, end: predictorMonthRange(last).end };
+          if (first >= 12 && last <= 119999) monthlyRange = { start: civilMonthRange(first).start, end: civilMonthRange(last).end };
         }
       }
     }

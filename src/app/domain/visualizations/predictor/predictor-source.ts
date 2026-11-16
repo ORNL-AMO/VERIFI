@@ -1,4 +1,5 @@
-import { emptyMonthlySource, civilMonthRange as predictorMonthRange } from '../visualization-monthly-combination';
+import { emptyMonthlySource } from '../visualization-monthly-combination';
+import { civilMonthIndex, civilMonthRange } from '../visualization-periods';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { isStandardPredictor, type IdbPredictor } from '@data/models/idbModels/predictor';
 import type { IdbPredictorData } from '@data/models/idbModels/predictorData';
@@ -35,7 +36,7 @@ export function predictorHistoryRange(snapshot: AccountWorkspaceSnapshot, scope:
     const month = indexOf(reading);
     first = Math.min(first, month); last = Math.max(last, month);
   }
-  return Number.isFinite(first) ? { start: predictorMonthRange(first).start, end: predictorMonthRange(last).end } : undefined;
+  return Number.isFinite(first) ? { start: civilMonthRange(first).start, end: civilMonthRange(last).end } : undefined;
 }
 export function predictorContext(predictor: IdbPredictor): string {
   const stationName = predictor.weatherStationName?.trim(), stationId = predictor.weatherStationId?.trim();
@@ -55,7 +56,6 @@ export function validPredictorMonth(reading: Pick<IdbPredictorData, 'year' | 'mo
     && Number.isInteger(reading.month) && reading.month >= 1 && reading.month <= 12;
 }
 const indexOf = (reading: Pick<IdbPredictorData, 'year' | 'month'>) => reading.year * 12 + reading.month - 1;
-export { civilMonthRange as predictorMonthRange } from '../visualization-monthly-combination';
 function indexOwnedReadings(snapshot: AccountWorkspaceSnapshot, predictors: readonly IdbPredictor[]): ReadonlyMap<string, readonly IdbPredictorData[]> {
   const owners = new Map(predictors.map(predictor => [predictor.guid, predictor.facilityId]));
   const readings = new Map<string, IdbPredictorData[]>();
@@ -77,7 +77,7 @@ export function latestPredictorDate(snapshot: AccountWorkspaceSnapshot, scope: V
     const grouped = groupReadings((readings.get(predictor.guid) ?? []).filter(validPredictorMonth));
     for (const [month, rows] of grouped) if (rows.length === 1 && Number.isFinite(rows[0].amount) && (latest === undefined || month > latest)) latest = month;
   }
-  return latest === undefined ? undefined : predictorMonthRange(latest).end;
+  return latest === undefined ? undefined : civilMonthRange(latest).end;
 }
 function groupReadings(readings: readonly IdbPredictorData[]): Map<number, IdbPredictorData[]> {
   const grouped = new Map<number, IdbPredictorData[]>();
@@ -97,6 +97,14 @@ export function predictorChartSupport(source: PredictorVisualizationSource, char
     reasons.push('Select saved Standard or Weather predictors. Only exact selections and All Predictors are supported.');
   if (source.settings?.energyTreatment || source.settings?.unit?.kind === 'pinned') reasons.push('Predictors use their saved units without conversion.');
   return reasons.length ? { chart, state: 'unsupported', reasons } : { chart, state: 'supported' };
+}
+/** The provider checks completed months after retaining saved-history quality evidence. */
+export function predictorPeriodIssue(request: Pick<VisualizationSourceRequest, 'period' | 'comparison'>, checkCompletedMonths = true): string | undefined {
+  const { period, comparison } = request;
+  if (comparison.kind !== 'none' || !['all-history', 'fixed', 'rolling'].includes(period.kind)
+    || 'basis' in period && period.basis !== 'calendar') return 'Predictors support calendar month ranges without comparison.';
+  if (checkCompletedMonths && period.kind === 'rolling' && period.includeIncomplete) return 'Choose completed months for the predictor rolling range.';
+  return undefined;
 }
 function readingNotes(predictor: IdbPredictor, reading: IdbPredictorData): string[] {
   const notes: string[] = [];
@@ -124,7 +132,7 @@ function monthlyObservation(record: IdbPredictor, entries: readonly IdbPredictor
       const notes = readingNotes(record, r);
       return `${r.guid}: ${String(r.amount)}${notes.length ? ` (${notes.join(', ')})` : ''}`;
     }).join('; ');
-    return { state: 'excluded', value: null, reason: `Duplicate readings for ${predictorMonthRange(month).start.slice(0, 7)} (${evidence}). No value chosen or combined.` };
+    return { state: 'excluded', value: null, reason: `Duplicate readings for ${civilMonthRange(month).start.slice(0, 7)} (${evidence}). No value chosen or combined.` };
   }
   if (!entries.length) return { state: 'missing', value: null, reason: 'No saved reading for this month.' };
   const reading = entries[0];
@@ -141,8 +149,8 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
   if (source.kind !== 'predictor') return unsupported('Choose a predictor source.');
   const support = predictorChartSupport(source, request.chart);
   if (support.state === 'unsupported') return unsupported(support.reasons.join(' '));
-  if (request.comparison.kind !== 'none' || !['all-history', 'fixed', 'rolling'].includes(period.kind)
-    || 'basis' in period && period.basis !== 'calendar') return unsupported('Predictors support calendar month ranges without comparison.');
+  const periodIssue = predictorPeriodIssue(request, false);
+  if (periodIssue) return unsupported(periodIssue);
   if (snapshot.account.guid !== identity.accountGuid) return unsupported('The predictors do not belong to the current account.');
   const guids = resolvePredictorSelection(snapshot, identity.scope, source);
   const owned = snapshot.predictors.filter(p => p.accountId === identity.accountGuid && identity.scope.facilityGuids.includes(p.facilityId)
@@ -180,28 +188,29 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
     earliest = Math.min(earliest, history.first); latest = Math.max(latest, history.last!);
   }
   if (!Number.isFinite(earliest) && !request.dateContext.monthlyRange) return empty('No usable saved predictor periods are available.');
-  let start = request.dateContext.monthlyRange?.start ?? predictorMonthRange(earliest).start, end = request.dateContext.monthlyRange?.end ?? predictorMonthRange(latest).end;
+  let start = request.dateContext.monthlyRange?.start ?? civilMonthRange(earliest).start, end = request.dateContext.monthlyRange?.end ?? civilMonthRange(latest).end;
   if (period.kind === 'fixed') { start = period.start; end = period.end; }
   if (period.kind === 'rolling') {
-    if (period.includeIncomplete) return unsupported('Choose completed months for the predictor rolling range.');
+    const issue = predictorPeriodIssue(request);
+    if (issue) return unsupported(issue);
     const anchor = period.anchor === 'latest-data' ? request.dateContext.latestDataDate : request.dateContext.calendarDate;
     if (!anchor) {
       for (const { record, grouped } of histories) for (const entries of grouped.values()) omitExcluded(record, entries);
       return empty('No eligible saved predictor observation is available for the rolling anchor.');
     }
-    let last = Number(anchor.slice(0, 4)) * 12 + Number(anchor.slice(5, 7)) - 1;
+    let last = civilMonthIndex(anchor);
     if (period.anchor === 'calendar') last--;
     const count = period.count * (period.unit === 'year' ? 12 : 1), first = last - count + 1;
     if (first < 12 || last > 119999 || !Number.isSafeInteger(count) || count < 1) return unsupported('Choose a rolling range within years 1–9999.');
-    start = predictorMonthRange(first).start; end = predictorMonthRange(last).end;
+    start = civilMonthRange(first).start; end = civilMonthRange(last).end;
   }
   if (request.dateContext.monthlyRange) ({ start, end } = request.dateContext.monthlyRange);
-  const first = Number(start.slice(0, 4)) * 12 + Number(start.slice(5, 7)) - 1;
-  const last = Number(end.slice(0, 4)) * 12 + Number(end.slice(5, 7)) - 1;
+  const first = civilMonthIndex(start);
+  const last = civilMonthIndex(end);
   if (last - first + 1 > 12000 || (last - first + 1) * Math.max(1, records.length) > 250000) return unsupported('Narrow the month range or predictor selection.');
   const rows: { periodKey: string; start: string; end: string; values: Record<string, VisualizationObservation> }[] = [];
   for (let month = first; month <= last; month++) {
-    const range = predictorMonthRange(month);
+    const range = civilMonthRange(month);
     if (range.start < start || range.end > end) continue;
     const values: Record<string, VisualizationObservation> = {};
     for (const history of histories) {

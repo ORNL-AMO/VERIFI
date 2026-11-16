@@ -24,7 +24,7 @@ import { createVisualizationChart, VISUALIZATION_CHART_CHOICES } from '../visual
 import { WorkbenchModule } from './workbench.module';
 import { WorkbenchComponent } from './workbench.component';
 import { By } from '@angular/platform-browser';
-import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
 import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-actions.component';
 import { utilityMeasureKey } from '@domain/visualizations/utility/utility-selection';
 import type { UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';

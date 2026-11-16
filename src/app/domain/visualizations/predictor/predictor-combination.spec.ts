@@ -11,7 +11,8 @@ import type { VisualizationSourceEvidence, VisualizationSourceRequest } from '..
 import { resolveCalendarizedUtility } from '../utility/utility-calendarized';
 import { utilityCapabilities, utilityChartSupport } from '../utility/utility-capabilities';
 import { predictorCapabilities, predictorChartSupport, resolvePredictor } from './predictor-source';
-import { predictorCombinationSupported, wholeMonthWindow } from '../visualization-monthly-combination';
+import { predictorCombinationSupported } from '../visualization-monthly-combination';
+import { wholeMonthWindow } from '../visualization-periods';
 
 describe('monthly utility and predictor combination', () => {
   function setup() {

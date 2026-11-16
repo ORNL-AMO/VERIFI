@@ -6,7 +6,7 @@ import type { IdbFacility } from '@data/models/idbModels/facility';
 import { annualAnalysisChartValues, monthlyAnalysisSavingsValues, monthlyAnalysisUseValues } from '@domain/calculations/analysis-calculations/analysis-chart-values';
 import { energyUseFiscalPeriod } from '@domain/calculations/energy-footprint/energy-use-projection';
 import { civilDate, validCivil } from '../utility/utility-periods';
-import { predictorMonthRange } from '../predictor/predictor-source';
+import { civilMonthIndex, civilMonthRange } from '../visualization-periods';
 import type { AnalysisResultVisualizationSource, VisualizationChart, VisualizationSource } from '../visualization-definition';
 import type { ResolvedVisualizationPeriod, VisualizationChartSupport, VisualizationData, VisualizationObservation, VisualizationSourceCapabilities, VisualizationSourceRequest, VisualizationSourceResolution } from '../visualization-source-provider';
 
@@ -70,14 +70,13 @@ export function analysisPeriodIssue(request: Pick<VisualizationSourceRequest, 'c
   if (chart.interval === 'yearly') return ['all-history', 'latest-saved-year', 'fiscal-year'].includes(period.kind) ? undefined : 'Choose all history, latest complete result fiscal year or one fiscal year.';
   if (!['all-history', 'fixed', 'rolling'].includes(period.kind) || 'basis' in period && period.basis !== 'calendar') return 'Monthly analysis results require calendar months.';
   if (period.kind === 'fixed' && (!validCivil(period.start) || !validCivil(period.end) || period.start > period.end || period.start.slice(8) !== '01'
-    || predictorMonthRange(monthNumber(period.end)).end !== period.end)) return 'Choose an inclusive range of whole months.';
+    || civilMonthRange(civilMonthIndex(period.end)).end !== period.end)) return 'Choose an inclusive range of whole months.';
   if (period.kind === 'rolling' && (!Number.isSafeInteger(period.count) || period.count < 1 || period.includeIncomplete)) return 'Choose a positive rolling range of completed months.';
   return undefined;
 }
-function monthNumber(value: string): number { return Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7)) - 1; }
 export function latestAnalysisMonth(value: Pick<AnalysisVisualizationResults, 'monthly'>): string | undefined {
   return value.monthly.map(row => new Date(row.date)).filter(date => Number.isFinite(date.getTime()))
-    .map(date => predictorMonthRange(date.getFullYear() * 12 + date.getMonth()).end).sort().at(-1);
+    .map(date => civilMonthRange(date.getFullYear() * 12 + date.getMonth()).end).sort().at(-1);
 }
 /** Projects current authoritative results only; never changes calculation periods or saved analyses. */
 export function resolveFacilityAnalysisResults(value: FacilityVisualizationResults, request: VisualizationSourceRequest): VisualizationSourceResolution {
@@ -117,7 +116,7 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
     ...(!percentage && analysis.analysisCategory === 'energy' ? { energyTreatment: analysis.energyIsSource ? 'source' as const : 'site' as const } : {}) }];
   const periods: ResolvedVisualizationPeriod[] = [], rows: Extract<VisualizationData, { kind: 'time-series' }>['rows'][number][] = [];
   const intermediateYears = new Set((value.scope === 'facility' ? value.groups : []).flatMap(group => group.annualAnalysisSummaryData.filter(row => row.isIntermediateBanked).map(row => row.year)));
-  const intermediateMonths = new Set((value.scope === 'facility' ? value.groups : []).flatMap(group => group.monthlyAnalysisSummaryData.filter(row => row.isIntermediateBanked && Number.isFinite(new Date(row.date).getTime())).map(row => monthNumber(civilDate(new Date(row.date))))));
+  const intermediateMonths = new Set((value.scope === 'facility' ? value.groups : []).flatMap(group => group.monthlyAnalysisSummaryData.filter(row => row.isIntermediateBanked && Number.isFinite(new Date(row.date).getTime())).map(row => civilMonthIndex(civilDate(new Date(row.date))))));
   const warnings: string[] = value.scope === 'facility' && value.groupOnly ? ['Selected-group results end at its latest complete fiscal year while another group blocks facility results.'] : [];
   const point = (amount: number | null | undefined, partial: boolean, notes: string[], excluded = false): VisualizationObservation =>
     excluded ? { state: 'excluded', value: null, reason: 'Calculated/annual improvement is unavailable during this banking transition.' }
@@ -140,18 +139,18 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
     }
   } else {
     const monthly = value.monthly.filter(row => Number.isFinite(new Date(row.date).getTime()));
-    const byMonth = new Map(monthly.map(row => [monthNumber(civilDate(new Date(row.date))), row]));
+    const byMonth = new Map(monthly.map(row => [civilMonthIndex(civilDate(new Date(row.date))), row]));
     const savings = monthlyAnalysisSavingsValues(monthly, !!source.groupGuid && monthly.some(row => row.isBanked));
-    const savingsByMonth = new Map(monthly.map((row, index) => [monthNumber(civilDate(new Date(row.date))), savings[index]]));
+    const savingsByMonth = new Map(monthly.map((row, index) => [civilMonthIndex(civilDate(new Date(row.date))), savings[index]]));
     let first = Math.min(...byMonth.keys()), last = Math.max(...byMonth.keys());
-    if (period.kind === 'fixed') { first = monthNumber(period.start); last = monthNumber(period.end); }
+    if (period.kind === 'fixed') { first = civilMonthIndex(period.start); last = civilMonthIndex(period.end); }
     if (period.kind === 'rolling') {
       const anchor = period.anchor === 'calendar' ? request.dateContext.calendarDate : latestAnalysisMonth(value);
-      if (anchor) { last = monthNumber(anchor) - (period.anchor === 'calendar' ? 1 : 0); first = last - period.count * (period.unit === 'year' ? 12 : 1) + 1; }
+      if (anchor) { last = civilMonthIndex(anchor) - (period.anchor === 'calendar' ? 1 : 0); first = last - period.count * (period.unit === 'year' ? 12 : 1) + 1; }
     }
     if (Number.isFinite(first) && (first < 12 || last > 119999 || last - first > 119987)) return unsupported('Choose months within civil years 1–9999.');
     for (let month = first; month <= last; month++) {
-      const range = predictorMonthRange(month), row = byMonth.get(month);
+      const range = civilMonthRange(month), row = byMonth.get(month);
       const intermediate = row?.isIntermediateBanked || !source.groupGuid && intermediateMonths.has(month);
       const metric = source.measure === 'banked-savings' ? 'bankedSavings' : source.measure === 'banked-losses' ? 'bankedLosses' : source.measure;
       const numeric = row ? ['actual', 'calculated'].includes(source.measure) ? monthlyAnalysisUseValues({ ...row, isIntermediateBanked: !!intermediate })[metric] : savingsByMonth.get(month)?.[metric] : null;

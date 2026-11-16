@@ -32,7 +32,7 @@ import { TimeSeriesPresenter } from '../time-series/time-series.presenter';
 import { UtilitySourceEditorComponent } from '../utility/editors/source-editor/utility-source-editor.component';
 import { echarts } from '@app/v1/shared/charts/echarts';
 import { decisionNodeId, projectMeterItems } from '../decisions/decision-tree';
-import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
 import { visualizationRecord, visualizationSnapshot } from './visualization-test-fixtures';
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 

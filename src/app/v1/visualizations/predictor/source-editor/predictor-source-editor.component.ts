@@ -5,18 +5,18 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { decisionNodeId } from '../../decisions/decision-tree';
 import { predictorResourceChoices, projectPredictorItems } from '../predictor-items';
-import type { UtilityEditorContext } from '../../utility/editors/utility-editor-context';
+import type { VisualizationSourceEditorContext } from '../../shared/source-editor-context';
 import type { ResourceOption } from '../../shared/resource-picker/resource-picker.component';
 
 @Component({ selector: 'app-predictor-source-editor', standalone: false,
   templateUrl: './predictor-source-editor.component.html', styleUrls: ['./predictor-source-editor.component.css'] })
 export class PredictorSourceEditorComponent {
   readonly emptyNodes: ReadonlySet<string> = new Set();
-  readonly contextState = signal<UtilityEditorContext | undefined>(undefined);
+  readonly contextState = signal<VisualizationSourceEditorContext | undefined>(undefined);
   readonly selected = new FormControl<string[]>([], { nonNullable: true });
   private readonly workspace = inject(AccountWorkspaceStore);
 
-  @Input({ required: true }) set context(context: UtilityEditorContext) {
+  @Input({ required: true }) set context(context: VisualizationSourceEditorContext) {
     this.contextState.set(context);
     context.disabled ? this.selected.disable({ emitEvent: false }) : this.selected.enable({ emitEvent: false });
   }

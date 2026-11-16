@@ -9,13 +9,13 @@ import { equipmentChartSupport, useEquipmentHistorySettings } from '@domain/visu
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { decisionNodeId } from '../../decisions/decision-tree';
 import { energyUseSelectionChoices, equipmentResourceChoices, projectEquipmentItems } from '../equipment-items';
-import type { UtilityEditorContext } from '../../utility/editors/utility-editor-context';
+import type { VisualizationSourceEditorContext } from '../../shared/source-editor-context';
 import { visualizationIntentEqual } from '../../editing/visualization-reconciliation';
 
 @Component({ selector: 'app-equipment-source-editor', standalone: false,
   templateUrl: './equipment-source-editor.component.html', styleUrls: ['../../shared/compact-controls.css', './equipment-source-editor.component.css'] })
 export class EquipmentSourceEditorComponent {
-  readonly contextState = signal<UtilityEditorContext | undefined>(undefined);
+  readonly contextState = signal<VisualizationSourceEditorContext | undefined>(undefined);
   readonly selected = new FormControl<string[]>([], { nonNullable: true });
   readonly unit = new FormControl('', { nonNullable: true });
   readonly historySettings = new FormControl(false, { nonNullable: true });
@@ -29,7 +29,7 @@ export class EquipmentSourceEditorComponent {
   readonly emptyNodes: ReadonlySet<string> = new Set();
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly destroy = inject(DestroyRef);
-  @Input({ required: true }) set context(context: UtilityEditorContext) {
+  @Input({ required: true }) set context(context: VisualizationSourceEditorContext) {
     this.contextState.set(context);
     for (const control of [this.selected, this.unit, this.historySettings]) context.disabled ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
   }

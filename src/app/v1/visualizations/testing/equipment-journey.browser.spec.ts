@@ -21,7 +21,7 @@ import { EquipmentEditorsModule } from '../energy-use/equipment-editors.module';
 import { EquipmentSourceEditorComponent } from '../energy-use/source-editor/equipment-source-editor.component';
 import { EquipmentSourceProvider } from '../energy-use/equipment-source-provider.service';
 import { UtilityEditorsModule } from '../utility/editors/utility-editors.module';
-import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
 import { echarts } from '@app/v1/shared/charts/echarts';
 
 describe('saved equipment history native journey', () => {
