@@ -24,6 +24,7 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
     cleared.push(`${source.kind}: selected resources and dependent series`);
     const copy = { ...source };
     if ('selection' in copy) delete copy.selection;
+    if (copy.kind === 'energy-use') delete copy.equipmentTypes;
     if (copy.kind === 'utility') delete copy.charge;
     if (copy.kind === 'analysis') {
       delete copy.analysisGuid; delete copy.groupGuid;
