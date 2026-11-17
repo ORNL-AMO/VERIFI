@@ -50,9 +50,10 @@
         @for (analysis of filteredCards(); track analysis.value) {
           <div class="report-analysis-card">
             <label class="report-analysis-card__selection">
-              <input type="radio" name="analysis" required [formControl]="selectionControl()" [value]="analysis.value">
+              <input type="radio" [name]="identity.selection" required [formControl]="selectionControl()" [value]="analysis.value">
               <span class="report-analysis-card__content">
                 <strong>{{ analysis.name }}</strong>
+                @if (analysis.ownerName) { <span class="report-analysis-card__metadata">{{ analysis.ownerName }}</span> }
                 <span class="report-analysis-card__metadata">
                   {{ analysis.category }} · Baseline {{ analysis.baseline }}
                 </span>

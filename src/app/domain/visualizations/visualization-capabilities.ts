@@ -268,10 +268,19 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
         add('missing-source', `Repair the missing ${reference.kind} reference: ${reference.id}.`, source.id);
       for (const candidate of candidates) reasons.push(...referenceSelectionReasons(source, candidate));
     }
-    if (resolved.references.some(reference => reference.accountGuid !== definition.accountGuid
-      || (reference.kind === 'facility' ? !request.identity.scope.facilityGuids.includes(reference.id)
-        : reference.facilityGuid !== undefined ? !request.identity.scope.facilityGuids.includes(reference.facilityGuid)
-          : definition.facilitySelection.kind !== 'all' || request.identity.scope.kind === 'facility')))
+    const accountFacilities = source.kind === 'analysis' && source.mode === 'result' ? resolved.accountAnalysisFacilityGuids : undefined;
+    if (accountFacilities && (new Set(accountFacilities).size !== accountFacilities.length
+      || accountFacilities.some(guid => !guid.trim() || !request.identity.scope.facilityGuids.includes(guid))))
+      add('ownership', 'Include every selected facility of the named account analysis.', source.id);
+    if (resolved.references.some(reference => {
+      if (reference.accountGuid !== definition.accountGuid) return true;
+      if (reference.kind === 'facility') return !request.identity.scope.facilityGuids.includes(reference.id);
+      if (reference.facilityGuid !== undefined) return !request.identity.scope.facilityGuids.includes(reference.facilityGuid);
+      // Scoped account results need an explicit selected-facility closure, not an inferred filtered account total.
+      const accountResult = source.kind === 'analysis' && source.mode === 'result'
+        && reference.kind === 'analysis' && reference.id === source.analysisGuid && accountFacilities !== undefined;
+      return !accountResult && (definition.facilitySelection.kind !== 'all' || request.identity.scope.kind === 'facility');
+    }))
       add('ownership', 'Resolved references must belong to the saved account and facility scope.', source.id);
     if (!resolved.periods.length) add('period', 'Resolve actual native period intervals before rendering.', source.id);
     if (observations(resolved.data).some(point => point.state === 'observed' && !Number.isFinite(point.value)))

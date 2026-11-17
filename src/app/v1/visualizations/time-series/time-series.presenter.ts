@@ -66,7 +66,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
         const key = `${chart.interval}:${dateIndex}`;
         const order = chart.interval === 'native' ? Date.parse(`${row.start}T12:00:00Z`) : Number(dateIndex);
         const fiscal = source.result.periods.find(period => period.role === role && period.start === row.start && period.end === row.end && period.basis === 'fiscal');
-        const equipmentYear = source.evidence.request.source.kind === 'energy-use' ? fiscal?.fiscalYear : undefined;
+        const equipmentYear = ['energy-use', 'analysis'].includes(source.evidence.request.source.kind) ? fiscal?.fiscalYear : undefined;
         const alignedDate = equipmentYear !== undefined ? `FY ${equipmentYear}` : chart.interval === 'native' ? row.start : monthLabel(Number(dateIndex), chart.interval === 'yearly');
         slots.set(key, { key, order, label: alignedDate });
         const observation: VisualizationObservation = row.values[item.metadata.id] ?? { state: 'alignment-padding', value: null, reason: 'This series has no native observation at this alignment slot.' };

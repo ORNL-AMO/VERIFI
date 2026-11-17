@@ -1,3 +1,4 @@
+import { projectDecisionItems, configuredChartSummary } from '../shared/configured-items';
 import { resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, ElementRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
@@ -16,7 +17,7 @@ import { RecoveryActionsComponent, VisualizationChildDraftGuard } from '../recov
 import { VisualizationFacilitySelection, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
-import { decisionNodeId, prepareDecisionChange, projectDecisionItems, configuredChartSummary } from '../decisions/decision-tree';
+import { decisionNodeId, prepareDecisionChange } from '../decisions/decision-tree';
 import type { DecisionChangeResult, DecisionRef, VisualizationDecisionAction } from '../decisions/decision-types';
 import type { PeriodSettingsContext, UtilityEditorContext } from '../utility/editors/utility-editor-context';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';

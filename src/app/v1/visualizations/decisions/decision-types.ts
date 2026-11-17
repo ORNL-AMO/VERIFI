@@ -1,5 +1,5 @@
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import type { UtilitySelectionMode, UtilityVisualizationSource, VisualizationChart, VisualizationDefinition,
+import type { AnalysisResultVisualizationSource, UtilitySelectionMode, UtilityVisualizationSource, VisualizationChart, VisualizationDefinition,
   EnergyUseSelectionMode, SettingBinding, VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
@@ -41,6 +41,10 @@ export interface DecisionResourceChoice {
   readonly available: boolean;
 }
 export type VisualizationDecisionAction =
+  | { readonly kind: 'analysis-binding'; readonly sourceId: string; readonly analysisGuid?: string; readonly groupGuid?: string }
+  | { readonly kind: 'analysis-measure'; readonly sourceId: string; readonly measure: AnalysisResultVisualizationSource['measure'] }
+  | { readonly kind: 'analysis-interval'; readonly sourceId: string; readonly interval: 'monthly' | 'yearly' }
+  | { readonly kind: 'analysis-defaults'; readonly sourceId: string }
   | { readonly kind: 'facilities'; readonly selection: VisualizationFacilitySelection }
   | { readonly kind: 'chart'; readonly chart: VisualizationChart }
   | { readonly kind: 'chart-type'; readonly traceType: 'line' | 'bar' }

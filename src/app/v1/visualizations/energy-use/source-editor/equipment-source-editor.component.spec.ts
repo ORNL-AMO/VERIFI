@@ -1,3 +1,4 @@
+import { projectDecisionItems } from '../../shared/configured-items';
 import type { VisualizationDefinition, VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
@@ -5,7 +6,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { equipmentDefinition, equipmentFixture, equipmentSnapshot } from '@domain/visualizations/testing/equipment-fixtures';
 import { EquipmentEditorsModule } from '../equipment-editors.module';
 import { EquipmentSourceEditorComponent } from './equipment-source-editor.component';
-import { prepareDecisionChange, projectDecisionItems } from '../../decisions/decision-tree';
+import { prepareDecisionChange } from '../../decisions/decision-tree';
 import { useEquipmentHistorySettings } from '@domain/visualizations/energy-use/equipment-source';
 
 const dormantOverrides: readonly VisualizationSeriesOverride[] = [

@@ -1,3 +1,4 @@
+import { analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
 import { equipmentFixture } from '@domain/visualizations/testing/equipment-fixtures';
 import { getNewIdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
@@ -26,9 +27,65 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
   }
   if (sourceKinds.includes('predictor')) lifecycle.continuePredictors();
   if (sourceKinds.includes('energy-use')) { lifecycle.selectEnergyUseMode('equipment'); lifecycle.continueEquipment(); }
+  if (sourceKinds.includes('analysis')) {
+    const workspace = TestBed.inject(AccountWorkspaceStore);
+    if (!workspace.facilityAnalyses().length) workspace.publish({ ...workspace.snapshot()!, facilityAnalyses: [analysisFixture().analysis] });
+    lifecycle.selectAnalysis(workspace.facilityAnalyses()[0].guid);
+    lifecycle.continueAnalysis();
+  }
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it('collects only an exact named analysis and reviews replacement while preserving unavailable intent', () => {
+    const { workspace } = configureLibraryTest(); const data = analysisFixture(); workspace.publish(data.snapshot);
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('analysis'); expect(lifecycle.canContinueAnalysis()).toBe(false);
+    lifecycle.selectAnalysis('analysis-a');
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a', measure: 'actual' });
+    expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('groupGuid');
+    lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue('Production'); expect(lifecycle.canSubmit()).toBe(true);
+    workspace.publishCommitted({ ...data.snapshot, facilityAnalyses: [] }, {}); expect(lifecycle.canSubmit()).toBe(false);
+    lifecycle.editSelection('analysis'); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a' });
+    const replacement = { ...data.analysis, guid: 'replacement' };
+    workspace.publishCommitted({ ...data.snapshot, facilityAnalyses: [replacement] }, {});
+    expect(lifecycle.canContinueAnalysis()).toBe(false);
+    lifecycle.selectAnalysis('replacement'); expect(lifecycle.confirmation()).toBe('decision');
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    lifecycle.cancelConfirmation(); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    lifecycle.selectAnalysis('replacement'); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('replacement'); expect(lifecycle.canContinueAnalysis()).toBe(true);
+    lifecycle.toggleSource('analysis'); expect(lifecycle.confirmation()).toBe('decision'); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.analysisGuid.value).toBeNull();
+  });
+
+  it.each([['line', 'bar'], ['bar', 'line']] as const)('saves the current %s to %s chart choice after selecting an analysis', async (initial, selected) => {
+    const { workspace, commands } = configureLibraryTest(); workspace.publish(analysisFixture().snapshot);
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart(initial); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
+    lifecycle.selectAnalysis('analysis-a'); lifecycle.continueAnalysis(); lifecycle.editSelection('chart'); lifecycle.selectChart(selected);
+    lifecycle.continueSources(); lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue('Current chart'); await lifecycle.submit();
+    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { kind: 'time-series', defaultTraceType: selected, interval: 'monthly' },
+      sources: [{ analysisGuid: 'analysis-a', mode: 'result', measure: 'actual' }], series: [{ metric: 'actual', resourceGuid: 'analysis-a', axis: 'left' }] });
+    expect(commands.prepareCreate.mock.calls[0][0].sources[0]).not.toHaveProperty('groupGuid');
+  });
+
+  it('rejects stale analysis replacement review and clears an excluded facility binding only after scope review', () => {
+    const { workspace } = configureLibraryTest(); const data = analysisFixture();
+    const snapshot = { ...data.snapshot, facilities: [...data.snapshot.facilities, { ...data.facility, guid: 'facility-b' }],
+      facilityAnalyses: [...data.snapshot.facilityAnalyses, { ...data.analysis, guid: 'replacement' }] };
+    workspace.publish(snapshot);
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
+    lifecycle.selectAnalysis('analysis-a'); lifecycle.selectAnalysis('replacement'); expect(lifecycle.confirmation()).toBe('decision');
+    workspace.publishCommitted({ ...snapshot, facilityAnalyses: snapshot.facilityAnalyses.map(item => ({ ...item, name: 'Renamed' })) }, {});
+    lifecycle.confirmDecision(); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a'); expect(lifecycle.error()).toContain('Choices changed');
+    lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-b'] }); expect(lifecycle.confirmation()).toBe('decision');
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a'); lifecycle.cancelConfirmation();
+    expect(lifecycle.form.controls.facilitySelection.value).toEqual({ kind: 'all' });
+    lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-b'] }); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.analysisGuid.value).toBeNull(); expect(lifecycle.canContinueAnalysis()).toBe(false);
+  });
+
   it.each([
     ['group', 'energy-group', 'energy-use-group'], ['equipment', 'equipment-a', 'equipment'],
     ['equipment-type', 'Pump', undefined], ['linked-meter-group', 'linked-group', 'meter-group'], ['facility', 'facility-a', 'facility']

@@ -6,6 +6,7 @@ import { IconName } from '@app/v1/shared/icons/icon-registry';
 export interface ReportAnalysisSelectionCard {
   readonly value: string;
   readonly name: string;
+  readonly ownerName?: string;
   readonly category: string;
   readonly categoryValue?: 'energy' | 'water';
   readonly baselineYear?: number;

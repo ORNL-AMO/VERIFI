@@ -6,7 +6,8 @@ import { VisualizationDefinition, VisualizationSourceKind } from '@domain/visual
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { visualizationReferences } from '@domain/visualizations/visualization-references';
 import { InventoryTile } from '@app/v1/shared/inventory/inventory.models';
-import { visualizationChartIcon, visualizationDefinitionChartLabel } from '../visualization-charts';
+import { visualizationChartIcon } from '../visualization-charts';
+import { visualizationDefinitionChartLabel } from '../shared/configured-items';
 import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 
 export { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';

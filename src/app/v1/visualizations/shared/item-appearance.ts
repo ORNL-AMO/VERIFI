@@ -1,5 +1,32 @@
-import type { VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
-import type { DecisionItemAppearance, DecisionItemIdentity } from '../decisions/decision-types';
+import type { VisualizationDefinition, VisualizationSeries, VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
+import { findVisualizationSeriesOverride } from '@domain/visualizations/visualization-series';
+import type { DecisionItemAppearance, DecisionItemIdentity, VisualizationDecisionItem } from '../decisions/decision-types';
+import { visualizationSeriesStyle } from './series-style';
+
+export function findItemSeries(definition: VisualizationDefinition, sourceId: string, metric: string,
+  identity: DecisionItemIdentity): VisualizationSeries | undefined {
+  return definition.series.find(series => series.sourceId === sourceId && series.metric === metric
+    && identity.resourceGuid !== undefined && series.resourceGuid === identity.resourceGuid)
+    ?? definition.series.find(series => series.sourceId === sourceId && series.metric === metric && !series.resourceGuid);
+}
+
+/** Editors retain missing configured identities while sharing runtime override precedence. */
+export function resolveItemPresentation(definition: VisualizationDefinition, item: {
+  readonly sourceId: string; readonly metric: string; readonly identity: DecisionItemIdentity; readonly providerSeriesId: string;
+}) {
+  const series = findItemSeries(definition, item.sourceId, item.metric, item.identity);
+  const override = series && findVisualizationSeriesOverride(definition, series,
+    { id: item.providerSeriesId, resourceGuid: item.identity.resourceGuid });
+  const { overrides: _overrides, id: _id, sourceId: _sourceId, resourceGuid: _resourceGuid, metric: _metric,
+    ...declaredValues } = series ?? {} as VisualizationSeries;
+  const { resourceGuid: _overrideResource, seriesId: _overrideSeries, accountGuid: _account, ...overrideValues } = override ?? {};
+  const declared: DecisionItemAppearance = declaredValues, own: DecisionItemAppearance = overrideValues;
+  const values = { ...visualizationSeriesStyle(item.providerSeriesId), ...declared, ...own };
+  const appearance: VisualizationDecisionItem['appearance'] = { ...values,
+    traceType: values.traceType ?? (definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line'),
+    axis: values.axis ?? 'left', visible: values.visible !== false };
+  return { series, override, declared, own, appearance };
+}
 
 export function itemKey(identity: DecisionItemIdentity): string { return identity.resourceGuid !== undefined ? `resource:${identity.resourceGuid}` : `series:${identity.seriesId}`; }
 export function overrideMatches(override: VisualizationSeriesOverride, identity: DecisionItemIdentity, accountGuid: string): boolean {

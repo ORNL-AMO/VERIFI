@@ -1,3 +1,5 @@
+import { AnalysisDataSession } from '../analysis/analysis-data-session.service';
+import { analysisPeriodIssue, latestAnalysisMonth } from '@domain/visualizations/analysis/facility-analysis-source';
 import { wholeMonthWindow } from '@domain/visualizations/visualization-monthly-combination';
 import { latestPredictorDate, predictorHistoryRange, predictorMonthRange, resolvePredictor } from '@domain/visualizations/predictor/predictor-source';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -11,6 +13,7 @@ import { UtilitySourceProvider } from './utility-source-provider.service';
 
 @Injectable()
 export class UtilityDateContextResolver implements PreviewDateContextResolver {
+  private readonly analysisData = inject(AnalysisDataSession, { optional: true });
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly data = inject(UtilityDataSession);
   private readonly provider = inject(UtilitySourceProvider);
@@ -18,6 +21,15 @@ export class UtilityDateContextResolver implements PreviewDateContextResolver {
     const scope = resolveVisualizationFacilities(definition, this.workspace.facilities()).scope;
     const sources = definition.sources.filter((s): s is UtilityVisualizationSource => s.kind === 'utility');
     const predictors = definition.sources.filter(source => source.kind === 'predictor');
+    const analysis = definition.sources.find(source => source.kind === 'analysis');
+    if (analysis && definition.sources.length === 1 && this.analysisData) {
+      const calendarDate = civilDate(new Date());
+      if (analysisPeriodIssue({ chart: definition.chart!, period: definition.period, comparison: definition.comparison })) return { calendarDate };
+      const result = await this.analysisData.acquire({ identity: { ...identity, scope, sourceId: analysis.id, requestId: 'date-context' },
+        source: analysis, chart: definition.chart!, period: definition.period, comparison: definition.comparison, series: definition.series, dateContext: { calendarDate } }, signal);
+      if (signal.aborted || !this.workspace.isReady() || this.workspace.account()?.guid !== identity.accountGuid || this.workspace.revision() !== identity.workspaceRevision) throw new DOMException('Analysis date context superseded', 'AbortError');
+      return { calendarDate, ...(result.state === 'ready' ? { latestDataDate: latestAnalysisMonth(result.value) } : {}) };
+    }
     if (!sources.length && !predictors.length) {
       if (signal.aborted || !this.workspace.isReady() || this.workspace.account()?.guid !== identity.accountGuid || this.workspace.revision() !== identity.workspaceRevision)
         throw new DOMException('Date context superseded', 'AbortError');

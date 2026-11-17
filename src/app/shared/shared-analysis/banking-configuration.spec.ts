@@ -40,6 +40,22 @@ describe('banking configuration', () => {
     expect(evaluateBankingSource(current, [current, source, dependency]).issue).toBe('cycle');
   });
 
+  it.each([undefined, ''])('rejects a transitive banking dependency without a source ID (%s)', bankedAnalysisItemId => {
+    const current = analysis('current', { hasBanking: true, bankedAnalysisItemId: 'source' });
+    const source = analysis('source', { hasBanking: true, bankedAnalysisItemId: 'dependency' });
+    const dependency = analysis('dependency', { hasBanking: true, bankedAnalysisItemId });
+
+    expect(evaluateBankingSource(current, [current, source, dependency]).issue).toBe('dependency-missing');
+  });
+
+  it('accepts a complete chain and stops at a dependency that no longer applies banking', () => {
+    const current = analysis('current', { hasBanking: true, bankedAnalysisItemId: 'source' });
+    const source = analysis('source', { hasBanking: true, bankedAnalysisItemId: 'dependency' });
+    const dependency = analysis('dependency', { bankedAnalysisItemId: 'removed' });
+
+    expect(evaluateBankingSource(current, [current, source, dependency])).toEqual({ source });
+  });
+
   it('includes transitive dependencies only while the matching source group applies banking', () => {
     const dependency = analysis('dependency');
     const source = analysis('source', {
