@@ -69,6 +69,10 @@ describe('VIS7 saved exploration acceptance', () => {
     expect(panel.querySelector('.equation')?.textContent).toMatch(/^Production pump \(kWh\) = .+ × Electric furnace \(kWh\)/);
     window.dispatchEvent(new Event('beforeprint')); host.detectChanges();
     await vi.waitFor(() => expect([...root.querySelectorAll<HTMLElement>('.pair-chart')].filter(canvas => echarts.getInstanceByDom(canvas))).toHaveLength(6));
+    for (const canvas of root.querySelectorAll<HTMLElement>('.pair-chart')) {
+      expect(canvas.getAttribute('role')).toBe('img');
+      expect(canvas.getAttribute('aria-label')).toContain('versus');
+    }
     const printPairs = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await page.viewport(1100, 4000);
     await printPairs.send('Emulation.setEmulatedMedia', { media: 'print' });
@@ -114,6 +118,8 @@ describe('VIS7 saved exploration acceptance', () => {
       await page.viewport(width, 850); currentRoot.querySelector('main')!.className = `v1-root ${theme}`; host.detectChanges();
       const canvas = currentRoot.querySelector<HTMLElement>('.heatmap-chart')!; canvas.scrollIntoView();
       await vi.waitFor(() => expect(echarts.getInstanceByDom(canvas)?.getWidth()).toBeGreaterThan(200));
+      expect(canvas.getAttribute('role')).toBe('img');
+      expect(canvas.getAttribute('aria-label')).toContain('Blank cells have no data');
       expect(currentRoot.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth + 1);
       await page.screenshot({ element: currentRoot, path: `../../../../../.angular/vis7-${label}.png` });
     }

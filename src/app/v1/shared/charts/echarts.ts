@@ -17,6 +17,8 @@ import {
   ScatterSeriesOption
 } from 'echarts/charts';
 import {
+  AriaComponent,
+  AriaComponentOption,
   DataZoomComponent,
   DataZoomComponentOption,
   DatasetComponent,
@@ -39,6 +41,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { LegacyGridContainLabel } from 'echarts/features';
 
 echarts.use([
+  AriaComponent,
   SankeyChart,
   TreemapChart,
   BarChart,
@@ -67,6 +70,7 @@ export type V1EChartsOption = echarts.ComposeOption<
   | HeatmapSeriesOption
   | LineSeriesOption
   | ScatterSeriesOption
+  | AriaComponentOption
   | DataZoomComponentOption
   | DatasetComponentOption
   | GridComponentOption
