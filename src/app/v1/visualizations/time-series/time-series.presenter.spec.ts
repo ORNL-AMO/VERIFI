@@ -109,9 +109,9 @@ describe('saved time-series presentation', () => {
     expect(model.traces.filter(trace => trace.id.startsWith(first.id + ':')).map(trace => trace.type)).toEqual(['bar', 'bar']);
     expect(model.traces.filter(trace => trace.id.startsWith('second-meter:')).map(trace => trace.type)).toEqual(['line', 'line']);
   });
-  it('rejects unsupported styles and aborted presentation', () => {
+  it('prepares area and rejects aborted presentation', () => {
     const definition = utilityVisualizationFixture();
-    expect(() => prepareTimeSeries({ ...definition, chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'none' } }, [ready(definition)])).toThrow('line or bar');
+    expect(prepareTimeSeries({ ...definition, chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'none' } }, [ready(definition)]).traces[0].type).toBe('area');
     const abort = new AbortController(); abort.abort();
     expect(() => new TimeSeriesPresenter().prepare(definition, [ready(definition)], abort.signal)).toThrow('canceled');
   });

@@ -39,7 +39,7 @@ describe('Meter decision branches', () => {
     state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: external } } }] } });
     expect(state.component.settingsForm.controls.unit.value).toBe(external); expect(state.component.conflict()).toBe(false);
   });
-  it('places each selected item beside the source settings without an Items wrapper or movement buttons', () => {
+  it('places each selected item beside the source settings with ordering actions and without an Items wrapper', () => {
     const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
     const state = setup({ ...original, sources: [{ ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } }] });
     const root = state.fixture.nativeElement as HTMLElement, sections = root.querySelector('.utility-editor')!;
@@ -48,7 +48,7 @@ describe('Meter decision branches', () => {
     expect(items.map(item => item.querySelector('.decision-section__toggle strong')?.textContent)).toContain('Boiler meter');
     expect([...sections.children].some(section => section.querySelector('strong')?.textContent === 'Data settings')).toBe(true);
     expect(root.querySelector('[id^="items:"]')).toBeNull();
-    expect(root.querySelector('button[aria-label^="Move "]')).toBeNull();
+    expect(root.querySelector('button[aria-label^="Move "]')).not.toBeNull();
   });
   it('shows the default-on calendarization switch inside Data settings and preserves drafts while a change is reviewed', () => {
     const state = setup(), root = state.fixture.nativeElement as HTMLElement;

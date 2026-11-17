@@ -225,7 +225,7 @@ export class LibraryLifecycle {
     let definition = createVisualizationSetupDefinition({ name: value.name.trim() || 'Visualization', accountGuid: editor.accountGuid,
       facilitySelection: value.facilitySelection, chart: createVisualizationChart(value.chart), sourceKinds: value.sourceKinds });
     const equipmentSourceId = definition.sources.find(source => source.kind === 'energy-use')?.id;
-    if (equipmentSourceId && value.sourceKinds.length === 1 && (value.chart === 'line' || value.chart === 'bar')) definition = useEquipmentHistorySettings(definition, equipmentSourceId);
+    if (equipmentSourceId && value.sourceKinds.length === 1 && (value.chart === 'line' || value.chart === 'bar' || value.chart === 'area')) definition = useEquipmentHistorySettings(definition, equipmentSourceId);
     const sourceId = definition.sources.find(source => source.kind === 'utility')?.id;
     const change = (action: Parameters<typeof prepareDecisionChange>[1]) => { const result = prepareDecisionChange(definition, action, { snapshot }); if (result.state !== 'unchanged') definition = result.definition; };
     const predictorSourceId = definition.sources.find(source => source.kind === 'predictor')?.id;

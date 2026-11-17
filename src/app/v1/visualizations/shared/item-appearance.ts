@@ -38,3 +38,8 @@ export function isCustomized(appearance: DecisionItemAppearance, explicitOverrid
     || (explicitOverride ? appearance.visible !== undefined : appearance.visible === false)
     || appearance.lineStyle !== undefined && (explicitOverride || appearance.lineStyle !== 'solid') || appearance.order !== undefined;
 }
+
+/** Stable order: configured current members precede new matches; source groups stay together. */
+export function orderDecisionItems<T extends VisualizationDecisionItem>(items: T[]): T[] {
+  return items.sort((a, b) => (a.appearance.order ?? Number.MAX_SAFE_INTEGER) - (b.appearance.order ?? Number.MAX_SAFE_INTEGER));
+}

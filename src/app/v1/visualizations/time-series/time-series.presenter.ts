@@ -1,3 +1,4 @@
+import { timeSeriesStackIssues } from '@domain/visualizations/visualization-time-series';
 import { civilMonthIndex } from '@domain/visualizations/visualization-periods';
 import { allowsMixedAxisUnits } from '@domain/visualizations/visualization-source-provider';
 import { Injectable } from '@angular/core';
@@ -27,14 +28,14 @@ export class TimeSeriesPresenter implements VisualizationPreviewPresenter {
 /** Align declared comparison intervals, retaining every observation's original civil dates. */
 export function prepareTimeSeries(definition: VisualizationDefinition, evidence: readonly VisualizationSourceEvidence[]): TimeSeriesModel {
   const chart = definition.chart;
-  if (chart?.kind !== 'time-series' || !['line', 'bar'].includes(chart.defaultTraceType) || chart.stack !== 'none') throw new Error('Choose unstacked line or bar traces.');
+  if (chart?.kind !== 'time-series') throw new Error('Choose a time-series chart.');
   const resolved = evidence.map(entry => {
     if ((entry.resolution.state !== 'ready' && entry.resolution.state !== 'empty') || !entry.resolution.resolved || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Resolve compatible time-series sources before preparing a chart.');
     return { evidence: entry, result: entry.resolution.resolved, data: entry.resolution.resolved.data };
   });
   const selected = resolveVisualizationSeries(definition, resolved.flatMap(entry => entry.result.series));
-  if (selected.some(item => !['line', 'bar'].includes(item.selected.traceType ?? chart.defaultTraceType)))
-    throw new Error('Choose unstacked line or bar traces.');
+  const stackIssues = timeSeriesStackIssues(definition, selected, evidence);
+  if (stackIssues.length) throw new Error(stackIssues.map(issue => issue.message).join(' '));
   for (const axis of ['left', 'right'] as const) {
     const axisSeries = selected.filter(item => item.selected.axis === axis);
     const axisCapabilities = [...new Set(axisSeries.map(item => item.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
@@ -55,7 +56,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   if (definition.comparison.kind !== 'none') warnings.add(`Comparison observations beginning ${comparisonStart} are aligned by period offset to ${primaryStart}. Accessible values retain their original dates.`);
   const primaryMonth = primaryStart ? civilMonthIndex(primaryStart) : 0, comparisonMonth = comparisonStart ? civilMonthIndex(comparisonStart) : 0;
   const slots = new Map<string, { key: string; label: string; order: number }>();
-  const traces: TimeSeriesTrace[] = [];
+  let traces: TimeSeriesTrace[] = [];
   for (const item of selected) {
     const source = resolved.find(entry => entry.result.series.some(series => series.id === item.metadata.id && series.sourceId === item.metadata.sourceId));
     if (!source) continue;
@@ -76,14 +77,19 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
       if (!points.length) continue;
       const style = visualizationSeriesStyle(item.metadata.id);
       const label = item.selected.label ?? item.metadata.label;
-      traces.push({ id: `${item.metadata.id}:${role}`, type: (item.selected.traceType ?? chart.defaultTraceType) as 'line' | 'bar', label: role === 'comparison' ? `${label} (comparison)` : label,
+      traces.push({ id: `${item.metadata.id}:${role}`, type: (item.selected.traceType ?? chart.defaultTraceType) as TimeSeriesTrace['type'], label: role === 'comparison' ? `${label} (comparison)` : label,
         unit: item.metadata.unit, axis: item.selected.axis, color: item.selected.color ?? style.color,
         lineStyle: item.selected.lineStyle ?? style.lineStyle, role, points });
     }
   }
+  if (chart.stack === 'percent') {
+    warnings.add('Percentages show the share of visible selected contributions, separately for each comparison role. Incomplete or zero totals have no percentage.');
+    traces = percentageTraces(traces);
+  }
   const duplicateLabels = new Map<string, number>();
   for (const trace of traces) duplicateLabels.set(trace.label, (duplicateLabels.get(trace.label) ?? 0) + 1);
-  return { title: definition.appearance.title ?? definition.name, chart, legend: definition.appearance.legend,
+  return { title: definition.appearance.title ?? definition.name,
+    windowKey: JSON.stringify([chart.interval, resolved.flatMap(entry => entry.result.periods)]), chart, legend: definition.appearance.legend,
     partial: resolved.some(entry => entry.result.quality.partial),
     showPartialNotice, omissions: resolved.flatMap(entry => entry.result.quality.omissions ?? []),
     slots: [...slots.values()].sort((a, b) => a.order - b.order || a.key.localeCompare(b.key)),
@@ -93,4 +99,29 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
 function monthLabel(index: number, yearly: boolean): string {
   const year = Math.floor(index / 12), month = index % 12;
   return yearly ? `${year}-${String(month + 1).padStart(2, '0')}` : new Date(year, month, 1, 12).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+/** One denominator per role and slot; absent/padding evidence never becomes an observed zero. */
+function percentageTraces(traces: readonly TimeSeriesTrace[]): TimeSeriesTrace[] {
+  const counts = new Map<string, number>();
+  const totals = new Map<string, { count: number; complete: boolean; total: number }>();
+  for (const trace of traces) {
+    counts.set(trace.role, (counts.get(trace.role) ?? 0) + 1);
+    for (const point of trace.points) {
+      const key = `${trace.role}:${point.slot}`;
+      const total = totals.get(key) ?? { count: 0, complete: true, total: 0 };
+      total.count++;
+      if (point.observation.state !== 'observed' || point.observation.partial) total.complete = false;
+      if (point.observation.state === 'observed') total.total += point.observation.value;
+      totals.set(key, total);
+    }
+  }
+  return traces.map(trace => ({ ...trace, points: trace.points.map(point => {
+    const total = totals.get(`${trace.role}:${point.slot}`)!;
+    const reason = !total.complete || total.count !== counts.get(trace.role) ? 'Incomplete comparable total; a selected contribution is missing, excluded, partial or alignment padding.'
+      : !Number.isFinite(total.total) ? 'The selected total is nonfinite.'
+      : total.total <= 0 ? 'The selected total is zero; no percentage is defined.' : undefined;
+    return { ...point, percentage: !reason && point.observation.state === 'observed' ? point.observation.value / total.total * 100 : null,
+      ...(reason ? { percentageReason: reason } : {}) };
+  }) }));
 }

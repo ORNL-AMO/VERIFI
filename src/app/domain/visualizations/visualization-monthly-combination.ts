@@ -11,7 +11,7 @@ export function predictorCombinationSupported(definition: VisualizationDefinitio
   if (!definition.sources.some(source => source.kind === 'predictor') || definition.sources.length === 1) return true;
   const chart = definition.chart, period = definition.period;
   return isMixedPredictorSourceSet(definition.sources) && chart?.kind === 'time-series' && chart.interval === 'monthly'
-    && chart.stack === 'none' && ['line', 'bar'].includes(chart.defaultTraceType) && definition.comparison.kind === 'none'
+    && chart.stack === 'none' && definition.comparison.kind === 'none'
     && (period.kind === 'all-history' || period.kind === 'fixed' && period.basis === 'calendar'
       || period.kind === 'rolling' && period.basis === 'calendar' && !period.includeIncomplete);
 }

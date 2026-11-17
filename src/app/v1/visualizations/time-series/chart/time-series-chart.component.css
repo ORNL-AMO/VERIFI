@@ -5,3 +5,5 @@
 .time-series-notices { margin-block-end: .75rem; overflow-wrap: anywhere; }
 .time-series-notices ul { max-height: 20rem; overflow: auto; }
 @media print { .time-series-actions { display: none; } .time-series-canvas { height: 20rem; break-inside: avoid; } }
+
+.time-series-share { font-size: .85rem; overflow-wrap: anywhere; }

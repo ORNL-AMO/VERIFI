@@ -72,10 +72,24 @@
           [expanded]="expandedNodes().has(rootNodes.chart)" (expandedChange)="setSection(rootNodes.chart, $event)">
           <div class="visualization-choices" role="group" aria-label="Chart type">
             @for (chart of charts; track chart.value) {
-              <button type="button" class="visualization-choice" [disabled]="!editor.canEdit()" [attr.aria-pressed]="chartSummary() === chart.label" (click)="chooseChart(chart.value)"><app-ui-icon [name]="chart.icon"/>{{ chart.label }}</button>
+              <button type="button" class="visualization-choice" [disabled]="!editor.canEdit()" [attr.aria-pressed]="chartTypeSummary() === chart.label" (click)="chooseChart(chart.value)"><app-ui-icon [name]="chart.icon"/>{{ chart.label }}</button>
             }
           </div>
           @let savedChart = definition.chart;
+          @if (savedChart && savedChart.kind === 'time-series') {
+            <span class="visualization-control-label">Stacking</span>
+            <div class="visualization-buttons" role="group" aria-label="Stacking">
+              @for (choice of stackChoices(); track choice.value) {
+                <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !!choice.reason"
+                  [attr.aria-pressed]="savedChart.stack === choice.value" [attr.aria-describedby]="choice.reason ? 'stack-' + choice.value + '-reason' : null"
+                  (click)="setStack(choice.value)">{{ choice.label }}</button>
+              }
+            </div>
+            @for (choice of stackChoices(); track choice.value) {
+              @if (choice.reason) { <p [id]="'stack-' + choice.value + '-reason'">{{ choice.label }}: {{ choice.reason }}</p> }
+            }
+            @if (savedChart.stack === 'percent') { <p>Share of visible selected contributions. Percentages require complete, nonnegative values and a positive total for each period.</p> }
+          }
           @if (savedChart && savedChart.kind === 'time-series') {
             <p class="visualization-workbench__default">Default for new items: {{ savedChart.defaultTraceType }}</p>
             <span class="visualization-control-label">Interval</span>

@@ -1,4 +1,4 @@
-import { EQUIPMENT_TYPES, energyUseBuckets, energyUseSelectionMode, energyUseResourceKind, energyUseSeriesId, selectedEnergyUseIds } from './equipment-selection';
+import { type EnergyUseBucket, EQUIPMENT_TYPES, energyUseBuckets, energyUseSelectionMode, energyUseResourceKind, energyUseSeriesId, selectedEnergyUseIds } from './equipment-selection';
 export { equipmentCatalog } from './equipment-selection';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { energyUseChartYears, savedEnergyUseYears, energyUseFiscalPeriod, projectEnergyUse, knownEnergyUseAmount, type ProjectedEnergyUse } from '@domain/calculations/energy-footprint/energy-use-projection';
@@ -14,11 +14,11 @@ export function equipmentUnit(snapshot: AccountWorkspaceSnapshot, scope: Visuali
 export function equipmentCapabilities(): VisualizationSourceCapabilities {
   return { kind: 'energy-use', measures: ['consumption'], aggregations: ['none', 'sum'], periods: ['all-history', 'latest-saved-year', 'fiscal-year'],
     comparisons: ['none'], chartKinds: ['time-series'], shapes: ['time-series'], alignments: ['fiscal-interval'], settings: ['unit'],
-    controls: ['series', 'appearance', 'axes'], allowDateOverride: true, allowMultipleSources: false };
+    controls: ['series', 'appearance', 'axes', 'stacking'], allowDateOverride: true, allowMultipleSources: false };
 }
 export function equipmentChartSupport(source: EnergyUseVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
-  if (chart.kind !== 'time-series' || chart.interval !== 'yearly' || chart.stack !== 'none' || !['line', 'bar'].includes(chart.defaultTraceType)) reasons.push('Equipment history supports yearly, unstacked line or bar charts.');
+  if (chart.kind !== 'time-series' || chart.interval !== 'yearly') reasons.push('Equipment history supports yearly line, bar or area charts.');
   const mode = energyUseSelectionMode(source);
   if (source.measure !== 'consumption' || source.aggregation !== (mode === 'equipment' ? 'none' : 'sum')) reasons.push('Use annual consumption with one trace per selected item, group, type or facility.');
   if (!mode || !selectedEnergyUseIds(source).length) reasons.push('Choose how to select Energy Uses, then select resources.');
@@ -37,7 +37,7 @@ export function useEquipmentHistorySettings(definition: VisualizationDefinition,
   return { ...definition, sources: definition.sources.map(source => {
     if (source.id !== sourceId || source.kind !== 'energy-use') return source;
     return { ...source, measure: 'consumption', aggregation: !energyUseSelectionMode(source) || energyUseSelectionMode(source) === 'equipment' ? 'none' : 'sum', settings: { unit: source.settings?.unit ?? { kind: 'owner' } } };
-  }), chart: { kind: 'time-series', defaultTraceType: chart?.kind === 'time-series' && chart.defaultTraceType === 'bar' ? 'bar' : 'line', interval: 'yearly', stack: 'none' },
+  }), chart: { kind: 'time-series', defaultTraceType: chart?.kind === 'time-series' ? chart.defaultTraceType : 'line', interval: 'yearly', stack: 'none' },
   period: ['all-history', 'latest-saved-year', 'fiscal-year'].includes(definition.period.kind) ? definition.period : { kind: 'latest-saved-year', basis: 'fiscal' },
   comparison: { kind: 'none' }, series: definition.series.map(series => series.sourceId === sourceId ? { ...series, metric: 'consumption' } : series) };
 }
@@ -70,9 +70,7 @@ export function resolveEquipment(snapshot: AccountWorkspaceSnapshot, request: Vi
   const years = period.kind === 'fiscal-year' ? [period.year] : period.kind === 'latest-saved-year' ? saved.slice(-1) : energyUseChartYears(items);
   if (!years.length) return { identity, state: 'empty', periods: [], message: 'No saved equipment years are available for the selected items.' };
   if (years.length * buckets.reduce((count, bucket) => count + Math.max(1, bucket.items.length), 0) > 250000) return unsupported('Narrow the Energy Use selection or pin a fiscal year.');
-  const series = buckets.map(bucket => ({ id: energyUseSeriesId(source, bucket.key), sourceId: source.id, metric: 'consumption',
-    ...(bucket.resourceGuid ? { resourceGuid: bucket.resourceGuid } : {}), label: bucket.label, unit, dimension: 'energy', additive: true,
-    contributionKeys: bucket.items.flatMap(item => item.utilityData.map((value, index) => JSON.stringify([item.guid, index, value.energySource]))) }));
+  const series = equipmentSeriesMetadata(source, unit, buckets);
   const facilityGuids = [...new Set([...items.map(item => item.facilityId), ...buckets.flatMap(bucket => bucket.facilityGuid ? [bucket.facilityGuid] : [])])];
   if (!facilityGuids.length) return { identity, state: 'empty', periods: [], message: 'No equipment currently matches the selected categories.' };
   const periods: { role: 'primary'; start: string; end: string; basis: 'fiscal'; interval: 'yearly'; fiscalYear: number; facilityGuid: string }[] = [];
@@ -112,4 +110,16 @@ export function resolveEquipment(snapshot: AccountWorkspaceSnapshot, request: Vi
   return { identity, state: 'ready', resolved: { data: { kind: 'time-series', rows }, alignment: { kind: 'fiscal-interval', key: 'actual-annual-interval' }, series, periods,
     references: selection.references, provenance: [...provenance],
     quality: { partial: rows.some(row => Object.values(row.values).some(point => point.state !== 'observed' || point.partial)), warnings: [] } } };
+}
+
+/** Catalog metadata only; does not project annual values or request calculations. */
+export function discoverEquipmentSeries(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope, source: EnergyUseVisualizationSource) {
+  const { buckets } = energyUseBuckets(snapshot, scope, source);
+  const unit = equipmentUnit(snapshot, scope, source);
+  return equipmentSeriesMetadata(source, unit, buckets);
+}
+function equipmentSeriesMetadata(source: EnergyUseVisualizationSource, unit: string, buckets: readonly EnergyUseBucket[]) {
+  return buckets.map(bucket => ({ id: energyUseSeriesId(source, bucket.key), sourceId: source.id, metric: 'consumption',
+    ...(bucket.resourceGuid ? { resourceGuid: bucket.resourceGuid } : {}), label: bucket.label, unit, dimension: 'energy', additive: true,
+    contributionKeys: bucket.items.flatMap(item => item.utilityData.map((value, index) => JSON.stringify([item.guid, index, value.energySource]))) }));
 }

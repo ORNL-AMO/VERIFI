@@ -1,14 +1,27 @@
 @let view = preview.state();
 <section class="visualization-preview" aria-label="Visualization" [attr.aria-busy]="view.state === 'loading'">
+  @if (renderedPreview(); as rendered) {
+    <div class="visualization-preview__chart" [hidden]="view.state !== 'ready'"><ng-container *ngComponentOutlet="rendered.component; inputs: rendered.presentation.inputs"/></div>
+  }
   @if (view.state === 'ready') {
-    <div class="visualization-preview__chart"><ng-container *ngComponentOutlet="view.component; inputs: view.presentation.inputs"/></div>
-    <div class="visually-hidden visualization-preview__accessible-data">
-      <table>
-        <caption>{{ view.presentation.details.caption }}</caption>
-        <thead><tr>@for (column of view.presentation.details.columns; track $index) { <th scope="col">{{ column }}</th> }</tr></thead>
-        <tbody>@for (row of view.presentation.details.rows; track $index) { <tr>@for (value of row; track $index) { <td>{{ value }}</td> }</tr> }</tbody>
-      </table>
-    </div>
+    @let page = dataPage();
+    <details class="visualization-preview__accessible-data">
+      <summary>Show data</summary>
+      <p role="status" aria-live="polite">Rows {{ page.start }}–{{ page.end }} of {{ page.count }}</p>
+      <div class="visualization-preview__table" tabindex="0" role="region" aria-label="Source data">
+        <table>
+          <caption>{{ view.presentation.details.caption }}</caption>
+          <thead><tr>@for (column of view.presentation.details.columns; track $index) { <th scope="col">{{ column }}</th> }</tr></thead>
+          <tbody>@for (row of page.rows; track $index) { <tr>@for (value of row; track $index) { <td>{{ value }}</td> }</tr> }</tbody>
+        </table>
+      </div>
+      @if (page.last > 0) {
+        <nav aria-label="Source data pages">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="page.page === 0" (click)="changePage(-1)">Previous page</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="page.page === page.last" (click)="changePage(1)">Next page</button>
+        </nav>
+      }
+    </details>
   } @else {
     <div class="visualization-preview__notice" [attr.role]="view.state === 'error' || view.state === 'invalid' ? 'alert' : 'status'" aria-live="polite">
       <p>{{ view.message }}</p>

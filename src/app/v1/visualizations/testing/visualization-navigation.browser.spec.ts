@@ -738,7 +738,7 @@ describe('visualization routed journeys in Chromium', () => {
       const search = test.root.querySelector<HTMLInputElement>('input[type="search"]')!;
       await userEvent.type(search, 'My energy'); test.fixture.detectChanges();
       await activate(test, 'Add visualization'); await activate(test, 'Continue');
-      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(9);
       await activate(test, 'Scatter'); await activate(test, 'Meters'); await activate(test, 'Predictors');
       expect(namedButton(creationDialog(test), 'Meters').getAttribute('aria-pressed')).toBe('true');
       expect(namedButton(creationDialog(test), 'Predictors').getAttribute('aria-pressed')).toBe('true');
@@ -799,7 +799,7 @@ describe('visualization routed journeys in Chromium', () => {
       await test.navigate(`${base}/dashboard`); await activate(test, 'Add visualization');
       expect(creationDialog(test).querySelector('[aria-label="Included facilities"]')).not.toBeNull();
       await activate(test, 'Continue');
-      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(9);
       await activate(test, 'Line'); await activate(test, 'Meters'); await activate(test, 'Continue');
       await bindMeterForCreation(test);
       await userEvent.type(creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!, 'Plant usage');
@@ -835,7 +835,7 @@ describe('visualization routed journeys in Chromium', () => {
     try {
       await test.navigate(`${base}/dashboard`); await activate(test, 'Add visualization'); await activate(test, 'Continue');
       const dialog = creationDialog(test);
-      expect(dialog.querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      expect(dialog.querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(9);
       expect([...dialog.querySelectorAll('.creation-section-title')].map(heading => heading.textContent)).toEqual(['Pre-configured', 'Custom']);
       for (const heading of dialog.querySelectorAll<HTMLElement>('.creation-section-title')) {
         expect(getComputedStyle(heading).borderBottomWidth).toBe('0px');
