@@ -111,6 +111,22 @@ describe('visualization preview orchestration', () => {
     for (const provider of providers) expect(provider.resolve).toHaveBeenCalledTimes(1);
   });
 
+  it('retains warnings, omissions and unavailable observations when a ready utility and empty predictor have no usable values', async () => {
+    const definition = mixedDefinition(), entry = visualizationEvidenceFixture(definition);
+    if (entry.resolution.state !== 'ready' || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Expected utility evidence');
+    const resolved = entry.resolution.resolved, data = entry.resolution.resolved.data;
+    const warning = 'Negative usage is invalid for this meter.';
+    const { controller, prepare } = setupMixed({ definition, providers: [{ resolve: async request => ({ identity: request.identity, state: 'ready', resolved: {
+      ...resolved, quality: { partial: true, warnings: [warning], omissions: [{ resourceGuid: 'meter-a', label: 'Meter A', issue: 'Excluded reading', readings: ['Saved -5'] }] },
+      data: { kind: 'time-series', rows: data.rows.map(row => ({ ...row, values: Object.fromEntries(Object.keys(row.values).map(id => [id,
+        { state: 'excluded', value: null, reason: 'The saved reading cannot be used.' }])) })) }
+    } }) }, { resolve: async request => ({ identity: request.identity, state: 'empty', periods: [], message: 'No saved predictor values.', reasons: [] }) }] });
+    controller.update(definition, identity); await settle();
+    expect(controller.state()).toMatchObject({ state: 'empty', reasons: expect.arrayContaining([warning,
+      'Meter A · Excluded reading: Saved -5', expect.stringContaining('The saved reading cannot be used.')]) });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it('preserves configured mixed sources when one sourceKind has no adapter, without requesting partial data', () => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve);
     const { controller } = setup({ provider: { resolve }, dates: { resolve: resolveDates } });

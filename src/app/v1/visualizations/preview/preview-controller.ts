@@ -16,6 +16,24 @@ export type PreviewState =
 
 let nextPreviewId = 0;
 
+function emptyPreviewReasons(evidence: readonly VisualizationSourceEvidence[]): readonly string[] {
+  const reasons = new Set<string>();
+  for (const { resolution } of evidence) {
+    if (resolution.state !== 'ready' && resolution.state !== 'empty') continue;
+    if (resolution.state === 'empty') for (const reason of resolution.reasons ?? [resolution.message]) reasons.add(reason);
+    const resolved = resolution.resolved;
+    if (!resolved) continue;
+    for (const warning of resolved.quality.warnings) reasons.add(warning);
+    for (const omission of resolved.quality.omissions ?? []) reasons.add(`${omission.label} · ${omission.issue}: ${omission.readings.join('; ')}`);
+    if (resolved.data.kind !== 'time-series') continue;
+    const labels = new Map(resolved.series.map(series => [series.id, series.label]));
+    for (const row of resolved.data.rows) for (const [id, observation] of Object.entries(row.values)) {
+      if (observation.state === 'missing' || observation.state === 'excluded') reasons.add(`${labels.get(id) ?? id}: ${observation.reason}`);
+    }
+  }
+  return [...reasons];
+}
+
 /** Preview lifetime and evidence are independent of persistence and autosave acknowledgements. */
 @Injectable()
 export class PreviewController {
@@ -127,8 +145,7 @@ export class PreviewController {
         return (result.state === 'ready' || result.state === 'empty') && result.resolved?.data.kind === 'time-series'
           && result.resolved.data.rows.some(row => Object.values(row.values).some(value => value.state === 'observed'));
       })) {
-        this.value.set({ state: 'empty', message: 'No usable values in the selected month range.', reasons: evidence.flatMap(entry =>
-          entry.resolution.state === 'empty' ? entry.resolution.reasons ?? [entry.resolution.message] : []) }); return;
+        this.value.set({ state: 'empty', message: 'No usable values in the selected month range.', reasons: emptyPreviewReasons(evidence) }); return;
       }
       const unavailable = evidence.find(entry => entry.resolution.state === 'missing-source' || entry.resolution.state === 'error') ?? evidence.find(entry => entry.resolution.state !== 'ready' && !(isMixedPredictorSourceSet(definition.sources) && entry.resolution.state === 'empty' && entry.resolution.resolved));
       if (unavailable && unavailable.resolution.state !== 'ready') {
