@@ -107,8 +107,8 @@ export class AnalysisDataSession {
         fullRequest = { ...built, includeGroupSummaries: true };
       }
       const fingerprint = groupRequest ? facilityAnalysisGroupResultsFingerprint(groupRequest) : facilityAnalysisResultsFingerprint(fullRequest!);
-      const key = `${identity.accountGuid}:${identity.definitionGuid}`;
-      const cached = this.cache.get(key);
+      const key = JSON.stringify(['facility', identity.accountGuid, fingerprint]);
+      const cached = this.readCached(key);
       // Target identity is projection intent; full facility work can serve a different selected group.
       let value: FacilityVisualizationResults;
       if (cached?.fingerprint === fingerprint && cached.value.scope === 'facility') value = { ...cached.value, analysis, facility };
@@ -123,8 +123,7 @@ export class AnalysisDataSession {
           if (result.value.groupGuid !== source.groupGuid) return unavailable('error', 'The calculation returned a mismatched group.');
           value = { scope: 'facility', analysis, facility, annual: result.value.annualAnalysisSummaryData, monthly: result.value.monthlyAnalysisSummaryData, groups: [], reportYear: result.value.reportYear, groupOnly: true };
         } else value = { scope: 'facility', analysis, facility, annual: result.value.annualAnalysisSummaries, monthly: result.value.monthlyAnalysisSummaryData, groups: result.value.groupSummaries ?? [], reportYear: result.value.reportYear, groupOnly: false };
-        this.cache.clear();
-        this.cache.set(key, { fingerprint, value });
+        this.remember(key, fingerprint, value);
       }
       if (!current()) return unavailable('error', 'Analysis preview canceled or superseded.');
       if (source.groupGuid && !groupOnly) {
@@ -134,6 +133,17 @@ export class AnalysisDataSession {
       }
       return { state: 'ready', value: { ...value, groupLabel: snapshot.meterGroups.find(item => item.guid === source.groupGuid && item.facilityId === facility.guid)?.name } };
     } catch (error) { return unavailable('error', error instanceof Error ? error.message : 'Analysis calculation failed. Retry from current inputs.'); }
+  }
+  private readCached(key: string) {
+    const cached = this.cache.get(key);
+    if (cached) { this.cache.delete(key); this.cache.set(key, cached); }
+    return cached;
+  }
+  private remember(key: string, fingerprint: string, value: AnalysisVisualizationResults): void {
+    this.cache.delete(key);
+    this.cache.set(key, { fingerprint, value });
+    // Keep distinct selected analyses reusable without retaining unbounded Worker result graphs.
+    while (this.cache.size > 16) this.cache.delete(this.cache.keys().next().value!);
   }
   private async calculateAccount(analysis: IdbAccountAnalysisItem, snapshot: AccountWorkspaceSnapshot, request: VisualizationSourceRequest, signal: AbortSignal): Promise<AnalysisPreviewResult> {
     const { identity, source } = request;
@@ -176,8 +186,8 @@ export class AnalysisDataSession {
       const metadata = { scope: 'account' as const, analysis, account: snapshot.account, selectedFacilityGuids };
       if (!selected.length) return { state: 'ready', value: { ...metadata, monthly: [], annual: [] } };
       const built = buildAccountAnalysisResultsRequest(analysis, snapshot);
-      const fingerprint = accountAnalysisResultsFingerprint(built), key = `${identity.accountGuid}:${identity.definitionGuid}`;
-      const cached = this.cache.get(key);
+      const fingerprint = accountAnalysisResultsFingerprint(built), key = JSON.stringify(['account', identity.accountGuid, fingerprint]);
+      const cached = this.readCached(key);
       let value: AccountVisualizationResults;
       if (cached?.fingerprint === fingerprint && cached.value.scope === 'account') value = { ...cached.value, ...metadata };
       else {
@@ -191,7 +201,7 @@ export class AnalysisDataSession {
           return unavailable('error', 'The calculation returned mismatched account results.');
         }
         value = { ...metadata, monthly: result.value.monthlyAnalysisSummaryData, annual: result.value.annualAnalysisSummaries, reportYear: result.value.reportYear };
-        this.cache.clear(); this.cache.set(key, { fingerprint, value });
+        this.remember(key, fingerprint, value);
       }
       return current() ? { state: 'ready', value } : unavailable('error', 'Analysis preview canceled or superseded.');
     } catch (error) { return unavailable('error', error instanceof Error ? error.message : 'Analysis calculation failed. Retry from current inputs.'); }

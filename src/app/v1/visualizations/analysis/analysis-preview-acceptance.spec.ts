@@ -91,6 +91,8 @@ describe('composed analysis date/provider/presentation acceptance', () => {
     const { fixture, store, controller, update } = setup(), group = analysisDefinition('actual', 'group-a');
     update(group); const failed = await worker(0); failed.reply('Transient calculation failure'); await state(controller, 'error');
     controller.retry(); const retried = await worker(1); retried.reply(); await state(controller, 'ready');
+    const initial = controller.state(); if (initial.state !== 'ready') throw new Error('Expected initial results');
+    const originalRows = initial.presentation.details.rows;
     const unfinished = { ...fixture.snapshot.facilityAnalyses[0], groups: [...fixture.snapshot.facilityAnalyses[0].groups, { ...fixture.snapshot.facilityAnalyses[0].groups[0], idbGroupId: 'unfinished', analysisType: 'regression' as const }] };
     store.publishCommitted({ ...fixture.snapshot, facilityAnalyses: [unfinished, fixture.snapshot.facilityAnalyses[1]] }, {});
     update(group); const fallback = await worker(2); expect(fallback.payload).toHaveProperty('groupGuid', 'group-a'); fallback.reply(); await state(controller, 'ready');
@@ -99,7 +101,10 @@ describe('composed analysis date/provider/presentation acceptance', () => {
     update(group); await state(controller, 'missing-source'); expect(ControlledWorker.instances).toHaveLength(3);
     store.publishCommitted({ ...fixture.snapshot, facilityAnalyses: [{ ...fixture.snapshot.facilityAnalyses[0], guid: 'same-name-replacement' }, fixture.snapshot.facilityAnalyses[1]] }, {});
     update(group); await state(controller, 'missing-source'); expect(group.sources[0]).toHaveProperty('analysisGuid', 'analysis-a');
-    store.publishCommitted(fixture.snapshot, {}); update(group); const recovered = await worker(3); recovered.reply(); await state(controller, 'ready'); controller.destroy();
+    store.publishCommitted(fixture.snapshot, {}); update(group); await state(controller, 'ready');
+    const recovered = controller.state(); if (recovered.state !== 'ready') throw new Error('Expected recovered results');
+    expect(recovered.presentation.details.rows).toEqual(originalRows);
+    expect(ControlledWorker.instances).toHaveLength(3); controller.destroy();
   });
   it('reuses account numerical work for display edits but refreshes fiscal settings and clears blocked/empty results', async () => {
     const { fixture, store, controller, update } = setup();
