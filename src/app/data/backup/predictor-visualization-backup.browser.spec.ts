@@ -1,3 +1,4 @@
+import { previewValuesText } from '@app/v1/visualizations/testing/preview-values.testing';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
@@ -95,7 +96,7 @@ describe('populated predictor visualization backup acceptance', () => {
         fixture.componentRef.setInput('identity', { accountGuid, definitionGuid: record.guid, definitionRevision: record.revision, workspaceRevision: store.revision() });
         const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root'; root.style.width = '100%'; fixture.detectChanges();
         await vi.waitFor(() => { fixture!.detectChanges(); expect(root.querySelector('canvas')).not.toBeNull(); });
-        const values = root.querySelector('table')!.textContent!;
+        const values = previewValuesText(fixture!);
         expect(values).toContain('0 widgets'); expect(values).toContain('Manual weather override'); expect(values).toContain('Saved station');
         expect(values).toContain('Duplicate readings'); expect(values).not.toContain('Same name collision');
         for (const duplicate of restored.predictorData.filter(reading => reading.predictorId === weather.guid && reading.month === 2))
@@ -111,9 +112,9 @@ describe('populated predictor visualization backup acceptance', () => {
           }
           await page.viewport(1100, 850); root.className = 'v1-root';
           await media.send('Emulation.setEmulatedMedia', { media: 'print' }); fixture.detectChanges();
-          await vi.waitFor(() => expect(getComputedStyle(root.querySelector<HTMLElement>('.time-series-actions')!).display).toBe('none'));
+          expect(root.querySelector('.time-series-actions, table')).toBeNull();
           await vi.waitFor(() => expect(chart.getHeight()).toBe(Math.round(root.querySelector<HTMLElement>('.time-series-canvas')!.getBoundingClientRect().height)));
-          expect(root.querySelector('table')!.textContent).toBe(values);
+          expect(previewValuesText(fixture!)).toBe(values);
           await page.screenshot({ element: root, path: `../../../../.angular/predictor-p4-restored-${kind}-print.png` });
           await media.send('Emulation.setEmulatedMedia', { media: '' });
         }

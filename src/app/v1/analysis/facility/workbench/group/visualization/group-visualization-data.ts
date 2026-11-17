@@ -1,3 +1,4 @@
+import { correlationStatistics } from '@domain/calculations/exploratory-statistics';
 import type { CalanderizedMeter } from '@data/models/calanderization';
 import type { AnalysisCategory } from '@data/models/analysis';
 import type { IdbFacility } from '@data/models/idbModels/facility';
@@ -154,17 +155,5 @@ export function summarizeCorrelation(points: readonly GroupMonthlyPoint[], predi
     return point.complete && x != null && y != null && Number.isFinite(x) && Number.isFinite(y)
       ? [{ x, y, label: point.label }] : [];
   });
-  if (pairs.length < 3) return { pairs, unavailableReason: 'At least three complete paired months are needed for a linear fit and correlation.' };
-  const meanX = pairs.reduce((sum, pair) => sum + pair.x, 0) / pairs.length;
-  const meanY = pairs.reduce((sum, pair) => sum + pair.y, 0) / pairs.length;
-  let xx = 0, yy = 0, xy = 0;
-  for (const pair of pairs) {
-    const x = pair.x - meanX, y = pair.y - meanY;
-    xx += x * x; yy += y * y; xy += x * y;
-  }
-  if (xx === 0 || yy === 0) return { pairs, unavailableReason: 'Both predictor and group usage must vary to calculate a linear fit and correlation.' };
-  const r = Math.max(-1, Math.min(1, xy / Math.sqrt(xx) / Math.sqrt(yy)));
-  const slope = xy / xx, intercept = meanY - slope * meanX;
-  if (![r, slope, intercept].every(Number.isFinite)) return { pairs, unavailableReason: 'The values exceed the supported range for correlation.' };
-  return { pairs, r, rSquared: r * r, slope, intercept };
+  return { pairs, ...correlationStatistics(pairs) };
 }

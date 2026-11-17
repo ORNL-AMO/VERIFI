@@ -1,3 +1,4 @@
+import { isExplorationChart, visualizationInterval } from './visualization-interval';
 import type { VisualizationDefinition, VisualizationSource } from './visualization-definition';
 import type { VisualizationResolvedData, VisualizationSourceRequest, VisualizationSourceResolution, ResolvedVisualizationSeries, VisualizationResolvedReference } from './visualization-source-provider';
 import { civilMonthIndex, civilMonthRange, wholeMonthWindow } from './visualization-periods';
@@ -10,6 +11,8 @@ export function isMixedPredictorSourceSet(sources: readonly VisualizationSource[
 export function predictorCombinationSupported(definition: VisualizationDefinition): boolean {
   if (!definition.sources.some(source => source.kind === 'predictor') || definition.sources.length === 1) return true;
   const chart = definition.chart, period = definition.period;
+  if (isExplorationChart(chart)) return visualizationInterval(chart) === 'monthly' && definition.comparison.kind === 'none'
+    && definition.sources.every(source => source.kind === 'predictor' || source.kind === 'analysis' && source.mode === 'result' || source.kind === 'utility' && source.dataMode === 'calendarized');
   return isMixedPredictorSourceSet(definition.sources) && chart?.kind === 'time-series' && chart.interval === 'monthly'
     && chart.stack === 'none' && definition.comparison.kind === 'none'
     && (period.kind === 'all-history' || period.kind === 'fixed' && period.basis === 'calendar'

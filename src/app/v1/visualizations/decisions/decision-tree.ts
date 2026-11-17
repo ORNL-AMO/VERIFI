@@ -1,3 +1,4 @@
+import { isExplorationChart } from '@domain/visualizations/visualization-interval';
 import { replaceAnalysisBinding } from '../analysis/analysis-binding';
 import { analysisMeasureLabels, analysisSeriesId, analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
 import { projectAnalysisItems, analysisChoices, analysisGroupChoices } from '../analysis/analysis-items';
@@ -194,18 +195,6 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     nextSection = { kind: 'sources' };
   } else if (action.kind === 'chart') {
     next = { ...definition, chart: action.chart };
-    if (definition.chart?.kind !== action.chart.kind) for (const source of definition.sources) {
-      const ownSeries = definition.series.filter(series => series.sourceId === source.id);
-      if (ownSeries.some(series => series.traceType !== undefined || series.overrides?.some(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid && override.traceType !== undefined))) cleared.push('Per-item trace types');
-      for (const item of projectDecisionItems(definition, source.id, context.snapshot)) affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
-      next = { ...next, series: next.series.map(series => {
-        if (series.sourceId !== source.id) return series;
-        const { traceType: _type, overrides: prior, ...base } = series;
-        const overrides = prior?.map(override => { if ((override.accountGuid ?? definition.accountGuid) !== definition.accountGuid) return override;
-          const { traceType: _overrideType, ...kept } = override; return kept; });
-        return { ...base, ...(overrides?.length ? { overrides } : {}) };
-      }) };
-    }
     nextSection = { kind: 'sources' };
   } else if (action.kind === 'add-source') {
     let index = 1; while (definition.sources.some(source => source.id === `${action.sourceKind}-${index}`)) index++;
@@ -244,7 +233,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         const repairAccountGroup = action.kind === 'analysis-defaults' && accountTarget && !!groupGuid;
         if (repairAccountGroup) { clearItems(source.id, true); cleared.push('Unsupported account group target'); }
         const changed = { ...(repairAccountGroup ? accountSource : source), measure, ...(action.kind === 'analysis-defaults' ? { settings: { unit: { kind: 'owner' as const } } } : {}) };
-        next = { ...definition, chart: { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line', interval, stack: 'none' },
+        next = { ...definition, chart: isExplorationChart(definition.chart) ? { ...definition.chart, interval } : { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line', interval, stack: 'none' },
           sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.filter(item => !repairAccountGroup || item.sourceId !== source.id).map(item => item.sourceId === source.id ? { ...item, metric: measure } : item) };
         if (action.kind === 'analysis-defaults' || analysisPeriodIssue({ chart: next.chart!, period: next.period, comparison: next.comparison })) {
           if (next.period.kind !== 'all-history' || next.comparison.kind !== 'none') cleared.push('Incompatible period or comparison');
@@ -456,6 +445,16 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       if (next.chart?.kind === 'time-series' && next.chart.interval === 'native') next = { ...next, chart: { ...next.chart, interval: 'monthly' } };
       cleared.push('Native bill observation view'); nextSection = { kind: 'data-settings', sourceId: source.id };
     }
+  }
+  if (next.chart?.kind === 'scatter' && ['selection-mode', 'toggle-resource', 'set-resources', 'source-settings', 'analysis-binding', 'remove-source-kind', 'energy-use-selection-mode', 'energy-use-resources', 'predictor-selection', 'equipment-selection', 'equipment-defaults', 'analysis-defaults'].includes(action.kind)) {
+    const chart = { ...next.chart };
+    for (const axis of ['x', 'y'] as const) {
+      const selector = chart[axis]; if (!selector) continue;
+      const items = projectDecisionItems(next, selector.sourceId, context.snapshot);
+      const retained = items.some(item => selector.resourceGuid !== undefined ? item.identity.resourceGuid === selector.resourceGuid : item.identity.seriesId === selector.seriesId);
+      if (!retained) { delete chart[axis]; cleared.push(`Scatter ${axis.toUpperCase()} series binding`); affect({ kind: 'chart' }); }
+    }
+    next = { ...next, chart };
   }
   next = cleanJson(next);
   if (visualizationIntentEqual(next, definition)) return { state: 'unchanged' };

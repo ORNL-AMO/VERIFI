@@ -17,9 +17,9 @@
             {{ saveLabel() }}
           </span>
           <span class="v1-chip">{{ chartSummary() }}</span>
-          @if (selectedPredictorGuids().length) {
-            @let dataStatus = predictorHeaderStatus();
-            <span class="v1-chip v1-chip--{{ dataStatus.tone === 'neutral' ? 'info' : dataStatus.tone }}" role="status" aria-label="Predictor data status">
+          @if (hasDataStatusSources()) {
+            @let dataStatus = dataHeaderStatus();
+            <span class="v1-chip v1-chip--{{ dataStatus.tone === 'neutral' ? 'info' : dataStatus.tone }}" role="status" aria-label="Source data status">
               <app-ui-icon [name]="dataStatus.icon" [spin]="dataStatus.icon === 'loading'"/>{{ dataStatus.label }}
             </span>
           }
@@ -32,18 +32,18 @@
         <div><dt>Chart type</dt><dd>{{ chartSummary() }}</dd></div>
         <div><dt>Period</dt><dd>{{ periodSummary() }}</dd></div>
       </dl></div>
-      @if (predictorStatusSummaries().length) {
-        <ul class="v1-data-workbench-status-notes visualization-workbench__status-notes" aria-label="Predictor data issues">
-          @for (issue of predictorStatusSummaries(); track issue.id) {
+      @if (dataStatusSummaries().length) {
+        <ul class="v1-data-workbench-status-notes visualization-workbench__status-notes" aria-label="Source data issues">
+          @for (issue of dataStatusSummaries(); track issue.id) {
             <li><app-ui-icon [name]="issue.severity === 'error' ? 'danger' : 'warning'"/>
-              <button type="button" class="v1-btn v1-btn--quiet" (click)="openPredictorIssue(issue)">{{ issue.entity.name }} · {{ issue.description }}</button>
+              <button type="button" class="v1-btn v1-btn--quiet" (click)="openDataIssue(issue)">{{ issue.entity.name }} · {{ issue.description }}</button>
             </li>
           }
         </ul>
-        @if (remainingPredictorIssues().length) {
-          <details class="visualization-workbench__more-issues"><summary>More data issues ({{ remainingPredictorIssues().length }})</summary>
-            <ul>@for (issue of remainingPredictorIssues(); track issue.id) {
-              <li><button type="button" class="v1-btn v1-btn--quiet" (click)="openPredictorIssue(issue)">{{ issue.entity.name }} · {{ issue.description }}</button></li>
+        @if (remainingDataIssues().length) {
+          <details class="visualization-workbench__more-issues"><summary>More data issues ({{ remainingDataIssues().length }})</summary>
+            <ul>@for (issue of remainingDataIssues(); track issue.id) {
+              <li><button type="button" class="v1-btn v1-btn--quiet" (click)="openDataIssue(issue)">{{ issue.entity.name }} · {{ issue.description }}</button></li>
             }</ul>
           </details>
         }
@@ -76,6 +76,9 @@
             }
           </div>
           @let savedChart = definition.chart;
+          @if (savedChart && (savedChart.kind === 'scatter' || savedChart.kind === 'correlation' || savedChart.kind === 'heatmap')) {
+            <app-exploration-settings [definition]="definition" [items]="explorationItems()" [disabled]="!editor.canEdit()" (requested)="updateExplorationChart($event)"/>
+          }
           @if (savedChart && savedChart.kind === 'time-series') {
             <span class="visualization-control-label">Stacking</span>
             <div class="visualization-buttons" role="group" aria-label="Stacking">

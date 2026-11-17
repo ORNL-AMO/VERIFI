@@ -12,6 +12,7 @@ export class ItemSettingsComponent implements OnChanges {
   private identity = '';
   private fingerprint = '';
   readonly disabled = input(false);
+  readonly timeSeries = input(true);
   readonly position = input(0);
   readonly itemCount = input(1);
   readonly editorKey = input('');

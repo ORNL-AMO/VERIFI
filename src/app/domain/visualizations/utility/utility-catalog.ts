@@ -41,12 +41,12 @@ export function discoverUtilitySeries(snapshot: AccountWorkspaceSnapshot, scope:
       : source.measure === 'energy' ? 'energy' : `consumption:${physical}`;
     const charge = source.measure === 'charge' ? bucket.meters[0].charges?.find(c => c.guid === source.charge?.chargeGuid) : undefined;
     const treatment = source.settings?.energyTreatment?.kind === 'pinned' ? source.settings.energyTreatment.value : owner?.energyIsSource ? 'source' as const : 'site' as const;
-    const measureLabel = source.measure === 'energy' ? `${treatment === 'source' ? 'Source' : 'Site'} energy`
+    const measureLabel = source.measure === 'energy' ? 'Energy'
       : source.measure === 'cost' ? 'Cost' : source.measure === 'location-emissions' ? 'Location-based emissions'
       : source.measure === 'market-emissions' ? 'Market-based emissions' : 'Consumption';
     return [{ id: utilitySeriesId(source.id, bucket.key), sourceId: source.id, metric,
       ...(bucket.resourceGuid ? { resourceGuid: bucket.resourceGuid } : {}),
-      label: charge ? `${bucket.label} / ${charge.name} / ${source.charge?.measure === 'cost' ? 'Recorded amount' : 'Recorded usage / demand'}` : `${bucket.label} / ${measureLabel}`, unit, dimension,
+      label: charge ? `${bucket.label} / ${charge.name} / ${source.charge?.measure === 'cost' ? 'Recorded amount' : 'Recorded usage / demand'}` : source.measure === 'energy' ? bucket.label : `${bucket.label} / ${measureLabel}`, unit, dimension,
       ...(unit === 'USD' ? { currency: 'USD' } : {}),
       ...(source.measure === 'energy' ? { energyTreatment: treatment } : {}),
       additive: !charge || source.charge?.measure === 'cost' || !['demand', 'demandMDQ'].includes(charge.chargeType),

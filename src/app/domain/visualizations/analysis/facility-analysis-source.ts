@@ -1,3 +1,4 @@
+import { isExplorationChart, visualizationInterval } from '../visualization-interval';
 import type { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import type { IdbAccount } from '@data/models/idbModels/account';
 import type { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
@@ -46,17 +47,17 @@ export function analysisUnit(analysis: Pick<IdbAnalysisItem, 'analysisCategory' 
 }
 export function facilityAnalysisCapabilities(): VisualizationSourceCapabilities {
   return { kind: 'analysis', measures: Object.keys(analysisMeasureLabels) as AnalysisResultVisualizationSource['measure'][], aggregations: ['none'],
-    periods: ['all-history', 'fixed', 'rolling', 'latest-saved-year', 'fiscal-year'], comparisons: ['none'], chartKinds: ['time-series'], shapes: ['time-series'],
-    alignments: ['civil-month', 'fiscal-interval'], settings: ['unit', 'energyTreatment'], controls: ['series', 'appearance', 'axes'], allowDateOverride: true, allowMultipleSources: false };
+    periods: ['all-history', 'fixed', 'rolling', 'latest-saved-year', 'fiscal-year'], comparisons: ['none'], chartKinds: ['time-series', 'scatter', 'correlation', 'heatmap'], shapes: ['time-series'],
+    alignments: ['civil-month', 'fiscal-interval'], settings: ['unit', 'energyTreatment'], controls: ['series', 'appearance', 'axes', 'fit', 'normalization'], allowDateOverride: true, allowMultipleSources: false };
 }
 export function facilityAnalysisChartSupport(source: VisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
   if (source.kind !== 'analysis' || source.mode !== 'result') reasons.push('Saved model visualizations are not supported in this slice.');
-  if (chart.kind !== 'time-series' || !['monthly', 'yearly'].includes(chart.interval) || chart.stack !== 'none') reasons.push('Analysis results support monthly or yearly, unstacked line/bar/area charts.');
+  if (chart.kind === 'time-series' ? !['monthly', 'yearly'].includes(visualizationInterval(chart)) || chart.stack !== 'none' : !isExplorationChart(chart)) reasons.push('Analysis results support monthly or yearly, unstacked line/bar/area charts.');
   if (source.kind === 'analysis' && source.mode === 'result') {
-    if (chart.kind === 'time-series') {
-      if (chart.interval === 'yearly' && !['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(source.measure)) reasons.push('Savings and losses use monthly rolling percentage results.');
-      if (chart.interval === 'monthly' && ['annual-improvement', 'total-improvement'].includes(source.measure)) reasons.push('Annual and total improvement require yearly results.');
+    if (chart.kind === 'time-series' || isExplorationChart(chart)) {
+      if (visualizationInterval(chart) === 'yearly' && !['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(source.measure)) reasons.push('Savings and losses use monthly rolling percentage results.');
+      if (visualizationInterval(chart) === 'monthly' && ['annual-improvement', 'total-improvement'].includes(source.measure)) reasons.push('Annual and total improvement require yearly results.');
     }
     if (source.measure.startsWith('banked-') && !source.groupGuid) reasons.push('Banked savings and losses require a group with applicable banking.');
     if (source.settings?.unit?.kind === 'pinned' || source.settings?.energyTreatment?.kind === 'pinned') reasons.push('Follow the named analysis’s saved units and site/source basis; conversions are unsupported.');
@@ -66,8 +67,8 @@ export function facilityAnalysisChartSupport(source: VisualizationSource, chart:
 export function analysisPeriodIssue(request: Pick<VisualizationSourceRequest, 'chart' | 'period' | 'comparison'>): string | undefined {
   const { chart, period, comparison } = request;
   if (comparison.kind !== 'none') return 'Analysis results do not support comparisons.';
-  if (chart.kind !== 'time-series') return 'Choose a time-series chart.';
-  if (chart.interval === 'yearly') return ['all-history', 'latest-saved-year', 'fiscal-year'].includes(period.kind) ? undefined : 'Choose all history, latest complete result fiscal year or one fiscal year.';
+  if (chart.kind !== 'time-series' && !isExplorationChart(chart)) return 'Choose a supported time-series or exploration chart.';
+  if (visualizationInterval(chart) === 'yearly') return ['all-history', 'latest-saved-year', 'fiscal-year'].includes(period.kind) ? undefined : 'Choose all history, latest complete result fiscal year or one fiscal year.';
   if (!['all-history', 'fixed', 'rolling'].includes(period.kind) || 'basis' in period && period.basis !== 'calendar') return 'Monthly analysis results require calendar months.';
   if (period.kind === 'fixed' && (!validCivil(period.start) || !validCivil(period.end) || period.start > period.end || period.start.slice(8) !== '01'
     || civilMonthRange(civilMonthIndex(period.end)).end !== period.end)) return 'Choose an inclusive range of whole months.';
@@ -91,7 +92,7 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
   const support = facilityAnalysisChartSupport(source, chart), periodIssue = analysisPeriodIssue(request);
   if (support.state === 'unsupported') return unsupported(support.reasons.join(' '));
   if (periodIssue) return unsupported(periodIssue);
-  if (source.kind !== 'analysis' || source.mode !== 'result' || chart.kind !== 'time-series') return unsupported('Choose analysis results.');
+  if (source.kind !== 'analysis' || source.mode !== 'result' || chart.kind !== 'time-series' && !isExplorationChart(chart)) return unsupported('Choose analysis results.');
   const { analysis } = value;
   const facility = value.scope === 'facility' ? value.facility : undefined;
   const owner = value.scope === 'account' ? value.account : value.facility;
@@ -122,7 +123,7 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
     excluded ? { state: 'excluded', value: null, reason: 'Calculated/annual improvement is unavailable during this banking transition.' }
       : amount == null || !Number.isFinite(amount) ? { state: 'missing', value: null, reason: 'No finite analysis result is available for this period.' }
         : { state: 'observed', value: amount, provenance: source.measure === 'actual' ? 'measured' : source.measure === 'calculated' ? 'modeled' : 'savings', partial, notes };
-  if (chart.interval === 'yearly') {
+  if (visualizationInterval(chart) === 'yearly') {
     const available = value.annual.filter(row => Number.isInteger(row.year) && (value.reportYear === undefined || row.year <= value.reportYear));
     const years = period.kind === 'fiscal-year' ? [period.year] : period.kind === 'latest-saved-year' ? available.map(row => row.year).sort((a, b) => a - b).slice(-1) : available.map(row => row.year);
     for (const year of years) {
@@ -145,9 +146,10 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
     let first = Math.min(...byMonth.keys()), last = Math.max(...byMonth.keys());
     if (period.kind === 'fixed') { first = civilMonthIndex(period.start); last = civilMonthIndex(period.end); }
     if (period.kind === 'rolling') {
-      const anchor = period.anchor === 'calendar' ? request.dateContext.calendarDate : latestAnalysisMonth(value);
+      const anchor = period.anchor === 'calendar' ? request.dateContext.calendarDate : request.dateContext.latestDataDate ?? latestAnalysisMonth(value);
       if (anchor) { last = civilMonthIndex(anchor) - (period.anchor === 'calendar' ? 1 : 0); first = last - period.count * (period.unit === 'year' ? 12 : 1) + 1; }
     }
+    if (request.dateContext.monthlyRange) { first = civilMonthIndex(request.dateContext.monthlyRange.start); last = civilMonthIndex(request.dateContext.monthlyRange.end); }
     if (Number.isFinite(first) && (first < 12 || last > 119999 || last - first > 119987)) return unsupported('Choose months within civil years 1–9999.');
     for (let month = first; month <= last; month++) {
       const range = civilMonthRange(month), row = byMonth.get(month);
@@ -162,7 +164,7 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
     }
   }
   const resolved = { data: { kind: 'time-series' as const, rows }, series, periods,
-    alignment: { kind: chart.interval === 'yearly' ? 'fiscal-interval' as const : 'civil-month' as const, key: chart.interval === 'yearly' ? 'actual-annual-interval' : 'civil-month' },
+    alignment: { kind: visualizationInterval(chart) === 'yearly' ? 'fiscal-interval' as const : 'civil-month' as const, key: visualizationInterval(chart) === 'yearly' ? 'actual-annual-interval' : 'YYYY-MM' },
     references: [{ kind: 'analysis' as const, id: analysis.guid, accountGuid: analysis.accountId, ...(facility ? { facilityGuid: facility.guid } : {}) },
       ...(source.groupGuid ? [{ kind: 'analysis-group' as const, id: source.groupGuid, accountGuid: analysis.accountId, ...(facility ? { facilityGuid: facility.guid } : {}) }] : [])],
     provenance: [source.measure === 'actual' ? 'measured' as const : source.measure === 'calculated' ? 'modeled' as const : 'savings' as const],

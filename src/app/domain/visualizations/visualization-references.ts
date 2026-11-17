@@ -71,6 +71,18 @@ export function visualizationReferences(definition: VisualizationDefinition): re
         optional: true, accountGuid: override.accountGuid ?? definition.accountGuid });
     });
   });
+  if (definition.chart?.kind === 'scatter') for (const axis of ['x', 'y'] as const) {
+    const selector = definition.chart[axis];
+    if (!selector) continue;
+    const source = definition.sources.find(source => source.id === selector.sourceId);
+    if (selector.resourceGuid) {
+      const reference = visualizationSeriesReference(source, selector.resourceGuid, definition.facilitySelection);
+      add(`chart.${axis}.resourceGuid`, reference.kind, selector.resourceGuid, reference.parentGuid, reference.groupGuid);
+    } else if (selector.seriesId) {
+      const reference = visualizationPresentationReference(source, selector.seriesId);
+      if (reference) add(`chart.${axis}.seriesId`, reference.kind, reference.guid);
+    }
+  }
   return refs;
 }
 
@@ -104,7 +116,7 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
   const issues: VisualizationReferenceIssue[] = [];
   const sourceForPath = (path: string) => {
     const parts = path.split('.');
-    return parts[0] === 'sources' ? definition.sources[Number(parts[1])]?.id
+    return parts[0] === 'chart' && definition.chart?.kind === 'scatter' ? definition.chart[parts[1] as 'x' | 'y']?.sourceId : parts[0] === 'sources' ? definition.sources[Number(parts[1])]?.id
       : parts[0] === 'series' ? definition.series[Number(parts[1])]?.sourceId : undefined;
   };
   const protectedPresentation = (kind: VisualizationReferenceKind, guid: string, sourceId: string | undefined) => blocked.some(ref =>
@@ -137,7 +149,12 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
     const local = !ref.optional || ref.accountGuid === definition.accountGuid;
     const protectedOptional = ref.optional && protectedPresentation(ref.kind, ref.guid, sourceForPath(ref.path));
     const mapped = !existing && !protectedOptional && local && map && Object.hasOwn(map, key) ? map[key] : undefined;
-    if (mapped) setPath(result, ref.path, mapped);
+    if (mapped) {
+      const selector = ref.path.startsWith('chart.') && definition.chart?.kind === 'scatter' ? definition.chart[ref.path.split('.')[1] as 'x' | 'y'] : undefined;
+      const source = definition.sources.find(source => source.id === selector?.sourceId);
+      const provider = selector?.seriesId ? visualizationPresentationReference(source, selector.seriesId) : undefined;
+      setPath(result, ref.path, provider ? provider.prefix + mapped : mapped);
+    }
     if (ref.optional) {
       // Keep unmapped presentation intent qualified to its original owner, never retargeted.
       setPath(result, ref.path.replace(/resourceGuid$/, 'accountGuid'), mapped ? accountGuid : ref.accountGuid!);

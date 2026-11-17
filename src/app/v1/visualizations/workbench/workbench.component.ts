@@ -1,3 +1,6 @@
+import { resolveUtilitySelection } from '@domain/visualizations/utility/utility-selection';
+import { isExplorationChart } from '@domain/visualizations/visualization-interval';
+import type { VisualizationChart } from '@domain/visualizations/visualization-definition';
 import { timeSeriesStackIssues, timeSeriesStackSettingsIssues } from '@domain/visualizations/visualization-time-series';
 import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
 import { discoverEquipmentSeries } from '@domain/visualizations/energy-use/equipment-source';
@@ -28,7 +31,7 @@ import { visualizationIntentEqual } from '../editing/visualization-reconciliatio
 import type { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import type { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
-import { predictorStatusPresentation } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
+import { predictorStatusPresentation as dataStatusPresentation } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false, host: { class: 'visualization-workbench-host' },
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -64,36 +67,44 @@ export class WorkbenchComponent {
   readonly workspace = inject(AccountWorkspaceStore);
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly status = inject(WorkspaceStatusService);
-  readonly selectedPredictorGuids = computed(() => {
+  private readonly selectedStatusResources = computed(() => {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    const empty = { meters: [] as readonly string[], predictors: [] as readonly string[] };
     if (!this.workspace.isReady() || !snapshot || definition?.accountGuid !== this.accountGuid()
-      || snapshot.account.guid !== this.accountGuid() || this.editor.record()?.guid !== this.navigation.routeState().visualizationGuid) return [];
-    const included = this.facilityContext()?.scope.facilityGuids ?? [];
-    const selected = new Set(definition.sources.flatMap(source => source.kind === 'predictor'
-      ? resolvePredictorSelection(snapshot, this.facilityContext()!.scope, source) : []));
-    return snapshot.predictors.filter(predictor => predictor.accountId === snapshot.account.guid
-      && included.includes(predictor.facilityId) && selected.has(predictor.guid)).map(predictor => predictor.guid);
+      || snapshot.account.guid !== this.accountGuid() || this.editor.record()?.guid !== this.navigation.routeState().visualizationGuid) return empty;
+    const scope = this.facilityContext()?.scope;
+    if (!scope) return empty;
+    const meters = new Set(definition.sources.flatMap(source => source.kind === 'utility'
+      ? resolveUtilitySelection(snapshot, scope, source).meters.map(meter => meter.guid) : []));
+    const predictors = new Set(definition.sources.flatMap(source => source.kind === 'predictor'
+      ? resolvePredictorSelection(snapshot, scope, source) : []));
+    return { meters: [...meters], predictors: snapshot.predictors.filter(predictor => predictor.accountId === snapshot.account.guid
+      && scope.facilityGuids.includes(predictor.facilityId) && predictors.has(predictor.guid)).map(predictor => predictor.guid) };
   });
-  readonly predictorStatusState = computed<StatusEvaluationState>(() => {
+  readonly selectedMeterGuids = computed(() => this.selectedStatusResources().meters);
+  readonly selectedPredictorGuids = computed(() => this.selectedStatusResources().predictors);
+  readonly hasDataStatusSources = computed(() => !!(this.selectedMeterGuids().length || this.selectedPredictorGuids().length));
+  readonly dataStatusState = computed<StatusEvaluationState>(() => {
     const state = this.status.state(), evaluation = this.status.evaluation();
     return state === 'ready' && (evaluation?.accountGuid !== this.accountGuid() || evaluation.revision !== this.workspace.revision()) ? 'evaluating' : state;
   });
-  readonly predictorStatusIssues = computed(() => {
-    if (this.predictorStatusState() !== 'ready') return [];
-    const selected = new Set(this.selectedPredictorGuids());
-    return this.status.items().filter(item => item.entity.kind === 'predictor' && item.entity.accountGuid === this.accountGuid()
-      && selected.has(item.entity.guid) && (item.severity === 'error' || item.severity === 'warning'));
+  readonly dataStatusIssues = computed(() => {
+    if (this.dataStatusState() !== 'ready') return [];
+    const meters = new Set(this.selectedMeterGuids()), predictors = new Set(this.selectedPredictorGuids());
+    return this.status.items().filter(item => item.entity.accountGuid === this.accountGuid()
+      && (item.entity.kind === 'meter' && meters.has(item.entity.guid) || item.entity.kind === 'predictor' && predictors.has(item.entity.guid))
+      && (item.severity === 'error' || item.severity === 'warning'));
   });
-  readonly predictorHeaderStatus = computed(() => {
-    const issues = this.predictorStatusIssues();
-    return predictorStatusPresentation(issues.some(issue => issue.severity === 'error') ? 'danger' : issues.length ? 'warning' : 'success', this.predictorStatusState());
+  readonly dataHeaderStatus = computed(() => {
+    const issues = this.dataStatusIssues();
+    return dataStatusPresentation(issues.some(issue => issue.severity === 'error') ? 'danger' : issues.length ? 'warning' : 'success', this.dataStatusState());
   });
-  readonly predictorStatusSummaries = computed(() => this.predictorStatusIssues().slice(0, 2));
-  readonly remainingPredictorIssues = computed(() => this.predictorStatusIssues().slice(2));
+  readonly dataStatusSummaries = computed(() => this.dataStatusIssues().slice(0, 2));
+  readonly remainingDataIssues = computed(() => this.dataStatusIssues().slice(2));
 
-  openPredictorIssue(item: StatusItem): void {
+  openDataIssue(item: StatusItem): void {
     // Recheck a rendered action against the current account, selection, and active findings.
-    const current = this.predictorStatusIssues().find(issue => issue.id === item.id);
+    const current = this.dataStatusIssues().find(issue => issue.id === item.id);
     if (current) this.status.navigateTo(current);
   }
   readonly journeys = inject(VisualizationNavigationService);
@@ -272,9 +283,19 @@ export class WorkbenchComponent {
     return selection.kind === 'all' ? 'All Facilities' : selection.facilityGuids.length === 1
       ? this.facilities().find(item => item.guid === selection.facilityGuids[0])?.name || 'Unavailable facility' : `${selection.facilityGuids.length} facilities`;
   }
+  readonly explorationItems = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    return definition && snapshot ? definition.sources.flatMap(source => projectDecisionItems(definition, source.id, snapshot)) : [];
+  });
+  updateExplorationChart(chart: VisualizationChart): void { void this.requestDecision({ kind: 'chart', chart }); }
   chooseChart(choice: VisualizationChartChoiceId): void {
     if ((choice === 'line' || choice === 'bar' || choice === 'area') && this.editor.definition()?.chart?.kind === 'time-series') void this.requestDecision({ kind: 'chart-type', traceType: choice });
-    else void this.requestDecision({ kind: 'chart', chart: createVisualizationChart(choice) });
+    else {
+      let chart = createVisualizationChart(choice);
+      const sources = this.editor.definition()?.sources;
+      if (isExplorationChart(chart) && sources?.length === 1 && sources[0].kind === 'energy-use') chart = { ...chart, interval: 'yearly', ...(chart.kind === 'heatmap' ? { dimension: 'series-period' as const } : {}) };
+      void this.requestDecision({ kind: 'chart', chart });
+    }
   }
   setStack(stack: 'none' | 'absolute' | 'percent'): void {
     if (this.stackChoices().find(choice => choice.value === stack)?.reason) return;

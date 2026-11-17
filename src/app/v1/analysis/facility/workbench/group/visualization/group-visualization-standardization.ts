@@ -1,22 +1,8 @@
 import type { GroupMonthlyPoint, TimeSeriesDisplay, TimeSeriesScale, VisualizationPredictor } from './group-visualization.models';
 
 /** Population z-scores across the full analysis period. Gaps never become zeroes. */
-export function zScores(values: readonly (number | null)[]): { values: (number | null)[]; available: boolean } {
-  const finite = values.filter((value): value is number => value != null && Number.isFinite(value));
-  // Scaling first bounds intermediate arithmetic even for very large or tiny usage values.
-  const magnitude = finite.reduce((max, value) => Math.max(max, Math.abs(value)), 0);
-  let mean = 0, squaredDeviations = 0, count = 0;
-  for (const value of finite) {
-    const scaled = magnitude ? value / magnitude : 0;
-    const delta = scaled - mean;
-    mean += delta / ++count;
-    squaredDeviations += delta * (scaled - mean);
-  }
-  const deviation = Math.sqrt(squaredDeviations / count);
-  const available = count >= 2 && deviation > 0 && Number.isFinite(deviation);
-  return { available, values: values.map(value => available && value != null && Number.isFinite(value)
-    ? (value / magnitude - mean) / deviation : null) };
-}
+export { zScores } from '@domain/calculations/exploratory-standardization';
+import { zScores } from '@domain/calculations/exploratory-standardization';
 
 /** Each series is standardized independently; visibility and zoom do not change its reference period. */
 export function buildTimeSeriesDisplay(points: readonly GroupMonthlyPoint[], predictors: readonly VisualizationPredictor[],

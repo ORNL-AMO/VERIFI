@@ -34,7 +34,7 @@
   </label>
   </app-visualization-decision-section>
   @for (item of items(); track item.key; let position = $index) {
-    <app-visualization-item-settings [item]="item" [position]="position" [itemCount]="items().length" [disabled]="view.disabled" [editorKey]="view.editorKey ?? ''"
+    <app-visualization-item-settings [timeSeries]="view.definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="items().length" [disabled]="view.disabled" [editorKey]="view.editorKey ?? ''"
       [expandedNodes]="view.expandedNodes ?? emptyNodes" [resetKey]="item.resetKey"
       (requested)="view.request?.($event)" (sectionChanged)="view.sectionChanged?.($event.id, $event.expanded)"/>
   }

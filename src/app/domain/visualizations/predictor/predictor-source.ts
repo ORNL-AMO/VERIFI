@@ -1,3 +1,4 @@
+import { isExplorationChart, visualizationInterval } from '../visualization-interval';
 import { emptyMonthlySource } from '../visualization-monthly-combination';
 import { civilMonthIndex, civilMonthRange } from '../visualization-periods';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
@@ -86,11 +87,11 @@ function groupReadings(readings: readonly IdbPredictorData[]): Map<number, IdbPr
 }
 export function predictorCapabilities(): VisualizationSourceCapabilities {
   return { kind: 'predictor', measures: ['value'], aggregations: ['none'], periods: ['all-history', 'fixed', 'rolling'], comparisons: ['none'],
-    chartKinds: ['time-series'], shapes: ['time-series'], alignments: ['civil-month'], settings: ['unit'], controls: ['series', 'appearance', 'axes'], allowDateOverride: true, allowMultipleSources: true, allowMixedAxisUnits: true };
+    chartKinds: ['time-series', 'scatter', 'correlation', 'heatmap'], shapes: ['time-series'], alignments: ['civil-month'], settings: ['unit'], controls: ['series', 'appearance', 'axes', 'fit', 'normalization'], allowDateOverride: true, allowMultipleSources: true, allowMixedAxisUnits: true };
 }
 export function predictorChartSupport(source: PredictorVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
-  if (chart.kind !== 'time-series' || chart.interval !== 'monthly' || chart.stack !== 'none')
+  if (chart.kind === 'time-series' ? chart.interval !== 'monthly' || chart.stack !== 'none' : !isExplorationChart(chart) || visualizationInterval(chart) !== 'monthly')
     reasons.push('Predictors support monthly, unstacked line, bar or area charts.');
   if (source.aggregation !== 'none') reasons.push('Predictor aggregation is not supported.');
   if (!isAllPredictors(source) && (source.selection?.kind !== 'fixed' || source.selection.resource !== 'predictor' || !source.selection.guids.length))

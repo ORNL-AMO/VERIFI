@@ -1,3 +1,4 @@
+import { previewValuesText } from './preview-values.testing';
 import { By } from '@angular/platform-browser';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { VisualizationCommandHandler } from '@data/account-workspace/handlers/visualization-command-handler.service';
@@ -101,7 +102,7 @@ describe('saved All Predictors and mixed monthly charts', () => {
     const definition = fixedProduction(true), saved = await save(definition), root = mount(); await ready(root);
     await handlers.updatePredictor({ ...store.predictors()[0], name: 'Renamed production' }, account.guid);
     await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(true); await ready(root);
-    expect(root.querySelector('table')!.textContent).toContain('My production');
+    expect(previewValuesText(fixture!)).toContain('My production');
     expect(await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.guid)).toEqual(saved);
     await handlers.deletePredictorsWithData({ facilityGuid: facility.guid, predictors: [...store.predictors()], predictorData: [...store.predictorData()], facilityAnalyses: [] }, account.guid);
     const replacement = { ...predictor, id: 2, guid: 'replacement', name: 'Renamed production' };
@@ -122,8 +123,8 @@ describe('saved All Predictors and mixed monthly charts', () => {
     const repaired = (await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.guid))!;
     expect(repaired.guid).toBe(saved.guid); expect(repaired.id).toBe(saved.id); expect(repaired.createdDate).toEqual(saved.createdDate);
     expect(component.editor.definition()!.appearance).toEqual(definition.appearance);
-    expect(root.querySelector('table')!.textContent).toContain('20 widgets');
-    expect(root.querySelector('table')!.textContent).not.toContain('My production');
+    expect(previewValuesText(fixture!)).toContain('20 widgets');
+    expect(previewValuesText(fixture!)).not.toContain('My production');
     expect(store.predictorData()).toEqual(dataBefore); expect(weather).not.toHaveBeenCalled();
   });
 
@@ -142,7 +143,7 @@ describe('saved All Predictors and mixed monthly charts', () => {
     await component.confirmDecision(); fixture!.detectChanges(); await ready(root);
     expect(component.editor.definition()!.sources[1]).toMatchObject({ selection: { kind: 'rule', filter: {} } });
     expect(component.editor.definition()!.series[1].overrides).toHaveLength(1);
-    expect(root.querySelector('table')!.textContent).not.toContain('Other custom');
+    expect(previewValuesText(fixture!)).not.toContain('Other custom');
     const commands = TestBed.inject(SavedVisualizationCommands), current = (await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.guid))!;
     const duplicated = await commands.submit(commands.prepareDuplicate(current));
     expect(duplicated.state).toBe('committed');
@@ -163,11 +164,11 @@ describe('saved All Predictors and mixed monthly charts', () => {
     await predictorHandler.deletePredictorsWithData({ facilityGuid: facility.guid,
       predictors: store.predictors().filter(item => item.guid === predictor.guid), predictorData: store.predictorData().filter(item => item.predictorId === predictor.guid), facilityAnalyses: [] }, account.guid);
     await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(true); await ready(root);
-    expect(root.querySelector('table')!.textContent).not.toContain('My production');
+    expect(previewValuesText(fixture!)).not.toContain('My production');
     expect((await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.guid))!.definition).toEqual(current.definition);
     await harness.seed({ predictor: [predictor], predictorData: [{ ...getNewIdbPredictorData(predictor), id: 3, guid: 'returned-reading', year: 2026, month: 4, amount: 0 }] });
     await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(true); await ready(root);
-    expect(root.querySelector('table')!.textContent).toContain('My production');
+    expect(previewValuesText(fixture!)).toContain('My production');
     expect((await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.guid))!.definition).toEqual(current.definition);
   });
 
@@ -248,7 +249,7 @@ describe('saved All Predictors and mixed monthly charts', () => {
     expect(all.textContent).toContain('All Predictors'); expect(all.getAttribute('aria-checked')).toBe('true'); expect(all.disabled).toBe(false);
     await harness.seed({ predictor: [predictor], predictorData: [{ ...getNewIdbPredictorData(predictor), id: 1, guid: 'new-zero', year: 2026, month: 4, amount: 0 }] });
     await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(true);
-    await ready(root); expect(root.querySelector('table')!.textContent).toContain('0 widgets');
+    await ready(root); expect(previewValuesText(fixture!)).toContain('0 widgets');
     expect(root.querySelectorAll('.resource-picker__option[aria-checked="true"]')).toHaveLength(1);
     expect(await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.guid)).toEqual(saved);
     const reopened = mount(); await ready(reopened);
@@ -273,7 +274,7 @@ describe('saved All Predictors and mixed monthly charts', () => {
     const options = chart.getOption() as any;
     expect(options.yAxis.map((axis: any) => axis.name)).toEqual(['']);
     expect(options.series).toHaveLength(2); expect(options.series[1].data).toEqual([['monthly:24315', 0]]);
-    expect(root.querySelector('table')!.textContent).toContain('widgets'); expect(root.querySelector('table')!.textContent).toContain('kWh');
+    expect(previewValuesText(fixture!)).toContain('widgets'); expect(previewValuesText(fixture!)).toContain('kWh');
     const subscriptions = calendarizeBase.mock.calls.length;
     await fixture!.componentInstance.requestDecision({ kind: 'item-style', sourceId: source.id, item: { resourceGuid: predictor.guid }, changes: { axis: 'right', traceType: 'bar' } });
     fixture!.detectChanges(); await fixture!.componentInstance.editor.flush(); await ready(root);

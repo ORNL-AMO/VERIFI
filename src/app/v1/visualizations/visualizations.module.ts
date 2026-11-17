@@ -1,3 +1,5 @@
+import { ExplorationModule } from './exploration/exploration.module';
+import { CorrelationPresenter, ScatterPresenter, HeatmapPresenter } from './exploration/exploration.presenter';
 import { AnalysisDataSession } from './analysis/analysis-data-session.service';
 import { AnalysisSourceProvider } from './analysis/analysis-source-provider.service';
 import { EquipmentSourceProvider } from './energy-use/equipment-source-provider.service';
@@ -11,12 +13,15 @@ import { VisualizationDateContextResolver } from './preview/visualization-date-c
 import { VISUALIZATION_DATE_CONTEXT_RESOLVER, VISUALIZATION_SOURCE_PROVIDERS, VISUALIZATION_PREVIEW_PRESENTERS } from './preview/preview-registry';
 import { TimeSeriesPresenter } from './time-series/time-series.presenter';
 
-@NgModule({ imports: [LibraryModule, WorkbenchModule], providers: [AnalysisDataSession, AnalysisSourceProvider, EquipmentSourceProvider, PredictorSourceProvider, UtilitySourceProvider, UtilityDataSession, VisualizationDateContextResolver, TimeSeriesPresenter,
+@NgModule({ imports: [LibraryModule, WorkbenchModule, ExplorationModule], providers: [CorrelationPresenter, ScatterPresenter, HeatmapPresenter, AnalysisDataSession, AnalysisSourceProvider, EquipmentSourceProvider, PredictorSourceProvider, UtilitySourceProvider, UtilityDataSession, VisualizationDateContextResolver, TimeSeriesPresenter,
   { provide: VISUALIZATION_SOURCE_PROVIDERS, multi: true, useExisting: UtilitySourceProvider },
   { provide: VISUALIZATION_SOURCE_PROVIDERS, multi: true, useExisting: PredictorSourceProvider },
   { provide: VISUALIZATION_SOURCE_PROVIDERS, multi: true, useExisting: EquipmentSourceProvider },
   { provide: VISUALIZATION_SOURCE_PROVIDERS, multi: true, useExisting: AnalysisSourceProvider },
   { provide: VISUALIZATION_PREVIEW_PRESENTERS, multi: true, useExisting: TimeSeriesPresenter },
+  { provide: VISUALIZATION_PREVIEW_PRESENTERS, multi: true, useExisting: CorrelationPresenter },
+  { provide: VISUALIZATION_PREVIEW_PRESENTERS, multi: true, useExisting: ScatterPresenter },
+  { provide: VISUALIZATION_PREVIEW_PRESENTERS, multi: true, useExisting: HeatmapPresenter },
   { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useExisting: VisualizationDateContextResolver }
 ] })
 export class VisualizationsModule { }

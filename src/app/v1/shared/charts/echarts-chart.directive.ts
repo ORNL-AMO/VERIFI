@@ -1,4 +1,4 @@
-import { AfterViewInit, Directive, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, inject } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, EventEmitter, Input, HostListener, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, inject } from '@angular/core';
 import { echarts, V1EChartsOption } from './echarts';
 import type { ECharts } from 'echarts/core';
 export type { V1EChartsOption } from './echarts';
@@ -84,6 +84,21 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     this.chart?.dispose();
     this.chart = undefined;
   }
+
+  @HostListener('window:beforeprint')
+  renderForPrint(): void {
+    if (!this.option || this.destroyed) return;
+    this.zone.runOutsideAngular(() => {
+      this.initializeChart();
+      if (this.initialRenderFrame !== undefined) { cancelAnimationFrame(this.initialRenderFrame); this.initialRenderFrame = undefined; }
+      this.applyOptionNow();
+      this.chart?.resize();
+      this.appliedSize = this.readContentSize();
+    });
+  }
+
+  @HostListener('window:afterprint')
+  restoreAfterPrint(): void { this.zone.runOutsideAngular(() => this.scheduleResize()); }
 
   private initializeWhenVisible(): void {
     this.visibilityObserver?.disconnect();

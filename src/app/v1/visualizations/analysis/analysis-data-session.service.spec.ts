@@ -44,6 +44,35 @@ describe('active facility analysis preview results', () => {
     expect(next.state).toBe('ready'); expect(ControlledWorker.instances).toHaveLength(1);
     if (next.state === 'ready') expect(next.resolved.series[0].label).toContain('Renamed');
   });
+  it('reuses distinct analysis results after an exploration appearance edit', async () => {
+    const { fixture, store, data, request: original } = setup();
+    if (original.source.kind !== 'analysis' || original.source.mode !== 'result') throw new Error('Expected result source');
+    const other = { ...fixture.analysis, guid: 'analysis-b', name: 'Other analysis' };
+    store.publishCommitted({ ...fixture.snapshot, facilityAnalyses: [fixture.analysis, other] }, {});
+    const first = { ...original, identity: { ...original.identity, workspaceRevision: store.revision() },
+      chart: { kind: 'correlation' as const, statistic: 'r' as const, scale: 'raw' as const } };
+    const second = { ...first, identity: { ...first.identity, sourceId: 'analysis-b-source' }, source: { ...original.source, id: 'analysis-b-source', analysisGuid: other.guid } };
+    const respond = vi.spyOn(ControlledWorker.prototype, 'postMessage').mockImplementation(function (this: ControlledWorker, payload: unknown) {
+      this.payload = payload;
+      queueMicrotask(() => this.emit({ ok: true, value: calculateFacilityAnalysisResults(payload as Parameters<typeof calculateFacilityAnalysisResults>[0]) }));
+    });
+    try {
+      const initialSignal = new AbortController().signal;
+      const initial = await Promise.all([first, second].map(request => data.acquire(request, initialSignal)));
+      expect(initial.map(result => result.state)).toEqual(['ready', 'ready']);
+      expect(ControlledWorker.instances).toHaveLength(2);
+      const appearanceSignal = new AbortController().signal;
+      const next = await Promise.all([first, second].map(request => data.acquire({ ...request,
+        chart: { ...request.chart, scale: 'z-score', grouping: 'month' } }, appearanceSignal)));
+      expect(next.map(result => result.state)).toEqual(['ready', 'ready']);
+      expect(ControlledWorker.instances).toHaveLength(2);
+      // Monthly date discovery requests sources sequentially before provider projection.
+      const discoverySignal = new AbortController().signal;
+      for (const request of [first, second]) expect((await data.acquire(request, discoverySignal)).state).toBe('ready');
+      expect(ControlledWorker.instances).toHaveLength(2);
+    } finally { respond.mockRestore(); }
+  });
+
   it('blocks invalid results, permits selected-group fallback and returns retryable errors', async () => {
     const { fixture, request: original, provider, store } = setup();
     const blocked = { ...fixture.analysis, groups: [...fixture.analysis.groups, { ...fixture.analysis.groups[0], idbGroupId: 'other-group', analysisType: 'regression' as const }] };

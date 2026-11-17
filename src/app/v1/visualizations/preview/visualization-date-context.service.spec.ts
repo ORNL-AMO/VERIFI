@@ -63,6 +63,19 @@ describe('shared utility latest-data anchor', () => {
     expect(data.acquire).toHaveBeenCalledWith(identity, abort.signal, true, false);
     expect(resolve.mock.calls[0][0]).toMatchObject({ period: { kind: 'all-history' }, comparison: { kind: 'none' }, chart: { interval: 'monthly' } });
   });
+  it.each<NonNullable<VisualizationDefinition['chart']>>([
+    { kind: 'scatter', interval: 'yearly', showFit: true },
+    { kind: 'correlation', interval: 'yearly', statistic: 'r', scale: 'raw' },
+    { kind: 'heatmap', interval: 'yearly', dimension: 'series-period', scale: 'linear' }
+  ])('discovers the actual latest observed month for yearly $kind rolling anchors', async chart => {
+    const { dates, resolve, definition, identity } = setup();
+    const result = await dates.resolve({ ...definition, chart,
+      period: { kind: 'rolling', count: 2, unit: 'year', anchor: 'latest-data', basis: 'calendar', includeIncomplete: true }
+    }, identity, new AbortController().signal);
+    expect(result.latestDataDate).toBe('2026-01-31');
+    expect(result.monthlyRange).toBeUndefined();
+    expect(resolve.mock.calls[0][0]).toMatchObject({ period: { kind: 'all-history' }, chart: { kind: 'time-series', interval: 'monthly' } });
+  });
   it('does not resolve history for a calendar anchor and rejects superseded date work', async () => {
     const { dates, data, resolve, definition, identity } = setup();
     await dates.resolve({ ...definition, period: { ...definition.period, anchor: 'calendar' } }, identity, new AbortController().signal);

@@ -1,3 +1,4 @@
+import { previewValuesText } from './preview-values.testing';
 import { analysisPickerTestProvider } from './analysis-picker.testing';
 import { configureLibraryTest } from '../library/testing/library-testing';
 import { LibraryLifecycle } from '../library/lifecycle/library-lifecycle.service';
@@ -107,7 +108,7 @@ describe('A1 saved facility analysis native journey', () => {
     expect(state.presentation.details.rows).toHaveLength(expected.monthlyAnalysisSummaryData.length);
     expect(state.presentation.details.rows[0].join(' ')).toContain(`${expected.monthlyAnalysisSummaryData[0].energyUse} kWh`);
     await mount({ ...read.definition, period: { kind: 'fixed', basis: 'calendar', start: '2021-01-01', end: '2021-12-31' } }, 2);
-    expect(requests).toHaveLength(1); expect(root.querySelector('table')!.textContent).toContain('2021-01-01');
+    expect(requests).toHaveLength(1); expect(previewValuesText(preview!)).toContain('2021-01-01');
     let edited = read.definition;
     for (const action of [
       { kind: 'analysis-binding' as const, sourceId: 'source-1', analysisGuid: analysis.guid, groupGuid: 'group-a' },
@@ -125,7 +126,7 @@ describe('A1 saved facility analysis native journey', () => {
     const options = echarts.getInstanceByDom(root.querySelector<HTMLElement>('.time-series-canvas')!)!.getOption() as { series: { name: string; type: string; yAxisIndex: number }[]; yAxis: { position: string }[] };
     expect(options.series[0]).toMatchObject({ name: 'Production improvement', type: 'bar' });
     expect(options.yAxis[options.series[0].yAxisIndex].position).toBe('right');
-    expect(root.querySelector('table')!.textContent).toContain('%');
+    expect(previewValuesText(preview!)).toContain('%');
     for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)';
       await page.screenshot({ element: root, path: `../../../../../.angular/analysis-a1-${label}.png` });
@@ -133,7 +134,7 @@ describe('A1 saved facility analysis native journey', () => {
     await page.viewport(1100, 850); root.className = 'v1-root';
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-    try { expect(getComputedStyle(root.querySelector('.time-series-actions')!).display).toBe('none'); await page.screenshot({ element: root, path: '../../../../../.angular/analysis-a1-print.png' }); }
+    try { expect(root.querySelector('.time-series-actions, table')).toBeNull(); await page.screenshot({ element: root, path: '../../../../../.angular/analysis-a1-print.png' }); }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
     const validSnapshot = store.snapshot()!;
     store.publishCommitted({ ...validSnapshot, facilityAnalyses: [{ ...validSnapshot.facilityAnalyses[0], groups: [...validSnapshot.facilityAnalyses[0].groups,
@@ -166,8 +167,8 @@ describe('A1 saved facility analysis native journey', () => {
       preview.componentRef.setInput('definition', restoredRead.definition); preview.componentRef.setInput('active', true);
       preview.componentRef.setInput('identity', { accountGuid, workspaceRevision: store.revision(), definitionGuid: restored.guid, definitionRevision: restored.revision }); preview.detectChanges();
       await vi.waitFor(() => { preview!.detectChanges(); const current = preview!.componentInstance.preview.state(); expect(current.state, current.state === 'ready' ? '' : current.message).toBe('ready'); });
-      expect(root.querySelector('table')!.textContent).toContain(expectedRestoredValues);
-      expect(root.querySelector('table')!.textContent).toContain('20 %');
+      expect(previewValuesText(preview!)).toContain(expectedRestoredValues);
+      expect(previewValuesText(preview!)).toContain('20 %');
       preview.componentRef.setInput('active', false); preview.detectChanges();
     }
 
