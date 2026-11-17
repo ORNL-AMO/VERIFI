@@ -90,6 +90,13 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
     return { calendarDate, ...(latestDataDate ? { latestDataDate } : {}), ...(monthlyRange ? { monthlyRange } : {}), ...(noAnchor && !sourceUnavailable ? { emptyReasons: emptyReasons.length ? emptyReasons : ['No eligible saved observations are available.'] } : {}) };
   }
   private async explorationDates(definition: VisualizationDefinition, identity: PreviewIdentity, signal: AbortSignal): Promise<PreviewDateContext> {
+    if (visualizationInterval(definition.chart) !== 'monthly') {
+      // Annual sources keep their own interval bounds. Discover rolling anchors
+      // through the existing monthly history path, never a padded annual end date.
+      return this.resolve({ ...definition,
+        chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'yearly', stack: 'none' }
+      }, identity, signal);
+    }
     const calendarDate = civilDate(new Date());
     const snapshot = this.workspace.snapshot();
     const scope = resolveVisualizationFacilities(definition, this.workspace.facilities()).scope;
@@ -98,7 +105,6 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
     const utilities = definition.sources.filter((source): source is UtilityVisualizationSource => source.kind === 'utility');
     if (utilities.length) await this.data.acquire(identity, signal, true, this.data.requiresGrid(utilities, scope));
     current();
-    if (visualizationInterval(definition.chart) !== 'monthly') return { calendarDate };
     const histories: { start: string; end: string }[] = [];
     const latest: string[] = [];
     const reasons: string[] = [];
