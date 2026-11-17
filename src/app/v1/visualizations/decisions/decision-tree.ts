@@ -1,14 +1,25 @@
+import { replaceAnalysisBinding } from '../analysis/analysis-binding';
+import { analysisMeasureLabels, analysisSeriesId, analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
+import { projectAnalysisItems, analysisChoices, analysisGroupChoices } from '../analysis/analysis-items';
+import { energyUseSelectionMode, energyUseResourceKind, energyUseSeriesId, selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
+import type { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { useEquipmentHistorySettings } from '@domain/visualizations/energy-use/equipment-source';
+import { equipmentResourceChoices, projectEquipmentItems } from '../energy-use/equipment-items';
+import { predictorSeriesId, isAllPredictors, resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
+import { predictorResourceChoices, projectPredictorItems } from '../predictor/predictor-items';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import { createVisualizationDefinition, type ResourceSelection, type UtilityVisualizationSource,
-  type VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, type ResourceSelection, type UtilityVisualizationSource, type PredictorVisualizationSource,
+  type EnergyUseVisualizationSource, type AnalysisResultVisualizationSource, type VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { utilityUnit } from '@domain/visualizations/utility/utility-catalog';
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import { resolveUtilitySelection, utilityMeasureKey, utilitySeriesId } from '@domain/visualizations/utility/utility-selection';
 import { resolveVisualizationFacilities, sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
-import { meterResourceChoices, nativeObservationAvailable, projectMeterItems, itemKey, overrideMatches, sourceSeries, isCustomized } from '../utility/utility-items';
-export { meterSelectionChoices, meterResourceChoices, nativeObservationAvailable, projectMeterItems, configuredChartSummary } from '../utility/utility-items';
+import { meterResourceChoices, nativeObservationAvailable } from '../utility/utility-items';
+import { itemKey, overrideMatches, findItemSeries, isCustomized } from '../shared/item-appearance';
+import { projectDecisionItems } from '../shared/configured-items';
+export { meterSelectionChoices, meterResourceChoices, nativeObservationAvailable, projectMeterItems } from '../utility/utility-items';
 import type { DecisionChangeContext, DecisionChangeResult, DecisionItemIdentity, DecisionItemPatch,
   DecisionRef, VisualizationDecisionAction } from './decision-types';
 
@@ -34,12 +45,18 @@ function compatiblePinnedUnit(definition: VisualizationDefinition, source: Utili
   });
 }
 
-function ensureSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource): VisualizationDefinition {
-  if (!source.selection) return definition;
-  const metric = utilityMeasureKey(source);
+function ensureSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource | AnalysisResultVisualizationSource): VisualizationDefinition {
+  if (source.kind === 'analysis') {
+    if (!source.analysisGuid || definition.series.some(series => series.sourceId === source.id && series.metric === source.measure)) return definition;
+    let id = `${source.id}-series`, index = 1;
+    while (definition.series.some(series => series.id === id)) id = `${source.id}-series-${index++}`;
+    return { ...definition, series: [...definition.series, { id, sourceId: source.id, metric: source.measure, resourceGuid: source.groupGuid ?? source.analysisGuid, axis: 'left' }] };
+  }
+  if (!source.selection && !(source.kind === 'energy-use' && source.equipmentTypes?.length)) return definition;
+  const metric = source.kind === 'predictor' ? 'value' : source.kind === 'energy-use' ? 'consumption' : utilityMeasureKey(source);
   const declared = definition.series.filter(series => series.sourceId === source.id && series.metric === metric);
   if (declared.some(series => !series.resourceGuid)) return definition;
-  if (source.selection.kind === 'fixed' && source.selection.guids.every(guid => declared.some(series => series.resourceGuid === guid))) return definition;
+  if (source.selection?.kind === 'fixed' && source.selection.guids.every(guid => declared.some(series => series.resourceGuid === guid))) return definition;
   let id = `${source.id}-series`, index = 1;
   while (definition.series.some(series => series.id === id)) id = `${source.id}-series-${index++}`;
   return { ...definition, series: [...definition.series, { id, sourceId: source.id, metric, axis: 'left' }] };
@@ -61,8 +78,10 @@ function cleanJson<T>(value: T): T {
     .filter(([, entry]) => entry !== undefined).map(([key, entry]) => [key, cleanJson(entry)])) as T;
   return value;
 }
-function patchItem(definition: VisualizationDefinition, source: UtilityVisualizationSource, identity: DecisionItemIdentity, changes: DecisionItemPatch): VisualizationDefinition {
-  const prepared = ensureSeries(definition, source), selected = sourceSeries(prepared, source, identity);
+function patchItem(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource | AnalysisResultVisualizationSource, identity: DecisionItemIdentity, changes: DecisionItemPatch): VisualizationDefinition {
+  const prepared = ensureSeries(definition, source);
+  const metric = source.kind === 'analysis' ? source.measure : source.kind === 'predictor' ? 'value' : source.kind === 'energy-use' ? 'consumption' : utilityMeasureKey(source);
+  const selected = findItemSeries(prepared, source.id, metric, identity);
   if (!selected) return definition;
   const apply = <T extends object>(value: T): T => {
     const result = { ...value } as Record<string, unknown>;
@@ -71,24 +90,37 @@ function patchItem(definition: VisualizationDefinition, source: UtilityVisualiza
   };
   return { ...prepared, series: prepared.series.map(series => {
     if (series.id !== selected.id) return series;
-    if (series.resourceGuid && series.resourceGuid === identity.resourceGuid && changes.order === undefined) {
-      const result = apply(series);
-      return result.axis ? result : { ...result, axis: 'left' };
-    }
     const overrides = [...series.overrides ?? []], index = overrides.findIndex(entry => overrideMatches(entry, identity, definition.accountGuid));
-    const provider = identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === utilitySeriesId(source.id, identity.resourceGuid!)
+    const provider = source.kind !== 'analysis' && identity.resourceGuid !== undefined ? overrides.find(entry => entry.seriesId === (source.kind === 'predictor' ? predictorSeriesId : source.kind === 'energy-use' ? (id: string, key: string) => energyUseSeriesId(source, key) : utilitySeriesId)(source.id, identity.resourceGuid!)
       && (entry.accountGuid ?? definition.accountGuid) === definition.accountGuid) : undefined;
+    if (series.resourceGuid && series.resourceGuid === identity.resourceGuid && changes.order === undefined) {
+      const { overrides: _old, ...result } = apply(series);
+      const retained = overrides.flatMap(entry => {
+        if (entry !== provider && !overrideMatches(entry, identity, definition.accountGuid)) return [entry];
+        const preference = { ...entry } as Record<string, unknown>;
+        for (const [key, value] of Object.entries(changes)) if (value !== undefined) delete preference[key];
+        return Object.keys(preference).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key)) ? [preference as typeof entry] : [];
+      });
+      return { ...result, axis: result.axis ?? 'left', ...(retained.length ? { overrides: retained } : {}) };
+    }
     const { seriesId: _providerId, resourceGuid: _providerResource, ...retained } = provider ?? {};
     const override = apply(index >= 0 ? overrides[index] : { ...retained, ...identity, accountGuid: definition.accountGuid });
     const hasValues = Object.keys(override).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key));
     if (index >= 0) { if (hasValues) overrides[index] = override; else overrides.splice(index, 1); }
     else if (hasValues) overrides.push(override);
+    // A cleared preference must not return through the weaker provider selector.
+    const retainedOverrides = overrides.flatMap(entry => {
+      if (entry !== provider) return [entry];
+      const retained = { ...entry };
+      for (const [key, value] of Object.entries(changes)) if (value === null || value === '') delete (retained as Record<string, unknown>)[key];
+      return Object.keys(retained).some(key => !['resourceGuid', 'seriesId', 'accountGuid'].includes(key)) ? [retained] : [];
+    });
     const { overrides: _old, ...base } = series;
-    return { ...base, ...(overrides.length ? { overrides } : {}) };
+    return { ...base, ...(retainedOverrides.length ? { overrides: retainedOverrides } : {}) };
   }) };
 }
-function withoutItem(definition: VisualizationDefinition, source: UtilityVisualizationSource, identity: DecisionItemIdentity): VisualizationDefinition {
-  const providerIdentity: DecisionItemIdentity = identity.resourceGuid !== undefined ? { seriesId: utilitySeriesId(source.id, identity.resourceGuid) } : identity;
+function withoutItem(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource | AnalysisResultVisualizationSource, identity: DecisionItemIdentity): VisualizationDefinition {
+  const providerIdentity: DecisionItemIdentity = identity.resourceGuid !== undefined ? { seriesId: (source.kind === 'analysis' ? analysisSeriesId : source.kind === 'predictor' ? predictorSeriesId : source.kind === 'energy-use' ? (id: string, key: string) => energyUseSeriesId(source, key) : utilitySeriesId)(source.id, identity.resourceGuid) } : identity;
   return pruneChart({ ...definition, series: definition.series.filter(series => !(series.sourceId === source.id && identity.resourceGuid !== undefined && series.resourceGuid === identity.resourceGuid))
     .map(series => {
       if (series.sourceId !== source.id || !series.overrides) return series;
@@ -104,7 +136,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   let nextSection: DecisionRef | undefined;
   const affect = (ref: DecisionRef) => affected.add(decisionNodeId(ref));
   const clearItems = (sourceId: string, allBindings = false) => {
-    const items = projectMeterItems(definition, sourceId, context.snapshot);
+    const items = projectDecisionItems(definition, sourceId, context.snapshot);
     if (allBindings && items.length) cleared.push(`${items.length} selected item${items.length === 1 ? '' : 's'}`);
     if (items.some(item => item.customized) || hasSourcePresentation(definition, sourceId)) cleared.push('Customized item presentation');
     affect({ kind: 'resources', sourceId });
@@ -118,12 +150,32 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       const changed = next.sources.find(item => item.id === source.id);
       if (!visualizationIntentEqual('selection' in source ? source.selection : undefined, changed && 'selection' in changed ? changed.selection : undefined)) affect({ kind: 'resources', sourceId: source.id });
       if (source.kind === 'utility' && changed?.kind === 'utility' && !visualizationIntentEqual(source.charge, changed.charge)) affect({ kind: 'data-settings', sourceId: source.id });
-      const retained = new Set(projectMeterItems(next, source.id, context.snapshot).map(item => item.key));
-      for (const item of projectMeterItems(definition, source.id, context.snapshot)) if (!retained.has(item.key)) {
+      const retained = new Set(projectDecisionItems(next, source.id, context.snapshot).map(item => item.key));
+      for (const item of projectDecisionItems(definition, source.id, context.snapshot)) if (!retained.has(item.key)) {
         affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
       }
     }
     nextSection = { kind: 'sources' };
+  } else if (action.kind === 'chart-stack') {
+    if (definition.chart?.kind !== 'time-series') return { state: 'unchanged' };
+    next = { ...definition, chart: { ...definition.chart, stack: action.stack } };
+  } else if (action.kind === 'item-order' || action.kind === 'reset-order') {
+    const source = definition.sources.find(source => source.id === action.sourceId);
+    if (!source || source.kind === 'analysis' && source.mode !== 'result') return { state: 'unchanged' };
+    if (action.kind === 'reset-order') {
+      next = { ...definition, series: definition.series.map(series => series.sourceId !== source.id ? series : { ...series,
+        overrides: series.overrides?.map(override => {
+          if ((override.accountGuid ?? definition.accountGuid) !== definition.accountGuid) return override;
+          const { order: _order, ...retained } = override; return retained;
+        }) }) };
+    } else {
+      const items = [...projectDecisionItems(definition, source.id, context.snapshot)];
+      const index = items.findIndex(item => item.key === itemKey(action.item));
+      const target = index + (action.direction === 'up' ? -1 : 1);
+      if (index < 0 || target < 0 || target >= items.length) return { state: 'unchanged' };
+      [items[index], items[target]] = [items[target], items[index]];
+      items.forEach((item, order) => { next = patchItem(next, source, item.identity, { order }); });
+    }
   } else if (action.kind === 'chart-type') {
     if (definition.chart?.kind !== 'time-series') return { state: 'unchanged' };
     next = { ...definition, chart: { ...definition.chart, defaultTraceType: action.traceType }, series: definition.series.map(series => {
@@ -145,7 +197,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     if (definition.chart?.kind !== action.chart.kind) for (const source of definition.sources) {
       const ownSeries = definition.series.filter(series => series.sourceId === source.id);
       if (ownSeries.some(series => series.traceType !== undefined || series.overrides?.some(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid && override.traceType !== undefined))) cleared.push('Per-item trace types');
-      for (const item of projectMeterItems(definition, source.id, context.snapshot)) affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
+      for (const item of projectDecisionItems(definition, source.id, context.snapshot)) affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
       next = { ...next, series: next.series.map(series => {
         if (series.sourceId !== source.id) return series;
         const { traceType: _type, overrides: prior, ...base } = series;
@@ -169,7 +221,145 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     nextSection = { kind: 'sources' };
   } else {
     const source = definition.sources.find(source => source.id === action.sourceId);
+    if (source?.kind === 'analysis') {
+      if (action.kind === 'analysis-binding') {
+        const scope = resolveVisualizationFacilities(definition, context.snapshot.facilities).scope;
+        if (action.analysisGuid && !analysisChoices(context.snapshot, scope, definition.facilitySelection.kind === 'all').some(item => item.value === action.analysisGuid)) return { state: 'unchanged' };
+        if (action.groupGuid && !analysisGroupChoices(context.snapshot, action.analysisGuid).some(item => item.value === action.groupGuid)) return { state: 'unchanged' };
+        if (source.mode === 'result' && source.analysisGuid === action.analysisGuid && source.groupGuid === action.groupGuid) return { state: 'unchanged' };
+        clearItems(source.id, true); affect({ kind: 'source', sourceId: source.id });
+        next = replaceAnalysisBinding(definition, source.id, action);
+      } else if (source.mode === 'result' && action.kind === 'analysis-measure') {
+        if (!Object.hasOwn(analysisMeasureLabels, action.measure)) return { state: 'unchanged' };
+        const changed = { ...source, measure: action.measure };
+        next = ensureSeries({ ...definition, sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.map(item => item.sourceId === source.id ? { ...item, metric: action.measure } : item) }, changed);
+        affect({ kind: 'data-settings', sourceId: source.id });
+      } else if (source.mode === 'result' && (action.kind === 'analysis-interval' || action.kind === 'analysis-defaults')) {
+        const interval = action.kind === 'analysis-interval' ? action.interval : 'monthly';
+        const measure = action.kind === 'analysis-defaults' || interval === 'yearly' && !['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(source.measure)
+          || interval === 'monthly' && ['annual-improvement', 'total-improvement'].includes(source.measure) ? 'actual' : source.measure;
+        if (measure !== source.measure) cleared.push('Incompatible analysis measure');
+        const accountTarget = context.snapshot.accountAnalyses.some(item => item.guid === source.analysisGuid && item.accountId === definition.accountGuid);
+        const { groupGuid, ...accountSource } = source;
+        const repairAccountGroup = action.kind === 'analysis-defaults' && accountTarget && !!groupGuid;
+        if (repairAccountGroup) { clearItems(source.id, true); cleared.push('Unsupported account group target'); }
+        const changed = { ...(repairAccountGroup ? accountSource : source), measure, ...(action.kind === 'analysis-defaults' ? { settings: { unit: { kind: 'owner' as const } } } : {}) };
+        next = { ...definition, chart: { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line', interval, stack: 'none' },
+          sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.filter(item => !repairAccountGroup || item.sourceId !== source.id).map(item => item.sourceId === source.id ? { ...item, metric: measure } : item) };
+        if (action.kind === 'analysis-defaults' || analysisPeriodIssue({ chart: next.chart!, period: next.period, comparison: next.comparison })) {
+          if (next.period.kind !== 'all-history' || next.comparison.kind !== 'none') cleared.push('Incompatible period or comparison');
+          next = { ...next, period: { kind: 'all-history' }, comparison: { kind: 'none' } };
+        }
+        if (action.kind === 'analysis-defaults' && (source.settings?.unit?.kind === 'pinned' || source.settings?.energyTreatment?.kind === 'pinned')) cleared.push('Pinned analysis display settings');
+        affect({ kind: 'period' }); affect({ kind: 'source', sourceId: source.id });
+        next = ensureSeries(next, changed);
+      } else if (source.mode === 'result' && action.kind === 'item-style' && projectAnalysisItems(definition, source.id, context.snapshot).some(item => item.key === itemKey(action.item))) {
+        next = patchItem(definition, source, action.item, action.changes);
+      } else return { state: 'unchanged' };
+      nextSection = { kind: 'source', sourceId: source.id };
+    } else if (source?.kind === 'energy-use') {
+      if (action.kind === 'energy-use-selection-mode') {
+        if (energyUseSelectionMode(source) === action.mode) return { state: 'unchanged' };
+        clearItems(source.id, true);
+        if (source.selection || source.equipmentTypes?.length) cleared.push('Previous Energy Use selections');
+        affect({ kind: 'source', sourceId: source.id });
+        const { selection: _selection, equipmentTypes: _types, ...base } = source;
+        next = { ...definition, sources: definition.sources.map(item => item.id === source.id ? { ...base, selectionMode: action.mode, aggregation: action.mode === 'equipment' ? 'none' : 'sum' } : item), series: definition.series.filter(series => series.sourceId !== source.id) };
+      } else if (action.kind === 'equipment-selection' || action.kind === 'energy-use-resources') {
+        const mode = action.kind === 'equipment-selection' ? 'equipment' : energyUseSelectionMode(source);
+        if (!mode) return { state: 'unchanged' };
+        const guids = [...new Set(action.kind === 'equipment-selection' ? action.equipmentGuids : action.ids)];
+        const previous = selectedEnergyUseIds(source);
+        const choices = equipmentResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, mode);
+        if (guids.some(guid => !previous.includes(guid) && !choices.some(choice => choice.value === guid))) return { state: 'unchanged' };
+        if (energyUseSelectionMode(source) === mode && guids.length === previous.length && guids.every(guid => previous.includes(guid))) return { state: 'unchanged' };
+        if (energyUseSelectionMode(source) !== mode) {
+          clearItems(source.id, true); if (previous.length || source.selection) cleared.push('Previous Energy Use selection');
+          next = { ...next, series: next.series.filter(series => series.sourceId !== source.id) };
+          affect({ kind: 'source', sourceId: source.id });
+        }
+        for (const guid of previous.filter(guid => !guids.includes(guid))) {
+          const identity: DecisionItemIdentity = mode === 'equipment-type' ? { seriesId: energyUseSeriesId(source, guid) } : { resourceGuid: guid };
+          const item = projectEquipmentItems(definition, source.id, context.snapshot).find(item => item.key === itemKey(identity));
+          if (item?.customized) cleared.push(`${item.label} presentation`);
+          next = withoutItem(next, source, identity);
+          affect({ kind: 'item', sourceId: source.id, itemKey: itemKey(identity) });
+        }
+        const { selection: _selection, equipmentTypes: _types, ...base } = source;
+        const changed: EnergyUseVisualizationSource = { ...base, selectionMode: mode, aggregation: mode === 'equipment' ? 'none' : 'sum',
+          ...(guids.length ? mode === 'equipment-type' ? { equipmentTypes: guids as EquipmentType[] } : { selection: { kind: 'fixed', resource: energyUseResourceKind(mode), guids } } : {}) };
+        next = { ...next, sources: next.sources.map(item => item.id === source.id ? changed : item) };
+        if (guids.length) next = ensureSeries(next, changed);
+        else {
+          if (hasSourcePresentation(definition, source.id)) cleared.push('Customized item presentation');
+          next = { ...next, series: next.series.filter(series => series.sourceId !== source.id) };
+        }
+        affect({ kind: 'resources', sourceId: source.id });
+      } else if (action.kind === 'equipment-defaults') {
+        next = ensureSeries(useEquipmentHistorySettings(definition, source.id), { ...source, measure: 'consumption' });
+        affect({ kind: 'period' }); affect({ kind: 'source', sourceId: source.id });
+        if (!visualizationIntentEqual(next, definition)) cleared.push('Unsupported chart, period or Energy Use settings');
+      } else if (action.kind === 'equipment-unit') {
+        next = { ...definition, sources: definition.sources.map(item => item.id === source.id ? { ...source, settings: { ...source.settings, unit: action.unit } } : item) };
+      } else if (action.kind === 'item-style' && projectEquipmentItems(definition, source.id, context.snapshot).some(item => item.key === itemKey(action.item))) {
+        next = patchItem(definition, source, action.item, action.changes);
+      } else return { state: 'unchanged' };
+      nextSection = { kind: action.kind === 'energy-use-selection-mode' ? 'resources' : action.kind === 'energy-use-resources' || action.kind === 'equipment-selection' ? 'data-settings' : 'source', sourceId: source.id };
+    } else if (source?.kind === 'predictor') {
+      if (action.kind === 'predictor-selection') {
+        const choices = predictorResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope);
+        const previous = resolvePredictorSelection(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, source);
+        const guids = action.all ? choices.map(choice => choice.value) : [...new Set(action.predictorGuids)], added = guids.filter(guid => !previous.includes(guid)), removed = previous.filter(guid => !guids.includes(guid));
+        if (added.some(guid => !choices.some(choice => choice.value === guid))) return { state: 'unchanged' };
+        const selection: ResourceSelection | undefined = action.all ? { kind: 'rule', resource: 'predictor', filter: {} } : guids.length ? { kind: 'fixed', resource: 'predictor', guids } : undefined;
+        if (visualizationIntentEqual(source.selection, selection)) return { state: 'unchanged' };
+        if (source.selection && !isAllPredictors(source) && !(source.selection.kind === 'fixed' && source.selection.resource === 'predictor')) {
+          clearItems(source.id, true); cleared.push('Previous predictor selection'); affect({ kind: 'source', sourceId: source.id });
+          next = pruneChart({ ...next, series: next.series.filter(series => series.sourceId !== source.id) });
+        }
+        const items = projectPredictorItems(definition, source.id, context.snapshot);
+        for (const guid of removed) {
+          const item = items.find(item => item.identity.resourceGuid === guid);
+          if (item?.customized) cleared.push(`${item.label} presentation`);
+          affect({ kind: 'item', sourceId: source.id, itemKey: itemKey({ resourceGuid: guid }) });
+          next = withoutItem(next, source, { resourceGuid: guid });
+        }
+        if (!selection) {
+          if (hasSourcePresentation(definition, source.id)) cleared.push('Customized item presentation');
+          next = pruneChart({ ...next, series: next.series.filter(series => series.sourceId !== source.id) });
+        }
+        const { selection: _selection, ...base } = source;
+        next = { ...next, sources: next.sources.map(item => item.id === source.id ? { ...base, ...(selection ? { selection } : {}) } : item) };
+        if (selection) next = ensureSeries(next, { ...base, selection });
+        if (action.all) {
+          // Exact declarations become dormant-capable overrides under the live declaration.
+          const live = next.series.find(series => series.sourceId === source.id && series.metric === 'value' && !series.resourceGuid)!;
+          const exact = next.series.filter(series => series.sourceId === source.id && series.metric === 'value' && series.resourceGuid);
+          const overrides = [...live.overrides ?? []];
+          for (const series of exact) {
+            const { id: _id, sourceId: _source, metric: _metric, overrides: own, ...appearance } = series;
+            for (const item of own ?? []) {
+              if (!overrides.some(existing => (existing.accountGuid ?? definition.accountGuid) === (item.accountGuid ?? definition.accountGuid)
+                && (item.resourceGuid !== undefined ? existing.resourceGuid === item.resourceGuid : existing.seriesId === item.seriesId))) overrides.push(item);
+            }
+            const override = own?.find(item => overrideMatches(item, { resourceGuid: series.resourceGuid! }, definition.accountGuid))
+              ?? own?.find(item => overrideMatches(item, { seriesId: predictorSeriesId(source.id, series.resourceGuid!) }, definition.accountGuid));
+            const { seriesId: _seriesId, resourceGuid: _resourceGuid, accountGuid: _accountGuid, ...custom } = override ?? {};
+            const index = overrides.findIndex(item => overrideMatches(item, { resourceGuid: series.resourceGuid! }, definition.accountGuid));
+            const retained = { ...appearance, ...custom, resourceGuid: series.resourceGuid!, accountGuid: definition.accountGuid };
+            if (index < 0) overrides.push(retained); else overrides[index] = retained;
+          }
+          next = { ...next, series: next.series.filter(series => !exact.includes(series)).map(series => series.id === live.id ? { ...series, ...(overrides.length ? { overrides } : {}) } : series) };
+        }
+        affect({ kind: 'resources', sourceId: source.id });
+        nextSection = { kind: 'source', sourceId: source.id };
+      } else if (action.kind === 'item-style' && projectPredictorItems(definition, source.id, context.snapshot)
+        .some(item => item.identity.resourceGuid === action.item.resourceGuid && action.item.resourceGuid !== undefined)) {
+        next = patchItem(definition, source, action.item, action.changes);
+      } else return { state: 'unchanged' };
+    } else {
     if (source?.kind !== 'utility') return { state: 'unchanged' };
+
     if (action.kind === 'selection-mode') {
       if (source.selectionMode === action.mode) return { state: 'unchanged' };
       clearItems(source.id, true);
@@ -194,7 +384,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       const added = ids.filter(id => !selected.includes(id)), removed = selected.filter(id => !ids.includes(id));
       const available = new Set(meterResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, mode, source.measure).map(choice => choice.value));
       if (added.some(id => !available.has(id))) return { state: 'unchanged' };
-      const items = removed.length ? projectMeterItems(definition, source.id, context.snapshot) : [];
+      const items = removed.length ? projectDecisionItems(definition, source.id, context.snapshot) : [];
       for (const resourceId of removed) {
         const identity: DecisionItemIdentity = mode === 'source' ? { seriesId: utilitySeriesId(source.id, `source:${resourceId}`) } : { resourceGuid: resourceId };
         const item = items.find(item => item.key === itemKey(identity));
@@ -252,11 +442,12 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         clearItems(source.id); next = { ...next, series: next.series.filter(series => series.sourceId !== source.id) };
       }
       next = replaceSource(next, changed);
-      const firstItem = projectMeterItems(next, source.id, context.snapshot)[0];
+      const firstItem = projectDecisionItems(next, source.id, context.snapshot)[0];
       nextSection = firstItem ? { kind: 'item', sourceId: source.id, itemKey: firstItem.key } : { kind: 'data-settings', sourceId: source.id };
     } else if (action.kind === 'item-style') {
       next = patchItem(definition, source, action.item, action.changes);
     }
+  }
   }
   if ('sourceId' in action && ['toggle-resource', 'set-resources', 'selection-mode'].includes(action.kind) && !visualizationIntentEqual(next, definition)) {
     const source = next.sources.find(source => source.id === action.sourceId);

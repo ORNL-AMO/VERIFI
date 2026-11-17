@@ -10,6 +10,8 @@ import { readSavedVisualization } from '@data/visualizations/saved-visualization
 import { visualizationReferences } from '@domain/visualizations/visualization-references';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
+import type { EnergyUseVisualizationSource } from '@domain/visualizations/visualization-definition';
+import { equipmentDefinition, equipmentFixture } from '@domain/visualizations/testing/equipment-fixtures';
 import { BackupImportCommandService } from './backup-import-command.service';
 import { BackupPreparationService } from './backup-preparation.service';
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
@@ -20,6 +22,32 @@ describe('saved visualization backup transactions in Chromium', () => {
   const builder = new WorkspaceBackupSnapshotBuilder(), preparation = new BackupPreparationService();
   beforeEach(async () => { harness = await IndexedDbTestHarness.create('visualization-backup'); });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
+
+  it.each((['Account', 'Facility'] as const).flatMap(kind => (['group', 'equipment-type', 'linked-meter-group', 'facility'] as const).map(mode => ({ kind, mode }))))('round trips $mode selection and appearance in a $kind backup', async ({ kind, mode }) => {
+    const base = equipmentDefinition(), id = mode === 'facility' ? 'facility-a' : mode === 'group' ? 'energy-group-a' : mode === 'equipment-type' ? 'Pump' : 'group-a';
+    const resource = mode === 'facility' ? 'facility' as const : mode === 'group' ? 'energy-use-group' as const : 'meter-group' as const;
+    const source: EnergyUseVisualizationSource = { id: 'source-1', kind: 'energy-use', selectionMode: mode, measure: 'consumption', aggregation: 'sum', denominator: 'selected',
+      ...(mode === 'equipment-type' ? { equipmentTypes: ['Pump'] } : { selection: { kind: 'fixed', resource, guids: [id] } }) };
+    const prefix = `source-1:${mode === 'equipment-type' ? 'equipment-type' : resource}:`;
+    const definition = { ...base, facilitySelection: { kind: 'fixed' as const, facilityGuids: ['facility-a'] }, sources: [source], series: [{ ...base.series[0], overrides: [{ seriesId: `${prefix}${id}`, color: '#123456' }] }] };
+    const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)], energyUseEquipment: [equipmentFixture({ guid: 'equipment-a', energyUseGroupId: 'energy-group-a', equipmentType: 'Pump', utilityMeterGroupIds: ['group-a'] })] };
+    const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account' ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    const service = createService();
+    let accountGuid: string;
+    if (kind === 'Account') accountGuid = (await service.importAccountBackupFile(backup, 0)).guid;
+    else { await harness.seed({ accounts: [{ guid: 'destination', name: 'Destination' }] }); accountGuid = 'destination'; await service.importFacilityBackupFile(backup, accountGuid, 0); }
+    await harness.reopen();
+    const restored = await readSnapshot(accountGuid), decoded = readSavedVisualization(restored.savedVisualizations[0]);
+    expect(decoded.state).toBe('valid'); if (!('definition' in decoded)) throw new Error('Expected readable grouped selection');
+    const restoredSource = decoded.definition.sources[0] as EnergyUseVisualizationSource;
+    const mappedId = mode === 'facility' ? restored.facilities[0].guid : mode === 'group' ? restored.energyUseGroups[0].guid : mode === 'equipment-type' ? 'Pump' : restored.meterGroups[0].guid;
+    expect(restoredSource.selectionMode).toBe(mode);
+    if (mode === 'equipment-type') expect(restoredSource.equipmentTypes).toEqual(['Pump']);
+    else expect(restoredSource.selection).toEqual({ kind: 'fixed', resource, guids: [mappedId] });
+    expect(decoded.definition.series[0].overrides).toEqual([{ seriesId: `${prefix}${mappedId}`, color: '#123456', accountGuid }]);
+    expect(restored.energyUseEquipment[0].utilityMeterGroupIds).toEqual([restored.meterGroups[0].guid]);
+    expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(decoded.definition);
+  });
 
   it.each(['Account', 'Facility'] as const)('round trips resource-bearing provider appearance in a %s backup', async kind => {
     const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
@@ -46,9 +74,9 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(decoded.definition);
   });
 
-  it.each(['Account', 'Facility'] as const)('round trips an exact item order override in a %s backup', async kind => {
+  it.each((['Account', 'Facility'] as const).flatMap(kind => (['none', 'absolute', 'percent'] as const).map(stack => ({ kind, stack }))))('round trips area/$stack and exact item order in a $kind backup', async ({ kind, stack }) => {
     const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
-    const definition = { ...base, series: [{ ...base.series[0], traceType: 'bar' as const, overrides: [
+    const definition = { ...base, chart: { kind: 'time-series' as const, defaultTraceType: 'area' as const, interval: 'monthly' as const, stack }, series: [{ ...base.series[0], traceType: 'area' as const, overrides: [
       { accountGuid: base.accountGuid, resourceGuid: 'meter-a', order: 2 }
     ] }] };
     const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)] };
@@ -68,7 +96,8 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(decoded.definition.series[0].overrides).toEqual([
       { accountGuid, resourceGuid: decoded.definition.series[0].resourceGuid, order: 2 }
     ]);
-    expect(decoded.definition.series[0].traceType).toBe('bar');
+    expect(decoded.definition.series[0].traceType).toBe('area');
+    expect(decoded.definition.chart).toEqual(definition.chart);
     expect(decoded.definition.series[0].resourceGuid).toBe(restored.meters[0].guid);
     const reexported = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored))));
     expect(reexported.savedVisualizations[0].definition).toEqual(decoded.definition);

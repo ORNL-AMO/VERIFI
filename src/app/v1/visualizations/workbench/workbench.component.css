@@ -32,10 +32,18 @@ h2 { font-size: 1.1rem; }
 @media (max-width: 760px) { .visualization-workbench__save-state { flex-basis: 100%; justify-content: flex-start; min-width: 0; white-space: normal; } }
 @media print {
   :host(.visualization-workbench-host), .visualization-workbench { height: auto; overflow: visible; }
-  button, .visualization-workbench__controls { display: none; }
+  button, .v1-data-workbench-actions, .visualization-workbench__controls { display: none; }
   .visualization-workbench__layout { display: block; overflow: visible; }
   .visualization-workbench__chart { overflow: visible; }
   #visualization-workbench-facts, .visualization-workbench > app-visualization-recovery-actions { max-height: none; overflow: visible; }
 }
 
 .visualization-workbench__default { margin: .6rem 0; color: var(--v1-muted); font-size: .78rem; }
+.visualization-workbench__status-notes button, .visualization-workbench__more-issues button { justify-content: flex-start; text-align: start; white-space: normal; overflow-wrap: anywhere; min-width: 0; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; font: inherit; color: inherit; }
+.visualization-workbench__status-notes button:hover, .visualization-workbench__more-issues button:hover { text-decoration: underline; }
+.visualization-workbench__status-notes li { min-width: 0; }
+.visualization-workbench__more-issues { max-height: 25dvh; overflow: auto; padding: var(--v1-space-2); font-size: .8rem; }
+@media print {
+  .visualization-workbench__status-notes button, .visualization-workbench__more-issues button { display: inline; }
+  .visualization-workbench__more-issues { max-height: none; overflow: visible; }
+}

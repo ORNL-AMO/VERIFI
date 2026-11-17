@@ -2,9 +2,10 @@
       <div>
         <app-report-analysis-selection [cards]="analysisCards()" [selectionControl]="editor.form.controls.analysis"
           [selectedValue]="selectedValue()" [resetKey]="context.key()" idPrefix="account-report"
-          [canEdit]="editor.canEdit()" [showTypeFilter]="showTypeFilter()" (inspected)="inspectAnalysis($event)"/>
+          [canEdit]="editor.canEdit()" [showTypeFilter]="showTypeFilter()" [sectioned]="sectioned()" (inspected)="inspectAnalysis($event)">
         @if (context.savedAnalysisUnavailable()) { <p class="v1-alert v1-alert--warning" role="status">The saved analysis is unavailable or ineligible. Its reference is preserved until you choose a replacement.</p> }
         @if (context.needsPairRefresh()) { <p class="v1-alert v1-alert--warning" role="status">Your facility analysis has changed. Refresh this report’s analysis link to use its latest setup.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canEdit() || editor.needsProtection()" (click)="editor.refreshLink()">Refresh analysis link</button> }
+        </app-report-analysis-selection>
       </div>
     }
 

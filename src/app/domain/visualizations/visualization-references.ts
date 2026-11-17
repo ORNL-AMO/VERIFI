@@ -1,4 +1,5 @@
 import { VisualizationDefinition, VisualizationResourceKind, VisualizationSource } from './visualization-definition';
+import { isEnergyUseTypePresentation, visualizationPresentationReference } from './visualization-presentation-reference';
 
 export type VisualizationReferenceKind = VisualizationResourceKind | 'analysis' | 'model' | 'charge' | 'unknown';
 
@@ -101,39 +102,41 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
   } {
   const result = structuredClone(definition);
   const issues: VisualizationReferenceIssue[] = [];
-  // Ordinary category identities are definition-local. The known utility Unassigned
-  // category additionally embeds a facility GUID, so preserve its typed transfer boundary.
+  const sourceForPath = (path: string) => {
+    const parts = path.split('.');
+    return parts[0] === 'sources' ? definition.sources[Number(parts[1])]?.id
+      : parts[0] === 'series' ? definition.series[Number(parts[1])]?.sourceId : undefined;
+  };
+  const protectedPresentation = (kind: VisualizationReferenceKind, guid: string, sourceId: string | undefined) => blocked.some(ref =>
+    (ref.kind === kind || ref.kind === 'unknown') && ref.guid === guid && sourceForPath(ref.path) === sourceId);
+  // Provider-local categories stay local; known resource-bearing IDs require verified maps.
   definition.series.forEach((series, seriesIndex) => series.overrides?.forEach((override, overrideIndex) => {
     if (override.seriesId === undefined) return;
     const owner = override.accountGuid ?? definition.accountGuid;
     if (owner !== definition.accountGuid) return; // Foreign appearances must never reconnect.
     const path = `series.${seriesIndex}.overrides.${overrideIndex}`;
     const source = definition.sources.find(source => source.id === series.sourceId);
-    const prefix = source?.kind === 'utility' ? `${source.id}:` : undefined;
-    const suffix = prefix && override.seriesId.startsWith(prefix) ? override.seriesId.slice(prefix.length) : undefined;
-    const unassigned = source?.kind === 'utility' && source.groupBy === 'group' && suffix?.startsWith('unassigned:')
-      ? suffix.slice('unassigned:'.length) : undefined;
-    // Resource-bearing utility IDs follow the same namespace as explicit GUID selectors.
-    // Source and total categories retain provider-local identity; unknown providers are opaque.
-    const resource = source?.kind === 'utility' && ['meter', 'group', 'facility'].includes(source.groupBy) && suffix && suffix !== 'total' && !suffix.startsWith('source:')
-      && !suffix.startsWith('unassigned:') ? visualizationSeriesReference(source, suffix, definition.facilitySelection) : undefined;
-    const kind = unassigned ? 'facility' : resource?.kind;
-    const guid = unassigned ?? (resource && resource.kind !== 'unknown' ? suffix : undefined);
-    if (guid && kind) {
-      const map = maps[kind];
-      const mapped = map && Object.hasOwn(map, guid) ? map[guid] : undefined;
+    const resource = visualizationPresentationReference(source, override.seriesId);
+    if (resource) {
+      const map = maps[resource.kind];
+      const protectedIdentity = protectedPresentation(resource.kind, resource.guid, source?.id);
+      const mapped = !protectedIdentity && map && Object.hasOwn(map, resource.guid) ? map[resource.guid] : undefined;
       if (mapped) {
-        setPath(result, `${path}.seriesId`, `${prefix}${unassigned ? 'unassigned:' : ''}${mapped}`);
+        setPath(result, `${path}.seriesId`, `${resource.prefix}${mapped}`);
         setPath(result, `${path}.accountGuid`, accountGuid);
       } else setPath(result, `${path}.accountGuid`, owner);
-    } else setPath(result, `${path}.accountGuid`, accountGuid);
+    } else {
+      const verifiedCategory = isEnergyUseTypePresentation(source, override.seriesId) && !blocked.some(ref => sourceForPath(ref.path) === source?.id);
+      setPath(result, `${path}.accountGuid`, verifiedCategory ? accountGuid : source?.kind === 'predictor' || source?.kind === 'energy-use' ? owner : accountGuid);
+    }
   }));
   for (const ref of visualizationReferences(definition)) {
     const existing = blocked.find(item => item.path === ref.path);
     const map = maps[ref.kind];
     const key = visualizationReferenceKey(ref);
     const local = !ref.optional || ref.accountGuid === definition.accountGuid;
-    const mapped = !existing && local && map && Object.hasOwn(map, key) ? map[key] : undefined;
+    const protectedOptional = ref.optional && protectedPresentation(ref.kind, ref.guid, sourceForPath(ref.path));
+    const mapped = !existing && !protectedOptional && local && map && Object.hasOwn(map, key) ? map[key] : undefined;
     if (mapped) setPath(result, ref.path, mapped);
     if (ref.optional) {
       // Keep unmapped presentation intent qualified to its original owner, never retargeted.

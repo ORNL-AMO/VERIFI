@@ -3,8 +3,6 @@
 :host {
   display: block;
   min-width: 0;
-  padding-top: 1.25rem;
-  border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
 }
 
 .better-plants-notes .report-setup-help { flex: 1; }

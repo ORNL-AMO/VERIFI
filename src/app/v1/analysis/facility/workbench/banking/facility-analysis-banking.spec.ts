@@ -7,7 +7,8 @@ import {
   bankingPreviewReportYear,
   bankingSourceOptions,
   bankingTabAvailable,
-  bankingYearOptions
+  bankingYearOptions,
+  selectedBankingSource
 } from './facility-analysis-banking';
 
 describe('facility analysis banking presentation', () => {
@@ -44,6 +45,17 @@ describe('facility analysis banking presentation', () => {
       newBaselineYears: [2022, 2023, 2024]
     });
     expect(bankingYearOptions(2025, 2024, { source: 2024, consumer: 2024 }).appliedYears).toEqual([]);
+  });
+
+  it('keeps an incompletely linked banking chain unavailable in choices and selected-source results', () => {
+    const current = analysis('current', { hasBanking: true, bankedAnalysisItemId: 'source' });
+    const source = analysis('source', { hasBanking: true, bankedAnalysisItemId: 'dependency' });
+    const dependency = analysis('dependency', { hasBanking: true });
+    const analyses = [current, source, dependency];
+
+    expect(bankingSourceOptions(current, analyses, []).find(option => option.sourceGuid === source.guid))
+      .toMatchObject({ validation: 'unavailable' });
+    expect(selectedBankingSource(current, analyses)).toBeUndefined();
   });
 
 

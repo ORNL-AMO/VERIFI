@@ -3,4 +3,10 @@
 .visualization-preview__notice { padding: 1rem; }
 .visualization-preview__notice p { margin: 0 0 .5rem; }
 .visualization-preview__chart { min-width: 0; }
-@media print { button { display: none; } }
+.visualization-preview__accessible-data { padding: .75rem; border-top: 1px solid var(--v1-border); overflow-wrap: anywhere; }
+.visualization-preview__accessible-data summary { cursor: pointer; font-weight: 700; }
+.visualization-preview__table { overflow: auto; max-height: 32rem; }
+.visualization-preview__table table { width: 100%; border-collapse: collapse; }
+.visualization-preview__table th, .visualization-preview__table td { padding: .5rem; vertical-align: top; border: 1px solid var(--v1-border); }
+.visualization-preview__accessible-data nav { display: flex; gap: .5rem; margin-top: .5rem; }
+@media print { button, .visualization-preview__accessible-data { display: none; } }

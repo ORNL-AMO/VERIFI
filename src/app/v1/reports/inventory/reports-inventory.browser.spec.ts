@@ -478,8 +478,9 @@ describe('report inventory browser journeys and presentation', () => {
     await page.getByRole('button', { name: 'Hide facts', exact: true }).click(); await settle(view.fixture);
     const heading = view.root.querySelector<HTMLElement>('#account-report-analysis-title')!.getBoundingClientRect();
     const filters = view.root.querySelector<HTMLElement>('.report-analysis-filters')!.getBoundingClientRect();
-    expect(filters.left).toBeGreaterThan(heading.right);
-    expect(filters.top).toBeLessThan(heading.bottom);
+    expect(filters.left).toBeGreaterThanOrEqual(heading.left);
+    expect(filters.right).toBeLessThanOrEqual(heading.right);
+    expect(filters.top).toBeGreaterThanOrEqual(heading.bottom);
     expect(view.root.querySelector('.report-analysis-filters app-ui-icon[name="filter"]')).not.toBeNull();
     const names = () => [...view.root.querySelectorAll('.report-analysis-card:not(.report-analysis-card--empty) strong')].map(item => item.textContent);
     await page.getByRole('combobox', { name: 'Type', exact: true }).selectOptions('water'); await settle(view.fixture);

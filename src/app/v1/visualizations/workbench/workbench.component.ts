@@ -1,3 +1,9 @@
+import { timeSeriesStackIssues, timeSeriesStackSettingsIssues } from '@domain/visualizations/visualization-time-series';
+import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
+import { discoverEquipmentSeries } from '@domain/visualizations/energy-use/equipment-source';
+import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
+import { projectDecisionItems, configuredChartSummary } from '../shared/configured-items';
+import { resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, ElementRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
@@ -15,11 +21,14 @@ import { RecoveryActionsComponent, VisualizationChildDraftGuard } from '../recov
 import { VisualizationFacilitySelection, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
-import { decisionNodeId, prepareDecisionChange, projectMeterItems, configuredChartSummary } from '../decisions/decision-tree';
+import { decisionNodeId, prepareDecisionChange } from '../decisions/decision-tree';
 import type { DecisionChangeResult, DecisionRef, VisualizationDecisionAction } from '../decisions/decision-types';
-import type { PeriodSettingsContext, UtilityEditorContext } from '../utility/editors/utility-editor-context';
+import type { PeriodSettingsContext, VisualizationSourceEditorContext } from '../shared/source-editor-context';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 import type { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import type { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
+import { predictorStatusPresentation } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false, host: { class: 'visualization-workbench-host' },
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -30,7 +39,7 @@ export class WorkbenchComponent {
     return VISUALIZATION_DATA_SOURCES.map(choice => ({ ...choice, selected: kinds.has(choice.value),
       disabled: !this.editor.canEdit() || !!this.pendingDecision() || this.decisionBusy() || kinds.size === 1 && kinds.has(choice.value) }));
   });
-  readonly charts = VISUALIZATION_CHART_CHOICES;
+  get charts() { return VISUALIZATION_CHART_CHOICES; }
   readonly expandedNodes = signal<ReadonlySet<string>>(new Set());
   readonly nodeResetKeys = signal<Readonly<Record<string, number>>>({});
   readonly decisionError = signal('');
@@ -54,6 +63,39 @@ export class WorkbenchComponent {
   readonly settingsExpanded = new FormControl(true, { nonNullable: true });
   readonly workspace = inject(AccountWorkspaceStore);
   readonly navigation = inject(WorkspaceNavigationService);
+  private readonly status = inject(WorkspaceStatusService);
+  readonly selectedPredictorGuids = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    if (!this.workspace.isReady() || !snapshot || definition?.accountGuid !== this.accountGuid()
+      || snapshot.account.guid !== this.accountGuid() || this.editor.record()?.guid !== this.navigation.routeState().visualizationGuid) return [];
+    const included = this.facilityContext()?.scope.facilityGuids ?? [];
+    const selected = new Set(definition.sources.flatMap(source => source.kind === 'predictor'
+      ? resolvePredictorSelection(snapshot, this.facilityContext()!.scope, source) : []));
+    return snapshot.predictors.filter(predictor => predictor.accountId === snapshot.account.guid
+      && included.includes(predictor.facilityId) && selected.has(predictor.guid)).map(predictor => predictor.guid);
+  });
+  readonly predictorStatusState = computed<StatusEvaluationState>(() => {
+    const state = this.status.state(), evaluation = this.status.evaluation();
+    return state === 'ready' && (evaluation?.accountGuid !== this.accountGuid() || evaluation.revision !== this.workspace.revision()) ? 'evaluating' : state;
+  });
+  readonly predictorStatusIssues = computed(() => {
+    if (this.predictorStatusState() !== 'ready') return [];
+    const selected = new Set(this.selectedPredictorGuids());
+    return this.status.items().filter(item => item.entity.kind === 'predictor' && item.entity.accountGuid === this.accountGuid()
+      && selected.has(item.entity.guid) && (item.severity === 'error' || item.severity === 'warning'));
+  });
+  readonly predictorHeaderStatus = computed(() => {
+    const issues = this.predictorStatusIssues();
+    return predictorStatusPresentation(issues.some(issue => issue.severity === 'error') ? 'danger' : issues.length ? 'warning' : 'success', this.predictorStatusState());
+  });
+  readonly predictorStatusSummaries = computed(() => this.predictorStatusIssues().slice(0, 2));
+  readonly remainingPredictorIssues = computed(() => this.predictorStatusIssues().slice(2));
+
+  openPredictorIssue(item: StatusItem): void {
+    // Recheck a rendered action against the current account, selection, and active findings.
+    const current = this.predictorStatusIssues().find(issue => issue.id === item.id);
+    if (current) this.status.navigateTo(current);
+  }
   readonly journeys = inject(VisualizationNavigationService);
   private readonly unsaved = inject(UnsavedChangesService);
   private readonly modal = inject(ModalPortalService);
@@ -95,7 +137,7 @@ export class WorkbenchComponent {
     return definition.sources.map(source => {
       const choice = VISUALIZATION_DATA_SOURCES.find(item => item.value === source.kind)!;
       const nodeId = decisionNodeId({ kind: 'source', sourceId: source.id });
-      const context: UtilityEditorContext = { definition, sourceId: source.id, editorKey: this.editorKey(),
+      const context: VisualizationSourceEditorContext = { definition, sourceId: source.id, editorKey: this.editorKey(),
         disabled: !this.editor.canEdit(), expandedNodes: this.expandedNodes(), nodeResetKeys: this.nodeResetKeys(),
         request: action => {
           if (this.editor.key() !== key) return;
@@ -105,8 +147,10 @@ export class WorkbenchComponent {
             // Continuous form edits can arrive before the next render. Apply typed patches
             // to current intent, while rejecting removed items and superseded measure forms.
             if (action.kind === 'item-style') {
-              if (!projectMeterItems(current, action.sourceId, snapshot).some(item => action.item.resourceGuid !== undefined
+              if (!projectDecisionItems(current, action.sourceId, snapshot).some(item => action.item.resourceGuid !== undefined
                 ? item.identity.resourceGuid === action.item.resourceGuid : item.identity.seriesId === action.item.seriesId)) return;
+            } else if (action.kind === 'equipment-unit') {
+              if (source.kind !== 'energy-use' || current.sources.find(item => item.id === source.id)?.kind !== 'energy-use') return;
             } else if (action.kind === 'source-settings') {
               const currentSource = current.sources.find(item => item.id === action.sourceId);
               if (source.kind !== 'utility' || currentSource?.kind !== 'utility' || currentSource.measure !== source.measure) return;
@@ -119,7 +163,8 @@ export class WorkbenchComponent {
         draftChanged: () => this.childRevision.update(value => value + 1),
         changed: next => { if (this.editor.key() === key && this.editor.localRevision() === revision) this.editor.applyDefinition(next); } };
       return { id: source.id, kind: source.kind, label: choice.label, icon: choice.icon, nodeId,
-        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}` : source.measure,
+        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}`
+          : source.kind === 'predictor' ? '' : source.measure,
         context, attention: this.invalidEditors()[nodeId] || Object.entries(this.invalidEditors()).some(([id, invalid]) => invalid && id.split(':')[1] === encodeURIComponent(source.id)) };
     });
   });
@@ -127,6 +172,24 @@ export class WorkbenchComponent {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : 'Chart not selected';
   });
+  readonly chartTypeSummary = computed(() => this.chartSummary().split(' · ')[0]);
+  readonly stackChoices = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    if (!definition || !snapshot || definition.chart?.kind !== 'time-series') return [];
+    const currentChart = definition.chart;
+    const scope = resolveVisualizationFacilities(definition, snapshot.facilities).scope;
+    const metadata = definition.sources.flatMap(source => source.kind === 'utility' ? discoverUtilitySeries(snapshot, scope, source)
+      : source.kind === 'energy-use' ? discoverEquipmentSeries(snapshot, scope, source) : []);
+    const items = definition.sources.flatMap(source => projectDecisionItems(definition, source.id, snapshot));
+    return (['none', 'absolute', 'percent'] as const).map(stack => {
+      const chart = { ...currentChart, stack };
+      const candidate = { ...definition, chart };
+      const reasons = [...new Set([...timeSeriesStackSettingsIssues(chart, definition.sources, items.map(item => item.appearance)),
+        ...timeSeriesStackIssues(candidate, resolveVisualizationSeries(candidate, metadata), []).map(issue => issue.message)])];
+      return { value: stack, label: stack === 'none' ? 'None' : stack === 'absolute' ? 'Absolute' : 'Percentage', reason: reasons.join(' ') };
+    });
+  });
+  readonly annualEquipment = computed(() => this.editor.definition()?.sources.some(source => source.kind === 'energy-use') ?? false);
   readonly calendarizedOnly = computed(() => !this.editor.definition()?.sources.some(source => source.kind === 'utility' && source.dataMode === 'billing-period'));
   readonly previewIdentity = computed(() => ({ accountGuid: this.accountGuid(), workspaceRevision: this.workspace.revision(),
     definitionGuid: this.navigation.routeState().visualizationGuid ?? '', definitionRevision: this.editor.localRevision() }));
@@ -142,7 +205,8 @@ export class WorkbenchComponent {
     const period = this.editor.definition()?.period;
     if (!period) return 'Unavailable';
     if (period.kind === 'all-history') return 'All saved history';
-    if (period.kind === 'fixed') return `${period.start} – ${period.end} (${period.basis})`;
+    if (period.kind === 'fixed') return this.editor.definition()?.sources.some(source => source.kind === 'predictor')
+      ? `${period.start.slice(0, 7)} – ${period.end.slice(0, 7)} (${period.basis})` : `${period.start} – ${period.end} (${period.basis})`;
     if (period.kind === 'rolling') return `Rolling ${period.count} ${period.unit}(s), ${period.anchor} anchor (${period.basis})`;
     return period.kind === 'fiscal-year' ? `Fiscal year ${period.year}` : 'Latest saved fiscal year';
   });
@@ -209,8 +273,12 @@ export class WorkbenchComponent {
       ? this.facilities().find(item => item.guid === selection.facilityGuids[0])?.name || 'Unavailable facility' : `${selection.facilityGuids.length} facilities`;
   }
   chooseChart(choice: VisualizationChartChoiceId): void {
-    if ((choice === 'line' || choice === 'bar') && this.editor.definition()?.chart?.kind === 'time-series') void this.requestDecision({ kind: 'chart-type', traceType: choice });
+    if ((choice === 'line' || choice === 'bar' || choice === 'area') && this.editor.definition()?.chart?.kind === 'time-series') void this.requestDecision({ kind: 'chart-type', traceType: choice });
     else void this.requestDecision({ kind: 'chart', chart: createVisualizationChart(choice) });
+  }
+  setStack(stack: 'none' | 'absolute' | 'percent'): void {
+    if (this.stackChoices().find(choice => choice.value === stack)?.reason) return;
+    void this.requestDecision({ kind: 'chart-stack', stack });
   }
   setInterval(interval: 'monthly' | 'yearly'): void {
     const definition = this.editor.definition();
@@ -276,6 +344,11 @@ export class WorkbenchComponent {
       try { if (!await this.editor.retarget(action.selection, result.definition)) return; }
       finally { this.decisionBusy.set(false); }
     } else this.editor.applyDefinition(result.definition);
+    if (action.kind === 'item-order') {
+      const key = this.editor.key();
+      const target = decisionNodeId({ kind: 'item', sourceId: action.sourceId, itemKey: action.item.resourceGuid !== undefined ? `resource:${action.item.resourceGuid}` : `series:${action.item.seriesId}` });
+      setTimeout(() => { if (!this.destroy.destroyed && key === this.editor.key()) this.panelElement?.nativeElement.ownerDocument.getElementById(`${target}-heading`)?.focus(); });
+    }
     this.resetAffected(result.affectedNodeIds);
     if (result.next) this.openDecisionPath(result.next);
     if (focusWasInside && active instanceof HTMLElement && (!active.isConnected || active.getClientRects().length === 0)) {

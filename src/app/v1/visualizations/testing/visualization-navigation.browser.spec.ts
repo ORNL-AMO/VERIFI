@@ -1,3 +1,4 @@
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -31,7 +32,7 @@ import { TimeSeriesPresenter } from '../time-series/time-series.presenter';
 import { UtilitySourceEditorComponent } from '../utility/editors/source-editor/utility-source-editor.component';
 import { echarts } from '@app/v1/shared/charts/echarts';
 import { decisionNodeId, projectMeterItems } from '../decisions/decision-tree';
-import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
 import { visualizationRecord, visualizationSnapshot } from './visualization-test-fixtures';
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
@@ -101,6 +102,7 @@ function setup(options: { singleFacility?: boolean; readyChart?: boolean } = {})
       { path: 'outside', component: OutsidePage }]),
     { provide: AccountWorkspaceStore, useValue: store },
     { provide: AccountWorkspaceService, useValue: { selectAccount: vi.fn(async () => 'published') } },
+    { provide: WorkspaceStatusService, useValue: { state: signal('idle'), evaluation: signal(undefined) } },
     { provide: WorkspaceNavigationService, useValue: navigation },
     { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
     { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
@@ -736,13 +738,14 @@ describe('visualization routed journeys in Chromium', () => {
       const search = test.root.querySelector<HTMLInputElement>('input[type="search"]')!;
       await userEvent.type(search, 'My energy'); test.fixture.detectChanges();
       await activate(test, 'Add visualization'); await activate(test, 'Continue');
-      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(9);
       await activate(test, 'Scatter'); await activate(test, 'Meters'); await activate(test, 'Predictors');
       expect(namedButton(creationDialog(test), 'Meters').getAttribute('aria-pressed')).toBe('true');
       expect(namedButton(creationDialog(test), 'Predictors').getAttribute('aria-pressed')).toBe('true');
       expect(creationDialog(test).querySelector('input[formcontrolname="name"]')).toBeNull();
       await activate(test, 'Continue');
       await bindMeterForCreation(test);
+      await activate(test, 'Skip for now');
       const name = creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
       expect(document.activeElement).toBe(name);
       await userEvent.type(name, 'Weather and usage'); test.fixture.detectChanges();
@@ -796,7 +799,7 @@ describe('visualization routed journeys in Chromium', () => {
       await test.navigate(`${base}/dashboard`); await activate(test, 'Add visualization');
       expect(creationDialog(test).querySelector('[aria-label="Included facilities"]')).not.toBeNull();
       await activate(test, 'Continue');
-      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(9);
       await activate(test, 'Line'); await activate(test, 'Meters'); await activate(test, 'Continue');
       await bindMeterForCreation(test);
       await userEvent.type(creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!, 'Plant usage');
@@ -832,7 +835,7 @@ describe('visualization routed journeys in Chromium', () => {
     try {
       await test.navigate(`${base}/dashboard`); await activate(test, 'Add visualization'); await activate(test, 'Continue');
       const dialog = creationDialog(test);
-      expect(dialog.querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(8);
+      expect(dialog.querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(9);
       expect([...dialog.querySelectorAll('.creation-section-title')].map(heading => heading.textContent)).toEqual(['Pre-configured', 'Custom']);
       for (const heading of dialog.querySelectorAll<HTMLElement>('.creation-section-title')) {
         expect(getComputedStyle(heading).borderBottomWidth).toBe('0px');

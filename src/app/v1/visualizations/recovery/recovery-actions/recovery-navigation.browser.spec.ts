@@ -1,3 +1,4 @@
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -20,6 +21,8 @@ import { visualizationRecord, visualizationSnapshot } from '../../testing/visual
 import { WorkbenchComponent, visualizationLeaveGuard } from '../../workbench/workbench.component';
 import { WorkbenchModule } from '../../workbench/workbench.module';
 import { RecoveryActionsComponent } from './recovery-actions.component';
+import { equipmentDefinition, equipmentSnapshot } from '@domain/visualizations/testing/equipment-fixtures';
+import { PeriodSettingsComponent } from '../../shared/period-settings/period-settings.component';
 
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: `
   <main class="v1-root"><router-outlet/></main>
@@ -32,11 +35,11 @@ class DashboardPage { }
 const workbenchBase = '/v1/workspace/account/account-a/visualization/workbench';
 const originalUrl = `${workbenchBase}/visualization-a`;
 
-function setup(firstOutcome: 'failed' | 'refresh-required') {
+function setup(firstOutcome: 'failed' | 'refresh-required', energy = false) {
   const store = new AccountWorkspaceStore();
-  const definition = createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
+  const definition = energy ? { ...equipmentDefinition(), period: { kind: 'fiscal-year' as const, year: 2027 } } : createVisualizationSetupDefinition({ name: 'Usage and weather', accountGuid: 'account-a',
     facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a'] }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] });
-  store.publish({ ...visualizationSnapshot(), savedVisualizations: [{ ...visualizationRecord(), definition }] });
+  store.publish({ ...(energy ? equipmentSnapshot() : visualizationSnapshot()), savedVisualizations: [{ ...visualizationRecord(), definition }] });
   const currentUrl = signal('/');
   const routeState = computed(() => parseWorkspaceRoute(currentUrl()));
   let durable: IdbSavedVisualization | undefined;
@@ -66,6 +69,7 @@ function setup(firstOutcome: 'failed' | 'refresh-required') {
         component: WorkbenchComponent, canDeactivate: [visualizationLeaveGuard] }]),
     { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
     { provide: AccountWorkspaceStore, useValue: store },
+    { provide: WorkspaceStatusService, useValue: { state: signal('idle'), evaluation: signal(undefined) } },
     { provide: WorkspaceNavigationService, useValue: { routeState, isSingleSiteWorkspace: () => false } },
     { provide: SavedVisualizationCommands, useValue: { prepareCreate, submit, recover } }
   ] });
@@ -78,7 +82,7 @@ function setup(firstOutcome: 'failed' | 'refresh-required') {
   const navigate = async (url: string) => { await router.navigateByUrl(url); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges(); };
   const settle = async () => { fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges(); };
   const destroy = () => { fixture.destroy(); subscription.unsubscribe(); };
-  return { fixture, root, store, router, workbench, recovery, prepareCreate, submit, recover, navigate, settle, destroy,
+  return { fixture, root, store, router, workbench, recovery, prepareCreate, submit, recover, navigate, settle, destroy, definition,
     modal: TestBed.inject(ModalPortalService) };
 }
 
@@ -118,6 +122,44 @@ async function blockedBack(test: ReturnType<typeof setup>): Promise<void> {
 }
 
 describe('routed deleted-draft recovery protection in Chromium', () => {
+  it.each(['failed', 'refresh-required'] as const)('protects an incomplete Energy Use year through navigation and deletion, then recovers one identity after %s', async outcome => {
+    const test = setup(outcome, true);
+    try {
+      await test.navigate('/dashboard'); await test.navigate(originalUrl);
+      const periods = test.fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
+      periods.form.controls.year.setValue(null); await test.settle();
+      expect(test.workbench()!.hasInvalidFields()).toBe(true);
+      await test.workbench()!.requestDecision({ kind: 'equipment-unit', sourceId: 'source-1', unit: { kind: 'pinned', value: 'MJ' } }); await test.settle();
+      expect(periods.form.controls.year.value).toBeNull();
+      const leave = test.router.navigateByUrl('/dashboard');
+      await vi.waitFor(() => { test.fixture.detectChanges(); expect(dialog(test).textContent).toContain('Resolve unsaved visualization changes'); });
+      await activate(test, 'Cancel'); await expect(leave).resolves.toBe(false);
+      expect(test.router.url).toBe(originalUrl); expect(periods.form.controls.year.value).toBeNull();
+      const record = test.store.savedVisualizations()[0];
+      test.store.publishCommitted({ ...test.store.snapshot()!, savedVisualizations: [{ ...record, revision: record.revision + 1,
+        definition: { ...test.definition, period: { kind: 'fiscal-year', year: 2029 } } }] }, test.store.selections());
+      await test.settle(); expect(test.workbench()!.editor.conflicts().some(conflict => conflict.id === 'configuration')).toBe(true);
+      expect(periods.form.controls.year.value).toBeNull();
+      test.workbench()!.editor.resolveConflicts({ configuration: 'local' }); await test.settle();
+      test.store.publishCommitted({ ...test.store.snapshot()!, savedVisualizations: [] }, test.store.selections()); await test.settle();
+      await activate(test, 'Save as new', false);
+      expect(dialog(test).textContent).toContain('Resolve unsaved field input'); expect(test.prepareCreate).not.toHaveBeenCalled();
+      await activate(test, 'Cancel'); expect(periods.form.controls.year.value).toBeNull(); expect(test.workbench()!.hasInvalidFields()).toBe(true);
+      await activate(test, 'Save as new', false); await activate(test, 'Discard field input and continue');
+      expect(test.workbench()!.hasInvalidFields()).toBe(false);
+      await activate(test, 'Create independent copy'); const proposal = test.recovery()!.proposal();
+      expect(proposal?.definition.period).toEqual({ kind: 'fiscal-year', year: 2027 });
+      expect(proposal?.definition.sources[0]).toMatchObject({ settings: { unit: { kind: 'pinned', value: 'MJ' } } });
+      await blockedBack(test); expect(test.recovery()!.proposal()).toBe(proposal);
+      await activate(test, 'Retry');
+      await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${workbenchBase}/recovered-identity`); });
+      expect(test.prepareCreate).toHaveBeenCalledOnce(); expect(test.submit).toHaveBeenCalledTimes(outcome === 'failed' ? 2 : 1);
+      expect(test.recover).toHaveBeenCalledTimes(outcome === 'refresh-required' ? 1 : 0);
+      expect(test.store.savedVisualizations()).toHaveLength(1);
+      expect(test.workbench()!.editor.definition()?.sources).toEqual(proposal!.definition.sources);
+      expect(test.workbench()!.editor.definition()?.period).toEqual(proposal!.definition.period);
+    } finally { test.destroy(); }
+  });
   it.each(['failed', 'refresh-required'] as const)('keeps the %s Save as new review reachable through Back and retries one stable identity', async outcome => {
     const test = setup(outcome);
     try {

@@ -16,7 +16,7 @@ class BrowserPresenterFixture { @Input() label = ''; }
 const identity: PreviewIdentity = { accountGuid: 'account-a', definitionGuid: 'visualization-a', definitionRevision: 1, workspaceRevision: 1 };
 async function settle() { for (let i = 0; i < 10; i++) await Promise.resolve(); }
 
-function setup(resolveOverride?: (request: VisualizationSourceRequest, signal: AbortSignal) => Promise<VisualizationSourceResolution>) {
+function setup(resolveOverride?: (request: VisualizationSourceRequest, signal: AbortSignal) => Promise<VisualizationSourceResolution>, dataRows?: string[][]) {
   const definition = utilityVisualizationFixture(), evidence = visualizationEvidenceFixture(definition);
   const resolve = resolveOverride ?? (async request => ({ ...evidence.resolution, identity: request.identity }));
   const store = new AccountWorkspaceStore(); store.publish(visualizationSnapshot());
@@ -26,7 +26,7 @@ function setup(resolveOverride?: (request: VisualizationSourceRequest, signal: A
       supportsChart: () => evidence.chartSupport, resolve }] },
     { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: BrowserPresenterFixture,
       prepare: () => ({ inputs: { label: 'Current monthly energy chart' }, details: {
-        caption: 'Measured energy in kWh', columns: ['Period', 'Energy'], rows: [['January 2025', '0']] } }) }] },
+        caption: 'Measured energy in kWh', columns: ['Period', 'Energy'], rows: dataRows ?? [['January 2025', '0']] } }) }] },
     { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: { resolve: async () => ({ calendarDate: '2026-11-11', latestDataDate: '2025-12-31' }) } }
   ] });
   const fixture = TestBed.createComponent(PreviewComponent);
@@ -38,11 +38,15 @@ describe('visualization preview in Chromium', () => {
   it('mounts a clean chart with true zero values available to assistive technology', async () => {
     const { fixture, root } = setup(); await settle(); fixture.detectChanges();
     expect(root.querySelector('app-browser-preview-fixture')?.textContent).toContain('Current monthly energy chart');
-    expect(root.querySelector('summary, details, app-pagination, h2, button')).toBeNull();
-    const accessibleData = root.querySelector<HTMLElement>('.visually-hidden')!;
+    const disclosure = root.querySelector<HTMLDetailsElement>('.visualization-preview__accessible-data')!;
+    expect(disclosure.open).toBe(false);
+    root.querySelector<HTMLElement>('summary')!.focus();
+    await userEvent.keyboard('{Enter}'); fixture.detectChanges();
+    expect(disclosure.open).toBe(true);
+    const accessibleData = disclosure;
     expect(accessibleData.querySelector('table')).not.toBeNull();
     expect(accessibleData.hasAttribute('aria-hidden')).toBe(false);
-    expect(accessibleData.getBoundingClientRect().height).toBeLessThanOrEqual(1);
+    expect(accessibleData.getBoundingClientRect().height).toBeGreaterThan(1);
     expect(root.querySelector('caption')!.textContent).toBe('Measured energy in kWh');
     expect(root.querySelector('tbody')!.textContent).toContain('January 20250');
     expect(root.querySelectorAll('th[scope="col"]')).toHaveLength(2);
@@ -51,6 +55,22 @@ describe('visualization preview in Chromium', () => {
       root.className = theme; fixture.detectChanges();
       expect(root.querySelector<HTMLElement>('.visualization-preview')!.scrollWidth).toBeLessThanOrEqual(281);
     }
+    fixture.destroy();
+  });
+
+  it('opens and pages dense source values with keyboard controls', async () => {
+    const { fixture, root } = setup(undefined, Array.from({ length: 130 }, (_, i) => [`Month ${i}`, String(i)]));
+    await settle(); fixture.detectChanges();
+    root.querySelector<HTMLElement>('summary')!.focus(); await userEvent.keyboard('{Enter}'); fixture.detectChanges();
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(50);
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('nav button')];
+    expect(buttons[0].disabled).toBe(true); buttons[1].focus(); await userEvent.keyboard('{Enter}'); fixture.detectChanges();
+    expect(root.querySelector('tbody')!.textContent).toContain('Month 50');
+    expect(document.activeElement).toBe(buttons[1]);
+    await userEvent.keyboard('{Enter}'); fixture.detectChanges();
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(30);
+    expect(root.querySelector('tbody')!.textContent).toContain('Month 129');
+    expect(root.querySelector('[role="status"]')!.textContent).toContain('101–130 of 130');
     fixture.destroy();
   });
 

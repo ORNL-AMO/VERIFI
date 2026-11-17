@@ -1,3 +1,6 @@
+import { timeSeriesStackIssues } from './visualization-time-series';
+import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
+import { allowsMixedAxisUnits } from './visualization-source-provider';
 import { resolveVisualizationSeries } from './visualization-series';
 import type { VisualizationChart, VisualizationDefinition, VisualizationScope, VisualizationSource } from './visualization-definition';
 import { decodeVisualizationDefinition } from './visualization-validation';
@@ -135,7 +138,7 @@ function seriesReferenceKinds(source: VisualizationSource, guid: string): readon
  * role's requested dates. Sparse coverage is valid; substituting another period is not.
  */
 function resolvedDataReasons(definition: VisualizationDefinition, source: VisualizationSource,
-  resolved: VisualizationResolvedData, scope: VisualizationScope): VisualizationCompatibilityReason[] {
+  resolved: VisualizationResolvedData, scope: VisualizationScope, allowEmpty = false): VisualizationCompatibilityReason[] {
   const reasons: VisualizationCompatibilityReason[] = [];
   const add = (code: 'period' | 'data' | 'series' | 'ownership', message: string) => reasons.push({ code, message, sourceId: source.id });
   const validRange = (range: { start: string; end: string }) => civilDate(range.start) && civilDate(range.end) && range.start <= range.end;
@@ -165,7 +168,7 @@ function resolvedDataReasons(definition: VisualizationDefinition, source: Visual
     add('series', 'Resolved series IDs must be nonempty and unique.');
   const selectedMetadata = resolveVisualizationSeries(definition, resolved.series).map(entry => entry.metadata);
   const data = resolved.data;
-  if (!observations(data).length) add('data', 'Use an empty source resolution when no explicit observations are available.');
+  if (!observations(data).length && !allowEmpty) add('data', 'Use an empty source resolution when no explicit observations are available.');
   if (data.kind === 'time-series') {
     for (const row of data.rows) {
       const role = row.role ?? 'primary';
@@ -236,6 +239,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('capability', 'This source does not support the requested measure, aggregation, period, comparison, or chart.', source.id);
     if (!sameIntent(chart, chartSupport.chart) || chartSupport.state !== 'supported')
       add('capability', chartSupport.state === 'unsupported' ? chartSupport.reasons.join(' ') : 'Review support for these exact chart settings.', source.id);
+    if (capabilities.allowMultipleSources === false && definition.sources.length > 1)
+      add('capability', 'This source supports only one source configuration at a time.', source.id);
     if (Object.keys(source.settings ?? {}).some(key => !capabilities.settings.includes(key as 'unit' | 'energyTreatment')))
       add('capability', 'This source cannot preserve the requested setting binding.', source.id);
     if (chart.kind === 'time-series' && chart.stack !== 'none' && !capabilities.controls.includes('stacking')
@@ -243,13 +248,16 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       || chart.kind === 'scatter' && chart.showFit && !capabilities.controls.includes('fit')
       || chart.kind === 'correlation' && chart.scale === 'z-score' && !capabilities.controls.includes('normalization'))
       add('capability', 'This source does not support the requested chart transformation.', source.id);
-    if (resolution.state !== 'ready') {
+    if (resolution.state !== 'ready' && !(isMixedPredictorSourceSet(definition.sources) && resolution.state === 'empty' && resolution.resolved)) {
       add(resolution.state === 'missing-source' ? 'missing-source' : 'data', resolution.message, source.id); continue;
     }
-    const resolved = resolution.resolved;
+    const resolved = 'resolved' in resolution ? resolution.resolved : undefined;
+    if (!resolved) { add('data', 'Resolve source evidence before rendering.', source.id); continue; }
+    if (resolution.state === 'empty' && observations(resolved.data).some(point => point.state === 'observed'))
+      add('data', 'Empty source evidence cannot contain observed values.', source.id);
     if (!capabilities.controls.includes('axes') && resolveVisualizationSeries(definition, resolved.series).some(entry => entry.selected.axis === 'right'))
       add('capability', 'This source does not support the requested axis override.', source.id);
-    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope));
+    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope, resolution.state === 'empty' && isMixedPredictorSourceSet(definition.sources)));
     if (!chartCapability.shapes.includes(resolved.data.kind) || !capabilities.shapes.includes(resolved.data.kind)
       || !capabilities.alignments.includes(resolved.alignment.kind))
       add('capability', 'This chart cannot preserve the resolved data shape.', source.id);
@@ -261,10 +269,19 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
         add('missing-source', `Repair the missing ${reference.kind} reference: ${reference.id}.`, source.id);
       for (const candidate of candidates) reasons.push(...referenceSelectionReasons(source, candidate));
     }
-    if (resolved.references.some(reference => reference.accountGuid !== definition.accountGuid
-      || (reference.kind === 'facility' ? !request.identity.scope.facilityGuids.includes(reference.id)
-        : reference.facilityGuid !== undefined ? !request.identity.scope.facilityGuids.includes(reference.facilityGuid)
-          : definition.facilitySelection.kind !== 'all' || request.identity.scope.kind === 'facility')))
+    const accountFacilities = source.kind === 'analysis' && source.mode === 'result' ? resolved.accountAnalysisFacilityGuids : undefined;
+    if (accountFacilities && (new Set(accountFacilities).size !== accountFacilities.length
+      || accountFacilities.some(guid => !guid.trim() || !request.identity.scope.facilityGuids.includes(guid))))
+      add('ownership', 'Include every selected facility of the named account analysis.', source.id);
+    if (resolved.references.some(reference => {
+      if (reference.accountGuid !== definition.accountGuid) return true;
+      if (reference.kind === 'facility') return !request.identity.scope.facilityGuids.includes(reference.id);
+      if (reference.facilityGuid !== undefined) return !request.identity.scope.facilityGuids.includes(reference.facilityGuid);
+      // Scoped account results need an explicit selected-facility closure, not an inferred filtered account total.
+      const accountResult = source.kind === 'analysis' && source.mode === 'result'
+        && reference.kind === 'analysis' && reference.id === source.analysisGuid && accountFacilities !== undefined;
+      return !accountResult && (definition.facilitySelection.kind !== 'all' || request.identity.scope.kind === 'facility');
+    }))
       add('ownership', 'Resolved references must belong to the saved account and facility scope.', source.id);
     if (!resolved.periods.length) add('period', 'Resolve actual native period intervals before rendering.', source.id);
     if (observations(resolved.data).some(point => point.state === 'observed' && !Number.isFinite(point.value)))
@@ -276,11 +293,11 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   }
   const allMetadata = resolvedSources.flatMap(entry => entry.resolved.series);
   const selected = resolveVisualizationSeries(definition, allMetadata);
-  if (!selected.length) add('series', 'Choose at least one available visible series.');
+  if (!selected.length && (chart.kind !== 'time-series' || !resolveVisualizationSeries(definition, allMetadata, true).length)) add('series', 'Choose at least one available series.');
   for (const series of definition.series) {
     const available = allMetadata.some(metadata => metadata.sourceId === series.sourceId && metadata.metric === series.metric
       && (series.resourceGuid === undefined || metadata.resourceGuid === series.resourceGuid));
-    if (!available && series.visible !== false) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
+    if (!available && series.visible !== false && !(isMixedPredictorSourceSet(definition.sources) && evidence.some(entry => entry.request.source.id === series.sourceId && entry.resolution.state === 'empty' && entry.resolution.resolved?.series.length === 0) && !series.resourceGuid)) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
   }
   for (const { selected: series, metadata } of selected) {
     const entry = resolvedSources.find(entry => entry.source.id === series.sourceId)!;
@@ -320,11 +337,13 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   if (chart.kind !== 'scatter' && chart.kind !== 'correlation') {
     for (const axis of ['left', 'right'] as const) {
       const axisSeries = selected.filter(entry => chart.kind !== 'time-series' || entry.selected.axis === axis);
-      if (new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
+      const axisCapabilities = [...new Set(axisSeries.map(entry => entry.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
+      if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
         add('units', 'Use compatible units and currency on each axis; composition totals require one meaning.');
     }
   }
-  if (chart.kind === 'time-series' && chart.stack !== 'none' || ['breakdown', 'treemap', 'sankey'].includes(chart.kind)) {
+  for (const issue of timeSeriesStackIssues(definition, selected, evidence)) add(issue.code, issue.message);
+  if (['breakdown', 'treemap', 'sankey'].includes(chart.kind)) {
     if (selected.some(entry => !entry.metadata.additive)) add('units', 'Stacking and composition require authoritative additive measures.');
     const contributions = new Set<string>();
     for (const { metadata } of selected) {

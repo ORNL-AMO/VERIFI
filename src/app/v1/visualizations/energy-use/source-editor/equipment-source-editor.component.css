@@ -1,0 +1,8 @@
+:host { display: block; min-width: 0; }
+label { display: grid; gap: .25rem; margin: .75rem 0; }
+select { max-width: 100%; }
+.equipment-settings__toggle { display: flex; align-items: center; gap: .65rem; min-height: var(--v1-control-height-sm); padding-left: 0; cursor: pointer; }
+.equipment-settings__toggle .form-check-input { float: none; flex: 0 0 auto; margin: 0; background-color: var(--v1-surface); border-color: var(--v1-border); cursor: pointer; }
+.equipment-settings__toggle .form-check-input:checked { background-color: var(--v1-content-control); border-color: var(--v1-content-control); }
+.equipment-settings__toggle .form-check-input:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: 2px; box-shadow: none; }
+.equipment-settings__toggle .form-check-input:disabled { cursor: not-allowed; opacity: .55; }

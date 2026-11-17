@@ -27,6 +27,18 @@ describe('combined item settings', () => {
     state.component.form.controls.axis.setValue('right');
     expect(state.requested).toHaveBeenLastCalledWith(expect.objectContaining({ changes: { axis: 'right' } }));
   });
+  it('offers area and keyboard-compatible order actions without rewriting appearance', () => {
+    const state = setup(), root = state.fixture.nativeElement as HTMLElement;
+    state.fixture.componentRef.setInput('position', 1); state.fixture.componentRef.setInput('itemCount', 3); state.fixture.detectChanges();
+    root.querySelector<HTMLButtonElement>('button[aria-label="Area"]')!.click();
+    expect(state.requested).toHaveBeenLastCalledWith(expect.objectContaining({ changes: { traceType: 'area' } }));
+    root.querySelector<HTMLButtonElement>('button[aria-label="Move Main meter up"]')!.click();
+    expect(state.requested).toHaveBeenLastCalledWith({ kind: 'item-order', sourceId: 'utility', item: { resourceGuid: 'meter-a' }, direction: 'up' });
+    state.fixture.componentRef.setInput('position', 0); state.fixture.detectChanges();
+    expect(root.querySelector<HTMLButtonElement>('button[aria-label="Move Main meter up"]')!.disabled).toBe(true);
+    Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === 'Reset order')!.click();
+    expect(state.requested).toHaveBeenLastCalledWith({ kind: 'reset-order', sourceId: 'utility' });
+  });
   it('shows all item controls together under one named accordion', () => {
     const state = setup(), root = state.fixture.nativeElement as HTMLElement;
     expect(root.querySelectorAll('app-visualization-decision-section')).toHaveLength(1);

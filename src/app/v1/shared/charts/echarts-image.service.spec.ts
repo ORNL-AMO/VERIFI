@@ -1,11 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-import { EChartsImageService, documentChartOption, ECHARTS_IMAGE_TIMEOUT_MS, ECHARTS_IMAGE_FACTORY } from './echarts-image.service';
+import {
+  EChartsImageService, documentChartOption, ECHARTS_IMAGE_TIMEOUT_MS, ECHARTS_IMAGE_FACTORY, PDF_CHART_IMAGE_OPTIONS
+} from './echarts-image.service';
 
 const rendering = { charts: [] as Array<{
   events: Map<string, () => void>;
   setOption: ReturnType<typeof vi.fn>;
   dispose: ReturnType<typeof vi.fn>;
   getDataURL: ReturnType<typeof vi.fn>;
+  renderToCanvas: ReturnType<typeof vi.fn>;
   on: ReturnType<typeof vi.fn>;
   off: ReturnType<typeof vi.fn>;
 }> };
@@ -13,6 +16,7 @@ const rendering = { charts: [] as Array<{
 const createChart = () => {
   const events = new Map<string, () => void>();
   const chart = { events, setOption: vi.fn(), dispose: vi.fn(), getDataURL: vi.fn(() => 'data:image/png;base64,aW1hZ2U='),
+    renderToCanvas: vi.fn(() => ({ toDataURL: vi.fn(() => 'data:image/jpeg;base64,aW1hZ2U=') })),
     on: vi.fn((event: string, callback: () => void) => events.set(event, callback)), off: vi.fn() };
   rendering.charts.push(chart); return chart;
 };
@@ -32,6 +36,8 @@ describe('EChartsImageService', () => {
     expect(a.on.mock.invocationCallOrder[0]).toBeLessThan(a.setOption.mock.invocationCallOrder[0]);
     a.events.get('finished')!();
     await expect(first).resolves.toContain('data:image/png');
+    expect(a.getDataURL).toHaveBeenCalledWith(expect.objectContaining({ pixelRatio: 2, type: 'png' }));
+    expect(a.renderToCanvas).not.toHaveBeenCalled();
     await Promise.resolve();
     expect(a.dispose).toHaveBeenCalledOnce();
     expect(rendering.charts).toHaveLength(2);
@@ -41,9 +47,9 @@ describe('EChartsImageService', () => {
     expect(document.querySelector('[data-report-chart-capture]')).toBeNull();
   });
 
-  it('aborts an active capture, cleans its listeners, and continues the queue', async () => {
+  it.each(['png', 'jpeg'] as const)('aborts an active %s capture, cleans up, and continues the queue', async format => {
     const service = TestBed.inject(EChartsImageService), controller = new AbortController();
-    const capture = service.capture({ series: [] }, {}, controller.signal);
+    const capture = service.capture({ series: [] }, { format }, controller.signal);
     const rejected = expect(capture).rejects.toMatchObject({ name: 'AbortError' });
     await Promise.resolve(); controller.abort(); await rejected; await Promise.resolve();
     expect(rendering.charts[0].dispose).toHaveBeenCalledOnce();
@@ -52,6 +58,30 @@ describe('EChartsImageService', () => {
     const retry = service.capture({ series: [] });
     await Promise.resolve(); await Promise.resolve();
     rendering.charts[1].events.get('finished')!(); await retry;
+  });
+
+  it.each([0, 0.9, 1])('uses canvas JPEG encoding with quality %s and the PDF pixel ratio', async quality => {
+    const capture = TestBed.inject(EChartsImageService).capture({}, { ...PDF_CHART_IMAGE_OPTIONS, quality });
+    await Promise.resolve();
+    const chart = rendering.charts[0];
+    chart.events.get('finished')!();
+    await expect(capture).resolves.toMatch(/^data:image\/jpeg;base64,/);
+    expect(chart.renderToCanvas).toHaveBeenCalledWith({ pixelRatio: 4 / 3, backgroundColor: '#ffffff' });
+    expect(chart.renderToCanvas.mock.results[0].value.toDataURL).toHaveBeenCalledWith('image/jpeg', quality);
+    expect(chart.getDataURL).not.toHaveBeenCalled();
+    expect(chart.dispose).toHaveBeenCalledOnce();
+    expect(document.querySelector('[data-report-chart-capture]')).toBeNull();
+  });
+
+  it('rejects an incorrect encoded format and still cleans up the chart', async () => {
+    const capture = TestBed.inject(EChartsImageService).capture({}, PDF_CHART_IMAGE_OPTIONS);
+    const rejected = expect(capture).rejects.toThrow('requested format');
+    await Promise.resolve();
+    const chart = rendering.charts[0];
+    chart.renderToCanvas.mockReturnValue({ toDataURL: () => 'data:image/png;base64,incorrect' });
+    chart.events.get('finished')!(); await rejected;
+    expect(chart.dispose).toHaveBeenCalledOnce();
+    expect(document.querySelector('[data-report-chart-capture]')).toBeNull();
   });
 
   it('fails finitely if ECharts never completes and removes its resources', async () => {
@@ -67,6 +97,16 @@ describe('EChartsImageService', () => {
     const service = TestBed.inject(EChartsImageService), controller = new AbortController(); controller.abort();
     await expect(service.capture({}, { width: 0 })).rejects.toThrow('dimensions');
     await expect(service.capture({}, {}, controller.signal)).rejects.toMatchObject({ name: 'AbortError' });
+    expect(rendering.charts).toHaveLength(0);
+  });
+
+  it.each([NaN, Infinity, -0.1, 1.1])('rejects JPEG quality %s before creating a chart', async quality => {
+    await expect(TestBed.inject(EChartsImageService).capture({}, { format: 'jpeg', quality })).rejects.toThrow('quality');
+    expect(rendering.charts).toHaveLength(0);
+  });
+
+  it('rejects an unsupported image format before creating a chart', async () => {
+    await expect(TestBed.inject(EChartsImageService).capture({}, { format: 'webp' as 'jpeg' })).rejects.toThrow('format');
     expect(rendering.charts).toHaveLength(0);
   });
 });

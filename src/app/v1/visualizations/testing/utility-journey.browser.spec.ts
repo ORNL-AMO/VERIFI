@@ -26,7 +26,7 @@ import { VISUALIZATION_DATE_CONTEXT_RESOLVER, VISUALIZATION_PREVIEW_PRESENTERS, 
 import { TimeSeriesModule } from '../time-series/time-series.module';
 import { TimeSeriesPresenter } from '../time-series/time-series.presenter';
 import { UtilityDataSession } from '../utility/utility-data-session.service';
-import { UtilityDateContextResolver } from '../utility/utility-date-context.service';
+import { VisualizationDateContextResolver } from '../preview/visualization-date-context.service';
 import { UtilitySourceProvider } from '../utility/utility-source-provider.service';
 
 /** Real IndexedDB publication and a native calculation Worker feed the registered production presenter. */
@@ -58,10 +58,10 @@ describe('saved utility journey across native browser boundaries', () => {
       }
     };
     TestBed.configureTestingModule({ imports: [PreviewModule, TimeSeriesModule], providers: [
-      UtilityDataSession, UtilitySourceProvider, UtilityDateContextResolver, TimeSeriesPresenter,
+      UtilityDataSession, UtilitySourceProvider, VisualizationDateContextResolver, TimeSeriesPresenter,
       { provide: VISUALIZATION_SOURCE_PROVIDERS, useExisting: UtilitySourceProvider, multi: true },
       { provide: VISUALIZATION_PREVIEW_PRESENTERS, useExisting: TimeSeriesPresenter, multi: true },
-      { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useExisting: UtilityDateContextResolver },
+      { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useExisting: VisualizationDateContextResolver },
       { provide: LocalStorageService, useValue: { retrieve: () => null, store: () => {}, clear: () => {} } }
     ] });
     harness = await IndexedDbTestHarness.create('utility-journey');

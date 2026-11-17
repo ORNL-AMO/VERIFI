@@ -14,6 +14,13 @@ function snapshot() {
     accountAnalyses: [{ guid: 'account-analysis', accountId: reportAccount.guid, name: 'Linked account analysis', facilityAnalysisItems: [] }] as any };
 }
 describe('report inventory projections', () => {
+  it('removes the pending-content label for facility Data Quality while retaining pending account Analysis content', () => {
+    const data = snapshot();
+    const entries = buildReportInventory({ ...data,
+      facilityReports: data.facilityReports.map(report => ({ ...report, facilityReportType: 'dataQuality' as const })) }, [], 'ready');
+    expect(entries.find(entry => entry.scope === 'facility')!.snapshot.contentPending).toBe(false);
+    expect(entries.find(entry => entry.scope === 'account')!.snapshot.contentPending).toBe(true);
+  });
   it('projects scope-qualified status actions and explicit pending reasons into report cards', () => {
     const data = snapshot();
     const findings = (['account-report', 'facility-report'] as const).flatMap(kind => [
@@ -53,7 +60,7 @@ describe('report inventory projections', () => {
     const data = reportSnapshot([reportFixture({ facilityReportType: value })]);
     const entry = buildReportInventory(data, [], 'ready')[0];
     expect(entry.scope).toBe('facility'); expect(entry.typeLabel).toBe(label);
-    expect(entry.snapshot.contentPending).toBe(value !== 'analysis');
+    expect(entry.snapshot.contentPending).toBe(!['analysis', 'dataQuality'].includes(value));
   });
   it('keeps missing legacy facility settings and invalid modification dates explicit in the inventory', () => {
     const report = reportFixture({ facilityReportType: 'overview', dataOverviewReportSettings: undefined, modifiedDate: new Date('invalid') });

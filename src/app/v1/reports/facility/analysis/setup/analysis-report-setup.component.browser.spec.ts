@@ -3,9 +3,26 @@ import { of } from 'rxjs';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 import { facilityAnalysisReportFixture } from '../testing/analysis-report-test-fixtures';
+import { reportFixture } from '../../testing/report-test-fixtures';
+import { expectReportSetupSections } from '../../../testing/report-setup-browser-assertions';
 
 describe('facility Analysis setup matrix in Chromium', () => {
   afterEach(async () => { await page.viewport(1280, 720); });
+  it.each([
+    ['light', [], 1100], ['dark', ['v1-theme-dark'], 760],
+    ['high-contrast', ['v1-theme-dark', 'v1-contrast-strong'], 420]
+  ] as const)('uses the same connected Setup headers for placeholder reports in %s', async (_theme, classes, width) => {
+    await page.viewport(width, 900);
+    const view = await setupReportWorkbench([reportFixture({ facilityReportType: 'overview' })]);
+    await view.open();
+    const host = view.harness.fixture.nativeElement as HTMLElement;
+    host.classList.add('v1-root', ...classes);
+    Object.assign(host.style, { display: 'block', width: `${width}px` });
+    const setup = host.querySelector<HTMLElement>('app-facility-report-setup .report-setup')!;
+    expectReportSetupSections(setup, 2);
+    expect(setup.scrollWidth).toBeLessThanOrEqual(setup.clientWidth + 1);
+    expect(view.updateName).not.toHaveBeenCalled();
+  });
   it.each([
     ['light', [], 1100], ['dark', ['v1-theme-dark'], 760],
     ['high-contrast', ['v1-theme-dark', 'v1-contrast-strong'], 420]
@@ -21,6 +38,12 @@ describe('facility Analysis setup matrix in Chromium', () => {
     Object.assign(host.querySelector<HTMLElement>('app-facility-report-workbench')!.style,
       { display: 'flex', overflow: 'visible', minHeight: '100%' });
     view.harness.detectChanges();
+    expectReportSetupSections(host.querySelector<HTMLElement>('.report-section.report-setup')!, 4);
+    const name = host.querySelector<HTMLInputElement>('#report-workbench-name')!;
+    const year = host.querySelector<HTMLSelectElement>('#facility-analysis-report-year')!;
+    expect(year.closest('.report-setup-section')).toBe(name.closest('.report-setup-section'));
+    if (width > 992) expect(year.getBoundingClientRect().left).toBeGreaterThan(name.getBoundingClientRect().right);
+    else expect(year.getBoundingClientRect().top).toBeGreaterThanOrEqual(name.getBoundingClientRect().bottom);
     const toggles = [...host.querySelectorAll<HTMLButtonElement>('.content-preset')];
     const preset = toggles.find(button => button.textContent?.trim() === 'Facility Detail')!;
     expect(toggles).toHaveLength(6);

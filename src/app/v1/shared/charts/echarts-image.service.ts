@@ -7,7 +7,15 @@ export interface EChartsImageOptions {
   readonly width?: number;
   readonly height?: number;
   readonly pixelRatio?: number;
+  readonly format?: 'png' | 'jpeg';
+  /** JPEG encoding quality from 0 to 1; PNG encoding remains lossless. */
+  readonly quality?: number;
 }
+
+/** Balanced PDF images preserve the logical chart layout at 1600 × 900 output pixels. */
+export const PDF_CHART_IMAGE_OPTIONS: Readonly<Required<EChartsImageOptions>> = {
+  width: 1200, height: 675, pixelRatio: 4 / 3, format: 'jpeg', quality: 0.9
+};
 
 export const ECHARTS_IMAGE_TIMEOUT_MS = 15_000;
 
@@ -25,19 +33,24 @@ export class EChartsImageService {
 
   capture(option: V1EChartsOption, options: EChartsImageOptions = {}, signal?: AbortSignal): Promise<string> {
     const width = options.width ?? 1200, height = options.height ?? 675, pixelRatio = options.pixelRatio ?? 2;
+    const format = options.format ?? 'png', quality = options.quality ?? 0.9;
     if (![width, height, pixelRatio].every(value => Number.isFinite(value) && value > 0)
       || width > 4096 || height > 4096 || pixelRatio > 4 || Math.max(width, height) * pixelRatio > 8192) {
       return Promise.reject(new Error('Chart export dimensions are outside the supported range.'));
     }
+    if (!['png', 'jpeg'].includes(format) || !Number.isFinite(quality) || quality < 0 || quality > 1) {
+      return Promise.reject(new Error('Chart export format or JPEG quality is outside the supported range.'));
+    }
     if (signal?.aborted) return Promise.reject(abortError());
-    const capture = this.queue.then(() => this.render(option, width, height, pixelRatio, signal));
+    const capture = this.queue.then(() => this.render(option, { width, height, pixelRatio, format, quality }, signal));
     this.queue = capture.then(() => undefined, () => undefined);
     return abortable(capture, signal);
   }
 
-  private async render(option: V1EChartsOption, width: number, height: number, pixelRatio: number,
+  private async render(option: V1EChartsOption, options: Required<EChartsImageOptions>,
     signal?: AbortSignal): Promise<string> {
     signal?.throwIfAborted();
+    const { width, height, pixelRatio, format, quality } = options;
     const host = this.document.createElement('div');
     host.dataset['reportChartCapture'] = '';
     host.setAttribute('aria-hidden', 'true');
@@ -51,9 +64,13 @@ export class EChartsImageService {
         completed = () => {
           try {
             signal?.throwIfAborted();
-            const image = chart!.getDataURL({ type: 'png', pixelRatio, backgroundColor: '#ffffff',
-              excludeComponents: ['toolbox', 'dataZoom'] });
-            if (!image.startsWith('data:image/png;base64,')) throw new Error('The chart image could not be created.');
+            const image = format === 'jpeg'
+              ? chart!.renderToCanvas({ pixelRatio, backgroundColor: '#ffffff' }).toDataURL('image/jpeg', quality)
+              : chart!.getDataURL({ type: 'png', pixelRatio, backgroundColor: '#ffffff',
+                excludeComponents: ['toolbox', 'dataZoom'] });
+            if (!image.startsWith(`data:image/${format};base64,`)) {
+              throw new Error('The chart image could not be created in the requested format.');
+            }
             resolve(image);
           } catch (error) { reject(error); }
         };

@@ -1,3 +1,8 @@
+import { analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
+import { equipmentFixture } from '@domain/visualizations/testing/equipment-fixtures';
+import { getNewIdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { getNewIdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { Router } from '@angular/router';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -20,9 +25,140 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
     if (!workspace.meters().some(item => item.guid === 'meter-a')) workspace.publish({ ...workspace.snapshot()!, meters: [...workspace.meters(), meter({})] });
     lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized');
   }
+  if (sourceKinds.includes('predictor')) lifecycle.continuePredictors();
+  if (sourceKinds.includes('energy-use')) { lifecycle.selectEnergyUseMode('equipment'); lifecycle.continueEquipment(); }
+  if (sourceKinds.includes('analysis')) {
+    const workspace = TestBed.inject(AccountWorkspaceStore);
+    if (!workspace.facilityAnalyses().length) workspace.publish({ ...workspace.snapshot()!, facilityAnalyses: [analysisFixture().analysis] });
+    lifecycle.selectAnalysis(workspace.facilityAnalyses()[0].guid);
+    lifecycle.continueAnalysis();
+  }
 }
 
 describe('visualization Dashboard lifecycle', () => {
+  it('collects only an exact named analysis and reviews replacement while preserving unavailable intent', () => {
+    const { workspace } = configureLibraryTest(); const data = analysisFixture(); workspace.publish(data.snapshot);
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('analysis'); expect(lifecycle.canContinueAnalysis()).toBe(false);
+    lifecycle.selectAnalysis('analysis-a');
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a', measure: 'actual' });
+    expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('groupGuid');
+    lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue('Production'); expect(lifecycle.canSubmit()).toBe(true);
+    workspace.publishCommitted({ ...data.snapshot, facilityAnalyses: [] }, {}); expect(lifecycle.canSubmit()).toBe(false);
+    lifecycle.editSelection('analysis'); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a' });
+    const replacement = { ...data.analysis, guid: 'replacement' };
+    workspace.publishCommitted({ ...data.snapshot, facilityAnalyses: [replacement] }, {});
+    expect(lifecycle.canContinueAnalysis()).toBe(false);
+    lifecycle.selectAnalysis('replacement'); expect(lifecycle.confirmation()).toBe('decision');
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    lifecycle.cancelConfirmation(); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
+    lifecycle.selectAnalysis('replacement'); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('replacement'); expect(lifecycle.canContinueAnalysis()).toBe(true);
+    lifecycle.toggleSource('analysis'); expect(lifecycle.confirmation()).toBe('decision'); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.analysisGuid.value).toBeNull();
+  });
+
+  it.each([['line', 'bar'], ['bar', 'line']] as const)('saves the current %s to %s chart choice after selecting an analysis', async (initial, selected) => {
+    const { workspace, commands } = configureLibraryTest(); workspace.publish(analysisFixture().snapshot);
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart(initial); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
+    lifecycle.selectAnalysis('analysis-a'); lifecycle.continueAnalysis(); lifecycle.editSelection('chart'); lifecycle.selectChart(selected);
+    lifecycle.continueSources(); lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue('Current chart'); await lifecycle.submit();
+    expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { kind: 'time-series', defaultTraceType: selected, interval: 'monthly' },
+      sources: [{ analysisGuid: 'analysis-a', mode: 'result', measure: 'actual' }], series: [{ metric: 'actual', resourceGuid: 'analysis-a', axis: 'left' }] });
+    expect(commands.prepareCreate.mock.calls[0][0].sources[0]).not.toHaveProperty('groupGuid');
+  });
+
+  it('rejects stale analysis replacement review and clears an excluded facility binding only after scope review', () => {
+    const { workspace } = configureLibraryTest(); const data = analysisFixture();
+    const snapshot = { ...data.snapshot, facilities: [...data.snapshot.facilities, { ...data.facility, guid: 'facility-b' }],
+      facilityAnalyses: [...data.snapshot.facilityAnalyses, { ...data.analysis, guid: 'replacement' }] };
+    workspace.publish(snapshot);
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
+    lifecycle.selectAnalysis('analysis-a'); lifecycle.selectAnalysis('replacement'); expect(lifecycle.confirmation()).toBe('decision');
+    workspace.publishCommitted({ ...snapshot, facilityAnalyses: snapshot.facilityAnalyses.map(item => ({ ...item, name: 'Renamed' })) }, {});
+    lifecycle.confirmDecision(); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a'); expect(lifecycle.error()).toContain('Choices changed');
+    lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-b'] }); expect(lifecycle.confirmation()).toBe('decision');
+    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a'); lifecycle.cancelConfirmation();
+    expect(lifecycle.form.controls.facilitySelection.value).toEqual({ kind: 'all' });
+    lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-b'] }); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.analysisGuid.value).toBeNull(); expect(lifecycle.canContinueAnalysis()).toBe(false);
+  });
+
+  it.each([
+    ['group', 'energy-group', 'energy-use-group'], ['equipment', 'equipment-a', 'equipment'],
+    ['equipment-type', 'Pump', undefined], ['linked-meter-group', 'linked-group', 'meter-group'], ['facility', 'facility-a', 'facility']
+  ] as const)('collects %s selection before resources and reviews switching methods', (mode, id, resource) => {
+    const { workspace } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [equipmentFixture({ energyUseGroupId: 'energy-group', equipmentType: 'Pump', utilityMeterGroupIds: ['linked-group'] })],
+      energyUseGroups: [{ ...getNewIdbFacilityEnergyUseGroup('account-a', 'facility-a'), guid: 'energy-group' }],
+      meterGroups: [{ ...getNewIdbUtilityMeterGroup('Energy', 'Linked group', 'facility-a', 'account-a'), guid: 'linked-group' }] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('energy-use-selection-mode'); lifecycle.selectEnergyUseMode(mode);
+    expect(lifecycle.equipmentChoices().some(choice => choice.guid === id)).toBe(true);
+    lifecycle.form.controls.energyUseResourceIds.setValue([id]); lifecycle.continueEquipment(); lifecycle.form.controls.name.setValue('Saved selection');
+    expect(lifecycle.canSubmit()).toBe(true);
+    const source = lifecycle.draftDefinition()!.sources[0];
+    expect(source).toMatchObject({ selectionMode: mode, aggregation: mode === 'equipment' ? 'none' : 'sum',
+      ...(resource ? { selection: { kind: 'fixed', resource, guids: [id] } } : { equipmentTypes: ['Pump'] }) });
+    const next = mode === 'equipment' ? 'group' : 'equipment';
+    lifecycle.selectEnergyUseMode(next); expect(lifecycle.confirmation()).toBe('decision');
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual([id]); lifecycle.cancelConfirmation();
+    expect(lifecycle.form.controls.energyUseMode.value).toBe(mode);
+    lifecycle.selectEnergyUseMode(next); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual([]); expect(lifecycle.form.controls.energyUseMode.value).toBe(next);
+    expect(lifecycle.form.controls.name.value).toBe('Saved selection');
+  });
+  it('collects exact equipment in Add with annual defaults and protects missing and removed selections', () => {
+    const { workspace } = configureLibraryTest();
+    workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [equipmentFixture()] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
+    lifecycle.continueFacilities(); lifecycle.selectChart('bar'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('energy-use-selection-mode'); lifecycle.selectEnergyUseMode('equipment'); expect(lifecycle.step()).toBe('equipment'); lifecycle.form.controls.energyUseResourceIds.setValue(['equipment-a']); lifecycle.continueEquipment();
+    lifecycle.form.controls.name.setValue('Equipment'); expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()).toMatchObject({ chart: { defaultTraceType: 'bar', interval: 'yearly', stack: 'none' }, sources: [{ aggregation: 'none', selection: { kind: 'fixed', resource: 'equipment', guids: ['equipment-a'] } }], period: { kind: 'latest-saved-year' } });
+    lifecycle.editSelection('equipment'); expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
+    workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [] }); expect(lifecycle.equipmentSelectionValid()).toBe(false);
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
+    lifecycle.toggleSource('energy-use'); expect(lifecycle.confirmation()).toBe('decision'); lifecycle.cancelConfirmation();
+    expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
+    lifecycle.form.controls.energyUseResourceIds.setValue([]); lifecycle.continueEquipment(); expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('selection');
+  });
+
+  it('saves All with an empty catalog and tracks future predictors until an individual is deselected', () => {
+    const { workspace } = configureLibraryTest();
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
+    selectSetup(lifecycle, ['predictor']); lifecycle.editSelection('predictor'); lifecycle.toggleAllPredictors();
+    lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('All history');
+    expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'rule', resource: 'predictor', filter: {} } });
+    const first = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'first' };
+    workspace.publish({ ...workspace.snapshot()!, predictors: [first, { ...first, guid: 'future' }] });
+    expect(lifecycle.predictorSelectedGuids()).toEqual(['first', 'future']);
+    lifecycle.editSelection('predictor'); lifecycle.togglePredictor('first');
+    expect(lifecycle.form.controls.predictorAll.value).toBe(false);
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'fixed', guids: ['future'] } });
+  });
+  it('hands an exact predictor through Add and Back, retains it on compatible scope changes, and saves explicit empty setup', () => {
+    const { workspace } = configureLibraryTest();
+    const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'production', name: 'Production' };
+    workspace.publish({ ...workspace.snapshot()!, predictors: [predictor] });
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
+    lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
+    expect(lifecycle.step()).toBe('predictor');
+    lifecycle.togglePredictor(predictor.guid); expect(lifecycle.step()).toBe('predictor'); lifecycle.continuePredictors(); expect(lifecycle.step()).toBe('name');
+    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'fixed', resource: 'predictor', guids: ['production'] } });
+    lifecycle.editSelection('predictor'); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
+    lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Production');
+    workspace.publish({ ...workspace.snapshot()!, predictors: [] });
+    expect(lifecycle.canSubmit()).toBe(false); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
+    lifecycle.editSelection('predictor');
+    lifecycle.togglePredictor('production'); lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Set up later');
+    expect(lifecycle.canSubmit()).toBe(true);
+    expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('selection');
+  });
   it.each((['energy-trend', 'cost-trend'] as const).flatMap(recipe => [
     { mode: 'source' as const, resource: 'Electricity' },
     { mode: 'group' as const, resource: 'group-a' },

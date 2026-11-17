@@ -1,6 +1,6 @@
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import type { UtilitySelectionMode, UtilityVisualizationSource, VisualizationChart, VisualizationDefinition,
-  VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType } from '@domain/visualizations/visualization-definition';
+import type { AnalysisResultVisualizationSource, UtilitySelectionMode, UtilityVisualizationSource, VisualizationChart, VisualizationDefinition,
+  EnergyUseSelectionMode, SettingBinding, VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
@@ -41,11 +41,24 @@ export interface DecisionResourceChoice {
   readonly available: boolean;
 }
 export type VisualizationDecisionAction =
+  | { readonly kind: 'analysis-binding'; readonly sourceId: string; readonly analysisGuid?: string; readonly groupGuid?: string }
+  | { readonly kind: 'analysis-measure'; readonly sourceId: string; readonly measure: AnalysisResultVisualizationSource['measure'] }
+  | { readonly kind: 'analysis-interval'; readonly sourceId: string; readonly interval: 'monthly' | 'yearly' }
+  | { readonly kind: 'analysis-defaults'; readonly sourceId: string }
   | { readonly kind: 'facilities'; readonly selection: VisualizationFacilitySelection }
   | { readonly kind: 'chart'; readonly chart: VisualizationChart }
-  | { readonly kind: 'chart-type'; readonly traceType: 'line' | 'bar' }
+  | { readonly kind: 'chart-type'; readonly traceType: VisualizationTraceType }
+  | { readonly kind: 'chart-stack'; readonly stack: 'none' | 'absolute' | 'percent' }
+  | { readonly kind: 'item-order'; readonly sourceId: string; readonly item: DecisionItemIdentity; readonly direction: 'up' | 'down' }
+  | { readonly kind: 'reset-order'; readonly sourceId: string }
   | { readonly kind: 'add-source'; readonly sourceKind: VisualizationSourceKind }
   | { readonly kind: 'remove-source-kind'; readonly sourceKind: VisualizationSourceKind }
+  | { readonly kind: 'energy-use-selection-mode'; readonly sourceId: string; readonly mode: EnergyUseSelectionMode }
+  | { readonly kind: 'energy-use-resources'; readonly sourceId: string; readonly ids: readonly string[] }
+  | { readonly kind: 'equipment-selection'; readonly sourceId: string; readonly equipmentGuids: readonly string[] }
+  | { readonly kind: 'equipment-defaults'; readonly sourceId: string }
+  | { readonly kind: 'equipment-unit'; readonly sourceId: string; readonly unit: SettingBinding<string> }
+  | { readonly kind: 'predictor-selection'; readonly sourceId: string; readonly predictorGuids: readonly string[]; readonly all?: boolean }
   | { readonly kind: 'measure'; readonly sourceId: string; readonly measure: UtilityVisualizationSource['measure'] }
   | { readonly kind: 'selection-mode'; readonly sourceId: string; readonly mode: UtilitySelectionMode }
   | { readonly kind: 'toggle-resource'; readonly sourceId: string; readonly resourceId: string; readonly selected: boolean }

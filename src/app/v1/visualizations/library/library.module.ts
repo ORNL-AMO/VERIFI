@@ -1,3 +1,6 @@
+import { AnalysisEditorsModule } from '../analysis/analysis-editors.module';
+import { EquipmentEditorsModule } from '../energy-use/equipment-editors.module';
+import { PredictorEditorsModule } from '../predictor/predictor-editors.module';
 import { FacilityPickerModule } from '../shared/facility-picker/facility-picker.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,7 +16,7 @@ import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/b
 import { LibraryComponent } from './library.component';
 import { CreationComponent } from '../creation/creation-drawer/creation-drawer.component';
 
-@NgModule({ declarations: [LibraryComponent, CreationComponent], imports: [FacilityPickerModule, CommonModule, ReactiveFormsModule, IconComponent,
+@NgModule({ declarations: [LibraryComponent, CreationComponent], imports: [AnalysisEditorsModule, EquipmentEditorsModule, PredictorEditorsModule, FacilityPickerModule, CommonModule, ReactiveFormsModule, IconComponent,
   WorkspaceSlideoutComponent, ConfirmationDialogComponent, DataEmptyStateComponent, InventoryGridComponent,
   PageIdentityComponent, BrowsePositionDirective, BrowseHeaderDirective], exports: [LibraryComponent] })
 export class LibraryModule { }

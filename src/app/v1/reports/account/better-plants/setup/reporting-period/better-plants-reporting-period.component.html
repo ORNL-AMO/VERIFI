@@ -1,6 +1,5 @@
 @let selectedAnalysis = analysis();
-<section class="report-setup-section" [formGroup]="form" aria-labelledby="better-plants-period-title">
-  <h2 id="better-plants-period-title">Reporting period</h2>
+<div [formGroup]="form" role="group" aria-label="Report years">
   <div class="report-setup-fields">
     <div class="report-setup-field">
       <span class="better-plants-baseline-label">Baseline year</span>
@@ -23,4 +22,4 @@
   @if (periodState() === 'ready' && !years().length) { <p class="v1-alert v1-alert--warning">No complete reporting years are available. Review the account’s meter data.</p> }
   @if (baselineWarning()) { <p class="v1-alert v1-alert--warning">This baseline year does not match your corporate baseline year.</p> }
   <label class="report-setup-option"><input type="checkbox" formControlName="includeAllYears"><span>Generate a report for every year</span></label>
-</section>
+</div>

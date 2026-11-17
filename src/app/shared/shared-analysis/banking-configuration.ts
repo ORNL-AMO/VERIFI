@@ -198,10 +198,10 @@ function hasMissingBankingDependency(source: IdbAnalysisItem, analyses: readonly
   const byGuid = new Map(analyses.map(analysis => [analysis.guid, analysis]));
   const visited = new Set<string>();
   let cursor: IdbAnalysisItem | undefined = source;
-  while (cursor?.hasBanking && cursor.bankedAnalysisItemId) {
+  while (cursor?.hasBanking) {
     if (visited.has(cursor.guid)) return false;
     visited.add(cursor.guid);
-    const dependency = byGuid.get(cursor.bankedAnalysisItemId);
+    const dependency = cursor.bankedAnalysisItemId ? byGuid.get(cursor.bankedAnalysisItemId) : undefined;
     if (!dependency) return true;
     cursor = dependency;
   }

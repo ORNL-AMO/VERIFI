@@ -48,6 +48,14 @@ describe('account report workbench', () => {
     expect(workbench.context.resources().find(resource => resource.id === 'account-report')?.icon).toBe(icon);
     expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
     expect(!!harness.routeNativeElement!.querySelector('#account-report-analysis')).toBe(['betterPlants', 'performance', 'analysis', 'accountSavings'].includes(value));
+    if (value !== 'betterPlants') {
+      const headings = [...harness.routeNativeElement!.querySelectorAll('.setup-section-heading')];
+      expect(headings.map(heading => heading.textContent?.trim())).toEqual([
+        'Report information', ...(['performance', 'analysis', 'accountSavings'].includes(value) ? ['Analysis *'] : []), 'Report-specific settings'
+      ]);
+      for (const heading of headings) expect(heading.parentElement!.getAttribute('aria-labelledby')).toBe(heading.id);
+      expect(harness.routeNativeElement!.querySelector('.report-setup > app-account-report-delete')).not.toBeNull();
+    }
     expect(harness.routeNativeElement!.querySelector('nav a')?.getAttribute('href')).toContain('/account-a/reports/dashboard');
     expect(harness.routeNativeElement!.querySelector('nav a')?.textContent?.trim()).toBe(snapshot.account.name);
     expect(harness.routeNativeElement!.querySelector('nav[aria-label="Account report breadcrumb"]')?.textContent?.trim()).toBe(snapshot.account.name);

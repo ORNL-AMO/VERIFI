@@ -1,3 +1,4 @@
+import { analysisPickerTestProvider } from '../../testing/analysis-picker.testing';
 import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -38,7 +39,7 @@ export function configureLibraryTest(imports: unknown[] = []) {
   const visualizations = { rememberReturn: vi.fn(), open: vi.fn(async () => true),
     workbenchRoute: (accountGuid: string, guid: string) => ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'workbench', guid],
     dashboardRoute: (accountGuid: string) => ['/v1', 'workspace', 'account', accountGuid, 'visualization', 'dashboard'] };
-  TestBed.configureTestingModule({ imports, providers: [provideRouter([]), LibraryLifecycle,
+  TestBed.configureTestingModule({ imports, providers: [provideRouter([]), LibraryLifecycle, analysisPickerTestProvider(),
     { provide: AccountWorkspaceService, useValue: { selectAccount: vi.fn(async () => 'published') } },
     { provide: AccountWorkspaceStore, useValue: workspace }, { provide: SavedVisualizationCommands, useValue: commands },
     { provide: WorkspaceNavigationService, useValue: navigation }, { provide: VisualizationNavigationService, useValue: visualizations }

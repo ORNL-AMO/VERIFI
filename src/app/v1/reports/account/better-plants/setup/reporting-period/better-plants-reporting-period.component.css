@@ -1,7 +1,6 @@
 @import '../../../../shared/editing/report-setup.css';
 
 :host { display: block; min-width: 0; }
-.report-setup-section { padding: 0; border: 0; }
 .report-setup-help { margin-block: .75rem; }
 
 .better-plants-baseline-label {

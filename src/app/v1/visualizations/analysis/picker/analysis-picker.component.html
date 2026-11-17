@@ -1,0 +1,16 @@
+<app-report-analysis-selection [cards]="cards()" [selectionControl]="selectionControl"
+  [selectedValue]="selectedGuid()" [resetKey]="resetKey()" [idPrefix]="idPrefix()"
+  [canEdit]="!disabled()" [showTypeFilter]="showTypeFilter()"
+  emptyMessage="No saved analyses are available." (inspected)="inspectedGuid.set($event)"/>
+@if (inspected(); as entry) {
+  @if (entry.scope === 'facility') {
+    <app-analysis-details-slideout [card]="entry.card" [meterGroups]="inventories.meterGroups()" [evaluation]="inventories.statusState()"
+      actionLabel="Select analysis" actionIcon="check" [actionDisabled]="disabled()"
+      (closed)="inspectedGuid.set(undefined)" (opened)="selectInspected()"/>
+  } @else {
+    <app-account-analysis-details-slideout [card]="entry.card" [outcomeDisplay]="inspectedOutcome()" [evaluation]="inventories.statusState()"
+      [facilityInputs]="inventories.facilityInputs()" [facilityFindings]="inventories.statusItems()"
+      actionLabel="Select analysis" actionIcon="check" [actionDisabled]="disabled()"
+      (closed)="inspectedGuid.set(undefined)" (actionSelected)="selectInspected()"/>
+  }
+}

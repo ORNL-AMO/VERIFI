@@ -3,8 +3,33 @@ import { utilityVisualizationFixture, analysisVisualizationFixture } from '@doma
 import { createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { reviewVisualizationReset, reviewVisualizationFacilityCopy } from './visualization-recovery';
+import { equipmentDefinition, equipmentSnapshot } from '@domain/visualizations/testing/equipment-fixtures';
+import type { EnergyUseSelectionMode, EnergyUseVisualizationSource, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { energyUseResourceKind } from '@domain/visualizations/energy-use/equipment-selection';
 
 describe('reviewed visualization recovery', () => {
+  it.each<EnergyUseSelectionMode>(['equipment', 'group', 'equipment-type', 'linked-meter-group', 'facility'])('resets %s Energy Use choices and dependent appearance while retaining reusable settings', mode => {
+    const base = equipmentDefinition(), source: EnergyUseVisualizationSource = { ...base.sources[0] as EnergyUseVisualizationSource,
+      selectionMode: mode, aggregation: mode === 'equipment' ? 'none' : 'sum', settings: { unit: { kind: 'pinned', value: 'MJ' } } };
+    const { selection: _selection, ...unbound } = source;
+    const original: VisualizationDefinition = { ...base, period: { kind: 'fiscal-year', year: 2028 }, sources: [{ ...unbound,
+      ...(mode === 'equipment-type' ? { equipmentTypes: ['Pump'] } : { selection: { kind: 'fixed', resource: energyUseResourceKind(mode), guids: ['selected'] } }) }] };
+    const before = structuredClone(original), review = reviewVisualizationReset(original, [], true);
+    expect(review.definition.sources[0]).toEqual(unbound);
+    expect(review.definition.series).toEqual([]);
+    expect(review.definition.chart).toEqual(original.chart); expect(review.definition.period).toEqual(original.period);
+    expect(decodeVisualizationDefinition(review.definition).state).toBe('setup-required'); expect(original).toEqual(before);
+  });
+  it('keeps type membership live on a reviewed facility copy while clearing excluded fixed equipment bindings', () => {
+    const snapshot = equipmentSnapshot(), catalog = { ...snapshot, facilities: [...snapshot.facilities, { ...snapshot.facilities[0], guid: 'other' }] };
+    const base = equipmentDefinition(), source = base.sources[0] as EnergyUseVisualizationSource;
+    const { selection: _selection, ...unbound } = source;
+    const typed: VisualizationDefinition = { ...base, sources: [{ ...unbound, selectionMode: 'equipment-type', aggregation: 'sum', equipmentTypes: ['Pump'] }] };
+    expect(reviewVisualizationFacilityCopy(typed, { kind: 'fixed', facilityGuids: ['other'] }, catalog).definition.sources).toEqual(typed.sources);
+    const fixed = reviewVisualizationFacilityCopy(base, { kind: 'fixed', facilityGuids: ['other'] }, catalog);
+    expect(fixed.definition.sources[0]).not.toHaveProperty('selection'); expect(fixed.definition.series).toEqual([]);
+    expect(base.sources[0]).toHaveProperty('selection');
+  });
   it('clears the entire broken fixed selection without silently dropping one contribution', () => {
     const original = utilityVisualizationFixture();
     const result = reviewVisualizationReset(original, [{ path: 'sources.0.selection.guids.0', kind: 'meter', guid: 'meter-a', reason: 'missing' }]);

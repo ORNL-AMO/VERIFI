@@ -1,4 +1,4 @@
-import type { VisualizationDefinition, VisualizationSeries } from './visualization-definition';
+import type { VisualizationDefinition, VisualizationSeries, VisualizationSeriesOverride } from './visualization-definition';
 import type { ResolvedVisualizationSeries } from './visualization-source-provider';
 
 export interface EffectiveVisualizationSeries {
@@ -6,12 +6,25 @@ export interface EffectiveVisualizationSeries {
   readonly metadata: ResolvedVisualizationSeries;
 }
 
+/** Resource identity wins; foreign and unsupported provider-local preferences stay dormant. */
+export function findVisualizationSeriesOverride(
+  definition: Pick<VisualizationDefinition, 'accountGuid'> & Partial<Pick<VisualizationDefinition, 'sources'>>,
+  selected: VisualizationSeries,
+  target: Pick<ResolvedVisualizationSeries, 'id' | 'resourceGuid'>
+): VisualizationSeriesOverride | undefined {
+  const source = definition.sources?.find(source => source.id === selected.sourceId);
+  const applicable = (override: VisualizationSeriesOverride) => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid
+    && !(source?.kind === 'analysis' && source.mode === 'result' && override.seriesId !== undefined);
+  return selected.overrides?.find(override => applicable(override) && override.resourceGuid !== undefined && override.resourceGuid === target.resourceGuid)
+    ?? selected.overrides?.find(override => applicable(override) && override.seriesId !== undefined && override.seriesId === target.id);
+}
+
 /**
  * Expand matching-set selections without persisting discovered resources. Exact declarations
  * take precedence over a wildcard; owner-qualified overrides supply presentation only.
  */
 export function resolveVisualizationSeries(
-  definition: Pick<VisualizationDefinition, 'accountGuid' | 'series'> & Partial<Pick<VisualizationDefinition, 'chart'>>,
+  definition: Pick<VisualizationDefinition, 'accountGuid' | 'series'> & Partial<Pick<VisualizationDefinition, 'chart' | 'sources'>>,
   resolved: readonly ResolvedVisualizationSeries[],
   includeHidden = false
 ): readonly EffectiveVisualizationSeries[] {
@@ -21,14 +34,8 @@ export function resolveVisualizationSeries(
       && (selected.resourceGuid === undefined || selected.resourceGuid === candidate.resourceGuid)
       && (selected.resourceGuid !== undefined || !definition.series.some(exact => exact.sourceId === candidate.sourceId
         && exact.metric === candidate.metric && exact.resourceGuid !== undefined && exact.resourceGuid === candidate.resourceGuid)));
-    const overrides = (selected.overrides ?? []).filter(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid);
-    const matchingOverride = (metadata: ResolvedVisualizationSeries) => {
-      // Domain resource identity wins over a provider-local category selector.
-      const resource = overrides.find(override => override.resourceGuid !== undefined && override.resourceGuid === metadata.resourceGuid);
-      return resource ?? overrides.find(override => override.seriesId !== undefined && override.seriesId === metadata.id);
-    };
     return matches.flatMap(metadata => {
-      const override = matchingOverride(metadata);
+      const override = findVisualizationSeriesOverride(definition, selected, metadata);
       const { overrides: _overrides, ...base } = selected;
       const { resourceGuid: _resourceGuid, seriesId: _seriesId, accountGuid: _accountGuid, order: _order, ...appearance } = override ?? {};
       const traceType = override?.traceType ?? base.traceType

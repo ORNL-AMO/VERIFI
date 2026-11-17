@@ -17,6 +17,12 @@
             {{ saveLabel() }}
           </span>
           <span class="v1-chip">{{ chartSummary() }}</span>
+          @if (selectedPredictorGuids().length) {
+            @let dataStatus = predictorHeaderStatus();
+            <span class="v1-chip v1-chip--{{ dataStatus.tone === 'neutral' ? 'info' : dataStatus.tone }}" role="status" aria-label="Predictor data status">
+              <app-ui-icon [name]="dataStatus.icon" [spin]="dataStatus.icon === 'loading'"/>{{ dataStatus.label }}
+            </span>
+          }
           <button #settingsToggle type="button" class="v1-btn v1-btn--quiet" aria-controls="visualization-settings" [disabled]="!editor.definition()" [attr.aria-expanded]="settingsExpanded.value" (click)="toggleSettings(settingsToggle)"><app-ui-icon name="settingsSliders"/>Settings</button>
           <app-data-workbench-facts-toggle #factsToggle controls="visualization-workbench-facts"/>
         </div>
@@ -26,6 +32,22 @@
         <div><dt>Chart type</dt><dd>{{ chartSummary() }}</dd></div>
         <div><dt>Period</dt><dd>{{ periodSummary() }}</dd></div>
       </dl></div>
+      @if (predictorStatusSummaries().length) {
+        <ul class="v1-data-workbench-status-notes visualization-workbench__status-notes" aria-label="Predictor data issues">
+          @for (issue of predictorStatusSummaries(); track issue.id) {
+            <li><app-ui-icon [name]="issue.severity === 'error' ? 'danger' : 'warning'"/>
+              <button type="button" class="v1-btn v1-btn--quiet" (click)="openPredictorIssue(issue)">{{ issue.entity.name }} · {{ issue.description }}</button>
+            </li>
+          }
+        </ul>
+        @if (remainingPredictorIssues().length) {
+          <details class="visualization-workbench__more-issues"><summary>More data issues ({{ remainingPredictorIssues().length }})</summary>
+            <ul>@for (issue of remainingPredictorIssues(); track issue.id) {
+              <li><button type="button" class="v1-btn v1-btn--quiet" (click)="openPredictorIssue(issue)">{{ issue.entity.name }} · {{ issue.description }}</button></li>
+            }</ul>
+          </details>
+        }
+      }
     </header>
   </div>
   @if (!workspace.isReady()) {
@@ -50,17 +72,32 @@
           [expanded]="expandedNodes().has(rootNodes.chart)" (expandedChange)="setSection(rootNodes.chart, $event)">
           <div class="visualization-choices" role="group" aria-label="Chart type">
             @for (chart of charts; track chart.value) {
-              <button type="button" class="visualization-choice" [disabled]="!editor.canEdit()" [attr.aria-pressed]="chartSummary() === chart.label" (click)="chooseChart(chart.value)"><app-ui-icon [name]="chart.icon"/>{{ chart.label }}</button>
+              <button type="button" class="visualization-choice" [disabled]="!editor.canEdit()" [attr.aria-pressed]="chartTypeSummary() === chart.label" (click)="chooseChart(chart.value)"><app-ui-icon [name]="chart.icon"/>{{ chart.label }}</button>
             }
           </div>
           @let savedChart = definition.chart;
           @if (savedChart && savedChart.kind === 'time-series') {
+            <span class="visualization-control-label">Stacking</span>
+            <div class="visualization-buttons" role="group" aria-label="Stacking">
+              @for (choice of stackChoices(); track choice.value) {
+                <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !!choice.reason"
+                  [attr.aria-pressed]="savedChart.stack === choice.value" [attr.aria-describedby]="choice.reason ? 'stack-' + choice.value + '-reason' : null"
+                  (click)="setStack(choice.value)">{{ choice.label }}</button>
+              }
+            </div>
+            @for (choice of stackChoices(); track choice.value) {
+              @if (choice.reason) { <p [id]="'stack-' + choice.value + '-reason'">{{ choice.label }}: {{ choice.reason }}</p> }
+            }
+            @if (savedChart.stack === 'percent') { <p>Share of visible selected contributions. Percentages require complete, nonnegative values and a positive total for each period.</p> }
+          }
+          @if (savedChart && savedChart.kind === 'time-series') {
             <p class="visualization-workbench__default">Default for new items: {{ savedChart.defaultTraceType }}</p>
             <span class="visualization-control-label">Interval</span>
             <div class="visualization-buttons" role="group" aria-label="Chart interval">
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly() || annualEquipment()" [attr.aria-pressed]="savedChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
               <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'yearly'" (click)="setInterval('yearly')">Yearly</button>
             </div>
+            @if (annualEquipment()) { <p>Equipment consumption uses annual fiscal periods.</p> }
             @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
           }
         </app-visualization-decision-section>
@@ -78,12 +115,15 @@
           <app-visualization-decision-section [nodeId]="source.nodeId" [label]="source.label" [summary]="source.summary" [icon]="source.icon" [attention]="source.attention"
             [expanded]="expandedNodes().has(source.nodeId)" (expandedChange)="setSection(source.nodeId, $event)">
             @if (source.kind === 'utility') { <app-utility-source-editor [context]="source.context"/> }
+            @else if (source.kind === 'energy-use') { <app-equipment-source-editor [context]="source.context"/> }
+            @else if (source.kind === 'analysis') { <app-analysis-source-editor [context]="source.context"/> }
+            @else if (source.kind === 'predictor') { <app-predictor-source-editor [context]="source.context"/> }
             @else { <p role="status">Setup required. Data selection for {{ source.label }} is not available yet.</p> }
           </app-visualization-decision-section>
         }
         <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates and comparison" [summary]="periodSummary()" icon="calendar"
           [attention]="periodInvalid()" [expanded]="expandedNodes().has(rootNodes.period)" (expandedChange)="setSection(rootNodes.period, $event)">
-          <app-utility-period-settings [context]="periodContext()"/>
+          <app-visualization-period-settings [context]="periodContext()"/>
         </app-visualization-decision-section>
         <app-visualization-decision-section [nodeId]="rootNodes.appearance" label="Chart appearance" [summary]="editor.form.controls.title.value || definition.name" icon="paintRoller"
           [attention]="editor.form.invalid" [expanded]="expandedNodes().has(rootNodes.appearance)" (expandedChange)="setSection(rootNodes.appearance, $event)">

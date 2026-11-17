@@ -97,6 +97,23 @@ describe('FacilityReportActionsService', () => {
     await expect(service.updateName('facility-b', source.guid, 'Wrong facility')).rejects.toMatchObject({ code: 'workspace-not-ready' });
   });
 
+  it('renames Data Quality from the latest record without overwriting its source or content settings', async () => {
+    const source = reportFixture({ facilityReportType: 'dataQuality' });
+    store.publish(reportSnapshot([source]), { facility: reportFacility });
+    const latest = structuredClone(source);
+    latest.dataQualityReportSettings = { ...latest.dataQualityReportSettings, selectedMode: 'manual',
+      selectedMeterIds: ['meter-a'], selectedPredictorIds: ['predictor-a'], includeAnnualTotalsTable: false };
+    boundary.execute.mockImplementationOnce(async (options, persist) => {
+      store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [latest] }] });
+      const value = await persist();
+      store.publishCommittedPatch(options.publication.buildPatch(value));
+      return { value };
+    });
+    expect(await service.updateName('facility-a', source.guid, 'Quality review')).toEqual({ ...latest, name: 'Quality review' });
+    expect(handler.updateFacilityReportSetup).not.toHaveBeenCalled();
+    expect(handler.updateFacilityReport).toHaveBeenCalledExactlyOnceWith({ ...latest, name: 'Quality review' }, 'account-a');
+  });
+
   it('does not rewrite a name that another queued operation has already saved', async () => {
     boundary.execute.mockImplementationOnce(async (options, persist) => {
       const latest = reportFixture({ name: 'Already saved' });

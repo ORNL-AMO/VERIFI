@@ -1,6 +1,4 @@
-import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import { configuredChartSummary } from './utility/utility-items';
-import type { VisualizationChart, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import type { VisualizationChart } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 
 export type VisualizationChartChoiceId = 'line' | 'bar' | 'area' | 'scatter' | 'correlation'
@@ -43,9 +41,4 @@ function visualizationChartChoice(chart: VisualizationChart | undefined) {
   const choice = chart.kind === 'time-series' ? chart.defaultTraceType
     : chart.kind === 'breakdown' ? chart.type === 'bar' ? 'breakdown-bar' : 'donut' : chart.kind;
   return VISUALIZATION_CHART_CHOICES.find(item => item.value === choice);
-}
-
-/** Catalog-only summary: no data provider or calculation is requested. */
-export function visualizationDefinitionChartLabel(definition: VisualizationDefinition | undefined, snapshot: AccountWorkspaceSnapshot): string {
-  return definition ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : 'Chart not selected';
 }

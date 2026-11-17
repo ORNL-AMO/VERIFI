@@ -5,7 +5,6 @@ import { ReportAutosaveController } from '@app/v1/reports/shared/editing/report-
 import { FacilityReportActionsService } from '../../facility-report-actions.service';
 import { FacilityReportWorkbenchContext } from '../facility-report-workbench-context.service';
 
-/** Pending facility formats preserve their existing name-only editing. */
 @Injectable()
 export class FacilityReportEditor {
   private readonly context = inject(FacilityReportWorkbenchContext);

@@ -18,7 +18,7 @@ async function settle() { for (let i = 0; i < 8; i++) await Promise.resolve(); }
 describe('visualization preview presentation', () => {
   beforeEach(() => { const store = new AccountWorkspaceStore(); store.publish(visualizationSnapshot());
     TestBed.configureTestingModule({ providers: [{ provide: AccountWorkspaceStore, useValue: store }] }); });
-  it('retains every exact value for assistive technology without visible table controls or changing saved intent', async () => {
+  it('pages every exact source value without changing saved intent', async () => {
     const definition = utilityVisualizationFixture(), evidence = visualizationEvidenceFixture(definition);
     const rows = Array.from({ length: 130 }, (_, index) => [`Observation ${index}`, String(index)]);
     TestBed.configureTestingModule({ imports: [PreviewModule, RendererFixtureComponent], providers: [
@@ -32,9 +32,13 @@ describe('visualization preview presentation', () => {
     fixture.componentRef.setInput('definition', definition); fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
     await settle(); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.querySelectorAll('tbody tr')).toHaveLength(130);
-    expect(root.querySelector('.visually-hidden table tbody')!.textContent).toContain('Observation 129');
-    expect(root.querySelector('details, summary, app-pagination, h2, [role="status"]')).toBeNull();
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(50);
+    fixture.componentInstance.changePage(1); fixture.detectChanges();
+    expect(root.querySelector('tbody')!.textContent).toContain('Observation 50');
+    fixture.componentInstance.changePage(1); fixture.detectChanges();
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(30);
+    expect(root.querySelector('tbody')!.textContent).toContain('Observation 129');
+    expect(root.querySelector('[role="status"]')!.textContent).toContain('101–130 of 130');
     expect(root.textContent).not.toContain('Preview uses');
     expect(definition).toEqual(before);
     fixture.destroy();
@@ -81,8 +85,8 @@ describe('visualization preview presentation', () => {
     fixture.componentRef.setInput('definition', definition); fixture.componentRef.setInput('identity', identity); fixture.detectChanges();
     await settle(); fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Current utility chart');
-    expect(fixture.nativeElement.querySelector('summary')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.visually-hidden table')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('summary').textContent).toBe('Show data');
+    expect(fixture.nativeElement.querySelector('.visualization-preview__accessible-data table')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('caption').textContent).toBe('Energy in kWh');
     expect(fixture.nativeElement.querySelectorAll('th[scope="col"]').length).toBe(2);
     expect(fixture.nativeElement.querySelector('tbody').textContent).toContain('0');

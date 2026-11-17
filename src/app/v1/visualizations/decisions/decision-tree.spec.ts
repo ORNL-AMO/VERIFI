@@ -1,8 +1,9 @@
+import { configuredChartSummary } from '../shared/configured-items';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { createVisualizationDefinition, createVisualizationSetupDefinition, type UtilityVisualizationSource, type VisualizationDefinition, type VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
 import { visualizationSnapshot } from '../testing/visualization-test-fixtures';
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
-import { configuredChartSummary, decisionNodeId, meterResourceChoices, nativeObservationAvailable, prepareDecisionChange, projectMeterItems } from './decision-tree';
+import { decisionNodeId, meterResourceChoices, nativeObservationAvailable, prepareDecisionChange, projectMeterItems } from './decision-tree';
 import type { VisualizationDecisionAction } from './decision-types';
 import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';

@@ -1,6 +1,7 @@
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { observed, visualizationEvidenceFixture } from '@domain/visualizations/testing/visualization-provider-fixtures';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { timeSeriesOption } from './time-series-options';
 import type { VisualizationSourceEvidence, ResolvedVisualizationSeries } from '@domain/visualizations/visualization-source-provider';
 import { prepareTimeSeries, TimeSeriesPresenter } from './time-series.presenter';
 
@@ -13,6 +14,37 @@ function appendSeries(evidence: VisualizationSourceEvidence, metadata: ResolvedV
 }
 
 describe('saved time-series presentation', () => {
+  it('retains coverage and omission evidence without predictor alerts, while preserving meter notices', () => {
+    const definition = utilityVisualizationFixture(), evidence = ready(definition);
+    if (evidence.resolution.state !== 'ready') throw new Error('Expected ready evidence');
+    const omissions = [{ resourceGuid: 'predictor-a', label: 'Weather', issue: 'Invalid saved month', readings: ['invalid: 12 (2024-13) · Manual weather override'] }];
+    const partial: VisualizationSourceEvidence = { ...evidence, resolution: { ...evidence.resolution,
+      resolved: { ...evidence.resolution.resolved, quality: { partial: true, warnings: [], omissions } } } };
+    const predictor: VisualizationSourceEvidence = { ...partial, request: { ...partial.request, source: { id: partial.request.source.id,
+      kind: 'predictor', measure: 'value', aggregation: 'none' } } };
+    const model = prepareTimeSeries(definition, [predictor]);
+    expect(model).toMatchObject({ partial: true, showPartialNotice: false, omissions, warnings: [] });
+    const meter = prepareTimeSeries(definition, [partial]);
+    expect(meter.showPartialNotice).toBe(true);
+    expect(meter.warnings).toContain('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
+  });
+  it('permits unconverted mixed-unit traces only when their adapter explicitly supports shared axes', () => {
+    const base = utilityVisualizationFixture();
+    const definition: VisualizationDefinition = { ...base, sources: [{ id: 'predictors', kind: 'predictor', measure: 'value', aggregation: 'none',
+      selection: { kind: 'fixed', resource: 'predictor', guids: ['a', 'b'] } }], series: [
+      { id: 'a', sourceId: 'predictors', metric: 'value', resourceGuid: 'a', axis: 'left' },
+      { id: 'b', sourceId: 'predictors', metric: 'value', resourceGuid: 'b', axis: 'left' }
+    ] };
+    const original = ready(definition);
+    if (original.resolution.state !== 'ready') throw new Error('Expected ready evidence');
+    const evidence: VisualizationSourceEvidence = { ...original, capabilities: { ...original.capabilities, allowMixedAxisUnits: true },
+      resolution: { ...original.resolution, resolved: { ...original.resolution.resolved,
+        series: original.resolution.resolved.series.map((series, index) => ({ ...series, unit: index ? 'widgets' : 'days' })) } } };
+    const presentation = new TimeSeriesPresenter().prepare(definition, [evidence], new AbortController().signal);
+    expect(presentation.details.rows.map(row => row[4])).toEqual(['0 days · predictor', '0 widgets · predictor']);
+    expect(prepareTimeSeries(definition, [evidence]).traces.map(trace => trace.axis)).toEqual(['left', 'left']);
+    expect(() => prepareTimeSeries(definition, [{ ...evidence, capabilities: { ...evidence.capabilities, allowMixedAxisUnits: false } }])).toThrow('compatible units');
+  });
   it('keeps observed zero, original comparison dates and actual quality in accessible details', () => {
     const definition = { ...utilityVisualizationFixture(), comparison: { kind: 'previous-year' as const, basis: 'calendar' as const } };
     const presentation = new TimeSeriesPresenter().prepare(definition, [ready(definition)], new AbortController().signal);
@@ -50,12 +82,15 @@ describe('saved time-series presentation', () => {
     if (evidence.resolution.state !== 'ready' || evidence.resolution.resolved.data.kind !== 'time-series') throw new Error('Fixture must be time-series.');
     const amended: VisualizationSourceEvidence = { ...evidence, resolution: { ...evidence.resolution, resolved: { ...evidence.resolution.resolved,
       quality: { partial: true, warnings: ['Meter B omitted: invalid bill'] }, data: { kind: 'time-series', rows: [
-        { periodKey: 'jan', start: '2025-01-01', end: '2025-01-31', values: { energy: { state: 'observed', value: 10, provenance: 'measured', partial: true } } },
+        { periodKey: 'jan', start: '2025-01-01', end: '2025-01-31', values: { energy: { state: 'observed', value: 10, provenance: 'measured', partial: true, notes: ['Estimated from downtime log; verify before analysis'] } } },
         { periodKey: 'feb', start: '2025-02-01', end: '2025-02-28', values: { energy: { state: 'missing', value: null, reason: 'Invalid cost input' } } }
       ] } } } };
     const snapshot = structuredClone(amended);
     const presentation = new TimeSeriesPresenter().prepare(definition, [amended], new AbortController().signal);
     expect(presentation.details.rows[0][4]).toContain('partial subtotal');
+    expect(presentation.details.rows[0][4]).toContain('Estimated from downtime log; verify before analysis');
+    const model = prepareTimeSeries(definition, [amended]), option = timeSeriesOption(model) as any;
+    expect(option.tooltip.formatter([{ seriesId: model.traces[0].id, axisValue: model.slots[0].key }])).toContain('Estimated from downtime log; verify before analysis');
     expect(presentation.details.rows[1][4]).toBe('missing: Invalid cost input');
     expect(amended).toEqual(snapshot);
   });
@@ -74,9 +109,9 @@ describe('saved time-series presentation', () => {
     expect(model.traces.filter(trace => trace.id.startsWith(first.id + ':')).map(trace => trace.type)).toEqual(['bar', 'bar']);
     expect(model.traces.filter(trace => trace.id.startsWith('second-meter:')).map(trace => trace.type)).toEqual(['line', 'line']);
   });
-  it('rejects unsupported styles and aborted presentation', () => {
+  it('prepares area and rejects aborted presentation', () => {
     const definition = utilityVisualizationFixture();
-    expect(() => prepareTimeSeries({ ...definition, chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'none' } }, [ready(definition)])).toThrow('line or bar');
+    expect(prepareTimeSeries({ ...definition, chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'none' } }, [ready(definition)]).traces[0].type).toBe('area');
     const abort = new AbortController(); abort.abort();
     expect(() => new TimeSeriesPresenter().prepare(definition, [ready(definition)], abort.signal)).toThrow('canceled');
   });

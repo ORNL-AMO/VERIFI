@@ -8,7 +8,7 @@ import { meter } from '@app/v1/data/meters/facility-meters.testing';
 import { UtilityEditorsModule } from '../utility-editors.module';
 import { decisionNodeId } from '../../../decisions/decision-tree';
 import { UtilitySourceEditorComponent } from './utility-source-editor.component';
-import type { UtilityEditorContext } from '../utility-editor-context';
+import type { VisualizationSourceEditorContext } from '../../../shared/source-editor-context';
 
 describe('Meter decision branches', () => {
   it('retains normalized-equivalent raw unit text through its own acknowledgement and replaces it on reset', () => {
@@ -39,7 +39,7 @@ describe('Meter decision branches', () => {
     state.update({ definition: { ...original, sources: [{ ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: external } } }] } });
     expect(state.component.settingsForm.controls.unit.value).toBe(external); expect(state.component.conflict()).toBe(false);
   });
-  it('places each selected item beside the source settings without an Items wrapper or movement buttons', () => {
+  it('places each selected item beside the source settings with ordering actions and without an Items wrapper', () => {
     const original = utilityVisualizationFixture(), source = original.sources[0] as UtilityVisualizationSource;
     const state = setup({ ...original, sources: [{ ...source, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'meter-b'] } }] });
     const root = state.fixture.nativeElement as HTMLElement, sections = root.querySelector('.utility-editor')!;
@@ -48,7 +48,7 @@ describe('Meter decision branches', () => {
     expect(items.map(item => item.querySelector('.decision-section__toggle strong')?.textContent)).toContain('Boiler meter');
     expect([...sections.children].some(section => section.querySelector('strong')?.textContent === 'Data settings')).toBe(true);
     expect(root.querySelector('[id^="items:"]')).toBeNull();
-    expect(root.querySelector('button[aria-label^="Move "]')).toBeNull();
+    expect(root.querySelector('button[aria-label^="Move "]')).not.toBeNull();
   });
   it('shows the default-on calendarization switch inside Data settings and preserves drafts while a change is reviewed', () => {
     const state = setup(), root = state.fixture.nativeElement as HTMLElement;
@@ -131,11 +131,11 @@ describe('Meter decision branches', () => {
     const store = new AccountWorkspaceStore(); store.publish({ ...visualizationSnapshot(), meters: [meter({ id: 1 }), meter({ id: 2, guid: 'meter-b', name: 'Boiler meter' })] });
     const request = vi.fn(), invalid = vi.fn();
     const expandedNodes = new Set(['measure', 'selection-mode', 'resources', 'data-settings', 'items'].map(kind => `${kind}:utility`));
-    let context: UtilityEditorContext = { definition, sourceId: 'utility', editorKey: 'saved-a', disabled: false, changed: vi.fn(),
+    let context: VisualizationSourceEditorContext = { definition, sourceId: 'utility', editorKey: 'saved-a', disabled: false, changed: vi.fn(),
       request, expandedNodes, sectionChanged: vi.fn(), nodeValidityChanged: invalid };
     TestBed.configureTestingModule({ imports: [UtilityEditorsModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }] });
     const fixture = TestBed.createComponent(UtilitySourceEditorComponent); fixture.componentRef.setInput('context', context); fixture.detectChanges();
-    const update = (changes: Partial<UtilityEditorContext>) => { context = { ...context, ...changes }; fixture.componentRef.setInput('context', context); fixture.detectChanges(); };
+    const update = (changes: Partial<VisualizationSourceEditorContext>) => { context = { ...context, ...changes }; fixture.componentRef.setInput('context', context); fixture.detectChanges(); };
     return { fixture, component: fixture.componentInstance, store, request, invalid, update };
   }
   it('shows emissions choices under Charted Data only while the account displays emissions', () => {

@@ -1,0 +1,10 @@
+@if (contextState(); as view) {
+<app-visualization-resource-picker label="Predictors" icon="predictor" [control]="selected" [options]="choices()"
+  [allMode]="allMode()" allLabel="All Predictors" (allSelectionRequested)="selectAll($event)" [disabled]="view.disabled" [requestChanges]="true" (selectionRequested)="toggleSelection($event)" (selectionSetRequested)="setSelection($event)"/>
+@for (item of items(); track item.key; let position = $index) {
+  @if (!item.available) { <p role="status">{{ item.missing ? 'Selected predictor unavailable.' : 'Predictor type not supported.' }} Choose a supported predictor to repair this selection.</p> }
+  <app-visualization-item-settings [item]="item" [position]="position" [itemCount]="items().length" [disabled]="view.disabled" [editorKey]="view.editorKey ?? ''"
+    [expandedNodes]="view.expandedNodes ?? emptyNodes" [resetKey]="item.resetKey"
+    (requested)="view.request?.($event)" (sectionChanged)="view.sectionChanged?.($event.id, $event.expanded)"/>
+}
+}

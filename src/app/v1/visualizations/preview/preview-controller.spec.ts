@@ -1,3 +1,4 @@
+import { analysisDefinition } from '@domain/visualizations/testing/analysis-fixtures';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { visualizationSnapshot } from '../testing/visualization-test-fixtures';
 import { Component } from '@angular/core';
@@ -64,6 +65,30 @@ function setupMixed(options: { definition?: VisualizationDefinition; providers?:
 }
 
 describe('visualization preview orchestration', () => {
+  it('lets matching numerical work finish during appearance edits, then resolves only the newest presentation with current identities', async () => {
+    const pending = deferred<VisualizationSourceResolution>();
+    let firstRequest!: VisualizationSourceRequest, firstSignal!: AbortSignal;
+    const prepare = vi.fn(() => presentation);
+    const resolve = vi.fn(async (request: VisualizationSourceRequest, signal: AbortSignal) => {
+      if (!firstRequest) { firstRequest = request; firstSignal = signal; return pending.promise; }
+      return { ...visualizationEvidenceFixture(utilityVisualizationFixture()).resolution, identity: request.identity };
+    });
+    const { controller, definition, evidence } = setup({ provider: { resolve }, presenter: { prepare } });
+    controller.update(definition, identity); await settle();
+    const latest = { ...definition, appearance: { ...definition.appearance, title: 'Newest title' } };
+    controller.update({ ...definition, name: 'Intermediate name' }, { ...identity, definitionRevision: 2 });
+    controller.update(latest, { ...identity, definitionRevision: 3 });
+    expect(firstSignal.aborted).toBe(false); expect(resolve).toHaveBeenCalledTimes(1);
+    pending.resolve({ ...evidence.resolution, identity: firstRequest.identity });
+    await settle(); await settle();
+    const state = controller.state(); expect(state.state).toBe('ready');
+    if (state.state !== 'ready') throw new Error();
+    expect(state.definition.appearance.title).toBe('Newest title');
+    expect(state.evidence[0].request.identity.definitionRevision).toBe(3);
+    expect(prepare).toHaveBeenCalledTimes(1);
+    expect(resolve).toHaveBeenCalledTimes(2); // Session-owned numerical cache is reused; evidence is requested afresh.
+  });
+
   it.each(VISUALIZATION_CHART_CHOICES)('retains $label mixed-sourceKind setup without requesting data or dates', ({ value, label }) => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve), describe = vi.fn(), supportsChart = vi.fn(), prepare = vi.fn();
     const { controller } = setup({ provider: { resolve, describe, supportsChart }, presenter: { prepare }, dates: { resolve: resolveDates } });
@@ -89,6 +114,15 @@ describe('visualization preview orchestration', () => {
     for (const provider of providers) expect(provider.resolve).not.toHaveBeenCalled();
   });
 
+  it('preserves mixed setup without requesting dates or data when a production adapter disallows combinations', () => {
+    const entry = visualizationEvidenceFixture(mixedDefinition(), 1);
+    const { controller, definition, providers, resolveDates } = setupMixed({ providers: [{}, { describe: () => ({ ...entry.capabilities, allowMultipleSources: false }) }] });
+    controller.update(definition, identity);
+    expect(controller.state()).toMatchObject({ state: 'unsupported' });
+    expect(resolveDates).not.toHaveBeenCalled();
+    for (const provider of providers) expect(provider.resolve).not.toHaveBeenCalled();
+  });
+
   it('resolves compatible utility and predictor series against one shared date context and presents both', async () => {
     const { controller, definition, providers, prepare, resolveDates } = setupMixed();
     controller.update(definition, identity); await settle();
@@ -102,6 +136,22 @@ describe('visualization preview orchestration', () => {
     for (const provider of providers) expect(provider.resolve).toHaveBeenCalledTimes(1);
   });
 
+  it('retains warnings, omissions and unavailable observations when a ready utility and empty predictor have no usable values', async () => {
+    const definition = mixedDefinition(), entry = visualizationEvidenceFixture(definition);
+    if (entry.resolution.state !== 'ready' || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Expected utility evidence');
+    const resolved = entry.resolution.resolved, data = entry.resolution.resolved.data;
+    const warning = 'Negative usage is invalid for this meter.';
+    const { controller, prepare } = setupMixed({ definition, providers: [{ resolve: async request => ({ identity: request.identity, state: 'ready', resolved: {
+      ...resolved, quality: { partial: true, warnings: [warning], omissions: [{ resourceGuid: 'meter-a', label: 'Meter A', issue: 'Excluded reading', readings: ['Saved -5'] }] },
+      data: { kind: 'time-series', rows: data.rows.map(row => ({ ...row, values: Object.fromEntries(Object.keys(row.values).map(id => [id,
+        { state: 'excluded', value: null, reason: 'The saved reading cannot be used.' }])) })) }
+    } }) }, { resolve: async request => ({ identity: request.identity, state: 'empty', periods: [], message: 'No saved predictor values.', reasons: [] }) }] });
+    controller.update(definition, identity); await settle();
+    expect(controller.state()).toMatchObject({ state: 'empty', reasons: expect.arrayContaining([warning,
+      'Meter A · Excluded reading: Saved -5', expect.stringContaining('The saved reading cannot be used.')]) });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it('preserves configured mixed sources when one sourceKind has no adapter, without requesting partial data', () => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve);
     const { controller } = setup({ provider: { resolve }, dates: { resolve: resolveDates } });
@@ -111,12 +161,12 @@ describe('visualization preview orchestration', () => {
     expect(definition).toEqual(original); expect(resolve).not.toHaveBeenCalled(); expect(resolveDates).not.toHaveBeenCalled();
   });
 
-  it('rejects incompatible mixed-source units on one axis before mounting the presenter', async () => {
+  it('allows unconverted mixed-source units on one axis in the supported monthly chart', async () => {
     const base = mixedDefinition();
     const { controller, definition, prepare } = setupMixed({ definition: { ...base, series: base.series.map(series => ({ ...series, axis: 'left' })) } });
     controller.update(definition, identity); await settle();
-    expect(controller.state()).toMatchObject({ state: 'incompatible', reasons: expect.arrayContaining([expect.stringContaining('compatible units')]) });
-    expect(prepare).not.toHaveBeenCalled();
+    expect(controller.state()).toMatchObject({ state: 'ready' });
+    expect(prepare).toHaveBeenCalledOnce();
   });
 
   it('rejects mixed-source observations with different declared alignment', async () => {
@@ -215,12 +265,13 @@ describe('visualization preview orchestration', () => {
     expect(controller.state().state).toBe('error'); expect(prepare).not.toHaveBeenCalled();
   });
 
-  it.each(['definitionRevision', 'workspaceRevision', 'accountGuid'] as const)('rejects a late response after %s changes', async field => {
+  it.each(['definitionRevision', 'workspaceRevision', 'accountGuid'] as const)('rejects a late response after numerical or %s identity changes', async field => {
     const pending = deferred<VisualizationSourceResolution>(); let original!: VisualizationSourceRequest; let signal!: AbortSignal;
     const { controller, definition, evidence } = setup({ provider: { resolve: (request, abort) => { original = request; signal = abort; return pending.promise; } } });
     controller.update(definition, identity); await settle();
     const nextIdentity = { ...identity, [field]: field === 'accountGuid' ? 'account-b' : 2 };
-    controller.update(field === 'accountGuid' ? { ...definition, accountGuid: 'account-b' } : definition, nextIdentity);
+    controller.update(field === 'accountGuid' ? { ...definition, accountGuid: 'account-b' }
+      : field === 'definitionRevision' ? { ...definition, period: { kind: 'fixed', basis: 'calendar', start: '2025-02-01', end: '2025-12-31' } } : definition, nextIdentity);
     expect(signal.aborted).toBe(true);
     pending.resolve({ ...evidence.resolution, identity: original.identity }); await settle();
     expect(controller.state().state).not.toBe('ready');
@@ -270,5 +321,26 @@ describe('visualization preview orchestration', () => {
     const { controller, definition } = setup({ provider: { resolve }, dates: { resolve: () => pending.promise } });
     controller.update(definition, identity); controller.update(undefined, undefined); pending.resolve({ calendarDate: '2026-11-11' }); await settle();
     expect(resolve).not.toHaveBeenCalled(); expect(controller.state().state).toBe('setup-required');
+  });
+});
+
+describe('analysis preview publication freshness', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  it('rejects evidence if committed inputs change during asynchronous presentation', async () => {
+    const definition = analysisDefinition(), evidence = visualizationEvidenceFixture(definition), store = workspace();
+    const pending = deferred<PreviewPresentation>(), prepare = vi.fn(() => pending.promise);
+    const provider: VisualizationSourceProvider = { kind: 'analysis', describe: () => evidence.capabilities,
+      supportsChart: (_source, chart) => ({ state: 'supported', chart }), resolve: async request => ({ ...evidence.resolution, identity: request.identity }) };
+    TestBed.configureTestingModule({ providers: [PreviewController, PreviewRegistry, { provide: AccountWorkspaceStore, useValue: store },
+      { provide: VISUALIZATION_SOURCE_PROVIDERS, useValue: [provider] },
+      { provide: VISUALIZATION_PREVIEW_PRESENTERS, useValue: [{ kind: 'time-series', component: TestChartComponent, prepare }] },
+      { provide: VISUALIZATION_DATE_CONTEXT_RESOLVER, useValue: dates }] });
+    const controller = TestBed.inject(PreviewController);
+    controller.update(definition, { ...identity, workspaceRevision: store.revision() });
+    await settle(); expect(prepare).toHaveBeenCalledOnce();
+    store.publishCommitted(store.snapshot()!, {});
+    pending.resolve(presentation); await settle();
+    expect(controller.state()).toMatchObject({ state: 'error', message: expect.stringContaining('Analysis inputs changed') });
+    controller.destroy();
   });
 });

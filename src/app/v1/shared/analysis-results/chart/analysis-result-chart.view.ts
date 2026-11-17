@@ -1,3 +1,4 @@
+import { annualAnalysisChartValues, monthlyAnalysisUseValues, monthlyAnalysisSavingsValues } from '@domain/calculations/analysis-calculations/analysis-chart-values';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { FacilityAnalysisGroupCalculationResult } from '@platform/web-workers/facility-analysis-results-worker.contract';
 import {
@@ -79,7 +80,7 @@ export function annualUseChartMetrics(category: 'energy' | 'water' | undefined, 
 export function annualUseChartRows(rows: readonly AnnualAnalysisSummary[]): readonly MeterResultsChartRow[] {
   return rows.map(row => ({
     periodKey: String(row.year), periodLabel: String(row.year), sortValue: row.year,
-    values: { actual: row.energyUse, calculated: row.isIntermediateBanked ? null : row.adjusted }
+    values: { actual: annualAnalysisChartValues(row)['actual'], calculated: annualAnalysisChartValues(row)['calculated'] }
   }));
 }
 
@@ -87,8 +88,8 @@ export function annualImprovementChartRows(rows: readonly AnnualAnalysisSummary[
   return rows.map(row => ({
     periodKey: String(row.year), periodLabel: String(row.year), sortValue: row.year,
     values: {
-      annualImprovement: row.isIntermediateBanked ? null : row.annualSavingsPercentImprovement,
-      totalImprovement: row.totalSavingsPercentImprovement
+      annualImprovement: annualAnalysisChartValues(row)['annualImprovement'],
+      totalImprovement: annualAnalysisChartValues(row)['totalImprovement']
     }
   }));
 }
@@ -112,7 +113,7 @@ export function monthlyUseChartRows(rows: readonly MonthlyAnalysisSummaryData[])
       periodKey: `${date.getFullYear()}-${date.getMonth()}`,
       periodLabel: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       sortValue: date.getTime(),
-      values: { actual: row.energyUse, calculated: row.isIntermediateBanked ? null : row.adjusted }
+      values: monthlyAnalysisUseValues(row)
     };
   });
 }
@@ -129,41 +130,11 @@ export function monthlySavingsChartView(rows: readonly MonthlyAnalysisSummaryDat
       { id: 'losses', label: 'Losses', unit: '%', color: 'var(--v1-danger)' },
       { id: 'savings', label: 'Savings', unit: '%', color: 'var(--v1-success)' }
     ];
-  const transitionCarry = carriedTransitionImprovement(rows);
-  return {
-    metrics,
-    rows: rows.map(row => {
-      const date = new Date(row.date);
-      const rollingImprovement = row.rolling12MonthImprovement;
-      const values: Record<string, number | null> = {
-        savings: (!includeBanking || !row.isBanked) && rollingImprovement >= 0 ? rollingImprovement : 0,
-        losses: (!includeBanking || !row.isBanked) && rollingImprovement < 0 ? rollingImprovement : 0
-      };
-      if (includeBanking) {
-        const bankedImprovement = row.isIntermediateBanked
-          ? transitionCarry.get(row) ?? row.percentSavingsComparedToBaseline
-          : rollingImprovement;
-        values['bankedSavings'] = row.isBanked && bankedImprovement >= 0 ? bankedImprovement : 0;
-        values['bankedLosses'] = row.isBanked && bankedImprovement < 0 ? bankedImprovement : 0;
-      }
-      return {
-        periodKey: `${date.getFullYear()}-${date.getMonth()}`,
-        periodLabel: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-        sortValue: date.getTime(), values
-      };
-    })
-  };
-}
-
-function carriedTransitionImprovement(rows: readonly MonthlyAnalysisSummaryData[]): ReadonlyMap<MonthlyAnalysisSummaryData, number> {
-  const carry = new Map<MonthlyAnalysisSummaryData, number>();
-  let appliedImprovement: number | undefined;
-  [...rows].sort((first, second) => new Date(first.date).getTime() - new Date(second.date).getTime()).forEach(row => {
-    if (row.isBanked && !row.isIntermediateBanked && Number.isFinite(row.percentSavingsComparedToBaseline)) {
-      appliedImprovement = row.percentSavingsComparedToBaseline;
-    } else if (row.isIntermediateBanked && appliedImprovement !== undefined) {
-      carry.set(row, appliedImprovement);
-    }
-  });
-  return carry;
+  const values = monthlyAnalysisSavingsValues(rows, includeBanking);
+  return { metrics, rows: rows.map((row, index) => {
+    const date = new Date(row.date);
+    return { periodKey: `${date.getFullYear()}-${date.getMonth()}`,
+      periodLabel: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      sortValue: date.getTime(), values: values[index] };
+  }) };
 }

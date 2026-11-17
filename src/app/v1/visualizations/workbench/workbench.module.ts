@@ -1,3 +1,7 @@
+import { PeriodSettingsModule } from '../shared/period-settings/period-settings.module';
+import { AnalysisEditorsModule } from '../analysis/analysis-editors.module';
+import { EquipmentEditorsModule } from '../energy-use/equipment-editors.module';
+import { PredictorEditorsModule } from '../predictor/predictor-editors.module';
 import { FacilityPickerModule } from '../shared/facility-picker/facility-picker.module';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -14,5 +18,5 @@ import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench
 import { RouterLink } from '@angular/router';
 import { DecisionSectionModule } from '../shared/decision-section/decision-section.module';
 
-@NgModule({ declarations: [WorkbenchComponent], imports: [FacilityPickerModule, CommonModule, ReactiveFormsModule, RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule, TimeSeriesModule, DecisionSectionModule], exports: [WorkbenchComponent] })
+@NgModule({ declarations: [WorkbenchComponent], imports: [PeriodSettingsModule, AnalysisEditorsModule, EquipmentEditorsModule, PredictorEditorsModule, FacilityPickerModule, CommonModule, ReactiveFormsModule, RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule, TimeSeriesModule, DecisionSectionModule], exports: [WorkbenchComponent] })
 export class WorkbenchModule { }

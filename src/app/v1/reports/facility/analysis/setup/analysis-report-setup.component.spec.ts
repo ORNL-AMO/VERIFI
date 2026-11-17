@@ -15,8 +15,17 @@ describe('facility report setup controls', () => {
     const setup = view.harness.routeDebugElement!.query(By.directive(ReportAnalysisSelectionComponent)).componentInstance as ReportAnalysisSelectionComponent;
     expect(workbench.editor.form.controls.settings.controls.reportYear.value).toBe(2023);
     const root = view.harness.routeNativeElement!;
-    expect(root.querySelector('.report-setup-top #report-workbench-name')).not.toBeNull();
-    expect(root.querySelector<HTMLSelectElement>('.report-setup-top #facility-analysis-report-year')?.required).toBe(true);
+    expect([...root.querySelectorAll('.setup-section-heading')].map(heading => heading.textContent?.trim()))
+      .toEqual(['Report information', 'Analysis *', 'Included content', 'Table columns']);
+    const nameSection = root.querySelector('#report-workbench-name')!.closest('section')!;
+    const yearSection = root.querySelector('#facility-analysis-report-year')!.closest('section')!;
+    expect(nameSection).toBe(yearSection);
+    expect(root.querySelector('#report-period-heading')).toBeNull();
+    for (const heading of root.querySelectorAll('.setup-section-heading')) {
+      expect(heading.parentElement!.getAttribute('aria-labelledby')).toBe(heading.id);
+      expect(heading.nextElementSibling!.classList.contains('report-setup-body')).toBe(true);
+    }
+    expect(root.querySelector<HTMLSelectElement>('#facility-analysis-report-year')?.required).toBe(true);
     expect(root.querySelector('label[for=facility-analysis-report-year]')?.textContent).toContain('Report year *');
     expect(root.querySelector('#report-configuration-heading')).toBeNull();
     expect(root.querySelector('#report-name-help')).toBeNull();
