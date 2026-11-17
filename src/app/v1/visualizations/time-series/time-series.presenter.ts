@@ -1,3 +1,4 @@
+import { allowsMixedAxisUnits } from '@domain/visualizations/visualization-source-provider';
 import { Injectable } from '@angular/core';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import type { VisualizationSourceEvidence, VisualizationObservation } from '@domain/visualizations/visualization-source-provider';
@@ -27,18 +28,21 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   const chart = definition.chart;
   if (chart?.kind !== 'time-series' || !['line', 'bar'].includes(chart.defaultTraceType) || chart.stack !== 'none') throw new Error('Choose unstacked line or bar traces.');
   const resolved = evidence.map(entry => {
-    if (entry.resolution.state !== 'ready' || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Resolve compatible time-series sources before preparing a chart.');
+    if ((entry.resolution.state !== 'ready' && entry.resolution.state !== 'empty') || !entry.resolution.resolved || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Resolve compatible time-series sources before preparing a chart.');
     return { evidence: entry, result: entry.resolution.resolved, data: entry.resolution.resolved.data };
   });
   const selected = resolveVisualizationSeries(definition, resolved.flatMap(entry => entry.result.series));
   if (selected.some(item => !['line', 'bar'].includes(item.selected.traceType ?? chart.defaultTraceType)))
     throw new Error('Choose unstacked line or bar traces.');
   for (const axis of ['left', 'right'] as const) {
-    const signatures = selected.filter(item => item.selected.axis === axis).map(item => `${item.metadata.dimension}:${item.metadata.unit}:${item.metadata.currency ?? ''}:${item.metadata.energyTreatment ?? ''}`);
-    if (new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
+    const axisSeries = selected.filter(item => item.selected.axis === axis);
+    const axisCapabilities = [...new Set(axisSeries.map(item => item.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
+    const signatures = axisSeries.map(item => `${item.metadata.dimension}:${item.metadata.unit}:${item.metadata.currency ?? ''}:${item.metadata.energyTreatment ?? ''}`);
+    if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(signatures).size > 1) throw new Error(`Choose compatible units, currency and treatment for the ${axis} axis.`);
   }
   const warnings = new Set(resolved.flatMap(entry => entry.result.quality.warnings));
-  if (resolved.some(entry => entry.result.quality.partial)) warnings.add('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
+  const showPartialNotice = resolved.some(entry => entry.evidence.request.source.kind !== 'predictor' && entry.result.quality.partial);
+  if (showPartialNotice) warnings.add('This chart includes partial coverage. Review unavailable observations and omitted contributions before interpreting totals.');
   const contributionOwners = new Map<string, Set<string>>();
   for (const item of selected) for (const key of item.metadata.contributionKeys ?? []) {
     const owners = contributionOwners.get(key) ?? new Set<string>(); owners.add(item.metadata.id); contributionOwners.set(key, owners);
@@ -79,6 +83,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   for (const trace of traces) duplicateLabels.set(trace.label, (duplicateLabels.get(trace.label) ?? 0) + 1);
   return { title: definition.appearance.title ?? definition.name, chart, legend: definition.appearance.legend,
     partial: resolved.some(entry => entry.result.quality.partial),
+    showPartialNotice, omissions: resolved.flatMap(entry => entry.result.quality.omissions ?? []),
     slots: [...slots.values()].sort((a, b) => a.order - b.order || a.key.localeCompare(b.key)),
     traces: traces.map((trace, index) => duplicateLabels.get(trace.label)! > 1 ? { ...trace, label: `${trace.label} (series ${index + 1})` } : trace), warnings: [...warnings] };
 }

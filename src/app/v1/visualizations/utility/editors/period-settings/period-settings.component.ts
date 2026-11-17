@@ -1,3 +1,4 @@
+import { predictorMonthRange } from '@domain/visualizations/predictor/predictor-source';
 import { Component, DestroyRef, Input, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,8 +13,9 @@ export interface PeriodFormValue {
 
 export function periodFormValue(definition: VisualizationDefinition): PeriodFormValue {
   const period = definition.period, comparison = definition.comparison;
+  const monthly = definition.sources.some(source => source.kind === 'predictor');
   return { kind: period.kind, basis: 'basis' in period ? period.basis : 'calendar',
-    start: period.kind === 'fixed' ? period.start : '', end: period.kind === 'fixed' ? period.end : '',
+    start: period.kind === 'fixed' ? monthly ? period.start.slice(0, 7) : period.start : '', end: period.kind === 'fixed' ? monthly ? period.end.slice(0, 7) : period.end : '',
     count: period.kind === 'rolling' ? period.count : 12, unit: period.kind === 'rolling' ? period.unit : 'month',
     anchor: period.kind === 'rolling' ? period.anchor : 'latest-data',
     includeIncomplete: period.kind === 'rolling' ? period.includeIncomplete : true,
@@ -28,8 +30,13 @@ function validCivilDate(value: string): boolean {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
-export function periodFormIssue(value: PeriodFormValue): string | undefined {
-  if (value.kind === 'fixed' && (!validCivilDate(value.start) || !validCivilDate(value.end) || value.start > value.end))
+export function periodFormIssue(value: PeriodFormValue, monthly = false): string | undefined {
+  if (monthly && value.kind === 'fixed') {
+    if (!/^\d{4}-\d{2}$/.test(value.start) || !/^\d{4}-\d{2}$/.test(value.end)
+      || !validCivilDate(`${value.start}-01`) || !validCivilDate(`${value.end}-01`) || value.start > value.end)
+      return 'Choose real start and end months in chronological order.';
+  }
+  if (!monthly && value.kind === 'fixed' && (!validCivilDate(value.start) || !validCivilDate(value.end) || value.start > value.end))
     return 'Choose real start and end dates in chronological order.';
   if (value.kind === 'rolling' && (!Number.isSafeInteger(value.count) || value.count! < 1)) return 'Enter a positive whole number of rolling periods.';
   if (value.kind === 'fiscal-year' && (!Number.isSafeInteger(value.year) || value.year! < 1 || value.year! > 9999)) return 'Enter a fiscal year from 1 to 9999.';
@@ -39,8 +46,10 @@ export function periodFormIssue(value: PeriodFormValue): string | undefined {
 }
 
 export function applyPeriodForm(definition: VisualizationDefinition, value: PeriodFormValue): VisualizationDefinition {
-  if (periodFormIssue(value)) return definition;
-  const period: VisualizationPeriod = value.kind === 'fixed' ? { kind: 'fixed', start: value.start, end: value.end, basis: value.basis }
+  const monthly = definition.sources.some(source => source.kind === 'predictor');
+  if (periodFormIssue(value, monthly)) return definition;
+  const monthRange = (value: string) => predictorMonthRange(Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7)) - 1);
+  const period: VisualizationPeriod = value.kind === 'fixed' ? { kind: 'fixed', start: monthly ? monthRange(value.start).start : value.start, end: monthly ? monthRange(value.end).end : value.end, basis: value.basis }
     : value.kind === 'rolling' ? { kind: 'rolling', count: value.count!, unit: value.unit, anchor: value.anchor, basis: value.basis, includeIncomplete: value.includeIncomplete }
     : value.kind === 'fiscal-year' ? { kind: 'fiscal-year', year: value.year! }
     : value.kind === 'latest-saved-year' ? { kind: 'latest-saved-year', basis: 'fiscal' } : { kind: 'all-history' };
@@ -51,7 +60,7 @@ export function applyPeriodForm(definition: VisualizationDefinition, value: Peri
 }
 
 function periodSettingsFingerprint(definition: VisualizationDefinition): string {
-  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison]);
+  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor')]);
 }
 
 @Component({ selector: 'app-utility-period-settings', standalone: false, templateUrl: './period-settings.component.html',
@@ -63,6 +72,9 @@ export class PeriodSettingsComponent {
   private savedFingerprint = '';
   readonly conflict = signal(false);
   readonly disabled = signal(true);
+  readonly monthOnly = signal(false);
+  readonly retainedPartial = signal(false);
+  readonly unsupportedPredictorPeriod = signal(false);
   readonly form = new FormGroup({
     kind: new FormControl<VisualizationPeriod['kind']>('all-history', { nonNullable: true }),
     basis: new FormControl<'calendar' | 'fiscal'>('calendar', { nonNullable: true }),
@@ -73,22 +85,30 @@ export class PeriodSettingsComponent {
     comparison: new FormControl<VisualizationComparison['kind']>('none', { nonNullable: true }),
     comparisonBasis: new FormControl<'calendar' | 'fiscal'>('calendar', { nonNullable: true }),
     comparisonStart: new FormControl('', { nonNullable: true }), comparisonEnd: new FormControl('', { nonNullable: true })
-  }, { validators: control => periodFormIssue(control.getRawValue() as PeriodFormValue) ? { periodSetup: true } : null });
+  }, { validators: control => periodFormIssue(control.getRawValue() as PeriodFormValue, this.monthOnly()) ? { periodSetup: true } : null });
   readonly value = signal(this.form.getRawValue());
-  readonly issue = computed(() => periodFormIssue(this.value()));
+  readonly issue = computed(() => periodFormIssue(this.value(), this.monthOnly()));
 
   @Input({ required: true }) set context(context: PeriodSettingsContext) {
+    const hadInvalidInput = !!periodFormIssue(this.form.getRawValue(), this.monthOnly());
     this.contextValue = context; this.disabled.set(context.disabled);
+    this.monthOnly.set(context.definition.sources.some(source => source.kind === 'predictor'));
+    const period = context.definition.period;
+    this.retainedPartial.set(this.monthOnly() && period.kind === 'fixed' && (period.start !== period.start.slice(0, 7) + '-01'
+      || period.end !== predictorMonthRange(Number(period.end.slice(0, 4)) * 12 + Number(period.end.slice(5, 7)) - 1).end));
+    this.unsupportedPredictorPeriod.set(this.monthOnly() && (context.definition.comparison.kind !== 'none'
+      || 'basis' in period && period.basis !== 'calendar' || !['all-history', 'fixed', 'rolling'].includes(period.kind)
+      || period.kind === 'rolling' && period.includeIncomplete));
     const identity = JSON.stringify([context.editorKey, context.resetKey, context.definition.accountGuid]);
     const fingerprint = periodSettingsFingerprint(context.definition);
     if (identity !== this.identity) {
       this.identity = identity; this.hydrate(context.definition);
     } else if (fingerprint !== this.savedFingerprint) {
-      if (this.conflict() || periodFormIssue(this.form.getRawValue())) this.conflict.set(true);
+      if (this.conflict() || hadInvalidInput) this.conflict.set(true);
       else this.hydrate(context.definition);
     }
     context.disabled ? this.form.disable({ emitEvent: false }) : this.form.enable({ emitEvent: false });
-    context.validityChanged?.(this.conflict() || !!periodFormIssue(this.form.getRawValue()));
+    context.validityChanged?.(this.conflict() || !!periodFormIssue(this.form.getRawValue(), this.monthOnly()));
   }
 
   constructor() {
@@ -103,7 +123,14 @@ export class PeriodSettingsComponent {
   selectChoice<T>(control: FormControl<T>, value: T): void {
     if (this.disabled() || control.disabled || control.value === value) return;
     control.markAsDirty();
-    control.setValue(value);
+    if (this.monthOnly() && (control as unknown) === this.form.controls.kind) {
+      this.form.patchValue({ kind: value as VisualizationPeriod['kind'], basis: 'calendar', includeIncomplete: false, comparison: 'none' });
+    } else control.setValue(value);
+  }
+
+  usePredictorDefaults(): void {
+    if (this.disabled()) return;
+    this.form.patchValue({ kind: 'all-history', basis: 'calendar', includeIncomplete: false, comparison: 'none' });
   }
 
   useSaved(): void {
@@ -125,7 +152,7 @@ export class PeriodSettingsComponent {
   }
 
   private publish(): void {
-    const context = this.contextValue, value = this.form.getRawValue(), invalid = !!periodFormIssue(value);
+    const context = this.contextValue, value = this.form.getRawValue(), invalid = !!periodFormIssue(value, this.monthOnly());
     context?.validityChanged?.(this.conflict() || invalid);
     if (!context || context.disabled || invalid || this.conflict()) return;
     const next = applyPeriodForm(context.definition, value);

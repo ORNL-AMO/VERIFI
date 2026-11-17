@@ -1,3 +1,4 @@
+import { emptyMonthlySource } from '../visualization-monthly-combination';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -45,7 +46,7 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
   const owner = utilityOwner(snapshot, identity.scope);
   if (!owner) return unsupported('The owner fiscal and unit settings are unavailable.');
   const eligible = selection.meters.filter(meter => utilityMeterEligible(meter, source));
-  if (!eligible.length) return { identity, state: 'empty', periods: [], message: 'No selected meters expose this utility measure.' };
+  if (!eligible.length) return emptyMonthlySource(request, 'No selected meters expose this utility measure.', [], selection.references);
   const buckets = utilityBuckets(snapshot, source, eligible);
   const metadata = discoverUtilitySeries(snapshot, identity.scope, source);
   if (metadata.length !== buckets.length) return unsupported('Selected totals have incompatible or unavailable units. Choose compatible meters, a common supported unit, or separate meter series.');
@@ -67,9 +68,9 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
         : snapshot.meterData.filter(reading => reading.meterId === meter.guid && validCivil(readingCivil(reading))).map(reading => readingCivil(reading).slice(0, 7));
     }).sort();
     if (historyKeys.some(key => !validCivil(`${key}-01`))) return unsupported('Canonical utility results contain an invalid period.');
-    if (!historyKeys.length && request.period.kind === 'all-history') return { identity, state: 'empty', periods: [], message: 'No saved utility history is available.' };
+    if (!historyKeys.length && request.period.kind === 'all-history' && !request.dateContext.monthlyRange) return { identity, state: 'empty', periods: [], message: 'No saved utility history is available.' };
     const history = historyKeys.length ? { start: `${historyKeys[0]}-01`, end: monthRange(Number(historyKeys[historyKeys.length - 1].slice(0, 4)), Number(historyKeys[historyKeys.length - 1].slice(5)) - 1).end } : undefined;
-    let ranges = resolveUtilityRanges(request.period, request.comparison, owner, request.dateContext, history);
+    let ranges = request.dateContext.monthlyRange ? [{ ...request.dateContext.monthlyRange, role: 'primary' as const, basis: 'calendar' as const }] : resolveUtilityRanges(request.period, request.comparison, owner, request.dateContext, history);
     if (request.chart.interval === 'yearly' && request.period.kind === 'all-history') {
       const basis = owner.fiscalYear === 'nonCalendarYear' ? 'fiscal' : 'calendar';
       if (request.comparison.kind === 'previous-year' && request.comparison.basis !== basis) return unsupported('Choose a comparison year with the same calendar or fiscal basis as the yearly source.');

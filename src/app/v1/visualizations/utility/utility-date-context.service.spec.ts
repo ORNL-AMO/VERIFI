@@ -7,8 +7,40 @@ import type { VisualizationSourceRequest } from '@domain/visualizations/visualiz
 import { UtilityDataSession } from './utility-data-session.service';
 import { UtilitySourceProvider } from './utility-source-provider.service';
 import { UtilityDateContextResolver } from './utility-date-context.service';
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
+import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 
 describe('shared utility latest-data anchor', () => {
+  it('keeps invalid-reading explanations when no category has a usable latest-data anchor', async () => {
+    const { store, dates, resolve, definition } = setup();
+    const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'p' };
+    store.publish({ ...store.snapshot()!, predictors: [predictor], predictorData: [{ ...getNewIdbPredictorData(predictor), guid: 'invalid', year: 2026, month: 13, amount: 7 }] });
+    resolve.mockResolvedValue({ identity: {} as never, state: 'empty', message: 'No meter history.', periods: [], reasons: ['No meter readings.'] } as never);
+    const mixed: VisualizationDefinition = { ...definition, sources: [...definition.sources, { id: 'p', kind: 'predictor', measure: 'value', aggregation: 'none', selection: { kind: 'rule', resource: 'predictor', filter: {} } }] };
+    const result = await dates.resolve(mixed, { accountGuid: 'account-a', workspaceRevision: store.revision(), definitionGuid: 'saved', definitionRevision: 1 }, new AbortController().signal);
+    expect(result.latestDataDate).toBeUndefined();
+    expect(result.emptyReasons).toEqual(expect.arrayContaining(['No meter readings.', expect.stringContaining('invalid: 7')]));
+  });
+  it('shares the newest eligible anchor from either category and preserves whole contained fixed months', async () => {
+    const { store, dates, data, resolve, definition } = setup();
+    const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'p' };
+    store.publish({ ...store.snapshot()!, predictors: [predictor], predictorData: [{ ...getNewIdbPredictorData(predictor), year: 2026, month: 4, amount: 0, weatherDataWarning: true }] });
+    const mixed: VisualizationDefinition = { ...definition, period: { kind: 'rolling', count: 2, unit: 'month', basis: 'calendar', anchor: 'latest-data', includeIncomplete: false },
+      sources: [...definition.sources, { id: 'predictor', kind: 'predictor', measure: 'value', aggregation: 'none', selection: { kind: 'rule', resource: 'predictor', filter: {} } }] };
+    const identity = { accountGuid: 'account-a', workspaceRevision: store.revision(), definitionGuid: 'saved', definitionRevision: 1 };
+    resolve.mockResolvedValue({ identity: {} as never, state: 'ready', resolved: { periods: [{ start: '2025-01-01', end: '2026-06-30' }], data: { kind: 'time-series', rows: [{ end: '2026-02-28', values: { x: { state: 'observed', value: 0 } } }] } } } as never);
+    expect(await dates.resolve(mixed, identity, new AbortController().signal)).toMatchObject({ latestDataDate: '2026-04-30', monthlyRange: { start: '2026-03-01', end: '2026-04-30' } });
+    const fixed = await dates.resolve({ ...mixed, period: { kind: 'fixed', basis: 'calendar', start: '2024-01-15', end: '2024-03-20' } }, identity, new AbortController().signal);
+    expect(fixed.monthlyRange).toEqual({ start: '2024-02-01', end: '2024-02-29' });
+    resolve.mockResolvedValue({ identity: {} as never, state: 'ready', resolved: { periods: [{ start: '2025-01-01', end: '2026-06-30' }], data: { kind: 'time-series', rows: [{ end: '2026-06-30', values: { x: { state: 'observed', value: 5 } } }] } } } as never);
+    expect((await dates.resolve(mixed, identity, new AbortController().signal)).latestDataDate).toBe('2026-06-30');
+    const all = await dates.resolve({ ...mixed, period: { kind: 'all-history' } }, identity, new AbortController().signal);
+    expect(all.monthlyRange).toEqual({ start: '2025-01-01', end: '2026-06-30' });
+    const calls = data.acquire.mock.calls.length;
+    await dates.resolve({ ...mixed, sources: [mixed.sources[1]] }, identity, new AbortController().signal);
+    expect(data.acquire.mock.calls).toHaveLength(calls);
+  });
   afterEach(() => TestBed.resetTestingModule());
   function setup() {
     const store = new AccountWorkspaceStore(), snapshot = visualizationSnapshot();
@@ -21,7 +53,7 @@ describe('shared utility latest-data anchor', () => {
     ] } } }));
     TestBed.configureTestingModule({ providers: [UtilityDateContextResolver, { provide: AccountWorkspaceStore, useValue: store }, { provide: UtilityDataSession, useValue: data }, { provide: UtilitySourceProvider, useValue: { resolve } }] });
     const definition = { ...utilityVisualizationFixture(), period: { kind: 'rolling' as const, count: 12, unit: 'month' as const, anchor: 'latest-data' as const, basis: 'calendar' as const, includeIncomplete: true } };
-    const identity = { accountGuid: definition.accountGuid, workspaceRevision: 1, definitionGuid: 'saved', definitionRevision: 1 };
+    const identity = { accountGuid: definition.accountGuid, workspaceRevision: store.revision(), definitionGuid: 'saved', definitionRevision: 1 };
     return { data, resolve, definition, identity, store, dates: TestBed.inject(UtilityDateContextResolver) };
   }
   it('anchors to provider-validated observations, retaining real zero and skipping invalid or retired rows', async () => {

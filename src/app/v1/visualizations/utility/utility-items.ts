@@ -1,6 +1,9 @@
+import { itemKey, overrideMatches, isCustomized } from '../shared/item-appearance';
+export { itemKey, overrideMatches, isCustomized } from '../shared/item-appearance';
+import { projectPredictorItems } from '../predictor/predictor-items';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import type { UtilitySelectionMode, UtilityVisualizationSource, VisualizationDefinition, VisualizationScope,
-  VisualizationSeries, VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
+import type { UtilitySelectionMode, UtilityVisualizationSource, PredictorVisualizationSource, VisualizationDefinition, VisualizationScope,
+  VisualizationSeries } from '@domain/visualizations/visualization-definition';
 import { discoverUtilitySeries, utilityMeterEligible } from '@domain/visualizations/utility/utility-catalog';
 import { resolveUtilitySelection, utilityBuckets, utilityMeasureKey, utilitySeriesId } from '@domain/visualizations/utility/utility-selection';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
@@ -57,20 +60,10 @@ export function nativeObservationAvailable(definition: VisualizationDefinition, 
   return selection.meters.length === 1 && !selection.missing.length;
 }
 
-export function itemKey(identity: DecisionItemIdentity): string { return identity.resourceGuid !== undefined ? `resource:${identity.resourceGuid}` : `series:${identity.seriesId}`; }
-export function overrideMatches(override: VisualizationSeriesOverride, identity: DecisionItemIdentity, accountGuid: string): boolean {
-  return (override.accountGuid ?? accountGuid) === accountGuid && (identity.resourceGuid !== undefined
-    ? override.resourceGuid === identity.resourceGuid : override.seriesId === identity.seriesId);
-}
-export function sourceSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource, identity: DecisionItemIdentity): VisualizationSeries | undefined {
-  const metric = utilityMeasureKey(source);
+export function sourceSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource, identity: DecisionItemIdentity): VisualizationSeries | undefined {
+  const metric = source.kind === 'predictor' ? 'value' : utilityMeasureKey(source);
   return definition.series.find(series => series.sourceId === source.id && series.metric === metric && identity.resourceGuid !== undefined && series.resourceGuid === identity.resourceGuid)
     ?? definition.series.find(series => series.sourceId === source.id && series.metric === metric && !series.resourceGuid);
-}
-export function isCustomized(appearance: DecisionItemAppearance, explicitOverride = false): boolean {
-  return !!appearance.label || !!appearance.color || appearance.traceType !== undefined || (explicitOverride ? appearance.axis !== undefined : appearance.axis === 'right')
-    || (explicitOverride ? appearance.visible !== undefined : appearance.visible === false)
-    || appearance.lineStyle !== undefined && (explicitOverride || appearance.lineStyle !== 'solid') || appearance.order !== undefined;
 }
 /** Configured identities survive missing readings, empty groups and incompatible observations. */
 export function projectMeterItems(definition: VisualizationDefinition, sourceId: string, snapshot: AccountWorkspaceSnapshot): readonly VisualizationDecisionItem[] {
@@ -126,6 +119,8 @@ export function projectMeterItems(definition: VisualizationDefinition, sourceId:
 export function configuredChartSummary(definition: VisualizationDefinition, snapshot: AccountWorkspaceSnapshot): 'Line' | 'Bar' | 'Combination' | undefined {
   if (definition.chart?.kind !== 'time-series') return undefined;
   const items = definition.sources.flatMap(source => source.kind === 'utility' ? projectMeterItems(definition, source.id, snapshot) : []);
-  const types = new Set(items.length ? items.map(item => item.appearance.traceType) : [definition.chart.defaultTraceType]);
+  const predictorItems = definition.sources.flatMap(source => source.kind === 'predictor' ? projectPredictorItems(definition, source.id, snapshot) : []);
+  const allItems = [...items, ...predictorItems];
+  const types = new Set(allItems.length ? allItems.map(item => item.appearance.traceType) : [definition.chart.defaultTraceType]);
   return types.size > 1 ? 'Combination' : types.has('bar') ? 'Bar' : types.has('line') ? 'Line' : undefined;
 }

@@ -1,3 +1,4 @@
+import { resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, ElementRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
@@ -15,11 +16,14 @@ import { RecoveryActionsComponent, VisualizationChildDraftGuard } from '../recov
 import { VisualizationFacilitySelection, VisualizationSourceKind } from '@domain/visualizations/visualization-definition';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
-import { decisionNodeId, prepareDecisionChange, projectMeterItems, configuredChartSummary } from '../decisions/decision-tree';
+import { decisionNodeId, prepareDecisionChange, projectDecisionItems, configuredChartSummary } from '../decisions/decision-tree';
 import type { DecisionChangeResult, DecisionRef, VisualizationDecisionAction } from '../decisions/decision-types';
 import type { PeriodSettingsContext, UtilityEditorContext } from '../utility/editors/utility-editor-context';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 import type { PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import type { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
+import { predictorStatusPresentation } from '@app/v1/data/predictors/inventory/predictor-inventory.models';
 
 @Component({ selector: 'app-visualization-workbench', standalone: false, host: { class: 'visualization-workbench-host' },
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
@@ -30,7 +34,7 @@ export class WorkbenchComponent {
     return VISUALIZATION_DATA_SOURCES.map(choice => ({ ...choice, selected: kinds.has(choice.value),
       disabled: !this.editor.canEdit() || !!this.pendingDecision() || this.decisionBusy() || kinds.size === 1 && kinds.has(choice.value) }));
   });
-  readonly charts = VISUALIZATION_CHART_CHOICES;
+  get charts() { return VISUALIZATION_CHART_CHOICES; }
   readonly expandedNodes = signal<ReadonlySet<string>>(new Set());
   readonly nodeResetKeys = signal<Readonly<Record<string, number>>>({});
   readonly decisionError = signal('');
@@ -54,6 +58,39 @@ export class WorkbenchComponent {
   readonly settingsExpanded = new FormControl(true, { nonNullable: true });
   readonly workspace = inject(AccountWorkspaceStore);
   readonly navigation = inject(WorkspaceNavigationService);
+  private readonly status = inject(WorkspaceStatusService);
+  readonly selectedPredictorGuids = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    if (!this.workspace.isReady() || !snapshot || definition?.accountGuid !== this.accountGuid()
+      || snapshot.account.guid !== this.accountGuid() || this.editor.record()?.guid !== this.navigation.routeState().visualizationGuid) return [];
+    const included = this.facilityContext()?.scope.facilityGuids ?? [];
+    const selected = new Set(definition.sources.flatMap(source => source.kind === 'predictor'
+      ? resolvePredictorSelection(snapshot, this.facilityContext()!.scope, source) : []));
+    return snapshot.predictors.filter(predictor => predictor.accountId === snapshot.account.guid
+      && included.includes(predictor.facilityId) && selected.has(predictor.guid)).map(predictor => predictor.guid);
+  });
+  readonly predictorStatusState = computed<StatusEvaluationState>(() => {
+    const state = this.status.state(), evaluation = this.status.evaluation();
+    return state === 'ready' && (evaluation?.accountGuid !== this.accountGuid() || evaluation.revision !== this.workspace.revision()) ? 'evaluating' : state;
+  });
+  readonly predictorStatusIssues = computed(() => {
+    if (this.predictorStatusState() !== 'ready') return [];
+    const selected = new Set(this.selectedPredictorGuids());
+    return this.status.items().filter(item => item.entity.kind === 'predictor' && item.entity.accountGuid === this.accountGuid()
+      && selected.has(item.entity.guid) && (item.severity === 'error' || item.severity === 'warning'));
+  });
+  readonly predictorHeaderStatus = computed(() => {
+    const issues = this.predictorStatusIssues();
+    return predictorStatusPresentation(issues.some(issue => issue.severity === 'error') ? 'danger' : issues.length ? 'warning' : 'success', this.predictorStatusState());
+  });
+  readonly predictorStatusSummaries = computed(() => this.predictorStatusIssues().slice(0, 2));
+  readonly remainingPredictorIssues = computed(() => this.predictorStatusIssues().slice(2));
+
+  openPredictorIssue(item: StatusItem): void {
+    // Recheck a rendered action against the current account, selection, and active findings.
+    const current = this.predictorStatusIssues().find(issue => issue.id === item.id);
+    if (current) this.status.navigateTo(current);
+  }
   readonly journeys = inject(VisualizationNavigationService);
   private readonly unsaved = inject(UnsavedChangesService);
   private readonly modal = inject(ModalPortalService);
@@ -105,7 +142,7 @@ export class WorkbenchComponent {
             // Continuous form edits can arrive before the next render. Apply typed patches
             // to current intent, while rejecting removed items and superseded measure forms.
             if (action.kind === 'item-style') {
-              if (!projectMeterItems(current, action.sourceId, snapshot).some(item => action.item.resourceGuid !== undefined
+              if (!projectDecisionItems(current, action.sourceId, snapshot).some(item => action.item.resourceGuid !== undefined
                 ? item.identity.resourceGuid === action.item.resourceGuid : item.identity.seriesId === action.item.seriesId)) return;
             } else if (action.kind === 'source-settings') {
               const currentSource = current.sources.find(item => item.id === action.sourceId);
@@ -119,7 +156,8 @@ export class WorkbenchComponent {
         draftChanged: () => this.childRevision.update(value => value + 1),
         changed: next => { if (this.editor.key() === key && this.editor.localRevision() === revision) this.editor.applyDefinition(next); } };
       return { id: source.id, kind: source.kind, label: choice.label, icon: choice.icon, nodeId,
-        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}` : source.measure,
+        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}`
+          : source.kind === 'predictor' ? '' : source.measure,
         context, attention: this.invalidEditors()[nodeId] || Object.entries(this.invalidEditors()).some(([id, invalid]) => invalid && id.split(':')[1] === encodeURIComponent(source.id)) };
     });
   });
@@ -142,7 +180,8 @@ export class WorkbenchComponent {
     const period = this.editor.definition()?.period;
     if (!period) return 'Unavailable';
     if (period.kind === 'all-history') return 'All saved history';
-    if (period.kind === 'fixed') return `${period.start} – ${period.end} (${period.basis})`;
+    if (period.kind === 'fixed') return this.editor.definition()?.sources.some(source => source.kind === 'predictor')
+      ? `${period.start.slice(0, 7)} – ${period.end.slice(0, 7)} (${period.basis})` : `${period.start} – ${period.end} (${period.basis})`;
     if (period.kind === 'rolling') return `Rolling ${period.count} ${period.unit}(s), ${period.anchor} anchor (${period.basis})`;
     return period.kind === 'fiscal-year' ? `Fiscal year ${period.year}` : 'Latest saved fiscal year';
   });

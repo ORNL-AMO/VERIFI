@@ -2,6 +2,7 @@ import type {
   VisualizationChart, VisualizationComparison, VisualizationPeriod, VisualizationResourceKind,
   VisualizationScope, VisualizationSeries, VisualizationSource, VisualizationSourceKind
 } from './visualization-definition';
+import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { sameVisualizationScope } from './visualization-scope';
 export { sameVisualizationScope } from './visualization-scope';
 
@@ -24,6 +25,16 @@ export interface VisualizationSourceCapabilities {
   readonly settings: readonly ('unit' | 'energyTreatment')[];
   readonly controls: readonly VisualizationControl[];
   readonly allowDateOverride: boolean;
+  /** False limits this adapter to a single source configuration; omitted leaves combinations to runtime compatibility. */
+  readonly allowMultipleSources?: boolean;
+  /** Original, unconverted values may share an unstacked axis. Never authorizes totals. */
+  readonly allowMixedAxisUnits?: boolean;
+}
+
+export function allowsMixedAxisUnits(chart: VisualizationChart, capabilities: readonly VisualizationSourceCapabilities[], sources: readonly VisualizationSource[] = []): boolean {
+  return chart.kind === 'time-series' && chart.stack === 'none' && capabilities.length > 0
+    && (capabilities.every(capability => capability.allowMixedAxisUnits === true)
+      || chart.interval === 'monthly' && isMixedPredictorSourceSet(sources));
 }
 
 export interface VisualizationRequestIdentity {
@@ -45,12 +56,12 @@ export interface VisualizationSourceRequest {
   readonly comparison: VisualizationComparison;
   readonly series: readonly VisualizationSeries[];
   /** Consumer resolves this once across the selected sources; providers must not substitute local clocks/last dates. */
-  readonly dateContext: { readonly calendarDate: string; readonly latestDataDate?: string };
+  readonly dateContext: { readonly calendarDate: string; readonly latestDataDate?: string; readonly emptyReasons?: readonly string[]; readonly monthlyRange?: { readonly start: string; readonly end: string } };
 }
 
 export type VisualizationProvenance = 'measured' | 'predictor' | 'weather' | 'estimated' | 'carried-forward' | 'modeled' | 'savings';
 export type VisualizationObservation =
-  | { readonly state: 'observed'; readonly value: number; readonly provenance: VisualizationProvenance; readonly partial: boolean }
+  | { readonly state: 'observed'; readonly value: number; readonly provenance: VisualizationProvenance; readonly partial: boolean; readonly notes?: readonly string[] }
   | { readonly state: 'missing' | 'alignment-padding' | 'excluded'; readonly value: null; readonly reason: string };
 
 /** Actual inclusive civil intervals, not just fiscal-year labels. */
@@ -88,6 +99,14 @@ export interface VisualizationResolvedReference {
   readonly facilityGuid?: string;
 }
 
+/** Factual omitted-input evidence, grouped by resource and issue; never persisted or treated as a status finding. */
+export interface VisualizationOmission {
+  readonly resourceGuid: string;
+  readonly label: string;
+  readonly issue: string;
+  readonly readings: readonly string[];
+}
+
 export type VisualizationData =
   | { readonly kind: 'time-series'; readonly rows: readonly {
       readonly periodKey: string; readonly start: string; readonly end: string;
@@ -119,13 +138,13 @@ export interface VisualizationResolvedData {
   readonly periods: readonly ResolvedVisualizationPeriod[];
   readonly references: readonly VisualizationResolvedReference[];
   readonly provenance: readonly VisualizationProvenance[];
-  readonly quality: { readonly partial: boolean; readonly warnings: readonly string[] };
+  readonly quality: { readonly partial: boolean; readonly warnings: readonly string[]; readonly omissions?: readonly VisualizationOmission[] };
   readonly analysisFreshness?: 'current' | 'stale';
 }
 
 export type VisualizationSourceResolution = { readonly identity: VisualizationRequestIdentity } & (
   | { readonly state: 'ready'; readonly resolved: VisualizationResolvedData }
-  | { readonly state: 'empty'; readonly periods: readonly ResolvedVisualizationPeriod[]; readonly message: string }
+  | { readonly state: 'empty'; readonly periods: readonly ResolvedVisualizationPeriod[]; readonly message: string; readonly reasons?: readonly string[]; readonly resolved?: VisualizationResolvedData }
   | { readonly state: 'loading' | 'waiting'; readonly message: string }
   | { readonly state: 'missing-source'; readonly references: readonly { readonly kind: VisualizationResolvedReference['kind']; readonly id: string }[]; readonly message: string }
   | { readonly state: 'invalid-analysis' | 'error' | 'unsupported'; readonly message: string }

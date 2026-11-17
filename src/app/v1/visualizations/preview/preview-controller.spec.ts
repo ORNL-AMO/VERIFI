@@ -89,6 +89,15 @@ describe('visualization preview orchestration', () => {
     for (const provider of providers) expect(provider.resolve).not.toHaveBeenCalled();
   });
 
+  it('preserves mixed setup without requesting dates or data when a production adapter disallows combinations', () => {
+    const entry = visualizationEvidenceFixture(mixedDefinition(), 1);
+    const { controller, definition, providers, resolveDates } = setupMixed({ providers: [{}, { describe: () => ({ ...entry.capabilities, allowMultipleSources: false }) }] });
+    controller.update(definition, identity);
+    expect(controller.state()).toMatchObject({ state: 'unsupported' });
+    expect(resolveDates).not.toHaveBeenCalled();
+    for (const provider of providers) expect(provider.resolve).not.toHaveBeenCalled();
+  });
+
   it('resolves compatible utility and predictor series against one shared date context and presents both', async () => {
     const { controller, definition, providers, prepare, resolveDates } = setupMixed();
     controller.update(definition, identity); await settle();
@@ -102,6 +111,22 @@ describe('visualization preview orchestration', () => {
     for (const provider of providers) expect(provider.resolve).toHaveBeenCalledTimes(1);
   });
 
+  it('retains warnings, omissions and unavailable observations when a ready utility and empty predictor have no usable values', async () => {
+    const definition = mixedDefinition(), entry = visualizationEvidenceFixture(definition);
+    if (entry.resolution.state !== 'ready' || entry.resolution.resolved.data.kind !== 'time-series') throw new Error('Expected utility evidence');
+    const resolved = entry.resolution.resolved, data = entry.resolution.resolved.data;
+    const warning = 'Negative usage is invalid for this meter.';
+    const { controller, prepare } = setupMixed({ definition, providers: [{ resolve: async request => ({ identity: request.identity, state: 'ready', resolved: {
+      ...resolved, quality: { partial: true, warnings: [warning], omissions: [{ resourceGuid: 'meter-a', label: 'Meter A', issue: 'Excluded reading', readings: ['Saved -5'] }] },
+      data: { kind: 'time-series', rows: data.rows.map(row => ({ ...row, values: Object.fromEntries(Object.keys(row.values).map(id => [id,
+        { state: 'excluded', value: null, reason: 'The saved reading cannot be used.' }])) })) }
+    } }) }, { resolve: async request => ({ identity: request.identity, state: 'empty', periods: [], message: 'No saved predictor values.', reasons: [] }) }] });
+    controller.update(definition, identity); await settle();
+    expect(controller.state()).toMatchObject({ state: 'empty', reasons: expect.arrayContaining([warning,
+      'Meter A · Excluded reading: Saved -5', expect.stringContaining('The saved reading cannot be used.')]) });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it('preserves configured mixed sources when one sourceKind has no adapter, without requesting partial data', () => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve);
     const { controller } = setup({ provider: { resolve }, dates: { resolve: resolveDates } });
@@ -111,12 +136,12 @@ describe('visualization preview orchestration', () => {
     expect(definition).toEqual(original); expect(resolve).not.toHaveBeenCalled(); expect(resolveDates).not.toHaveBeenCalled();
   });
 
-  it('rejects incompatible mixed-source units on one axis before mounting the presenter', async () => {
+  it('allows unconverted mixed-source units on one axis in the supported monthly chart', async () => {
     const base = mixedDefinition();
     const { controller, definition, prepare } = setupMixed({ definition: { ...base, series: base.series.map(series => ({ ...series, axis: 'left' })) } });
     controller.update(definition, identity); await settle();
-    expect(controller.state()).toMatchObject({ state: 'incompatible', reasons: expect.arrayContaining([expect.stringContaining('compatible units')]) });
-    expect(prepare).not.toHaveBeenCalled();
+    expect(controller.state()).toMatchObject({ state: 'ready' });
+    expect(prepare).toHaveBeenCalledOnce();
   });
 
   it('rejects mixed-source observations with different declared alignment', async () => {

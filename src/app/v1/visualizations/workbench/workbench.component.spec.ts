@@ -6,7 +6,15 @@ import { SessionStorageService } from 'ngx-webstorage';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { evaluateWorkspaceStatus } from '@app/v1/status/status.evaluator';
+import { presentFindings } from '@app/v1/status/status.catalog';
+import { partitionStatusFindings, createStatusWarningDismissal } from '@app/v1/status/status.dismissals';
+import type { StatusEvaluationState } from '@app/v1/status/status.models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -309,7 +317,8 @@ describe('visualization workbench', () => {
     button.click(); fixture.detectChanges();
     expect(component.editor.definition()!.sources.filter(source => source.kind === choice.value)).toHaveLength(1);
     expect(button.getAttribute('aria-pressed')).toBe('true');
-    expect(root.textContent).toContain(`Data selection for ${choice.label} is not available yet.`);
+    if (choice.value === 'predictor') expect(root.querySelector('app-predictor-source-editor')).not.toBeNull();
+    else expect(root.textContent).toContain(`Data selection for ${choice.label} is not available yet.`);
     button.click(); fixture.detectChanges();
     expect(button.getAttribute('aria-pressed')).toBe('false');
     expect(component.editor.definition()!.sources).toEqual(original.sources);
@@ -366,12 +375,15 @@ describe('visualization workbench', () => {
     expect(component.editor.definition()).toBeUndefined();
     await expect(TestBed.inject(UnsavedChangesService).resolveNavigationPreflight()).resolves.toBe(true);
   });
-  function setup(definition?: VisualizationDefinition, singleFacility = false, withMeter = false) {
+  function setup(definition?: VisualizationDefinition, singleFacility = false, withMeter = false, extra: Partial<AccountWorkspaceSnapshot> = {}) {
     const initial = visualizationSnapshot();
-    const snapshot = { ...initial, ...(withMeter ? { meters: [meter({ id: 1 })] } : {}), account: { ...initial.account, isSingleFacilityCompany: singleFacility } };
+    const snapshot = { ...initial, ...(withMeter ? { meters: [meter({ id: 1 })] } : {}), account: { ...initial.account, isSingleFacilityCompany: singleFacility }, ...extra };
     const store = new AccountWorkspaceStore(); store.publish(definition ? { ...snapshot,
       savedVisualizations: [{ ...getNewIdbSavedVisualization(definition), id: 1, guid: 'visualization-a' }] } : snapshot);
     const route = signal({ section: 'visualization', accountGuid: 'account-a', visualizationGuid: 'visualization-a' });
+    const statusState = signal<StatusEvaluationState>('ready');
+    const evaluation = computed(() => evaluateWorkspaceStatus({ snapshot: store.snapshot()!, calendarizedMeters: [], revision: store.revision(), asOfDate: new Date('2026-11-15T12:00:00Z') }));
+    const status = { state: statusState, evaluation, navigateTo: vi.fn(), items: computed(() => presentFindings(partitionStatusFindings(evaluation().findings, store.account()?.statusWarningDismissals).active)) };
     const prepareCreate = vi.fn((value: VisualizationDefinition) => ({ kind: 'create' as const, accountGuid: value.accountGuid, guid: 'new-identity', definition: value, createdDate: '2026-11-12T00:00:00.000Z' }));
     const submit = vi.fn(async (command: any) => ({ state: 'committed', value: command.kind === 'create'
       ? { ...getNewIdbSavedVisualization(command.definition), guid: command.guid }
@@ -379,11 +391,77 @@ describe('visualization workbench', () => {
     TestBed.configureTestingModule({ imports: [WorkbenchModule], providers: [provideRouter([]),
       { provide: SessionStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
       { provide: AccountWorkspaceStore, useValue: store }, { provide: WorkspaceNavigationService, useValue: { routeState: route, isSingleSiteWorkspace: computed(() => store.account()?.isSingleFacilityCompany === true && store.facilities().length === 1) } },
+      { provide: WorkspaceStatusService, useValue: status },
       { provide: SavedVisualizationCommands, useValue: { submit, prepareCreate } }
     ] });
     const fixture = TestBed.createComponent(WorkbenchComponent); fixture.detectChanges();
-    return { fixture, component: fixture.componentInstance, store, submit, prepareCreate, route };
+    return { fixture, component: fixture.componentInstance, store, submit, prepareCreate, route, status, statusState };
   }
+  function predictorSetup() {
+    const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'predictor-a', name: 'Weather', predictorType: 'Weather' as const, weatherDataType: 'dryBulbTemp' as const };
+    const sibling = { ...predictor, guid: 'sibling', name: 'Other predictor' };
+    const definition = createVisualizationDefinition('Predictor history', 'account-a', { kind: 'fixed', facilityGuids: ['facility-a'] }, 'predictor');
+    const configured: VisualizationDefinition = { ...definition, period: { kind: 'fixed', basis: 'calendar', start: '2024-01-01', end: '2024-01-31' },
+      sources: definition.sources.map(source => source.kind === 'predictor' ? { ...source, selection: { kind: 'fixed', resource: 'predictor', guids: [predictor.guid] } } : source),
+      series: definition.series.map(series => ({ ...series, visible: false })) };
+    const readings = [1, 3].map(month => ({ ...getNewIdbPredictorData(predictor), guid: `reading-${month}`, year: 2024, month, amount: -2, weatherDataWarning: true }));
+    return { ...setup(configured, false, false, { predictors: [predictor, sibling], predictorData: readings }), predictor, sibling };
+  }
+  it('shows only selected predictors’ full-history status in the header, independent of dates and visibility', () => {
+    const { component, fixture, status } = predictorSetup();
+    const header = (fixture.nativeElement as HTMLElement).querySelector('header')!;
+    expect(header.querySelector('[aria-label="Predictor data status"]')?.textContent).toContain('Has errors');
+    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.data.gap', 'predictor.data.negative', 'predictor.weather.warning']));
+    expect(component.predictorStatusIssues().every(issue => issue.entity.guid === 'predictor-a')).toBe(true);
+    expect(header.querySelectorAll('[aria-label="Predictor data issues"] > li')).toHaveLength(2);
+    expect(header.querySelector('details')?.textContent).toContain('More data issues');
+    header.querySelector<HTMLButtonElement>('[aria-label="Predictor data issues"] button')!.click();
+    expect(status.navigateTo).toHaveBeenCalledWith(component.predictorStatusIssues()[0]);
+  });
+  it('uses status preferences and dismissals rather than raising independent chart findings', () => {
+    const { component, fixture, store, predictor } = predictorSetup();
+    const publish = (snapshot: AccountWorkspaceSnapshot) => { store.publishCommitted(snapshot, store.selections()); fixture.detectChanges(); };
+    publish({ ...store.snapshot()!, predictors: [{ ...predictor, canBeNegative: true, ignoreWeatherDataWarning: true, ignoreDateStatusChecks: true }] });
+    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(['predictor.data.gap']);
+    publish({ ...store.snapshot()!, predictors: [{ ...predictor, canBeNegative: true, ignoreDateStatusChecks: true }], predictorData: store.predictorData().filter(reading => reading.month === 1) });
+    const warning = component.predictorStatusIssues()[0];
+    expect(warning.code).toBe('predictor.weather.warning');
+    publish({ ...store.snapshot()!, account: { ...store.account()!, statusWarningDismissals: [createStatusWarningDismissal(warning, '2026-11-15T12:00:00Z')] } });
+    expect(component.predictorStatusIssues()).toEqual([]);
+    expect(component.predictorHeaderStatus().label).toBe('All data valid');
+  });
+  it('follows account and facility expected-range and staleness preferences', () => {
+    const { component, fixture, store, predictor } = predictorSetup();
+    const publish = (snapshot: AccountWorkspaceSnapshot) => { store.publishCommitted(snapshot, store.selections()); fixture.detectChanges(); };
+    publish({ ...store.snapshot()!, predictors: [predictor],
+      account: { ...store.account()!, expectedRangeSettings: { enabled: true }, dataStalenessSettings: { enabled: true, thresholdMonths: 3 } },
+      facilities: store.facilities().map(facility => ({ ...facility, expectedRangeSettings: { useAccountSettings: true, enabled: true }, dataStalenessSettings: { useAccountSettings: true, enabled: true, thresholdMonths: 3 } })),
+      predictorData: [1, 2, 3, 4, 1000].map((amount, index) => ({ ...getNewIdbPredictorData(predictor), guid: `outlier-${index}`, amount, year: 2024, month: index + 1 })) });
+    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.currency.stale', 'predictor.quality.outlier']));
+    publish({ ...store.snapshot()!, account: { ...store.account()!, expectedRangeSettings: { enabled: false }, dataStalenessSettings: { enabled: false, thresholdMonths: 3 } } });
+    expect(component.predictorStatusIssues()).toEqual([]);
+    publish({ ...store.snapshot()!, facilities: store.facilities().map(facility => ({ ...facility, expectedRangeSettings: { useAccountSettings: false, enabled: true }, dataStalenessSettings: { useAccountSettings: false, enabled: true, thresholdMonths: 3 } })) });
+    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.currency.stale', 'predictor.quality.outlier']));
+  });
+  it('clears status while checks are pending/unavailable or account and selected resources change, and guards stale actions', () => {
+    const { component, fixture, store, route, status, statusState, sibling } = predictorSetup();
+    const old = component.predictorStatusIssues()[0];
+    for (const state of ['evaluating', 'error', 'idle'] as const) {
+      statusState.set(state); fixture.detectChanges();
+      expect(component.predictorStatusIssues()).toEqual([]);
+      expect(component.predictorHeaderStatus().label).toBe(state === 'error' ? 'Checks unavailable' : 'Checks pending');
+    }
+    statusState.set('ready'); fixture.detectChanges();
+    const definition = component.editor.definition()!;
+    component.editor.applyDefinition({ ...definition, sources: definition.sources.map(source => source.kind === 'predictor' ? { ...source, selection: { kind: 'fixed', resource: 'predictor', guids: [sibling.guid] } } : source) });
+    fixture.detectChanges();
+    expect(component.predictorStatusIssues().every(issue => issue.entity.guid === sibling.guid)).toBe(true);
+    component.openPredictorIssue(old); expect(status.navigateTo).not.toHaveBeenCalled();
+    route.set({ ...route(), accountGuid: 'account-b' }); fixture.detectChanges();
+    expect(component.selectedPredictorGuids()).toEqual([]);
+    expect(component.predictorStatusIssues()).toEqual([]);
+    expect((fixture.nativeElement as HTMLElement).querySelector('[aria-label="Predictor data status"]')).toBeNull();
+  });
   it('shows saved ownership and saves valid edits before leaving', async () => {
     const { fixture, component, submit } = setup();
     expect(fixture.nativeElement.textContent).toContain('Plant A');

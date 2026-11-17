@@ -15,6 +15,9 @@ export class ResourcePickerComponent implements OnChanges {
   readonly label = input.required<string>();
   readonly options = input<readonly ResourceOption[]>([]);
   readonly icon = input<IconName>('meter');
+  readonly allMode = input<boolean | undefined>(undefined);
+  readonly allLabel = input('Include All');
+  readonly allSelectionRequested = output<boolean>();
   readonly disabled = input(false);
   readonly requestChanges = input(false);
   readonly selectionRequested = output<{ readonly guid: string; readonly selected: boolean }>();
@@ -28,7 +31,7 @@ export class ResourcePickerComponent implements OnChanges {
       .map<ResourceOption>(guid => ({ guid, label: `Unavailable: ${guid}`, unavailable: true, detail: '' }))]
       .map(option => ({ ...option, selected: selected.has(option.guid) }));
   });
-  readonly allSelected = computed(() => this.options().length > 0 && this.options().every(option => this.selectedGuids().includes(option.guid)));
+  readonly allSelected = computed(() => this.allMode() ?? (this.options().length > 0 && this.options().every(option => this.selectedGuids().includes(option.guid))));
   readonly showSearch = computed(() => this.choices().length > 8 || !!this.query());
   readonly filtered = computed(() => {
     const query = this.query().trim().toLocaleLowerCase();
@@ -55,7 +58,9 @@ export class ResourcePickerComponent implements OnChanges {
   }
 
   toggleAll(): void {
-    if (this.control.disabled || this.disabled() || !this.options().length) return;
+    if (this.control.disabled || this.disabled()) return;
+    if (this.allMode() !== undefined) { this.allSelectionRequested.emit(!this.allMode()); return; }
+    if (!this.options().length) return;
     const selected = this.allSelected() ? [] : [...new Set([...this.control.value, ...this.options().map(option => option.guid)])];
     if (this.requestChanges()) { this.selectionSetRequested.emit(selected); return; }
     this.control.markAsDirty(); this.control.setValue(selected);

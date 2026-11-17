@@ -29,6 +29,17 @@ describe('saved line/bar chart options', () => {
     expect(option.yAxis).toEqual([expect.objectContaining({ position: 'left', scale: false }), expect.objectContaining({ position: 'right', scale: true })]);
     expect(option.series[1].data).toEqual([['a', 0], ['b', null], ['d', -5]]);
   });
+  it('omits mixed-unit axis labels, retains each tooltip unit, and restores labels when traces move or hide', () => {
+    const selected = model('line'), first = selected.traces[0];
+    const mixed: TimeSeriesModel = { ...selected, traces: [first, { ...first, id: 'temperature', label: 'Temperature', unit: '°F' }] };
+    const options = timeSeriesOption(mixed) as any;
+    expect(options.yAxis[0].name).toBe('');
+    expect(options.tooltip.formatter([{ seriesId: 'energy', axisValue: 'a' }, { seriesId: 'temperature', axisValue: 'a' }])).toContain('0 kWh');
+    expect(options.tooltip.formatter([{ seriesId: 'temperature', axisValue: 'a' }])).toContain('0 °F');
+    const split = timeSeriesOption({ ...mixed, traces: [first, { ...mixed.traces[1], axis: 'right' }] }) as any;
+    expect(split.yAxis.map((axis: any) => axis.name)).toEqual(['kWh', '°F']);
+    expect((timeSeriesOption({ ...mixed, traces: [first] }) as any).yAxis[0].name).toBe('kWh');
+  });
   it('keeps zoom transient and supplies original dates and quality in tooltips', () => {
     const selected = model('line'), snapshot = structuredClone(selected), option = timeSeriesOption(selected, { start: 25, end: 75 }) as any;
     expect(option.dataZoom[0]).toMatchObject({ start: 25, end: 75 });
