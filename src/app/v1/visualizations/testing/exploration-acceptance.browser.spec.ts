@@ -73,6 +73,8 @@ describe('VIS7 saved exploration acceptance', () => {
       expect(canvas.getAttribute('role')).toBe('img');
       expect(canvas.getAttribute('aria-label')).toContain('versus');
     }
+    expect(root.querySelector('.pair-chart')?.getAttribute('aria-label')).toContain('10 kWh');
+    expect(root.querySelector('.pair-chart')?.getAttribute('aria-label')).toContain('2026-12-31');
     const printPairs = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await page.viewport(1100, 4000);
     await printPairs.send('Emulation.setEmulatedMedia', { media: 'print' });
@@ -120,6 +122,8 @@ describe('VIS7 saved exploration acceptance', () => {
       await vi.waitFor(() => expect(echarts.getInstanceByDom(canvas)?.getWidth()).toBeGreaterThan(200));
       expect(canvas.getAttribute('role')).toBe('img');
       expect(canvas.getAttribute('aria-label')).toContain('Blank cells have no data');
+      expect(canvas.getAttribute('aria-label')).toContain('10 kWh');
+      expect(canvas.getAttribute('aria-label')).toContain('constant or insufficient series');
       expect(currentRoot.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth + 1);
       await page.screenshot({ element: currentRoot, path: `../../../../../.angular/vis7-${label}.png` });
     }

@@ -146,6 +146,27 @@ describe('EChartsChartDirective in Chromium', () => {
       .toEqual(expect.arrayContaining([expect.objectContaining({ markArea: expect.any(Object) })]));
   });
 
+  it('restores screen dimensions after a synchronous print cycle without an intermediate observer delivery', async () => {
+    TestBed.configureTestingModule({ imports: [EChartsDirectiveHostComponent] });
+    const fixture = TestBed.createComponent(EChartsDirectiveHostComponent);
+    const host = fixture.nativeElement.querySelector('.chart-host') as HTMLElement;
+    host.style.width = '800px'; host.style.height = '360px';
+    fixture.detectChanges(); await nextAnimationFrame(); await nextAnimationFrame();
+    const chart = echarts.getInstanceByDom(host)!;
+    try {
+      expect(chart.getWidth()).toBe(800);
+      // Printing can apply and restore its layout synchronously before ResizeObserver runs.
+      host.style.width = '500px'; host.style.height = '300px';
+      window.dispatchEvent(new Event('beforeprint'));
+      expect(chart.getWidth()).toBe(500);
+      host.style.width = '800px'; host.style.height = '360px';
+      window.dispatchEvent(new Event('afterprint'));
+      await nextAnimationFrame(); await nextAnimationFrame();
+      expect(chart.getWidth()).toBe(800); expect(chart.getHeight()).toBe(360);
+      expect(echarts.getInstanceByDom(host)).toBe(chart);
+    } finally { fixture.destroy(); }
+  });
+
   it('emits ECharts data zoom changes', async () => {
     TestBed.overrideComponent(EChartsDirectiveHostComponent, {
       set: {

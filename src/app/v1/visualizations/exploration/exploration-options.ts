@@ -4,7 +4,8 @@ import { correlationStatistics } from '@domain/calculations/exploratory-statisti
 import { absentObservation, explorationObservationText, pairRows, type ExplorationModel, type ExplorationPair, type ExplorationSeries } from '@domain/visualizations/visualization-exploration';
 
 export function pairOption(model: ExplorationModel, pair: ExplorationPair, zoom: V1EChartsDataZoomRange): V1EChartsOption {
-  const rows = pairRows(model, pair).filter(row => row.included && row.displayX !== null && row.displayY !== null);
+  const observations = pairRows(model, pair);
+  const rows = observations.filter(row => row.included && row.displayX !== null && row.displayY !== null);
   const chart = model.chart;
   const grouping = chart.kind === 'heatmap' ? 'none' : chart.grouping ?? 'none';
   const standardized = chart.kind !== 'heatmap' && chart.scale === 'z-score';
@@ -17,7 +18,7 @@ export function pairOption(model: ExplorationModel, pair: ExplorationPair, zoom:
   const min = rows.reduce((min, row) => Math.min(min, row.displayX!), Infinity), max = rows.reduce((max, row) => Math.max(max, row.displayX!), -Infinity);
   const showFit = chart.kind !== 'heatmap' && (chart.showFit ?? true);
   return {
-    animation: false, aria: { enabled: true, label: { description: `${pair.y.label} versus ${pair.x.label}. Hover over points for original observation values.` } },
+    animation: false, aria: { enabled: true, label: { description: `${pair.y.label} versus ${pair.x.label}. Original observations: ${observations.map(row => `${row.slot.label}. ${pair.x.label}: ${explorationObservationText(row.x, pair.x.unit)}. ${pair.y.label}: ${explorationObservationText(row.y, pair.y.unit)}`).join('; ')}` } },
     legend: { show: model.legend && grouping !== 'none', type: 'scroll', top: 0, selectedMode: false },
     grid: { left: 24, right: 24, top: 48, bottom: 88, containLabel: true },
     xAxis: { type: 'value', scale: true, name: `${pair.x.label}${standardized ? ' (z-score)' : pair.x.unit ? ' (' + pair.x.unit + ')' : ''}`, nameLocation: 'middle', nameGap: 32, nameTruncate: { maxWidth: 240 } },
@@ -94,7 +95,7 @@ export function heatmapOption(panel: HeatmapPanel): V1EChartsOption {
       ...(marker ? { textContent: { type: 'text', style: { text: marker, fill: api.visual('borderColor') as string, fontSize: 12 } },
         textConfig: { position: 'inside' } } : {}) };
   };
-  return { animation: false, aria: { enabled: true, label: { description: `${panel.title}. Blank cells have no data. Hover over cells for values and observation quality.` } },
+  return { animation: false, aria: { enabled: true, label: { description: `${panel.title}. Blank cells have no data. ${panel.cells.map(cell => cell.text).join('; ')}` } },
     grid: { top: 20, left: 24, right: 24, bottom: 92, containLabel: true },
     xAxis: { type: 'category', data: [...panel.columns], axisLabel: { hideOverlap: true, width: 100, overflow: 'truncate' } },
     yAxis: { type: 'category', data: [...panel.rows], axisLabel: { width: 150, overflow: 'truncate' } },

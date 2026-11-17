@@ -1,6 +1,6 @@
 @if (model) {
   @if (model.chart.stack === 'percent') { <p class="time-series-share">Share of visible selected contributions for each period. Incomplete or zero totals have no percentage.</p> }
   @if (model.traces.length) {
-    <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)" role="img" [attr.aria-label]="model.title + '. Hover over points for original values and observation quality.'"></div>
+    <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)"></div>
   } @else { <p role="status">No visible series. Open a data source’s item settings and turn on Show trace.</p> }
 }

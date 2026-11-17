@@ -21,7 +21,7 @@ export function timeSeriesOption(model: TimeSeriesModel, zoom: V1EChartsDataZoom
   const points = new Map(model.traces.map(trace => [trace.id, new Map(trace.points.map(point => [point.slot, point]))]));
   return {
     animation: false,
-    aria: { enabled: true, label: { description: `${model.title}. Hover over points for values, original periods and observation quality.` } },
+    aria: { enabled: true, label: { description: `${model.title}. Original observations: ${model.traces.map(trace => `${trace.label}. ${trace.points.map(point => `${point.start} – ${point.end}: ${observationText(point, trace.unit)}`).join('; ')}`).join('. ')}` } },
     legend: { show: model.legend, type: 'scroll', top: 0, data: model.traces.map(trace => trace.label), selectedMode: false, width: '90%', formatter: (name: string) => name.length > 44 ? `${name.slice(0, 41)}…` : name, tooltip: { show: true, renderMode: 'richText', confine: true } },
     grid: { top: model.legend ? 64 : 28, left: 20, right: 20, bottom: 72, containLabel: true },
     xAxis: { type: 'category', data: model.slots.map(slot => slot.key), axisLabel: { formatter: (key: string) => labels.get(key) ?? key } },

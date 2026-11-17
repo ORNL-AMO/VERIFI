@@ -11,6 +11,8 @@ describe('exploration chart presentation', () => {
     expect(option.series.at(-1)).toMatchObject({ type: 'line', data: [[1, 2], [4, 8]] });
     expect(option.dataZoom[0]).toMatchObject({ start: 20, end: 80, filterMode: 'none' });
     expect(model.pairs[0].count).toBe(4);
+    expect(option.aria.label.description).toContain('1 kWh');
+    expect(option.aria.label.description).toContain('4 kWh');
   });
   it('uses symmetric fixed coefficient scales without confusing negative r and R²', async () => {
     const fixture = explorationFixture();
@@ -19,6 +21,7 @@ describe('exploration chart presentation', () => {
     expect(panel.cells.find(cell => cell.row === 0 && cell.column === 2)!.value).toBeCloseTo(-1);
     expect(panel.cells.find(cell => cell.row === 2 && cell.column === 0)!.pairId).toBe(panel.cells.find(cell => cell.row === 0 && cell.column === 2)!.pairId);
     expect((heatmapOption(panel) as any).visualMap[0]).toMatchObject({ min: -1, max: 1 });
+    expect((heatmapOption(panel) as any).aria.label.description).toContain('r: -1');
     const squared = heatmapPanels({ ...model, chart: { kind: 'correlation', statistic: 'r-squared', scale: 'raw' } })[0];
     expect(squared.cells.find(cell => cell.row === 0 && cell.column === 2)!.value).toBeCloseTo(1);
     expect((heatmapOption(squared) as any).visualMap[0]).toMatchObject({ min: 0, max: 1 });
@@ -40,6 +43,9 @@ describe('exploration chart presentation', () => {
     expect(option.series[0].data.every(point => point.value.length === 2)).toBe(true);
     expect(option.series[1].data.map(point => point.value[2])).toEqual([0, 9]);
     expect(option.visualMap[0]).toMatchObject({ min: 0, max: 9 });
+    expect(option.aria.label.description).toContain('No bill');
+    expect(option.aria.label.description).toContain('Duplicate month');
+    expect(option.aria.label.description).toContain('9 kWh');
   });
   it.each([[4, 8], [-8, -4]])('uses observed bounds %s to %s without a synthetic zero for gaps', async (min, max) => {
     const fixture = explorationFixture(1, { kind: 'heatmap', dimension: 'month-year', scale: 'linear' });

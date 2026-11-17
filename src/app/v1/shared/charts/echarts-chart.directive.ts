@@ -93,8 +93,12 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
       if (this.initialRenderFrame !== undefined) { cancelAnimationFrame(this.initialRenderFrame); this.initialRenderFrame = undefined; }
       this.applyOptionNow();
       this.chart?.resize();
+      this.appliedSize = this.readContentSize();
     });
   }
+
+  @HostListener('window:afterprint')
+  restoreAfterPrint(): void { this.zone.runOutsideAngular(() => this.scheduleResize()); }
 
   private initializeWhenVisible(): void {
     this.visibilityObserver?.disconnect();
