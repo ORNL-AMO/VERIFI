@@ -344,7 +344,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     const intervals = fiscalSlots.get(key) ?? new Set<string>();
     intervals.add(`${period.start}:${period.end}`); fiscalSlots.set(key, intervals);
   }
-  if ([...fiscalSlots.values()].some(intervals => intervals.size > 1))
+  // Exploration pairs actual dates; fiscal labels may name the start or end year of the same interval.
+  if (!isExplorationChart(chart) && [...fiscalSlots.values()].some(intervals => intervals.size > 1))
     add('period', 'Fiscal rollups require the same actual interval for each year and comparison role, not just matching labels.');
   if (chart.kind !== 'scatter' && chart.kind !== 'correlation' && !(chart.kind === 'heatmap' && (chart.dimension === 'month-year' || chart.normalization === 'z-score'))) {
     for (const axis of ['left', 'right'] as const) {

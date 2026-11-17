@@ -89,6 +89,16 @@ describe('annual exploration interval compatibility', () => {
     expect(checkVisualizationCompatibility(definition, matching).state).toBe('compatible');
     const model = await prepareExploration(definition, matching, new AbortController().signal);
     expect(model.pairs[1].count).toBe(4);
+    const offsetFiscalLabels = matching.map((entry, sourceIndex) => {
+      const result = entry.resolution.resolved;
+      const rows = result.data.rows.map(row => ({ ...row, start: `${row.start.slice(0, 4)}-07-01`, end: `${Number(row.start.slice(0, 4)) + 1}-06-30` }));
+      return { ...entry, resolution: { ...entry.resolution, resolved: { ...result, data: { ...result.data, rows },
+        periods: rows.map(row => ({ role: 'primary' as const, start: row.start, end: row.end, basis: 'fiscal' as const,
+          interval: 'yearly' as const, fiscalYear: Number(row.start.slice(0, 4)) + sourceIndex })) } } };
+    });
+    expect(checkVisualizationCompatibility(definition, offsetFiscalLabels)).toMatchObject({ state: 'compatible' });
+    const offsetModel = await prepareExploration(definition, offsetFiscalLabels, new AbortController().signal);
+    expect(offsetModel.pairs.every(pair => pair.count === 4)).toBe(true);
     const result = checkVisualizationCompatibility(definition, [evidence(false, false), evidence(true, true)]);
     expect(result.state).toBe('unavailable');
     if (result.state === 'unavailable') expect(result.reasons.some(reason => reason.message.includes('actual start/end'))).toBe(true);
