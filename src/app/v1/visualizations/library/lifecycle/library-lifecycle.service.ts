@@ -270,8 +270,9 @@ export class LibraryLifecycle {
   continueResources(): void { if (this.canContinueResources()) this.step.set('observation'); }
   continueObservation(): void { if (this.canContinueObservation()) this.step.set(this.hasPredictors() ? 'predictor' : 'name'); }
   togglePredictor(predictorGuid: string): void {
-    if (!this.canEditDraft() || !this.hasPredictors() || !this.predictorChoices().some(choice => choice.value === predictorGuid)) return;
+    if (!this.canEditDraft() || !this.hasPredictors()) return;
     const selected = this.predictorSelectedGuids();
+    if (!selected.includes(predictorGuid) && !this.predictorChoices().some(choice => choice.value === predictorGuid)) return;
     this.form.controls.predictorAll.setValue(false);
     this.form.controls.predictorGuids.setValue(selected.includes(predictorGuid) ? selected.filter(guid => guid !== predictorGuid) : [...selected, predictorGuid]);
   }

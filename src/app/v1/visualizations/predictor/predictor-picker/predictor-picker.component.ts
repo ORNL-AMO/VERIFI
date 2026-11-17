@@ -14,10 +14,17 @@ export class PredictorPickerComponent {
   readonly selectionRequested = output<string>();
   readonly search = new FormControl('', { nonNullable: true });
   private readonly query = signal('');
-  readonly showSearch = computed(() => this.choices().length > 8 || !!this.query());
+  readonly configured = computed<readonly PredictorResourceChoice[]>(() => {
+    const choices = this.choices(), available = new Set(choices.map(choice => choice.value));
+    return this.allMode() ? choices : [...choices, ...this.selected().filter(guid => !available.has(guid)).map(guid => ({
+      value: guid, label: 'Unavailable predictor', detail: `Saved selection · ${guid}`,
+      cardDetail: 'Remove this unavailable selection', icon: 'predictor' as const, available: false
+    }))];
+  });
+  readonly showSearch = computed(() => this.configured().length > 8 || !!this.query());
   readonly filtered = computed(() => {
     const query = this.query().trim().toLocaleLowerCase();
-    return this.choices().filter(choice => `${choice.label} ${choice.detail}`.toLocaleLowerCase().includes(query));
+    return this.configured().filter(choice => `${choice.label} ${choice.detail}`.toLocaleLowerCase().includes(query));
   });
   constructor() {
     this.search.valueChanges.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(value => this.query.set(value));

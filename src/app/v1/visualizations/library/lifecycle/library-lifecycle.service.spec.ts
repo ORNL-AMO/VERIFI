@@ -53,7 +53,7 @@ describe('visualization Dashboard lifecycle', () => {
     workspace.publish({ ...workspace.snapshot()!, predictors: [] });
     expect(lifecycle.canSubmit()).toBe(false); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
     lifecycle.editSelection('predictor');
-    lifecycle.form.controls.predictorGuids.setValue([]); lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Set up later');
+    lifecycle.togglePredictor('production'); lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Set up later');
     expect(lifecycle.canSubmit()).toBe(true);
     expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('selection');
   });

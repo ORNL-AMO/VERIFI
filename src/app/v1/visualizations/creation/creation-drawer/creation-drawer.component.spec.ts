@@ -12,6 +12,32 @@ import { FacilityPickerComponent } from '../../shared/facility-picker/facility-p
 import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 
 describe('visualization creation drawer', () => {
+  it('removes a disappeared predictor through Add while retaining the surviving fixed selection', async () => {
+    const { workspace, commands } = configureLibraryTest([LibraryModule]);
+    const first = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'first', name: 'First' };
+    const second = { ...first, guid: 'second', name: 'Second' };
+    workspace.publish({ ...workspace.snapshot()!, predictors: [first, second] });
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    try {
+      lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('predictor'); lifecycle.continueSources(); fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const button = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.trim() === label)!;
+      const card = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('.predictor-choice')].find(item => item.querySelector('strong')?.textContent === label)!;
+      card('First').click(); fixture.detectChanges(); card('Second').click(); fixture.detectChanges(); button('Continue').click(); fixture.detectChanges();
+      lifecycle.form.controls.name.setValue('Surviving history');
+      workspace.publish({ ...workspace.snapshot()!, predictors: [second] }); fixture.detectChanges();
+      expect(button('Add visualization').disabled).toBe(true);
+      button('Review predictor selection').click(); fixture.detectChanges();
+      expect(card('Unavailable predictor').getAttribute('aria-pressed')).toBe('true');
+      expect(button('Continue').disabled).toBe(true);
+      card('Unavailable predictor').click(); fixture.detectChanges();
+      expect(lifecycle.form.controls.predictorGuids.value).toEqual(['second']);
+      expect(card('Second').getAttribute('aria-pressed')).toBe('true');
+      expect(root.textContent).not.toContain('Unavailable predictor');
+      button('Continue').click(); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();
+      expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ sources: [{ selection: { kind: 'fixed', guids: ['second'] } }] });
+    } finally { fixture.destroy(); }
+  });
   it('offers All Predictors as an explicit card even with an empty catalog', async () => {
     const { workspace } = configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
     workspace.publish({ ...workspace.snapshot()!, predictors: [] });
