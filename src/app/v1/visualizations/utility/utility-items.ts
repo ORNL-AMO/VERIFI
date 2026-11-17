@@ -1,8 +1,9 @@
+import { projectEquipmentItems } from '../energy-use/equipment-items';
 import { itemKey, overrideMatches, isCustomized } from '../shared/item-appearance';
 export { itemKey, overrideMatches, isCustomized } from '../shared/item-appearance';
 import { projectPredictorItems } from '../predictor/predictor-items';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
-import type { UtilitySelectionMode, UtilityVisualizationSource, PredictorVisualizationSource, VisualizationDefinition, VisualizationScope,
+import type { UtilitySelectionMode, UtilityVisualizationSource, PredictorVisualizationSource, EnergyUseVisualizationSource, VisualizationDefinition, VisualizationScope,
   VisualizationSeries } from '@domain/visualizations/visualization-definition';
 import { discoverUtilitySeries, utilityMeterEligible } from '@domain/visualizations/utility/utility-catalog';
 import { resolveUtilitySelection, utilityBuckets, utilityMeasureKey, utilitySeriesId } from '@domain/visualizations/utility/utility-selection';
@@ -60,8 +61,8 @@ export function nativeObservationAvailable(definition: VisualizationDefinition, 
   return selection.meters.length === 1 && !selection.missing.length;
 }
 
-export function sourceSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource, identity: DecisionItemIdentity): VisualizationSeries | undefined {
-  const metric = source.kind === 'predictor' ? 'value' : utilityMeasureKey(source);
+export function sourceSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource, identity: DecisionItemIdentity): VisualizationSeries | undefined {
+  const metric = source.kind === 'predictor' ? 'value' : source.kind === 'energy-use' ? 'consumption' : utilityMeasureKey(source);
   return definition.series.find(series => series.sourceId === source.id && series.metric === metric && identity.resourceGuid !== undefined && series.resourceGuid === identity.resourceGuid)
     ?? definition.series.find(series => series.sourceId === source.id && series.metric === metric && !series.resourceGuid);
 }
@@ -120,7 +121,7 @@ export function configuredChartSummary(definition: VisualizationDefinition, snap
   if (definition.chart?.kind !== 'time-series') return undefined;
   const items = definition.sources.flatMap(source => source.kind === 'utility' ? projectMeterItems(definition, source.id, snapshot) : []);
   const predictorItems = definition.sources.flatMap(source => source.kind === 'predictor' ? projectPredictorItems(definition, source.id, snapshot) : []);
-  const allItems = [...items, ...predictorItems];
+  const allItems = [...items, ...predictorItems, ...definition.sources.flatMap(source => source.kind === 'energy-use' ? projectEquipmentItems(definition, source.id, snapshot) : [])];
   const types = new Set(allItems.length ? allItems.map(item => item.appearance.traceType) : [definition.chart.defaultTraceType]);
   return types.size > 1 ? 'Combination' : types.has('bar') ? 'Bar' : types.has('line') ? 'Line' : undefined;
 }

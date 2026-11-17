@@ -1,0 +1,41 @@
+@if (contextState(); as view) {
+  @let ids = nodes();
+  <app-visualization-decision-section [nodeId]="ids.mode" label="Select by" [summary]="modeLabel()" icon="filter" [attention]="!mode()"
+    [expanded]="view.expandedNodes?.has(ids.mode) ?? false" (expandedChange)="setSection(ids.mode, $event)">
+    <div class="visualization-choices" role="group" aria-label="Energy Use selection method">
+      @for (choice of modes; track choice.value) {
+        <button type="button" class="visualization-choice" [disabled]="view.disabled" [attr.aria-pressed]="mode() === choice.value" (click)="selectMode(choice.value)"><app-ui-icon [name]="choice.icon"/>{{ choice.label }}</button>
+      }
+    </div>
+  </app-visualization-decision-section>
+  <app-visualization-decision-section [nodeId]="ids.resources" [label]="modeLabel()" [summary]="selected.value.length + ' selected'" icon="checklist" [attention]="!selected.value.length"
+    [expanded]="view.expandedNodes?.has(ids.resources) ?? false" (expandedChange)="setSection(ids.resources, $event)">
+    @if (mode()) {
+      <app-visualization-resource-picker [label]="modeLabel()" icon="energyUseGroup" allLabel="Select current choices" [control]="selected" [options]="choices()"
+        [disabled]="view.disabled" [requestChanges]="true" (selectionRequested)="toggleSelection($event)" (selectionSetRequested)="setSelection($event)"/>
+    } @else { <p role="status">Choose how to select Energy Uses first.</p> }
+  </app-visualization-decision-section>
+  <app-visualization-decision-section [nodeId]="ids.settings" label="Data settings" summary="Equipment history and energy unit" icon="settingsSliders"
+    [expanded]="view.expandedNodes?.has(ids.settings) ?? false" (expandedChange)="setSection(ids.settings, $event)">
+  <label class="equipment-settings__toggle form-check form-switch">
+    <input type="checkbox" role="switch" class="form-check-input" [formControl]="historySettings">Use equipment history settings
+  </label>
+  @if (unsupported()) {
+    <p role="status">Equipment history requires a selection method and yearly, unstacked line/bar consumption traces. Your saved settings are retained.</p>
+  }
+  <label>Display energy unit
+    <select class="v1-select" [formControl]="unit">
+      <option value="">Follow owner energy unit</option>
+      @if (savedUnit(); as binding) {
+        @if (binding.kind === 'pinned' && !units.includes(binding.value)) { <option [value]="binding.value">{{ binding.value }} (unsupported)</option> }
+      }
+      @for (value of units; track value) { <option [value]="value">{{ value }}</option> }
+    </select>
+  </label>
+  </app-visualization-decision-section>
+  @for (item of items(); track item.key) {
+    <app-visualization-item-settings [item]="item" [disabled]="view.disabled" [editorKey]="view.editorKey ?? ''"
+      [expandedNodes]="view.expandedNodes ?? emptyNodes" [resetKey]="item.resetKey"
+      (requested)="view.request?.($event)" (sectionChanged)="view.sectionChanged?.($event.id, $event.expanded)"/>
+  }
+}

@@ -1,3 +1,5 @@
+import type { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
+
 /** Saved intent only. Record identity, revisions, and persistence belong to Vis2. */
 export const VISUALIZATION_DEFINITION_VERSION = 2;
 
@@ -12,6 +14,7 @@ export type VisualizationScope =
 
 export type VisualizationTraceType = 'line' | 'bar' | 'area';
 export type UtilitySelectionMode = 'source' | 'group' | 'meter' | 'facility' | 'rule';
+export type EnergyUseSelectionMode = 'group' | 'equipment' | 'equipment-type' | 'linked-meter-group' | 'facility';
 
 export type SettingBinding<T> = { readonly kind: 'owner' } | { readonly kind: 'pinned'; readonly value: T };
 export type VisualizationResourceKind = 'facility' | 'meter' | 'meter-group' | 'predictor' | 'equipment' | 'energy-use-group';
@@ -57,6 +60,9 @@ export interface PredictorVisualizationSource extends SourceBase {
 
 export interface EnergyUseVisualizationSource extends SourceBase {
   readonly kind: 'energy-use';
+  readonly selectionMode?: EnergyUseSelectionMode;
+  /** Named categories, not resource GUIDs. */
+  readonly equipmentTypes?: readonly EquipmentType[];
   readonly measure: 'consumption' | 'cost' | 'emissions' | 'balance';
   readonly selection?: ResourceSelection;
   readonly aggregation: 'none' | 'sum';

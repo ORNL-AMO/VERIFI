@@ -1,3 +1,4 @@
+import { EQUIPMENT_TYPES } from './energy-use/equipment-selection';
 import { VISUALIZATION_DEFINITION_VERSION, VisualizationDefinition, VisualizationSource, VisualizationSourceKind } from './visualization-definition';
 
 export interface VisualizationIssue {
@@ -76,7 +77,8 @@ const source = variant({
     charge: object({ meterGuid: text, chargeGuid: text, measure: enumeration('cost', 'usage') }) }, ['settings', 'selection', 'selectionMode', 'charge']),
   predictor: object({ ...base, kind: enumeration('predictor'), measure: enumeration('value'), selection, aggregation: enumeration('none', 'sum', 'mean') }, ['settings', 'selection']),
   'energy-use': object({ ...base, kind: enumeration('energy-use'), measure: enumeration('consumption', 'cost', 'emissions', 'balance'), selection,
-    aggregation: enumeration('none', 'sum'), denominator: enumeration('selected', 'facility', 'account', 'metered-consumption') }, ['settings', 'selection']),
+    selectionMode: enumeration('group', 'equipment', 'equipment-type', 'linked-meter-group', 'facility'), equipmentTypes: array(enumeration(...EQUIPMENT_TYPES)),
+    aggregation: enumeration('none', 'sum'), denominator: enumeration('selected', 'facility', 'account', 'metered-consumption') }, ['settings', 'selection', 'selectionMode', 'equipmentTypes']),
   analysis: variant({
     result: object({ ...base, kind: enumeration('analysis'), mode: enumeration('result'), analysisGuid: text, groupGuid: text,
       measure: enumeration('actual', 'calculated', 'savings', 'losses', 'annual-improvement', 'total-improvement', 'banked-savings', 'banked-losses'),
@@ -169,7 +171,7 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
     const path = `$.sources[${index}]`;
     if ('selection' in selected || ['utility', 'predictor', 'energy-use'].includes(selected.kind)) {
       const picked = 'selection' in selected ? selected.selection : undefined;
-      if (!picked || picked.kind === 'fixed' && !picked.guids.length) need(`${path}.selection`, 'Select resources.');
+      if (!(selected.kind === 'energy-use' && selected.selectionMode === 'equipment-type' && selected.equipmentTypes?.length) && (!picked || picked.kind === 'fixed' && !picked.guids.length)) need(`${path}.selection`, 'Select resources.');
       if (picked && !sourceResources(selected.kind).includes(picked.resource)) need(`${path}.selection.resource`, 'Choose a resource kind supported by this source.');
     }
     if (selected.kind === 'analysis' && !selected.analysisGuid) need(`${path}.analysisGuid`, 'Select a saved analysis.');
@@ -194,7 +196,7 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
 
 function sourceResources(kind: VisualizationSourceKind): readonly string[] {
   return kind === 'utility' ? ['facility', 'meter', 'meter-group'] : kind === 'predictor' ? ['predictor']
-    : kind === 'energy-use' ? ['facility', 'equipment', 'energy-use-group'] : [];
+    : kind === 'energy-use' ? ['facility', 'equipment', 'energy-use-group', 'meter-group'] : [];
 }
 
 /** Decode the current greenfield contract without mutation or persistence writes. */

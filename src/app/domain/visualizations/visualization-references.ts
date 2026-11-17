@@ -1,5 +1,5 @@
 import { VisualizationDefinition, VisualizationResourceKind, VisualizationSource } from './visualization-definition';
-import { visualizationPresentationReference } from './visualization-presentation-reference';
+import { isEnergyUseTypePresentation, visualizationPresentationReference } from './visualization-presentation-reference';
 
 export type VisualizationReferenceKind = VisualizationResourceKind | 'analysis' | 'model' | 'charge' | 'unknown';
 
@@ -125,7 +125,10 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
         setPath(result, `${path}.seriesId`, `${resource.prefix}${mapped}`);
         setPath(result, `${path}.accountGuid`, accountGuid);
       } else setPath(result, `${path}.accountGuid`, owner);
-    } else setPath(result, `${path}.accountGuid`, source?.kind === 'predictor' ? owner : accountGuid);
+    } else {
+      const verifiedCategory = isEnergyUseTypePresentation(source, override.seriesId) && !blocked.some(ref => sourceForPath(ref.path) === source?.id);
+      setPath(result, `${path}.accountGuid`, verifiedCategory ? accountGuid : source?.kind === 'predictor' || source?.kind === 'energy-use' ? owner : accountGuid);
+    }
   }));
   for (const ref of visualizationReferences(definition)) {
     const existing = blocked.find(item => item.path === ref.path);

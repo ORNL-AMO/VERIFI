@@ -1,12 +1,16 @@
 @let current = value();
 <fieldset [formGroup]="form" class="period-settings">
-  <legend>{{ monthOnly() ? 'Month range' : 'Periods and comparisons' }}</legend>
+  <legend>{{ annualOnly() ? 'Equipment fiscal years' : monthOnly() ? 'Month range' : 'Periods and comparisons' }}</legend>
   @if (conflict()) {
     <div role="alert">
       <p>Saved settings changed while your local input was incomplete. Review which settings to keep before continuing.</p>
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useSaved()">Use saved settings</button>
       <button type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled()" (click)="keepLocal()">Keep local input</button>
     </div>
+  }
+  @if (unsupportedEquipmentPeriod()) {
+    <p role="status">The saved period or comparison is unsupported for equipment history. Its intent is retained.</p>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useEquipmentDefaults()">Use latest saved fiscal year without comparison</button>
   }
   @if (unsupportedPredictorPeriod()) {
     <p role="status">The saved range or comparison is not supported for predictors. Its intent is retained.</p>
@@ -16,28 +20,30 @@
   <span class="visualization-control-label">Saved period</span>
   <div class="visualization-choices" role="group" aria-label="Saved period">
     <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'all-history'" (click)="selectChoice(form.controls.kind, 'all-history')"><app-ui-icon name="calendar"/>All history</button>
+    @if (!annualOnly()) {
     <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'fixed'" (click)="selectChoice(form.controls.kind, 'fixed')"><app-ui-icon name="calendarCheck"/>{{ monthOnly() ? 'Fixed months' : 'Fixed dates' }}</button>
     <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'rolling'" (click)="selectChoice(form.controls.kind, 'rolling')"><app-ui-icon name="clock"/>Rolling period</button>
-    @if (!monthOnly()) {
+    }
+    @if (!monthOnly() || annualOnly()) {
     <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'fiscal-year'" (click)="selectChoice(form.controls.kind, 'fiscal-year')"><app-ui-icon name="calendar"/>Pinned fiscal year</button>
     <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.kind === 'latest-saved-year'" (click)="selectChoice(form.controls.kind, 'latest-saved-year')"><app-ui-icon name="calendarCheck"/>Latest fiscal year</button>
     }
   </div>
-  @if (current.kind === 'fixed') {
+  @if (!annualOnly() && current.kind === 'fixed') {
     @if (monthOnly()) {
       <label>Start month<input type="month" min="0001-01" max="9999-12" formControlName="start"></label><label>End month<input type="month" min="0001-01" max="9999-12" formControlName="end"></label>
     } @else {
       <label>Start date<input type="date" formControlName="start"></label><label>End date<input type="date" formControlName="end"></label>
     }
   }
-  @if (!monthOnly() && (current.kind === 'fixed' || current.kind === 'rolling')) {
+  @if (!annualOnly() && !monthOnly() && (current.kind === 'fixed' || current.kind === 'rolling')) {
   <span class="visualization-control-label">Calendar basis</span>
   <div class="visualization-buttons" role="group" aria-label="Calendar basis">
     <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.basis === 'calendar'" (click)="selectChoice(form.controls.basis, 'calendar')">Calendar</button>
     <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.basis === 'fiscal'" (click)="selectChoice(form.controls.basis, 'fiscal')">Owner’s fiscal calendar</button>
   </div>
   }
-  @if (current.kind === 'rolling') {
+  @if (!annualOnly() && current.kind === 'rolling') {
     <label>Number of periods<input type="number" min="1" step="1" formControlName="count"></label>
   <span class="visualization-control-label">Period unit</span>
   <div class="visualization-buttons" role="group" aria-label="Period unit">
@@ -52,8 +58,9 @@
     @if (!monthOnly()) { <label class="period-settings__check"><input type="checkbox" formControlName="includeIncomplete">Include the incomplete current period</label> }
     @else { <p>Whole months only. Each rolling year represents 12 months.</p> }
   }
-  @if (!monthOnly()) {
+  @if (!monthOnly() || annualOnly()) {
   @if (current.kind === 'fiscal-year') { <label>Fiscal year<input type="number" min="1" max="9999" step="1" formControlName="year"></label> }
+  @if (!annualOnly()) {
   <span class="visualization-control-label">Comparison</span>
   <div class="visualization-choices" role="group" aria-label="Comparison">
     <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'none'" (click)="selectChoice(form.controls.comparison, 'none')"><app-ui-icon name="circle"/>None</button>
@@ -70,6 +77,7 @@
   }
   @if (current.comparison === 'custom') {
     <label>Comparison start<input type="date" formControlName="comparisonStart"></label><label>Comparison end<input type="date" formControlName="comparisonEnd"></label>
+  }
   }
   }
   @if (issue(); as message) { <p role="alert">{{ message }} Your input is retained until corrected or discarded.</p> }

@@ -1,3 +1,4 @@
+import { equipmentDefinition } from '@domain/visualizations/testing/equipment-fixtures';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
@@ -6,6 +7,24 @@ import { UtilityEditorsModule } from '../utility-editors.module';
 import { applyPeriodForm, periodFormIssue, periodFormValue, PeriodSettingsComponent } from './period-settings.component';
 
 describe('utility period editing', () => {
+  it('offers only annual equipment periods and protects incomplete pinned years through saved changes', () => {
+    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
+    const context = { definition: equipmentDefinition(), disabled: false, editorKey: 'equipment', changed, validityChanged };
+    fixture.componentRef.setInput('context', context); fixture.detectChanges();
+    const component = fixture.componentInstance, root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[aria-label="Comparison"]')).toBeNull();
+    expect([...root.querySelectorAll('[aria-label="Saved period"] button')].map(button => button.textContent?.trim())).toEqual(['All history', 'Pinned fiscal year', 'Latest fiscal year']);
+    expect(changed).not.toHaveBeenCalled(); component.selectChoice(component.form.controls.kind, 'fiscal-year');
+    expect(validityChanged).toHaveBeenLastCalledWith(true); expect(changed).not.toHaveBeenCalled();
+    component.form.controls.year.setValue(2028);
+    expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fiscal-year', year: 2028 }, comparison: { kind: 'none' } });
+    component.form.controls.year.setValue(null);
+    fixture.componentRef.setInput('context', { ...context, definition: { ...context.definition, period: { kind: 'all-history' } } }); fixture.detectChanges();
+    expect(component.conflict()).toBe(true); expect(component.form.controls.year.value).toBeNull();
+    component.useSaved(); expect(component.form.controls.kind.value).toBe('all-history'); expect(validityChanged).toHaveBeenLastCalledWith(false);
+  });
+
   afterEach(() => TestBed.resetTestingModule());
   it('uses inclusive month inputs for predictors, preserves partial-month saved intent on hydration, and retains invalid input', () => {
     TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
