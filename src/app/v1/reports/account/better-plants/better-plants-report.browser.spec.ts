@@ -1,4 +1,6 @@
-import { Injector, inject } from '@angular/core';
+import { Component, Injector, inject } from '@angular/core';
+import { PortalModule } from '@angular/cdk/portal';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { TestBed } from '@angular/core/testing';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, firstValueFrom, of, take, timeout } from 'rxjs';
@@ -23,6 +25,10 @@ import { setupAccountReportWorkbench } from '../testing/account-report-workbench
 import { StatusItem } from '@app/v1/status/status.models';
 import { BetterPlantsReportService } from './better-plants-report.service';
 import { BetterPlantsOutputService } from './output/better-plants-output.service';
+
+@Component({ standalone: true, imports: [PortalModule], host: { style: 'display:contents' },
+  template: '<div class="v1-root v1-palette-blueprint" style="display:contents"><ng-container [cdkPortalOutlet]="modal.activePortal()"/></div>' })
+class BetterPlantsPresentationPortalHost { readonly modal = inject(ModalPortalService); }
 
 describe('Better Plants review and display in Chromium', () => {
   let database: IndexedDbTestHarness;
@@ -137,6 +143,55 @@ describe('Better Plants review and display in Chromium', () => {
     expect(outputButtons.every(button => !button.disabled)).toBe(true);
     expect(coordinator.state().value?.summaries?.map(summary => summary.reportYear)).toEqual([2024, 2023]);
     expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).not.toBeNull();
+    const preview = root.querySelector<HTMLElement>('app-better-plants-preview')!;
+    const inlinePapers = Array.from(preview.querySelectorAll<HTMLElement>('article.report-document'));
+    const reportText = inlinePapers.map(paper => paper.textContent);
+    const mount = root.parentElement!;
+    const portal = TestBed.createComponent(BetterPlantsPresentationPortalHost); portal.autoDetectChanges();
+    // Retain both fixture surfaces after TestBed replaces its default root.
+    mount.appendChild(root); root.appendChild(portal.nativeElement);
+    const present = root.querySelector<HTMLButtonElement>('footer .v1-wizard-actions__next > button')!;
+    const calculationsBeforePresentation = execute.mock.calls.length, revisionBeforePresentation = view.store.committedRevision();
+    const reportsBeforePresentation = await database.getAll('accountReports');
+    const denyFullscreen = category === 'water' ? vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Use window fallback')) : undefined;
+    try {
+      expect(present.textContent?.trim()).toBe('Present'); expect(present.disabled).toBe(false);
+      if (category === 'water') {
+        outputButtons[0].focus({ preventScroll: true }); expect(document.activeElement).toBe(outputButtons[0]);
+        // Programmatic activation reproduces browsers that do not focus buttons on click.
+        present.click();
+      } else await page.getByRole('button', { name: 'Present', exact: true }).click();
+      await portal.whenStable();
+      const surface = (portal.nativeElement as HTMLElement).querySelector<HTMLElement>('[role=dialog]')!;
+      if (category === 'energy') await vi.waitFor(() => expect(document.fullscreenElement).toBe(surface));
+      else expect(surface.querySelector('[role=status]')?.textContent).toContain('Fullscreen is unavailable');
+      if (category === 'water') {
+        (portal.nativeElement as HTMLElement).querySelector('.v1-root')!.classList.add('v1-theme-dark');
+        await page.viewport(390, 900); await portal.whenStable(); await new Promise(requestAnimationFrame);
+      }
+      expect(preview.querySelector('article')).toBeNull();
+      const presentedPapers = Array.from(surface.querySelectorAll<HTMLElement>('article.report-document'));
+      expect(presentedPapers.map(paper => paper.getAttribute('aria-label'))).toEqual(['2024 Better Plants report', '2023 Better Plants report']);
+      expect(presentedPapers.map(paper => paper.textContent)).toEqual(reportText);
+      expect(surface.querySelector('img')?.getAttribute('src')).toBe('assets/images/better-plants-report-banner.jpg');
+      const beforeZoom = presentedPapers[0].getBoundingClientRect().width;
+      await page.getByRole('button', { name: 'Zoom in', exact: true }).click(); await portal.whenStable();
+      expect(presentedPapers[0].getBoundingClientRect().width).toBeCloseTo(beforeZoom * 1.1, 0);
+      presentedPapers[1].scrollIntoView();
+      expect(surface.querySelector<HTMLElement>('.report-presentation__scroll')!.scrollTop).toBeGreaterThan(0);
+      const table = presentedPapers[0].querySelector<HTMLElement>('.table-scroll')!;
+      table.scrollIntoView(); table.focus(); await userEvent.keyboard('{ArrowRight}');
+      if (category === 'water') await vi.waitFor(() => expect(table.scrollLeft).toBeGreaterThan(0));
+      await page.screenshot({ element: surface, path: `./__screenshots__/better-plants-presentation-${category}.png` });
+      await page.getByRole('button', { name: 'Close presentation', exact: true }).click(); await portal.whenStable();
+      await vi.waitFor(() => expect(document.fullscreenElement).toBeNull());
+      view.harness.detectChanges();
+      expect(preview.querySelectorAll('article.report-document')).toHaveLength(2);
+      expect(document.activeElement).toBe(present);
+      expect(execute).toHaveBeenCalledTimes(calculationsBeforePresentation);
+      expect(view.store.committedRevision()).toBe(revisionBeforePresentation);
+      expect(await database.getAll('accountReports')).toEqual(reportsBeforePresentation);
+    } finally { denyFullscreen?.mockRestore(); portal.destroy(); await page.viewport(1200, 1100); }
     const exports = component.workbench.session()!.injector.get(BetterPlantsOutputService).output;
     const calculationCount = execute.mock.calls.length, revision = view.store.committedRevision();
     await exports.generate('pdf'); await exports.generate('xlsx');
@@ -220,6 +275,7 @@ describe('Better Plants review and display in Chromium', () => {
     await transactions.runTransaction(['utilityMeterData'], 'readwrite', tx => tx.put('utilityMeterData', changed));
     view.store.publishCommittedPatch({ collections: [{ collection: 'meterData', upsert: [changed] }] });
     view.harness.detectChanges(); expect(view.harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
+    expect(Array.from(root.querySelectorAll('footer button')).some(button => button.textContent?.trim() === 'Present')).toBe(false);
     await waitFor(state => state.state === 'review-required');
     await database.reopen(); expect((await database.getAll('accountAnalysisItems'))[0]['dataCheckReviews']).toHaveLength(1);
   });

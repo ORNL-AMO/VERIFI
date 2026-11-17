@@ -8,6 +8,7 @@ import { ReportWorkbenchEditor } from '../editing/report-autosave-controller';
 import { ReportConfigurationStatus, ReportIdentity } from '../report.models';
 import { ReportStageId, ReportWorkbenchStage } from './report-workbench.models';
 import { ReportOutputCapability } from '../output/report-output.models';
+import { ReportPresentationCapability } from '../presentation/report-presentation-controller';
 
 export interface ReportEditor extends ReportWorkbenchEditor {
   readonly name: FormControl<string>;
@@ -23,6 +24,7 @@ export interface ReportRuntime {
   /** Pending facility formats retain their supported name-only editing. */
   readonly gateSetup: boolean;
   readonly output?: ReportOutputCapability;
+  readonly presentation?: ReportPresentationCapability;
 }
 
 export interface ReportFeatureDefinition {

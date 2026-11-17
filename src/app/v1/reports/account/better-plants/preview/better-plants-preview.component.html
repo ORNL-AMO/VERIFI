@@ -1,3 +1,6 @@
+<app-report-presentation [title]="context.report()?.name || 'Better Plants report'" [content]="reportContent"
+  [available]="canPresent()"/>
+<ng-template #reportContent>
 @let result = report.state();
 @let companyInfo = company();
 @if (result.state !== 'ready') {
@@ -63,3 +66,4 @@
     </article>
   }
 }
+</ng-template>

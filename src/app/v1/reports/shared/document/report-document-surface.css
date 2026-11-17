@@ -1,5 +1,5 @@
 /* Shared on-screen document framing; print and export pagination remain separate. */
-.report-document { width: 100%; min-width: 0; max-width: 76rem; margin-inline: auto; border: 1px solid var(--v1-border); border-radius: 0; background: var(--v1-surface); color: var(--v1-text); }
+.report-document { width: 100%; min-width: 0; max-width: var(--report-document-max-width, 76rem); margin-inline: auto; border: 1px solid var(--v1-border); border-radius: 0; background: var(--v1-surface); color: var(--v1-text); }
 .document-section { padding: 1.25rem; border-bottom: 1px solid var(--v1-border); }
 .report-document + .report-document { margin-block-start: 2rem; }
 .document-title { padding: 1.25rem; text-align: center; }

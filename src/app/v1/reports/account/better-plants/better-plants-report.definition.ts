@@ -7,11 +7,13 @@ import { BetterPlantsSetupPageComponent } from './setup/page/better-plants-setup
 import { BetterPlantsDataChecksComponent } from './data-checks/better-plants-data-checks.component';
 import { BetterPlantsPreviewComponent } from './preview/better-plants-preview.component';
 import { BetterPlantsOutputService } from './output/better-plants-output.service';
+import { ReportPresentationController } from '@app/v1/reports/shared/presentation/report-presentation-controller';
 
 export const BETTER_PLANTS_REPORT: ReportFeatureDefinition = {
   type: 'betterPlants',
-  providers: [BetterPlantsEditor, BetterPlantsReportService, BetterPlantsOutputService,
+  providers: [BetterPlantsEditor, BetterPlantsReportService, BetterPlantsOutputService, ReportPresentationController,
     { provide: ACCOUNT_ANALYSIS_EDITOR, useExisting: BetterPlantsEditor },
-    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(BetterPlantsEditor), checks: inject(BetterPlantsReportService), gateSetup: true, output: inject(BetterPlantsOutputService).output }) }],
+    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(BetterPlantsEditor), checks: inject(BetterPlantsReportService), gateSetup: true,
+      output: inject(BetterPlantsOutputService).output, presentation: inject(ReportPresentationController) }) }],
   stages: { setup: BetterPlantsSetupPageComponent, 'data-checks': BetterPlantsDataChecksComponent, report: BetterPlantsPreviewComponent }
 };
