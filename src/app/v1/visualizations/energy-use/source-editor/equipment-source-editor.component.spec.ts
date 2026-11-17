@@ -1,4 +1,4 @@
-import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import type { VisualizationDefinition, VisualizationSeriesOverride } from '@domain/visualizations/visualization-definition';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -8,8 +8,24 @@ import { EquipmentSourceEditorComponent } from './equipment-source-editor.compon
 import { prepareDecisionChange, projectDecisionItems } from '../../decisions/decision-tree';
 import { useEquipmentHistorySettings } from '@domain/visualizations/energy-use/equipment-source';
 
+const dormantOverrides: readonly VisualizationSeriesOverride[] = [
+  { resourceGuid: 'dormant', accountGuid: 'foreign', color: '#123456' },
+  { seriesId: 'unknown-format', label: 'Preserved provider appearance' }
+];
+
 describe('equipment history editor', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it.each(dormantOverrides)('reviews clearing the last selected resource when dormant presentation remains: %j', override => {
+    const initial = equipmentDefinition(), definition = { ...initial,
+      series: initial.series.map(series => ({ ...series, overrides: [override] })) };
+    const before = structuredClone(definition);
+    const result = prepareDecisionChange(definition, { kind: 'energy-use-resources', sourceId: 'source-1', ids: [] }, { snapshot: equipmentSnapshot() });
+    expect(result.state).toBe('confirm');
+    if (result.state === 'unchanged') throw new Error('Expected reviewed removal');
+    expect(result.cleared).toContain('Customized item presentation');
+    expect(result.definition.series).toEqual([]);
+    expect(definition).toEqual(before);
+  });
   it('requests a reviewed facility mode change and selects owned facilities while retaining missing facility intent', () => {
     const snapshot = equipmentSnapshot(), store = new AccountWorkspaceStore();
     store.publish({ ...snapshot, facilities: [{ ...snapshot.facilities[0], name: 'Production' }, { ...snapshot.facilities[0], guid: 'empty', name: 'Empty facility' }, { ...snapshot.facilities[0], guid: 'foreign', accountId: 'another-account', name: 'Foreign' }] });

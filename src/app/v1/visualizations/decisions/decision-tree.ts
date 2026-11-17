@@ -227,7 +227,10 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
           ...(guids.length ? mode === 'equipment-type' ? { equipmentTypes: guids as EquipmentType[] } : { selection: { kind: 'fixed', resource: energyUseResourceKind(mode), guids } } : {}) };
         next = { ...next, sources: next.sources.map(item => item.id === source.id ? changed : item) };
         if (guids.length) next = ensureSeries(next, changed);
-        else next = { ...next, series: next.series.filter(series => series.sourceId !== source.id) };
+        else {
+          if (hasSourcePresentation(definition, source.id)) cleared.push('Customized item presentation');
+          next = { ...next, series: next.series.filter(series => series.sourceId !== source.id) };
+        }
         affect({ kind: 'resources', sourceId: source.id });
       } else if (action.kind === 'equipment-defaults') {
         next = ensureSeries(useEquipmentHistorySettings(definition, source.id), { ...source, measure: 'consumption' });
