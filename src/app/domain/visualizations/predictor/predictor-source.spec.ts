@@ -23,6 +23,21 @@ function setup() {
 }
 
 describe('saved monthly predictor projection', () => {
+  it.each(['observed', 'duplicate', 'nonfinite'] as const)('retains saved reading notes in %s runtime evidence without changing records', state => {
+    const { snapshot, request, reading } = setup();
+    const note = 'Estimated from downtime log; verify before analysis';
+    snapshot.predictorData = [{ ...reading(1, state === 'nonfinite' ? NaN : 5), notes: `  ${note}  ` },
+      ...(state === 'duplicate' ? [reading(1, 7, 'duplicate')] : [])];
+    const before = structuredClone(snapshot.predictorData), result = resolvePredictor(snapshot, request);
+    if (state === 'observed') {
+      expect(result.state).toBe('ready');
+      if (result.state !== 'ready' || result.resolved.data.kind !== 'time-series') throw new Error('Expected observed annotation');
+      expect(Object.values(result.resolved.data.rows[0].values)[0]).toMatchObject({ state: 'observed', value: 5, partial: false, notes: [note] });
+    } else {
+      expect(result).toMatchObject({ state: 'empty', reasons: expect.arrayContaining([expect.stringContaining(note)]) });
+    }
+    expect(snapshot.predictorData).toEqual(before);
+  });
   it('resolves 150,000 saved months without an argument-count limit', () => {
     const { snapshot, predictor, source, request, reading } = setup();
     snapshot.predictors = Array.from({ length: 2500 }, (_, index) => ({ ...predictor, guid: `predictor-${index}` }));
@@ -40,6 +55,16 @@ describe('saved monthly predictor projection', () => {
     expect(result.resolved.data.rows).toHaveLength(60);
     expect(result.resolved.data.rows[0]).toMatchObject({ start: '2020-01-01', values: { 'predictor:predictor:predictor-0': { state: 'observed', value: 0 } } });
     expect(result.resolved.data.rows.at(-1)).toMatchObject({ end: '2024-12-31', values: { 'predictor:predictor:predictor-2499': { state: 'observed', value: 59 } } });
+  });
+  it('retains every excluded reading in a large duplicate month without an argument-count limit', () => {
+    const { snapshot, request, reading } = setup();
+    snapshot.predictorData = Array.from({ length: 150000 }, (_, index) => reading(1, index, `duplicate-${String(index).padStart(6, '0')}`));
+    const result = resolvePredictor(snapshot, request);
+    expect(result.state).toBe('empty');
+    if (result.state !== 'empty') throw new Error('Expected duplicate-month exclusion');
+    expect(result.reasons?.[0]).toContain('duplicate-000000: 0');
+    expect(result.reasons?.[0]).toContain('duplicate-149999: 149999');
+    expect(snapshot.predictorData).toHaveLength(150000);
   });
   it('keeps history bounds separate from eligible latest values and excludes unowned or invalid months', () => {
     const { snapshot, predictor, source, request, reading } = setup();

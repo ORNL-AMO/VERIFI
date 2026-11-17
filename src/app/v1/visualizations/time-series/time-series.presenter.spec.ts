@@ -1,6 +1,7 @@
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { observed, visualizationEvidenceFixture } from '@domain/visualizations/testing/visualization-provider-fixtures';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { timeSeriesOption } from './time-series-options';
 import type { VisualizationSourceEvidence, ResolvedVisualizationSeries } from '@domain/visualizations/visualization-source-provider';
 import { prepareTimeSeries, TimeSeriesPresenter } from './time-series.presenter';
 
@@ -81,12 +82,15 @@ describe('saved time-series presentation', () => {
     if (evidence.resolution.state !== 'ready' || evidence.resolution.resolved.data.kind !== 'time-series') throw new Error('Fixture must be time-series.');
     const amended: VisualizationSourceEvidence = { ...evidence, resolution: { ...evidence.resolution, resolved: { ...evidence.resolution.resolved,
       quality: { partial: true, warnings: ['Meter B omitted: invalid bill'] }, data: { kind: 'time-series', rows: [
-        { periodKey: 'jan', start: '2025-01-01', end: '2025-01-31', values: { energy: { state: 'observed', value: 10, provenance: 'measured', partial: true } } },
+        { periodKey: 'jan', start: '2025-01-01', end: '2025-01-31', values: { energy: { state: 'observed', value: 10, provenance: 'measured', partial: true, notes: ['Estimated from downtime log; verify before analysis'] } } },
         { periodKey: 'feb', start: '2025-02-01', end: '2025-02-28', values: { energy: { state: 'missing', value: null, reason: 'Invalid cost input' } } }
       ] } } } };
     const snapshot = structuredClone(amended);
     const presentation = new TimeSeriesPresenter().prepare(definition, [amended], new AbortController().signal);
     expect(presentation.details.rows[0][4]).toContain('partial subtotal');
+    expect(presentation.details.rows[0][4]).toContain('Estimated from downtime log; verify before analysis');
+    const model = prepareTimeSeries(definition, [amended]), option = timeSeriesOption(model) as any;
+    expect(option.tooltip.formatter([{ seriesId: model.traces[0].id, axisValue: model.slots[0].key }])).toContain('Estimated from downtime log; verify before analysis');
     expect(presentation.details.rows[1][4]).toBe('missing: Invalid cost input');
     expect(amended).toEqual(snapshot);
   });

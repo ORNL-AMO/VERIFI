@@ -100,6 +100,8 @@ export function predictorChartSupport(source: PredictorVisualizationSource, char
 }
 function readingNotes(predictor: IdbPredictor, reading: IdbPredictorData): string[] {
   const notes: string[] = [];
+  const savedNote = reading.notes?.trim();
+  if (savedNote) notes.push(savedNote);
   if (reading.amount < 0) notes.push('Negative saved amount');
   if (reading.weatherDataWarning || predictor.weatherDataWarning) notes.push('Saved weather warning');
   if (reading.weatherDataChanged) notes.push('Saved weather data changed');
@@ -154,7 +156,7 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
   const omit = (record: IdbPredictor, issue: string, readings: readonly IdbPredictorData[]) => {
     let group = omissions.find(item => item.resourceGuid === record.guid && item.issue === issue);
     if (!group) { group = { resourceGuid: record.guid, label: record.name, issue, readings: [] }; omissions.push(group); }
-    group.readings.push(...[...readings].sort((a, b) => a.guid.localeCompare(b.guid)).map(reading => readingEvidence(record, reading)));
+    for (const reading of [...readings].sort((a, b) => a.guid.localeCompare(b.guid))) group.readings.push(readingEvidence(record, reading));
   };
   const omitExcluded = (record: IdbPredictor, readings: readonly IdbPredictorData[]) => {
     if (readings.length > 1) omit(record, 'Duplicate month', readings);
