@@ -167,7 +167,8 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
     references: [{ kind: 'analysis' as const, id: analysis.guid, accountGuid: analysis.accountId, ...(facility ? { facilityGuid: facility.guid } : {}) },
       ...(source.groupGuid ? [{ kind: 'analysis-group' as const, id: source.groupGuid, accountGuid: analysis.accountId, ...(facility ? { facilityGuid: facility.guid } : {}) }] : [])],
     provenance: [source.measure === 'actual' ? 'measured' as const : source.measure === 'calculated' ? 'modeled' as const : 'savings' as const],
-    quality: { partial: rows.some(row => Object.values(row.values).some(point => point.state !== 'observed' || point.partial)), warnings }, analysisFreshness: 'current' as const };
+    quality: { partial: rows.some(row => Object.values(row.values).some(point => point.state !== 'observed' || point.partial)), warnings }, analysisFreshness: 'current' as const,
+    ...(value.scope === 'account' ? { accountAnalysisFacilityGuids: [...value.selectedFacilityGuids] } : {}) };
   return rows.some(row => Object.values(row.values).some(point => point.state === 'observed')) ? { identity, state: 'ready', resolved }
     : { identity, state: 'empty', periods, resolved, message: 'No usable analysis values in the requested period.' };
 }

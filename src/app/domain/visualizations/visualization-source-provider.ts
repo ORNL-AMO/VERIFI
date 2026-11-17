@@ -140,6 +140,8 @@ export interface VisualizationResolvedData {
   readonly provenance: readonly VisualizationProvenance[];
   readonly quality: { readonly partial: boolean; readonly warnings: readonly string[]; readonly omissions?: readonly VisualizationOmission[] };
   readonly analysisFreshness?: 'current' | 'stale';
+  /** Authoritative selected-facility closure for account results; included chart facilities may also contain skipped facilities. */
+  readonly accountAnalysisFacilityGuids?: readonly string[];
 }
 
 export type VisualizationSourceResolution = { readonly identity: VisualizationRequestIdentity } & (

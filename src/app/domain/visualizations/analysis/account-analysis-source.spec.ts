@@ -1,9 +1,11 @@
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
-import type { AnalysisResultVisualizationSource } from '@domain/visualizations/visualization-definition';
+import type { AnalysisResultVisualizationSource, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { checkVisualizationCompatibility } from '../visualization-capabilities';
+import { resolveVisualizationFacilities } from '../visualization-facilities';
 import { calculateAccountAnalysisResults } from '@domain/calculations/analysis-calculations/account-analysis-results-calculation';
 import { annualAnalysisChartValues, monthlyAnalysisSavingsValues, monthlyAnalysisUseValues } from '@domain/calculations/analysis-calculations/analysis-chart-values';
 import { accountAnalysisDefinition, accountAnalysisFixture, accountAnalysisSourceRequest } from '../testing/analysis-fixtures';
-import { resolveAccountAnalysisResults, latestAnalysisMonth, type AccountVisualizationResults } from './facility-analysis-source';
+import { resolveAccountAnalysisResults, latestAnalysisMonth, facilityAnalysisCapabilities, facilityAnalysisChartSupport, type AccountVisualizationResults } from './facility-analysis-source';
 
 function results(): AccountVisualizationResults {
   const fixture = accountAnalysisFixture(), value = calculateAccountAnalysisResults(fixture.request);
@@ -16,6 +18,36 @@ function project(value = results(), request = accountAnalysisSourceRequest()) {
   return { resolved, rows: resolved.resolved.data.rows, points: resolved.resolved.data.rows.map(row => Object.values(row.values)[0]), series: resolved.resolved.series };
 }
 describe('saved account total analysis projection', () => {
+  it.each(['fixed-multiple', 'all-single'] as const)('composes owned account results with %s inclusion and still rejects foreign ownership', inclusion => {
+    const fixture = accountAnalysisFixture(), single = inclusion === 'all-single';
+    const facilityGuids = single ? ['facility-a'] : ['facility-a', 'facility-b'];
+    const account = { ...fixture.snapshot.account, isSingleFacilityCompany: single };
+    const analysis = { ...fixture.analysis, facilityAnalysisItems: fixture.analysis.facilityAnalysisItems.filter(link => !single || facilityGuids.includes(link.facilityId)) };
+    const calculated = calculateAccountAnalysisResults({ ...fixture.request, account, accountAnalysisItem: analysis,
+      accountFacilities: fixture.request.accountFacilities.filter(facility => facilityGuids.includes(facility.guid)),
+      allAccountAnalysisItems: fixture.request.allAccountAnalysisItems.filter(item => facilityGuids.includes(item.facilityId)),
+      meters: fixture.request.meters.filter(meter => facilityGuids.includes(meter.facilityId)),
+      meterData: fixture.request.meterData.filter(reading => facilityGuids.includes(reading.facilityId)) });
+    const value: AccountVisualizationResults = { scope: 'account', analysis, account, selectedFacilityGuids: facilityGuids,
+      monthly: calculated.monthlyAnalysisSummaryData, annual: calculated.annualAnalysisSummaries, reportYear: calculated.reportYear };
+    const definition: VisualizationDefinition = { ...accountAnalysisDefinition(), facilitySelection: single ? { kind: 'all' } : { kind: 'fixed', facilityGuids } };
+    const base = accountAnalysisSourceRequest(definition), request = { ...base, identity: { ...base.identity,
+      scope: resolveVisualizationFacilities(definition, fixture.snapshot.facilities.filter(facility => !single || facilityGuids.includes(facility.guid))).scope } };
+    const resolution = resolveAccountAnalysisResults(value, request);
+    expect(resolution.state).toBe('ready');
+    if (resolution.state !== 'ready') throw new Error('Expected scoped account results');
+    const evidence = { request, resolution, capabilities: facilityAnalysisCapabilities(), chartSupport: facilityAnalysisChartSupport(request.source, request.chart) };
+    expect(checkVisualizationCompatibility(definition, [evidence]).state).toBe('compatible');
+    const { accountAnalysisFacilityGuids: _proof, ...withoutProof } = resolution.resolved;
+    expect(checkVisualizationCompatibility(definition, [{ ...evidence, resolution: { ...resolution, resolved: withoutProof } }])).toMatchObject({
+      state: 'unavailable', reasons: expect.arrayContaining([expect.objectContaining({ code: 'ownership' })]) });
+    expect(checkVisualizationCompatibility(definition, [{ ...evidence, resolution: { ...resolution,
+      resolved: { ...resolution.resolved, accountAnalysisFacilityGuids: ['excluded-facility'] } } }])).toMatchObject({
+      state: 'unavailable', reasons: expect.arrayContaining([expect.objectContaining({ code: 'ownership' })]) });
+    expect(checkVisualizationCompatibility(definition, [{ ...evidence, resolution: { ...resolution,
+      resolved: { ...resolution.resolved, references: resolution.resolved.references.map(reference => ({ ...reference, accountGuid: 'foreign' })) } } }])).toMatchObject({
+        state: 'unavailable', reasons: expect.arrayContaining([expect.objectContaining({ code: 'ownership' })]) });
+  });
   it.each(['energy', 'water'] as const)('matches all account workbench chart measures for %s', category => {
     const value = results(); value.analysis.analysisCategory = category;
     for (const measure of ['actual', 'calculated', 'savings', 'losses', 'annual-improvement', 'total-improvement'] as const) {
