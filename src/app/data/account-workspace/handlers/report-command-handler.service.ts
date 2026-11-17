@@ -16,7 +16,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { buildSingleFacilityAnalysisPair, singleFacilityAnalysisPairCandidates, singleFacilityAnalysisPairIsCurrent } from '../single-facility-analysis-pairs';
-import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings } from '../facility-report-setup.models';
+import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings } from '../facility-report-setup.models';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
@@ -62,8 +62,14 @@ export class ReportCommandHandler {
         throw new WorkspaceWriteError('validation-failed', 'These settings belong to a Data Quality report.');
       }
       let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
-      if (changes.analysisItemId !== undefined || changes.analysisReportSettings !== undefined) {
-        if (report.facilityReportType !== 'analysis') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a facility Analysis report.');
+      if (changes.analysisReportSettings !== undefined && report.facilityReportType !== 'analysis') {
+        throw new WorkspaceWriteError('validation-failed', 'These settings belong to a facility Analysis report.');
+      }
+      if (changes.modelingReportSettings !== undefined && report.facilityReportType !== 'modeling') {
+        throw new WorkspaceWriteError('validation-failed', 'These settings belong to a facility Modeling report.');
+      }
+      if (changes.analysisItemId !== undefined || changes.analysisReportSettings !== undefined || changes.modelingReportSettings !== undefined) {
+        if (!['analysis', 'modeling'].includes(report.facilityReportType)) throw new WorkspaceWriteError('validation-failed', 'These settings require an Analysis or Modeling report.');
         if (changes.analysisItemId !== undefined) {
           if (changes.analysisItemId !== null) {
             const analysis = (await tx.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountGuid))
@@ -74,6 +80,8 @@ export class ReportCommandHandler {
         }
         if (changes.analysisReportSettings) updated = { ...updated,
           analysisReportSettings: mergeFacilityAnalysisSettings(report.analysisReportSettings, changes.analysisReportSettings) };
+        if (changes.modelingReportSettings) updated = { ...updated,
+          modelingReportSettings: mergeFacilityModelingSettings(report.modelingReportSettings, changes.modelingReportSettings) };
       }
       if (report.facilityReportType === 'dataQuality') {
         const patch = changes.dataQualityReportSettings ?? {};

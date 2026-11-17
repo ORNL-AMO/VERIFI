@@ -1,0 +1,4 @@
+@import '../../../shared/workbench/report-workbench-stage.css';
+@import '../../../shared/editing/report-setup.css';
+.report-section .modeling-option { display: flex; align-items: center; margin-block-end: .75rem; }
+.modeling-option > input { margin: 0; }

@@ -1,0 +1,169 @@
+@let report = view();
+@if (!report.hasContent) {
+<article class="report-document" aria-label="Modeling report">
+  <ng-container [ngTemplateOutlet]="documentTitle" />
+  <div class="document-section"><ng-container [ngTemplateOutlet]="reportNotice"
+      [ngTemplateOutletContext]="{ heading: 'No sections are selected.', message: 'Choose included content in Setup.' }" />
+  </div>
+</article>
+}
+@if (report.settings.includeIssuesSummary) {
+<article class="report-document" aria-labelledby="modeling-issues">
+  <ng-container [ngTemplateOutlet]="documentTitle" />
+  <section class="document-section" aria-labelledby="modeling-issues">
+    <h3 id="modeling-issues" class="section-heading">Issues Summary</h3>
+    @if (!report.groups.length) { <ng-container [ngTemplateOutlet]="reportNotice"
+      [ngTemplateOutletContext]="{ heading: 'No included analysis groups are available.', message: 'Review the linked analysis setup.' }" />
+    }
+    @if (!hasIssues() && report.groups.length) { <ng-container [ngTemplateOutlet]="reportNotice"
+      [ngTemplateOutletContext]="{ heading: 'No issues identified.', success: true }" /> }
+    @for (severity of report.issues; track severity.severity) {
+    @if (severity.rows.length) {
+    <div class="table-scroll" tabindex="0" role="region" [attr.aria-label]="severity.label + ' issues'">
+      <table>
+        <caption>{{ severity.label }} issues</caption>
+        <thead>
+          <tr>
+            <th scope="col">Facility</th>
+            <th scope="col">Group</th>
+            <th scope="col">Issue</th>
+          </tr>
+        </thead>
+        <tbody>@for (row of severity.rows; track $index) { <tr>
+            <td>{{ row.facilityName }}</td>
+            <th scope="row">{{ row.groupName }}</th>
+            <td>{{ row.note }}</td>
+          </tr> }</tbody>
+      </table>
+    </div>
+    }
+    }
+  </section>
+</article>
+}
+@if (report.settings.includeExecutiveSummary) {
+<article class="report-document" aria-labelledby="modeling-executive">
+  @if (!report.settings.includeIssuesSummary) { <ng-container [ngTemplateOutlet]="documentTitle" /> }
+  <section class="document-section" aria-labelledby="modeling-executive">
+    <h3 id="modeling-executive" class="section-heading">Executive Summary</h3>
+    @if (regression().length) { <h4 class="method-heading">Analysis Type: Regression</h4><ng-container
+      [ngTemplateOutlet]="regressionTable" [ngTemplateOutletContext]="{ rows: regression() }" /> }
+    @for (method of report.methods; track method.method) {
+    <div class="table-scroll" tabindex="0" role="region" [attr.aria-label]="method.label + ' summary'">
+      <table>
+        <caption>Analysis Type: {{ method.label }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Facility</th>
+            <th scope="col">Group</th>
+            <th scope="col">Baseline year</th>@if (method.method !== 'absoluteEnergyConsumption') { <th scope="col">
+              Predictor variables</th> }
+          </tr>
+        </thead>
+        <tbody>@for (row of method.groups; track row.key) { <tr>
+            <td>{{ row.facilityName }}</td>
+            <th scope="row">{{ row.groupName }}</th>
+            <td>{{ row.baselineYear }}</td>@if (method.method !== 'absoluteEnergyConsumption') { <td>@for (predictor of
+              row.predictors; track $index) { <div>{{ predictor }}</div> } @empty { — }</td> }
+          </tr> }</tbody>
+      </table>
+    </div>
+    }
+    @if (!report.groups.length) { <ng-container [ngTemplateOutlet]="reportNotice"
+      [ngTemplateOutletContext]="{ heading: 'Executive summary is unavailable.' }" /> }
+  </section>
+</article>
+}
+@if (report.settings.includeDataValidationTables) {
+<article class="report-document" aria-labelledby="modeling-validation">
+  @if (!report.settings.includeIssuesSummary && !report.settings.includeExecutiveSummary) { <ng-container
+    [ngTemplateOutlet]="documentTitle" /> }
+  <section class="document-section" aria-labelledby="modeling-validation">
+    <h3 id="modeling-validation" class="section-heading">Data Validation Tables</h3>
+    @for (row of regression(); track row.key) {
+    <section class="model-validation" [attr.aria-label]="row.facilityName + ' · ' + row.groupName">
+      <h4 class="group-heading">{{ row.facilityName }} · {{ row.groupName }}</h4>
+      <ng-container [ngTemplateOutlet]="regressionTable" [ngTemplateOutletContext]="{ rows: [row] }" />
+      @if (row.model?.SEPValidation?.length) {
+      <div class="table-scroll" tabindex="0" role="region" [attr.aria-label]="row.groupName + ' predictor validation'">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Validation measure</th>@for (validation of row.model!.SEPValidation; track $index) { <th
+                scope="col">{{ validation.predictorVariable }}</th> }
+            </tr>
+          </thead>
+          <tbody>@for (metric of row.details.validation; track metric.label) { <tr>
+              <th scope="row">{{ metric.label }}</th>@for (cell of metric.cells; track $index) { <td
+                [class.failed]="cell.failed">{{ cell.value | analysisResultNumber }}@if (cell.failed) { <span> —
+                  Fail</span> }</td> }
+            </tr> }</tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">Validation check</th>@for (validation of row.model!.SEPValidation; track $index) { <td
+                [class.failed]="!validation.isValid">{{ validation.isValid ? 'Pass' : 'Fail' }}</td> }
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      } @else { <ng-container [ngTemplateOutlet]="reportNotice"
+        [ngTemplateOutletContext]="{ heading: 'Predictor validation is unavailable for this model.', message: 'Review the analysis setup.' }" />
+      }
+    </section>
+    } @empty { <ng-container [ngTemplateOutlet]="reportNotice"
+      [ngTemplateOutletContext]="{ heading: 'No regression groups are included.', message: 'Data validation tables apply to regression groups.' }" />
+    }
+  </section>
+</article>
+}
+<ng-template #documentTitle>
+  <header class="document-title">
+    <h2 class="report-title">{{ title() }}</h2>
+    <p>Generated By VERIFI</p>
+  </header>
+</ng-template>
+<ng-template #reportNotice let-heading="heading" let-message="message" let-success="success">
+  <aside class="v1-alert report-notice" [class.v1-alert--info]="!success" [class.v1-alert--success]="success"
+    role="status">
+    <div class="report-notice__heading">
+      <app-ui-icon [name]="success ? 'success' : 'info'" aria-hidden="true" />
+      <strong>{{ heading }}</strong>
+    </div>
+    @if (message) { <p>{{ message }}</p> }
+  </aside>
+</ng-template>
+<ng-template #regressionTable let-rows="rows">
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Regression model statistics">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Facility</th>
+          <th scope="col">Group</th>
+          <th scope="col">Model period</th>
+          <th scope="col">Variable p-values</th>
+          <th scope="col">R²</th>
+          <th scope="col">Adjusted R²</th>
+          <th scope="col">Model p-value</th>
+          <th scope="col">Formula</th>
+          <th scope="col">Minor issues</th>
+        </tr>
+      </thead>
+      <tbody>@for (row of rows; track row.key) { @let model = row.model;
+        <tr>
+          <td>{{ row.facilityName }}</td>
+          <th scope="row">{{ row.groupName }}@if (model?.isUserDefinedModel) { <span class="model-note">User
+              defined</span> }@if (!model) { <span class="model-note">Model unavailable</span> }</th>
+          <td>{{ row.details.modelPeriod }}</td>
+          <td>@if (model && !model.isUserDefinedModel) { @for (variable of row.details.variablePValues; track $index) {
+            <div>{{ variable.name }}: {{ variable.value }}</div> } @empty { — } } @else { — }</td>
+          <td>{{ model && !model.isUserDefinedModel ? ((model.R2 | number:'1.3-3') ?? '—') : '—' }}</td>
+          <td>{{ model && !model.isUserDefinedModel ? ((model.adjust_R2 | number:'1.3-3') ?? '—') : '—' }}</td>
+          <td>{{ model && !model.isUserDefinedModel ? ((model.modelPValue | number:'1.2-2') ?? '—') : '—' }}</td>
+          <td class="formula">{{ row.details.formula }}</td>
+          <td>@for (note of row.minor; track $index) { <div>{{ note }}</div> } @empty { — }</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</ng-template>

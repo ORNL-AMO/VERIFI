@@ -1,6 +1,17 @@
-import { getAnalysisReportSettings, getDataQualityReportSettings } from '@data/models/idbModels/facilityReport';
-import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings } from './facility-report-setup.models';
+import { getAnalysisReportSettings, getDataQualityReportSettings, getModelingReportSettings } from '@data/models/idbModels/facilityReport';
+import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings } from './facility-report-setup.models';
 describe('facility report setup patches', () => {
+  it('merges Modeling switches and clears its year without changing untouched settings', () => {
+    const saved = { ...getModelingReportSettings(), reportYear: 2023, includeExecutiveSummary: false };
+    expect(mergeFacilityModelingSettings(saved, { reportYear: null, includeIssuesSummary: false })).toEqual({
+      reportYear: undefined, includeExecutiveSummary: false, includeIssuesSummary: false, includeDataValidationTables: true
+    });
+    expect(saved.reportYear).toBe(2023); expect(saved.includeIssuesSummary).toBe(true);
+  });
+  it.each([{ reportYear: 2024.5 }, { reportYear: 0 }, { reportYear: '2024' }, { includeIssuesSummary: 'true' },
+    { includeExecutiveSummary: null }, { unknown: true }])('rejects malformed Modeling settings: %j', patch => {
+    expect(() => mergeFacilityModelingSettings(getModelingReportSettings(), patch as never)).toThrow('invalid');
+  });
   it('merges Data Quality edits without defaulting absent optional flags or mutating GUID arrays', () => {
     const saved = getDataQualityReportSettings();
     saved.selectedAnalysisItemId = 'analysis-a'; saved.selectedMeterIds = ['meter-a'];
