@@ -1,3 +1,4 @@
+import { timeSeriesStackIssues } from './visualization-time-series';
 import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { allowsMixedAxisUnits } from './visualization-source-provider';
 import { resolveVisualizationSeries } from './visualization-series';
@@ -292,7 +293,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   }
   const allMetadata = resolvedSources.flatMap(entry => entry.resolved.series);
   const selected = resolveVisualizationSeries(definition, allMetadata);
-  if (!selected.length) add('series', 'Choose at least one available visible series.');
+  if (!selected.length && (chart.kind !== 'time-series' || !resolveVisualizationSeries(definition, allMetadata, true).length)) add('series', 'Choose at least one available series.');
   for (const series of definition.series) {
     const available = allMetadata.some(metadata => metadata.sourceId === series.sourceId && metadata.metric === series.metric
       && (series.resourceGuid === undefined || metadata.resourceGuid === series.resourceGuid));
@@ -341,7 +342,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
         add('units', 'Use compatible units and currency on each axis; composition totals require one meaning.');
     }
   }
-  if (chart.kind === 'time-series' && chart.stack !== 'none' || ['breakdown', 'treemap', 'sankey'].includes(chart.kind)) {
+  for (const issue of timeSeriesStackIssues(definition, selected, evidence)) add(issue.code, issue.message);
+  if (['breakdown', 'treemap', 'sankey'].includes(chart.kind)) {
     if (selected.some(entry => !entry.metadata.additive)) add('units', 'Stacking and composition require authoritative additive measures.');
     const contributions = new Set<string>();
     for (const { metadata } of selected) {

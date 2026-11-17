@@ -1,3 +1,4 @@
+import { orderDecisionItems } from '../shared/item-appearance';
 import { EQUIPMENT_TYPES, energyUseSelectionMode, energyUseSeriesId, selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
 import { energyUseIcon } from '@app/v1/data/energy-uses/models/energy-use-icons';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
@@ -30,7 +31,7 @@ export function projectEquipmentItems(definition: VisualizationDefinition, sourc
   const source = definition.sources.find(s => s.id === sourceId);
   if (source?.kind !== 'energy-use' || !energyUseSelectionMode(source)) return [];
   const scope = resolveVisualizationFacilities(definition, snapshot.facilities).scope, choices = equipmentResourceChoices(snapshot, scope, energyUseSelectionMode(source));
-  return selectedEnergyUseIds(source).map(guid => {
+  return orderDecisionItems(selectedEnergyUseIds(source).map(guid => {
     const choice = choices.find(c => c.value === guid), id = energyUseSeriesId(source, guid);
     const identity: DecisionItemIdentity = energyUseSelectionMode(source) === 'equipment-type' ? { seriesId: id } : { resourceGuid: guid };
     const { series, override, appearance } = resolveItemPresentation(definition,
@@ -40,5 +41,5 @@ export function projectEquipmentItems(definition: VisualizationDefinition, sourc
       available: !!choice, missing: !choice, customized: !!series && isCustomized(series) || !!override && isCustomized(override, true),
       customColor: series?.color !== undefined || override?.color !== undefined,
       appearance };
-  });
+  }));
 }

@@ -74,9 +74,9 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(decoded.definition);
   });
 
-  it.each(['Account', 'Facility'] as const)('round trips an exact item order override in a %s backup', async kind => {
+  it.each((['Account', 'Facility'] as const).flatMap(kind => (['none', 'absolute', 'percent'] as const).map(stack => ({ kind, stack }))))('round trips area/$stack and exact item order in a $kind backup', async ({ kind, stack }) => {
     const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
-    const definition = { ...base, series: [{ ...base.series[0], traceType: 'bar' as const, overrides: [
+    const definition = { ...base, chart: { kind: 'time-series' as const, defaultTraceType: 'area' as const, interval: 'monthly' as const, stack }, series: [{ ...base.series[0], traceType: 'area' as const, overrides: [
       { accountGuid: base.accountGuid, resourceGuid: 'meter-a', order: 2 }
     ] }] };
     const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)] };
@@ -96,7 +96,8 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(decoded.definition.series[0].overrides).toEqual([
       { accountGuid, resourceGuid: decoded.definition.series[0].resourceGuid, order: 2 }
     ]);
-    expect(decoded.definition.series[0].traceType).toBe('bar');
+    expect(decoded.definition.series[0].traceType).toBe('area');
+    expect(decoded.definition.chart).toEqual(definition.chart);
     expect(decoded.definition.series[0].resourceGuid).toBe(restored.meters[0].guid);
     const reexported = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored))));
     expect(reexported.savedVisualizations[0].definition).toEqual(decoded.definition);

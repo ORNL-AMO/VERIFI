@@ -6,10 +6,13 @@ export interface TimeSeriesPoint {
   readonly start: string;
   readonly end: string;
   readonly observation: VisualizationObservation;
+  /** Derived share only; the original observation is never replaced. */
+  readonly percentage?: number | null;
+  readonly percentageReason?: string;
 }
 export interface TimeSeriesTrace {
   readonly id: string;
-  readonly type: 'line' | 'bar';
+  readonly type: 'line' | 'bar' | 'area';
   readonly label: string;
   readonly unit: string;
   readonly axis: 'left' | 'right';
@@ -20,6 +23,7 @@ export interface TimeSeriesTrace {
 }
 export interface TimeSeriesModel {
   readonly title: string;
+  readonly windowKey?: string;
   readonly chart: Extract<NonNullable<VisualizationDefinition['chart']>, { kind: 'time-series' }>;
   readonly legend: boolean;
   readonly slots: readonly { readonly key: string; readonly label: string; readonly order: number }[];

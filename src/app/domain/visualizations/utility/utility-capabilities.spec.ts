@@ -8,14 +8,16 @@ describe('utility capability boundaries', () => {
   it('advertises only implemented shapes and exact chart settings', () => {
     expect(utilityCapabilities(source).shapes).toEqual(['time-series']);
     expect(utilityChartSupport(source, chart).state).toBe('supported');
-    expect(utilityChartSupport(source, { ...chart, stack: 'absolute' }).state).toBe('unsupported');
-    expect(utilityChartSupport(source, { ...chart, defaultTraceType: 'area' }).state).toBe('unsupported');
+    expect(utilityChartSupport(source, { ...chart, stack: 'absolute' }).state).toBe('supported');
+    expect(utilityChartSupport(source, { ...chart, defaultTraceType: 'area' }).state).toBe('supported');
   });
   it('requires native individual charge observations and disallows calendarized charges', () => {
     const charge = { ...source, measure: 'charge' as const };
     expect(utilityChartSupport(charge, chart).state).toBe('unsupported');
     const native = { ...charge, dataMode: 'billing-period' as const, aggregation: 'none' as const, groupBy: 'meter' as const };
     expect(utilityChartSupport(native, { ...chart, interval: 'native' }).state).toBe('supported');
+    expect(utilityChartSupport(native, { ...chart, interval: 'native', defaultTraceType: 'area' }).state).toBe('supported');
+    expect(utilityChartSupport(native, { ...chart, interval: 'native', stack: 'absolute' }).state).toBe('unsupported');
     expect(utilityCapabilities(native).comparisons).toEqual(['none']);
     expect(utilityChartSupport({ ...native, aggregation: 'sum' }, { ...chart, interval: 'native' }).state).toBe('unsupported');
   });

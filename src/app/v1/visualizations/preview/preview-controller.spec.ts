@@ -65,6 +65,30 @@ function setupMixed(options: { definition?: VisualizationDefinition; providers?:
 }
 
 describe('visualization preview orchestration', () => {
+  it('lets matching numerical work finish during appearance edits, then resolves only the newest presentation with current identities', async () => {
+    const pending = deferred<VisualizationSourceResolution>();
+    let firstRequest!: VisualizationSourceRequest, firstSignal!: AbortSignal;
+    const prepare = vi.fn(() => presentation);
+    const resolve = vi.fn(async (request: VisualizationSourceRequest, signal: AbortSignal) => {
+      if (!firstRequest) { firstRequest = request; firstSignal = signal; return pending.promise; }
+      return { ...visualizationEvidenceFixture(utilityVisualizationFixture()).resolution, identity: request.identity };
+    });
+    const { controller, definition, evidence } = setup({ provider: { resolve }, presenter: { prepare } });
+    controller.update(definition, identity); await settle();
+    const latest = { ...definition, appearance: { ...definition.appearance, title: 'Newest title' } };
+    controller.update({ ...definition, name: 'Intermediate name' }, { ...identity, definitionRevision: 2 });
+    controller.update(latest, { ...identity, definitionRevision: 3 });
+    expect(firstSignal.aborted).toBe(false); expect(resolve).toHaveBeenCalledTimes(1);
+    pending.resolve({ ...evidence.resolution, identity: firstRequest.identity });
+    await settle(); await settle();
+    const state = controller.state(); expect(state.state).toBe('ready');
+    if (state.state !== 'ready') throw new Error();
+    expect(state.definition.appearance.title).toBe('Newest title');
+    expect(state.evidence[0].request.identity.definitionRevision).toBe(3);
+    expect(prepare).toHaveBeenCalledTimes(1);
+    expect(resolve).toHaveBeenCalledTimes(2); // Session-owned numerical cache is reused; evidence is requested afresh.
+  });
+
   it.each(VISUALIZATION_CHART_CHOICES)('retains $label mixed-sourceKind setup without requesting data or dates', ({ value, label }) => {
     const resolve = vi.fn(), resolveDates = vi.fn(dates.resolve), describe = vi.fn(), supportsChart = vi.fn(), prepare = vi.fn();
     const { controller } = setup({ provider: { resolve, describe, supportsChart }, presenter: { prepare }, dates: { resolve: resolveDates } });
@@ -241,12 +265,13 @@ describe('visualization preview orchestration', () => {
     expect(controller.state().state).toBe('error'); expect(prepare).not.toHaveBeenCalled();
   });
 
-  it.each(['definitionRevision', 'workspaceRevision', 'accountGuid'] as const)('rejects a late response after %s changes', async field => {
+  it.each(['definitionRevision', 'workspaceRevision', 'accountGuid'] as const)('rejects a late response after numerical or %s identity changes', async field => {
     const pending = deferred<VisualizationSourceResolution>(); let original!: VisualizationSourceRequest; let signal!: AbortSignal;
     const { controller, definition, evidence } = setup({ provider: { resolve: (request, abort) => { original = request; signal = abort; return pending.promise; } } });
     controller.update(definition, identity); await settle();
     const nextIdentity = { ...identity, [field]: field === 'accountGuid' ? 'account-b' : 2 };
-    controller.update(field === 'accountGuid' ? { ...definition, accountGuid: 'account-b' } : definition, nextIdentity);
+    controller.update(field === 'accountGuid' ? { ...definition, accountGuid: 'account-b' }
+      : field === 'definitionRevision' ? { ...definition, period: { kind: 'fixed', basis: 'calendar', start: '2025-02-01', end: '2025-12-31' } } : definition, nextIdentity);
     expect(signal.aborted).toBe(true);
     pending.resolve({ ...evidence.resolution, identity: original.identity }); await settle();
     expect(controller.state().state).not.toBe('ready');

@@ -10,7 +10,11 @@ export class TimeSeriesChartComponent implements OnChanges {
   private readonly modelValue = signal<TimeSeriesModel | undefined>(undefined);
   readonly zoom = signal<V1EChartsDataZoomRange>({ start: 0, end: 100 });
   readonly option = computed(() => { const model = this.modelValue(); return model ? timeSeriesOption(model, this.zoom()) : undefined; });
-  ngOnChanges(): void { this.modelValue.set(this.model); }
+  ngOnChanges(): void {
+    const previous = this.modelValue();
+    if (previous && (previous.windowKey ?? JSON.stringify(previous.slots)) !== (this.model.windowKey ?? JSON.stringify(this.model.slots))) this.resetZoom();
+    this.modelValue.set(this.model);
+  }
   updateZoom(range: V1EChartsDataZoomRange): void {
     if (Number.isFinite(range.start) && Number.isFinite(range.end)) this.zoom.set({ start: Math.max(0, Math.min(100, range.start)), end: Math.max(0, Math.min(100, range.end)) });
   }

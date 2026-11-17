@@ -10,13 +10,14 @@ export function utilityCapabilities(source: UtilityVisualizationSource): Visuali
     // Setup definitions already carry owner bindings. Irrelevant owner bindings are inert;
     // pinned bindings still have to match resolved metadata in the compatibility check.
     settings: ['unit', 'energyTreatment'],
-    controls: ['series', 'appearance', 'axes'], allowDateOverride: true };
+    controls: ['series', 'appearance', 'axes', ...(source.dataMode === 'calendarized' ? ['stacking' as const] : [])], allowDateOverride: true };
 }
 
 export function utilityChartSupport(source: UtilityVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
   if (source.selection?.kind === 'rule' && source.selection.resource !== 'meter') reasons.push('Use a matching meter rule with explicit facility or group anchors. Other rule resource kinds are unavailable.');
-  if (chart.kind !== 'time-series' || !['line', 'bar'].includes(chart.defaultTraceType) || chart.stack !== 'none') reasons.push('Utility charts support unstacked line and bar traces.');
+  if (chart.kind !== 'time-series') reasons.push('Utility charts support time-series presentations.');
+  if (chart.kind === 'time-series' && chart.stack !== 'none' && source.dataMode === 'billing-period') reasons.push('Native bill occurrences cannot be stacked. Choose calendarized monthly or yearly data.');
   if (source.measure === 'charge' && source.dataMode !== 'billing-period') reasons.push('Detailed charges are available as native bill observations only.');
   if (chart.kind === 'time-series' && ((source.dataMode === 'billing-period') !== (chart.interval === 'native'))) reasons.push('Choose Native for bill observations, or Monthly/Yearly for calendarized data.');
   if (source.dataMode === 'billing-period' && (source.aggregation !== 'none' || source.groupBy !== 'meter')) reasons.push('Native bills retain individual meter occurrences; grouped totals are unavailable.');

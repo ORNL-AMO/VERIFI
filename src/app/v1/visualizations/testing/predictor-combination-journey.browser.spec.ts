@@ -79,7 +79,7 @@ describe('saved All Predictors and mixed monthly charts', () => {
     fixture.detectChanges(); return root;
   }
   async function ready(root: HTMLElement) {
-    await vi.waitFor(() => { fixture!.detectChanges(); expect(root.querySelector('canvas')).not.toBeNull(); });
+    await vi.waitFor(() => { fixture!.detectChanges(); expect(root.querySelector('.visualization-preview')?.getAttribute('aria-busy')).toBe('false'); expect(root.querySelector('canvas')).not.toBeNull(); });
     return echarts.getInstanceByDom(root.querySelector<HTMLElement>('.time-series-canvas')!)!;
   }
 

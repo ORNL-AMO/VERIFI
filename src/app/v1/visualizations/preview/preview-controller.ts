@@ -8,6 +8,14 @@ import { decodeVisualizationDefinition } from '@domain/visualizations/visualizat
 import { isCurrentVisualizationResponse, VisualizationSourceEvidence, VisualizationSourceRequest } from '@domain/visualizations/visualization-source-provider';
 import { visualizationChartLabel } from '../visualization-charts';
 import { PreviewIdentity, PreviewPresentation, PreviewRegistry } from './preview-registry';
+import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
+
+/** These fields affect provider values. Trace styling, visibility and ordering do not. */
+function timeSeriesDataIntent(definition: VisualizationDefinition) {
+  return { sources: definition.sources, facilitySelection: definition.facilitySelection, period: definition.period, comparison: definition.comparison,
+    chart: definition.chart?.kind === 'time-series' ? { kind: 'time-series', interval: definition.chart.interval } : definition.chart,
+    series: definition.series.map(series => ({ id: series.id, sourceId: series.sourceId, metric: series.metric, resourceGuid: series.resourceGuid })) };
+}
 
 export type PreviewState =
   | { readonly state: 'inactive' | 'setup-required' | 'invalid' | 'unsupported' | 'loading' | 'empty' | 'missing-source' | 'error' | 'incompatible'; readonly message: string; readonly reasons?: readonly string[] }
@@ -46,8 +54,23 @@ export class PreviewController {
   private abort?: AbortController;
   private context?: { definition?: VisualizationDefinition; identity?: PreviewIdentity; active: boolean };
   private destroyed = false;
+  private resolving = false;
+  private deferredPresentation = false;
+  private resolveSnapshot?: ReturnType<AccountWorkspaceStore['snapshot']>;
 
   update(definition: VisualizationDefinition | undefined, identity: PreviewIdentity | undefined, active = true): void {
+    const previous = this.context;
+    if (!this.destroyed && this.resolving && active && previous?.active && definition?.chart?.kind === 'time-series'
+      && previous.definition?.chart?.kind === 'time-series' && identity && previous.identity
+      && identity.accountGuid === definition.accountGuid && identity.accountGuid === previous.identity.accountGuid && identity.definitionGuid === previous.identity.definitionGuid
+      && identity.workspaceRevision === previous.identity.workspaceRevision && this.workspace.isReady()
+      && this.workspace.snapshot() === this.resolveSnapshot && decodeVisualizationDefinition(definition).state === 'valid'
+      && visualizationIntentEqual(timeSeriesDataIntent(definition), timeSeriesDataIntent(previous.definition))) {
+      // Let the current numerical acquisition finish and seed its existing session cache.
+      // Afterwards resolve the latest presentation normally, with fresh request/evidence identities.
+      this.context = { definition: structuredClone(definition), identity: { ...identity }, active };
+      this.deferredPresentation = true; return;
+    }
     this.cancel();
     if (this.destroyed) return;
     this.context = { definition: definition ? structuredClone(definition) : undefined, identity: identity ? { ...identity } : undefined, active };
@@ -85,18 +108,29 @@ export class PreviewController {
     if (unsupported.length) { this.value.set({ state: 'incompatible', message: unsupported.join(' ') }); return; }
     const abort = this.abort = new AbortController();
     const generation = this.generation;
+    this.resolving = true; this.resolveSnapshot = this.workspace.snapshot();
     this.value.set({ state: 'loading', message: 'Preparing chart…' });
     void this.resolve(decoded.definition, this.context.identity!, generation, abort);
   }
 
   retry(): void {
     const context = this.context;
-    if (context && !this.destroyed) this.update(context.definition, context.identity, context.active);
+    if (context && !this.destroyed) { this.cancel(); this.update(context.definition, context.identity, context.active); }
   }
 
   destroy(): void { this.destroyed = true; this.cancel(); }
 
-  private cancel(): void { this.generation++; this.abort?.abort(); this.abort = undefined; }
+  private cancel(): void {
+    this.generation++; this.abort?.abort(); this.abort = undefined;
+    this.resolving = false; this.deferredPresentation = false; this.resolveSnapshot = undefined;
+  }
+  private restartDeferredPresentation(): boolean {
+    if (!this.deferredPresentation || !this.context) return false;
+    const context = this.context;
+    this.resolving = false;
+    this.update(context.definition, context.identity, context.active);
+    return true;
+  }
   private current(generation: number, abort: AbortController): boolean {
     return !this.destroyed && generation === this.generation && !abort.signal.aborted && this.context?.active === true;
   }
@@ -154,6 +188,7 @@ export class PreviewController {
         this.value.set({ state: resolution.state === 'waiting' ? 'loading' : resolution.state === 'invalid-analysis' ? 'error' : resolution.state,
           message: resolution.message, ...('reasons' in resolution ? { reasons: resolution.reasons } : {}) }); return;
       }
+      if (this.restartDeferredPresentation()) return;
       const compatibility = checkVisualizationCompatibility(definition, evidence);
       if (compatibility.state !== 'compatible') {
         this.value.set({ state: 'incompatible', message: 'Review the data sources and chart settings.',
@@ -165,6 +200,7 @@ export class PreviewController {
       if (analysisSnapshot && (!this.workspace.isReady() || this.workspace.snapshot() !== analysisSnapshot)) {
         abort.abort(); this.value.set({ state: 'error', message: 'Analysis inputs changed while preparing the chart. Retry current results.' }); return;
       }
+      if (this.restartDeferredPresentation()) return;
       if (!presentation.details?.caption?.trim() || !presentation.details.columns.length
         || presentation.details.rows.some(row => row.length !== presentation.details.columns.length)) {
         this.value.set({ state: 'error', message: 'The chart does not provide complete accessible values.' }); return;
@@ -175,6 +211,8 @@ export class PreviewController {
       if (!this.current(generation, abort)) return;
       abort.abort();
       this.value.set({ state: 'error', message: error instanceof Error ? error.message : 'The chart could not be prepared. Retry the chart.' });
+    } finally {
+      if (generation === this.generation) this.resolving = false;
     }
   }
 }

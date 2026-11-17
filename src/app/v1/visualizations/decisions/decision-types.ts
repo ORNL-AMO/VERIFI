@@ -47,7 +47,10 @@ export type VisualizationDecisionAction =
   | { readonly kind: 'analysis-defaults'; readonly sourceId: string }
   | { readonly kind: 'facilities'; readonly selection: VisualizationFacilitySelection }
   | { readonly kind: 'chart'; readonly chart: VisualizationChart }
-  | { readonly kind: 'chart-type'; readonly traceType: 'line' | 'bar' }
+  | { readonly kind: 'chart-type'; readonly traceType: VisualizationTraceType }
+  | { readonly kind: 'chart-stack'; readonly stack: 'none' | 'absolute' | 'percent' }
+  | { readonly kind: 'item-order'; readonly sourceId: string; readonly item: DecisionItemIdentity; readonly direction: 'up' | 'down' }
+  | { readonly kind: 'reset-order'; readonly sourceId: string }
   | { readonly kind: 'add-source'; readonly sourceKind: VisualizationSourceKind }
   | { readonly kind: 'remove-source-kind'; readonly sourceKind: VisualizationSourceKind }
   | { readonly kind: 'energy-use-selection-mode'; readonly sourceId: string; readonly mode: EnergyUseSelectionMode }

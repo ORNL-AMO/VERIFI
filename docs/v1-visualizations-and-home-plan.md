@@ -13,7 +13,7 @@ Active plan for [epic #2564](https://github.com/ORNL-AMO/VERIFI/issues/2564): es
 
 ## Current implementation and owning references
 
-Visualizations is enabled. Saved JSON contracts, storage/transfer/recovery, Dashboard/workbench, utility projections/editing, the initial unstacked line/bar path, Energy usage trend/Utility cost trend recipes, and supported inventory capture exist. Other source/chart combinations retain setup/unavailable behavior. Current Home provides status/count summaries; customizable linked dashboards remain future work. Read the relevant current reference rather than every document:
+Visualizations is enabled. Saved JSON contracts, storage/transfer/recovery, Dashboard/workbench, utility projections/editing, line/bar/area editing with compatible utility and Energy Use stacks, percentages and series ordering, Energy usage trend/Utility cost trend recipes, and supported inventory capture exist. Other source/chart combinations retain setup/unavailable behavior. Current Home provides status/count summaries; customizable linked dashboards remain future work. Read the relevant current reference rather than every document:
 
 | Change | Current owner |
 | --- | --- |
@@ -35,7 +35,7 @@ These are implementation/acceptance relationships, not claims about remote issue
 | Vis3: Dashboard/workbench | [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Implemented framework after Vis1/Vis2; broader real-data acceptance remains issue-owned. |
 | Vis4: utility sources | [#2905](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Implemented initial utility journey after Vis1/Vis3; production-shell review/QA remains pending. |
 | Vis5: other sources | [#2906](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Predictor/weather, Energy Uses, and facility/account result journeys are complete under [focused source acceptance](v1-visualization-sources-plan.md); standalone model inspection is outside scope. Broader issue/release acceptance and VIS4 production-shell QA remain separate. |
-| Vis6: time series/comparison | [#2907](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Initial utility line/bar slice exists; broader editing follows Vis3/Vis4. |
+| Vis6: time series/comparison | [#2907](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Implemented time-series breadth across current sources: area/combinations, compatible stacks/percentages, ordering, stable preview/zoom and paged source data. Existing source-specific comparison boundaries remain; broader production-shell/release acceptance stays separate. |
 | Vis7: correlation/heatmap | [#2908](https://github.com/ORNL-AMO/VERIFI/issues/2908) | After Vis5/Vis6. |
 | Vis8: composition/flow | [#2909](https://github.com/ORNL-AMO/VERIFI/issues/2909) | After Vis5/Vis6. |
 | Vis9: capture coverage | [#2910](https://github.com/ORNL-AMO/VERIFI/issues/2910) | Initial utility inventory capture exists; remaining capture depends on Vis2–Vis8. |
@@ -59,7 +59,7 @@ Map [v0 account Home](../src/app/v0/data-evaluation/account/account-home/), [fac
 
 ## Outstanding acceptance
 
-- Production-shell utility manual verification, human review, and QA remain pending; historical focused checks do not close issues or certify the full breadth of Vis3/Vis4/Vis6/Vis9.
+- Production-shell utility manual verification, human review, and QA remain pending; focused development checks do not close issues or certify broader Vis3/Vis4/Vis9 or release acceptance.
 - Other sources must retain annual estimate/carry-forward versus measured/model meaning, actual fiscal periods, source/model freshness, cancellation, and no viewing-time mutation or weather retrieval. Incompatible combinations explain unavailability rather than resampling or fabricating values.
 - Home must preserve account/facility/single-facility ownership, explicit compatible filter precedence, linked-definition identity, independent layout duplication, recoverable widget/source deletion, safe defaults, and old/new backup transfer. Deleting layouts/widgets never deletes their underlying source definitions/data.
 - Summary widgets use existing goal settings, active analyses, calculations and findings; missing/incomplete data is not zero progress or success. Layout order remains reading/focus order and pointer actions have keyboard alternatives.

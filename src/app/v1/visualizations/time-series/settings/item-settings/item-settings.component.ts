@@ -12,6 +12,8 @@ export class ItemSettingsComponent implements OnChanges {
   private identity = '';
   private fingerprint = '';
   readonly disabled = input(false);
+  readonly position = input(0);
+  readonly itemCount = input(1);
   readonly editorKey = input('');
   readonly resetKey = input(0);
   readonly expandedNodes = input<ReadonlySet<string>>(new Set());
@@ -69,6 +71,16 @@ export class ItemSettingsComponent implements OnChanges {
   choose<T>(control: FormControl<T>, value: T): void {
     if (this.disabled() || control.value === value) return;
     control.markAsDirty(); control.setValue(value);
+  }
+
+  move(direction: 'up' | 'down'): void {
+    const item = this.current();
+    if (!item || this.disabled()) return;
+    this.requested.emit({ kind: 'item-order', sourceId: item.sourceId, item: item.identity, direction });
+  }
+  resetOrder(): void {
+    const item = this.current();
+    if (item && !this.disabled()) this.requested.emit({ kind: 'reset-order', sourceId: item.sourceId });
   }
 
   private edit(changes: Extract<VisualizationDecisionAction, { kind: 'item-style' }>['changes']): void {

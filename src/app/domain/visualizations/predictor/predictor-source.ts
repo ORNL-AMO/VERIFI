@@ -90,8 +90,8 @@ export function predictorCapabilities(): VisualizationSourceCapabilities {
 }
 export function predictorChartSupport(source: PredictorVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
-  if (chart.kind !== 'time-series' || chart.interval !== 'monthly' || chart.stack !== 'none' || !['line', 'bar'].includes(chart.defaultTraceType))
-    reasons.push('Predictors support monthly, unstacked line or bar charts.');
+  if (chart.kind !== 'time-series' || chart.interval !== 'monthly' || chart.stack !== 'none')
+    reasons.push('Predictors support monthly, unstacked line, bar or area charts.');
   if (source.aggregation !== 'none') reasons.push('Predictor aggregation is not supported.');
   if (!isAllPredictors(source) && (source.selection?.kind !== 'fixed' || source.selection.resource !== 'predictor' || !source.selection.guids.length))
     reasons.push('Select saved Standard or Weather predictors. Only exact selections and All Predictors are supported.');

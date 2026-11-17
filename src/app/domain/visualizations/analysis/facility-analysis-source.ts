@@ -52,7 +52,7 @@ export function facilityAnalysisCapabilities(): VisualizationSourceCapabilities 
 export function facilityAnalysisChartSupport(source: VisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
   if (source.kind !== 'analysis' || source.mode !== 'result') reasons.push('Saved model visualizations are not supported in this slice.');
-  if (chart.kind !== 'time-series' || !['monthly', 'yearly'].includes(chart.interval) || chart.stack !== 'none' || !['line', 'bar'].includes(chart.defaultTraceType)) reasons.push('Analysis results support monthly or yearly, unstacked line/bar charts.');
+  if (chart.kind !== 'time-series' || !['monthly', 'yearly'].includes(chart.interval) || chart.stack !== 'none') reasons.push('Analysis results support monthly or yearly, unstacked line/bar/area charts.');
   if (source.kind === 'analysis' && source.mode === 'result') {
     if (chart.kind === 'time-series') {
       if (chart.interval === 'yearly' && !['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(source.measure)) reasons.push('Savings and losses use monthly rolling percentage results.');

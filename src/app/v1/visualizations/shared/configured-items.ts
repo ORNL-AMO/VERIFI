@@ -20,11 +20,12 @@ export function projectDecisionItems(definition: VisualizationDefinition, source
 }
 
 export function configuredChartSummary(definition: VisualizationDefinition,
-  snapshot: AccountWorkspaceSnapshot): 'Line' | 'Bar' | 'Combination' | undefined {
+  snapshot: AccountWorkspaceSnapshot): string | undefined {
   if (definition.chart?.kind !== 'time-series') return undefined;
   const items = definition.sources.flatMap(source => projectDecisionItems(definition, source.id, snapshot));
   const types = new Set(items.length ? items.map(item => item.appearance.traceType) : [definition.chart.defaultTraceType]);
-  return types.size > 1 ? 'Combination' : types.has('bar') ? 'Bar' : types.has('line') ? 'Line' : undefined;
+  const label = types.size > 1 ? 'Combination' : types.has('bar') ? 'Bar' : types.has('area') ? 'Area' : 'Line';
+  return label + (definition.chart.stack === 'absolute' ? ' · Absolute stack' : definition.chart.stack === 'percent' ? ' · Percentage stack' : '');
 }
 
 /** Configured metadata only: no data provider or calculation is requested. */

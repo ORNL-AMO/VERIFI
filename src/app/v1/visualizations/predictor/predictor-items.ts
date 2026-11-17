@@ -1,3 +1,4 @@
+import { orderDecisionItems } from '../shared/item-appearance';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { VisualizationDefinition, VisualizationScope } from '@domain/visualizations/visualization-definition';
 import { predictorCatalog, predictorContext, predictorSeriesId, predictorUnit, resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
@@ -24,7 +25,7 @@ export function projectPredictorItems(definition: VisualizationDefinition, sourc
   const choices = predictorResourceChoices(snapshot, scope);
   const predictors = snapshot.predictors.filter(p => p.accountId === definition.accountGuid && scope.facilityGuids.includes(p.facilityId)
     && snapshot.facilities.some(f => f.guid === p.facilityId && f.accountId === definition.accountGuid));
-  return resolvePredictorSelection(snapshot, scope, source).map(guid => {
+  return orderDecisionItems(resolvePredictorSelection(snapshot, scope, source).map(guid => {
     const choice = choices.find(c => c.value === guid), identity = { resourceGuid: guid }, id = predictorSeriesId(sourceId, guid);
     const { series, override, appearance } = resolveItemPresentation(definition,
       { sourceId, metric: 'value', identity, providerSeriesId: id });
@@ -36,5 +37,5 @@ export function projectPredictorItems(definition: VisualizationDefinition, sourc
       available: !!choice, missing: !predictor, customized: !!series && isCustomized(series) || !!override && isCustomized(override, true),
       customColor: appearance.color !== undefined && (series?.color !== undefined || override?.color !== undefined),
       appearance };
-  });
+  }));
 }

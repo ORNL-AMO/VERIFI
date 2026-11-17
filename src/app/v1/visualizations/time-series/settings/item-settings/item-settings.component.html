@@ -10,7 +10,15 @@
       <div class="visualization-buttons" role="group" [attr.aria-label]="item.label + ' trace type'">
         <button type="button" class="v1-icon-btn" aria-label="Line" title="Line" [disabled]="disabled()" [attr.aria-pressed]="current.traceType === 'line'" (click)="choose(form.controls.traceType, 'line')"><app-ui-icon name="chartLine"/></button>
         <button type="button" class="v1-icon-btn" aria-label="Bar" title="Bar" [disabled]="disabled()" [attr.aria-pressed]="current.traceType === 'bar'" (click)="choose(form.controls.traceType, 'bar')"><app-ui-icon name="barChart"/></button>
+        <button type="button" class="v1-icon-btn" aria-label="Area" title="Area" [disabled]="disabled()" [attr.aria-pressed]="current.traceType === 'area'" (click)="choose(form.controls.traceType, 'area')"><app-ui-icon name="chartTimeSeries"/></button>
       </div>
+      @if (itemCount() > 1 || item.appearance.order !== undefined) {
+        <div class="visualization-buttons" role="group" [attr.aria-label]="item.label + ' order'">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled() || position() === 0" (click)="move('up')" [attr.aria-label]="'Move ' + item.label + ' up'">Move up</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled() || position() >= itemCount() - 1" (click)="move('down')" [attr.aria-label]="'Move ' + item.label + ' down'">Move down</button>
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="resetOrder()">Reset order</button>
+        </div>
+      }
       <span class="visualization-control-label">Axis</span>
       <div class="visualization-buttons" role="group" [attr.aria-label]="item.label + ' axis'">
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.axis === 'left'" (click)="choose(form.controls.axis, 'left')">Left</button>

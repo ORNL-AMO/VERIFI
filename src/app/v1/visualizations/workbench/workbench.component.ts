@@ -1,3 +1,7 @@
+import { timeSeriesStackIssues, timeSeriesStackSettingsIssues } from '@domain/visualizations/visualization-time-series';
+import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
+import { discoverEquipmentSeries } from '@domain/visualizations/energy-use/equipment-source';
+import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
 import { projectDecisionItems, configuredChartSummary } from '../shared/configured-items';
 import { resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -168,6 +172,23 @@ export class WorkbenchComponent {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : 'Chart not selected';
   });
+  readonly chartTypeSummary = computed(() => this.chartSummary().split(' · ')[0]);
+  readonly stackChoices = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    if (!definition || !snapshot || definition.chart?.kind !== 'time-series') return [];
+    const currentChart = definition.chart;
+    const scope = resolveVisualizationFacilities(definition, snapshot.facilities).scope;
+    const metadata = definition.sources.flatMap(source => source.kind === 'utility' ? discoverUtilitySeries(snapshot, scope, source)
+      : source.kind === 'energy-use' ? discoverEquipmentSeries(snapshot, scope, source) : []);
+    const items = definition.sources.flatMap(source => projectDecisionItems(definition, source.id, snapshot));
+    return (['none', 'absolute', 'percent'] as const).map(stack => {
+      const chart = { ...currentChart, stack };
+      const candidate = { ...definition, chart };
+      const reasons = [...new Set([...timeSeriesStackSettingsIssues(chart, definition.sources, items.map(item => item.appearance)),
+        ...timeSeriesStackIssues(candidate, resolveVisualizationSeries(candidate, metadata), []).map(issue => issue.message)])];
+      return { value: stack, label: stack === 'none' ? 'None' : stack === 'absolute' ? 'Absolute' : 'Percentage', reason: reasons.join(' ') };
+    });
+  });
   readonly annualEquipment = computed(() => this.editor.definition()?.sources.some(source => source.kind === 'energy-use') ?? false);
   readonly calendarizedOnly = computed(() => !this.editor.definition()?.sources.some(source => source.kind === 'utility' && source.dataMode === 'billing-period'));
   readonly previewIdentity = computed(() => ({ accountGuid: this.accountGuid(), workspaceRevision: this.workspace.revision(),
@@ -252,8 +273,12 @@ export class WorkbenchComponent {
       ? this.facilities().find(item => item.guid === selection.facilityGuids[0])?.name || 'Unavailable facility' : `${selection.facilityGuids.length} facilities`;
   }
   chooseChart(choice: VisualizationChartChoiceId): void {
-    if ((choice === 'line' || choice === 'bar') && this.editor.definition()?.chart?.kind === 'time-series') void this.requestDecision({ kind: 'chart-type', traceType: choice });
+    if ((choice === 'line' || choice === 'bar' || choice === 'area') && this.editor.definition()?.chart?.kind === 'time-series') void this.requestDecision({ kind: 'chart-type', traceType: choice });
     else void this.requestDecision({ kind: 'chart', chart: createVisualizationChart(choice) });
+  }
+  setStack(stack: 'none' | 'absolute' | 'percent'): void {
+    if (this.stackChoices().find(choice => choice.value === stack)?.reason) return;
+    void this.requestDecision({ kind: 'chart-stack', stack });
   }
   setInterval(interval: 'monthly' | 'yearly'): void {
     const definition = this.editor.definition();
@@ -319,6 +344,11 @@ export class WorkbenchComponent {
       try { if (!await this.editor.retarget(action.selection, result.definition)) return; }
       finally { this.decisionBusy.set(false); }
     } else this.editor.applyDefinition(result.definition);
+    if (action.kind === 'item-order') {
+      const key = this.editor.key();
+      const target = decisionNodeId({ kind: 'item', sourceId: action.sourceId, itemKey: action.item.resourceGuid !== undefined ? `resource:${action.item.resourceGuid}` : `series:${action.item.seriesId}` });
+      setTimeout(() => { if (!this.destroy.destroyed && key === this.editor.key()) this.panelElement?.nativeElement.ownerDocument.getElementById(`${target}-heading`)?.focus(); });
+    }
     this.resetAffected(result.affectedNodeIds);
     if (result.next) this.openDecisionPath(result.next);
     if (focusWasInside && active instanceof HTMLElement && (!active.isConnected || active.getClientRects().length === 0)) {

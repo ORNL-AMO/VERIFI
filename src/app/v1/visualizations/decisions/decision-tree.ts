@@ -156,6 +156,26 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       }
     }
     nextSection = { kind: 'sources' };
+  } else if (action.kind === 'chart-stack') {
+    if (definition.chart?.kind !== 'time-series') return { state: 'unchanged' };
+    next = { ...definition, chart: { ...definition.chart, stack: action.stack } };
+  } else if (action.kind === 'item-order' || action.kind === 'reset-order') {
+    const source = definition.sources.find(source => source.id === action.sourceId);
+    if (!source || source.kind === 'analysis' && source.mode !== 'result') return { state: 'unchanged' };
+    if (action.kind === 'reset-order') {
+      next = { ...definition, series: definition.series.map(series => series.sourceId !== source.id ? series : { ...series,
+        overrides: series.overrides?.map(override => {
+          if ((override.accountGuid ?? definition.accountGuid) !== definition.accountGuid) return override;
+          const { order: _order, ...retained } = override; return retained;
+        }) }) };
+    } else {
+      const items = [...projectDecisionItems(definition, source.id, context.snapshot)];
+      const index = items.findIndex(item => item.key === itemKey(action.item));
+      const target = index + (action.direction === 'up' ? -1 : 1);
+      if (index < 0 || target < 0 || target >= items.length) return { state: 'unchanged' };
+      [items[index], items[target]] = [items[target], items[index]];
+      items.forEach((item, order) => { next = patchItem(next, source, item.identity, { order }); });
+    }
   } else if (action.kind === 'chart-type') {
     if (definition.chart?.kind !== 'time-series') return { state: 'unchanged' };
     next = { ...definition, chart: { ...definition.chart, defaultTraceType: action.traceType }, series: definition.series.map(series => {
@@ -224,7 +244,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         const repairAccountGroup = action.kind === 'analysis-defaults' && accountTarget && !!groupGuid;
         if (repairAccountGroup) { clearItems(source.id, true); cleared.push('Unsupported account group target'); }
         const changed = { ...(repairAccountGroup ? accountSource : source), measure, ...(action.kind === 'analysis-defaults' ? { settings: { unit: { kind: 'owner' as const } } } : {}) };
-        next = { ...definition, chart: { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' && definition.chart.defaultTraceType === 'bar' ? 'bar' : 'line', interval, stack: 'none' },
+        next = { ...definition, chart: { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line', interval, stack: 'none' },
           sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.filter(item => !repairAccountGroup || item.sourceId !== source.id).map(item => item.sourceId === source.id ? { ...item, metric: measure } : item) };
         if (action.kind === 'analysis-defaults' || analysisPeriodIssue({ chart: next.chart!, period: next.period, comparison: next.comparison })) {
           if (next.period.kind !== 'all-history' || next.comparison.kind !== 'none') cleared.push('Incompatible period or comparison');
