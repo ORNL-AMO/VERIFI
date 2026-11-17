@@ -10,9 +10,37 @@ import { AnalysisEditorsModule } from '../analysis-editors.module';
 import { AnalysisSourceEditorComponent } from './analysis-source-editor.component';
 import { prepareDecisionChange } from '../../decisions/decision-tree';
 import { projectAnalysisItems } from '../analysis-items';
+import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 
 describe('facility analysis source editing', () => {
   afterEach(() => TestBed.resetTestingModule());
+  it.each(['facility', 'account'] as const)('explicitly reviews replacing retained %s model intent with results from the same named analysis', async scope => {
+    const data = scope === 'account' ? accountAnalysisFixture() : analysisFixture();
+    const workspace = new AccountWorkspaceStore(); workspace.publish(data.snapshot);
+    TestBed.configureTestingModule({ imports: [AnalysisEditorsModule], providers: [provideRouter([]), analysisPickerTestProvider(), { provide: AccountWorkspaceStore, useValue: workspace }] });
+    const initial = scope === 'account' ? accountAnalysisDefinition() : analysisDefinition();
+    const definition: VisualizationDefinition = { ...initial, sources: [{ id: 'source-1', kind: 'analysis', mode: 'model', analysisGuid: data.analysis.guid,
+      modelId: 'saved-model', measure: 'modeled', aggregation: 'none' }], series: initial.series.map(series => ({ ...series, metric: 'modeled', label: 'Model presentation' })) };
+    const before = structuredClone(definition), fixture = TestBed.createComponent(AnalysisSourceEditorComponent), request = vi.fn();
+    const context = { definition, sourceId: 'source-1', disabled: false, changed: vi.fn(), request };
+    try {
+      fixture.componentRef.setInput('context', context); fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const picker = fixture.debugElement.query(By.directive(AnalysisPickerComponent)).componentInstance as AnalysisPickerComponent;
+      expect(picker.selectionControl.value).toBeNull();
+      root.querySelector<HTMLButtonElement>(`[aria-label="Inspect ${data.analysis.name}"]`)!.click(); fixture.detectChanges();
+      root.querySelector<HTMLButtonElement>(`${scope === 'account' ? 'app-account-analysis-details-slideout' : 'app-analysis-details-slideout'} .v1-workspace-slideout__footer button`)!.click(); fixture.detectChanges();
+      expect(request).toHaveBeenLastCalledWith({ kind: 'analysis-binding', sourceId: 'source-1', analysisGuid: data.analysis.guid });
+      const proposal = prepareDecisionChange(definition, request.mock.lastCall![0], { snapshot: data.snapshot });
+      expect(proposal.state).toBe('confirm');
+      if (proposal.state === 'unchanged') throw new Error('Expected reviewed replacement');
+      expect(proposal.definition.sources[0]).toMatchObject({ mode: 'result', analysisGuid: data.analysis.guid, measure: 'actual' });
+      expect(proposal.definition.sources[0]).not.toHaveProperty('modelId');
+      expect(definition).toEqual(before); expect(picker.selectionControl.value).toBeNull();
+      fixture.componentRef.setInput('context', { ...context, definition: proposal.definition }); fixture.detectChanges(); await fixture.whenStable();
+      expect(picker.selectionControl.value).toBe(data.analysis.guid);
+    } finally { fixture.destroy(); }
+  });
   it('edits wildcard Analysis presentation without activating dormant provider preferences', () => {
     const { snapshot } = analysisFixture(), initial = analysisDefinition();
     const dormant = { seriesId: 'source-1:result', label: 'Dormant label', visible: false };

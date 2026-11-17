@@ -2,7 +2,7 @@
   <div class="analysis-settings" [formGroup]="form">
     @if (scope(); as scope) {
       <app-visualization-analysis-picker [accountGuid]="context.definition.accountGuid" [scope]="scope"
-        [allFacilities]="context.definition.facilitySelection.kind === 'all'" [selectedGuid]="source()?.analysisGuid ?? null"
+        [allFacilities]="context.definition.facilitySelection.kind === 'all'" [selectedGuid]="source()?.mode === 'result' ? (source()?.analysisGuid ?? null) : null"
         [disabled]="context.disabled" [resetKey]="pickerKey()" [idPrefix]="pickerId()" (selected)="selectAnalysis($event)"/>
     }
     @if (missingAnalysis()) { <p role="status">The selected analysis is unavailable or unsupported.</p> }

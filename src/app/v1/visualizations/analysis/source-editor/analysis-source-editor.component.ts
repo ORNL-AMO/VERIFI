@@ -74,7 +74,7 @@ export class AnalysisSourceEditorComponent {
     const view = this.view(); this.hydrate();
     if (view && !view.disabled) view.request?.({ kind: 'analysis-binding', sourceId: view.sourceId, ...(analysisGuid ? { analysisGuid } : {}), ...(groupGuid ? { groupGuid } : {}) });
   }
-  selectAnalysis(guid: string): void { if (guid !== this.source()?.analysisGuid) this.binding(guid); }
+  selectAnalysis(guid: string): void { const source = this.source(); if (source?.mode !== 'result' || guid !== source.analysisGuid) this.binding(guid); }
   defaults(): void { const view = this.view(); if (view && !view.disabled) view.request?.({ kind: 'analysis-defaults', sourceId: view.sourceId }); }
   private hydrate(): void {
     const source = this.source(), chart = this.view()?.definition.chart;
