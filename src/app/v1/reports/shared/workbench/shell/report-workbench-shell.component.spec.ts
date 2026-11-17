@@ -1,9 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { ReportsSharedModule } from '../../reports-shared.module';
+import { ReportAutosaveState, ReportWorkbenchEditor } from '../../editing/report-autosave-controller';
 import { ReportWorkbenchController } from '../report-workbench.controller';
-import { ReportWorkbenchHeaderComponent } from '../report-workbench-header/report-workbench-header.component';
 import { ReportStageId } from '../report-workbench.models';
 import { ReportOutputCapability } from '../../output/report-output.models';
 import { ReportPresentationCapability } from '../../presentation/report-presentation-controller';
@@ -14,14 +15,17 @@ describe('report presentation footer action', () => {
     const presentation = { available: signal(false), present: vi.fn() } satisfies ReportPresentationCapability;
     const output: ReportOutputCapability = { formats: ['pdf', 'pptx'], available: signal(true), busy: signal(false), unavailableReason: signal(''),
       state: signal({ phase: 'idle', message: '' }), generate: vi.fn(), cancel: vi.fn() };
-    const runtime = signal({ editor: {}, output, presentation: presentation as ReportPresentationCapability | undefined });
+    const editor = { state: signal<ReportAutosaveState>('idle'), error: signal<string | undefined>(undefined), saving: signal(false), isDirty: signal(false),
+      retry: vi.fn(), discard: vi.fn(), pauseAutosave: vi.fn(), resumeAutosave: vi.fn() } satisfies ReportWorkbenchEditor;
+    const runtime = signal({ editor, output, presentation: presentation as ReportPresentationCapability | undefined });
     const stage = signal<ReportStageId>('report');
     const workbench = { host: { stage, state: () => 'ready', returnLink: () => ({ route: ['/reports'] }), presentation: () => ({
       breadcrumbs: [], breadcrumbLabel: 'Reports', resources: [], selectedId: 'analysis', name: 'Analysis', typeLabel: 'Analysis',
       titleId: 'analysis-heading', status: 'ready', statusLabel: 'Ready', facts: [] }) },
       session: () => ({ runtime: runtime() }), previous: () => undefined, next: () => undefined, workflow: () => undefined, stages: () => [], beforeUnload: vi.fn() };
-    TestBed.overrideComponent(ReportWorkbenchHeaderComponent, { set: { template: '' } });
-    TestBed.configureTestingModule({ imports: [ReportsSharedModule], providers: [provideRouter([]), { provide: ReportWorkbenchController, useValue: workbench }] });
+    TestBed.configureTestingModule({ imports: [ReportsSharedModule], providers: [provideRouter([]),
+      { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(false), toggleFacts: vi.fn() } },
+      { provide: ReportWorkbenchController, useValue: workbench }] });
     const fixture = TestBed.createComponent(ReportWorkbenchShellComponent); fixture.detectChanges();
     const actions = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('footer button'));
     expect(actions().map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint']);
