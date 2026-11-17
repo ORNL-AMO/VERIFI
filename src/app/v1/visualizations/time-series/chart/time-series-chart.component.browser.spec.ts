@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { userEvent } from 'vitest/browser';
 import { vi } from 'vitest';
 import { echarts } from '@app/v1/shared/charts/echarts';
 import { TimeSeriesModule } from '../time-series.module';
@@ -86,7 +85,7 @@ describe('saved time-series canvas in Chromium', () => {
       expect(fixture.componentInstance.zoom()).toEqual({ start: 25, end: 75 });
     } finally { fixture.destroy(); }
   });
-  it('renders real zero/gaps, resizes without remounting or losing zoom, resets through the keyboard and disposes the canvas', async () => {
+  it('renders real zero/gaps, resizes without remounting or losing zoom, omits reset controls and disposes the canvas', async () => {
     const model: TimeSeriesModel = { title: 'Monthly energy', chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' }, legend: true, warnings: ['Partial coverage'],
       slots: ['Jan', 'Feb', 'Mar', 'Apr'].map((key, order) => ({ key, label: key, order })),
       traces: [{ id: 'energy', type: 'line', label: 'Energy', unit: 'kWh', axis: 'left', color: 'var(--v1-chart-series-1)', lineStyle: 'solid', role: 'primary',
@@ -109,16 +108,13 @@ describe('saved time-series canvas in Chromium', () => {
       expect(echarts.getInstanceByDom(canvasHost)).toBe(chart);
       expect(fixture.componentInstance.zoom()).toEqual({ start: 25, end: 75 });
       expect((chart.getOption() as any).dataZoom[0]).toMatchObject({ start: 25, end: 75 });
-      const reset = root.querySelector<HTMLButtonElement>('button')!;
-      reset.focus(); await userEvent.keyboard('{Enter}'); fixture.detectChanges();
-      expect(fixture.componentInstance.zoom()).toEqual({ start: 0, end: 100 });
-      expect(document.activeElement).toBe(reset);
+      expect(root.querySelector('button, details, .time-series-warning')).toBeNull();
       for (const theme of ['v1-root', 'v1-root v1-theme-dark', 'v1-root v1-theme-dark v1-contrast-strong']) {
         root.className = theme; root.style.width = '280px'; fixture.detectChanges(); await frame(); await frame();
         await vi.waitFor(() => expect(chart.getWidth()).toBe(280));
         expect(canvasHost.scrollWidth).toBeLessThanOrEqual(281);
       }
-      expect(canvasHost.getAttribute('aria-label')).toContain('Exact values and quality');
+      expect(canvasHost.getAttribute('aria-label')).toContain('Hover over points');
       fixture.destroy(); expect(chart.isDisposed()).toBe(true);
     } finally { fixture.destroy(); }
   });

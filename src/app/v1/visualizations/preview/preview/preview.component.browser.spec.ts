@@ -35,42 +35,18 @@ function setup(resolveOverride?: (request: VisualizationSourceRequest, signal: A
 }
 
 describe('visualization preview in Chromium', () => {
-  it('mounts a clean chart with true zero values available to assistive technology', async () => {
+  it('mounts a chart-only preview while retaining true zero source evidence', async () => {
     const { fixture, root } = setup(); await settle(); fixture.detectChanges();
     expect(root.querySelector('app-browser-preview-fixture')?.textContent).toContain('Current monthly energy chart');
-    const disclosure = root.querySelector<HTMLDetailsElement>('.visualization-preview__accessible-data')!;
-    expect(disclosure.open).toBe(false);
-    root.querySelector<HTMLElement>('summary')!.focus();
-    await userEvent.keyboard('{Enter}'); fixture.detectChanges();
-    expect(disclosure.open).toBe(true);
-    const accessibleData = disclosure;
-    expect(accessibleData.querySelector('table')).not.toBeNull();
-    expect(accessibleData.hasAttribute('aria-hidden')).toBe(false);
-    expect(accessibleData.getBoundingClientRect().height).toBeGreaterThan(1);
-    expect(root.querySelector('caption')!.textContent).toBe('Measured energy in kWh');
-    expect(root.querySelector('tbody')!.textContent).toContain('January 20250');
-    expect(root.querySelectorAll('th[scope="col"]')).toHaveLength(2);
+    expect(root.querySelector('table, details, nav')).toBeNull();
+    const state = fixture.componentInstance.preview.state();
+    if (state.state !== 'ready') throw new Error('Expected current chart');
+    expect(state.presentation.details.rows).toEqual([['January 2025', '0']]);
     root.style.width = '280px';
     for (const theme of ['v1-root', 'v1-root v1-theme-dark', 'v1-root v1-theme-dark v1-contrast-strong']) {
       root.className = theme; fixture.detectChanges();
       expect(root.querySelector<HTMLElement>('.visualization-preview')!.scrollWidth).toBeLessThanOrEqual(281);
     }
-    fixture.destroy();
-  });
-
-  it('opens and pages dense source values with keyboard controls', async () => {
-    const { fixture, root } = setup(undefined, Array.from({ length: 130 }, (_, i) => [`Month ${i}`, String(i)]));
-    await settle(); fixture.detectChanges();
-    root.querySelector<HTMLElement>('summary')!.focus(); await userEvent.keyboard('{Enter}'); fixture.detectChanges();
-    expect(root.querySelectorAll('tbody tr')).toHaveLength(50);
-    const buttons = [...root.querySelectorAll<HTMLButtonElement>('nav button')];
-    expect(buttons[0].disabled).toBe(true); buttons[1].focus(); await userEvent.keyboard('{Enter}'); fixture.detectChanges();
-    expect(root.querySelector('tbody')!.textContent).toContain('Month 50');
-    expect(document.activeElement).toBe(buttons[1]);
-    await userEvent.keyboard('{Enter}'); fixture.detectChanges();
-    expect(root.querySelectorAll('tbody tr')).toHaveLength(30);
-    expect(root.querySelector('tbody')!.textContent).toContain('Month 129');
-    expect(root.querySelector('[role="status"]')!.textContent).toContain('101–130 of 130');
     fixture.destroy();
   });
 

@@ -1,3 +1,5 @@
+import { isExplorationChart, visualizationInterval } from '@domain/visualizations/visualization-interval';
+import { resolveAccountAnalysisResults, resolveFacilityAnalysisResults } from '@domain/visualizations/analysis/facility-analysis-source';
 import { AnalysisDataSession } from '../analysis/analysis-data-session.service';
 import { analysisPeriodIssue, latestAnalysisMonth } from '@domain/visualizations/analysis/facility-analysis-source';
 import { civilMonthIndex, civilMonthRange, wholeMonthWindow } from '@domain/visualizations/visualization-periods';
@@ -18,6 +20,7 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
   private readonly data = inject(UtilityDataSession);
   private readonly provider = inject(UtilitySourceProvider);
   async resolve(definition: VisualizationDefinition, identity: PreviewIdentity, signal: AbortSignal): Promise<PreviewDateContext> {
+    if (isExplorationChart(definition.chart)) return this.explorationDates(definition, identity, signal);
     const scope = resolveVisualizationFacilities(definition, this.workspace.facilities()).scope;
     const sources = definition.sources.filter((s): s is UtilityVisualizationSource => s.kind === 'utility');
     const predictors = definition.sources.filter(source => source.kind === 'predictor');
@@ -86,4 +89,61 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
     if (!current()) throw new DOMException('Date context superseded', 'AbortError');
     return { calendarDate, ...(latestDataDate ? { latestDataDate } : {}), ...(monthlyRange ? { monthlyRange } : {}), ...(noAnchor && !sourceUnavailable ? { emptyReasons: emptyReasons.length ? emptyReasons : ['No eligible saved observations are available.'] } : {}) };
   }
+  private async explorationDates(definition: VisualizationDefinition, identity: PreviewIdentity, signal: AbortSignal): Promise<PreviewDateContext> {
+    const calendarDate = civilDate(new Date());
+    const snapshot = this.workspace.snapshot();
+    const scope = resolveVisualizationFacilities(definition, this.workspace.facilities()).scope;
+    const current = () => { if (signal.aborted || !snapshot || this.workspace.snapshot() !== snapshot) throw new DOMException('Date context superseded', 'AbortError'); };
+    current();
+    const utilities = definition.sources.filter((source): source is UtilityVisualizationSource => source.kind === 'utility');
+    if (utilities.length) await this.data.acquire(identity, signal, true, this.data.requiresGrid(utilities, scope));
+    current();
+    if (visualizationInterval(definition.chart) !== 'monthly') return { calendarDate };
+    const histories: { start: string; end: string }[] = [];
+    const latest: string[] = [];
+    const reasons: string[] = [];
+    for (const source of definition.sources) {
+      current();
+      const request = { identity: { ...identity, scope, sourceId: source.id, requestId: 'exploration-dates' }, source,
+        chart: definition.chart!, period: { kind: 'all-history' as const }, comparison: { kind: 'none' as const }, series: definition.series, dateContext: { calendarDate } };
+      let result: import('@domain/visualizations/visualization-source-provider').VisualizationSourceResolution | undefined;
+      if (source.kind === 'utility') result = await this.provider.resolve(request, signal);
+      else if (source.kind === 'predictor') {
+        const range = predictorHistoryRange(snapshot!, scope, source), end = latestPredictorDate(snapshot!, scope, source);
+        if (range) histories.push(range);
+        if (end) latest.push(end);
+        continue;
+      } else if (source.kind === 'analysis' && this.analysisData) {
+        const acquired = await this.analysisData.acquire(request, signal);
+        if (acquired.state === 'ready') {
+          const end = latestAnalysisMonth(acquired.value); if (end) latest.push(end);
+          result = acquired.value.scope === 'account' ? resolveAccountAnalysisResults(acquired.value, request) : resolveFacilityAnalysisResults(acquired.value, request);
+        }
+      }
+      current();
+      if (result?.state === 'ready' || result?.state === 'empty') {
+        const resolved = result.resolved;
+        if (resolved?.data.kind === 'time-series') {
+          histories.push(...resolved.periods);
+          for (const row of resolved.data.rows) if (Object.values(row.values).some(value => value.state === 'observed' && Number.isFinite(value.value))) latest.push(row.end);
+        }
+        if (result.state === 'empty') reasons.push(...result.reasons ?? [result.message]);
+      }
+    }
+    current();
+    const latestDataDate = latest.sort().at(-1), period = definition.period;
+    let monthlyRange: PreviewDateContext['monthlyRange'];
+    if (period.kind === 'fixed') monthlyRange = wholeMonthWindow(period.start, period.end);
+    if (period.kind === 'all-history' && histories.length) monthlyRange = wholeMonthWindow(histories.map(range => range.start).sort()[0], histories.map(range => range.end).sort().at(-1)!);
+    if (period.kind === 'rolling') {
+      const anchor = period.anchor === 'calendar' ? calendarDate : latestDataDate;
+      if (anchor) {
+        const last = civilMonthIndex(anchor) - (period.anchor === 'calendar' ? 1 : 0), first = last - period.count * (period.unit === 'year' ? 12 : 1) + 1;
+        if (first >= 12 && last <= 119999) monthlyRange = { start: civilMonthRange(first).start, end: civilMonthRange(last).end };
+      }
+    }
+    return { calendarDate, ...(latestDataDate ? { latestDataDate } : {}), ...(monthlyRange ? { monthlyRange } : {}),
+      ...(!latestDataDate ? { emptyReasons: reasons.length ? reasons : ['No eligible saved observation is available.'] } : {}) };
+  }
+
 }

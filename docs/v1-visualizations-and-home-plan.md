@@ -13,7 +13,7 @@ Active plan for [epic #2564](https://github.com/ORNL-AMO/VERIFI/issues/2564): es
 
 ## Current implementation and owning references
 
-Visualizations is enabled. Saved JSON contracts, storage/transfer/recovery, Dashboard/workbench, utility projections/editing, line/bar/area editing with compatible utility and Energy Use stacks, percentages and series ordering, Energy usage trend/Utility cost trend recipes, and supported inventory capture exist. Other source/chart combinations retain setup/unavailable behavior. Current Home provides status/count summaries; customizable linked dashboards remain future work. Read the relevant current reference rather than every document:
+Visualizations is enabled. Saved JSON contracts, storage/transfer/recovery, Dashboard/workbench, utility projections/editing, line/bar/area editing with compatible utility and Energy Use stacks, percentages and series ordering, Energy usage trend/Utility cost trend recipes, and supported inventory capture exist. Scatter, pairwise correlation/matrices, and monthly/yearly heatmaps are implemented under the [exploration contract](v1-exploration-visualizations.md). Other source/chart combinations retain setup/unavailable behavior. Current Home provides status/count summaries; customizable linked dashboards remain future work. Read the relevant current reference rather than every document:
 
 | Change | Current owner |
 | --- | --- |
@@ -35,8 +35,8 @@ These are implementation/acceptance relationships, not claims about remote issue
 | Vis3: Dashboard/workbench | [#2904](https://github.com/ORNL-AMO/VERIFI/issues/2904) | Implemented framework after Vis1/Vis2; broader real-data acceptance remains issue-owned. |
 | Vis4: utility sources | [#2905](https://github.com/ORNL-AMO/VERIFI/issues/2905) | Implemented initial utility journey after Vis1/Vis3; production-shell review/QA remains pending. |
 | Vis5: other sources | [#2906](https://github.com/ORNL-AMO/VERIFI/issues/2906) | Predictor/weather, Energy Uses, and facility/account result journeys are complete under [focused source acceptance](v1-visualization-sources-plan.md); standalone model inspection is outside scope. Broader issue/release acceptance and VIS4 production-shell QA remain separate. |
-| Vis6: time series/comparison | [#2907](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Implemented time-series breadth across current sources: area/combinations, compatible stacks/percentages, ordering, stable preview/zoom and paged source data. Existing source-specific comparison boundaries remain; broader production-shell/release acceptance stays separate. |
-| Vis7: correlation/heatmap | [#2908](https://github.com/ORNL-AMO/VERIFI/issues/2908) | After Vis5/Vis6. |
+| Vis6: time series/comparison | [#2907](https://github.com/ORNL-AMO/VERIFI/issues/2907) | Implemented time-series breadth across current sources: area/combinations, compatible stacks/percentages, ordering, stable preview/zoom and original-value tooltips. Existing source-specific comparison boundaries remain; broader production-shell/release acceptance stays separate. |
+| Vis7: correlation/heatmap | [#2908](https://github.com/ORNL-AMO/VERIFI/issues/2908) | Implemented after Vis5/Vis6: saved pairwise figures/matrices and heatmaps, with exact observation alignment, original-value tooltips and shared header data checks. Production-shell/release QA remains separate. |
 | Vis8: composition/flow | [#2909](https://github.com/ORNL-AMO/VERIFI/issues/2909) | After Vis5/Vis6. |
 | Vis9: capture coverage | [#2910](https://github.com/ORNL-AMO/VERIFI/issues/2910) | Initial utility inventory capture exists; remaining capture depends on Vis2–Vis8. |
 | Vis10: integrated acceptance | [#2911](https://github.com/ORNL-AMO/VERIFI/issues/2911) | After Vis1–Vis9; source/chart coverage and integrated journeys. |

@@ -18,6 +18,7 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
   const cleared: string[] = [];
   const sources = next.sources.map((source, index): VisualizationSource => {
     const sourceIssues = issues.some(issue => issue.path.startsWith(`sources.${index}.`)
+      || issue.path.startsWith('chart.') && definition.chart?.kind === 'scatter' && definition.chart[issue.path.split('.')[1] as 'x' | 'y']?.sourceId === source.id
       || issue.path.startsWith('series.') && definition.series[Number(issue.path.split('.')[1])]?.sourceId === source.id);
     if (!allSources && !sourceIssues) return source;
     affected.add(source.id);
@@ -37,6 +38,7 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
   // Retain the selected chart while clearing only axes whose declared series were removed.
   if (result.chart?.kind === 'scatter') {
     const chart = { ...result.chart };
+    for (const axis of ['x', 'y'] as const) if (chart[axis] && affected.has(chart[axis]!.sourceId)) { delete chart[axis]; cleared.push('Scatter axis that depends on cleared resources'); }
     if (chart.xSeriesId && !result.series.some(series => series.id === chart.xSeriesId)) {
       delete chart.xSeriesId; cleared.push('Scatter X axis that depends on cleared series');
     }

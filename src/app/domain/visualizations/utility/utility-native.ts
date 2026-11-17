@@ -67,7 +67,7 @@ export function resolveNativeUtility(snapshot: AccountWorkspaceSnapshot, request
     const warnings = new Set<string>(['Native bill observations are positioned at their saved bill dates. Bill duration is not inferred or prorated.']);
     const id = utilitySeriesId(source.id, meter.guid);
     const metadata: ResolvedVisualizationSeries = { id, sourceId: source.id, metric: utilityMeasureKey(source), resourceGuid: meter.guid,
-      label: `${meter.name} / ${measure.label}`, unit: measure.unit, dimension: measure.dimension, additive: measure.additive,
+      label: source.measure === 'energy' ? meter.name : `${meter.name} / ${measure.label}`, unit: measure.unit, dimension: measure.dimension, additive: measure.additive,
       ...(measure.currency ? { currency: measure.currency } : {}), ...(measure.energyTreatment ? { energyTreatment: measure.energyTreatment } : {}),
       contributionKeys: inPeriod.map(reading => `${meter.guid}:${reading.guid}:${utilityMeasureKey(source)}`) };
     const rows = inPeriod.map(reading => {
@@ -137,7 +137,7 @@ function nativeMeasure(snapshot: AccountWorkspaceSnapshot, source: UtilityVisual
     const unit = requireUnit(meter.energyUnit, pinned ?? owner.energyUnit);
     const applies = treatment === 'source' && checkShowSiteToSource(meter.source, meter.includeInEnergy, meter.scope);
     if (applies && (!Number.isFinite(meter.siteToSource) || meter.siteToSource <= 0)) throw new Error('The meter has no valid site-to-source multiplier.');
-    return { unit, dimension: 'energy', additive: true, energyTreatment: treatment, label: `${treatment === 'source' ? 'Source' : 'Site'} energy`,
+    return { unit, dimension: 'energy', additive: true, energyTreatment: treatment, label: 'Energy',
       value: reading => {
         const value = convert(reading.totalEnergyUse, meter.energyUnit, unit);
         return observed(reading, value === undefined ? undefined : applies ? value * meter.siteToSource : value);

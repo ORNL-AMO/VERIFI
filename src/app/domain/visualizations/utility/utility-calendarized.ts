@@ -1,3 +1,4 @@
+import { visualizationInterval } from '../visualization-interval';
 import { emptyMonthlySource } from '../visualization-monthly-combination';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
@@ -39,7 +40,8 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
   const source = request.source;
   const support = utilityChartSupport(source, request.chart);
   if (source.dataMode !== 'calendarized' || support.state !== 'supported') return unsupported(support.state === 'unsupported' ? support.reasons.join(' ') : 'Choose calendarized data.');
-  if (request.chart.kind !== 'time-series' || request.chart.interval === 'native') return unsupported('Choose Monthly or Yearly for calendarized utility data.');
+  const interval = visualizationInterval(request.chart);
+  if (interval === 'native') return unsupported('Choose Monthly or Yearly for calendarized utility data.');
   if (!source.selection || source.selection.kind === 'fixed' && !source.selection.guids.length) return unsupported('Select meters or meter groups before previewing.');
   const selection = resolveUtilitySelection(snapshot, identity.scope, source);
   if (selection.missing.length) return { identity, state: 'missing-source', references: selection.missing, message: 'Repair the saved utility selection before previewing.' };
@@ -71,16 +73,16 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
     if (!historyKeys.length && request.period.kind === 'all-history' && !request.dateContext.monthlyRange) return { identity, state: 'empty', periods: [], message: 'No saved utility history is available.' };
     const history = historyKeys.length ? { start: `${historyKeys[0]}-01`, end: monthRange(Number(historyKeys[historyKeys.length - 1].slice(0, 4)), Number(historyKeys[historyKeys.length - 1].slice(5)) - 1).end } : undefined;
     let ranges = request.dateContext.monthlyRange ? [{ ...request.dateContext.monthlyRange, role: 'primary' as const, basis: 'calendar' as const }] : resolveUtilityRanges(request.period, request.comparison, owner, request.dateContext, history);
-    if (request.chart.interval === 'yearly' && request.period.kind === 'all-history') {
+    if (interval === 'yearly' && request.period.kind === 'all-history') {
       const basis = owner.fiscalYear === 'nonCalendarYear' ? 'fiscal' : 'calendar';
       if (request.comparison.kind === 'previous-year' && request.comparison.basis !== basis) return unsupported('Choose a comparison year with the same calendar or fiscal basis as the yearly source.');
       ranges = ranges.map(range => ({ ...range, basis }));
     }
-    if (request.chart.interval === 'yearly' && new Set(ranges.map(range => range.basis)).size > 1) return unsupported('Yearly comparisons require matching calendar or fiscal interval meaning.');
+    if (interval === 'yearly' && new Set(ranges.map(range => range.basis)).size > 1) return unsupported('Yearly comparisons require matching calendar or fiscal interval meaning.');
     const months: { key: string; year: number; month: number; start: string; end: string; role: 'primary' | 'comparison'; basis: 'calendar' | 'fiscal' }[] = [];
     for (const range of ranges) {
       let start = range.start, end = range.end;
-      if (request.chart.interval === 'yearly') {
+      if (interval === 'yearly') {
         const calendar = range.basis === 'fiscal' ? owner : { fiscalYear: 'calendarYear' as const, fiscalYearMonth: 0, fiscalYearCalendarEnd: true };
         start = fiscalRange(fiscalYear(range.start, calendar), calendar).start;
         end = fiscalRange(fiscalYear(range.end, calendar), calendar).end;
@@ -113,7 +115,7 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
     });
     let rows: readonly TimeSeriesRow[] = monthlyRows.map(({ basis: _basis, ...row }) => row);
     let periods: ResolvedVisualizationPeriod[];
-    if (request.chart.interval === 'yearly') {
+    if (interval === 'yearly') {
       const annual = new Map<string, { period: ResolvedVisualizationPeriod; rows: TimeSeriesRow[] }>();
       for (const row of monthlyRows) {
         const calendar = row.basis === 'fiscal' ? owner : { fiscalYear: 'calendarYear' as const, fiscalYearMonth: 0, fiscalYearCalendarEnd: true };
@@ -138,8 +140,8 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
     for (const diagnostic of diagnostics.values()) warnings.add(`${diagnostic.label}: ${diagnostic.reason} Periods: ${compressPeriods([...diagnostic.periods].sort())}.`);
     const provenance = [...new Set(rows.flatMap(row => Object.values(row.values).flatMap(observation => observation.state === 'observed' ? [observation.provenance] : [])))];
     return { identity, state: 'ready', resolved: { data: { kind: 'time-series', rows },
-      alignment: { kind: request.chart.interval === 'monthly' ? 'civil-month' : periods.some(period => period.basis === 'fiscal') ? 'fiscal-interval' : 'civil-year',
-        key: request.chart.interval === 'monthly' ? 'YYYY-MM' : periods.some(period => period.basis === 'fiscal') ? `fiscal:${owner.fiscalYearMonth}:${owner.fiscalYearCalendarEnd}` : 'YYYY' },
+      alignment: { kind: interval === 'monthly' ? 'civil-month' : periods.some(period => period.basis === 'fiscal') ? 'fiscal-interval' : 'civil-year',
+        key: interval === 'monthly' ? 'YYYY-MM' : periods.some(period => period.basis === 'fiscal') ? `fiscal:${owner.fiscalYearMonth}:${owner.fiscalYearCalendarEnd}` : 'YYYY' },
       series: metadata, periods, references: selection.references, provenance,
       quality: { partial: rows.some(row => Object.values(row.values).some(observation => observation.state === 'observed' ? observation.partial : observation.state !== 'excluded')), warnings: [...warnings] } } };
   } catch (error) { return unsupported(error instanceof Error ? error.message : 'This utility projection is unavailable.'); }

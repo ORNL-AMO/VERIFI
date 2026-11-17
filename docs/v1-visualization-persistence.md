@@ -34,6 +34,8 @@ Populated Energy Use restores preserve explicit annual arrays, source occurrence
 
 Unreadable payloads remain opaque and preserved. Transfers lock unreadable records and retain ordered transfer maps; later format recognition does not automatically verify relationships. Re-export retains original payload and context. Contradictory outer identity/ownership, duplicate identities, and malformed preservation metadata reject preparation before replacement deletion or writes.
 
+Scatter resource/category axis selectors participate in the same verified reference enumeration, remapping, inclusion review and repair as their source selections. Optional exploration settings remain saved JSON intent; current definitions without those settings are read without writes.
+
 ## Deletion and restore
 
 Account deletion removes owned definitions. Facility deletion removes definitions owned by that facility against the pre-delete catalog in the same native transaction; account definitions retain broken references. A sole-facility All chart is therefore removed with its facility. Selected-facility replacement uses one original ownership catalog across its complete batch. Facility replacement removes existing definitions even when an older incoming backup contains none. Individual source deletion retains definitions for explicit repair.

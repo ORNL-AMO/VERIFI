@@ -1,3 +1,4 @@
+import { previewValuesText } from './preview-values.testing';
 import { Component, inject, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -105,9 +106,8 @@ describe('VIS6 composed saved time-series acceptance', () => {
     const saved = component.editor.definition()!, guid = component.editor.record()!.guid;
     expect(saved.chart).toMatchObject({ defaultTraceType: 'area', stack: 'percent' });
 
-    const disclosure = root.querySelector<HTMLDetailsElement>('.visualization-preview__accessible-data')!;
-    disclosure.querySelector<HTMLElement>('summary')!.focus(); await userEvent.keyboard('{Enter}'); host.detectChanges();
-    expect(disclosure.open).toBe(true); expect(disclosure.textContent).toContain('75% of visible selection');
+    expect(root.querySelector('table, .visualization-preview__accessible-data')).toBeNull();
+    expect(previewValuesText(host!)).toContain('75% of visible selection');
     for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark'], [390, 'v1-theme-dark v1-contrast-strong', 'narrow-contrast']] as const) {
       await page.viewport(width, 850); root.querySelector('main')!.className = `v1-root ${theme}`; host.detectChanges();
       root.querySelector<HTMLElement>('.visualization-workbench__chart')!.scrollTop = 0;
@@ -120,7 +120,7 @@ describe('VIS6 composed saved time-series acceptance', () => {
     root.querySelector<HTMLElement>('.visualization-workbench__chart')!.scrollTop = 0;
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-    try { expect(getComputedStyle(disclosure).display).toBe('none'); await page.screenshot({ element: root, path: '../../../../../.angular/vis6-print.png' }); }
+    try { expect(root.querySelector('table')).toBeNull(); await page.screenshot({ element: root, path: '../../../../../.angular/vis6-print.png' }); }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
 
     host.destroy(); host = undefined;

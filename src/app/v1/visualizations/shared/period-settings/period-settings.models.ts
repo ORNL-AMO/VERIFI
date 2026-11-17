@@ -1,3 +1,4 @@
+import { isExplorationChart, visualizationInterval } from '@domain/visualizations/visualization-interval';
 import { analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
 import { equipmentPeriodIssue } from '@domain/visualizations/energy-use/equipment-source';
 import { predictorPeriodIssue } from '@domain/visualizations/predictor/predictor-source';
@@ -16,7 +17,7 @@ interface PeriodEditorChoice {
   readonly icon: 'calendar' | 'calendarCheck' | 'clock';
 }
 export interface PeriodEditorNotice {
-  readonly kind: 'analysis' | 'equipment' | 'predictor';
+  readonly kind: 'analysis' | 'equipment' | 'predictor' | 'exploration';
   readonly message: string;
   readonly resetLabel: string;
   readonly reset: Partial<PeriodFormValue>;
@@ -36,7 +37,7 @@ export function periodEditorPolicy(definition: VisualizationDefinition): PeriodE
   const analysis = definition.sources.some(source => source.kind === 'analysis');
   const equipment = definition.sources.some(source => source.kind === 'energy-use');
   const monthInput = usesMonthRange(definition);
-  const annual = equipment || analysis && definition.chart?.kind === 'time-series' && definition.chart.interval === 'yearly';
+  const annual = equipment || analysis && visualizationInterval(definition.chart) === 'yearly';
   const choices: PeriodEditorChoice[] = [{ kind: 'all-history', label: 'All history', icon: 'calendar' }];
   if (!annual) choices.push({ kind: 'fixed', label: monthInput ? 'Fixed months' : 'Fixed dates', icon: 'calendarCheck' },
     { kind: 'rolling', label: 'Rolling period', icon: 'clock' });
@@ -51,20 +52,21 @@ export function periodEditorPolicy(definition: VisualizationDefinition): PeriodE
     notices.push({ kind: 'equipment', message: 'The saved period or comparison is unsupported for equipment history. Its intent is retained.',
       resetLabel: 'Use latest saved fiscal year without comparison', reset: { kind: 'latest-saved-year', comparison: 'none' } });
   }
-  if (monthInput && !analysis && predictorPeriodIssue(definition)) {
+  if (definition.sources.some(source => source.kind === 'predictor') && !analysis && predictorPeriodIssue(definition)) {
     notices.push({ kind: 'predictor', message: 'The saved range or comparison is not supported for predictors. Its intent is retained.',
       resetLabel: 'Use all history without comparison', reset: { kind: 'all-history', basis: 'calendar', includeIncomplete: false, comparison: 'none' } });
   }
+  if (isExplorationChart(definition.chart) && definition.comparison.kind !== 'none') notices.push({ kind: 'exploration', message: 'Exploration uses one selected period without a comparison overlay. The saved comparison is retained.', resetLabel: 'Use one period without comparison', reset: { comparison: 'none' } });
   const period = definition.period;
   return { monthInput, title: annual ? analysis ? 'Analysis fiscal years' : 'Equipment fiscal years' : monthInput ? 'Month range' : 'Periods and comparisons', choices,
-    controls: { ranges: !annual, fiscalYear: !monthInput || annual, basis: !annual && !monthInput, comparison: !annual && !monthInput, incomplete: !monthInput },
+    controls: { ranges: !annual, fiscalYear: !monthInput || annual, basis: !annual && !monthInput, comparison: !annual && !monthInput && !isExplorationChart(definition.chart), incomplete: !monthInput },
     selectionDefaults: annual ? { comparison: 'none', basis: 'fiscal' } : monthInput ? { basis: 'calendar', includeIncomplete: false, comparison: 'none' } : {},
     notices, retainedPartial: monthInput && period.kind === 'fixed'
       && (period.start !== period.start.slice(0, 7) + '-01' || period.end !== civilMonthRange(civilMonthIndex(period.end)).end) };
 }
 
 function usesMonthRange(definition: VisualizationDefinition): boolean {
-  return definition.sources.some(source => source.kind === 'predictor')
+  return isExplorationChart(definition.chart) && visualizationInterval(definition.chart) === 'monthly' || definition.sources.some(source => source.kind === 'predictor')
     || definition.sources.some(source => source.kind === 'analysis') && definition.chart?.kind === 'time-series' && definition.chart.interval === 'monthly';
 }
 

@@ -31,7 +31,7 @@ export class AnalysisDataSession {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly data = inject(UtilityDataSession);
   private readonly calendarization = inject(WorkspaceCalendarizationService);
-  private readonly pending = new WeakMap<AbortSignal, Promise<AnalysisPreviewResult>>();
+  private readonly pending = new WeakMap<AbortSignal, Map<string, Promise<AnalysisPreviewResult>>>();
   private readonly cache = new Map<string, { readonly fingerprint: string; readonly value: AnalysisVisualizationResults }>();
   private readonly cancellations = new Set<() => void>();
   private session = 0;
@@ -48,10 +48,13 @@ export class AnalysisDataSession {
     const snapshot = this.workspace.snapshot();
     if (this.lastSnapshot && snapshot !== this.lastSnapshot && this.workspace.revision() === 0) { this.session++; this.cache.clear(); }
     this.lastSnapshot = snapshot;
-    const existing = this.pending.get(signal);
+    const requests = this.pending.get(signal) ?? new Map<string, Promise<AnalysisPreviewResult>>();
+    const key = JSON.stringify(request.source);
+    const existing = requests.get(key);
     if (existing) return existing;
     const promise = this.calculate(request, signal);
-    this.pending.set(signal, promise);
+    requests.set(key, promise);
+    this.pending.set(signal, requests);
     return promise;
   }
   private async calculate(request: VisualizationSourceRequest, signal: AbortSignal): Promise<AnalysisPreviewResult> {

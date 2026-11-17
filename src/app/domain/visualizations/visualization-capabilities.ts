@@ -1,3 +1,4 @@
+import { isExplorationChart, visualizationInterval, explorationChartIssue } from './visualization-interval';
 import { timeSeriesStackIssues } from './visualization-time-series';
 import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { allowsMixedAxisUnits } from './visualization-source-provider';
@@ -20,8 +21,8 @@ export interface ChartCapability {
 export const CHART_CAPABILITIES: Readonly<Record<VisualizationChart['kind'], ChartCapability>> = {
   'time-series': { kind: 'time-series', shapes: ['time-series'], controls: ['series', 'appearance', 'axes', 'stacking'], allowDateOverride: true },
   scatter: { kind: 'scatter', shapes: ['pairs', 'time-series'], controls: ['series', 'appearance', 'axes', 'fit'], allowDateOverride: true },
-  correlation: { kind: 'correlation', shapes: ['matrix', 'pairs', 'time-series'], controls: ['series', 'appearance', 'normalization'], allowDateOverride: true },
-  heatmap: { kind: 'heatmap', shapes: ['matrix', 'time-series'], controls: ['series', 'appearance'], allowDateOverride: true },
+  correlation: { kind: 'correlation', shapes: ['matrix', 'pairs', 'time-series'], controls: ['series', 'appearance', 'normalization', 'fit'], allowDateOverride: true },
+  heatmap: { kind: 'heatmap', shapes: ['matrix', 'time-series'], controls: ['series', 'appearance', 'normalization'], allowDateOverride: true },
   breakdown: { kind: 'breakdown', shapes: ['breakdown'], controls: ['series', 'appearance', 'denominator'], allowDateOverride: true },
   treemap: { kind: 'treemap', shapes: ['hierarchy'], controls: ['series', 'appearance', 'hierarchy', 'denominator'], allowDateOverride: true },
   sankey: { kind: 'sankey', shapes: ['flow'], controls: ['series', 'appearance', 'denominator'], allowDateOverride: true }
@@ -239,16 +240,17 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('capability', 'This source does not support the requested measure, aggregation, period, comparison, or chart.', source.id);
     if (!sameIntent(chart, chartSupport.chart) || chartSupport.state !== 'supported')
       add('capability', chartSupport.state === 'unsupported' ? chartSupport.reasons.join(' ') : 'Review support for these exact chart settings.', source.id);
-    if (capabilities.allowMultipleSources === false && definition.sources.length > 1)
+    if (capabilities.allowMultipleSources === false && definition.sources.length > 1 && !isExplorationChart(chart))
       add('capability', 'This source supports only one source configuration at a time.', source.id);
     if (Object.keys(source.settings ?? {}).some(key => !capabilities.settings.includes(key as 'unit' | 'energyTreatment')))
       add('capability', 'This source cannot preserve the requested setting binding.', source.id);
     if (chart.kind === 'time-series' && chart.stack !== 'none' && !capabilities.controls.includes('stacking')
       || definition.series.some(series => series.sourceId === source.id && series.axis === 'right') && !capabilities.controls.includes('axes')
       || chart.kind === 'scatter' && chart.showFit && !capabilities.controls.includes('fit')
-      || chart.kind === 'correlation' && chart.scale === 'z-score' && !capabilities.controls.includes('normalization'))
+      || chart.kind === 'correlation' && chart.scale === 'z-score' && !capabilities.controls.includes('normalization')
+      || chart.kind === 'heatmap' && chart.normalization === 'z-score' && !capabilities.controls.includes('normalization'))
       add('capability', 'This source does not support the requested chart transformation.', source.id);
-    if (resolution.state !== 'ready' && !(isMixedPredictorSourceSet(definition.sources) && resolution.state === 'empty' && resolution.resolved)) {
+    if (resolution.state !== 'ready' && !((isMixedPredictorSourceSet(definition.sources) || isExplorationChart(chart)) && resolution.state === 'empty' && resolution.resolved)) {
       add(resolution.state === 'missing-source' ? 'missing-source' : 'data', resolution.message, source.id); continue;
     }
     const resolved = 'resolved' in resolution ? resolution.resolved : undefined;
@@ -257,7 +259,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('data', 'Empty source evidence cannot contain observed values.', source.id);
     if (!capabilities.controls.includes('axes') && resolveVisualizationSeries(definition, resolved.series).some(entry => entry.selected.axis === 'right'))
       add('capability', 'This source does not support the requested axis override.', source.id);
-    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope, resolution.state === 'empty' && isMixedPredictorSourceSet(definition.sources)));
+    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope, resolution.state === 'empty' && (isMixedPredictorSourceSet(definition.sources) || isExplorationChart(chart))));
     if (!chartCapability.shapes.includes(resolved.data.kind) || !capabilities.shapes.includes(resolved.data.kind)
       || !capabilities.alignments.includes(resolved.alignment.kind))
       add('capability', 'This chart cannot preserve the resolved data shape.', source.id);
@@ -293,7 +295,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   }
   const allMetadata = resolvedSources.flatMap(entry => entry.resolved.series);
   const selected = resolveVisualizationSeries(definition, allMetadata);
-  if (!selected.length && (chart.kind !== 'time-series' || !resolveVisualizationSeries(definition, allMetadata, true).length)) add('series', 'Choose at least one available series.');
+  if (!selected.length && !isExplorationChart(chart) && (chart.kind !== 'time-series' || !resolveVisualizationSeries(definition, allMetadata, true).length)) add('series', 'Choose at least one available series.');
   for (const series of definition.series) {
     const available = allMetadata.some(metadata => metadata.sourceId === series.sourceId && metadata.metric === series.metric
       && (series.resourceGuid === undefined || metadata.resourceGuid === series.resourceGuid));
@@ -316,15 +318,25 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     if (treatment?.kind === 'pinned' && metadata.energyTreatment !== treatment.value)
       add('units', 'Resolve the pinned site/source treatment before rendering.', series.sourceId);
   }
+  if (isExplorationChart(chart)) {
+    const issue = explorationChartIssue(chart);
+    if (issue) add('capability', issue);
+    if (definition.comparison.kind !== 'none') add('period', 'Exploration uses one selected period without comparison.');
+    if (resolvedSources.some(entry => entry.resolved.periods.some(period => period.interval !== visualizationInterval(chart)))) add('period', 'Choose the same monthly or yearly observation interval for every source.');
+  }
   const shapeKinds = new Set(resolvedSources.map(entry => entry.resolved.data.kind));
   if (shapeKinds.size > 1) add('capability', 'Combine sources only after a provider supplies one compatible data shape.');
-  if (new Set(resolvedSources.map(entry => `${entry.resolved.alignment.kind}:${entry.resolved.alignment.key}`)).size > 1)
+  if (!isExplorationChart(chart) && new Set(resolvedSources.map(entry => `${entry.resolved.alignment.kind}:${entry.resolved.alignment.key}`)).size > 1)
     add('period', 'Sources must declare the same observation alignment; implicit pairing is unsupported.');
   const periods = resolvedSources.flatMap(entry => entry.resolved.periods);
-  if (new Set(periods.map(period => `${period.interval}:${period.basis}`)).size > 1)
+  if (!isExplorationChart(chart) && new Set(periods.map(period => `${period.interval}:${period.basis}`)).size > 1)
     add('period', 'Sources need compatible native intervals and calendar/fiscal alignment.');
   if (chart.kind === 'time-series' && chart.interval !== 'native' && periods.some(period => period.interval !== chart.interval))
     add('period', 'The requested chart interval requires an explicitly supported provider projection.');
+  if (isExplorationChart(chart) && visualizationInterval(chart) === 'yearly') {
+    const intervals = [...new Map(periods.map(period => [`${period.start}/${period.end}`, period])).values()].sort((a, b) => a.start.localeCompare(b.start));
+    if (intervals.some((period, index) => index > 0 && intervals[index - 1].end >= period.start)) add('period', 'Yearly exploration requires matching actual start/end dates. The selected fiscal calendars overlap with different annual intervals.');
+  }
   const fiscalSlots = new Map<string, Set<string>>();
   for (const period of periods.filter(period => period.interval === 'yearly' && period.basis === 'fiscal')) {
     if (period.fiscalYear === undefined) { add('period', 'Fiscal intervals require their authoritative fiscal-year identity.'); continue; }
@@ -334,11 +346,11 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   }
   if ([...fiscalSlots.values()].some(intervals => intervals.size > 1))
     add('period', 'Fiscal rollups require the same actual interval for each year and comparison role, not just matching labels.');
-  if (chart.kind !== 'scatter' && chart.kind !== 'correlation') {
+  if (chart.kind !== 'scatter' && chart.kind !== 'correlation' && !(chart.kind === 'heatmap' && (chart.dimension === 'month-year' || chart.normalization === 'z-score'))) {
     for (const axis of ['left', 'right'] as const) {
       const axisSeries = selected.filter(entry => chart.kind !== 'time-series' || entry.selected.axis === axis);
       const axisCapabilities = [...new Set(axisSeries.map(entry => entry.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
-      if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
+      if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}:${chart.kind === 'heatmap' ? entry.metadata.energyTreatment ?? '' : ''}`)).size > 1)
         add('units', 'Use compatible units and currency on each axis; composition totals require one meaning.');
     }
   }

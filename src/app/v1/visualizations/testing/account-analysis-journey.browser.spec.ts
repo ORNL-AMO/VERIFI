@@ -1,3 +1,4 @@
+import { previewValuesText } from './preview-values.testing';
 import { configureLibraryTest } from '../library/testing/library-testing';
 import { LibraryLifecycle } from '../library/lifecycle/library-lifecycle.service';
 import { CreationComponent } from '../creation/creation-drawer/creation-drawer.component';
@@ -124,7 +125,7 @@ describe('A2 saved account analysis native journey', () => {
     const reopened = readSavedVisualization((await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.value.guid))!);
     if (reopened.state !== 'valid') throw new Error('Expected reopened account chart');
     await mount(reopened.definition); expect(requests).toHaveLength(1);
-    expect(root.querySelector('table')!.textContent).toContain('Account improvement'); expect(root.querySelector('table')!.textContent).toContain('%');
+    expect(previewValuesText(preview!)).toContain('Account improvement'); expect(previewValuesText(preview!)).toContain('%');
     for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)';
       await page.screenshot({ element: root, path: `../../../../../.angular/analysis-a2-${label}.png` });
@@ -132,7 +133,7 @@ describe('A2 saved account analysis native journey', () => {
     await page.viewport(1100, 850); root.className = 'v1-root';
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-    try { expect(getComputedStyle(root.querySelector('.time-series-actions')!).display).toBe('none'); await page.screenshot({ element: root, path: '../../../../../.angular/analysis-a2-print.png' }); }
+    try { expect(root.querySelector('.time-series-actions, table')).toBeNull(); await page.screenshot({ element: root, path: '../../../../../.angular/analysis-a2-print.png' }); }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
     expect(await harness.getAll('analysisItems')).toEqual(before.facility); expect(await harness.getAll('accountAnalysisItems')).toEqual(before.account); expect(await harness.getAll('utilityMeterData')).toEqual(before.readings);
     preview.componentRef.setInput('active', false); preview.detectChanges();
@@ -147,7 +148,7 @@ describe('A2 saved account analysis native journey', () => {
     const source = restoredRead.definition.sources[0]; if (source.kind !== 'analysis') throw new Error('Expected restored analysis');
     expect(source.analysisGuid).not.toBe('account-analysis'); expect(restoredRead.definition.series[0].resourceGuid).toBe(source.analysisGuid);
     await mount(restoredRead.definition, 'ready', restored.guid);
-    expect(root.querySelector('table')!.textContent).toContain('Account improvement');
+    expect(previewValuesText(preview!)).toContain('Account improvement');
     preview.componentRef.setInput('active', false); preview.detectChanges();
     await TestBed.inject(AccountWorkspaceService).selectAccount('account-a');
     const facilityOnly = await commands.submit(commands.prepareCreate({ ...accountAnalysisDefinition(), name: 'Transferred account reference',

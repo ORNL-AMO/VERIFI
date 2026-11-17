@@ -1,3 +1,4 @@
+import { previewValuesText } from '@app/v1/visualizations/testing/preview-values.testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
 import { provideIndexedDb } from 'ngx-indexed-db';
@@ -95,7 +96,7 @@ describe('populated Energy Use visualization backup acceptance', () => {
       const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root'; root.style.width = '100%'; fixture.detectChanges();
       await vi.waitFor(() => { fixture!.detectChanges(); expect(fixture!.componentInstance.preview.state().state).toBe('ready'); });
       const state = fixture.componentInstance.preview.state(); if (state.state !== 'ready') throw new Error('Expected restored annual preview');
-      const table = root.querySelector('table')!.textContent!;
+      const table = previewValuesText(fixture!);
       for (const text of ['2021-07-01', '2025-06-30', 'Source FY 2022', 'Saved 10 kWh', 'Saved 3.6 MJ', 'Partial coverage', 'Saved annual estimate']) expect(table).toContain(text);
       expect(table).not.toContain('Same name collision');
       expect(table).toContain('Explicit saved history after retirement FY 2023');
@@ -116,8 +117,8 @@ describe('populated Energy Use visualization backup acceptance', () => {
         const media = cdp() as { send(method: string, params: { media: string }): Promise<unknown> };
         await page.viewport(1100, 850); root.className = 'v1-root'; await media.send('Emulation.setEmulatedMedia', { media: 'print' });
         try {
-          expect(getComputedStyle(root.querySelector('.time-series-actions')!).display).toBe('none');
-          expect(root.querySelector('table')!.textContent).toBe(table);
+          expect(root.querySelector('.time-series-actions, table')).toBeNull();
+          expect(previewValuesText(fixture!)).toBe(table);
           await page.screenshot({ element: root, path: `../../../../.angular/energy-e3-restored-${kind}-print.png` });
         } finally { await media.send('Emulation.setEmulatedMedia', { media: '' }); }
       }

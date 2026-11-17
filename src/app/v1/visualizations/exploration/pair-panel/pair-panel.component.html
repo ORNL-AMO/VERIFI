@@ -1,0 +1,8 @@
+<article>
+  <h3>{{ pair.y.label }} versus {{ pair.x.label }}</h3>
+  <p>{{ summary() }}</p>
+  @if (equation()) { <p class="equation">{{ equation() }}</p> }
+  @if (pair.statistics.unavailableReason) { <p role="status">{{ pair.statistics.unavailableReason }}</p> }
+  @if (model.chart.kind !== 'heatmap' && model.chart.scale === 'z-score') { <p>Axes use z-scores. Statistics and equation retain original units.</p> }
+  <div class="pair-chart" [appV1ECharts]="option()" [deferUntilVisible]="true" (dataZoomChanged)="updateZoom($event)"></div>
+</article>

@@ -31,7 +31,7 @@
     } @else { <p role="status">Saved model visualizations are not supported yet. Choose an analysis to replace this binding explicitly.</p> }
   </div>
   @for (item of items(); track item.key; let position = $index) {
-    <app-visualization-item-settings [item]="item" [position]="position" [itemCount]="items().length" [disabled]="context.disabled" [editorKey]="context.editorKey ?? ''"
+    <app-visualization-item-settings [timeSeries]="context.definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="items().length" [disabled]="context.disabled" [editorKey]="context.editorKey ?? ''"
       [expandedNodes]="context.expandedNodes ?? emptyNodes" [resetKey]="item.resetKey"
       (requested)="context.request?.($event)" (sectionChanged)="context.sectionChanged?.($event.id, $event.expanded)"/>
   }

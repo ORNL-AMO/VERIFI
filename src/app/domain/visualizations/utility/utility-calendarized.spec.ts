@@ -10,6 +10,7 @@ import { meter, reading, calendarizedMeter, monthlyData } from '@app/v1/data/met
 import { visualizationSnapshot } from '@app/v1/visualizations/testing/visualization-test-fixtures';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { resolveCalendarizedUtility } from './utility-calendarized';
+import { discoverUtilitySeries } from './utility-catalog';
 import { utilityMeasureKey } from './utility-selection';
 import { buildWorkspaceCalendarizationRequest } from '@app/v1/shared/calendarization/workspace-calendarization-request';
 import { projectWorkspaceCalendarization } from '@app/v1/shared/calendarization/workspace-calendarization-projection';
@@ -64,6 +65,14 @@ describe('calendarized utility projections', () => {
     expect(actual.references).toContainEqual(expect.objectContaining({ kind: 'meter', id: 'meter-a' }));
     expect({ snapshot, meters }).toEqual(before);
   });
+  it.each(['site', 'source'] as const)('keeps %s treatment in metadata without adding it to series labels', treatment => {
+    const { snapshot, request, source } = setup({ settings: { energyTreatment: { kind: 'pinned', value: treatment } } });
+    const catalog = discoverUtilitySeries(snapshot, request.identity.scope, source);
+    const projected = ready(resolveCalendarizedUtility(snapshot, request, [{ ...project(snapshot), energyIsSource: treatment === 'source' }])).series;
+    expect(catalog[0]).toMatchObject({ label: snapshot.meters[0].name, energyTreatment: treatment });
+    expect(projected[0]).toMatchObject({ label: catalog[0].label, energyTreatment: treatment });
+  });
+
   it('matches the actual canonical full-month workspace request and owner projection', () => {
     const { snapshot, request } = setup();
     const built = buildWorkspaceCalendarizationRequest(snapshot), p = built.payload;

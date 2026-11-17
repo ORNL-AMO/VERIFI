@@ -1,0 +1,4 @@
+label { display: block; margin: .65rem 0; }
+select { display: block; width: 100%; }
+p { font-size: .85rem; }
+.check { display: flex; gap: .5rem; align-items: center; }
