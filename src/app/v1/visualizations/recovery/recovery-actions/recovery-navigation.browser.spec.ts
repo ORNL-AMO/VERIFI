@@ -22,7 +22,7 @@ import { WorkbenchComponent, visualizationLeaveGuard } from '../../workbench/wor
 import { WorkbenchModule } from '../../workbench/workbench.module';
 import { RecoveryActionsComponent } from './recovery-actions.component';
 import { equipmentDefinition, equipmentSnapshot } from '@domain/visualizations/testing/equipment-fixtures';
-import { PeriodSettingsComponent } from '../../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../../shared/period-settings/period-settings.component';
 
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: `
   <main class="v1-root"><router-outlet/></main>

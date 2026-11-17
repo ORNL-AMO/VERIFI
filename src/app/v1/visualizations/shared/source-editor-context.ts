@@ -1,7 +1,7 @@
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
-import type { VisualizationDecisionAction } from '../../decisions/decision-types';
+import type { VisualizationDecisionAction } from '../decisions/decision-types';
 
-export interface UtilityEditorContext {
+export interface VisualizationSourceEditorContext {
   readonly definition: VisualizationDefinition;
   readonly sourceId: string;
   readonly disabled: boolean;
@@ -18,6 +18,6 @@ export interface UtilityEditorContext {
 }
 
 export type PeriodSettingsChange = Pick<VisualizationDefinition, 'period' | 'comparison'>;
-export type PeriodSettingsContext = Pick<UtilityEditorContext, 'definition' | 'disabled' | 'editorKey' | 'resetKey' | 'validityChanged' | 'draftChanged'> & {
+export type PeriodSettingsContext = Pick<VisualizationSourceEditorContext, 'definition' | 'disabled' | 'editorKey' | 'resetKey' | 'validityChanged' | 'draftChanged'> & {
   readonly changed: (change: PeriodSettingsChange) => void;
 };

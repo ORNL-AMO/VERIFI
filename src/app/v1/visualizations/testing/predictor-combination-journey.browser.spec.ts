@@ -3,7 +3,7 @@ import { PredictorCommandHandler } from '@data/account-workspace/handlers/predic
 import { VisualizationCommandHandler } from '@data/account-workspace/handlers/visualization-command-handler.service';
 import { RecoveryActionsComponent } from '../recovery/recovery-actions/recovery-actions.component';
 import { VisualizationNavigationService } from '../visualization-navigation.service';
-import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
 import { ItemSettingsComponent } from '../time-series/settings/item-settings/item-settings.component';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';

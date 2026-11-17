@@ -1,7 +1,7 @@
 import { page, userEvent } from 'vitest/browser';
 import { PredictorEditorsModule } from '../predictor/predictor-editors.module';
 import { PredictorSourceEditorComponent } from '../predictor/source-editor/predictor-source-editor.component';
-import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
 import { UtilityEditorsModule } from '../utility/editors/utility-editors.module';
 import { visualizationSnapshot } from './visualization-test-fixtures';
 import { ComponentFixture, TestBed } from '@angular/core/testing';

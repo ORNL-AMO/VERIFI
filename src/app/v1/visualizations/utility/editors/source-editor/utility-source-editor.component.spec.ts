@@ -8,7 +8,7 @@ import { meter } from '@app/v1/data/meters/facility-meters.testing';
 import { UtilityEditorsModule } from '../utility-editors.module';
 import { decisionNodeId } from '../../../decisions/decision-tree';
 import { UtilitySourceEditorComponent } from './utility-source-editor.component';
-import type { UtilityEditorContext } from '../utility-editor-context';
+import type { VisualizationSourceEditorContext } from '../../../shared/source-editor-context';
 
 describe('Meter decision branches', () => {
   it('retains normalized-equivalent raw unit text through its own acknowledgement and replaces it on reset', () => {
@@ -131,11 +131,11 @@ describe('Meter decision branches', () => {
     const store = new AccountWorkspaceStore(); store.publish({ ...visualizationSnapshot(), meters: [meter({ id: 1 }), meter({ id: 2, guid: 'meter-b', name: 'Boiler meter' })] });
     const request = vi.fn(), invalid = vi.fn();
     const expandedNodes = new Set(['measure', 'selection-mode', 'resources', 'data-settings', 'items'].map(kind => `${kind}:utility`));
-    let context: UtilityEditorContext = { definition, sourceId: 'utility', editorKey: 'saved-a', disabled: false, changed: vi.fn(),
+    let context: VisualizationSourceEditorContext = { definition, sourceId: 'utility', editorKey: 'saved-a', disabled: false, changed: vi.fn(),
       request, expandedNodes, sectionChanged: vi.fn(), nodeValidityChanged: invalid };
     TestBed.configureTestingModule({ imports: [UtilityEditorsModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }] });
     const fixture = TestBed.createComponent(UtilitySourceEditorComponent); fixture.componentRef.setInput('context', context); fixture.detectChanges();
-    const update = (changes: Partial<UtilityEditorContext>) => { context = { ...context, ...changes }; fixture.componentRef.setInput('context', context); fixture.detectChanges(); };
+    const update = (changes: Partial<VisualizationSourceEditorContext>) => { context = { ...context, ...changes }; fixture.componentRef.setInput('context', context); fixture.detectChanges(); };
     return { fixture, component: fixture.componentInstance, store, request, invalid, update };
   }
   it('shows emissions choices under Charted Data only while the account displays emissions', () => {

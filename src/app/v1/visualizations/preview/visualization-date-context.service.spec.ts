@@ -4,9 +4,9 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import type { VisualizationSourceRequest } from '@domain/visualizations/visualization-source-provider';
-import { UtilityDataSession } from './utility-data-session.service';
-import { UtilitySourceProvider } from './utility-source-provider.service';
-import { UtilityDateContextResolver } from './utility-date-context.service';
+import { UtilityDataSession } from '../utility/utility-data-session.service';
+import { UtilitySourceProvider } from '../utility/utility-source-provider.service';
+import { VisualizationDateContextResolver } from './visualization-date-context.service';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -51,10 +51,10 @@ describe('shared utility latest-data anchor', () => {
       { end: '2026-02-28', values: { first: { state: 'missing', value: null, reason: 'Invalid saved inputs.' } } },
       { end: '2026-03-31', values: { first: { state: 'excluded', value: null, reason: 'Retired.' } } }
     ] } } }));
-    TestBed.configureTestingModule({ providers: [UtilityDateContextResolver, { provide: AccountWorkspaceStore, useValue: store }, { provide: UtilityDataSession, useValue: data }, { provide: UtilitySourceProvider, useValue: { resolve } }] });
+    TestBed.configureTestingModule({ providers: [VisualizationDateContextResolver, { provide: AccountWorkspaceStore, useValue: store }, { provide: UtilityDataSession, useValue: data }, { provide: UtilitySourceProvider, useValue: { resolve } }] });
     const definition = { ...utilityVisualizationFixture(), period: { kind: 'rolling' as const, count: 12, unit: 'month' as const, anchor: 'latest-data' as const, basis: 'calendar' as const, includeIncomplete: true } };
     const identity = { accountGuid: definition.accountGuid, workspaceRevision: store.revision(), definitionGuid: 'saved', definitionRevision: 1 };
-    return { data, resolve, definition, identity, store, dates: TestBed.inject(UtilityDateContextResolver) };
+    return { data, resolve, definition, identity, store, dates: TestBed.inject(VisualizationDateContextResolver) };
   }
   it('anchors to provider-validated observations, retaining real zero and skipping invalid or retired rows', async () => {
     const { dates, data, resolve, definition, identity } = setup();

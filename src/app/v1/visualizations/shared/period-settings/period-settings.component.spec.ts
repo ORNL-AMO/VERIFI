@@ -4,12 +4,13 @@ import { createVisualizationDefinition } from '@domain/visualizations/visualizat
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
-import { UtilityEditorsModule } from '../utility-editors.module';
-import { applyPeriodForm, periodFormIssue, periodFormValue, PeriodSettingsComponent } from './period-settings.component';
+import { PeriodSettingsModule } from './period-settings.module';
+import { PeriodSettingsComponent } from './period-settings.component';
+import { applyPeriodForm, periodFormIssue, periodFormValue } from './period-settings.models';
 
-describe('utility period editing', () => {
+describe('shared visualization period editing', () => {
   it('explicitly removes an unsupported Analysis comparison even when all history is already selected', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();
     fixture.componentRef.setInput('context', { definition: { ...analysisDefinition(), comparison: { kind: 'previous-period' } }, disabled: false, changed }); fixture.detectChanges();
     expect(changed).not.toHaveBeenCalled();
@@ -19,7 +20,7 @@ describe('utility period editing', () => {
   });
 
   it('offers only annual equipment periods and protects incomplete pinned years through saved changes', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
     const context = { definition: equipmentDefinition(), disabled: false, editorKey: 'equipment', changed, validityChanged };
     fixture.componentRef.setInput('context', context); fixture.detectChanges();
@@ -36,9 +37,24 @@ describe('utility period editing', () => {
     component.useSaved(); expect(component.form.controls.kind.value).toBe('all-history'); expect(validityChanged).toHaveBeenLastCalledWith(false);
   });
 
+  it.each(['monthly', 'yearly'] as const)('uses the %s Analysis policy for rendered inputs and comparisons', interval => {
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
+    const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();
+    const definition = analysisDefinition(interval === 'yearly' ? 'annual-improvement' : 'actual');
+    fixture.componentRef.setInput('context', { definition, disabled: false, changed }); fixture.detectChanges();
+    const component = fixture.componentInstance, root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[aria-label="Comparison"]')).toBeNull();
+    expect(root.querySelector('[aria-label="Calendar basis"]')).toBeNull();
+    component.selectChoice(component.form.controls.kind, interval === 'yearly' ? 'fiscal-year' : 'fixed'); fixture.detectChanges();
+    expect(root.querySelectorAll('input[type="month"]')).toHaveLength(interval === 'monthly' ? 2 : 0);
+    expect(root.querySelector('input[formcontrolname="year"]') !== null).toBe(interval === 'yearly');
+    expect(root.querySelector('input[type="date"]')).toBeNull();
+    expect(changed).not.toHaveBeenCalled();
+  });
+
   afterEach(() => TestBed.resetTestingModule());
   it('uses inclusive month inputs for predictors, preserves partial-month saved intent on hydration, and retains invalid input', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
     const definition = { ...createVisualizationDefinition('Predictor', 'account-a', { kind: 'all' }, 'predictor'),
       period: { kind: 'fixed' as const, start: '2024-01-15', end: '2024-03-10', basis: 'calendar' as const } };
@@ -75,7 +91,7 @@ describe('utility period editing', () => {
   });
 
   it('retains invalid dates across external period changes until the user chooses saved or local settings', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
     const context = { definition: utilityVisualizationFixture(), disabled: false, editorKey: 'chart-a', changed, validityChanged };
     fixture.componentRef.setInput('context', context); fixture.detectChanges();
@@ -99,7 +115,7 @@ describe('utility period editing', () => {
   });
 
   it('protects invalid local dates through unrelated acknowledgement and replaces them on identity change', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
     const context = { definition: utilityVisualizationFixture(), disabled: false, editorKey: 'chart-a', changed, validityChanged };
     fixture.componentRef.setInput('context', context); fixture.detectChanges();
@@ -114,7 +130,7 @@ describe('utility period editing', () => {
     expect(fixture.componentInstance.form.controls.kind.value).toBe('all-history');
   });
   it('retains incomplete independent dates through an external retarget and reviews the local choice', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
     const context = { definition: utilityVisualizationFixture(), disabled: false, editorKey: 'chart-a', changed, validityChanged };
     fixture.componentRef.setInput('context', context); fixture.detectChanges();
@@ -133,7 +149,7 @@ describe('utility period editing', () => {
     expect(component.conflict()).toBe(false); expect(validityChanged).toHaveBeenLastCalledWith(false);
   });
   it('honors an explicit reviewed period reset during a same-identity ownership change', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn(), validityChanged = vi.fn();
     const context = { definition: utilityVisualizationFixture(), disabled: false, editorKey: 'chart-a', resetKey: 0, changed, validityChanged };
     fixture.componentRef.setInput('context', context); fixture.detectChanges();
@@ -144,7 +160,7 @@ describe('utility period editing', () => {
     expect(fixture.componentInstance.issue()).toBeUndefined(); expect(validityChanged).toHaveBeenLastCalledWith(false); expect(changed).not.toHaveBeenCalled();
   });
   it('publishes compact period and comparison choices through typed controls without duplicate saves', () => {
-    TestBed.configureTestingModule({ imports: [UtilityEditorsModule] });
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();
     const context = { definition: utilityVisualizationFixture(), disabled: false, editorKey: 'chart-a', changed };
     fixture.componentRef.setInput('context', context); fixture.detectChanges();

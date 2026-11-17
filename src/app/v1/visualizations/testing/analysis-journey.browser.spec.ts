@@ -27,7 +27,7 @@ import { prepareDecisionChange } from '../decisions/decision-tree';
 import { VisualizationsModule } from '../visualizations.module';
 import { PreviewComponent } from '../preview/preview/preview.component';
 import { AnalysisSourceEditorComponent } from '../analysis/source-editor/analysis-source-editor.component';
-import { PeriodSettingsComponent } from '../utility/editors/period-settings/period-settings.component';
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
 import { calculateFacilityAnalysisResults } from '@domain/calculations/analysis-calculations/facility-analysis-results-calculation';
 import type { FacilityAnalysisResultsWorkerRequest } from '@platform/web-workers/facility-analysis-results-worker.contract';
 import { echarts } from '@app/v1/shared/charts/echarts';
