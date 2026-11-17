@@ -299,7 +299,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   for (const series of definition.series) {
     const available = allMetadata.some(metadata => metadata.sourceId === series.sourceId && metadata.metric === series.metric
       && (series.resourceGuid === undefined || metadata.resourceGuid === series.resourceGuid));
-    if (!available && series.visible !== false && !(isMixedPredictorSourceSet(definition.sources) && evidence.some(entry => entry.request.source.id === series.sourceId && entry.resolution.state === 'empty' && entry.resolution.resolved?.series.length === 0) && !series.resourceGuid)) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
+    if (!available && series.visible !== false && !((isMixedPredictorSourceSet(definition.sources) || isExplorationChart(chart)) && evidence.some(entry => entry.request.source.id === series.sourceId && entry.resolution.state === 'empty' && entry.resolution.resolved?.series.length === 0) && !series.resourceGuid)) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
   }
   for (const { selected: series, metadata } of selected) {
     const entry = resolvedSources.find(entry => entry.source.id === series.sourceId)!;

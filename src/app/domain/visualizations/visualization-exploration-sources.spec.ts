@@ -48,5 +48,20 @@ describe('exploration across current source families', () => {
     expect(checkVisualizationCompatibility(heatmap, forChart(heatmap)).state).toBe('unavailable');
     const normalized = { ...heatmap, chart: { kind: 'heatmap' as const, dimension: 'series-period' as const, scale: 'diverging' as const, normalization: 'z-score' as const } };
     expect(checkVisualizationCompatibility(normalized, forChart(normalized)).state).toBe('compatible');
+
+    const emptySnapshot = { ...snapshot, predictors: [], predictorData: [] };
+    const wildcard: VisualizationDefinition = { ...definition,
+      sources: definition.sources.map(source => source.kind === 'predictor' ? { ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } } : source),
+      series: definition.series.map(series => series.sourceId === predictorSource.id ? { id: 'all-predictors', sourceId: predictorSource.id, metric: 'value', axis: 'left' } : series) };
+    const emptyCatalogEvidence = evidence.map(entry => {
+      if (entry.request.source.kind !== 'predictor') return entry;
+      const request = { ...entry.request, source: wildcard.sources.find(source => source.id === predictorSource.id)!, series: wildcard.series.filter(series => series.sourceId === predictorSource.id) };
+      return { ...entry, request, resolution: resolvePredictor(emptySnapshot, request) };
+    });
+    expect(emptyCatalogEvidence.at(-1)!.resolution).toMatchObject({ state: 'empty', resolved: { series: [] } });
+    expect(checkVisualizationCompatibility(wildcard, emptyCatalogEvidence)).toMatchObject({ state: 'compatible' });
+    expect((await prepareExploration(wildcard, emptyCatalogEvidence, new AbortController().signal)).pairs).toHaveLength(1);
+    const missingFixed = evidence.map(entry => entry.request.source.kind === 'predictor' ? { ...entry, resolution: resolvePredictor(emptySnapshot, entry.request) } : entry);
+    expect(checkVisualizationCompatibility(definition, missingFixed).state).toBe('unavailable');
   });
 });
