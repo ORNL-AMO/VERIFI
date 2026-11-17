@@ -17,6 +17,7 @@ import { DataQualityReportModule } from './data-quality-report.module';
 import { DataQualityAnnualTotalsComponent } from './annual-totals/data-quality-annual-totals.component';
 import { DataQualityReportPreviewComponent } from './preview/data-quality-report-preview.component';
 import { DataQualityReportService } from './data-quality-report.service';
+import { ReportPresentationController } from '@app/v1/reports/shared/presentation/report-presentation-controller';
 
 function inputs() {
   const snapshot = dataQualityPredictorReadingsSnapshot();
@@ -131,7 +132,7 @@ describe('Data Quality annual table presentation', () => {
 describe('Data Quality report notes', () => {
   afterEach(() => TestBed.resetTestingModule());
   it('renders the shared no-content message without obsolete PDF availability text', () => {
-    TestBed.configureTestingModule({ imports: [DataQualityReportModule], providers: [
+    TestBed.configureTestingModule({ imports: [DataQualityReportModule], providers: [ReportPresentationController,
       { provide: DataQualityReportService, useValue: {
         state: () => ({ state: 'ready', value: { meters: [], predictors: [], annualTotals: [] } }),
         editor: { draft: () => ({ name: 'Empty report', settings: {} }) }

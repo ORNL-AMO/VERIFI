@@ -1,5 +1,5 @@
 :host { display: block; min-width: 0; }
-.report-presentation { position: fixed; inset: 0; z-index: 1100; display: flex; flex-direction: column; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; overflow: hidden; background: #000; color: #fff; }
+.report-presentation { position: fixed; inset: 0; z-index: 1100; display: flex; flex-direction: column; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; overflow: clip; background: #000; color: #fff; }
 .report-presentation::backdrop { background: #000; }
 .report-presentation__toolbar { display: flex; flex: 0 0 auto; justify-content: flex-end; align-items: center; gap: 1rem; padding: .75rem max(1rem, env(safe-area-inset-right)) .75rem max(1rem, env(safe-area-inset-left)); background: #000; }
 .report-presentation__toolbar p { flex: 1 1 auto; margin: 0; font-size: .875rem; }

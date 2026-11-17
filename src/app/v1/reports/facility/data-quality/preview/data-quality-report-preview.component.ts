@@ -23,5 +23,7 @@ export class DataQualityReportPreviewComponent {
   readonly predictors = computed(() => this.view()?.predictors.map(predictor => ({
     ...predictor, icon: predictorIcon(predictor.report.predictor)
   })) ?? []);
+  readonly canPresent = computed(() => this.results.state().state === 'ready'
+    && (this.meters().length > 0 || this.predictors().length > 0));
   readonly messages = dataQualityReportMessages();
 }
