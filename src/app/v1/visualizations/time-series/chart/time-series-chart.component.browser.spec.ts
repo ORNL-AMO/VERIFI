@@ -57,6 +57,35 @@ describe('saved time-series canvas in Chromium', () => {
       expect(fixture.componentInstance.zoom()).toEqual({ start: 0, end: 100 });
     } finally { fixture.destroy(); }
   });
+  it('clears stacking and area fill when returning to unstacked lines on the same canvas', async () => {
+    const slots = ['a', 'b', 'c', 'd'].map((key, order) => ({ key, label: key, order }));
+    const model: TimeSeriesModel = { title: 'Presentation transitions', windowKey: 'same-periods',
+      chart: { kind: 'time-series', defaultTraceType: 'area', interval: 'monthly', stack: 'absolute' },
+      legend: true, warnings: [], slots, traces: [20, 80].map((value, index) => ({ id: `series-${index}`, type: 'area',
+        label: `Series ${index}`, unit: 'kWh', axis: 'left', color: index ? '#b44a19' : '#23684d', lineStyle: 'solid', role: 'primary',
+        points: slots.map((slot, month) => ({ slot: slot.key, start: `2026-0${month + 1}-01`, end: `2026-0${month + 1}-28`,
+          observation: { state: 'observed', value, provenance: 'measured', partial: false } })) })) };
+    TestBed.configureTestingModule({ imports: [TimeSeriesModule] });
+    const fixture = TestBed.createComponent(TimeSeriesChartComponent), root = fixture.nativeElement as HTMLElement;
+    root.style.width = '640px'; fixture.componentRef.setInput('model', model); fixture.detectChanges();
+    try {
+      const element = root.querySelector<HTMLElement>('.time-series-canvas')!;
+      await vi.waitFor(() => expect(echarts.getInstanceByDom(element)?.getOption()).toBeDefined());
+      const chart = echarts.getInstanceByDom(element)!;
+      const plottedSecondValue = () => {
+        const data = (chart as any).getModel().getSeriesByIndex(1).getData();
+        return data.get(data.getCalculationInfo('stackResultDimension') ?? data.mapDimension('y'), 0);
+      };
+      expect(plottedSecondValue()).toBe(100);
+      chart.dispatchAction({ type: 'dataZoom', start: 25, end: 75 }); fixture.detectChanges();
+      fixture.componentRef.setInput('model', { ...model, chart: { ...model.chart, defaultTraceType: 'line', stack: 'none' },
+        traces: model.traces.map(trace => ({ ...trace, type: 'line' })) }); fixture.detectChanges();
+      expect(echarts.getInstanceByDom(element)).toBe(chart);
+      expect(plottedSecondValue()).toBe(80);
+      expect((chart as any).getModel().getSeriesByIndex(0).getModel('areaStyle').isEmpty()).toBe(true);
+      expect(fixture.componentInstance.zoom()).toEqual({ start: 25, end: 75 });
+    } finally { fixture.destroy(); }
+  });
   it('renders real zero/gaps, resizes without remounting or losing zoom, resets through the keyboard and disposes the canvas', async () => {
     const model: TimeSeriesModel = { title: 'Monthly energy', chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' }, legend: true, warnings: ['Partial coverage'],
       slots: ['Jan', 'Feb', 'Mar', 'Apr'].map((key, order) => ({ key, label: key, order })),
