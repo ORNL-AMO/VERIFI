@@ -2,6 +2,7 @@
   <h2 #heading tabindex="-1">{{ view.title }}</h2>
   <p class="composition-period">{{ view.period }}</p>
   @if (hierarchy()) {
+    <p class="composition-print-path">Viewing: All selected data@for (node of path(); track node.id) { / {{ node.label }} }</p>
     <nav aria-label="Hierarchy path" class="composition-path">
       <button type="button" class="v1-btn v1-btn--quiet" (click)="drill('')">All selected data</button>
       @for (node of path(); track node.id) { <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-current]="$last ? 'location' : null" (click)="drill(node.id)">{{ node.label }}</button> }

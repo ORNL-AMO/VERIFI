@@ -71,18 +71,32 @@ describe('VIS8 saved composition acceptance', () => {
       expect(root.textContent).toContain('2025-01-01'); expect(root.textContent).toContain('Unavailable'); expect(root.textContent).toContain('Source occurrence 1');
       if (chart.kind === 'treemap' || chart.kind === 'sunburst') {
         const component = fixture.debugElement.query(By.directive(CompositionChartComponent)).componentInstance as CompositionChartComponent;
-        const explore = root.querySelector<HTMLButtonElement>('[aria-label="Explore hierarchy"] button')!;
-        explore.click(); fixture.detectChanges(); expect(component.rootId()).not.toBe('');
+        const explore = () => { root.querySelector<HTMLButtonElement>('[aria-label="Explore hierarchy"] button')!.click(); fixture!.detectChanges(); expect(component.rootId()).not.toBe(''); };
+        explore();
         expect(root.ownerDocument.activeElement).toBe(root.querySelector('h2'));
         canvas.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true })); fixture.detectChanges(); expect(component.rootId()).toBe('');
-        explore.click(); fixture.detectChanges(); canvas.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true })); fixture.detectChanges(); expect(component.rootId()).toBe('');
+        explore(); canvas.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true })); fixture.detectChanges(); expect(component.rootId()).toBe('');
         for (const [width, theme, label] of [[1100, '', 'light'], [390, 'v1-theme-dark', 'dark']] as const) {
           await page.viewport(width, 850); root.className = `v1-root ${theme}`; fixture.detectChanges();
           await page.screenshot({ element: root, path: `../../../../../.angular/vis8-${chart.kind}-${label}.png` });
         }
+        explore();
+        const printedPath = ['All selected data', ...component.path().map(node => node.label)].join(' / ');
+        expect(component.path().length).toBeGreaterThan(0);
+        expect(getComputedStyle(root.querySelector('.composition-print-path')!).display).toBe('none');
         const print = cdp() as { send: (method: string, parameters: object) => Promise<unknown> };
         await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-        try { window.dispatchEvent(new Event('beforeprint')); fixture.detectChanges(); expect(getComputedStyle(root.querySelector('.composition-path')!).display).toBe('none'); expect(getComputedStyle(root.querySelector('h2')!).display).not.toBe('none'); }
+        try {
+          window.dispatchEvent(new Event('beforeprint')); fixture.detectChanges();
+          expect(getComputedStyle(root.querySelector('.composition-path')!).display).toBe('none');
+          expect(getComputedStyle(root.querySelector('.composition-navigation')!).display).toBe('none');
+          expect(getComputedStyle(root.querySelector('h2')!).display).not.toBe('none');
+          const context = root.querySelector<HTMLElement>('.composition-print-path');
+          expect(context).not.toBeNull();
+          expect(context!.textContent?.replace(/\s+/g, ' ').trim()).toBe(`Viewing: ${printedPath}`);
+          expect(getComputedStyle(context!).display).not.toBe('none');
+          await page.screenshot({ element: root, path: `../../../../../.angular/vis8-${chart.kind}-print.png` });
+        }
         finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); window.dispatchEvent(new Event('afterprint')); }
       }
     }
