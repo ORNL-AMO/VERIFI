@@ -23,6 +23,7 @@ export interface TimeSeriesTrace {
 }
 export interface TimeSeriesModel {
   readonly title: string;
+  readonly yearToDateLabel?: string;
   readonly windowKey?: string;
   readonly chart: Extract<NonNullable<VisualizationDefinition['chart']>, { kind: 'time-series' }>;
   readonly legend: boolean;

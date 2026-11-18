@@ -58,7 +58,10 @@ describe('saved predictor native journey', () => {
       fixture!.detectChanges();
       const panels = [...root.querySelectorAll<HTMLElement>('.heatmap-chart')];
       expect(panels).toHaveLength(2);
-      expect(panels.every(panel => !!echarts.getInstanceByDom(panel))).toBe(true);
+      expect(panels.every(panel => {
+        const chart = echarts.getInstanceByDom(panel);
+        return chart && (chart.getOption()?.['series'] as unknown[] | undefined)?.length;
+      })).toBe(true);
     });
     expect([...root.querySelectorAll('h3')].map(heading => heading.textContent)).toEqual(['Production · Plant A', 'Production · Plant B']);
     const charts = [...root.querySelectorAll<HTMLElement>('.heatmap-chart')].map(element => echarts.getInstanceByDom(element)!);

@@ -1,3 +1,4 @@
+import { yearToDateSourcesSupported } from '@domain/visualizations/utility/utility-year-to-date';
 import { unchangedCaptureSource } from '@data/visualizations/visualization-capture-origin';
 import { facilityMeterRoute } from '@app/v1/routing/workspace-route';
 import { PreviewComponent } from '../preview/preview/preview.component';
@@ -136,7 +137,8 @@ export class WorkbenchComponent {
   readonly sourceLink = computed(() => {
     if (this.editor.isMissing() || this.hasInvalidFields() || this.editor.form.invalid || this.editor.conflicts().length || !this.workspace.isReady()) return undefined;
     const source = unchangedCaptureSource(this.editor.record(), this.editor.definition(), this.workspace.snapshot());
-    return source ? { route: facilityMeterRoute(source.facilityGuid, source.meterGuid, 'monthly-chart'), fragment: source.kind === 'meter-monthly' ? 'meter-monthly-chart' : 'meter-fiscal-comparison-heading' } : undefined;
+    const chart = this.editor.definition()?.chart;
+    return source ? { route: facilityMeterRoute(source.facilityGuid, source.meterGuid, source.kind === 'meter-yearly' ? 'yearly' : 'monthly-chart'), fragment: source.kind === 'meter-yearly' ? 'meter-yearly-chart' : source.kind === 'meter-monthly' ? 'meter-monthly-chart' : 'meter-fiscal-comparison-heading', queryParams: source.kind === 'meter-yearly' && chart?.kind === 'time-series' && chart.yearToDate ? { yearlyMode: 'year-to-date' } : {} } : undefined;
   });
   private readonly previewChild = viewChild(PreviewComponent);
   readonly patternYears = computed(() => this.previewChild()?.monthlyPatternsModel()?.years ?? []);
@@ -349,10 +351,12 @@ export class WorkbenchComponent {
     if (this.stackChoices().find(choice => choice.value === stack)?.reason) return;
     void this.requestDecision({ kind: 'chart-stack', stack });
   }
+  readonly supportsYearToDate = computed(() => { const definition = this.editor.definition(); return !!definition && yearToDateSourcesSupported(definition); });
+  setYearToDate(enabled: boolean): void { this.requestDecision({ kind: 'year-to-date', enabled }); }
   setInterval(interval: 'monthly' | 'yearly'): void {
     const definition = this.editor.definition();
     if (!definition || !this.editor.canEdit() || definition.chart?.kind !== 'time-series' || definition.chart.interval === interval) return;
-    this.editor.applyDefinition({ ...definition, chart: { ...definition.chart, interval } });
+    this.requestDecision({ kind: 'chart-interval', interval });
   }
   async requestDecision(action: VisualizationDecisionAction): Promise<void> {
     const snapshot = this.workspace.snapshot(); let definition = this.editor.definition();

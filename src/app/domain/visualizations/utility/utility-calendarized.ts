@@ -1,3 +1,4 @@
+import { utilityYearToDate, utilityYearToDateRange } from './utility-year-to-date';
 import { monthlyPatternsCalendar } from '../visualization-monthly-patterns';
 import { isCompositionChart } from '../visualization-composition';
 import { resolveUtilityComposition } from './utility-composition';
@@ -45,12 +46,17 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
   const support = utilityChartSupport(source, request.chart);
   if (source.dataMode !== 'calendarized' || support.state !== 'supported') return unsupported(support.state === 'unsupported' ? support.reasons.join(' ') : 'Choose calendarized data.');
   const interval = visualizationInterval(request.chart);
+  const isYtd = request.chart.kind === 'time-series' && request.chart.yearToDate === true;
+  if (isYtd && (interval !== 'yearly' || request.period.kind !== 'all-history' || request.comparison.kind !== 'none')) return unsupported('Year to Date requires yearly utility data, all history and no extra comparison.');
   if (interval === 'native') return unsupported('Choose Monthly or Yearly for calendarized utility data.');
   if (!source.selection || source.selection.kind === 'fixed' && !source.selection.guids.length) return unsupported('Select meters or meter groups before previewing.');
   const selection = resolveUtilitySelection(snapshot, identity.scope, source);
   if (selection.missing.length) return { identity, state: 'missing-source', references: selection.missing, message: 'Repair the saved utility selection before previewing.' };
   const owner = utilityOwner(snapshot, identity.scope);
   if (!owner) return unsupported('The owner fiscal and unit settings are unavailable.');
+  const ytdAnchor = isYtd ? request.dateContext.latestDataDate ?? latestUtilityHistoryMonth(snapshot, selection.meters, meters) : undefined;
+  if (isYtd && !ytdAnchor) return { identity, state: 'empty', periods: [], message: 'No eligible saved month is available for Year to Date.' };
+  const ytd = ytdAnchor ? utilityYearToDate(ytdAnchor, owner) : undefined;
   const eligible = selection.meters.filter(meter => utilityMeterEligible(meter, source));
   if (!eligible.length) return emptyMonthlySource(request, 'No selected meters expose this utility measure.', [], selection.references);
   const buckets = utilityBuckets(snapshot, source, eligible);
@@ -96,13 +102,14 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
       if (count > 12000 || months.length + count > 12000 || (months.length + count) * eligible.length > 250000) return unsupported('This utility projection is too large. Narrow the date interval or meter selection.');
       for (let index = 0; index < count; index++) {
         const date = new Date(first.getFullYear(), first.getMonth() + index, 1, 12), bounds = monthRange(date.getFullYear(), date.getMonth());
-        if (overlaps(bounds, { start, end })) months.push({ key: bounds.start.slice(0, 7), year: date.getFullYear(), month: date.getMonth(), ...bounds, role: range.role, basis: range.basis });
+        const window = ytd ? utilityYearToDateRange(fiscalYear(bounds.start, owner), owner, ytd) : undefined;
+        if (overlaps(bounds, { start, end }) && (!window || bounds.start >= window.start && bounds.end <= window.end && bounds.start <= ytd!.anchor)) months.push({ key: bounds.start.slice(0, 7), year: date.getFullYear(), month: date.getMonth(), ...bounds, role: range.role, basis: range.basis });
       }
     }
     if (!months.length) return { identity, state: 'empty', periods: [], message: 'No utility periods can be resolved from this saved history.' };
     const selectedKeys = new Set(months.map(month => month.key));
     const projected = eligible.map(meter => projectMeter(snapshot, source, meter, meters.find(item => item.meter.guid === meter.guid), record, selectedKeys,
-      projectionEvidence));
+      projectionEvidence, isYtd));
     const projectionByMeter = new Map(projected.map(item => [item.meter.guid, item]));
     const monthlyRows: (TimeSeriesRow & { basis: 'calendar' | 'fiscal' })[] = months.map(month => {
       const values: Record<string, VisualizationObservation> = {};
@@ -123,7 +130,7 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
       const annual = new Map<string, { period: ResolvedVisualizationPeriod; rows: TimeSeriesRow[] }>();
       for (const row of monthlyRows) {
         const calendar = row.basis === 'fiscal' ? owner : { fiscalYear: 'calendarYear' as const, fiscalYearMonth: 0, fiscalYearCalendarEnd: true };
-        const year = fiscalYear(row.start, calendar), bounds = fiscalRange(year, calendar), key = `${row.role}:${bounds.start}:${bounds.end}`;
+        const year = fiscalYear(row.start, calendar), bounds = ytd ? utilityYearToDateRange(year, calendar, ytd) : fiscalRange(year, calendar), key = `${row.role}:${bounds.start}:${bounds.end}`;
         const item = annual.get(key) ?? { period: { ...bounds, role: row.role!, basis: row.basis, interval: 'yearly', ...(row.basis === 'fiscal' ? { fiscalYear: year } : {}),
           ...(identity.scope.kind === 'facility' ? { facilityGuid: identity.scope.facilityGuid } : {}) }, rows: [] };
         item.rows.push(row); annual.set(key, item);
@@ -152,6 +159,7 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
       'facilityId' in calendarOwner || identity.scope.kind === 'facility' || resourceFacility ? 'facility' : 'account',
       meters.filter(item => selectedMeters.has(item.meter.guid)).flatMap(item => item.monthlyData.map(row => `${row.year}-${String(row.monthNumValue + 1).padStart(2, '0')}-01`))) : undefined;
     return { identity, state: 'ready', resolved: { data: { kind: 'time-series', rows },
+      ...(ytd ? { yearToDate: ytd } : {}),
       ...(patternCalendar ? { monthlyPatternsCalendar: patternCalendar } : {}),
       alignment: { kind: interval === 'monthly' ? 'civil-month' : periods.some(period => period.basis === 'fiscal') ? 'fiscal-interval' : 'civil-year',
         key: interval === 'monthly' ? 'YYYY-MM' : periods.some(period => period.basis === 'fiscal') ? `fiscal:${owner.fiscalYearMonth}:${owner.fiscalYearCalendarEnd}` : 'YYYY' },
@@ -161,7 +169,7 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
 }
 
 function projectMeter(snapshot: AccountWorkspaceSnapshot, source: UtilityVisualizationSource, meter: IdbUtilityMeter, projected: CalanderizedMeter | undefined,
-  record: (meter: IdbUtilityMeter, key: string, reason: string) => void, selectedKeys: ReadonlySet<string>, projectionEvidence?: UtilityProjectionEvidence): MeterProjection {
+  record: (meter: IdbUtilityMeter, key: string, reason: string) => void, selectedKeys: ReadonlySet<string>, projectionEvidence?: UtilityProjectionEvidence, markPartialMonths = false): MeterProjection {
   const observations = new Map<string, VisualizationObservation>();
   const readings = snapshot.meterData.filter(reading => reading.meterId === meter.guid).sort((left, right) => readingCivil(left).localeCompare(readingCivil(right)) || left.guid.localeCompare(right.guid));
   const ownershipInvalid = readings.some(reading => reading.accountId !== snapshot.account.guid || reading.facilityId !== meter.facilityId);
@@ -208,6 +216,10 @@ function projectMeter(snapshot: AccountWorkspaceSnapshot, source: UtilityVisuali
     let observation = ownershipInvalid ? unavailableObservation('Saved readings contradict their meter ownership.')
       : duplicateKeys.has(key) ? unavailableObservation('Duplicate canonical monthly results cannot be safely aggregated.')
       : calendarizedObservation(meter, readings, source, year, month, value, allocation);
+    if (markPartialMonths && observation.state === 'observed' && allocation) {
+      const applied = allocation.find(item => civilDate(item.calanderizedMonth).slice(0, 7) === key)?.monthReadingSummaries.reduce((sum, item) => sum + item.daysApplied, 0) ?? 0;
+      if (applied < new Date(year, month + 1, 0).getDate()) observation = { ...observation, partial: true };
+    }
     if (savedUnitError && observation.state !== 'excluded') observation = unavailableObservation(savedUnitError);
     const allocationDates = meter.meterReadingDataApplication === 'backward'
       ? new Set((allocation?.find(item => civilDate(item.calanderizedMonth).slice(0, 7) === key)?.monthReadingSummaries ?? [])
@@ -259,4 +271,27 @@ function compressPeriods(keys: readonly string[]): string {
     else { flush(); first = last = key; }
   }
   flush(); return output.join(', ');
+}
+
+/** Meter-level evidence: changing displayed measures or hidden traces cannot move the cutoff. */
+export function latestUtilityHistoryMonth(snapshot: AccountWorkspaceSnapshot, selected: readonly IdbUtilityMeter[], projections: readonly CalanderizedMeter[]): string | undefined {
+  let latest: string | undefined;
+  for (const meter of selected) {
+    if (meter.accountId !== snapshot.account.guid || !snapshot.facilities.some(facility => facility.guid === meter.facilityId && facility.accountId === snapshot.account.guid)) continue;
+    const matches = projections.filter(item => item.meter.guid === meter.guid);
+    if (matches.length !== 1) continue;
+    const projected = matches[0];
+    const keys = new Set(projected.monthlyData.map(row => `${row.year}-${String(row.monthNumValue + 1).padStart(2, '0')}`));
+    if ([...keys].some(key => !validCivil(`${key}-01`))) continue;
+    for (const measure of ['energy', 'consumption', 'cost'] as const) {
+      const source: UtilityVisualizationSource = { id: 'ytd-anchor', kind: 'utility', measure, aggregation: 'none', groupBy: 'meter', dataMode: 'calendarized', selectionMode: 'meter' };
+      if (!utilityMeterEligible(meter, source)) continue;
+      try {
+        const result = projectMeter(snapshot, source, meter, projected, () => {}, keys);
+        for (const [key, observation] of result.observations) if (observation.state === 'observed' && (!latest || key > latest.slice(0, 7)))
+          latest = monthRange(Number(key.slice(0, 4)), Number(key.slice(5)) - 1).end;
+      } catch { /* Another usable quantity can still establish this meter's calendarized history. */ }
+    }
+  }
+  return latest;
 }

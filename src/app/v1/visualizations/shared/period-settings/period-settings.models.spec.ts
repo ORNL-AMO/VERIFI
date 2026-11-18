@@ -15,38 +15,38 @@ const annualKinds = ['all-history', 'fiscal-year', 'latest-saved-year'];
 
 describe('visualization period editor policy', () => {
   it.each([
-    { name: 'Utility', definition: utilityVisualizationFixture(), monthInput: false, ranges: true, comparison: true, kinds: [...monthlyKinds, 'fiscal-year', 'latest-saved-year'] },
-    { name: 'Predictor', definition: predictorDefinition(), monthInput: true, ranges: true, comparison: false, kinds: monthlyKinds },
-    { name: 'Utility/Predictor', definition: combine(utilityVisualizationFixture(), predictorDefinition()), monthInput: true, ranges: true, comparison: false, kinds: monthlyKinds },
-    { name: 'Equipment', definition: equipmentDefinition(), monthInput: false, ranges: false, comparison: false, kinds: annualKinds },
-    { name: 'monthly Analysis', definition: analysisDefinition(), monthInput: true, ranges: true, comparison: false, kinds: monthlyKinds },
-    { name: 'yearly Analysis', definition: analysisDefinition('annual-improvement'), monthInput: false, ranges: false, comparison: false, kinds: annualKinds },
-    { name: 'unsupported Predictor/Equipment', definition: combine(predictorDefinition(), equipmentDefinition()), monthInput: true, ranges: false, comparison: false, kinds: annualKinds },
-    { name: 'unsupported Analysis/Equipment', definition: combine(analysisDefinition(), equipmentDefinition()), monthInput: true, ranges: false, comparison: false, kinds: annualKinds }
-  ])('projects $name controls without changing the definition', ({ definition, monthInput, ranges, comparison, kinds }) => {
+    { name: 'Utility', definition: utilityVisualizationFixture(), monthInput: true, ranges: true, kinds: monthlyKinds },
+    { name: 'Predictor', definition: predictorDefinition(), monthInput: true, ranges: true, kinds: monthlyKinds },
+    { name: 'Utility/Predictor', definition: combine(utilityVisualizationFixture(), predictorDefinition()), monthInput: true, ranges: true, kinds: monthlyKinds },
+    { name: 'Equipment', definition: equipmentDefinition(), monthInput: false, ranges: false, kinds: annualKinds },
+    { name: 'monthly Analysis', definition: analysisDefinition(), monthInput: true, ranges: true, kinds: monthlyKinds },
+    { name: 'yearly Analysis', definition: analysisDefinition('annual-improvement'), monthInput: false, ranges: false, kinds: annualKinds },
+    { name: 'unsupported Predictor/Equipment', definition: combine(predictorDefinition(), equipmentDefinition()), monthInput: false, ranges: false, kinds: annualKinds },
+    { name: 'unsupported Analysis/Equipment', definition: combine(analysisDefinition(), equipmentDefinition()), monthInput: false, ranges: false, kinds: annualKinds }
+  ])('projects $name controls without changing the definition', ({ definition, monthInput, ranges, kinds }) => {
     const before = structuredClone(definition), policy = periodEditorPolicy(definition);
     expect(policy.monthInput).toBe(monthInput);
-    expect(policy.controls).toMatchObject({ ranges, comparison, basis: ranges && !monthInput, fiscalYear: !monthInput || !ranges, incomplete: !monthInput });
+    expect(policy.controls).toMatchObject({ ranges, basis: ranges && !monthInput, fiscalYear: !monthInput || !ranges, incomplete: !monthInput });
     expect(policy.choices.map(choice => choice.kind)).toEqual(kinds);
     expect(definition).toEqual(before);
   });
 
   it.each([
-    { definition: utilityVisualizationFixture(), defaults: {} },
-    { definition: predictorDefinition(), defaults: { basis: 'calendar', includeIncomplete: false, comparison: 'none' } },
-    { definition: analysisDefinition(), defaults: { basis: 'calendar', includeIncomplete: false, comparison: 'none' } },
-    { definition: equipmentDefinition(), defaults: { basis: 'fiscal', comparison: 'none' } },
-    { definition: analysisDefinition('annual-improvement'), defaults: { basis: 'fiscal', comparison: 'none' } },
-    { definition: combine(predictorDefinition(), equipmentDefinition()), defaults: { basis: 'fiscal', comparison: 'none' } }
+    { definition: utilityVisualizationFixture(), defaults: { basis: 'calendar', includeIncomplete: false } },
+    { definition: predictorDefinition(), defaults: { basis: 'calendar', includeIncomplete: false } },
+    { definition: analysisDefinition(), defaults: { basis: 'calendar', includeIncomplete: false } },
+    { definition: equipmentDefinition(), defaults: { basis: 'fiscal' } },
+    { definition: analysisDefinition('annual-improvement'), defaults: { basis: 'fiscal' } },
+    { definition: combine(predictorDefinition(), equipmentDefinition()), defaults: { basis: 'fiscal' } }
   ])('retains the existing explicit period-choice defaults for $definition.sources', ({ definition, defaults }) => {
     expect(periodEditorPolicy(definition).selectionDefaults).toEqual(defaults);
   });
 
   it.each([
-    { definition: predictorDefinition(), kind: 'predictor', reset: { kind: 'all-history', basis: 'calendar', includeIncomplete: false, comparison: 'none' } },
-    { definition: equipmentDefinition(), kind: 'equipment', reset: { kind: 'latest-saved-year', comparison: 'none' } },
-    { definition: analysisDefinition(), kind: 'analysis', reset: { kind: 'all-history', basis: 'calendar', includeIncomplete: false, comparison: 'none' } },
-    { definition: analysisDefinition('annual-improvement'), kind: 'analysis', reset: { kind: 'all-history', basis: 'fiscal', includeIncomplete: false, comparison: 'none' } }
+    { definition: predictorDefinition(), kind: 'predictor', reset: { kind: 'all-history', basis: 'calendar', includeIncomplete: false } },
+    { definition: equipmentDefinition(), kind: 'equipment', reset: { kind: 'latest-saved-year' } },
+    { definition: analysisDefinition(), kind: 'analysis', reset: { kind: 'all-history', basis: 'calendar', includeIncomplete: false } },
+    { definition: analysisDefinition('annual-improvement'), kind: 'analysis', reset: { kind: 'all-history', basis: 'fiscal', includeIncomplete: false } }
   ])('offers an explicit $kind reset without applying it during projection', ({ definition, kind, reset }) => {
     const unsupported: VisualizationDefinition = { ...definition, comparison: { kind: 'previous-period' } }, before = structuredClone(unsupported);
     expect(periodEditorPolicy(unsupported).notices).toEqual([expect.objectContaining({ kind, reset })]);

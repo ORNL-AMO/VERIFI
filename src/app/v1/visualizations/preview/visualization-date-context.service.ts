@@ -1,3 +1,6 @@
+import { latestUtilityHistoryMonth } from '@domain/visualizations/utility/utility-calendarized';
+import { resolveUtilitySelection } from '@domain/visualizations/utility/utility-selection';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { isExplorationChart, visualizationInterval } from '@domain/visualizations/visualization-interval';
 import { resolveAccountAnalysisResults, resolveFacilityAnalysisResults } from '@domain/visualizations/analysis/facility-analysis-source';
 import { AnalysisDataSession } from '../analysis/analysis-data-session.service';
@@ -18,6 +21,7 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
   private readonly analysisData = inject(AnalysisDataSession, { optional: true });
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly data = inject(UtilityDataSession);
+  private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly provider = inject(UtilitySourceProvider);
   async resolve(definition: VisualizationDefinition, identity: PreviewIdentity, signal: AbortSignal): Promise<PreviewDateContext> {
     if (isExplorationChart(definition.chart)) return this.explorationDates(definition, identity, signal);
@@ -41,12 +45,19 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
       return { calendarDate: civilDate(new Date()) };
     }
     // Establish shared calculation demand before any native or calendarized provider uses this signal.
-    if (sources.length) await this.data.acquire(identity, signal, sources.some(s => s.dataMode === 'calendarized'), this.data.requiresGrid(sources, scope));
+    const acquired = sources.length ? await this.data.acquire(identity, signal, sources.some(s => s.dataMode === 'calendarized'), this.data.requiresGrid(sources, scope)) : undefined;
     const calendarDate = civilDate(new Date());
     const snapshot = this.workspace.snapshot();
     const current = () => !signal.aborted && this.workspace.isReady() && this.workspace.account()?.guid === identity.accountGuid
       && this.workspace.revision() === identity.workspaceRevision && (!sources.length || this.data.isCurrent(identity));
     if (!snapshot || !current()) throw new DOMException('Date context superseded', 'AbortError');
+    if (definition.chart?.kind === 'time-series' && definition.chart.yearToDate && acquired?.base) {
+      const selected = [...new Map(sources.flatMap(source => resolveUtilitySelection(snapshot, scope, source).meters).map(meter => [meter.guid, meter])).values()];
+      const projection = this.calendarization.project(acquired.base, { context: scope.kind === 'facility' ? { kind: 'facility', guid: scope.facilityGuid } : { kind: 'account', guid: snapshot.account.guid }, meterGuids: selected.map(meter => meter.guid), includeEmissions: false });
+      if (projection.state === 'error') throw new Error(projection.error?.message ?? 'Year to Date history could not be resolved.');
+      const latestDataDate = latestUtilityHistoryMonth(snapshot, selected, projection.meters);
+      return { calendarDate, ...(latestDataDate ? { latestDataDate } : { emptyReasons: ['No eligible saved month is available for Year to Date.'] }) };
+    }
     const needsLatest = definition.period.kind === 'rolling' && definition.period.anchor === 'latest-data';
     let latestDataDate = needsLatest ? predictors.flatMap(source => latestPredictorDate(snapshot, scope, source) ?? []).sort().at(-1) : undefined;
     const emptyReasons: string[] = [];

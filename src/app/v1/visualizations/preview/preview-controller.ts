@@ -1,3 +1,4 @@
+import { yearToDateIssue } from '@domain/visualizations/utility/utility-year-to-date';
 import { compositionSourceDetails } from '../composition/composition.models';
 import { isCompositionChart } from '@domain/visualizations/visualization-composition';
 import { monthlyPatternsIssue } from '@domain/visualizations/visualization-monthly-patterns';
@@ -19,7 +20,7 @@ import { visualizationIntentEqual } from '../editing/visualization-reconciliatio
 /** These fields affect provider values. Trace styling, visibility and ordering do not. */
 function visualizationDataIntent(definition: VisualizationDefinition) {
   return { sources: definition.sources, facilitySelection: definition.facilitySelection, period: definition.period, comparison: definition.comparison,
-    chart: isCompositionChart(definition.chart) ? { kind: 'composition', balance: definition.chart.kind === 'sankey' && definition.chart.flow === 'energy-balance' } : isExplorationChart(definition.chart) ? { kind: definition.chart.kind, interval: visualizationInterval(definition.chart) } : definition.chart?.kind === 'monthly-patterns' ? { kind: 'monthly-patterns' } : definition.chart?.kind === 'time-series' ? { kind: 'time-series', interval: definition.chart.interval } : definition.chart,
+    chart: isCompositionChart(definition.chart) ? { kind: 'composition', balance: definition.chart.kind === 'sankey' && definition.chart.flow === 'energy-balance' } : isExplorationChart(definition.chart) ? { kind: definition.chart.kind, interval: visualizationInterval(definition.chart) } : definition.chart?.kind === 'monthly-patterns' ? { kind: 'monthly-patterns' } : definition.chart?.kind === 'time-series' ? { kind: 'time-series', interval: definition.chart.interval, yearToDate: definition.chart.yearToDate === true } : definition.chart,
     series: definition.series.map(series => ({ id: series.id, sourceId: series.sourceId, metric: series.metric, resourceGuid: series.resourceGuid })) };
 }
 
@@ -100,7 +101,7 @@ export class PreviewController {
     }
     const basisIssue = snapshot && visualizationAnalysisBasisIssue(decoded.definition, snapshot);
     if (basisIssue) { this.value.set({ state: 'incompatible', message: basisIssue }); return; }
-    const patternIssue = monthlyPatternsIssue(decoded.definition);
+    const patternIssue = monthlyPatternsIssue(decoded.definition) ?? yearToDateIssue(decoded.definition);
     if (patternIssue) { this.value.set({ state: 'incompatible', message: patternIssue }); return; }
     const providers = decoded.definition.sources.map(source => this.registry.provider(source.kind));
     const presenter = this.registry.presenter(decoded.definition.chart!.kind);

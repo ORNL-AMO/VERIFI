@@ -5,7 +5,7 @@ import { decodeVisualizationDefinition } from '@domain/visualizations/visualizat
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 
 export interface VisualizationCaptureSource {
-  readonly kind: 'meter-monthly' | 'meter-monthly-patterns';
+  readonly kind: 'meter-monthly' | 'meter-monthly-patterns' | 'meter-yearly';
   readonly facilityGuid: string;
   readonly meterGuid: string;
 }
@@ -17,9 +17,10 @@ export interface VisualizationCaptureOrigin {
 }
 
 export function captureSourceMatches(source: VisualizationCaptureSource, definition: VisualizationDefinition): boolean {
-  return !!source && ['meter-monthly', 'meter-monthly-patterns'].includes(source.kind)
+  return !!source && ['meter-monthly', 'meter-monthly-patterns', 'meter-yearly'].includes(source.kind)
     && typeof source.facilityGuid === 'string' && !!source.facilityGuid.trim() && typeof source.meterGuid === 'string' && !!source.meterGuid.trim()
-    && definition.chart?.kind === (source.kind === 'meter-monthly' ? 'time-series' : 'monthly-patterns')
+    && definition.chart?.kind === (source.kind === 'meter-monthly-patterns' ? 'monthly-patterns' : 'time-series')
+    && (definition.chart?.kind !== 'time-series' || definition.chart.interval === (source.kind === 'meter-yearly' ? 'yearly' : 'monthly'))
     && definition.facilitySelection.kind === 'fixed' && definition.facilitySelection.facilityGuids.length === 1
     && definition.facilitySelection.facilityGuids[0] === source.facilityGuid && definition.sources.length > 0
     && definition.sources.every(item => item.kind === 'utility' && item.dataMode === 'calendarized' && item.selectionMode === 'meter'
@@ -52,7 +53,8 @@ export function unchangedCaptureSource(record: Readonly<IdbSavedVisualization> |
         const { name: _name, ...rest } = serializeVisualizationDefinition({ ...normalized, chart: { ...normalized.chart, smoothLines: normalized.chart.smoothLines === true, yearOverrides: years } });
         return rest;
       }
-      const { name: _name, ...rest } = serializeVisualizationDefinition(normalized); return rest;
+      const intent = normalized.chart?.kind === 'time-series' ? { ...normalized, chart: { ...normalized.chart, yearToDate: normalized.chart.yearToDate === true, smoothLines: normalized.chart.smoothLines === true } } : normalized;
+      const { name: _name, ...rest } = serializeVisualizationDefinition(intent); return rest;
     };
     if (!sameJson(intent(definition), intent(baseline.definition))) return undefined;
     const source = origin.source;

@@ -174,7 +174,7 @@ export interface MonthlyPatternYearStyle {
 export type VisualizationChart =
   | { readonly kind: 'monthly-patterns'; readonly smoothLines?: boolean; readonly yearOverrides?: Readonly<Record<string, MonthlyPatternYearStyle>> }
   | { readonly kind: 'time-series'; readonly defaultTraceType: VisualizationTraceType; readonly interval: 'monthly' | 'yearly' | 'native';
-      readonly stack: 'none' | 'absolute' | 'percent'; readonly smoothLines?: boolean }
+      readonly stack: 'none' | 'absolute' | 'percent'; readonly smoothLines?: boolean; readonly yearToDate?: boolean }
   | (VisualizationPairSettings & { readonly kind: 'scatter'; readonly xSeriesId?: string; readonly ySeriesId?: string; readonly x?: VisualizationSeriesSelector; readonly y?: VisualizationSeriesSelector; readonly showFit: boolean })
   | (VisualizationPairSettings & { readonly kind: 'correlation'; readonly statistic: 'r' | 'r-squared'; readonly scale: 'raw' | 'z-score'; readonly view?: 'pairs' | 'matrix'; readonly showFit?: boolean })
   | (VisualizationExplorationSettings & { readonly kind: 'heatmap'; readonly dimension: 'month-year' | 'series-period'; readonly scale: 'linear' | 'diverging'; readonly normalization?: 'raw' | 'z-score' })

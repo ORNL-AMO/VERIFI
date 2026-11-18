@@ -1,3 +1,7 @@
+import { PeriodSettingsComponent } from '../shared/period-settings/period-settings.component';
+import type { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { MeterWorkbenchYearlyDataComponent } from '@app/v1/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { TimeSeriesChartComponent } from '../time-series/chart/time-series-chart.component';
 import { PortalModule } from '@angular/cdk/portal';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -71,6 +75,7 @@ describe('monthly meter capture through native storage and canonical calculation
       FacilityMetersWorkspaceService,
       provideRouter([
         { path: 'v1/workspace/facility/:facilityGuid/data/meters/:meterGuid/monthly-chart', component: MeterWorkbenchMonthlyChartComponent, canActivate: [protectedNavigationPreflightGuard] },
+        { path: 'v1/workspace/facility/:facilityGuid/data/meters/:meterGuid/yearly', component: MeterWorkbenchYearlyDataComponent, canActivate: [protectedNavigationPreflightGuard] },
         { path: 'v1/workspace/account/:accountGuid/visualization/workbench/:visualizationGuid', component: WorkbenchComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [visualizationLeaveGuard] },
         { path: 'v1/workspace/account/:accountGuid/visualization/dashboard', component: LibraryComponent, canActivate: [protectedNavigationPreflightGuard] }
       ]),
@@ -116,6 +121,90 @@ describe('monthly meter capture through native storage and canonical calculation
       expect(preview.preview.state().state).toBe('ready');
     }, { timeout: 15000 });
   }
+
+  it.each([false, true])('captures yearly data (YTD=%s), reopens durable settings and links to the same source mode', async ytd => {
+    const router = TestBed.inject(Router), workspace = TestBed.inject(AccountWorkspaceService);
+    await harness.seed({ utilityMeterData: Array.from({ length: 12 }, (_, month) => ({ ...reading({ id: 100 + month, guid: `previous-${month}`, year: 2025, month: month + 1, totalEnergyUse: 10, totalCost: 20 }) })) });
+    await workspace.reloadActiveWorkspace();
+    await router.navigateByUrl('/v1/workspace/facility/facility-a/data/meters/meter-a/yearly'); await settle();
+    const yearly = () => fixture.debugElement.query(By.directive(MeterWorkbenchYearlyDataComponent)).componentInstance as MeterWorkbenchYearlyDataComponent;
+    await vi.waitFor(() => { fixture.detectChanges(); expect(yearly().captureSupport().state).toBe('supported'); }, { timeout: 15000 });
+    if (ytd) { button('Year to Date').click(); await settle(); }
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('.v1-meter-results-chart__series-controls .v1-meter-yearly-data__mode')).not.toBeNull();
+    expect(yearly().chartRows().map(row => row.values['energyUse'])).toEqual([ytd ? 30 : 120, 33]);
+    expect(root.querySelector('.v1-meter-yearly-data__table')?.textContent).toContain(ytd ? 'FY 2025 YTD' : 'FY 2025');
+    if (ytd) {
+      const main = root.querySelector('main')!; main.style.width = '100%';
+      try {
+        for (const width of [1280, 390]) {
+          await page.viewport(width, 900); main.classList.toggle('v1-theme-dark', width === 390); await settle();
+          expect(main.scrollWidth).toBeLessThanOrEqual(main.clientWidth + 1);
+          const toggle = root.querySelector('.v1-meter-yearly-data__mode')!, controls = root.querySelector('.v1-meter-results-chart__series-controls')!;
+          expect(toggle.getBoundingClientRect().left).toBe(controls.getBoundingClientRect().left);
+          expect(root.textContent).not.toContain('Some totals have partial');
+          await page.screenshot({ path: `../../../../../.angular/vis9-yearly/ytd-${width}.png` });
+        }
+      } finally { await page.viewport(1280, 900); main.classList.remove('v1-theme-dark'); }
+      const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', params: { media: string }) => Promise<unknown> };
+      await print.send('Emulation.setEmulatedMedia', { media: 'print' });
+      try {
+        expect(getComputedStyle(root.querySelector('.v1-meter-results-chart__controls')!).display).toBe('none');
+        expect(root.querySelector('.v1-meter-yearly-data__table caption')?.textContent).toContain('March');
+        await page.screenshot({ path: '../../../../../.angular/vis9-yearly/ytd-print.png' });
+      } finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
+    }
+    button('Visualize').click(); await settle();
+    expect(drawer().name.value).toBe(`HQ (Simple) - ${ytd ? 'Year to Date' : 'Yearly'} Electricity`);
+    button('Cancel').click(); await settle(); expect((await harness.getAll('savedVisualizations'))).toHaveLength(0);
+    expect(document.activeElement?.getAttribute('aria-label')).toBe('Visualize');
+    button('Visualize').click(); await settle(); button('Save and open').click();
+    await vi.waitFor(() => expect(router.url).toContain('/visualization/workbench/')); await settle(); await expectPreview();
+    expect(root.querySelector('#period-body [aria-label="Chart interval"]')).not.toBeNull();
+    expect(root.querySelector('#chart-body [aria-label="Chart interval"]')).toBeNull();
+    expect(root.querySelector('[aria-label="Comparison"]')).toBeNull();
+    const saved = (await harness.getAll('savedVisualizations'))[0] as unknown as IdbSavedVisualization;
+    expect(saved.captureOrigin?.source.kind).toBe('meter-yearly');
+    expect(readSavedVisualization(saved)).toMatchObject({ state: 'valid', definition: { chart: { interval: 'yearly', ...(ytd ? { yearToDate: true } : {}) } } });
+    const model = () => (fixture.debugElement.query(By.directive(TimeSeriesChartComponent)).componentInstance as TimeSeriesChartComponent).model;
+    expect(model().traces[0].points.map(point => point.observation.value)).toEqual([ytd ? 30 : 120, 33]);
+    await workspaceReload(); expect(workbench().sourceLink()).toBeDefined();
+    workbench().setYearToDate(!ytd); await settle(); expect(await workbench().editor.flush()).toBe(true); await expectPreview(); expect(workbench().sourceLink()).toBeUndefined();
+    workbench().setYearToDate(ytd); await settle(); expect(await workbench().editor.flush()).toBe(true); await expectPreview(); expect(workbench().sourceLink()).toBeDefined();
+    if (ytd) {
+      await harness.seed({ utilityMeterData: [{ ...reading({ id: 200, guid: 'new-zero', year: 2026, month: 4, totalEnergyUse: 0, totalCost: 0 }) }] });
+      await workspaceReload(); expect(model().yearToDateLabel).toContain('April'); expect(model().traces[0].points.map(point => point.observation.value)).toEqual([40, 33]);
+      expect(workbench().sourceLink()).toBeDefined();
+    }
+    const link = [...root.querySelectorAll<HTMLAnchorElement>('a')].find(link => link.textContent?.includes('View source chart'))!;
+    link.click(); await settle(); await vi.waitFor(() => expect(router.url).toContain('/yearly'));
+    expect(router.url).toContain('meter-yearly-chart'); expect(yearly().ytd()).toBe(ytd);
+    if (ytd) expect(yearly().contextLabel()).toContain('April');
+    expect(document.activeElement?.id).toBe('meter-yearly-chart');
+  });
+
+  it.each(['group', 'source'] as const)('creates a yearly YTD %s chart from scratch with one cutoff for unequal meter histories', async mode => {
+    const router = TestBed.inject(Router), workspace = TestBed.inject(AccountWorkspaceService), store = TestBed.inject(AccountWorkspaceStore);
+    await firstValueFrom(harness.dbService.update('utilityMeter', { ...store.meters()[0], groupId: 'group-a' }));
+    await harness.seed({ utilityMeterGroups: [{ ...group({ guid: 'group-a', name: 'Production' }) }], utilityMeter: [{ ...meter({ id: 2, guid: 'meter-b', groupId: 'group-a', meterReadingDataApplication: 'fullMonth' }) }], utilityMeterData: [{ ...reading({ id: 40, guid: 'late', meterId: 'meter-b', year: 2026, month: 4, totalEnergyUse: 5 }) }] });
+    await workspace.reloadActiveWorkspace(); await router.navigateByUrl('/v1/workspace/account/account-a/visualization/dashboard'); await settle();
+    button('Add visualization').click(); await settle();
+    const lifecycle = (fixture.debugElement.query(By.directive(LibraryComponent)).componentInstance as LibraryComponent).lifecycle;
+    lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('utility'); lifecycle.continueSources();
+    lifecycle.selectMeterMode(mode); lifecycle.toggleResource(mode === 'group' ? 'group-a' : 'Electricity'); lifecycle.continueResources(); lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Yearly YTD cohort');
+    await lifecycle.submit(); await settle(); await expectPreview();
+    workbench().setInterval('yearly'); await settle(); await expectPreview();
+    const dates = fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
+    dates.selectChoice(dates.form.controls.kind, 'fixed'); dates.form.patchValue({ start: '2026-01', end: '2026-02' }); await settle();
+    expect(workbench().editor.definition()?.period).toMatchObject({ start: '2026-01-01', end: '2026-02-28' });
+    expect((fixture.nativeElement as HTMLElement).querySelector('#period-body input[type="date"]')).toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('#period-body input[type="month"]').length).toBe(2);
+    await workbench().requestDecision({ kind: 'year-to-date', enabled: true }); await settle(); expect(workbench().pendingDecision()).toBeDefined();
+    await workbench().confirmDecision(); await settle(); await expectPreview();
+    expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    const model = (fixture.debugElement.query(By.directive(TimeSeriesChartComponent)).componentInstance as TimeSeriesChartComponent).model;
+    expect(model.yearToDateLabel).toContain('April'); expect(model.traces[0].points[0].observation).toMatchObject({ value: 38, partial: true });
+  });
 
   it('creates energy plus cost from scratch, edits independent traces and shared units, and reopens one durable Meters selection', async () => {
     const router = TestBed.inject(Router);

@@ -10,7 +10,7 @@
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title"><h1 id="visualization-title"><app-ui-icon name="dataVisualization"/>{{ editor.definition()?.name || 'Visualization' }}</h1></div>
         <div class="v1-data-workbench-actions" aria-label="Visualization summary and controls">
-          @if (sourceLink(); as source) { <a class="v1-btn v1-btn--quiet" [routerLink]="source.route" [fragment]="source.fragment"><app-ui-icon name="chartTimeSeries"/>View source chart</a> }
+          @if (sourceLink(); as source) { <a class="v1-btn v1-btn--quiet" [routerLink]="source.route" [fragment]="source.fragment" [queryParams]="source.queryParams"><app-ui-icon name="chartTimeSeries"/>View source chart</a> }
           <span class="visualization-workbench__save-state" [class.visualization-workbench__save-state--saved]="editor.state() === 'saved' && !hasInvalidFields()" [class.visualization-workbench__save-state--error]="saveNeedsAttention()" role="status" aria-live="polite">
             @if (saveInProgress()) { <app-ui-icon name="loading" spin/> }
             @else if (saveNeedsAttention()) { <app-ui-icon name="warning"/> }
@@ -99,13 +99,7 @@
           }
           @if (savedChart && savedChart.kind === 'time-series') {
             <p class="visualization-workbench__default">Default for new items: {{ savedChart.defaultTraceType }}</p>
-            <span class="visualization-control-label">Interval</span>
-            <div class="visualization-buttons" role="group" aria-label="Chart interval">
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly() || annualEquipment()" [attr.aria-pressed]="savedChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'yearly'" (click)="setInterval('yearly')">Yearly</button>
-            </div>
-            @if (annualEquipment()) { <p>Equipment consumption uses annual fiscal periods.</p> }
-            @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
+
           }
         </app-visualization-decision-section>
         <app-visualization-decision-section [nodeId]="rootNodes.sources" label="Data Sources" [summary]="sourceCategoryCount() + ' configured'" icon="database"
@@ -139,8 +133,24 @@
             <app-monthly-pattern-year-settings [chart]="definition.chart!" [editorKey]="editor.key()" [years]="patternYears()" [disabled]="!editor.canEdit() || patternLoading()" (changed)="updateChartSettings($event)"/>
           </app-visualization-decision-section>
         }
-        <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates and comparison" [summary]="periodSummary()" icon="calendar"
+        <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates" [summary]="periodSummary()" icon="calendar"
           [attention]="periodInvalid()" [expanded]="expandedNodes().has(rootNodes.period)" (expandedChange)="setSection(rootNodes.period, $event)">
+          @let dateChart = definition.chart;
+          @if (dateChart && dateChart.kind === 'time-series') {
+            <span class="visualization-control-label">Interval</span>
+            <div class="visualization-buttons" role="group" aria-label="Chart interval">
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly() || annualEquipment()" [attr.aria-pressed]="dateChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="dateChart.interval === 'yearly'" (click)="setInterval('yearly')">Yearly</button>
+            </div>
+            @if (dateChart.interval === 'yearly' && supportsYearToDate()) {
+              <div class="visualization-buttons" role="group" aria-label="Yearly totals">
+                <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" [attr.aria-pressed]="!dateChart.yearToDate" (click)="setYearToDate(false)">Full year</button>
+                <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" [attr.aria-pressed]="dateChart.yearToDate === true" (click)="setYearToDate(true)">Year to Date</button>
+              </div>
+            }
+            @if (annualEquipment()) { <p>Equipment consumption uses annual fiscal periods.</p> }
+            @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
+          }
           <app-visualization-period-settings [context]="periodContext()"/>
         </app-visualization-decision-section>
         <app-visualization-decision-section [nodeId]="rootNodes.appearance" label="Chart appearance" [summary]="editor.form.controls.title.value || definition.name" icon="paintRoller"

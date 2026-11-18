@@ -127,7 +127,7 @@ const chart = variant({
       }
     } }, ['smoothLines', 'yearOverrides']),
   'time-series': object({ kind: enumeration('time-series'), defaultTraceType: enumeration('line', 'bar', 'area'), interval: enumeration('monthly', 'yearly', 'native'),
-    stack: enumeration('none', 'absolute', 'percent'), smoothLines: boolean }, ['smoothLines']),
+    stack: enumeration('none', 'absolute', 'percent'), smoothLines: boolean, yearToDate: boolean }, ['smoothLines', 'yearToDate']),
   scatter: object({ kind: enumeration('scatter'), ...pairFields, x: selector, y: selector, xSeriesId: text, ySeriesId: text, showFit: boolean }, ['interval', 'grouping', 'scale', 'x', 'y', 'xSeriesId', 'ySeriesId']),
   correlation: object({ kind: enumeration('correlation'), ...pairFields, statistic: enumeration('r', 'r-squared'), view: enumeration('pairs', 'matrix'), showFit: boolean }, ['interval', 'grouping', 'view', 'showFit']),
   heatmap: object({ kind: enumeration('heatmap'), ...explorationFields, dimension: enumeration('month-year', 'series-period'), scale: enumeration('linear', 'diverging'), normalization: enumeration('raw', 'z-score') }, ['interval', 'normalization']),

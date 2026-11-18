@@ -1,3 +1,4 @@
+import { yearToDateSourcesSupported } from '@domain/visualizations/utility/utility-year-to-date';
 import { isCompositionChart, initializeCompositionChart } from '@domain/visualizations/visualization-composition';
 import { civilMonthRange, civilMonthIndex } from '@domain/visualizations/visualization-periods';
 import { isExplorationChart } from '@domain/visualizations/visualization-interval';
@@ -150,7 +151,7 @@ function withoutItem(definition: VisualizationDefinition, source: UtilityVisuali
     }) });
 }
 
-type SingleDecisionAction = Exclude<VisualizationDecisionAction, { kind: 'source-measures' | 'analysis-targets' | 'chart-display' }>;
+type SingleDecisionAction = Exclude<VisualizationDecisionAction, { kind: 'source-measures' | 'analysis-targets' | 'chart-display' | 'year-to-date' | 'chart-interval' }>;
 function prepareSingleDecisionChange(definition: VisualizationDefinition, action: SingleDecisionAction, context: DecisionChangeContext): DecisionChangeResult {
   let next = definition;
   const cleared: string[] = [], affected = new Set<string>();
@@ -543,6 +544,10 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   const cleared: string[] = [], affected = new Set<string>();
   let nextRef: DecisionRef | undefined;
   const result = (): DecisionChangeResult => {
+    if (definition.chart?.kind === 'time-series' && definition.chart.yearToDate && !yearToDateSourcesSupported(next)) {
+      if (next.chart?.kind === 'time-series') { const { yearToDate: _ytd, ...chart } = next.chart; next = { ...next, chart }; }
+      cleared.push('Year to Date comparison'); affected.add(decisionNodeId({ kind: 'chart' }));
+    }
     const selection = (value: VisualizationDefinition) => value.sources.map(source => 'selection' in source ? source.selection : undefined)[0];
     if (next.chart?.kind === 'monthly-patterns' && Object.keys(next.chart.yearOverrides ?? {}).length && !visualizationIntentEqual(selection(definition), selection(next))) {
       const { yearOverrides: _years, ...chart } = next.chart; next = { ...next, chart }; cleared.push('Year presentation');
@@ -559,6 +564,20 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     const ids = new Set(sources.map(source => source.id));
     next = pruneChart({ ...next, sources: next.sources.filter(source => !ids.has(source.id)), series: next.series.filter(series => !ids.has(series.sourceId)) });
   };
+  if (action.kind === 'year-to-date') {
+    if (definition.chart?.kind !== 'time-series' || action.enabled && !yearToDateSourcesSupported(definition)) return { state: 'unchanged' };
+    next = { ...definition, chart: { ...definition.chart, yearToDate: action.enabled } };
+    if (action.enabled && context.invalidNodeIds?.includes(decisionNodeId({ kind: 'period' }))) { cleared.push('Incomplete date input'); affected.add(decisionNodeId({ kind: 'period' })); }
+    if (action.enabled && (definition.period.kind !== 'all-history' || definition.comparison.kind !== 'none')) {
+      cleared.push('Custom dates and extra comparison'); affected.add(decisionNodeId({ kind: 'period' }));
+      next = { ...next, period: { kind: 'all-history' }, comparison: { kind: 'none' } };
+    }
+    return result();
+  }
+  if (action.kind === 'chart-interval') {
+    if (definition.chart?.kind !== 'time-series') return { state: 'unchanged' };
+    next = { ...definition, chart: { ...definition.chart, interval: action.interval } }; return result();
+  }
   if (action.kind === 'analysis-interval') {
     const members = definition.sources.filter(source => source.kind === 'analysis');
     if (!members.length) return { state: 'unchanged' };

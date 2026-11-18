@@ -33,6 +33,8 @@ import {
   LegendComponentOption,
   MarkAreaComponent,
   MarkAreaComponentOption,
+  TitleComponent,
+  TitleComponentOption,
   ToolboxComponent,
   ToolboxComponentOption,
   TooltipComponent,
@@ -60,6 +62,7 @@ echarts.use([
   GridComponent,
   LegendComponent,
   MarkAreaComponent,
+  TitleComponent,
   ToolboxComponent,
   TooltipComponent,
   TransformComponent,
@@ -84,6 +87,7 @@ export type V1EChartsOption = echarts.ComposeOption<
   | GridComponentOption
   | LegendComponentOption
   | MarkAreaComponentOption
+  | TitleComponentOption
   | ToolboxComponentOption
   | TooltipComponentOption
   | VisualMapComponentOption

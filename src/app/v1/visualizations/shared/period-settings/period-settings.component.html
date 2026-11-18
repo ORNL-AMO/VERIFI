@@ -51,25 +51,6 @@
   }
   @if (settings.controls.fiscalYear) {
   @if (current.kind === 'fiscal-year') { <label>Fiscal year<input type="number" min="1" max="9999" step="1" formControlName="year"></label> }
-  @if (settings.controls.comparison) {
-  <span class="visualization-control-label">Comparison</span>
-  <div class="visualization-choices" role="group" aria-label="Comparison">
-    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'none'" (click)="selectChoice(form.controls.comparison, 'none')"><app-ui-icon name="circle"/>None</button>
-    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'previous-period'" (click)="selectChoice(form.controls.comparison, 'previous-period')"><app-ui-icon name="arrowLeft"/>Previous period</button>
-    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'previous-year'" (click)="selectChoice(form.controls.comparison, 'previous-year')"><app-ui-icon name="calendar"/>Previous year</button>
-    <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="current.comparison === 'custom'" (click)="selectChoice(form.controls.comparison, 'custom')"><app-ui-icon name="calendarCheck"/>Custom dates</button>
-  </div>
-  @if (current.comparison === 'previous-year') {
-  <span class="visualization-control-label">Comparison calendar</span>
-  <div class="visualization-buttons" role="group" aria-label="Comparison calendar">
-    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.comparisonBasis === 'calendar'" (click)="selectChoice(form.controls.comparisonBasis, 'calendar')">Calendar year</button>
-    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="current.comparisonBasis === 'fiscal'" (click)="selectChoice(form.controls.comparisonBasis, 'fiscal')">Owner’s fiscal year</button>
-  </div>
-  }
-  @if (current.comparison === 'custom') {
-    <label>Comparison start<input type="date" formControlName="comparisonStart"></label><label>Comparison end<input type="date" formControlName="comparisonEnd"></label>
-  }
-  }
   }
   @if (issue(); as message) { <p role="alert">{{ message }} Your input is retained until corrected or discarded.</p> }
 </fieldset>

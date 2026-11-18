@@ -18,6 +18,18 @@ import { checkVisualizationCompatibility } from '../visualization-capabilities';
 import { utilityCapabilities, utilityChartSupport } from './utility-capabilities';
 
 describe('calendarized utility projections', () => {
+  it('uses the latest authoritative backward-calendarized month rather than an unprojected bill month', () => {
+    const { snapshot, request } = setup({}, {
+      meters: [meter({ meterReadingDataApplication: 'backward' })],
+      meterData: [1, 2, 3, 4].map((month, index) => reading({ guid: `partial-${index}`, year: 2026, month, day: 15, totalEnergyUse: 30, totalCost: 60 }))
+    });
+    const projection = canonicalProjection(snapshot, false);
+    const result = ready(resolveCalendarizedUtility(snapshot, { ...request, chart: { kind: 'time-series', interval: 'yearly', defaultTraceType: 'line', stack: 'none', yearToDate: true }, dateContext: { calendarDate: '2030-12-31' } }, projection.meters));
+    expect(result.yearToDate).toMatchObject({ anchor: '2026-03-31', monthCount: 3 });
+    expect(result.rows[0].end).toBe('2026-03-31');
+    expect(Object.values(result.rows[0].values)[0]).toMatchObject({ state: 'observed', partial: true });
+    expect(Object.values(result.rows[0].values)[0].value).toBeCloseTo(projection.meters[0].monthlyData.reduce((sum, row) => sum + row.energyUse, 0));
+  });
   it('converts mixed consumption quantities independently through chart display units', () => {
     const selected = [meter({ meterReadingDataApplication: 'fullMonth' }), meter({ guid: 'water', source: 'Water Intake', startingUnit: 'gal', meterReadingDataApplication: 'fullMonth' })];
     const { snapshot, request } = setup({ measure: 'consumption', settings: { quantityUnits: { energy: 'MWh', volume: 'kgal' } }, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'water'] } },

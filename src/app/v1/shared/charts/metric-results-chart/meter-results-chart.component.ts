@@ -76,6 +76,7 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() comparisonBand?: MeterResultsChartComparisonBand;
   @Input() period: MeterResultsPeriod = 'monthly';
   @Input() state: MeterChartState = 'ready';
+  @Input() contextLabel?: string;
   @Input() ariaLabel = 'Meter results chart';
   @Input() loadingTitle = 'Preparing chart data';
   @Input() loadingDescription = 'VERIFI is calculating calendarized data.';
@@ -149,7 +150,7 @@ export class MeterResultsChartComponent implements OnChanges {
       periodLabel: row.periodLabel,
       cells: metrics.map(metric => ({
         metricId: metric.id,
-        valueLabel: formatChartAccessibleValue(chartValue(row, metric.id), !!metric.currency, metric.unit)
+        valueLabel: formatChartAccessibleValue(chartValue(row, metric.id), !!metric.currency, metric.unit) + (row.annotations?.[metric.id] ? ` · ${row.annotations[metric.id]}` : '')
       }))
     }));
   });
@@ -170,8 +171,9 @@ export class MeterResultsChartComponent implements OnChanges {
       showLegend: this.showLegend, tooltipMaxRows: this.tooltipMaxRows, tooltipOverflowHint: this.tooltipOverflowHint,
       zoomStart: this.zoomStart(), zoomEnd: this.zoomEnd()
     });
-    if (!this.visualize) return option;
-    return { ...option, legend: { ...option.legend as object,
+    const contextual: V1EChartsOption = this.contextLabel ? { ...option, title: { text: this.contextLabel, left: 'center', top: 0, textStyle: { color: 'var(--v1-muted)', fontSize: 12, fontWeight: 'normal' } }, legend: { ...option.legend as object, top: 26 }, grid: { ...option.grid as object, top: this.showLegend ? 100 : 50 } } : option;
+    if (!this.visualize) return contextual;
+    return { ...contextual, legend: { ...contextual.legend as object,
       selected: Object.fromEntries(this.metricOptions().map(metric => [metric.label, !this.hiddenMetricIds().includes(metric.id)])) } };
   });
 

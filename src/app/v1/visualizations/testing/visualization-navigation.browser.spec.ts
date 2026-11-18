@@ -552,7 +552,7 @@ describe('visualization routed journeys in Chromium', () => {
       expect(chart.scrollTop).toBe(0); expect(surface.scrollTop).toBe(0);
       expect(chart.getBoundingClientRect().top).toBe(chartTop);
       const expandedWidth = chart.getBoundingClientRect().width;
-      periods.form.controls.kind.setValue('fixed'); periods.form.controls.start.setValue('2026-03-01');
+      periods.form.controls.kind.setValue('fixed'); periods.form.controls.start.setValue('2026-03');
       test.fixture.detectChanges();
       const panelFocus = panel.querySelector<HTMLButtonElement>('button')!;
       panelFocus.focus({ preventScroll: true });
@@ -565,7 +565,7 @@ describe('visualization routed journeys in Chromium', () => {
       await userEvent.keyboard('{Enter}'); test.fixture.detectChanges();
       expect(panel.hidden).toBe(false);
       expect(test.fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance).toBe(periods);
-      expect(periods.form.controls.start.value).toBe('2026-03-01');
+      expect(periods.form.controls.start.value).toBe('2026-03');
       expect(panel.scrollTop).toBeGreaterThan(0);
       for (const width of [1280, 390]) {
         await page.viewport(width, 900);

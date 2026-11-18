@@ -27,6 +27,7 @@
     <div class="v1-meter-results-chart__controls" aria-label="Chart controls">
       @if (showSeriesControls) {
         <div class="v1-meter-results-chart__series-controls">
+          <ng-content select="[chartControls]"/>
           @if (currentUtilityMetric) {
             <div class="v1-meter-results-chart__control-group" role="group" [attr.aria-label]="currentUtilityMetric.label + ' display'">
               <span>{{ currentUtilityMetric.label }}</span>

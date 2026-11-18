@@ -36,6 +36,8 @@ export interface MeterResultsChartRow {
   readonly periodLabel: string;
   readonly sortValue: number;
   readonly values: Readonly<Record<string, number | null>>;
+  /** Feature-owned period and quality text, shared by tooltips and accessible values. */
+  readonly annotations?: Readonly<Record<string, string>>;
   /** Metrics with no observation at this alignment slot; omit the slot rather than drawing a gap. */
   readonly paddingMetricIds?: readonly string[];
 }

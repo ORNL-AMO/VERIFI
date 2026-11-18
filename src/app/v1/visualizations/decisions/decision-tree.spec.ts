@@ -30,6 +30,18 @@ function selected(mode: 'source' | 'group' | 'meter' | 'facility' | 'rule', ids:
 }
 
 describe('shared visualization decisions', () => {
+  it('reviews replacing custom dates with YTD and removing it when intervals or source categories change', () => {
+    const definition = { ...selected('meter', ['meter-a']), chart: { kind: 'time-series' as const, interval: 'yearly' as const, defaultTraceType: 'line' as const, stack: 'none' as const }, period: { kind: 'fixed' as const, start: '2025-01-01', end: '2025-12-31', basis: 'calendar' as const } };
+    const result = prepareDecisionChange(definition, { kind: 'year-to-date', enabled: true }, { snapshot: snapshot() });
+    expect(result.state).toBe('confirm'); if (result.state === 'unchanged') throw new Error('Expected date review');
+    expect(result.definition).toMatchObject({ period: { kind: 'all-history' }, comparison: { kind: 'none' }, chart: { yearToDate: true } });
+    for (const action of [{ kind: 'chart-interval', interval: 'monthly' }, { kind: 'add-source', sourceKind: 'predictor' }, { kind: 'chart', chart: { kind: 'monthly-patterns' } }] as const) {
+      const change = prepareDecisionChange(result.definition, action, { snapshot: snapshot() });
+      expect(change.state).toBe('confirm'); if (change.state === 'unchanged') throw new Error('Expected YTD review');
+      expect(change.cleared).toContain('Year to Date comparison');
+      expect(change.definition.chart).not.toHaveProperty('yearToDate', true);
+    }
+  });
   it('constrains monthly patterns to one resource and usage measure, and reviews clearing year styles on replacement', () => {
     let definition = selected('meter', ['meter-a']);
     definition = apply(definition, { kind: 'chart', chart: { kind: 'monthly-patterns' } });

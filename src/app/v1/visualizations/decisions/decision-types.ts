@@ -43,6 +43,8 @@ export interface DecisionResourceChoice {
   readonly available: boolean;
 }
 export type VisualizationDecisionAction =
+  | { readonly kind: 'year-to-date'; readonly enabled: boolean }
+  | { readonly kind: 'chart-interval'; readonly interval: 'monthly' | 'yearly' }
   | { readonly kind: 'source-measures'; readonly sourceKind: VisualizationSourceKind; readonly measures: readonly string[] }
   | { readonly kind: 'analysis-targets'; readonly targets: readonly { readonly analysisGuid: string; readonly groupGuid?: string }[] }
   | { readonly kind: 'chart-display'; readonly settings: VisualizationDisplaySettings }

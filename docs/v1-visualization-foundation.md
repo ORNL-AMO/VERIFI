@@ -47,6 +47,8 @@ Comparison roles form separate stacks and align by period offset while preservin
 
 Saved trace/order fields and the definition version are unchanged. Original observations remain provider-owned; percentages and ECharts options exist only at the presentation boundary. Appearance edits reuse existing calculation-session results. Compatible presentation edits during an acquisition let numerical work finish before preparing the newest presentation with fresh evidence; account/snapshot/input changes and explicit retry retain cancellation and freshness checks.
 
+Yearly utility time-series intent may additionally save `yearToDate: true`; absence means full-year behavior. YTD uses all history without another comparison and one meter-history cutoff across sources, independent of visibility/measures. Providers aggregate original monthly observations into equal fiscal-month windows, attesting the live cutoff and actual bounds. Calendarization, precision, conversions, gap and quality meaning remain authoritative. New observations advance runtime bounds rather than changing saved intent; this optional extension does not require definition, database or backup-envelope version changes. Other source/chart kinds cannot silently ignore it.
+
 ## Monthly-pattern presentations
 
 The `monthly-patterns` chart aligns one utility resource’s calendarized usage and optional cost by fiscal month, with separate panels and a shared year legend. A resource is one meter, one meter group or one utility source; groups/sources retain canonical aggregation and live membership. One energy or consumption measure is required for utilities. Alternatively, one fixed Standard/saved Weather predictor produces a single panel in saved units, without aggregation or weather retrieval. Native bills, mixed categories, multiple separately selected resources, stacking and additional comparisons remain unavailable. Providers attest the current owner calendar and actual saved-history years. Meter, group and predictor owners are their facilities; utility-source patterns follow the visualization’s facility/account scope. Presentation groups canonical observations using existing fiscal-date helpers; it does not change calendarization or persist values. Twelve slots retain explicit gaps, zeros, original dates and quality. Years absent from the canonical history are not inferred from padding.
@@ -133,7 +135,7 @@ Utility inventory and both meter Monthly Chart captures are implemented under th
 
 | Data source | Meaning an adapter must preserve |
 | --- | --- |
-| Meter monthly/fiscal views | Meter GUID, canonical calendarization, measures, axes, selected years, fiscal alignment, and explicit native/monthly interpretation. |
+| Meter monthly/fiscal/yearly views | Meter GUID, canonical calendarization, measures, axes, selected years, fiscal alignment, and explicit native/monthly interpretation. |
 | Predictor/weather | Saved histories, units, duplicates, and observation pairing. Preserve the existing raw “Units ignored” comparison explicitly or block it; do not fetch weather. |
 | Bill charges/correlation | Meter/charge identity, usage/demand interpretation, X/Y pairing, exclusions, and authoritative fitted results. |
 | Analysis group exploration | Analysis/group identity, predictor selection, raw versus z-score mode, baseline/sample exclusions, signed correlation versus R-squared. |

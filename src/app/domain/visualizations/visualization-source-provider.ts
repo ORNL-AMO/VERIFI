@@ -134,6 +134,7 @@ export type VisualizationData =
 
 export interface VisualizationResolvedData {
   /** Current facility/portfolio calendar and observed-history years for a Monthly patterns resource. */
+  readonly yearToDate?: import('./utility/utility-year-to-date').UtilityYearToDate;
   readonly monthlyPatternsCalendar?: MonthlyPatternsCalendar;
   /** Original leaf contributions and denominator evidence; never saved with the definition. */
   readonly composition?: VisualizationCompositionEvidence;

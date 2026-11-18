@@ -3,7 +3,7 @@ import type { CalanderizedMeter } from '@data/models/calanderization';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import type { UtilityVisualizationSource, VisualizationDefinition, VisualizationSeries } from '@domain/visualizations/visualization-definition';
 import { captureVisualizationDefinition, VisualizationCaptureResult } from '@domain/visualizations/visualization-integration';
-import type { VisualizationSourceEvidence, VisualizationSourceRequest } from '@domain/visualizations/visualization-source-provider';
+import type { VisualizationObservation, VisualizationSourceEvidence, VisualizationSourceRequest } from '@domain/visualizations/visualization-source-provider';
 import { resolveCalendarizedUtility } from '@domain/visualizations/utility/utility-calendarized';
 import { utilityCapabilities, utilityChartSupport } from '@domain/visualizations/utility/utility-capabilities';
 import { utilityMeasureKey } from '@domain/visualizations/utility/utility-selection';
@@ -21,6 +21,7 @@ export interface MonthlyMeterCaptureInput {
   readonly presentation: MeterResultsChartPresentation;
   readonly workspaceRevision: number;
   readonly calendarDate: string;
+  readonly yearly?: { readonly yearToDate: boolean; readonly latestDataDate?: string; readonly observations: Readonly<Record<string, Readonly<Record<string, VisualizationObservation>>>> };
   readonly patterns?: { readonly hiddenYears: readonly number[] };
 }
 
@@ -31,8 +32,8 @@ export function captureMonthlyMeter(input: MonthlyMeterCaptureInput): Visualizat
   const facility = snapshot.facilities.find(item => item.guid === input.facilityGuid && item.accountId === snapshot.account.guid);
   const meter = snapshot.meters.find(item => item.guid === input.meterGuid && item.accountId === snapshot.account.guid && item.facilityId === input.facilityGuid);
   if (!facility || !meter || projectedMeter.meter.guid !== meter.guid || !meter.meterReadingDataApplication)
-    return unsupported('Open a ready monthly chart in its owning account and facility before capturing.');
-  if (!input.rows.length) return unsupported('Add monthly readings before saving this visualization.');
+    return unsupported('Open a ready chart in its owning account and facility before capturing.');
+  if (!input.rows.length) return unsupported('Add readings before saving this visualization.');
   const years = [...new Set(projectedMeter.monthlyData.map(row => row.fiscalYear))].sort((a, b) => a - b);
   if (input.patterns) {
     if (projectedMeter.monthlyData.some(row => !Number.isInteger(row.monthNumValue) || row.monthNumValue < 0 || row.monthNumValue > 11
@@ -50,7 +51,7 @@ export function captureMonthlyMeter(input: MonthlyMeterCaptureInput): Visualizat
     const metric = input.metrics.find(metric => metric.id === item.metricId);
     const measure = item.metricId === 'energyUse' ? 'energy' : item.metricId === 'energyConsumption' ? 'consumption' : item.metricId === 'energyCost' ? 'cost' : undefined;
     if (!metric || !measure || measure === 'consumption' && meter.scope === 2)
-      return unsupported('This monthly chart uses a specialized measure that saved visualizations cannot yet preserve.');
+      return unsupported('This chart uses a specialized measure that saved visualizations cannot yet preserve.');
     const unit = metric.currency ? 'USD' : metric.unit;
     if (!unit) return unsupported('This chart has no reproducible display unit.');
     const source: UtilityVisualizationSource = { id: `monthly-${metric.id}`, kind: 'utility', selectionMode: 'meter',
@@ -67,20 +68,22 @@ export function captureMonthlyMeter(input: MonthlyMeterCaptureInput): Visualizat
       { kind: 'fixed', facilityGuids: [facility.guid] }, 'utility'),
     sources, series, period: { kind: 'all-history' }, comparison: { kind: 'none' },
     ...(input.patterns ? { name: `${facility.name || 'Facility'} - Monthly Patterns ${meter.name || meter.source}` } : {}),
+    ...(input.yearly ? { name: `${facility.name || 'Facility'} - ${input.yearly.yearToDate ? 'Year to Date' : 'Yearly'} ${meter.name || meter.source}` } : {}),
     chart: input.patterns ? { kind: 'monthly-patterns', smoothLines: false, yearOverrides: Object.fromEntries(years.map((year, index) => [String(year), {
       color: MONTHLY_PATTERN_YEAR_COLORS[index % MONTHLY_PATTERN_YEAR_COLORS.length], visible: !input.patterns!.hiddenYears.includes(year) }])) }
-      : { kind: 'time-series', interval: 'monthly', defaultTraceType: 'line', stack: 'none', smoothLines: view.smoothLines },
+      : { kind: 'time-series', interval: input.yearly ? 'yearly' : 'monthly', defaultTraceType: 'line', stack: 'none', smoothLines: view.smoothLines, ...(input.yearly?.yearToDate ? { yearToDate: true } : {}) },
     appearance: { legend: view.legend }
   };
   const evidence: VisualizationSourceEvidence[] = [];
-  const expectedRows = new Map(input.rows.map(row => [monthKey(row.periodKey), row]));
-  if (expectedRows.size !== input.rows.length) return unsupported('Duplicate monthly periods cannot be captured safely.');
+  let visibleObservation = false;
+  const expectedRows = new Map(input.rows.map(row => [input.yearly ? row.periodKey : monthKey(row.periodKey), row]));
+  if (expectedRows.size !== input.rows.length) return unsupported('Duplicate periods cannot be captured safely.');
   for (const source of sources) {
     const request: VisualizationSourceRequest = { identity: { accountGuid: snapshot.account.guid,
       scope: { kind: 'facility', facilityGuid: facility.guid, facilityGuids: [facility.guid] }, workspaceRevision: input.workspaceRevision,
       definitionGuid: 'monthly-meter-capture', definitionRevision: 1, requestId: 'monthly-meter-capture', sourceId: source.id },
       source, chart: definition.chart!, period: definition.period, comparison: definition.comparison, series: definition.series.filter(series => series.sourceId === source.id),
-      dateContext: { calendarDate: input.calendarDate } };
+      dateContext: { calendarDate: input.calendarDate, ...(input.yearly?.latestDataDate ? { latestDataDate: input.yearly.latestDataDate } : {}) } };
     const resolution = resolveCalendarizedUtility(snapshot, request, [projectedMeter]);
     if (resolution.state !== 'ready' || resolution.resolved.data.kind !== 'time-series')
       return unsupported('message' in resolution ? resolution.message : 'The saved provider cannot reproduce this monthly chart.');
@@ -88,20 +91,25 @@ export function captureMonthlyMeter(input: MonthlyMeterCaptureInput): Visualizat
     if (metadata.length !== 1 || metadata[0].resourceGuid !== meter.guid || source.settings?.unit?.kind !== 'pinned' || metadata[0].unit !== source.settings.unit.value)
       return unsupported('The saved provider would change the selected meter or displayed units.');
     const rows = resolution.resolved.data.rows;
-    if (input.patterns ? [...expectedRows.keys()].some(key => !rows.some(row => row.start.slice(0, 7) === key))
-      : rows.length !== expectedRows.size || rows.some(row => !expectedRows.has(row.start.slice(0, 7))))
-      return unsupported('The saved provider would change this chart’s monthly coverage.');
+    const rowKey = (row: typeof rows[number]) => input.yearly ? String(fiscalYear(row.start, facility)) : row.start.slice(0, 7);
+    if (input.patterns ? [...expectedRows.keys()].some(key => !rows.some(row => rowKey(row) === key))
+      : rows.length !== expectedRows.size || rows.some(row => !expectedRows.has(rowKey(row))))
+      return unsupported('The saved provider would change this chart’s coverage.');
     const metricId = source.id.slice('monthly-'.length);
     for (const row of rows) {
-      const expected = expectedRows.get(row.start.slice(0, 7))?.values[metricId], actual = row.values[metadata[0].id];
+      const expected = expectedRows.get(rowKey(row))?.values[metricId], actual = row.values[metadata[0].id];
+      const expectedQuality = input.yearly?.observations[rowKey(row)]?.[metricId];
+      if (input.yearly && (!expectedQuality || JSON.stringify(actual) !== JSON.stringify(expectedQuality))) return unsupported('The yearly observation quality changed during capture.');
       if (expected === null || expected === undefined || !Number.isFinite(expected)) {
         if (actual?.state === 'observed') return unsupported('The saved provider would fill a gap in this chart.');
-      } else if (actual?.state !== 'observed' || actual.partial || actual.provenance !== 'measured' || !equalValue(expected, actual.value)) {
+      } else if (actual?.state !== 'observed' || !input.yearly && (actual.partial || actual.provenance !== 'measured') || !equalValue(expected, actual.value)) {
         return unsupported('This chart contains values whose quality or monthly allocation cannot be preserved faithfully. Review the meter’s readings and settings before capture.');
       }
     }
+    if (series.find(item => item.sourceId === source.id)?.visible !== false && rows.some(row => row.values[metadata[0].id]?.state === 'observed')) visibleObservation = true;
     evidence.push({ request, capabilities: utilityCapabilities(source), chartSupport: utilityChartSupport(source, definition.chart!), resolution });
   }
+  if (!visibleObservation) return unsupported('Show at least one series with reproducible observations before saving this visualization.');
   return captureVisualizationDefinition(definition, evidence, { sourceIdentities: 'durable', omissions: [],
     preserved: ['sources', 'filters', 'aggregation', 'settings', 'series', 'periods', 'appearance', 'chart-settings'] });
 }

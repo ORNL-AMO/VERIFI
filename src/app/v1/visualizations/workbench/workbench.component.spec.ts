@@ -268,7 +268,7 @@ describe('visualization workbench', () => {
     const settings = root.querySelector('#visualization-settings')!;
     const sections = [...settings.children].filter(child => child.matches('app-visualization-decision-section'));
     expect(sections.map(section => section.querySelector('strong')?.textContent))
-      .toEqual(['Facilities', 'Chart', 'Data Sources', 'Meters', 'Predictors', 'Dates and comparison', 'Chart appearance']);
+      .toEqual(['Facilities', 'Chart', 'Data Sources', 'Meters', 'Predictors', 'Dates', 'Chart appearance']);
     expect(categories.closest('app-visualization-decision-section')!.querySelector('app-utility-source-editor')).toBeNull();
     const predictor = component.sourcePanels().find(source => source.kind === 'predictor')!;
     expect(component.expandedNodes().has(predictor.nodeId)).toBe(true);

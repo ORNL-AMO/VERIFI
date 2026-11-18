@@ -1,4 +1,5 @@
 @if (model) {
+  @if (model.yearToDateLabel) { <p class="time-series-share">{{ model.yearToDateLabel }}</p> }
   @if (model.chart.stack === 'percent') { <p class="time-series-share">Share of visible selected contributions for each period. Incomplete or zero totals have no percentage.</p> }
   @if (model.traces.length) {
     <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)"></div>

@@ -1,3 +1,4 @@
+import { yearToDateIssue } from './utility/utility-year-to-date';
 import { isCompositionChart, compositionPeriodIssue } from './visualization-composition';
 import { isExplorationChart, visualizationInterval, explorationChartIssue } from './visualization-interval';
 import { timeSeriesStackIssues } from './visualization-time-series';
@@ -347,6 +348,12 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     if (issue) add('capability', issue);
     if (definition.comparison.kind !== 'none') add('period', 'Exploration uses one selected period without comparison.');
     if (resolvedSources.some(entry => entry.resolved.periods.some(period => period.interval !== visualizationInterval(chart)))) add('period', 'Choose the same monthly or yearly observation interval for every source.');
+  }
+  const ytdIssue = yearToDateIssue(definition);
+  if (ytdIssue) add('period', ytdIssue);
+  if (chart.kind === 'time-series' && chart.yearToDate) {
+    if (resolvedSources.some(entry => !entry.resolved.yearToDate || !civilDate(entry.resolved.yearToDate.anchor) || !Number.isInteger(entry.resolved.yearToDate.monthCount) || entry.resolved.yearToDate.monthCount < 1 || entry.resolved.yearToDate.monthCount > 12)) add('period', 'Resolve the shared Year to Date cutoff before rendering.');
+    if (new Set(resolvedSources.map(entry => JSON.stringify(entry.resolved.yearToDate))).size > 1) add('period', 'Every yearly source must use the same Year to Date cutoff.');
   }
   const shapeKinds = new Set(resolvedSources.map(entry => entry.resolved.data.kind));
   if (shapeKinds.size > 1) add('capability', 'Combine sources only after a provider supplies one compatible data shape.');
