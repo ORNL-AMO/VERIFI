@@ -60,7 +60,7 @@
               <div class="creation-choices" aria-label="Meter resources">
                 @for (resource of lifecycle.resourceCards(); track resource.value) {
                   @let selected = lifecycle.form.controls.resourceIds.value.includes(resource.value);
-                  <button type="button" class="creation-choice creation-choice--multiple" [disabled]="lifecycle.composition() && !selected && lifecycle.form.controls.sourceKinds.value.length > 0" [attr.aria-pressed]="selected" (click)="lifecycle.toggleResource(resource.value)">
+                  <button type="button" class="creation-choice creation-choice--multiple" [attr.aria-pressed]="selected" (click)="lifecycle.toggleResource(resource.value)">
                     <app-ui-icon class="creation-choice__selection" [name]="selected ? 'success' : 'circle'" [size]="20"/>
                     <app-ui-icon [name]="resource.icon" [size]="28"/><strong>{{ resource.label }}</strong>
                     @if (resource.detail) { <span class="creation-choice__description">{{ resource.detail }}</span> }
