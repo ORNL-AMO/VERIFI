@@ -41,6 +41,23 @@ describe('utility composition projection', () => {
     const donut = setup('donut', [-10, 0]);
     expect(checkVisualizationCompatibility(donut.definition, [donut.evidence])).toMatchObject({ state: 'unavailable', reasons: expect.arrayContaining([expect.objectContaining({ code: 'data' })]) });
   });
+  it.each(['donut', 'percent-bar', 'treemap', 'sunburst'] as const)('ignores an explicitly hidden negative contribution in %s compatibility without dropping its evidence', kind => {
+    const { value, definition, request, projected } = setup('donut', [-10, 0]);
+    const credit = value.meters[0], positive = { ...credit, guid: 'positive', name: 'Positive usage' };
+    const snapshot = { ...value, meters: [credit, positive], meterData: [...value.meterData, ...value.meterData.map(row => ({ ...row, guid: `${row.guid}-positive`, meterId: positive.guid, totalEnergyUse: 20 }))] };
+    const source = { ...request.source as UtilityVisualizationSource, selection: { kind: 'fixed' as const, resource: 'meter' as const, guids: [credit.guid, positive.guid] } };
+    const chart: VisualizationDefinition['chart'] = kind === 'donut' ? { kind: 'breakdown', type: 'donut', values: 'absolute' }
+      : kind === 'percent-bar' ? { kind: 'breakdown', type: 'bar', values: 'percent' } : { kind, hierarchy: ['source', 'meter'], values: 'absolute' };
+    const hidden: VisualizationDefinition = { ...definition, chart, sources: [source], series: definition.series.map(series => ({ ...series, overrides: [{ resourceGuid: credit.guid, visible: false }] })) };
+    const submitted = { ...request, chart, source, series: hidden.series }, resolution = resolveCalendarizedUtility(snapshot, submitted, [projected,
+      calendarizedMeter(positive, [0, 1].map(month => monthlyData({ monthNumValue: month, energyUse: 20 })), { energyUnit: 'kWh', consumptionUnit: 'kWh' })]);
+    const evidence = { request: submitted, resolution, capabilities: utilityCapabilities(source), chartSupport: utilityChartSupport(source, chart) };
+    expect(checkVisualizationCompatibility(hidden, [evidence]).state).toBe('compatible');
+    expect(checkVisualizationCompatibility({ ...hidden, series: definition.series }, [{ ...evidence, request: { ...submitted, series: definition.series } }]))
+      .toMatchObject({ state: 'unavailable', reasons: expect.arrayContaining([expect.objectContaining({ code: 'data' })]) });
+    if (resolution.state !== 'ready') throw new Error(JSON.stringify(resolution));
+    expect(resolution.resolved.composition!.contributions.find(row => row.categories.meter?.id === credit.guid)?.observation).toMatchObject({ value: -10 });
+  });
   it('rejects partial-month boundaries and keeps missing monthly coverage partial rather than zero', () => {
     const { value, request, projected } = setup('donut', [10]);
     const result = resolveCalendarizedUtility(value, request, [projected]);

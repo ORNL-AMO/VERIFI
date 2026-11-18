@@ -98,6 +98,14 @@ function observations(data: VisualizationResolvedData['data']): readonly Visuali
   }
 }
 
+/** Visibility changes geometry, while original observations remain available in source details. */
+function visibleCompositionObservations(definition: VisualizationDefinition, resolved: VisualizationResolvedData): readonly VisualizationObservation[] {
+  if (!resolved.composition) return observations(resolved.data);
+  const visible = new Set(resolveVisualizationSeries(definition, resolved.series).map(series => series.metadata.id));
+  return [...resolved.composition.contributions, ...resolved.composition.residuals ?? []]
+    .filter(contribution => visible.has(contribution.seriesId)).map(contribution => contribution.observation);
+}
+
 function explicitSourceFacilities(source: VisualizationSource): readonly string[] | undefined {
   const selection = 'selection' in source ? source.selection : undefined;
   return selection?.kind === 'rule' ? selection.filter.facilityGuids?.length ? selection.filter.facilityGuids : undefined
@@ -291,7 +299,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     if (observations(resolved.data).some(point => point.state === 'observed' && !Number.isFinite(point.value)))
       add('data', 'Nonfinite observations cannot be rendered as valid data.', source.id);
     if ((chart.kind === 'sankey' || chart.kind === 'treemap' || chart.kind === 'sunburst' || chart.kind === 'breakdown' && chart.type === 'donut')
-      && [...observations(resolved.data), ...(resolved.composition?.contributions.map(value => value.observation) ?? [])].some(point => point.state === 'observed' && point.value < 0))
+      && visibleCompositionObservations(definition, resolved).some(point => point.state === 'observed' && point.value < 0))
       add('data', 'This composition contains unsupported negative contributions; use the source details to repair it.', source.id);
     resolvedSources.push({ source, resolved });
   }
@@ -363,7 +371,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     const periodIssue = compositionPeriodIssue(definition);
     if (periodIssue) add('period', periodIssue);
     if (definition.sources.length !== 1 || !['utility', 'energy-use'].includes(definition.sources[0].kind)) add('capability', 'Composition uses one utility or Energy Use source configuration.');
-    if (chart.kind === 'breakdown' && chart.values === 'percent' && resolvedSources.some(entry => observations(entry.resolved.data).some(point => point.state === 'observed' && point.value < 0))) add('data', 'Percentage breakdowns require nonnegative contributions. Choose absolute bars.');
+    if (chart.kind === 'breakdown' && chart.values === 'percent' && resolvedSources.some(entry => visibleCompositionObservations(definition, entry.resolved).some(point => point.state === 'observed' && point.value < 0))) add('data', 'Percentage breakdowns require nonnegative contributions. Choose absolute bars.');
     if (selected.some(entry => !entry.metadata.additive)) add('units', 'Stacking and composition require authoritative additive measures.');
     const contributions = new Set<string>();
     for (const { metadata } of selected) {
