@@ -11,6 +11,7 @@ import { ReportResultState } from '@app/v1/reports/shared/calculation/report-res
 import { BetterPlantsResult } from '../better-plants-report.service';
 import { BetterPlantsReportService } from '../better-plants-report.service';
 import { BetterPlantsPreviewComponent } from './better-plants-preview.component';
+import { ReportPresentationController } from '../../../shared/presentation/report-presentation-controller';
 
 describe('Better Plants in-app report', () => {
   afterEach(() => TestBed.resetTestingModule());
@@ -18,25 +19,34 @@ describe('Better Plants in-app report', () => {
     const snapshot = analysisReportFixture(category), workspace = new AccountWorkspaceStore(); workspace.publish(snapshot);
     const inputs = buildAnalysisReportInputs(snapshot, 'account-analysis');
     const state = signal<ReportResultState<BetterPlantsResult>>({ key: 'view', state: 'ready', value: { inputs, summaries: calculateBetterPlantsReport(inputs, [2023]), reviewed: true, completed: true, blocked: false, years: [2023], fingerprints: ['current'] } });
-    await TestBed.configureTestingModule({ imports: [AccountReportsModule], providers: [provideRouter([]),
+    await TestBed.configureTestingModule({ imports: [AccountReportsModule], providers: [provideRouter([]), ReportPresentationController,
       { provide: AccountReportWorkbenchContext, useValue: { workspace, report: computed(() => workspace.accountReports()[0]) } },
       { provide: BetterPlantsReportService, useValue: { state, checksRoute: () => ['/checks'] } }
     ] }).compileComponents();
-    const fixture = TestBed.createComponent(BetterPlantsPreviewComponent); fixture.detectChanges();
-    return { fixture, state, workspace };
+    const fixture = TestBed.createComponent(BetterPlantsPreviewComponent); fixture.detectChanges(); await fixture.whenStable();
+    return { fixture, state, workspace, presentation: TestBed.inject(ReportPresentationController) };
   }
   it.each(['energy', 'water'] as const)('renders the official-form %s content and baseline/report comparison', async category => {
-    const { fixture } = await setup(category);
+    const { fixture, presentation } = await setup(category);
     expect(fixture.nativeElement.querySelector('img').getAttribute('src')).toBe('assets/images/better-plants-report-banner.jpg');
     expect(fixture.nativeElement.querySelectorAll('table').length).toBeGreaterThanOrEqual(3);
     expect(fixture.nativeElement.textContent).toContain(category === 'water' ? 'Water Consumed (kGal)' : 'Energy Consumed (MMBtu)');
     expect(fixture.nativeElement.textContent).toContain('Baseline Year'); expect(fixture.nativeElement.textContent).toContain('Report Year');
     expect(fixture.nativeElement.querySelector('button')).toBeNull();
+    expect(presentation.available()).toBe(true);
   });
   it('removes rendered values when review becomes required and offers the checks destination', async () => {
-    const { fixture, state } = await setup();
+    const { fixture, state, presentation } = await setup();
     state.set({ key: 'view', state: 'review-required', message: 'Review required.' }); fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('table')).toBeNull(); expect(fixture.nativeElement.querySelector('img')).toBeNull();
     expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe('/checks');
+    expect(presentation.available()).toBe(false);
+  });
+  it('keeps presentation unavailable when there are no report periods', async () => {
+    const { fixture, state, presentation } = await setup();
+    state.update(current => ({ ...current, value: { ...current.value!, summaries: [] } })); fixture.detectChanges();
+    expect(presentation.available()).toBe(false);
+    expect(fixture.nativeElement.querySelector('article')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('No report periods are available');
   });
 });

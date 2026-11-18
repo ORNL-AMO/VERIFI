@@ -6,10 +6,12 @@ import { AnalysisReportSetupComponent } from './setup/analysis-report-setup.comp
 import { AnalysisReportDataChecksComponent } from './data-checks/analysis-report-data-checks.component';
 import { AnalysisReportPreviewComponent } from './preview/analysis-report-preview.component';
 import { AnalysisReportOutputService } from './output/analysis-report-output.service';
+import { ReportPresentationController } from '@app/v1/reports/shared/presentation/report-presentation-controller';
 
 export const FACILITY_ANALYSIS_REPORT: ReportFeatureDefinition = {
   type: 'analysis',
-  providers: [AnalysisReportEditor, FacilityAnalysisReportService, AnalysisReportOutputService,
-    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(AnalysisReportEditor), checks: inject(FacilityAnalysisReportService), gateSetup: true, output: inject(AnalysisReportOutputService).output }) }],
+  providers: [AnalysisReportEditor, FacilityAnalysisReportService, AnalysisReportOutputService, ReportPresentationController,
+    { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(AnalysisReportEditor), checks: inject(FacilityAnalysisReportService), gateSetup: true,
+      output: inject(AnalysisReportOutputService).output, presentation: inject(ReportPresentationController) }) }],
   stages: { setup: AnalysisReportSetupComponent, 'data-checks': AnalysisReportDataChecksComponent, report: AnalysisReportPreviewComponent }
 };

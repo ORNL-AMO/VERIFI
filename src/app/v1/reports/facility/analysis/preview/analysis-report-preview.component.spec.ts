@@ -7,6 +7,7 @@ import { FacilityAnalysisReportService } from '../analysis-report.service';
 import { buildFacilityAnalysisReportInputs } from '@domain/reports/analysis-report-inputs';
 import { facilityAnalysisReportFixture } from '../testing/analysis-report-test-fixtures';
 import { AnalysisReportPreviewComponent } from './analysis-report-preview.component';
+import { ReportPresentationController } from '../../../shared/presentation/report-presentation-controller';
 import { AnalysisReportResultChartsComponent } from '../result-charts/analysis-report-result-charts.component';
 import { GroupContributionsComponent } from '@app/v1/shared/analysis-results/group-contributions/group-contributions.component';
 import { ContributionHeatmapComponent } from '@app/v1/shared/analysis-results/contribution-heatmap/contribution-heatmap.component';
@@ -25,7 +26,7 @@ function contributionPreview(reportYear = 2023) {
   const service = { context: { report, facility: () => source.facility, workspace: { facilityAnalyses: () => [source.analysis] } },
     state: signal({ state: 'ready', value: { results, checks: [] } }), groupNames: labels,
     setupRoute: () => ['/setup'] };
-  TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [provideRouter([]),
+  TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [provideRouter([]), ReportPresentationController,
     { provide: FacilityAnalysisReportService, useValue: service }] });
   const fixture = TestBed.createComponent(AnalysisReportPreviewComponent);
   fixture.detectChanges();
@@ -48,7 +49,7 @@ describe('continuous facility report', () => {
     const service = { context: { report, facility: () => source.facility, workspace: { facilityAnalyses: () => [analysis] } }, state,
       groupNames: () => ({ [first.idbGroupId]: 'First plant group', 'second-group': 'Second plant group with a long descriptive name' }),
       checksRoute: () => ['/checks'], setupRoute: () => ['/setup'] };
-    TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [provideRouter([]), { provide: FacilityAnalysisReportService, useValue: service }] });
+    TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [provideRouter([]), ReportPresentationController, { provide: FacilityAnalysisReportService, useValue: service }] });
     const fixture = TestBed.createComponent(AnalysisReportPreviewComponent); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelectorAll('article.report-document')).toHaveLength(6);

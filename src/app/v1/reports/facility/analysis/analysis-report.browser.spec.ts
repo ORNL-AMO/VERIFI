@@ -1,5 +1,7 @@
 import * as echarts from 'echarts/core';
-import { Injector } from '@angular/core';
+import { Component, Injector, inject } from '@angular/core';
+import { PortalModule } from '@angular/cdk/portal';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
@@ -27,6 +29,10 @@ import { StatusItem } from '@app/v1/status/status.models';
 import { setupReportWorkbench } from '../testing/report-workbench-test-setup';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { FacilityAnalysisReportService } from './analysis-report.service';
+
+@Component({ standalone: true, imports: [PortalModule], host: { style: 'display:contents' },
+  template: '<div class="v1-root v1-palette-blueprint" style="display:contents"><ng-container [cdkPortalOutlet]="modal.activePortal()"/></div>' })
+class ReportPresentationPortalHost { readonly modal = inject(ModalPortalService); }
 
 describe('facility analysis report journey in Chromium', () => {
   let database: IndexedDbTestHarness;
@@ -194,6 +200,41 @@ describe('facility analysis report journey in Chromium', () => {
     const footer = root.querySelector<HTMLElement>('footer')!;
     expect(groupMonthly.getBoundingClientRect().bottom).toBeLessThanOrEqual(footer.getBoundingClientRect().top + 1);
     expect(calculations).toBe(1);
+    if (category === 'energy' && !source && !regression) {
+      const mount = root.parentElement!;
+      const portal = TestBed.createComponent(ReportPresentationPortalHost); portal.autoDetectChanges();
+      // TestBed replaces its default root when creating a second fixture; retain both surfaces.
+      mount.appendChild(root); root.appendChild(portal.nativeElement);
+      const beforePresentation = view.store.committedRevision(), checksBeforePresentation = checksCalculations;
+      const savedReport = structuredClone((await database.getAll('facilityReports'))[0]);
+      const present = root.querySelector<HTMLButtonElement>('footer .v1-wizard-actions__next > button')!;
+      expect(present.textContent?.trim()).toBe('Present'); expect(present.disabled).toBe(false);
+      const denyFullscreen = vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Use window fallback'));
+      try {
+        const pdfButton = root.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!;
+        pdfButton.focus({ preventScroll: true }); expect(document.activeElement).toBe(pdfButton);
+        // Programmatic activation reproduces browsers that do not focus buttons on click.
+        present.click();
+        await portal.whenStable(); view.harness.detectChanges();
+        expect(preview.querySelector('article.report-document')).toBeNull();
+        expect((portal.nativeElement as HTMLElement).querySelectorAll('article.report-document').length).toBe(papers.length);
+        await page.screenshot({ element: (portal.nativeElement as HTMLElement).querySelector<HTMLElement>('[role=dialog]')!, path: './__screenshots__/facility-analysis-presentation.png' });
+        const presentedPaper = (portal.nativeElement as HTMLElement).querySelector<HTMLElement>('article.report-document')!;
+        const paperWidth = presentedPaper.getBoundingClientRect().width;
+        await page.getByRole('button', { name: 'Zoom in', exact: true }).click(); await portal.whenStable();
+        expect(presentedPaper.getBoundingClientRect().width).toBeCloseTo(paperWidth * 1.1, 0);
+        expect((portal.nativeElement as HTMLElement).querySelector('article.report-document')).toBe(presentedPaper);
+        await page.getByRole('button', { name: 'Reset zoom to 100%', exact: true }).click(); await portal.whenStable();
+        expect(presentedPaper.getBoundingClientRect().width).toBeCloseTo(paperWidth, 0);
+        await page.getByRole('button', { name: 'Close presentation', exact: true }).click();
+        await portal.whenStable(); view.harness.detectChanges();
+        expect(root.querySelectorAll('article.report-document').length).toBe(papers.length);
+        expect(document.activeElement).toBe(present);
+        expect(calculations).toBe(1); expect(checksCalculations).toBe(checksBeforePresentation);
+        expect(view.store.committedRevision()).toBe(beforePresentation);
+        expect((await database.getAll('facilityReports'))[0]).toEqual(savedReport);
+      } finally { denyFullscreen.mockRestore(); portal.destroy(); }
+    }
     await view.open('facility-report', 'data-checks'); await waitFor(state => !!state.value?.checks);
     expect(retainedChart.isDisposed()).toBe(true);
     expect(coordinator.state().value?.checks?.map(check => check.reportYear)).toEqual([2023]);

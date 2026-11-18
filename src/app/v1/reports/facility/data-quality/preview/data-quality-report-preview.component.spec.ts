@@ -3,6 +3,7 @@ import { setupReportWorkbench } from '../../testing/report-workbench-test-setup'
 import { dataQualityReport, dataQualitySnapshot } from '../testing/data-quality-report-test-fixtures';
 import { DataQualityReportService } from '../data-quality-report.service';
 import { DataQualityReportEditor } from '../editing/data-quality-report-editor.service';
+import { METER_CONTENT_FLAGS, PREDICTOR_CONTENT_FLAGS } from '../data-quality-report-settings';
 
 function setup(reports = [dataQualityReport()]) { return setupReportWorkbench(reports, [], dataQualitySnapshot(reports)); }
 
@@ -82,6 +83,9 @@ describe('Data Quality report foundation', () => {
     expect(button.textContent?.trim()).toBe('PDF');
     expect(button.disabled).toBe(false);
     expect(button.title).toBe('');
+    expect(Array.from(harness.routeNativeElement!.querySelectorAll('footer button')).map(action => action.textContent?.trim()))
+      .toEqual(['PDF', 'Present']);
+    expect(workbench.workbench.session()!.runtime.presentation!.available()).toBe(true);
     const output = workbench.workbench.session()!.runtime.output!;
     const generate = vi.spyOn(output, 'generate').mockResolvedValue();
     button.click();
@@ -93,6 +97,19 @@ describe('Data Quality report foundation', () => {
     expect(store.facilityReports()[0]).toEqual(saved);
     expect(store.committedRevision()).toBeUndefined();
     expect(reportDefinition('facility', 'dataQuality')?.contentImplemented).toBe(true);
+  });
+
+  it('hides Present when no report content is enabled', async () => {
+    const report = dataQualityReport();
+    for (const flag of [...METER_CONTENT_FLAGS, ...PREDICTOR_CONTENT_FLAGS]) report.dataQualityReportSettings[flag] = false;
+    const view = await setup([report]);
+    const workbench = await view.open('report-a', 'report');
+    const runtime = workbench.workbench.session()!.runtime;
+    await vi.waitFor(() => { view.harness.detectChanges(); expect(view.harness.routeNativeElement!.textContent).toContain('No report content is enabled'); });
+    expect(runtime.presentation!.available()).toBe(false);
+    expect(Array.from(view.harness.routeNativeElement!.querySelectorAll('footer button'))
+      .some(button => button.textContent?.trim() === 'Present')).toBe(false);
+    expect(view.updateSetup).not.toHaveBeenCalled();
   });
 
   it('saves name edits before stage navigation, retains the session, and preserves all saved report settings', async () => {

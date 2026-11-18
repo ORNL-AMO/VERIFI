@@ -16,4 +16,5 @@ export class BetterPlantsPreviewComponent {
   });
   readonly company = computed(() => this.document()?.company);
   readonly pages = computed(() => this.document()?.pages ?? []);
+  readonly canPresent = computed(() => this.report.state().state === 'ready' && this.pages().length > 0);
 }
