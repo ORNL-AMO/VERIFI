@@ -36,12 +36,13 @@ describe('facility report workbench navigation', () => {
     if (value === 'modeling') expect(harness.routeNativeElement!.querySelector(previewSelector)).not.toBeNull();
     else expect(harness.routeNativeElement!.querySelector(`${previewSelector} h2`)?.textContent?.trim()).toBe(value === 'analysis'
       ? 'Facility analysis report' : value === 'dataQuality' ? 'Saved report' : `${label} Report`);
-    if (value === 'analysis' || value === 'dataQuality') {
+    if (['analysis', 'dataQuality', 'modeling'].includes(value)) {
       const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions')!;
       const buttons = Array.from(outputs.querySelectorAll<HTMLButtonElement>('button'));
-      expect(buttons.map(button => button.textContent?.trim())).toEqual(value === 'analysis' ? ['PDF', 'PowerPoint'] : ['PDF']);
+      expect(buttons.map(button => button.textContent?.trim())).toEqual(value === 'dataQuality' ? ['PDF'] : ['PDF', 'PowerPoint']);
       expect(buttons.every(button => button.disabled && button.type === 'button')).toBe(true);
-    } else expect(harness.routeNativeElement!.querySelector('footer')?.textContent).not.toContain('Back to reports');
+      if (value === 'modeling') expect(harness.routeNativeElement!.querySelector('footer')?.textContent).not.toContain('Back to reports');
+    } else expect(harness.routeNativeElement!.querySelector('footer')?.textContent).toContain('Back to reports');
     expect(harness.routeNativeElement!.querySelector('footer a')?.getAttribute('href')).toContain(['analysis', 'savings', 'costSavings'].includes(value) ? '/data-checks' : '/setup');
     expect(harness.routeNativeElement!.textContent).toContain(value === 'analysis' || value === 'modeling' ? 'Waiting for'
       : value === 'dataQuality' ? 'Review Setup' : 'preview is pending migration');
