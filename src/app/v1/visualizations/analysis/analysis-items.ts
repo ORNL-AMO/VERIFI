@@ -37,8 +37,10 @@ export function projectAnalysisItems(definition: VisualizationDefinition, source
   const identity = { resourceGuid: source.groupGuid ?? source.analysisGuid }, id = analysisSeriesId(source.id);
   const { series, override, appearance } = resolveItemPresentation(definition,
     { sourceId, metric: source.measure, identity, providerSeriesId: id });
+  const scopeLabel = source.groupGuid ? analysisGroupChoices(snapshot, source.analysisGuid).find(item => item.value === source.groupGuid)?.label ?? 'Unavailable group' : accountAnalysis ? 'Account total' : 'Facility total';
   return [{ key: itemKey(identity), identity, sourceId, selectedId: series?.id ?? `${sourceId}-series`,
-    label: analysis?.name ?? `Unavailable: ${source.analysisGuid}`, detail: `${source.groupGuid ? analysisGroupChoices(snapshot, source.analysisGuid).find(item => item.value === source.groupGuid)?.label ?? 'Unavailable group' : accountAnalysis ? 'Account total' : 'Facility total'} · ${analysisMeasureLabels[source.measure]}`,
+    scopeLabel, ...(facilityAnalysis ? { facilityGuid: facilityAnalysis.facilityId } : {}),
+    label: analysis?.name ?? `Unavailable: ${source.analysisGuid}`, detail: `${scopeLabel} · ${analysisMeasureLabels[source.measure]}`,
     unit: analysis ? analysisUnit(analysis, source.measure) : '', available, missing: !available,
     customized: !!series && isCustomized(series) || !!override && isCustomized(override, true), customColor: series?.color !== undefined || override?.color !== undefined,
     appearance }];

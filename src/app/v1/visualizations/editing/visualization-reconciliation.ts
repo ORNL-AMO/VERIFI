@@ -33,7 +33,7 @@ export function reconcileVisualizationIntent(base: VisualizationDefinition, loca
     { id: 'title' as const, label: 'Display title', get: (value: VisualizationDefinition) => value.appearance.title },
     { id: 'legend' as const, label: 'Legend', get: (value: VisualizationDefinition) => value.appearance.legend },
     { id: 'configuration' as const, label: 'Facilities, sources, periods, series, and chart settings', get: (value: VisualizationDefinition) => ({
-      facilitySelection: value.facilitySelection, sources: value.sources, period: value.period, comparison: value.comparison, series: value.series, chart: value.chart
+      facilitySelection: value.facilitySelection, sources: value.sources, period: value.period, comparison: value.comparison, series: value.series, chart: value.chart, displaySettings: value.displaySettings
     }) }
   ];
   const selected = new Map<string, unknown>();
@@ -52,7 +52,7 @@ export function reconcileVisualizationIntent(base: VisualizationDefinition, loca
     selected.set(group.id, chosen); baselines.set(group.id, baseline);
   }
   const compose = (values: Map<string, unknown>): VisualizationDefinition => {
-    const configuration = values.get('configuration') as Pick<VisualizationDefinition, 'facilitySelection' | 'sources' | 'period' | 'comparison' | 'series' | 'chart'>;
+    const configuration = values.get('configuration') as Pick<VisualizationDefinition, 'facilitySelection' | 'sources' | 'period' | 'comparison' | 'series' | 'chart' | 'displaySettings'>;
     const { chart: _oldChart, ...owner } = saved;
     const { chart, ...settings } = configuration;
     const title = values.get('title') as string | undefined;

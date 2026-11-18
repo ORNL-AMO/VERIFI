@@ -8,6 +8,10 @@ import type { VisualizationDecisionAction } from './decision-types';
 import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-catalog';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
 import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
+import { projectTraceItems } from '../shared/trace-items';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
+import { analysisDefinition, analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
+import { resolveUtilitySelection } from '@domain/visualizations/utility/utility-selection';
 
 const snapshot = () => ({ ...visualizationSnapshot(), meters: [meter({ groupId: 'group-a' }), meter({ guid: 'meter-b', groupId: 'group-a', source: 'Natural Gas' })],
   meterGroups: [group({ guid: 'group-a', name: 'Boilers' }), group({ guid: 'empty-group', name: 'Future equipment' })], meterData: [reading({})] });
@@ -26,6 +30,64 @@ function selected(mode: 'source' | 'group' | 'meter' | 'facility' | 'rule', ids:
 }
 
 describe('shared visualization decisions', () => {
+  it('keeps charges on one explicit meter and reviews clearing the old charge when replacing it', () => {
+    let definition = selected('meter', ['meter-a']);
+    definition = apply(definition, { kind: 'source-measures', sourceKind: 'utility', measures: ['charge'] });
+    const sourceId = definition.sources[0].id;
+    definition = apply(definition, { kind: 'source-settings', sourceId, settings: { charge: { meterGuid: 'meter-a', chargeGuid: 'charge-a', measure: 'cost' } } });
+    expect(prepareDecisionChange(definition, { kind: 'set-resources', sourceId, resourceIds: ['meter-a', 'meter-b'] }, { snapshot: snapshot() }).state).toBe('unchanged');
+    expect(prepareDecisionChange(definition, { kind: 'selection-mode', sourceId, mode: 'group' }, { snapshot: snapshot() }).state).toBe('unchanged');
+    for (const action of [
+      { kind: 'toggle-resource', sourceId, resourceId: 'meter-b', selected: true },
+      { kind: 'set-resources', sourceId, resourceIds: ['meter-b'] }
+    ] as const) {
+      const result = prepareDecisionChange(definition, action, { snapshot: snapshot() });
+      expect(result.state).toBe('confirm'); if (result.state === 'unchanged') throw new Error('Expected reviewed replacement');
+      expect(result.cleared).toContain('Named charge settings');
+      const source = result.definition.sources[0] as UtilityVisualizationSource;
+      expect(source.selection).toEqual({ kind: 'fixed', resource: 'meter', guids: ['meter-b'] });
+      expect(source.charge).toBeUndefined();
+      const scope = resolveVisualizationFacilities(result.definition, snapshot().facilities).scope;
+      expect(resolveUtilitySelection(snapshot(), scope, source).meters.map(meter => meter.guid)).toEqual(['meter-b']);
+    }
+  });
+  it('keeps usage and percentage axes when adding Analysis targets or result scopes', () => {
+    const data = analysisFixture(), definition = analysisDefinition();
+    const snapshot = { ...data.snapshot, facilityAnalyses: [data.analysis, { ...data.analysis, guid: 'second', name: 'Second analysis' }] };
+    const measured = prepareDecisionChange(definition, { kind: 'source-measures', sourceKind: 'analysis', measures: ['actual', 'savings'] }, { snapshot });
+    if (measured.state === 'unchanged') throw new Error('Expected selected measures');
+    const before = measured.definition.series;
+    const result = prepareDecisionChange(measured.definition, { kind: 'analysis-targets', targets: [{ analysisGuid: 'analysis-a' }, { analysisGuid: 'analysis-a', groupGuid: 'group-a' }, { analysisGuid: 'second' }] }, { snapshot });
+    if (result.state === 'unchanged') throw new Error('Expected new targets');
+    expect(result.definition.series.filter(series => series.metric === 'actual').map(series => series.axis)).toEqual(['left', 'left', 'left']);
+    expect(result.definition.series.filter(series => series.metric === 'savings').map(series => series.axis)).toEqual(['right', 'right', 'right']);
+    expect(result.definition.series.slice(0, 2)).toEqual(before);
+  });
+  it('reviews incompatible banked measures when an Analysis total is added to group targets', () => {
+    const data = analysisFixture(), definition = analysisDefinition('banked-savings', 'group-a');
+    const snapshot = { ...data.snapshot, facilityAnalyses: [{ ...data.analysis, hasBanking: true, groups: data.analysis.groups.map(group => ({ ...group, applyBanking: true })) }] };
+    const result = prepareDecisionChange(definition, { kind: 'analysis-targets', targets: [{ analysisGuid: 'analysis-a', groupGuid: 'group-a' }, { analysisGuid: 'analysis-a' }] }, { snapshot });
+    expect(result.state).toBe('confirm'); if (result.state === 'unchanged') throw new Error('Expected reviewed measure replacement');
+    expect(result.cleared).toContain('Incompatible analysis measures');
+    expect(result.definition.sources.map(source => source.measure)).toEqual(['actual', 'actual']);
+    expect(result.definition.series.map(series => series.metric)).toEqual(['actual', 'actual']);
+    expect(serializeVisualizationDefinition(result.definition).sources[0].targets).toHaveLength(2);
+  });
+  it('generates meter by measure traces, shares selection changes and preserves independent appearance and global order', () => {
+    let definition = selected('meter', ['meter-a', 'meter-b']);
+    definition = apply(definition, { kind: 'source-measures', sourceKind: 'utility', measures: ['energy', 'cost'] });
+    expect(projectTraceItems(definition, snapshot())).toHaveLength(4);
+    const cost = projectTraceItems(definition, snapshot()).find(item => item.sourceId !== 'source-1' && item.identity.resourceGuid === 'meter-a')!;
+    expect(cost.appearance.axis).toBe('right');
+    definition = apply(definition, { kind: 'item-style', sourceId: cost.sourceId, item: cost.identity, changes: { traceType: 'bar', visible: false, label: 'Meter cost' } });
+    definition = apply(definition, { kind: 'item-order', sourceId: cost.sourceId, item: cost.identity, direction: 'up' });
+    expect(projectTraceItems(definition, snapshot())[0]).toMatchObject({ sourceId: cost.sourceId, appearance: { traceType: 'bar', visible: false, label: 'Meter cost' } });
+    const remove = prepareDecisionChange(definition, { kind: 'toggle-resource', sourceId: 'source-1', resourceId: 'meter-a', selected: false }, { snapshot: snapshot() });
+    expect(remove.state).toBe('confirm'); if (remove.state === 'unchanged') throw new Error('Expected review');
+    expect(remove.definition.sources.every(source => source.kind === 'utility' && source.selection?.kind === 'fixed' && source.selection.guids.join() === 'meter-b')).toBe(true);
+    expect(serializeVisualizationDefinition(remove.definition).sources).toHaveLength(1);
+    expect(projectTraceItems(remove.definition, snapshot())).toHaveLength(2);
+  });
   it('retains blocked imported items and their style despite excluded GUID collisions while pruning verified siblings', () => {
     const selectedBoth = selected('meter', ['meter-a', 'meter-b']);
     const definition: VisualizationDefinition = { ...selectedBoth, series: [

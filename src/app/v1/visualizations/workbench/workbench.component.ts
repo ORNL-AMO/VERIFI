@@ -7,6 +7,7 @@ import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-ca
 import { discoverEquipmentSeries } from '@domain/visualizations/energy-use/equipment-source';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
 import { projectDecisionItems, configuredChartSummary } from '../shared/configured-items';
+import { projectTraceItems, utilityMeasureLabels } from '../shared/trace-items';
 import { resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, DestroyRef, ElementRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
@@ -38,6 +39,7 @@ import { predictorStatusPresentation as dataStatusPresentation } from '@app/v1/d
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
 export class WorkbenchComponent {
   readonly editor = inject(VisualizationEditorSession);
+  readonly smoothLines = new FormControl(false, { nonNullable: true });
   readonly dataSources = computed(() => {
     const definition = this.editor.definition(), kinds = new Set(definition?.sources.map(source => source.kind));
     const composition = isCompositionChart(definition?.chart);
@@ -128,6 +130,9 @@ export class WorkbenchComponent {
   @ViewChild('leaveDialog', { static: true }) private leaveDialog!: TemplateRef<unknown>;
   @ViewChild(RecoveryActionsComponent) private recoveryActions?: RecoveryActionsComponent;
   readonly accountGuid = computed(() => this.navigation.routeState().accountGuid ?? '');
+  readonly capturedReturn = computed(() => this.journeys.monthlyMeterReturn(this.accountGuid(), this.navigation.routeState().visualizationGuid ?? ''));
+  readonly canReturnToMeter = computed(() => this.journeys.canReturnToMonthlyMeter(this.accountGuid(), this.navigation.routeState().visualizationGuid ?? '', this.workspace.snapshot()));
+  readonly returnError = signal('');
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const route = this.journeys.dashboardRoute(this.accountGuid());
     if (this.navigation.isSingleSiteWorkspace()) return [{ label: 'Dashboard', icon: 'dataVisualization', route }];
@@ -147,7 +152,7 @@ export class WorkbenchComponent {
   readonly sourcePanels = computed(() => {
     const definition = this.editor.definition(), key = this.editor.key(), revision = this.editor.localRevision();
     if (!definition) return [];
-    return definition.sources.map(source => {
+    return definition.sources.filter((source, index, sources) => sources.findIndex(item => item.kind === source.kind) === index).map(source => {
       const choice = VISUALIZATION_DATA_SOURCES.find(item => item.value === source.kind)!;
       const nodeId = decisionNodeId({ kind: 'source', sourceId: source.id });
       const context: VisualizationSourceEditorContext = { definition, sourceId: source.id, editorKey: this.editorKey(),
@@ -167,6 +172,8 @@ export class WorkbenchComponent {
             } else if (action.kind === 'source-settings') {
               const currentSource = current.sources.find(item => item.id === action.sourceId);
               if (source.kind !== 'utility' || currentSource?.kind !== 'utility' || currentSource.measure !== source.measure) return;
+            } else if (action.kind === 'source-measures' || action.kind === 'analysis-targets') {
+              if (action.kind === 'source-measures' && source.kind !== action.sourceKind || action.kind === 'analysis-targets' && source.kind !== 'analysis') return;
             } else return;
           }
           void this.requestDecision(action);
@@ -176,11 +183,22 @@ export class WorkbenchComponent {
         draftChanged: () => this.childRevision.update(value => value + 1),
         changed: next => { if (this.editor.key() === key && this.editor.localRevision() === revision) this.editor.applyDefinition(next); } };
       return { id: source.id, kind: source.kind, label: choice.label, icon: choice.icon, nodeId,
-        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}`
+        summary: source.kind === 'utility' ? definition.sources.filter(item => item.kind === source.kind).map(item => utilityMeasureLabels[item.measure] ?? item.measure).join(', ')
           : source.kind === 'predictor' ? '' : source.measure,
         context, attention: this.invalidEditors()[nodeId] || Object.entries(this.invalidEditors()).some(([id, invalid]) => invalid && id.split(':')[1] === encodeURIComponent(source.id)) };
     });
   });
+  readonly traceItems = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    return definition && snapshot ? projectTraceItems(definition, snapshot).map(item => ({ ...item,
+      resetKey: this.nodeResetKeys()[decisionNodeId({ kind: 'item', sourceId: item.sourceId, itemKey: item.key })] ?? 0 })) : [];
+  });
+  readonly sourceCategoryCount = computed(() => new Set(this.editor.definition()?.sources.map(source => source.kind)).size);
+  readonly displayContext = computed(() => {
+    const key = this.editor.key();
+    return { definition: this.editor.definition()!, disabled: !this.editor.canEdit(), editorKey: this.editorKey(), request: (action: VisualizationDecisionAction) => { if (this.editor.key() === key) this.requestTrace(action); } };
+  });
+  requestTrace(action: VisualizationDecisionAction): void { void this.requestDecision(action); }
   readonly chartSummary = computed(() => {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : 'Chart not selected';
@@ -230,6 +248,17 @@ export class WorkbenchComponent {
   readonly saveNeedsAttention = computed(() => this.hasInvalidFields() || ['invalid', 'error', 'conflict', 'refresh-required', 'missing'].includes(this.editor.state()));
 
   constructor() {
+    effect(() => {
+      const chart = this.editor.definition()?.chart, enabled = this.editor.canEdit();
+      this.smoothLines.setValue(chart?.kind === 'time-series' && chart.smoothLines === true, { emitEvent: false });
+      if (enabled) this.smoothLines.enable({ emitEvent: false }); else this.smoothLines.disable({ emitEvent: false });
+    });
+    const smoothing = this.smoothLines.valueChanges.subscribe(value => {
+      const definition = this.editor.definition();
+      if (this.editor.canEdit() && definition?.chart?.kind === 'time-series' && !!definition.chart.smoothLines !== value)
+        this.editor.applyDefinition({ ...definition, chart: { ...definition.chart, smoothLines: value } });
+    });
+    this.destroy.onDestroy(() => smoothing.unsubscribe());
     effect(() => {
       const route = this.navigation.routeState();
       if (route.section === 'visualization' && route.visualizationGuid && route.accountGuid) {
@@ -398,6 +427,16 @@ export class WorkbenchComponent {
     this.expandedNodes.update(current => new Set([...current, ...ids]));
   }
   back(): void { void this.journeys.returnToDashboard(this.accountGuid()); }
+
+  async backToMonthlyChart(): Promise<void> {
+    const key = this.editor.key();
+    if (!await this.resolveLeave() || key !== this.editor.key()) return;
+    this.returnError.set('');
+    try {
+      if (await this.journeys.returnToMonthlyMeter(this.accountGuid(), this.navigation.routeState().visualizationGuid ?? '', this.workspace.snapshot())) return;
+    } catch { /* A failed route must retain the workbench and its safe navigation. */ }
+    if (key === this.editor.key()) this.returnError.set('The Monthly Chart could not be opened. Retry, or use the breadcrumbs to return to Visualizations.');
+  }
 
   resolveLeave(): Promise<boolean> {
     if (this.leaving) return this.leaving;

@@ -4,8 +4,8 @@ import type { VisualizationResolvedData, VisualizationSourceRequest, Visualizati
 import { civilMonthIndex, civilMonthRange, wholeMonthWindow } from './visualization-periods';
 
 export function isMixedPredictorSourceSet(sources: readonly VisualizationSource[]): boolean {
-  return sources.length === 2 && sources.filter(source => source.kind === 'predictor').length === 1
-    && sources.some(source => source.kind === 'utility' && source.dataMode === 'calendarized');
+  return sources.some(source => source.kind === 'predictor') && sources.some(source => source.kind === 'utility')
+    && sources.every(source => source.kind === 'predictor' || source.kind === 'utility' && source.dataMode === 'calendarized');
 }
 
 export function predictorCombinationSupported(definition: VisualizationDefinition): boolean {

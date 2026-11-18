@@ -35,26 +35,21 @@ import { echarts } from '@app/v1/shared/charts/echarts';
 
 function providers() { return [provideRouter([]), { provide: LocalStorageService, useValue: { retrieve: () => null, store: () => {}, clear: () => {} } }]; }
 describe('A1 saved facility analysis native journey', () => {
-  it('requires a report-style analysis card in Add and leaves result configuration to the workbench', async () => {
+  it('requires a exact Analysis resource in Add and leaves result configuration to the workbench', async () => {
     const { workspace } = configureLibraryTest([LibraryModule]); workspace.publish(analysisFixture().snapshot);
     const drawer = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
     lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources(); drawer.detectChanges();
     const root = drawer.nativeElement as HTMLElement; root.className = 'v1-root';
     try {
-      expect(root.querySelector('app-report-analysis-selection')).not.toBeNull();
+      expect(root.querySelector('app-visualization-resource-picker')).not.toBeNull();
       expect(root.querySelector('[formcontrolname=interval]')).toBeNull(); expect(root.querySelector('[formcontrolname=measure]')).toBeNull();
       expect(root.querySelector('.creation-selections')?.textContent).not.toContain('Choose analysis later');
-      expect(root.querySelector('[role=radiogroup]')?.getAttribute('aria-required')).toBe('true');
       const next = [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Continue')!;
       expect(next.disabled).toBe(true); lifecycle.continueAnalysis(); expect(lifecycle.step()).toBe('analysis');
-      const radio = root.querySelector<HTMLInputElement>('input[type=radio]')!;
+      const radio = root.querySelector<HTMLButtonElement>('.resource-picker__option')!;
       radio.focus(); await userEvent.keyboard(' '); drawer.detectChanges();
       expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a', mode: 'result', measure: 'actual' });
       expect(lifecycle.step()).toBe('analysis'); expect(next.disabled).toBe(false);
-      root.querySelector<HTMLButtonElement>('[aria-label="Inspect Production baseline"]')!.click(); drawer.detectChanges();
-      expect(root.querySelector('app-analysis-details-slideout')).not.toBeNull();
-      root.querySelector<HTMLButtonElement>('app-analysis-details-slideout .v1-workspace-slideout__footer button')!.click(); drawer.detectChanges();
-      expect(root.querySelector('app-analysis-details-slideout')).toBeNull();
       for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
         await page.viewport(width, 850); root.className = `v1-root ${theme}`;
         const dialog = root.querySelector<HTMLElement>('[role=dialog]')!;

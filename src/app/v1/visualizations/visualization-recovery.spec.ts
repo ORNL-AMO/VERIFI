@@ -6,8 +6,22 @@ import { reviewVisualizationReset, reviewVisualizationFacilityCopy } from './vis
 import { equipmentDefinition, equipmentSnapshot } from '@domain/visualizations/testing/equipment-fixtures';
 import type { EnergyUseSelectionMode, EnergyUseVisualizationSource, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { energyUseResourceKind } from '@domain/visualizations/energy-use/equipment-selection';
+import { analysisDefinition } from '@domain/visualizations/testing/analysis-fixtures';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 
 describe('reviewed visualization recovery', () => {
+  it('resets a shared Analysis selection once per measure without leaving duplicate or partially bound targets', () => {
+    const base = analysisDefinition(), source = base.sources[0];
+    if (source.kind !== 'analysis' || source.mode !== 'result') throw new Error('Expected Analysis results');
+    const sources = ['analysis-a', 'analysis-b'].flatMap(analysisGuid => (['actual', 'calculated'] as const).map(measure => ({ ...source, id: `${analysisGuid}-${measure}`, analysisGuid, measure })));
+    const original = { ...base, sources, series: [] };
+    const review = reviewVisualizationReset(original, [{ path: 'sources.0.analysisGuid', kind: 'analysis', guid: 'analysis-a', reason: 'missing' }]);
+    expect(review.definition.sources).toHaveLength(2);
+    expect(review.definition.sources.every(item => item.kind === 'analysis' && !item.analysisGuid)).toBe(true);
+    expect(decodeVisualizationDefinition(serializeVisualizationDefinition(review.definition)).state).toBe('setup-required');
+    expect(review.referencePaths).toContain('sources.3.analysisGuid');
+    expect(original.sources).toHaveLength(4);
+  });
   it.each<EnergyUseSelectionMode>(['equipment', 'group', 'equipment-type', 'linked-meter-group', 'facility'])('resets %s Energy Use choices and dependent appearance while retaining reusable settings', mode => {
     const base = equipmentDefinition(), source: EnergyUseVisualizationSource = { ...base.sources[0] as EnergyUseVisualizationSource,
       selectionMode: mode, aggregation: mode === 'equipment' ? 'none' : 'sum', settings: { unit: { kind: 'pinned', value: 'MJ' } } };

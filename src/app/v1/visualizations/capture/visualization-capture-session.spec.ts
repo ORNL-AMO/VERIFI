@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import type { CreateVisualizationCommand, VisualizationCommandOutcome } from '@data/account-workspace/visualization-commands.models';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
-import { UtilityCaptureSession } from './utility-capture-session';
+import { VisualizationCaptureSession } from './visualization-capture-session';
 
 describe('inventory capture creation lifecycle', () => {
   function setup() {
@@ -13,7 +13,7 @@ describe('inventory capture creation lifecycle', () => {
     const prepare = vi.fn(() => command), submit = vi.fn(async (_submitted: CreateVisualizationCommand): Promise<VisualizationCommandOutcome> => ({ state: 'committed', command, value: record, referenceIssues: [] }));
     const recover = vi.fn(async () => ({ state: 'valid' as const, record, definition, issues: [] })), open = vi.fn(async () => true), registerProtection = vi.fn(() => unregister);
     const resolve = vi.fn(() => ({ prepare, submit, recover, open, accountGuid: account, ready, registerProtection }));
-    return { session: new UtilityCaptureSession(resolve), definition, command, account, ready, prepare, submit, recover, open, registerProtection, unregister, resolve };
+    return { session: new VisualizationCaptureSession(resolve), definition, command, account, ready, prepare, submit, recover, open, registerProtection, unregister, resolve };
   }
   it('resolves storage dependencies only on capture and retains one identity through rejected-write retries', async () => {
     const state = setup(); expect(state.resolve).not.toHaveBeenCalled();

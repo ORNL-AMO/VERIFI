@@ -1,4 +1,6 @@
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import { EQUIPMENT_TYPES } from './energy-use/equipment-selection';
+import { expandVisualizationDefinition } from './visualization-source-groups';
 import { VISUALIZATION_DEFINITION_VERSION, VisualizationDefinition, VisualizationSource, VisualizationSourceKind } from './visualization-definition';
 
 export interface VisualizationIssue {
@@ -68,7 +70,12 @@ const selection = variant({
     facilityGuids: array(text), groupGuids: array(text), utilitySources: array(text), search: text, includeRetired: boolean
   }, ['facilityGuids', 'groupGuids', 'utilitySources', 'search', 'includeRetired']) })
 });
-const settings = object({ unit: binding(text), energyTreatment: binding(enumeration('site', 'source')) }, ['unit', 'energyTreatment']);
+const quantityUnitMap: Check = (value, path, issues) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) { issue(issues, path, 'Expected physical quantity units.'); return; }
+  const converter = new ConvertValue(undefined, '', '');
+  for (const [quantity, unit] of Object.entries(value)) if (typeof unit !== 'string' || converter.getUnit(unit)?.measure !== quantity) issue(issues, path, 'Choose compatible physical quantity units.');
+};
+const settings = object({ unit: binding(text), energyTreatment: binding(enumeration('site', 'source')), quantityUnits: quantityUnitMap }, ['unit', 'energyTreatment', 'quantityUnits']);
 const base = { id: text, settings };
 const source = variant({
   utility: object({ ...base, kind: enumeration('utility'), measure: enumeration('energy', 'consumption', 'cost', 'location-emissions', 'market-emissions', 'charge'),
@@ -112,7 +119,7 @@ const selector: Check = (value, path, issues) => {
 };
 const chart = variant({
   'time-series': object({ kind: enumeration('time-series'), defaultTraceType: enumeration('line', 'bar', 'area'), interval: enumeration('monthly', 'yearly', 'native'),
-    stack: enumeration('none', 'absolute', 'percent') }),
+    stack: enumeration('none', 'absolute', 'percent'), smoothLines: boolean }, ['smoothLines']),
   scatter: object({ kind: enumeration('scatter'), ...pairFields, x: selector, y: selector, xSeriesId: text, ySeriesId: text, showFit: boolean }, ['interval', 'grouping', 'scale', 'x', 'y', 'xSeriesId', 'ySeriesId']),
   correlation: object({ kind: enumeration('correlation'), ...pairFields, statistic: enumeration('r', 'r-squared'), view: enumeration('pairs', 'matrix'), showFit: boolean }, ['interval', 'grouping', 'view', 'showFit']),
   heatmap: object({ kind: enumeration('heatmap'), ...explorationFields, dimension: enumeration('month-year', 'series-period'), scale: enumeration('linear', 'diverging'), normalization: enumeration('raw', 'z-score') }, ['interval', 'normalization']),
@@ -136,13 +143,23 @@ const seriesOverride: Check = (value, path, issues) => {
     if (count !== 1) issue(issues, path, 'Choose exactly one resource GUID or provider series identity for a presentation override.');
   }
 };
+const displaySettings = object({ units: (value, path, issues) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) { issue(issues, path, 'Expected quantity unit bindings.'); return; }
+  for (const [quantity, unit] of Object.entries(value)) {
+    const converter = new ConvertValue(undefined, '', '');
+    if (!Object.hasOwn(converter._measures, quantity)) issue(issues, path, 'Choose a recognized physical quantity.');
+    if (unit && typeof unit === 'object' && 'kind' in unit && unit.kind === 'pinned' && 'value' in unit
+      && (typeof unit.value !== 'string' || converter.getUnit(unit.value)?.measure !== quantity)) issue(issues, path, 'Choose units compatible with this physical quantity.');
+    binding(text)(unit, `${path}.${quantity}`, issues);
+  }
+}, energyTreatment: binding(enumeration('site', 'source')) }, ['units', 'energyTreatment']);
 const definition: Check = object({
   version: enumeration(VISUALIZATION_DEFINITION_VERSION), name: text, accountGuid: text,
   facilitySelection: variant({ all: object({ kind: enumeration('all') }), fixed: object({ kind: enumeration('fixed'), facilityGuids: array(text) }) }),
   sources: array(source), period, comparison,
   series: array(object({ ...seriesFields, visible: boolean, overrides: array(seriesOverride) }, [...seriesOptional, 'visible', 'overrides'])),
-  chart, appearance: object({ legend: boolean, title: text }, ['title'])
-}, ['chart']);
+  chart, appearance: object({ legend: boolean, title: text }, ['title']), displaySettings
+}, ['chart', 'displaySettings']);
 
 /** Reject values JSON would silently change or drop before validating their known fields. */
 function checkJson(value: unknown, path: string, issues: VisualizationIssue[], ancestors = new Set<object>(), depth = 0): void {
@@ -216,6 +233,8 @@ export function decodeVisualizationDefinition(value: unknown): VisualizationVali
   const issues: VisualizationIssue[] = [];
   checkJson(value, '$', issues);
   if (issues.length) return { state: 'invalid', issues };
+  try { value = expandVisualizationDefinition(value); }
+  catch (error) { return { state: 'invalid', issues: [{ path: '$.sources', code: 'invalid', message: error instanceof Error ? error.message : 'Invalid source groups.' }] }; }
   if (value && typeof value === 'object' && !Array.isArray(value) && Object.hasOwn(value, 'version')) {
     const version = (value as { version: unknown }).version;
     if (typeof version === 'number' && Number.isSafeInteger(version) && version > 0 && version !== VISUALIZATION_DEFINITION_VERSION)

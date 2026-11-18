@@ -22,6 +22,10 @@ import { visualizationIntentEqual } from '../editing/visualization-reconciliatio
 import { meterResourceChoices, nativeObservationAvailable } from '../utility/utility-items';
 import { itemKey, overrideMatches, findItemSeries, isCustomized } from '../shared/item-appearance';
 import { projectDecisionItems } from '../shared/configured-items';
+import { projectTraceItems } from '../shared/trace-items';
+import { utilityMeasureLabels } from '../shared/trace-items';
+import type { VisualizationSource } from '@domain/visualizations/visualization-definition';
+import { initializeAnalysisDisplaySettings, visualizationSourceQuantity } from '@domain/visualizations/visualization-display-settings';
 export { meterSelectionChoices, meterResourceChoices, nativeObservationAvailable, projectMeterItems } from '../utility/utility-items';
 import type { DecisionChangeContext, DecisionChangeResult, DecisionItemIdentity, DecisionItemPatch,
   DecisionRef, VisualizationDecisionAction } from './decision-types';
@@ -63,6 +67,19 @@ function ensureSeries(definition: VisualizationDefinition, source: UtilityVisual
   let id = `${source.id}-series`, index = 1;
   while (definition.series.some(series => series.id === id)) id = `${source.id}-series-${index++}`;
   return { ...definition, series: [...definition.series, { id, sourceId: source.id, metric, axis: 'left' }] };
+}
+/** New traces reuse an existing measure/quantity axis before choosing the other axis. */
+function alignNewSourceAxis(definition: VisualizationDefinition, source: VisualizationSource, snapshot: AccountWorkspaceSnapshot): VisualizationDefinition {
+  const quantity = (item: VisualizationSource) => item.kind === 'utility' && (item.measure === 'cost' || item.measure === 'charge') ? 'currency'
+    : item.kind === 'analysis' && !['actual', 'calculated'].includes(item.measure) ? 'percentage'
+    : item.kind === 'utility' && item.measure.endsWith('emissions') ? 'emissions' : visualizationSourceQuantity(definition, item, snapshot) ?? item.measure;
+  const peers = definition.sources.filter(item => item.id !== source.id && definition.series.some(series => series.sourceId === item.id));
+  const compatible = peers.find(item => item.kind === source.kind && item.measure === source.measure && quantity(item) === quantity(source))
+    ?? peers.find(item => quantity(item) === quantity(source));
+  const reference = compatible ?? peers[0];
+  const usedAxis = definition.series.find(series => series.sourceId === reference?.id)?.axis ?? 'left';
+  const axis = compatible ? usedAxis : reference ? usedAxis === 'left' ? 'right' : 'left' : 'left';
+  return { ...definition, series: definition.series.map(series => series.sourceId === source.id ? { ...series, axis } : series) };
 }
 function replaceSource(definition: VisualizationDefinition, source: UtilityVisualizationSource): VisualizationDefinition {
   return ensureSeries({ ...definition, sources: definition.sources.map(item => item.id === source.id ? source : item) }, source);
@@ -133,7 +150,8 @@ function withoutItem(definition: VisualizationDefinition, source: UtilityVisuali
     }) });
 }
 
-export function prepareDecisionChange(definition: VisualizationDefinition, action: VisualizationDecisionAction, context: DecisionChangeContext): DecisionChangeResult {
+type SingleDecisionAction = Exclude<VisualizationDecisionAction, { kind: 'source-measures' | 'analysis-targets' | 'chart-display' }>;
+function prepareSingleDecisionChange(definition: VisualizationDefinition, action: SingleDecisionAction, context: DecisionChangeContext): DecisionChangeResult {
   let next = definition;
   const cleared: string[] = [], affected = new Set<string>();
   let nextSection: DecisionRef | undefined;
@@ -384,6 +402,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     if (source?.kind !== 'utility') return { state: 'unchanged' };
 
     if (action.kind === 'selection-mode') {
+      if (source.measure === 'charge' && action.mode !== 'meter') return { state: 'unchanged' };
       if (source.selectionMode === action.mode) return { state: 'unchanged' };
       clearItems(source.id, true);
       const { selection: _selection, charge: _charge, ...base } = source;
@@ -402,7 +421,8 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       const selected = mode === 'source' ? source.selection?.kind === 'rule' ? source.selection.filter.utilitySources ?? [] : []
         : source.selection?.kind === 'fixed' ? source.selection.guids : [];
       const ids = action.kind === 'set-resources' ? [...new Set(action.resourceIds)]
-        : action.selected ? [...new Set([...selected, action.resourceId])] : selected.filter(id => id !== action.resourceId);
+        : action.selected ? source.measure === 'charge' ? [action.resourceId] : [...new Set([...selected, action.resourceId])] : selected.filter(id => id !== action.resourceId);
+      if (source.measure === 'charge' && (mode !== 'meter' || ids.length > 1)) return { state: 'unchanged' };
       if (ids.length === selected.length && ids.every(id => selected.includes(id))) return { state: 'unchanged' };
       const added = ids.filter(id => !selected.includes(id)), removed = selected.filter(id => !ids.includes(id));
       const available = new Set(meterResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, mode, source.measure).map(choice => choice.value));
@@ -416,10 +436,12 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         next = withoutItem(next, source, identity);
       }
       if (removed.length && !ids.length && hasSourcePresentation(definition, source.id)) cleared.push('Customized item presentation');
-      const { selection: _selection, ...base } = source;
+      const { selection: _selection, charge, ...base } = source;
+      const retainCharge = charge && ids.length === 1 && ids[0] === charge.meterGuid;
+      if (charge && !retainCharge) { cleared.push('Named charge settings'); affect({ kind: 'data-settings', sourceId: source.id }); }
       const selection: ResourceSelection | undefined = ids.length ? mode === 'source' ? { kind: 'rule', resource: 'meter', filter: { utilitySources: ids } }
         : { kind: 'fixed', resource: mode === 'group' ? 'meter-group' : mode === 'facility' ? 'facility' : 'meter', guids: ids } : undefined;
-      next = replaceSource(next, { ...base, ...(selection ? { selection } : {}) });
+      next = replaceSource(next, { ...base, ...(retainCharge ? { charge } : {}), ...(selection ? { selection } : {}) });
       if (!ids.length) next = pruneChart({ ...next, series: next.series.filter(series => series.sourceId !== source.id) });
       nextSection = { kind: 'data-settings', sourceId: source.id };
     } else if (action.kind === 'measure') {
@@ -474,7 +496,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   }
   if ('sourceId' in action && ['toggle-resource', 'set-resources', 'selection-mode'].includes(action.kind) && !visualizationIntentEqual(next, definition)) {
     const source = next.sources.find(source => source.id === action.sourceId);
-    if (source?.kind === 'utility' && source.dataMode === 'billing-period' && !nativeObservationAvailable(next, source.id, context.snapshot)) {
+    if (source?.kind === 'utility' && source.measure !== 'charge' && source.dataMode === 'billing-period' && !nativeObservationAvailable(next, source.id, context.snapshot)) {
       next = replaceSource(next, { ...source, dataMode: 'calendarized' });
       if (next.chart?.kind === 'time-series' && next.chart.interval === 'native') next = { ...next, chart: { ...next.chart, interval: 'monthly' } };
       cleared.push('Native bill observation view'); nextSection = { kind: 'data-settings', sourceId: source.id };
@@ -496,4 +518,120 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     || !!id.split(':')[1] && affected.has(`source:${id.split(':')[1]}`)) ?? [];
   if (invalidated.length) cleared.push('Incomplete input in the affected sections');
   return { state: cleared.length ? 'confirm' : 'apply', definition: next, cleared: [...new Set(cleared)], affectedNodeIds: [...affected], ...(nextSection ? { next: nextSection } : {}) };
+}
+
+/** Source decisions act on a shared selection; trace decisions remain individually qualified. */
+export function prepareDecisionChange(definition: VisualizationDefinition, action: VisualizationDecisionAction, context: DecisionChangeContext): DecisionChangeResult {
+  let next = definition;
+  const cleared: string[] = [], affected = new Set<string>();
+  let nextRef: DecisionRef | undefined;
+  const result = (): DecisionChangeResult => visualizationIntentEqual(next, definition) ? { state: 'unchanged' }
+    : { state: cleared.length ? 'confirm' : 'apply', definition: cleanJson(next), cleared: [...new Set(cleared)], affectedNodeIds: [...affected], ...(nextRef ? { next: nextRef } : {}) };
+  const remove = (sources: readonly VisualizationSource[]) => {
+    for (const source of sources) {
+      if (context.invalidNodeIds?.some(id => id.split(':')[1] === encodeURIComponent(source.id))) cleared.push('Unsaved trace fields');
+      if (hasSourcePresentation(next, source.id)) cleared.push('Customized trace presentation');
+      affected.add(decisionNodeId({ kind: 'source', sourceId: source.id }));
+    }
+    const ids = new Set(sources.map(source => source.id));
+    next = pruneChart({ ...next, sources: next.sources.filter(source => !ids.has(source.id)), series: next.series.filter(series => !ids.has(series.sourceId)) });
+  };
+  if (action.kind === 'analysis-interval') {
+    const members = definition.sources.filter(source => source.kind === 'analysis');
+    if (!members.length) return { state: 'unchanged' };
+    const supported = [...new Set(members.filter(source => source.mode === 'result').map(source => source.measure))].filter(measure => action.interval === 'yearly'
+      ? ['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(measure) : !['annual-improvement', 'total-improvement'].includes(measure));
+    const changed = prepareDecisionChange(definition, { kind: 'source-measures', sourceKind: 'analysis', measures: supported.length ? supported : ['actual'] }, context);
+    if (changed.state !== 'unchanged') { next = changed.definition; cleared.push(...changed.cleared, 'Incompatible analysis measures'); changed.affectedNodeIds.forEach(id => affected.add(id)); }
+    next = { ...next, chart: isExplorationChart(definition.chart) ? { ...definition.chart, interval: action.interval } : { ...definition.chart, kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line', interval: action.interval, stack: 'none' } };
+    if (analysisPeriodIssue({ chart: next.chart!, period: next.period, comparison: next.comparison })) {
+      cleared.push('Incompatible period or comparison'); next = { ...next, period: { kind: 'all-history' }, comparison: { kind: 'none' } };
+    }
+    affected.add(decisionNodeId({ kind: 'period' })); return result();
+  }
+  if (action.kind === 'chart-display') {
+    next = { ...definition, displaySettings: structuredClone(action.settings) }; return result();
+  }
+  if (action.kind === 'source-measures') {
+    const members = definition.sources.filter(source => source.kind === action.sourceKind), first = members[0];
+    if (!first || !action.measures.length || isCompositionChart(definition.chart) && action.measures.length !== 1) return { state: 'unchanged' };
+    const allowed = first.kind === 'utility' ? Object.keys(utilityMeasureLabels) : first.kind === 'analysis' ? Object.keys(analysisMeasureLabels) : first.kind === 'predictor' ? ['value'] : ['consumption'];
+    if (new Set(action.measures).size !== action.measures.length || action.measures.some(measure => !allowed.includes(measure))) return { state: 'unchanged' };
+    if (first.kind === 'utility' && action.measures.includes('charge') && (action.measures.length !== 1 || first.selectionMode !== 'meter' || first.selection?.kind !== 'fixed' || first.selection.resource !== 'meter' || first.selection.guids.length !== 1)) return { state: 'unchanged' };
+    remove(members.filter(source => !action.measures.includes(source.measure)));
+    const targets = first.kind === 'analysis' ? [...new Map(members.filter((source): source is AnalysisResultVisualizationSource => source.kind === 'analysis' && source.mode === 'result')
+      .map(source => [JSON.stringify([source.analysisGuid, source.groupGuid]), source])).values()] : [first];
+    for (const target of targets) for (const measure of action.measures) {
+      if (next.sources.some(source => source.kind === first.kind && source.measure === measure && (target.kind !== 'analysis' || source.kind === 'analysis' && source.analysisGuid === target.analysisGuid && source.groupGuid === target.groupGuid))) continue;
+      const id = `${target.kind}-${target.kind === 'analysis' ? encodeURIComponent(`${target.analysisGuid ?? 'setup'}/${target.groupGuid ?? 'total'}`) + '-' : ''}${measure}`;
+      const source = { ...target, id, measure, settings: undefined, ...(target.kind === 'utility' ? { charge: measure === 'charge' ? target.charge : undefined } : {}) } as VisualizationSource;
+      next = { ...next, sources: [...next.sources, source] };
+      if (source.kind !== 'analysis' || source.mode === 'result') next = ensureSeries(next, source);
+      next = alignNewSourceAxis(next, source, context.snapshot);
+    }
+    if (action.sourceKind === 'utility') {
+      const charge = action.measures[0] === 'charge';
+      next = { ...next, sources: next.sources.map(source => source.kind !== 'utility' ? source : { ...source,
+        dataMode: charge ? 'billing-period' : 'calendarized',
+        ...(charge ? { aggregation: 'none', groupBy: 'meter' } : source.dataMode === 'billing-period' ? { aggregation: 'sum' } : {}) }) };
+      if (next.chart?.kind === 'time-series') next = { ...next, chart: { ...next.chart, interval: charge ? 'native' : next.chart.interval === 'native' ? 'monthly' : next.chart.interval,
+        ...(charge ? { stack: 'none' } : {}) } };
+      if (charge && definition.chart?.kind === 'time-series' && definition.chart.stack !== 'none') cleared.push('Stacking settings');
+      if (charge && next.comparison.kind !== 'none') { cleared.push('Comparison settings'); affected.add(decisionNodeId({ kind: 'period' })); next = { ...next, comparison: { kind: 'none' } }; }
+    }
+    if (action.sourceKind === 'analysis') next = initializeAnalysisDisplaySettings(next, context.snapshot);
+    return result();
+  }
+  if (action.kind === 'analysis-targets') {
+    const members = definition.sources.filter((source): source is AnalysisResultVisualizationSource => source.kind === 'analysis' && source.mode === 'result');
+    const model = definition.sources.find(source => source.kind === 'analysis' && source.mode === 'model');
+    const first = members[0]; if (!first && !model) return { state: 'unchanged' };
+    if (model) { cleared.push('Saved model configuration'); remove([model]); }
+    const choices = analysisChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, definition.facilitySelection.kind === 'all');
+    if (action.targets.some(target => !choices.some(choice => choice.value === target.analysisGuid)
+      || target.groupGuid && !analysisGroupChoices(context.snapshot, target.analysisGuid).some(choice => choice.value === target.groupGuid))) return { state: 'unchanged' };
+    const selectedMeasures: AnalysisResultVisualizationSource['measure'][] = members.length ? [...new Set(members.map(source => source.measure))] : ['actual'];
+    const banking = action.targets.length > 0 && action.targets.every(target => {
+      const analysis = context.snapshot.facilityAnalyses.find(item => item.guid === target.analysisGuid && item.accountId === definition.accountGuid);
+      return analysis?.hasBanking && !!target.groupGuid && analysis.groups.some(group => group.idbGroupId === target.groupGuid && group.applyBanking);
+    });
+    const compatible = selectedMeasures.filter(measure => !measure.startsWith('banked-') || banking);
+    const measures: AnalysisResultVisualizationSource['measure'][] = compatible.length ? compatible : ['actual'];
+    if (compatible.length !== selectedMeasures.length) cleared.push('Incompatible analysis measures');
+    remove(members.filter(source => !measures.includes(source.measure) || !action.targets.some(target => target.analysisGuid === source.analysisGuid && target.groupGuid === source.groupGuid)));
+    const targets = action.targets.length ? action.targets : [{ analysisGuid: undefined, groupGuid: undefined }];
+    for (const target of targets) for (const measure of measures) {
+      if (next.sources.some(source => source.kind === 'analysis' && source.mode === 'result' && source.analysisGuid === target.analysisGuid && source.groupGuid === target.groupGuid && source.measure === measure)) continue;
+      const source: AnalysisResultVisualizationSource = { kind: 'analysis', mode: 'result', aggregation: 'none', measure,
+        id: `analysis-${encodeURIComponent(`${target.analysisGuid ?? 'setup'}/${target.groupGuid ?? 'total'}`)}-${measure}`, ...target };
+      next = alignNewSourceAxis(ensureSeries({ ...next, sources: [...next.sources, source] }, source), source, context.snapshot);
+    }
+    next = initializeAnalysisDisplaySettings(next, context.snapshot);
+    return result();
+  }
+  if (action.kind === 'item-order' || action.kind === 'reset-order') {
+    if (action.kind === 'reset-order') {
+      next = { ...definition, series: definition.series.map(series => ({ ...series, overrides: series.overrides?.map(override => {
+        if ((override.accountGuid ?? definition.accountGuid) !== definition.accountGuid) return override;
+        const { order: _order, ...rest } = override; return rest;
+      }) })) };
+    } else {
+      const items = projectTraceItems(definition, context.snapshot), index = items.findIndex(item => item.sourceId === action.sourceId && item.key === itemKey(action.item));
+      const target = index + (action.direction === 'up' ? -1 : 1);
+      if (index < 0 || target < 0 || target >= items.length) return { state: 'unchanged' };
+      [items[index], items[target]] = [items[target], items[index]];
+      items.forEach((item, order) => { const source = next.sources.find(source => source.id === item.sourceId)!;
+        if (source.kind !== 'analysis' || source.mode === 'result') next = patchItem(next, source, item.identity, { order }); });
+    }
+    return result();
+  }
+  const source = 'sourceId' in action ? definition.sources.find(source => source.id === action.sourceId) : undefined;
+  const shared = source?.kind === 'utility' && ['selection-mode', 'set-resources', 'toggle-resource', 'source-settings'].includes(action.kind)
+    && !(action.kind === 'source-settings' && Object.hasOwn(action.settings, 'charge'));
+  if (!shared) return prepareSingleDecisionChange(definition, action, context);
+  for (const member of definition.sources.filter(item => item.kind === source.kind)) {
+    const changed = prepareSingleDecisionChange(next, { ...action, sourceId: member.id } as SingleDecisionAction, context);
+    if (changed.state !== 'unchanged') { nextRef ??= changed.next; next = changed.definition; cleared.push(...changed.cleared); changed.affectedNodeIds.forEach(id => affected.add(id)); }
+  }
+  return result();
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, ViewChild, EventEmitter, Output, computed, signal } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewChild, ElementRef, EventEmitter, Output, computed, effect, signal } from '@angular/core';
 import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { accessibleMetricLabel, chartValue, clamp, clampPercent, coerceMetricId, formatChartAccessibleValue,
   MeterChartSeriesDisplay, metricById, metricLifetimeTotal, metricResultsChartOption } from './metric-results-chart-option';
@@ -7,6 +7,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
   MeterResultsChartComparisonBand,
   MeterResultsChartMetric,
+  MeterResultsChartPresentation,
   MeterResultsChartRow,
   MeterResultsPeriod
 } from '../metric-results-chart.models';
@@ -59,9 +60,14 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() highlightedMetricId?: string;
   @Input() showPointSymbols = true;
   @Input() showChartActions = true;
+  @Input() visualize?: { readonly disabled: boolean; readonly reason?: string };
+  @Input() initialPresentation?: MeterResultsChartPresentation;
+  @Output() visualizeRequested = new EventEmitter<MeterResultsChartPresentation>();
+  @Output() presentationChanged = new EventEmitter<MeterResultsChartPresentation>();
   @Input() zoomRange?: V1EChartsDataZoomRange;
   @Output() zoomRangeChanged = new EventEmitter<V1EChartsDataZoomRange>();
   private readonly optionRevision = signal(0);
+  private pendingPresentation?: MeterResultsChartPresentation;
   @Input() showValueLabels = false;
   @Input() compactValueLabels = false;
   @Input() showAllMetrics = false;
@@ -87,6 +93,7 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() compact = false;
 
   @ViewChild(EChartsChartDirective) chartDirective?: EChartsChartDirective;
+  @ViewChild('visualizeButton') visualizeButton?: ElementRef<HTMLButtonElement>;
 
   readonly idPrefix = `v1-meter-results-chart-${++nextChartId}`;
   readonly rows = signal<readonly MeterResultsChartRow[]>([]);
@@ -97,6 +104,9 @@ export class MeterResultsChartComponent implements OnChanges {
   readonly costMetricId = signal<string | undefined>(undefined);
   readonly utilityDisplay = signal<MeterChartSeriesDisplay>('line');
   readonly costDisplay = signal<MeterChartSeriesDisplay>('line');
+  readonly leftTraceType = signal<'line' | 'bar'>('line');
+  readonly rightTraceType = signal<'line' | 'bar'>('line');
+  readonly hiddenMetricIds = signal<readonly string[]>([]);
   readonly allMetricsEnabled = signal(false);
   readonly allMetricSeriesDisplay = signal<Exclude<MeterChartSeriesDisplay, 'off'>>('line');
   readonly allMetricSeriesStacked = signal(false);
@@ -124,7 +134,7 @@ export class MeterResultsChartComponent implements OnChanges {
     if (costMetric && this.costDisplay() !== 'off') {
       metrics.push(costMetric);
     }
-    return metrics;
+    return this.visualize ? metrics.filter(metric => !this.hiddenMetricIds().includes(metric.id)) : metrics;
   });
   readonly accessibleColumns = computed<readonly MeterChartAccessibleColumn[]>(() => {
     return this.visibleMetrics().map(metric => ({
@@ -150,7 +160,7 @@ export class MeterResultsChartComponent implements OnChanges {
   });
   readonly chartOption = computed<V1EChartsOption>(() => {
     this.optionRevision();
-    return metricResultsChartOption({
+    const option = metricResultsChartOption({
       rows: this.rows(), metrics: this.metricOptions(), leftMetricId: this.utilityMetricId(), rightMetricId: this.costMetricId(),
       leftDisplay: this.utilityDisplay(), rightDisplay: this.costDisplay(), allMetrics: this.allMetricsEnabled(),
       allMetricsDisplay: this.allMetricSeriesDisplay(), stackSeries: this.allMetricSeriesStacked(), comparisonBand: this.metricComparisonBand(),
@@ -160,7 +170,28 @@ export class MeterResultsChartComponent implements OnChanges {
       showLegend: this.showLegend, tooltipMaxRows: this.tooltipMaxRows, tooltipOverflowHint: this.tooltipOverflowHint,
       zoomStart: this.zoomStart(), zoomEnd: this.zoomEnd()
     });
+    if (!this.visualize) return option;
+    return { ...option, legend: { ...option.legend as object,
+      selected: Object.fromEntries(this.metricOptions().map(metric => [metric.label, !this.hiddenMetricIds().includes(metric.id)])) } };
   });
+
+  readonly presentation = computed<MeterResultsChartPresentation>(() => {
+    this.optionRevision();
+    return { leftMetricId: this.utilityMetric()?.id, rightMetricId: this.costMetric()?.id,
+      leftDisplay: this.utilityDisplay(), rightDisplay: this.costDisplay(),
+      leftTraceType: this.leftTraceType(), rightTraceType: this.rightTraceType(), hiddenMetricIds: this.hiddenMetricIds(),
+      zoom: { start: this.zoomStart(), end: this.zoomEnd() }, smoothLines: this.smoothLines, legend: this.showLegend };
+  });
+
+  constructor() {
+    effect(() => this.presentationChanged.emit(this.presentation()));
+  }
+
+  syncLegend(selection: Readonly<Record<string, boolean>>): void {
+    if (this.visualize) this.hiddenMetricIds.set(this.metricOptions().filter(metric => selection[metric.label] === false).map(metric => metric.id));
+  }
+
+  focusVisualize(): void { this.visualizeButton?.nativeElement.focus({ preventScroll: true }); }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['chartRows']) {
@@ -180,9 +211,11 @@ export class MeterResultsChartComponent implements OnChanges {
     }
     if (changes['defaultLeftDisplay']) {
       this.utilityDisplay.set(this.defaultLeftDisplay);
+      if (this.defaultLeftDisplay !== 'off') this.leftTraceType.set(this.defaultLeftDisplay);
     }
     if (changes['defaultRightDisplay']) {
       this.costDisplay.set(this.defaultRightDisplay);
+      if (this.defaultRightDisplay !== 'off') this.rightTraceType.set(this.defaultRightDisplay);
     }
     if (changes['showAllMetrics']) {
       this.allMetricsEnabled.set(this.showAllMetrics);
@@ -196,22 +229,41 @@ export class MeterResultsChartComponent implements OnChanges {
     if (changes['comparisonBand']) {
       this.metricComparisonBand.set(this.comparisonBand);
     }
-    if (changes['chartRows'] && !this.canZoom()) {
+    if (changes['chartRows'] && !this.canZoom() && (!this.visualize || this.chartState() === 'ready' && this.rows().length > 0)) {
       this.resetZoom(false);
     }
     if (changes['zoomRange'] && this.zoomRange) {
       this.zoomStart.set(clampPercent(this.zoomRange.start, 0));
       this.zoomEnd.set(clampPercent(this.zoomRange.end, 100));
     }
+    if (changes['initialPresentation']) this.pendingPresentation = this.initialPresentation;
+    if (this.pendingPresentation) {
+      const view = this.pendingPresentation;
+      if (view.leftMetricId === this.utilityMetricId() && view.rightMetricId === this.costMetric()?.id) {
+        this.utilityDisplay.set(view.leftDisplay); this.costDisplay.set(view.rightDisplay);
+        this.leftTraceType.set(view.leftTraceType); this.rightTraceType.set(view.rightTraceType);
+        this.hiddenMetricIds.set(view.hiddenMetricIds);
+        this.zoomStart.set(view.zoom.start); this.zoomEnd.set(view.zoom.end);
+        this.pendingPresentation = undefined;
+      }
+    }
     this.optionRevision.update(value => value + 1);
   }
 
   setUtilityDisplay(display: MeterChartSeriesDisplay): void {
     this.utilityDisplay.set(display);
+    if (display !== 'off') {
+      this.leftTraceType.set(display);
+      this.hiddenMetricIds.update(ids => ids.filter(id => id !== this.utilityMetricId()));
+    }
   }
 
   setCostDisplay(display: MeterChartSeriesDisplay): void {
     this.costDisplay.set(display);
+    if (display !== 'off') {
+      this.rightTraceType.set(display);
+      this.hiddenMetricIds.update(ids => ids.filter(id => id !== this.costMetricId()));
+    }
   }
 
   zoomIn(): void {

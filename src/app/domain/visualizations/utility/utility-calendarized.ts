@@ -163,7 +163,8 @@ function projectMeter(snapshot: AccountWorkspaceSnapshot, source: UtilityVisuali
   // Unit ownership is supplied by the request's already-projected meter, not the ambient workspace.
   const from = source.measure === 'energy' ? projected?.energyUnit : source.measure === 'consumption' ? projected?.consumptionUnit : undefined;
   const savedUnitError = utilityInputUnitError(source, meter, from);
-  const pinned = source.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : undefined;
+  const quantity = from && new ConvertValue(undefined, '', '').getUnit(from)?.measure;
+  const pinned = quantity && source.settings?.quantityUnits?.[quantity] || (source.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : undefined);
   if (!savedUnitError && pinned && from) {
     const conversion = new ConvertValue(1, from, pinned);
     if (conversion.hasError || !Number.isFinite(conversion.convertedValue)) throw new Error(`Cannot convert ${from} to ${pinned}. Choose compatible units.`);

@@ -16,6 +16,18 @@ describe('visualization resource picker', () => {
     return { fixture, component: fixture.componentInstance, control };
   }
 
+  it('requests one replacement for single selection without Include All or changing reviewed state', () => {
+    const { fixture, component, control } = setup();
+    fixture.componentRef.setInput('requestChanges', true); fixture.componentRef.setInput('singleSelection', true); fixture.detectChanges();
+    const requested = vi.fn(); component.selectionSetRequested.subscribe(requested);
+    const rows = fixture.nativeElement.querySelectorAll('.resource-picker__option') as NodeListOf<HTMLButtonElement>;
+    expect(fixture.nativeElement.querySelector('.resource-picker__all')).toBeNull();
+    expect(rows[0].getAttribute('aria-pressed')).toBe('true');
+    rows[0].click(); component.toggleAll(); expect(requested).not.toHaveBeenCalled();
+    rows[1].click(); expect(requested).toHaveBeenCalledExactlyOnceWith(['meter-b']);
+    expect(control.value).toEqual(['meter-a']); expect(control.pristine).toBe(true);
+  });
+
   it('filters locally without changing selection, and updates typed selection through rendered rows', () => {
     const { fixture, component, control } = setup();
     const changed = vi.fn(); control.valueChanges.subscribe(changed);

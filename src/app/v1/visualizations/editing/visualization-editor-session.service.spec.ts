@@ -5,7 +5,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import { VisualizationCommandOutcome, VisualizationConflictError, UpdateVisualizationCommand } from '@data/account-workspace/visualization-commands.models';
 import { IdbSavedVisualization, getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { createVisualizationDefinition, createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition, normalizeVisualizationDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { VisualizationEditorSession } from './visualization-editor-session.service';
@@ -90,7 +90,7 @@ describe('VisualizationEditorSession', () => {
     await vi.advanceTimersByTimeAsync(650);
     expect(test.submit).toHaveBeenCalledTimes(2);
     for (const [command] of test.submit.mock.calls) {
-      expect(command.definition.sources).toEqual(definition.sources);
+      expect(command.definition.sources).toEqual(normalizeVisualizationDefinition(definition).sources);
       expect(command.definition.chart).toEqual({ kind: 'scatter', showFit: false });
       expect(command.definition.series).toEqual([]);
       expect(command.definition.period).toEqual(definition.period);
@@ -110,7 +110,7 @@ describe('VisualizationEditorSession', () => {
     expect(test.session.definition()).toMatchObject({ sources: definition.sources, chart: definition.chart, series: [] });
     expect(test.submit).not.toHaveBeenCalled();
     test.session.discard();
-    expect(test.session.definition()).toEqual(definition);
+    expect(test.session.definition()).toEqual(normalizeVisualizationDefinition(definition));
   });
 
   it('flushes all newer coherent edits before authorizing navigation', async () => {

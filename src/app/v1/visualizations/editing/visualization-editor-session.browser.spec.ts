@@ -1,3 +1,4 @@
+import { expandVisualizationDefinition, serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
@@ -60,7 +61,7 @@ describe('visualization editor session with native IndexedDB', () => {
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({ guid: proposal.guid, revision: 2,
       definition: { name: 'Durable name', appearance: { title: 'Current utility use', legend: false } } });
-    expect(saved[0].definition).toEqual({ ...definition, name: 'Durable name', appearance: { title: 'Current utility use', legend: false } });
+    expect(saved[0].definition).toEqual(serializeVisualizationDefinition({ ...definition, name: 'Durable name', appearance: { title: 'Current utility use', legend: false } }));
     const store = TestBed.inject(AccountWorkspaceStore);
     store.publish({ ...previous, savedVisualizations: saved });
     // Reopening destroys all original providers. This fresh editor reads the reopened committed snapshot;
@@ -70,7 +71,7 @@ describe('visualization editor session with native IndexedDB', () => {
     try {
       const reopened = injector.get(VisualizationEditorSession); reopened.open(account.guid, proposal.guid); TestBed.tick();
       expect(reopened.form.getRawValue()).toEqual({ name: 'Durable name', title: 'Current utility use', legend: false });
-      expect(reopened.definition()).toEqual(saved[0].definition);
+      expect(reopened.definition()).toEqual(expandVisualizationDefinition(saved[0].definition));
       expect(reopened.state()).toBe('saved'); expect(reopened.needsProtection()).toBe(false);
     } finally { injector.destroy(); }
   });

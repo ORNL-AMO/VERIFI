@@ -14,8 +14,23 @@ import { discoverUtilitySeries } from './utility-catalog';
 import { utilityMeasureKey } from './utility-selection';
 import { buildWorkspaceCalendarizationRequest } from '@app/v1/shared/calendarization/workspace-calendarization-request';
 import { projectWorkspaceCalendarization } from '@app/v1/shared/calendarization/workspace-calendarization-projection';
+import { checkVisualizationCompatibility } from '../visualization-capabilities';
+import { utilityCapabilities, utilityChartSupport } from './utility-capabilities';
 
 describe('calendarized utility projections', () => {
+  it('converts mixed consumption quantities independently through chart display units', () => {
+    const selected = [meter({ meterReadingDataApplication: 'fullMonth' }), meter({ guid: 'water', source: 'Water Intake', startingUnit: 'gal', meterReadingDataApplication: 'fullMonth' })];
+    const { snapshot, request } = setup({ measure: 'consumption', settings: { quantityUnits: { energy: 'MWh', volume: 'kgal' } }, selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a', 'water'] } },
+      { meters: selected, meterData: [reading({ totalEnergyUse: 10 }), reading({ guid: 'water-bill', meterId: 'water', totalVolume: 1000 })] });
+    const projected = [project(snapshot, [10]), calendarizedMeter(selected[1], [monthlyData({ year: 2026, monthNumValue: 0, date: new Date(2026, 0, 1), energyConsumption: 1000 })], { consumptionUnit: 'gal' })];
+    const resolved = ready(resolveCalendarizedUtility(snapshot, request, projected));
+    expect(resolved.series.map(series => series.unit)).toEqual(['MWh', 'kgal']);
+    expect(Object.values(resolved.rows[0].values).map(value => value.value)).toEqual([0.01, 1]);
+    const source = request.source as UtilityVisualizationSource;
+    const definition = { ...utilityVisualizationFixture(), sources: [source], chart: request.chart, series: selected.map((meter, index) => ({ id: meter.guid, sourceId: source.id, metric: 'consumption', resourceGuid: meter.guid, axis: index ? 'right' as const : 'left' as const })) };
+    const complete = { ...request, series: definition.series };
+    expect(checkVisualizationCompatibility(definition, [{ request: complete, capabilities: utilityCapabilities(source), chartSupport: utilityChartSupport(source, request.chart), resolution: resolveCalendarizedUtility(snapshot, complete, projected) }]).state).toBe('compatible');
+  });
   function setup(options: Partial<UtilityVisualizationSource> = {}, overrides: Partial<AccountWorkspaceSnapshot> = {}) {
     const definition = utilityVisualizationFixture();
     const source: UtilityVisualizationSource = { ...definition.sources[0] as UtilityVisualizationSource,

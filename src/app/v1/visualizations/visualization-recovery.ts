@@ -1,6 +1,6 @@
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { VisualizationDefinition, VisualizationFacilitySelection, VisualizationSource } from '@domain/visualizations/visualization-definition';
-import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
+import { visualizationReferences, VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { inspectVisualizationReferences, VisualizationReferenceCatalog } from '@data/account-workspace/visualization-reference-inspection';
 
@@ -16,11 +16,11 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
   const next = structuredClone(definition);
   const affected = new Set<string>();
   const cleared: string[] = [];
-  const sources = next.sources.map((source, index): VisualizationSource => {
-    const sourceIssues = issues.some(issue => issue.path.startsWith(`sources.${index}.`)
-      || issue.path.startsWith('chart.') && definition.chart?.kind === 'scatter' && definition.chart[issue.path.split('.')[1] as 'x' | 'y']?.sourceId === source.id
-      || issue.path.startsWith('series.') && definition.series[Number(issue.path.split('.')[1])]?.sourceId === source.id);
-    if (!allSources && !sourceIssues) return source;
+  const affectedKinds = new Set(next.sources.filter((source, index) => allSources || issues.some(issue => issue.path.startsWith(`sources.${index}.`)
+    || issue.path.startsWith('chart.') && definition.chart?.kind === 'scatter' && definition.chart[issue.path.split('.')[1] as 'x' | 'y']?.sourceId === source.id
+    || issue.path.startsWith('series.') && definition.series[Number(issue.path.split('.')[1])]?.sourceId === source.id)).map(source => source.kind));
+  const sources = next.sources.map((source): VisualizationSource => {
+    if (!affectedKinds.has(source.kind)) return source;
     affected.add(source.id);
     cleared.push(`${source.kind}: selected resources and dependent series`);
     const copy = { ...source };
@@ -29,11 +29,12 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
     if (copy.kind === 'utility') delete copy.charge;
     if (copy.kind === 'analysis') {
       delete copy.analysisGuid; delete copy.groupGuid;
-      if (copy.mode === 'model') { delete copy.modelId; delete copy.comparisonModelId; }
+      if (copy.mode === 'model') return { id: copy.id, kind: 'analysis', mode: 'result', measure: 'actual', aggregation: 'none' };
     }
     return copy;
   });
-  let result: VisualizationDefinition = { ...next, sources, series: next.series.filter(series => !affected.has(series.sourceId)) };
+  const uniqueSources = sources.filter((source, index) => source.kind !== 'analysis' || !affectedKinds.has('analysis') || sources.findIndex(candidate => candidate.kind === 'analysis' && candidate.measure === source.measure) === index);
+  let result: VisualizationDefinition = { ...next, sources: uniqueSources, series: next.series.filter(series => !affected.has(series.sourceId)) };
 
   // Retain the selected chart while clearing only axes whose declared series were removed.
   if (result.chart?.kind === 'scatter') {
@@ -49,7 +50,9 @@ export function reviewVisualizationReset(definition: VisualizationDefinition, is
   }
   const decoded = decodeVisualizationDefinition(result);
   if (decoded.state === 'invalid' || decoded.state === 'unsupported') throw new Error('This definition cannot be safely reset. Its original intent has been preserved.');
-  return { definition: result, cleared, referencePaths: issues.map(issue => issue.path) };
+  const clearedPaths = visualizationReferences(definition).filter(reference => reference.path.startsWith('sources.') && affected.has(definition.sources[Number(reference.path.split('.')[1])]?.id)
+    || reference.path.startsWith('series.') && affected.has(definition.series[Number(reference.path.split('.')[1])]?.sourceId)).map(reference => reference.path);
+  return { definition: result, cleared: [...new Set(cleared)], referencePaths: [...new Set([...issues.map(issue => issue.path), ...clearedPaths])] };
 }
 
 export function reviewVisualizationFacilityCopy(definition: VisualizationDefinition, selection: VisualizationFacilitySelection,

@@ -1,3 +1,5 @@
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
+import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { vi } from 'vitest';
 import { dbConfig } from '@data/indexedDB/_dbConfig';
@@ -23,6 +25,21 @@ describe('saved visualization backup transactions in Chromium', () => {
   beforeEach(async () => { harness = await IndexedDbTestHarness.create('visualization-backup'); });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
 
+  it.each(['Account', 'Facility'] as const)('retains optional line smoothing and pinned settings through a %s backup', async kind => {
+    const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    const definition = { ...base, chart: { kind: 'time-series' as const, interval: 'monthly' as const, defaultTraceType: 'line' as const, stack: 'none' as const, smoothLines: true },
+      sources: base.sources.map(source => ({ ...source, settings: { unit: { kind: 'pinned' as const, value: 'kWh' }, energyTreatment: { kind: 'pinned' as const, value: 'site' as const } } })) };
+    const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)] };
+    const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account' ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    const service = createService();
+    let accountGuid: string;
+    if (kind === 'Account') accountGuid = (await service.importAccountBackupFile(backup, 0)).guid;
+    else { await harness.seed({ accounts: [{ guid: 'destination', name: 'Destination' }] }); accountGuid = 'destination'; await service.importFacilityBackupFile(backup, accountGuid, 0); }
+    await harness.reopen();
+    const restored = await readSnapshot(accountGuid), decoded = readSavedVisualization(restored.savedVisualizations[0]);
+    expect(decoded).toMatchObject({ state: 'valid', definition: { chart: { smoothLines: true }, sources: [{ settings: { unit: { kind: 'pinned', value: 'kWh' }, energyTreatment: { kind: 'pinned', value: 'site' } } }] } });
+  });
+
   it.each((['Account', 'Facility'] as const).flatMap(kind => (['group', 'equipment-type', 'linked-meter-group', 'facility'] as const).map(mode => ({ kind, mode }))))('round trips $mode selection and appearance in a $kind backup', async ({ kind, mode }) => {
     const base = equipmentDefinition(), id = mode === 'facility' ? 'facility-a' : mode === 'group' ? 'energy-group-a' : mode === 'equipment-type' ? 'Pump' : 'group-a';
     const resource = mode === 'facility' ? 'facility' as const : mode === 'group' ? 'energy-use-group' as const : 'meter-group' as const;
@@ -46,7 +63,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     else expect(restoredSource.selection).toEqual({ kind: 'fixed', resource, guids: [mappedId] });
     expect(decoded.definition.series[0].overrides).toEqual([{ seriesId: `${prefix}${mappedId}`, color: '#123456', accountGuid }]);
     expect(restored.energyUseEquipment[0].utilityMeterGroupIds).toEqual([restored.meterGroups[0].guid]);
-    expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(decoded.definition);
+    expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(serializeVisualizationDefinition(decoded.definition));
   });
 
   it.each(['Account', 'Facility'] as const)('round trips resource-bearing provider appearance in a %s backup', async kind => {
@@ -71,7 +88,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     if (!('definition' in decoded)) throw new Error('Expected current restored intent.');
     expect(decoded.definition.series[0].overrides).toEqual([{ seriesId: `utility:${restored.meters[0].guid}`,
       visible: false, traceType: 'bar', color: '#123456', lineStyle: 'dotted', order: 0, accountGuid }]);
-    expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(decoded.definition);
+    expect(preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored)))).savedVisualizations[0].definition).toEqual(serializeVisualizationDefinition(decoded.definition));
   });
 
   it.each((['Account', 'Facility'] as const).flatMap(kind => (['none', 'absolute', 'percent'] as const).map(stack => ({ kind, stack }))))('round trips area/$stack and exact item order in a $kind backup', async ({ kind, stack }) => {
@@ -100,7 +117,7 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(decoded.definition.chart).toEqual(definition.chart);
     expect(decoded.definition.series[0].resourceGuid).toBe(restored.meters[0].guid);
     const reexported = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored))));
-    expect(reexported.savedVisualizations[0].definition).toEqual(decoded.definition);
+    expect(reexported.savedVisualizations[0].definition).toEqual(serializeVisualizationDefinition(decoded.definition));
   });
 
   it.each(['Account', 'Facility'] as const)('round trips incomplete mixed-family Scatter intent in a %s backup without fabricating bindings', async kind => {
@@ -123,10 +140,10 @@ describe('saved visualization backup transactions in Chromium', () => {
     expect(record.facilityId).toBeUndefined(); expect(savedVisualizationFacilityGuid(record, restored.facilities)).toBe(restored.facilities[0].guid); expect(record.recordVersion).toBe(1);
     expect(record.preservation.references).toEqual([]); expect(decoded.state).toBe('setup-required');
     if (!('definition' in decoded)) throw new Error('Expected readable restored setup.');
-    expect(decoded.definition).toEqual({ ...definition, accountGuid, facilitySelection: { kind: 'fixed', facilityGuids: [restored.facilities[0].guid] } });
+    expect(decoded.definition).toEqual(normalizeVisualizationDefinition({ ...definition, accountGuid, facilitySelection: { kind: 'fixed', facilityGuids: [restored.facilities[0].guid] } }));
     expect(decoded.definition.chart).not.toHaveProperty('xSeriesId'); expect(decoded.definition.chart).not.toHaveProperty('ySeriesId');
     const reexported = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(restored))));
-    expect(reexported.savedVisualizations[0].definition).toEqual(decoded.definition);
+    expect(reexported.savedVisualizations[0].definition).toEqual(serializeVisualizationDefinition(decoded.definition));
     expect(backup).toEqual(before);
   });
 

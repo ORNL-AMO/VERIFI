@@ -1,8 +1,9 @@
 import { initializeCompositionChart } from './visualization-composition';
 import type { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { expandVisualizationDefinition, serializeVisualizationDefinition } from './visualization-source-groups';
 
 /** Saved intent only. Record identity, revisions, and persistence belong to Vis2. */
-export const VISUALIZATION_DEFINITION_VERSION = 2;
+export const VISUALIZATION_DEFINITION_VERSION = 3;
 
 export type VisualizationFacilitySelection =
   | { readonly kind: 'all' }
@@ -30,7 +31,15 @@ export type ResourceSelection =
     } };
 
 export interface VisualizationSourceSettings {
+  /** Compiled runtime display units. Durable source groups omit provider settings. */
+  readonly quantityUnits?: Readonly<Record<string, string>>;
   readonly unit?: SettingBinding<string>;
+  readonly energyTreatment?: SettingBinding<'site' | 'source'>;
+}
+
+/** Chart-wide display intent; quantity keys are the existing converter's measure names. */
+export interface VisualizationDisplaySettings {
+  readonly units?: Readonly<Record<string, SettingBinding<string>>>;
   readonly energyTreatment?: SettingBinding<'site' | 'source'>;
 }
 
@@ -157,7 +166,7 @@ export type VisualizationHierarchyLevel = 'facility' | 'group' | 'source' | 'equ
 
 export type VisualizationChart =
   | { readonly kind: 'time-series'; readonly defaultTraceType: VisualizationTraceType; readonly interval: 'monthly' | 'yearly' | 'native';
-      readonly stack: 'none' | 'absolute' | 'percent' }
+      readonly stack: 'none' | 'absolute' | 'percent'; readonly smoothLines?: boolean }
   | (VisualizationPairSettings & { readonly kind: 'scatter'; readonly xSeriesId?: string; readonly ySeriesId?: string; readonly x?: VisualizationSeriesSelector; readonly y?: VisualizationSeriesSelector; readonly showFit: boolean })
   | (VisualizationPairSettings & { readonly kind: 'correlation'; readonly statistic: 'r' | 'r-squared'; readonly scale: 'raw' | 'z-score'; readonly view?: 'pairs' | 'matrix'; readonly showFit?: boolean })
   | (VisualizationExplorationSettings & { readonly kind: 'heatmap'; readonly dimension: 'month-year' | 'series-period'; readonly scale: 'linear' | 'diverging'; readonly normalization?: 'raw' | 'z-score' })
@@ -178,6 +187,7 @@ export interface VisualizationDefinition {
   readonly series: readonly VisualizationSeries[];
   readonly chart?: VisualizationChart;
   readonly appearance: { readonly legend: boolean; readonly title?: string };
+  readonly displaySettings?: VisualizationDisplaySettings;
 }
 
 /** Creation commits coherent but incomplete intent; source discovery belongs to the workbench. */
@@ -221,6 +231,7 @@ export function createVisualizationSetupDefinition(input: VisualizationSetupInpu
 
 /** Coherent metadata and set-valued inclusion compare independently of raw editor text. */
 export function normalizeVisualizationDefinition(value: VisualizationDefinition): VisualizationDefinition {
+  value = expandVisualizationDefinition(serializeVisualizationDefinition(value)) as VisualizationDefinition;
   const title = value.appearance.title?.trim();
   return { ...structuredClone(value), name: value.name.trim(),
     facilitySelection: value.facilitySelection.kind === 'fixed'

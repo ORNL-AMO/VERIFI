@@ -25,13 +25,15 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
     const sources = definition.sources.filter((s): s is UtilityVisualizationSource => s.kind === 'utility');
     const predictors = definition.sources.filter(source => source.kind === 'predictor');
     const analysis = definition.sources.find(source => source.kind === 'analysis');
-    if (analysis && definition.sources.length === 1 && this.analysisData) {
+    if (analysis && definition.sources.every(source => source.kind === 'analysis') && this.analysisData) {
       const calendarDate = civilDate(new Date());
       if (analysisPeriodIssue({ chart: definition.chart!, period: definition.period, comparison: definition.comparison })) return { calendarDate };
-      const result = await this.analysisData.acquire({ identity: { ...identity, scope, sourceId: analysis.id, requestId: 'date-context' },
-        source: analysis, chart: definition.chart!, period: definition.period, comparison: definition.comparison, series: definition.series, dateContext: { calendarDate } }, signal);
+      const results = [];
+      for (const selected of definition.sources) results.push(await this.analysisData.acquire({ identity: { ...identity, scope, sourceId: selected.id, requestId: 'date-context' },
+        source: selected, chart: definition.chart!, period: definition.period, comparison: definition.comparison, series: definition.series.filter(series => series.sourceId === selected.id), dateContext: { calendarDate } }, signal));
       if (signal.aborted || !this.workspace.isReady() || this.workspace.account()?.guid !== identity.accountGuid || this.workspace.revision() !== identity.workspaceRevision) throw new DOMException('Analysis date context superseded', 'AbortError');
-      return { calendarDate, ...(result.state === 'ready' ? { latestDataDate: latestAnalysisMonth(result.value) } : {}) };
+      const latestDataDate = results.flatMap(result => result.state === 'ready' ? latestAnalysisMonth(result.value) ?? [] : []).sort().at(-1);
+      return { calendarDate, ...(latestDataDate ? { latestDataDate } : {}) };
     }
     if (!sources.length && !predictors.length) {
       if (signal.aborted || !this.workspace.isReady() || this.workspace.account()?.guid !== identity.accountGuid || this.workspace.revision() !== identity.workspaceRevision)

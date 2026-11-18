@@ -24,6 +24,12 @@ export function utilityUnit(snapshot: AccountWorkspaceSnapshot, scope: Visualiza
     const charge = meter.charges?.find(c => c.guid === source.charge?.chargeGuid);
     return recordedChargeUsageUnit(charge, meter) ?? '';
   }
+  if (source.measure === 'consumption') {
+    let quantity: string | undefined;
+    try { quantity = new ConvertValue(undefined, '', '').getUnit(getUnitFromMeter(meter, owner))?.measure; } catch { /* Canonical metadata handles invalid units below. */ }
+    const unit = quantity && source.settings?.quantityUnits?.[quantity];
+    if (unit) return unit;
+  }
   if (source.settings?.unit?.kind === 'pinned') return source.settings.unit.value;
   try { return source.measure === 'energy' ? getConsumptionUnit(meter, owner) : getUnitFromMeter(meter, owner); } catch { return ''; }
 }

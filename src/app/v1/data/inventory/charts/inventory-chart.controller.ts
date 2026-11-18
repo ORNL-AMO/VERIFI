@@ -19,7 +19,7 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { VisualizationNavigationService } from '@app/v1/visualizations/visualization-navigation.service';
 import { civilDate } from '@domain/visualizations/utility/utility-periods';
 import { captureInventoryUtility } from './utility-visualization-capture';
-import { UtilityCaptureSession } from './utility-capture-session';
+import { VisualizationCaptureSession } from '@app/v1/visualizations/capture/visualization-capture-session';
 
 /** Chart demand and session state share the routed inventory lifetime without owning DOM or navigation. */
 export class InventoryChartController {
@@ -114,7 +114,7 @@ export class InventoryChartController {
       matchingGuids: this.source.matchingGuids(), chart, grouping: this.grouping(), view: this.view(), projectedMeters: this.projection()!.meters,
       workspaceRevision: this.workspace.revision(), calendarDate: civilDate(new Date()) });
   });
-  readonly capture = new UtilityCaptureSession(() => {
+  readonly capture = new VisualizationCaptureSession(() => {
     const commands = this.injector.get(SavedVisualizationCommands), navigation = this.injector.get(VisualizationNavigationService), unsaved = this.injector.get(UnsavedChangesService);
     return { prepare: definition => commands.prepareCreate(definition), submit: command => commands.submit(command), recover: (accountGuid, guid) => commands.recover(accountGuid, guid),
       open: (accountGuid, guid) => { navigation.rememberReturn(accountGuid, this.source.context().facilityGuid); return navigation.open(accountGuid, guid); },

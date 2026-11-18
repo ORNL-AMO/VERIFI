@@ -79,7 +79,7 @@ describe('equipment history editor', () => {
     fixture.componentRef.setInput('context', { ...context, definition: accepted, disabled: true }); fixture.detectChanges();
     expect(toggle.disabled).toBe(true); toggle.click(); expect(request).not.toHaveBeenCalled();
   });
-  it('hydrates without edits, emits typed selection/unit changes, and retains missing selections for repair', () => {
+  it('hydrates without edits, emits typed selection changes, and retains missing selections for repair', () => {
     const store = new AccountWorkspaceStore(); store.publish(equipmentSnapshot([equipmentFixture(), equipmentFixture({ guid: 'other', name: 'Other equipment', utilityData: [], noLongerInUse: { isNoLongerInUse: true, year: 2023 } })]));
     TestBed.configureTestingModule({ imports: [EquipmentEditorsModule], providers: [{ provide: AccountWorkspaceStore, useValue: store }] });
     const fixture = TestBed.createComponent(EquipmentSourceEditorComponent), requested = vi.fn(), definition = equipmentDefinition();
@@ -91,8 +91,6 @@ describe('equipment history editor', () => {
     const other = [...root.querySelectorAll<HTMLButtonElement>('.resource-picker__option')].find(button => button.textContent?.includes('Other equipment'))!;
     other.click();
     expect(requested).toHaveBeenLastCalledWith({ kind: 'energy-use-resources', sourceId: 'source-1', ids: ['equipment-a', 'other'] });
-    fixture.componentInstance.unit.setValue('MJ');
-    expect(requested).toHaveBeenLastCalledWith({ kind: 'equipment-unit', sourceId: 'source-1', unit: { kind: 'pinned', value: 'MJ' } });
     store.publish(equipmentSnapshot([])); fixture.detectChanges();
     expect(root.textContent).toContain('Unavailable: equipment-a');
     fixture.componentRef.setInput('context', { ...context, disabled: true }); fixture.detectChanges();

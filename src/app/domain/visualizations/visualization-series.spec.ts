@@ -126,7 +126,7 @@ describe('effective visualization series', () => {
     expect(result.find(item => item.metadata.resourceGuid === 'meter-a')?.selected.label).toBe('Explicit resource');
   });
 
-  it('orders exact and matching-set items together within stable source groups', () => {
+  it('orders exact and matching-set items together across source groups', () => {
     const base = utilityVisualizationFixture(), { resourceGuid: _resourceGuid, ...wildcard } = base.series[0];
     const definition: VisualizationDefinition = { ...base, series: [
       { ...base.series[0], id: 'exact-a', traceType: 'bar', label: 'Exact A', overrides: [
@@ -141,9 +141,9 @@ describe('effective visualization series', () => {
     const metadata = ['meter-a', 'meter-b', 'meter-c', 'other-meter'].map(resourceGuid => ({ ...resolved[0],
       id: `utility:energy:${resourceGuid}`, resourceGuid, sourceId: resourceGuid === 'other-meter' ? 'other' : 'utility' }));
     const result = resolveVisualizationSeries(definition, metadata);
-    expect(result.map(item => item.metadata.resourceGuid)).toEqual(['meter-b', 'meter-a', 'meter-c', 'other-meter']);
-    expect(result.map(item => item.selected.traceType)).toEqual(['line', 'bar', 'line', 'line']);
-    expect(result[1].selected.label).toBe('Exact A');
+    expect(result.map(item => item.metadata.resourceGuid)).toEqual(['meter-b', 'other-meter', 'meter-a', 'meter-c']);
+    expect(result.map(item => item.selected.traceType)).toEqual(['line', 'line', 'bar', 'line']);
+    expect(result[2].selected.label).toBe('Exact A');
     expect(result.every(item => !Object.hasOwn(item, 'order') && !Object.hasOwn(item.selected, 'order'))).toBe(true);
   });
 });

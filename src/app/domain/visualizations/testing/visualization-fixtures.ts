@@ -4,6 +4,7 @@ export function utilityVisualizationFixture(facilitySelection: VisualizationFaci
   return { ...createVisualizationDefinition('Monthly energy', 'account-a', facilitySelection, 'utility'),
     sources: [{ id: 'utility', kind: 'utility', selectionMode: 'meter', measure: 'energy', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] },
       aggregation: 'sum', dataMode: 'calendarized', groupBy: 'meter', settings: { unit: { kind: 'pinned', value: 'kWh' }, energyTreatment: { kind: 'pinned', value: 'site' } } }],
+    displaySettings: { units: { energy: { kind: 'pinned', value: 'kWh' } }, energyTreatment: { kind: 'pinned', value: 'site' } },
     series: [{ id: 'energy', sourceId: 'utility', metric: 'energy', resourceGuid: 'meter-a', label: 'Electricity', color: 'var(--v1-chart-series-1)', axis: 'left', lineStyle: 'solid' }],
     chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' } };
 }

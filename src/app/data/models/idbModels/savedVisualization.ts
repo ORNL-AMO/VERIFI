@@ -1,5 +1,6 @@
 import { getNewIdbEntry, IdbEntry } from './idbEntry';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import type { VisualizationGuidMaps, VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
 export const SAVED_VISUALIZATION_RECORD_VERSION = 1;
@@ -39,6 +40,6 @@ export function getNewIdbSavedVisualization(
     accountId: definition.accountGuid,
     recordVersion: SAVED_VISUALIZATION_RECORD_VERSION,
     revision: 1,
-    definition: structuredClone(definition)
+    definition: serializeVisualizationDefinition(definition)
   };
 }

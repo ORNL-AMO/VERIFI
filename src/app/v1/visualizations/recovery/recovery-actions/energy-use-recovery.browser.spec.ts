@@ -1,3 +1,5 @@
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
+import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { previewValuesText } from '../../testing/preview-values.testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
@@ -86,7 +88,7 @@ describe('Energy Use source repair and facility journeys in Chromium', () => {
     expect(recovery.componentInstance.canReset()).toBe(true);
     if (mode !== 'equipment-type') expect(inspectVisualizationReferences(intent, store.snapshot()!).some(issue => issue.kind === energyUseResourceKind(mode))).toBe(true);
     await recovery.componentInstance.start('reset'); recovery.componentInstance.cancel();
-    expect(editor.definition()).toEqual(intent); expect((await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations'))[0].definition).toEqual(intent);
+    expect(editor.definition()).toEqual(normalizeVisualizationDefinition(intent)); expect((await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations'))[0].definition).toEqual(serializeVisualizationDefinition(intent));
     await recovery.componentInstance.start('reset'); await recovery.componentInstance.confirm();
     const reset = editor.definition()!;
     expect(reset.sources[0]).not.toHaveProperty('selection'); expect(reset.sources[0]).not.toHaveProperty('equipmentTypes'); expect(reset.series).toEqual([]);
@@ -108,7 +110,7 @@ describe('Energy Use source repair and facility journeys in Chromium', () => {
     preview!.destroy(); preview = undefined; recovery.destroy(); recovery = undefined;
     await harness.reopen();
     const reopened = await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations');
-    expect(reopened[0].definition).toEqual(repair.definition); expect(readSavedVisualization(reopened[0]).state).toBe('valid');
+    expect(reopened[0].definition).toEqual(serializeVisualizationDefinition(repair.definition)); expect(readSavedVisualization(reopened[0]).state).toBe('valid');
   });
 
   it.each(['group', 'equipment-type', 'linked-meter-group', 'facility'] as const)('keeps %s selections and appearance while membership empties and returns', async mode => {
@@ -144,9 +146,9 @@ describe('Energy Use source repair and facility journeys in Chromium', () => {
     expect(reviewed.period).toEqual(original.period); expect(reviewed.sources[0].settings).toEqual(original.sources[0].settings);
     await recovery.componentInstance.confirm();
     const records = await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations');
-    expect(records).toHaveLength(2); expect(records.find(record => record.guid === created.value!.guid)!.definition).toEqual(original);
+    expect(records).toHaveLength(2); expect(records.find(record => record.guid === created.value!.guid)!.definition).toEqual(serializeVisualizationDefinition(original));
     const copied = records.find(record => record.guid !== created.value!.guid)!;
-    expect(copied.definition).toEqual(reviewed); expect(readSavedVisualization(copied).state).toBe(mode === 'equipment' ? 'setup-required' : 'valid');
+    expect(copied.definition).toEqual(serializeVisualizationDefinition(reviewed)); expect(readSavedVisualization(copied).state).toBe(mode === 'equipment' ? 'setup-required' : 'valid');
   });
 
   it('retargets and copies reviewed facility selections, rejects stale review, and preserves account intent on facility deletion', async () => {
@@ -166,13 +168,13 @@ describe('Energy Use source repair and facility journeys in Chromium', () => {
     expect(retargeted.value.guid).toBe(created.value.guid);
     const duplicate = await commands.submit(commands.prepareDuplicate(retargeted.value));
     if (duplicate.state !== 'committed' || !duplicate.value) throw new Error('Expected independent duplicate');
-    expect(duplicate.value.guid).not.toBe(created.value.guid); expect(duplicate.value.definition).toEqual({ ...changed.definition, name: `${changed.definition.name} (Copy)` });
+    expect(duplicate.value.guid).not.toBe(created.value.guid); expect(duplicate.value.definition).toEqual(serializeVisualizationDefinition({ ...changed.definition, name: `${changed.definition.name} (Copy)` }));
     const portfolio = await commands.submit(commands.prepareCreate(intent)); if (portfolio.state !== 'committed' || !portfolio.value) throw new Error('Expected portfolio');
     await TestBed.inject(IndexedDbCascadeDeleteService).deleteFacility(store.facilities().find(f => f.guid === 'facility-b')!, 'account-a');
     await workspace.reloadActiveWorkspace(true);
     const retained = await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations');
     expect(retained.map(record => record.guid)).toEqual([portfolio.value.guid]);
-    expect(retained[0].definition).toEqual(intent);
+    expect(retained[0].definition).toEqual(serializeVisualizationDefinition(intent));
     expect(inspectVisualizationReferences(intent, store.snapshot()!)).toContainEqual(expect.objectContaining({ kind: 'facility', guid: 'facility-b' }));
   });
 });

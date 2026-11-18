@@ -10,6 +10,9 @@
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title"><h1 id="visualization-title"><app-ui-icon name="dataVisualization"/>{{ editor.definition()?.name || 'Visualization' }}</h1></div>
         <div class="v1-data-workbench-actions" aria-label="Visualization summary and controls">
+          @if (capturedReturn()) {
+            @if (canReturnToMeter()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="backToMonthlyChart()"><app-ui-icon name="chevronLeft"/>Back to Monthly Chart</button> }
+          }
           <span class="visualization-workbench__save-state" [class.visualization-workbench__save-state--saved]="editor.state() === 'saved' && !hasInvalidFields()" [class.visualization-workbench__save-state--error]="saveNeedsAttention()" role="status" aria-live="polite">
             @if (saveInProgress()) { <app-ui-icon name="loading" spin/> }
             @else if (saveNeedsAttention()) { <app-ui-icon name="warning"/> }
@@ -32,6 +35,8 @@
         <div><dt>Chart type</dt><dd>{{ chartSummary() }}</dd></div>
         <div><dt>Period</dt><dd>{{ periodSummary() }}</dd></div>
       </dl></div>
+      @if (capturedReturn() && !canReturnToMeter()) { <p role="status">The source meter or facility is unavailable. Use the breadcrumbs to return to Visualizations.</p> }
+      @if (returnError()) { <p role="alert">{{ returnError() }}</p> }
       @if (dataStatusSummaries().length) {
         <ul class="v1-data-workbench-status-notes visualization-workbench__status-notes" aria-label="Source data issues">
           @for (issue of dataStatusSummaries(); track issue.id) {
@@ -107,7 +112,7 @@
             @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
           }
         </app-visualization-decision-section>
-        <app-visualization-decision-section [nodeId]="rootNodes.sources" label="Data Sources" [summary]="definition.sources.length + ' configured'" icon="database"
+        <app-visualization-decision-section [nodeId]="rootNodes.sources" label="Data Sources" [summary]="sourceCategoryCount() + ' configured'" icon="database"
           [expanded]="expandedNodes().has(rootNodes.sources)" (expandedChange)="setSection(rootNodes.sources, $event)">
           <div class="visualization-choices" role="group" aria-label="Data source categories">
             @for (option of dataSources(); track option.value) {
@@ -127,6 +132,10 @@
             @else { <p role="status">Setup required. Data selection for {{ source.label }} is not available yet.</p> }
           </app-visualization-decision-section>
         }
+        @for (item of traceItems(); track item.traceKey; let position = $index) {
+          <app-visualization-item-settings [timeSeries]="definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="traceItems().length" [disabled]="!editor.canEdit()" [editorKey]="editorKey()" [resetKey]="item.resetKey"
+            [expandedNodes]="expandedNodes()" (requested)="requestTrace($event)" (sectionChanged)="setSection($event.id, $event.expanded)"/>
+        }
         <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates and comparison" [summary]="periodSummary()" icon="calendar"
           [attention]="periodInvalid()" [expanded]="expandedNodes().has(rootNodes.period)" (expandedChange)="setSection(rootNodes.period, $event)">
           <app-visualization-period-settings [context]="periodContext()"/>
@@ -136,7 +145,11 @@
           <label>Visualization name<input formControlName="name" type="text" aria-describedby="visualization-name-error"></label>
           @if (editor.form.controls.name.invalid) { <p id="visualization-name-error" role="alert">Enter a name.</p> }
           <label>Chart title<input formControlName="title" type="text"></label>
+          <app-visualization-display-settings [context]="displayContext()"/>
           <label class="visualization-workbench__checkbox"><input formControlName="legend" type="checkbox">Show legend</label>
+          @if (definition.chart?.kind === 'time-series') {
+            <label class="visualization-workbench__checkbox"><input [formControl]="smoothLines" type="checkbox">Smooth lines</label>
+          }
         </app-visualization-decision-section>
       </form>
       <section class="visualization-workbench__chart" aria-label="Visualization">

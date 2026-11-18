@@ -1,3 +1,4 @@
+import { expandVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { previewValuesText } from './preview-values.testing';
 import { By } from '@angular/platform-browser';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
@@ -148,7 +149,7 @@ describe('saved All Predictors and mixed monthly charts', () => {
     const duplicated = await commands.submit(commands.prepareDuplicate(current));
     expect(duplicated.state).toBe('committed');
     if (duplicated.state !== 'committed' || !duplicated.value) throw new Error('Expected duplicate');
-    expect(duplicated.value.guid).not.toBe(saved.guid); expect(duplicated.value.definition).toMatchObject({ sources: component.editor.definition()!.sources, series: component.editor.definition()!.series });
+    expect(duplicated.value.guid).not.toBe(saved.guid); expect(expandVisualizationDefinition(duplicated.value.definition)).toMatchObject({ sources: component.editor.definition()!.sources, series: component.editor.definition()!.series });
     const recovery = fixture!.debugElement.query(By.directive(RecoveryActionsComponent)).componentInstance as RecoveryActionsComponent;
     const open = vi.spyOn(TestBed.inject(VisualizationNavigationService), 'open').mockResolvedValue(true);
     await recovery.start('copy'); recovery.facilitySelectionControl.setValue({ kind: 'fixed', facilityGuids: [otherFacility.guid] });

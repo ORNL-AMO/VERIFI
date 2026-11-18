@@ -28,7 +28,9 @@
     [chartRows]="chartRows()"
     [metrics]="metrics()"
     [defaultLeftMetricId]="defaultLeftMetricId()"
-    [defaultRightMetricId]="defaultRightMetricId()">
+    [defaultRightMetricId]="defaultRightMetricId()"
+    [visualize]="visualizeAction()" [initialPresentation]="initialPresentation()"
+    (presentationChanged)="chartView.set($event)" (visualizeRequested)="openCapture($event)">
   </app-meter-results-chart>
 
   @if (showFiscalYearComparison() && utilityMetric(); as currentUtilityMetric) {
@@ -40,4 +42,9 @@
       [usesFiscalYearLabels]="usesFiscalYearLabels()">
     </app-meter-fiscal-year-comparison-chart>
   }
+}
+
+@if (reviewed(); as captureReview) {
+  <app-visualization-capture-slideout [definition]="captureReview.definition" [session]="capture"
+    [error]="captureError()" (saveRequested)="saveCapture($event)" (closed)="closeCapture()"/>
 }

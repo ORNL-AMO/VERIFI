@@ -6,7 +6,7 @@ import { SessionStorageService } from 'ngx-webstorage';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
-import { createVisualizationDefinition, createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationDefinition, createVisualizationSetupDefinition, normalizeVisualizationDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
@@ -37,6 +37,22 @@ import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
 describe('visualization workbench', () => {
+  it('retains the workbench and exposes retry feedback when returning to the meter throws', async () => {
+    const { component } = setup();
+    const returned = vi.spyOn(TestBed.inject(VisualizationNavigationService), 'returnToMonthlyMeter').mockRejectedValueOnce(new Error('Route failed')).mockResolvedValueOnce(true);
+    await component.backToMonthlyChart(); expect(component.returnError()).toContain('could not be opened');
+    await component.backToMonthlyChart(); expect(component.returnError()).toBe(''); expect(returned).toHaveBeenCalledTimes(2);
+  });
+  it('edits saved smoothing without losing it when switching between line and bar', async () => {
+    const original = utilityVisualizationFixture(), { component, fixture } = setup(original);
+    expect(component.smoothLines.value).toBe(false);
+    component.smoothLines.setValue(true); fixture.detectChanges();
+    expect(component.editor.definition()?.chart).toMatchObject({ smoothLines: true });
+    await component.requestDecision({ kind: 'chart-type', traceType: 'bar' }); fixture.detectChanges();
+    expect(component.editor.definition()?.chart).toMatchObject({ smoothLines: true, defaultTraceType: 'bar' });
+    await component.requestDecision({ kind: 'chart-type', traceType: 'line' }); fixture.detectChanges();
+    expect(component.smoothLines.value).toBe(true);
+  });
   afterEach(() => TestBed.resetTestingModule());
   it('reviews facility pruning with durable imported reference blocks despite excluded destination collisions', async () => {
     const original = utilityVisualizationFixture();
@@ -96,16 +112,6 @@ describe('visualization workbench', () => {
     expect(item.form.controls.label.value).toBe('Custom meter');
     expect(component.editor.definition()!.series[0].label).toBe('Custom meter');
   });
-  it('retains consecutive chart-unit edits before the next view update', () => {
-    const { component, fixture } = setup(utilityVisualizationFixture(), false, true);
-    const source = fixture.debugElement.query(By.directive(UtilitySourceEditorComponent)).componentInstance as UtilitySourceEditorComponent;
-    source.settingsForm.controls.unit.setValue('M');
-    source.settingsForm.controls.unit.setValue('MW');
-    source.settingsForm.controls.unit.setValue('MWh');
-    fixture.detectChanges();
-    expect(source.settingsForm.controls.unit.value).toBe('MWh');
-    expect(component.editor.definition()!.sources[0].settings?.unit).toEqual({ kind: 'pinned', value: 'MWh' });
-  });
   it('does not restore item styling from an old control after the item is removed', async () => {
     const { component, fixture } = setup(utilityVisualizationFixture(), false, true);
     const item = fixture.debugElement.query(By.directive(ItemSettingsComponent)).componentInstance as ItemSettingsComponent;
@@ -114,15 +120,6 @@ describe('visualization workbench', () => {
     item.form.controls.label.setValue('Stale item label');
     expect(component.editor.definition()!.series).toEqual([]);
     expect(component.editor.definition()!.sources[0]).not.toHaveProperty('selection');
-  });
-  it('rejects old data-setting controls after their charted data is changed', async () => {
-    const { component, fixture } = setup(utilityVisualizationFixture(), false, true);
-    const source = fixture.debugElement.query(By.directive(UtilitySourceEditorComponent)).componentInstance as UtilitySourceEditorComponent;
-    await component.requestDecision({ kind: 'measure', sourceId: 'utility', measure: 'cost' });
-    await component.confirmDecision();
-    source.settingsForm.controls.unit.setValue('MWh');
-    expect(component.editor.definition()!.sources[0]).toMatchObject({ measure: 'cost', settings: {} });
-    expect(component.editor.definition()!.sources[0].settings?.unit).toBeUndefined();
   });
   it('keeps incomplete Bill charge setup collapsed while retaining its attention indicator', () => {
     const original = utilityVisualizationFixture();
@@ -187,9 +184,9 @@ describe('visualization workbench', () => {
     const definition = { ...original, series: original.series.map(series => ({ ...series, color: '#123456' })) };
     const { component, fixture } = setup(definition);
     await component.requestDecision({ kind: 'toggle-resource', sourceId: 'utility', resourceId: 'meter-a', selected: false }); fixture.detectChanges();
-    expect(component.pendingDecision()).toBeDefined(); expect(component.editor.definition()).toEqual(definition);
+    expect(component.pendingDecision()).toBeDefined(); expect(component.editor.definition()).toEqual(normalizeVisualizationDefinition(definition));
     expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
-    component.cancelDecision(); fixture.detectChanges(); expect(component.editor.definition()).toEqual(definition);
+    component.cancelDecision(); fixture.detectChanges(); expect(component.editor.definition()).toEqual(normalizeVisualizationDefinition(definition));
     await component.requestDecision({ kind: 'toggle-resource', sourceId: 'utility', resourceId: 'meter-a', selected: false });
     await component.confirmDecision(); fixture.detectChanges();
     expect(component.editor.definition()!.sources[0]).not.toHaveProperty('selection');
@@ -203,20 +200,6 @@ describe('visualization workbench', () => {
     expect(component.pendingDecision()).toBeDefined();
     await component.confirmDecision();
     expect(component.editor.definition()!.series[0].traceType).toBeUndefined();
-  });
-  it('keeps the current measure and pinned settings when reset review is canceled', async () => {
-    const definition = utilityVisualizationFixture();
-    const { component, fixture, submit } = setup(definition);
-    const source = fixture.debugElement.query(By.directive(UtilitySourceEditorComponent)).componentInstance as UtilitySourceEditorComponent;
-    source.selectMeasure('cost'); fixture.detectChanges();
-    expect(component.pendingDecision()).toBeDefined();
-    expect(component.editor.definition()).toEqual(definition);
-    expect(source.settingsForm.controls.unit.value).toBe('kWh');
-    component.cancelDecision(); fixture.detectChanges();
-    expect(component.editor.definition()).toEqual(definition); expect(submit).not.toHaveBeenCalled();
-    source.selectMeasure('cost'); fixture.detectChanges();
-    await component.confirmDecision(); fixture.detectChanges();
-    expect(component.editor.definition()!.sources[0]).toMatchObject({ measure: 'cost', settings: {} });
   });
   it('rejects a prepared reset when local intent changes during review', async () => {
     const original = utilityVisualizationFixture();
@@ -246,21 +229,11 @@ describe('visualization workbench', () => {
     const { component, fixture, store } = setup(definition, false, true);
     store.publish({ ...store.snapshot()!, meters: [meter({ id: 1, charges: ['a', 'b'].map(suffix => ({ guid: `charge-${suffix}`, name: `Charge ${suffix}`, chargeType: 'consumption' as const, displayUsageInTable: true, displayChargeInTable: true })) })] });
     component.setSection('source:utility', true); component.setSection('data-settings:utility', true); fixture.detectChanges();
-    const select = fixture.nativeElement.querySelector('select[formcontrolname="chargeGuid"]') as HTMLSelectElement;
+    const select = fixture.nativeElement.querySelector('select[formcontrolname="guid"]') as HTMLSelectElement;
     expect(select.value).toBe('charge-a'); select.value = 'charge-b'; select.dispatchEvent(new Event('change')); fixture.detectChanges();
     expect(component.pendingDecision()).toBeDefined(); expect(select.value).toBe('charge-a');
     component.cancelDecision(); fixture.detectChanges();
     expect(select.value).toBe('charge-a'); expect((component.editor.definition()!.sources[0] as UtilityVisualizationSource).charge?.chargeGuid).toBe('charge-a');
-  });
-  it('preserves an unrelated invalid unit draft when ownership is requested', async () => {
-    const { component, fixture, submit } = setup(utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] }));
-    const source = fixture.debugElement.query(By.directive(UtilitySourceEditorComponent)).componentInstance as UtilitySourceEditorComponent;
-    source.settingsForm.controls.unit.setValue(''); fixture.detectChanges();
-    expect(component.hasInvalidFields()).toBe(true);
-    await component.requestDecision({ kind: 'facilities', selection: { kind: 'all' } });
-    expect(component.pendingDecision()).toBeUndefined(); expect(component.decisionError()).toBe('');
-    expect(component.editor.definition()!.facilitySelection).toEqual({ kind: 'all' });
-    expect(source.settingsForm.controls.unit.value).toBe(''); expect(component.hasInvalidFields()).toBe(true); expect(submit).toHaveBeenCalledOnce();
   });
   it('preserves an incomplete independent calendar draft when ownership is requested', async () => {
     const original = utilityVisualizationFixture();
@@ -325,26 +298,6 @@ describe('visualization workbench', () => {
     expect(button.getAttribute('aria-pressed')).toBe('false');
     expect(component.editor.definition()!.sources).toEqual(original.sources);
     expect(component.editor.definition()!.series).toEqual(original.series);
-  });
-  it('keeps a selected category and its incomplete draft until removal is confirmed', async () => {
-    const { component, fixture } = setup(utilityVisualizationFixture(), false, true);
-    const source = fixture.debugElement.query(By.directive(UtilitySourceEditorComponent)).componentInstance as UtilitySourceEditorComponent;
-    source.settingsForm.controls.unit.setValue(''); fixture.detectChanges();
-    component.toggleDataSource('predictor'); fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-    const meters = root.querySelector<HTMLButtonElement>('[aria-label="Data source categories"] button')!;
-    meters.click();
-    await vi.waitFor(() => { fixture.detectChanges(); expect(component.pendingDecision()).toBeDefined(); });
-    expect(meters.getAttribute('aria-pressed')).toBe('true');
-    expect(source.settingsForm.controls.unit.value).toBe('');
-    component.cancelDecision(); fixture.detectChanges();
-    expect(component.hasInvalidFields()).toBe(true); expect(meters.getAttribute('aria-pressed')).toBe('true');
-    meters.click();
-    await vi.waitFor(() => { fixture.detectChanges(); expect(component.pendingDecision()).toBeDefined(); });
-    await component.confirmDecision(); fixture.detectChanges();
-    expect(component.editor.definition()!.sources.map(source => source.kind)).toEqual(['predictor']);
-    expect(meters.getAttribute('aria-pressed')).toBe('false'); expect(component.hasInvalidFields()).toBe(false);
-    expect(fixture.debugElement.query(By.directive(UtilitySourceEditorComponent))).toBeNull();
   });
   it('keeps a mounted incomplete period after external deletion until Save as new explicitly discards field drafts', async () => {
     const { component, fixture, store, submit, prepareCreate } = setup();
@@ -516,7 +469,7 @@ describe('visualization workbench', () => {
     expect(root.querySelector('.v1-chip')?.textContent).toContain(choice.label);
     expect(root.textContent).toContain('Meters'); expect(root.textContent).toContain('Predictors'); expect(root.textContent).toContain('Analysis');
     expect(root.querySelector('nav[aria-label="Visualization breadcrumb"] a')?.textContent).toContain('Account A');
-    expect(component.editor.definition()).toEqual(definition);
+    expect(component.editor.definition()).toEqual(normalizeVisualizationDefinition(definition));
   });
   it('reports the Analysis result item type in its summary and selected Chart control', () => {
     const base = analysisDefinition();

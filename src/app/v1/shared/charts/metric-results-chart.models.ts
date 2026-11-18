@@ -1,6 +1,20 @@
 /** Feature-neutral contracts consumed by reusable v1 metric result charts. */
 export type MeterResultsPeriod = 'monthly' | 'yearly';
 
+/** Temporary, semantic chart state. Never persisted as visualization intent. */
+export interface MeterResultsChartPresentation {
+  readonly leftMetricId?: string;
+  readonly rightMetricId?: string;
+  readonly leftDisplay: 'off' | 'bar' | 'line';
+  readonly rightDisplay: 'off' | 'bar' | 'line';
+  readonly leftTraceType: 'bar' | 'line';
+  readonly rightTraceType: 'bar' | 'line';
+  readonly hiddenMetricIds: readonly string[];
+  readonly zoom: { readonly start: number; readonly end: number };
+  readonly smoothLines: boolean;
+  readonly legend: boolean;
+}
+
 export interface MeterResultsChartMetric {
   readonly id: string;
   readonly label: string;

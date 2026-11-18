@@ -5,6 +5,7 @@ import { getNewIdbSavedVisualization, IdbSavedVisualization, SAVED_VISUALIZATION
 import { readSavedVisualization, savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
 import { normalizeVisualizationDefinition, VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
 import { VisualizationReference, VisualizationReferenceIssue, visualizationReferences } from '@domain/visualizations/visualization-references';
@@ -75,7 +76,7 @@ export class VisualizationCommandHandler {
           this.invalid('Reviewed replacement sources must belong to the saved scope and be available.');
       }
       const next: IdbSavedVisualization = { ...current, revision: current.revision + 1,
-        modifiedDate: new Date(), definition: submitted.definition };
+        modifiedDate: new Date(), definition: serializeVisualizationDefinition(submitted.definition) };
       delete next.facilityId;
       if (remaining.length) next.preservation = { references: remaining, transfers: current.preservation?.transfers ?? [] };
       else delete next.preservation;
@@ -103,7 +104,7 @@ export class VisualizationCommandHandler {
       const definition = prepareVisualizationFacilityChange(decoded.definition, submitted.targetFacilities, catalog, current.preservation?.references).definition;
       this.assertDefinition(definition, submitted.accountGuid);
       if (!sameDefinitionIntent(normalizeVisualizationDefinition(definition), normalizeVisualizationDefinition(submitted.reviewedDefinition))) throw new VisualizationConflictError(current);
-      const next: IdbSavedVisualization = { ...current, revision: current.revision + 1, modifiedDate: new Date(), definition };
+      const next: IdbSavedVisualization = { ...current, revision: current.revision + 1, modifiedDate: new Date(), definition: serializeVisualizationDefinition(definition) };
       delete next.facilityId;
       if (current.preservation) next.preservation = { ...current.preservation,
         references: reconcileRetargetReferences(decoded.definition, definition, current.preservation.references, catalog) };
@@ -221,7 +222,7 @@ function referenceIdentity(definition: VisualizationDefinition, ref: Visualizati
 /** Compare current definition intent independently of JSON object-key order. */
 function sameDefinitionIntent(left: unknown, right: unknown): boolean {
   const a = decodeVisualizationDefinition(left), b = decodeVisualizationDefinition(right);
-  return 'definition' in a && 'definition' in b && sameJson(a.definition, b.definition);
+  return 'definition' in a && 'definition' in b && sameJson(serializeVisualizationDefinition(a.definition), serializeVisualizationDefinition(b.definition));
 }
 
 /** Definitions have a closed decoder-approved JSON shape; object key order is not semantic. */

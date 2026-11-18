@@ -1,3 +1,4 @@
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { createVisualizationDefinition, createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { analysisVisualizationFixture, utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
@@ -14,13 +15,12 @@ describe('visualization library projections', () => {
     const second = { ...snapshot.facilities[0], guid: 'facility-b' };
     const two = buildVisualizationLibrary({ ...snapshot, facilities: [...snapshot.facilities, second], savedVisualizations: [record] })[0];
     expect(two.scope).toBe('portfolio'); expect(two.facilityGuid).toBeUndefined();
-    expect(record.facilityId).toBe('stale-facility'); expect(record.definition).toEqual(definition);
+    expect(record.facilityId).toBe('stale-facility'); expect(record.definition).toEqual(serializeVisualizationDefinition(definition));
   });
   it('deduplicates repeated data-source categories and matches each Dashboard filter', () => {
     const base = createVisualizationSetupDefinition({ name: 'All sources', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: createVisualizationChart('line'), sourceKinds: ['utility', 'predictor', 'energy-use', 'analysis'] });
-    const definition = { ...base, sources: [...base.sources, { ...base.sources[1], id: 'predictor-2' },
-      { ...analysisVisualizationFixture(true).sources[0], id: 'analysis-model' }] };
+    const definition = { ...base, sources: [...base.sources, { ...base.sources[0] as import('@domain/visualizations/visualization-definition').UtilityVisualizationSource, id: 'utility-cost', measure: 'cost' as const }] };
     const entries = buildVisualizationLibrary({ ...librarySnapshot(), savedVisualizations: [getNewIdbSavedVisualization(definition)] });
     expect(entries[0].dataSourceLabel).toBe('Meters, Predictors, Energy Use, Analysis');
     expect(entries[0].sourceKinds).toEqual(['utility', 'predictor', 'energy-use', 'analysis']);
@@ -63,7 +63,7 @@ describe('visualization library projections', () => {
     snapshot.meters = [];
     const [missing] = buildVisualizationLibrary(snapshot);
     expect(missing.status).toBe('repair-required'); expect(missing.issues.join()).toContain('meter-a');
-    expect(record.definition).toEqual(utilityVisualizationFixture());
+    expect(record.definition).toEqual(serializeVisualizationDefinition(utilityVisualizationFixture()));
   });
   it('preserves unknown and transfer-locked payloads as visible read-only records', () => {
     const unknown = { ...libraryRecord(), definition: { version: 999, payload: ['preserved'] } };

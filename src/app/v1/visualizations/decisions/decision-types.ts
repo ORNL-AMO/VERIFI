@@ -1,6 +1,6 @@
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { AnalysisResultVisualizationSource, UtilitySelectionMode, UtilityVisualizationSource, VisualizationChart, VisualizationDefinition,
-  EnergyUseVisualizationSource, EnergyUseSelectionMode, SettingBinding, VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType } from '@domain/visualizations/visualization-definition';
+  EnergyUseVisualizationSource, EnergyUseSelectionMode, SettingBinding, VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType, VisualizationDisplaySettings } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
@@ -26,6 +26,8 @@ export interface VisualizationDecisionItem {
   readonly identity: DecisionItemIdentity;
   readonly label: string;
   readonly detail: string;
+  readonly facilityGuid?: string;
+  readonly scopeLabel?: string;
   readonly unit: string;
   readonly available: boolean;
   readonly missing: boolean;
@@ -41,6 +43,9 @@ export interface DecisionResourceChoice {
   readonly available: boolean;
 }
 export type VisualizationDecisionAction =
+  | { readonly kind: 'source-measures'; readonly sourceKind: VisualizationSourceKind; readonly measures: readonly string[] }
+  | { readonly kind: 'analysis-targets'; readonly targets: readonly { readonly analysisGuid: string; readonly groupGuid?: string }[] }
+  | { readonly kind: 'chart-display'; readonly settings: VisualizationDisplaySettings }
   | { readonly kind: 'analysis-binding'; readonly sourceId: string; readonly analysisGuid?: string; readonly groupGuid?: string }
   | { readonly kind: 'analysis-measure'; readonly sourceId: string; readonly measure: AnalysisResultVisualizationSource['measure'] }
   | { readonly kind: 'analysis-interval'; readonly sourceId: string; readonly interval: 'monthly' | 'yearly' }

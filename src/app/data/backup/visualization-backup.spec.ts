@@ -1,3 +1,4 @@
+import { expandVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import { BackupPreparationService } from './backup-preparation.service';
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
@@ -110,7 +111,7 @@ describe('saved visualization backup preparation and transfer', () => {
     const original = savedVisualizationFixture(utilityVisualizationFixture());
     const first = transferSavedVisualization(original, 'destination', {}, 'first');
     const second = transferSavedVisualization(first, 'next', { meter: { 'meter-a': 'accidental-match' } }, 'second');
-    expect(second.definition).toMatchObject({ sources: [{ selection: { guids: ['meter-a'] } }], series: [{ resourceGuid: 'meter-a' }] });
+    expect(expandVisualizationDefinition(second.definition)).toMatchObject({ sources: [{ selection: { guids: ['meter-a'] } }], series: [{ resourceGuid: 'meter-a' }] });
     expect(second.preservation.references).toEqual(first.preservation.references);
     expect(readSavedVisualization(second).state).toBe('repair-required');
   });
@@ -130,7 +131,7 @@ describe('saved visualization backup preparation and transfer', () => {
     expect(Object.values(maps.model)).toEqual(['model-a', 'model-b']);
     const model = source.savedVisualizations.find(item => (item.definition as any).sources[0].mode === 'model');
     const transferred = transferSavedVisualization(model, 'new-account', maps, 'copy');
-    expect(transferred.definition).toMatchObject({ sources: [{ analysisGuid: 'analysis-a-new', groupGuid: 'group-a-new', modelId: 'model-a', comparisonModelId: 'model-b' }] });
+    expect(readSavedVisualization(transferred)).toMatchObject({ definition: { sources: [{ analysisGuid: 'analysis-a-new', groupGuid: 'group-a-new', modelId: 'model-a', comparisonModelId: 'model-b' }] } });
     expect(transferred.preservation.references).toEqual([]);
   });
 });

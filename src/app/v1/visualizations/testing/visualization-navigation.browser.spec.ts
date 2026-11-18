@@ -1,3 +1,4 @@
+import { expandVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
@@ -127,7 +128,7 @@ async function expandDecision(test: ReturnType<typeof setup>, id: string): Promi
 
 async function bindMeterForCreation(test: ReturnType<typeof setup>, name = 'Meter A'): Promise<void> {
   await activate(test, 'Individual meters'); await activate(test, name);
-  await activate(test, 'Continue'); await activate(test, 'Continue');
+  await activate(test, 'Continue');
 }
 
 async function waitForDialog(test: ReturnType<typeof setup>) {
@@ -178,7 +179,7 @@ function creationDialog(test: ReturnType<typeof setup>): HTMLElement {
 }
 
 describe('visualization routed journeys in Chromium', () => {
-  it('uses calendarization and combined item controls from a collapsed workbench', async () => {
+  it('uses calendarized data automatically and retains combined item controls', async () => {
     const test = setup();
     try {
       const original = utilityVisualizationFixture();
@@ -191,14 +192,8 @@ describe('visualization routed journeys in Chromium', () => {
       expect(test.root.querySelector('[id="observation:utility-heading"]')).toBeNull();
       await expandDecision(test, 'source:utility'); await expandDecision(test, 'data-settings:utility');
       const settings = test.root.querySelector<HTMLElement>('[id="data-settings:utility-body"]')!;
-      const calendarized = [...settings.querySelectorAll<HTMLInputElement>('input[role="switch"]')]
-        .find(input => input.closest('label')?.textContent?.trim() === 'Use Calendarized Data')!;
-      expect(calendarized.checked).toBe(true);
-      calendarized.focus(); await userEvent.keyboard(' '); test.fixture.detectChanges();
-      expect(calendarized.checked).toBe(false);
-      expect(editor.editor.definition()!.chart).toMatchObject({ interval: 'native' });
-      await userEvent.keyboard(' '); test.fixture.detectChanges();
-      expect(calendarized.checked).toBe(true);
+      expect(settings.textContent).not.toContain('Use Calendarized Data');
+      expect(editor.editor.definition()!.sources[0]).toMatchObject({ dataMode: 'calendarized' });
       expect(editor.editor.definition()!.chart).toMatchObject({ interval: 'monthly' });
       const itemId = decisionNodeId({ kind: 'item', sourceId: 'utility', itemKey: 'resource:meter-a' });
       await expandDecision(test, itemId);
@@ -206,7 +201,7 @@ describe('visualization routed journeys in Chromium', () => {
       expect(item.querySelector('app-visualization-decision-section')).toBeNull();
       expect(test.root.querySelector('[id^="items:"]')).toBeNull();
       expect(test.root.querySelector('button[aria-label^="Move "]')).toBeNull();
-      expect(item.querySelector('[aria-label="Meter A trace type"]')).not.toBeNull();
+      expect(item.querySelector('[aria-label="Meter A · Energy trace type"]')).not.toBeNull();
       const label = item.querySelector<HTMLInputElement>('input[formcontrolname="label"]')!;
       label.focus(); await userEvent.keyboard('Custom meter'); test.fixture.detectChanges();
       const bar = item.querySelector<HTMLButtonElement>('button[aria-label="Bar"]')!;
@@ -247,24 +242,20 @@ describe('visualization routed journeys in Chromium', () => {
       expect(predictorHost.querySelector<HTMLElement>('.decision-section__body')!.hidden).toBe(false);
       await expandDecision(test, 'source:utility'); await expandDecision(test, 'data-settings:utility');
       const dataSettings = test.root.querySelector<HTMLElement>('[id="data-settings:utility-body"]')!;
-      const aggregate = [...dataSettings.querySelectorAll<HTMLInputElement>('input[role="switch"]')]
+      const aggregate = [...dataSettings.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')]
         .find(input => input.closest('label')?.textContent?.includes('Aggregate by facility'))!;
       aggregate.focus(); await userEvent.keyboard(' '); test.fixture.detectChanges();
       expect(aggregate.checked).toBe(true);
       expect(projectMeterItems(editor.editor.definition()!, 'utility', test.store.snapshot()!).map(item => item.identity.resourceGuid)).toEqual(['facility-a']);
-      const sourceEnergy = namedButton(dataSettings.querySelector<HTMLElement>('[aria-label="Site or source energy"]')!, 'Source');
-      sourceEnergy.focus(); await userEvent.keyboard('{Enter}'); test.fixture.detectChanges();
-      expect(sourceEnergy.getAttribute('aria-pressed')).toBe('true');
-      const meterSource = editor.editor.definition()!.sources.find(source => source.kind === 'utility')!;
-      expect(meterSource.settings?.energyTreatment).toEqual({ kind: 'pinned', value: 'source' });
-      const defaultUnits = dataSettings.querySelector<HTMLInputElement>('input[formcontrolname="useDefaultUnits"]')!;
-      defaultUnits.focus(); await userEvent.keyboard(' '); test.fixture.detectChanges();
-      expect(defaultUnits.checked).toBe(true);
-      expect(dataSettings.querySelector('input[formcontrolname="unit"]')).toBeNull();
+      await expandDecision(test, editor.rootNodes.appearance);
+      const sourceEnergy = test.root.querySelector<HTMLSelectElement>('select[aria-label="Site / Source energy"]')!;
+      sourceEnergy.focus(); sourceEnergy.value = 'source'; sourceEnergy.dispatchEvent(new Event('change')); test.fixture.detectChanges();
+      expect(sourceEnergy.value).toBe('source');
+      const defaultUnits = test.root.querySelector<HTMLSelectElement>('select[aria-label="Energy units"]')!;
+      defaultUnits.focus(); defaultUnits.value = ''; defaultUnits.dispatchEvent(new Event('change')); test.fixture.detectChanges();
+      expect(defaultUnits.value).toBe('');
       await editor.editor.flush(); test.fixture.detectChanges();
-      expect(test.store.savedVisualizations().find(record => record.guid === 'visualization-a')!.definition).toMatchObject({
-        sources: [expect.objectContaining({ groupBy: 'facility', settings: { unit: { kind: 'owner' }, energyTreatment: { kind: 'pinned', value: 'source' } } }), expect.objectContaining({ kind: 'predictor' })]
-      });
+      expect(editor.editor.definition()).toMatchObject({ displaySettings: { units: { energy: { kind: 'owner' } }, energyTreatment: { kind: 'pinned', value: 'source' } }, sources: [expect.objectContaining({ groupBy: 'facility' }), expect.objectContaining({ kind: 'predictor' })] });
     } finally { test.destroy(); }
   });
   it('edits no-data items independently and confirms resets before changing the selected checkbox', async () => {
@@ -280,7 +271,7 @@ describe('visualization routed journeys in Chromium', () => {
       const editor = test.editor()!;
       const open = (kind: Parameters<typeof decisionNodeId>[0]['kind'], itemKey?: string) => expandDecision(test, decisionNodeId({ kind, sourceId: 'utility', itemKey }));
       await open('source'); await open('item', 'resource:meter-a');
-      const typeGroup = test.root.querySelector('[aria-label="Meter A trace type"]')!;
+      const typeGroup = test.root.querySelector('[aria-label="Meter A · Energy trace type"]')!;
       const bar = typeGroup.querySelector<HTMLButtonElement>('[aria-label="Bar"]')!;
       bar.focus(); await userEvent.keyboard('{Enter}'); test.fixture.detectChanges();
       expect(editor.chartSummary()).toBe('Combination');
@@ -726,9 +717,9 @@ describe('visualization routed journeys in Chromium', () => {
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/workbench/created-1`); });
       const record = test.store.savedVisualizations().find(item => item.guid === 'created-1')!;
       expect(test.editor()!.expandedNodes().size).toBe(0);
-      expect(record.definition).toMatchObject({ sources: [{ kind: 'utility', groupBy: choice.grouping }] });
+      expect(expandVisualizationDefinition(record.definition)).toMatchObject({ sources: [{ kind: 'utility', groupBy: choice.grouping }] });
       await activateBreadcrumb(test, 'Account A'); await test.navigate(`${base}/workbench/created-1`);
-      expect(test.editor()!.editor.definition()).toEqual(record.definition);
+      expect(test.editor()!.editor.definition()).toEqual(expandVisualizationDefinition(record.definition));
     } finally { test.destroy(); await page.viewport(1280, 900); }
   });
   it('adds a mixed-sourceKind Scatter with the keyboard and reopens its full intent after restoring Dashboard filters', async () => {
@@ -745,7 +736,7 @@ describe('visualization routed journeys in Chromium', () => {
       expect(creationDialog(test).querySelector('input[formcontrolname="name"]')).toBeNull();
       await activate(test, 'Continue');
       await bindMeterForCreation(test);
-      await activate(test, 'Skip for now');
+      await activate(test, 'Skip for now'); await activate(test, 'Continue');
       const name = creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
       expect(document.activeElement).toBe(name);
       await userEvent.type(name, 'Weather and usage'); test.fixture.detectChanges();
@@ -801,7 +792,7 @@ describe('visualization routed journeys in Chromium', () => {
       await activate(test, 'Continue');
       expect(creationDialog(test).querySelectorAll('[aria-label="Chart type"] .creation-choice')).toHaveLength(11);
       await activate(test, 'Line'); await activate(test, 'Meters'); await activate(test, 'Continue');
-      await bindMeterForCreation(test);
+      await bindMeterForCreation(test); await activate(test, 'Continue');
       await userEvent.type(creationDialog(test).querySelector<HTMLInputElement>('input[formcontrolname="name"]')!, 'Plant usage');
       test.fixture.detectChanges(); await activate(test, 'Add visualization');
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/workbench/created-1`); });

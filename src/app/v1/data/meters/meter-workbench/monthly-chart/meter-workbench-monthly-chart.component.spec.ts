@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import type { MeterResultsChartPresentation } from '@app/v1/shared/charts/metric-results-chart.models';
+import { CaptureSlideoutModule } from '@app/v1/visualizations/capture/capture-slideout/capture-slideout.module';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -111,6 +113,10 @@ describe('MeterWorkbenchMonthlyChartComponent', () => {
   standalone: true
 })
 class MeterResultsChartStubComponent {
+  @Input() visualize?: { disabled: boolean; reason?: string };
+  @Input() initialPresentation?: MeterResultsChartPresentation;
+  @Output() presentationChanged = new EventEmitter<MeterResultsChartPresentation>();
+  @Output() visualizeRequested = new EventEmitter<MeterResultsChartPresentation>();
   @Input() chartRows: readonly MeterResultsChartRow[] = [];
   @Input() metrics: readonly MeterResultsChartMetric[] = [];
   @Input() defaultLeftMetricId?: string;
@@ -155,7 +161,7 @@ function setup(options: {
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchMonthlyChartComponent],
-    imports: [CommonModule, IconComponent, MeterResultsChartStubComponent, MeterFiscalYearComparisonChartStubComponent],
+    imports: [CommonModule, IconComponent, CaptureSlideoutModule, MeterResultsChartStubComponent, MeterFiscalYearComparisonChartStubComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

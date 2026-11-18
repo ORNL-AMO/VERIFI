@@ -8,6 +8,7 @@ import { annualAnalysisChartValues, monthlyAnalysisSavingsValues, monthlyAnalysi
 import { energyUseFiscalPeriod } from '@domain/calculations/energy-footprint/energy-use-projection';
 import { civilDate, validCivil } from '../utility/utility-periods';
 import { civilMonthIndex, civilMonthRange } from '../visualization-periods';
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import type { AnalysisResultVisualizationSource, VisualizationChart, VisualizationSource } from '../visualization-definition';
 import type { ResolvedVisualizationPeriod, VisualizationChartSupport, VisualizationData, VisualizationObservation, VisualizationSourceCapabilities, VisualizationSourceRequest, VisualizationSourceResolution } from '../visualization-source-provider';
 
@@ -60,7 +61,6 @@ export function facilityAnalysisChartSupport(source: VisualizationSource, chart:
       if (visualizationInterval(chart) === 'monthly' && ['annual-improvement', 'total-improvement'].includes(source.measure)) reasons.push('Annual and total improvement require yearly results.');
     }
     if (source.measure.startsWith('banked-') && !source.groupGuid) reasons.push('Banked savings and losses require a group with applicable banking.');
-    if (source.settings?.unit?.kind === 'pinned' || source.settings?.energyTreatment?.kind === 'pinned') reasons.push('Follow the named analysis’s saved units and site/source basis; conversions are unsupported.');
   }
   return reasons.length ? { chart, state: 'unsupported', reasons } : { chart, state: 'supported' };
 }
@@ -109,7 +109,12 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
   const group = value.scope === 'facility' && source.groupGuid ? value.analysis.groups.find(group => group.idbGroupId === source.groupGuid) : undefined;
   if (source.groupGuid && (!group || ['skip', 'skipAnalysis'].includes(group.analysisType))) return { identity, state: 'missing-source', references: [{ kind: 'analysis-group', id: source.groupGuid }], message: 'Choose an applicable group from the named analysis.' };
   if (source.measure.startsWith('banked-') && !(value.scope === 'facility' && value.analysis.hasBanking && group?.applyBanking)) return unsupported('This group has no applicable banking.');
-  const id = analysisSeriesId(source.id), unit = analysisUnit(analysis, source.measure), percentage = unit === '%';
+  const id = analysisSeriesId(source.id), originalUnit = analysisUnit(analysis, source.measure), percentage = originalUnit === '%';
+  const unit = !percentage && source.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : originalUnit;
+  if (!percentage && source.settings?.energyTreatment?.kind === 'pinned' && analysis.analysisCategory === 'energy'
+    && source.settings.energyTreatment.value !== (analysis.energyIsSource ? 'source' : 'site')) return unsupported('Selected analyses must share the chart’s Site/Source basis. Change Chart appearance or select compatible analyses.');
+  const conversion = !percentage ? new ConvertValue(1, originalUnit, unit) : undefined;
+  if (conversion?.hasError || conversion && !Number.isFinite(conversion.convertedValue)) return unsupported('Choose chart units compatible with the selected analysis results.');
   if (!unit) return unsupported('The named analysis has no saved display unit.');
   const resourceGuid = source.groupGuid ?? analysis.guid;
   const series = [{ id, sourceId: source.id, metric: source.measure, resourceGuid, label: `${analysis.name} · ${source.groupGuid && value.scope === 'facility' ? value.groupLabel ?? source.groupGuid : value.scope === 'account' ? 'Account total' : 'Facility total'} · ${analysisMeasureLabels[source.measure]}`,
@@ -122,7 +127,9 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
   const point = (amount: number | null | undefined, partial: boolean, notes: string[], excluded = false): VisualizationObservation =>
     excluded ? { state: 'excluded', value: null, reason: 'Calculated/annual improvement is unavailable during this banking transition.' }
       : amount == null || !Number.isFinite(amount) ? { state: 'missing', value: null, reason: 'No finite analysis result is available for this period.' }
-        : { state: 'observed', value: amount, provenance: source.measure === 'actual' ? 'measured' : source.measure === 'calculated' ? 'modeled' : 'savings', partial, notes };
+        : { state: 'observed', value: percentage || unit === originalUnit ? amount : new ConvertValue(amount, originalUnit, unit).convertedValue,
+          provenance: source.measure === 'actual' ? 'measured' : source.measure === 'calculated' ? 'modeled' : 'savings', partial,
+          notes: unit === originalUnit ? notes : [...notes, `Original analysis value: ${amount} ${originalUnit}`] };
   if (visualizationInterval(chart) === 'yearly') {
     const available = value.annual.filter(row => Number.isInteger(row.year) && (value.reportYear === undefined || row.year <= value.reportYear));
     const years = period.kind === 'fiscal-year' ? [period.year] : period.kind === 'latest-saved-year' ? available.map(row => row.year).sort((a, b) => a - b).slice(-1) : available.map(row => row.year);

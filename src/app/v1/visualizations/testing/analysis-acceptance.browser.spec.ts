@@ -1,3 +1,4 @@
+import { expandVisualizationDefinition, serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { Component, inject, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -62,10 +63,10 @@ describe('A4 composed analysis workbench acceptance', () => {
     drawer = TestBed.createComponent(CreationComponent); const lifecycle = TestBed.inject(LibraryLifecycle);
     lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources(); drawer.detectChanges();
     const name = target === 'account' ? 'Portfolio baseline' : 'Production baseline';
-    const radio = (drawer.nativeElement as HTMLElement).querySelector(`[aria-label="Inspect ${name}"]`)!.closest('.report-analysis-card')!.querySelector<HTMLInputElement>('input')!;
+    const radio = [...(drawer.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.resource-picker__option')].find(button => button.textContent?.includes(name))!;
     radio.focus(); await userEvent.keyboard(' '); drawer.detectChanges();
     expect(lifecycle.canContinueAnalysis()).toBe(true); expect(resultRequests).toHaveLength(0);
-    lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue(`Acceptance ${target}`); await lifecycle.submit(); drawer.detectChanges(); drawer.destroy(); drawer = undefined;
+    lifecycle.continueAnalysis(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue(`Acceptance ${target}`); await lifecycle.submit(); drawer.detectChanges(); drawer.destroy(); drawer = undefined;
     expect(store.savedVisualizations()).toHaveLength(1);
     host = TestBed.createComponent(AcceptanceHost); host.detectChanges();
     const component = host.debugElement.query(By.directive(WorkbenchComponent)).componentInstance as WorkbenchComponent;
@@ -74,10 +75,10 @@ describe('A4 composed analysis workbench acceptance', () => {
     const wait = async (expected = 'ready') => vi.waitFor(() => { host!.detectChanges(); const state = preview()?.preview.state(); expect(state?.state, JSON.stringify(state)).toBe(expected); });
     await wait();
     if (target === 'group') {
-      await component.requestDecision({ kind: 'analysis-binding', sourceId: 'source-1', analysisGuid: 'analysis-a', groupGuid: 'group-a' });
+      await component.requestDecision({ kind: 'analysis-binding', sourceId: component.editor.definition()!.sources[0].id, analysisGuid: 'analysis-a', groupGuid: 'group-a' });
       if (component.pendingDecision()) await component.confirmDecision(); host.detectChanges(); expect(await component.editor.flush()).toBe(true); await wait();
     }
-    component.setSection('source:source-1', true); component.setSection(component.rootNodes.period, true); host.detectChanges();
+    component.setSection('source:' + encodeURIComponent(component.editor.definition()!.sources[0].id), true); component.setSection(component.rootNodes.period, true); host.detectChanges();
     const guid = store.savedVisualizations()[0].guid;
     return { fixture, store, commands, component, root, preview, wait, guid, resultRequests, sourceBefore, route };
   }
@@ -87,10 +88,35 @@ describe('A4 composed analysis workbench acceptance', () => {
   }
   async function sources() { return { facility: await harness!.getAll('analysisItems'), account: await harness!.getAll('accountAnalysisItems'), readings: await harness!.getAll('utilityMeterData'), predictors: await harness!.getAll('predictorData') }; }
 
+  it('saves multiple Analysis targets and measures with shared display units and reuses their canonical results', async () => {
+    const { component, wait, resultRequests, sourceBefore } = await setup('account');
+    await component.requestDecision({ kind: 'source-measures', sourceKind: 'analysis', measures: ['actual', 'savings'] }); host!.detectChanges(); await wait();
+    await component.requestDecision({ kind: 'analysis-targets', targets: [{ analysisGuid: 'account-analysis' }, { analysisGuid: 'analysis-a' }, { analysisGuid: 'analysis-a', groupGuid: 'group-a' }, { analysisGuid: 'analysis-b' }] });
+    if (component.pendingDecision()) await component.confirmDecision(); host!.detectChanges(); await wait();
+    const axes = component.editor.definition()!.series;
+    expect(axes.filter(series => series.metric === 'actual').map(series => series.axis)).toEqual(['left', 'left', 'left', 'left']);
+    expect(axes.filter(series => series.metric === 'savings').map(series => series.axis)).toEqual(['right', 'right', 'right', 'right']);
+    const productionTraces = component.traceItems().filter(item => item.label === 'Production baseline · Actual use');
+    expect(productionTraces).toHaveLength(2);
+    expect(productionTraces.map(item => item.detail)).toEqual(expect.arrayContaining([expect.stringContaining('Facility total'), expect.stringContaining('Production ·')]));
+    const numericalWork = resultRequests.length;
+    await component.requestDecision({ kind: 'source-measures', sourceKind: 'analysis', measures: ['actual', 'calculated', 'savings'] }); host!.detectChanges(); await wait();
+    expect(component.sourcePanels()).toHaveLength(1); expect(component.traceItems()).toHaveLength(12);
+    expect(resultRequests).toHaveLength(numericalWork);
+    await component.requestDecision({ kind: 'chart-display', settings: { units: { energy: { kind: 'pinned', value: 'MMBtu' } } } }); host!.detectChanges(); await wait();
+    expect(resultRequests).toHaveLength(numericalWork); expect(await component.editor.flush()).toBe(true);
+    const before = structuredClone(component.editor.definition());
+    await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(); host!.detectChanges(); await wait();
+    expect(component.editor.definition()).toEqual(before);
+    const durable = await harness!.getAll<SavedRecord>('savedVisualizations');
+    expect(durable[0].definition).toMatchObject({ sources: [{ kind: 'analysis', measures: ['actual', 'savings', 'calculated'], targets: [{}, {}, {}, {}] }] });
+    expect(await sources()).toEqual(sourceBefore);
+  });
+
   it.each(['group', 'account'] as const)('saves %s controls through reopen, protects review/conflicts, and recovers publication without replay', async target => {
     const { component, root, wait, guid, resultRequests, sourceBefore } = await setup(target);
     const initialWorkers = resultRequests.length;
-    await select(root, 'measure', 'calculated'); expect(await component.editor.flush()).toBe(true); await wait();
+    await component.requestDecision({ kind: 'source-measures', sourceKind: 'analysis', measures: ['calculated'] }); if (component.pendingDecision()) await component.confirmDecision(); host!.detectChanges(); expect(await component.editor.flush()).toBe(true); await wait();
     expect(component.editor.definition()!.sources[0]).toHaveProperty('measure', 'calculated'); expect(resultRequests).toHaveLength(initialWorkers);
     const fixed = [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Fixed months')!;
     fixed.click(); host!.detectChanges();
@@ -117,10 +143,10 @@ describe('A4 composed analysis workbench acceptance', () => {
       await component.requestDecision({ kind: 'facilities', selection: { kind: 'fixed', facilityGuids: ['facility-a'] } }); host!.detectChanges();
       if (component.pendingDecision()) await component.confirmDecision(); host!.detectChanges(); await wait('unsupported');
       expect(component.editor.record()!.guid).toBe(guid); expect(component.editor.definition()!.sources).toEqual(retained.sources); expect(component.editor.definition()!.series).toEqual(retained.series);
-      expect(root.querySelector('[aria-label="Inspect Portfolio baseline"]')).toBeNull();
+      expect(component.sourcePanels()[0].context.definition.facilitySelection.kind).toBe('fixed');
       await component.requestDecision({ kind: 'facilities', selection: { kind: 'all' } }); host!.detectChanges();
       if (component.pendingDecision()) await component.confirmDecision(); host!.detectChanges(); await wait();
-      expect(root.querySelector('[aria-label="Inspect Portfolio baseline"]')).not.toBeNull(); expect(resultRequests).toHaveLength(initialWorkers);
+      expect(component.sourcePanels()[0].context.definition.facilitySelection.kind).toBe('all'); expect(resultRequests).toHaveLength(initialWorkers);
     }
     const handler = TestBed.inject(VisualizationCommandHandler), update = vi.spyOn(handler, 'update');
     update.mockRejectedValueOnce(new Error('Save temporarily unavailable'));
@@ -138,7 +164,7 @@ describe('A4 composed analysis workbench acceptance', () => {
     const local = { ...component.editor.definition()!, period: { kind: 'fixed' as const, basis: 'calendar' as const, start: '2020-01-01', end: '2020-12-31' } };
     component.editor.applyDefinition(local);
     await handler.update({ kind: 'update', accountGuid: 'account-a', guid, expectedRevision: record.revision,
-      definition: { ...record.definition as VisualizationDefinition, period: { kind: 'all-history' } } }, 'account-a');
+      definition: { ...expandVisualizationDefinition(record.definition) as VisualizationDefinition, period: { kind: 'all-history' } } }, 'account-a');
     await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(true); host!.detectChanges();
     expect(component.editor.conflicts().map(conflict => conflict.id)).toContain('configuration');
     component.editor.resolveConflicts({ configuration: 'saved' }); expect(await component.editor.flush()).toBe(true); host!.detectChanges(); await wait();
@@ -165,7 +191,7 @@ describe('A4 composed analysis workbench acceptance', () => {
     host.destroy(); host = undefined;
     await harness!.reopen();
     const durable = await harness!.getAll<SavedRecord>('savedVisualizations');
-    expect(durable).toHaveLength(1); expect(durable[0].guid).toBe(guid); expect(durable[0].definition).toEqual(expected);
+    expect(durable).toHaveLength(1); expect(durable[0].guid).toBe(guid); expect(durable[0].definition).toEqual(serializeVisualizationDefinition(expected!));
     expect(await sources()).toEqual(sourceBefore);
   });
 
@@ -186,8 +212,8 @@ describe('A4 composed analysis workbench acceptance', () => {
     expect(component.editor.definition()).toEqual(definition);
     await recovery.start('reset'); host!.detectChanges(); await recovery.confirm(); host!.detectChanges();
     const name = target === 'account' ? fixture.analysis.name : fixture.snapshot.facilityAnalyses[0].name;
-    component.setSection('source:source-1', true); host!.detectChanges();
-    const radio = root.querySelector(`[aria-label="Inspect ${name}"]`)!.closest('.report-analysis-card')!.querySelector<HTMLInputElement>('input')!;
+    component.setSection('source:' + encodeURIComponent(component.editor.definition()!.sources[0].id), true); host!.detectChanges();
+    const radio = [...root.querySelectorAll<HTMLButtonElement>('.resource-picker__option')].find(button => button.textContent?.includes(name))!;
     radio.focus(); await userEvent.keyboard(' '); host!.detectChanges(); expect(await component.editor.flush()).toBe(true); await wait();
     expect(component.editor.definition()!.sources[0]).toHaveProperty('analysisGuid', replacementGuid); expect(component.editor.record()!.guid).toBe(guid);
     expect(await sources()).toEqual(beforeRepair); expect(await harness!.getAll('utilityMeterData')).toEqual(sourceBefore.readings);

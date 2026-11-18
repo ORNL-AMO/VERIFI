@@ -13,6 +13,23 @@ import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testi
 import { analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
 
 describe('visualization creation drawer', () => {
+  it('shows Meter Data To Chart with the shared multiple-selection markers and measure icons, without an observation step', () => {
+    const { workspace } = configureLibraryTest([LibraryModule]); workspace.publish({ ...workspace.snapshot()!, meters: [meter({})] });
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('utility'); lifecycle.continueSources();
+    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(lifecycle.step()).toBe('measures'); expect(root.querySelector('h4')).toBeNull();
+    expect(root.querySelector('.creation-section-title')?.textContent).toBe('Meter Data To Chart');
+    const cards = fixture.debugElement.queryAll(By.css('[aria-label="Meters measures"] button'));
+    expect(cards.map(card => card.queryAll(By.directive(IconComponent))[1].componentInstance.name)).toEqual(['energy', 'droplet', 'piggyBank']);
+    expect(cards.map(card => card.query(By.css('.creation-choice__selection')).componentInstance.name)).toEqual(['success', 'circle', 'circle']);
+    cards[2].nativeElement.click(); fixture.detectChanges();
+    expect(cards[2].query(By.css('.creation-choice__selection')).componentInstance.name).toBe('success');
+    expect(lifecycle.draftDefinition()!.sources.every(source => source.kind === 'utility' && source.dataMode === 'calendarized')).toBe(true);
+    expect(root.textContent).not.toContain('Calendarized months'); expect(root.textContent).not.toContain('Native bills');
+    fixture.destroy();
+  });
   it.each(['breakdown-bar', 'donut', 'treemap', 'sunburst'] as const)('allows selecting utility resources while creating a %s composition', async chart => {
     const { workspace, commands } = configureLibraryTest([LibraryModule]);
     workspace.publish({ ...workspace.snapshot()!, meters: [meter({ name: 'Main meter' })] });
@@ -23,7 +40,7 @@ describe('visualization creation drawer', () => {
       const resource = fixture.nativeElement.querySelector('[aria-label="Meter resources"] button') as HTMLButtonElement;
       expect(resource).not.toBeNull(); expect(resource.disabled).toBe(false);
       resource.click(); fixture.detectChanges(); expect(lifecycle.form.controls.resourceIds.value).toEqual(['meter-a']);
-      lifecycle.continueResources(); lifecycle.selectObservation('calendarized'); lifecycle.form.controls.name.setValue('Utility composition');
+      lifecycle.continueResources(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Utility composition');
       await lifecycle.submit();
       expect(commands.prepareCreate).toHaveBeenCalledWith(expect.objectContaining({ sources: [expect.objectContaining({ kind: 'utility', dataMode: 'calendarized', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] } })] }));
     } finally { fixture.destroy(); }
@@ -40,7 +57,7 @@ describe('visualization creation drawer', () => {
       const button = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.trim() === label)!;
       const card = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('.predictor-choice')].find(item => item.querySelector('strong')?.textContent === label)!;
       card('First').click(); fixture.detectChanges(); card('Second').click(); fixture.detectChanges(); button('Continue').click(); fixture.detectChanges();
-      lifecycle.form.controls.name.setValue('Surviving history');
+      if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Surviving history');
       workspace.publish({ ...workspace.snapshot()!, predictors: [second] }); fixture.detectChanges();
       expect(button('Add visualization').disabled).toBe(true);
       button('Review predictor selection').click(); fixture.detectChanges();
@@ -50,7 +67,7 @@ describe('visualization creation drawer', () => {
       expect(lifecycle.form.controls.predictorGuids.value).toEqual(['second']);
       expect(card('Second').getAttribute('aria-pressed')).toBe('true');
       expect(root.textContent).not.toContain('Unavailable predictor');
-      button('Continue').click(); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();
+      button('Continue').click(); fixture.detectChanges(); button('Continue').click(); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();
       expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ sources: [{ selection: { kind: 'fixed', guids: ['second'] } }] });
     } finally { fixture.destroy(); }
   });
@@ -61,16 +78,16 @@ describe('visualization creation drawer', () => {
       lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources(); fixture.detectChanges();
       const root = fixture.nativeElement as HTMLElement;
       const button = (label: string) => [...root.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.trim() === label)!;
-      expect(root.querySelector('app-visualization-analysis-picker')).not.toBeNull();
+      expect(root.querySelector('app-visualization-resource-picker')).not.toBeNull();
       expect(root.querySelector('[formcontrolname=groupGuid]')).toBeNull();
       expect(root.querySelector('[formcontrolname=measure]')).toBeNull();
       expect(root.querySelector('[formcontrolname=interval]')).toBeNull();
       expect(button('Continue').disabled).toBe(true);
-      root.querySelector<HTMLInputElement>('input[type=radio]')!.click(); fixture.detectChanges();
+      root.querySelector<HTMLButtonElement>('.resource-picker__option')!.click(); fixture.detectChanges();
       expect(button('Continue').disabled).toBe(false); button('Continue').click(); fixture.detectChanges();
       lifecycle.editSelection('chart'); fixture.detectChanges(); button('Bar').click(); fixture.detectChanges();
       button('Continue').click(); fixture.detectChanges(); button('Continue').click(); fixture.detectChanges();
-      lifecycle.form.controls.name.setValue('Changed chart'); await lifecycle.submit();
+      if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Changed chart'); await lifecycle.submit();
       expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly' },
         sources: [{ analysisGuid: 'analysis-a', mode: 'result', measure: 'actual' }] });
       expect(commands.prepareCreate.mock.calls[0][0].sources[0]).not.toHaveProperty('groupGuid');
@@ -92,7 +109,7 @@ describe('visualization creation drawer', () => {
       expect(empty.disabled).toBe(false); empty.click(); fixture.detectChanges();
       expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['empty']);
       button('Continue').click(); fixture.detectChanges();
-      lifecycle.form.controls.name.setValue('Facility equipment'); await lifecycle.submit();
+      if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Facility equipment'); await lifecycle.submit();
       expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { defaultTraceType: 'bar', interval: 'yearly' },
         sources: [{ selectionMode: 'facility', aggregation: 'sum', selection: { kind: 'fixed', resource: 'facility', guids: ['empty'] } }] });
     } finally { fixture.destroy(); }
@@ -122,7 +139,7 @@ describe('visualization creation drawer', () => {
     card('HDD').click(); fixture.detectChanges(); expect(card('Production').getAttribute('aria-pressed')).toBe('true');
     card('HDD').click(); fixture.detectChanges();
     [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Continue')!.click(); fixture.detectChanges();
-    expect(lifecycle.step()).toBe('name'); lifecycle.form.controls.name.setValue('Production and weather'); await lifecycle.submit();
+    expect(lifecycle.step()).toBe('measures'); lifecycle.continueMeasures(); fixture.detectChanges(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Production and weather'); await lifecycle.submit();
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ sources: [{ selection: { kind: 'fixed', resource: 'predictor', guids: ['production', 'hdd'] } }], series: [{ axis: 'left' }] });
     fixture.destroy();
   });
@@ -147,7 +164,7 @@ describe('visualization creation drawer', () => {
       ]);
       cards[1].click(); fixture.detectChanges();
       expect(lifecycle.form.controls.resourceIds.value).toEqual(['meter-b']);
-      lifecycle.continueResources(); lifecycle.selectObservation('calendarized'); await lifecycle.submit();
+      lifecycle.continueResources(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); await lifecycle.submit();
       expect(commands.prepareCreate).toHaveBeenCalledOnce();
       expect(commands.prepareCreate.mock.calls[0][0].sources[0]).toMatchObject({ selection: { kind: 'fixed', resource: 'meter', guids: ['meter-b'] } });
     } finally { fixture.destroy(); }
@@ -204,11 +221,11 @@ describe('visualization creation drawer', () => {
       .toEqual(['success', 'success', 'circle', 'circle']);
     expect(lifecycle.step()).toBe('sources'); expect(button('Continue').disabled).toBe(false);
     button('Continue').click(); fixture.detectChanges(); await fixture.whenStable();
-    lifecycle.selectMeterMode('source'); lifecycle.toggleResource('Electricity'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized'); fixture.detectChanges(); await fixture.whenStable();
+    lifecycle.selectMeterMode('source'); lifecycle.toggleResource('Electricity'); lifecycle.continueResources(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); fixture.detectChanges(); await fixture.whenStable();
     expect(lifecycle.step()).toBe('predictor'); button('Skip for now').click(); fixture.detectChanges(); await fixture.whenStable();
-    expect(root.querySelector('label[for="visualization-name"]')).not.toBeNull(); await lifecycle.submit(); fixture.detectChanges();
+    expect(lifecycle.step()).toBe('measures'); button('Continue').click(); fixture.detectChanges(); expect(root.querySelector('label[for="visualization-name"]')).not.toBeNull(); await lifecycle.submit(); fixture.detectChanges();
     expect(root.textContent).toContain('Enter a visualization name.'); expect(commands.submit).not.toHaveBeenCalled();
-    lifecycle.form.controls.name.setValue('Weather and usage'); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();
+    if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Weather and usage'); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { kind: 'scatter', showFit: false }, sources: [{ kind: 'utility' }, { kind: 'predictor' }] });
     fixture.destroy();
   });
@@ -239,8 +256,8 @@ describe('visualization creation drawer', () => {
     expect(resourceCard.query(By.css('.creation-choice__selection')).componentInstance.name).toBe('success');
     resourceCard.nativeElement.click(); fixture.detectChanges(); expect(button('Continue').disabled).toBe(true);
     resourceCard.nativeElement.click(); fixture.detectChanges(); button('Continue').click(); fixture.detectChanges();
-    root.querySelector<HTMLButtonElement>('[aria-label="Observation view"] button')!.click(); fixture.detectChanges();
-    button('Add visualization').click(); await fixture.whenStable();
+    expect(root.querySelector('[aria-label="Observation view"]')).toBeNull();
+    button('Continue').click(); fixture.detectChanges(); button('Add visualization').click(); await fixture.whenStable();
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ name: 'Energy usage trend', sources: [{ groupBy: choice.groupBy }] });
     fixture.destroy();
   });
@@ -263,7 +280,7 @@ describe('visualization creation drawer', () => {
     await TestBed.compileComponents();
     const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
     lifecycle.openCreate(); lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-a'] }); lifecycle.continueFacilities(); lifecycle.selectRecipe('cost-trend');
-    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized');
+    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures();
     const before = lifecycle.form.getRawValue(); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     root.querySelector<HTMLButtonElement>('[aria-label="Change Facility A"]')!.click(); fixture.detectChanges(); await fixture.whenStable();
@@ -282,7 +299,7 @@ describe('visualization creation drawer', () => {
   it('uses the shell portal for protected discard and keeps the draft after Stay', async () => {
     configureLibraryTest([LibraryModule]); await TestBed.compileComponents();
     const fixture = TestBed.createComponent(CreationComponent); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); fixture.detectChanges();
-    lifecycle.form.controls.name.setValue('Retain me'); lifecycle.requestClose(); fixture.detectChanges();
+    if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Retain me'); lifecycle.requestClose(); fixture.detectChanges();
     const modal = TestBed.inject(ModalPortalService); expect(modal.activePortal()).not.toBeNull(); expect(modal.workspaceBlocked()).toBe(true);
     lifecycle.cancelConfirmation(); fixture.detectChanges(); expect(lifecycle.form.controls.name.value).toBe('Retain me'); expect(modal.activePortal()).toBeNull();
     fixture.destroy(); expect(modal.activePortal()).toBeNull();

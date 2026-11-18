@@ -15,7 +15,7 @@
         [disabled]="view.disabled" [requestChanges]="true" (selectionRequested)="toggleSelection($event)" (selectionSetRequested)="setSelection($event)"/>
     } @else { <p role="status">Choose how to select Energy Uses first.</p> }
   </app-visualization-decision-section>
-  <app-visualization-decision-section [nodeId]="ids.settings" label="Data settings" [summary]="composition() ? 'Annual consumption, shares and energy unit' : 'Equipment history and energy unit'" icon="settingsSliders"
+  <app-visualization-decision-section [nodeId]="ids.settings" label="Data settings" [summary]="composition() ? 'Annual consumption and shares' : 'Equipment history'" icon="settingsSliders"
     [expanded]="view.expandedNodes?.has(ids.settings) ?? false" (expandedChange)="setSection(ids.settings, $event)">
   @if (!composition()) {
   <label class="equipment-settings__toggle form-check form-switch">
@@ -29,19 +29,7 @@
   @if (unsupported()) {
     <p role="status">Choose a selection method and compatible consumption, chart and period settings. Energy balance requires whole facilities. Your saved settings are retained.</p>
   }
-  <label>Display energy unit
-    <select class="v1-select" [formControl]="unit">
-      <option value="">Follow owner energy unit</option>
-      @if (savedUnit(); as binding) {
-        @if (binding.kind === 'pinned' && !units.includes(binding.value)) { <option [value]="binding.value">{{ binding.value }} (unsupported)</option> }
-      }
-      @for (value of units; track value) { <option [value]="value">{{ value }}</option> }
-    </select>
-  </label>
+
   </app-visualization-decision-section>
-  @for (item of items(); track item.key; let position = $index) {
-    <app-visualization-item-settings [timeSeries]="view.definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="items().length" [disabled]="view.disabled" [editorKey]="view.editorKey ?? ''"
-      [expandedNodes]="view.expandedNodes ?? emptyNodes" [resetKey]="item.resetKey"
-      (requested)="view.request?.($event)" (sectionChanged)="view.sectionChanged?.($event.id, $event.expanded)"/>
-  }
+
 }

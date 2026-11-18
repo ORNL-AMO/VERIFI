@@ -4,6 +4,7 @@ import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-ana
 import { BackupFile } from '@data/models/backup-file';
 import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { remapVisualizationDefinition, VisualizationGuidMaps, VisualizationReferenceKind, visualizationReferenceKey } from '@domain/visualizations/visualization-references';
 
 export interface VisualizationImportSummary {
@@ -89,7 +90,7 @@ export function transferSavedVisualization(record: Readonly<IdbSavedVisualizatio
     result.preservation = { locked: true, references: record.preservation?.references ?? [], transfers };
   } else {
     const remapped = remapVisualizationDefinition(decoded.definition, accountGuid, maps, record.preservation?.references ?? []);
-    result.definition = remapped.definition;
+    result.definition = serializeVisualizationDefinition(remapped.definition);
     delete result.facilityId;
     result.preservation = { references: remapped.issues, transfers };
   }

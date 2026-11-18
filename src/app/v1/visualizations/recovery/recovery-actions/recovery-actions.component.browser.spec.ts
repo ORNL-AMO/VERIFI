@@ -1,3 +1,5 @@
+import { expandVisualizationDefinition, serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
+import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
 import { vi } from 'vitest';
@@ -49,7 +51,7 @@ describe('reviewed visualization recovery with native storage', () => {
     const saved = (await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations'))[0];
     expect(saved.guid).toBe('locked-chart'); expect(saved.revision).toBe(2); expect(saved.preservation).toBeUndefined();
     expect(readSavedVisualization(saved).state).toBe('setup-required');
-    expect((saved.definition as any).sources[0].selection).toBeUndefined();
+    expect((expandVisualizationDefinition(saved.definition) as any).sources[0].selection).toBeUndefined();
   });
 
   it('resets only a broken source and its Scatter binding while retaining the chart and unaffected sourceKind after reopen', async () => {
@@ -86,9 +88,9 @@ describe('reviewed visualization recovery with native storage', () => {
     await harness.reopen();
     const records = await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations');
     expect(records).toHaveLength(2); expect(copy.guid).not.toBe(original.guid);
-    expect(records.find(record => record.guid === original.guid)!.definition).toEqual(definition);
+    expect(records.find(record => record.guid === original.guid)!.definition).toEqual(serializeVisualizationDefinition(definition));
     const duplicate = records.find(record => record.guid === copy.guid)!;
-    expect(duplicate.definition).toEqual({ ...definition, name: `${definition.name} (Copy)` });
+    expect(duplicate.definition).toEqual(serializeVisualizationDefinition({ ...definition, name: `${definition.name} (Copy)` }));
     expect(readSavedVisualization(duplicate).state).toBe('setup-required');
   });
 
@@ -101,14 +103,14 @@ describe('reviewed visualization recovery with native storage', () => {
     const fixture = TestBed.createComponent(RecoveryActionsComponent); fixture.detectChanges();
     await fixture.componentInstance.start('copy'); fixture.componentInstance.facilitySelectionControl.setValue({ kind: 'fixed', facilityGuids: ['facility-b'] });
     const expected = { ...definition, name: `${definition.name} (Copy)`, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-b'] } };
-    expect(fixture.componentInstance.review()!.definition).toEqual(expected);
+    expect(fixture.componentInstance.review()!.definition).toEqual(normalizeVisualizationDefinition(expected as VisualizationDefinition));
     await fixture.componentInstance.confirm(); fixture.destroy();
     await harness.reopen();
     const records = await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations');
     expect(records).toHaveLength(2);
-    expect(records.find(record => record.guid === original.guid)!.definition).toEqual(definition);
+    expect(records.find(record => record.guid === original.guid)!.definition).toEqual(serializeVisualizationDefinition(definition));
     const copied = records.find(record => record.guid !== original.guid)!;
-    expect(copied).not.toHaveProperty('facilityId'); expect(copied.definition).toEqual(expected);
+    expect(copied).not.toHaveProperty('facilityId'); expect(copied.definition).toEqual(serializeVisualizationDefinition(expected as VisualizationDefinition));
     expect(readSavedVisualization(copied).state).toBe('setup-required');
   });
 

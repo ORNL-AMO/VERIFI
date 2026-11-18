@@ -250,9 +250,9 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('capability', 'This source does not support the requested measure, aggregation, period, comparison, or chart.', source.id);
     if (!sameIntent(chart, chartSupport.chart) || chartSupport.state !== 'supported')
       add('capability', chartSupport.state === 'unsupported' ? chartSupport.reasons.join(' ') : 'Review support for these exact chart settings.', source.id);
-    if (capabilities.allowMultipleSources === false && definition.sources.length > 1 && !isExplorationChart(chart))
+    if (capabilities.allowMultipleSources === false && new Set(definition.sources.map(source => source.kind)).size > 1 && !isExplorationChart(chart))
       add('capability', 'This source supports only one source configuration at a time.', source.id);
-    if (Object.keys(source.settings ?? {}).some(key => !capabilities.settings.includes(key as 'unit' | 'energyTreatment')))
+    if (Object.keys(source.settings ?? {}).some(key => !capabilities.settings.includes(key as 'unit' | 'energyTreatment' | 'quantityUnits')))
       add('capability', 'This source cannot preserve the requested setting binding.', source.id);
     if (chart.kind === 'time-series' && chart.stack !== 'none' && !capabilities.controls.includes('stacking')
       || definition.series.some(series => series.sourceId === source.id && series.axis === 'right') && !capabilities.controls.includes('axes')
@@ -324,6 +324,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     const unit = entry.source.settings?.unit;
     if (unit?.kind === 'pinned' && metadata.unit !== unit.value)
       add('units', 'Resolve the pinned unit before rendering; a unit label is not a conversion.', series.sourceId);
+    const quantityUnit = entry.source.settings?.quantityUnits?.[metadata.dimension.replace(/^consumption:/, '')];
+    if (quantityUnit && metadata.unit !== quantityUnit) add('units', 'Resolve the chart quantity units before rendering.', series.sourceId);
     const treatment = entry.source.settings?.energyTreatment;
     if (treatment?.kind === 'pinned' && metadata.energyTreatment !== treatment.value)
       add('units', 'Resolve the pinned site/source treatment before rendering.', series.sourceId);

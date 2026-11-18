@@ -1,6 +1,7 @@
 import { resolveVisualizationFacilities, type VisualizationFacilityRecord } from '@domain/visualizations/visualization-facilities';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition, VisualizationIssue } from '@domain/visualizations/visualization-validation';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
 
 export type SavedVisualizationReadResult =
@@ -96,7 +97,7 @@ export function savedVisualizationForFacilityExport(record: Readonly<IdbSavedVis
   if (!record.preservation?.locked && record.recordVersion === SAVED_VISUALIZATION_RECORD_VERSION && 'definition' in decoded
     && decoded.definition.accountGuid === record.accountId
     && !record.preservation?.references.some(ref => ref.path.startsWith('facilitySelection.'))) {
-    result.definition = { ...decoded.definition, facilitySelection: { kind: 'fixed', facilityGuids: [facilityGuid] } };
+    result.definition = serializeVisualizationDefinition({ ...decoded.definition, facilitySelection: { kind: 'fixed', facilityGuids: [facilityGuid] } });
     delete result.facilityId;
   }
   return result;

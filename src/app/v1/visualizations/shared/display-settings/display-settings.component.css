@@ -1,0 +1,2 @@
+:host { display: grid; gap: .5rem; }
+label { display: grid; gap: .25rem; min-width: 0; }

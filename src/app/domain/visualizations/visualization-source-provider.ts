@@ -23,7 +23,7 @@ export interface VisualizationSourceCapabilities {
   readonly chartKinds: readonly VisualizationChartKind[];
   readonly shapes: readonly VisualizationDataShape[];
   readonly alignments: readonly VisualizationAlignment[];
-  readonly settings: readonly ('unit' | 'energyTreatment')[];
+  readonly settings: readonly ('unit' | 'energyTreatment' | 'quantityUnits')[];
   readonly controls: readonly VisualizationControl[];
   readonly allowDateOverride: boolean;
   /** False limits this adapter to a single source configuration; omitted leaves combinations to runtime compatibility. */

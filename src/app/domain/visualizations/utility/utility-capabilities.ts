@@ -11,7 +11,7 @@ export function utilityCapabilities(source: UtilityVisualizationSource): Visuali
     chartKinds: ['time-series', 'scatter', 'correlation', 'heatmap', 'breakdown', 'treemap', 'sunburst'], shapes: ['time-series', 'breakdown', 'hierarchy'], alignments: source.dataMode === 'billing-period' ? ['billing-occurrence'] : ['civil-month', 'civil-year', 'fiscal-interval', 'category', 'hierarchy'],
     // Setup definitions already carry owner bindings. Irrelevant owner bindings are inert;
     // pinned bindings still have to match resolved metadata in the compatibility check.
-    settings: ['unit', 'energyTreatment'],
+    settings: ['unit', 'energyTreatment', 'quantityUnits'],
     controls: ['series', 'appearance', 'axes', 'fit', 'normalization', 'hierarchy', 'denominator', ...(source.dataMode === 'calendarized' ? ['stacking' as const] : [])], allowDateOverride: true };
 }
 
