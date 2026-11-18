@@ -2,6 +2,7 @@ import type { VisualizationDefinition } from '@domain/visualizations/visualizati
 import type { VisualizationSourceEvidence, VisualizationObservation } from '@domain/visualizations/visualization-source-provider';
 import { compositionData, compositionHierarchy, isCompositionChart, sumCompositionObservations, type CompositionChart, type CompositionContribution, type CompositionNode, type VisualizationCompositionEvidence } from '@domain/visualizations/visualization-composition';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
+import { utilitySeriesId } from '@domain/visualizations/utility/utility-selection';
 import type { PreviewDetails } from '../preview/preview-registry';
 import { visualizationSeriesStyle } from '../shared/series-style';
 
@@ -40,12 +41,16 @@ export function compositionSourceDetails(definition: VisualizationDefinition, ev
 export function prepareComposition(definition: VisualizationDefinition, evidence: readonly VisualizationSourceEvidence[]): CompositionModel {
   const chart = definition.chart, result = evidence[0]?.resolution;
   if (!isCompositionChart(chart) || result?.state !== 'ready' || !result.resolved.composition) throw new Error('Resolve composition contributions before preparing a chart.');
-  const resolved = result.resolved, original = resolved.composition!, unit = resolved.series[0]?.unit ?? '';
-  const selected = resolveVisualizationSeries(definition, resolved.series), styles = new Map(selected.map(value => [value.metadata.id, value]));
+  const resolved = result.resolved, original = resolved.composition!, source = definition.sources[0];
+  const selected = resolveVisualizationSeries(definition, resolved.series), unit = selected[0]?.metadata.unit ?? '', styles = new Map(selected.map(value => [value.metadata.id, value]));
   const order = new Map(selected.map((value, index) => [value.metadata.id, index]));
   const contributions = original.contributions.filter(value => styles.has(value.seriesId)).sort((left, right) => order.get(left.seriesId)! - order.get(right.seriesId)!).map(value => {
     const style = styles.get(value.seriesId)!;
-    const categories = Object.fromEntries(Object.entries(value.categories).map(([level, category]) => [level, category.id === style.metadata.resourceGuid && style.selected.label ? { ...category, label: style.selected.label } : category]));
+    const categories = Object.fromEntries(Object.entries(value.categories).map(([level, category]) => {
+      const matches = category.id === style.metadata.resourceGuid || source.kind === 'utility' && source.groupBy === 'source' && source.aggregation !== 'none'
+        && level === 'source' && style.metadata.id === utilitySeriesId(source.id, `source:${category.id}`);
+      return [level, matches && style.selected.label ? { ...category, label: style.selected.label } : category];
+    }));
     return { ...value, categories };
   });
   const composition = { ...original, contributions, residuals: original.residuals?.filter(value => styles.has(value.seriesId)) };
@@ -67,7 +72,7 @@ export function prepareComposition(definition: VisualizationDefinition, evidence
   }
   const selectedTotal = sumCompositionObservations([...contributions, ...composition.residuals ?? []].map(value => value.observation));
   const share = (observation: VisualizationObservation, denominator: VisualizationObservation | undefined): number | null => observation.state === 'observed' && denominator?.state === 'observed' && denominator.value > 0 ? observation.value / denominator.value * 100 : null;
-  const source = definition.sources[0], denominatorKind = source?.kind === 'energy-use' ? source.denominator : 'selected';
+  const denominatorKind = source?.kind === 'energy-use' ? source.denominator : 'selected';
   const display = nodes.map(node => {
     const facilities = [...new Set(node.contributions.map(value => value.categories.facility?.id).filter(Boolean))];
     const facilityDenominator = facilities.length === 1 ? original.denominators.find(value => value.kind === 'facility' && value.facilityGuid === facilities[0])?.observation : undefined;
