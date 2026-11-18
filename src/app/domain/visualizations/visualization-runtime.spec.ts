@@ -360,7 +360,7 @@ describe('visualization source/runtime contracts', () => {
     expect(reasonCodes(definition, [replaceResolved(evidence, { series: ready(evidence).series.map(series => ({ ...series, unit: 'MMBtu', energyTreatment: 'source' })) })])).toContain('units');
   });
 
-  it('allows multiple distinct fiscal years but rejects incompatible intervals within one fiscal slot', () => {
+  it('rejects incompatible fiscal intervals and comparison overlays in composition', () => {
     const base = energyUseVisualizationFixture(), source = base.sources[0];
     if (source.kind !== 'energy-use') throw new Error('Expected Energy Use source');
     const definition: VisualizationDefinition = { ...base, facilitySelection: { kind: 'all' },
@@ -368,12 +368,12 @@ describe('visualization source/runtime contracts', () => {
     const evidence = visualizationEvidenceFixture(definition);
     const first = ready(evidence).periods[0];
     const differentYear = { ...first, fiscalYear: 2024, start: '2023-10-01', end: '2024-09-30' };
-    expect(checkVisualizationCompatibility(definition, [replaceResolved(evidence, { periods: [first, differentYear] })]).state).toBe('compatible');
+    expect(checkVisualizationCompatibility(definition, [replaceResolved(evidence, { periods: [first, differentYear] })]).state).toBe('unavailable');
     const incompatible = { ...first, facilityGuid: 'facility-b', start: '2025-01-01', end: '2025-12-31' };
     expect(reasonCodes(definition, [replaceResolved(evidence, { periods: [first, incompatible] })])).toContain('period');
     const comparisonDefinition: VisualizationDefinition = { ...definition, comparison: { kind: 'custom', start: incompatible.start, end: incompatible.end } };
     expect(checkVisualizationCompatibility(comparisonDefinition, [replaceResolved(visualizationEvidenceFixture(comparisonDefinition),
-      { periods: [first, { ...incompatible, role: 'comparison' }] })]).state).toBe('compatible');
+      { periods: [first, { ...incompatible, role: 'comparison' }] })]).state).toBe('unavailable');
   });
 
   it('rejects annual estimates as monthly observations', () => {

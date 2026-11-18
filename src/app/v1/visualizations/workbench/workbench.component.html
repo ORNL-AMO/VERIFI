@@ -76,8 +76,11 @@
             }
           </div>
           @let savedChart = definition.chart;
+          @if (savedChart && (savedChart.kind === 'breakdown' || savedChart.kind === 'treemap' || savedChart.kind === 'sunburst' || savedChart.kind === 'sankey')) {
+            <app-composition-settings [definition]="definition" [singleFacility]="facilityContext()?.scope.kind === 'facility'" [disabled]="!editor.canEdit()" (requested)="updateChartSettings($event)"/>
+          }
           @if (savedChart && (savedChart.kind === 'scatter' || savedChart.kind === 'correlation' || savedChart.kind === 'heatmap')) {
-            <app-exploration-settings [definition]="definition" [items]="explorationItems()" [disabled]="!editor.canEdit()" (requested)="updateExplorationChart($event)"/>
+            <app-exploration-settings [definition]="definition" [items]="explorationItems()" [disabled]="!editor.canEdit()" (requested)="updateChartSettings($event)"/>
           }
           @if (savedChart && savedChart.kind === 'time-series') {
             <span class="visualization-control-label">Stacking</span>

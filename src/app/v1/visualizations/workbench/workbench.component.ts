@@ -1,3 +1,4 @@
+import { isCompositionChart } from '@domain/visualizations/visualization-composition';
 import { resolveUtilitySelection } from '@domain/visualizations/utility/utility-selection';
 import { isExplorationChart } from '@domain/visualizations/visualization-interval';
 import type { VisualizationChart } from '@domain/visualizations/visualization-definition';
@@ -38,9 +39,10 @@ import { predictorStatusPresentation as dataStatusPresentation } from '@app/v1/d
 export class WorkbenchComponent {
   readonly editor = inject(VisualizationEditorSession);
   readonly dataSources = computed(() => {
-    const kinds = new Set(this.editor.definition()?.sources.map(source => source.kind));
+    const definition = this.editor.definition(), kinds = new Set(definition?.sources.map(source => source.kind));
+    const composition = isCompositionChart(definition?.chart);
     return VISUALIZATION_DATA_SOURCES.map(choice => ({ ...choice, selected: kinds.has(choice.value),
-      disabled: !this.editor.canEdit() || !!this.pendingDecision() || this.decisionBusy() || kinds.size === 1 && kinds.has(choice.value) }));
+      disabled: composition && !kinds.has(choice.value) && (definition?.chart?.kind === 'sankey' ? choice.value !== 'energy-use' : !['utility', 'energy-use'].includes(choice.value)) || !this.editor.canEdit() || !!this.pendingDecision() || this.decisionBusy() || kinds.size === 1 && kinds.has(choice.value) }));
   });
   get charts() { return VISUALIZATION_CHART_CHOICES; }
   readonly expandedNodes = signal<ReadonlySet<string>>(new Set());
@@ -287,8 +289,10 @@ export class WorkbenchComponent {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? definition.sources.flatMap(source => projectDecisionItems(definition, source.id, snapshot)) : [];
   });
-  updateExplorationChart(chart: VisualizationChart): void { void this.requestDecision({ kind: 'chart', chart }); }
+  updateChartSettings(chart: VisualizationChart): void { void this.requestDecision({ kind: 'chart', chart }); }
   chooseChart(choice: VisualizationChartChoiceId): void {
+    const current = this.editor.definition()?.chart;
+    if (isCompositionChart(current) && (current.kind === choice || current.kind === 'breakdown' && (current.type === 'bar' ? choice === 'breakdown-bar' : choice === 'donut'))) return;
     if ((choice === 'line' || choice === 'bar' || choice === 'area') && this.editor.definition()?.chart?.kind === 'time-series') void this.requestDecision({ kind: 'chart-type', traceType: choice });
     else {
       let chart = createVisualizationChart(choice);

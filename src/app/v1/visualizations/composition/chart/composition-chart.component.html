@@ -1,0 +1,37 @@
+@if (value(); as view) {
+  <h2 #heading tabindex="-1">{{ view.title }}</h2>
+  <p class="composition-period">{{ view.period }}</p>
+  @if (hierarchy()) {
+    <nav aria-label="Hierarchy path" class="composition-path">
+      <button type="button" class="v1-btn v1-btn--quiet" (click)="drill('')">All selected data</button>
+      @for (node of path(); track node.id) { <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-current]="$last ? 'location' : null" (click)="drill(node.id)">{{ node.label }}</button> }
+      @if (rootId()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="parent()">Back one level</button> }
+    </nav>
+  }
+  @if (view.partial) { <p role="status">Partial coverage · totals and shares show known values only.</p> }
+  @if (view.chart.kind === 'breakdown' && view.chart.type === 'donut' || hierarchy()) { <p class="composition-context">Areas show selected positive contributions. Labels and source details identify each percentage’s denominator.</p> }
+  @if (view.chart.kind !== 'sankey' && view.chart.values === 'percent') { <p class="composition-context">Percentage labels: {{ view.shareLabel }}.</p> }
+  @for (diagnostic of view.evidence.diagnostics; track $index) { <p class="composition-diagnostic">{{ diagnostic }}</p> }
+  @if (hasGeometry()) {
+    <div class="composition-canvas" [style.height.px]="height()" [appV1ECharts]="option()" (chartPointClicked)="clicked($event)" (keydown)="keydown($event)"
+      tabindex="0" role="img" [attr.aria-label]="view.title + '. Original values and keyboard navigation follow the chart.'" [attr.aria-keyshortcuts]="hierarchy() ? 'Backspace Home' : null"></div>
+  } @else { <p role="status">No drawable values at this level. Zero and unavailable contributions remain in Source details. Review item visibility if every item is hidden.</p> }
+  @if (hierarchy()) {
+    <nav aria-label="Explore hierarchy" class="composition-navigation"><ul>
+      @for (node of children(); track node.id) {
+        <li>@if (node.branch) { <button type="button" class="v1-btn v1-btn--quiet" (click)="drill(node.id)">Explore {{ node.label }}</button> } @else { <strong>{{ node.label }}</strong> }
+          <span class="composition-description visually-hidden">{{ node.description }}</span></li>
+      }
+    </ul></nav>
+  }
+  <details class="composition-details"><summary>Source details</summary>
+    <table><caption>Chart values and shares</caption><thead><tr><th scope="col">Item</th><th scope="col">Original value, shares and coverage</th></tr></thead>
+      <tbody>@for (node of view.nodes; track node.id) { <tr><th scope="row">{{ node.label }}</th><td class="composition-description">{{ node.description }}</td></tr> }</tbody>
+    </table>
+    <div class="composition-table-scroll" tabindex="0" role="region" aria-label="Original source contributions">
+      <table><caption>{{ view.details.caption }}</caption><thead><tr>@for (column of view.details.columns; track column) { <th scope="col">{{ column }}</th> }</tr></thead>
+        <tbody>@for (row of view.details.rows; track $index) { <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr> }</tbody></table>
+    </div>
+    <nav aria-label="Open source data"><ul>@for (link of sourceLinks(); track $index) { <li><a [routerLink]="link.route">{{ link.label }}</a></li> }</ul></nav>
+  </details>
+}

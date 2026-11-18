@@ -1,3 +1,4 @@
+import { initializeCompositionChart } from './visualization-composition';
 import type { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
 
 /** Saved intent only. Record identity, revisions, and persistence belong to Vis2. */
@@ -152,6 +153,8 @@ export interface VisualizationPairSettings extends VisualizationExplorationSetti
   readonly scale?: 'raw' | 'z-score';
 }
 
+export type VisualizationHierarchyLevel = 'facility' | 'group' | 'source' | 'equipment' | 'meter';
+
 export type VisualizationChart =
   | { readonly kind: 'time-series'; readonly defaultTraceType: VisualizationTraceType; readonly interval: 'monthly' | 'yearly' | 'native';
       readonly stack: 'none' | 'absolute' | 'percent' }
@@ -159,7 +162,8 @@ export type VisualizationChart =
   | (VisualizationPairSettings & { readonly kind: 'correlation'; readonly statistic: 'r' | 'r-squared'; readonly scale: 'raw' | 'z-score'; readonly view?: 'pairs' | 'matrix'; readonly showFit?: boolean })
   | (VisualizationExplorationSettings & { readonly kind: 'heatmap'; readonly dimension: 'month-year' | 'series-period'; readonly scale: 'linear' | 'diverging'; readonly normalization?: 'raw' | 'z-score' })
   | { readonly kind: 'breakdown'; readonly type: 'bar' | 'donut'; readonly values: 'absolute' | 'percent' }
-  | { readonly kind: 'treemap'; readonly hierarchy: readonly ('facility' | 'group' | 'source' | 'equipment')[]; readonly values: 'absolute' | 'percent' }
+  | { readonly kind: 'treemap'; readonly hierarchy: readonly VisualizationHierarchyLevel[]; readonly values: 'absolute' | 'percent' }
+  | { readonly kind: 'sunburst'; readonly hierarchy: readonly VisualizationHierarchyLevel[]; readonly values: 'absolute' | 'percent' }
   | { readonly kind: 'sankey'; readonly flow: 'source-to-equipment' | 'source-to-group' | 'energy-balance' };
 
 export interface VisualizationDefinition {
@@ -209,7 +213,7 @@ export function createVisualizationSetupDefinition(input: VisualizationSetupInpu
   }));
   return { version: VISUALIZATION_DEFINITION_VERSION, name: input.name, accountGuid: input.accountGuid,
     facilitySelection: structuredClone(input.facilitySelection), sources, chart: structuredClone(input.sourceKinds.length === 1 && input.sourceKinds[0] === 'energy-use' && ['scatter', 'correlation', 'heatmap'].includes(input.chart.kind)
-      ? { ...input.chart, interval: 'yearly', ...(input.chart.kind === 'heatmap' ? { dimension: 'series-period' } : {}) } as VisualizationChart : input.chart),
+      ? { ...input.chart, interval: 'yearly', ...(input.chart.kind === 'heatmap' ? { dimension: 'series-period' } : {}) } as VisualizationChart : initializeCompositionChart(input.chart, input.sourceKinds[0], input.facilitySelection.kind === 'fixed' && input.facilitySelection.facilityGuids.length === 1)),
     period: !['scatter', 'correlation', 'heatmap'].includes(input.chart.kind) && input.sourceKinds.length === 1 && input.sourceKinds[0] === 'energy-use'
       ? { kind: 'latest-saved-year', basis: 'fiscal' } : { kind: 'all-history' },
     comparison: { kind: 'none' }, series: [], appearance: { legend: true } };

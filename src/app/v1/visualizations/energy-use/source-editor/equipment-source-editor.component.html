@@ -15,13 +15,19 @@
         [disabled]="view.disabled" [requestChanges]="true" (selectionRequested)="toggleSelection($event)" (selectionSetRequested)="setSelection($event)"/>
     } @else { <p role="status">Choose how to select Energy Uses first.</p> }
   </app-visualization-decision-section>
-  <app-visualization-decision-section [nodeId]="ids.settings" label="Data settings" summary="Equipment history and energy unit" icon="settingsSliders"
+  <app-visualization-decision-section [nodeId]="ids.settings" label="Data settings" [summary]="composition() ? 'Annual consumption, shares and energy unit' : 'Equipment history and energy unit'" icon="settingsSliders"
     [expanded]="view.expandedNodes?.has(ids.settings) ?? false" (expandedChange)="setSection(ids.settings, $event)">
+  @if (!composition()) {
   <label class="equipment-settings__toggle form-check form-switch">
     <input type="checkbox" role="switch" class="form-check-input" [formControl]="historySettings">Use equipment history settings
   </label>
+  }
+  @if (composition()) {
+    <label>Percentage denominator<select class="v1-select" [formControl]="denominator"><option value="selected">Selected contributions</option><option value="facility">Full facility equipment use</option><option value="account">Full account equipment use</option><option value="metered-consumption">Metered consumption</option></select></label>
+    <p>Facility/account denominators include all equipment in their named scope, independently of visibility or drill position. Metered shares require complete positive site-energy coverage.</p>
+  }
   @if (unsupported()) {
-    <p role="status">Equipment history requires a selection method and yearly, unstacked line/bar consumption traces. Your saved settings are retained.</p>
+    <p role="status">Choose a selection method and compatible consumption, chart and period settings. Energy balance requires whole facilities. Your saved settings are retained.</p>
   }
   <label>Display energy unit
     <select class="v1-select" [formControl]="unit">

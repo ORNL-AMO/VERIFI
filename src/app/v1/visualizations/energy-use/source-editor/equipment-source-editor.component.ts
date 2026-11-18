@@ -1,3 +1,5 @@
+import { isCompositionChart } from '@domain/visualizations/visualization-composition';
+import type { EnergyUseVisualizationSource } from '@domain/visualizations/visualization-definition';
 import { energyUseSelectionMode, selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
 import type { EnergyUseSelectionMode } from '@domain/visualizations/visualization-definition';
 import { Component, Input, computed, effect, inject, signal, DestroyRef } from '@angular/core';
@@ -18,6 +20,8 @@ export class EquipmentSourceEditorComponent {
   readonly contextState = signal<VisualizationSourceEditorContext | undefined>(undefined);
   readonly selected = new FormControl<string[]>([], { nonNullable: true });
   readonly unit = new FormControl('', { nonNullable: true });
+  readonly denominator = new FormControl<EnergyUseVisualizationSource['denominator']>('facility', { nonNullable: true });
+  readonly composition = computed(() => isCompositionChart(this.contextState()?.definition.chart));
   readonly historySettings = new FormControl(false, { nonNullable: true });
   private manualSettings = false;
   private historyIdentity = '';
@@ -31,7 +35,7 @@ export class EquipmentSourceEditorComponent {
   private readonly destroy = inject(DestroyRef);
   @Input({ required: true }) set context(context: VisualizationSourceEditorContext) {
     this.contextState.set(context);
-    for (const control of [this.selected, this.unit, this.historySettings]) context.disabled ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
+    for (const control of [this.selected, this.unit, this.historySettings, this.denominator]) context.disabled ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
   }
   readonly source = computed(() => {
     const context = this.contextState(), source = context?.definition.sources.find(s => s.id === context.sourceId);
@@ -60,7 +64,8 @@ export class EquipmentSourceEditorComponent {
   constructor() {
     effect(() => {
       const source = this.source();
-      this.selected.setValue(source ? [...selectedEnergyUseIds(source)] : []);
+      this.selected.setValue(source ? [...selectedEnergyUseIds(source)] : [], { emitEvent: false });
+      this.denominator.setValue(source?.denominator ?? 'facility', { emitEvent: false });
       this.unit.setValue(source?.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : '', { emitEvent: false });
       const context = this.contextState();
       const identity = JSON.stringify([context?.editorKey, context?.sourceId, context?.resetKey]);
@@ -74,6 +79,10 @@ export class EquipmentSourceEditorComponent {
       // Stay with the current configuration while the host reviews a preset change.
       this.historySettings.setValue(enabled && this.historySettingsApplied(), { emitEvent: false });
       if (enabled && !this.historySettingsApplied()) this.useDefaults();
+    });
+    this.denominator.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(denominator => {
+      const context = this.contextState();
+      if (context && !context.disabled && denominator !== this.source()?.denominator) context.request?.({ kind: 'equipment-denominator', sourceId: context.sourceId, denominator });
     });
     this.unit.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(value => {
       const context = this.contextState();
