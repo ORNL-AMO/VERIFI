@@ -21,6 +21,7 @@ export class PredictorSourceEditorComponent {
     context.disabled ? this.selected.disable({ emitEvent: false }) : this.selected.enable({ emitEvent: false });
   }
 
+  readonly patterns = computed(() => this.contextState()?.definition.chart?.kind === 'monthly-patterns');
   readonly allMode = computed(() => {
     const context = this.contextState(), source = context?.definition.sources.find(source => source.id === context.sourceId);
     return source?.kind === 'predictor' && isAllPredictors(source);
@@ -30,10 +31,11 @@ export class PredictorSourceEditorComponent {
       const context = this.contextState(), snapshot = this.workspace.snapshot();
       const source = context?.definition.sources.find(source => source.id === context.sourceId);
       const scope = context && snapshot ? resolveVisualizationFacilities(context.definition, snapshot.facilities).scope : undefined;
-      this.selected.setValue(source?.kind === 'predictor' && snapshot && scope ? [...resolvePredictorSelection(snapshot, scope, source)] : []);
+      this.selected.setValue(source?.kind === 'predictor' && snapshot && scope && !(this.patterns() && isAllPredictors(source)) ? [...resolvePredictorSelection(snapshot, scope, source)] : []);
     });
   }
   selectAll(all: boolean): void {
+    if (this.patterns()) return;
     const context = this.contextState();
     if (context && !context.disabled) context.request?.({ kind: 'predictor-selection', sourceId: context.sourceId, predictorGuids: [], ...(all ? { all: true } : {}) });
   }
@@ -53,7 +55,7 @@ export class PredictorSourceEditorComponent {
 
   toggleSelection(change: { readonly guid: string; readonly selected: boolean }): void {
     const selected = this.selected.value;
-    this.setSelection(change.selected ? [...selected, change.guid] : selected.filter(guid => guid !== change.guid));
+    this.setSelection(change.selected ? this.patterns() ? [change.guid] : [...selected, change.guid] : selected.filter(guid => guid !== change.guid));
   }
   setSelection(predictorGuids: readonly string[]): void {
     const context = this.contextState();

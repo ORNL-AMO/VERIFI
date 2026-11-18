@@ -1,3 +1,4 @@
+import { createCaptureOrigin, unchangedCaptureSource } from '@data/visualizations/visualization-capture-origin';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
@@ -25,11 +26,13 @@ describe('saved visualization backup transactions in Chromium', () => {
   beforeEach(async () => { harness = await IndexedDbTestHarness.create('visualization-backup'); });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
 
-  it.each(['Account', 'Facility'] as const)('retains optional line smoothing and pinned settings through a %s backup', async kind => {
+  it.each((['Account', 'Facility'] as const).flatMap(kind => (['time-series', 'monthly-patterns'] as const).map(chartKind => ({ kind, chartKind }))))('retains smoothing, capture origin and pinned settings through a $kind $chartKind backup', async ({ kind, chartKind }) => {
     const base = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
-    const definition = { ...base, chart: { kind: 'time-series' as const, interval: 'monthly' as const, defaultTraceType: 'line' as const, stack: 'none' as const, smoothLines: true },
+    const definition = { ...base, chart: chartKind === 'monthly-patterns' ? { kind: 'monthly-patterns' as const, smoothLines: true, yearOverrides: { '2026': { visible: false, color: '#23684d' } } } : { kind: 'time-series' as const, interval: 'monthly' as const, defaultTraceType: 'line' as const, stack: 'none' as const, smoothLines: true },
       sources: base.sources.map(source => ({ ...source, settings: { unit: { kind: 'pinned' as const, value: 'kWh' }, energyTreatment: { kind: 'pinned' as const, value: 'site' as const } } })) };
-    const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [savedVisualizationFixture(definition)] };
+    const record = savedVisualizationFixture(definition);
+    record.captureOrigin = createCaptureOrigin({ kind: chartKind === 'monthly-patterns' ? 'meter-monthly-patterns' : 'meter-monthly', facilityGuid: 'facility-a', meterGuid: 'meter-a' }, definition);
+    const snapshot = { ...visualizationBackupSnapshot(), savedVisualizations: [record] };
     const backup = preparation.prepare(JSON.parse(JSON.stringify(kind === 'Account' ? builder.buildAccountBackup(snapshot) : builder.buildFacilityBackup(snapshot, 'facility-a'))));
     const service = createService();
     let accountGuid: string;
@@ -38,6 +41,9 @@ describe('saved visualization backup transactions in Chromium', () => {
     await harness.reopen();
     const restored = await readSnapshot(accountGuid), decoded = readSavedVisualization(restored.savedVisualizations[0]);
     expect(decoded).toMatchObject({ state: 'valid', definition: { chart: { smoothLines: true }, sources: [{ settings: { unit: { kind: 'pinned', value: 'kWh' }, energyTreatment: { kind: 'pinned', value: 'site' } } }] } });
+    if (decoded.state !== 'valid') throw new Error('Expected a valid restored capture');
+    expect(unchangedCaptureSource(restored.savedVisualizations[0], decoded.definition, restored)).toMatchObject({ facilityGuid: restored.facilities[0].guid, meterGuid: restored.meters[0].guid });
+    expect(unchangedCaptureSource(restored.savedVisualizations[0], { ...decoded.definition, appearance: { legend: false } }, restored)).toBeUndefined();
   });
 
   it.each((['Account', 'Facility'] as const).flatMap(kind => (['group', 'equipment-type', 'linked-meter-group', 'facility'] as const).map(mode => ({ kind, mode }))))('round trips $mode selection and appearance in a $kind backup', async ({ kind, mode }) => {

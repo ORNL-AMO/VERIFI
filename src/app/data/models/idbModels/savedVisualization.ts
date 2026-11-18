@@ -1,6 +1,7 @@
 import { getNewIdbEntry, IdbEntry } from './idbEntry';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
+import type { VisualizationCaptureOrigin } from '@data/visualizations/visualization-capture-origin';
 import type { VisualizationGuidMaps, VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
 export const SAVED_VISUALIZATION_RECORD_VERSION = 1;
@@ -28,6 +29,7 @@ export interface IdbSavedVisualization extends IdbEntry {
   /** Retain unreadable backup definitions; the data boundary decodes supported JSON separately. */
   definition: unknown;
   preservation?: VisualizationPreservation;
+  captureOrigin?: VisualizationCaptureOrigin;
 }
 
 /** Creation may reuse a submitted identity so retries cannot allocate another saved record. */

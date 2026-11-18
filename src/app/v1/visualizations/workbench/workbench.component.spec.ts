@@ -37,12 +37,6 @@ import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
 import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
 describe('visualization workbench', () => {
-  it('retains the workbench and exposes retry feedback when returning to the meter throws', async () => {
-    const { component } = setup();
-    const returned = vi.spyOn(TestBed.inject(VisualizationNavigationService), 'returnToMonthlyMeter').mockRejectedValueOnce(new Error('Route failed')).mockResolvedValueOnce(true);
-    await component.backToMonthlyChart(); expect(component.returnError()).toContain('could not be opened');
-    await component.backToMonthlyChart(); expect(component.returnError()).toBe(''); expect(returned).toHaveBeenCalledTimes(2);
-  });
   it('edits saved smoothing without losing it when switching between line and bar', async () => {
     const original = utilityVisualizationFixture(), { component, fixture } = setup(original);
     expect(component.smoothLines.value).toBe(false);

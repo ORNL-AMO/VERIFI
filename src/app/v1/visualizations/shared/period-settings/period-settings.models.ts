@@ -18,7 +18,7 @@ interface PeriodEditorChoice {
   readonly icon: 'calendar' | 'calendarCheck' | 'clock';
 }
 export interface PeriodEditorNotice {
-  readonly kind: 'analysis' | 'equipment' | 'predictor' | 'exploration' | 'composition';
+  readonly kind: 'analysis' | 'equipment' | 'predictor' | 'exploration' | 'composition' | 'monthly-patterns';
   readonly message: string;
   readonly resetLabel: string;
   readonly reset: Partial<PeriodFormValue>;
@@ -35,6 +35,10 @@ export interface PeriodEditorPolicy {
 
 /** Presentation policy only: unsupported combinations retain the existing editor controls and saved intent. */
 export function periodEditorPolicy(definition: VisualizationDefinition): PeriodEditorPolicy {
+  if (definition.chart?.kind === 'monthly-patterns') return { monthInput: false, title: 'All saved fiscal years',
+    choices: [{ kind: 'all-history', label: 'All history', icon: 'calendar' }],
+    controls: { ranges: false, fiscalYear: false, basis: false, comparison: false, incomplete: false }, selectionDefaults: { comparison: 'none' }, retainedPartial: false,
+    notices: definition.period.kind !== 'all-history' || definition.comparison.kind !== 'none' ? [{ kind: 'monthly-patterns', message: 'Monthly patterns use all saved years without an additional comparison.', resetLabel: 'Use all history without comparison', reset: { kind: 'all-history', comparison: 'none' } }] : [] };
   const analysis = definition.sources.some(source => source.kind === 'analysis');
   const equipment = definition.sources.some(source => source.kind === 'energy-use');
   const monthInput = usesMonthRange(definition);

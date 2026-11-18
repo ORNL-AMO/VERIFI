@@ -202,7 +202,7 @@ describe('visualization creation drawer', () => {
     await fixture.whenStable(); fixture.detectChanges();
     const chartButtons = fixture.debugElement.queryAll(By.css('[aria-label="Chart type"] button'));
     expect(chartButtons.map(button => button.query(By.css('strong')).nativeElement.textContent))
-      .toEqual(['Line', 'Bar', 'Area', 'Scatter', 'Correlation', 'Heatmap', 'Breakdown bar', 'Donut', 'Treemap', 'Sunburst', 'Sankey']);
+      .toEqual(['Line', 'Bar', 'Area', 'Monthly patterns', 'Scatter', 'Correlation', 'Heatmap', 'Breakdown bar', 'Donut', 'Treemap', 'Sunburst', 'Sankey']);
     expect(chartButtons.map(button => button.query(By.directive(IconComponent)).componentInstance.name))
       .toEqual(fixture.componentInstance.charts.map(chart => chart.icon));
     [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Chart type"] button')].find(item => item.querySelector('strong')?.textContent === 'Scatter')!.click(); fixture.detectChanges();

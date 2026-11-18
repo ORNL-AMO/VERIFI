@@ -1,14 +1,17 @@
 @let view = preview.state();
 <section class="visualization-preview" aria-label="Visualization" [attr.aria-busy]="view.state === 'loading'">
   @if (renderedPreview(); as rendered) {
-    <div class="visualization-preview__chart" [hidden]="view.state !== 'ready'"><ng-container *ngComponentOutlet="rendered.component; inputs: rendered.presentation.inputs"/></div>
+    <div class="visualization-preview__chart" [hidden]="view.state !== 'ready'">
+      @if (monthlyPatternsModel(); as model) { <app-monthly-patterns-chart [model]="model" (visibilityChanged)="yearVisibilityChanged.emit($event)"/> }
+      @else { <ng-container *ngComponentOutlet="rendered.component; inputs: rendered.presentation.inputs"/> }
+    </div>
   }
   @if (view.state !== 'ready') {
     <div class="visualization-preview__notice" [attr.role]="view.state === 'error' || view.state === 'invalid' ? 'alert' : 'status'" aria-live="polite">
       <p>{{ view.message }}</p>
       @if (view.state !== 'empty' && view.reasons?.length) { <ul>@for (reason of view.reasons; track $index) { <li>{{ reason }}</li> }</ul> }
       @if (view.details; as details) {
-        <details><summary>Source details</summary><div style="overflow-x:auto"><table><caption>{{ details.caption }}</caption><thead><tr>@for (column of details.columns; track column) { <th scope="col">{{ column }}</th> }</tr></thead><tbody>@for (row of details.rows; track $index) { <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr> }</tbody></table></div></details>
+        <div class="visually-hidden"><table><caption>{{ details.caption }}</caption><thead><tr>@for (column of details.columns; track column) { <th scope="col">{{ column }}</th> }</tr></thead><tbody>@for (row of details.rows; track $index) { <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr> }</tbody></table></div>
       }
       @if (view.state === 'missing-source') { <p>Review the missing references in Data Sources.</p> }
       @if (canRetry()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="preview.retry()">Retry chart</button> }

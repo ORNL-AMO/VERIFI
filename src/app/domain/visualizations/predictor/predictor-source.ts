@@ -1,3 +1,4 @@
+import { monthlyPatternsCalendar } from '../visualization-monthly-patterns';
 import { isExplorationChart, visualizationInterval } from '../visualization-interval';
 import { emptyMonthlySource } from '../visualization-monthly-combination';
 import { civilMonthIndex, civilMonthRange } from '../visualization-periods';
@@ -87,12 +88,13 @@ function groupReadings(readings: readonly IdbPredictorData[]): Map<number, IdbPr
 }
 export function predictorCapabilities(): VisualizationSourceCapabilities {
   return { kind: 'predictor', measures: ['value'], aggregations: ['none'], periods: ['all-history', 'fixed', 'rolling'], comparisons: ['none'],
-    chartKinds: ['time-series', 'scatter', 'correlation', 'heatmap'], shapes: ['time-series'], alignments: ['civil-month'], settings: ['unit'], controls: ['series', 'appearance', 'axes', 'fit', 'normalization'], allowDateOverride: true, allowMultipleSources: true, allowMixedAxisUnits: true };
+    chartKinds: ['monthly-patterns', 'time-series', 'scatter', 'correlation', 'heatmap'], shapes: ['time-series'], alignments: ['civil-month'], settings: ['unit'], controls: ['series', 'appearance', 'axes', 'fit', 'normalization'], allowDateOverride: true, allowMultipleSources: true, allowMixedAxisUnits: true };
 }
 export function predictorChartSupport(source: PredictorVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
-  if (chart.kind === 'time-series' ? chart.interval !== 'monthly' || chart.stack !== 'none' : !isExplorationChart(chart) || visualizationInterval(chart) !== 'monthly')
+  if (chart.kind !== 'monthly-patterns' && (chart.kind === 'time-series' ? chart.interval !== 'monthly' || chart.stack !== 'none' : !isExplorationChart(chart) || visualizationInterval(chart) !== 'monthly'))
     reasons.push('Predictors support monthly, unstacked line, bar or area charts.');
+  if (chart.kind === 'monthly-patterns' && (source.selection?.kind !== 'fixed' || source.selection.guids.length !== 1)) reasons.push('Monthly patterns require one saved predictor.');
   if (source.aggregation !== 'none') reasons.push('Predictor aggregation is not supported.');
   if (!isAllPredictors(source) && (source.selection?.kind !== 'fixed' || source.selection.resource !== 'predictor' || !source.selection.guids.length))
     reasons.push('Select saved Standard or Weather predictors. Only exact selections and All Predictors are supported.');
@@ -228,6 +230,8 @@ export function resolvePredictor(snapshot: AccountWorkspaceSnapshot, request: Vi
   const hasValues = rows.some(row => Object.values(row.values).some(value => value.state === 'observed'));
   if (!hasValues && !request.dateContext.monthlyRange) return empty(`No usable saved values in the selected month range (${start.slice(0, 7)} – ${end.slice(0, 7)}).`);
   return { identity, ...(hasValues ? { state: 'ready' as const } : { state: 'empty' as const, message: 'No usable saved predictor values in this range.', periods: [], reasons: omissions.map(group => `${group.label} · ${group.issue}: ${group.readings.join('; ')}`) }), resolved: {
+    ...(request.chart.kind === 'monthly-patterns' && records.length === 1 ? { monthlyPatternsCalendar: monthlyPatternsCalendar(snapshot.facilities.find(facility => facility.guid === records[0].facilityId)!, 'facility',
+      [...histories[0].grouped.keys()].map(month => civilMonthRange(month).start)) } : {}),
     data: { kind: 'time-series', rows }, alignment: { kind: 'civil-month', key: 'YYYY-MM' },
     series, references,
     periods: [{ role: 'primary', start: rows[0].start, end: rows.at(-1)!.end, basis: 'calendar', interval: 'monthly' }],

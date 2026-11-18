@@ -144,6 +144,8 @@ class MeterFiscalYearComparisonChartStubComponent {
   @Input() utilityMetric?: MeterResultsChartMetric;
   @Input() costMetric?: MeterResultsChartMetric;
   @Input() fiscalYearStartMonth = 0;
+  @Input() contextKey = '';
+  @Input() visualize?: { readonly disabled: boolean; readonly reason?: string };
   @Input() usesFiscalYearLabels = false;
 }
 

@@ -10,9 +10,7 @@
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title"><h1 id="visualization-title"><app-ui-icon name="dataVisualization"/>{{ editor.definition()?.name || 'Visualization' }}</h1></div>
         <div class="v1-data-workbench-actions" aria-label="Visualization summary and controls">
-          @if (capturedReturn()) {
-            @if (canReturnToMeter()) { <button type="button" class="v1-btn v1-btn--quiet" (click)="backToMonthlyChart()"><app-ui-icon name="chevronLeft"/>Back to Monthly Chart</button> }
-          }
+          @if (sourceLink(); as source) { <a class="v1-btn v1-btn--quiet" [routerLink]="source.route" [fragment]="source.fragment"><app-ui-icon name="chartTimeSeries"/>View source chart</a> }
           <span class="visualization-workbench__save-state" [class.visualization-workbench__save-state--saved]="editor.state() === 'saved' && !hasInvalidFields()" [class.visualization-workbench__save-state--error]="saveNeedsAttention()" role="status" aria-live="polite">
             @if (saveInProgress()) { <app-ui-icon name="loading" spin/> }
             @else if (saveNeedsAttention()) { <app-ui-icon name="warning"/> }
@@ -35,8 +33,6 @@
         <div><dt>Chart type</dt><dd>{{ chartSummary() }}</dd></div>
         <div><dt>Period</dt><dd>{{ periodSummary() }}</dd></div>
       </dl></div>
-      @if (capturedReturn() && !canReturnToMeter()) { <p role="status">The source meter or facility is unavailable. Use the breadcrumbs to return to Visualizations.</p> }
-      @if (returnError()) { <p role="alert">{{ returnError() }}</p> }
       @if (dataStatusSummaries().length) {
         <ul class="v1-data-workbench-status-notes visualization-workbench__status-notes" aria-label="Source data issues">
           @for (issue of dataStatusSummaries(); track issue.id) {
@@ -132,9 +128,16 @@
             @else { <p role="status">Setup required. Data selection for {{ source.label }} is not available yet.</p> }
           </app-visualization-decision-section>
         }
+        @if (definition.chart?.kind !== 'monthly-patterns') {
         @for (item of traceItems(); track item.traceKey; let position = $index) {
           <app-visualization-item-settings [timeSeries]="definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="traceItems().length" [disabled]="!editor.canEdit()" [editorKey]="editorKey()" [resetKey]="item.resetKey"
             [expandedNodes]="expandedNodes()" (requested)="requestTrace($event)" (sectionChanged)="setSection($event.id, $event.expanded)"/>
+        }
+        }
+        @if (definition.chart?.kind === 'monthly-patterns') {
+          <app-visualization-decision-section nodeId="pattern-years" label="Years" summary="All saved fiscal years" icon="calendar" [expanded]="expandedNodes().has('pattern-years')" (expandedChange)="setSection('pattern-years', $event)">
+            <app-monthly-pattern-year-settings [chart]="definition.chart!" [editorKey]="editor.key()" [years]="patternYears()" [disabled]="!editor.canEdit() || patternLoading()" (changed)="updateChartSettings($event)"/>
+          </app-visualization-decision-section>
         }
         <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates and comparison" [summary]="periodSummary()" icon="calendar"
           [attention]="periodInvalid()" [expanded]="expandedNodes().has(rootNodes.period)" (expandedChange)="setSection(rootNodes.period, $event)">
@@ -147,13 +150,13 @@
           <label>Chart title<input formControlName="title" type="text"></label>
           <app-visualization-display-settings [context]="displayContext()"/>
           <label class="visualization-workbench__checkbox"><input formControlName="legend" type="checkbox">Show legend</label>
-          @if (definition.chart?.kind === 'time-series') {
+          @if (definition.chart?.kind === 'time-series' || definition.chart?.kind === 'monthly-patterns') {
             <label class="visualization-workbench__checkbox"><input [formControl]="smoothLines" type="checkbox">Smooth lines</label>
           }
         </app-visualization-decision-section>
       </form>
       <section class="visualization-workbench__chart" aria-label="Visualization">
-        @if (previewActive()) { <app-visualization-preview [definition]="definition" [identity]="previewIdentity()" [active]="previewActive()"/> }
+        @if (previewActive()) { <app-visualization-preview [definition]="definition" [identity]="previewIdentity()" [active]="previewActive()" (yearVisibilityChanged)="setPatternVisibility($event)"/> }
         @else { <p role="status">Chart unavailable. Review the workspace or source relationships to continue.</p> }
       </section>
     </div>

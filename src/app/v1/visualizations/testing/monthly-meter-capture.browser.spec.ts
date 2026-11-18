@@ -5,7 +5,7 @@ import { By } from '@angular/platform-browser';
 import { NavigationEnd, provideRouter, Router, RouterOutlet } from '@angular/router';
 import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { page, userEvent } from 'vitest/browser';
+import { cdp, page, userEvent } from 'vitest/browser';
 import { echarts } from '@app/v1/shared/charts/echarts';
 import { textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
@@ -15,7 +15,9 @@ import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-ha
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
-import { meter, reading } from '@app/v1/data/meters/facility-meters.testing';
+import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData } from '@data/models/idbModels/predictorData';
+import { meter, reading, group } from '@app/v1/data/meters/facility-meters.testing';
 import { MetersModule } from '@app/v1/data/meters/meters.module';
 import { FacilityMetersWorkspaceService } from '@app/v1/data/meters/facility-meters-workspace.service';
 import { MeterWorkbenchMonthlyChartComponent } from '@app/v1/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
@@ -32,12 +34,17 @@ import { LibraryComponent } from '../library/library.component';
 import { PreviewComponent } from '../preview/preview/preview.component';
 import { CaptureSlideoutComponent } from '../capture/capture-slideout/capture-slideout.component';
 import { DisplaySettingsComponent } from '../shared/display-settings/display-settings.component';
+import { MeterFiscalYearComparisonChartComponent } from '@app/v1/data/meters/meter-workbench/monthly-chart/fiscal-year-comparison-chart/meter-fiscal-year-comparison-chart.component';
+import { MonthlyPatternsChartComponent } from '../monthly-patterns/chart/monthly-patterns-chart.component';
+import { MonthlyPatternYearSettingsComponent } from '../monthly-patterns/year-settings/monthly-pattern-year-settings.component';
 import { decisionNodeId } from '../decisions/decision-tree';
 import type { UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';
 
 @Component({ standalone: true, imports: [RouterOutlet, PortalModule], template: `
-  <main class="v1-root v1-workspace__main" style="height:650px;width:1000px;overflow:auto"><router-outlet/></main>
-  <div class="v1-root"><ng-template [cdkPortalOutlet]="modal.activePortal()"/></div>` })
+  <main class="v1-root v1-workspace__main"><router-outlet/></main>
+  <div class="v1-root"><ng-template [cdkPortalOutlet]="modal.activePortal()"/></div>`,
+  styles: [`main { height: 650px; width: 1000px; overflow: auto; }
+    @media print { main { height: auto; overflow: visible; } }`] })
 class CaptureJourneyHost { readonly modal = inject(ModalPortalService); }
 
 describe('monthly meter capture through native storage and canonical calculation', () => {
@@ -101,6 +108,7 @@ describe('monthly meter capture through native storage and canonical calculation
     if (!button) throw new Error(`Missing button ${label}`);
     return button;
   }
+  async function workspaceReload(): Promise<void> { await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(); await settle(); await expectPreview(); }
   async function expectPreview(): Promise<void> {
     await vi.waitFor(() => {
       fixture.detectChanges();
@@ -162,6 +170,166 @@ describe('monthly meter capture through native storage and canonical calculation
     expect(TestBed.inject(AccountWorkspaceStore).meterData()).toHaveLength(3);
   });
 
+  it('creates monthly patterns from scratch and follows the selected meter facility calendar', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/v1/workspace/account/account-a/visualization/dashboard'); await settle();
+    button('Add visualization').click(); await settle();
+    const lifecycle = (fixture.debugElement.query(By.directive(LibraryComponent)).componentInstance as LibraryComponent).lifecycle;
+    lifecycle.continueFacilities(); lifecycle.selectChart('monthly-patterns');
+    expect(lifecycle.availableDataSources().map(source => source.value)).toEqual(['utility', 'predictor']);
+    lifecycle.toggleSource('utility'); lifecycle.continueSources();
+    lifecycle.selectMeterMode('facility'); expect(lifecycle.form.controls.selectionMode.value).toBeNull();
+    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources();
+    lifecycle.toggleCreationMeasure('utility', 'cost'); lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Built monthly patterns');
+    await lifecycle.submit(); await settle(); await expectPreview();
+    expect(workbench().sourcePanels()).toHaveLength(1);
+    expect(fixture.nativeElement.textContent).not.toContain('View source chart');
+    const model = () => fixture.debugElement.query(By.directive(MonthlyPatternsChartComponent)).componentInstance.model();
+    expect(model().panels).toHaveLength(2); expect(model().months[0]).toBe('Jan');
+    await firstValueFrom(harness.dbService.update('facilities', { ...facility, fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: true }));
+    await workspaceReload();
+    expect(model().months[0]).toBe('Jul'); expect(model().years[0].label).toBe('FY 2026');
+    button('Settings').click(); await settle();
+    const root = fixture.nativeElement.querySelector('main') as HTMLElement; root.style.width = '100%';
+    try {
+      for (const width of [1280, 390]) {
+        await page.viewport(width, 900); root.classList.toggle('v1-theme-dark', width === 390); await settle();
+        expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+        await page.screenshot({ path: `../../../../../.angular/vis9-patterns/utility-${width}.png` });
+      }
+    } finally { await page.viewport(1280, 900); root.classList.remove('v1-theme-dark'); }
+    const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', params: { media: string }) => Promise<unknown> };
+    await print.send('Emulation.setEmulatedMedia', { media: 'print' });
+    try {
+      expect(getComputedStyle(fixture.nativeElement.querySelector('#visualization-settings')).display).toBe('none');
+      expect(getComputedStyle(fixture.nativeElement.querySelector('.v1-data-workbench-actions')).display).toBe('none');
+      const printedChart = fixture.nativeElement.querySelector('.monthly-patterns-chart').getBoundingClientRect();
+      expect(printedChart.height).toBeGreaterThan(0);
+      expect(printedChart.bottom).toBeLessThanOrEqual(root.getBoundingClientRect().bottom);
+      expect(fixture.nativeElement.querySelector('app-monthly-patterns-chart details')).toBeNull();
+      await page.screenshot({ path: '../../../../../.angular/vis9-patterns/utility-print.png' });
+    } finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
+
+    expect((await harness.getAll('savedVisualizations'))[0].captureOrigin).toBeUndefined();
+    expect((await harness.getAll('savedVisualizations'))[0].definition).toMatchObject({ chart: { kind: 'monthly-patterns' }, sources: [{ kind: 'utility', measures: ['energy', 'cost'] }] });
+  });
+
+  it.each(['group', 'source'] as const)('creates combined monthly patterns by %s and includes new matching meters', async mode => {
+    const workspace = TestBed.inject(AccountWorkspaceService), store = TestBed.inject(AccountWorkspaceStore), router = TestBed.inject(Router);
+    await firstValueFrom(harness.dbService.update('utilityMeter', { ...store.meters()[0], groupId: 'group-a' }));
+    await harness.seed({ utilityMeterGroups: [{ ...group({ guid: 'group-a', name: 'Production' }) }],
+      utilityMeter: [{ ...meter({ id: 2, guid: 'meter-b', name: 'Second meter', groupId: 'group-a', meterReadingDataApplication: 'fullMonth' }) }],
+      utilityMeterData: [{ ...reading({ id: 40, guid: 'second-bill', meterId: 'meter-b', totalEnergyUse: 5, totalCost: 10 }) }] });
+    await workspace.reloadActiveWorkspace(); await router.navigateByUrl('/v1/workspace/account/account-a/visualization/dashboard'); await settle();
+    button('Add visualization').click(); await settle();
+    const lifecycle = (fixture.debugElement.query(By.directive(LibraryComponent)).componentInstance as LibraryComponent).lifecycle;
+    lifecycle.continueFacilities(); lifecycle.selectChart('monthly-patterns'); lifecycle.toggleSource('utility'); lifecycle.continueSources();
+    lifecycle.selectMeterMode(mode); lifecycle.toggleResource(mode === 'group' ? 'group-a' : 'Electricity'); lifecycle.continueResources();
+    lifecycle.toggleCreationMeasure('utility', 'cost'); lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Combined patterns'); await lifecycle.submit();
+    await settle(); await expectPreview();
+    const model = () => fixture.debugElement.query(By.directive(MonthlyPatternsChartComponent)).componentInstance.model();
+    expect(model().panels).toHaveLength(2);
+    expect(model().panels[0].years[0].points[0].observation).toMatchObject({ state: 'observed', value: 15 });
+    expect(model().panels[1].years[0].points[0].observation).toMatchObject({ state: 'observed', value: 30 });
+    await harness.seed({ utilityMeter: [{ ...meter({ id: 3, guid: 'meter-c', groupId: 'group-a', meterReadingDataApplication: 'fullMonth' }) }],
+      utilityMeterData: [{ ...reading({ id: 41, guid: 'third-bill', meterId: 'meter-c', totalEnergyUse: 7, totalCost: 14 }) }] });
+    await workspaceReload();
+    expect(model().panels[0].years[0].points[0].observation).toMatchObject({ state: 'observed', value: 22 });
+    expect(fixture.nativeElement.textContent).not.toContain('View source chart');
+    expect(fixture.nativeElement.querySelector('app-monthly-patterns-chart details')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-monthly-patterns-chart .visually-hidden table')).not.toBeNull();
+  });
+
+  it('creates a single-panel predictor pattern with fiscal alignment, zeros, negative values and gaps', async () => {
+    const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), id: 1, guid: 'production', name: 'Production', unit: 'widgets' };
+    await harness.seed({ predictor: [predictor], predictorData: [
+      { ...getNewIdbPredictorData(predictor), id: 1, guid: 'production-july', year: 2026, month: 7, amount: 0 },
+      { ...getNewIdbPredictorData(predictor), id: 2, guid: 'production-september', year: 2026, month: 9, amount: -2 },
+      { ...getNewIdbPredictorData(predictor), id: 3, guid: 'production-next', year: 2027, month: 7, amount: 8 }
+    ] });
+    await firstValueFrom(harness.dbService.update('facilities', { ...facility, fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: true }));
+    await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace();
+    await TestBed.inject(Router).navigateByUrl('/v1/workspace/account/account-a/visualization/dashboard'); await settle();
+    button('Add visualization').click(); await settle();
+    const lifecycle = (fixture.debugElement.query(By.directive(LibraryComponent)).componentInstance as LibraryComponent).lifecycle;
+    lifecycle.continueFacilities(); lifecycle.selectChart('monthly-patterns'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
+    expect(fixture.nativeElement.querySelector('.predictor-all-choice')).toBeNull();
+    expect(lifecycle.predictorChoices().map(choice => choice.value)).toContain('production');
+    expect(lifecycle.canEditDraft()).toBe(true);
+    lifecycle.togglePredictor('production'); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
+    lifecycle.continuePredictors(); lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Production patterns');
+    await lifecycle.submit(); await settle(); await expectPreview();
+    const model = () => fixture.debugElement.query(By.directive(MonthlyPatternsChartComponent)).componentInstance.model();
+    expect(model().panels).toHaveLength(1); expect(model().panels[0].unit).toBe('widgets'); expect(model().months[0]).toBe('Jul');
+    expect(model().years.map(year => year.label)).toEqual(['FY 2027', 'FY 2028']);
+    expect(model().panels[0].years[0].points.slice(0, 3).map(point => point.observation)).toMatchObject([{ state: 'observed', value: 0 }, { state: 'missing', value: null }, { state: 'observed', value: -2 }]);
+    expect(fixture.nativeElement.querySelector('app-monthly-patterns-chart details')).toBeNull();
+    const root = fixture.nativeElement.querySelector('main') as HTMLElement; root.style.width = '100%';
+    try {
+      for (const width of [1280, 390]) {
+        await page.viewport(width, 900); root.classList.toggle('v1-theme-dark', width === 390); await settle();
+        expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+        await page.screenshot({ path: `../../../../../.angular/vis9-patterns/predictor-${width}.png` });
+      }
+    } finally { await page.viewport(1280, 900); root.classList.remove('v1-theme-dark'); }
+    expect(await workbench().editor.flush()).toBe(true); await workspaceReload(); expect(model().panels).toHaveLength(1);
+  });
+
+  it('captures linked fiscal patterns, persists year edits and future years, and exposes only unchanged source links', async () => {
+    const workspace = TestBed.inject(AccountWorkspaceService);
+    await harness.seed({ utilityMeterData: Array.from({ length: 10 }, (_, index) => { const month = index + 3; return { ...reading({ id: 40 + index, guid: `next-year-${index}`, year: 2026 + Math.floor(month / 12), month: month % 12 + 1, totalEnergyUse: 42, totalCost: 84 }) }; }) });
+    await workspace.reloadActiveWorkspace(); await settle();
+    await vi.waitFor(() => { fixture.detectChanges(); expect(monthly().patternCaptureSupport().state, JSON.stringify(monthly().patternCaptureSupport())).toBe('supported'); });
+    const patterns = fixture.debugElement.query(By.directive(MeterFiscalYearComparisonChartComponent)).componentInstance as MeterFiscalYearComparisonChartComponent;
+    const sourceRoot = fixture.nativeElement.querySelector('app-meter-fiscal-year-comparison-chart') as HTMLElement;
+    await vi.waitFor(() => expect(echarts.getInstanceByDom(sourceRoot.querySelector('.v1-meter-fiscal-comparison__chart')!)).toBeDefined());
+    echarts.getInstanceByDom(sourceRoot.querySelector('.v1-meter-fiscal-comparison__chart')!)!.dispatchAction({ type: 'legendToggleSelect', name: '2026' }); await settle();
+    expect(patterns.hiddenYears()).toEqual([2026]);
+    const visualize = sourceRoot.querySelector<HTMLButtonElement>('button[aria-label="Visualize"]')!;
+    visualize.focus(); await userEvent.keyboard('{Enter}'); await settle();
+    expect(drawer().name.value).toBe('HQ (Simple) - Monthly Patterns Electricity');
+    button('Cancel').click(); await settle(); expect(document.activeElement).toBe(visualize);
+    visualize.click(); await settle(); button('Save and open').click();
+    await vi.waitFor(() => expect(TestBed.inject(Router).url).toContain('/visualization/workbench/')); await settle(); await expectPreview();
+    const savedGuid = workbench().editor.record()!.guid;
+    const model = () => fixture.debugElement.query(By.directive(MonthlyPatternsChartComponent)).componentInstance.model();
+    expect(model().panels).toHaveLength(2); expect(model().years.map(year => [year.year, year.visible])).toEqual([[2026, false], [2027, true]]);
+    expect((await harness.getAll('savedVisualizations'))[0].captureOrigin).toMatchObject({ source: { kind: 'meter-monthly-patterns', meterGuid: 'meter-a' } });
+    workbench().editor.form.controls.name.setValue('Renamed patterns'); expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    expect(fixture.nativeElement.textContent).toContain('View source chart');
+    workbench().smoothLines.setValue(true); expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    expect(model().smoothLines).toBe(true); expect(fixture.nativeElement.textContent).not.toContain('View source chart');
+    workbench().smoothLines.setValue(false); expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    expect(fixture.nativeElement.textContent).toContain('View source chart');
+    const savedChartRoot = () => fixture.nativeElement.querySelector('app-monthly-patterns-chart .monthly-patterns-chart') as HTMLElement;
+    await vi.waitFor(() => expect(echarts.getInstanceByDom(savedChartRoot())).toBeDefined());
+    echarts.getInstanceByDom(savedChartRoot())!.dispatchAction({ type: 'legendToggleSelect', name: '2027' }); await settle();
+    await vi.waitFor(() => { fixture.detectChanges(); expect(model().years.every(year => !year.visible)).toBe(true); });
+    expect(fixture.nativeElement.textContent).not.toContain('View source chart');
+    echarts.getInstanceByDom(savedChartRoot())!.dispatchAction({ type: 'legendToggleSelect', name: '2027' }); await settle(); await expectPreview();
+    workbench().setSection('pattern-years', true); await settle();
+    const settings = fixture.debugElement.query(By.directive(MonthlyPatternYearSettingsComponent)).componentInstance as MonthlyPatternYearSettingsComponent;
+    settings.form.controls['2027'].controls.color.setValue('#23684d'); await settle();
+    expect(fixture.nativeElement.textContent).not.toContain('View source chart');
+    expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    expect(model().years.find(year => year.year === 2027)?.color).toBe('#23684d');
+    const duplicate = await TestBed.inject(SavedVisualizationCommands).submit(TestBed.inject(SavedVisualizationCommands).prepareDuplicate(workbench().editor.record()!));
+    expect(duplicate.state).toBe('committed');
+    const store = TestBed.inject(AccountWorkspaceStore);
+    expect(store.savedVisualizations().find(record => record.guid !== savedGuid)?.captureOrigin).toEqual(workbench().editor.record()?.captureOrigin);
+    await harness.seed({ utilityMeterData: Array.from({ length: 12 }, (_, index) => { const month = index + 13; return { ...reading({ id: 60 + index, guid: `future-year-${index}`, year: 2026 + Math.floor(month / 12), month: month % 12 + 1, totalEnergyUse: 43, totalCost: 86 }) }; }) });
+    await workspaceReload();
+    expect(model().years.map(year => year.year)).toEqual([2026, 2027, 2028]); expect(model().years.at(-1)?.visible).toBe(true);
+    workbench().setSection('pattern-years', true); await settle();
+    const current = fixture.debugElement.query(By.directive(MonthlyPatternYearSettingsComponent)).componentInstance as MonthlyPatternYearSettingsComponent;
+    current.form.controls['2027'].controls.color.setValue('#efb118'); await settle(); expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    expect(fixture.nativeElement.textContent).toContain('View source chart');
+    const link = [...fixture.nativeElement.querySelectorAll('a')].find((anchor: HTMLAnchorElement) => anchor.textContent?.includes('View source chart')) as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe(monthlyUrl + '#meter-fiscal-comparison-heading');
+    link.focus(); await userEvent.keyboard('{Enter}'); await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe(monthlyUrl + '#meter-fiscal-comparison-heading'));
+    await vi.waitFor(() => expect(document.activeElement?.id).toBe('meter-fiscal-comparison-heading'));
+  });
+
   it('reviews a bill-charge meter replacement and reopens only the new meter and named charge', async () => {
     const workspace = TestBed.inject(AccountWorkspaceService), store = TestBed.inject(AccountWorkspaceStore);
     const charge = (guid: string) => ({ guid, name: guid, chargeType: 'flatFee' as const, displayChargeInTable: true, displayUsageInTable: false });
@@ -210,7 +378,7 @@ describe('monthly meter capture through native storage and canonical calculation
     }
   });
 
-  it('cancels without a record, saves once, edits/reopens, duplicates, and returns with original controls, zoom and focus', async () => {
+  it('cancels without a record, saves once, edits/reopens, duplicates, and links only an unchanged source', async () => {
     const commands = TestBed.inject(SavedVisualizationCommands), submit = vi.spyOn(commands, 'submit');
     chart().setUtilityDisplay('bar'); chart().syncDataZoom({ start: 20, end: 80 }); await settle();
     await vi.waitFor(() => expect(echarts.getInstanceByDom(fixture.nativeElement.querySelector('.v1-meter-results-chart__chart'))).toBeDefined());
@@ -233,8 +401,11 @@ describe('monthly meter capture through native storage and canonical calculation
     await vi.waitFor(() => expect(TestBed.inject(Router).url).toContain('/visualization/workbench/')); await settle();
     expect(submit).toHaveBeenCalledOnce(); expect(await harness.getAll('savedVisualizations')).toHaveLength(1);
     await expectPreview();
+    expect(fixture.nativeElement.textContent).toContain('View source chart');
+    workbench().editor.form.controls.name.setValue('Renamed monthly capture'); await settle();
+    expect(fixture.nativeElement.textContent).toContain('View source chart');
     const store = TestBed.inject(AccountWorkspaceStore), saved = store.savedVisualizations()[0];
-    expect(workbench().editor.definition()).toMatchObject({ name: 'Monthly main', chart: { smoothLines: true }, series: [{ traceType: 'bar' }, { traceType: 'line', visible: false }] });
+    expect(workbench().editor.definition()).toMatchObject({ name: 'Renamed monthly capture', chart: { smoothLines: true }, series: [{ traceType: 'bar' }, { traceType: 'line', visible: false }] });
     workbench().smoothLines.setValue(false); workbench().editor.form.controls.title.setValue('Edited in workbench');
     expect(await workbench().editor.flush()).toBe(true); await settle();
     const duplicate = await commands.submit(commands.prepareDuplicate(store.savedVisualizations()[0]));
@@ -242,11 +413,13 @@ describe('monthly meter capture through native storage and canonical calculation
     expect(readSavedVisualization(store.savedVisualizations().find(item => item.guid !== saved.guid)!)).toMatchObject({ definition: { chart: { smoothLines: false } } });
     await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(); await settle();
     expect(workbench().editor.definition()?.chart).toMatchObject({ smoothLines: false });
-    button('Back to Monthly Chart').click(); await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe(monthlyUrl)); await settle();
-    await vi.waitFor(() => { fixture.detectChanges(); expect(monthly().captureSupport().state).toBe('supported'); });
-    expect(chart().presentation()).toMatchObject({ leftDisplay: 'bar', zoom: { start: 20, end: 80 }, smoothLines: true, hiddenMetricIds: ['energyCost'] });
-    expect(document.activeElement).toBe(button('Visualize'));
-    expect(sourceScroll.scrollTop).toBe(scrollTop);
+    expect(fixture.nativeElement.textContent).not.toContain('View source chart');
+    workbench().smoothLines.setValue(true); workbench().editor.form.controls.title.setValue(''); await settle();
+    expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    const sourceLink = [...fixture.nativeElement.querySelectorAll('a')].find((link: HTMLAnchorElement) => link.textContent?.includes('View source chart')) as HTMLAnchorElement;
+    expect(sourceLink).toBeDefined(); expect(sourceLink.getAttribute('href')).toBe(monthlyUrl + '#meter-monthly-chart');
+    sourceLink.click(); await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe(monthlyUrl + '#meter-monthly-chart')); await settle();
+    expect(chart().presentation().zoom).toEqual({ start: 0, end: 100 });
     expect(store.meters()[0].name).toBe('Electricity'); expect(store.meterData()).toHaveLength(3);
   });
 

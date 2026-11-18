@@ -1,0 +1,7 @@
+<div class="monthly-patterns-chart" [class.monthly-patterns-chart--combined]="model().panels.length > 1" [appV1ECharts]="option()" (legendSelectionChanged)="legendChanged($event)" role="img" [attr.aria-label]="model().title"></div>
+@if (!hasVisibleYears()) { <p role="status">Show at least one year to display monthly patterns.</p> }
+@for (warning of model().warnings; track $index) { <p role="status">{{ warning }}</p> }
+<div class="visually-hidden monthly-patterns-data"><table><caption>{{ model().title }}: original monthly values and quality</caption>
+<thead><tr><th>Panel</th><th>Year</th><th>Start</th><th>End</th><th>Value / quality</th></tr></thead>
+<tbody>@for (row of rows(); track row.key) { <tr><td>{{ row.panel }}</td><td>{{ row.year }}</td><td>{{ row.start }}</td><td>{{ row.end }}</td><td>{{ row.value }}</td></tr> }</tbody>
+</table></div>

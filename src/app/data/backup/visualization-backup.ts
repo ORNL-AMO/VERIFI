@@ -73,6 +73,18 @@ export function mergeVisualizationTransferMaps(all: readonly VisualizationGuidMa
 export function transferSavedVisualization(record: Readonly<IdbSavedVisualization>, accountGuid: string,
   maps: VisualizationGuidMaps, guid: string): IdbSavedVisualization {
   const result: IdbSavedVisualization = { ...structuredClone(record) };
+  if (result.captureOrigin) {
+    const origin = result.captureOrigin;
+    try {
+      const baseline = decodeVisualizationDefinition(origin.baseline);
+      const facilityGuid = maps.facility?.[origin.source.facilityGuid], meterGuid = maps.meter?.[origin.source.meterGuid];
+      if (!('definition' in baseline) || !facilityGuid || !meterGuid || origin.unresolved) result.captureOrigin = { ...origin, unresolved: true };
+      else {
+        const mapped = remapVisualizationDefinition(baseline.definition, accountGuid, maps);
+        result.captureOrigin = { source: { ...origin.source, facilityGuid, meterGuid }, baseline: serializeVisualizationDefinition(mapped.definition), ...(mapped.issues.length ? { unresolved: true } : {}) };
+      }
+    } catch { result.captureOrigin = { ...origin, unresolved: true }; }
+  }
   delete result.id;
   result.guid = guid;
   result.accountId = accountGuid;

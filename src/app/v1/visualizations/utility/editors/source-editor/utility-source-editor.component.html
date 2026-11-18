@@ -4,12 +4,12 @@
   <app-visualization-decision-section [nodeId]="ids.mode" label="Select by" [summary]="selectionLabel()" icon="filter"
     [expanded]="context.expandedNodes?.has(ids.mode) ?? false" (expandedChange)="setSection(ids.mode, $event)">
     <div class="visualization-choices" role="group" aria-label="Meter selection method">
-      @for (mode of modes; track mode.value) { <button type="button" class="visualization-choice" [disabled]="disabled() || (!!chargeSource() && mode.value !== 'meter')" [title]="chargeSource() && mode.value !== 'meter' ? 'Bill charges require one individual meter.' : ''" [attr.aria-pressed]="source.selectionMode === mode.value" (click)="selectMode(mode.value)"><app-ui-icon [name]="mode.icon"/>{{ mode.label }}</button> }
+      @for (mode of modes; track mode.value) { <button type="button" class="visualization-choice" [disabled]="disabled() || (!!chargeSource() && mode.value !== 'meter') || (patterns() && !['meter', 'group', 'source'].includes(mode.value))" [title]="(chargeSource() && mode.value !== 'meter') || (patterns() && !['meter', 'group', 'source'].includes(mode.value)) ? 'Choose one meter, meter group or source for monthly patterns; bill charges require a meter.' : ''" [attr.aria-pressed]="source.selectionMode === mode.value" (click)="selectMode(mode.value)"><app-ui-icon [name]="mode.icon"/>{{ mode.label }}</button> }
     </div>
   </app-visualization-decision-section>
   <app-visualization-decision-section [nodeId]="ids.resources" [label]="resourceLabel()" [summary]="selected.value.length + ' selected'" icon="checklist"
     [expanded]="context.expandedNodes?.has(ids.resources) ?? false" (expandedChange)="setSection(ids.resources, $event)">
-    @if (source.selectionMode) { <app-visualization-resource-picker [label]="resourceLabel()" [control]="selected" [options]="choices()" [disabled]="disabled()" [singleSelection]="!!chargeSource()" [requestChanges]="true" (selectionRequested)="toggleResource($event)" (selectionSetRequested)="setResources($event)"/> }
+    @if (source.selectionMode) { <app-visualization-resource-picker [label]="resourceLabel()" [control]="selected" [options]="choices()" [disabled]="disabled()" [singleSelection]="!!chargeSource() || patterns()" [requestChanges]="true" (selectionRequested)="toggleResource($event)" (selectionSetRequested)="setResources($event)"/> }
     @else { <p role="status">Choose how to select meters first.</p> }
   </app-visualization-decision-section>
   <app-visualization-decision-section [nodeId]="ids.measure" label="Meter Data To Chart" [summary]="measureLabel()" icon="energy"
@@ -18,9 +18,10 @@
       @for (option of visibleMeasures(); track option.value) { <button type="button" class="visualization-choice" [disabled]="option.disabled" [title]="option.reason" [attr.aria-pressed]="option.selected" (click)="selectMeasure(option.value)"><app-ui-icon [name]="option.icon"/>{{ option.label }}</button> }
     </div>
   </app-visualization-decision-section>
+  @if (!patterns()) {
   <app-visualization-decision-section [nodeId]="ids.settings" [attention]="!!chargeSource() && !chargeSource()?.charge" label="Data settings" summary="Grouping" icon="settingsSliders"
     [expanded]="context.expandedNodes?.has(ids.settings) ?? false" (expandedChange)="setSection(ids.settings, $event)">
-    <label class="utility-editor__toggle"><input type="checkbox" [formControl]="aggregateByFacility" [attr.disabled]="disabled() || source.dataMode !== 'calendarized' ? '' : null">Aggregate by facility</label>
+    @if (!patterns()) { <label class="utility-editor__toggle"><input type="checkbox" [formControl]="aggregateByFacility" [attr.disabled]="disabled() || source.dataMode !== 'calendarized' ? '' : null">Aggregate by facility</label> }
     @if (chargeSource()) {
       <div [formGroup]="chargeForm">
         <label>Named charge<select class="v1-select" formControlName="guid"><option value="">Choose a charge</option>@for (charge of chargeOptions(); track charge.guid) { <option [value]="charge.guid">{{ charge.name }}</option> }</select></label>
@@ -28,4 +29,5 @@
       </div>
     }
   </app-visualization-decision-section>
+  }
 }

@@ -1,5 +1,7 @@
 import { Component, DestroyRef, ElementRef, Injector, ViewChild, afterRenderEffect, computed, effect, inject, signal, untracked } from '@angular/core';
-import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
@@ -8,6 +10,7 @@ import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results
 import { VisualizationCaptureSession } from '@app/v1/visualizations/capture/visualization-capture-session';
 import { VisualizationNavigationService } from '@app/v1/visualizations/visualization-navigation.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { MeterFiscalYearComparisonChartComponent } from './fiscal-year-comparison-chart/meter-fiscal-year-comparison-chart.component';
 import { captureMonthlyMeter } from './monthly-meter-visualization-capture';
 import { civilDate } from '@domain/visualizations/utility/utility-periods';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -31,13 +34,17 @@ import {
 })
 export class MeterWorkbenchMonthlyChartComponent {
   private readonly router = inject(Router);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly fragment = toSignal(inject(ActivatedRoute, { optional: true })?.fragment ?? of(null));
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly store = inject(AccountWorkspaceStore);
   private readonly journeys = inject(VisualizationNavigationService);
   private readonly injector = inject(Injector);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroy = inject(DestroyRef);
   @ViewChild(MeterResultsChartComponent) private chart?: MeterResultsChartComponent;
+  @ViewChild(MeterFiscalYearComparisonChartComponent) private patternsChart?: MeterFiscalYearComparisonChartComponent;
+  readonly captureKind = signal<'meter-monthly' | 'meter-monthly-patterns'>('meter-monthly');
+  readonly hiddenPatternYears = signal<readonly number[]>([]);
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly account = this.workspace.account;
@@ -87,11 +94,6 @@ export class MeterWorkbenchMonthlyChartComponent {
   });
 
   readonly chartView = signal<MeterResultsChartPresentation | undefined>(undefined, { equal: (a, b) => JSON.stringify(a) === JSON.stringify(b) });
-  private readonly chartIdentity = computed(() => JSON.stringify([this.account()?.guid, this.facility()?.guid, this.meter()?.guid]));
-  readonly initialPresentation = computed<MeterResultsChartPresentation | undefined>(() => {
-    const [accountGuid, facilityGuid, meterGuid] = JSON.parse(this.chartIdentity()) as (string | undefined)[];
-    return accountGuid && facilityGuid && meterGuid ? this.journeys.monthlyMeterView(accountGuid, facilityGuid, meterGuid)?.presentation : undefined;
-  });
   private readonly defaultPresentation = computed<MeterResultsChartPresentation>(() => ({ leftMetricId: this.defaultLeftMetricId(), rightMetricId: this.costMetric()?.id,
       leftDisplay: 'line', rightDisplay: 'line', leftTraceType: 'line', rightTraceType: 'line',
       hiddenMetricIds: [], zoom: { start: 0, end: 100 }, smoothLines: true, legend: true }));
@@ -100,30 +102,39 @@ export class MeterWorkbenchMonthlyChartComponent {
     if (!this.store.isReady() || this.store.hasPending() || this.workspace.calendarizationState() !== 'ready' || !snapshot || !facility || !meter || !projected)
       return { state: 'unsupported' as const, reasons: ['Wait for a ready monthly chart before saving a visualization.'] };
     return captureMonthlyMeter({ snapshot, facilityGuid: facility.guid, meterGuid: meter.guid, projectedMeter: projected,
-      metrics: this.metrics(), rows: this.chartRows(), presentation: this.chartView() ?? this.initialPresentation() ?? this.defaultPresentation(),
+      metrics: this.metrics(), rows: this.chartRows(), presentation: this.chartView() ?? this.defaultPresentation(),
       workspaceRevision: this.store.revision(), calendarDate: civilDate(new Date()) });
   });
   readonly visualizeAction = computed(() => {
     const support = this.captureSupport();
     return { disabled: support.state !== 'supported' || !!this.reviewed(), reason: support.state === 'unsupported' ? support.reasons.join(' ') : undefined };
   });
-  readonly reviewed = signal<{ definition: VisualizationDefinition; revision: number; presentation: MeterResultsChartPresentation; scrollTop: number } | undefined>(undefined);
+  readonly patternCaptureSupport = computed(() => {
+    const snapshot = this.store.snapshot(), facility = this.facility(), meter = this.meter(), projected = this.selectedCalendarizedMeter();
+    if (!this.store.isReady() || this.store.hasPending() || this.workspace.calendarizationState() !== 'ready' || !snapshot || !facility || !meter || !projected)
+      return { state: 'unsupported' as const, reasons: ['Wait for a ready monthly chart before saving a visualization.'] };
+    return captureMonthlyMeter({ snapshot, facilityGuid: facility.guid, meterGuid: meter.guid, projectedMeter: projected,
+      metrics: this.metrics(), rows: this.chartRows(), presentation: { ...this.defaultPresentation(), smoothLines: false },
+      patterns: { hiddenYears: this.hiddenPatternYears() }, workspaceRevision: this.store.revision(), calendarDate: civilDate(new Date()) });
+  });
+  readonly patternsVisualizeAction = computed(() => {
+    const support = this.patternCaptureSupport();
+    return { disabled: support.state !== 'supported' || !!this.reviewed(), reason: support.state === 'unsupported' ? support.reasons.join(' ') : undefined };
+  });
+  openPatternsCapture(): void {
+    if (this.reviewed() || this.capture.needsProtection()) return;
+    const support = this.patternCaptureSupport(); if (support.state !== 'supported') return;
+    this.captureKind.set('meter-monthly-patterns'); this.capture.captureAnother(); this.captureError.set('');
+    this.reviewed.set({ definition: support.definition, revision: this.store.revision() });
+  }
+  readonly reviewed = signal<{ definition: VisualizationDefinition; revision: number } | undefined>(undefined);
   readonly captureError = signal('');
   private readonly focusCaptureRequested = signal(false);
   readonly capture = new VisualizationCaptureSession(() => {
     const commands = this.injector.get(SavedVisualizationCommands), unsaved = this.injector.get(UnsavedChangesService);
-    return { prepare: definition => commands.prepareCreate(definition), submit: command => commands.submit(command), recover: (accountGuid, guid) => commands.recover(accountGuid, guid),
+    return { prepare: definition => commands.prepareCreate(definition, { kind: this.captureKind(), facilityGuid: this.facility()!.guid, meterGuid: this.meter()!.guid }), submit: command => commands.submit(command), recover: (accountGuid, guid) => commands.recover(accountGuid, guid),
       accountGuid: () => this.store.account()?.guid, ready: () => this.store.isReady(),
-      open: (accountGuid, guid) => {
-        const reviewed = this.reviewed();
-        if (reviewed?.definition.facilitySelection.kind === 'fixed') {
-          const source = reviewed.definition.sources[0];
-          if (source.kind === 'utility' && source.selection?.kind === 'fixed') this.journeys.rememberMonthlyMeter(accountGuid, guid,
-            { facilityGuid: reviewed.definition.facilitySelection.facilityGuids[0], meterGuid: source.selection.guids[0],
-              presentation: reviewed.presentation, scrollTop: reviewed.scrollTop });
-        }
-        return this.journeys.open(accountGuid, guid);
-      },
+      open: (accountGuid, guid) => this.journeys.open(accountGuid, guid),
       registerProtection: (dirty, saving, refreshRequired, discard, preventLeave) => {
         const unregister = unsaved.register(dirty, discard, () => saving() || refreshRequired());
         const unregisterLeave = unsaved.registerNavigationPreflight(preventLeave), unregisterUnload = unsaved.protectBeforeUnload(dirty);
@@ -133,42 +144,39 @@ export class MeterWorkbenchMonthlyChartComponent {
 
   constructor() {
     this.destroy.onDestroy(() => this.capture.dispose());
+    let anchor = '';
     afterRenderEffect(() => {
-      if (this.focusCaptureRequested() && !this.reviewed() && this.workspace.calendarizationState() === 'ready' && this.chart) {
-        this.chart.focusVisualize(); this.focusCaptureRequested.set(false);
-      }
+      const fragment = this.fragment(), key = JSON.stringify([this.account()?.guid, this.meter()?.guid, fragment]);
+      if (!fragment || !['meter-monthly-chart', 'meter-fiscal-comparison-heading'].includes(fragment) || key === anchor || this.workspace.calendarizationState() !== 'ready') return;
+      const target = this.host.querySelector<HTMLElement>(`[id="${fragment}"]`);
+      if (target) { anchor = key; target.scrollIntoView?.({ block: 'start' }); target.focus({ preventScroll: true }); }
     });
-    let restoredKey = '';
-    afterRenderEffect(() => {
-      const account = this.account(), facility = this.facility(), meter = this.meter(), ready = this.workspace.calendarizationState() === 'ready';
-      const key = JSON.stringify([account?.guid, facility?.guid, meter?.guid]);
-      if (!ready || key === restoredKey || !account || !facility || !meter) return;
-      const restored = this.journeys.monthlyMeterView(account.guid, facility.guid, meter.guid);
-      if (restored && this.chart) {
-        restoredKey = key;
-        this.chart.focusVisualize(); this.scrollRoot().scrollTop = restored.scrollTop;
-      }
-    });
-    let context = '';
+    let owner = '';
     effect(() => {
       const key = JSON.stringify([this.account()?.guid, this.facility()?.guid, this.meter()?.guid]);
-      if (key !== context) { context = key; untracked(() => { this.chartView.set(undefined); if (this.reviewed() && !this.capture.needsProtection()) this.closeCapture(); }); }
+      if (key !== owner) { owner = key; untracked(() => { this.chartView.set(undefined); this.hiddenPatternYears.set([]); if (this.reviewed() && !this.capture.needsProtection()) this.closeCapture(); }); }
+    });
+    afterRenderEffect(() => {
+      if (this.focusCaptureRequested() && !this.reviewed() && this.workspace.calendarizationState() === 'ready' && this.chart) {
+        if (this.captureKind() === 'meter-monthly-patterns') this.patternsChart?.focusVisualize(); else this.chart.focusVisualize();
+        this.focusCaptureRequested.set(false);
+      }
     });
   }
 
   openCapture(view: MeterResultsChartPresentation): void {
     if (this.reviewed() || this.capture.needsProtection()) return;
-    this.chartView.set(view);
+    this.captureKind.set('meter-monthly'); this.chartView.set(view);
     const support = this.captureSupport();
     if (support.state !== 'supported') return;
     this.capture.captureAnother(); this.captureError.set('');
-    this.reviewed.set({ definition: support.definition, revision: this.store.revision(), presentation: structuredClone(view), scrollTop: this.scrollRoot().scrollTop });
+    this.reviewed.set({ definition: support.definition, revision: this.store.revision() });
   }
 
   async saveCapture(name: string): Promise<void> {
     if (this.capture.saving()) return;
     if (this.capture.refreshRequired()) { await this.capture.retry(); return; }
-    const reviewed = this.reviewed(), support = this.captureSupport();
+    const reviewed = this.reviewed(), support = this.captureKind() === 'meter-monthly-patterns' ? this.patternCaptureSupport() : this.captureSupport();
     if (!reviewed || support.state !== 'supported' || reviewed.revision !== this.store.revision()
       || JSON.stringify(reviewed.definition) !== JSON.stringify(support.definition)) {
       this.captureError.set('The source chart changed during review. Close this panel and select Visualize again to review the current chart.'); return;
@@ -185,7 +193,7 @@ export class MeterWorkbenchMonthlyChartComponent {
     this.focusCaptureRequested.set(true);
   }
 
-  private scrollRoot(): HTMLElement { return this.host.closest<HTMLElement>('.v1-workspace__main') ?? this.host; }
+
 
   openSettings(): void {
     const facility = this.facility();

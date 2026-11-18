@@ -1,9 +1,11 @@
 @if (showSearch()) { <input type="search" class="form-control v1-input creation-search" [formControl]="search" aria-label="Search predictors" placeholder="Search predictors"> }
 <div class="creation-choices" role="group" aria-label="Saved predictors">
+  @if (allowAll()) {
   <button type="button" class="creation-choice predictor-all-choice" [disabled]="disabled()" [attr.aria-pressed]="allMode()" (click)="allRequested.emit()">
     <app-ui-icon class="creation-choice__selection" [name]="allMode() ? 'success' : 'circle'" [size]="20"/>
     <app-ui-icon name="checklist" [size]="32"/><strong>All Predictors</strong>
   </button>
+  }
   @for (choice of filtered(); track choice.value) {
     @let isSelected = selected().includes(choice.value);
     <button type="button" class="creation-choice predictor-choice" [disabled]="disabled()" [attr.aria-pressed]="isSelected"

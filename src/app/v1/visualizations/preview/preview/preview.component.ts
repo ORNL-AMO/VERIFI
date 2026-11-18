@@ -1,5 +1,6 @@
 import type { PreviewState } from '../preview-controller';
-import { Component, computed, DestroyRef, effect, signal, inject, Input, OnChanges } from '@angular/core';
+import { Component, computed, DestroyRef, effect, signal, inject, Input, OnChanges, output } from '@angular/core';
+import type { MonthlyPatternsModel } from '../../monthly-patterns/monthly-patterns.presenter';
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { PreviewController } from '../preview-controller';
 import { PreviewIdentity } from '../preview-registry';
@@ -13,6 +14,11 @@ export class PreviewComponent implements OnChanges {
   @Input() identity?: PreviewIdentity;
   @Input() active = true;
   readonly preview = inject(PreviewController);
+  readonly yearVisibilityChanged = output<readonly number[]>();
+  readonly monthlyPatternsModel = computed(() => {
+    const rendered = this.renderedPreview();
+    return rendered?.definition.chart?.kind === 'monthly-patterns' ? rendered.presentation.inputs['model'] as MonthlyPatternsModel : undefined;
+  });
   private readonly lastReady = signal<Extract<PreviewState, { state: 'ready' }> | undefined>(undefined);
   readonly renderedPreview = computed(() => {
     const state = this.preview.state();

@@ -47,6 +47,12 @@ Comparison roles form separate stacks and align by period offset while preservin
 
 Saved trace/order fields and the definition version are unchanged. Original observations remain provider-owned; percentages and ECharts options exist only at the presentation boundary. Appearance edits reuse existing calculation-session results. Compatible presentation edits during an acquisition let numerical work finish before preparing the newest presentation with fresh evidence; account/snapshot/input changes and explicit retry retain cancellation and freshness checks.
 
+## Monthly-pattern presentations
+
+The `monthly-patterns` chart aligns one utility resource’s calendarized usage and optional cost by fiscal month, with separate panels and a shared year legend. A resource is one meter, one meter group or one utility source; groups/sources retain canonical aggregation and live membership. One energy or consumption measure is required for utilities. Alternatively, one fixed Standard/saved Weather predictor produces a single panel in saved units, without aggregation or weather retrieval. Native bills, mixed categories, multiple separately selected resources, stacking and additional comparisons remain unavailable. Providers attest the current owner calendar and actual saved-history years. Meter, group and predictor owners are their facilities; utility-source patterns follow the visualization’s facility/account scope. Presentation groups canonical observations using existing fiscal-date helpers; it does not change calendarization or persist values. Twelve slots retain explicit gaps, zeros, original dates and quality. Years absent from the canonical history are not inferred from padding.
+
+Saved chart settings contain optional smoothing and year-qualified label/color/line-pattern/visibility overrides, linked across panels. Omitted smoothing is false. New years appear from all-history data; existing overrides stay dormant when absent. Current owner fiscal settings own month order and year labels, while display units and energy basis retain their declared bindings. Original values remain accessible in screen-reader tables, without a visible Source data disclosure.
+
 ## Exploration presentations
 
 Saved Scatter, Correlation and Heatmap behavior belongs to [exploration visualizations](v1-exploration-visualizations.md): pairwise figures/matrices, observation alignment, complete samples, signed r versus R², standardization, heatmap dimensions/scales, chart tooltips and shared header data checks. These charts reuse the source semantics below and have explicitly approved combinations beyond the time-series boundaries. Native bill/charge pairing, model inspection and comparison overlays remain unavailable.
@@ -123,7 +129,7 @@ Additive totals require declared nonoverlapping contribution identities and comp
 
 ## Capture extension requirements
 
-Utility inventory and the main meter Monthly Chart capture are implemented under the [utility contract](v1-utility-visualizations.md#monthly-meter-capture). Extend other capture adapters at their source feature, preserving these meanings:
+Utility inventory and both meter Monthly Chart captures are implemented under the [utility contract](v1-utility-visualizations.md#monthly-meter-capture). Extend other capture adapters at their source feature, preserving these meanings:
 
 | Data source | Meaning an adapter must preserve |
 | --- | --- |

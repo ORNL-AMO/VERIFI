@@ -118,6 +118,14 @@ const selector: Check = (value, path, issues) => {
     issue(issues, path, 'Choose exactly one resource or category series.');
 };
 const chart = variant({
+  'monthly-patterns': object({ kind: enumeration('monthly-patterns'), smoothLines: boolean,
+    yearOverrides: (value, path, issues) => {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) { issue(issues, path, 'Choose valid year presentation.'); return; }
+      for (const [year, style] of Object.entries(value)) {
+        if (!/^[1-9]\d{0,3}$/.test(year)) issue(issues, path, 'Choose a valid fiscal year.');
+        object({ label: text, color: text, lineStyle: enumeration('solid', 'dashed', 'dotted'), visible: boolean }, ['label', 'color', 'lineStyle', 'visible'])(style, `${path}.${year}`, issues);
+      }
+    } }, ['smoothLines', 'yearOverrides']),
   'time-series': object({ kind: enumeration('time-series'), defaultTraceType: enumeration('line', 'bar', 'area'), interval: enumeration('monthly', 'yearly', 'native'),
     stack: enumeration('none', 'absolute', 'percent'), smoothLines: boolean }, ['smoothLines']),
   scatter: object({ kind: enumeration('scatter'), ...pairFields, x: selector, y: selector, xSeriesId: text, ySeriesId: text, showFit: boolean }, ['interval', 'grouping', 'scale', 'x', 'y', 'xSeriesId', 'ySeriesId']),

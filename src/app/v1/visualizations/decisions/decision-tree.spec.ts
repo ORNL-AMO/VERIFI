@@ -30,6 +30,26 @@ function selected(mode: 'source' | 'group' | 'meter' | 'facility' | 'rule', ids:
 }
 
 describe('shared visualization decisions', () => {
+  it('constrains monthly patterns to one resource and usage measure, and reviews clearing year styles on replacement', () => {
+    let definition = selected('meter', ['meter-a']);
+    definition = apply(definition, { kind: 'chart', chart: { kind: 'monthly-patterns' } });
+    definition = apply(definition, { kind: 'source-measures', sourceKind: 'utility', measures: ['energy', 'cost'] });
+    definition = apply(definition, { kind: 'chart', chart: { kind: 'monthly-patterns', yearOverrides: { '2026': { visible: false, color: '#23684d' } } } });
+    const sourceId = definition.sources[0].id;
+    for (const action of [
+      { kind: 'set-resources', sourceId, resourceIds: ['meter-a', 'meter-b'] },
+      { kind: 'selection-mode', sourceId, mode: 'facility' },
+      { kind: 'source-measures', sourceKind: 'utility', measures: ['cost'] },
+      { kind: 'source-measures', sourceKind: 'utility', measures: ['energy', 'consumption'] },
+      { kind: 'add-source', sourceKind: 'analysis' }
+    ] as const) expect(prepareDecisionChange(definition, action, { snapshot: snapshot() }).state).toBe('unchanged');
+    const replaced = prepareDecisionChange(definition, { kind: 'set-resources', sourceId, resourceIds: ['meter-b'] }, { snapshot: snapshot() });
+    expect(replaced.state).toBe('confirm'); if (replaced.state === 'unchanged') throw new Error('Expected year review');
+    expect(replaced.cleared).toContain('Year presentation');
+    expect(replaced.definition.chart).toEqual({ kind: 'monthly-patterns' });
+    expect(replaced.definition.sources).toHaveLength(2);
+    expect(replaced.definition.sources.every(source => source.kind === 'utility' && source.selection?.kind === 'fixed' && source.selection.guids.join() === 'meter-b')).toBe(true);
+  });
   it('keeps charges on one explicit meter and reviews clearing the old charge when replacing it', () => {
     let definition = selected('meter', ['meter-a']);
     definition = apply(definition, { kind: 'source-measures', sourceKind: 'utility', measures: ['charge'] });

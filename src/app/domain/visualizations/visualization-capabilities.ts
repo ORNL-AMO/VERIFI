@@ -1,6 +1,7 @@
 import { isCompositionChart, compositionPeriodIssue } from './visualization-composition';
 import { isExplorationChart, visualizationInterval, explorationChartIssue } from './visualization-interval';
 import { timeSeriesStackIssues } from './visualization-time-series';
+import { monthlyPatternsIssue } from './visualization-monthly-patterns';
 import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { allowsMixedAxisUnits } from './visualization-source-provider';
 import { resolveVisualizationSeries } from './visualization-series';
@@ -20,6 +21,7 @@ export interface ChartCapability {
 
 /** Rendering registrations alone never grant a source permission to use a chart. */
 export const CHART_CAPABILITIES: Readonly<Record<VisualizationChart['kind'], ChartCapability>> = {
+  'monthly-patterns': { kind: 'monthly-patterns', shapes: ['time-series'], controls: ['series', 'appearance'], allowDateOverride: false },
   'time-series': { kind: 'time-series', shapes: ['time-series'], controls: ['series', 'appearance', 'axes', 'stacking'], allowDateOverride: true },
   scatter: { kind: 'scatter', shapes: ['pairs', 'time-series'], controls: ['series', 'appearance', 'axes', 'fit'], allowDateOverride: true },
   correlation: { kind: 'correlation', shapes: ['matrix', 'pairs', 'time-series'], controls: ['series', 'appearance', 'normalization', 'fit'], allowDateOverride: true },
@@ -220,6 +222,8 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   const chartCapability = CHART_CAPABILITIES[chart.kind];
   const reasons: VisualizationCompatibilityReason[] = [];
   const add = (code: VisualizationCompatibilityReason['code'], message: string, sourceId?: string) => reasons.push({ code, message, ...(sourceId ? { sourceId } : {}) });
+  const patternsIssue = monthlyPatternsIssue(definition);
+  if (patternsIssue) add('capability', patternsIssue);
   const resolvedSources: { source: VisualizationSource; resolved: VisualizationResolvedData }[] = [];
   if (evidence.some(entry => !definition.sources.some(source => source.id === entry.request.identity.sourceId)))
     add('missing-source', 'Remove evidence that does not belong to a declared source.');
@@ -265,6 +269,14 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     }
     const resolved = 'resolved' in resolution ? resolution.resolved : undefined;
     if (!resolved) { add('data', 'Resolve source evidence before rendering.', source.id); continue; }
+    if (chart.kind === 'monthly-patterns') {
+      const calendar = resolved.monthlyPatternsCalendar;
+      if (!calendar || !Number.isInteger(calendar.fiscalYearMonth) || calendar.fiscalYearMonth < 0 || calendar.fiscalYearMonth > 11
+        || (calendar.ownerKind === 'facility' ? !request.identity.scope.facilityGuids.includes(calendar.ownerGuid)
+          || !resolved.references.some(ref => ref.facilityGuid === calendar.ownerGuid) : calendar.ownerKind !== 'account' || calendar.ownerGuid !== definition.accountGuid)
+        || !['calendarYear', 'nonCalendarYear'].includes(calendar.fiscalYear) || typeof calendar.fiscalYearCalendarEnd !== 'boolean'
+        || new Set(calendar.years).size !== calendar.years.length || calendar.years.some(year => !Number.isSafeInteger(year) || year < 1 || year > 9999)) add('period', 'Resolve the selected resource’s current owner fiscal calendar.', source.id);
+    }
     if (resolution.state === 'empty' && observations(resolved.data).some(point => point.state === 'observed'))
       add('data', 'Empty source evidence cannot contain observed values.', source.id);
     if (!capabilities.controls.includes('axes') && resolveVisualizationSeries(definition, resolved.series).some(entry => entry.selected.axis === 'right'))
@@ -359,7 +371,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
   // Exploration pairs actual dates; fiscal labels may name the start or end year of the same interval.
   if (!isExplorationChart(chart) && [...fiscalSlots.values()].some(intervals => intervals.size > 1))
     add('period', 'Fiscal rollups require the same actual interval for each year and comparison role, not just matching labels.');
-  if (chart.kind !== 'scatter' && chart.kind !== 'correlation' && !(chart.kind === 'heatmap' && (chart.dimension === 'month-year' || chart.normalization === 'z-score'))) {
+  if (chart.kind !== 'monthly-patterns' && chart.kind !== 'scatter' && chart.kind !== 'correlation' && !(chart.kind === 'heatmap' && (chart.dimension === 'month-year' || chart.normalization === 'z-score'))) {
     for (const axis of ['left', 'right'] as const) {
       const axisSeries = selected.filter(entry => chart.kind !== 'time-series' || entry.selected.axis === axis);
       const axisCapabilities = [...new Set(axisSeries.map(entry => entry.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));

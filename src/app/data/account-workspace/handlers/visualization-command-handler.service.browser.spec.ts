@@ -1,3 +1,5 @@
+import { meter } from '@app/v1/data/meters/facility-meters.testing';
+import { unchangedCaptureSource } from '@data/visualizations/visualization-capture-origin';
 import { expandVisualizationDefinition, serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
@@ -32,6 +34,24 @@ describe('saved visualization native commands', () => {
     return { kind: 'create' as const, accountGuid: account.guid, guid: 'visualization-a',
       definition: utilityVisualizationFixture({ kind: 'fixed', facilityGuids: [facility.guid] }), createdDate: '2026-11-11T00:00:00.000Z' };
   }
+
+  it('persists one original capture baseline through retries, edits, duplication and reopen', async () => {
+    await harness.seed({ utilityMeter: [{ ...meter({ id: 1 }) }] });
+    const handler = TestBed.inject(VisualizationCommandHandler), command = { ...proposal(), captureSource: { kind: 'meter-monthly' as const, facilityGuid: 'facility-a', meterGuid: 'meter-a' } };
+    const saved = await handler.create(command, account.guid);
+    expect(saved.captureOrigin?.source).toEqual(command.captureSource);
+    expect(await handler.create(command, account.guid)).toEqual(saved);
+    await expect(handler.create({ ...command, captureSource: undefined }, account.guid)).rejects.toThrow();
+    const changed = await handler.update({ kind: 'update', accountGuid: account.guid, guid: saved.guid, expectedRevision: 1,
+      definition: { ...command.definition, appearance: { legend: false } } }, account.guid);
+    expect(changed.captureOrigin).toEqual(saved.captureOrigin);
+    const duplicate = await handler.duplicate({ ...command, kind: 'duplicate', guid: 'capture-copy', sourceGuid: saved.guid, expectedRevision: 2,
+      definition: { ...command.definition, name: 'Edited duplicate', appearance: { legend: false } } }, account.guid);
+    expect(duplicate.captureOrigin).toEqual(saved.captureOrigin);
+    await harness.reopen();
+    const records = await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations');
+    expect(records.map(record => record.captureOrigin)).toEqual([saved.captureOrigin, saved.captureOrigin]);
+  });
 
   it('creates incomplete or missing-source intent, retries once by identity, duplicates independently, and reopens saved edits', async () => {
     const handler = TestBed.inject(VisualizationCommandHandler);

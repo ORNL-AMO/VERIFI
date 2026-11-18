@@ -6,6 +6,7 @@ import { readSavedVisualization, savedVisualizationEnvelopeError } from '@data/v
 import { normalizeVisualizationDefinition, VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
+import { createCaptureOrigin, type VisualizationCaptureOrigin } from '@data/visualizations/visualization-capture-origin';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
 import { VisualizationReference, VisualizationReferenceIssue, visualizationReferences } from '@domain/visualizations/visualization-references';
@@ -23,10 +24,15 @@ export class VisualizationCommandHandler {
 
   async create(command: CreateVisualizationCommand, activeAccountGuid: string): Promise<IdbSavedVisualization> {
     const submitted = structuredClone(command);
-    return this.transactions.runTransaction(OWNER_STORES, 'readwrite', async tx => {
+    if (submitted.captureSource && submitted.retainedCaptureOrigin) this.invalid('Choose a new capture or retained provenance, not both.');
+    return this.transactions.runTransaction(submitted.captureSource ? [...new Set([...OWNER_STORES, ...CATALOG_STORES])] : OWNER_STORES, 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
       this.assertDefinition(submitted.definition, submitted.accountGuid);
       await this.assertFacilitiesExist(tx, submitted.definition);
+      if (submitted.captureSource) {
+        const catalog = await readVisualizationReferenceCatalog(tx), source = submitted.captureSource;
+        if (!catalog.meters.some(item => item.guid === source.meterGuid && item.facilityId === source.facilityGuid && item.accountId === submitted.accountGuid)) this.invalid('The capture source is no longer available.');
+      }
       return this.addOnce(tx, submitted);
     });
   }
@@ -46,7 +52,7 @@ export class VisualizationCommandHandler {
       const expected = { ...decoded.definition, name: submitted.definition.name };
       if (!sameDefinitionIntent(expected, submitted.definition)) throw new VisualizationConflictError(source);
       await this.assertFacilitiesExist(tx, submitted.definition);
-      return this.addOnce(tx, submitted);
+      return this.addOnce(tx, submitted, source.captureOrigin);
     });
   }
 
@@ -129,7 +135,7 @@ export class VisualizationCommandHandler {
       inspectVisualizationReferences(decoded.definition, await readVisualizationReferenceCatalog(tx), record.preservation?.references));
   }
 
-  private async addOnce(tx: IndexedDbTransactionContext, command: CreateVisualizationCommand | DuplicateVisualizationCommand): Promise<IdbSavedVisualization> {
+  private async addOnce(tx: IndexedDbTransactionContext, command: CreateVisualizationCommand | DuplicateVisualizationCommand, inheritedOrigin?: VisualizationCaptureOrigin): Promise<IdbSavedVisualization> {
     if (!command.guid?.trim() || !Number.isFinite(new Date(command.createdDate).getTime())) this.invalid('A stable identity and creation date are required.');
     const existing = await this.find(tx, command.guid);
     if (existing) return this.matchCreation(existing, command);
@@ -137,6 +143,9 @@ export class VisualizationCommandHandler {
     const record = getNewIdbSavedVisualization(command.definition, {
       guid: command.guid, createdDate, modifiedDate: createdDate
     });
+    if (command.kind === 'create' && command.captureSource) record.captureOrigin = createCaptureOrigin(command.captureSource, command.definition);
+    else if (command.kind === 'create' && command.retainedCaptureOrigin) record.captureOrigin = structuredClone(command.retainedCaptureOrigin);
+    else if (inheritedOrigin) record.captureOrigin = structuredClone(inheritedOrigin);
     record.id = await tx.add('savedVisualizations', record) as number;
     return record;
   }
@@ -144,6 +153,10 @@ export class VisualizationCommandHandler {
   private matchCreation(record: IdbSavedVisualization, command: CreateVisualizationCommand | DuplicateVisualizationCommand): IdbSavedVisualization {
     if (record.accountId !== command.accountGuid || record.revision !== 1 || !sameDefinitionIntent(record.definition, command.definition)
       || new Date(record.createdDate).getTime() !== new Date(command.createdDate).getTime()) throw new VisualizationConflictError(record.accountId === command.accountGuid ? record : undefined);
+    if (command.kind === 'create') {
+      const origin = command.captureSource ? createCaptureOrigin(command.captureSource, command.definition) : command.retainedCaptureOrigin;
+      if (!sameJson(record.captureOrigin, origin)) throw new VisualizationConflictError(record);
+    }
     return record;
   }
 

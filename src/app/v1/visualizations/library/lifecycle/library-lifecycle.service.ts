@@ -101,10 +101,12 @@ export class LibraryLifecycle {
     && this.editor()!.accountGuid === this.workspace.account()?.guid);
   readonly canContinueFacilities = computed(() => this.canEditDraft() && this.ownerValid());
   readonly selectedChart = computed(() => VISUALIZATION_CHART_CHOICES.find(choice => choice.value === this.draft().chart));
+  readonly monthlyPatterns = computed(() => this.draft().chart === 'monthly-patterns');
   readonly composition = computed(() => !!this.draft().chart && isCompositionChart(createVisualizationChart(this.draft().chart!)));
-  readonly availableDataSources = computed(() => VISUALIZATION_DATA_SOURCES.filter(source => !this.composition() || this.draft().sourceKinds.includes(source.value) || (this.draft().chart === 'sankey' ? source.value === 'energy-use' : ['utility', 'energy-use'].includes(source.value))));
+  readonly availableDataSources = computed(() => VISUALIZATION_DATA_SOURCES.filter(source => (!this.monthlyPatterns() || ['utility', 'predictor'].includes(source.value) || this.draft().sourceKinds.includes(source.value)) && (!this.composition() || this.draft().sourceKinds.includes(source.value) || (this.draft().chart === 'sankey' ? source.value === 'energy-use' : ['utility', 'energy-use'].includes(source.value)))));
   readonly selectedDataSources = computed(() => VISUALIZATION_DATA_SOURCES.filter(sourceKind => this.draft().sourceKinds.includes(sourceKind.value)));
   readonly dataSourcesValid = computed(() => this.draft().sourceKinds.length > 0
+    && (!this.monthlyPatterns() || this.draft().sourceKinds.length === 1 && ['utility', 'predictor'].includes(this.draft().sourceKinds[0]))
     && (!this.composition() || this.draft().sourceKinds.length === 1 && (this.draft().chart === 'sankey' ? this.draft().sourceKinds[0] === 'energy-use' : ['utility', 'energy-use'].includes(this.draft().sourceKinds[0])))
     && new Set(this.draft().sourceKinds).size === this.draft().sourceKinds.length
     && this.selectedDataSources().length === this.draft().sourceKinds.length);
@@ -119,7 +121,7 @@ export class LibraryLifecycle {
   readonly equipmentSelectionValid = computed(() => !this.hasEquipment() || this.draft().energyUseResourceIds.every(guid => this.equipmentChoices().some(choice => choice.guid === guid)));
   readonly hasPredictors = computed(() => this.draft().sourceKinds.includes('predictor'));
   readonly predictorChoices = computed(() => { const snapshot = this.workspace.snapshot(); return snapshot ? predictorResourceChoices(snapshot, this.scope(this.draft())) : []; });
-  readonly predictorSelectionValid = computed(() => !this.hasPredictors() || this.draft().predictorAll || this.draft().predictorGuids.every(guid => this.predictorChoices().some(choice => choice.value === guid)));
+  readonly predictorSelectionValid = computed(() => (!this.monthlyPatterns() || !this.hasPredictors() || !this.draft().predictorAll && this.draft().predictorGuids.length === 1) && (!this.hasPredictors() || this.draft().predictorAll || this.draft().predictorGuids.every(guid => this.predictorChoices().some(choice => choice.value === guid))));
   readonly predictorSelectedGuids = computed(() => this.draft().predictorAll ? this.predictorChoices().map(choice => choice.value) : this.draft().predictorGuids);
   readonly hasAnalysis = computed(() => this.draft().sourceKinds.includes('analysis'));
   readonly analysisScope = computed(() => this.scope(this.draft()));
@@ -151,12 +153,12 @@ export class LibraryLifecycle {
     return [...choices, ...this.draft().resourceIds.filter(value => !choices.some(choice => choice.value === value))
       .map(value => ({ value, label: 'Unavailable selection', detail: 'Select to remove', icon: this.selectedMode()?.icon ?? 'meter', available: false }))];
   });
-  readonly resourcePrompt = computed(() => `Choose one or more ${this.selectedMode()?.label.toLowerCase() ?? 'resources'}.`);
+  readonly resourcePrompt = computed(() => this.monthlyPatterns() ? 'Choose one meter, meter group or utility source.' : `Choose one or more ${this.selectedMode()?.label.toLowerCase() ?? 'resources'}.`);
   readonly resourcesValid = computed(() => {
     const value = this.draft();
     if (!this.hasMeters()) return true;
     if (!this.selectedMode()) return false;
-    return value.resourceIds.length > 0 && value.resourceIds.every(id => this.resourceChoices().some(choice => choice.value === id));
+    return (!this.monthlyPatterns() || ['meter', 'group', 'source'].includes(value.selectionMode ?? '') && value.resourceIds.length === 1) && value.resourceIds.length > 0 && value.resourceIds.every(id => this.resourceChoices().some(choice => choice.value === id));
   });
   readonly draftDefinition = computed(() => this.buildDefinition());
   readonly canContinueResources = computed(() => this.canEditDraft() && this.ownerValid() && this.resourcesValid());
@@ -308,6 +310,7 @@ export class LibraryLifecycle {
     this.step.set('selection-mode');
   }
   selectMeterMode(mode: UtilitySelectionMode): void {
+    if (this.monthlyPatterns() && !['meter', 'group', 'source'].includes(mode)) return;
     if (!this.canEditDraft() || !this.hasMeters() || !this.selectionModes.some(choice => choice.value === mode)) return;
     const definition = this.draftDefinition(), sourceId = definition?.sources.find(source => source.kind === 'utility')?.id;
     if (!definition || !sourceId) return;
@@ -319,12 +322,19 @@ export class LibraryLifecycle {
   toggleResource(id: string): void {
     if (!this.canEditDraft() || !this.resourceCards().some(choice => choice.value === id)) return;
     const selected = this.form.controls.resourceIds.value;
-    this.form.controls.resourceIds.setValue(selected.includes(id) ? selected.filter(value => value !== id) : [...selected, id]);
+    this.form.controls.resourceIds.setValue(this.monthlyPatterns() ? [id] : selected.includes(id) ? selected.filter(value => value !== id) : [...selected, id]);
   }
   toggleSource(kind: VisualizationSourceKind): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(source => source.value === kind)) return;
+    if (this.monthlyPatterns() && !['utility', 'predictor'].includes(kind) && !this.form.controls.sourceKinds.value.includes(kind)) return;
     const selected = this.form.controls.sourceKinds.value;
     if (this.composition() && (!this.availableDataSources().some(source => source.value === kind) || !selected.includes(kind) && selected.length > 0)) return;
+    if (this.monthlyPatterns() && !selected.includes(kind)) {
+      const apply = () => this.form.controls.sourceKinds.setValue([kind]);
+      const definition = this.draftDefinition();
+      if (definition) this.requestDecision(prepareDecisionChange(definition, { kind: 'add-source', sourceKind: kind }, { snapshot: this.workspace.snapshot()! }), apply); else apply();
+      return;
+    }
     const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'analysis' && selected.includes(kind)) this.form.patchValue({ analysisGuid: null, analysisGuids: [] }); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } if (kind === 'energy-use' && selected.includes(kind)) this.form.patchValue({ energyUseResourceIds: [], energyUseMode: null }); if (kind === 'predictor' && selected.includes(kind)) { this.form.controls.predictorGuids.setValue([]); this.form.controls.predictorAll.setValue(false); } };
     if (kind === 'predictor' && selected.includes(kind) && (this.form.controls.predictorAll.value || this.form.controls.predictorGuids.value.length)) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Predictor selection'], affectedNodeIds: [] }, apply);
     else if (kind === 'analysis' && selected.includes(kind) && this.form.controls.analysisGuids.value.length) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Analysis selection'], affectedNodeIds: [] }, apply);
@@ -338,9 +348,10 @@ export class LibraryLifecycle {
     const selected = this.predictorSelectedGuids();
     if (!selected.includes(predictorGuid) && !this.predictorChoices().some(choice => choice.value === predictorGuid)) return;
     this.form.controls.predictorAll.setValue(false);
-    this.form.controls.predictorGuids.setValue(selected.includes(predictorGuid) ? selected.filter(guid => guid !== predictorGuid) : [...selected, predictorGuid]);
+    this.form.controls.predictorGuids.setValue(this.monthlyPatterns() ? [predictorGuid] : selected.includes(predictorGuid) ? selected.filter(guid => guid !== predictorGuid) : [...selected, predictorGuid]);
   }
   toggleAllPredictors(): void {
+    if (this.monthlyPatterns()) return;
     if (!this.canEditDraft()) return;
     this.form.controls.predictorAll.setValue(!this.form.controls.predictorAll.value);
     this.form.controls.predictorGuids.setValue([]);
@@ -364,7 +375,7 @@ export class LibraryLifecycle {
     const value = this.draft();
     return value.sourceKinds.map(kind => ({ kind, label: VISUALIZATION_DATA_SOURCES.find(choice => choice.value === kind)!.label,
       prompt: ({ utility: 'Meter Data To Chart', predictor: 'Predictor Data To Chart', 'energy-use': 'Energy Use Data To Chart', analysis: 'Analysis Data To Chart' } as const)[kind],
-      choices: (kind === 'utility' ? Object.entries(utilityMeasureLabels).filter(([measure]) => measure !== 'charge' && (this.workspace.account()?.displayEmissions || !measure.endsWith('emissions')))
+      choices: (kind === 'utility' ? Object.entries(utilityMeasureLabels).filter(([measure]) => measure !== 'charge' && (!this.monthlyPatterns() || ['energy', 'consumption', 'cost'].includes(measure)) && (this.workspace.account()?.displayEmissions || !measure.endsWith('emissions')))
         : kind === 'analysis' ? Object.entries(analysisMeasureLabels).filter(([measure]) => ['actual', 'calculated', 'savings', 'losses'].includes(measure))
         : kind === 'predictor' ? [['value', 'Value']] : [['consumption', 'Consumption']]).map(([id, label]) => ({ id, label, icon: kind === 'utility' ? utilityMeasureIcons[id] : VISUALIZATION_DATA_SOURCES.find(choice => choice.value === kind)!.icon,
           selected: kind === 'utility' ? value.utilityMeasures.includes(id) : kind === 'analysis' ? value.analysisMeasures.includes(id) : true })) }));
@@ -373,7 +384,7 @@ export class LibraryLifecycle {
     if (!this.canEditDraft() || kind !== 'utility' && kind !== 'analysis' || !this.measureChoices().some(category => category.kind === kind && category.choices.some(choice => choice.id === measure))) return;
     const control = kind === 'utility' ? this.form.controls.utilityMeasures : this.form.controls.analysisMeasures;
     const values = control.value;
-    const selected = this.composition() ? [measure] : values.includes(measure) ? values.filter(value => value !== measure) : [...values, measure];
+    const selected = this.monthlyPatterns() ? measure === 'cost' ? values.includes('cost') ? values.filter(value => value !== 'cost') : [...values, 'cost'] : [measure, ...values.filter(value => value === 'cost')] : this.composition() ? [measure] : values.includes(measure) ? values.filter(value => value !== measure) : [...values, measure];
     if (selected.length) control.setValue(selected);
   }
   continueMeasures(): void { if (this.canEditDraft()) this.step.set('name'); }

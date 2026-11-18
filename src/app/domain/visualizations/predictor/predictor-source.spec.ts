@@ -5,6 +5,7 @@ import { createVisualizationDefinition, type PredictorVisualizationSource, type 
 import type { VisualizationSourceRequest } from '../visualization-source-provider';
 import { checkVisualizationCompatibility } from '../visualization-capabilities';
 import { predictorCatalog, predictorCapabilities, predictorChartSupport, latestPredictorDate, resolvePredictor, resolvePredictorSelection, predictorHistoryRange } from './predictor-source';
+import { prepareMonthlyPatterns } from '@app/v1/visualizations/monthly-patterns/monthly-patterns.presenter';
 
 function setup() {
   const predictor = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'predictor-a', name: 'Production', unit: 'widgets' };
@@ -23,6 +24,22 @@ function setup() {
 }
 
 describe('saved monthly predictor projection', () => {
+  it.each(['Standard', 'Weather'] as const)('aligns a single saved %s predictor to facility fiscal years without changing value or gap meaning', predictorType => {
+    const { snapshot, definition: initial, request: original, source, reading } = setup();
+    snapshot.predictors = snapshot.predictors.map(predictor => ({ ...predictor, predictorType }));
+    snapshot.facilities = snapshot.facilities.map(facility => ({ ...facility, fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: true }));
+    snapshot.predictorData = [reading(7, 0), reading(9, -2)];
+    const definition = { ...initial, chart: { kind: 'monthly-patterns' as const } }, request = { ...original, chart: definition.chart };
+    const resolution = resolvePredictor(snapshot, request);
+    const evidence = [{ request, capabilities: predictorCapabilities(), chartSupport: predictorChartSupport(source, request.chart), resolution }];
+    expect(checkVisualizationCompatibility(definition, evidence).state).toBe('compatible');
+    const model = prepareMonthlyPatterns(definition, evidence);
+    expect(model.months[0]).toBe('Jul'); expect(model.years[0].label).toBe('FY 2025'); expect(model.panels).toHaveLength(1);
+    expect(model.panels[0].years[0].points.slice(0, 3).map(point => point.observation)).toMatchObject([
+      { state: 'observed', value: 0 }, { state: 'missing', value: null }, { state: 'observed', value: -2 }
+    ]);
+    expect(predictorChartSupport({ ...source, selection: { kind: 'rule', resource: 'predictor', filter: {} } }, request.chart).state).toBe('unsupported');
+  });
   it.each(['observed', 'duplicate', 'nonfinite'] as const)('retains saved reading notes in %s runtime evidence without changing records', state => {
     const { snapshot, request, reading } = setup();
     const note = 'Estimated from downtime log; verify before analysis';

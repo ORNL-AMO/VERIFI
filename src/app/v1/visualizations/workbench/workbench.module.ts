@@ -1,4 +1,5 @@
 import { DisplaySettingsModule } from '../shared/display-settings/display-settings.module';
+import { MonthlyPatternsModule } from '../monthly-patterns/monthly-patterns.module';
 import { ItemSettingsModule } from '../time-series/settings/item-settings/item-settings.module';
 import { CompositionModule } from '../composition/composition.module';
 import { ExplorationModule } from '../exploration/exploration.module';
@@ -22,5 +23,5 @@ import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench
 import { RouterLink } from '@angular/router';
 import { DecisionSectionModule } from '../shared/decision-section/decision-section.module';
 
-@NgModule({ declarations: [WorkbenchComponent], imports: [DisplaySettingsModule, ItemSettingsModule, CompositionModule, ExplorationModule, PeriodSettingsModule, AnalysisEditorsModule, EquipmentEditorsModule, PredictorEditorsModule, FacilityPickerModule, CommonModule, ReactiveFormsModule, RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule, TimeSeriesModule, DecisionSectionModule], exports: [WorkbenchComponent] })
+@NgModule({ declarations: [WorkbenchComponent], imports: [MonthlyPatternsModule, DisplaySettingsModule, ItemSettingsModule, CompositionModule, ExplorationModule, PeriodSettingsModule, AnalysisEditorsModule, EquipmentEditorsModule, PredictorEditorsModule, FacilityPickerModule, CommonModule, ReactiveFormsModule, RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, ConfirmationDialogComponent, EditorConflictReviewComponent, PreviewModule, RecoveryModule, UtilityEditorsModule, TimeSeriesModule, DecisionSectionModule], exports: [WorkbenchComponent] })
 export class WorkbenchModule { }

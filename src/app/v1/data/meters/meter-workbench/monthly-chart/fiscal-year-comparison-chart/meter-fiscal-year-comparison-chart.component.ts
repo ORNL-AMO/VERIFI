@@ -1,28 +1,13 @@
+import { MONTHLY_PATTERN_YEAR_COLORS } from '@domain/visualizations/visualization-monthly-patterns';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, ViewChild, computed, signal } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild, computed, signal, output } from '@angular/core';
 import { MonthlyData } from '@data/models/calanderization';
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { MeterResultsChartMetric, meterHasLifetimeCost } from '../../../models';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
-const FISCAL_YEAR_COLORS = [
-  '#4269d0',
-  '#efb118',
-  '#ff725c',
-  '#6cc5b0',
-  '#3ca951',
-  '#ff8ab7',
-  '#a463f2',
-  '#97bbf5',
-  '#9c6b4e',
-  '#9498a0',
-  '#1f7a8c',
-  '#b65d1f',
-  '#7a5195',
-  '#667a1f',
-  '#b23a48'
-] as const;
+const FISCAL_YEAR_COLORS = MONTHLY_PATTERN_YEAR_COLORS;
 
 export interface MeterFiscalYearComparisonSeries {
   readonly year: number;
@@ -67,6 +52,17 @@ export class MeterFiscalYearComparisonChartComponent implements OnChanges {
   @Input() costMetric?: MeterResultsChartMetric;
   @Input() fiscalYearStartMonth = 0;
   @Input() usesFiscalYearLabels = false;
+  @Input() contextKey = '';
+  @Input() visualize?: { readonly disabled: boolean; readonly reason?: string };
+  readonly visualizeRequested = output<void>();
+  readonly visibilityChanged = output<readonly number[]>();
+  readonly hiddenYears = signal<readonly number[]>([]);
+  @ViewChild('visualizeButton') private visualizeButton?: ElementRef<HTMLButtonElement>;
+  focusVisualize(): void { this.visualizeButton?.nativeElement.focus({ preventScroll: true }); }
+  legendChanged(selected: Readonly<Record<string, boolean>>): void {
+    const years = this.comparison().series.filter(series => selected[series.label] === false).map(series => series.year);
+    this.hiddenYears.set(years); this.visibilityChanged.emit(years);
+  }
 
   @ViewChild(EChartsChartDirective) chartDirective?: EChartsChartDirective;
 
@@ -119,11 +115,10 @@ export class MeterFiscalYearComparisonChartComponent implements OnChanges {
       ])
     }));
   });
-  readonly chartOption = computed<V1EChartsOption>(() => fiscalYearComparisonOption(
-    this.comparison(),
-    this.utility(),
-    this.cost()
-  ));
+  readonly chartOption = computed<V1EChartsOption>(() => {
+    const comparison = this.comparison(), option = fiscalYearComparisonOption(comparison, this.utility(), this.cost());
+    return { ...option, legend: { ...(option.legend as object), selected: Object.fromEntries(comparison.series.map(series => [series.label, !this.hiddenYears().includes(series.year)])) } };
+  });
   readonly ariaLabel = computed(() => {
     const utilityLabel = this.utility()?.label ?? 'utility';
     return this.comparison().hasCost
@@ -132,6 +127,7 @@ export class MeterFiscalYearComparisonChartComponent implements OnChanges {
   });
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['contextKey']) { this.hiddenYears.set([]); this.visibilityChanged.emit([]); }
     if (changes['monthlyRows']) {
       this.rows.set(this.monthlyRows);
     }

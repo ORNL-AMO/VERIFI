@@ -1,3 +1,4 @@
+import type { MonthlyPatternsCalendar } from './visualization-monthly-patterns';
 import type {
   VisualizationChart, VisualizationComparison, VisualizationPeriod, VisualizationResourceKind,
   VisualizationScope, VisualizationSeries, VisualizationSource, VisualizationSourceKind
@@ -132,6 +133,8 @@ export type VisualizationData =
       readonly links: readonly { readonly source: string; readonly target: string; readonly observation: VisualizationObservation }[] };
 
 export interface VisualizationResolvedData {
+  /** Current facility/portfolio calendar and observed-history years for a Monthly patterns resource. */
+  readonly monthlyPatternsCalendar?: MonthlyPatternsCalendar;
   /** Original leaf contributions and denominator evidence; never saved with the definition. */
   readonly composition?: VisualizationCompositionEvidence;
   readonly data: VisualizationData;

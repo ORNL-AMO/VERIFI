@@ -1,3 +1,4 @@
+import { monthlyPatternsCalendar } from '../visualization-monthly-patterns';
 import { isCompositionChart } from '../visualization-composition';
 import { resolveUtilityComposition } from './utility-composition';
 import { visualizationInterval } from '../visualization-interval';
@@ -142,7 +143,16 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
     }
     for (const diagnostic of diagnostics.values()) warnings.add(`${diagnostic.label}: ${diagnostic.reason} Periods: ${compressPeriods([...diagnostic.periods].sort())}.`);
     const provenance = [...new Set(rows.flatMap(row => Object.values(row.values).flatMap(observation => observation.state === 'observed' ? [observation.provenance] : [])))];
+    const selectedResource = source.selection?.kind === 'fixed' ? source.selection.guids[0] : undefined;
+    const resourceFacility = source.selectionMode === 'meter' ? selection.meters.find(meter => meter.guid === selectedResource)?.facilityId
+      : source.selectionMode === 'group' ? snapshot.meterGroups.find(group => group.guid === selectedResource && group.accountId === snapshot.account.guid)?.facilityId : undefined;
+    const calendarOwner = resourceFacility ? snapshot.facilities.find(item => item.guid === resourceFacility && item.accountId === snapshot.account.guid) : owner;
+    const selectedMeters = new Set(selection.meters.map(meter => meter.guid));
+    const patternCalendar = request.chart.kind === 'monthly-patterns' && calendarOwner ? monthlyPatternsCalendar(calendarOwner,
+      'facilityId' in calendarOwner || identity.scope.kind === 'facility' || resourceFacility ? 'facility' : 'account',
+      meters.filter(item => selectedMeters.has(item.meter.guid)).flatMap(item => item.monthlyData.map(row => `${row.year}-${String(row.monthNumValue + 1).padStart(2, '0')}-01`))) : undefined;
     return { identity, state: 'ready', resolved: { data: { kind: 'time-series', rows },
+      ...(patternCalendar ? { monthlyPatternsCalendar: patternCalendar } : {}),
       alignment: { kind: interval === 'monthly' ? 'civil-month' : periods.some(period => period.basis === 'fiscal') ? 'fiscal-interval' : 'civil-year',
         key: interval === 'monthly' ? 'YYYY-MM' : periods.some(period => period.basis === 'fiscal') ? `fiscal:${owner.fiscalYearMonth}:${owner.fiscalYearCalendarEnd}` : 'YYYY' },
       series: metadata, periods, references: selection.references, provenance,

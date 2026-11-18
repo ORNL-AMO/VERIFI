@@ -8,6 +8,7 @@ import { WorkspaceWriteError } from './workspace-commands.models';
 import { CreateVisualizationCommand, DuplicateVisualizationCommand, VisualizationCommand, VisualizationCommandOutcome, VisualizationConflictError } from './visualization-commands.models';
 import { VisualizationCommandHandler } from './handlers/visualization-command-handler.service';
 import { inspectVisualizationReferences } from './visualization-reference-inspection';
+import type { VisualizationCaptureSource, VisualizationCaptureOrigin } from '../visualizations/visualization-capture-origin';
 
 @Injectable({ providedIn: 'root' })
 export class SavedVisualizationCommands {
@@ -17,10 +18,11 @@ export class SavedVisualizationCommands {
     private readonly workspace: AccountWorkspaceStore) { }
 
   /** Keep this command in the live editor until acknowledged or explicitly discarded. */
-  prepareCreate(definition: VisualizationDefinition): CreateVisualizationCommand {
+  prepareCreate(definition: VisualizationDefinition, captureSource?: VisualizationCaptureSource, retainedCaptureOrigin?: VisualizationCaptureOrigin): CreateVisualizationCommand {
     const record = getNewIdbSavedVisualization(definition);
     return { kind: 'create', accountGuid: record.accountId, guid: record.guid,
-      definition: structuredClone(definition), createdDate: record.createdDate.toISOString() };
+      definition: structuredClone(definition), createdDate: record.createdDate.toISOString(), ...(captureSource ? { captureSource: structuredClone(captureSource) } : {}),
+      ...(retainedCaptureOrigin ? { retainedCaptureOrigin: structuredClone(retainedCaptureOrigin) } : {}) };
   }
 
   prepareDuplicate(record: Readonly<IdbSavedVisualization>, name?: string): DuplicateVisualizationCommand {

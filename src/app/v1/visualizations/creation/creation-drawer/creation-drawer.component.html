@@ -48,7 +48,7 @@
               <p>View meters by</p>
               <div class="creation-choices" aria-label="View meters by">
                 @for (grouping of lifecycle.selectionModes; track grouping.value) {
-                  <button type="button" class="creation-choice" [attr.aria-pressed]="lifecycle.form.controls.selectionMode.value === grouping.value" (click)="lifecycle.selectMeterMode(grouping.value)">
+                  <button type="button" class="creation-choice" [disabled]="lifecycle.monthlyPatterns() && !['meter', 'group', 'source'].includes(grouping.value)" [attr.aria-pressed]="lifecycle.form.controls.selectionMode.value === grouping.value" (click)="lifecycle.selectMeterMode(grouping.value)">
                     <app-ui-icon [name]="grouping.icon" [size]="28"/><strong>{{ grouping.label }}</strong>
                   </button>
                 }
@@ -87,8 +87,8 @@
             }
             @case ('predictor') {
               <legend class="visually-hidden"><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Select predictor</h3></legend>
-              <p>Choose predictors.</p>
-              <app-visualization-predictor-picker [choices]="lifecycle.predictorChoices()" [selected]="lifecycle.predictorSelectedGuids()" [allMode]="lifecycle.form.controls.predictorAll.value" (allRequested)="lifecycle.toggleAllPredictors()"
+              <p>{{ lifecycle.monthlyPatterns() ? 'Choose one predictor.' : 'Choose predictors.' }}</p>
+              <app-visualization-predictor-picker [allowAll]="!lifecycle.monthlyPatterns()" [choices]="lifecycle.predictorChoices()" [selected]="lifecycle.predictorSelectedGuids()" [allMode]="lifecycle.form.controls.predictorAll.value" (allRequested)="lifecycle.toggleAllPredictors()"
                 [disabled]="!lifecycle.canEditDraft()" (selectionRequested)="lifecycle.togglePredictor($event)"/>
             }
             @case ('measures') {
@@ -137,7 +137,7 @@
       @else if (!editor.entry && currentStep === 'resources') { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canContinueResources()" (click)="lifecycle.continueResources()">Continue</button> }
       @else if (!editor.entry && currentStep === 'analysis') { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canContinueAnalysis()" (click)="lifecycle.continueAnalysis()">Continue</button> }
       @else if (!editor.entry && currentStep === 'equipment') { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canEditDraft() || !lifecycle.equipmentSelectionValid()" (click)="lifecycle.continueEquipment()">{{ lifecycle.form.controls.energyUseResourceIds.value.length ? 'Continue' : 'Skip for now' }}</button> }
-      @else if (!editor.entry && currentStep === 'predictor') { <button type="button" class="v1-btn" [class.v1-btn--action]="(lifecycle.form.controls.predictorAll.value || lifecycle.form.controls.predictorGuids.value.length > 0)" [class.v1-btn--quiet]="(!lifecycle.form.controls.predictorAll.value && !lifecycle.form.controls.predictorGuids.value.length)" [disabled]="!lifecycle.canEditDraft() || !lifecycle.predictorSelectionValid()" (click)="lifecycle.continuePredictors()">{{ (lifecycle.form.controls.predictorAll.value || lifecycle.form.controls.predictorGuids.value.length) ? 'Continue' : 'Skip for now' }}</button> }
+      @else if (!editor.entry && currentStep === 'predictor') { <button type="button" class="v1-btn" [class.v1-btn--action]="(lifecycle.form.controls.predictorAll.value || lifecycle.form.controls.predictorGuids.value.length > 0)" [class.v1-btn--quiet]="(!lifecycle.form.controls.predictorAll.value && !lifecycle.form.controls.predictorGuids.value.length)" [disabled]="!lifecycle.canEditDraft() || !lifecycle.predictorSelectionValid()" (click)="lifecycle.continuePredictors()">{{ (lifecycle.monthlyPatterns() || lifecycle.form.controls.predictorAll.value || lifecycle.form.controls.predictorGuids.value.length) ? 'Continue' : 'Skip for now' }}</button> }
       @else if (!editor.entry && currentStep === 'measures') { <button type="button" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canEditDraft()" (click)="lifecycle.continueMeasures()">Continue</button> }
       @else if (editor.entry || currentStep === 'name') { <button type="submit" form="visualization-creation-form" class="v1-btn v1-btn--action" [disabled]="!lifecycle.canSubmit()">{{ lifecycle.saving() ? editor.entry ? 'Saving…' : 'Adding…' : editor.entry ? 'Save name' : 'Add visualization' }}</button> }
     </div>

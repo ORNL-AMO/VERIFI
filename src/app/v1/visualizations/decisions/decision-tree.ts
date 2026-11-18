@@ -222,6 +222,15 @@ function prepareSingleDecisionChange(definition: VisualizationDefinition, action
       chart = { ...chart, hierarchy: definition.chart.hierarchy, values: definition.chart.values };
     if (chart.kind === 'time-series' && definition.sources.length === 1 && definition.sources[0].kind === 'energy-use') chart = { ...chart, interval: 'yearly' };
     next = { ...definition, chart };
+    if (chart.kind === 'monthly-patterns' && definition.chart?.kind !== 'monthly-patterns') {
+      if (next.period.kind !== 'all-history' || next.comparison.kind !== 'none') cleared.push('Dates and comparison settings');
+      if (definition.sources.some(source => hasSourcePresentation(definition, source.id))) cleared.push('Individual trace presentation');
+      next = { ...next, period: { kind: 'all-history' }, comparison: { kind: 'none' },
+        series: next.series.map(series => ({ id: series.id, sourceId: series.sourceId, metric: series.metric,
+          ...(series.resourceGuid ? { resourceGuid: series.resourceGuid } : {}), ...(series.label ? { label: series.label } : {}),
+          axis: next.sources.find(source => source.id === series.sourceId)?.measure === 'cost' ? 'right' : 'left', traceType: 'line' })) };
+    }
+    if (definition.chart?.kind === 'monthly-patterns' && chart.kind !== 'monthly-patterns' && Object.keys(definition.chart.yearOverrides ?? {}).length) cleared.push('Year presentation');
     if (isCompositionChart(chart)) {
       if (next.comparison.kind !== 'none') { cleared.push('Comparison overlay'); next = { ...next, comparison: { kind: 'none' } }; affect({ kind: 'period' }); }
       if (next.sources.some(source => source.kind === 'energy-use') && !['latest-saved-year', 'fiscal-year'].includes(next.period.kind)) {
@@ -238,9 +247,16 @@ function prepareSingleDecisionChange(definition: VisualizationDefinition, action
     }
     nextSection = { kind: 'sources' };
   } else if (action.kind === 'add-source') {
+    if (definition.chart?.kind === 'monthly-patterns' && !['utility', 'predictor'].includes(action.sourceKind)) return { state: 'unchanged' };
     let index = 1; while (definition.sources.some(source => source.id === `${action.sourceKind}-${index}`)) index++;
     const source = { ...createVisualizationDefinition('', definition.accountGuid, definition.facilitySelection, action.sourceKind).sources[0], id: `${action.sourceKind}-${index}` };
-    if (isCompositionChart(definition.chart)) {
+    if (definition.chart?.kind === 'monthly-patterns') {
+      if (definition.sources.length === 1 && definition.sources[0].kind === source.kind) return { state: 'unchanged' };
+      for (const previous of definition.sources) { clearItems(previous.id, true); affect({ kind: 'source', sourceId: previous.id }); }
+      const { yearOverrides: _years, ...chart } = definition.chart;
+      cleared.push('Previous source configuration and year presentation');
+      next = { ...definition, sources: [source], series: [], chart };
+    } else if (isCompositionChart(definition.chart)) {
       if (definition.chart.kind === 'sankey' ? source.kind !== 'energy-use' : !['utility', 'energy-use'].includes(source.kind)) return { state: 'unchanged' };
       for (const previous of definition.sources) { clearItems(previous.id, true); affect({ kind: 'source', sourceId: previous.id }); }
       cleared.push('Previous source configuration');
@@ -348,6 +364,7 @@ function prepareSingleDecisionChange(definition: VisualizationDefinition, action
       nextSection = { kind: action.kind === 'energy-use-selection-mode' ? 'resources' : action.kind === 'energy-use-resources' || action.kind === 'equipment-selection' ? 'data-settings' : 'source', sourceId: source.id };
     } else if (source?.kind === 'predictor') {
       if (action.kind === 'predictor-selection') {
+        if (definition.chart?.kind === 'monthly-patterns' && (action.all || action.predictorGuids.length > 1)) return { state: 'unchanged' };
         const choices = predictorResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope);
         const previous = resolvePredictorSelection(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, source);
         const guids = action.all ? choices.map(choice => choice.value) : [...new Set(action.predictorGuids)], added = guids.filter(guid => !previous.includes(guid)), removed = previous.filter(guid => !guids.includes(guid));
@@ -402,7 +419,7 @@ function prepareSingleDecisionChange(definition: VisualizationDefinition, action
     if (source?.kind !== 'utility') return { state: 'unchanged' };
 
     if (action.kind === 'selection-mode') {
-      if (source.measure === 'charge' && action.mode !== 'meter') return { state: 'unchanged' };
+      if (source.measure === 'charge' && action.mode !== 'meter' || definition.chart?.kind === 'monthly-patterns' && !['meter', 'group', 'source'].includes(action.mode)) return { state: 'unchanged' };
       if (source.selectionMode === action.mode) return { state: 'unchanged' };
       clearItems(source.id, true);
       const { selection: _selection, charge: _charge, ...base } = source;
@@ -421,8 +438,8 @@ function prepareSingleDecisionChange(definition: VisualizationDefinition, action
       const selected = mode === 'source' ? source.selection?.kind === 'rule' ? source.selection.filter.utilitySources ?? [] : []
         : source.selection?.kind === 'fixed' ? source.selection.guids : [];
       const ids = action.kind === 'set-resources' ? [...new Set(action.resourceIds)]
-        : action.selected ? source.measure === 'charge' ? [action.resourceId] : [...new Set([...selected, action.resourceId])] : selected.filter(id => id !== action.resourceId);
-      if (source.measure === 'charge' && (mode !== 'meter' || ids.length > 1)) return { state: 'unchanged' };
+        : action.selected ? source.measure === 'charge' || definition.chart?.kind === 'monthly-patterns' ? [action.resourceId] : [...new Set([...selected, action.resourceId])] : selected.filter(id => id !== action.resourceId);
+      if (source.measure === 'charge' && (mode !== 'meter' || ids.length > 1) || definition.chart?.kind === 'monthly-patterns' && (!['meter', 'group', 'source'].includes(mode) || ids.length > 1)) return { state: 'unchanged' };
       if (ids.length === selected.length && ids.every(id => selected.includes(id))) return { state: 'unchanged' };
       const added = ids.filter(id => !selected.includes(id)), removed = selected.filter(id => !ids.includes(id));
       const available = new Set(meterResourceChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, mode, source.measure).map(choice => choice.value));
@@ -525,8 +542,14 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   let next = definition;
   const cleared: string[] = [], affected = new Set<string>();
   let nextRef: DecisionRef | undefined;
-  const result = (): DecisionChangeResult => visualizationIntentEqual(next, definition) ? { state: 'unchanged' }
-    : { state: cleared.length ? 'confirm' : 'apply', definition: cleanJson(next), cleared: [...new Set(cleared)], affectedNodeIds: [...affected], ...(nextRef ? { next: nextRef } : {}) };
+  const result = (): DecisionChangeResult => {
+    const selection = (value: VisualizationDefinition) => value.sources.map(source => 'selection' in source ? source.selection : undefined)[0];
+    if (next.chart?.kind === 'monthly-patterns' && Object.keys(next.chart.yearOverrides ?? {}).length && !visualizationIntentEqual(selection(definition), selection(next))) {
+      const { yearOverrides: _years, ...chart } = next.chart; next = { ...next, chart }; cleared.push('Year presentation');
+    }
+    return visualizationIntentEqual(next, definition) ? { state: 'unchanged' }
+      : { state: cleared.length ? 'confirm' : 'apply', definition: cleanJson(next), cleared: [...new Set(cleared)], affectedNodeIds: [...affected], ...(nextRef ? { next: nextRef } : {}) };
+  };
   const remove = (sources: readonly VisualizationSource[]) => {
     for (const source of sources) {
       if (context.invalidNodeIds?.some(id => id.split(':')[1] === encodeURIComponent(source.id))) cleared.push('Unsaved trace fields');
@@ -555,6 +578,9 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   if (action.kind === 'source-measures') {
     const members = definition.sources.filter(source => source.kind === action.sourceKind), first = members[0];
     if (!first || !action.measures.length || isCompositionChart(definition.chart) && action.measures.length !== 1) return { state: 'unchanged' };
+    if (definition.chart?.kind === 'monthly-patterns' && (action.sourceKind !== 'predictor' && (action.sourceKind !== 'utility'
+      || action.measures.filter(measure => ['energy', 'consumption'].includes(measure)).length !== 1
+      || action.measures.some(measure => !['energy', 'consumption', 'cost'].includes(measure))))) return { state: 'unchanged' };
     const allowed = first.kind === 'utility' ? Object.keys(utilityMeasureLabels) : first.kind === 'analysis' ? Object.keys(analysisMeasureLabels) : first.kind === 'predictor' ? ['value'] : ['consumption'];
     if (new Set(action.measures).size !== action.measures.length || action.measures.some(measure => !allowed.includes(measure))) return { state: 'unchanged' };
     if (first.kind === 'utility' && action.measures.includes('charge') && (action.measures.length !== 1 || first.selectionMode !== 'meter' || first.selection?.kind !== 'fixed' || first.selection.resource !== 'meter' || first.selection.guids.length !== 1)) return { state: 'unchanged' };
@@ -628,7 +654,12 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
   const source = 'sourceId' in action ? definition.sources.find(source => source.id === action.sourceId) : undefined;
   const shared = source?.kind === 'utility' && ['selection-mode', 'set-resources', 'toggle-resource', 'source-settings'].includes(action.kind)
     && !(action.kind === 'source-settings' && Object.hasOwn(action.settings, 'charge'));
-  if (!shared) return prepareSingleDecisionChange(definition, action, context);
+  if (!shared) {
+    const changed = prepareSingleDecisionChange(definition, action, context);
+    if (changed.state === 'unchanged') return changed;
+    next = changed.definition; nextRef = changed.next; cleared.push(...changed.cleared); changed.affectedNodeIds.forEach(id => affected.add(id));
+    return result();
+  }
   for (const member of definition.sources.filter(item => item.kind === source.kind)) {
     const changed = prepareSingleDecisionChange(next, { ...action, sourceId: member.id } as SingleDecisionAction, context);
     if (changed.state !== 'unchanged') { nextRef ??= changed.next; next = changed.definition; cleared.push(...changed.cleared); changed.affectedNodeIds.forEach(id => affected.add(id)); }

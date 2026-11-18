@@ -13,7 +13,7 @@
     </article>
   </section>
 } @else {
-  <app-meter-results-chart
+  <app-meter-results-chart id="meter-monthly-chart" tabindex="-1"
     ariaLabel="Meter monthly data chart"
     loadingTitle="Preparing monthly chart"
     loadingDescription="VERIFI is calculating calendarized data for this meter."
@@ -29,17 +29,18 @@
     [metrics]="metrics()"
     [defaultLeftMetricId]="defaultLeftMetricId()"
     [defaultRightMetricId]="defaultRightMetricId()"
-    [visualize]="visualizeAction()" [initialPresentation]="initialPresentation()"
+    [visualize]="visualizeAction()"
     (presentationChanged)="chartView.set($event)" (visualizeRequested)="openCapture($event)">
   </app-meter-results-chart>
 
   @if (showFiscalYearComparison() && utilityMetric(); as currentUtilityMetric) {
     <app-meter-fiscal-year-comparison-chart
-      [monthlyRows]="monthlyRows()"
+      [monthlyRows]="monthlyRows()" [contextKey]="meter()?.guid || ''"
       [utilityMetric]="currentUtilityMetric"
       [costMetric]="costMetric()"
       [fiscalYearStartMonth]="fiscalYearStartMonth()"
-      [usesFiscalYearLabels]="usesFiscalYearLabels()">
+      [usesFiscalYearLabels]="usesFiscalYearLabels()"
+      [visualize]="patternsVisualizeAction()" (visibilityChanged)="hiddenPatternYears.set($event)" (visualizeRequested)="openPatternsCapture()">
     </app-meter-fiscal-year-comparison-chart>
   }
 }

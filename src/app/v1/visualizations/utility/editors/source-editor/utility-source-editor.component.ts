@@ -17,6 +17,7 @@ export class UtilitySourceEditorComponent {
   readonly contextState = signal<VisualizationSourceEditorContext | undefined>(undefined);
   readonly sources = computed(() => this.contextState()?.definition.sources.filter((source): source is UtilityVisualizationSource => source.kind === 'utility') ?? []);
   readonly selectedSource = computed(() => this.sources()[0]);
+  readonly patterns = computed(() => this.contextState()?.definition.chart?.kind === 'monthly-patterns');
   readonly disabled = computed(() => this.contextState()?.disabled ?? true);
   readonly modes = meterSelectionChoices();
   readonly selectedMeasures = computed(() => this.sources().map(source => source.measure));
@@ -25,8 +26,8 @@ export class UtilitySourceEditorComponent {
     { value: 'cost', label: 'Cost', icon: 'piggyBank' }, { value: 'location-emissions', label: 'Location emissions', icon: 'location' },
     { value: 'market-emissions', label: 'Market emissions', icon: 'earth' }, { value: 'charge', label: 'Bill charge', icon: 'invoice' }
   ] as const satisfies readonly { value: UtilityVisualizationSource['measure']; label: string; icon: IconName }[];
-  readonly visibleMeasures = computed(() => this.measures.filter(option => this.store.account()?.displayEmissions
-    || option.value !== 'location-emissions' && option.value !== 'market-emissions').map(option => ({ ...option,
+  readonly visibleMeasures = computed(() => this.measures.filter(option => (!this.patterns() || ['energy', 'consumption', 'cost'].includes(option.value)) && ( this.store.account()?.displayEmissions
+    || option.value !== 'location-emissions' && option.value !== 'market-emissions')).map(option => ({ ...option,
       selected: this.selectedMeasures().includes(option.value), disabled: this.disabled() || option.value === 'charge' && !this.chargeAvailable(),
       reason: option.value === 'charge' && !this.chargeAvailable() ? 'Bill charges require one selected meter and use bill dates separately from monthly measures.' : '' })));
   readonly measureLabel = computed(() => this.measures.filter(option => this.selectedMeasures().includes(option.value)).map(option => option.label).join(', '));
@@ -81,7 +82,7 @@ export class UtilitySourceEditorComponent {
   selectMode(mode: UtilitySelectionMode): void { const source = this.selectedSource(); if (source) this.request({ kind: 'selection-mode', sourceId: source.id, mode }); }
   selectMeasure(measure: UtilityVisualizationSource['measure']): void {
     const selected = this.selectedMeasures(), chart = this.contextState()?.definition.chart;
-    const measures = isCompositionChart(chart) || measure === 'charge' || selected.includes('charge') ? [measure] : selected.includes(measure) ? selected.filter(value => value !== measure) : [...selected, measure];
+    const measures = this.patterns() ? measure === 'cost' ? selected.includes('cost') ? selected.filter(value => value !== 'cost') : [...selected, 'cost'] : [measure, ...selected.filter(value => value === 'cost')] : isCompositionChart(chart) || measure === 'charge' || selected.includes('charge') ? [measure] : selected.includes(measure) ? selected.filter(value => value !== measure) : [...selected, measure];
     if (measures.length) this.request({ kind: 'source-measures', sourceKind: 'utility', measures });
   }
   toggleResource(change: { readonly guid: string; readonly selected: boolean }): void {

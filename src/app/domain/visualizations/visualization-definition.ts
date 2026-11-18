@@ -164,7 +164,15 @@ export interface VisualizationPairSettings extends VisualizationExplorationSetti
 
 export type VisualizationHierarchyLevel = 'facility' | 'group' | 'source' | 'equipment' | 'meter';
 
+export interface MonthlyPatternYearStyle {
+  readonly label?: string;
+  readonly color?: string;
+  readonly lineStyle?: 'solid' | 'dashed' | 'dotted';
+  readonly visible?: boolean;
+}
+
 export type VisualizationChart =
+  | { readonly kind: 'monthly-patterns'; readonly smoothLines?: boolean; readonly yearOverrides?: Readonly<Record<string, MonthlyPatternYearStyle>> }
   | { readonly kind: 'time-series'; readonly defaultTraceType: VisualizationTraceType; readonly interval: 'monthly' | 'yearly' | 'native';
       readonly stack: 'none' | 'absolute' | 'percent'; readonly smoothLines?: boolean }
   | (VisualizationPairSettings & { readonly kind: 'scatter'; readonly xSeriesId?: string; readonly ySeriesId?: string; readonly x?: VisualizationSeriesSelector; readonly y?: VisualizationSeriesSelector; readonly showFit: boolean })
