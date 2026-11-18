@@ -156,9 +156,9 @@
           <td>{{ row.details.modelPeriod }}</td>
           <td>@if (model && !model.isUserDefinedModel) { @for (variable of row.details.variablePValues; track $index) {
             <div>{{ variable.name }}: {{ variable.value }}</div> } @empty { — } } @else { — }</td>
-          <td>{{ model && !model.isUserDefinedModel ? ((model.R2 | number:'1.3-3') ?? '—') : '—' }}</td>
-          <td>{{ model && !model.isUserDefinedModel ? ((model.adjust_R2 | number:'1.3-3') ?? '—') : '—' }}</td>
-          <td>{{ model && !model.isUserDefinedModel ? ((model.modelPValue | number:'1.2-2') ?? '—') : '—' }}</td>
+          <td>{{ row.details.r2 }}</td>
+          <td>{{ row.details.adjustedR2 }}</td>
+          <td>{{ row.details.modelPValue }}</td>
           <td class="formula">{{ row.details.formula }}</td>
           <td>@for (note of row.minor; track $index) { <div>{{ note }}</div> } @empty { — }</td>
         </tr>

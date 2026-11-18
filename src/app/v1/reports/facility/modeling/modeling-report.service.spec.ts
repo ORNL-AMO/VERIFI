@@ -15,7 +15,7 @@ describe('Modeling report result session', () => {
     const report = computed(() => snapshot().facilityReports[0]);
     const execute = vi.fn((request: AnalysisReportWorkerRequest) => of<AnalysisReportWorkerResponse>({ ok: true, operation: 'checks',
       value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }));
-    const editor = { context: { report, stage, key: () => 'account:facility:modeling-report',
+    const editor = { context: { report, stage, facility: computed(() => snapshot().facilities[0]), key: () => 'account:facility:modeling-report',
       workspace: { status: () => 'ready', isReady: () => true, hasPending: pending, snapshot,
         facilities: computed(() => snapshot().facilities), meterGroups: computed(() => snapshot().meterGroups), predictors: computed(() => snapshot().predictors) } },
       state: saved, setupValid: () => true, base: () => ({ state: 'ready' }), periodsCurrent: () => true,
@@ -38,6 +38,8 @@ describe('Modeling report result session', () => {
       modelingReportSettings: { ...report.modelingReportSettings, includeExecutiveSummary: false } })),
       meterGroups: value.meterGroups.map(group => ({ ...group, name: 'Renamed group' })) }));
     await ready(service); expect(execute).toHaveBeenCalledTimes(1); expect(service.view()!.groups[0].groupName).toBe('Renamed group');
+    expect(service.exportSnapshot()).toMatchObject({ identity: 'account:facility:modeling-report', name: 'New title',
+      scopeName: 'Plant A', view: { reportYear: 2023, settings: { includeExecutiveSummary: false } } });
     stage.set('setup'); TestBed.tick(); expect(service.view()).toBeUndefined();
     stage.set('report'); await ready(service); expect(execute).toHaveBeenCalledTimes(1);
   });

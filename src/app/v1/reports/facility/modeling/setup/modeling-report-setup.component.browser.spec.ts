@@ -11,6 +11,8 @@ import { setupReportWorkbench } from '../../testing/report-workbench-test-setup'
 import { modelingSnapshot, modelingMeters } from '../testing/modeling-report-test-fixtures';
 import { ModelingReportEditor } from '../editing/modeling-report-editor.service';
 import { FacilityModelingReportService } from '../modeling-report.service';
+import { ReportFileDeliveryService } from '@platform/reports/report-file-delivery.service';
+import { ReportArtifact } from '@shared/report-output/report-output.models';
 
 async function reportReady(coordinator: FacilityModelingReportService): Promise<void> {
   const result = firstValueFrom(toObservable(coordinator.state, { injector: TestBed.inject(Injector) }).pipe(
@@ -70,7 +72,9 @@ describe('Facility Modeling report Chromium journey', () => {
     const workerUrl = new URL('../../../../../platform/web-workers/analysis-report.worker', import.meta.url);
     const meters = modelingMeters(snapshot), execute = vi.fn((request: AnalysisReportWorkerRequest) =>
       runWorker<AnalysisReportWorkerResponse>(new Worker(workerUrl, { type: 'module' }), request));
+    const delivered: ReportArtifact[] = [];
     const view = await setupReportWorkbench(snapshot.facilityReports, [
+      { provide: ReportFileDeliveryService, useValue: { download: (artifact: ReportArtifact) => delivered.push(artifact) } },
       { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of({ state: 'ready', inputFingerprint: 'current', meters }),
         currentInputFingerprint: () => 'current', project: () => ({ state: 'ready', meters }), retry: vi.fn() } },
       { provide: AnalysisReportCalculationService, useValue: { execute } }
@@ -105,7 +109,20 @@ describe('Facility Modeling report Chromium journey', () => {
     expect(execute.mock.calls[0][0].years).toEqual([2024]);
     expect(root.textContent).toContain('Model unavailable'); expect(root.textContent).toContain('Select an available regression model');
     expect(root.querySelector('app-analysis-checks-acknowledgment')).toBeNull();
-    expect(root.querySelector('app-report-output-actions')).toBeNull();
+    const output = root.querySelector('footer app-report-output-actions')!;
+    expect(output.querySelectorAll('button')).toHaveLength(2);
+    const download = output.querySelector<HTMLButtonElement>('button')!;
+    expect(download.disabled).toBe(false);
+    download.click();
+    await vi.waitFor(() => expect(delivered).toHaveLength(1));
+    expect(await delivered[0].blob.slice(0, 5).text()).toBe('%PDF-');
+    expect(delivered[0].fileName).toContain('Modeling — 2024.pdf');
+    view.harness.detectChanges();
+    const powerpoint = Array.from(output.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent?.includes('PowerPoint'))!;
+    expect(powerpoint.disabled).toBe(false); powerpoint.click();
+    await vi.waitFor(() => expect(delivered).toHaveLength(2));
+    expect(delivered[1].fileName).toContain('Modeling — 2024.pptx');
+    expect(await delivered[1].blob.slice(0, 2).text()).toBe('PK');
     const notice = root.querySelector<HTMLElement>('.report-notice')!;
     expect(notice.querySelector('.report-notice__heading app-ui-icon')).not.toBeNull();
     expect(notice.querySelector('strong')?.textContent).toContain('Predictor validation is unavailable');

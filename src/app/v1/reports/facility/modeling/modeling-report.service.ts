@@ -7,6 +7,7 @@ import { AnalysisReportWorkerRequest } from '@platform/web-workers/analysis-repo
 import { AnalysisReportCalculationService } from '@app/v1/reports/shared/calculation/analysis-report-calculation.service';
 import { ReportResultController, ReportResultRequest } from '@app/v1/reports/shared/calculation/report-result-controller';
 import { ModelingReportEditor } from './editing/modeling-report-editor.service';
+import { ModelingReportExportSnapshot } from '@app/v1/reports/shared/modeling/output/modeling-report-output';
 
 @Injectable()
 export class FacilityModelingReportService {
@@ -48,6 +49,10 @@ export class FacilityModelingReportService {
       predictors: Object.fromEntries(this.context.workspace.predictors().map(item => [item.guid, item.name])),
       groups: Object.fromEntries(this.context.workspace.meterGroups().map(item => [item.guid, item.name]))
     }) : undefined;
+  });
+  readonly exportSnapshot = computed<ModelingReportExportSnapshot | undefined>(() => {
+    const view = this.view(), report = this.context.report(), facility = this.context.facility();
+    return view && report && facility ? { identity: this.context.key(), name: report.name, scopeName: facility.name, view } : undefined;
   });
   retry(): void { if (this.editor.base().state === 'error') this.editor.retryPeriods(); this.results.retry(); }
 }
