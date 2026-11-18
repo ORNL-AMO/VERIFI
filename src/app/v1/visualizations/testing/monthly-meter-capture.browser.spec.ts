@@ -195,6 +195,12 @@ describe('monthly meter capture through native storage and canonical calculation
     await lifecycle.submit(); await settle(); await expectPreview();
     workbench().setInterval('yearly'); await settle(); await expectPreview();
     const dates = fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
+    dates.selectChoice(dates.form.controls.kind, 'fiscal-year'); await settle();
+    expect((fixture.nativeElement as HTMLElement).querySelector('#period-body input[formcontrolname="year"]')).not.toBeNull();
+    dates.form.controls.year.setValue(2026); await settle();
+    expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
+    expect(workbench().editor.definition()?.period).toEqual({ kind: 'fiscal-year', year: 2026 });
+    expect((fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>('#period-body input[formcontrolname="year"]')?.value).toBe('2026');
     dates.selectChoice(dates.form.controls.kind, 'fixed'); dates.form.patchValue({ start: '2026-01', end: '2026-02' }); await settle();
     expect(workbench().editor.definition()?.period).toMatchObject({ start: '2026-01-01', end: '2026-02-28' });
     expect((fixture.nativeElement as HTMLElement).querySelector('#period-body input[type="date"]')).toBeNull();

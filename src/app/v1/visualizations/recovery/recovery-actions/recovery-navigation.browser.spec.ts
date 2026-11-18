@@ -153,7 +153,11 @@ describe('routed deleted-draft recovery protection in Chromium', () => {
       await blockedBack(test); expect(test.recovery()!.proposal()).toBe(proposal);
       await activate(test, 'Retry');
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${workbenchBase}/recovered-identity`); });
-      expect(test.prepareCreate).toHaveBeenCalledOnce(); expect(test.submit).toHaveBeenCalledTimes(outcome === 'failed' ? 2 : 1);
+      expect(test.prepareCreate).toHaveBeenCalledOnce();
+      // Normal source autosave may run before deletion; count only recovery creation attempts.
+      const creates = test.submit.mock.calls.map(([command]) => command).filter(command => command.kind === 'create');
+      expect(creates).toHaveLength(outcome === 'failed' ? 2 : 1);
+      expect(creates.every(command => command.guid === proposal!.guid)).toBe(true);
       expect(test.recover).toHaveBeenCalledTimes(outcome === 'refresh-required' ? 1 : 0);
       expect(test.store.savedVisualizations()).toHaveLength(1);
       expect(test.workbench()!.editor.definition()?.sources).toEqual(proposal!.definition.sources);

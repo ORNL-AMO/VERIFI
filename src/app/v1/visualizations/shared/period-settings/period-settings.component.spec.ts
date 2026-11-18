@@ -9,6 +9,24 @@ import { PeriodSettingsComponent } from './period-settings.component';
 import { applyPeriodForm, periodFormIssue, periodFormValue } from './period-settings.models';
 
 describe('shared visualization period editing', () => {
+  it('lets yearly utility charts choose, enter and reopen a pinned fiscal year', () => {
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
+    const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();
+    const definition = { ...utilityVisualizationFixture(), chart: { kind: 'time-series' as const, interval: 'yearly' as const, defaultTraceType: 'line' as const, stack: 'none' as const } };
+    const context = { definition, disabled: false, editorKey: 'yearly-utility', changed };
+    fixture.componentRef.setInput('context', context); fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    [...root.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === 'Pinned fiscal year')!.click(); fixture.detectChanges();
+    const year = root.querySelector<HTMLInputElement>('input[formcontrolname="year"]');
+    expect(year).not.toBeNull();
+    year!.value = '2025'; year!.dispatchEvent(new Event('input', { bubbles: true })); fixture.detectChanges();
+    expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fiscal-year', year: 2025 }, comparison: { kind: 'none' } });
+    fixture.componentRef.setInput('context', { ...context, definition: { ...definition, period: { kind: 'fiscal-year', year: 2025 } } }); fixture.detectChanges();
+    expect(root.querySelector<HTMLInputElement>('input[formcontrolname="year"]')?.value).toBe('2025');
+    year!.value = '2026'; year!.dispatchEvent(new Event('input', { bubbles: true })); fixture.detectChanges();
+    expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fiscal-year', year: 2026 }, comparison: { kind: 'none' } });
+  });
+
   it('explicitly removes an unsupported Analysis comparison even when all history is already selected', () => {
     TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();

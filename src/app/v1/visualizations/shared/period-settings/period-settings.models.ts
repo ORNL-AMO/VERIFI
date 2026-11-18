@@ -68,7 +68,7 @@ export function periodEditorPolicy(definition: VisualizationDefinition): PeriodE
   }
   const period = definition.period;
   return { monthInput, title: annual ? analysis ? 'Analysis fiscal years' : 'Equipment fiscal years' : monthInput ? 'Month range' : 'Date range', choices,
-    controls: { ranges: !annual, fiscalYear: !monthInput || annual || composition, basis: !annual && (!monthInput || yearlyUtility), incomplete: !monthInput },
+    controls: { ranges: !annual, fiscalYear: !monthInput || annual || composition || yearlyUtility, basis: !annual && (!monthInput || yearlyUtility), incomplete: !monthInput },
     selectionDefaults: annual ? { basis: 'fiscal' } : monthInput ? { basis: 'calendar', includeIncomplete: false } : {},
     notices, retainedPartial: monthInput && period.kind === 'fixed'
       && (period.start !== period.start.slice(0, 7) + '-01' || period.end !== civilMonthRange(civilMonthIndex(period.end)).end) };
