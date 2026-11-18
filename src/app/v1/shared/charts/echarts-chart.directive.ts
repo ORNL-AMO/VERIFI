@@ -118,7 +118,11 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     if (this.chart || this.destroyed) return;
     this.visibilityObserver?.disconnect();
     this.visibilityObserver = undefined;
-    this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas' });
+    const scale = Number(this.elementRef.nativeElement.closest('[data-v1-chart-pixel-ratio-scale]')?.getAttribute('data-v1-chart-pixel-ratio-scale'));
+    // Presentation magnifies the same canvas up to its maximum zoom. Allocate enough
+    // pixels once, preserving chart interactions and instances through zoom changes.
+    const resolution = Number.isFinite(scale) && scale > 1 ? { devicePixelRatio: window.devicePixelRatio * scale } : {};
+    this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas', ...resolution });
     this.appliedSize = this.readContentSize();
     this.bindDataZoomEvent();
     this.bindPointClickEvent();
