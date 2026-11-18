@@ -1,10 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { PortalModule } from '@angular/cdk/portal';
-import { page, userEvent } from 'vitest/browser';
+import { cdp, page, userEvent } from 'vitest/browser';
 import * as echarts from 'echarts/core';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
+import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { ReportsSharedModule } from '../../reports-shared.module';
 import { ReportPresentationController } from '../report-presentation-controller';
 
@@ -20,9 +20,9 @@ import { ReportPresentationController } from '../report-presentation-controller'
           <div class="table-scroll" tabindex="0" role="region" aria-label="Annual results" style="overflow:auto;max-width:100%">
             <table style="width:1600px"><caption>Annual results</caption><tr><th>Year</th><th>Consumption</th></tr><tr><td>2023</td><td>100</td></tr></table>
           </div>
-          <div style="height:1500px">Report sections</div>
+          <div [style.height.px]="sectionsHeight()">Report sections</div>
           <h3>Deep report chart</h3>
-          <div class="deep-chart" style="height:300px;width:100%" [appV1ECharts]="option" [deferUntilVisible]="true"></div>
+          <div class="deep-chart" style="height:300px;width:100%" [appV1ECharts]="option()" [deferUntilVisible]="true"></div>
         </article>
       </ng-template>
       <footer>@if (controller.available()) { <button (click)="controller.present()">Present</button> }</footer>
@@ -34,13 +34,16 @@ class PresentationBrowserHost {
   readonly modal = inject(ModalPortalService);
   readonly ready = signal(true);
   readonly dark = signal(false);
-  readonly option = { xAxis: { type: 'category' as const, data: ['2023'] }, yAxis: { type: 'value' as const }, series: [{ type: 'bar' as const, data: [100] }] };
+  readonly sectionsHeight = signal(1500);
+  readonly option = signal<V1EChartsOption>({ xAxis: { type: 'category', data: ['2023'] }, yAxis: { type: 'value' }, series: [{ type: 'bar', data: [100] }] });
 }
 
 describe('report presentation in Chromium', () => {
+  const browserSession = () => cdp() as { send(method: string, parameters?: Record<string, unknown>): Promise<void> };
   afterEach(async () => {
     TestBed.resetTestingModule(); vi.restoreAllMocks();
     if (document.fullscreenElement) await document.exitFullscreen();
+    await browserSession().send('Emulation.clearDeviceMetricsOverride');
     await page.viewport(1280, 900);
   });
 
@@ -77,6 +80,86 @@ describe('report presentation in Chromium', () => {
     });
     return linear[0] * .2126 + linear[1] * .7152 + linear[2] * .0722;
   }
+
+  it.each([
+    ['window', 1], ['fullscreen', 1], ['window', 2], ['fullscreen', 2]
+  ] as const)('keeps native chart hover aligned and the bitmap sharp at every zoom in %s mode at DPR %s', async (mode, dpr) => {
+    if (mode === 'window') vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Denied'));
+    await browserSession().send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: dpr, mobile: false });
+    await page.viewport(1280, 900);
+    expect(window.devicePixelRatio).toBe(dpr);
+    const { root, settle, host } = await setup();
+    host.option.set({ animation: false,
+      tooltip: { trigger: 'item', confine: true, transitionDuration: 0, formatter: '<span class="hover-result">Point A: 25, 40</span>' },
+      xAxis: { type: 'value', min: 0, max: 100 }, yAxis: { type: 'value', min: 0, max: 100 },
+      series: [{ type: 'scatter', symbolSize: 24, data: [[25, 40]] }]
+    });
+    await page.getByRole('button', { name: 'Present', exact: true }).click(); await settle();
+    if (mode === 'fullscreen') await vi.waitFor(() => expect(document.fullscreenElement).not.toBeNull());
+    const scroll = root.querySelector<HTMLElement>('.report-presentation__scroll')!;
+    const chartElement = root.querySelector<HTMLElement>('[role=dialog] .deep-chart')!;
+    expect(chartElement.querySelector('canvas')).toBeNull();
+    chartElement.scrollIntoView({ block: 'center' });
+    await vi.waitFor(() => expect(echarts.getInstanceByDom(chartElement)?.getOption().series).toHaveLength(1));
+    const chart = echarts.getInstanceByDom(chartElement)!;
+    const hovered = vi.fn(); chart.on('mousemove', hovered);
+    const setZoom = async (percent: number) => {
+      await page.getByRole('button', { name: 'Reset zoom to 100%', exact: true }).click(); await settle();
+      const label = percent < 100 ? 'Zoom out' : 'Zoom in';
+      for (let value = 100; value !== percent; value += percent < 100 ? -10 : 10) {
+        await page.getByRole('button', { name: label, exact: true }).click(); await settle();
+      }
+    };
+    const expectHover = async (percent: number, reposition = true) => {
+      const scale = percent / 100;
+      // ECharts applies options and responsive layout on animation frames, after Angular settles.
+      await new Promise(requestAnimationFrame); await new Promise(requestAnimationFrame);
+      await vi.waitFor(() => expect(chart.getWidth()).toBe(chartElement.clientWidth));
+      const [x, y] = chart.convertToPixel({ seriesIndex: 0 }, [25, 40]) as number[];
+      if (reposition) {
+        chartElement.scrollIntoView({ block: 'center', inline: 'center' });
+        const bounds = chartElement.getBoundingClientRect(), viewport = scroll.getBoundingClientRect();
+        scroll.scrollLeft += bounds.left + x * scale - (viewport.left + scroll.clientWidth / 2);
+        scroll.scrollTop += bounds.top + y * scale - (viewport.top + scroll.clientHeight / 2);
+      }
+      // Move off the point first: re-entering must hit the same data, rather than retain an old tooltip.
+      await userEvent.hover(root.querySelector<HTMLButtonElement>('.report-presentation__close')!);
+      chart.dispatchAction({ type: 'hideTip' });
+      hovered.mockClear();
+      const canvas = chartElement.querySelector('canvas')!;
+      await userEvent.hover(canvas, { position: { x: x * scale, y: y * scale } });
+      await vi.waitFor(() => expect(hovered, `native point targeting at ${percent}%`).toHaveBeenCalledWith(expect.objectContaining({ dataIndex: 0, value: [25, 40] })));
+      const tooltip = chartElement.querySelector<HTMLElement>('.hover-result')!;
+      expect(tooltip.textContent).toBe('Point A: 25, 40');
+      const tip = tooltip.getBoundingClientRect(), point = chartElement.getBoundingClientRect();
+      expect(Math.abs(tip.left - (point.left + x * scale))).toBeLessThan(100);
+      expect(Math.abs(tip.top - (point.top + y * scale))).toBeLessThan(100);
+      expect(canvas.width).toBeGreaterThanOrEqual(Math.floor(chart.getWidth() * window.devicePixelRatio * 2));
+      expect(canvas.height).toBeGreaterThanOrEqual(Math.floor(chart.getHeight() * window.devicePixelRatio * 2));
+      expect(echarts.getInstanceByDom(chartElement)).toBe(chart);
+      expectControlsAtScreenEdges(root);
+    };
+    for (const percent of [50, 100, 110, 150, 200]) {
+      await setZoom(percent); await expectHover(percent);
+      scroll.scrollTop -= 30;
+      scroll.scrollLeft += 30;
+      await expectHover(percent, false);
+    }
+    if (mode === 'window') {
+      await page.viewport(760, 900); await settle();
+      await vi.waitFor(() => expect(chart.getWidth()).toBeLessThan(760));
+      await expectHover(200);
+    }
+    expect(chart.getDataURL({ type: 'png', pixelRatio: 2 })).toMatch(/^data:image\/png/);
+    await page.screenshot({ element: root.querySelector<HTMLElement>('[role=dialog]')!, path: `./__screenshots__/presentation-chart-200-${mode}-dpr${dpr}.png` });
+    await page.getByRole('button', { name: 'Close presentation', exact: true }).click(); await settle();
+    expect(chart.isDisposed()).toBe(true);
+    const inlineChart = root.querySelector<HTMLElement>('.background .deep-chart')!;
+    inlineChart.scrollIntoView();
+    await vi.waitFor(() => expect(inlineChart.querySelector('canvas')).not.toBeNull());
+    const inlineCanvas = inlineChart.querySelector('canvas')!;
+    expect(inlineCanvas.width).toBe(Math.floor(echarts.getInstanceByDom(inlineChart)!.getWidth() * window.devicePixelRatio));
+  });
 
   it.each(['fullscreen', 'window'] as const)('keeps the report scrollbar visible while scrolling down and back up in %s mode', async mode => {
     if (mode === 'window') vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Denied'));
@@ -214,8 +297,17 @@ describe('report presentation in Chromium', () => {
     // Put the viewport just above the magnified report's width to exercise the overflow boundary.
     await page.viewport(Math.ceil(originalWidth * 1.5) + 100, 900); await settle(); await new Promise(requestAnimationFrame);
     expectFits();
+    const centerPoint = (scale: number) => {
+      const viewport = scroll.getBoundingClientRect(), report = paper.getBoundingClientRect();
+      return { x: (viewport.left + scroll.clientLeft + scroll.clientWidth / 2 - report.left) / scale,
+        y: (viewport.top + scroll.clientTop + scroll.clientHeight / 2 - report.top) / scale };
+    };
+    const beforeOverflow = centerPoint(1.5);
     await page.getByRole('button', { name: 'Zoom in', exact: true }).click(); await settle();
     expect(scroll.scrollWidth).toBeGreaterThan(scroll.clientWidth);
+    const afterOverflow = centerPoint(1.6);
+    expect(Math.abs(afterOverflow.x - beforeOverflow.x)).toBeLessThan(1);
+    expect(Math.abs(afterOverflow.y - beforeOverflow.y)).toBeLessThan(1);
     scroll.focus(); await userEvent.keyboard('{ArrowRight}');
     await vi.waitFor(() => expect(scroll.scrollLeft).toBeGreaterThan(0));
     await page.getByRole('button', { name: 'Zoom out', exact: true }).click(); await settle();
@@ -235,6 +327,32 @@ describe('report presentation in Chromium', () => {
     expectFits();
     await page.getByRole('button', { name: 'Close presentation', exact: true }).click(); await settle();
     expect(root.querySelector<HTMLElement>('article.paper')!.getBoundingClientRect().width).toBeCloseTo(inlineWidth, 0);
+  });
+
+  it('tracks late report layout at 50% without retaining unscaled blank scroll space', async () => {
+    vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Denied'));
+    const { root, settle, host } = await setup();
+    await page.getByRole('button', { name: 'Present', exact: true }).click(); await settle();
+    for (let step = 0; step < 5; step++) {
+      await page.getByRole('button', { name: 'Zoom out', exact: true }).click(); await settle();
+    }
+    const scroll = root.querySelector<HTMLElement>('.report-presentation__scroll')!;
+    const frame = root.querySelector<HTMLElement>('.report-presentation__frame')!;
+    const paper = root.querySelector<HTMLElement>('[role=dialog] article')!;
+    const expectBounds = () => {
+      expect(frame.getBoundingClientRect().height).toBeCloseTo(paper.getBoundingClientRect().height, 0);
+      const style = getComputedStyle(scroll);
+      expect(scroll.scrollHeight).toBeCloseTo(Math.max(scroll.clientHeight,
+        frame.getBoundingClientRect().height + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)), 0);
+      expect(scroll.scrollWidth).toBeLessThanOrEqual(scroll.clientWidth + 1);
+    };
+    await vi.waitFor(expectBounds);
+    host.sectionsHeight.set(2700); await settle();
+    await vi.waitFor(expectBounds);
+    scroll.scrollTop = scroll.scrollHeight;
+    const chart = root.querySelector<HTMLElement>('[role=dialog] .deep-chart')!;
+    await vi.waitFor(() => expect(chart.querySelector('canvas')).not.toBeNull());
+    expect(chart.getBoundingClientRect().bottom).toBeLessThanOrEqual(scroll.getBoundingClientRect().bottom);
   });
 
   it.each(['fullscreen', 'window'] as const)('magnifies the document in %s mode while keeping controls reachable and charts mounted', async mode => {

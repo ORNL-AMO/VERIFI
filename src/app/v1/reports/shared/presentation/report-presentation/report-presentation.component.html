@@ -8,8 +8,11 @@
         (click)="close()"><app-ui-icon name="close"/></button>
     </header>
     <div #viewport class="report-presentation__scroll" tabindex="0" role="region" aria-label="Report content">
-      <div class="report-presentation__document" [style.width.px]="documentWidth()" [style.zoom]="zoomPercent() / 100">
-        <ng-container [ngTemplateOutlet]="content()"/>
+      <div class="report-presentation__frame" [style.width.px]="scaledWidth()" [style.height.px]="scaledHeight()">
+        <div #reportDocument class="report-presentation__document" [style.width.px]="documentWidth()"
+          [style.transform]="'scale(' + zoomPercent() / 100 + ')'" [attr.data-v1-chart-pixel-ratio-scale]="maximumZoom / 100">
+          <ng-container [ngTemplateOutlet]="content()"/>
+        </div>
       </div>
     </div>
     <footer class="report-presentation__footer">

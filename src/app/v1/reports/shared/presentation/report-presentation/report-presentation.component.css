@@ -17,6 +17,7 @@
 .report-presentation__scroll::-webkit-scrollbar-thumb { background: #999; border-radius: 10px; box-shadow: none; }
 .report-presentation__scroll::-webkit-scrollbar-thumb:hover { background: #bbb; }
 /* Share the wider presentation limit with the report, keeping zoom's scroll bounds aligned. */
-.report-presentation__document { --report-document-max-width: 91.2rem; max-width: var(--report-document-max-width); margin-inline: auto; scrollbar-color: auto; }
+.report-presentation__frame { position: relative; margin-inline: auto; overflow: clip; }
+.report-presentation__document { --report-document-max-width: 91.2rem; position: absolute; top: 0; left: 0; display: flow-root; width: 100%; max-width: var(--report-document-max-width); transform-origin: top left; scrollbar-color: auto; }
 @media (max-width: 640px) { .report-presentation__toolbar { flex-wrap: wrap; gap: .5rem; } }
 @media print { .report-presentation { display: none; } }
