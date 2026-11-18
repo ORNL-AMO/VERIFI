@@ -4,6 +4,7 @@ import type {
 } from './visualization-definition';
 import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { sameVisualizationScope } from './visualization-scope';
+import type { VisualizationCompositionEvidence } from './visualization-composition';
 export { sameVisualizationScope } from './visualization-scope';
 
 export type VisualizationChartKind = VisualizationChart['kind'];
@@ -131,6 +132,8 @@ export type VisualizationData =
       readonly links: readonly { readonly source: string; readonly target: string; readonly observation: VisualizationObservation }[] };
 
 export interface VisualizationResolvedData {
+  /** Original leaf contributions and denominator evidence; never saved with the definition. */
+  readonly composition?: VisualizationCompositionEvidence;
   readonly data: VisualizationData;
   /** Provider-owned observation-key semantics; mixed sources must declare the same alignment. */
   readonly alignment: { readonly kind: VisualizationAlignment; readonly key: string };

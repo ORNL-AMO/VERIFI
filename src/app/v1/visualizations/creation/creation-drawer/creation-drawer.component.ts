@@ -10,7 +10,7 @@ import { visualizationDataSourceChoices } from '../../visualization-data-sources
 export class CreationComponent implements OnDestroy {
   readonly lifecycle = inject(LibraryLifecycle);
   readonly dataSources = visualizationDataSourceChoices();
-  readonly charts = VISUALIZATION_CHART_CHOICES.filter(chart => chart.value !== 'breakdown-bar');
+  readonly charts = [...VISUALIZATION_CHART_CHOICES];
   private readonly stepHeading = viewChild<ElementRef<HTMLElement>>('stepHeading');
   private readonly visualizationName = viewChild<ElementRef<HTMLInputElement>>('visualizationName');
   private readonly modal = inject(ModalPortalService);

@@ -1,0 +1,15 @@
+:host { display: block; min-width: 0; }
+h2 { font-size: 1.1rem; text-align: center; overflow-wrap: anywhere; }
+.composition-period, .composition-context { text-align: center; color: var(--v1-muted); font-size: .85rem; overflow-wrap: anywhere; }
+.composition-path { display: flex; flex-wrap: wrap; gap: .25rem; }
+.composition-print-path { display: none; overflow-wrap: anywhere; }
+.composition-canvas { width: 100%; min-height: 360px; }
+.composition-navigation ul, .composition-details ul { padding-left: 1.25rem; }
+.composition-description { display: block; white-space: pre-line; font-size: .85rem; }
+.composition-diagnostic { padding: .5rem; border-left: 3px solid var(--v1-warning); overflow-wrap: anywhere; }
+.composition-details { border-top: 1px solid var(--v1-border); padding: .75rem 0; }
+.composition-details summary { cursor: pointer; }
+.composition-table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+th, td { padding: .5rem; border: 1px solid var(--v1-border); vertical-align: top; overflow-wrap: anywhere; }
+@media print { .composition-path, .composition-navigation, .composition-details { display: none; } .composition-print-path { display: block; } .composition-canvas { break-inside: avoid; } }

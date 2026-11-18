@@ -10,7 +10,7 @@ describe('visualization chart choices', () => {
       facilitySelection: { kind: 'all' }, chart, sourceKinds: ['utility', 'predictor'] });
     const result = decodeVisualizationDefinition(JSON.parse(JSON.stringify(value)));
     expect(result.state).toBe('setup-required');
-    expect('definition' in result && result.definition.chart).toEqual(chart);
+    expect('definition' in result && result.definition.chart).toEqual(chart.kind === 'treemap' || chart.kind === 'sunburst' ? { ...chart, hierarchy: ['facility', 'source', 'meter'] } : chart);
     expect(value.series).toEqual([]);
     expect(visualizationChartLabel(chart)).toBe(choice.label);
     expect(visualizationChartIcon(chart)).toBe(choice.icon);
@@ -22,7 +22,7 @@ describe('visualization chart choices', () => {
     expect(createVisualizationChart('correlation')).toEqual({ kind: 'correlation', statistic: 'r', scale: 'raw' });
     expect(createVisualizationChart('heatmap')).toEqual({ kind: 'heatmap', dimension: 'month-year', scale: 'linear' });
     expect(createVisualizationChart('breakdown-bar')).toEqual({ kind: 'breakdown', type: 'bar', values: 'absolute' });
-    expect(createVisualizationChart('sankey')).toEqual({ kind: 'sankey', flow: 'energy-balance' });
+    expect(createVisualizationChart('sankey')).toEqual({ kind: 'sankey', flow: 'source-to-equipment' });
     const first = createVisualizationChart('treemap');
     const second = createVisualizationChart('treemap');
     expect(first).toEqual({ kind: 'treemap', hierarchy: [], values: 'absolute' });

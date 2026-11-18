@@ -1,3 +1,6 @@
+import type { CalanderizedMeter } from '@data/models/calanderization';
+import { isCompositionChart, compositionPresets } from '../visualization-composition';
+import { resolveEquipmentComposition } from './equipment-composition';
 import { isExplorationChart, visualizationInterval } from '../visualization-interval';
 import { type EnergyUseBucket, EQUIPMENT_TYPES, energyUseBuckets, energyUseSelectionMode, energyUseResourceKind, energyUseSeriesId, selectedEnergyUseIds } from './equipment-selection';
 export { equipmentCatalog } from './equipment-selection';
@@ -14,13 +17,15 @@ export function equipmentUnit(snapshot: AccountWorkspaceSnapshot, scope: Visuali
 }
 export function equipmentCapabilities(): VisualizationSourceCapabilities {
   return { kind: 'energy-use', measures: ['consumption'], aggregations: ['none', 'sum'], periods: ['all-history', 'latest-saved-year', 'fiscal-year'],
-    comparisons: ['none'], chartKinds: ['time-series', 'scatter', 'correlation', 'heatmap'], shapes: ['time-series'], alignments: ['fiscal-interval'], settings: ['unit'],
-    controls: ['series', 'appearance', 'axes', 'stacking', 'fit', 'normalization'], allowDateOverride: true, allowMultipleSources: false };
+    comparisons: ['none'], chartKinds: ['time-series', 'scatter', 'correlation', 'heatmap', 'breakdown', 'treemap', 'sunburst', 'sankey'], shapes: ['time-series', 'breakdown', 'hierarchy', 'flow'], alignments: ['fiscal-interval', 'category', 'hierarchy', 'flow'], settings: ['unit'],
+    controls: ['series', 'appearance', 'axes', 'stacking', 'fit', 'normalization', 'hierarchy', 'denominator'], allowDateOverride: true, allowMultipleSources: false };
 }
 export function equipmentChartSupport(source: EnergyUseVisualizationSource, chart: VisualizationChart): VisualizationChartSupport {
   const reasons: string[] = [];
-  if ((chart.kind !== 'time-series' && !isExplorationChart(chart)) || visualizationInterval(chart) !== 'yearly') reasons.push('Equipment history supports yearly line, bar or area charts.');
+  if (!isCompositionChart(chart) && ((chart.kind !== 'time-series' && !isExplorationChart(chart)) || visualizationInterval(chart) !== 'yearly')) reasons.push('Equipment history supports yearly line, bar or area charts.');
+  if ((chart.kind === 'treemap' || chart.kind === 'sunburst') && ![...compositionPresets('energy-use'), ...compositionPresets('energy-use', true)].some(preset => JSON.stringify(preset.levels) === JSON.stringify(chart.hierarchy))) reasons.push('Choose a compatible Energy Use hierarchy preset.');
   const mode = energyUseSelectionMode(source);
+  if (chart.kind === 'sankey' && chart.flow === 'energy-balance' && mode !== 'facility') reasons.push('Energy balance requires an explicit whole-facility selection.');
   if (source.measure !== 'consumption' || source.aggregation !== (mode === 'equipment' ? 'none' : 'sum')) reasons.push('Use annual consumption with one trace per selected item, group, type or facility.');
   if (!mode || !selectedEnergyUseIds(source).length) reasons.push('Choose how to select Energy Uses, then select resources.');
   if (mode === 'equipment-type' ? source.selection !== undefined || !source.equipmentTypes?.length || source.equipmentTypes.some(type => !EQUIPMENT_TYPES.includes(type))
@@ -53,7 +58,7 @@ function observation(row: ProjectedEnergyUse): VisualizationObservation {
   return { state: 'observed', value: amount, provenance: row.carried ? 'carried-forward' : 'estimated', partial: row.partial, notes };
 }
 /** Reads annual saved amounts; never creates history or recalculates equipment consumption. */
-export function resolveEquipment(snapshot: AccountWorkspaceSnapshot, request: VisualizationSourceRequest): VisualizationSourceResolution {
+export function resolveEquipment(snapshot: AccountWorkspaceSnapshot, request: VisualizationSourceRequest, meters?: readonly CalanderizedMeter[]): VisualizationSourceResolution {
   const { identity, source, period } = request;
   const unsupported = (message: string): VisualizationSourceResolution => ({ identity, state: 'unsupported', message });
   if (source.kind !== 'energy-use') return unsupported('Choose an Energy Use source.');
@@ -67,6 +72,7 @@ export function resolveEquipment(snapshot: AccountWorkspaceSnapshot, request: Vi
   const items = [...new Map(buckets.flatMap(bucket => bucket.items).map(item => [item.guid, item])).values()];
   const unit = equipmentUnit(snapshot, identity.scope, source);
   if (!unit || new ConvertValue(undefined, '', '').getUnit(unit)?.measure !== 'energy') return unsupported('Choose a supported energy display unit.');
+  if (isCompositionChart(request.chart)) return resolveEquipmentComposition(snapshot, request, unit, equipmentSeriesMetadata(source, unit, buckets), meters);
   const saved = savedEnergyUseYears(items);
   const years = period.kind === 'fiscal-year' ? [period.year] : period.kind === 'latest-saved-year' ? saved.slice(-1) : energyUseChartYears(items);
   if (!years.length) return { identity, state: 'empty', periods: [], message: 'No saved equipment years are available for the selected items.' };

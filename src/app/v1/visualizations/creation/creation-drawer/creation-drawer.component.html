@@ -103,11 +103,11 @@
             }
             @case ('sources') {
               <legend class="visually-hidden"><h3 id="visualization-choice-heading" #stepHeading tabindex="-1">Data Sources</h3></legend>
-              <p>Choose one or more data sources, then continue.</p>
+              <p>{{ lifecycle.composition() ? 'Choose one compatible data source, then continue.' : 'Choose one or more data sources, then continue.' }}</p>
               <div class="creation-choices" aria-label="Data Sources">
-                @for (dataSource of dataSources; track dataSource.value) {
+                @for (dataSource of lifecycle.availableDataSources(); track dataSource.value) {
                   @let selected = lifecycle.form.controls.sourceKinds.value.includes(dataSource.value);
-                  <button type="button" class="creation-choice creation-choice--multiple" [attr.aria-pressed]="selected" (click)="lifecycle.toggleSource(dataSource.value)">
+                  <button type="button" class="creation-choice creation-choice--multiple" [disabled]="lifecycle.composition() && !selected && lifecycle.form.controls.sourceKinds.value.length > 0" [attr.aria-pressed]="selected" (click)="lifecycle.toggleSource(dataSource.value)">
                     <app-ui-icon class="creation-choice__selection" [name]="selected ? 'success' : 'circle'" [size]="20"/>
                     <app-ui-icon [name]="dataSource.icon" [size]="28"/><strong>{{ dataSource.label }}</strong>
                   </button>

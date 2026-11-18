@@ -13,6 +13,21 @@ import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testi
 import { analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
 
 describe('visualization creation drawer', () => {
+  it.each(['breakdown-bar', 'donut', 'treemap', 'sunburst'] as const)('allows selecting utility resources while creating a %s composition', async chart => {
+    const { workspace, commands } = configureLibraryTest([LibraryModule]);
+    workspace.publish({ ...workspace.snapshot()!, meters: [meter({ name: 'Main meter' })] });
+    const fixture = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
+    try {
+      lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart(chart); lifecycle.toggleSource('utility'); lifecycle.continueSources(); lifecycle.selectMeterMode('meter');
+      fixture.detectChanges();
+      const resource = fixture.nativeElement.querySelector('[aria-label="Meter resources"] button') as HTMLButtonElement;
+      expect(resource).not.toBeNull(); expect(resource.disabled).toBe(false);
+      resource.click(); fixture.detectChanges(); expect(lifecycle.form.controls.resourceIds.value).toEqual(['meter-a']);
+      lifecycle.continueResources(); lifecycle.selectObservation('calendarized'); lifecycle.form.controls.name.setValue('Utility composition');
+      await lifecycle.submit();
+      expect(commands.prepareCreate).toHaveBeenCalledWith(expect.objectContaining({ sources: [expect.objectContaining({ kind: 'utility', dataMode: 'calendarized', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] } })] }));
+    } finally { fixture.destroy(); }
+  });
   it('removes a disappeared predictor through Add while retaining the surviving fixed selection', async () => {
     const { workspace, commands } = configureLibraryTest([LibraryModule]);
     const first = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'first', name: 'First' };
@@ -170,7 +185,7 @@ describe('visualization creation drawer', () => {
     await fixture.whenStable(); fixture.detectChanges();
     const chartButtons = fixture.debugElement.queryAll(By.css('[aria-label="Chart type"] button'));
     expect(chartButtons.map(button => button.query(By.css('strong')).nativeElement.textContent))
-      .toEqual(['Line', 'Bar', 'Area', 'Scatter', 'Correlation', 'Heatmap', 'Donut', 'Treemap', 'Sankey']);
+      .toEqual(['Line', 'Bar', 'Area', 'Scatter', 'Correlation', 'Heatmap', 'Breakdown bar', 'Donut', 'Treemap', 'Sunburst', 'Sankey']);
     expect(chartButtons.map(button => button.query(By.directive(IconComponent)).componentInstance.name))
       .toEqual(fixture.componentInstance.charts.map(chart => chart.icon));
     [...root.querySelectorAll<HTMLButtonElement>('[aria-label="Chart type"] button')].find(item => item.querySelector('strong')?.textContent === 'Scatter')!.click(); fixture.detectChanges();

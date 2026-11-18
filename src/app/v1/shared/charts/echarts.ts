@@ -1,6 +1,10 @@
 import * as echarts from 'echarts/core';
 export { echarts };
 import {
+  PieChart,
+  PieSeriesOption,
+  SunburstChart,
+  SunburstSeriesOption,
   SankeyChart,
   SankeySeriesOption,
   TreemapChart,
@@ -42,6 +46,8 @@ import { LegacyGridContainLabel } from 'echarts/features';
 
 echarts.use([
   AriaComponent,
+  PieChart,
+  SunburstChart,
   SankeyChart,
   TreemapChart,
   BarChart,
@@ -63,6 +69,8 @@ echarts.use([
 ]);
 
 export type V1EChartsOption = echarts.ComposeOption<
+  | PieSeriesOption
+  | SunburstSeriesOption
   | SankeySeriesOption
   | TreemapSeriesOption
   | BarSeriesOption

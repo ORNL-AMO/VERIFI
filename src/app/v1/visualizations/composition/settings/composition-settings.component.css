@@ -1,0 +1,3 @@
+.composition-settings { display: grid; gap: .75rem; margin-top: .75rem; }
+label { display: grid; gap: .25rem; }
+p { font-size: .85rem; color: var(--v1-muted); margin: 0; }

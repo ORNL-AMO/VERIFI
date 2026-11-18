@@ -1,3 +1,4 @@
+import { isCompositionChart, compositionPeriodIssue } from '@domain/visualizations/visualization-composition';
 import { isExplorationChart, visualizationInterval } from '@domain/visualizations/visualization-interval';
 import { analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
 import { equipmentPeriodIssue } from '@domain/visualizations/energy-use/equipment-source';
@@ -17,7 +18,7 @@ interface PeriodEditorChoice {
   readonly icon: 'calendar' | 'calendarCheck' | 'clock';
 }
 export interface PeriodEditorNotice {
-  readonly kind: 'analysis' | 'equipment' | 'predictor' | 'exploration';
+  readonly kind: 'analysis' | 'equipment' | 'predictor' | 'exploration' | 'composition';
   readonly message: string;
   readonly resetLabel: string;
   readonly reset: Partial<PeriodFormValue>;
@@ -39,11 +40,15 @@ export function periodEditorPolicy(definition: VisualizationDefinition): PeriodE
   const monthInput = usesMonthRange(definition);
   const annual = equipment || analysis && visualizationInterval(definition.chart) === 'yearly';
   const choices: PeriodEditorChoice[] = [{ kind: 'all-history', label: 'All history', icon: 'calendar' }];
+  const composition = isCompositionChart(definition.chart);
+  if (composition && equipment) choices.splice(0);
   if (!annual) choices.push({ kind: 'fixed', label: monthInput ? 'Fixed months' : 'Fixed dates', icon: 'calendarCheck' },
     { kind: 'rolling', label: 'Rolling period', icon: 'clock' });
-  if (!monthInput || annual) choices.push({ kind: 'fiscal-year', label: 'Pinned fiscal year', icon: 'calendar' },
+  if (!monthInput || annual || composition) choices.push({ kind: 'fiscal-year', label: 'Pinned fiscal year', icon: 'calendar' },
     { kind: 'latest-saved-year', label: analysis ? 'Latest complete result fiscal year' : 'Latest fiscal year', icon: 'calendarCheck' });
   const notices: PeriodEditorNotice[] = [];
+  const compositionIssue = composition ? compositionPeriodIssue(definition) : undefined;
+  if (compositionIssue) notices.push({ kind: 'composition', message: compositionIssue, resetLabel: equipment ? 'Use latest saved fiscal year' : 'Use all history without comparison', reset: { kind: equipment ? 'latest-saved-year' : 'all-history', comparison: 'none' } });
   if (analysis && definition.chart && analysisPeriodIssue({ chart: definition.chart, period: definition.period, comparison: definition.comparison })) {
     notices.push({ kind: 'analysis', message: 'This period or comparison is unsupported for analysis results. The saved intent is retained.',
       resetLabel: 'Use all history without comparison', reset: { kind: 'all-history', basis: annual ? 'fiscal' : 'calendar', includeIncomplete: false, comparison: 'none' } });
@@ -59,14 +64,14 @@ export function periodEditorPolicy(definition: VisualizationDefinition): PeriodE
   if (isExplorationChart(definition.chart) && definition.comparison.kind !== 'none') notices.push({ kind: 'exploration', message: 'Exploration uses one selected period without a comparison overlay. The saved comparison is retained.', resetLabel: 'Use one period without comparison', reset: { comparison: 'none' } });
   const period = definition.period;
   return { monthInput, title: annual ? analysis ? 'Analysis fiscal years' : 'Equipment fiscal years' : monthInput ? 'Month range' : 'Periods and comparisons', choices,
-    controls: { ranges: !annual, fiscalYear: !monthInput || annual, basis: !annual && !monthInput, comparison: !annual && !monthInput && !isExplorationChart(definition.chart), incomplete: !monthInput },
+    controls: { ranges: !annual, fiscalYear: !monthInput || annual || composition, basis: !annual && !monthInput, comparison: !composition && !annual && !monthInput && !isExplorationChart(definition.chart), incomplete: !monthInput },
     selectionDefaults: annual ? { comparison: 'none', basis: 'fiscal' } : monthInput ? { basis: 'calendar', includeIncomplete: false, comparison: 'none' } : {},
     notices, retainedPartial: monthInput && period.kind === 'fixed'
       && (period.start !== period.start.slice(0, 7) + '-01' || period.end !== civilMonthRange(civilMonthIndex(period.end)).end) };
 }
 
 function usesMonthRange(definition: VisualizationDefinition): boolean {
-  return isExplorationChart(definition.chart) && visualizationInterval(definition.chart) === 'monthly' || definition.sources.some(source => source.kind === 'predictor')
+  return isCompositionChart(definition.chart) && definition.sources.every(source => source.kind === 'utility') || isExplorationChart(definition.chart) && visualizationInterval(definition.chart) === 'monthly' || definition.sources.some(source => source.kind === 'predictor')
     || definition.sources.some(source => source.kind === 'analysis') && definition.chart?.kind === 'time-series' && definition.chart.interval === 'monthly';
 }
 

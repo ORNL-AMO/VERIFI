@@ -117,7 +117,8 @@ const chart = variant({
   correlation: object({ kind: enumeration('correlation'), ...pairFields, statistic: enumeration('r', 'r-squared'), view: enumeration('pairs', 'matrix'), showFit: boolean }, ['interval', 'grouping', 'view', 'showFit']),
   heatmap: object({ kind: enumeration('heatmap'), ...explorationFields, dimension: enumeration('month-year', 'series-period'), scale: enumeration('linear', 'diverging'), normalization: enumeration('raw', 'z-score') }, ['interval', 'normalization']),
   breakdown: object({ kind: enumeration('breakdown'), type: enumeration('bar', 'donut'), values: enumeration('absolute', 'percent') }),
-  treemap: object({ kind: enumeration('treemap'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment')), values: enumeration('absolute', 'percent') }),
+  treemap: object({ kind: enumeration('treemap'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment', 'meter')), values: enumeration('absolute', 'percent') }),
+  sunburst: object({ kind: enumeration('sunburst'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment', 'meter')), values: enumeration('absolute', 'percent') }),
   sankey: object({ kind: enumeration('sankey'), flow: enumeration('source-to-equipment', 'source-to-group', 'energy-balance') })
 }, true);
 const seriesFields = { id: text, sourceId: text, metric: text, resourceGuid: text, label: text, color: text, traceType: enumeration('line', 'bar', 'area'),
@@ -200,7 +201,7 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
         need('$.chart', 'Choose declared X and Y series.');
     }
   }
-  if (value.chart?.kind === 'treemap' && (!value.chart.hierarchy.length || new Set(value.chart.hierarchy).size !== value.chart.hierarchy.length))
+  if ((value.chart?.kind === 'treemap' || value.chart?.kind === 'sunburst') && (!value.chart.hierarchy.length || new Set(value.chart.hierarchy).size !== value.chart.hierarchy.length))
     need('$.chart.hierarchy', 'Choose non-repeated hierarchy levels.');
   return issues;
 }

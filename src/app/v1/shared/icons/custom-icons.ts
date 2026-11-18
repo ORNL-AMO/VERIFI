@@ -136,6 +136,23 @@ export const SankeyIcon = [
   ['rect', { x: 19.5, y: 17.5, width: 2.5, height: 4, rx: 0.5, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }]
 ] as const satisfies IconSvgObject;
 
+/** Design source: src/assets/icons/sunburst.svg. Keep geometry in sync. */
+export const SunburstIcon = [
+  ['path', { d: 'M12 5.5A6.5 6.5 0 0 1 17.62917 15.25L14.59808 13.5A3 3 0 0 0 12 9Z', fill: 'currentColor', stroke: 'none', opacity: 0.15, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M17.62917 15.25A6.5 6.5 0 0 1 5.5 12L9 12A3 3 0 0 0 14.59808 13.5Z', fill: 'currentColor', stroke: 'none', opacity: 0.35, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M5.5 12A6.5 6.5 0 0 1 12 5.5L12 9A3 3 0 0 0 9 12Z', fill: 'currentColor', stroke: 'none', opacity: 0.6, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M12 2A10 10 0 0 1 20.66025 7L17.62917 8.75A6.5 6.5 0 0 0 12 5.5Z', fill: 'currentColor', stroke: 'none', opacity: 0.12, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M20.66025 7A10 10 0 0 1 20.66025 17L17.62917 15.25A6.5 6.5 0 0 0 17.62917 8.75Z', fill: 'currentColor', stroke: 'none', opacity: 0.28, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M20.66025 17A10 10 0 0 1 9.41181 21.65926L10.31768 18.27852A6.5 6.5 0 0 0 17.62917 15.25Z', fill: 'currentColor', stroke: 'none', opacity: 0.3, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M9.41181 21.65926A10 10 0 0 1 2 12L5.5 12A6.5 6.5 0 0 0 10.31768 18.27852Z', fill: 'currentColor', stroke: 'none', opacity: 0.45, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M2 12A10 10 0 0 1 7 3.33975L8.75 6.37083A6.5 6.5 0 0 0 5.5 12Z', fill: 'currentColor', stroke: 'none', opacity: 0.5, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M7 3.33975A10 10 0 0 1 12 2L12 5.5A6.5 6.5 0 0 0 8.75 6.37083Z', fill: 'currentColor', stroke: 'none', opacity: 0.7, strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 12, cy: 12, r: 10, stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 12, cy: 12, r: 6.5, stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['circle', { cx: 12, cy: 12, r: 3, stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M12 9L12 2 M14.59808 13.5L20.66025 17 M9 12L2 12 M17.62917 8.75L20.66025 7 M10.31768 18.27852L9.41181 21.65926 M8.75 6.37083L7 3.33975', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
 export const CUSTOM_ICONS = {
   dataVisualization: VerifiChartIcon,
   betterPlantsReport: BetterPlantsReportIcon,
@@ -152,5 +169,6 @@ export const CUSTOM_ICONS = {
   facilityEnergyFootprint: FacilityEnergyFootprintIcon,
   heatmap: HeatmapIcon,
   treemap: TreemapIcon,
-  sankey: SankeyIcon
+  sankey: SankeyIcon,
+  sunburst: SunburstIcon
 };

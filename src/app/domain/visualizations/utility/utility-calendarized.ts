@@ -1,3 +1,5 @@
+import { isCompositionChart } from '../visualization-composition';
+import { resolveUtilityComposition } from './utility-composition';
 import { visualizationInterval } from '../visualization-interval';
 import { emptyMonthlySource } from '../visualization-monthly-combination';
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
@@ -38,6 +40,7 @@ export function resolveCalendarizedUtility(snapshot: AccountWorkspaceSnapshot, r
   const unsupported = (message: string): VisualizationSourceResolution => ({ identity, state: 'unsupported', message });
   if (snapshot.account.guid !== identity.accountGuid || request.source.kind !== 'utility' || request.source.id !== identity.sourceId) return unsupported('Resolve utility data in its owning account and source identity.');
   const source = request.source;
+  if (isCompositionChart(request.chart)) return resolveUtilityComposition(snapshot, request, monthly => resolveCalendarizedUtility(snapshot, monthly, meters, projectionEvidence));
   const support = utilityChartSupport(source, request.chart);
   if (source.dataMode !== 'calendarized' || support.state !== 'supported') return unsupported(support.state === 'unsupported' ? support.reasons.join(' ') : 'Choose calendarized data.');
   const interval = visualizationInterval(request.chart);

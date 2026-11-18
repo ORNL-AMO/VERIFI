@@ -49,6 +49,10 @@ Saved trace/order fields and the definition version are unchanged. Original obse
 
 Saved Scatter, Correlation and Heatmap behavior belongs to [exploration visualizations](v1-exploration-visualizations.md): pairwise figures/matrices, observation alignment, complete samples, signed r versus R², standardization, heatmap dimensions/scales, chart tooltips and shared header data checks. These charts reuse the source semantics below and have explicitly approved combinations beyond the time-series boundaries. Native bill/charge pairing, model inspection and comparison overlays remain unavailable.
 
+## Composition presentations
+
+Breakdown bars/donuts, Treemap, Sunburst and Energy Use Sankey share canonical leaf evidence, compatible actual periods, named percentage denominators and accessible original source details. Their supported source/settings combinations, hierarchy presets, annual snapshot and metered-balance behavior belong to [composition visualizations](v1-composition-visualizations.md). Configured hierarchy is saved; drill position remains temporary.
+
 ## Predictor observations
 
 The predictor adapter supports exact selections and All Predictors for saved Standard and Weather predictors in monthly, unstacked line/bar/area charts, with aggregation `none` and no comparison. Legacy blank predictor types are Standard. All uses the existing unfiltered rule-shaped selection contract; custom filters, Math/Conversion placeholders, predictor conversions, fiscal ranges, and unsupported chart settings remain retained intent. Fixed selections remain exact even when they cover the current catalog. Each selected predictor has an independent trace and GUID identity within one source configuration.
@@ -129,7 +133,7 @@ Only the utility inventory capture described by its owner is implemented. Extend
 | Energy Use treemap/flows | Latest/pinned year, actual fiscal intervals, saved-value provenance, equipment/group/source occurrences, hierarchy and full-scope share denominators. Keep unaccounted/overallocated or unsupported negative flow contributions accessible; never fabricate negative Sankey links. |
 | Report result charts | Durable report/analysis context and report-specific periods/measures. Prepared rows alone do not establish provenance. |
 
-Existing chart availability does not establish compatible capture or editing for every source/type combination. Exploration support has its own capability approval and observation-fidelity checks. Pending composition/hierarchy/flow support and new capture locations require their own approval.
+Existing chart availability does not establish compatible capture or editing for every source/type combination. Exploration support has its own capability approval and observation-fidelity checks. Composition support has its own chart-specific approval; new capture locations still require source-owned fidelity adapters.
 
 ## Planned Home and report reuse
 

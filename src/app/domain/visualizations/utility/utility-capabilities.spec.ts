@@ -6,7 +6,7 @@ describe('utility capability boundaries', () => {
   const source = utilityVisualizationFixture().sources[0] as UtilityVisualizationSource;
   const chart = { kind: 'time-series' as const, defaultTraceType: 'line' as const, interval: 'monthly' as const, stack: 'none' as const };
   it('advertises only implemented shapes and exact chart settings', () => {
-    expect(utilityCapabilities(source).shapes).toEqual(['time-series']);
+    expect(utilityCapabilities(source).shapes).toEqual(['time-series', 'breakdown', 'hierarchy']);
     expect(utilityChartSupport(source, chart).state).toBe('supported');
     expect(utilityChartSupport(source, { ...chart, stack: 'absolute' }).state).toBe('supported');
     expect(utilityChartSupport(source, { ...chart, defaultTraceType: 'area' }).state).toBe('supported');
