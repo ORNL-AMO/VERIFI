@@ -103,14 +103,22 @@ const comparison = variant({
   'previous-year': object({ kind: enumeration('previous-year'), basis }),
   custom: dateRange(object({ kind: enumeration('custom'), start: civilDate, end: civilDate }))
 });
+const explorationFields = { interval: enumeration('monthly', 'yearly') };
+const pairFields = { ...explorationFields, grouping: enumeration('none', 'year', 'month'), scale: enumeration('raw', 'z-score') };
+const selector: Check = (value, path, issues) => {
+  object({ sourceId: text, resourceGuid: text, seriesId: text }, ['resourceGuid', 'seriesId'])(value, path, issues);
+  if (value && typeof value === 'object' && Number(Object.hasOwn(value, 'resourceGuid')) + Number(Object.hasOwn(value, 'seriesId')) !== 1)
+    issue(issues, path, 'Choose exactly one resource or category series.');
+};
 const chart = variant({
   'time-series': object({ kind: enumeration('time-series'), defaultTraceType: enumeration('line', 'bar', 'area'), interval: enumeration('monthly', 'yearly', 'native'),
     stack: enumeration('none', 'absolute', 'percent') }),
-  scatter: object({ kind: enumeration('scatter'), xSeriesId: text, ySeriesId: text, showFit: boolean }, ['xSeriesId', 'ySeriesId']),
-  correlation: object({ kind: enumeration('correlation'), statistic: enumeration('r', 'r-squared'), scale: enumeration('raw', 'z-score') }),
-  heatmap: object({ kind: enumeration('heatmap'), dimension: enumeration('month-year', 'series-period'), scale: enumeration('linear', 'diverging') }),
+  scatter: object({ kind: enumeration('scatter'), ...pairFields, x: selector, y: selector, xSeriesId: text, ySeriesId: text, showFit: boolean }, ['interval', 'grouping', 'scale', 'x', 'y', 'xSeriesId', 'ySeriesId']),
+  correlation: object({ kind: enumeration('correlation'), ...pairFields, statistic: enumeration('r', 'r-squared'), view: enumeration('pairs', 'matrix'), showFit: boolean }, ['interval', 'grouping', 'view', 'showFit']),
+  heatmap: object({ kind: enumeration('heatmap'), ...explorationFields, dimension: enumeration('month-year', 'series-period'), scale: enumeration('linear', 'diverging'), normalization: enumeration('raw', 'z-score') }, ['interval', 'normalization']),
   breakdown: object({ kind: enumeration('breakdown'), type: enumeration('bar', 'donut'), values: enumeration('absolute', 'percent') }),
-  treemap: object({ kind: enumeration('treemap'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment')), values: enumeration('absolute', 'percent') }),
+  treemap: object({ kind: enumeration('treemap'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment', 'meter')), values: enumeration('absolute', 'percent') }),
+  sunburst: object({ kind: enumeration('sunburst'), hierarchy: array(enumeration('facility', 'group', 'source', 'equipment', 'meter')), values: enumeration('absolute', 'percent') }),
   sankey: object({ kind: enumeration('sankey'), flow: enumeration('source-to-equipment', 'source-to-group', 'energy-balance') })
 }, true);
 const seriesFields = { id: text, sourceId: text, metric: text, resourceGuid: text, label: text, color: text, traceType: enumeration('line', 'bar', 'area'),
@@ -186,10 +194,14 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
   for (const [index, series] of value.series.entries()) if (!value.sources.some(selected => selected.id === series.sourceId))
     need(`$.series[${index}].sourceId`, 'Choose a source declared in this definition.');
   if (!value.chart) need('$.chart', 'Choose a compatible chart.');
-  if (value.chart?.kind === 'scatter') for (const id of [value.chart.xSeriesId, value.chart.ySeriesId]) {
-    if (!value.series.some(series => series.id === id)) need('$.chart', 'Choose declared X and Y series.');
+  if (value.chart?.kind === 'scatter') {
+    for (const axis of ['x', 'y'] as const) {
+      const selected = value.chart[axis], legacy = axis === 'x' ? value.chart.xSeriesId : value.chart.ySeriesId;
+      if (selected ? !value.sources.some(source => source.id === selected.sourceId) : !value.series.some(series => series.id === legacy))
+        need('$.chart', 'Choose declared X and Y series.');
+    }
   }
-  if (value.chart?.kind === 'treemap' && (!value.chart.hierarchy.length || new Set(value.chart.hierarchy).size !== value.chart.hierarchy.length))
+  if ((value.chart?.kind === 'treemap' || value.chart?.kind === 'sunburst') && (!value.chart.hierarchy.length || new Set(value.chart.hierarchy).size !== value.chart.hierarchy.length))
     need('$.chart.hierarchy', 'Choose non-repeated hierarchy levels.');
   return issues;
 }

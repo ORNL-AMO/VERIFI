@@ -42,6 +42,10 @@ with translucent fills so the intensity differences follow the surrounding theme
 Use `name="sankey"` for weighted flow ribbons branching from a source to multiple
 destinations. Its source is [`sankey.svg`](../../../../assets/icons/sankey.svg).
 
+Use `name="sunburst"` for a shaded hierarchy arranged in concentric, subdivided
+rings. Its source is [`sunburst.svg`](../../../../assets/icons/sunburst.svg), with
+translucent `currentColor` fills matching the heatmap and treemap treatment.
+
 ## Energy-use icons
 
 Use `name="pump"` for the open-center pump and `name="fan"` for the scroll fan

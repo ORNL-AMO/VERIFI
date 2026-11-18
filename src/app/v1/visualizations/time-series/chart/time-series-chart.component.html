@@ -1,22 +1,6 @@
 @if (model) {
-  <div class="time-series-actions"><button type="button" class="v1-btn v1-btn--quiet" (click)="resetZoom()">Reset zoom</button></div>
   @if (model.chart.stack === 'percent') { <p class="time-series-share">Share of visible selected contributions for each period. Incomplete or zero totals have no percentage.</p> }
-  @if (model.partial && model.showPartialNotice !== false) { <p class="time-series-warning" role="status">Partial coverage: review unavailable observations and omitted contributions before interpreting totals.</p> }
-  @if (model.omissions?.length) {
-    <details class="time-series-notices time-series-omissions"><summary>Omitted readings</summary>
-      @for (group of model.omissions; track $index) {
-        <details><summary>{{ group.label }} · {{ group.issue }} ({{ group.readings.length }})</summary>
-          <ul>@for (reading of group.readings; track $index) { <li>{{ reading }}</li> }</ul>
-        </details>
-      }
-    </details>
-  }
-  @if (model.warnings.length) {
-    <details class="time-series-notices"><summary>Data quality and overlap notices ({{ model.warnings.length }})</summary>
-      <ul>@for (warning of model.warnings; track warning) { <li>{{ warning }}</li> }</ul>
-    </details>
-  }
   @if (model.traces.length) {
-    <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)" role="img" [attr.aria-label]="model.title + '. Exact values and quality follow in an accessible data table.'"></div>
+    <div class="time-series-canvas" [appV1ECharts]="option()" (dataZoomChanged)="updateZoom($event)"></div>
   } @else { <p role="status">No visible series. Open a data source’s item settings and turn on Show trace.</p> }
 }

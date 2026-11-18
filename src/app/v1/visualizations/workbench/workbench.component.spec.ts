@@ -30,7 +30,7 @@ import { utilityMeasureKey } from '@domain/visualizations/utility/utility-select
 import type { UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { analysisDefinition, analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
-import { meter } from '@app/v1/data/meters/facility-meters.testing';
+import { group, meter, reading } from '@app/v1/data/meters/facility-meters.testing';
 import { UtilitySourceEditorComponent } from '../utility/editors/source-editor/utility-source-editor.component';
 import { ItemSettingsComponent } from '../time-series/settings/item-settings/item-settings.component';
 import { VISUALIZATION_DATA_SOURCES } from '../visualization-data-sources';
@@ -412,25 +412,25 @@ describe('visualization workbench', () => {
   it('shows only selected predictors’ full-history status in the header, independent of dates and visibility', () => {
     const { component, fixture, status } = predictorSetup();
     const header = (fixture.nativeElement as HTMLElement).querySelector('header')!;
-    expect(header.querySelector('[aria-label="Predictor data status"]')?.textContent).toContain('Has errors');
-    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.data.gap', 'predictor.data.negative', 'predictor.weather.warning']));
-    expect(component.predictorStatusIssues().every(issue => issue.entity.guid === 'predictor-a')).toBe(true);
-    expect(header.querySelectorAll('[aria-label="Predictor data issues"] > li')).toHaveLength(2);
+    expect(header.querySelector('[aria-label="Source data status"]')?.textContent).toContain('Has errors');
+    expect(component.dataStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.data.gap', 'predictor.data.negative', 'predictor.weather.warning']));
+    expect(component.dataStatusIssues().every(issue => issue.entity.guid === 'predictor-a')).toBe(true);
+    expect(header.querySelectorAll('[aria-label="Source data issues"] > li')).toHaveLength(2);
     expect(header.querySelector('details')?.textContent).toContain('More data issues');
-    header.querySelector<HTMLButtonElement>('[aria-label="Predictor data issues"] button')!.click();
-    expect(status.navigateTo).toHaveBeenCalledWith(component.predictorStatusIssues()[0]);
+    header.querySelector<HTMLButtonElement>('[aria-label="Source data issues"] button')!.click();
+    expect(status.navigateTo).toHaveBeenCalledWith(component.dataStatusIssues()[0]);
   });
   it('uses status preferences and dismissals rather than raising independent chart findings', () => {
     const { component, fixture, store, predictor } = predictorSetup();
     const publish = (snapshot: AccountWorkspaceSnapshot) => { store.publishCommitted(snapshot, store.selections()); fixture.detectChanges(); };
     publish({ ...store.snapshot()!, predictors: [{ ...predictor, canBeNegative: true, ignoreWeatherDataWarning: true, ignoreDateStatusChecks: true }] });
-    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(['predictor.data.gap']);
+    expect(component.dataStatusIssues().map(issue => issue.code)).toEqual(['predictor.data.gap']);
     publish({ ...store.snapshot()!, predictors: [{ ...predictor, canBeNegative: true, ignoreDateStatusChecks: true }], predictorData: store.predictorData().filter(reading => reading.month === 1) });
-    const warning = component.predictorStatusIssues()[0];
+    const warning = component.dataStatusIssues()[0];
     expect(warning.code).toBe('predictor.weather.warning');
     publish({ ...store.snapshot()!, account: { ...store.account()!, statusWarningDismissals: [createStatusWarningDismissal(warning, '2026-11-15T12:00:00Z')] } });
-    expect(component.predictorStatusIssues()).toEqual([]);
-    expect(component.predictorHeaderStatus().label).toBe('All data valid');
+    expect(component.dataStatusIssues()).toEqual([]);
+    expect(component.dataHeaderStatus().label).toBe('All data valid');
   });
   it('follows account and facility expected-range and staleness preferences', () => {
     const { component, fixture, store, predictor } = predictorSetup();
@@ -439,30 +439,66 @@ describe('visualization workbench', () => {
       account: { ...store.account()!, expectedRangeSettings: { enabled: true }, dataStalenessSettings: { enabled: true, thresholdMonths: 3 } },
       facilities: store.facilities().map(facility => ({ ...facility, expectedRangeSettings: { useAccountSettings: true, enabled: true }, dataStalenessSettings: { useAccountSettings: true, enabled: true, thresholdMonths: 3 } })),
       predictorData: [1, 2, 3, 4, 1000].map((amount, index) => ({ ...getNewIdbPredictorData(predictor), guid: `outlier-${index}`, amount, year: 2024, month: index + 1 })) });
-    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.currency.stale', 'predictor.quality.outlier']));
+    expect(component.dataStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.currency.stale', 'predictor.quality.outlier']));
     publish({ ...store.snapshot()!, account: { ...store.account()!, expectedRangeSettings: { enabled: false }, dataStalenessSettings: { enabled: false, thresholdMonths: 3 } } });
-    expect(component.predictorStatusIssues()).toEqual([]);
+    expect(component.dataStatusIssues()).toEqual([]);
     publish({ ...store.snapshot()!, facilities: store.facilities().map(facility => ({ ...facility, expectedRangeSettings: { useAccountSettings: false, enabled: true }, dataStalenessSettings: { useAccountSettings: false, enabled: true, thresholdMonths: 3 } })) });
-    expect(component.predictorStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.currency.stale', 'predictor.quality.outlier']));
+    expect(component.dataStatusIssues().map(issue => issue.code)).toEqual(expect.arrayContaining(['predictor.currency.stale', 'predictor.quality.outlier']));
   });
   it('clears status while checks are pending/unavailable or account and selected resources change, and guards stale actions', () => {
     const { component, fixture, store, route, status, statusState, sibling } = predictorSetup();
-    const old = component.predictorStatusIssues()[0];
+    const old = component.dataStatusIssues()[0];
     for (const state of ['evaluating', 'error', 'idle'] as const) {
       statusState.set(state); fixture.detectChanges();
-      expect(component.predictorStatusIssues()).toEqual([]);
-      expect(component.predictorHeaderStatus().label).toBe(state === 'error' ? 'Checks unavailable' : 'Checks pending');
+      expect(component.dataStatusIssues()).toEqual([]);
+      expect(component.dataHeaderStatus().label).toBe(state === 'error' ? 'Checks unavailable' : 'Checks pending');
     }
     statusState.set('ready'); fixture.detectChanges();
     const definition = component.editor.definition()!;
     component.editor.applyDefinition({ ...definition, sources: definition.sources.map(source => source.kind === 'predictor' ? { ...source, selection: { kind: 'fixed', resource: 'predictor', guids: [sibling.guid] } } : source) });
     fixture.detectChanges();
-    expect(component.predictorStatusIssues().every(issue => issue.entity.guid === sibling.guid)).toBe(true);
-    component.openPredictorIssue(old); expect(status.navigateTo).not.toHaveBeenCalled();
+    expect(component.dataStatusIssues().every(issue => issue.entity.guid === sibling.guid)).toBe(true);
+    component.openDataIssue(old); expect(status.navigateTo).not.toHaveBeenCalled();
     route.set({ ...route(), accountGuid: 'account-b' }); fixture.detectChanges();
     expect(component.selectedPredictorGuids()).toEqual([]);
-    expect(component.predictorStatusIssues()).toEqual([]);
-    expect((fixture.nativeElement as HTMLElement).querySelector('[aria-label="Predictor data status"]')).toBeNull();
+    expect(component.dataStatusIssues()).toEqual([]);
+    expect((fixture.nativeElement as HTMLElement).querySelector('[aria-label="Source data status"]')).toBeNull();
+  });
+  function meterStatusSetup(grouped = false) {
+    const selected = meter({ id: 1, guid: 'meter-a', name: 'Included meter', groupId: 'group-a', ignoreDateStatusChecks: true });
+    const sibling = meter({ id: 2, guid: 'meter-b', name: 'Other meter', groupId: 'group-b', ignoreDateStatusChecks: true });
+    const definition = utilityVisualizationFixture({ kind: 'fixed', facilityGuids: ['facility-a'] });
+    const configured: VisualizationDefinition = { ...definition, period: { kind: 'fixed', basis: 'calendar', start: '2026-01-01', end: '2026-01-31' },
+      sources: definition.sources.map(source => source.kind === 'utility' && grouped ? { ...source, selectionMode: 'group', groupBy: 'group', selection: { kind: 'fixed', resource: 'meter-group', guids: ['group-a'] } } : source),
+      series: definition.series.map(series => ({ ...series, visible: false })) };
+    return { ...setup(configured, false, false, { meters: [selected, sibling],
+      meterGroups: [group({ guid: 'group-a', name: 'Included group' })],
+      meterData: [selected, sibling].map((item, index) => reading({ guid: `negative-${index}`, meterId: item.guid, totalEnergyUse: -5, totalCost: 0, year: 2024, month: 1 })) }), selected, sibling };
+  }
+  it.each([false, true])('shows shared meter checks for exact/group selections (%s) regardless of dates or hidden traces', grouped => {
+    const { component, fixture, status } = meterStatusSetup(grouped);
+    expect(component.selectedMeterGuids()).toEqual(['meter-a']);
+    const negative = component.dataStatusIssues().find(issue => issue.code === 'meter.data.negative');
+    expect(negative?.entity.guid).toBe('meter-a');
+    expect(component.dataStatusIssues().every(issue => issue.entity.guid === 'meter-a')).toBe(true);
+    const header = (fixture.nativeElement as HTMLElement).querySelector('header')!;
+    expect(header.querySelector('[aria-label="Source data status"]')!.textContent).toContain('Has errors');
+    const button = [...header.querySelectorAll<HTMLButtonElement>('[aria-label="Source data issues"] button, .visualization-workbench__more-issues button')].find(button => button.textContent?.includes(negative!.description))!;
+    button.click(); expect(status.navigateTo).toHaveBeenCalledWith(negative);
+  });
+  it('honors meter check preferences, live group membership, stale checks and obsolete actions', () => {
+    const { component, fixture, store, status, statusState, selected, sibling } = meterStatusSetup(true);
+    const negative = component.dataStatusIssues().find(issue => issue.code === 'meter.data.negative')!;
+    store.publishCommitted({ ...store.snapshot()!, meters: [{ ...selected, canBeNegative: true }, sibling] }, store.selections()); fixture.detectChanges();
+    expect(component.dataStatusIssues().some(issue => issue.code === 'meter.data.negative')).toBe(false);
+    component.openDataIssue(negative); expect(status.navigateTo).not.toHaveBeenCalled();
+    store.publishCommitted({ ...store.snapshot()!, meters: [{ ...selected, groupId: 'group-b' }, { ...sibling, groupId: 'group-a' }] }, store.selections()); fixture.detectChanges();
+    expect(component.selectedMeterGuids()).toEqual(['meter-b']);
+    expect(component.dataStatusIssues().some(issue => issue.code === 'meter.data.negative' && issue.entity.guid === 'meter-b')).toBe(true);
+    for (const state of ['evaluating', 'error', 'idle'] as const) {
+      statusState.set(state); fixture.detectChanges(); expect(component.dataStatusIssues()).toEqual([]);
+      expect(component.dataHeaderStatus().label).toBe(state === 'error' ? 'Checks unavailable' : 'Checks pending');
+    }
   });
   it('shows saved ownership and saves valid edits before leaving', async () => {
     const { fixture, component, submit } = setup();

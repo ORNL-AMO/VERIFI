@@ -20,4 +20,5 @@ export class AnalysisReportPreviewComponent {
   readonly unit = computed(() => this.document()?.unit ?? '');
   readonly groupContributions = computed(() => this.document()?.contributions ?? { groups: [], years: [] });
   readonly sections = computed(() => this.document()?.sections ?? []);
+  readonly canPresent = computed(() => this.report.state().state === 'ready' && this.sections().length > 0);
 }

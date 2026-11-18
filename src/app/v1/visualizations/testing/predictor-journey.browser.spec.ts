@@ -1,3 +1,4 @@
+import { previewValuesText } from './preview-values.testing';
 import { page, userEvent } from 'vitest/browser';
 import { PredictorEditorsModule } from '../predictor/predictor-editors.module';
 import { PredictorSourceEditorComponent } from '../predictor/source-editor/predictor-source-editor.component';
@@ -29,6 +30,58 @@ describe('saved predictor native journey', () => {
   let harness: IndexedDbTestHarness | undefined;
   let fixture: ComponentFixture<PreviewComponent> | undefined;
   afterEach(async () => { fixture?.destroy(); fixture = undefined; vi.restoreAllMocks(); if (harness) await harness.destroy(); harness = undefined; TestBed.resetTestingModule(); });
+  it('labels unitless heatmaps by facility and leaves missing months blank without hiding recorded zeroes', async () => {
+    TestBed.configureTestingModule({ imports: [VisualizationsModule], providers: [
+      { provide: LocalStorageService, useValue: { retrieve: () => null, store: () => {}, clear: () => {} } }
+    ] });
+    harness = await IndexedDbTestHarness.create('exploration-facility-labels');
+    const account = { ...getNewIdbAccount(), id: 1, guid: 'account-a' };
+    const facilities = ['Plant A', 'Plant B'].map((name, index) => ({ ...getNewIdbFacility(account), id: index + 1, guid: `facility-${index}`, name }));
+    const predictors = facilities.map((facility, index) => ({ ...getNewIdbPredictor(account.guid, facility.guid), id: index + 1,
+      guid: `production-${index}`, name: 'Production', unit: '' }));
+    const readings = predictors.flatMap((predictor, index) => [1, 3].map(month => ({ ...getNewIdbPredictorData(predictor), id: index * 3 + month,
+      guid: `reading-${index}-${month}`, year: 2025, month, amount: index === 0 && month === 1 ? 0 : month * (index + 1) })));
+    await harness.seed({ accounts: [account], facilities, predictor: predictors, predictorData: readings });
+    await TestBed.inject(AccountWorkspaceService).selectAccount(account.guid);
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const initial = { ...createVisualizationDefinition('Production history', account.guid,
+      { kind: 'fixed', facilityGuids: facilities.map(facility => facility.guid) }, 'predictor'),
+      chart: { kind: 'heatmap' as const, dimension: 'month-year' as const, scale: 'linear' as const } };
+    const selected = prepareDecisionChange(initial, { kind: 'predictor-selection', sourceId: 'source-1', predictorGuids: predictors.map(predictor => predictor.guid) }, { snapshot: store.snapshot()! });
+    if (selected.state === 'unchanged') throw new Error('Expected predictor selection');
+    fixture = TestBed.createComponent(PreviewComponent);
+    const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root'; root.style.width = '100%';
+    fixture.componentRef.setInput('definition', selected.definition);
+    fixture.componentRef.setInput('identity', { accountGuid: account.guid, workspaceRevision: store.revision(), definitionGuid: 'labels', definitionRevision: 1 });
+    fixture.detectChanges();
+    await vi.waitFor(() => {
+      fixture!.detectChanges();
+      const panels = [...root.querySelectorAll<HTMLElement>('.heatmap-chart')];
+      expect(panels).toHaveLength(2);
+      // The instance exists before its first option is applied on an animation frame.
+      expect(panels.every(panel => !!echarts.getInstanceByDom(panel)?.getOption())).toBe(true);
+    });
+    expect([...root.querySelectorAll('h3')].map(heading => heading.textContent)).toEqual(['Production · Plant A', 'Production · Plant B']);
+    const charts = [...root.querySelectorAll<HTMLElement>('.heatmap-chart')].map(element => echarts.getInstanceByDom(element)!);
+    expect(charts.every(chart => !!chart)).toBe(true);
+    charts.forEach((chart, index) => {
+      const options = chart.getOption() as {
+        visualMap: { text?: string[]; min: number; max: number }[];
+        series: { type: string; data: { value: number[]; cell: { value: number | null; text: string; marker: string; column: number } }[] }[];
+      };
+      expect(options.visualMap).toHaveLength(1);
+      expect(options.visualMap[0]).toMatchObject({ min: index ? 2 : 0, max: index ? 6 : 3 });
+      expect(options.visualMap[0].text?.every(label => /^\d+$/.test(label))).toBe(true);
+      expect(options.series[0].type).toBe('custom');
+      const february = options.series[0].data.find(point => point.cell.column === 1)!;
+      expect(february.value).toEqual([1, 0]);
+      expect(february.cell).toMatchObject({ value: null, marker: '', text: expect.stringContaining('No saved reading') });
+      expect(options.series[1].data.map(point => point.value[2])).toEqual(index ? [2, 6] : [0, 3]);
+    });
+    await page.screenshot({ element: root, path: '../../../../../.angular/vis7-facility-labels.png' });
+    expect(await harness.getAll('predictorData')).toEqual(readings);
+  });
+
   it('saves, renders, reopens and edits predictor bindings without source writes or meter calculations', async () => {
     TestBed.configureTestingModule({ imports: [VisualizationsModule], providers: [
       { provide: LocalStorageService, useValue: { retrieve: () => null, store: () => {}, clear: () => {} } }
@@ -65,8 +118,8 @@ describe('saved predictor native journey', () => {
       fixture.detectChanges();
       await vi.waitFor(() => { fixture!.detectChanges(); const state = fixture!.componentInstance.preview.state();
         expect(state.state, state.state === 'ready' ? undefined : state.message).toBe('ready'); expect(root.querySelector('canvas')).not.toBeNull(); });
-      expect(root.querySelector('table')!.textContent).toContain('Manual weather override');
-      expect(root.querySelector('table')!.textContent).toContain('2024-02-01');
+      expect(previewValuesText(fixture!)).toContain('Manual weather override');
+      expect(previewValuesText(fixture!)).toContain('2024-02-01');
       return root;
     };
     const initialRoot = await mount(created.value);
@@ -74,7 +127,7 @@ describe('saved predictor native journey', () => {
     const initialOptions = initialChart.getOption() as { yAxis: { name: string }[]; series: { yAxisIndex: number }[] };
     expect(initialOptions.yAxis.map(axis => axis.name)).toEqual(['']);
     expect(initialOptions.series.map(series => series.yAxisIndex)).toEqual([0, 0]);
-    expect(initialRoot.querySelector('table')!.textContent).toContain('100 widgets');
+    expect(previewValuesText(fixture!)).toContain('100 widgets');
     await page.screenshot({ element: initialRoot, path: '../../../../../.angular/predictor-multi-shared-axis.png' });
     const reopened = (await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(savedGuid))!;
     const styled = prepareDecisionChange(decode(reopened), { kind: 'item-style', sourceId: 'source-1', item: { resourceGuid: predictor.guid },

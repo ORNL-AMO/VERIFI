@@ -21,14 +21,16 @@ import { ReportOutputActionsComponent } from './output/report-output-actions/rep
 import { ReportWorkbenchShellComponent } from './workbench/shell/report-workbench-shell.component';
 import { ReportStageOutletComponent } from './workbench/stage-outlet/report-stage-outlet.component';
 import { PendingReportStageComponent } from './workbench/pending-stage/pending-report-stage.component';
+import { ReportPresentationComponent } from './presentation/report-presentation/report-presentation.component';
+import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 
 @NgModule({
-  declarations: [ReportAnalysisChecksStageComponent, ReportOutputActionsComponent, ReportAnalysisSelectionComponent, AnalysisChecksAcknowledgmentComponent,
+  declarations: [ReportPresentationComponent, ReportAnalysisChecksStageComponent, ReportOutputActionsComponent, ReportAnalysisSelectionComponent, AnalysisChecksAcknowledgmentComponent,
     AnalysisDataChecksComponent, ReportWorkbenchHeaderComponent, ReportWorkbenchShellComponent, ReportStageOutletComponent, PendingReportStageComponent],
-  imports: [AnalysisResultNumberPipe, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, WorkspaceSlideoutComponent,
+  imports: [ModalFocusTrapDirective, AnalysisResultNumberPipe, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, WorkspaceSlideoutComponent,
     ConfirmationDialogComponent, DataEmptyStateComponent, AnalysisStageNavigationComponent, DataWorkbenchResourceSwitcherComponent,
     DataWorkbenchFactsToggleComponent, StatusFindingActionComponent],
-  exports: [ReportAnalysisChecksStageComponent, ReportOutputActionsComponent, ReportAnalysisSelectionComponent, AnalysisChecksAcknowledgmentComponent,
+  exports: [ReportPresentationComponent, ReportAnalysisChecksStageComponent, ReportOutputActionsComponent, ReportAnalysisSelectionComponent, AnalysisChecksAcknowledgmentComponent,
     AnalysisDataChecksComponent, ReportWorkbenchHeaderComponent, ReportWorkbenchShellComponent, ReportStageOutletComponent,
     PendingReportStageComponent, StatusFindingActionComponent]
 })

@@ -1,3 +1,6 @@
+<app-report-presentation [title]="context.report()?.name || 'Facility analysis report'" [content]="reportContent"
+  [available]="canPresent()"/>
+<ng-template #reportContent>
 @let result = report.state();
 @let configuration = settings();
 @let selectedAnalysis = analysis();
@@ -50,3 +53,4 @@
     </article>
   }
 }
+</ng-template>

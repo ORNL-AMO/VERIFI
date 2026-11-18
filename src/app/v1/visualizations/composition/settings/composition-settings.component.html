@@ -1,0 +1,19 @@
+<div class="composition-settings" [formGroup]="form">
+  @if (kind() === 'breakdown') {
+    <label>Breakdown style<select class="v1-select" formControlName="type"><option value="bar">Bar</option><option value="donut">Donut</option></select></label>
+  }
+  @if (kind() !== 'sankey') {
+    <label>Display values<select class="v1-select" formControlName="values"><option value="absolute">Absolute</option><option value="percent">Percentage</option></select></label>
+  }
+  @if (kind() === 'treemap' || kind() === 'sunburst') {
+    <label>Hierarchy<select class="v1-select" formControlName="hierarchy"><option value="" disabled>Choose a hierarchy</option>
+      @if (retainedHierarchy()) { <option [value]="retainedHierarchy()">Saved hierarchy (review preset)</option> }
+      @for (preset of presets(); track preset.label) { <option [value]="preset.levels.join('/')">{{ preset.label }}</option> }
+    </select></label>
+  }
+  @if (kind() === 'sankey') {
+    <label>Flow<select class="v1-select" formControlName="flow"><option value="source-to-equipment">Source to equipment</option><option value="source-to-group">Source to group</option><option value="energy-balance">Facility energy balance</option></select></label>
+    <p>Energy balance requires whole-facility selections and current metered data. Over-allocation remains visible without negative links.</p>
+  }
+  <p>Composition uses one utility or Energy Use source and one period, without comparison overlays.</p>
+</div>

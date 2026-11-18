@@ -1,3 +1,4 @@
+import { previewValuesText } from './preview-values.testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
 import { firstValueFrom, filter, Subscription, take, timeout } from 'rxjs';
@@ -176,7 +177,7 @@ describe('saved utility journey across native browser boundaries', () => {
     await expectValue(first, 10);
     expect(workerMessages).toHaveBeenCalled();
     await vi.waitFor(() => expect((first.nativeElement as HTMLElement).querySelector('canvas')).not.toBeNull());
-    expect((first.nativeElement as HTMLElement).querySelector('tbody')?.textContent).toContain('Factory main');
+    expect(previewValuesText(first)).toContain('Factory main');
     const workerCount = workerMessages.mock.calls.length;
 
     const styled = decoded(saved);

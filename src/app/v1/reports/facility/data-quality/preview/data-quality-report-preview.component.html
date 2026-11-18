@@ -1,3 +1,6 @@
+<app-report-presentation [title]="editor.draft().name || 'Data Quality Report'" [content]="reportContent"
+  [available]="canPresent()"/>
+<ng-template #reportContent>
 @let state = results.state();
 @let draft = editor.draft();
 @let meterSections = meters();
@@ -133,3 +136,4 @@
     </section>
   }
 }
+</ng-template>

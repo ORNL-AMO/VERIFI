@@ -2,7 +2,7 @@ import type { VisualizationChart } from '@domain/visualizations/visualization-de
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 
 export type VisualizationChartChoiceId = 'line' | 'bar' | 'area' | 'scatter' | 'correlation'
-  | 'heatmap' | 'breakdown-bar' | 'donut' | 'treemap' | 'sankey';
+  | 'heatmap' | 'breakdown-bar' | 'donut' | 'treemap' | 'sunburst' | 'sankey';
 
 /** Pure catalog: selecting setup intent never requires a provider or a calculation. */
 export const VISUALIZATION_CHART_CHOICES: readonly { readonly value: VisualizationChartChoiceId; readonly label: string; readonly icon: IconName }[] = [
@@ -11,6 +11,7 @@ export const VISUALIZATION_CHART_CHOICES: readonly { readonly value: Visualizati
   { value: 'scatter', label: 'Scatter', icon: 'chartScatter' }, { value: 'correlation', label: 'Correlation', icon: 'covariate' },
   { value: 'heatmap', label: 'Heatmap', icon: 'heatmap' }, { value: 'breakdown-bar', label: 'Breakdown bar', icon: 'chartBar' },
   { value: 'donut', label: 'Donut', icon: 'chartDonut' }, { value: 'treemap', label: 'Treemap', icon: 'treemap' },
+  { value: 'sunburst', label: 'Sunburst', icon: 'sunburst' },
   { value: 'sankey', label: 'Sankey', icon: 'sankey' }
 ];
 
@@ -24,7 +25,8 @@ export function createVisualizationChart(choice: VisualizationChartChoiceId): Vi
     case 'breakdown-bar': return { kind: 'breakdown', type: 'bar', values: 'absolute' };
     case 'donut': return { kind: 'breakdown', type: 'donut', values: 'absolute' };
     case 'treemap': return { kind: 'treemap', hierarchy: [], values: 'absolute' };
-    case 'sankey': return { kind: 'sankey', flow: 'energy-balance' };
+    case 'sunburst': return { kind: 'sunburst', hierarchy: [], values: 'absolute' };
+    case 'sankey': return { kind: 'sankey', flow: 'source-to-equipment' };
   }
 }
 

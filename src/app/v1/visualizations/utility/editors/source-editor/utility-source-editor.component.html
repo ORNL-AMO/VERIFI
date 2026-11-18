@@ -81,7 +81,7 @@
       @if (issue(); as message) { <p role="alert">{{ message }}</p> }
     </app-visualization-decision-section>
     @for (item of items(); track item.key; let position = $index) {
-      <app-visualization-item-settings [item]="item" [position]="position" [itemCount]="items().length" [disabled]="disabled()" [editorKey]="context.editorKey ?? ''" [resetKey]="item.resetKey"
+      <app-visualization-item-settings [timeSeries]="context.definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="items().length" [disabled]="disabled()" [editorKey]="context.editorKey ?? ''" [resetKey]="item.resetKey"
         [expandedNodes]="context.expandedNodes ?? emptyExpanded" (requested)="request($event)" (sectionChanged)="setSection($event.id, $event.expanded)"/>
     } @empty { <p role="status">Select resources to configure their traces.</p> }
   </div>

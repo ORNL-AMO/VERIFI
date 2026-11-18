@@ -1,0 +1,7 @@
+:host { display: block; min-width: 0; border: 1px solid var(--v1-border); }
+article { padding: .8rem; }
+h3 { text-align: center; font-size: 1rem; overflow-wrap: anywhere; }
+p { text-align: center; font-size: .85rem; margin-bottom: .4rem; }
+.pair-chart { height: 360px; width: 100%; }
+.equation { overflow-wrap: anywhere; }
+@media print { :host { break-inside: avoid; } .pair-chart { height: 300px; } }

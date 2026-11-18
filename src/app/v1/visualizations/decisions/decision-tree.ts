@@ -1,3 +1,6 @@
+import { isCompositionChart, initializeCompositionChart } from '@domain/visualizations/visualization-composition';
+import { civilMonthRange, civilMonthIndex } from '@domain/visualizations/visualization-periods';
+import { isExplorationChart } from '@domain/visualizations/visualization-interval';
 import { replaceAnalysisBinding } from '../analysis/analysis-binding';
 import { analysisMeasureLabels, analysisSeriesId, analysisPeriodIssue } from '@domain/visualizations/analysis/facility-analysis-source';
 import { projectAnalysisItems, analysisChoices, analysisGroupChoices } from '../analysis/analysis-items';
@@ -193,24 +196,42 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     }
     nextSection = { kind: 'sources' };
   } else if (action.kind === 'chart') {
-    next = { ...definition, chart: action.chart };
-    if (definition.chart?.kind !== action.chart.kind) for (const source of definition.sources) {
-      const ownSeries = definition.series.filter(series => series.sourceId === source.id);
-      if (ownSeries.some(series => series.traceType !== undefined || series.overrides?.some(override => (override.accountGuid ?? definition.accountGuid) === definition.accountGuid && override.traceType !== undefined))) cleared.push('Per-item trace types');
-      for (const item of projectDecisionItems(definition, source.id, context.snapshot)) affect({ kind: 'item', sourceId: source.id, itemKey: item.key });
-      next = { ...next, series: next.series.map(series => {
-        if (series.sourceId !== source.id) return series;
-        const { traceType: _type, overrides: prior, ...base } = series;
-        const overrides = prior?.map(override => { if ((override.accountGuid ?? definition.accountGuid) !== definition.accountGuid) return override;
-          const { traceType: _overrideType, ...kept } = override; return kept; });
-        return { ...base, ...(overrides?.length ? { overrides } : {}) };
+    let chart = initializeCompositionChart(action.chart, definition.sources[0]?.kind, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope.kind === 'facility');
+    if (isCompositionChart(chart) && isCompositionChart(definition.chart) && 'values' in chart && 'values' in definition.chart
+      && (chart.kind !== definition.chart.kind || chart.kind === 'breakdown' && definition.chart.kind === 'breakdown' && chart.type !== definition.chart.type))
+      chart = { ...chart, values: definition.chart.values };
+    if ((chart.kind === 'treemap' || chart.kind === 'sunburst') && (definition.chart?.kind === 'treemap' || definition.chart?.kind === 'sunburst') && chart.kind !== definition.chart.kind)
+      chart = { ...chart, hierarchy: definition.chart.hierarchy, values: definition.chart.values };
+    if (chart.kind === 'time-series' && definition.sources.length === 1 && definition.sources[0].kind === 'energy-use') chart = { ...chart, interval: 'yearly' };
+    next = { ...definition, chart };
+    if (isCompositionChart(chart)) {
+      if (next.comparison.kind !== 'none') { cleared.push('Comparison overlay'); next = { ...next, comparison: { kind: 'none' } }; affect({ kind: 'period' }); }
+      if (next.sources.some(source => source.kind === 'energy-use') && !['latest-saved-year', 'fiscal-year'].includes(next.period.kind)) {
+        cleared.push('Multiple-year or unsupported annual period'); next = { ...next, period: { kind: 'latest-saved-year', basis: 'fiscal' } }; affect({ kind: 'period' });
+      }
+      if (next.sources.some(source => source.kind === 'utility') && next.period.kind === 'fixed') {
+        const start = civilMonthRange(civilMonthIndex(next.period.start)).start, end = civilMonthRange(civilMonthIndex(next.period.end)).end;
+        if (start !== next.period.start || end !== next.period.end) { cleared.push('Partial-month date boundaries'); next = { ...next, period: { ...next.period, start, end } }; affect({ kind: 'period' }); }
+      }
+      next = { ...next, sources: next.sources.map(source => {
+        if (source.kind !== 'utility' || source.dataMode !== 'billing-period' || source.measure === 'charge') return source;
+        cleared.push('Native bill observation mode'); affect({ kind: 'data-settings', sourceId: source.id }); return { ...source, dataMode: 'calendarized' };
       }) };
     }
     nextSection = { kind: 'sources' };
   } else if (action.kind === 'add-source') {
     let index = 1; while (definition.sources.some(source => source.id === `${action.sourceKind}-${index}`)) index++;
     const source = { ...createVisualizationDefinition('', definition.accountGuid, definition.facilitySelection, action.sourceKind).sources[0], id: `${action.sourceKind}-${index}` };
-    next = { ...definition, sources: [...definition.sources, source] };
+    if (isCompositionChart(definition.chart)) {
+      if (definition.chart.kind === 'sankey' ? source.kind !== 'energy-use' : !['utility', 'energy-use'].includes(source.kind)) return { state: 'unchanged' };
+      for (const previous of definition.sources) { clearItems(previous.id, true); affect({ kind: 'source', sourceId: previous.id }); }
+      cleared.push('Previous source configuration');
+      const chart = definition.chart.kind === 'treemap' || definition.chart.kind === 'sunburst'
+        ? initializeCompositionChart({ ...definition.chart, hierarchy: [] }, source.kind, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope.kind === 'facility') : definition.chart;
+      next = { ...definition, sources: [source], series: [], chart,
+        period: source.kind === 'energy-use' && !['latest-saved-year', 'fiscal-year'].includes(definition.period.kind) ? { kind: 'latest-saved-year', basis: 'fiscal' } : definition.period };
+      if (source.kind === 'energy-use' && !['latest-saved-year', 'fiscal-year'].includes(definition.period.kind)) { cleared.push('Unsupported annual period'); affect({ kind: 'period' }); }
+    } else next = { ...definition, sources: [...definition.sources, source] };
     nextSection = { kind: source.kind === 'utility' ? 'selection-mode' : 'source', sourceId: source.id };
   } else if (action.kind === 'remove-source-kind') {
     const removed = definition.sources.filter(source => source.kind === action.sourceKind);
@@ -244,7 +265,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         const repairAccountGroup = action.kind === 'analysis-defaults' && accountTarget && !!groupGuid;
         if (repairAccountGroup) { clearItems(source.id, true); cleared.push('Unsupported account group target'); }
         const changed = { ...(repairAccountGroup ? accountSource : source), measure, ...(action.kind === 'analysis-defaults' ? { settings: { unit: { kind: 'owner' as const } } } : {}) };
-        next = { ...definition, chart: { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line', interval, stack: 'none' },
+        next = { ...definition, chart: isExplorationChart(definition.chart) ? { ...definition.chart, interval } : { kind: 'time-series', defaultTraceType: definition.chart?.kind === 'time-series' ? definition.chart.defaultTraceType : 'line', interval, stack: 'none' },
           sources: definition.sources.map(item => item.id === source.id ? changed : item), series: definition.series.filter(item => !repairAccountGroup || item.sourceId !== source.id).map(item => item.sourceId === source.id ? { ...item, metric: measure } : item) };
         if (action.kind === 'analysis-defaults' || analysisPeriodIssue({ chart: next.chart!, period: next.period, comparison: next.comparison })) {
           if (next.period.kind !== 'all-history' || next.comparison.kind !== 'none') cleared.push('Incompatible period or comparison');
@@ -299,6 +320,8 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
         next = ensureSeries(useEquipmentHistorySettings(definition, source.id), { ...source, measure: 'consumption' });
         affect({ kind: 'period' }); affect({ kind: 'source', sourceId: source.id });
         if (!visualizationIntentEqual(next, definition)) cleared.push('Unsupported chart, period or Energy Use settings');
+      } else if (action.kind === 'equipment-denominator') {
+        next = { ...definition, sources: definition.sources.map(item => item.id === source.id ? { ...source, denominator: action.denominator } : item) };
       } else if (action.kind === 'equipment-unit') {
         next = { ...definition, sources: definition.sources.map(item => item.id === source.id ? { ...source, settings: { ...source.settings, unit: action.unit } } : item) };
       } else if (action.kind === 'item-style' && projectEquipmentItems(definition, source.id, context.snapshot).some(item => item.key === itemKey(action.item))) {
@@ -456,6 +479,16 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
       if (next.chart?.kind === 'time-series' && next.chart.interval === 'native') next = { ...next, chart: { ...next.chart, interval: 'monthly' } };
       cleared.push('Native bill observation view'); nextSection = { kind: 'data-settings', sourceId: source.id };
     }
+  }
+  if (next.chart?.kind === 'scatter' && ['selection-mode', 'toggle-resource', 'set-resources', 'source-settings', 'analysis-binding', 'remove-source-kind', 'energy-use-selection-mode', 'energy-use-resources', 'predictor-selection', 'equipment-selection', 'equipment-defaults', 'analysis-defaults'].includes(action.kind)) {
+    const chart = { ...next.chart };
+    for (const axis of ['x', 'y'] as const) {
+      const selector = chart[axis]; if (!selector) continue;
+      const items = projectDecisionItems(next, selector.sourceId, context.snapshot);
+      const retained = items.some(item => selector.resourceGuid !== undefined ? item.identity.resourceGuid === selector.resourceGuid : item.identity.seriesId === selector.seriesId);
+      if (!retained) { delete chart[axis]; cleared.push(`Scatter ${axis.toUpperCase()} series binding`); affect({ kind: 'chart' }); }
+    }
+    next = { ...next, chart };
   }
   next = cleanJson(next);
   if (visualizationIntentEqual(next, definition)) return { state: 'unchanged' };

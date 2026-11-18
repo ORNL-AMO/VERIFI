@@ -81,7 +81,7 @@ describe('native utility observations', () => {
       { meterData: [reading({ totalEnergyUse: 1000 })] });
     const actual = ready(resolveNativeUtility(saved, request));
     expect(actual.first).toMatchObject({ state: 'observed', value: 3 });
-    expect(actual.resolved.series[0]).toMatchObject({ unit: 'MWh', energyTreatment: 'source' });
+    expect(actual.resolved.series[0]).toMatchObject({ unit: 'MWh', energyTreatment: 'source', label: saved.meters[0].name });
   });
 
   it('converts water consumption using its physical unit and rejects an incompatible energy unit', () => {

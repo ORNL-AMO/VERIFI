@@ -7,6 +7,7 @@ import { FacilityReportsModule } from '../../facility-reports.module';
 import { FacilityAnalysisReportService } from '../analysis-report.service';
 import { facilityAnalysisReportFixture } from '../testing/analysis-report-test-fixtures';
 import { AnalysisReportPreviewComponent } from './analysis-report-preview.component';
+import { ReportPresentationController } from '../../../shared/presentation/report-presentation-controller';
 
 describe('continuous report with multiple groups in Chromium', () => {
   afterEach(async () => { TestBed.resetTestingModule(); await page.viewport(1280, 900); });
@@ -22,7 +23,7 @@ describe('continuous report with multiple groups in Chromium', () => {
     const labels = signal({ [first.idbGroupId]: 'Primary production group', 'second-group': 'Secondary process with a long descriptive group name' });
     const service = { context: { report: () => report, facility: () => source.facility, workspace: { facilityAnalyses: () => [analysis] } },
       state: signal({ state: 'ready', value: { results, checks: [] } }), groupNames: labels, setupRoute: () => ['/setup'] };
-    TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [provideRouter([]), { provide: FacilityAnalysisReportService, useValue: service }] });
+    TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [provideRouter([]), ReportPresentationController, { provide: FacilityAnalysisReportService, useValue: service }] });
     const fixture = TestBed.createComponent(AnalysisReportPreviewComponent);
     const root = fixture.nativeElement as HTMLElement;
     root.className = 'v1-root v1-palette-blueprint';

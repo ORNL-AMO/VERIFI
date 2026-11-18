@@ -1,3 +1,7 @@
+import { compositionSourceDetails } from '../composition/composition.models';
+import { isCompositionChart } from '@domain/visualizations/visualization-composition';
+import type { PreviewDetails } from './preview-registry';
+import { isExplorationChart, visualizationInterval } from '@domain/visualizations/visualization-interval';
 import { predictorCombinationSupported, isMixedPredictorSourceSet } from '@domain/visualizations/visualization-monthly-combination';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
@@ -11,14 +15,14 @@ import { PreviewIdentity, PreviewPresentation, PreviewRegistry } from './preview
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 
 /** These fields affect provider values. Trace styling, visibility and ordering do not. */
-function timeSeriesDataIntent(definition: VisualizationDefinition) {
+function visualizationDataIntent(definition: VisualizationDefinition) {
   return { sources: definition.sources, facilitySelection: definition.facilitySelection, period: definition.period, comparison: definition.comparison,
-    chart: definition.chart?.kind === 'time-series' ? { kind: 'time-series', interval: definition.chart.interval } : definition.chart,
+    chart: isCompositionChart(definition.chart) ? { kind: 'composition', balance: definition.chart.kind === 'sankey' && definition.chart.flow === 'energy-balance' } : isExplorationChart(definition.chart) ? { kind: definition.chart.kind, interval: visualizationInterval(definition.chart) } : definition.chart?.kind === 'time-series' ? { kind: 'time-series', interval: definition.chart.interval } : definition.chart,
     series: definition.series.map(series => ({ id: series.id, sourceId: series.sourceId, metric: series.metric, resourceGuid: series.resourceGuid })) };
 }
 
 export type PreviewState =
-  | { readonly state: 'inactive' | 'setup-required' | 'invalid' | 'unsupported' | 'loading' | 'empty' | 'missing-source' | 'error' | 'incompatible'; readonly message: string; readonly reasons?: readonly string[] }
+  | { readonly state: 'inactive' | 'setup-required' | 'invalid' | 'unsupported' | 'loading' | 'empty' | 'missing-source' | 'error' | 'incompatible'; readonly message: string; readonly reasons?: readonly string[]; readonly details?: PreviewDetails }
   | { readonly state: 'ready'; readonly component: Type<unknown>; readonly presentation: PreviewPresentation;
       readonly definition: VisualizationDefinition; readonly evidence: readonly VisualizationSourceEvidence[] };
 
@@ -60,12 +64,12 @@ export class PreviewController {
 
   update(definition: VisualizationDefinition | undefined, identity: PreviewIdentity | undefined, active = true): void {
     const previous = this.context;
-    if (!this.destroyed && this.resolving && active && previous?.active && definition?.chart?.kind === 'time-series'
-      && previous.definition?.chart?.kind === 'time-series' && identity && previous.identity
+    if (!this.destroyed && this.resolving && active && previous?.active && (definition?.chart?.kind === 'time-series' || isExplorationChart(definition?.chart) || isCompositionChart(definition?.chart))
+      && (previous.definition?.chart?.kind === 'time-series' || isExplorationChart(previous?.definition?.chart) || isCompositionChart(previous?.definition?.chart)) && identity && previous.identity
       && identity.accountGuid === definition.accountGuid && identity.accountGuid === previous.identity.accountGuid && identity.definitionGuid === previous.identity.definitionGuid
       && identity.workspaceRevision === previous.identity.workspaceRevision && this.workspace.isReady()
       && this.workspace.snapshot() === this.resolveSnapshot && decodeVisualizationDefinition(definition).state === 'valid'
-      && visualizationIntentEqual(timeSeriesDataIntent(definition), timeSeriesDataIntent(previous.definition))) {
+      && visualizationIntentEqual(visualizationDataIntent(definition), visualizationDataIntent(previous.definition))) {
       // Let the current numerical acquisition finish and seed its existing session cache.
       // Afterwards resolve the latest presentation normally, with fresh request/evidence identities.
       this.context = { definition: structuredClone(definition), identity: { ...identity }, active };
@@ -98,7 +102,7 @@ export class PreviewController {
     if (!predictorCombinationSupported(decoded.definition)) {
       this.value.set({ state: 'unsupported', message: 'Use monthly calendarized meters and predictors without comparison. Your saved setup is preserved.' }); return;
     }
-    if (decoded.definition.sources.length > 1 && decoded.definition.sources.some((source, index) => providers[index]!.describe(source).allowMultipleSources === false)) {
+    if (!isExplorationChart(decoded.definition.chart) && decoded.definition.sources.length > 1 && decoded.definition.sources.some((source, index) => providers[index]!.describe(source).allowMultipleSources === false)) {
       this.value.set({ state: 'unsupported', message: 'A selected source does not support combinations. Your saved setup is preserved.' }); return;
     }
     const unsupported = decoded.definition.sources.flatMap((source, index) => {
@@ -175,14 +179,14 @@ export class PreviewController {
       if (unsupportedChart) {
         this.value.set({ state: 'incompatible', message: unsupportedChart.resolution.state === 'ready' ? 'These chart settings are not supported.' : unsupportedChart.resolution.message }); return;
       }
-      if (definition.sources.some(source => source.kind === 'predictor') && evidence.every(entry => entry.resolution.state === 'ready' || entry.resolution.state === 'empty') && !evidence.some(entry => {
+      if (!isExplorationChart(definition.chart) && definition.sources.some(source => source.kind === 'predictor') && evidence.every(entry => entry.resolution.state === 'ready' || entry.resolution.state === 'empty') && !evidence.some(entry => {
         const result = entry.resolution;
         return (result.state === 'ready' || result.state === 'empty') && result.resolved?.data.kind === 'time-series'
           && result.resolved.data.rows.some(row => Object.values(row.values).some(value => value.state === 'observed'));
       })) {
         this.value.set({ state: 'empty', message: 'No usable values in the selected month range.', reasons: emptyPreviewReasons(evidence) }); return;
       }
-      const unavailable = evidence.find(entry => entry.resolution.state === 'missing-source' || entry.resolution.state === 'error') ?? evidence.find(entry => entry.resolution.state !== 'ready' && !(isMixedPredictorSourceSet(definition.sources) && entry.resolution.state === 'empty' && entry.resolution.resolved));
+      const unavailable = evidence.find(entry => entry.resolution.state === 'missing-source' || entry.resolution.state === 'error') ?? evidence.find(entry => entry.resolution.state !== 'ready' && !((isMixedPredictorSourceSet(definition.sources) || isExplorationChart(definition.chart)) && entry.resolution.state === 'empty' && entry.resolution.resolved));
       if (unavailable && unavailable.resolution.state !== 'ready') {
         const resolution = unavailable.resolution;
         this.value.set({ state: resolution.state === 'waiting' ? 'loading' : resolution.state === 'invalid-analysis' ? 'error' : resolution.state,
@@ -192,7 +196,8 @@ export class PreviewController {
       const compatibility = checkVisualizationCompatibility(definition, evidence);
       if (compatibility.state !== 'compatible') {
         this.value.set({ state: 'incompatible', message: 'Review the data sources and chart settings.',
-          reasons: compatibility.reasons.map(reason => reason.message) }); return;
+          reasons: compatibility.reasons.map(reason => reason.message),
+          ...(isCompositionChart(definition.chart) ? { details: compositionSourceDetails(definition, evidence) } : {}) }); return;
       }
       const presenter = this.registry.presenter(definition.chart!.kind)!;
       const presentation = await presenter.prepare(definition, evidence, abort.signal);

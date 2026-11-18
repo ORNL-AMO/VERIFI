@@ -1,3 +1,5 @@
+import { isCompositionChart, compositionPeriodIssue } from './visualization-composition';
+import { isExplorationChart, visualizationInterval, explorationChartIssue } from './visualization-interval';
 import { timeSeriesStackIssues } from './visualization-time-series';
 import { isMixedPredictorSourceSet } from './visualization-monthly-combination';
 import { allowsMixedAxisUnits } from './visualization-source-provider';
@@ -20,10 +22,11 @@ export interface ChartCapability {
 export const CHART_CAPABILITIES: Readonly<Record<VisualizationChart['kind'], ChartCapability>> = {
   'time-series': { kind: 'time-series', shapes: ['time-series'], controls: ['series', 'appearance', 'axes', 'stacking'], allowDateOverride: true },
   scatter: { kind: 'scatter', shapes: ['pairs', 'time-series'], controls: ['series', 'appearance', 'axes', 'fit'], allowDateOverride: true },
-  correlation: { kind: 'correlation', shapes: ['matrix', 'pairs', 'time-series'], controls: ['series', 'appearance', 'normalization'], allowDateOverride: true },
-  heatmap: { kind: 'heatmap', shapes: ['matrix', 'time-series'], controls: ['series', 'appearance'], allowDateOverride: true },
+  correlation: { kind: 'correlation', shapes: ['matrix', 'pairs', 'time-series'], controls: ['series', 'appearance', 'normalization', 'fit'], allowDateOverride: true },
+  heatmap: { kind: 'heatmap', shapes: ['matrix', 'time-series'], controls: ['series', 'appearance', 'normalization'], allowDateOverride: true },
   breakdown: { kind: 'breakdown', shapes: ['breakdown'], controls: ['series', 'appearance', 'denominator'], allowDateOverride: true },
   treemap: { kind: 'treemap', shapes: ['hierarchy'], controls: ['series', 'appearance', 'hierarchy', 'denominator'], allowDateOverride: true },
+  sunburst: { kind: 'sunburst', shapes: ['hierarchy'], controls: ['series', 'appearance', 'hierarchy', 'denominator'], allowDateOverride: true },
   sankey: { kind: 'sankey', shapes: ['flow'], controls: ['series', 'appearance', 'denominator'], allowDateOverride: true }
 };
 
@@ -93,6 +96,14 @@ function observations(data: VisualizationResolvedData['data']): readonly Visuali
     case 'hierarchy': return data.nodes.map(node => node.observation);
     case 'flow': return data.links.map(link => link.observation);
   }
+}
+
+/** Visibility changes geometry, while original observations remain available in source details. */
+function visibleCompositionObservations(definition: VisualizationDefinition, resolved: VisualizationResolvedData): readonly VisualizationObservation[] {
+  if (!resolved.composition) return observations(resolved.data);
+  const visible = new Set(resolveVisualizationSeries(definition, resolved.series).map(series => series.metadata.id));
+  return [...resolved.composition.contributions, ...resolved.composition.residuals ?? []]
+    .filter(contribution => visible.has(contribution.seriesId)).map(contribution => contribution.observation);
 }
 
 function explicitSourceFacilities(source: VisualizationSource): readonly string[] | undefined {
@@ -239,16 +250,17 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('capability', 'This source does not support the requested measure, aggregation, period, comparison, or chart.', source.id);
     if (!sameIntent(chart, chartSupport.chart) || chartSupport.state !== 'supported')
       add('capability', chartSupport.state === 'unsupported' ? chartSupport.reasons.join(' ') : 'Review support for these exact chart settings.', source.id);
-    if (capabilities.allowMultipleSources === false && definition.sources.length > 1)
+    if (capabilities.allowMultipleSources === false && definition.sources.length > 1 && !isExplorationChart(chart))
       add('capability', 'This source supports only one source configuration at a time.', source.id);
     if (Object.keys(source.settings ?? {}).some(key => !capabilities.settings.includes(key as 'unit' | 'energyTreatment')))
       add('capability', 'This source cannot preserve the requested setting binding.', source.id);
     if (chart.kind === 'time-series' && chart.stack !== 'none' && !capabilities.controls.includes('stacking')
       || definition.series.some(series => series.sourceId === source.id && series.axis === 'right') && !capabilities.controls.includes('axes')
       || chart.kind === 'scatter' && chart.showFit && !capabilities.controls.includes('fit')
-      || chart.kind === 'correlation' && chart.scale === 'z-score' && !capabilities.controls.includes('normalization'))
+      || chart.kind === 'correlation' && chart.scale === 'z-score' && !capabilities.controls.includes('normalization')
+      || chart.kind === 'heatmap' && chart.normalization === 'z-score' && !capabilities.controls.includes('normalization'))
       add('capability', 'This source does not support the requested chart transformation.', source.id);
-    if (resolution.state !== 'ready' && !(isMixedPredictorSourceSet(definition.sources) && resolution.state === 'empty' && resolution.resolved)) {
+    if (resolution.state !== 'ready' && !((isMixedPredictorSourceSet(definition.sources) || isExplorationChart(chart)) && resolution.state === 'empty' && resolution.resolved)) {
       add(resolution.state === 'missing-source' ? 'missing-source' : 'data', resolution.message, source.id); continue;
     }
     const resolved = 'resolved' in resolution ? resolution.resolved : undefined;
@@ -257,7 +269,7 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
       add('data', 'Empty source evidence cannot contain observed values.', source.id);
     if (!capabilities.controls.includes('axes') && resolveVisualizationSeries(definition, resolved.series).some(entry => entry.selected.axis === 'right'))
       add('capability', 'This source does not support the requested axis override.', source.id);
-    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope, resolution.state === 'empty' && isMixedPredictorSourceSet(definition.sources)));
+    reasons.push(...resolvedDataReasons(definition, source, resolved, request.identity.scope, resolution.state === 'empty' && (isMixedPredictorSourceSet(definition.sources) || isExplorationChart(chart))));
     if (!chartCapability.shapes.includes(resolved.data.kind) || !capabilities.shapes.includes(resolved.data.kind)
       || !capabilities.alignments.includes(resolved.alignment.kind))
       add('capability', 'This chart cannot preserve the resolved data shape.', source.id);
@@ -286,18 +298,18 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     if (!resolved.periods.length) add('period', 'Resolve actual native period intervals before rendering.', source.id);
     if (observations(resolved.data).some(point => point.state === 'observed' && !Number.isFinite(point.value)))
       add('data', 'Nonfinite observations cannot be rendered as valid data.', source.id);
-    if ((chart.kind === 'sankey' || chart.kind === 'treemap' || chart.kind === 'breakdown' && chart.type === 'donut')
-      && observations(resolved.data).some(point => point.state === 'observed' && point.value < 0))
+    if ((chart.kind === 'sankey' || chart.kind === 'treemap' || chart.kind === 'sunburst' || chart.kind === 'breakdown' && chart.type === 'donut')
+      && visibleCompositionObservations(definition, resolved).some(point => point.state === 'observed' && point.value < 0))
       add('data', 'This composition contains unsupported negative contributions; use the source details to repair it.', source.id);
     resolvedSources.push({ source, resolved });
   }
   const allMetadata = resolvedSources.flatMap(entry => entry.resolved.series);
   const selected = resolveVisualizationSeries(definition, allMetadata);
-  if (!selected.length && (chart.kind !== 'time-series' || !resolveVisualizationSeries(definition, allMetadata, true).length)) add('series', 'Choose at least one available series.');
+  if (!selected.length && !(isCompositionChart(chart) && resolveVisualizationSeries(definition, allMetadata, true).length) && !isExplorationChart(chart) && (chart.kind !== 'time-series' || !resolveVisualizationSeries(definition, allMetadata, true).length)) add('series', 'Choose at least one available series.');
   for (const series of definition.series) {
     const available = allMetadata.some(metadata => metadata.sourceId === series.sourceId && metadata.metric === series.metric
       && (series.resourceGuid === undefined || metadata.resourceGuid === series.resourceGuid));
-    if (!available && series.visible !== false && !(isMixedPredictorSourceSet(definition.sources) && evidence.some(entry => entry.request.source.id === series.sourceId && entry.resolution.state === 'empty' && entry.resolution.resolved?.series.length === 0) && !series.resourceGuid)) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
+    if (!available && series.visible !== false && !((isMixedPredictorSourceSet(definition.sources) || isExplorationChart(chart)) && evidence.some(entry => entry.request.source.id === series.sourceId && entry.resolution.state === 'empty' && entry.resolution.resolved?.series.length === 0) && !series.resourceGuid)) add('series', `Resolve the selected metric/resource for ${series.id}.`, series.sourceId);
   }
   for (const { selected: series, metadata } of selected) {
     const entry = resolvedSources.find(entry => entry.source.id === series.sourceId)!;
@@ -316,15 +328,25 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     if (treatment?.kind === 'pinned' && metadata.energyTreatment !== treatment.value)
       add('units', 'Resolve the pinned site/source treatment before rendering.', series.sourceId);
   }
+  if (isExplorationChart(chart)) {
+    const issue = explorationChartIssue(chart);
+    if (issue) add('capability', issue);
+    if (definition.comparison.kind !== 'none') add('period', 'Exploration uses one selected period without comparison.');
+    if (resolvedSources.some(entry => entry.resolved.periods.some(period => period.interval !== visualizationInterval(chart)))) add('period', 'Choose the same monthly or yearly observation interval for every source.');
+  }
   const shapeKinds = new Set(resolvedSources.map(entry => entry.resolved.data.kind));
   if (shapeKinds.size > 1) add('capability', 'Combine sources only after a provider supplies one compatible data shape.');
-  if (new Set(resolvedSources.map(entry => `${entry.resolved.alignment.kind}:${entry.resolved.alignment.key}`)).size > 1)
+  if (!isExplorationChart(chart) && new Set(resolvedSources.map(entry => `${entry.resolved.alignment.kind}:${entry.resolved.alignment.key}`)).size > 1)
     add('period', 'Sources must declare the same observation alignment; implicit pairing is unsupported.');
   const periods = resolvedSources.flatMap(entry => entry.resolved.periods);
-  if (new Set(periods.map(period => `${period.interval}:${period.basis}`)).size > 1)
+  if (!isExplorationChart(chart) && new Set(periods.map(period => `${period.interval}:${period.basis}`)).size > 1)
     add('period', 'Sources need compatible native intervals and calendar/fiscal alignment.');
   if (chart.kind === 'time-series' && chart.interval !== 'native' && periods.some(period => period.interval !== chart.interval))
     add('period', 'The requested chart interval requires an explicitly supported provider projection.');
+  if (isExplorationChart(chart) && visualizationInterval(chart) === 'yearly') {
+    const intervals = [...new Map(periods.map(period => [`${period.start}/${period.end}`, period])).values()].sort((a, b) => a.start.localeCompare(b.start));
+    if (intervals.some((period, index) => index > 0 && intervals[index - 1].end >= period.start)) add('period', 'Yearly exploration requires matching actual start/end dates. The selected fiscal calendars overlap with different annual intervals.');
+  }
   const fiscalSlots = new Map<string, Set<string>>();
   for (const period of periods.filter(period => period.interval === 'yearly' && period.basis === 'fiscal')) {
     if (period.fiscalYear === undefined) { add('period', 'Fiscal intervals require their authoritative fiscal-year identity.'); continue; }
@@ -332,33 +354,38 @@ export function checkVisualizationCompatibility(definition: VisualizationDefinit
     const intervals = fiscalSlots.get(key) ?? new Set<string>();
     intervals.add(`${period.start}:${period.end}`); fiscalSlots.set(key, intervals);
   }
-  if ([...fiscalSlots.values()].some(intervals => intervals.size > 1))
+  // Exploration pairs actual dates; fiscal labels may name the start or end year of the same interval.
+  if (!isExplorationChart(chart) && [...fiscalSlots.values()].some(intervals => intervals.size > 1))
     add('period', 'Fiscal rollups require the same actual interval for each year and comparison role, not just matching labels.');
-  if (chart.kind !== 'scatter' && chart.kind !== 'correlation') {
+  if (chart.kind !== 'scatter' && chart.kind !== 'correlation' && !(chart.kind === 'heatmap' && (chart.dimension === 'month-year' || chart.normalization === 'z-score'))) {
     for (const axis of ['left', 'right'] as const) {
       const axisSeries = selected.filter(entry => chart.kind !== 'time-series' || entry.selected.axis === axis);
       const axisCapabilities = [...new Set(axisSeries.map(entry => entry.metadata.sourceId))].flatMap(sourceId => evidence.filter(entry => entry.request.identity.sourceId === sourceId).map(entry => entry.capabilities));
-      if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}`)).size > 1)
+      if (!allowsMixedAxisUnits(chart, axisCapabilities, definition.sources) && new Set(axisSeries.map(entry => `${entry.metadata.dimension}:${entry.metadata.unit}:${entry.metadata.currency ?? ''}:${chart.kind === 'heatmap' ? entry.metadata.energyTreatment ?? '' : ''}`)).size > 1)
         add('units', 'Use compatible units and currency on each axis; composition totals require one meaning.');
     }
   }
   for (const issue of timeSeriesStackIssues(definition, selected, evidence)) add(issue.code, issue.message);
-  if (['breakdown', 'treemap', 'sankey'].includes(chart.kind)) {
+  if (isCompositionChart(chart)) {
+    if (new Set(resolvedSources.flatMap(entry => entry.resolved.periods.map(period => `${period.start}/${period.end}`))).size > 1) add('period', 'Composition requires one common actual period; annual snapshots and incompatible intervals cannot be combined.');
+    const periodIssue = compositionPeriodIssue(definition);
+    if (periodIssue) add('period', periodIssue);
+    if (definition.sources.length !== 1 || !['utility', 'energy-use'].includes(definition.sources[0].kind)) add('capability', 'Composition uses one utility or Energy Use source configuration.');
+    if (chart.kind === 'breakdown' && chart.values === 'percent' && resolvedSources.some(entry => visibleCompositionObservations(definition, entry.resolved).some(point => point.state === 'observed' && point.value < 0))) add('data', 'Percentage breakdowns require nonnegative contributions. Choose absolute bars.');
     if (selected.some(entry => !entry.metadata.additive)) add('units', 'Stacking and composition require authoritative additive measures.');
     const contributions = new Set<string>();
     for (const { metadata } of selected) {
-      if (!metadata.contributionKeys?.length || metadata.contributionKeys.some(key => !key.trim())) {
+      const emptyComposition = resolvedSources.some(entry => entry.resolved.composition && entry.resolved.series.includes(metadata) && !entry.resolved.composition.contributions.some(value => value.seriesId === metadata.id && value.observation.state === 'observed'));
+      if (!emptyComposition && (!metadata.contributionKeys?.length || metadata.contributionKeys.some(key => !key.trim()))) {
         add('data', 'Resolve canonical underlying contribution identities before computing totals or stacks.'); continue;
       }
-      for (const key of metadata.contributionKeys) {
+      for (const key of metadata.contributionKeys ?? []) {
         if (contributions.has(key)) add('data', 'These series overlap underlying contributions; select a non-overlapping total.');
         contributions.add(key);
       }
     }
     if (new Set(selected.map(entry => entry.metadata.energyTreatment ?? 'not-applicable')).size > 1)
       add('units', 'Site and source energy treatments may be compared but cannot contribute to one stack or composition total.');
-    if (chart.kind === 'time-series' && new Set(selected.map(entry => entry.selected.axis)).size > 1)
-      add('units', 'Stacking cannot combine different axes.');
   }
   if (reasons.length) return { state: 'unavailable', reasons };
   const controls = chartCapability.controls.filter(control => evidence.every(entry => entry.capabilities.controls.includes(control)));

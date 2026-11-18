@@ -1,0 +1,23 @@
+<div [formGroup]="form">
+  <label>Observation interval<select class="v1-select" formControlName="interval"><option value="monthly">Monthly</option><option value="yearly">Yearly (matching actual periods)</option></select></label>
+  @if (kind() === 'scatter') {
+    <label>X series<select class="v1-select" formControlName="x"><option value="">Choose one series</option>@if (missingX()) { <option [value]="form.controls.x.value">Unavailable saved X series</option> }@for (choice of choices(); track choice.key) { <option [value]="choice.key">{{ choice.label }}</option> }</select></label>
+    <label>Y series<select class="v1-select" formControlName="y"><option value="">Choose one series</option>@if (missingY()) { <option [value]="form.controls.y.value">Unavailable saved Y series</option> }@for (choice of choices(); track choice.key) { <option [value]="choice.key">{{ choice.label }}</option> }</select></label>
+  }
+  @if (kind() === 'correlation') {
+    <p>Every unique pair of visible selected series appears once. Pair order follows series order.</p>
+    <label>View<select class="v1-select" formControlName="view"><option value="pairs">All pairwise plots</option><option value="matrix">Coefficient matrix</option></select></label>
+    <label>Matrix statistic<select class="v1-select" formControlName="statistic"><option value="r">Signed correlation (r)</option><option value="r-squared">R-squared (R²)</option></select></label>
+  }
+  @if (kind() !== 'heatmap') {
+    <label>Point colors<select class="v1-select" formControlName="grouping"><option value="none">None</option><option value="year">Calendar year</option><option value="month">Month of year</option></select></label>
+    <label>Axes<select class="v1-select" formControlName="scale"><option value="raw">Original values</option><option value="z-score">Standardized (z-score)</option></select></label>
+    <label class="check"><input type="checkbox" formControlName="showFit">Show linear fit</label>
+    <p>Statistics use at least three complete paired observations. Missing, excluded and partial observations are omitted separately for each pair.</p>
+  } @else {
+    <label>Layout<select class="v1-select" formControlName="dimension"><option value="month-year">Month by year (one panel per series)</option><option value="series-period">Series by time</option></select></label>
+    <label>Values<select class="v1-select" formControlName="normalization"><option value="raw">Original values</option><option value="z-score">Standardized (z-score)</option></select></label>
+    <label>Color scale<select class="v1-select" formControlName="colorScale"><option value="linear">Sequential</option><option value="diverging">Diverging around zero</option></select></label>
+    <p>Raw Series by time needs compatible units and measures. Standardized values allow mixed units and retain original observations.</p>
+  }
+</div>

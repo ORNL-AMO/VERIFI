@@ -1,6 +1,6 @@
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import type { AnalysisResultVisualizationSource, UtilitySelectionMode, UtilityVisualizationSource, VisualizationChart, VisualizationDefinition,
-  EnergyUseSelectionMode, SettingBinding, VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType } from '@domain/visualizations/visualization-definition';
+  EnergyUseVisualizationSource, EnergyUseSelectionMode, SettingBinding, VisualizationFacilitySelection, VisualizationSourceKind, VisualizationTraceType } from '@domain/visualizations/visualization-definition';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 
@@ -57,6 +57,7 @@ export type VisualizationDecisionAction =
   | { readonly kind: 'energy-use-resources'; readonly sourceId: string; readonly ids: readonly string[] }
   | { readonly kind: 'equipment-selection'; readonly sourceId: string; readonly equipmentGuids: readonly string[] }
   | { readonly kind: 'equipment-defaults'; readonly sourceId: string }
+  | { readonly kind: 'equipment-denominator'; readonly sourceId: string; readonly denominator: EnergyUseVisualizationSource['denominator'] }
   | { readonly kind: 'equipment-unit'; readonly sourceId: string; readonly unit: SettingBinding<string> }
   | { readonly kind: 'predictor-selection'; readonly sourceId: string; readonly predictorGuids: readonly string[]; readonly all?: boolean }
   | { readonly kind: 'measure'; readonly sourceId: string; readonly measure: UtilityVisualizationSource['measure'] }

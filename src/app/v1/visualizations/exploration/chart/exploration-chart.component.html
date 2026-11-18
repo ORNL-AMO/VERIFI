@@ -1,0 +1,20 @@
+@if (value(); as view) {
+  <h2>{{ view.title }}</h2>
+  @if (!view.series.length) { <p role="status">No visible series. Restore series visibility in Data Sources.</p> }
+  @if (view.chart.kind !== 'heatmap' && !view.pairs.length) { <p role="status">Select at least two visible series to explore a relationship.</p> }
+  @if (view.chart.kind !== 'heatmap' && !matrix()) {
+    <div class="pair-grid">@for (pair of view.pairs; track pair.id) {
+      <app-exploration-pair-panel [model]="view" [pair]="pair"/>
+    }</div>
+  }
+  @for (panel of panels(); track panel.id) {
+    <section class="heatmap-panel" [attr.aria-label]="panel.title">
+      <h3>{{ panel.title }}</h3>
+      @if (panel.empty) { <p role="status">No usable values for this panel.</p> }
+      <div class="heatmap-scroll" tabindex="0" role="region" [attr.aria-label]="panel.title + ' chart'">
+        <div class="heatmap-chart" [style.height.px]="panel.height" [style.min-width.px]="panel.width" [appV1ECharts]="panel.option" [deferUntilVisible]="true"></div>
+      </div>
+    </section>
+  }
+  @if (view.chart.kind === 'heatmap') { <p class="cell-key">Blank: no data · * Partial coverage · × Excluded · — Unavailable standardized value.</p> }
+}

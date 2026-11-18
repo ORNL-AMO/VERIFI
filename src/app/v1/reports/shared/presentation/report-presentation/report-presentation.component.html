@@ -1,0 +1,30 @@
+@if (!presenting()) { <ng-container [ngTemplateOutlet]="content()"/> }
+<ng-template #overlay>
+  <section #surface class="report-presentation" role="dialog" aria-modal="true" [attr.aria-label]="title() + ' presentation'"
+    appModalFocusTrap modalInitialFocus=".report-presentation__close" (escapePressed)="close()">
+    <header class="report-presentation__toolbar">
+      <p role="status">{{ fallbackMessage() }}</p>
+      <button type="button" class="report-presentation__control report-presentation__close" aria-label="Close presentation" title="Close presentation"
+        (click)="close()"><app-ui-icon name="close"/></button>
+    </header>
+    <div #viewport class="report-presentation__scroll" tabindex="0" role="region" aria-label="Report content">
+      <div class="report-presentation__frame" [style.width.px]="scaledWidth()" [style.height.px]="scaledHeight()">
+        <div #reportDocument class="report-presentation__document" [style.width.px]="documentWidth()"
+          [style.transform]="'scale(' + zoomPercent() / 100 + ')'" [attr.data-v1-chart-pixel-ratio-scale]="maximumZoom / 100">
+          <ng-container [ngTemplateOutlet]="content()"/>
+        </div>
+      </div>
+    </div>
+    <footer class="report-presentation__footer">
+      <div class="report-presentation__zoom" role="group" aria-label="Report zoom">
+        <button type="button" class="report-presentation__control" aria-label="Zoom out" title="Zoom out"
+          [disabled]="zoomPercent() <= minimumZoom" (click)="zoomOut()"><app-ui-icon name="zoomOut"/></button>
+        <button type="button" class="report-presentation__control report-presentation__percentage" aria-label="Reset zoom to 100%" title="Reset zoom to 100%"
+          (click)="resetZoom()">{{ zoomPercent() }}%</button>
+        <button type="button" class="report-presentation__control" aria-label="Zoom in" title="Zoom in"
+          [disabled]="zoomPercent() >= maximumZoom" (click)="zoomIn()"><app-ui-icon name="zoomIn"/></button>
+        <span class="v1-sr-only" role="status">Report zoom: {{ zoomPercent() }}%</span>
+      </div>
+    </footer>
+  </section>
+</ng-template>

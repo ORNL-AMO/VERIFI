@@ -155,3 +155,22 @@
   white-space: nowrap !important;
   border: 0 !important;
 }
+
+/* Saved figures can span pages; release the workspace viewport only for their print route. */
+@media print {
+  .v1-root:has(app-visualization-workbench),
+  .v1-root:has(app-visualization-workbench) .v1-route-stage,
+  .v1-root:has(app-visualization-workbench) app-workspace-shell,
+  .v1-root:has(app-visualization-workbench) .v1-workspace,
+  .v1-root:has(app-visualization-workbench) .v1-workspace__main {
+    display: block;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .v1-root:has(app-visualization-workbench) app-shell-header,
+  .v1-root:has(app-visualization-workbench) app-primary-rail,
+  .v1-root:has(app-visualization-workbench) app-section-nav,
+  .v1-root:has(app-visualization-workbench) app-support-panel,
+  .v1-root:has(app-visualization-workbench) .v1-workspace__notifications { display: none; }
+}

@@ -1,3 +1,4 @@
+import { visualizationInterval } from '@domain/visualizations/visualization-interval';
 import { Component, DestroyRef, Input, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,7 +35,7 @@ export class AnalysisSourceEditorComponent {
     const analysis = this.workspace.facilityAnalyses().find(item => item.guid === source.analysisGuid);
     const group = analysis?.groups.find(item => item.idbGroupId === source.groupGuid);
     return (Object.entries(analysisMeasureLabels) as [AnalysisResultVisualizationSource['measure'], string][])
-      .filter(([measure]) => definition?.chart?.kind === 'time-series' && definition.chart.interval === 'yearly'
+      .filter(([measure]) => visualizationInterval(definition?.chart) === 'yearly'
         ? ['actual', 'calculated', 'annual-improvement', 'total-improvement'].includes(measure)
         : !['annual-improvement', 'total-improvement'].includes(measure) && (!measure.startsWith('banked-') || !!analysis?.hasBanking && !!group?.applyBanking))
       .map(([value, label]) => ({ value, label }));
@@ -79,6 +80,6 @@ export class AnalysisSourceEditorComponent {
   private hydrate(): void {
     const source = this.source(), chart = this.view()?.definition.chart;
     this.form.reset({ groupGuid: source?.groupGuid ?? '', measure: source?.mode === 'result' ? source.measure : 'actual',
-      interval: chart?.kind === 'time-series' && chart.interval === 'yearly' ? 'yearly' : 'monthly' }, { emitEvent: false });
+      interval: visualizationInterval(chart) === 'yearly' ? 'yearly' : 'monthly' }, { emitEvent: false });
   }
 }

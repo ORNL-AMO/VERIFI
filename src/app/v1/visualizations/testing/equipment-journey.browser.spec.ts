@@ -1,3 +1,4 @@
+import { previewValuesText } from './preview-values.testing';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
@@ -68,7 +69,7 @@ describe('saved equipment history native journey', () => {
       const seeded = await harness.getAll('facilityEnergyUseEquipment');
       await TestBed.inject(AccountWorkspaceService).reloadActiveWorkspace(true);
       fixture.componentRef.setInput('identity', { accountGuid: 'account-a', workspaceRevision: store.revision(), definitionGuid: saved.value.guid, definitionRevision: 1 });
-      await vi.waitFor(() => { fixture!.detectChanges(); expect((fixture!.nativeElement as HTMLElement).querySelector('table')?.textContent).toContain('30 kWh'); });
+      await vi.waitFor(() => { fixture!.detectChanges(); expect(previewValuesText(fixture!)).toContain('30 kWh'); });
       let edited = reopened.definition;
       for (const action of [
         { kind: 'equipment-unit' as const, sourceId: 'source-1', unit: { kind: 'pinned' as const, value: 'MJ' } },
@@ -84,8 +85,8 @@ describe('saved equipment history native journey', () => {
       fixture.componentRef.setInput('definition', read.definition);
       fixture.componentRef.setInput('identity', { accountGuid: 'account-a', workspaceRevision: store.revision(), definitionGuid: saved.value.guid, definitionRevision: 2 });
       const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root'; root.style.width = '100%';
-      await vi.waitFor(() => { fixture!.detectChanges(); expect(root.querySelector('table')?.textContent).toContain('108 MJ'); });
-      expect(root.querySelector('table')!.textContent).toContain('Facility equipment');
+      await vi.waitFor(() => { fixture!.detectChanges(); expect(previewValuesText(fixture!)).toContain('108 MJ'); });
+      expect(previewValuesText(fixture!)).toContain('Facility equipment');
       for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
         await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)'; fixture.detectChanges();
         await page.screenshot({ element: root, path: `../../../../../.angular/equipment-e2-facility-chart-${label}.png` });
@@ -94,7 +95,7 @@ describe('saved equipment history native journey', () => {
       const printSession = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
       await printSession.send('Emulation.setEmulatedMedia', { media: 'print' });
       try {
-        expect(getComputedStyle(root.querySelector('.time-series-actions')!).display).toBe('none');
+        expect(root.querySelector('.time-series-actions, table')).toBeNull();
         await page.screenshot({ element: root, path: '../../../../../.angular/equipment-e2-facility-print.png' });
       } finally { await printSession.send('Emulation.setEmulatedMedia', { media: '' }); }
       expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(seeded);
@@ -135,9 +136,9 @@ describe('saved equipment history native journey', () => {
       return root;
     };
     const first = await mount(created.value);
-    expect(first.querySelector('table')!.textContent).toContain('Carried forward from FY 2024');
-    expect(first.querySelector('table')!.textContent).toContain('Partial coverage');
-    expect(first.querySelector('table')!.textContent).toContain('2023-07-01');
+    expect(previewValuesText(fixture!)).toContain('Carried forward from FY 2024');
+    expect(previewValuesText(fixture!)).toContain('Partial coverage');
+    expect(previewValuesText(fixture!)).toContain('2023-07-01');
     const reopened = (await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(created.value.guid))!;
     let edited: VisualizationDefinition = { ...decode(reopened), period: { kind: 'fiscal-year' as const, year: 2027 } };
     for (const action of [
@@ -150,7 +151,7 @@ describe('saved equipment history native journey', () => {
     const updated = await commands.submit({ kind: 'update', accountGuid: account.guid, guid: reopened.guid, expectedRevision: reopened.revision, definition: edited });
     if (updated.state !== 'committed' || !updated.value) throw new Error('Expected saved edit');
     const root = await mount((await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(reopened.guid))!);
-    expect(root.querySelector('table')!.textContent).toContain('0 MJ'); expect(root.querySelector('table')!.textContent).toContain('2026-07-01');
+    expect(previewValuesText(fixture!)).toContain('0 MJ'); expect(previewValuesText(fixture!)).toContain('2026-07-01');
     const options = echarts.getInstanceByDom(root.querySelector<HTMLElement>('.time-series-canvas')!)!.getOption() as { xAxis: { data: string[]; axisLabel: { formatter: (key: string) => string } }[]; series: { name: string; type: string; yAxisIndex: number }[] };
     expect(options.xAxis[0].data.map(key => options.xAxis[0].axisLabel.formatter(key))).toEqual(['FY 2027']);
     expect(options.series[0]).toMatchObject({ type: 'bar', name: 'Saved pump', yAxisIndex: 1 });
@@ -166,8 +167,8 @@ describe('saved equipment history native journey', () => {
     const printSession = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await printSession.send('Emulation.setEmulatedMedia', { media: 'print' });
     try {
-      expect(getComputedStyle(root.querySelector('.time-series-actions')!).display).toBe('none');
-      expect(root.querySelector('table')!.textContent).toContain('Source FY 2026');
+      expect(root.querySelector('.time-series-actions, table')).toBeNull();
+      expect(previewValuesText(fixture!)).toContain('Source FY 2026');
       await page.screenshot({ element: root, path: '../../../../../.angular/equipment-e1-print.png' });
     } finally { await printSession.send('Emulation.setEmulatedMedia', { media: '' }); }
     fixture!.componentInstance.preview.update({ ...edited, sources: edited.sources.map(source => ({ ...source, selection: { kind: 'fixed', resource: 'equipment', guids: ['deleted-equipment'] } })) }, { accountGuid: account.guid, workspaceRevision: store.revision(), definitionGuid: reopened.guid, definitionRevision: 3 });

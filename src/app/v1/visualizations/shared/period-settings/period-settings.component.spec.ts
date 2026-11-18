@@ -37,6 +37,24 @@ describe('shared visualization period editing', () => {
     component.useSaved(); expect(component.form.controls.kind.value).toBe('all-history'); expect(validityChanged).toHaveBeenLastCalledWith(false);
   });
 
+  it('changes utility date inputs to whole months on composition conversion and exposes the pinned fiscal year input', () => {
+    TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
+    const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();
+    const definition = { ...utilityVisualizationFixture(), period: { kind: 'fixed' as const, start: '2026-01-01', end: '2026-03-31', basis: 'calendar' as const } };
+    const context = { definition, disabled: false, editorKey: 'utility', changed };
+    fixture.componentRef.setInput('context', context); fixture.detectChanges();
+    expect(fixture.componentInstance.form.controls.start.value).toBe('2026-01-01');
+    fixture.componentRef.setInput('context', { ...context, definition: { ...definition, chart: { kind: 'breakdown', type: 'donut', values: 'absolute' } } }); fixture.detectChanges();
+    const component = fixture.componentInstance, root = fixture.nativeElement as HTMLElement;
+    expect(component.form.controls.start.value).toBe('2026-01'); expect(component.issue()).toBeUndefined();
+    expect(changed).not.toHaveBeenCalled();
+    component.selectChoice(component.form.controls.kind, 'fiscal-year'); fixture.detectChanges();
+    expect(root.querySelector('input[formcontrolname="year"]')).not.toBeNull();
+    component.form.controls.year.setValue(2025);
+    expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fiscal-year', year: 2025 }, comparison: { kind: 'none' } });
+    fixture.destroy();
+  });
+
   it.each(['monthly', 'yearly'] as const)('uses the %s Analysis policy for rendered inputs and comparisons', interval => {
     TestBed.configureTestingModule({ imports: [PeriodSettingsModule] });
     const fixture = TestBed.createComponent(PeriodSettingsComponent), changed = vi.fn();

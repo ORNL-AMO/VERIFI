@@ -1,3 +1,4 @@
+import { previewValuesText } from '../../testing/preview-values.testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
 import { firstValueFrom } from 'rxjs';
@@ -56,7 +57,7 @@ describe('Energy Use source repair and facility journeys in Chromium', () => {
     preview.componentRef.setInput('identity', { accountGuid: 'account-a', workspaceRevision: TestBed.inject(AccountWorkspaceStore).revision(), definitionGuid: record.guid, definitionRevision: record.revision });
     preview.detectChanges();
     await vi.waitFor(() => { preview!.detectChanges(); expect(preview!.componentInstance.preview.state().state).toBe('ready'); });
-    expect((preview.nativeElement as HTMLElement).querySelector('table')?.textContent).toContain('36 MJ');
+    expect(previewValuesText(preview!)).toContain('36 MJ');
   }
 
   it.each(['equipment', 'group', 'linked-meter-group', 'facility', 'equipment-type'] as const)('reviews %s source repair, keeps canceled intent, and reopens an explicitly selected replacement', async mode => {
@@ -122,7 +123,7 @@ describe('Energy Use source repair and facility journeys in Chromium', () => {
     expect(await harness.getAll('savedVisualizations')).toEqual(savedBefore);
     await firstValueFrom(harness.dbService.update('facilityEnergyUseEquipment', { ...original })); await workspace.reloadActiveWorkspace(true);
     await render(created.value);
-    expect((preview!.nativeElement as HTMLElement).querySelector('table')!.textContent).toContain('Saved choice');
+    expect(previewValuesText(preview!)).toContain('Saved choice');
     expect(await harness.getAll('savedVisualizations')).toEqual(savedBefore);
     expect((await harness.getAll('facilityEnergyUseEquipment'))[0]).toEqual(original);
   });

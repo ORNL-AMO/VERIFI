@@ -1,3 +1,4 @@
+import { isCompositionChart } from '@domain/visualizations/visualization-composition';
 import { analysisChoices } from '../../analysis/analysis-items';
 import { replaceAnalysisBinding } from '../../analysis/analysis-binding';
 import { selectedEnergyUseIds } from '@domain/visualizations/energy-use/equipment-selection';
@@ -95,8 +96,11 @@ export class LibraryLifecycle {
     && this.editor()!.accountGuid === this.workspace.account()?.guid);
   readonly canContinueFacilities = computed(() => this.canEditDraft() && this.ownerValid());
   readonly selectedChart = computed(() => VISUALIZATION_CHART_CHOICES.find(choice => choice.value === this.draft().chart));
+  readonly composition = computed(() => !!this.draft().chart && isCompositionChart(createVisualizationChart(this.draft().chart!)));
+  readonly availableDataSources = computed(() => VISUALIZATION_DATA_SOURCES.filter(source => !this.composition() || this.draft().sourceKinds.includes(source.value) || (this.draft().chart === 'sankey' ? source.value === 'energy-use' : ['utility', 'energy-use'].includes(source.value))));
   readonly selectedDataSources = computed(() => VISUALIZATION_DATA_SOURCES.filter(sourceKind => this.draft().sourceKinds.includes(sourceKind.value)));
   readonly dataSourcesValid = computed(() => this.draft().sourceKinds.length > 0
+    && (!this.composition() || this.draft().sourceKinds.length === 1 && (this.draft().chart === 'sankey' ? this.draft().sourceKinds[0] === 'energy-use' : ['utility', 'energy-use'].includes(this.draft().sourceKinds[0])))
     && new Set(this.draft().sourceKinds).size === this.draft().sourceKinds.length
     && this.selectedDataSources().length === this.draft().sourceKinds.length);
   readonly canContinueSources = computed(() => this.canEditDraft() && this.ownerValid() && !!this.selectedChart() && this.dataSourcesValid());
@@ -151,7 +155,7 @@ export class LibraryLifecycle {
     return value.resourceIds.length > 0 && value.resourceIds.every(id => this.resourceChoices().some(choice => choice.value === id));
   });
   readonly draftDefinition = computed(() => this.buildDefinition());
-  readonly nativeAvailable = computed(() => { const definition = this.draftDefinition(); const source = definition?.sources.find(source => source.kind === 'utility'); return !!definition && !!source && nativeObservationAvailable(definition, source.id, this.workspace.snapshot()!); });
+  readonly nativeAvailable = computed(() => { const definition = this.draftDefinition(); const source = definition?.sources.find(source => source.kind === 'utility'); return !this.composition() && !!definition && !!source && nativeObservationAvailable(definition, source.id, this.workspace.snapshot()!); });
   readonly canContinueResources = computed(() => this.canEditDraft() && this.ownerValid() && this.resourcesValid());
   readonly canContinueObservation = computed(() => this.canContinueResources() && (this.draft().dataMode === 'calendarized' || this.nativeAvailable()));
   readonly canSubmit = computed(() => this.canEditDraft() && !!this.draft().name.trim() && this.form.controls.name.valid
@@ -284,7 +288,8 @@ export class LibraryLifecycle {
   continueFacilities(): void { if (this.canContinueFacilities()) { this.ownerChosen.set(true); this.step.set('chart'); } }
   selectChart(chart: VisualizationChartChoiceId): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.ownerValid() || !VISUALIZATION_CHART_CHOICES.some(choice => choice.value === chart)) return;
-    this.form.controls.chart.setValue(chart); this.step.set('sources');
+    this.form.controls.chart.setValue(chart);
+    this.step.set('sources');
   }
   selectRecipe(recipe: Exclude<VisualizationRecipe, 'custom'>): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.ownerValid()) return;
@@ -313,6 +318,7 @@ export class LibraryLifecycle {
   toggleSource(kind: VisualizationSourceKind): void {
     if (!this.canEditDraft() || this.editor()?.entry || !this.selectedChart() || !VISUALIZATION_DATA_SOURCES.some(source => source.value === kind)) return;
     const selected = this.form.controls.sourceKinds.value;
+    if (this.composition() && (!this.availableDataSources().some(source => source.value === kind) || !selected.includes(kind) && selected.length > 0)) return;
     const apply = () => { this.form.controls.sourceKinds.setValue(selected.includes(kind) ? selected.filter(value => value !== kind) : [...selected, kind]); if (kind === 'analysis' && selected.includes(kind)) this.form.controls.analysisGuid.setValue(null); if (kind === 'utility' && selected.includes(kind)) { this.resetBindings(); this.form.controls.selectionMode.setValue(null); } if (kind === 'energy-use' && selected.includes(kind)) this.form.patchValue({ energyUseResourceIds: [], energyUseMode: null }); if (kind === 'predictor' && selected.includes(kind)) { this.form.controls.predictorGuids.setValue([]); this.form.controls.predictorAll.setValue(false); } };
     if (kind === 'predictor' && selected.includes(kind) && (this.form.controls.predictorAll.value || this.form.controls.predictorGuids.value.length)) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Predictor selection'], affectedNodeIds: [] }, apply);
     else if (kind === 'analysis' && selected.includes(kind) && this.form.controls.analysisGuid.value) this.requestDecision({ state: 'confirm', definition: this.draftDefinition()!, cleared: ['Analysis selection'], affectedNodeIds: [] }, apply);

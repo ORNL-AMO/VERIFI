@@ -1,6 +1,10 @@
 import * as echarts from 'echarts/core';
 export { echarts };
 import {
+  PieChart,
+  PieSeriesOption,
+  SunburstChart,
+  SunburstSeriesOption,
   SankeyChart,
   SankeySeriesOption,
   TreemapChart,
@@ -17,6 +21,8 @@ import {
   ScatterSeriesOption
 } from 'echarts/charts';
 import {
+  AriaComponent,
+  AriaComponentOption,
   DataZoomComponent,
   DataZoomComponentOption,
   DatasetComponent,
@@ -39,6 +45,9 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { LegacyGridContainLabel } from 'echarts/features';
 
 echarts.use([
+  AriaComponent,
+  PieChart,
+  SunburstChart,
   SankeyChart,
   TreemapChart,
   BarChart,
@@ -60,6 +69,8 @@ echarts.use([
 ]);
 
 export type V1EChartsOption = echarts.ComposeOption<
+  | PieSeriesOption
+  | SunburstSeriesOption
   | SankeySeriesOption
   | TreemapSeriesOption
   | BarSeriesOption
@@ -67,6 +78,7 @@ export type V1EChartsOption = echarts.ComposeOption<
   | HeatmapSeriesOption
   | LineSeriesOption
   | ScatterSeriesOption
+  | AriaComponentOption
   | DataZoomComponentOption
   | DatasetComponentOption
   | GridComponentOption

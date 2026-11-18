@@ -1,3 +1,4 @@
+import { isCompositionChart } from '@domain/visualizations/visualization-composition';
 import { Component, DestroyRef, Input, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -6,7 +7,7 @@ import type { PeriodSettingsContext } from '../source-editor-context';
 import { applyPeriodForm, periodEditorPolicy, periodFormIssue, periodFormValue, type PeriodEditorNotice, type PeriodEditorPolicy, type PeriodFormValue } from './period-settings.models';
 
 function periodSettingsFingerprint(definition: VisualizationDefinition): string {
-  return JSON.stringify([definition.facilitySelection, definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor'), definition.sources.some(source => source.kind === 'energy-use'), definition.sources.some(source => source.kind === 'analysis') ? definition.chart : undefined]);
+  return JSON.stringify([definition.facilitySelection, isCompositionChart(definition.chart), definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor'), definition.sources.some(source => source.kind === 'energy-use'), definition.sources.some(source => source.kind === 'analysis') ? definition.chart : undefined]);
 }
 
 @Component({ selector: 'app-visualization-period-settings', standalone: false, templateUrl: './period-settings.component.html',

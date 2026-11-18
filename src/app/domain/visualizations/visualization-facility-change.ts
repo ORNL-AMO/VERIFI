@@ -20,7 +20,7 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
   // selection itself is explicitly reviewed, but source blocks require source repair.
   const sourceForPath = (path: string) => {
     const parts = path.split('.');
-    return parts[0] === 'sources' ? definition.sources[Number(parts[1])]?.id
+    return parts[0] === 'chart' && definition.chart?.kind === 'scatter' ? definition.chart[parts[1] as 'x' | 'y']?.sourceId : parts[0] === 'sources' ? definition.sources[Number(parts[1])]?.id
       : parts[0] === 'series' ? definition.series[Number(parts[1])]?.sourceId : undefined;
   };
   const protectedReferences = preserved.filter(ref => !ref.path.startsWith('facilitySelection.'));
@@ -110,9 +110,20 @@ export function prepareVisualizationFacilityChange(definition: VisualizationDefi
   });
   let chart = definition.chart;
   if (chart?.kind === 'scatter') {
-    const { xSeriesId, ySeriesId, ...base } = chart;
+    const scatter = { ...chart };
+    for (const axis of ['x', 'y'] as const) {
+      const selector = scatter[axis];
+      const source = definition.sources.find(source => source.id === selector?.sourceId);
+      const provider = selector?.seriesId ? visualizationPresentationReference(source, selector.seriesId) : undefined;
+      if (selector && (provider && excluded(provider.kind, provider.guid, source) || selector.resourceGuid && itemExcluded(source, selector.resourceGuid)
+        || resetSources.has(selector.sourceId) && !protectedReferences.some(ref => sourceForPath(ref.path) === selector.sourceId))) {
+        delete scatter[axis]; cleared.add('Excluded scatter axis');
+      }
+    }
+    const { xSeriesId, ySeriesId, ...base } = scatter;
     chart = { ...base, ...(series.some(item => item.id === xSeriesId) ? { xSeriesId } : {}), ...(series.some(item => item.id === ySeriesId) ? { ySeriesId } : {}) };
   }
+
   const { chart: _chart, ...base } = definition;
   return { definition: structuredClone({ ...base, facilitySelection: targetFacilities, sources, series, ...(chart ? { chart } : {}) }), cleared: [...cleared] };
 }

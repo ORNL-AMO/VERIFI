@@ -45,6 +45,8 @@ import { join } from 'path';
     <app-ui-icon name="treemap" [size]="16" [strokeWidth]="2" [decorative]="false" label="Treemap override"></app-ui-icon>
     <app-ui-icon name="sankey" [size]="24" [decorative]="false" label="Sankey"></app-ui-icon>
     <app-ui-icon name="sankey" [size]="16" [strokeWidth]="2" [decorative]="false" label="Sankey override"></app-ui-icon>
+    <app-ui-icon name="sunburst" [size]="24" [decorative]="false" label="Sunburst"></app-ui-icon>
+    <app-ui-icon name="sunburst" [size]="16" [strokeWidth]="2" [decorative]="false" label="Sunburst override"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -66,8 +68,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(32);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(32);
+    expect(icons.length).toBe(34);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(34);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -129,7 +131,9 @@ describe('IconComponent', () => {
     { file: 'treemap.svg', index: 28, label: 'Treemap', size: '24', stroke: undefined },
     { file: 'treemap.svg', index: 29, label: 'Treemap override', size: '16', stroke: '2' },
     { file: 'sankey.svg', index: 30, label: 'Sankey', size: '24', stroke: undefined },
-    { file: 'sankey.svg', index: 31, label: 'Sankey override', size: '16', stroke: '2' }
+    { file: 'sankey.svg', index: 31, label: 'Sankey override', size: '16', stroke: '2' },
+    { file: 'sunburst.svg', index: 32, label: 'Sunburst', size: '24', stroke: undefined },
+    { file: 'sunburst.svg', index: 33, label: 'Sunburst override', size: '16', stroke: '2' }
   ])('renders $file through the same themed, accessible icon API', ({ file, index, label, size, stroke }) => {
     const source = readFileSync(join(process.cwd(), 'src/assets/icons', file), 'utf8');
     const document = new DOMParser().parseFromString(source, 'image/svg+xml');
@@ -139,8 +143,14 @@ describe('IconComponent', () => {
     expect(host.getAttribute('aria-label')).toBe(label);
     expect(host.getAttribute('role')).toBe('img');
     expect(host.querySelector('svg')?.getAttribute('width')).toBe(size);
-    expect(host.querySelector('path')?.getAttribute('stroke')).toBe('currentColor');
     const sourcePaths = [...document.querySelectorAll('path')];
+    const renderedPaths = [...host.querySelectorAll('path')];
+    renderedPaths.forEach((path, index) => {
+      const sourcePath = sourcePaths[index];
+      expect(path.getAttribute('stroke')).toBe(sourcePath.getAttribute('stroke') ?? document.documentElement.getAttribute('stroke') ?? 'currentColor');
+      expect(path.getAttribute('fill')).toBe(sourcePath.getAttribute('fill') ?? document.documentElement.getAttribute('fill') ?? 'none');
+      expect(path.getAttribute('opacity')).toBe(sourcePath.getAttribute('opacity'));
+    });
     expect([...host.querySelectorAll('path')].map(path => path.getAttribute('stroke-width')))
       .toEqual(sourcePaths.map(path => stroke ?? path.getAttribute('stroke-width') ?? document.documentElement.getAttribute('stroke-width')));
     expect(host.querySelector('path')?.getAttribute('stroke-linecap')).toBe('round');
