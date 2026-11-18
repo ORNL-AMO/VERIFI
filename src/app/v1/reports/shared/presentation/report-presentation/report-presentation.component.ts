@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { ChangeDetectorRef, Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewContainerRef, afterNextRender, effect, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewContainerRef, afterNextRender, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { ReportPresentationController } from '../report-presentation-controller';
 
@@ -18,6 +18,7 @@ interface PresentationAttempt {
   readonly positions: readonly ScrollPosition[];
   element?: HTMLElement;
   enteredFullscreen: boolean;
+  documentObserver?: ResizeObserver;
 }
 
 @Component({
@@ -35,6 +36,9 @@ export class ReportPresentationComponent {
   readonly minimumZoom = 50;
   readonly maximumZoom = 200;
   readonly documentWidth = signal<number | null>(null);
+  private readonly documentSize = signal({ width: 0, height: 0 });
+  readonly scaledWidth = computed(() => this.documentSize().width ? this.documentSize().width * this.zoomPercent() / 100 : null);
+  readonly scaledHeight = computed(() => this.documentSize().height * this.zoomPercent() / 100);
   private readonly controller = inject(ReportPresentationController);
   private readonly modal = inject(ModalPortalService);
   private readonly document = inject(DOCUMENT);
@@ -46,6 +50,7 @@ export class ReportPresentationComponent {
   private readonly overlay = viewChild.required<TemplateRef<unknown>>('overlay');
   private readonly surface = viewChild<ElementRef<HTMLElement>>('surface');
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
+  private readonly reportDocument = viewChild<ElementRef<HTMLElement>>('reportDocument');
   private attempt?: PresentationAttempt;
   private appliedZoom = 100;
 
@@ -77,6 +82,7 @@ export class ReportPresentationComponent {
     this.zoomPercent.set(100);
     this.appliedZoom = 100;
     this.documentWidth.set(null);
+    this.documentSize.set({ width: 0, height: 0 });
     this.presenting.set(true);
     // Remove the inline copy before the shell attaches the very same document template.
     this.changes.detectChanges();
@@ -87,6 +93,7 @@ export class ReportPresentationComponent {
       if (!element) { this.close(); return; }
       attempt.element = element;
       this.resizeDocument();
+      this.observeDocument(attempt);
       void this.enterFullscreen(attempt, element);
     }, { injector: this.injector });
   }
@@ -103,24 +110,45 @@ export class ReportPresentationComponent {
     this.documentWidth.set(Math.max(1, viewport.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0)));
   }
 
+  private observeDocument(attempt: PresentationAttempt): void {
+    const document = this.reportDocument()?.nativeElement;
+    if (!document) return;
+    const bounds = document.getBoundingClientRect();
+    this.documentSize.set({ width: bounds.width, height: bounds.height });
+    if (typeof ResizeObserver === 'undefined') return;
+    attempt.documentObserver = new ResizeObserver(entries => {
+      if (this.attempt !== attempt || !document.isConnected) return;
+      const entry = entries.find(entry => entry.target === document);
+      if (!entry) return;
+      // Border-box sizes are unscaled, including fractional widths and late chart/image layout.
+      const box = entry.borderBoxSize[0];
+      this.documentSize.set({ width: box?.inlineSize ?? document.offsetWidth, height: box?.blockSize ?? document.offsetHeight });
+    });
+    attempt.documentObserver.observe(document);
+  }
+
   private setZoom(value: number): void {
     const viewport = this.viewport()?.nativeElement;
+    const document = this.reportDocument()?.nativeElement;
     const attempt = this.attempt;
-    if (!attempt || !viewport) return;
+    if (!attempt || !viewport || !document) return;
     const next = Math.max(this.minimumZoom, Math.min(this.maximumZoom, value));
     if (next === this.zoomPercent()) return;
-    const ratio = next / this.appliedZoom, style = getComputedStyle(viewport);
-    const paddingLeft = parseFloat(style.paddingLeft) || 0, paddingTop = parseFloat(style.paddingTop) || 0;
-    const left = (viewport.scrollLeft + viewport.clientWidth / 2 - paddingLeft) * ratio + paddingLeft - viewport.clientWidth / 2;
-    const top = (viewport.scrollTop + viewport.clientHeight / 2 - paddingTop) * ratio + paddingTop - viewport.clientHeight / 2;
+    const bounds = viewport.getBoundingClientRect(), report = document.getBoundingClientRect();
+    const centerX = bounds.left + viewport.clientLeft + viewport.clientWidth / 2;
+    const centerY = bounds.top + viewport.clientTop + viewport.clientHeight / 2;
+    const x = (centerX - report.left) / (this.appliedZoom / 100);
+    const y = (centerY - report.top) / (this.appliedZoom / 100);
     this.zoomPercent.set(next);
     // The portal is rendered at the shell outlet. Restore the reading position only
     // after that view has resized, so the old scroll bounds cannot clamp it.
     afterNextRender(() => {
       if (this.attempt !== attempt || this.zoomPercent() !== next) return;
       this.appliedZoom = next;
-      viewport.scrollLeft = Math.max(0, left);
-      viewport.scrollTop = Math.max(0, top);
+      const report = document.getBoundingClientRect();
+      const bounds = viewport.getBoundingClientRect();
+      viewport.scrollLeft += report.left + x * next / 100 - (bounds.left + viewport.clientLeft + viewport.clientWidth / 2);
+      viewport.scrollTop += report.top + y * next / 100 - (bounds.top + viewport.clientTop + viewport.clientHeight / 2);
     }, { injector: this.injector });
   }
 
@@ -128,6 +156,7 @@ export class ReportPresentationComponent {
     const attempt = this.attempt;
     if (!attempt) return;
     this.attempt = undefined;
+    attempt.documentObserver?.disconnect();
     this.presenting.set(false);
     if (this.modal.activePortal() === attempt.portal) this.modal.hide();
     this.exitOwnedFullscreen(attempt);

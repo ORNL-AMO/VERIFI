@@ -47,11 +47,36 @@ describe('report presentation lifecycle', () => {
   });
   afterEach(() => {
     TestBed.resetTestingModule();
+    vi.unstubAllGlobals();
     for (const [object, key, original] of [[HTMLElement.prototype, 'requestFullscreen', originalRequest],
       [document, 'fullscreenElement', originalElement], [document, 'exitFullscreen', originalExit]] as const) {
       if (original) Object.defineProperty(object, key, original);
       else Reflect.deleteProperty(object, key);
     }
+  });
+
+  it('disconnects document observation on close and ignores a stale size notification after reentry', async () => {
+    const observers: { notify: ResizeObserverCallback; disconnect: ReturnType<typeof vi.fn> }[] = [];
+    vi.stubGlobal('ResizeObserver', class {
+      readonly disconnect = vi.fn();
+      constructor(notify: ResizeObserverCallback) { observers.push({ notify, disconnect: this.disconnect }); }
+      observe(): void {}
+    });
+    const { root, open, close, settle, fixture } = await setup();
+    await open();
+    const oldDocument = root.querySelector<HTMLElement>('.report-presentation__document')!;
+    const notifySize = (index: number, target: HTMLElement, width: number, height: number) => observers[index].notify([
+      { target, borderBoxSize: [{ inlineSize: width, blockSize: height }] } as unknown as ResizeObserverEntry
+    ], {} as ResizeObserver);
+    notifySize(0, oldDocument, 1000, 1600); await settle();
+    expect(root.querySelector<HTMLElement>('.report-presentation__frame')!.style.height).toBe('1600px');
+    await close(); expect(observers[0].disconnect).toHaveBeenCalledOnce();
+    await open();
+    notifySize(1, root.querySelector<HTMLElement>('.report-presentation__document')!, 400, 800); await settle();
+    notifySize(0, oldDocument, 9999, 9999);
+    await settle();
+    expect(root.querySelector<HTMLElement>('.report-presentation__frame')!.style.height).toBe('800px');
+    fixture.destroy(); expect(observers[1].disconnect).toHaveBeenCalledOnce();
   });
 
   async function setup() {

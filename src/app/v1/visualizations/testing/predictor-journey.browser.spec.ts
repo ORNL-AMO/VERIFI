@@ -58,7 +58,8 @@ describe('saved predictor native journey', () => {
       fixture!.detectChanges();
       const panels = [...root.querySelectorAll<HTMLElement>('.heatmap-chart')];
       expect(panels).toHaveLength(2);
-      expect(panels.every(panel => !!echarts.getInstanceByDom(panel))).toBe(true);
+      // The instance exists before its first option is applied on an animation frame.
+      expect(panels.every(panel => !!echarts.getInstanceByDom(panel)?.getOption())).toBe(true);
     });
     expect([...root.querySelectorAll('h3')].map(heading => heading.textContent)).toEqual(['Production · Plant A', 'Production · Plant B']);
     const charts = [...root.querySelectorAll<HTMLElement>('.heatmap-chart')].map(element => echarts.getInstanceByDom(element)!);
