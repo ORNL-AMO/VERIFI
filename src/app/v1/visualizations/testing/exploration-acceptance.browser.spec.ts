@@ -51,7 +51,7 @@ describe('VIS7 saved exploration acceptance', () => {
     vi.spyOn(TestBed.inject(VisualizationNavigationService), 'open').mockImplementation(async (accountGuid, visualizationGuid) => { route.set({ section: 'visualization', accountGuid, visualizationGuid }); return true; });
     const lifecycle = TestBed.inject(LibraryLifecycle);
     lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('correlation'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources(); lifecycle.selectEnergyUseMode('equipment');
-    lifecycle.form.controls.energyUseResourceIds.setValue(equipment.map(item => item.guid)); lifecycle.continueEquipment(); lifecycle.form.controls.name.setValue('VIS7 equipment relationships'); await lifecycle.submit();
+    lifecycle.form.controls.energyUseResourceIds.setValue(equipment.map(item => item.guid)); lifecycle.continueEquipment(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('VIS7 equipment relationships'); await lifecycle.submit();
     expect(store.savedVisualizations()).toHaveLength(1);
     host = TestBed.createComponent(ExplorationHost); host.detectChanges();
     let component = host.debugElement.query(By.directive(WorkbenchComponent)).componentInstance as WorkbenchComponent;

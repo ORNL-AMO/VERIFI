@@ -94,7 +94,8 @@ export function resolveNativeUtility(snapshot: AccountWorkspaceSnapshot, request
 
 function nativeMeasure(snapshot: AccountWorkspaceSnapshot, source: UtilityVisualizationSource, meter: IdbUtilityMeter,
   owner: IdbAccount | IdbFacility, emissionsRates: readonly SubregionEmissions[]): NativeMeasure {
-  const pinned = source.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : undefined;
+  const quantity = source.measure === 'consumption' ? new ConvertValue(undefined, '', '').getUnit(getUnitFromMeter(meter, owner))?.measure : undefined;
+  const pinned = quantity && source.settings?.quantityUnits?.[quantity] || (source.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : undefined);
   const treatment = source.settings?.energyTreatment?.kind === 'pinned' ? source.settings.energyTreatment.value : owner.energyIsSource ? 'source' : 'site';
   const observed = (reading: IdbUtilityMeterData, value: unknown): VisualizationObservation => {
     if (typeof value !== 'number' || !Number.isFinite(value)) return unavailableObservation('Invalid or missing recorded value.');

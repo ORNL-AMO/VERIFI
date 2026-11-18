@@ -49,9 +49,10 @@ export class AnalysisDataSession {
     if (this.lastSnapshot && snapshot !== this.lastSnapshot && this.workspace.revision() === 0) { this.session++; this.cache.clear(); }
     this.lastSnapshot = snapshot;
     const requests = this.pending.get(signal) ?? new Map<string, Promise<AnalysisPreviewResult>>();
-    const key = JSON.stringify(request.source);
+    const source = request.source;
+    const key = source.kind === 'analysis' && source.mode === 'result' ? JSON.stringify([source.kind, source.analysisGuid, source.groupGuid]) : JSON.stringify(source);
     const existing = requests.get(key);
-    if (existing) return existing;
+    if (existing) return existing.then(result => result.state === 'ready' ? result : { ...result, identity: request.identity });
     const promise = this.calculate(request, signal);
     requests.set(key, promise);
     this.pending.set(signal, requests);

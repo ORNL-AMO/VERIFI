@@ -1,3 +1,4 @@
+import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { analysisPickerTestProvider } from '../../testing/analysis-picker.testing';
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
@@ -12,34 +13,50 @@ import { prepareDecisionChange } from '../../decisions/decision-tree';
 import { projectAnalysisItems } from '../analysis-items';
 import type { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 
-describe('facility analysis source editing', () => {
+describe('Analysis source editing', () => {
   afterEach(() => TestBed.resetTestingModule());
-  it.each(['facility', 'account'] as const)('explicitly reviews replacing retained %s model intent with results from the same named analysis', async scope => {
+  function setup(definition = analysisDefinition(), snapshot: AccountWorkspaceSnapshot = analysisFixture().snapshot) {
+    const workspace = new AccountWorkspaceStore(); workspace.publish(snapshot);
+    TestBed.configureTestingModule({ imports: [AnalysisEditorsModule], providers: [provideRouter([]), { provide: AccountWorkspaceStore, useValue: workspace }] });
+    const fixture = TestBed.createComponent(AnalysisSourceEditorComponent), request = vi.fn();
+    const context = { definition, sourceId: definition.sources[0].id, disabled: false, changed: vi.fn(), request };
+    fixture.componentRef.setInput('context', context); fixture.detectChanges();
+    return { fixture, component: fixture.componentInstance, request, context, workspace };
+  }
+  it('uses one Analysis picker, multiple compatible measures and separate target scopes without nested traces', () => {
+    const data = analysisFixture(), snapshot = { ...data.snapshot, facilityAnalyses: [data.analysis, { ...data.analysis, guid: 'second' }] };
+    const { fixture, component, request } = setup(analysisDefinition(), snapshot);
+    expect(request).not.toHaveBeenCalled();
+    component.setAnalyses(['analysis-a', 'second']);
+    expect(request).toHaveBeenLastCalledWith({ kind: 'analysis-targets', targets: [{ analysisGuid: 'analysis-a' }, { analysisGuid: 'second' }] });
+    component.toggleMeasure('calculated');
+    expect(request).toHaveBeenLastCalledWith({ kind: 'source-measures', sourceKind: 'analysis', measures: ['actual', 'calculated'] });
+    component.setTargetScopes('analysis-a', ['total', 'group-a']);
+    expect(request).toHaveBeenLastCalledWith({ kind: 'analysis-targets', targets: [{ analysisGuid: 'analysis-a' }, { analysisGuid: 'analysis-a', groupGuid: 'group-a' }] });
+    expect(fixture.nativeElement.querySelector('app-visualization-item-settings')).toBeNull(); fixture.destroy();
+  });
+  it.each(['facility', 'account'] as const)('reviews replacing retained %s model intent through an explicit result selection', scope => {
     const data = scope === 'account' ? accountAnalysisFixture() : analysisFixture();
-    const workspace = new AccountWorkspaceStore(); workspace.publish(data.snapshot);
-    TestBed.configureTestingModule({ imports: [AnalysisEditorsModule], providers: [provideRouter([]), analysisPickerTestProvider(), { provide: AccountWorkspaceStore, useValue: workspace }] });
     const initial = scope === 'account' ? accountAnalysisDefinition() : analysisDefinition();
-    const definition: VisualizationDefinition = { ...initial, sources: [{ id: 'source-1', kind: 'analysis', mode: 'model', analysisGuid: data.analysis.guid,
-      modelId: 'saved-model', measure: 'modeled', aggregation: 'none' }], series: initial.series.map(series => ({ ...series, metric: 'modeled', label: 'Model presentation' })) };
-    const before = structuredClone(definition), fixture = TestBed.createComponent(AnalysisSourceEditorComponent), request = vi.fn();
-    const context = { definition, sourceId: 'source-1', disabled: false, changed: vi.fn(), request };
-    try {
-      fixture.componentRef.setInput('context', context); fixture.detectChanges();
-      const root = fixture.nativeElement as HTMLElement;
-      const picker = fixture.debugElement.query(By.directive(AnalysisPickerComponent)).componentInstance as AnalysisPickerComponent;
-      expect(picker.selectionControl.value).toBeNull();
-      root.querySelector<HTMLButtonElement>(`[aria-label="Inspect ${data.analysis.name}"]`)!.click(); fixture.detectChanges();
-      root.querySelector<HTMLButtonElement>(`${scope === 'account' ? 'app-account-analysis-details-slideout' : 'app-analysis-details-slideout'} .v1-workspace-slideout__footer button`)!.click(); fixture.detectChanges();
-      expect(request).toHaveBeenLastCalledWith({ kind: 'analysis-binding', sourceId: 'source-1', analysisGuid: data.analysis.guid });
-      const proposal = prepareDecisionChange(definition, request.mock.lastCall![0], { snapshot: data.snapshot });
-      expect(proposal.state).toBe('confirm');
-      if (proposal.state === 'unchanged') throw new Error('Expected reviewed replacement');
-      expect(proposal.definition.sources[0]).toMatchObject({ mode: 'result', analysisGuid: data.analysis.guid, measure: 'actual' });
-      expect(proposal.definition.sources[0]).not.toHaveProperty('modelId');
-      expect(definition).toEqual(before); expect(picker.selectionControl.value).toBeNull();
-      fixture.componentRef.setInput('context', { ...context, definition: proposal.definition }); fixture.detectChanges(); await fixture.whenStable();
-      expect(picker.selectionControl.value).toBe(data.analysis.guid);
-    } finally { fixture.destroy(); }
+    const definition: VisualizationDefinition = { ...initial, sources: [{ id: 'source-1', kind: 'analysis', mode: 'model', analysisGuid: data.analysis.guid, modelId: 'saved-model', measure: 'modeled', aggregation: 'none' }] };
+    const { fixture, component, request } = setup(definition, data.snapshot);
+    component.selectAnalysis(data.analysis.guid);
+    const proposal = prepareDecisionChange(definition, request.mock.lastCall![0], { snapshot: data.snapshot });
+    expect(proposal.state).toBe('confirm'); if (proposal.state === 'unchanged') throw new Error('Expected reviewed replacement');
+    expect(proposal.definition.sources[0]).toMatchObject({ mode: 'result', analysisGuid: data.analysis.guid, measure: 'actual' });
+    expect(proposal.definition.sources[0]).not.toHaveProperty('modelId'); fixture.destroy();
+  });
+  it('hydrates without requests and prevents edits when disabled', () => {
+    const { fixture, component, request, context } = setup();
+    fixture.componentRef.setInput('context', { ...context, disabled: true }); fixture.detectChanges();
+    component.setAnalyses([]); component.toggleMeasure('calculated'); component.setTargetScopes('analysis-a', ['group-a']); component.form.controls.interval.setValue('yearly');
+    expect(request).not.toHaveBeenCalled(); expect(component.form.disabled).toBe(true); expect(component.targetScopes.disabled).toBe(true); fixture.destroy();
+  });
+  it('offers account totals without group or banked measure controls', () => {
+    const data = accountAnalysisFixture(), { fixture, component } = setup(accountAnalysisDefinition(), data.snapshot);
+    expect(component.targets()).toMatchObject([{ account: true, guid: data.analysis.guid }]);
+    expect(component.measures().map(item => item.value)).toEqual(['actual', 'calculated', 'savings', 'losses']);
+    expect(fixture.nativeElement.textContent).not.toContain('result scopes'); fixture.destroy();
   });
   it('edits wildcard Analysis presentation without activating dormant provider preferences', () => {
     const { snapshot } = analysisFixture(), initial = analysisDefinition();
@@ -55,25 +72,6 @@ describe('facility analysis source editing', () => {
     expect(result.definition.sources).toEqual(definition.sources);
     expect(definition).toEqual(before);
   });
-  it('emits typed bindings, measures and interval requests; hydration and disabled controls do not edit intent', () => {
-    const workspace = new AccountWorkspaceStore(); workspace.publish(analysisFixture().snapshot);
-    TestBed.configureTestingModule({ imports: [AnalysisEditorsModule], providers: [provideRouter([]), analysisPickerTestProvider(), { provide: AccountWorkspaceStore, useValue: workspace }] });
-    const fixture = TestBed.createComponent(AnalysisSourceEditorComponent), requested = vi.fn(), definition = analysisDefinition();
-    const context = { definition, sourceId: 'source-1', disabled: false, changed: () => {}, request: requested };
-    fixture.componentRef.setInput('context', context); fixture.detectChanges();
-    expect(requested).not.toHaveBeenCalled();
-    const selects = fixture.nativeElement.querySelectorAll('select') as NodeListOf<HTMLSelectElement>;
-    (fixture.nativeElement.querySelector('select[formcontrolname=groupGuid]') as HTMLSelectElement).value = 'group-a'; fixture.nativeElement.querySelector('select[formcontrolname=groupGuid]').dispatchEvent(new Event('change'));
-    expect(requested).toHaveBeenLastCalledWith({ kind: 'analysis-binding', sourceId: 'source-1', analysisGuid: 'analysis-a', groupGuid: 'group-a' });
-    (fixture.nativeElement.querySelector('select[formcontrolname=measure]') as HTMLSelectElement).value = 'calculated'; fixture.nativeElement.querySelector('select[formcontrolname=measure]').dispatchEvent(new Event('change'));
-    expect(requested).toHaveBeenLastCalledWith({ kind: 'analysis-measure', sourceId: 'source-1', measure: 'calculated' });
-    (fixture.nativeElement.querySelector('select[formcontrolname=interval]') as HTMLSelectElement).value = 'yearly'; fixture.nativeElement.querySelector('select[formcontrolname=interval]').dispatchEvent(new Event('change'));
-    expect(requested).toHaveBeenLastCalledWith({ kind: 'analysis-interval', sourceId: 'source-1', interval: 'yearly' });
-    fixture.componentRef.setInput('context', { ...context, disabled: true }); fixture.detectChanges();
-    expect([...selects].filter(select => ['groupGuid', 'interval', 'measure'].includes(select.getAttribute('formcontrolname') ?? '')).every(select => select.disabled)).toBe(true);
-    expect(fixture.nativeElement.querySelector('.report-analysis-selection').disabled).toBe(true);
-    fixture.destroy();
-  });
   it('reviews target/presentation loss and retains compatible appearance through measure changes', () => {
     const { snapshot } = analysisFixture();
     const definition = { ...analysisDefinition(), series: [{ ...analysisDefinition().series[0], label: 'My result', color: '#123456' }] };
@@ -85,43 +83,4 @@ describe('facility analysis source editing', () => {
     const clear = prepareDecisionChange(definition, { kind: 'analysis-binding', sourceId: 'source-1' }, { snapshot });
     expect(clear).toMatchObject({ state: 'confirm', definition: { sources: [{ kind: 'analysis' }], series: [] } });
   });
-  it('selects account cards, inspects metadata and configures only account measures without group controls', () => {
-    const workspace = new AccountWorkspaceStore(), data = accountAnalysisFixture(); workspace.publish(data.snapshot);
-    TestBed.configureTestingModule({ imports: [AnalysisEditorsModule], providers: [provideRouter([]), analysisPickerTestProvider(), { provide: AccountWorkspaceStore, useValue: workspace }] });
-    const fixture = TestBed.createComponent(AnalysisSourceEditorComponent), requested = vi.fn(), definition = accountAnalysisDefinition();
-    const context = { definition, sourceId: 'source-1', disabled: false, changed: () => {}, request: requested };
-    fixture.componentRef.setInput('context', context); fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('Account analysis'); expect(root.textContent).toContain('Facility ·');
-    expect(root.querySelector('[formcontrolname=groupGuid]')).toBeNull(); expect(root.textContent).toContain('Account total');
-    expect(fixture.componentInstance.measures().map(item => item.value)).toEqual(['actual', 'calculated', 'savings', 'losses']);
-    root.querySelector<HTMLButtonElement>('[aria-label="Inspect Portfolio baseline"]')!.click(); fixture.detectChanges();
-    expect(root.querySelector('app-account-analysis-details-slideout')).not.toBeNull();
-    root.querySelector<HTMLButtonElement>('app-account-analysis-details-slideout .v1-workspace-slideout__footer button')!.click(); fixture.detectChanges();
-    expect(root.querySelector('app-account-analysis-details-slideout')).toBeNull();
-    expect(root.textContent).not.toContain('Clear selection'); expect(root.textContent).not.toContain('Open the named analysis');
-    const switched = prepareDecisionChange(analysisDefinition('banked-savings', 'group-a'), { kind: 'analysis-binding', sourceId: 'source-1', analysisGuid: 'account-analysis' }, { snapshot: data.snapshot });
-    expect(switched).toMatchObject({ definition: { sources: [{ analysisGuid: 'account-analysis', measure: 'actual' }], series: [{ resourceGuid: 'account-analysis' }] } });
-    const malformed = { ...definition, sources: [{ ...definition.sources[0], groupGuid: 'group-a' } as typeof definition.sources[0]] };
-    const repaired = prepareDecisionChange(malformed, { kind: 'analysis-defaults', sourceId: 'source-1' }, { snapshot: data.snapshot });
-    expect(repaired.state).toBe('confirm');
-    if (repaired.state !== 'unchanged') expect(repaired.definition.sources[0]).not.toHaveProperty('groupGuid');
-    fixture.destroy();
-  });
-  it('retains account binding and appearance when inclusion becomes incompatible and hides single-facility pairs from new choices', () => {
-    const workspace = new AccountWorkspaceStore(), data = accountAnalysisFixture(); workspace.publish(data.snapshot);
-    TestBed.configureTestingModule({ imports: [AnalysisEditorsModule], providers: [provideRouter([]), analysisPickerTestProvider(), { provide: AccountWorkspaceStore, useValue: workspace }] });
-    const fixture = TestBed.createComponent(AnalysisSourceEditorComponent), definition = { ...accountAnalysisDefinition(), facilitySelection: { kind: 'fixed' as const, facilityGuids: ['facility-a'] } };
-    fixture.componentRef.setInput('context', { definition, sourceId: 'source-1', disabled: false, changed: () => {} }); fixture.detectChanges();
-    expect(fixture.componentInstance.issue()).toContain('Include every selected facility');
-    fixture.componentRef.setInput('context', { definition: { ...definition, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-a', 'facility-b'] } }, sourceId: 'source-1', disabled: false, changed: () => {} }); fixture.detectChanges();
-    const picker = fixture.debugElement.query(By.directive(AnalysisPickerComponent)).componentInstance as AnalysisPickerComponent;
-    expect(picker.cards().every(card => card.value !== 'account-analysis')).toBe(true);
-    expect(picker.cards().some(card => card.value === 'analysis-b')).toBe(true);
-    expect(projectAnalysisItems(definition, 'source-1', data.snapshot)[0]).toMatchObject({ available: false, identity: { resourceGuid: 'account-analysis' } });
-    workspace.publishCommitted({ ...data.snapshot, account: { ...data.snapshot.account, isSingleFacilityCompany: true }, facilities: [data.snapshot.facilities[0]] }, {}); fixture.detectChanges();
-    expect(picker.cards().every(card => card.value !== 'account-analysis')).toBe(true);
-    fixture.destroy();
-  });
-
 });

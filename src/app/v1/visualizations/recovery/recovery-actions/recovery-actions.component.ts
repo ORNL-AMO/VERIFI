@@ -152,7 +152,7 @@ export class RecoveryActionsComponent {
       } finally { this.saving.set(false); }
       return;
     }
-    this.proposal.set(this.commands.prepareCreate(review.definition));
+    this.proposal.set(this.commands.prepareCreate(review.definition, undefined, this.editor.record()?.captureOrigin));
     this.facilitySelectionControl.disable({ emitEvent: false });
     await this.persistProposal();
   }

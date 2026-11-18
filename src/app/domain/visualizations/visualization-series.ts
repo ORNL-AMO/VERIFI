@@ -44,12 +44,12 @@ export function resolveVisualizationSeries(
       return !includeHidden && effective.visible === false ? [] : [{ selected: effective, metadata, order: override?.order }];
     });
   });
-  // Item order spans exact and matching-set declarations, while source groups stay together.
-  return sourceOrder.flatMap(sourceId => expanded.filter(item => item.metadata.sourceId === sourceId)
-    .sort((left, right) => {
-      if (left.order === right.order) return 0;
-      if (left.order === undefined) return 1;
-      if (right.order === undefined) return -1;
-      return left.order - right.order;
-    }).map(({ selected, metadata }) => ({ selected, metadata })));
+  const resources = [...new Set([...definition.series.flatMap(series => series.resourceGuid ? [series.resourceGuid] : []), ...resolved.map(series => series.resourceGuid ?? series.id)])];
+  const kinds = [...new Set(definition.sources?.map(source => source.kind) ?? [])];
+  const category = (sourceId: string) => Math.max(0, kinds.indexOf(definition.sources?.find(source => source.id === sourceId)?.kind!));
+  return expanded.sort((left, right) => (left.order ?? Number.MAX_SAFE_INTEGER) - (right.order ?? Number.MAX_SAFE_INTEGER)
+    || category(left.metadata.sourceId) - category(right.metadata.sourceId)
+    || resources.indexOf(left.metadata.resourceGuid ?? left.metadata.id) - resources.indexOf(right.metadata.resourceGuid ?? right.metadata.id)
+    || sourceOrder.indexOf(left.metadata.sourceId) - sourceOrder.indexOf(right.metadata.sourceId))
+    .map(({ selected, metadata }) => ({ selected, metadata }));
 }

@@ -2,12 +2,12 @@ import { isCompositionChart } from '@domain/visualizations/visualization-composi
 import { Component, DestroyRef, Input, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import type { VisualizationComparison, VisualizationDefinition, VisualizationPeriod } from '@domain/visualizations/visualization-definition';
+import type { VisualizationDefinition, VisualizationPeriod } from '@domain/visualizations/visualization-definition';
 import type { PeriodSettingsContext } from '../source-editor-context';
 import { applyPeriodForm, periodEditorPolicy, periodFormIssue, periodFormValue, type PeriodEditorNotice, type PeriodEditorPolicy, type PeriodFormValue } from './period-settings.models';
 
 function periodSettingsFingerprint(definition: VisualizationDefinition): string {
-  return JSON.stringify([definition.facilitySelection, isCompositionChart(definition.chart), definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor'), definition.sources.some(source => source.kind === 'energy-use'), definition.sources.some(source => source.kind === 'analysis') ? definition.chart : undefined]);
+  return JSON.stringify([definition.facilitySelection, definition.chart?.kind === 'time-series' && definition.chart.yearToDate, isCompositionChart(definition.chart), definition.period, definition.comparison, definition.sources.some(source => source.kind === 'predictor'), definition.sources.some(source => source.kind === 'energy-use'), definition.sources.some(source => source.kind === 'analysis') ? definition.chart : undefined]);
 }
 
 @Component({ selector: 'app-visualization-period-settings', standalone: false, templateUrl: './period-settings.component.html',
@@ -27,9 +27,7 @@ export class PeriodSettingsComponent {
     count: new FormControl<number | null>(12), unit: new FormControl<'month' | 'year'>('month', { nonNullable: true }),
     anchor: new FormControl<'latest-data' | 'calendar'>('latest-data', { nonNullable: true }),
     includeIncomplete: new FormControl(true, { nonNullable: true }), year: new FormControl<number | null>(null),
-    comparison: new FormControl<VisualizationComparison['kind']>('none', { nonNullable: true }),
-    comparisonBasis: new FormControl<'calendar' | 'fiscal'>('calendar', { nonNullable: true }),
-    comparisonStart: new FormControl('', { nonNullable: true }), comparisonEnd: new FormControl('', { nonNullable: true })
+
   }, { validators: control => periodFormIssue(control.getRawValue() as PeriodFormValue, (this.policy()?.monthInput ?? false)) ? { periodSetup: true } : null });
   readonly value = signal(this.form.getRawValue());
   readonly issue = computed(() => periodFormIssue(this.value(), (this.policy()?.monthInput ?? false)));

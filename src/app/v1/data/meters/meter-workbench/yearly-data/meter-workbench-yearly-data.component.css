@@ -94,3 +94,6 @@ app-meter-results-chart + .v1-meter-yearly-data {
 .v1-meter-yearly-data__sort app-ui-icon {
   flex: 0 0 auto;
 }
+
+.v1-meter-yearly-data__mode { display: inline-flex; align-items: center; gap: .25rem; }
+.v1-meter-yearly-data__mode [aria-pressed="true"] { color: var(--v1-action); border-color: var(--v1-action); background: var(--v1-content-block); }

@@ -1,3 +1,7 @@
+import { yearToDateSourcesSupported } from '@domain/visualizations/utility/utility-year-to-date';
+import { unchangedCaptureSource } from '@data/visualizations/visualization-capture-origin';
+import { facilityMeterRoute } from '@app/v1/routing/workspace-route';
+import { PreviewComponent } from '../preview/preview/preview.component';
 import { isCompositionChart } from '@domain/visualizations/visualization-composition';
 import { resolveUtilitySelection } from '@domain/visualizations/utility/utility-selection';
 import { isExplorationChart } from '@domain/visualizations/visualization-interval';
@@ -7,9 +11,10 @@ import { discoverUtilitySeries } from '@domain/visualizations/utility/utility-ca
 import { discoverEquipmentSeries } from '@domain/visualizations/energy-use/equipment-source';
 import { resolveVisualizationSeries } from '@domain/visualizations/visualization-series';
 import { projectDecisionItems, configuredChartSummary } from '../shared/configured-items';
+import { projectTraceItems, utilityMeasureLabels } from '../shared/trace-items';
 import { resolvePredictorSelection } from '@domain/visualizations/predictor/predictor-source';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, ElementRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, ElementRef, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked, viewChild, afterRenderEffect } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -38,11 +43,12 @@ import { predictorStatusPresentation as dataStatusPresentation } from '@app/v1/d
   templateUrl: './workbench.component.html', styleUrls: ['./workbench.component.css'], providers: [VisualizationEditorSession] })
 export class WorkbenchComponent {
   readonly editor = inject(VisualizationEditorSession);
+  readonly smoothLines = new FormControl(false, { nonNullable: true });
   readonly dataSources = computed(() => {
     const definition = this.editor.definition(), kinds = new Set(definition?.sources.map(source => source.kind));
     const composition = isCompositionChart(definition?.chart);
     return VISUALIZATION_DATA_SOURCES.map(choice => ({ ...choice, selected: kinds.has(choice.value),
-      disabled: composition && !kinds.has(choice.value) && (definition?.chart?.kind === 'sankey' ? choice.value !== 'energy-use' : !['utility', 'energy-use'].includes(choice.value)) || !this.editor.canEdit() || !!this.pendingDecision() || this.decisionBusy() || kinds.size === 1 && kinds.has(choice.value) }));
+      disabled: definition?.chart?.kind === 'monthly-patterns' && !kinds.has(choice.value) && !['utility', 'predictor'].includes(choice.value) || composition && !kinds.has(choice.value) && (definition?.chart?.kind === 'sankey' ? choice.value !== 'energy-use' : !['utility', 'energy-use'].includes(choice.value)) || !this.editor.canEdit() || !!this.pendingDecision() || this.decisionBusy() || kinds.size === 1 && kinds.has(choice.value) }));
   });
   get charts() { return VISUALIZATION_CHART_CHOICES; }
   readonly expandedNodes = signal<ReadonlySet<string>>(new Set());
@@ -128,6 +134,15 @@ export class WorkbenchComponent {
   @ViewChild('leaveDialog', { static: true }) private leaveDialog!: TemplateRef<unknown>;
   @ViewChild(RecoveryActionsComponent) private recoveryActions?: RecoveryActionsComponent;
   readonly accountGuid = computed(() => this.navigation.routeState().accountGuid ?? '');
+  readonly sourceLink = computed(() => {
+    if (this.editor.isMissing() || this.hasInvalidFields() || this.editor.form.invalid || this.editor.conflicts().length || !this.workspace.isReady()) return undefined;
+    const source = unchangedCaptureSource(this.editor.record(), this.editor.definition(), this.workspace.snapshot());
+    const chart = this.editor.definition()?.chart;
+    return source ? { route: facilityMeterRoute(source.facilityGuid, source.meterGuid, source.kind === 'meter-yearly' ? 'yearly' : 'monthly-chart'), fragment: source.kind === 'meter-yearly' ? 'meter-yearly-chart' : source.kind === 'meter-monthly' ? 'meter-monthly-chart' : 'meter-fiscal-comparison-heading', queryParams: source.kind === 'meter-yearly' && chart?.kind === 'time-series' && chart.yearToDate ? { yearlyMode: 'year-to-date' } : {} } : undefined;
+  });
+  private readonly previewChild = viewChild(PreviewComponent);
+  readonly patternYears = computed(() => this.previewChild()?.monthlyPatternsModel()?.years ?? []);
+  readonly patternLoading = signal(false);
   readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
     const route = this.journeys.dashboardRoute(this.accountGuid());
     if (this.navigation.isSingleSiteWorkspace()) return [{ label: 'Dashboard', icon: 'dataVisualization', route }];
@@ -147,7 +162,7 @@ export class WorkbenchComponent {
   readonly sourcePanels = computed(() => {
     const definition = this.editor.definition(), key = this.editor.key(), revision = this.editor.localRevision();
     if (!definition) return [];
-    return definition.sources.map(source => {
+    return definition.sources.filter((source, index, sources) => sources.findIndex(item => item.kind === source.kind) === index).map(source => {
       const choice = VISUALIZATION_DATA_SOURCES.find(item => item.value === source.kind)!;
       const nodeId = decisionNodeId({ kind: 'source', sourceId: source.id });
       const context: VisualizationSourceEditorContext = { definition, sourceId: source.id, editorKey: this.editorKey(),
@@ -167,6 +182,8 @@ export class WorkbenchComponent {
             } else if (action.kind === 'source-settings') {
               const currentSource = current.sources.find(item => item.id === action.sourceId);
               if (source.kind !== 'utility' || currentSource?.kind !== 'utility' || currentSource.measure !== source.measure) return;
+            } else if (action.kind === 'source-measures' || action.kind === 'analysis-targets') {
+              if (action.kind === 'source-measures' && source.kind !== action.sourceKind || action.kind === 'analysis-targets' && source.kind !== 'analysis') return;
             } else return;
           }
           void this.requestDecision(action);
@@ -176,11 +193,22 @@ export class WorkbenchComponent {
         draftChanged: () => this.childRevision.update(value => value + 1),
         changed: next => { if (this.editor.key() === key && this.editor.localRevision() === revision) this.editor.applyDefinition(next); } };
       return { id: source.id, kind: source.kind, label: choice.label, icon: choice.icon, nodeId,
-        summary: source.kind === 'utility' ? `${source.measure} · ${source.selectionMode ?? 'Choose selection method'}`
+        summary: source.kind === 'utility' ? definition.sources.filter(item => item.kind === source.kind).map(item => utilityMeasureLabels[item.measure] ?? item.measure).join(', ')
           : source.kind === 'predictor' ? '' : source.measure,
         context, attention: this.invalidEditors()[nodeId] || Object.entries(this.invalidEditors()).some(([id, invalid]) => invalid && id.split(':')[1] === encodeURIComponent(source.id)) };
     });
   });
+  readonly traceItems = computed(() => {
+    const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
+    return definition && snapshot ? projectTraceItems(definition, snapshot).map(item => ({ ...item,
+      resetKey: this.nodeResetKeys()[decisionNodeId({ kind: 'item', sourceId: item.sourceId, itemKey: item.key })] ?? 0 })) : [];
+  });
+  readonly sourceCategoryCount = computed(() => new Set(this.editor.definition()?.sources.map(source => source.kind)).size);
+  readonly displayContext = computed(() => {
+    const key = this.editor.key();
+    return { definition: this.editor.definition()!, disabled: !this.editor.canEdit(), editorKey: this.editorKey(), request: (action: VisualizationDecisionAction) => { if (this.editor.key() === key) this.requestTrace(action); } };
+  });
+  requestTrace(action: VisualizationDecisionAction): void { void this.requestDecision(action); }
   readonly chartSummary = computed(() => {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? configuredChartSummary(definition, snapshot) ?? visualizationChartLabel(definition.chart) : 'Chart not selected';
@@ -230,6 +258,18 @@ export class WorkbenchComponent {
   readonly saveNeedsAttention = computed(() => this.hasInvalidFields() || ['invalid', 'error', 'conflict', 'refresh-required', 'missing'].includes(this.editor.state()));
 
   constructor() {
+    afterRenderEffect(() => this.patternLoading.set(this.previewChild()?.preview.state().state === 'loading'));
+    effect(() => {
+      const chart = this.editor.definition()?.chart, enabled = this.editor.canEdit();
+      this.smoothLines.setValue((chart?.kind === 'time-series' || chart?.kind === 'monthly-patterns') && chart.smoothLines === true, { emitEvent: false });
+      if (enabled) this.smoothLines.enable({ emitEvent: false }); else this.smoothLines.disable({ emitEvent: false });
+    });
+    const smoothing = this.smoothLines.valueChanges.subscribe(value => {
+      const definition = this.editor.definition();
+      if (this.editor.canEdit() && (definition?.chart?.kind === 'time-series' || definition?.chart?.kind === 'monthly-patterns') && !!definition.chart.smoothLines !== value)
+        this.editor.applyDefinition({ ...definition, chart: { ...definition.chart, smoothLines: value } });
+    });
+    this.destroy.onDestroy(() => smoothing.unsubscribe());
     effect(() => {
       const route = this.navigation.routeState();
       if (route.section === 'visualization' && route.visualizationGuid && route.accountGuid) {
@@ -289,6 +329,12 @@ export class WorkbenchComponent {
     const definition = this.editor.definition(), snapshot = this.workspace.snapshot();
     return definition && snapshot ? definition.sources.flatMap(source => projectDecisionItems(definition, source.id, snapshot)) : [];
   });
+  setPatternVisibility(hiddenYears: readonly number[]): void {
+    const definition = this.editor.definition(); if (!this.editor.canEdit() || definition?.chart?.kind !== 'monthly-patterns') return;
+    const overrides = { ...definition.chart.yearOverrides };
+    for (const year of this.patternYears()) overrides[String(year.year)] = { ...overrides[String(year.year)], visible: !hiddenYears.includes(year.year) };
+    this.updateChartSettings({ ...definition.chart, yearOverrides: overrides });
+  }
   updateChartSettings(chart: VisualizationChart): void { void this.requestDecision({ kind: 'chart', chart }); }
   chooseChart(choice: VisualizationChartChoiceId): void {
     const current = this.editor.definition()?.chart;
@@ -305,10 +351,12 @@ export class WorkbenchComponent {
     if (this.stackChoices().find(choice => choice.value === stack)?.reason) return;
     void this.requestDecision({ kind: 'chart-stack', stack });
   }
+  readonly supportsYearToDate = computed(() => { const definition = this.editor.definition(); return !!definition && yearToDateSourcesSupported(definition); });
+  setYearToDate(enabled: boolean): void { this.requestDecision({ kind: 'year-to-date', enabled }); }
   setInterval(interval: 'monthly' | 'yearly'): void {
     const definition = this.editor.definition();
     if (!definition || !this.editor.canEdit() || definition.chart?.kind !== 'time-series' || definition.chart.interval === interval) return;
-    this.editor.applyDefinition({ ...definition, chart: { ...definition.chart, interval } });
+    this.requestDecision({ kind: 'chart-interval', interval });
   }
   async requestDecision(action: VisualizationDecisionAction): Promise<void> {
     const snapshot = this.workspace.snapshot(); let definition = this.editor.definition();

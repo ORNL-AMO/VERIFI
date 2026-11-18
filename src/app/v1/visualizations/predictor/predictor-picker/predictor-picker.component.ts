@@ -10,6 +10,7 @@ export class PredictorPickerComponent {
   readonly selected = input<readonly string[]>([]);
   readonly disabled = input(false);
   readonly allMode = input(false);
+  readonly allowAll = input(true);
   readonly allRequested = output<void>();
   readonly selectionRequested = output<string>();
   readonly search = new FormControl('', { nonNullable: true });

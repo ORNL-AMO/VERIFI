@@ -39,6 +39,7 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
   @Input() deferUntilVisible = false;
   @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();
   @Output() chartPointClicked = new EventEmitter<V1EChartsPointClickEvent>();
+  @Output() legendSelectionChanged = new EventEmitter<Readonly<Record<string, boolean>>>();
 
   downloadPng(fileName: string): void {
     if (!this.chart || typeof document === 'undefined') {
@@ -126,6 +127,9 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     this.appliedSize = this.readContentSize();
     this.bindDataZoomEvent();
     this.bindPointClickEvent();
+    this.chart.on('legendselectchanged', (event: { selected?: Record<string, boolean> }) => {
+      if (event.selected) this.zone.run(() => this.legendSelectionChanged.emit({ ...event.selected }));
+    });
     this.observeThemeChanges();
     if (typeof ResizeObserver !== 'undefined') {
       this.resizeObserver = new ResizeObserver(() => this.scheduleResize());

@@ -14,8 +14,10 @@ import { UtilityDataSession } from './utility/utility-data-session.service';
 import { VisualizationDateContextResolver } from './preview/visualization-date-context.service';
 import { VISUALIZATION_DATE_CONTEXT_RESOLVER, VISUALIZATION_SOURCE_PROVIDERS, VISUALIZATION_PREVIEW_PRESENTERS } from './preview/preview-registry';
 import { TimeSeriesPresenter } from './time-series/time-series.presenter';
+import { MonthlyPatternsPresenter } from './monthly-patterns/monthly-patterns.presenter';
 
-@NgModule({ imports: [CompositionModule, LibraryModule, WorkbenchModule, ExplorationModule], providers: [BreakdownPresenter, TreemapPresenter, SunburstPresenter, SankeyPresenter, CorrelationPresenter, ScatterPresenter, HeatmapPresenter, AnalysisDataSession, AnalysisSourceProvider, EquipmentSourceProvider, PredictorSourceProvider, UtilitySourceProvider, UtilityDataSession, VisualizationDateContextResolver, TimeSeriesPresenter,
+@NgModule({ imports: [CompositionModule, LibraryModule, WorkbenchModule, ExplorationModule], providers: [MonthlyPatternsPresenter, BreakdownPresenter, TreemapPresenter, SunburstPresenter, SankeyPresenter, CorrelationPresenter, ScatterPresenter, HeatmapPresenter, AnalysisDataSession, AnalysisSourceProvider, EquipmentSourceProvider, PredictorSourceProvider, UtilitySourceProvider, UtilityDataSession, VisualizationDateContextResolver, TimeSeriesPresenter,
+  { provide: VISUALIZATION_PREVIEW_PRESENTERS, multi: true, useExisting: MonthlyPatternsPresenter },
   { provide: VISUALIZATION_SOURCE_PROVIDERS, multi: true, useExisting: UtilitySourceProvider },
   { provide: VISUALIZATION_SOURCE_PROVIDERS, multi: true, useExisting: PredictorSourceProvider },
   { provide: VISUALIZATION_SOURCE_PROVIDERS, multi: true, useExisting: EquipmentSourceProvider },

@@ -72,7 +72,7 @@ describe('saved equipment history native journey', () => {
       await vi.waitFor(() => { fixture!.detectChanges(); expect(previewValuesText(fixture!)).toContain('30 kWh'); });
       let edited = reopened.definition;
       for (const action of [
-        { kind: 'equipment-unit' as const, sourceId: 'source-1', unit: { kind: 'pinned' as const, value: 'MJ' } },
+        { kind: 'chart-display' as const, settings: { units: { energy: { kind: 'pinned' as const, value: 'MJ' } } } },
         { kind: 'item-style' as const, sourceId: 'source-1', item: { resourceGuid: id }, changes: { label: 'Facility equipment', color: '#23684d', traceType: 'bar' as const } }
       ]) {
         const changed = prepareDecisionChange(edited, action, { snapshot: store.snapshot()! });
@@ -142,7 +142,7 @@ describe('saved equipment history native journey', () => {
     const reopened = (await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(created.value.guid))!;
     let edited: VisualizationDefinition = { ...decode(reopened), period: { kind: 'fiscal-year' as const, year: 2027 } };
     for (const action of [
-      { kind: 'equipment-unit' as const, sourceId: 'source-1', unit: { kind: 'pinned' as const, value: 'MJ' } },
+      { kind: 'chart-display' as const, settings: { units: { energy: { kind: 'pinned' as const, value: 'MJ' } } } },
       { kind: 'item-style' as const, sourceId: 'source-1', item: { resourceGuid: pump.guid }, changes: { label: 'Saved pump', traceType: 'bar' as const, axis: 'right' as const, color: '#23684d' } }
     ]) {
       const result = prepareDecisionChange(edited, action, { snapshot: store.snapshot()! });
@@ -200,7 +200,7 @@ describe('saved equipment history native journey', () => {
         await page.screenshot({ element: host, path: `../../../../../.angular/equipment-${mode === 'equipment' ? 'e1' : 'e2-facility'}-controls-${label}.png` });
       }
       source.componentRef.setInput('context', { definition, sourceId: 'source-1', disabled: true, changed: () => {}, request: requested }); source.detectChanges();
-      expect((source.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('select')!.disabled).toBe(true);
+      expect([...(source.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button')].every(button => button.disabled || button.classList.contains('decision-section__toggle'))).toBe(true);
     } finally { source.destroy(); period.destroy(); host.remove(); }
   });
 });

@@ -25,7 +25,7 @@ describe('composition contracts and annual projections', () => {
   it('initializes compatible utility and Energy Use hierarchies without changing schema versions', () => {
     for (const sourceKind of ['utility', 'energy-use'] as const) {
       const definition = createVisualizationSetupDefinition({ name: 'Hierarchy', accountGuid: 'account-a', facilitySelection: { kind: 'all' }, chart: { kind: 'sunburst', hierarchy: [], values: 'absolute' }, sourceKinds: [sourceKind] });
-      expect(definition.version).toBe(2);
+      expect(definition.version).toBe(3);
       expect(definition.chart).toMatchObject({ hierarchy: ['facility', ...(sourceKind === 'utility' ? ['source', 'meter'] : ['group', 'equipment'])] });
     }
   });

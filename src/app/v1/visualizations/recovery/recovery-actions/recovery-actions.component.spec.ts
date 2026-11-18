@@ -7,7 +7,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
-import { createVisualizationSetupDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { createVisualizationSetupDefinition, normalizeVisualizationDefinition, VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { VisualizationEditorSession } from '../../editing/visualization-editor-session.service';
 import { VisualizationNavigationService } from '../../visualization-navigation.service';
@@ -61,7 +61,7 @@ describe('reviewed visualization recovery actions', () => {
     submit.mockResolvedValueOnce({ state: 'failed' }).mockResolvedValueOnce({ state: 'refresh-required' });
     await component.start('copy'); component.facilitySelectionControl.setValue({ kind: 'fixed', facilityGuids: ['facility-b'] }); await component.confirm();
     const proposal = component.proposal()!;
-    expect(proposal.definition).toEqual({ ...definition, name: `${definition.name} (Copy)`, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-b'] } });
+    expect(proposal.definition).toEqual({ ...normalizeVisualizationDefinition(definition), name: `${definition.name} (Copy)`, facilitySelection: { kind: 'fixed', facilityGuids: ['facility-b'] } });
     await component.confirm();
     expect(prepareCreate).toHaveBeenCalledOnce();
     component.cancel(); expect(component.proposal()).toBeDefined();

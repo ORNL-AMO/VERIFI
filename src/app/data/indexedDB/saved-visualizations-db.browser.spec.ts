@@ -46,7 +46,7 @@ describe('saved visualization storage in Chromium', () => {
     for (const record of stored) {
       const decoded = readSavedVisualization(record);
       expect(decoded.state).toBe('valid');
-      expect('definition' in decoded && decoded.definition.version).toBe(2);
+      expect('definition' in decoded && decoded.definition.version).toBe(3);
     }
     await harness.reopen();
     expect(await repository().getAllAccountVisualizations(current.accountGuid)).toEqual(stored);

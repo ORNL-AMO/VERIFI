@@ -33,6 +33,17 @@ async function worker(index: number) { await vi.waitFor(() => expect(ControlledW
 describe('active facility analysis preview results', () => {
   beforeEach(() => { ControlledWorker.instances = []; vi.stubGlobal('Worker', ControlledWorker); });
   afterEach(() => { TestBed.resetTestingModule(); vi.unstubAllGlobals(); vi.useRealTimers(); });
+  it('shares one numerical acquisition across simultaneous actual and calculated projections of the same target', async () => {
+    const { fixture, acquire, provider, request } = setup();
+    if (request.source.kind !== 'analysis' || request.source.mode !== 'result') throw new Error('Expected Analysis results');
+    const signal = new AbortController().signal;
+    const actual = provider.resolve(request, signal);
+    const calculated = provider.resolve({ ...request, identity: { ...request.identity, sourceId: 'calculated' }, source: { ...request.source, id: 'calculated', measure: 'calculated' } }, signal);
+    const first = await worker(0); first.emit({ ok: true, value: calculateFacilityAnalysisResults(fixture.request) });
+    expect((await actual).state).toBe('ready');
+    expect(await calculated).toMatchObject({ state: 'ready', identity: { sourceId: 'calculated' }, resolved: { series: [{ sourceId: 'calculated', metric: 'calculated' }] } });
+    expect(ControlledWorker.instances).toHaveLength(1); expect(acquire).toHaveBeenCalledOnce();
+  });
   it('keeps catalogs idle, shares date/projection acquisition and reuses result work for date, appearance and analysis-name changes', async () => {
     const { fixture, store, acquire, data, provider, request } = setup();
     expect(acquire).not.toHaveBeenCalled(); expect(ControlledWorker.instances).toHaveLength(0);

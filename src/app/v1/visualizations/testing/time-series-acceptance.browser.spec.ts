@@ -1,3 +1,4 @@
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { previewValuesText } from './preview-values.testing';
 import { Component, inject, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -55,7 +56,7 @@ describe('VIS6 composed saved time-series acceptance', () => {
     area.focus(); await userEvent.keyboard('{Enter}'); drawer.detectChanges();
     lifecycle.toggleSource('energy-use'); lifecycle.continueSources(); lifecycle.selectEnergyUseMode('equipment');
     lifecycle.form.controls.energyUseResourceIds.setValue(['equipment-a', 'equipment-b']); lifecycle.continueEquipment();
-    lifecycle.form.controls.name.setValue('VIS6 equipment shares'); await lifecycle.submit();
+    if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('VIS6 equipment shares'); await lifecycle.submit();
     expect(store.savedVisualizations()).toHaveLength(1);
     drawer.destroy(); drawer = undefined;
 
@@ -131,7 +132,7 @@ describe('VIS6 composed saved time-series acceptance', () => {
     host.destroy(); host = undefined;
     await harness.reopen();
     const durable = await harness.getAll('savedVisualizations');
-    expect(durable).toHaveLength(1); expect(durable[0]['guid']).toBe(guid); expect(durable[0]['definition']).toEqual(saved);
+    expect(durable).toHaveLength(1); expect(durable[0]['guid']).toBe(guid); expect(durable[0]['definition']).toEqual(serializeVisualizationDefinition(saved!));
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(before);
   });
 });

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { visualizationDashboardRoute, visualizationWorkbenchRoute } from '@app/v1/routing/workspace-route';
 
-/** Allowlisted session return context, separate from saved visualization intent. */
+/** Workspace navigation and Dashboard scope, separate from saved chart intent. */
 @Injectable({ providedIn: 'root' })
 export class VisualizationNavigationService {
   private readonly router = inject(Router);

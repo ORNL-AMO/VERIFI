@@ -1,0 +1,22 @@
+<app-workspace-slideout title="Save visualization" description="Do you want to save this visualization?"
+  [saving]="session.saving() || session.refreshRequired()" [hasFooter]="true" initialFocus="#capture-visualization-name" (closed)="closed.emit()">
+  <form id="capture-visualization-form" [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="session.saving() || !!session.proposal() || !!session.saved()">
+      <label for="capture-visualization-name">Visualization name</label>
+      <input id="capture-visualization-name" type="text" class="v1-input" [formControl]="name" autocomplete="off" required
+        [attr.aria-invalid]="name.invalid && name.touched" [attr.aria-describedby]="name.invalid && name.touched ? 'capture-name-error' : null">
+      @if (name.invalid && name.touched) { <p id="capture-name-error" role="alert">Enter a visualization name.</p> }
+    </fieldset>
+    @if (session.saving()) { <p role="status">Saving visualization…</p> }
+    @if (session.saved()) { <p role="status">Visualization saved.</p> }
+    @if (error || session.message()) { <p role="alert">{{ error || session.message() }}</p> }
+  </form>
+  <div slideoutFooter class="capture-actions">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="session.saving() || session.refreshRequired()" (click)="closed.emit()">{{ session.proposal() ? 'Discard capture' : session.saved() ? 'Close' : 'Cancel' }}</button>
+    @if (session.saved()) {
+      <button type="button" class="v1-btn v1-btn--primary" (click)="session.openSaved()">Open saved visualization</button>
+    } @else {
+      <button type="submit" form="capture-visualization-form" class="v1-btn v1-btn--primary" [disabled]="session.saving()"><app-ui-icon name="dataVisualization"/>{{ session.refreshRequired() ? 'Retry refresh' : session.proposal() ? 'Retry save' : 'Save and open' }}</button>
+    }
+  </div>
+</app-workspace-slideout>

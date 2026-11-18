@@ -2,12 +2,13 @@ import type { VisualizationChart } from '@domain/visualizations/visualization-de
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 
 export type VisualizationChartChoiceId = 'line' | 'bar' | 'area' | 'scatter' | 'correlation'
-  | 'heatmap' | 'breakdown-bar' | 'donut' | 'treemap' | 'sunburst' | 'sankey';
+  | 'monthly-patterns' | 'heatmap' | 'breakdown-bar' | 'donut' | 'treemap' | 'sunburst' | 'sankey';
 
 /** Pure catalog: selecting setup intent never requires a provider or a calculation. */
 export const VISUALIZATION_CHART_CHOICES: readonly { readonly value: VisualizationChartChoiceId; readonly label: string; readonly icon: IconName }[] = [
   { value: 'line', label: 'Line', icon: 'chartTimeSeries' }, { value: 'bar', label: 'Bar', icon: 'chartBar' },
   { value: 'area', label: 'Area', icon: 'chartTimeSeries' },
+  { value: 'monthly-patterns', label: 'Monthly patterns', icon: 'chartTimeSeries' },
   { value: 'scatter', label: 'Scatter', icon: 'chartScatter' }, { value: 'correlation', label: 'Correlation', icon: 'covariate' },
   { value: 'heatmap', label: 'Heatmap', icon: 'heatmap' }, { value: 'breakdown-bar', label: 'Breakdown bar', icon: 'chartBar' },
   { value: 'donut', label: 'Donut', icon: 'chartDonut' }, { value: 'treemap', label: 'Treemap', icon: 'treemap' },
@@ -17,6 +18,7 @@ export const VISUALIZATION_CHART_CHOICES: readonly { readonly value: Visualizati
 
 export function createVisualizationChart(choice: VisualizationChartChoiceId): VisualizationChart {
   switch (choice) {
+    case 'monthly-patterns': return { kind: 'monthly-patterns' };
     case 'line': case 'bar': case 'area':
       return { kind: 'time-series', defaultTraceType: choice, interval: 'monthly', stack: 'none' };
     case 'scatter': return { kind: 'scatter', showFit: false };

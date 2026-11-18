@@ -119,7 +119,7 @@ export function metricResultsChartOption(options: MetricResultsChartOptions): V1
     && visibleMetrics.length > 0 && visibleMetrics.every(metric => metric.unit === '%');
 
   return {
-    tooltip: { trigger: 'axis', ...(options.tooltipMaxRows ? { confine: true } : {}), formatter: params => formatChartTooltip(params, options.metrics, options.tooltipMaxRows, (options.tooltipOverflowHint ?? 'Use the legend to show fewer series.')) },
+    tooltip: { trigger: 'axis', ...(options.tooltipMaxRows ? { confine: true } : {}), formatter: params => formatChartTooltip(params, options.metrics, options.tooltipMaxRows, (options.tooltipOverflowHint ?? 'Use the legend to show fewer series.'), options.rows) },
     legend: { show: (options.showLegend !== false), top: 0, left: 'center', right: 88, data: visibleMetrics.map(metric => metric.label) },
     grid: {
       top: !(options.showLegend !== false) ? ((options.compactAxes ?? false) ? 12 : 24) : (options.showValueLabels ?? false) ? 84 : 72,
@@ -373,7 +373,8 @@ function formatChartTooltip(
   params: unknown,
   metrics: readonly MeterResultsChartMetric[],
   maxRows: number | undefined,
-  overflowHint: string
+  overflowHint: string,
+  sourceRows: readonly MeterResultsChartRow[]
 ): string {
   const tooltipParams = (Array.isArray(params) ? params : [params])
     .filter(isTooltipParam)
@@ -386,7 +387,9 @@ function formatChartTooltip(
     .map(param => {
       const metric = metrics.find(item => item.id === param.seriesId) ?? metrics.find(item => item.label === param.seriesName);
       const value = formatChartTooltipValue(param.value, metric?.currency, metric?.unit);
-      return `<div>${param.marker ?? ''}${escapeHtml(param.seriesName ?? '')}: ${escapeHtml(value)}</div>`;
+      const row = sourceRows.find(row => row.periodLabel === (param.axisValueLabel ?? param.name));
+      const annotation = metric && row?.annotations?.[metric.id];
+      return `<div>${param.marker ?? ''}${escapeHtml(param.seriesName ?? '')}: ${escapeHtml(value)}${annotation ? ' · ' + escapeHtml(annotation) : ''}</div>`;
     })
     .join('');
   const more = omitted ? `<div>+${omitted} more meters. ${escapeHtml(overflowHint)}</div>` : '';

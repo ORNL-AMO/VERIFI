@@ -41,7 +41,7 @@ export function timeSeriesOption(model: TimeSeriesModel, zoom: V1EChartsDataZoom
       // Stable series IDs are merged by ECharts, so leaving a mode must clear its prior options.
       areaStyle: trace.type === 'area' ? { opacity: trace.role === 'comparison' ? .16 : .35 } : null,
       stack: model.chart.stack === 'none' ? '' : trace.role, stackStrategy: 'samesign',
-      yAxisIndex: axes.indexOf(trace.axis), connectNulls: false, smooth: false, showSymbol: true, symbolSize: 5,
+      yAxisIndex: axes.indexOf(trace.axis), connectNulls: false, smooth: trace.type !== 'bar' && model.chart.smoothLines === true && model.slots.length > 2, showSymbol: true, symbolSize: 5,
       data: trace.points.filter(point => point.observation.state !== 'alignment-padding').map(point => [point.slot, model.chart.stack === 'percent' ? point.percentage ?? null : point.observation.state === 'observed' ? point.observation.value : null]),
       itemStyle: { color: trace.color }, lineStyle: { color: trace.color, type: trace.role === 'comparison' ? 'dashed' : trace.lineStyle, width: 2 },
       emphasis: { focus: 'series' }

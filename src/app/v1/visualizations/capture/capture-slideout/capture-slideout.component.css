@@ -1,0 +1,6 @@
+:host { display: contents; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+label { display: block; margin-block-end: var(--v1-space-2); font-weight: 700; }
+[role="alert"] { color: var(--v1-danger, var(--v1-text)); }
+.capture-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--v1-space-2); }
+@media print { :host { display: none; } }

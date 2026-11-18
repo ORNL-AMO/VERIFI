@@ -1,3 +1,4 @@
+import { CaptureSlideoutModule } from '@app/v1/visualizations/capture/capture-slideout/capture-slideout.module';
 import { CommonModule } from '@angular/common';
 import { Component, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -132,6 +133,8 @@ class MeterResultsChartStubComponent {
   @Input() defaultRightMetricId?: string;
   @Input() period?: string;
   @Input() state?: string;
+  @Input() visualize?: unknown;
+  @Input() contextLabel?: string;
   @Input() ariaLabel = '';
   @Input() loadingTitle = '';
   @Input() loadingDescription = '';
@@ -157,7 +160,7 @@ function setup(options: {
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchYearlyDataComponent],
-    imports: [CommonModule, IconComponent, MeterResultsChartStubComponent],
+    imports: [CommonModule, CaptureSlideoutModule, IconComponent, MeterResultsChartStubComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

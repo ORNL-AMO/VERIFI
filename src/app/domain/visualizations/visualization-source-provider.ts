@@ -1,3 +1,4 @@
+import type { MonthlyPatternsCalendar } from './visualization-monthly-patterns';
 import type {
   VisualizationChart, VisualizationComparison, VisualizationPeriod, VisualizationResourceKind,
   VisualizationScope, VisualizationSeries, VisualizationSource, VisualizationSourceKind
@@ -23,7 +24,7 @@ export interface VisualizationSourceCapabilities {
   readonly chartKinds: readonly VisualizationChartKind[];
   readonly shapes: readonly VisualizationDataShape[];
   readonly alignments: readonly VisualizationAlignment[];
-  readonly settings: readonly ('unit' | 'energyTreatment')[];
+  readonly settings: readonly ('unit' | 'energyTreatment' | 'quantityUnits')[];
   readonly controls: readonly VisualizationControl[];
   readonly allowDateOverride: boolean;
   /** False limits this adapter to a single source configuration; omitted leaves combinations to runtime compatibility. */
@@ -132,6 +133,9 @@ export type VisualizationData =
       readonly links: readonly { readonly source: string; readonly target: string; readonly observation: VisualizationObservation }[] };
 
 export interface VisualizationResolvedData {
+  /** Current facility/portfolio calendar and observed-history years for a Monthly patterns resource. */
+  readonly yearToDate?: import('./utility/utility-year-to-date').UtilityYearToDate;
+  readonly monthlyPatternsCalendar?: MonthlyPatternsCalendar;
   /** Original leaf contributions and denominator evidence; never saved with the definition. */
   readonly composition?: VisualizationCompositionEvidence;
   readonly data: VisualizationData;

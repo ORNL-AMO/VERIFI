@@ -1,3 +1,6 @@
+import { meter } from '@app/v1/data/meters/facility-meters.testing';
+import { unchangedCaptureSource } from '@data/visualizations/visualization-capture-origin';
+import { expandVisualizationDefinition, serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import type { VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
@@ -32,6 +35,24 @@ describe('saved visualization native commands', () => {
       definition: utilityVisualizationFixture({ kind: 'fixed', facilityGuids: [facility.guid] }), createdDate: '2026-11-11T00:00:00.000Z' };
   }
 
+  it('persists one original capture baseline through retries, edits, duplication and reopen', async () => {
+    await harness.seed({ utilityMeter: [{ ...meter({ id: 1 }) }] });
+    const handler = TestBed.inject(VisualizationCommandHandler), command = { ...proposal(), captureSource: { kind: 'meter-monthly' as const, facilityGuid: 'facility-a', meterGuid: 'meter-a' } };
+    const saved = await handler.create(command, account.guid);
+    expect(saved.captureOrigin?.source).toEqual(command.captureSource);
+    expect(await handler.create(command, account.guid)).toEqual(saved);
+    await expect(handler.create({ ...command, captureSource: undefined }, account.guid)).rejects.toThrow();
+    const changed = await handler.update({ kind: 'update', accountGuid: account.guid, guid: saved.guid, expectedRevision: 1,
+      definition: { ...command.definition, appearance: { legend: false } } }, account.guid);
+    expect(changed.captureOrigin).toEqual(saved.captureOrigin);
+    const duplicate = await handler.duplicate({ ...command, kind: 'duplicate', guid: 'capture-copy', sourceGuid: saved.guid, expectedRevision: 2,
+      definition: { ...command.definition, name: 'Edited duplicate', appearance: { legend: false } } }, account.guid);
+    expect(duplicate.captureOrigin).toEqual(saved.captureOrigin);
+    await harness.reopen();
+    const records = await harness.getAll<IdbSavedVisualization & Record<string, unknown>>('savedVisualizations');
+    expect(records.map(record => record.captureOrigin)).toEqual([saved.captureOrigin, saved.captureOrigin]);
+  });
+
   it('creates incomplete or missing-source intent, retries once by identity, duplicates independently, and reopens saved edits', async () => {
     const handler = TestBed.inject(VisualizationCommandHandler);
     const command = proposal();
@@ -56,7 +77,7 @@ describe('saved visualization native commands', () => {
     const facilities = await harness.getAll('facilities'), meters = await harness.getAll('utilityMeter');
     const catalog = { facilities, meters, meterGroups: [], predictors: [], energyUseGroups: [], energyUseEquipment: [], facilityAnalyses: [], accountAnalyses: [] } as unknown as VisualizationFacilityCatalog;
     return { kind: 'retarget' as const, accountGuid: account.guid, guid: saved.guid, expectedRevision: saved.revision, targetFacilities,
-      reviewedDefinition: prepareVisualizationFacilityChange(saved.definition as VisualizationDefinition, targetFacilities, catalog, saved.preservation?.references).definition };
+      reviewedDefinition: prepareVisualizationFacilityChange(expandVisualizationDefinition(saved.definition) as VisualizationDefinition, targetFacilities, catalog, saved.preservation?.references).definition };
   }
 
   it('accepts normalized review metadata without turning an inclusion edit into a rename', async () => {
@@ -86,11 +107,11 @@ describe('saved visualization native commands', () => {
     const moved = await handler.retarget(await inclusionCommand(saved, { kind: 'fixed', facilityGuids: [facility.guid] }), account.guid);
     expect(moved).toMatchObject({ id: saved.id, guid: saved.guid, revision: 2, createdDate: saved.createdDate,
       definition: { facilitySelection: { kind: 'fixed', facilityGuids: [facility.guid] }, period: command.definition.period, chart: command.definition.chart,
-        sources: [{ selection: { guids: ['meter-a'] } }], series: [{ overrides: [{ resourceGuid: 'meter-a', color: '#123456' }] }] } });
+        sources: [{ selection: { selection: { guids: ['meter-a'] } } }], series: [{ overrides: [{ resourceGuid: 'meter-a', color: '#123456' }] }] } });
     expect(moved).not.toHaveProperty('facilityId');
     await harness.reopen(); expect(await harness.getAll('savedVisualizations')).toEqual([moved]);
     const all = await TestBed.inject(VisualizationCommandHandler).retarget(await inclusionCommand(moved, { kind: 'all' }), account.guid);
-    expect(all).toMatchObject({ guid: saved.guid, revision: 3, definition: { facilitySelection: { kind: 'all' }, sources: [{ selection: { guids: ['meter-a'] } }] } });
+    expect(all).toMatchObject({ guid: saved.guid, revision: 3, definition: { facilitySelection: { kind: 'all' }, sources: [{ selection: { selection: { guids: ['meter-a'] } } }] } });
   });
 
   it('rejects stale revisions, missing and foreign facility targets without moving the record', async () => {
@@ -176,9 +197,9 @@ describe('saved visualization native commands', () => {
     const reviewed = await inclusionCommand(saved, { kind: 'fixed', facilityGuids: [facility.guid] });
     const committed = await handler.retarget(reviewed, account.guid);
     expect(committed).toMatchObject({ id: saved.id, guid: saved.guid, createdDate: saved.createdDate, revision: saved.revision + 1 });
-    expect(committed.definition).toEqual(reviewed.reviewedDefinition);
-    expect((committed.definition as VisualizationDefinition).sources[0]).toMatchObject({ selection: { guids: [blocked] } });
-    expect((committed.definition as VisualizationDefinition).series).toEqual([definition.series[1], {
+    expect(committed.definition).toEqual(serializeVisualizationDefinition(reviewed.reviewedDefinition));
+    expect((expandVisualizationDefinition(committed.definition) as VisualizationDefinition).sources[0]).toMatchObject({ selection: { guids: [blocked] } });
+    expect((expandVisualizationDefinition(committed.definition) as VisualizationDefinition).series).toEqual([definition.series[1], {
       ...definition.series[2], overrides: definition.series[2].overrides!.slice(0, 2)
     }]);
     expect(committed.preservation).toEqual({ transfers, references: [
@@ -221,7 +242,7 @@ describe('saved visualization native commands', () => {
     expect(committed.preservation?.references).toEqual(keepUnrelated
       ? [{ ...references[2], path: 'facilitySelection.facilityGuids.1' }, { ...references[3], path: 'sources.0.selection.guids.0' }] : []);
     expect(readSavedVisualization(committed).state).toBe(keepUnrelated ? 'repair-required' : 'valid');
-    if (keepUnrelated) expect((committed.definition as VisualizationDefinition).sources[0]).toMatchObject({ selection: { guids: [missingMeter, 'meter-a'] } });
+    if (keepUnrelated) expect((expandVisualizationDefinition(committed.definition) as VisualizationDefinition).sources[0]).toMatchObject({ selection: { guids: [missingMeter, 'meter-a'] } });
     await harness.reopen(); expect(await harness.getAll('savedVisualizations')).toEqual([committed]);
   });
 
@@ -231,7 +252,7 @@ describe('saved visualization native commands', () => {
     await TestBed.inject(IndexedDbTransactionService).runTransaction(['savedVisualizations'], 'readwrite', tx => tx.put('savedVisualizations', { ...saved, preservation }));
     const moved = await handler.retarget(await inclusionCommand(saved, { kind: 'all' }), account.guid);
     expect(moved.preservation).toEqual(preservation);
-    expect((moved.definition as VisualizationDefinition).sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
+    expect((expandVisualizationDefinition(moved.definition) as VisualizationDefinition).sources[0]).toMatchObject({ selection: { guids: ['meter-a'] } });
   });
 
   it('rolls back an inclusion write and retries the same reviewed target', async () => {

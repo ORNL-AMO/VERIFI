@@ -129,7 +129,7 @@ describe('routed deleted-draft recovery protection in Chromium', () => {
       const periods = test.fixture.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
       periods.form.controls.year.setValue(null); await test.settle();
       expect(test.workbench()!.hasInvalidFields()).toBe(true);
-      await test.workbench()!.requestDecision({ kind: 'equipment-unit', sourceId: 'source-1', unit: { kind: 'pinned', value: 'MJ' } }); await test.settle();
+      await test.workbench()!.requestDecision({ kind: 'chart-display', settings: { units: { energy: { kind: 'pinned', value: 'MJ' } } } }); await test.settle();
       expect(periods.form.controls.year.value).toBeNull();
       const leave = test.router.navigateByUrl('/dashboard');
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(dialog(test).textContent).toContain('Resolve unsaved visualization changes'); });
@@ -149,11 +149,15 @@ describe('routed deleted-draft recovery protection in Chromium', () => {
       expect(test.workbench()!.hasInvalidFields()).toBe(false);
       await activate(test, 'Create independent copy'); const proposal = test.recovery()!.proposal();
       expect(proposal?.definition.period).toEqual({ kind: 'fiscal-year', year: 2027 });
-      expect(proposal?.definition.sources[0]).toMatchObject({ settings: { unit: { kind: 'pinned', value: 'MJ' } } });
+      expect(proposal?.definition.displaySettings).toMatchObject({ units: { energy: { kind: 'pinned', value: 'MJ' } } });
       await blockedBack(test); expect(test.recovery()!.proposal()).toBe(proposal);
       await activate(test, 'Retry');
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${workbenchBase}/recovered-identity`); });
-      expect(test.prepareCreate).toHaveBeenCalledOnce(); expect(test.submit).toHaveBeenCalledTimes(outcome === 'failed' ? 2 : 1);
+      expect(test.prepareCreate).toHaveBeenCalledOnce();
+      // Normal source autosave may run before deletion; count only recovery creation attempts.
+      const creates = test.submit.mock.calls.map(([command]) => command).filter(command => command.kind === 'create');
+      expect(creates).toHaveLength(outcome === 'failed' ? 2 : 1);
+      expect(creates.every(command => command.guid === proposal!.guid)).toBe(true);
       expect(test.recover).toHaveBeenCalledTimes(outcome === 'refresh-required' ? 1 : 0);
       expect(test.store.savedVisualizations()).toHaveLength(1);
       expect(test.workbench()!.editor.definition()?.sources).toEqual(proposal!.definition.sources);

@@ -94,7 +94,7 @@ describe('facility analysis result projection', () => {
     const value = results(), request = analysisSourceRequest();
     expect(resolveFacilityAnalysisResults(value, { ...request, comparison: { kind: 'previous-period' } }).state).toBe('unsupported');
     expect(analysisPeriodIssue({ ...request, period: { kind: 'fixed', start: '2020-01-02', end: '2020-02-29', basis: 'calendar' } })).toBeDefined();
-    expect(resolveFacilityAnalysisResults(value, { ...request, source: { ...request.source, settings: { unit: { kind: 'pinned', value: 'kWh' } } } }).state).toBe('unsupported');
+    expect(resolveFacilityAnalysisResults(value, { ...request, source: { ...request.source, settings: { unit: { kind: 'pinned', value: 'gal' } } } }).state).toBe('unsupported');
     expect(resolveFacilityAnalysisResults(value, { ...request, identity: { ...request.identity, scope: { kind: 'portfolio', facilityGuids: ['other'] } } }).state).toBe('missing-source');
     expect(resolveFacilityAnalysisResults(value, analysisSourceRequest(analysisDefinition('actual', 'missing'))).state).toBe('missing-source');
     value.analysis.groups[0].analysisType = 'skip'; expect(resolveFacilityAnalysisResults(value, analysisSourceRequest(analysisDefinition('actual', 'group-a'))).state).toBe('missing-source');

@@ -1,0 +1,6 @@
+:host { display: block; min-width: 0; }
+.monthly-patterns-chart { width: 100%; height: 390px; }
+.monthly-patterns-chart--combined { height: 650px; }
+.monthly-patterns-data { overflow-x: auto; }
+@media (max-width: 600px) { .monthly-patterns-chart--combined { height: 600px; } }
+@media print { .monthly-patterns-chart { break-inside: avoid; } }

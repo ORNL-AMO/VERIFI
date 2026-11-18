@@ -1,88 +1,33 @@
 @if (selectedSource(); as source) {
   @let context = contextState()!;
   @let ids = nodes();
-  @let settings = settingsValue();
-  <div class="utility-editor">
-    <app-visualization-decision-section [nodeId]="ids.measure" label="Charted Data" [summary]="measureLabel()" icon="energy"
-      [expanded]="context.expandedNodes?.has(ids.measure) ?? false" (expandedChange)="setSection(ids.measure, $event)">
-      <div class="visualization-choices" role="group" aria-label="Charted Data">
-        @for (option of visibleMeasures(); track option.value) {
-          <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="source.measure === option.value" (click)="selectMeasure(option.value)"><app-ui-icon [name]="option.icon"/>{{ option.label }}</button>
-        }
+  <app-visualization-decision-section [nodeId]="ids.mode" label="Select by" [summary]="selectionLabel()" icon="filter"
+    [expanded]="context.expandedNodes?.has(ids.mode) ?? false" (expandedChange)="setSection(ids.mode, $event)">
+    <div class="visualization-choices" role="group" aria-label="Meter selection method">
+      @for (mode of modes; track mode.value) { <button type="button" class="visualization-choice" [disabled]="disabled() || (!!chargeSource() && mode.value !== 'meter') || (patterns() && !['meter', 'group', 'source'].includes(mode.value))" [title]="(chargeSource() && mode.value !== 'meter') || (patterns() && !['meter', 'group', 'source'].includes(mode.value)) ? 'Choose one meter, meter group or source for monthly patterns; bill charges require a meter.' : ''" [attr.aria-pressed]="source.selectionMode === mode.value" (click)="selectMode(mode.value)"><app-ui-icon [name]="mode.icon"/>{{ mode.label }}</button> }
+    </div>
+  </app-visualization-decision-section>
+  <app-visualization-decision-section [nodeId]="ids.resources" [label]="resourceLabel()" [summary]="selected.value.length + ' selected'" icon="checklist"
+    [expanded]="context.expandedNodes?.has(ids.resources) ?? false" (expandedChange)="setSection(ids.resources, $event)">
+    @if (source.selectionMode) { <app-visualization-resource-picker [label]="resourceLabel()" [control]="selected" [options]="choices()" [disabled]="disabled()" [singleSelection]="!!chargeSource() || patterns()" [requestChanges]="true" (selectionRequested)="toggleResource($event)" (selectionSetRequested)="setResources($event)"/> }
+    @else { <p role="status">Choose how to select meters first.</p> }
+  </app-visualization-decision-section>
+  <app-visualization-decision-section [nodeId]="ids.measure" label="Meter Data To Chart" [summary]="measureLabel()" icon="energy"
+    [expanded]="context.expandedNodes?.has(ids.measure) ?? false" (expandedChange)="setSection(ids.measure, $event)">
+    <div class="visualization-choices" role="group" aria-label="Meter Data To Chart">
+      @for (option of visibleMeasures(); track option.value) { <button type="button" class="visualization-choice" [disabled]="option.disabled" [title]="option.reason" [attr.aria-pressed]="option.selected" (click)="selectMeasure(option.value)"><app-ui-icon [name]="option.icon"/>{{ option.label }}</button> }
+    </div>
+  </app-visualization-decision-section>
+  @if (!patterns()) {
+  <app-visualization-decision-section [nodeId]="ids.settings" [attention]="!!chargeSource() && !chargeSource()?.charge" label="Data settings" summary="Grouping" icon="settingsSliders"
+    [expanded]="context.expandedNodes?.has(ids.settings) ?? false" (expandedChange)="setSection(ids.settings, $event)">
+    @if (!patterns()) { <label class="utility-editor__toggle"><input type="checkbox" [formControl]="aggregateByFacility" [attr.disabled]="disabled() || source.dataMode !== 'calendarized' ? '' : null">Aggregate by facility</label> }
+    @if (chargeSource()) {
+      <div [formGroup]="chargeForm">
+        <label>Named charge<select class="v1-select" formControlName="guid"><option value="">Choose a charge</option>@for (charge of chargeOptions(); track charge.guid) { <option [value]="charge.guid">{{ charge.name }}</option> }</select></label>
+        <label>Charge measure<select class="v1-select" formControlName="measure"><option value="cost">Amount</option><option value="usage">Usage / demand</option></select></label>
       </div>
-    </app-visualization-decision-section>
-    @if (source.measure !== 'charge') {
-      <app-visualization-decision-section [nodeId]="ids.mode" label="Select by" [summary]="selectionLabel()" icon="filter"
-        [attention]="!source.selectionMode" [expanded]="context.expandedNodes?.has(ids.mode) ?? false" (expandedChange)="setSection(ids.mode, $event)">
-        <div class="visualization-choices" role="group" aria-label="Meter selection method">
-          @for (mode of modes; track mode.value) {
-            <button type="button" class="visualization-choice" [disabled]="disabled()" [attr.aria-pressed]="source.selectionMode === mode.value" (click)="selectMode(mode.value)"><app-ui-icon [name]="mode.icon"/>{{ mode.label }}</button>
-          }
-        </div>
-      </app-visualization-decision-section>
-      <app-visualization-decision-section [nodeId]="ids.resources" [label]="resourceLabel()"
-        [summary]="selected.value.length + ' selected'" icon="checklist"
-        [attention]="!source.selection || !selectionSupported()" [expanded]="context.expandedNodes?.has(ids.resources) ?? false" (expandedChange)="setSection(ids.resources, $event)">
-        @if (selectionSupported()) {
-          <app-visualization-resource-picker [label]="resourceLabel()" [control]="selected" [options]="choices()" [disabled]="disabled()" [requestChanges]="true" (selectionRequested)="toggleResource($event)" (selectionSetRequested)="setResources($event)"/>
-        } @else { <p role="status">Choose how to select meters first.</p> }
-      </app-visualization-decision-section>
     }
-    <app-visualization-decision-section [nodeId]="ids.settings" label="Data settings" [summary]="settingsMeasure() === 'charge' ? 'Owning meter and charge' : 'Grouping, chart units and energy'" icon="settingsSliders"
-      [attention]="!!issue() || conflict() || source.measure === 'charge' && !source.charge" [expanded]="context.expandedNodes?.has(ids.settings) ?? false" (expandedChange)="setSection(ids.settings, $event)">
-      @if (conflict()) {
-        <div role="alert">
-          @if (measureConflict()) {
-            <p>The saved charted data changed to {{ measureLabel() }}. Your incomplete {{ settingsMeasureLabel() }} input is retained below. Use saved settings to discard it and continue with {{ measureLabel() }}.</p>
-          } @else { <p>Saved data settings changed while local input was incomplete.</p> }
-          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" (click)="useSaved()">Use saved settings</button>
-          @if (!measureConflict()) { <button type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled()" (click)="keepLocal()">Keep local input</button> }
-        </div>
-      }
-      <fieldset [formGroup]="settingsForm" [disabled]="disabled()">
-        @if (calendarizationChoiceVisible()) {
-          <label class="utility-editor__toggle form-check form-switch">
-            <input type="checkbox" role="switch" class="form-check-input" [formControl]="useCalendarizedData">Use Calendarized Data
-          </label>
-        }
-        @if (settingsMeasure() === 'charge') {
-          <label>Owning meter<select class="v1-select" formControlName="chargeMeter"><option value="">Choose a meter</option>@for (meter of meterOptions(); track meter.guid) { <option [value]="meter.guid" [disabled]="meter.unavailable">{{ meter.label }}</option> }</select></label>
-          <label>Named charge<select class="v1-select" formControlName="chargeGuid"><option value="">Choose a charge</option>@for (charge of chargeOptions(); track charge.guid) { <option [value]="charge.guid" [disabled]="charge.unavailable">{{ charge.label }}</option> }</select></label>
-          <span class="visualization-control-label">Charge measure</span>
-          <div class="visualization-buttons" role="group" aria-label="Charge measure">
-            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="settings.chargeMeasure === 'cost'" (click)="chooseSetting(settingsForm.controls.chargeMeasure, 'cost')">Amount</button>
-            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="settings.chargeMeasure === 'usage'" (click)="chooseSetting(settingsForm.controls.chargeMeasure, 'usage')">Usage / demand</button>
-          </div>
-        } @else {
-          <label class="utility-editor__toggle form-check form-switch">
-            <input type="checkbox" role="switch" class="form-check-input" [formControl]="aggregateByFacility">Aggregate by facility
-          </label>
-          @if (source.dataMode !== 'calendarized') { <p>Facility aggregation is available with calendarized data.</p> }
-          @if (settingsMeasure() !== 'cost') {
-            <label class="utility-editor__toggle form-check form-switch">
-              <input type="checkbox" role="switch" class="form-check-input" formControlName="useDefaultUnits">Use {{ settingsOwner() }} units
-            </label>
-            @if (!settings.useDefaultUnits) { <label>Chart units<input type="text" formControlName="unit"></label> }
-            @if (settingsMeasure() === 'energy') {
-              <label class="utility-editor__toggle form-check form-switch">
-                <input type="checkbox" role="switch" class="form-check-input" formControlName="useDefaultEnergySettings">Use {{ settingsOwner() }} energy settings
-              </label>
-              @if (!settings.useDefaultEnergySettings) {
-                <span class="visualization-control-label">Energy basis</span>
-                <div class="visualization-buttons" role="group" aria-label="Site or source energy">
-                  <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="settings.treatment === 'site'" title="Energy used on site" (click)="chooseSetting(settingsForm.controls.treatment, 'site')">Site</button>
-                  <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled()" [attr.aria-pressed]="settings.treatment === 'source'" title="Energy including generation and delivery losses" (click)="chooseSetting(settingsForm.controls.treatment, 'source')">Source</button>
-                </div>
-              }
-            }
-          } @else { <p>Cost uses the recorded currency.</p> }
-        }
-      </fieldset>
-      @if (issue(); as message) { <p role="alert">{{ message }}</p> }
-    </app-visualization-decision-section>
-    @for (item of items(); track item.key; let position = $index) {
-      <app-visualization-item-settings [timeSeries]="context.definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="items().length" [disabled]="disabled()" [editorKey]="context.editorKey ?? ''" [resetKey]="item.resetKey"
-        [expandedNodes]="context.expandedNodes ?? emptyExpanded" (requested)="request($event)" (sectionChanged)="setSection($event.id, $event.expanded)"/>
-    } @empty { <p role="status">Select resources to configure their traces.</p> }
-  </div>
+  </app-visualization-decision-section>
+  }
 }

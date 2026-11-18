@@ -16,8 +16,10 @@
     </article>
   </section>
 } @else {
+
   <app-meter-results-chart
-    ariaLabel="Meter yearly data chart"
+    id="meter-yearly-chart" tabindex="-1"
+    [ariaLabel]="'Meter yearly data chart · ' + contextLabel()" [contextLabel]="ytd() ? contextLabel() : undefined"
     loadingTitle="Preparing yearly chart"
     loadingDescription="VERIFI is calculating yearly data for this meter."
     errorTitle="Yearly chart could not be calculated"
@@ -31,7 +33,12 @@
     [chartRows]="chartRows()"
     [metrics]="metrics()"
     [defaultLeftMetricId]="defaultLeftMetricId()"
-    [defaultRightMetricId]="defaultRightMetricId()">
+    [defaultRightMetricId]="defaultRightMetricId()" [visualize]="visualizeAction()"
+    (presentationChanged)="chartView.set($event)" (visualizeRequested)="openCapture($event)">
+  <div chartControls class="v1-meter-yearly-data__mode" role="group" aria-label="Yearly totals">
+    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="capture.saving() || capture.refreshRequired()" [attr.aria-pressed]="!ytd()" (click)="setYearToDate(false)">Full year</button>
+    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="capture.saving() || capture.refreshRequired()" [attr.aria-pressed]="ytd()" (click)="setYearToDate(true)">Year to Date</button>
+  </div>
   </app-meter-results-chart>
 
   @if (state !== 'loading' && state !== 'error') {
@@ -42,6 +49,7 @@
 
       <div class="v1-meter-yearly-data__scroller">
         <table #yearlyDataTable class="v1-meter-yearly-data__table" [class.copying-table]="copyingTable()">
+          @if (ytd()) { <caption>{{ contextLabel() }}</caption> }
           <thead>
             <tr>
               @for (column of tableColumns; track column.id) {
@@ -64,10 +72,10 @@
             </tr>
           </thead>
           <tbody>
-            @for (row of currentRows; track row.year) {
+            @for (row of currentRows; track row.periodKey) {
               <tr>
                 @for (column of tableColumns; track column.id) {
-                  <td [class.v1-meter-yearly-data__number]="column.id !== 'year'">
+                  <td [class.v1-meter-yearly-data__number]="column.id !== 'year'" [attr.title]="row.annotations?.[column.id]">
                     {{ columnValue(row, column) }}
                   </td>
                 }
@@ -91,4 +99,8 @@
       </footer>
     </section>
   }
+}
+
+@if (reviewed(); as captureReview) {
+  <app-visualization-capture-slideout [definition]="captureReview.definition" [session]="capture" [error]="captureError()" (saveRequested)="saveCapture($event)" (closed)="closeCapture()"/>
 }

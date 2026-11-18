@@ -1,0 +1,13 @@
+@if (contextState(); as context) {
+  @for (quantity of quantities(); track quantity.id) {
+    <label>{{ quantity.label }}
+      <select class="v1-select" [attr.aria-label]="quantity.label" [formControl]="units.controls[quantity.id]">
+        <option value="">Follow visualization owner</option>
+        @for (option of quantity.options; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+      </select>
+    </label>
+  }
+  @if (showTreatment()) {
+    <label>Site / Source energy<select class="v1-select" aria-label="Site / Source energy" [formControl]="treatment"><option value="">Follow visualization owner</option><option value="site">Site</option><option value="source">Source</option></select></label>
+  }
+}

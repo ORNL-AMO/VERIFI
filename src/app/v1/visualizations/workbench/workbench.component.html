@@ -10,6 +10,7 @@
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title"><h1 id="visualization-title"><app-ui-icon name="dataVisualization"/>{{ editor.definition()?.name || 'Visualization' }}</h1></div>
         <div class="v1-data-workbench-actions" aria-label="Visualization summary and controls">
+          @if (sourceLink(); as source) { <a class="v1-btn v1-btn--quiet" [routerLink]="source.route" [fragment]="source.fragment" [queryParams]="source.queryParams"><app-ui-icon name="chartTimeSeries"/>View source chart</a> }
           <span class="visualization-workbench__save-state" [class.visualization-workbench__save-state--saved]="editor.state() === 'saved' && !hasInvalidFields()" [class.visualization-workbench__save-state--error]="saveNeedsAttention()" role="status" aria-live="polite">
             @if (saveInProgress()) { <app-ui-icon name="loading" spin/> }
             @else if (saveNeedsAttention()) { <app-ui-icon name="warning"/> }
@@ -98,16 +99,10 @@
           }
           @if (savedChart && savedChart.kind === 'time-series') {
             <p class="visualization-workbench__default">Default for new items: {{ savedChart.defaultTraceType }}</p>
-            <span class="visualization-control-label">Interval</span>
-            <div class="visualization-buttons" role="group" aria-label="Chart interval">
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly() || annualEquipment()" [attr.aria-pressed]="savedChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
-              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="savedChart.interval === 'yearly'" (click)="setInterval('yearly')">Yearly</button>
-            </div>
-            @if (annualEquipment()) { <p>Equipment consumption uses annual fiscal periods.</p> }
-            @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
+
           }
         </app-visualization-decision-section>
-        <app-visualization-decision-section [nodeId]="rootNodes.sources" label="Data Sources" [summary]="definition.sources.length + ' configured'" icon="database"
+        <app-visualization-decision-section [nodeId]="rootNodes.sources" label="Data Sources" [summary]="sourceCategoryCount() + ' configured'" icon="database"
           [expanded]="expandedNodes().has(rootNodes.sources)" (expandedChange)="setSection(rootNodes.sources, $event)">
           <div class="visualization-choices" role="group" aria-label="Data source categories">
             @for (option of dataSources(); track option.value) {
@@ -127,8 +122,35 @@
             @else { <p role="status">Setup required. Data selection for {{ source.label }} is not available yet.</p> }
           </app-visualization-decision-section>
         }
-        <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates and comparison" [summary]="periodSummary()" icon="calendar"
+        @if (definition.chart?.kind !== 'monthly-patterns') {
+        @for (item of traceItems(); track item.traceKey; let position = $index) {
+          <app-visualization-item-settings [timeSeries]="definition.chart?.kind === 'time-series'" [item]="item" [position]="position" [itemCount]="traceItems().length" [disabled]="!editor.canEdit()" [editorKey]="editorKey()" [resetKey]="item.resetKey"
+            [expandedNodes]="expandedNodes()" (requested)="requestTrace($event)" (sectionChanged)="setSection($event.id, $event.expanded)"/>
+        }
+        }
+        @if (definition.chart?.kind === 'monthly-patterns') {
+          <app-visualization-decision-section nodeId="pattern-years" label="Years" summary="All saved fiscal years" icon="calendar" [expanded]="expandedNodes().has('pattern-years')" (expandedChange)="setSection('pattern-years', $event)">
+            <app-monthly-pattern-year-settings [chart]="definition.chart!" [editorKey]="editor.key()" [years]="patternYears()" [disabled]="!editor.canEdit() || patternLoading()" (changed)="updateChartSettings($event)"/>
+          </app-visualization-decision-section>
+        }
+        <app-visualization-decision-section [nodeId]="rootNodes.period" label="Dates" [summary]="periodSummary()" icon="calendar"
           [attention]="periodInvalid()" [expanded]="expandedNodes().has(rootNodes.period)" (expandedChange)="setSection(rootNodes.period, $event)">
+          @let dateChart = definition.chart;
+          @if (dateChart && dateChart.kind === 'time-series') {
+            <span class="visualization-control-label">Interval</span>
+            <div class="visualization-buttons" role="group" aria-label="Chart interval">
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly() || annualEquipment()" [attr.aria-pressed]="dateChart.interval === 'monthly'" (click)="setInterval('monthly')">Monthly</button>
+              <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit() || !calendarizedOnly()" [attr.aria-pressed]="dateChart.interval === 'yearly'" (click)="setInterval('yearly')">Yearly</button>
+            </div>
+            @if (dateChart.interval === 'yearly' && supportsYearToDate()) {
+              <div class="visualization-buttons" role="group" aria-label="Yearly totals">
+                <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" [attr.aria-pressed]="!dateChart.yearToDate" (click)="setYearToDate(false)">Full year</button>
+                <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" [attr.aria-pressed]="dateChart.yearToDate === true" (click)="setYearToDate(true)">Year to Date</button>
+              </div>
+            }
+            @if (annualEquipment()) { <p>Equipment consumption uses annual fiscal periods.</p> }
+            @if (!calendarizedOnly()) { <p role="status">Native bill dates determine this chart's interval.</p> }
+          }
           <app-visualization-period-settings [context]="periodContext()"/>
         </app-visualization-decision-section>
         <app-visualization-decision-section [nodeId]="rootNodes.appearance" label="Chart appearance" [summary]="editor.form.controls.title.value || definition.name" icon="paintRoller"
@@ -136,11 +158,15 @@
           <label>Visualization name<input formControlName="name" type="text" aria-describedby="visualization-name-error"></label>
           @if (editor.form.controls.name.invalid) { <p id="visualization-name-error" role="alert">Enter a name.</p> }
           <label>Chart title<input formControlName="title" type="text"></label>
+          <app-visualization-display-settings [context]="displayContext()"/>
           <label class="visualization-workbench__checkbox"><input formControlName="legend" type="checkbox">Show legend</label>
+          @if (definition.chart?.kind === 'time-series' || definition.chart?.kind === 'monthly-patterns') {
+            <label class="visualization-workbench__checkbox"><input [formControl]="smoothLines" type="checkbox">Smooth lines</label>
+          }
         </app-visualization-decision-section>
       </form>
       <section class="visualization-workbench__chart" aria-label="Visualization">
-        @if (previewActive()) { <app-visualization-preview [definition]="definition" [identity]="previewIdentity()" [active]="previewActive()"/> }
+        @if (previewActive()) { <app-visualization-preview [definition]="definition" [identity]="previewIdentity()" [active]="previewActive()" (yearVisibilityChanged)="setPatternVisibility($event)"/> }
         @else { <p role="status">Chart unavailable. Review the workspace or source relationships to continue.</p> }
       </section>
     </div>

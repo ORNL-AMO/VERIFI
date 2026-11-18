@@ -5,6 +5,8 @@ import { getNewIdbSavedVisualization, IdbSavedVisualization, SAVED_VISUALIZATION
 import { readSavedVisualization, savedVisualizationEnvelopeError } from '@data/visualizations/saved-visualization-record';
 import { normalizeVisualizationDefinition, VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
+import { createCaptureOrigin, type VisualizationCaptureOrigin } from '@data/visualizations/visualization-capture-origin';
 import { prepareVisualizationFacilityChange } from '@domain/visualizations/visualization-facility-change';
 import { sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
 import { VisualizationReference, VisualizationReferenceIssue, visualizationReferences } from '@domain/visualizations/visualization-references';
@@ -22,10 +24,15 @@ export class VisualizationCommandHandler {
 
   async create(command: CreateVisualizationCommand, activeAccountGuid: string): Promise<IdbSavedVisualization> {
     const submitted = structuredClone(command);
-    return this.transactions.runTransaction(OWNER_STORES, 'readwrite', async tx => {
+    if (submitted.captureSource && submitted.retainedCaptureOrigin) this.invalid('Choose a new capture or retained provenance, not both.');
+    return this.transactions.runTransaction(submitted.captureSource ? [...new Set([...OWNER_STORES, ...CATALOG_STORES])] : OWNER_STORES, 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
       this.assertDefinition(submitted.definition, submitted.accountGuid);
       await this.assertFacilitiesExist(tx, submitted.definition);
+      if (submitted.captureSource) {
+        const catalog = await readVisualizationReferenceCatalog(tx), source = submitted.captureSource;
+        if (!catalog.meters.some(item => item.guid === source.meterGuid && item.facilityId === source.facilityGuid && item.accountId === submitted.accountGuid)) this.invalid('The capture source is no longer available.');
+      }
       return this.addOnce(tx, submitted);
     });
   }
@@ -45,7 +52,7 @@ export class VisualizationCommandHandler {
       const expected = { ...decoded.definition, name: submitted.definition.name };
       if (!sameDefinitionIntent(expected, submitted.definition)) throw new VisualizationConflictError(source);
       await this.assertFacilitiesExist(tx, submitted.definition);
-      return this.addOnce(tx, submitted);
+      return this.addOnce(tx, submitted, source.captureOrigin);
     });
   }
 
@@ -75,7 +82,7 @@ export class VisualizationCommandHandler {
           this.invalid('Reviewed replacement sources must belong to the saved scope and be available.');
       }
       const next: IdbSavedVisualization = { ...current, revision: current.revision + 1,
-        modifiedDate: new Date(), definition: submitted.definition };
+        modifiedDate: new Date(), definition: serializeVisualizationDefinition(submitted.definition) };
       delete next.facilityId;
       if (remaining.length) next.preservation = { references: remaining, transfers: current.preservation?.transfers ?? [] };
       else delete next.preservation;
@@ -103,7 +110,7 @@ export class VisualizationCommandHandler {
       const definition = prepareVisualizationFacilityChange(decoded.definition, submitted.targetFacilities, catalog, current.preservation?.references).definition;
       this.assertDefinition(definition, submitted.accountGuid);
       if (!sameDefinitionIntent(normalizeVisualizationDefinition(definition), normalizeVisualizationDefinition(submitted.reviewedDefinition))) throw new VisualizationConflictError(current);
-      const next: IdbSavedVisualization = { ...current, revision: current.revision + 1, modifiedDate: new Date(), definition };
+      const next: IdbSavedVisualization = { ...current, revision: current.revision + 1, modifiedDate: new Date(), definition: serializeVisualizationDefinition(definition) };
       delete next.facilityId;
       if (current.preservation) next.preservation = { ...current.preservation,
         references: reconcileRetargetReferences(decoded.definition, definition, current.preservation.references, catalog) };
@@ -128,7 +135,7 @@ export class VisualizationCommandHandler {
       inspectVisualizationReferences(decoded.definition, await readVisualizationReferenceCatalog(tx), record.preservation?.references));
   }
 
-  private async addOnce(tx: IndexedDbTransactionContext, command: CreateVisualizationCommand | DuplicateVisualizationCommand): Promise<IdbSavedVisualization> {
+  private async addOnce(tx: IndexedDbTransactionContext, command: CreateVisualizationCommand | DuplicateVisualizationCommand, inheritedOrigin?: VisualizationCaptureOrigin): Promise<IdbSavedVisualization> {
     if (!command.guid?.trim() || !Number.isFinite(new Date(command.createdDate).getTime())) this.invalid('A stable identity and creation date are required.');
     const existing = await this.find(tx, command.guid);
     if (existing) return this.matchCreation(existing, command);
@@ -136,6 +143,9 @@ export class VisualizationCommandHandler {
     const record = getNewIdbSavedVisualization(command.definition, {
       guid: command.guid, createdDate, modifiedDate: createdDate
     });
+    if (command.kind === 'create' && command.captureSource) record.captureOrigin = createCaptureOrigin(command.captureSource, command.definition);
+    else if (command.kind === 'create' && command.retainedCaptureOrigin) record.captureOrigin = structuredClone(command.retainedCaptureOrigin);
+    else if (inheritedOrigin) record.captureOrigin = structuredClone(inheritedOrigin);
     record.id = await tx.add('savedVisualizations', record) as number;
     return record;
   }
@@ -143,6 +153,10 @@ export class VisualizationCommandHandler {
   private matchCreation(record: IdbSavedVisualization, command: CreateVisualizationCommand | DuplicateVisualizationCommand): IdbSavedVisualization {
     if (record.accountId !== command.accountGuid || record.revision !== 1 || !sameDefinitionIntent(record.definition, command.definition)
       || new Date(record.createdDate).getTime() !== new Date(command.createdDate).getTime()) throw new VisualizationConflictError(record.accountId === command.accountGuid ? record : undefined);
+    if (command.kind === 'create') {
+      const origin = command.captureSource ? createCaptureOrigin(command.captureSource, command.definition) : command.retainedCaptureOrigin;
+      if (!sameJson(record.captureOrigin, origin)) throw new VisualizationConflictError(record);
+    }
     return record;
   }
 
@@ -221,7 +235,7 @@ function referenceIdentity(definition: VisualizationDefinition, ref: Visualizati
 /** Compare current definition intent independently of JSON object-key order. */
 function sameDefinitionIntent(left: unknown, right: unknown): boolean {
   const a = decodeVisualizationDefinition(left), b = decodeVisualizationDefinition(right);
-  return 'definition' in a && 'definition' in b && sameJson(a.definition, b.definition);
+  return 'definition' in a && 'definition' in b && sameJson(serializeVisualizationDefinition(a.definition), serializeVisualizationDefinition(b.definition));
 }
 
 /** Definitions have a closed decoder-approved JSON shape; object key order is not semantic. */

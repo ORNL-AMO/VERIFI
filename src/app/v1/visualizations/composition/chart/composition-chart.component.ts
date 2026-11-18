@@ -1,6 +1,5 @@
 import { Component, ElementRef, Input, OnChanges, ViewChild, computed, signal } from '@angular/core';
 import type { V1EChartsPointClickEvent } from '@app/v1/shared/charts/echarts-chart.directive';
-import { facilityEnergyUseRoute, facilityMeterRoute } from '@app/v1/routing/workspace-route';
 import type { CompositionModel } from '../composition.models';
 import { compositionOption } from '../composition-options';
 
@@ -32,17 +31,6 @@ export class CompositionChartComponent implements OnChanges {
       : model?.chart.kind === 'sankey' ? Math.max(480, new Set(model.evidence.contributions.map(row => row.categories.equipment?.id ?? row.categories.group?.id)).size * 28 + 80) : 560;
   });
   readonly option = computed(() => { const model = this.value(); return model && this.hasGeometry() ? compositionOption(model, this.rootId()) : undefined; });
-  readonly sourceLinks = computed(() => {
-    const result = new Map<string, { label: string; route: string[] }>();
-    for (const row of this.value()?.evidence.contributions ?? []) {
-      const facility = row.categories.facility, item = row.categories.equipment, meter = row.categories.meter;
-      if (!facility || !item && !meter) continue;
-      const route = meter ? facilityMeterRoute(facility.id, meter.id) : facilityEnergyUseRoute(facility.id,
-        row.categories.group?.id.startsWith('unavailable:') ? 'unavailable' : row.categories.group?.id ?? 'unavailable', item!.id);
-      result.set(JSON.stringify(route), { label: `${facility.label} / ${meter?.label ?? item!.label}`, route });
-    }
-    return [...result.values()];
-  });
   ngOnChanges(): void {
     if (this.value()?.identity !== this.model.identity || this.rootId() && !this.model.nodes.some(node => node.id === this.rootId())) this.rootId.set('');
     this.value.set(this.model);

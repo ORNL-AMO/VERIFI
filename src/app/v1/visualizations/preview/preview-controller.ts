@@ -1,5 +1,7 @@
+import { yearToDateIssue } from '@domain/visualizations/utility/utility-year-to-date';
 import { compositionSourceDetails } from '../composition/composition.models';
 import { isCompositionChart } from '@domain/visualizations/visualization-composition';
+import { monthlyPatternsIssue } from '@domain/visualizations/visualization-monthly-patterns';
 import type { PreviewDetails } from './preview-registry';
 import { isExplorationChart, visualizationInterval } from '@domain/visualizations/visualization-interval';
 import { predictorCombinationSupported, isMixedPredictorSourceSet } from '@domain/visualizations/visualization-monthly-combination';
@@ -8,6 +10,7 @@ import { resolveVisualizationFacilities } from '@domain/visualizations/visualiza
 import { inject, Injectable, signal, Type } from '@angular/core';
 import { checkVisualizationCompatibility } from '@domain/visualizations/visualization-capabilities';
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
+import { projectVisualizationDisplaySettings, visualizationAnalysisBasisIssue } from '@domain/visualizations/visualization-display-settings';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { isCurrentVisualizationResponse, VisualizationSourceEvidence, VisualizationSourceRequest } from '@domain/visualizations/visualization-source-provider';
 import { visualizationChartLabel } from '../visualization-charts';
@@ -17,7 +20,7 @@ import { visualizationIntentEqual } from '../editing/visualization-reconciliatio
 /** These fields affect provider values. Trace styling, visibility and ordering do not. */
 function visualizationDataIntent(definition: VisualizationDefinition) {
   return { sources: definition.sources, facilitySelection: definition.facilitySelection, period: definition.period, comparison: definition.comparison,
-    chart: isCompositionChart(definition.chart) ? { kind: 'composition', balance: definition.chart.kind === 'sankey' && definition.chart.flow === 'energy-balance' } : isExplorationChart(definition.chart) ? { kind: definition.chart.kind, interval: visualizationInterval(definition.chart) } : definition.chart?.kind === 'time-series' ? { kind: 'time-series', interval: definition.chart.interval } : definition.chart,
+    chart: isCompositionChart(definition.chart) ? { kind: 'composition', balance: definition.chart.kind === 'sankey' && definition.chart.flow === 'energy-balance' } : isExplorationChart(definition.chart) ? { kind: definition.chart.kind, interval: visualizationInterval(definition.chart) } : definition.chart?.kind === 'monthly-patterns' ? { kind: 'monthly-patterns' } : definition.chart?.kind === 'time-series' ? { kind: 'time-series', interval: definition.chart.interval, yearToDate: definition.chart.yearToDate === true } : definition.chart,
     series: definition.series.map(series => ({ id: series.id, sourceId: series.sourceId, metric: series.metric, resourceGuid: series.resourceGuid })) };
 }
 
@@ -63,9 +66,11 @@ export class PreviewController {
   private resolveSnapshot?: ReturnType<AccountWorkspaceStore['snapshot']>;
 
   update(definition: VisualizationDefinition | undefined, identity: PreviewIdentity | undefined, active = true): void {
+    const snapshot = this.workspace.snapshot();
+    if (definition && snapshot?.account.guid === definition.accountGuid) definition = projectVisualizationDisplaySettings(definition, snapshot);
     const previous = this.context;
-    if (!this.destroyed && this.resolving && active && previous?.active && (definition?.chart?.kind === 'time-series' || isExplorationChart(definition?.chart) || isCompositionChart(definition?.chart))
-      && (previous.definition?.chart?.kind === 'time-series' || isExplorationChart(previous?.definition?.chart) || isCompositionChart(previous?.definition?.chart)) && identity && previous.identity
+    if (!this.destroyed && this.resolving && active && previous?.active && (definition?.chart?.kind === 'monthly-patterns' || definition?.chart?.kind === 'time-series' || isExplorationChart(definition?.chart) || isCompositionChart(definition?.chart))
+      && (previous.definition?.chart?.kind === 'monthly-patterns' || previous.definition?.chart?.kind === 'time-series' || isExplorationChart(previous?.definition?.chart) || isCompositionChart(previous?.definition?.chart)) && identity && previous.identity
       && identity.accountGuid === definition.accountGuid && identity.accountGuid === previous.identity.accountGuid && identity.definitionGuid === previous.identity.definitionGuid
       && identity.workspaceRevision === previous.identity.workspaceRevision && this.workspace.isReady()
       && this.workspace.snapshot() === this.resolveSnapshot && decodeVisualizationDefinition(definition).state === 'valid'
@@ -94,6 +99,10 @@ export class PreviewController {
     if (identity.accountGuid !== decoded.definition.accountGuid || !identity.definitionGuid.trim()) {
       this.value.set({ state: 'invalid', message: 'The chart does not belong to the current account and visualization.' }); return;
     }
+    const basisIssue = snapshot && visualizationAnalysisBasisIssue(decoded.definition, snapshot);
+    if (basisIssue) { this.value.set({ state: 'incompatible', message: basisIssue }); return; }
+    const patternIssue = monthlyPatternsIssue(decoded.definition) ?? yearToDateIssue(decoded.definition);
+    if (patternIssue) { this.value.set({ state: 'incompatible', message: patternIssue }); return; }
     const providers = decoded.definition.sources.map(source => this.registry.provider(source.kind));
     const presenter = this.registry.presenter(decoded.definition.chart!.kind);
     if (providers.some(provider => !provider) || !presenter || !this.registry.dates) {
@@ -102,7 +111,7 @@ export class PreviewController {
     if (!predictorCombinationSupported(decoded.definition)) {
       this.value.set({ state: 'unsupported', message: 'Use monthly calendarized meters and predictors without comparison. Your saved setup is preserved.' }); return;
     }
-    if (!isExplorationChart(decoded.definition.chart) && decoded.definition.sources.length > 1 && decoded.definition.sources.some((source, index) => providers[index]!.describe(source).allowMultipleSources === false)) {
+    if (!isExplorationChart(decoded.definition.chart) && new Set(decoded.definition.sources.map(source => source.kind)).size > 1 && decoded.definition.sources.some((source, index) => providers[index]!.describe(source).allowMultipleSources === false)) {
       this.value.set({ state: 'unsupported', message: 'A selected source does not support combinations. Your saved setup is preserved.' }); return;
     }
     const unsupported = decoded.definition.sources.flatMap((source, index) => {

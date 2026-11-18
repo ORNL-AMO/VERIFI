@@ -6,7 +6,6 @@ import { Component, Input, computed, effect, inject, signal, DestroyRef } from '
 import { FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { energy } from '@domain/calculations/conversions/definitions/energy';
 import { equipmentChartSupport, useEquipmentHistorySettings } from '@domain/visualizations/energy-use/equipment-source';
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import { decisionNodeId } from '../../decisions/decision-tree';
@@ -19,13 +18,11 @@ import { visualizationIntentEqual } from '../../editing/visualization-reconcilia
 export class EquipmentSourceEditorComponent {
   readonly contextState = signal<VisualizationSourceEditorContext | undefined>(undefined);
   readonly selected = new FormControl<string[]>([], { nonNullable: true });
-  readonly unit = new FormControl('', { nonNullable: true });
   readonly denominator = new FormControl<EnergyUseVisualizationSource['denominator']>('facility', { nonNullable: true });
   readonly composition = computed(() => isCompositionChart(this.contextState()?.definition.chart));
   readonly historySettings = new FormControl(false, { nonNullable: true });
   private manualSettings = false;
   private historyIdentity = '';
-  readonly units = [...Object.keys(energy.metric), ...Object.keys(energy.imperial)];
   readonly modes = energyUseSelectionChoices();
   readonly mode = computed(() => this.source() ? energyUseSelectionMode(this.source()!) : undefined);
   readonly modeLabel = computed(() => this.modes.find(mode => mode.value === this.mode())?.label ?? 'Choose a selection method');
@@ -35,7 +32,7 @@ export class EquipmentSourceEditorComponent {
   private readonly destroy = inject(DestroyRef);
   @Input({ required: true }) set context(context: VisualizationSourceEditorContext) {
     this.contextState.set(context);
-    for (const control of [this.selected, this.unit, this.historySettings, this.denominator]) context.disabled ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
+    for (const control of [this.selected, this.historySettings, this.denominator]) context.disabled ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
   }
   readonly source = computed(() => {
     const context = this.contextState(), source = context?.definition.sources.find(s => s.id === context.sourceId);
@@ -49,7 +46,6 @@ export class EquipmentSourceEditorComponent {
     const context = this.contextState();
     return !!context && !!this.source() && visualizationIntentEqual(context.definition, useEquipmentHistorySettings(context.definition, context.sourceId));
   });
-  readonly savedUnit = computed(() => this.source()?.settings?.unit);
   readonly items = computed(() => {
     const snapshot = this.workspace.snapshot(), context = this.contextState();
     return snapshot && context ? projectEquipmentItems(context.definition, context.sourceId, snapshot).map(item => ({ ...item,
@@ -66,7 +62,6 @@ export class EquipmentSourceEditorComponent {
       const source = this.source();
       this.selected.setValue(source ? [...selectedEnergyUseIds(source)] : [], { emitEvent: false });
       this.denominator.setValue(source?.denominator ?? 'facility', { emitEvent: false });
-      this.unit.setValue(source?.settings?.unit?.kind === 'pinned' ? source.settings.unit.value : '', { emitEvent: false });
       const context = this.contextState();
       const identity = JSON.stringify([context?.editorKey, context?.sourceId, context?.resetKey]);
       if (identity !== this.historyIdentity) { this.historyIdentity = identity; this.manualSettings = false; }
@@ -84,11 +79,7 @@ export class EquipmentSourceEditorComponent {
       const context = this.contextState();
       if (context && !context.disabled && denominator !== this.source()?.denominator) context.request?.({ kind: 'equipment-denominator', sourceId: context.sourceId, denominator });
     });
-    this.unit.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(value => {
-      const context = this.contextState();
-      if (context && !context.disabled) context.request?.({ kind: 'equipment-unit', sourceId: context.sourceId,
-        unit: value ? { kind: 'pinned', value } : { kind: 'owner' } });
-    });
+
   }
   setSelection(equipmentGuids: readonly string[]): void {
     const context = this.contextState();

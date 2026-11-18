@@ -1,3 +1,4 @@
+import { expandVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { previewValuesText } from './preview-values.testing';
 import { configureLibraryTest } from '../library/testing/library-testing';
 import { LibraryLifecycle } from '../library/lifecycle/library-lifecycle.service';
@@ -32,7 +33,7 @@ function providers() { return [provideRouter([]), { provide: LocalStorageService
 describe('A2 saved account analysis native journey', () => {
   let harness: IndexedDbTestHarness | undefined, preview: ComponentFixture<PreviewComponent> | undefined;
   afterEach(async () => { preview?.destroy(); preview = undefined; vi.restoreAllMocks(); if (harness) await harness.destroy(); harness = undefined; TestBed.resetTestingModule(); });
-  it('requires a named account card in Add, supports keyboard selection/inspection and leaves configuration in the workbench', async () => {
+  it('requires a named account card in Add, supports keyboard multi-selection and leaves configuration in the workbench', async () => {
     const { workspace } = configureLibraryTest([LibraryModule]); workspace.publish(accountAnalysisFixture().snapshot);
     const drawer = TestBed.createComponent(CreationComponent), lifecycle = TestBed.inject(LibraryLifecycle);
     lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources(); drawer.detectChanges();
@@ -40,16 +41,12 @@ describe('A2 saved account analysis native journey', () => {
     try {
       expect(lifecycle.canContinueAnalysis()).toBe(false);
       expect(root.querySelector('[formcontrolname=interval]')).toBeNull(); expect(root.querySelector('[formcontrolname=measure]')).toBeNull();
-      const radio = root.querySelector('[aria-label="Inspect Portfolio baseline"]')!.closest('.report-analysis-card')!.querySelector<HTMLInputElement>('input[type=radio]')!;
+      const radio = [...root.querySelectorAll<HTMLButtonElement>('.resource-picker__option')].find(button => button.textContent?.includes('Portfolio baseline'))!;
       radio.focus(); await userEvent.keyboard(' '); drawer.detectChanges();
       expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'account-analysis', measure: 'actual' });
       expect(lifecycle.canContinueAnalysis()).toBe(true);
       expect(root.querySelector('.creation-selections')?.textContent).toContain('Portfolio baseline');
       expect(root.querySelector('.creation-selections')?.textContent).not.toContain('Unavailable analysis');
-      root.querySelector<HTMLButtonElement>('[aria-label="Inspect Portfolio baseline"]')!.click(); drawer.detectChanges();
-      expect(root.querySelector('app-account-analysis-details-slideout')).not.toBeNull();
-      root.querySelector<HTMLButtonElement>('app-account-analysis-details-slideout .v1-workspace-slideout__footer button')!.click(); drawer.detectChanges();
-      expect(root.querySelector('app-account-analysis-details-slideout')).toBeNull();
       for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
         await page.viewport(width, 850); root.className = `v1-root ${theme}`;
         const dialog = root.querySelector<HTMLElement>('[role=dialog]')!;
@@ -57,11 +54,11 @@ describe('A2 saved account analysis native journey', () => {
         await page.screenshot({ element: dialog, path: `../../../../../.angular/analysis-a2-picker-${label}.png` });
       }
       lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-a', 'facility-b'] }); drawer.detectChanges();
-      expect(root.querySelector('[aria-label="Inspect Portfolio baseline"]')).toBeNull();
-      expect(root.querySelector('[aria-label="Inspect Production baseline"]')).not.toBeNull();
+      expect(lifecycle.analysisResourceOptions().some(option => option.guid === 'account-analysis')).toBe(false);
+      expect(lifecycle.analysisResourceOptions().some(option => option.guid === 'analysis-a')).toBe(true);
       expect(lifecycle.canContinueAnalysis()).toBe(false);
       lifecycle.selectFacilities({ kind: 'all' }); drawer.detectChanges();
-      expect(root.querySelector('[aria-label="Inspect Portfolio baseline"]')).not.toBeNull();
+      expect(lifecycle.analysisResourceOptions().some(option => option.guid === 'account-analysis')).toBe(true);
       expect(lifecycle.canContinueAnalysis()).toBe(true);
     } finally { drawer.destroy(); }
   });
@@ -160,7 +157,7 @@ describe('A2 saved account analysis native journey', () => {
     const transferred = store.savedVisualizations().find(item => item.guid !== facilityOnly.value!.guid && (item.definition as VisualizationDefinition).name === 'Transferred account reference');
     expect(transferred).toBeDefined();
     expect(readSavedVisualization(transferred!).state).toBe('repair-required');
-    expect((transferred!.definition as VisualizationDefinition).sources[0]).toMatchObject({ analysisGuid: 'account-analysis' });
+    expect((expandVisualizationDefinition(transferred!.definition) as VisualizationDefinition).sources[0]).toMatchObject({ analysisGuid: 'account-analysis' });
     expect(transferred!.preservation?.references.some(reference => reference.kind === 'analysis' && reference.guid === 'account-analysis')).toBe(true);
   });
 });

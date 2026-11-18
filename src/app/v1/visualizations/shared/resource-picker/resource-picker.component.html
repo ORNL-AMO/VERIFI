@@ -5,11 +5,13 @@
     </label>
   }
   <div class="visualization-choices resource-picker__options" role="group" [attr.aria-label]="'Choose ' + label().toLowerCase()">
+    @if (!singleSelection()) {
     <button type="button" class="visualization-choice resource-picker__all" role="checkbox" [disabled]="disabled() || control.disabled || (allMode() === undefined && !options().length)" [attr.aria-checked]="allSelected()" (click)="toggleAll()">
       <app-ui-icon [name]="allSelected() ? 'success' : 'circle'" [size]="16"/><app-ui-icon name="checklist"/><span>{{ allLabel() }}</span>
     </button>
+    }
     @for (option of filtered(); track option.guid) {
-      <button type="button" class="visualization-choice resource-picker__option" role="checkbox" [class.resource-picker__option--unavailable]="option.unavailable" [disabled]="disabled() || control.disabled" [attr.aria-checked]="option.selected" (click)="toggle(option.guid)">
+      <button type="button" class="visualization-choice resource-picker__option" [attr.role]="singleSelection() ? null : 'checkbox'" [class.resource-picker__option--unavailable]="option.unavailable" [disabled]="disabled() || control.disabled" [attr.aria-checked]="singleSelection() ? null : option.selected" [attr.aria-pressed]="singleSelection() ? option.selected : null" (click)="toggle(option.guid)">
         <app-ui-icon [name]="option.selected ? 'success' : 'circle'" [size]="16"/><app-ui-icon [name]="option.unavailable ? 'warning' : (option.icon ?? icon())"/><span>{{ option.label }}@if (option.detail) { <small>{{ option.detail }}</small> }</span>
       </button>
     } @empty {

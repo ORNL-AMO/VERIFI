@@ -4,8 +4,15 @@
   <header class="v1-meter-fiscal-comparison__header">
     <div>
       <p>Monthly comparison</p>
-      <h2 id="meter-fiscal-comparison-heading">Monthly patterns by fiscal year</h2>
+      <h2 id="meter-fiscal-comparison-heading" tabindex="-1">Monthly patterns by fiscal year</h2>
     </div>
+    <div class="v1-meter-fiscal-comparison__actions">
+    @if (visualize; as action) {
+      <span [title]="action.reason || 'Visualize'">
+        <button #visualizeButton type="button" class="v1-icon-btn" aria-label="Visualize" [disabled]="action.disabled" [attr.aria-describedby]="action.reason ? 'fiscal-capture-reason' : null" (click)="visualizeRequested.emit()"><app-ui-icon name="dataVisualization"/></button>
+      </span>
+      @if (action.reason) { <span id="fiscal-capture-reason" class="visually-hidden">{{ action.reason }}</span> }
+    }
     <button
       type="button"
       class="v1-icon-btn"
@@ -15,6 +22,7 @@
       (click)="downloadPng()">
       <app-ui-icon name="download"></app-ui-icon>
     </button>
+    </div>
   </header>
 
   @if (comparisonData.series.length === 0) {
@@ -27,7 +35,7 @@
     <div
       class="v1-meter-fiscal-comparison__chart"
       [class.v1-meter-fiscal-comparison__chart--stacked]="comparisonData.hasCost"
-      [appV1ECharts]="chartOption()"
+      [appV1ECharts]="chartOption()" (legendSelectionChanged)="legendChanged($event)"
       role="img"
       [attr.aria-label]="ariaLabel()">
     </div>

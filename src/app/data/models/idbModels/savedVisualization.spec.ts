@@ -1,3 +1,4 @@
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { utilityVisualizationFixture } from '@domain/visualizations/testing/visualization-fixtures';
 import { getNewIdbSavedVisualization } from './savedVisualization';
 
@@ -13,7 +14,7 @@ describe('saved visualization model factory', () => {
     expect(first.id).toBeUndefined();
     expect(first).toMatchObject({ accountId: definition.accountGuid, recordVersion: 1, revision: 1 });
     expect(first.facilityId).toBeUndefined();
-    expect(first.definition).toEqual(definition);
+    expect(first.definition).toEqual(serializeVisualizationDefinition(definition));
     expect(first.definition).not.toBe(definition);
   });
 
@@ -29,6 +30,6 @@ describe('saved visualization model factory', () => {
 
     expect(record).toMatchObject({ ...entry, accountId: definition.accountGuid });
     expect(record.facilityId).toBeUndefined();
-    expect(record.definition).toEqual(definition);
+    expect(record.definition).toEqual(serializeVisualizationDefinition(definition));
   });
 });

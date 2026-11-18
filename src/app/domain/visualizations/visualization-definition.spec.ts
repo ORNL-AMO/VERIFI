@@ -94,7 +94,7 @@ describe('visualization saved intent', () => {
     expect(value.sources[0].settings).not.toBe(value.sources[1].settings);
     expect(decodeVisualizationDefinition(JSON.parse(JSON.stringify(value))).state).toBe('setup-required');
     expect(value.period).toEqual({ kind: 'all-history' });
-    expect(value.version).toBe(2);
+    expect(value.version).toBe(3);
   });
 
   it('decodes category presentation identities and rejects ambiguous or absent selectors', () => {
@@ -263,7 +263,7 @@ describe('visualization saved intent', () => {
   });
 
   it('distinguishes unsupported versions and providers without altering caller data', () => {
-    const value = { ...utilityVisualizationFixture(), version: 3, futureSettings: { untouched: true } };
+    const value = { ...utilityVisualizationFixture(), version: 4, futureSettings: { untouched: true } };
     const before = JSON.stringify(value);
     expect(decodeVisualizationDefinition(value).state).toBe('unsupported');
     expect(JSON.stringify(value)).toBe(before);

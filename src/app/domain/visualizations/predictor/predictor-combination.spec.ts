@@ -70,7 +70,7 @@ describe('monthly utility and predictor combination', () => {
     expect(predictorCombinationSupported(definition)).toBe(true);
     expect(predictorCombinationSupported({ ...definition, comparison: { kind: 'previous-period' } })).toBe(false);
     expect(predictorCombinationSupported({ ...definition, chart: { kind: 'time-series', defaultTraceType: 'line', stack: 'none', interval: 'yearly' } })).toBe(false);
-    expect(predictorCombinationSupported({ ...definition, sources: [...definition.sources, { ...definition.sources[1], id: 'extra' }] })).toBe(false);
+    expect(predictorCombinationSupported({ ...definition, sources: [...definition.sources, { kind: 'analysis', id: 'extra', mode: 'result', measure: 'actual', aggregation: 'none' }] })).toBe(false);
     expect(predictorCombinationSupported({ ...definition, sources: definition.sources.map(source => source.kind === 'utility' ? { ...source, dataMode: 'billing-period' } : source) })).toBe(false);
     expect(wholeMonthWindow('2024-01-15', '2024-03-20')).toEqual({ start: '2024-02-01', end: '2024-02-29' });
     expect(wholeMonthWindow('2024-01-15', '2024-01-20')).toBeUndefined();

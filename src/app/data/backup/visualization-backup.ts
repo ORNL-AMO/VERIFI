@@ -4,6 +4,7 @@ import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-ana
 import { BackupFile } from '@data/models/backup-file';
 import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { remapVisualizationDefinition, VisualizationGuidMaps, VisualizationReferenceKind, visualizationReferenceKey } from '@domain/visualizations/visualization-references';
 
 export interface VisualizationImportSummary {
@@ -72,6 +73,18 @@ export function mergeVisualizationTransferMaps(all: readonly VisualizationGuidMa
 export function transferSavedVisualization(record: Readonly<IdbSavedVisualization>, accountGuid: string,
   maps: VisualizationGuidMaps, guid: string): IdbSavedVisualization {
   const result: IdbSavedVisualization = { ...structuredClone(record) };
+  if (result.captureOrigin) {
+    const origin = result.captureOrigin;
+    try {
+      const baseline = decodeVisualizationDefinition(origin.baseline);
+      const facilityGuid = maps.facility?.[origin.source.facilityGuid], meterGuid = maps.meter?.[origin.source.meterGuid];
+      if (!('definition' in baseline) || !facilityGuid || !meterGuid || origin.unresolved) result.captureOrigin = { ...origin, unresolved: true };
+      else {
+        const mapped = remapVisualizationDefinition(baseline.definition, accountGuid, maps);
+        result.captureOrigin = { source: { ...origin.source, facilityGuid, meterGuid }, baseline: serializeVisualizationDefinition(mapped.definition), ...(mapped.issues.length ? { unresolved: true } : {}) };
+      }
+    } catch { result.captureOrigin = { ...origin, unresolved: true }; }
+  }
   delete result.id;
   result.guid = guid;
   result.accountId = accountGuid;
@@ -89,7 +102,7 @@ export function transferSavedVisualization(record: Readonly<IdbSavedVisualizatio
     result.preservation = { locked: true, references: record.preservation?.references ?? [], transfers };
   } else {
     const remapped = remapVisualizationDefinition(decoded.definition, accountGuid, maps, record.preservation?.references ?? []);
-    result.definition = remapped.definition;
+    result.definition = serializeVisualizationDefinition(remapped.definition);
     delete result.facilityId;
     result.preservation = { references: remapped.issues, transfers };
   }

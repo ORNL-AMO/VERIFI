@@ -1,3 +1,4 @@
+import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { previewValuesText } from './preview-values.testing';
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -144,7 +145,7 @@ describe('source data status in the native saved workbench', () => {
     }
     fixture!.destroy(); fixture = undefined;
     const reopened = await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.value.guid);
-    expect(reopened!.definition).toEqual(selected.definition);
+    expect(reopened!.definition).toEqual(serializeVisualizationDefinition(selected.definition));
     root = await mount();
     const issue = root.querySelector<HTMLButtonElement>('[aria-label="Source data issues"] button')!;
     issue.focus(); await userEvent.keyboard('{Enter}');

@@ -27,6 +27,7 @@
     <div class="v1-meter-results-chart__controls" aria-label="Chart controls">
       @if (showSeriesControls) {
         <div class="v1-meter-results-chart__series-controls">
+          <ng-content select="[chartControls]"/>
           @if (currentUtilityMetric) {
             <div class="v1-meter-results-chart__control-group" role="group" [attr.aria-label]="currentUtilityMetric.label + ' display'">
               <span>{{ currentUtilityMetric.label }}</span>
@@ -61,6 +62,11 @@
 
       @if (showChartActions) {
       <div class="v1-meter-results-chart__action-controls">
+        @if (visualize) {
+          <button #visualizeButton type="button" class="v1-icon-btn" title="Visualize" aria-label="Visualize"
+            [disabled]="visualize.disabled" [attr.aria-describedby]="visualize.reason ? idPrefix + '-capture-reason' : null"
+            (click)="visualizeRequested.emit(presentation())"><app-ui-icon name="dataVisualization"></app-ui-icon></button>
+        }
         <button type="button" class="v1-icon-btn" title="Zoom in" aria-label="Zoom in" [disabled]="!zoomAvailable" (click)="zoomIn()">
           <app-ui-icon name="zoomIn"></app-ui-icon>
         </button>
@@ -79,6 +85,7 @@
 
     }
 
+    @if (visualize?.reason) { <p [id]="idPrefix + '-capture-reason'" class="v1-meter-results-chart__capture-reason" role="status">{{ visualize.reason }}</p> }
     @if (currentRows.length === 0) {
       <article class="v1-empty-state" role="status">
         <app-ui-icon name="chartLine"></app-ui-icon>
@@ -97,6 +104,7 @@
         [appV1ECharts]="chartOption()"
         [deferUntilVisible]="deferUntilVisible"
         (dataZoomChanged)="syncDataZoom($event)"
+        (legendSelectionChanged)="syncLegend($event)"
         role="img"
         [attr.aria-label]="ariaLabel">
       </div>

@@ -1,0 +1,4 @@
+fieldset { border: 0; border-top: 1px solid var(--v1-border); padding: 0.75rem 0; margin: 0; min-width: 0; }
+legend { float: none; width: auto; font-size: inherit; font-weight: 600; margin: 0; }
+label { display: grid; gap: 0.25rem; margin-top: 0.5rem; }
+.year-toggle { display: flex; align-items: center; gap: 0.5rem; }

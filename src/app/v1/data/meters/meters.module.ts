@@ -11,6 +11,7 @@ import { BillInspectionChargeSectionComponent } from './meter-workbench/bill-ins
 import { BillInspectionCorrelationChartComponent } from './meter-workbench/bill-inspection/correlation-chart/bill-inspection-correlation-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchMonthlyChartComponent } from './meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
+import { CaptureSlideoutModule } from '@app/v1/visualizations/capture/capture-slideout/capture-slideout.module';
 import { MeterWorkbenchYearlyDataComponent } from './meter-workbench/yearly-data/meter-workbench-yearly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './meter-workbench/quality-report/meter-workbench-quality-report.component';
 import { MeterGroupWorkbenchComponent } from './meter-group-workbench/meter-group-workbench.component';
@@ -73,6 +74,7 @@ import { MeterActionsService } from './meter-actions.service';
     CreateMeterDrawerComponent
   ],
   imports: [
+    CaptureSlideoutModule,
     MeterQualityModule,
     DataQualityDotPlotModule,
     EditorConflictReviewComponent,

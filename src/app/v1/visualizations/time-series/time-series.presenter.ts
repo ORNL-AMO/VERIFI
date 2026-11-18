@@ -67,8 +67,8 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
         const key = `${chart.interval}:${dateIndex}`;
         const order = chart.interval === 'native' ? Date.parse(`${row.start}T12:00:00Z`) : Number(dateIndex);
         const fiscal = source.result.periods.find(period => period.role === role && period.start === row.start && period.end === row.end && period.basis === 'fiscal');
-        const equipmentYear = ['energy-use', 'analysis'].includes(source.evidence.request.source.kind) ? fiscal?.fiscalYear : undefined;
-        const alignedDate = equipmentYear !== undefined ? `FY ${equipmentYear}` : chart.interval === 'native' ? row.start : monthLabel(Number(dateIndex), chart.interval === 'yearly');
+        const equipmentYear = ['energy-use', 'analysis', ...(chart.interval === 'yearly' ? ['utility'] : [])].includes(source.evidence.request.source.kind) ? fiscal?.fiscalYear : undefined;
+        const alignedDate = equipmentYear !== undefined ? `FY ${equipmentYear}` : chart.interval === 'yearly' && source.evidence.request.source.kind === 'utility' ? `FY ${row.start.slice(0, 4)}` : chart.interval === 'native' ? row.start : monthLabel(Number(dateIndex), chart.interval === 'yearly');
         slots.set(key, { key, order, label: alignedDate });
         const observation: VisualizationObservation = row.values[item.metadata.id] ?? { state: 'alignment-padding', value: null, reason: 'This series has no native observation at this alignment slot.' };
         if (observation.state === 'observed' && !Number.isFinite(observation.value)) throw new Error('Nonfinite values cannot be rendered as valid observations.');
@@ -89,6 +89,7 @@ export function prepareTimeSeries(definition: VisualizationDefinition, evidence:
   const duplicateLabels = new Map<string, number>();
   for (const trace of traces) duplicateLabels.set(trace.label, (duplicateLabels.get(trace.label) ?? 0) + 1);
   return { title: definition.appearance.title ?? definition.name,
+    ...(chart.yearToDate ? { yearToDateLabel: resolved.find(entry => entry.result.yearToDate)?.result.yearToDate?.label } : {}),
     windowKey: JSON.stringify([chart.interval, resolved.flatMap(entry => entry.result.periods)]), chart, legend: definition.appearance.legend,
     partial: resolved.some(entry => entry.result.quality.partial),
     showPartialNotice, omissions: resolved.flatMap(entry => entry.result.quality.omissions ?? []),

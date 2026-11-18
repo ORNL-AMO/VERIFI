@@ -5,6 +5,41 @@ import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '
 import { MeterResultsChartComponent } from './meter-results-chart.component';
 
 describe('MeterResultsChartComponent', () => {
+  it('retains capture controls and zoom across a temporary workspace refresh', () => {
+    const fixture = setup(), component = fixture.componentInstance;
+    const metrics = component.metrics, rows = component.chartRows;
+    fixture.componentRef.setInput('visualize', { disabled: false }); fixture.detectChanges();
+    component.setUtilityDisplay('bar'); component.syncDataZoom({ start: 20, end: 80 });
+    fixture.componentRef.setInput('state', 'loading'); fixture.componentRef.setInput('metrics', []); fixture.componentRef.setInput('chartRows', []); fixture.detectChanges();
+    fixture.componentRef.setInput('state', 'ready'); fixture.componentRef.setInput('metrics', metrics); fixture.componentRef.setInput('chartRows', rows); fixture.detectChanges();
+    expect(component.presentation()).toMatchObject({ leftDisplay: 'bar', zoom: { start: 20, end: 80 } });
+  });
+  it('waits for matching metrics before restoring a captured view and does not overwrite later user controls', () => {
+    const fixture = setup(), component = fixture.componentInstance;
+    const saved = { ...component.presentation(), leftDisplay: 'bar' as const, leftTraceType: 'bar' as const, zoom: { start: 20, end: 80 } };
+    fixture.componentRef.setInput('metrics', []); fixture.componentRef.setInput('initialPresentation', saved); fixture.detectChanges();
+    fixture.componentRef.setInput('metrics', [{ id: 'utility', label: 'Total Energy' }, { id: 'cost', label: 'Total Cost', currency: true }]); fixture.detectChanges();
+    expect(component.presentation()).toMatchObject({ leftDisplay: 'bar', zoom: { start: 20, end: 80 } });
+    component.setUtilityDisplay('line');
+    fixture.componentRef.setInput('metrics', [{ id: 'utility', label: 'Energy updated' }, { id: 'cost', label: 'Cost updated', currency: true }]); fixture.detectChanges();
+    expect(component.presentation().leftDisplay).toBe('line');
+  });
+  it('exposes opt-in capture with current controls, legend visibility and transient zoom', () => {
+    const fixture = setup(), component = fixture.componentInstance, captured = vi.fn();
+    expect(fixture.nativeElement.querySelector('[aria-label="Visualize"]')).toBeNull();
+    fixture.componentRef.setInput('visualize', { disabled: false }); fixture.detectChanges();
+    component.visualizeRequested.subscribe(captured);
+    component.setUtilityDisplay('bar'); component.setUtilityDisplay('off');
+    component.syncLegend({ 'Total Cost': false, 'Total Energy': true });
+    component.syncDataZoom({ start: 25, end: 75 }); fixture.detectChanges();
+    (fixture.nativeElement.querySelector('[aria-label="Visualize"]') as HTMLButtonElement).click();
+    expect(captured).toHaveBeenCalledWith(expect.objectContaining({ leftDisplay: 'off', leftTraceType: 'bar', hiddenMetricIds: ['cost'], zoom: { start: 25, end: 75 } }));
+    component.setCostDisplay('line'); fixture.detectChanges();
+    expect(component.presentation().hiddenMetricIds).toEqual([]);
+    fixture.componentRef.setInput('visualize', { disabled: true, reason: 'No visible series' }); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[aria-label="Visualize"]').disabled).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('No visible series');
+  });
   it('keeps immediate canvas initialization by default and forwards explicit viewport deferral', () => {
     const fixture = setup();
     const directive = fixture.componentInstance.chartDirective as unknown as EChartsStubDirective;
@@ -422,6 +457,7 @@ describe('MeterResultsChartComponent', () => {
   providers: [{ provide: EChartsChartDirective, useExisting: forwardRef(() => EChartsStubDirective) }]
 })
 class EChartsStubDirective {
+  @Output() legendSelectionChanged = new EventEmitter<Readonly<Record<string, boolean>>>();
   @Input('appV1ECharts') option?: V1EChartsOption;
   @Input() deferUntilVisible = false;
   @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();

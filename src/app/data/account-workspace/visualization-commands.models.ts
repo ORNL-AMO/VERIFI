@@ -2,6 +2,7 @@ import { VisualizationDefinition, VisualizationFacilitySelection } from '@domain
 import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { WorkspaceWriteError } from './workspace-commands.models';
+import type { VisualizationCaptureSource, VisualizationCaptureOrigin } from '../visualizations/visualization-capture-origin';
 
 interface VisualizationCommandIdentity {
   readonly accountGuid: string;
@@ -12,6 +13,9 @@ export interface CreateVisualizationCommand extends VisualizationCommandIdentity
   readonly kind: 'create';
   readonly definition: VisualizationDefinition;
   readonly createdDate: string;
+  readonly captureSource?: VisualizationCaptureSource;
+  /** Recovery copies retain the original capture baseline rather than granting a new one. */
+  readonly retainedCaptureOrigin?: VisualizationCaptureOrigin;
 }
 
 export interface DuplicateVisualizationCommand extends VisualizationCommandIdentity {

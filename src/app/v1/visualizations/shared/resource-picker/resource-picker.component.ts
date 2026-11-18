@@ -19,6 +19,7 @@ export class ResourcePickerComponent implements OnChanges {
   readonly allLabel = input('Include All');
   readonly allSelectionRequested = output<boolean>();
   readonly disabled = input(false);
+  readonly singleSelection = input(false);
   readonly requestChanges = input(false);
   readonly selectionRequested = output<{ readonly guid: string; readonly selected: boolean }>();
   readonly selectionSetRequested = output<readonly string[]>();
@@ -52,13 +53,18 @@ export class ResourcePickerComponent implements OnChanges {
   toggle(guid: string): void {
     if (this.control.disabled || this.disabled()) return;
     const selected = this.control.value;
+    if (this.singleSelection()) {
+      if (selected.length === 1 && selected[0] === guid) return;
+      if (this.requestChanges()) { this.selectionSetRequested.emit([guid]); return; }
+      this.control.markAsDirty(); this.control.setValue([guid]); return;
+    }
     if (this.requestChanges()) { this.selectionRequested.emit({ guid, selected: !selected.includes(guid) }); return; }
     this.control.markAsDirty();
     this.control.setValue(selected.includes(guid) ? selected.filter(value => value !== guid) : [...selected, guid]);
   }
 
   toggleAll(): void {
-    if (this.control.disabled || this.disabled()) return;
+    if (this.control.disabled || this.disabled() || this.singleSelection()) return;
     if (this.allMode() !== undefined) { this.allSelectionRequested.emit(!this.allMode()); return; }
     if (!this.options().length) return;
     const selected = this.allSelected() ? [] : [...new Set([...this.control.value, ...this.options().map(option => option.guid)])];

@@ -2,6 +2,12 @@ import type { TimeSeriesModel } from './time-series.models';
 import { timeSeriesOption } from './time-series-options';
 
 describe('saved line/bar chart options', () => {
+  it('uses saved smoothing only for line geometry, retaining gaps and the existing default', () => {
+    const line = model('line'), smooth = { ...line, chart: { ...line.chart, smoothLines: true } };
+    expect((timeSeriesOption(smooth) as any).series[0]).toMatchObject({ smooth: true, connectNulls: false });
+    expect((timeSeriesOption(line) as any).series[0].smooth).toBe(false);
+    expect((timeSeriesOption({ ...smooth, traces: smooth.traces.map(trace => ({ ...trace, type: 'bar' as const })) }) as any).series[0].smooth).toBe(false);
+  });
   function model(type: 'line' | 'bar'): TimeSeriesModel {
     return { title: 'Energy', chart: { kind: 'time-series', defaultTraceType: type, interval: 'monthly', stack: 'none' }, legend: true,
       slots: ['a', 'b', 'c', 'd'].map((key, order) => ({ key, label: key, order })), warnings: [], traces: [{ id: 'energy', type, label: 'Energy', unit: 'kWh', axis: 'left', color: 'var(--v1-chart-series-1)', lineStyle: 'solid', role: 'primary', points: [

@@ -23,7 +23,7 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
   if (sourceKinds.includes('utility')) {
     const workspace = TestBed.inject(AccountWorkspaceStore);
     if (!workspace.meters().some(item => item.guid === 'meter-a')) workspace.publish({ ...workspace.snapshot()!, meters: [...workspace.meters(), meter({})] });
-    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized');
+    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources();
   }
   if (sourceKinds.includes('predictor')) lifecycle.continuePredictors();
   if (sourceKinds.includes('energy-use')) { lifecycle.selectEnergyUseMode('equipment'); lifecycle.continueEquipment(); }
@@ -33,57 +33,49 @@ function selectSetup(lifecycle: LibraryLifecycle, sourceKinds: readonly Visualiz
     lifecycle.selectAnalysis(workspace.facilityAnalyses()[0].guid);
     lifecycle.continueAnalysis();
   }
+  lifecycle.continueMeasures();
 }
 
 describe('visualization Dashboard lifecycle', () => {
-  it('collects only an exact named analysis and reviews replacement while preserving unavailable intent', () => {
-    const { workspace } = configureLibraryTest(); const data = analysisFixture(); workspace.publish(data.snapshot);
+  it('collects multiple exact analyses, retains unavailable selections and reviews their removal', () => {
+    const { workspace } = configureLibraryTest(); const data = analysisFixture();
+    workspace.publish({ ...data.snapshot, facilityAnalyses: [data.analysis, { ...data.analysis, guid: 'second', name: 'Second' }] });
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
-    expect(lifecycle.step()).toBe('analysis'); expect(lifecycle.canContinueAnalysis()).toBe(false);
-    lifecycle.selectAnalysis('analysis-a');
-    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
-    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a', measure: 'actual' });
-    expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('groupGuid');
-    lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue('Production'); expect(lifecycle.canSubmit()).toBe(true);
-    workspace.publishCommitted({ ...data.snapshot, facilityAnalyses: [] }, {}); expect(lifecycle.canSubmit()).toBe(false);
-    lifecycle.editSelection('analysis'); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
-    expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a' });
-    const replacement = { ...data.analysis, guid: 'replacement' };
-    workspace.publishCommitted({ ...data.snapshot, facilityAnalyses: [replacement] }, {});
     expect(lifecycle.canContinueAnalysis()).toBe(false);
-    lifecycle.selectAnalysis('replacement'); expect(lifecycle.confirmation()).toBe('decision');
-    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
-    lifecycle.cancelConfirmation(); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a');
-    lifecycle.selectAnalysis('replacement'); lifecycle.confirmDecision();
-    expect(lifecycle.form.controls.analysisGuid.value).toBe('replacement'); expect(lifecycle.canContinueAnalysis()).toBe(true);
-    lifecycle.toggleSource('analysis'); expect(lifecycle.confirmation()).toBe('decision'); lifecycle.confirmDecision();
-    expect(lifecycle.form.controls.analysisGuid.value).toBeNull();
+    lifecycle.selectAnalysis('analysis-a'); lifecycle.selectAnalysis('second');
+    expect(lifecycle.form.controls.analysisGuids.value).toEqual(['analysis-a', 'second']);
+    expect(lifecycle.draftDefinition()!.sources.map(source => source.kind === 'analysis' ? source.analysisGuid : undefined)).toEqual(['analysis-a', 'second']);
+    lifecycle.continueAnalysis(); lifecycle.toggleCreationMeasure('analysis', 'calculated'); lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Production');
+    expect(lifecycle.canSubmit()).toBe(true); expect(lifecycle.draftDefinition()!.sources).toHaveLength(4);
+    workspace.publishCommitted({ ...data.snapshot, facilityAnalyses: [{ ...data.analysis, guid: 'second' }] }, {});
+    expect(lifecycle.canSubmit()).toBe(false); lifecycle.editSelection('analysis'); lifecycle.selectAnalysis('analysis-a');
+    expect(lifecycle.confirmation()).toBe('decision'); lifecycle.cancelConfirmation();
+    expect(lifecycle.form.controls.analysisGuids.value).toEqual(['analysis-a', 'second']);
+    lifecycle.selectAnalysis('analysis-a'); lifecycle.confirmDecision();
+    expect(lifecycle.form.controls.analysisGuids.value).toEqual(['second']); expect(lifecycle.canContinueAnalysis()).toBe(true);
   });
 
   it.each([['line', 'bar'], ['bar', 'line']] as const)('saves the current %s to %s chart choice after selecting an analysis', async (initial, selected) => {
     const { workspace, commands } = configureLibraryTest(); workspace.publish(analysisFixture().snapshot);
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart(initial); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
     lifecycle.selectAnalysis('analysis-a'); lifecycle.continueAnalysis(); lifecycle.editSelection('chart'); lifecycle.selectChart(selected);
-    lifecycle.continueSources(); lifecycle.continueAnalysis(); lifecycle.form.controls.name.setValue('Current chart'); await lifecycle.submit();
+    lifecycle.continueSources(); lifecycle.continueAnalysis(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Current chart'); await lifecycle.submit();
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { kind: 'time-series', defaultTraceType: selected, interval: 'monthly' },
       sources: [{ analysisGuid: 'analysis-a', mode: 'result', measure: 'actual' }], series: [{ metric: 'actual', resourceGuid: 'analysis-a', axis: 'left' }] });
     expect(commands.prepareCreate.mock.calls[0][0].sources[0]).not.toHaveProperty('groupGuid');
   });
 
-  it('rejects stale analysis replacement review and clears an excluded facility binding only after scope review', () => {
+  it('rejects stale Analysis removal review and prunes excluded bindings only after scope review', () => {
     const { workspace } = configureLibraryTest(); const data = analysisFixture();
-    const snapshot = { ...data.snapshot, facilities: [...data.snapshot.facilities, { ...data.facility, guid: 'facility-b' }],
-      facilityAnalyses: [...data.snapshot.facilityAnalyses, { ...data.analysis, guid: 'replacement' }] };
-    workspace.publish(snapshot);
+    const snapshot = { ...data.snapshot, facilities: [...data.snapshot.facilities, { ...data.facility, guid: 'facility-b' }] }; workspace.publish(snapshot);
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('analysis'); lifecycle.continueSources();
-    lifecycle.selectAnalysis('analysis-a'); lifecycle.selectAnalysis('replacement'); expect(lifecycle.confirmation()).toBe('decision');
-    workspace.publishCommitted({ ...snapshot, facilityAnalyses: snapshot.facilityAnalyses.map(item => ({ ...item, name: 'Renamed' })) }, {});
-    lifecycle.confirmDecision(); expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a'); expect(lifecycle.error()).toContain('Choices changed');
-    lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-b'] }); expect(lifecycle.confirmation()).toBe('decision');
-    expect(lifecycle.form.controls.analysisGuid.value).toBe('analysis-a'); lifecycle.cancelConfirmation();
+    lifecycle.selectAnalysis('analysis-a'); lifecycle.selectAnalysis('analysis-a'); expect(lifecycle.confirmation()).toBe('decision');
+    workspace.publishCommitted({ ...snapshot, facilityAnalyses: [{ ...data.analysis, name: 'Renamed' }] }, {});
+    lifecycle.confirmDecision(); expect(lifecycle.form.controls.analysisGuids.value).toEqual(['analysis-a']); expect(lifecycle.error()).toContain('Choices changed');
+    lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-b'] }); expect(lifecycle.confirmation()).toBe('decision'); lifecycle.cancelConfirmation();
     expect(lifecycle.form.controls.facilitySelection.value).toEqual({ kind: 'all' });
     lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-b'] }); lifecycle.confirmDecision();
-    expect(lifecycle.form.controls.analysisGuid.value).toBeNull(); expect(lifecycle.canContinueAnalysis()).toBe(false);
+    expect(lifecycle.form.controls.analysisGuids.value).toEqual([]); expect(lifecycle.canContinueAnalysis()).toBe(false);
   });
 
   it.each([
@@ -97,7 +89,7 @@ describe('visualization Dashboard lifecycle', () => {
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources();
     expect(lifecycle.step()).toBe('energy-use-selection-mode'); lifecycle.selectEnergyUseMode(mode);
     expect(lifecycle.equipmentChoices().some(choice => choice.guid === id)).toBe(true);
-    lifecycle.form.controls.energyUseResourceIds.setValue([id]); lifecycle.continueEquipment(); lifecycle.form.controls.name.setValue('Saved selection');
+    lifecycle.form.controls.energyUseResourceIds.setValue([id]); lifecycle.continueEquipment(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Saved selection');
     expect(lifecycle.canSubmit()).toBe(true);
     const source = lifecycle.draftDefinition()!.sources[0];
     expect(source).toMatchObject({ selectionMode: mode, aggregation: mode === 'equipment' ? 'none' : 'sum',
@@ -116,14 +108,14 @@ describe('visualization Dashboard lifecycle', () => {
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
     lifecycle.continueFacilities(); lifecycle.selectChart('bar'); lifecycle.toggleSource('energy-use'); lifecycle.continueSources();
     expect(lifecycle.step()).toBe('energy-use-selection-mode'); lifecycle.selectEnergyUseMode('equipment'); expect(lifecycle.step()).toBe('equipment'); lifecycle.form.controls.energyUseResourceIds.setValue(['equipment-a']); lifecycle.continueEquipment();
-    lifecycle.form.controls.name.setValue('Equipment'); expect(lifecycle.canSubmit()).toBe(true);
+    if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Equipment'); expect(lifecycle.canSubmit()).toBe(true);
     expect(lifecycle.draftDefinition()).toMatchObject({ chart: { defaultTraceType: 'bar', interval: 'yearly', stack: 'none' }, sources: [{ aggregation: 'none', selection: { kind: 'fixed', resource: 'equipment', guids: ['equipment-a'] } }], period: { kind: 'latest-saved-year' } });
     lifecycle.editSelection('equipment'); expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
     workspace.publish({ ...workspace.snapshot()!, energyUseEquipment: [] }); expect(lifecycle.equipmentSelectionValid()).toBe(false);
     expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
     lifecycle.toggleSource('energy-use'); expect(lifecycle.confirmation()).toBe('decision'); lifecycle.cancelConfirmation();
     expect(lifecycle.form.controls.energyUseResourceIds.value).toEqual(['equipment-a']);
-    lifecycle.form.controls.energyUseResourceIds.setValue([]); lifecycle.continueEquipment(); expect(lifecycle.canSubmit()).toBe(true);
+    lifecycle.form.controls.energyUseResourceIds.setValue([]); lifecycle.continueEquipment(); lifecycle.continueMeasures(); expect(lifecycle.canSubmit()).toBe(true);
     expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('selection');
   });
 
@@ -131,7 +123,7 @@ describe('visualization Dashboard lifecycle', () => {
     const { workspace } = configureLibraryTest();
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
     selectSetup(lifecycle, ['predictor']); lifecycle.editSelection('predictor'); lifecycle.toggleAllPredictors();
-    lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('All history');
+    lifecycle.continuePredictors(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('All history');
     expect(lifecycle.canSubmit()).toBe(true);
     expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'rule', resource: 'predictor', filter: {} } });
     const first = { ...getNewIdbPredictor('account-a', 'facility-a'), guid: 'first' };
@@ -148,14 +140,14 @@ describe('visualization Dashboard lifecycle', () => {
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate();
     lifecycle.continueFacilities(); lifecycle.selectChart('line'); lifecycle.toggleSource('predictor'); lifecycle.continueSources();
     expect(lifecycle.step()).toBe('predictor');
-    lifecycle.togglePredictor(predictor.guid); expect(lifecycle.step()).toBe('predictor'); lifecycle.continuePredictors(); expect(lifecycle.step()).toBe('name');
+    lifecycle.togglePredictor(predictor.guid); expect(lifecycle.step()).toBe('predictor'); lifecycle.continuePredictors(); expect(lifecycle.step()).toBe('measures'); lifecycle.continueMeasures(); expect(lifecycle.step()).toBe('name');
     expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ selection: { kind: 'fixed', resource: 'predictor', guids: ['production'] } });
     lifecycle.editSelection('predictor'); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
-    lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Production');
+    lifecycle.continuePredictors(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Production');
     workspace.publish({ ...workspace.snapshot()!, predictors: [] });
     expect(lifecycle.canSubmit()).toBe(false); expect(lifecycle.form.controls.predictorGuids.value).toEqual(['production']);
     lifecycle.editSelection('predictor');
-    lifecycle.togglePredictor('production'); lifecycle.continuePredictors(); lifecycle.form.controls.name.setValue('Set up later');
+    lifecycle.togglePredictor('production'); lifecycle.continuePredictors(); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Set up later');
     expect(lifecycle.canSubmit()).toBe(true);
     expect(lifecycle.draftDefinition()!.sources[0]).not.toHaveProperty('selection');
   });
@@ -177,9 +169,9 @@ describe('visualization Dashboard lifecycle', () => {
     };
     transition({ kind: 'selection-mode', sourceId, mode });
     transition({ kind: 'set-resources', sourceId, resourceIds: [resource] });
-    const dataMode = mode === 'meter' ? 'billing-period' : 'calendarized';
+    const dataMode = 'calendarized';
     transition({ kind: 'source-settings', sourceId, settings: { dataMode } });
-    lifecycle.selectMeterMode(mode); lifecycle.toggleResource(resource); lifecycle.continueResources(); lifecycle.selectObservation(dataMode);
+    lifecycle.selectMeterMode(mode); lifecycle.toggleResource(resource); lifecycle.continueResources();
     expect(lifecycle.draftDefinition()).toEqual(expected);
     lifecycle.editSelection('resources'); lifecycle.selectMeterMode(mode);
     expect(lifecycle.draftDefinition()).toEqual(expected); expect(lifecycle.confirmation()).toBeUndefined();
@@ -195,7 +187,7 @@ describe('visualization Dashboard lifecycle', () => {
     const { workspace } = configureLibraryTest();
     workspace.publish({ ...workspace.snapshot()!, meters: [meter({ groupId: 'group-a' })], meterGroups: [group({ guid: 'group-a' })] });
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectRecipe('energy-trend');
-    lifecycle.selectMeterMode('source'); lifecycle.toggleResource('Electricity'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized');
+    lifecycle.selectMeterMode('source'); lifecycle.toggleResource('Electricity'); lifecycle.continueResources();
     const before = lifecycle.form.getRawValue();
     lifecycle.editSelection('selection-mode'); expect(lifecycle.form.getRawValue()).toEqual(before);
     lifecycle.selectMeterMode('source'); expect(lifecycle.form.controls.resourceIds.value).toEqual(['Electricity']);
@@ -212,9 +204,9 @@ describe('visualization Dashboard lifecycle', () => {
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectRecipe(recipe);
     expect(lifecycle.step()).toBe('selection-mode');
     lifecycle.selectMeterMode('group'); expect(lifecycle.resourceCards()[0].available).toBe(false);
-    lifecycle.toggleResource('empty-group'); lifecycle.continueResources(); expect(lifecycle.step()).toBe('observation');
-    expect(lifecycle.nativeAvailable()).toBe(false); lifecycle.selectObservation('calendarized');
-    await lifecycle.submit();
+    lifecycle.toggleResource('empty-group'); lifecycle.continueResources(); expect(lifecycle.step()).toBe('measures');
+
+    lifecycle.continueMeasures(); await lifecycle.submit();
     expect(commands.prepareCreate).toHaveBeenCalledOnce();
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ sources: [{ selectionMode: 'group', measure: recipe === 'cost-trend' ? 'cost' : 'energy',
       selection: { kind: 'fixed', resource: 'meter-group', guids: ['empty-group'] } }], chart: { defaultTraceType: 'line', interval: 'monthly' } });
@@ -222,21 +214,21 @@ describe('visualization Dashboard lifecycle', () => {
   it('requires custom Meter resources before name but permits coherent setup for other categories', async () => {
     const { commands, workspace } = configureLibraryTest(); workspace.publish({ ...workspace.snapshot()!, meters: [meter({})] });
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('scatter');
-    lifecycle.toggleSource('utility'); lifecycle.form.controls.name.setValue('Usage and weather'); lifecycle.continueSources();
+    lifecycle.toggleSource('utility'); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Usage and weather'); lifecycle.continueSources();
     expect(lifecycle.step()).toBe('selection-mode'); await lifecycle.submit(); expect(commands.submit).not.toHaveBeenCalled();
-    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources(); lifecycle.selectObservation('calendarized');
-    await lifecycle.submit(); expect(commands.prepareCreate).toHaveBeenCalledOnce();
+    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); lifecycle.continueResources();
+    lifecycle.continueMeasures(); await lifecycle.submit(); expect(commands.prepareCreate).toHaveBeenCalledOnce();
     expect(commands.prepareCreate.mock.calls[0][0]).toMatchObject({ chart: { kind: 'scatter', showFit: false } });
   });
-  it('offers all primary selection modes and requires one meter for native observations', () => {
+  it('offers all primary selection modes and always uses calendarized observations', () => {
     const { workspace } = configureLibraryTest(); workspace.publish({ ...workspace.snapshot()!, meters: [meter({}), meter({ guid: 'meter-b' })] });
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line');
     lifecycle.toggleSource('utility'); lifecycle.continueSources();
     expect(lifecycle.selectionModes.map(choice => choice.value)).toEqual(['source', 'group', 'meter']);
-    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); expect(lifecycle.nativeAvailable()).toBe(true);
-    lifecycle.toggleResource('meter-b'); expect(lifecycle.nativeAvailable()).toBe(false);
-    lifecycle.toggleResource('meter-b'); lifecycle.continueResources(); lifecycle.selectObservation('billing-period');
-    expect(lifecycle.draftDefinition()).toMatchObject({ chart: { interval: 'native' }, sources: [{ dataMode: 'billing-period', aggregation: 'none' }] });
+    lifecycle.selectMeterMode('meter'); lifecycle.toggleResource('meter-a'); expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ dataMode: 'calendarized' });
+    lifecycle.toggleResource('meter-b');
+    lifecycle.toggleResource('meter-b'); lifecycle.continueResources();
+    expect(lifecycle.draftDefinition()).toMatchObject({ chart: { interval: 'monthly' }, sources: [{ dataMode: 'calendarized', aggregation: 'sum' }] });
   });
   it('requires an explicit Source selection and rejects the removed selection method', () => {
     configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); lifecycle.continueFacilities(); lifecycle.selectChart('line');
@@ -249,7 +241,7 @@ describe('visualization Dashboard lifecycle', () => {
   });
   it('resets steps and selections when Add is reopened after explicit discard', () => {
     configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'predictor']);
-    lifecycle.form.controls.name.setValue('Discard this setup'); lifecycle.discard(); lifecycle.openCreate();
+    if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Discard this setup'); lifecycle.discard(); lifecycle.openCreate();
     expect(lifecycle.step()).toBe('facilities'); expect(lifecycle.selections()).toEqual([]);
     expect(lifecycle.form.controls.chart.value).toBeNull(); expect(lifecycle.form.controls.sourceKinds.value).toEqual([]);
     expect(lifecycle.form.controls.name.value).toBe(''); expect(lifecycle.canSubmit()).toBe(false);
@@ -315,7 +307,7 @@ describe('visualization Dashboard lifecycle', () => {
     const lifecycle = TestBed.inject(LibraryLifecycle);
     let finish!: (value: any) => void;
     commands.submit.mockImplementationOnce(command => new Promise(resolve => finish = value => resolve({ state: 'committed', command, ...value })));
-    lifecycle.openCreate(); selectSetup(lifecycle); lifecycle.form.controls.name.setValue('Saved before leaving');
+    lifecycle.openCreate(); selectSetup(lifecycle); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Saved before leaving');
     const saving = lifecycle.submit(); const leaving = lifecycle.resolveLeave();
     finish({ value: libraryRecord(), referenceIssues: [] });
     await saving; await expect(leaving).resolves.toBe(true);
@@ -333,7 +325,7 @@ describe('visualization Dashboard lifecycle', () => {
     const { commands, visualizations } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle);
     commands.submit.mockImplementationOnce(async command => ({ state: 'failed', command, error: new Error('Storage unavailable') } as any))
       .mockImplementationOnce(async command => ({ state: 'refresh-required', command, error: new Error('Refresh unavailable') } as any));
-    lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'predictor']); lifecycle.form.controls.name.setValue('Retained'); await lifecycle.submit();
+    lifecycle.openCreate(); selectSetup(lifecycle, ['utility', 'predictor']); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Retained'); await lifecycle.submit();
     const proposal = lifecycle.proposal();
     expect(proposal).toMatchObject({ definition: { chart: { kind: 'time-series', defaultTraceType: 'line' }, sources: [{ kind: 'utility' }, { kind: 'predictor' }] } });
     lifecycle.toggleSource('predictor'); expect(lifecycle.form.controls.sourceKinds.value).toEqual(['utility', 'predictor']);
@@ -346,7 +338,7 @@ describe('visualization Dashboard lifecycle', () => {
   it('prevents repeated activation and keeps draft state through transient workspace refresh', async () => {
     const { commands, workspace } = configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle);
     let finish!: (value: any) => void; commands.submit.mockImplementationOnce(command => new Promise(resolve => { finish = value => resolve({ state: 'committed', command, ...value }); }));
-    lifecycle.openCreate(); selectSetup(lifecycle); lifecycle.form.controls.name.setValue('Retained'); const saving = lifecycle.submit();
+    lifecycle.openCreate(); selectSetup(lifecycle); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Retained'); const saving = lifecycle.submit();
     const initial = lifecycle.editor(); workspace.beginLoad(false); await lifecycle.submit(); lifecycle.openCreate(); selectSetup(lifecycle);
     expect(lifecycle.editor()).toBe(initial); expect(commands.submit).toHaveBeenCalledTimes(1);
     workspace.publish(workspace.snapshot()!); finish({ value: libraryRecord(), referenceIssues: [] }); await saving;
@@ -355,12 +347,12 @@ describe('visualization Dashboard lifecycle', () => {
     const { workspace, commands } = configureLibraryTest(); workspace.publish({ ...workspace.snapshot()!, account: { ...workspace.account()!, isSingleFacilityCompany: true } });
     const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle);
     expect(lifecycle.form.controls.facilitySelection.value).toEqual({ kind: 'all' });
-    lifecycle.form.controls.name.setValue('  '); await lifecycle.submit(); expect(commands.submit).not.toHaveBeenCalled();
-    lifecycle.form.controls.name.setValue('Single facility'); await lifecycle.submit();
+    if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('  '); await lifecycle.submit(); expect(commands.submit).not.toHaveBeenCalled();
+    if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Single facility'); await lifecycle.submit();
     expect(commands.prepareCreate.mock.calls[0][0].facilitySelection).toEqual({ kind: 'all' });
   });
   it('uses portal-driven Stay and Discard decisions before leaving a changed draft', async () => {
-    configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle); lifecycle.form.controls.name.setValue('Protected');
+    configureLibraryTest(); const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.openCreate(); selectSetup(lifecycle); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Protected');
     const stay = lifecycle.resolveLeave(); expect(lifecycle.confirmation()).toBe('discard'); lifecycle.cancelConfirmation(); expect(await stay).toBe(false);
     expect(lifecycle.form.controls.name.value).toBe('Protected'); const discard = lifecycle.resolveLeave(); lifecycle.discard(); expect(await discard).toBe(true);
     expect(lifecycle.editor()).toBeUndefined(); expect(lifecycle.needsProtection()).toBe(false);
@@ -369,7 +361,7 @@ describe('visualization Dashboard lifecycle', () => {
     const { workspace, commands } = configureLibraryTest(); const record = libraryRecord(); workspace.publish({ ...workspace.snapshot()!, savedVisualizations: [record] });
     const saved = { ...record, revision: record.revision + 1, definition: { ...(record.definition as any), name: 'Externally saved' } };
     commands.submit.mockImplementationOnce(async command => ({ state: 'conflict', command, current: saved, error: new Error('Conflict') } as any));
-    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.rename(buildVisualizationLibrary(workspace.snapshot()!)[0]); lifecycle.form.controls.name.setValue('Local'); await lifecycle.submit();
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.rename(buildVisualizationLibrary(workspace.snapshot()!)[0]); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Local'); await lifecycle.submit();
     expect(lifecycle.form.controls.name.value).toBe('Local'); expect(lifecycle.canRetry()).toBe(false); lifecycle.useSavedConflict();
     expect(lifecycle.form.controls.name.value).toBe('Externally saved'); expect(lifecycle.proposal()).toBeUndefined();
   });
@@ -383,7 +375,7 @@ describe('visualization Dashboard lifecycle', () => {
     const { workspace, commands } = configureLibraryTest(); const record = libraryRecord(); workspace.publish({ ...workspace.snapshot()!, savedVisualizations: [record] });
     const saved = { ...record, revision: record.revision + 1, definition: { ...(record.definition as any), name: 'New saved', appearance: { legend: false } } };
     commands.submit.mockImplementationOnce(async command => ({ state: 'conflict', command, current: saved, error: new Error('Conflict') } as any));
-    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.rename(buildVisualizationLibrary(workspace.snapshot()!)[0]); lifecycle.form.controls.name.setValue('Mine'); await lifecycle.submit();
+    const lifecycle = TestBed.inject(LibraryLifecycle); lifecycle.rename(buildVisualizationLibrary(workspace.snapshot()!)[0]); if (lifecycle.step() === 'measures') lifecycle.continueMeasures(); lifecycle.form.controls.name.setValue('Mine'); await lifecycle.submit();
     lifecycle.keepLocalConflict(); expect(lifecycle.form.controls.name.value).toBe('Mine'); await lifecycle.submit();
     expect(commands.submit.mock.calls[1][0]).toMatchObject({ expectedRevision: saved.revision, definition: { name: 'Mine', appearance: { legend: false } } });
   });

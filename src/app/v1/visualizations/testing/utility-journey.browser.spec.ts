@@ -1,3 +1,4 @@
+import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { previewValuesText } from './preview-values.testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocalStorageService } from 'ngx-webstorage';
@@ -191,7 +192,7 @@ describe('saved utility journey across native browser boundaries', () => {
 
     const beforeEdit = decoded(saved);
     const edited: VisualizationDefinition = { ...beforeEdit, appearance: { ...beforeEdit.appearance, title: 'Saved source energy' },
-      sources: beforeEdit.sources.map(source => source.kind === 'utility' ? { ...source, settings: { ...source.settings, unit: { kind: 'pinned', value: 'MWh' } } } : source),
+      displaySettings: { ...beforeEdit.displaySettings, units: { energy: { kind: 'pinned', value: 'MWh' } } },
       chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' } };
     // Local presentation/unit edits reproject existing canonical results before any durable workspace reload.
     render(first, { ...saved, definition: edited });
@@ -204,7 +205,7 @@ describe('saved utility journey across native browser boundaries', () => {
     const reopened = store.savedVisualizations().find(record => record.guid === saved.guid)!;
     const second = mount(reopened);
     await expectValue(second, 0.01);
-    expect(decoded(reopened)).toMatchObject({ version: 2,
+    expect(decoded(reopened)).toMatchObject({ version: 3,
       chart: { kind: 'time-series', defaultTraceType: 'bar', interval: 'monthly', stack: 'none' },
       series: [{ overrides: [{ resourceGuid: 'meter-a', visible: true, label: 'Factory main' }] }] });
     const beforeReadingWorkerCount = workerMessages.mock.calls.length;
@@ -221,7 +222,7 @@ describe('saved utility journey across native browser boundaries', () => {
     const repository = new SavedVisualizationsDbService(harness!.dbService, new IndexedDbAccessService(harness!.dbService));
     const durable = await repository.getStoredByGuid(saved.guid);
     expect(durable).toEqual(beforeClose);
-    expect(decoded(durable!)).toEqual(edited);
+    expect(decoded(durable!)).toEqual(normalizeVisualizationDefinition(edited));
     expect((await firstValueFrom(harness!.dbService.getByKey<any>('utilityMeterData', bill.id)))?.totalEnergyUse).toBe(25);
     expect(Object.keys(durable!.definition as object)).not.toContain('data');
     expect(Object.keys(durable!.definition as object)).not.toContain('options');

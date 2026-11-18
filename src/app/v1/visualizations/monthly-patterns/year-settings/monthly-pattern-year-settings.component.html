@@ -1,0 +1,9 @@
+<p>Years use the selected resource’s current owner fiscal calendar. New years appear automatically.</p>
+@for (row of rows; track row.key) {
+  <fieldset [formGroup]="row.form"><legend>{{ row.label }}@if (row.absent) { <span> · no current data</span> }</legend>
+    <label class="year-toggle"><input type="checkbox" formControlName="visible">Show year</label>
+    <label>Year label<input class="v1-input" type="text" formControlName="label" [placeholder]="row.label"></label>
+    <label>Color<input class="v1-input" type="color" formControlName="color"></label>
+    <label>Line pattern<select class="v1-select" formControlName="lineStyle"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></label>
+  </fieldset>
+} @empty { <p role="status">Select a resource with monthly history to configure its years.</p> }

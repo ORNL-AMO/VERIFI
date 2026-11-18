@@ -67,6 +67,12 @@
   margin-left: auto;
 }
 
+.v1-meter-results-chart__capture-reason { color: var(--v1-muted); margin: 0; }
+
+@media print {
+  .v1-meter-results-chart__controls, .v1-meter-results-chart__capture-reason { display: none; }
+}
+
 .v1-meter-results-chart__action-controls .v1-icon-btn:hover:not(:disabled),
 .v1-meter-results-chart__action-controls .v1-icon-btn:focus-visible {
   border-color: var(--v1-content-control);

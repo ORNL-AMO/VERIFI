@@ -83,11 +83,15 @@ export function projectMeterItems(definition: VisualizationDefinition, sourceId:
     });
   }
   const items = configured.map<VisualizationDecisionItem>(item => {
+    const guid = item.identity.resourceGuid;
+    const facilityGuid = grouping === 'facility' ? guid : grouping === 'meter'
+      ? snapshot.meters.find(meter => meter.guid === guid && meter.accountId === definition.accountGuid)?.facilityId
+      : grouping === 'group' ? snapshot.meterGroups.find(group => group.guid === guid && group.accountId === definition.accountGuid)?.facilityId : undefined;
     const metadata = discovered.find(entry => item.identity.resourceGuid !== undefined ? entry.resourceGuid === item.identity.resourceGuid : entry.id === item.identity.seriesId);
     const providerIdentity = metadata?.id ?? item.identity.seriesId ?? utilitySeriesId(source.id, item.identity.resourceGuid!);
     const { series: selected, declared, own, appearance } = resolveItemPresentation(definition,
       { sourceId, metric: utilityMeasureKey(source), identity: item.identity, providerSeriesId: providerIdentity });
-    return { ...item, key: itemKey(item.identity), sourceId, selectedId: selected?.id ?? `${sourceId}-series`, unit: metadata?.unit ?? '',
+    return { ...item, ...(facilityGuid ? { facilityGuid } : {}), key: itemKey(item.identity), sourceId, selectedId: selected?.id ?? `${sourceId}-series`, unit: metadata?.unit ?? '',
       customized: isCustomized(own, true) || !!selected?.resourceGuid && isCustomized(declared), customColor: own.color !== undefined || declared.color !== undefined,
       appearance } satisfies VisualizationDecisionItem;
   });

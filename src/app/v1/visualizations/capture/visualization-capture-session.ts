@@ -4,7 +4,7 @@ import type { VisualizationDefinition } from '@domain/visualizations/visualizati
 import type { CreateVisualizationCommand, VisualizationCommandOutcome } from '@data/account-workspace/visualization-commands.models';
 import type { SavedVisualizationReadResult } from '@data/visualizations/saved-visualization-record';
 
-export interface UtilityCaptureSessionDependencies {
+export interface VisualizationCaptureSessionDependencies {
   readonly prepare: (definition: VisualizationDefinition) => CreateVisualizationCommand;
   readonly submit: (command: CreateVisualizationCommand) => Promise<VisualizationCommandOutcome>;
   readonly recover: (accountGuid: string, guid: string) => Promise<SavedVisualizationReadResult | undefined>;
@@ -15,7 +15,7 @@ export interface UtilityCaptureSessionDependencies {
 }
 
 /** One capture proposal owns one identity through write retries and publication recovery. */
-export class UtilityCaptureSession {
+export class VisualizationCaptureSession {
   readonly proposal = signal<CreateVisualizationCommand | undefined>(undefined);
   readonly saving = signal(false);
   readonly message = signal('');
@@ -26,9 +26,9 @@ export class UtilityCaptureSession {
   private running?: Promise<void>;
   private unregister?: () => void;
   private destroyed = false;
-  private dependencies?: UtilityCaptureSessionDependencies;
+  private dependencies?: VisualizationCaptureSessionDependencies;
 
-  constructor(private readonly resolveDependencies: () => UtilityCaptureSessionDependencies) { }
+  constructor(private readonly resolveDependencies: () => VisualizationCaptureSessionDependencies) { }
 
   start(definition: VisualizationDefinition): Promise<void> {
     if (this.destroyed || this.proposal() || this.saving() || this.saved()) return this.running ?? Promise.resolve();
@@ -52,7 +52,7 @@ export class UtilityCaptureSession {
     return this.running;
   }
 
-  private async execute(proposal: CreateVisualizationCommand, dependencies: UtilityCaptureSessionDependencies): Promise<void> {
+  private async execute(proposal: CreateVisualizationCommand, dependencies: VisualizationCaptureSessionDependencies): Promise<void> {
     if (this.refreshRequired()) {
       const recovered = await dependencies.recover(proposal.accountGuid, proposal.guid);
       if (this.destroyed) return;
@@ -68,7 +68,7 @@ export class UtilityCaptureSession {
       : result.state === 'conflict' ? 'This capture identity already changed. Discard the rejected proposal and capture again after reviewing the saved data.' : message(result.error));
   }
 
-  private async complete(proposal: CreateVisualizationCommand, dependencies: UtilityCaptureSessionDependencies): Promise<void> {
+  private async complete(proposal: CreateVisualizationCommand, dependencies: VisualizationCaptureSessionDependencies): Promise<void> {
     this.saved.set({ accountGuid: proposal.accountGuid, guid: proposal.guid });
     this.proposal.set(undefined); this.refreshRequired.set(false); this.saving.set(false);
     if (dependencies.accountGuid() !== proposal.accountGuid) { this.message.set('Saved in its owning account. Open it from that account’s Visualizations Dashboard.'); return; }
