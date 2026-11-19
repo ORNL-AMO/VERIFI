@@ -174,6 +174,42 @@ describe('Home atomic native commands and workspace publication', () => {
     expect(store.savedVisualizations()).toHaveLength(2); expect(store.savedVisualizations()).toContainEqual(oldChart);
     expect(definition(current(sibling.guid))).toEqual(before); expect(commands.ownerView(homeAccountOwner).state).toEqual(state);
   });
+  it('hydrates an external conflicting edit without replaying a rejected write and accepts a newly reviewed revision', async () => {
+    const { records } = await initialize(), home = records[0];
+    const retained = commands.prepareUpdate(home, { ...definition(home), name: 'Retained edit' });
+    await TestBed.inject(HomeCommandHandler).execute(commands.prepareUpdate(home, { ...definition(home), name: 'Other window' }), account.guid);
+    const committed = vi.fn(); TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    expect((await commands.submit(retained)).state).toBe('conflict'); expect(definition(current(home.guid)).name).toBe('home');
+    await commands.recover(account.guid, retained.operationGuid);
+    expect(definition(current(home.guid)).name).toBe('Other window'); expect(store.committedRevision()).toBeUndefined();
+    expect(committed).not.toHaveBeenCalled();
+    const retry = await commands.submit(commands.prepareUpdate(current(home.guid), { ...definition(current(home.guid)), name: 'Retained edit' }));
+    expect(retry.state).toBe('committed');
+  });
+  it('rejects stale chart-deletion dependencies even when the chart revision is unchanged', async () => {
+    const { records } = await initialize(), chart = store.savedVisualizations()[0], visualizations = TestBed.inject(SavedVisualizationCommands);
+    const reviewed = visualizations.prepareDelete(chart);
+    await commands.submit(commands.prepareUpdate(records[0], { ...definition(records[0]), widgets: [] }));
+    expect((await visualizations.submit(reviewed)).state).toBe('conflict');
+    expect(await harness.getAll('savedVisualizations')).toHaveLength(1);
+    await visualizations.recover(account.guid, chart.guid);
+    expect(visualizations.dependencies(chart.guid).widgets).toHaveLength(1);
+    expect((await visualizations.submit(visualizations.prepareDelete(store.savedVisualizations()[0]))).state).toBe('committed');
+    expect(visualizations.dependencies(chart.guid).widgets).toHaveLength(1);
+    expect(await harness.getAll('savedVisualizations')).toEqual([]);
+  });
+  it('uses a fallback for a blocked coincident default until explicit owner configuration acknowledges it', async () => {
+    const { records, record } = await initialize(), costs = records.find(item => item.template?.template === 'costs')!;
+    const owner = { ...record!, state: { ...ownerState(record!), defaultDashboardGuid: costs.guid }, preservation: {
+      references: [{ path: 'defaultDashboardGuid', kind: 'dashboard' as const, guid: costs.guid, reason: 'not-transferred' as const }], transfers: [] } };
+    await firstValueFrom(harness.dbService.update('homeOwners', owner));
+    await workspace.reloadActiveWorkspace(false);
+    const view = commands.ownerView(homeAccountOwner);
+    expect(view.state?.defaultDashboardGuid).toBe(costs.guid); expect(view.defaultDashboardGuid).toBe(records[0].guid);
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, view.state!))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).defaultDashboardGuid).toBe(costs.guid);
+    expect(store.homeOwners()[0].preservation?.references).toEqual([]);
+  });
   it('protects every affected starter after linked chart edits/deletion and exposes recoverable widget dependencies', async () => {
     const { records } = await initialize(), chart = store.savedVisualizations()[0];
     const visualizations = TestBed.inject(SavedVisualizationCommands);
@@ -187,7 +223,7 @@ describe('Home atomic native commands and workspace publication', () => {
     await visualizations.submit({ kind: 'update', accountGuid: account.guid, guid: updated.guid, expectedRevision: updated.revision, definition: read.definition });
     for (const record of records.slice(0, 2)) expect(current(record.guid).template?.customized).toBe(true);
     const next = store.savedVisualizations()[0];
-    await visualizations.submit({ kind: 'delete', accountGuid: account.guid, guid: next.guid, expectedRevision: next.revision });
+    await visualizations.submit(visualizations.prepareDelete(next));
     expect(store.savedVisualizations()).toHaveLength(0); expect(visualizations.dependencies(chart.guid).widgets).toHaveLength(2);
     expect(definition(current(records[0].guid)).widgets[0]).toMatchObject({ visualizationGuid: chart.guid });
     const proposal = commands.prepareTemplateReplacement(current(records[0].guid), { ...storageBlueprints()[0], version: 2 }, 'upgrade');
@@ -256,7 +292,7 @@ describe('Home atomic native commands and workspace publication', () => {
   it('protects pristine shared-chart placeholders on deletion and rejects an intervening stale template replacement', async () => {
     const { records } = await initialize(), chart = store.savedVisualizations()[0];
     const upgrade = commands.prepareTemplateReplacement(records[0], { ...storageBlueprints()[0], version: 2 }, 'upgrade');
-    await TestBed.inject(SavedVisualizationCommands).submit({ kind: 'delete', accountGuid: account.guid, guid: chart.guid, expectedRevision: chart.revision });
+    await TestBed.inject(SavedVisualizationCommands).submit(TestBed.inject(SavedVisualizationCommands).prepareDelete(chart));
     expect(records.slice(0, 2).every(record => current(record.guid).template?.customized)).toBe(true);
     expect((await commands.submit(upgrade)).state).toBe('conflict');
     expect(store.savedVisualizations()).toEqual([]);

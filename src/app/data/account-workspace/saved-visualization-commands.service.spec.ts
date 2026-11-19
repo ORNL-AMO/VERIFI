@@ -16,7 +16,7 @@ describe('saved visualization command outcomes', () => {
       duplicate: vi.fn(async () => structuredClone(record)), retarget: vi.fn(async () => structuredClone(record)), delete: vi.fn(async () => {}), inspect: vi.fn(async () => []) };
     const graphHandler = { ...handler, updateGraph: vi.fn(async () => ({ value: await handler.update(), homeDashboards: [] as IdbHomeDashboard[] })),
       retargetGraph: vi.fn(async () => ({ value: await handler.retarget(), homeDashboards: [] as IdbHomeDashboard[] })) };
-    const workspace = { account: () => ({ guid: 'account-a' }), isReady: () => true, savedVisualizations: () => [record], snapshot: () => undefined };
+    const workspace = { account: () => ({ guid: 'account-a' }), isReady: () => true, homeDashboards: () => [], savedVisualizations: () => [record], snapshot: () => undefined };
     return { boundary, handler: graphHandler, workspace, commands: new SavedVisualizationCommands(boundary as any, graphHandler as any, workspace as any) };
   }
 
@@ -97,7 +97,7 @@ describe('saved visualization command outcomes', () => {
     expect(await commands.submit(command)).toMatchObject({ state: 'refresh-required', command });
     expect(await commands.recover(record.accountId, record.guid)).toMatchObject({ state: 'valid', record });
     expect(handler.create).toHaveBeenCalledTimes(1);
-    expect(boundary.recoverCommittedPublication).toHaveBeenCalledWith(record.accountId);
+    expect(boundary.recoverCommittedPublication).toHaveBeenCalledWith(record.accountId, true);
   });
 
   it('does not submit writes or restore departed selections after an account switch', async () => {

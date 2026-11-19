@@ -8,8 +8,11 @@ import { CURRENT_DATA_VERSION, MigrationData } from '@data/indexedDB/data-migrat
 import { StatusWarningDismissal } from '@data/models/status-warning-dismissal';
 import { normalizeVisualizationAnalysisGroup } from './visualization-backup';
 import { energyUseBackupReferencesError } from './energy-use-backup-relations';
+import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { homeBackupRelationshipsError } from './home-backup';
 
-export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION; savedVisualizations: IdbSavedVisualization[] };
+export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION; savedVisualizations: IdbSavedVisualization[];
+  homeDashboards: IdbHomeDashboard[]; homeOwners: IdbHomeOwner[] };
 
 export class InvalidBackupError extends Error {
   constructor(message = 'Selected file is not a valid VERIFI backup.') {
@@ -43,7 +46,7 @@ const COLLECTION_FIELDS = [
   'facilities', 'meters', 'meterData', 'groups', 'accountReports', 'accountAnalysisItems',
   'facilityAnalysisItems', 'predictorData', 'predictorDataV2', 'predictors',
   'customEmissionsItems', 'customFuels', 'customGWPs', 'facilityReports',
-  'facilityEnergyUseGroups', 'facilityEnergyUseEquipment', 'savedVisualizations'
+  'facilityEnergyUseGroups', 'facilityEnergyUseEquipment', 'savedVisualizations', 'homeDashboards', 'homeOwners'
 ] as const;
 
 @Injectable({ providedIn: 'root' })
@@ -109,6 +112,8 @@ export class BackupPreparationService {
       facilityEnergyUseGroups: backup.facilityEnergyUseGroups.filter(item => item.facilityId === facilityGuid),
       facilityEnergyUseEquipment: backup.facilityEnergyUseEquipment.filter(item => item.facilityId === facilityGuid),
       savedVisualizations: backup.savedVisualizations.filter(item => savedVisualizationFacilityGuid(item, backup.facilities) === facilityGuid).map(item => savedVisualizationForFacilityExport(item, facilityGuid)),
+      homeDashboards: backup.homeDashboards.filter(item => item.facilityId === facilityGuid),
+      homeOwners: backup.homeOwners.filter(item => item.facilityId === facilityGuid),
       accountReports: [], accountAnalysisItems: []
     });
   }
@@ -223,12 +228,16 @@ function validateCoreRelationships(backup: BackupFile): void {
   const meterIds = new Set(backup.meters.map(item => item.guid));
   const predictorIds = new Set(backup.predictors.map(item => item.guid));
   const rootAccountId = backup.backupFileType === 'Account' ? backup.account.guid : backup.facility.accountId;
+  const homeError = homeBackupRelationshipsError(rootAccountId, facilities, backup.homeDashboards ?? [], backup.homeOwners ?? [],
+    backup.backupFileType === 'Facility' ? backup.facility.guid : undefined);
+  if (homeError) throw new BackupRelationshipError(homeError);
   const accountOwned = [
     ...backup.meters, ...backup.meterData, ...backup.groups, ...backup.predictorData,
     ...backup.predictors, ...backup.predictorDataV2, ...backup.facilityAnalysisItems,
     ...backup.accountAnalysisItems, ...backup.accountReports, ...backup.facilityReports,
     ...backup.customEmissionsItems, ...backup.customFuels, ...backup.customGWPs,
-    ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment, ...(backup.savedVisualizations ?? [])
+    ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment, ...(backup.savedVisualizations ?? []),
+    ...(backup.homeDashboards ?? []), ...(backup.homeOwners ?? [])
   ];
 
   if (backup.backupFileType === 'Account') {

@@ -11,7 +11,7 @@ describe('serialized Active for reporting rules', () => {
       owner: { kind, guid: kind === 'account' ? 'account-a' : 'facility-a' }, category: 'water' as const } }] };
     const decoded = decodeVisualizationDefinition(serializeVisualizationDefinition(value));
     expect('definition' in decoded && (decoded.definition.sources[0] as AnalysisResultVisualizationSource).reporting).toEqual(value.sources[0].reporting);
-    const mapped = remapVisualizationDefinition(value, 'account-b', { facility: { 'facility-a': 'facility-b' } });
+    const mapped = remapVisualizationDefinition(value, 'account-b', { account: { 'account-a': 'account-b' }, facility: { 'facility-a': 'facility-b' } });
     expect((mapped.definition.sources[0] as AnalysisResultVisualizationSource).reporting).toEqual({ kind: 'reporting',
       owner: { kind, guid: kind === 'account' ? 'account-b' : 'facility-b' }, category: 'water' });
     expect(mapped.issues).toEqual([]);
@@ -25,6 +25,15 @@ describe('serialized Active for reporting rules', () => {
     const again = remapVisualizationDefinition(first.definition, 'c', { facility: { missing: 'coincident' } }, first.issues);
     expect((again.definition.sources[0] as AnalysisResultVisualizationSource).reporting?.owner.guid).toBe('missing');
     expect(again.issues).toEqual(first.issues);
+  });
+  it('blocks account-reporting intent on facility-only transfer and retains the original owner evidence across hops', () => {
+    const value = { ...definition, sources: [{ ...source, reporting: { kind: 'reporting' as const,
+      owner: { kind: 'account' as const, guid: 'account-a' }, category: 'energy' as const } }] };
+    const first = remapVisualizationDefinition(value, 'destination', {});
+    expect(first.issues).toEqual([{ path: 'sources.0.reporting.owner.guid', kind: 'account', guid: 'account-a', reason: 'not-transferred' }]);
+    expect(decodeVisualizationDefinition(first.definition).state).not.toBe('invalid');
+    const second = remapVisualizationDefinition(first.definition, 'third', { account: { destination: 'third', 'account-a': 'third' } }, first.issues);
+    expect(second.issues).toEqual(first.issues);
   });
   it('rejects ambiguous exact/rule bindings and keeps old named-analysis bindings exact', () => {
     expect(decodeVisualizationDefinition({ ...definition, sources: [{ ...source, analysisGuid: 'exact', reporting: {

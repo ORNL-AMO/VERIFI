@@ -27,10 +27,15 @@ export class VisualizationImportNotificationBridgeService {
       if (this.notificationId) this.notifications.dismiss(this.notificationId);
       this.notificationId = undefined;
       this.notificationAccount = undefined;
-      if (!summary.locked && !summary.repairRequired) return;
-      const notification = this.notifications.warning('Saved visualizations need attention', {
-        message: `Imported ${summary.total} saved visualization${summary.total === 1 ? '' : 's'}. `
-          + `${summary.locked} locked; ${summary.repairRequired} require source repair. ${summary.reasons.join(' ')}`,
+      const homeAttention = !!summary.home && !!(summary.home.locked || summary.home.repairRequired);
+      const chartAttention = !!(summary.locked || summary.repairRequired);
+      if (!chartAttention && !homeAttention) return;
+      const title = homeAttention ? chartAttention ? 'Imported views need attention' : 'Home dashboards need attention' : 'Saved visualizations need attention';
+      const notification = this.notifications.warning(title, {
+        message: (summary.total || !summary.home ? `Imported ${summary.total} saved visualization${summary.total === 1 ? '' : 's'}. `
+          + `${summary.locked} locked; ${summary.repairRequired} require source repair. ` : '')
+          + (summary.home ? `Imported ${summary.home.dashboards} Home dashboard${summary.home.dashboards === 1 ? '' : 's'} and their saved owner settings. ` : '')
+          + summary.reasons.join(' '),
         durationMs: 0,
         retainOnOverflow: true,
         dismissible: true

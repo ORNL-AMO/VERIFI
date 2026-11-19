@@ -4,8 +4,8 @@ import { chartWidget, homeDefinition } from '@domain/home/testing/home-fixtures'
 import { HomeTemplateBlueprint } from '../home-template-graph';
 
 /** Small storage fixtures, deliberately independent of Home6's full shipped compositions. */
-export function storageBlueprints(owner: HomeOwner = { kind: 'account', guid: 'account-a' }): HomeTemplateBlueprint[] {
-  const chart = createVisualizationDefinition('Shared starter', 'account-a', owner.kind === 'account' ? { kind: 'all' }
+export function storageBlueprints(owner: HomeOwner = { kind: 'account', guid: 'account-a' }, accountGuid = owner.kind === 'account' ? owner.guid : 'account-a'): HomeTemplateBlueprint[] {
+  const chart = createVisualizationDefinition('Shared starter', accountGuid, owner.kind === 'account' ? { kind: 'all' }
     : { kind: 'fixed', facilityGuids: [owner.guid] }, 'utility');
   return HOME_STARTERS.map((template, index) => ({ template, version: 1,
     dashboard: { ...homeDefinition(index < 2 ? [chartWidget('trend')] : []), name: template,

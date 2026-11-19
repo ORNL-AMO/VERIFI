@@ -13,6 +13,7 @@ import { sameVisualizationFacilitySelection } from '@domain/visualizations/visua
 import { VisualizationReference, VisualizationReferenceIssue, visualizationReferences } from '@domain/visualizations/visualization-references';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { protectLinkedHomeDashboards } from '@data/home/home-chart-protection';
+import { homeChartUsage, sameHomeJson } from '@data/home/home-references';
 import { CreateVisualizationCommand, DeleteVisualizationCommand, DuplicateVisualizationCommand,
   UpdateVisualizationCommand, RetargetVisualizationCommand, VisualizationConflictError } from '../visualization-commands.models';
 import { inspectVisualizationReferences, VisualizationCatalogResource, VisualizationReferenceCatalog, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
@@ -136,6 +137,9 @@ export class VisualizationCommandHandler {
     return this.transactions.runTransaction(OWNER_STORES, 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
       const current = await this.requireCurrent(tx, submitted.guid, submitted.accountGuid, submitted.expectedRevision);
+      const dashboards = await tx.getAllByIndex<IdbHomeDashboard>('homeDashboards', 'accountId', submitted.accountGuid);
+      if (!sameHomeJson(homeChartUsage(dashboards, current.guid), submitted.homeUsage ?? []))
+        throw new VisualizationConflictError(current, 'Dashboard usage changed. Reload saved state and review the affected widgets before deleting this visualization.');
       await protectLinkedHomeDashboards(tx, submitted.accountGuid, current.guid);
       await tx.deleteByKey('savedVisualizations', current.id!);
     });

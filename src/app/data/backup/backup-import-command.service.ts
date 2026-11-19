@@ -1,4 +1,8 @@
+import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { HomeTransferMaps, transferHomeDashboard, transferHomeOwner, summarizeHomeImport } from './home-backup';
+import { BackupFile } from '@data/models/backup-file';
 import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
+import { protectLinkedHomeDashboards } from '@data/home/home-chart-protection';
 import { remapDataQualityBackupReferences } from './data-quality-backup-relations';
 import { accountReportAnalysisSetupKey } from '@data/account-workspace/account-report-setup.models';
 import { Injectable, signal } from '@angular/core';
@@ -55,7 +59,7 @@ const ACCOUNT_IMPORT_STORES: ReadonlyArray<VerifiStoreName> = [
   'facilityReports',
   'facilityEnergyUseGroups',
   'facilityEnergyUseEquipment',
-  'savedVisualizations'
+  'savedVisualizations', 'homeDashboards', 'homeOwners'
 ];
 
 const FACILITY_IMPORT_STORES: ReadonlyArray<VerifiStoreName> = [
@@ -74,7 +78,7 @@ const FACILITY_IMPORT_STORES: ReadonlyArray<VerifiStoreName> = [
   'facilityReports',
   'facilityEnergyUseGroups',
   'facilityEnergyUseEquipment',
-  'savedVisualizations'
+  'savedVisualizations', 'homeDashboards', 'homeOwners'
 ];
 
 const FACILITY_RESTORE_STORES = dedupeStores(
@@ -97,6 +101,7 @@ export class BackupImportCommandService {
   async importAccountBackupFile(preparedBackup: PreparedBackupFile, currIdx: number): Promise<IdbAccount> {
     const backupFile = structuredClone(preparedBackup);
     const visualizations: IdbSavedVisualization[] = [];
+    const homeDashboards: IdbHomeDashboard[] = [], homeOwners: IdbHomeOwner[] = [];
     this.summary.set(undefined);
 
     const result = await this.transactions.runTransaction(ACCOUNT_IMPORT_STORES, 'readwrite', async transaction => {
@@ -424,11 +429,10 @@ export class BackupImportCommandService {
         }
       }
 
-      visualizations.push(...await this.importVisualizations(transaction, preparedBackup, newAccount.guid,
-        visualizationTransferMaps(preparedBackup, backupFile)));
+      await this.importSavedGraphs(transaction, [{ source: preparedBackup, transferred: backupFile }], newAccount.guid, visualizations, homeDashboards, homeOwners);
       return newAccount;
     });
-    this.summary.set(summarizeVisualizationImport(result.guid, visualizations));
+    this.publishImportSummary(result.guid, visualizations, homeDashboards, homeOwners);
     return result;
   }
 
@@ -439,13 +443,13 @@ export class BackupImportCommandService {
   ): Promise<{ facility: IdbFacility, index?: number }> {
     this.summary.set(undefined);
     const visualizations: IdbSavedVisualization[] = [];
+    const homeDashboards: IdbHomeDashboard[] = [], homeOwners: IdbHomeOwner[] = [];
     const result = await this.transactions.runTransaction(FACILITY_IMPORT_STORES, 'readwrite', async transaction => {
       const imported = await this.importFacilityBackupInTransaction(transaction, preparedBackup, accountGUID, currIdx);
-      visualizations.push(...await this.importVisualizations(transaction, preparedBackup, accountGUID,
-        visualizationTransferMaps(preparedBackup, imported.transferred)));
+      await this.importSavedGraphs(transaction, [{ source: preparedBackup, transferred: imported.transferred }], accountGUID, visualizations, homeDashboards, homeOwners);
       return { facility: imported.facility, index: imported.index };
     });
-    this.summary.set(summarizeVisualizationImport(accountGUID, visualizations));
+    this.publishImportSummary(accountGUID, visualizations, homeDashboards, homeOwners);
     return result;
   }
 
@@ -457,14 +461,14 @@ export class BackupImportCommandService {
   ): Promise<{ facility: IdbFacility, index?: number }> {
     this.summary.set(undefined);
     const visualizations: IdbSavedVisualization[] = [];
+    const homeDashboards: IdbHomeDashboard[] = [], homeOwners: IdbHomeOwner[] = [];
     const result = await this.transactions.runTransaction(FACILITY_RESTORE_STORES, 'readwrite', async transaction => {
       currIdx = await this.deleteFacilityInTransaction(transaction, facilityToReplace, accountGUID, currIdx);
       const imported = await this.importFacilityBackupInTransaction(transaction, preparedBackup, accountGUID, currIdx);
-      visualizations.push(...await this.importVisualizations(transaction, preparedBackup, accountGUID,
-        visualizationTransferMaps(preparedBackup, imported.transferred)));
+      await this.importSavedGraphs(transaction, [{ source: preparedBackup, transferred: imported.transferred }], accountGUID, visualizations, homeDashboards, homeOwners);
       return { facility: imported.facility, index: imported.index };
     });
-    this.summary.set(summarizeVisualizationImport(accountGUID, visualizations));
+    this.publishImportSummary(accountGUID, visualizations, homeDashboards, homeOwners);
     return result;
   }
 
@@ -476,6 +480,7 @@ export class BackupImportCommandService {
   ): Promise<void> {
     this.summary.set(undefined);
     const visualizations: IdbSavedVisualization[] = [];
+    const homeDashboards: IdbHomeDashboard[] = [], homeOwners: IdbHomeOwner[] = [];
     await this.transactions.runTransaction(FACILITY_RESTORE_STORES, 'readwrite', async transaction => {
       const importedBackups: Array<{ source: PreparedBackupFile; transferred: PreparedBackupFile }> = [];
       const ownershipFacilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', selectedAccount.guid);
@@ -501,12 +506,9 @@ export class BackupImportCommandService {
         importedBackups.push({ source: backup, transferred: imported.transferred });
         idx = (imported.index ?? idx) + 1;
       }
-      const maps = mergeVisualizationTransferMaps(importedBackups.map(item => visualizationTransferMaps(item.source, item.transferred)));
-      for (const item of importedBackups) {
-        visualizations.push(...await this.importVisualizations(transaction, item.source, selectedAccount.guid, maps));
-      }
+      await this.importSavedGraphs(transaction, importedBackups, selectedAccount.guid, visualizations, homeDashboards, homeOwners);
     });
-    this.summary.set(summarizeVisualizationImport(selectedAccount.guid, visualizations));
+    this.publishImportSummary(selectedAccount.guid, visualizations, homeDashboards, homeOwners);
   }
 
   private async importFacilityBackupInTransaction(
@@ -768,7 +770,10 @@ export class BackupImportCommandService {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
       if (storeDefinition.storeName === 'savedVisualizations') {
         const records = await transaction.getAllByIndex<IdbSavedVisualization>('savedVisualizations', 'accountId', accountGuid);
-        for (const record of records) if (savedVisualizationFacilityGuid(record, facilities) === facility.guid) await transaction.deleteByKey('savedVisualizations', record.id!);
+        for (const record of records) if (savedVisualizationFacilityGuid(record, facilities) === facility.guid) {
+          await protectLinkedHomeDashboards(transaction, accountGuid, record.guid);
+          await transaction.deleteByKey('savedVisualizations', record.id!);
+        }
       } else await transaction.deleteAllByIndex(storeDefinition.storeName, 'facilityId', facility.guid);
     }
 
@@ -804,6 +809,47 @@ export class BackupImportCommandService {
     await transaction.deleteByKey('facilities', facility.id);
 
     return currIdx;
+  }
+
+  private async importSavedGraphs(transaction: IndexedDbTransactionContext, pairs: readonly { source: PreparedBackupFile; transferred: BackupFile }[],
+    accountGuid: string, visualizations: IdbSavedVisualization[], dashboards: IdbHomeDashboard[], owners: IdbHomeOwner[]): Promise<void> {
+    const root = (source: BackupFile) => source.backupFileType === 'Account' ? source.account.guid : source.facility.accountId;
+    const roots = [...new Set(pairs.map(pair => root(pair.source)))];
+    for (const sourceAccount of roots) {
+      const included = pairs.filter(pair => root(pair.source) === sourceAccount);
+      const resources = mergeVisualizationTransferMaps(included.map(pair => visualizationTransferMaps(pair.source, pair.transferred)));
+      const chartMap: Record<string, string> = Object.create(null), dashboardMap: Record<string, string> = Object.create(null);
+      for (const pair of included) {
+        const imported = await this.importVisualizations(transaction, pair.source, accountGuid, resources);
+        pair.source.savedVisualizations.forEach((chart, index) => {
+          if (Object.hasOwn(chartMap, chart.guid)) throw new BackupRelationshipError('A saved chart has ambiguous transfer identities.');
+          chartMap[chart.guid] = imported[index].guid;
+        });
+        visualizations.push(...imported);
+      }
+      const sourceDashboards = included.flatMap(pair => pair.source.homeDashboards ?? []);
+      for (const dashboard of sourceDashboards) {
+        if (Object.hasOwn(dashboardMap, dashboard.guid)) throw new BackupRelationshipError('A Home dashboard has ambiguous transfer identities.');
+        dashboardMap[dashboard.guid] = this.getGUID();
+      }
+      const maps: HomeTransferMaps = { ...resources, visualization: chartMap, dashboard: dashboardMap };
+      const sourceCharts = included.flatMap(pair => pair.source.savedVisualizations);
+      for (const record of sourceDashboards) {
+        const target = transferHomeDashboard(record, accountGuid, maps, dashboardMap[record.guid], sourceCharts);
+        target.id = await this.addRecord(transaction, 'homeDashboards', target); dashboards.push(target);
+      }
+      for (const record of included.flatMap(pair => pair.source.homeOwners ?? [])) {
+        const target = transferHomeOwner(record, accountGuid, maps, this.getGUID(), sourceDashboards);
+        target.id = await this.addRecord(transaction, 'homeOwners', target); owners.push(target);
+      }
+    }
+  }
+
+  private publishImportSummary(accountGuid: string, charts: readonly IdbSavedVisualization[], dashboards: readonly IdbHomeDashboard[], owners: readonly IdbHomeOwner[]): void {
+    const summary = summarizeVisualizationImport(accountGuid, charts);
+    if (!dashboards.length && !owners.length) { this.summary.set(summary); return; }
+    const home = summarizeHomeImport(dashboards, owners);
+    this.summary.set({ ...summary, home, reasons: [...summary.reasons, ...home.reasons] });
   }
 
   private async importVisualizations(transaction: IndexedDbTransactionContext, source: PreparedBackupFile,

@@ -11,6 +11,7 @@ import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { JStatRegressionModel } from '@data/models/analysis';
 import { normalizeVisualizationAnalysisGroup } from './visualization-backup';
 import { energyUseBackupReferencesError } from './energy-use-backup-relations';
+import { homeBackupRelationshipsError } from './home-backup';
 
 export interface BackupSnapshotBuilder {
   buildAccountBackup(snapshot: AccountWorkspaceSnapshot): BackupFile;
@@ -21,11 +22,14 @@ export interface BackupSnapshotBuilder {
 export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
   buildAccountBackup(snapshot: AccountWorkspaceSnapshot): BackupFile {
     validateVisualizations(snapshot);
+    validateHome(snapshot);
     validateEnergyUseReferences(snapshot, snapshot.energyUseEquipment);
     const facilities = snapshot.facilities.map(facility => structuredClone(facility));
     return {
       dataVersion: CURRENT_DATA_VERSION,
       savedVisualizations: snapshot.savedVisualizations.map(item => structuredClone(item)),
+      homeDashboards: (snapshot.homeDashboards ?? []).map(item => structuredClone(item)),
+      homeOwners: (snapshot.homeOwners ?? []).map(item => structuredClone(item)),
       account: sanitizeAccount(snapshot.account),
       facilities,
       facility: undefined,
@@ -53,6 +57,7 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
 
   buildFacilityBackup(snapshot: AccountWorkspaceSnapshot, facilityGuid: string): BackupFile {
     validateVisualizations(snapshot);
+    validateHome(snapshot);
     const facility = snapshot.facilities.find(item => item.guid === facilityGuid);
     if (!facility) {
       throw new Error('The requested facility does not belong to the active workspace.');
@@ -63,6 +68,8 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
     return {
       dataVersion: CURRENT_DATA_VERSION,
       savedVisualizations: snapshot.savedVisualizations.filter(item => savedVisualizationFacilityGuid(item, snapshot.facilities) === facilityGuid).map(item => savedVisualizationForFacilityExport(item, facilityGuid)),
+      homeDashboards: (snapshot.homeDashboards ?? []).filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
+      homeOwners: (snapshot.homeOwners ?? []).filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
       account: undefined,
       facilities: [],
       facility: clonedFacility,
@@ -184,4 +191,9 @@ function validateVisualizations(snapshot: AccountWorkspaceSnapshot): void {
       throw new Error('A saved visualization does not belong to its backup owner.');
     }
   }
+}
+
+function validateHome(snapshot: AccountWorkspaceSnapshot): void {
+  const error = homeBackupRelationshipsError(snapshot.account.guid, snapshot.facilities, snapshot.homeDashboards ?? [], snapshot.homeOwners ?? []);
+  if (error) throw new Error(error);
 }

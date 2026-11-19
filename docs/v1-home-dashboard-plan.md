@@ -6,7 +6,7 @@ Delivery tracker for [Home1 #2912](https://github.com/ORNL-AMO/VERIFI/issues/291
 
 - The [Home dashboard specification](v1-home-dashboard-spec.md) owns the accepted intended templates, layouts, bindings, filters, lifecycle, future interface requirements and acceptance scenarios.
 - The [Home content map](v1-home-content-map.md) owns source-backed legacy dispositions and adapter gaps.
-- Current runtime behavior remains owned by existing visualization, workspace, status, calculation and persistence references. Home1 has delivered a specification; customizable dashboards and Home2–Home6 remain unimplemented. Human review/QA and issue closure are separate from specification delivery.
+- Current runtime behavior remains owned by existing visualization, workspace, status, calculation and persistence references. Home1 has delivered a specification; [Home2 persistence](v1-home-persistence.md) implements storage and compatibility contracts. Home3–Home6 remain pending. Human review/QA and issue closure are separate from specification delivery.
 - Implement the new overview experience before migrating overview reports. Overview reports have not been migrated; their formats and creation flow remain later Reports work. Home must not advertise an unavailable v1 overview-report action.
 
 As phases land, move their implemented contracts into the appropriate current references and retire completed planning material after preserving unique invariants and open acceptance. Do not use this tracker as a competing behavior specification.
@@ -29,16 +29,9 @@ Each phase remains pending until its implementation, focused validation and appl
 
 [Issue #2913](https://github.com/ORNL-AMO/VERIFI/issues/2913). Depends on Home1 and Vis2.
 
-Implementation slices remain based on `home2`: contracts/schema/reporting intent; atomic commands/workspace/lifecycle; backup/copy/deletion and integrated acceptance. Each includes focused fast/native coverage and is reviewed/published against its immediate predecessor, with cumulative review against `home2`. The reviewed Home1 contract commit is an isolated prerequisite in the first slice.
+Implemented contracts are owned by [Home persistence](v1-home-persistence.md), including record/default handling, serialized bindings, atomic lifecycle commands, workspace recovery, verified backup/copy/remapping, and owner/source deletion. Native acceptance covers restart, rollback, revision conflicts, repeated initialization, publication recovery, shared links, missing sources, unknown formats and older backups. Human review/QA remains required before phase acceptance and issue closure.
 
-Compatibility choices: two initially empty Home stores at structural schema 22; versioned record/payload envelopes independent of saved and workspace revisions; unchanged global data version; missing older collections mean no initialization evidence, while an explicit initialized empty owner never reseeds. Chart links are GUID references, and future payloads retain opaque JSON plus verified-transfer blocks. Home6 supplies immutable recipes through the Home2 graph-command contract; no incomplete template workflow is activated here.
-
-
-- [ ] Add durable dashboard/default/layout/widget records, template provenance, origin metadata, and initialization/deletion state.
-- [ ] Define serialized reporting-following bindings alongside exact named-analysis bindings, with validation and verified transfer/remapping behavior before runtime use.
-- [ ] Implement atomic creation, duplication, deletion, restore, and untouched-template upgrade commands with one committed publication and safe recovery.
-- [ ] Preserve supported older backups, imported dashboards, unknown payloads, account/facility ownership, and linked-definition identity.
-- [ ] Cover round trips, initialization idempotency, interrupted commits/publication recovery, source loss, shared-chart customization protection, and native IndexedDB transactions.
+Home6 supplies complete starter recipes through these commands. No incomplete Home navigation, template creation flow or reporting resolver is activated by Home2.
 
 ### Home3 navigation and layout
 

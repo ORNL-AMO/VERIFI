@@ -1,7 +1,7 @@
 import { VisualizationDefinition, VisualizationResourceKind, VisualizationSource } from './visualization-definition';
 import { isEnergyUseTypePresentation, visualizationPresentationReference } from './visualization-presentation-reference';
 
-export type VisualizationReferenceKind = VisualizationResourceKind | 'analysis' | 'model' | 'charge' | 'unknown';
+export type VisualizationReferenceKind = VisualizationResourceKind | 'account' | 'analysis' | 'model' | 'charge' | 'unknown';
 
 /** Paths address saved intent, not generated labels or definition-local source/series IDs. */
 export interface VisualizationReference {
@@ -50,8 +50,8 @@ export function visualizationReferences(definition: VisualizationDefinition): re
       add(`${path}.charge.chargeGuid`, 'charge', source.charge.chargeGuid, source.charge.meterGuid);
     }
     if (source.kind === 'analysis') {
-      if (source.mode === 'result' && source.reporting?.owner.kind === 'facility')
-        add(`${path}.reporting.owner.guid`, 'facility', source.reporting.owner.guid);
+      if (source.mode === 'result' && source.reporting)
+        add(`${path}.reporting.owner.guid`, source.reporting.owner.kind, source.reporting.owner.guid);
       add(`${path}.analysisGuid`, 'analysis', source.analysisGuid);
       add(`${path}.groupGuid`, 'meter-group', source.groupGuid, source.analysisGuid);
       if (source.mode === 'model') {
@@ -115,10 +115,6 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
     definition: VisualizationDefinition; issues: readonly VisualizationReferenceIssue[];
   } {
   const result = structuredClone(definition);
-  result.sources.forEach((source, index) => {
-    if (source.kind === 'analysis' && source.mode === 'result' && source.reporting?.owner.kind === 'account'
-      && source.reporting.owner.guid === definition.accountGuid) setPath(result, `sources.${index}.reporting.owner.guid`, accountGuid);
-  });
   const issues: VisualizationReferenceIssue[] = [];
   const sourceForPath = (path: string) => {
     const parts = path.split('.');
@@ -154,7 +150,8 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
     const key = visualizationReferenceKey(ref);
     const local = !ref.optional || ref.accountGuid === definition.accountGuid;
     const protectedOptional = ref.optional && protectedPresentation(ref.kind, ref.guid, sourceForPath(ref.path));
-    const mapped = !existing && !protectedOptional && local && map && Object.hasOwn(map, key) ? map[key] : undefined;
+    const candidate = map && Object.hasOwn(map, key) ? map[key] : undefined;
+    const mapped = !existing && !protectedOptional && local && (ref.kind !== 'account' || candidate === accountGuid) ? candidate : undefined;
     if (mapped) {
       const selector = ref.path.startsWith('chart.') && definition.chart?.kind === 'scatter' ? definition.chart[ref.path.split('.')[1] as 'x' | 'y'] : undefined;
       const source = definition.sources.find(source => source.id === selector?.sourceId);
@@ -166,6 +163,13 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
       setPath(result, ref.path.replace(/resourceGuid$/, 'accountGuid'), mapped ? accountGuid : ref.accountGuid!);
     } else if (!mapped) issues.push(existing ?? { ...ref, reason: ref.kind === 'unknown' ? 'unclassified' : 'not-transferred' });
   }
+  // Keep the known payload's account envelope coherent, while retaining the original
+  // untransferred reporting owner in the durable block above. A facility-only
+  // transfer cannot activate a rule against an unrelated destination account.
+  result.sources.forEach((source, index) => {
+    if (source.kind === 'analysis' && source.mode === 'result' && source.reporting?.owner.kind === 'account')
+      setPath(result, `sources.${index}.reporting.owner.guid`, accountGuid);
+  });
   // Native charge metrics include the durable charge identity as well as its
   // measure. Keep that selector attached to the transferred source, while
   // leaving unknown metrics and blocked charge references untouched.
