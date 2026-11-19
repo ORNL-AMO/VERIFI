@@ -79,11 +79,16 @@
   @if (!report.settings.includeIssuesSummary && !report.settings.includeExecutiveSummary) { <ng-container
     [ngTemplateOutlet]="documentTitle" /> }
   <section class="document-section" aria-labelledby="modeling-validation">
-    <h3 id="modeling-validation" class="section-heading">Data Validation Tables</h3>
+    <h3 id="modeling-validation" class="section-heading">Model Details</h3>
     @for (row of regression(); track row.key) {
-    <section class="model-validation" [attr.aria-label]="row.facilityName + ' · ' + row.groupName">
-      <h4 class="group-heading">{{ row.facilityName }} · {{ row.groupName }}</h4>
-      <ng-container [ngTemplateOutlet]="regressionTable" [ngTemplateOutletContext]="{ rows: [row] }" />
+    <section class="model-validation" [attr.aria-label]="row.heading">
+      <h4 class="group-heading">{{ row.heading }}</h4>
+      <app-model-equation [label]="row.chart?.category === 'water' ? 'Modeled Water' : 'Modeled Energy'" [expression]="row.details.formula"/>
+      <ng-container [ngTemplateOutlet]="regressionTable" [ngTemplateOutletContext]="{ rows: [row], details: true, hideIdentity: report.scope === 'facility' }" />
+      @if (row.comparison && row.comparison.monthly.length) {
+        <app-analysis-model-comparison-chart [data]="row.comparison" [deferUntilVisible]="true"/>
+      } @else { <ng-container [ngTemplateOutlet]="reportNotice"
+        [ngTemplateOutletContext]="{ heading: row.chart?.message ?? 'No model comparison data is available.' }" /> }
       @if (row.model?.SEPValidation?.length) {
       <div class="table-scroll" tabindex="0" role="region" [attr.aria-label]="row.groupName + ' predictor validation'">
         <table>
@@ -111,7 +116,7 @@
       }
     </section>
     } @empty { <ng-container [ngTemplateOutlet]="reportNotice"
-      [ngTemplateOutletContext]="{ heading: 'No regression groups are included.', message: 'Data validation tables apply to regression groups.' }" />
+      [ngTemplateOutletContext]="{ heading: 'No regression groups are included.', message: 'Model Details apply to regression groups.' }" />
     }
   </section>
 </article>
@@ -132,34 +137,37 @@
     @if (message) { <p>{{ message }}</p> }
   </aside>
 </ng-template>
-<ng-template #regressionTable let-rows="rows">
+<ng-template #regressionTable let-rows="rows" let-details="details" let-hideIdentity="hideIdentity">
   <div class="table-scroll" tabindex="0" role="region" aria-label="Regression model statistics">
     <table>
       <thead>
         <tr>
-          <th scope="col">Facility</th>
-          <th scope="col">Group</th>
+          @if (!hideIdentity) { <th scope="col">Facility</th>
+          <th scope="col">Group</th> }
           <th scope="col">Model period</th>
           <th scope="col">Variable p-values</th>
           <th scope="col">R²</th>
           <th scope="col">Adjusted R²</th>
           <th scope="col">Model p-value</th>
-          <th scope="col">Formula</th>
+          @if (!details) { <th scope="col">Formula</th> }
           <th scope="col">Minor issues</th>
         </tr>
       </thead>
       <tbody>@for (row of rows; track row.key) { @let model = row.model;
         <tr>
-          <td>{{ row.facilityName }}</td>
+          @if (!hideIdentity) { <td>{{ row.facilityName }}</td>
           <th scope="row">{{ row.groupName }}@if (model?.isUserDefinedModel) { <span class="model-note">User
-              defined</span> }@if (!model) { <span class="model-note">Model unavailable</span> }</th>
-          <td>{{ row.details.modelPeriod }}</td>
+              defined</span> }@if (!model) { <span class="model-note">Model unavailable</span> }</th> }
+          <td>{{ row.details.modelPeriod }}@if (hideIdentity) {
+            @if (model?.isUserDefinedModel) { <span class="model-note">User defined</span> }
+            @if (!model) { <span class="model-note">Model unavailable</span> }
+          }</td>
           <td>@if (model && !model.isUserDefinedModel) { @for (variable of row.details.variablePValues; track $index) {
             <div>{{ variable.name }}: {{ variable.value }}</div> } @empty { — } } @else { — }</td>
           <td>{{ row.details.r2 }}</td>
           <td>{{ row.details.adjustedR2 }}</td>
           <td>{{ row.details.modelPValue }}</td>
-          <td class="formula">{{ row.details.formula }}</td>
+          @if (!details) { <td class="formula">{{ row.details.formula }}</td> }
           <td>@for (note of row.minor; track $index) { <div>{{ note }}</div> } @empty { — }</td>
         </tr>
         }

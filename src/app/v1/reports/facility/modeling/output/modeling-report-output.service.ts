@@ -3,8 +3,10 @@ import { PdfReportWriter } from '@platform/reports/pdf-report-writer';
 import { PptReportWriter } from '@platform/reports/ppt-report-writer';
 import { ReportExportSource, reportArtifact } from '@shared/report-output/report-output.models';
 import { ReportExportController } from '@app/v1/reports/shared/output/report-export-controller';
-import { ModelingReportExportSnapshot, modelingReportSections } from '@app/v1/reports/shared/modeling/output/modeling-report-output';
+import { ModelingOutputChart, ModelingReportExportSnapshot, modelingReportSections } from '@app/v1/reports/shared/modeling/output/modeling-report-output';
 import { modelingPdfDocument } from '@app/v1/reports/shared/modeling/output/modeling-report-pdf';
+import { EChartsImageService, PDF_CHART_IMAGE_OPTIONS } from '@app/v1/shared/charts/echarts-image.service';
+import { analysisModelComparisonChart } from '@app/v1/shared/analysis-results/model-comparison-chart/analysis-model-comparison-chart.view';
 import { modelingPptDocument } from '@app/v1/reports/shared/modeling/output/modeling-report-ppt';
 import { FacilityModelingReportService } from '../modeling-report.service';
 
@@ -13,6 +15,7 @@ export class ModelingReportOutputService {
   private readonly report = inject(FacilityModelingReportService);
   private readonly pdf = inject(PdfReportWriter);
   private readonly ppt = inject(PptReportWriter);
+  private readonly images = inject(EChartsImageService);
   readonly source = computed<ReportExportSource<ModelingReportExportSnapshot>>(() => {
     const state = this.report.state(), snapshot = this.report.exportSnapshot();
     const onReport = this.report.context.stage() === 'report';
@@ -30,11 +33,23 @@ export class ModelingReportOutputService {
     build: async (format, snapshot, context) => {
       context.progress('Building report…');
       const name = `${snapshot.name} — ${snapshot.scopeName} — Modeling — ${snapshot.view.reportYear}`;
-      if (format === 'pdf') return reportArtifact(await this.pdf.build(modelingPdfDocument(snapshot), {
-        signal: context.signal, strictAssets: true, orientation: 'landscape', format: 'a4',
-        onProgress: (completed, total) => context.progress('Building report…', completed, total)
-      }), name, 'pdf');
-      if (format === 'pptx') return reportArtifact(await this.ppt.build(modelingPptDocument(snapshot), {
+      const provider = (chart: ModelingOutputChart) => async () => {
+        context.signal.throwIfAborted(); context.progress('Rendering model comparison chart…');
+        const option = analysisModelComparisonChart(chart.modelComparison);
+        if (!option) throw new Error('The model comparison chart is unavailable.');
+        return this.images.capture(option, format === 'pdf' ? PDF_CHART_IMAGE_OPTIONS : undefined, context.signal);
+      };
+      if (format === 'pdf') {
+        const document = modelingPdfDocument(snapshot);
+        for (const section of document.sections) if (section.type === 'chart') {
+          (section as ModelingOutputChart).imageDataProvider = provider(section as ModelingOutputChart);
+        }
+        return reportArtifact(await this.pdf.build(document, {
+          signal: context.signal, strictAssets: true, orientation: 'landscape', format: 'a4',
+          onProgress: (completed, total) => context.progress('Building report…', completed, total)
+        }), name, 'pdf');
+      }
+      if (format === 'pptx') return reportArtifact(await this.ppt.build(modelingPptDocument(snapshot, provider), {
         signal: context.signal, strictAssets: true, layout: 'wide', minimumTableFontSize: 12,
         onProgress: (completed, total) => context.progress('Building report…', completed, total)
       }), name, 'pptx');

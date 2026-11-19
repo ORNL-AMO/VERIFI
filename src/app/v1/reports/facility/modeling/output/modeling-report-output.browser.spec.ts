@@ -13,8 +13,9 @@ import { ModelingReportOutputService } from './modeling-report-output.service';
 
 describe('Modeling file output in Chromium', () => {
   afterEach(() => TestBed.resetTestingModule());
-  it('delivers a real searchable PDF with cover, landscape paper, bookmarks and no preview capture', async () => {
+  it.each([2023, 2024])('delivers a real searchable PDF for report year %i with cover, bookmarks and no preview capture', async year => {
     const snapshot = modelingExportFixture(), delivered: ReportArtifact[] = [];
+    snapshot.view.reportYear = year;
     const flush = vi.fn(async () => true);
     TestBed.configureTestingModule({ providers: [ModelingReportOutputService,
       { provide: FacilityModelingReportService, useValue: { state: signal({ state: 'ready' }), exportSnapshot: signal(snapshot),
@@ -28,13 +29,13 @@ describe('Modeling file output in Chromium', () => {
     expect(raw.startsWith('%PDF-')).toBe(true); expect(artifact.mimeType).toBe('application/pdf');
     const paper = raw.match(/\/MediaBox \[0 0 ([\d.]+) ([\d.]+)\]/)!;
     expect(Number(paper[1])).toBeCloseTo(841.89, 2); expect(Number(paper[2])).toBeCloseTo(595.28, 2);
-    expect(raw).not.toContain('/Subtype /Image'); expect(raw).toContain('/Outlines');
-    expect(['Issues Summary', 'Executive Summary', 'Data Validation Tables'].map(title => bookmarkPage(raw, title))).toEqual([2, 3, 4]);
-    expect(bookmarkPage(raw, 'Plant A · Main meters')).toBe(4);
-    expect(pageCount(raw)).toBe(4);
+    expect(raw).toContain('/Subtype /Image'); expect(raw).toContain('/Outlines');
+    expect(['Issues Summary', 'Executive Summary', 'Model Details'].map(title => bookmarkPage(raw, title))).toEqual([2, 3, 4]);
+    expect(bookmarkPage(raw, 'Main meters')).toBe(4);
+    expect(pageCount(raw)).toBeGreaterThanOrEqual(4);
     expect(document.querySelector('app-modeling-report')).toBeNull();
     expect(output.state().phase).toBe('idle');
-    await saveArtifact(artifact.blob, 'modeling-normal');
+    await saveArtifact(artifact.blob, year === 2023 ? 'modeling-normal' : 'modeling-partial');
   });
 
   it('paginates long issue tables and validation groups without blank separator pages or missing bookmarks', async () => {
@@ -49,23 +50,24 @@ describe('Modeling file output in Chromium', () => {
     groups[0].model!.predictorVariables = Array.from({ length: 8 }, (_, index) => ({ ...item.model!.predictorVariables[0],
       id: `predictor-${index}`, name: `Production predictor ${index + 1} for processing equipment` }));
     const view = buildModelingReport({ reportYear: 2023, groups, hasBlockingErrors: true }, snapshot.view.settings,
-      { facilities: {}, groups: { group: longName, 'other-group': 'Next group' } });
+      { facilities: {}, groups: { group: longName, 'other-group': 'Next group' } }, 'facility');
     const blob = await TestBed.inject(PdfReportWriter).build(modelingPdfDocument({ ...snapshot, view }), { strictAssets: true });
     const raw = new TextDecoder('windows-1252').decode(await blob.arrayBuffer());
-    const first = bookmarkPage(raw, `Plant A · ${longName}`), next = bookmarkPage(raw, 'Plant A · Next group');
+    const first = bookmarkPage(raw, longName), next = bookmarkPage(raw, 'Next group');
     expect(bookmarkPage(raw, 'Executive Summary')).toBeGreaterThan(3);
-    expect(first).toBe(bookmarkPage(raw, 'Data Validation Tables'));
+    expect(first).toBe(bookmarkPage(raw, 'Model Details'));
     expect(next).toBeGreaterThan(first); expect(pageCount(raw)).toBe(next);
     await saveArtifact(blob, 'modeling-long');
   });
 
-  it.each(['standard', 'generated', 'long', 'diagnostic'] as const)('exports editable %s PowerPoint content through the v1 output capability', async mode => {
+  it.each(['standard', 'generated', 'long', 'diagnostic', 'partial'] as const)('exports editable %s PowerPoint content through the v1 output capability', async mode => {
     const snapshot = modelingExportFixture(), delivered: ReportArtifact[] = [];
+    if (mode === 'partial') snapshot.view.reportYear = 2024;
     if (mode === 'generated') Object.assign(snapshot.view.groups[0].model!, { isUserDefinedModel: false, R2: 0, adjust_R2: 0, modelPValue: 0 });
     if (mode === 'diagnostic') {
       const item = snapshot.view.groups[0];
       const view = buildModelingReport({ reportYear: 2023, hasBlockingErrors: true, groups: [{ ...item, model: undefined,
-        critical: ['Select an available model.'] }] }, snapshot.view.settings, { facilities: {}, groups: { group: 'Main meters' } });
+        critical: ['Select an available model.'] }] }, snapshot.view.settings, { facilities: {}, groups: { group: 'Main meters' } }, 'facility');
       Object.assign(snapshot.view, view);
     }
     if (mode === 'long') {
@@ -80,7 +82,7 @@ describe('Modeling file output in Chromium', () => {
       const view = buildModelingReport({ reportYear: 2023, hasBlockingErrors: true, groups }, snapshot.view.settings, {
         facilities: {}, groups: Object.fromEntries(groups.map((item, index) => [item.group.idbGroupId,
           `Manufacturing equipment, production lines and process heating meters ${index + 1}`]))
-      });
+      }, 'facility');
       Object.assign(snapshot.view, view);
     }
     TestBed.configureTestingModule({ providers: [ModelingReportOutputService,
@@ -93,7 +95,7 @@ describe('Modeling file output in Chromium', () => {
     await output.generate('pptx');
     expect(delivered).toHaveLength(1);
     const artifact = delivered[0], zip = await JSZip.loadAsync(await artifact.blob.arrayBuffer());
-    expect(artifact.fileName).toContain('Modeling — 2023.pptx');
+    expect(artifact.fileName).toContain(`Modeling — ${snapshot.view.reportYear}.pptx`);
     expect(artifact.mimeType).toBe('application/vnd.openxmlformats-officedocument.presentationml.presentation');
     const presentation = await zip.file('ppt/presentation.xml')!.async('string');
     expect(presentation).toContain('cx="12192000" cy="6858000"');
@@ -107,11 +109,12 @@ describe('Modeling file output in Chromium', () => {
     expect(documents.some(document => document.getElementsByTagName('a:tbl').length > 0)).toBe(true);
     expect(text.includes('Generated by VERIFI')).toBe(true);
     expect(text.includes('Facility / Group')).toBe(true);
-    expect(Object.keys(zip.files).some(name => /^ppt\/media\//.test(name) && !zip.files[name].dir)).toBe(false);
+    expect(Object.keys(zip.files).some(name => /^ppt\/media\//.test(name) && !zip.files[name].dir)).toBe(['standard', 'generated', 'partial'].includes(mode));
     const tableFonts = documents.flatMap(document => Array.from(document.getElementsByTagName('a:tbl'))
       .flatMap(table => Array.from(table.getElementsByTagName('a:rPr')).map(run => Number(run.getAttribute('sz'))).filter(Boolean)));
     expect(tableFonts.length).toBeGreaterThan(0); expect(Math.min(...tableFonts)).toBeGreaterThanOrEqual(1200);
     if (mode === 'generated') expect(text.includes('0.000')).toBe(true);
+    if (mode === 'partial') expect(text).not.toContain('Chart through');
     if (mode === 'diagnostic') expect(text.includes('Predictor validation is unavailable for this model.')).toBe(true);
     if (mode === 'long') { expect(text.includes('predictor 8')).toBe(true); expect(text.includes('continued')).toBe(true); }
     expect(document.querySelector('app-modeling-report')).toBeNull();

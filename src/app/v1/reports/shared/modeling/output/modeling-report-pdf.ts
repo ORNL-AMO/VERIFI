@@ -1,9 +1,8 @@
 import { ModelingReportView } from '@domain/reports/modeling-report';
 import { ReportDocument } from '@shared/report-output/report-document.model';
-import { ReportSection } from '@shared/report-output/report-section.model';
-import { ModelingReportExportSnapshot, modelingReportSections } from './modeling-report-output';
+import { ModelingOutputSection, ModelingReportExportSnapshot, modelingReportSections } from './modeling-report-output';
 
-export function modelingPdfSections(view: ModelingReportView): ReportSection[] {
+export function modelingPdfSections(view: ModelingReportView): ModelingOutputSection[] {
   // The built-in PDF font supports multiplication and superscripts, but not Unicode minus/subscript digits.
   return modelingReportSections(view).map(section => {
     if (section.title) section.title = pdfText(section.title);
@@ -11,6 +10,7 @@ export function modelingPdfSections(view: ModelingReportView): ReportSection[] {
     if (section.type === 'table') {
       section.headers = section.headers.map(header => typeof header === 'string' ? pdfText(header) : header);
       section.rows = section.rows.map(row => row.map(pdfText));
+      if (section.equation) section.equation = { label: pdfText(section.equation.label), expression: pdfText(section.equation.expression) };
     } else if (section.type === 'styledText') section.content = section.content.map(line => ({ ...line, text: pdfText(line.text) }));
     return section;
   });

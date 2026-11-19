@@ -65,7 +65,7 @@ describe('Modeling export lifecycle', () => {
     expect(view.output.available()).toBe(true);
   });
 
-  it.each(formats.flatMap(format => ['name', 'facility', 'group', 'predictor', 'year', 'settings', 'identity', 'stage', 'invalid', 'destroy']
+  it.each(formats.flatMap(format => ['name', 'facility', 'group', 'predictor', 'year', 'settings', 'identity', 'stage', 'invalid', 'destroy', 'chart']
     .map(change => ({ format, change }))))(
     'suppresses late $format downloads when $change changes', async ({ format, change }) => {
       const view = setup(); let finish!: (blob: Blob) => void;
@@ -80,6 +80,7 @@ describe('Modeling export lifecycle', () => {
       if (change === 'predictor') next.view.regression[0].model!.SEPValidation[0].predictorVariable = 'Renamed predictor';
       if (change === 'year') next.view.reportYear++;
       if (change === 'settings') next.view.settings.includeExecutiveSummary = false;
+      if (change === 'chart') Object.assign(next.view.regression[0].chart!.monthly[0], { modeledEnergy: 12345 });
       if (change === 'identity') next = { ...next, identity: 'account:other:report' };
       if (change === 'stage') view.stage.set('setup');
       if (change === 'invalid') view.valid.set(false);
@@ -97,12 +98,12 @@ describe('Modeling export lifecycle', () => {
     build.mockImplementationOnce(() => new Promise<Blob>(resolve => { finish = resolve; }));
     const generating = view.output.generate(format);
     await vi.waitFor(() => expect(build).toHaveBeenCalledOnce());
-    const original = structuredClone(build.mock.calls[0][0]), next = structuredClone(view.snapshot()!);
+    const original = JSON.stringify(build.mock.calls[0][0]), next = structuredClone(view.snapshot()!);
     next.view.groups[0].group.regressionConstant = 999;
     view.snapshot.set(next); TestBed.tick();
     await view.output.generate('pdf'); await view.output.generate('pptx');
     expect(view.build.mock.calls.length + view.pptBuild.mock.calls.length).toBe(1);
-    expect(build.mock.calls[0][0]).toEqual(original);
+    expect(JSON.stringify(build.mock.calls[0][0])).toEqual(original);
     finish(view.blob); await generating;
     expect(view.download).toHaveBeenCalledOnce();
   });

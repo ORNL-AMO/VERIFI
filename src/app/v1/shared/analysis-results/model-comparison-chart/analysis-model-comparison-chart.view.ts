@@ -11,7 +11,7 @@ export interface AnalysisModelComparisonRow {
 export interface AnalysisModelComparisonData {
   readonly source: 'generated' | 'user-defined';
   readonly modelYear: number | undefined;
-  readonly group: AnalysisGroup;
+  readonly group: Pick<AnalysisGroup, 'regressionStartYear' | 'regressionEndYear' | 'regressionModelStartMonth' | 'regressionModelEndMonth'>;
   readonly category: 'energy' | 'water';
   readonly unit?: string;
   readonly monthly: readonly AnalysisModelComparisonRow[];
@@ -109,7 +109,7 @@ function nearestPeriodIndex(rows: readonly { date: Date | string }[], target: Da
 
 function userDefinedPeriodIndices(
   rows: readonly AnalysisModelComparisonRow[],
-  group: AnalysisGroup
+  group: AnalysisModelComparisonData['group']
 ): { start: number; end: number } | undefined {
   if (![group.regressionStartYear, group.regressionModelStartMonth, group.regressionEndYear, group.regressionModelEndMonth]
     .every(value => Number.isFinite(value))) return undefined;

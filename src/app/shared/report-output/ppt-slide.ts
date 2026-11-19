@@ -1,3 +1,4 @@
+import { ReportEquation } from './report-section.model';
 export type PptSlide = TitleSlide | TableSlide | ChartSlide | ImageSlide;
 
 export interface TableHeaderCell {
@@ -24,6 +25,7 @@ export interface TableSlide {
     rows: Array<Array<string | number>>;
     note?: string;
     columnWidths?: Array<number>;
+    equation?: ReportEquation;
 }
 
 export interface ChartSlide {

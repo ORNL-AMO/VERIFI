@@ -6,6 +6,20 @@ import { modelingPdfDocument, modelingPdfSections } from './modeling-report-pdf'
 import { TableSection } from '@shared/report-output/report-section.model';
 
 describe('Modeling PDF composition', () => {
+  it('omits cutoff text without changing its chart title or model statistics', () => {
+    const snapshot = modelingExportFixture(), normal = modelingPdfSections(snapshot.view);
+    const sections = modelingPdfSections({ ...snapshot.view, reportYear: 2024 });
+    expect(sections.find(section => section.type === 'chart')?.title).toBe(normal.find(section => section.type === 'chart')?.title);
+    expect(JSON.stringify(sections)).not.toContain('Chart through');
+    expect(sections.filter(section => section.type === 'table')).toEqual(normal.filter(section => section.type === 'table'));
+  });
+  it('retains facility-qualified group identities for account-scoped details', () => {
+    const snapshot = modelingExportFixture();
+    const sections = modelingPdfSections({ ...snapshot.view, scope: 'account' });
+    const details = sections.find(section => section.type === 'table' && section.equation);
+    expect(details?.type === 'table' && details.headers.slice(0, 2)).toEqual(['Facility', 'Group']);
+    expect(sections.some(section => section.tocLabel === 'Plant A · Main meters')).toBe(true);
+  });
   it.each(Array.from({ length: 8 }, (_, mask) => mask))('exports exactly the selected sections (mask %i)', mask => {
     const snapshot = modelingExportFixture();
     const settings = { includeIssuesSummary: !!(mask & 1), includeExecutiveSummary: !!(mask & 2), includeDataValidationTables: !!(mask & 4) };
@@ -13,13 +27,22 @@ describe('Modeling PDF composition', () => {
     expect(sections.filter(section => section.type === 'heading').map(section => section.title)).toEqual([
       ...(settings.includeIssuesSummary ? ['Issues Summary'] : []),
       ...(settings.includeExecutiveSummary ? ['Executive Summary'] : []),
-      ...(settings.includeDataValidationTables ? ['Data Validation Tables'] : [])
+      ...(settings.includeDataValidationTables ? ['Model Details'] : [])
     ]);
     expect(sections.filter(section => section.type === 'heading').every(section => section.pageBreakBefore && section.tocInclude)).toBe(true);
     if (settings.includeDataValidationTables) {
-      const validation = sections.slice(sections.findIndex(section => section.type === 'heading' && section.title === 'Data Validation Tables') + 1);
+      const validation = sections.slice(sections.findIndex(section => section.type === 'heading' && section.title === 'Model Details') + 1);
       expect(validation.filter(section => section.type === 'table').map(section => section.title)).toEqual([undefined, undefined]);
       expect(validation.some(section => section.type === 'styledText' && section.tocInclude && section.bookmarkLevel === 1)).toBe(true);
+      const content = validation.filter(section => section.type === 'table' || section.type === 'chart');
+      expect(content.map(section => section.type)).toEqual(['table', 'chart', 'table']);
+      expect(content[0].type === 'table' && content[0].equation?.expression).toBe(modelingModelDetails(snapshot.view.regression[0]).formula);
+      expect(content[0].type === 'table' && content[0].headers).not.toContain('Formula');
+      expect(content[0].type === 'table' && content[0].headers).not.toContain('Facility');
+      expect(content[0].type === 'table' && content[0].headers).not.toContain('Group');
+      expect(content[0].type === 'table' && content[0].rows[0]).toHaveLength(6);
+      expect(content[0].type === 'table' && content[0].rows[0][0]).toContain('User defined');
+      expect(validation.find(section => section.type === 'styledText' && section.bookmarkLevel === 1)?.tocLabel).toBe('Main meters');
     }
     if (!mask) expect(sections).toEqual([]);
   });

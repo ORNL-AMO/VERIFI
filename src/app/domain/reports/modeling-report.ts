@@ -4,6 +4,22 @@ import { CheckedAnalysisReportInputs } from './analysis-report-inputs';
 import { analysisReviewContent } from './analysis-review-inputs';
 import { getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
+export interface ModelingReportChart {
+  readonly key: string;
+  readonly category: 'energy' | 'water';
+  readonly unit: string;
+  readonly source: 'generated' | 'user-defined';
+  readonly modelYear: number | undefined;
+  readonly throughYear?: number;
+  readonly monthly: readonly { readonly date: Date; readonly fiscalYear: number;
+    readonly energyUse: number | null; readonly modeledEnergy: number | null }[];
+  readonly message?: string;
+}
+export interface ModelingReportChecks extends AnalysisDataChecks { readonly charts?: readonly ModelingReportChart[]; }
+export function modelingGroupKey(item: AnalysisDataChecks['groups'][number]): string {
+  return JSON.stringify([item.facilityGuid, item.analysisGuid, item.group.idbGroupId]);
+}
+
 /** Predictor names occur inside validation messages, so refresh them before checking. */
 export function prepareModelingReportInputs(inputs: CheckedAnalysisReportInputs): CheckedAnalysisReportInputs {
   const detached = structuredClone(inputs), names = new Map(detached.predictors.map(item => [item.guid, item.name]));
@@ -28,19 +44,20 @@ export function modelingReportContent(inputs: CheckedAnalysisReportInputs, repor
 }
 
 /** Scope-neutral content, usable by facility Modeling and account Analysis reports. */
-export function buildModelingReport(checks: AnalysisDataChecks, settings: Pick<ModelingReportSettings,
+export function buildModelingReport(checks: ModelingReportChecks, settings: Pick<ModelingReportSettings,
   'includeIssuesSummary' | 'includeExecutiveSummary' | 'includeDataValidationTables'>,
   names: { readonly facilities: Readonly<Record<string, string>>; readonly groups: Readonly<Record<string, string>>;
-    readonly predictors?: Readonly<Record<string, string>> }) {
+    readonly predictors?: Readonly<Record<string, string>> }, scope: 'facility' | 'account' = 'account') {
   const predictorName = (variable: { readonly id: string; readonly name: string }) => names.predictors?.[variable.id] ?? variable.name;
   const groups = checks.groups.map(item => ({ ...item,
     model: item.model ? { ...item.model, predictorVariables: item.model.predictorVariables?.map(variable => ({ ...variable, name: predictorName(variable) })) } : undefined,
-    key: JSON.stringify([item.facilityGuid, item.analysisGuid, item.group.idbGroupId]),
+    key: modelingGroupKey(item),
+    chart: checks.charts?.find(chart => chart.key === modelingGroupKey(item)),
     facilityName: names.facilities[item.facilityGuid] ?? item.facilityName,
     groupName: names.groups[item.group.idbGroupId] ?? 'Analysis group',
     predictors: (item.group.predictorVariables ?? []).filter(variable => variable.productionInAnalysis).map(predictorName)
   }));
-  return { reportYear: checks.reportYear, settings, groups,
+  return { scope, reportYear: checks.reportYear, settings, groups,
     regression: groups.filter(item => item.group.analysisType === 'regression'),
     methods: (['energyIntensity', 'modifiedEnergyIntensity', 'absoluteEnergyConsumption'] as const).map(method => ({
       method, label: { energyIntensity: 'Classic Intensity', modifiedEnergyIntensity: 'Modified Intensity', absoluteEnergyConsumption: 'Absolute Consumption' }[method],

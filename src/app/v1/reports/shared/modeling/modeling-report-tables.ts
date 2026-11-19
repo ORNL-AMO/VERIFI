@@ -19,6 +19,19 @@ export function modelingModelDetails(item: ModelingGroup) {
 
 export const MODELING_REGRESSION_HEADERS = ['Facility', 'Group', 'Model period', 'Variable p-values',
   'R²', 'Adjusted R²', 'Model p-value', 'Formula', 'Minor issues'];
+export const MODELING_DETAILS_HEADERS = MODELING_REGRESSION_HEADERS.filter(header => header !== 'Formula');
+
+export function modelingDetailsCells(item: ModelingGroup, scope: ModelingReportView['scope'] = 'account'): string[] {
+  const cells = modelingRegressionCells(item).filter((_cell, index) => index !== 7);
+  if (scope === 'account') return cells;
+  const details = cells.slice(2);
+  details[0] += item.model?.isUserDefinedModel ? '\nUser defined' : !item.model ? '\nModel unavailable' : '';
+  return details;
+}
+
+export function modelingGroupTitle(view: ModelingReportView, item: ModelingGroup): string {
+  return view.scope === 'facility' ? item.groupName : `${item.facilityName} · ${item.groupName}`;
+}
 
 export function modelingRegressionCells(item: ModelingGroup): string[] {
   const details = modelingModelDetails(item), model = item.model;

@@ -20,4 +20,5 @@ thead, tfoot { background: var(--v1-surface-muted); }
 .formula { min-width: 12rem; overflow-wrap: anywhere; }
 .model-note { display: block; font-size: .8rem; }
 .model-validation + .model-validation { margin-top: 1.5rem; border-top: 1px solid var(--v1-border); }
-.model-validation > .table-scroll + .table-scroll { margin-block-start: 2.5rem; }
+.model-validation app-model-equation, .model-validation app-analysis-model-comparison-chart { display: block; margin-block: 2.5rem; }
+.model-validation > .report-notice { margin-block: 2.5rem; }

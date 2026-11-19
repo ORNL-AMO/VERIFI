@@ -8,6 +8,8 @@ import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/
 import { AnalysisReportCalculationService } from '@app/v1/reports/shared/calculation/analysis-report-calculation.service';
 import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
 import { calculateAnalysisDataChecks } from '@domain/reports/analysis-data-checks';
+import { calculateModelingReport } from '@domain/reports/modeling-report-calculation';
+import { echarts } from '@app/v1/shared/charts/echarts';
 import { setupReportWorkbench } from '../../testing/report-workbench-test-setup';
 import { modelingMeters, modelingSnapshot } from '../testing/modeling-report-test-fixtures';
 import { FacilityModelingReportService } from '../modeling-report.service';
@@ -23,8 +25,9 @@ class ModelingPresentationPortalHost {
 
 async function setup(snapshot = modelingSnapshot()) {
   const meters = modelingMeters(snapshot);
-  const execute = vi.fn((request: AnalysisReportWorkerRequest) => of<AnalysisReportWorkerResponse>({ ok: true, operation: 'checks',
-    value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }));
+  const execute = vi.fn((request: AnalysisReportWorkerRequest) => of<AnalysisReportWorkerResponse>(request.operation === 'modeling'
+    ? { ok: true, operation: 'modeling', value: request.years.map(year => calculateModelingReport(request.inputs, year, request.chartMeters)) }
+    : { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }));
   const view = await setupReportWorkbench(snapshot.facilityReports, [
     { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of({ state: 'ready', inputFingerprint: 'current', meters }),
       currentInputFingerprint: () => 'current', project: () => ({ state: 'ready', meters }), retry: vi.fn() } },
@@ -57,7 +60,11 @@ describe('Modeling report presentation in Chromium', () => {
     if (mode === 'window') vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Denied'));
     const snapshot = modelingSnapshot();
     snapshot.meterGroups[0].name = 'Manufacturing, production equipment and process heating meters';
-    if (mode === 'window') snapshot.facilityReports[0].modelingReportSettings.includeExecutiveSummary = false;
+    if (mode === 'window') {
+      Object.assign(snapshot.facilityReports[0].modelingReportSettings, { includeExecutiveSummary: false, reportYear: 2024 });
+      snapshot.meterData = snapshot.meterData.filter(row => row.year < 2024 || row.month <= 3);
+      snapshot.predictorData = snapshot.predictorData.filter(row => row.year < 2024 || row.month <= 3);
+    }
     const view = await setup(snapshot), { root, portal, session, results } = view;
     portal.componentInstance.dark.set(mode === 'window'); await portal.whenStable();
     const preview = root.querySelector<HTMLElement>('app-modeling-report-preview')!;
@@ -89,10 +96,18 @@ describe('Modeling report presentation in Chromium', () => {
     await page.getByRole('button', { name: 'Reset zoom to 100%', exact: true }).click(); await portal.whenStable();
     expect(papers[0].getBoundingClientRect().width).toBeCloseTo(width, 0);
     papers.at(-1)!.scrollIntoView(); expect(scroll.scrollTop).toBeGreaterThan(0);
+    const chartElement = dialog.querySelector<HTMLElement>('.model-comparison-chart__canvas')!;
+    chartElement.scrollIntoView({ block: 'center' });
+    await vi.waitFor(() => expect(echarts.getInstanceByDom(chartElement)).toBeDefined());
+    const chart = echarts.getInstanceByDom(chartElement)!;
+    await vi.waitFor(() => expect(chart.getZr().animation.isFinished()).toBe(true), { timeout: 10_000 });
+    expect(dialog.querySelectorAll('app-analysis-model-comparison-chart tbody tr')).toHaveLength(24);
+    expect(dialog.textContent).not.toContain('Chart through');
     expect(root.scrollTop).toBe(lockedTop);
     if (mode === 'window') {
       const table = dialog.querySelector<HTMLElement>('.model-validation .table-scroll')!;
-      expect(table.scrollWidth).toBeGreaterThan(table.clientWidth); table.scrollLeft = 100; expect(table.scrollLeft).toBeGreaterThan(0);
+      expect(table.scrollWidth).toBeLessThanOrEqual(table.clientWidth + 1);
+      expect(table.querySelectorAll('thead th')).toHaveLength(6);
     }
     expect(close.getBoundingClientRect().bottom).toBeLessThanOrEqual(scroll.getBoundingClientRect().top);
     await page.screenshot({ element: dialog, path: `../../../../../../../.angular/modeling-presentation-${mode}.png` });
@@ -148,7 +163,7 @@ describe('Modeling report presentation in Chromium', () => {
     view.store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', deleteGuids: [report.guid] }] });
     view.harness.detectChanges(); await view.portal.whenStable();
     expect((view.portal.nativeElement as HTMLElement).querySelector('[role=dialog]')).toBeNull();
-    expect(view.session.injector.destroyed).toBe(true); expect(view.execute).toHaveBeenCalledOnce();
+    expect(view.session.injector.destroyed).toBe(true); expect(view.execute).toHaveBeenCalledTimes(2);
     expect(view.updateSetup).not.toHaveBeenCalled();
     view.portal.destroy();
   });

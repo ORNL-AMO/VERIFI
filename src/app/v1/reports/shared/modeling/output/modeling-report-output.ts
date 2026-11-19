@@ -1,6 +1,10 @@
 import { ModelingReportView } from '@domain/reports/modeling-report';
-import { ReportSection } from '@shared/report-output/report-section.model';
-import { MODELING_REGRESSION_HEADERS, modelingRegressionCells, modelingValidationRows } from '../modeling-report-tables';
+import { ChartSection, ReportSection } from '@shared/report-output/report-section.model';
+import { AnalysisModelComparisonData } from '@app/v1/shared/analysis-results/model-comparison-chart/analysis-model-comparison-chart.view';
+import { MODELING_REGRESSION_HEADERS, MODELING_DETAILS_HEADERS, modelingDetailsCells, modelingGroupTitle, modelingModelDetails, modelingRegressionCells, modelingValidationRows } from '../modeling-report-tables';
+
+export type ModelingOutputChart = ChartSection & { readonly modelComparison: AnalysisModelComparisonData };
+export type ModelingOutputSection = Exclude<ReportSection, ChartSection> | ModelingOutputChart;
 
 /** Detached presentation data; future account adapters supply the same scope-neutral contract. */
 export interface ModelingReportExportSnapshot {
@@ -11,8 +15,8 @@ export interface ModelingReportExportSnapshot {
 }
 
 /** Unnormalized presentation content shared by both file formats and delivery freshness. */
-export function modelingReportSections(view: ModelingReportView): ReportSection[] {
-  const sections: ReportSection[] = [];
+export function modelingReportSections(view: ModelingReportView): ModelingOutputSection[] {
+  const sections: ModelingOutputSection[] = [];
   const heading = (title: string) => sections.push({ type: 'heading', title, pageBreakBefore: true,
     tocInclude: true, tocLabel: title });
   const notice = (text: string, explanation?: string, success = false) => sections.push({ type: 'styledText', content: [
@@ -40,19 +44,25 @@ export function modelingReportSections(view: ModelingReportView): ReportSection[
     if (!view.groups.length) notice('Executive summary is unavailable.');
   }
   if (view.settings.includeDataValidationTables) {
-    heading('Data Validation Tables');
+    heading('Model Details');
     for (const [index, group] of view.regression.entries()) {
-      const title = `${group.facilityName} · ${group.groupName}`;
+      const title = modelingGroupTitle(view, group);
       sections.push({ type: 'styledText', pageBreakBefore: index > 0, tocInclude: true, tocLabel: title, bookmarkLevel: 1,
         content: [{ text: title, fontSize: 12, bold: true, align: 'center' }] });
-      sections.push({ type: 'table', headers: [...MODELING_REGRESSION_HEADERS],
-        rows: [modelingRegressionCells(group)] });
+      sections.push({ type: 'table', headers: view.scope === 'facility' ? MODELING_DETAILS_HEADERS.slice(2) : [...MODELING_DETAILS_HEADERS], rows: [modelingDetailsCells(group, view.scope)],
+        equation: { label: group.chart?.category === 'water' ? 'Modeled Water' : 'Modeled Energy', expression: modelingModelDetails(group).formula } });
+      if (group.chart?.monthly.length) sections.push({ type: 'chart', title: `${title} — Model comparison`,
+        modelComparison: { ...group.chart, group: {
+          regressionStartYear: group.group.regressionStartYear, regressionEndYear: group.group.regressionEndYear,
+          regressionModelStartMonth: group.group.regressionModelStartMonth, regressionModelEndMonth: group.group.regressionModelEndMonth
+        } } });
+      else notice(group.chart?.message ?? 'No model comparison data is available.');
       if (group.model?.SEPValidation?.length) sections.push({ type: 'table',
         headers: ['Validation measure', ...group.model.SEPValidation.map(validation => validation.predictorVariable)],
         rows: modelingValidationRows(group) });
       else notice('Predictor validation is unavailable for this model.', 'Review the analysis setup.');
     }
-    if (!view.regression.length) notice('No regression groups are included.', 'Data validation tables apply to regression groups.');
+    if (!view.regression.length) notice('No regression groups are included.', 'Model Details apply to regression groups.');
   }
   return sections;
 }

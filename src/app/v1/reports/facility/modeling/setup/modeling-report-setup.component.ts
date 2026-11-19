@@ -29,7 +29,7 @@ export class ModelingReportSetupComponent {
   readonly content = [
     { key: 'includeIssuesSummary', label: 'Issues Summary' },
     { key: 'includeExecutiveSummary', label: 'Executive Summary' },
-    { key: 'includeDataValidationTables', label: 'Data Validation Tables' }
+    { key: 'includeDataValidationTables', label: 'Model Details' }
   ] as const;
   private readonly inspection = new ReportAnalysisInspectionController({
     key: this.context.key, canSelect: this.editor.canEdit,
