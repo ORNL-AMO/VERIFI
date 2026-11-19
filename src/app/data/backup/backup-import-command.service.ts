@@ -821,7 +821,7 @@ export class BackupImportCommandService {
       const chartMap: Record<string, string> = Object.create(null), dashboardMap: Record<string, string> = Object.create(null);
       for (const pair of included) {
         const imported = await this.importVisualizations(transaction, pair.source, accountGuid, resources);
-        pair.source.savedVisualizations.forEach((chart, index) => {
+        (pair.source.savedVisualizations ?? []).forEach((chart, index) => {
           if (Object.hasOwn(chartMap, chart.guid)) throw new BackupRelationshipError('A saved chart has ambiguous transfer identities.');
           chartMap[chart.guid] = imported[index].guid;
         });
@@ -833,7 +833,7 @@ export class BackupImportCommandService {
         dashboardMap[dashboard.guid] = this.getGUID();
       }
       const maps: HomeTransferMaps = { ...resources, visualization: chartMap, dashboard: dashboardMap };
-      const sourceCharts = included.flatMap(pair => pair.source.savedVisualizations);
+      const sourceCharts = included.flatMap(pair => pair.source.savedVisualizations ?? []);
       for (const record of sourceDashboards) {
         const target = transferHomeDashboard(record, accountGuid, maps, dashboardMap[record.guid], sourceCharts);
         target.id = await this.addRecord(transaction, 'homeDashboards', target); dashboards.push(target);
