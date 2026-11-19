@@ -26,6 +26,26 @@ describe('WorkspaceCommandBoundary', () => {
     await boundary.recoverCommittedPublication(store.account()!.guid); expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledTimes(2);
   });
 
+  it('does not publish or notify for a native conditional no-op', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    const committed = vi.fn(); boundary.committedChange$.subscribe(committed);
+    const snapshot = store.snapshot();
+    expect((await boundary.execute({ ...makeOptions(), isNoop: (value: { changed: boolean }) => !value.changed }, async () => ({ changed: false }))).value.changed).toBe(false);
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled(); expect(committed).not.toHaveBeenCalled();
+    expect(store.snapshot()).toBe(snapshot); expect(store.hasPending()).toBe(false);
+  });
+  it('clears pending state and recovers publication if a post-persistence decision fails', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store); workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+    const persist = vi.fn(async () => 'saved');
+    await expect(boundary.execute({ ...makeOptions(), isNoop: () => { throw new Error('decision failed'); } }, persist))
+      .rejects.toMatchObject({ persistenceCommitted: true });
+    expect(store.hasPending()).toBe(false);
+    await boundary.recoverCommittedPublication(store.account()!.guid);
+    expect(persist).toHaveBeenCalledTimes(1); expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledTimes(1);
+  });
+
   it('rejects a command when the workspace is loading', async () => {
     const { boundary, store } = createBoundary();
     store.beginLoad(false);
@@ -641,7 +661,7 @@ function publishReady(store: AccountWorkspaceStore, accountGuid = 'account-a'): 
 }
 
 function makeSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { id: 1, guid: accountGuid, name: 'Test Account' } as any,
     facilities: [
       { id: 1, guid: 'facility-a', accountId: accountGuid, name: 'Facility A' },

@@ -4,6 +4,8 @@ import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization
 import { SavedVisualizationCommands } from './saved-visualization-commands.service';
 import { WorkspaceWriteError } from './workspace-commands.models';
 import { VisualizationConflictError } from './visualization-commands.models';
+import { getNewIdbHomeDashboard, IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixtures';
 
 describe('saved visualization command outcomes', () => {
   const record: IdbSavedVisualization = { guid: 'visualization-a', accountId: 'account-a', revision: 1, recordVersion: 1,
@@ -12,8 +14,10 @@ describe('saved visualization command outcomes', () => {
     const boundary = { execute: vi.fn(async (_options, persist) => ({ value: await persist() })), recoverCommittedPublication: vi.fn(async () => {}) };
     const handler = { create: vi.fn(async (_command: unknown, _account: string) => structuredClone(record)), update: vi.fn(async () => structuredClone(record)),
       duplicate: vi.fn(async () => structuredClone(record)), retarget: vi.fn(async () => structuredClone(record)), delete: vi.fn(async () => {}), inspect: vi.fn(async () => []) };
+    const graphHandler = { ...handler, updateGraph: vi.fn(async () => ({ value: await handler.update(), homeDashboards: [] as IdbHomeDashboard[] })),
+      retargetGraph: vi.fn(async () => ({ value: await handler.retarget(), homeDashboards: [] as IdbHomeDashboard[] })) };
     const workspace = { account: () => ({ guid: 'account-a' }), isReady: () => true, savedVisualizations: () => [record], snapshot: () => undefined };
-    return { boundary, handler, workspace, commands: new SavedVisualizationCommands(boundary as any, handler as any, workspace as any) };
+    return { boundary, handler: graphHandler, workspace, commands: new SavedVisualizationCommands(boundary as any, graphHandler as any, workspace as any) };
   }
 
   it('assigns independent identities once and retains a cloned failed proposal for retry', async () => {
@@ -43,7 +47,7 @@ describe('saved visualization command outcomes', () => {
     expect(result).toMatchObject({ state: 'conflict', current, command });
   });
 
-  it('publishes the complete committed update as a workspace patch', async () => {
+  it('publishes the complete committed chart update as a stable workspace patch', async () => {
     const { commands, boundary, handler } = setup();
     const updated = { ...record, revision: 2, definition: { ...utilityVisualizationFixture(), name: 'Updated' } };
     handler.update.mockResolvedValueOnce(updated);
@@ -69,6 +73,18 @@ describe('saved visualization command outcomes', () => {
     expect(options.changeKind).toBe('update'); expect(options.publication.mode).toBe('patch');
     await commands.recover(record.accountId, record.guid);
     expect(handler.retarget).toHaveBeenCalledOnce();
+  });
+  it('includes every atomically protected Home dashboard in the same committed chart patch', async () => {
+    const { commands, boundary, handler } = setup();
+    const home = getNewIdbHomeDashboard('account-a', homeAccountOwner, homeDefinition());
+    handler.updateGraph.mockResolvedValueOnce({ value: record, homeDashboards: [home] });
+    expect((await commands.submit({ kind: 'update', accountGuid: record.accountId, guid: record.guid, expectedRevision: 1,
+      definition: utilityVisualizationFixture() })).state).toBe('committed');
+    const options = boundary.execute.mock.calls[0][0];
+    expect(options.publication.buildPatch(record)).toEqual({ collections: [
+      { collection: 'savedVisualizations', upsert: [record] }, { collection: 'homeDashboards', upsert: [home] }
+    ] });
+    expect(boundary.execute).toHaveBeenCalledTimes(1);
   });
 
   it('distinguishes committed publication failure and recovers without replaying the write', async () => {

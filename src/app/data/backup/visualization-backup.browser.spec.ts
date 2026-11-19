@@ -293,7 +293,7 @@ describe('saved visualization backup transactions in Chromium', () => {
 
   async function readSnapshot(accountGuid: string): Promise<AccountWorkspaceSnapshot> {
     const byOwner = async (store: string) => (await harness.getAll<any>(store)).filter(item => item.accountId === accountGuid);
-    return {
+    return { homeDashboards: [], homeOwners: [],
       account: (await harness.getAll<any>('accounts')).find(item => item.guid === accountGuid),
       facilities: await byOwner('facilities'), meters: await byOwner('utilityMeter'), meterGroups: await byOwner('utilityMeterGroups'),
       predictors: await byOwner('predictor'), facilityAnalyses: await byOwner('analysisItems'), accountAnalyses: await byOwner('accountAnalysisItems'),

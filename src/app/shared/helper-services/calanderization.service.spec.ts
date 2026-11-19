@@ -230,7 +230,7 @@ describe('CalanderizationService', () => {
 });
 
 function createSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { guid: accountGuid, name: 'Test Account', assessmentReportVersion: 'v0' } as any,
     facilities: [],
     meters: [],

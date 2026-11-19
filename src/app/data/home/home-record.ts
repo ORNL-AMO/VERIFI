@@ -14,13 +14,14 @@ export function homeEnvelopeError(value: unknown, payload: 'definition' | 'state
   if (preservation !== undefined && (!preservation || !homeJson(preservation) || !Array.isArray(preservation.references)
     || !Array.isArray(preservation.transfers) || preservation.locked !== undefined && typeof preservation.locked !== 'boolean'
     || preservation.references.some(ref => !ref || !homeText(ref.path) || !homeText(ref.guid)
-      || !['visualization', 'facility', 'analysis', 'meter', 'predictor', 'equipment'].includes(ref.kind)
+      || !['dashboard', 'visualization', 'facility', 'analysis', 'meter', 'predictor', 'equipment', 'unknown'].includes(ref.kind)
       || !['not-transferred', 'missing', 'foreign'].includes(ref.reason))
     || preservation.transfers.some(hop => !hop || !homeText(hop.accountId) || !homeText(hop.targetAccountId)
       || !hop.maps || typeof hop.maps !== 'object' || Array.isArray(hop.maps)
       || Object.values(hop.maps).some(map => !map || typeof map !== 'object' || Array.isArray(map)
         || Object.entries(map).some(([from, to]) => !homeText(from) || !homeText(to)))))) return 'Invalid Home preservation metadata.';
-  if (payload === 'definition' && record.template !== undefined) {
+  if (payload === 'definition' && record.template !== undefined && !homeJson(record.template)) return 'Template provenance must be serializable JSON.';
+  if (payload === 'definition' && record.template !== undefined && record.recordVersion === HOME_FORMAT_VERSION) {
     const template = record.template;
     if (!template || !homeJson(template) || !['home', 'goal-progress', 'energy-use', 'costs', 'emissions', 'water', 'blank'].includes(template.template)
       || !homePositiveInteger(template.version) || typeof template.automatic !== 'boolean' || typeof template.customized !== 'boolean'
@@ -28,6 +29,7 @@ export function homeEnvelopeError(value: unknown, payload: 'definition' | 'state
       || new Set(template.chartBaselines.map(chart => chart.guid)).size !== template.chartBaselines.length
       || decodeHomeDashboard(template.baseline).state === 'invalid') return 'Invalid Home template provenance.';
   }
+  if (payload === 'definition' && record.creationOperationGuid !== undefined && !homeText(record.creationOperationGuid)) return 'Invalid Home creation receipt.';
   return undefined;
 }
 export type HomeRecordRead<T> = { readonly state: 'valid'; readonly value: T }
@@ -36,7 +38,8 @@ function protectedRecord(record: Readonly<IdbHomeRecord>, payload: 'definition' 
   const error = homeEnvelopeError(record, payload);
   if (error) return { state: 'invalid', message: error };
   if (record.recordVersion !== HOME_FORMAT_VERSION) return { state: 'unsupported', message: 'This Home record needs another VERIFI version.' };
-  if (record.preservation?.locked) return { state: 'repair-required', message: 'Preserved Home relationships require explicit review.' };
+  if (record.preservation?.locked || record.preservation?.references.some(ref => ref.kind === 'unknown'))
+    return { state: 'repair-required', message: 'Preserved Home relationships require explicit review.' };
   return undefined;
 }
 /** Reference blocks are per-widget: readable dashboards still expose repairable missing links. */

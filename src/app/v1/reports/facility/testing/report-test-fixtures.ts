@@ -10,7 +10,7 @@ export function reportFixture(overrides: Partial<IdbFacilityReport> = {}): IdbFa
     id: 10, guid: 'report-a', name: 'Saved report', createdDate: new Date(2024, 0, 1), modifiedDate: new Date(2025, 0, 1), ...overrides };
 }
 export function reportSnapshot(reports: readonly IdbFacilityReport[] = [reportFixture()]): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: reportAccount, facilities: [reportFacility], facilityReports: reports,
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], customEmissions: [], customFuels: [],

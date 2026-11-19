@@ -3,6 +3,8 @@ import type { VisualizationDefinition } from '@domain/visualizations/visualizati
 import { decodeVisualizationDefinition, VisualizationIssue } from '@domain/visualizations/visualization-validation';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data/models/idbModels/savedVisualization';
+import { homeOwnerValid } from '@domain/home/home-bindings';
+import { HOME_STARTERS } from '@domain/home/home-dashboard';
 
 export type SavedVisualizationReadResult =
   | { readonly state: 'valid' | 'setup-required'; readonly record: Readonly<IdbSavedVisualization>;
@@ -35,6 +37,13 @@ export function savedVisualizationEnvelopeError(value: unknown): string | undefi
   if (!validDate(record.createdDate) || !validDate(record.modifiedDate) || !Object.hasOwn(record, 'definition'))
     return 'Saved visualization dates or payload are missing.';
   if (!isJsonValue(record.definition)) return 'Saved visualization payload must be losslessly serializable JSON.';
+  if (record.homeOrigin !== undefined) {
+    const origin = record.homeOrigin;
+    if (!origin || !isJsonValue(origin) || !nonblank(origin.operationGuid) || !homeOwnerValid(origin.owner)
+      || !Array.isArray(origin.templates) || !origin.templates.length || new Set(origin.templates).size !== origin.templates.length
+      || origin.templates.some(template => ![...HOME_STARTERS, 'blank'].includes(template))
+      || origin.unresolved !== undefined && typeof origin.unresolved !== 'boolean') return 'Invalid Home visualization provenance.';
+  }
   if (record.preservation !== undefined) {
     const preservation = record.preservation;
     if (!preservation || typeof preservation !== 'object' || (preservation.locked !== undefined && typeof preservation.locked !== 'boolean')

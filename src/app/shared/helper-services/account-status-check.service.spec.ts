@@ -84,7 +84,7 @@ describe('AccountStatusCheckService', () => {
 });
 
 function createSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { guid: accountGuid, name: 'Existing Account' } as any,
     facilities: [], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],

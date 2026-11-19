@@ -1,3 +1,4 @@
+import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
 /**
  * Defines the readonly snapshot, selection, lifecycle, revision, and error contracts
  * shared by the account workspace store, loader, service, and consumers.
@@ -25,6 +26,8 @@ export type WorkspaceStatus = 'idle' | 'loading' | 'switching' | 'ready' | 'erro
 export type WorkspaceEntity<T> = Readonly<T>;
 
 export interface AccountWorkspaceSnapshot {
+  readonly homeDashboards: readonly WorkspaceEntity<IdbHomeDashboard>[];
+  readonly homeOwners: readonly WorkspaceEntity<IdbHomeOwner>[];
   readonly savedVisualizations: readonly WorkspaceEntity<IdbSavedVisualization>[];
   readonly account: WorkspaceEntity<IdbAccount>;
   readonly facilities: readonly WorkspaceEntity<IdbFacility>[];

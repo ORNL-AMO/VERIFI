@@ -117,7 +117,7 @@ async function setupRoute(tab: 'settings' | 'readings') {
   TestBed.overrideComponent(PredictorWorkbenchComponent, { remove: { providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } });
   const store = TestBed.inject(AccountWorkspaceStore);
   const selectedFacility = facility();
-  const snapshot: AccountWorkspaceSnapshot = { account: account(), facilities: [selectedFacility],
+  const snapshot: AccountWorkspaceSnapshot = { homeDashboards: [], homeOwners: [], account: account(), facilities: [selectedFacility],
     predictors: [inventoryPredictor('predictor-a', { accountId: 'account-a', facilityId: 'facility-a', name: 'Saved output' })],
     meters: [], meterData: [], meterGroups: [], predictorData: [{
       id: 20, guid: 'reading-a', accountId: 'account-a', facilityId: 'facility-a', predictorId: 'predictor-a',

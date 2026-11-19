@@ -1,3 +1,4 @@
+import { HomeDbService } from '@data/indexedDB/home-db.service';
 /**
  * Builds a complete account workspace snapshot from persistence. It loads account-scoped
  * collections concurrently, validates account ownership, and returns deterministic ordering without publishing state.
@@ -48,7 +49,8 @@ export class AccountWorkspaceLoaderService {
     private customGwpRepository: CustomGWPDbService,
     private energyUseGroupRepository: FacilityEnergyUseGroupsDbService,
     private energyUseEquipmentRepository: FacilityEnergyUseEquipmentDbService,
-    private savedVisualizationsRepository: SavedVisualizationsDbService
+    private savedVisualizationsRepository: SavedVisualizationsDbService,
+    private homeRepository: HomeDbService
   ) { }
 
   async load(accountGuid: string): Promise<AccountWorkspaceSnapshot> {
@@ -78,7 +80,7 @@ export class AccountWorkspaceLoaderService {
         customGWPs,
         energyUseGroups,
         energyUseEquipment,
-        savedVisualizations
+        savedVisualizations, homeDashboards, homeOwners
       ] = await Promise.all([
         this.facilityRepository.getAllAccountFacilities(accountGuid),
         this.meterRepository.getAllAccountMeters(accountGuid),
@@ -95,7 +97,8 @@ export class AccountWorkspaceLoaderService {
         this.customGwpRepository.getAllAccountCustomGWP(accountGuid),
         this.energyUseGroupRepository.getAllAccountEnergyUseGroups(accountGuid),
         this.energyUseEquipmentRepository.getAllAccountEnergyUseEquipment(accountGuid),
-        this.savedVisualizationsRepository.getAllAccountVisualizations(accountGuid)
+        this.savedVisualizationsRepository.getAllAccountVisualizations(accountGuid),
+        this.homeRepository.getAllAccountDashboards(accountGuid), this.homeRepository.getAllAccountOwners(accountGuid)
       ]);
 
       const collections = {
@@ -114,13 +117,14 @@ export class AccountWorkspaceLoaderService {
         customGWPs,
         energyUseGroups,
         energyUseEquipment,
-        savedVisualizations
+        savedVisualizations, homeDashboards, homeOwners
       };
       validateAccountOwnership(accountGuid, collections);
 
       return {
         account,
         savedVisualizations: sortByLocalId(savedVisualizations),
+        homeDashboards: sortByLocalId(homeDashboards), homeOwners: sortByLocalId(homeOwners),
         facilities: sortByLocalId(facilities),
         meters: sortByLocalId(meters),
         meterData: sortByLocalId(meterData),

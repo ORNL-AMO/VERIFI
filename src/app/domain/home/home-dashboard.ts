@@ -76,7 +76,7 @@ export function resolveHomeDefault(state: HomeOwnerState, visibleDashboardGuids:
 /** Presentation policy only: never creates analyses or changes an existing owner identity. */
 export function presentedHomeOwner(account: { readonly guid: string; readonly isSingleFacilityCompany?: boolean },
   facilities: readonly { readonly guid: string; readonly accountId: string }[]): HomeOwner | undefined {
-  if (!account.isSingleFacilityCompany) return { kind: 'account', guid: account.guid };
+  if (account.isSingleFacilityCompany !== true) return { kind: 'account', guid: account.guid };
   const owned = facilities.filter(item => item.accountId === account.guid);
   return owned.length === 1 ? { kind: 'facility', guid: owned[0].guid } : undefined;
 }

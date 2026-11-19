@@ -1,3 +1,5 @@
+import type { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { homeChartDependencies } from '@data/home/home-references';
 import { Injectable } from '@angular/core';
 import { getNewIdbSavedVisualization, IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { readSavedVisualization, SavedVisualizationReadResult } from '@data/visualizations/saved-visualization-record';
@@ -16,6 +18,8 @@ export class SavedVisualizationCommands {
   private readonly unpublished = new Map<string, VisualizationCommandOutcome>();
   constructor(private readonly boundary: WorkspaceCommandBoundary, private readonly handler: VisualizationCommandHandler,
     private readonly workspace: AccountWorkspaceStore) { }
+
+  dependencies(guid: string) { return homeChartDependencies(this.workspace.homeDashboards(), guid); }
 
   /** Keep this command in the live editor until acknowledged or explicitly discarded. */
   prepareCreate(definition: VisualizationDefinition, captureSource?: VisualizationCaptureSource, retainedCaptureOrigin?: VisualizationCaptureOrigin): CreateVisualizationCommand {
@@ -52,6 +56,7 @@ export class SavedVisualizationCommands {
   private async execute(submitted: VisualizationCommand): Promise<VisualizationCommandOutcome> {
     let committed: IdbSavedVisualization | undefined;
     let persistenceFinished = false;
+    let homeChanges: readonly IdbHomeDashboard[] = [];
     try {
       if (this.workspace.account()?.guid !== submitted.accountGuid) throw new WorkspaceWriteError('cross-account-entity', 'Select the owning account before saving this visualization.');
       const result = await this.boundary.execute({ entityKind: 'savedVisualization', entityGuid: submitted.guid,
@@ -59,12 +64,15 @@ export class SavedVisualizationCommands {
         label: submitted.kind === 'delete' ? 'Deleting visualization' : 'Saving visualization', notification: { suppressSuccessToast: true },
         ...(submitted.kind === 'update' || submitted.kind === 'retarget' ? { publication: { mode: 'patch' as const, buildPatch: (value: IdbSavedVisualization | undefined) => {
           if (!value) throw new WorkspaceWriteError('validation-failed', 'The committed visualization is unavailable for publication.');
-          return { collections: [{ collection: 'savedVisualizations' as const, upsert: [value] }] };
+          return { collections: [{ collection: 'savedVisualizations' as const, upsert: [value] },
+            ...(homeChanges.length ? [{ collection: 'homeDashboards' as const, upsert: homeChanges }] : [])] };
         } } } : {}) }, async () => {
-          committed = submitted.kind === 'create' ? await this.handler.create(submitted, submitted.accountGuid)
+          if (submitted.kind === 'update' || submitted.kind === 'retarget') {
+            const graph = submitted.kind === 'update' ? await this.handler.updateGraph(submitted, submitted.accountGuid) : await this.handler.retargetGraph(submitted, submitted.accountGuid);
+            committed = graph.value; homeChanges = graph.homeDashboards;
+          } else committed = submitted.kind === 'create' ? await this.handler.create(submitted, submitted.accountGuid)
             : submitted.kind === 'duplicate' ? await this.handler.duplicate(submitted, submitted.accountGuid)
-            : submitted.kind === 'update' ? await this.handler.update(submitted, submitted.accountGuid)
-            : submitted.kind === 'retarget' ? await this.handler.retarget(submitted, submitted.accountGuid)
+
             : (await this.handler.delete(submitted, submitted.accountGuid), undefined);
           persistenceFinished = true;
           return committed;

@@ -11,7 +11,7 @@ export function visualizationRecord() {
     { kind: 'fixed', facilityGuids: [visualizationFacility.guid] }, 'utility')), id: 1, guid: 'visualization-a' };
 }
 export function visualizationSnapshot(): AccountWorkspaceSnapshot {
-  return { account: visualizationAccount, facilities: [visualizationFacility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
+  return { homeDashboards: [], homeOwners: [], account: visualizationAccount, facilities: [visualizationFacility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],
     energyUseGroups: [], energyUseEquipment: [], savedVisualizations: [visualizationRecord()] };
 }
