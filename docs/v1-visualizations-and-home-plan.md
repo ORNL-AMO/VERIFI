@@ -7,7 +7,7 @@ Active plan for [epic #2564](https://github.com/ORNL-AMO/VERIFI/issues/2564): es
 - Saved visualizations belong to an account with explicit portfolio/facility ownership and fixed or rolling periods. Keep source identity explicit so reopening cannot silently retarget data.
 - Save versioned VERIFI intent: sources, calculations, filters, aggregation, units/treatment, series, dates, and appearance. Runtime providers produce current values and ECharts options; saved definitions contain no instances, executable callbacks, or frozen results.
 - Home widgets reference saved visualizations. Editing a definition updates its linked appearances; Duplicate creates independent intent. Dashboard layout and widget overrides belong to the dashboard instance and never silently edit the linked definition.
-- Recipes create independent saved charts with explicit resource binding. Templates create independently editable dashboards; editing an instance never changes the shipped template. Personas suggest useful starting content without a mandatory role choice or restricted capabilities. Never auto-populate accounts/facilities.
+- Recipes create independent saved charts with explicit resource binding. Templates create independently editable dashboards; editing an instance never changes the shipped template. Personas suggest useful starting content without a mandatory role choice or restricted capabilities. Home will initialize editable starter dashboards once per owner, without creating source data; see the [Home dashboard plan](v1-home-dashboard-plan.md).
 - Use existing VERIFI calculations, fiscal periods, units, provenance, quality rules, and ECharts rendering. Expose only compatible source/chart/settings combinations; distinguish raw utility changes, modeled improvement/savings, equipment estimates, and predictor observations.
 - Custom report authoring is deferred. Keep reusable definitions/rendering extensible for later report reuse without implementing it here.
 
@@ -22,6 +22,7 @@ Visualizations is enabled. Saved JSON contracts, storage/transfer/recovery, Dash
 | Dashboard, creation, autosave, navigation, repair, preview | [Workbench](v1-visualization-workbench.md) |
 | Composition/hierarchy/flow settings, shares and accessible source details | [Composition visualizations](v1-composition-visualizations.md) |
 | Actual utility selections, periods, quality, charges, recipes/capture boundaries | [Utility visualizations](v1-utility-visualizations.md) |
+| Planned Home content, templates, lifecycle, and phase acceptance | [Home dashboard plan](v1-home-dashboard-plan.md) |
 
 The current definition version comes from source; do not maintain a competing schema here. Existing v0 data, calculations, report settings, and supported formats remain protected. Home storage/backup additions are explicit Home2 work; no incidental weather retrieval, formula, report-output, or IPC changes.
 
@@ -54,7 +55,7 @@ First complete the working saved utility journey, then remaining sources/charts/
 
 Energy usage trend is implemented with explicit utility-source, meter-group, or exact-meter binding; Utility cost trend binds exact meters. Remaining utility/source breakdown recipes depend on applicable Vis4/Vis8 adapters; usage versus production/weather requires Vis5/Vis6/Vis7; analysis comparison requires applicable Vis5/Vis6/Vis7 adapters. Recipes must retain scope, dates, units/provenance, save/reopen behavior, and useful unavailable explanations.
 
-Home1 defines these templates using existing data: Overview (totals/readiness/recent performance/next actions), Goals & Performance (energy/water goals, baselines/improvement/savings), Energy Use (trends/breakdowns/year/equipment comparisons), Costs (spending/charges/facility comparisons), Emissions (existing trends/breakdowns), Water (usage/costs/goals/comparisons), and Blank. Template names introduce no new goal types or calculation methods.
+The [Home dashboard plan](v1-home-dashboard-plan.md) records the agreed compositions and individual Home1–Home6 acceptance. The issue's Overview and Goals & Performance templates use the display names Home and Goal Progress. Together with Energy Use, Costs, Emissions, and conditional Water they form the editable starter set; Blank remains available for creation. Default performance widgets explicitly follow Active for reporting, while named-analysis charts remain pinned. These Home capabilities are planned, not implemented. Template names introduce no new goal types or calculation methods.
 
 Map [v0 account Home](../src/app/v0/data-evaluation/account/account-home/), [facility Home](../src/app/v0/data-evaluation/facility/facility-home/), [account Overview](../src/app/v0/data-evaluation/account/account-overview/), and [facility Overview](../src/app/v0/data-evaluation/facility/facility-overview/) content, including applicable maps/tables and Energy/Costs/Emissions/Water views. Retain, combine, or explicitly disposition each content area as implementation reaches it.
 
