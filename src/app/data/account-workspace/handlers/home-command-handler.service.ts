@@ -64,6 +64,11 @@ export class HomeCommandHandler {
       const catalog = await readVisualizationReferenceCatalog(tx);
       const charts = await tx.getAll<IdbSavedVisualization>('savedVisualizations');
       const visible = (records: readonly IdbHomeDashboard[]) => records.filter(record => homeDashboardVisible(record, { account, meters: catalog.meters })).map(record => record.guid);
+      const initialDefault = (next: HomeOwnerState, records: readonly IdbHomeDashboard[], preferred?: string): HomeOwnerState => {
+        if (state.defaultDashboardGuid !== undefined || owner?.preservation?.references.some(ref => ref.path === 'defaultDashboardGuid')) return next;
+        const available = owner ? homeOwnerResolutionState(owner, next) : next;
+        return withDefault(next, resolveHomeDefault({ ...available, ...(preferred ? { defaultDashboardGuid: preferred } : {}) }, visible(records)));
+      };
       const writeOwner = async (next: HomeOwnerState, acknowledgeReferences = false): Promise<IdbHomeOwner> => {
         if (owner) {
           const preservation = owner.preservation && acknowledgeReferences ? { ...owner.preservation,
@@ -80,17 +85,16 @@ export class HomeCommandHandler {
       if (submitted.kind === 'initialize' || submitted.kind === 'create') {
         // Backups containing dashboards but no owner marker are adopted without adding another starter set.
         if (submitted.kind === 'initialize' && dashboards.length) {
-          const order = completeOrder(resolution.dashboardOrder, dashboards);
+          const order = completeOrder(state.dashboardOrder, dashboards);
           const adopted = { ...state, initialized: true, dashboardOrder: order };
-          return { owner: await writeOwner(withDefault(adopted, resolveHomeDefault(adopted, visible(dashboards)))), changed: true };
+          return { owner: await writeOwner(initialDefault(adopted, dashboards)), changed: true };
         }
         this.assertGraph(submitted.graph, submitted, submitted.kind === 'initialize');
         const added = await this.addGraph(tx, submitted, submitted.graph, catalog, charts);
-        const order = [...completeOrder(resolution.dashboardOrder, dashboards), ...added.map(record => record.guid)];
+        const order = [...completeOrder(state.dashboardOrder, dashboards), ...added.map(record => record.guid)];
         const next = { ...state, initialized: true, dashboardOrder: order };
-        const preferred = resolution.defaultDashboardGuid ?? (submitted.kind === 'initialize'
-          ? added.find(record => record.template?.template === 'home')?.guid : undefined);
-        const nextState = withDefault(next, resolveHomeDefault({ ...next, ...(preferred ? { defaultDashboardGuid: preferred } : {}) }, visible([...dashboards, ...added])));
+        const preferred = submitted.kind === 'initialize' ? added.find(record => record.template?.template === 'home')?.guid : undefined;
+        const nextState = initialDefault(next, [...dashboards, ...added], preferred);
         return { owner: await writeOwner(nextState), dashboard: added[0], changed: true };
       }
       if (!owner || !state.initialized) invalid('Initialize or adopt the Home owner before editing it.');
@@ -110,8 +114,10 @@ export class HomeCommandHandler {
         const remaining = dashboards.filter(record => record.guid !== current.guid);
         const automaticTemplate = readHomeDashboard(current).state === 'valid' && current.template?.automatic ? current.template.template : undefined;
         const deletedStarters = automaticTemplate ? [...new Set([...state.deletedStarters, automaticTemplate])] : state.deletedStarters;
-        let next: HomeOwnerState = { ...state, dashboardOrder: completeOrder(state.dashboardOrder, remaining), deletedStarters };
-        if (state.defaultDashboardGuid === current.guid) next = withDefault(next, resolveHomeDefault(withDefault(next, undefined), visible(remaining)));
+        const order = state.dashboardOrder.filter(guid => guid !== current.guid || !resolution.dashboardOrder.includes(guid));
+        let next: HomeOwnerState = { ...state, dashboardOrder: completeOrder(order, remaining), deletedStarters };
+        if (resolution.defaultDashboardGuid === current.guid) next = withDefault(next,
+          resolveHomeDefault(homeOwnerResolutionState(owner, withDefault(next, undefined)), visible(remaining)));
         return { owner: await writeOwner(next), changed: true };
       }
       const read = readHomeDashboard(current);
@@ -151,10 +157,7 @@ export class HomeCommandHandler {
           ...(current.template ? { template: { ...current.template, customized: true } } : {}) };
         if (current.preservation) next.preservation = { ...current.preservation, references: remaining };
         await tx.put('homeDashboards', next);
-        const all = dashboards.map(record => record.guid === next.guid ? next : record);
-        const nextState = state.defaultDashboardGuid === next.guid && !visible(all).includes(next.guid)
-          ? withDefault(state, resolveHomeDefault(withDefault(state, undefined), visible(all))) : state;
-        return { owner: await writeOwner(nextState), dashboard: next, changed: true };
+        return { owner, dashboard: next, changed: true };
       }
       this.assertGraph(submitted.graph, submitted, false);
       const proposal = submitted.graph.dashboards[0];
@@ -285,8 +288,8 @@ function sameSet(a: readonly string[], b: readonly string[]): boolean {
   return first.size === second.size && [...first].every(value => second.has(value));
 }
 function completeOrder(order: readonly string[], dashboards: readonly IdbHomeDashboard[]): string[] {
-  const guids = new Set(dashboards.map(record => record.guid));
-  return [...order.filter(guid => guids.has(guid)), ...dashboards.filter(record => !order.includes(record.guid)).map(record => record.guid)];
+  // Unavailable entries are durable intent; ordinary lifecycle writes only append known layouts.
+  return [...order, ...dashboards.filter(record => !order.includes(record.guid)).map(record => record.guid)];
 }
 function withDefault(state: HomeOwnerState, guid: string | undefined): HomeOwnerState {
   const { defaultDashboardGuid: _, ...rest } = state;

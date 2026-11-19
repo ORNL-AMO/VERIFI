@@ -210,6 +210,35 @@ describe('Home atomic native commands and workspace publication', () => {
     expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, view.state!))).state).toBe('committed');
     expect(commands.ownerView(homeAccountOwner).defaultDashboardGuid).toBe(costs.guid);
     expect(store.homeOwners()[0].preservation?.references).toEqual([]);
+    const revision = store.homeOwners()[0].revision;
+    await commands.submit(commands.prepareUpdate(current(costs.guid), { ...definition(current(costs.guid)), visibility: 'hidden' }));
+    expect(commands.ownerView(homeAccountOwner).defaultDashboardGuid).toBe(records[0].guid);
+    expect(commands.ownerView(homeAccountOwner).state?.defaultDashboardGuid).toBe(costs.guid); expect(store.homeOwners()[0].revision).toBe(revision);
+    await commands.submit(commands.prepareDelete(current(costs.guid)));
+    expect(commands.ownerView(homeAccountOwner).state?.defaultDashboardGuid).toBe(records[0].guid);
+  });
+  it.each([true, false])('preserves transferred unavailable owner intent across lifecycle writes (initialized: %s)', async initialized => {
+    const { records, record } = await initialize(), costs = records.find(item => item.template?.template === 'costs')!;
+    const { transferHomeOwner } = await import('@data/backup/home-backup');
+    const source = { ...record!, state: { ...ownerState(record!), initialized, dashboardOrder: ['missing-order', ...ownerState(record!).dashboardOrder], defaultDashboardGuid: 'missing-default' } };
+    const transferred = transferHomeOwner(source, account.guid, { dashboard: Object.fromEntries(records.map(item => [item.guid, item.guid])) }, record!.guid, records);
+    await firstValueFrom(harness.dbService.update('homeOwners', { ...transferred, id: record!.id })); await workspace.reloadActiveWorkspace(false);
+    const assertIntent = () => {
+      const saved = store.homeOwners()[0];
+      expect(ownerState(saved).defaultDashboardGuid).toBe('missing-default'); expect(ownerState(saved).dashboardOrder[0]).toBe('missing-order');
+      expect(saved.preservation?.references).toEqual(transferred.preservation?.references);
+      expect(commands.ownerView(homeAccountOwner).defaultDashboardGuid).toBe(records[0].guid);
+    };
+    if (!initialized) { expect((await commands.submit(commands.prepareInitialize(homeAccountOwner, storageBlueprints()))).state).toBe('committed'); assertIntent(); }
+    expect((await commands.submit(commands.prepareCreate(homeAccountOwner, { template: 'blank', version: 1, dashboard: homeDefinition(), charts: [] }))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareDuplicate(current(records[0].guid)))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareUpdate(current(costs.guid), { ...definition(current(costs.guid)), name: 'Edited', visibility: 'hidden' }))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareDelete(current(costs.guid)))).state).toBe('committed'); assertIntent();
+    expect(ownerState(store.homeOwners()[0]).dashboardOrder).not.toContain(costs.guid);
+    await harness.reopen();
+    const restored = await TestBed.inject(AccountWorkspaceLoaderService).load(account.guid);
+    expect(ownerState(restored.homeOwners[0]).defaultDashboardGuid).toBe('missing-default');
+    expect(ownerState(restored.homeOwners[0]).dashboardOrder[0]).toBe('missing-order');
   });
   it('keeps a coincident shortcut unavailable until reviewed owner and resource bindings agree', async () => {
     const { records } = await initialize(), home = records[0];
