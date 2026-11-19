@@ -3,6 +3,7 @@ import { VisualizationReferenceIssue } from '@domain/visualizations/visualizatio
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { WorkspaceWriteError } from './workspace-commands.models';
 import type { VisualizationCaptureSource, VisualizationCaptureOrigin } from '../visualizations/visualization-capture-origin';
+import type { HomeChartUsage } from '@data/home/home-references';
 
 interface VisualizationCommandIdentity {
   readonly accountGuid: string;
@@ -37,6 +38,8 @@ export interface UpdateVisualizationCommand extends VisualizationCommandIdentity
 export interface DeleteVisualizationCommand extends VisualizationCommandIdentity {
   readonly kind: 'delete';
   readonly expectedRevision: number;
+  /** Omitted is compatible only when no dashboards use the chart and none are unreadable. */
+  readonly homeUsage?: readonly HomeChartUsage[];
 }
 
 export interface RetargetVisualizationCommand extends VisualizationCommandIdentity {
@@ -57,8 +60,9 @@ export type VisualizationCommandOutcome =
   | { readonly state: 'failed' | 'refresh-required'; readonly command: VisualizationCommand; readonly error: unknown };
 
 export class VisualizationConflictError extends WorkspaceWriteError {
-  constructor(readonly current: IdbSavedVisualization | undefined) {
-    super('validation-failed', 'This visualization changed or was deleted. Review the saved and local versions before continuing.');
+  constructor(readonly current: IdbSavedVisualization | undefined,
+    message = 'This visualization changed or was deleted. Review the saved and local versions before continuing.') {
+    super('validation-failed', message);
     this.name = 'VisualizationConflictError';
   }
 }

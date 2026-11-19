@@ -73,7 +73,7 @@ export function expandVisualizationDefinition(value: unknown): unknown {
     if (group.targets !== undefined && (!Array.isArray(group.targets) || new Set(group.targets.map(target => target?.['id'])).size !== group.targets.length
       || group.targets.some(target => !target || Object.keys(target).some(key => !['id', 'binding'].includes(key)) || typeof target['id'] !== 'string' || !target['id']
         || !target['binding'] || typeof target['binding'] !== 'object' || Array.isArray(target['binding'])
-        || Object.keys(target['binding']).some(key => !['mode', 'analysisGuid', 'groupGuid', 'modelId', 'comparisonModelId'].includes(key))))) throw new Error('Choose unique, valid saved Analysis targets.');
+        || Object.keys(target['binding']).some(key => !['mode', 'analysisGuid', 'groupGuid', 'modelId', 'comparisonModelId', 'reporting'].includes(key))))) throw new Error('Choose unique, valid saved Analysis targets.');
     kinds.add(group.kind);
     if (new Set(group.measures).size !== group.measures.length || !group.projections.length) throw new Error('Choose unique measures and source projections.');
     const configured = new Set<string>();

@@ -21,7 +21,7 @@ export const energyUseItem = (overrides: Partial<IdbFacilityEnergyUseEquipment> 
 });
 
 export function energyUsesSnapshot(items = [energyUseItem()]): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { guid: 'account-a', name: 'Example account' } as IdbAccount,
     facilities: [energyUseFacility(), energyUseFacility('facility-b', 'South plant')],
     savedVisualizations: [], energyUseEquipment: items, energyUseGroups: [energyUseGroup()],

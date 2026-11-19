@@ -109,7 +109,7 @@ describe('visualization editor session with native IndexedDB', () => {
 
   it('retains a rejected ownership proposal for retry or discard while keeping the current scope visible', async () => {
     const { session } = await create();
-    const retarget = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'retarget').mockRejectedValueOnce(new Error('Scope write rejected'));
+    const retarget = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'retargetGraph').mockRejectedValueOnce(new Error('Scope write rejected'));
     expect(await changeFacilities(session, { kind: 'all' })).toBe(false);
     expect(session.definition()!.facilitySelection).toEqual({ kind: 'fixed', facilityGuids: [facility.guid] });
     expect(session.needsProtection()).toBe(true); expect(session.canEdit()).toBe(false);
@@ -126,7 +126,7 @@ describe('visualization editor session with native IndexedDB', () => {
       facilitySelection: { kind: 'fixed', facilityGuids: [facility.guid] }, sourceKinds: ['utility'],
       chart: { kind: 'time-series', defaultTraceType: 'line', interval: 'monthly', stack: 'none' } });
     const { session, commands, proposal } = await create(definition);
-    const update = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'update');
+    const update = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'updateGraph');
     session.applyDefinition({ ...session.definition()!, chart: {
       kind: 'time-series', defaultTraceType: 'bar', interval: 'yearly', stack: 'none'
     } });
@@ -157,7 +157,7 @@ describe('visualization editor session with native IndexedDB', () => {
 
   it('recovers committed ownership publication without repeating a retarget', async () => {
     const { session } = await create();
-    const retarget = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'retarget');
+    const retarget = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'retargetGraph');
     vi.spyOn(TestBed.inject(AccountWorkspaceStore), 'publishCommittedPatch').mockImplementationOnce(() => { throw new Error('Patch unavailable'); });
     vi.spyOn(TestBed.inject(AccountWorkspaceService), 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication unavailable'));
     expect(await changeFacilities(session, { kind: 'all' })).toBe(false);
@@ -173,7 +173,7 @@ describe('visualization editor session with native IndexedDB', () => {
 
   it('recovers committed publication after an editor save without repeating its IndexedDB update', async () => {
     const { session, proposal } = await create();
-    const handler = TestBed.inject(VisualizationCommandHandler), update = vi.spyOn(handler, 'update');
+    const handler = TestBed.inject(VisualizationCommandHandler), update = vi.spyOn(handler, 'updateGraph');
     vi.spyOn(TestBed.inject(AccountWorkspaceStore), 'publishCommittedPatch').mockImplementationOnce(() => { throw new Error('Patch unavailable'); });
     vi.spyOn(TestBed.inject(AccountWorkspaceService), 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication unavailable'));
     session.form.controls.name.setValue('Committed update');
@@ -201,7 +201,7 @@ describe('visualization editor session with native IndexedDB', () => {
     const session = TestBed.runInInjectionContext(() => new VisualizationEditorSession());
     session.open(account.guid, original.guid); TestBed.tick();
     expect(session.canEdit()).toBe(false); expect(session.canRetarget()).toBe(true);
-    const retarget = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'retarget');
+    const retarget = vi.spyOn(TestBed.inject(VisualizationCommandHandler), 'retargetGraph');
     vi.spyOn(store, 'publishCommittedPatch').mockImplementationOnce(() => { throw new Error('Patch unavailable'); });
     vi.spyOn(TestBed.inject(AccountWorkspaceService), 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication unavailable'));
     expect(await changeFacilities(session, { kind: 'fixed', facilityGuids: [facility.guid] })).toBe(false);

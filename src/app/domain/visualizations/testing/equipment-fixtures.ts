@@ -15,7 +15,7 @@ export function equipmentFixture(overrides: Partial<IdbFacilityEnergyUseEquipmen
 export function equipmentSnapshot(items = [equipmentFixture()]): AccountWorkspaceSnapshot {
   const account = { ...getNewIdbAccount(), id: 1, guid: 'account-a', energyUnit: 'MJ' };
   const facility = { ...getNewIdbFacility(account), id: 1, guid: 'facility-a', energyUnit: 'kWh', fiscalYear: 'calendarYear' as const };
-  return { account, facilities: [facility], energyUseEquipment: items, energyUseGroups: [], savedVisualizations: [],
+  return { homeDashboards: [], homeOwners: [], account, facilities: [facility], energyUseEquipment: items, energyUseGroups: [], savedVisualizations: [],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [],
     accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [] };
 }

@@ -57,7 +57,7 @@ function workspaceSnapshot(): AccountWorkspaceSnapshot {
     guid: 'facility-a', accountId: 'account-a', energyUnit: 'GJ', volumeLiquidUnit: 'kgal',
     energyIsSource: true, fiscalYear: 'nonCalendarYear', fiscalYearMonth: 6, fiscalYearCalendarEnd: true
   });
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: accountValue, facilities: [facilityValue],
     meters: [meter({ guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a', siteToSource: 3 }),
       meter({ guid: 'meter-b', accountId: 'account-a', facilityId: 'facility-b' })],

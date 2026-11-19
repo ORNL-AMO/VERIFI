@@ -149,7 +149,7 @@ function respondSuccessfully(worker: FakeWorker, marker: string): void {
 }
 
 function createSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: {
       guid: accountGuid,
       name: 'Account',

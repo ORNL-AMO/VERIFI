@@ -31,7 +31,7 @@ function deferred() {
 }
 
 function snapshot(guid: string): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { id: guid === 'account-a' ? 1 : 2, guid, name: guid } as IdbAccount,
     facilities: [{ id: 10, guid: `facility-${guid}`, accountId: guid } as any], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [],
     accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [], customGWPs: [],

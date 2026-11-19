@@ -12,6 +12,7 @@ import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-worksp
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { VisualizationNavigationService } from '../../visualization-navigation.service';
 import { LibraryLifecycle } from '../lifecycle/library-lifecycle.service';
+import { homeChartDependencies, homeChartUsage } from '@data/home/home-references';
 
 export function librarySnapshot(): AccountWorkspaceSnapshot {
   return { account: { guid: 'account-a', name: 'Account A' }, facilities: [{ guid: 'facility-a', accountId: 'account-a', name: 'Facility A' }],
@@ -26,6 +27,11 @@ export function configureLibraryTest(imports: unknown[] = []) {
   const workspace = new AccountWorkspaceStore(); workspace.publish(librarySnapshot());
   let nextGuid = 0;
   const commands = {
+    dependencies: vi.fn(guid => homeChartDependencies(workspace.homeDashboards(), guid)),
+    prepareDelete: vi.fn(record => {
+      const homeUsage = homeChartUsage(workspace.homeDashboards(), record.guid);
+      return { kind: 'delete', accountGuid: record.accountId, guid: record.guid, expectedRevision: record.revision, ...(homeUsage.length ? { homeUsage } : {}) };
+    }),
     prepareCreate: vi.fn(definition => ({ kind: 'create', accountGuid: definition.accountGuid, guid: `created-${++nextGuid}`, definition, createdDate: new Date().toISOString() })),
     prepareDuplicate: vi.fn(record => ({ kind: 'duplicate', accountGuid: record.accountId, guid: `copy-${++nextGuid}`, definition: record.definition,
       sourceGuid: record.guid, expectedRevision: record.revision, createdDate: new Date().toISOString() })),

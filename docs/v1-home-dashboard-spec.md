@@ -192,3 +192,159 @@ Print uses saved reading order in one column, including widget titles, units, pe
 Current utility/analysis/Energy Use providers and shared renderers are reusable only where their exact combinations are supported by the [foundation](v1-visualization-foundation.md), [utility](v1-utility-visualizations.md), [composition](v1-composition-visualizations.md) and [workbench](v1-visualization-workbench.md) contracts. Home1 does not add a provider, schema, store, Worker message, runtime widget or report format.
 
 Home2 owns durable instances, template provenance and reporting-following saved intent; Home3 owns navigation/layout; Home4 owns linked rendering and compatible controls; Home5 owns goals/actions/tables/maps and any required compatible summary/category adapters; Home6 owns complete template creation and parity acceptance. Existing formulas, report output and v0 behavior remain unchanged.
+
+## Linked visualization and reporting contracts
+
+A chart widget references one saved visualization in its own account. The saved definition owns source intent and chart configuration; the dashboard owns widget position, size and explicit compatible overrides. Editing the definition updates linked appearances after commit. The chart action says Edit linked visualization and identifies other dashboard usage; Duplicate visualization creates independent intent. A table or summary projects existing domain data under its own typed settings and is not a frozen chart result.
+
+The initial starter-set operation shares identical saved chart intent within that owner set, including Home/Goal Progress rolling trends. Matching requires the same owner inclusion, source binding, measure, chart and saved settings, not just a matching name. Do not deduplicate against arbitrary pre-existing user charts. Creating a fresh dashboard from a shipped template creates new starter definitions; duplicating an existing dashboard retains its links. Restore uses fresh definitions within that restore and never resets a definition used elsewhere.
+
+Starter chart records have a Home/template origin label and library filter. Origin is provenance, not ownership or a hidden collection: charts remain ordinary same-account reusable records. User renaming does not remove their durable identity. Source records, numerical results, ECharts objects and executable functions are not stored in dashboard layouts.
+
+### Active for reporting resolution
+
+| Saved binding / condition | Required result |
+| --- | --- |
+| Follow reporting with valid selected energy/water analysis | Resolve the owner GUID and category to its committed selectedEnergyAnalysisId or selectedWaterAnalysisId; verify exact ownership/category, then use that analysis's current authoritative result. |
+| Follow reporting with no selection | Setup placeholder linking to Analysis selection. Existing other analyses do not create a fallback. |
+| Follow reporting with missing, foreign, wrong-category or invalid selection | Preserve the declared rule, show missing/invalid-source status and scoped repair links. Do not substitute a same-name analysis or clear the owner's selection by viewing. |
+| Selected analysis changes while widget is active | Revalidate and resolve the newly selected analysis. Cancel/reject pending evidence from the former resolved analysis, even if the dashboard GUID and reporting rule are unchanged. |
+| Selected analysis remains but inputs/results change | Existing analysis readiness, fingerprints, calculation freshness and retry policy apply. Old evidence cannot appear current. |
+| Exact named-analysis binding | Preserve its GUID through renames and reporting-selection changes. Deletion retains missing-source repair; never promote it to Follow reporting. |
+| Reporting-following portfolio progress table | Resolve each facility's own category selection for that row. Resolve account charts independently through the account selection and its authoritative child-analysis roster. |
+
+The rule is saved intent; the currently resolved analysis GUID is request evidence, not a silently persisted rebind. Home2 defines its serialized representation/transfer semantics; Home4 adds source/editor/capability resolution and the compatible rolling-improvement projection described above. Existing exact bindings retain their supported meaning. Single-facility Home uses the sole facility's selection; viewing never reconciles or initializes hidden account pairs.
+
+Goal targets remain existing sustainability settings. When goal and analysis baseline years differ, show both and a mismatch explanation. A percentage toward target is unavailable without a finite valid result and a positive valid target; retain negative improvement and above-target performance rather than silently clipping them into success. No goal setting or reporting selection is edited from a chart filter.
+
+## Dashboard filters and session behavior
+
+The precedence below applies separately to each setting that a widget supports. Selective inheritance is explicit, not an automatic override of any chart added to a dashboard.
+
+| Priority | Setting source | Persistence |
+| --- | --- | --- |
+| 1 | Explicit widget override, enabled for that setting | Dashboard widget configuration |
+| 2 | Opted-in dashboard setting; current browsing value supersedes its saved default for this session | Saved dashboard default plus separate session state |
+| 3 | Saved visualization or specialized widget setting, including declared follow-owner bindings | Existing linked definition or widget configuration |
+
+Controls offer dates and supported display units, Site/Source treatment for eligible utility energy, and market/location treatment for emissions. The effective treatment is always labeled. Initial energy units/basis follow the owner; emissions initially uses market, matching existing overview session behavior. Currency is not an arbitrary conversion control. Equipment and analysis units change only where their canonical projections support conversion; analysis energy basis and all baselines remain fixed.
+
+Source identity, category, included facilities, analysis roster, grouping and resource selection are not dashboard filter overrides. Same-account charts explicitly reused in another owner's dashboard keep their source inclusion and show that scope. Cross-account links are rejected. Location/market is a declared supported treatment override for existing emissions measures, resolved through providers; it never mutates the chart's saved measure or substitutes new input factors.
+
+When inheritance is off, a widget retains its saved period/settings and displays its own context. When a requested inherited/explicit override is unsupported, retain the request and show why it cannot render, with Use saved settings as an explicit recovery action. Do not silently ignore controls or apply a U monthly range to bill-charge, yearly equipment, latest-result goal summaries, or incompatible analysis periods.
+
+Invalid control input stays local with field feedback and does not replace the last valid effective request. Valid changes invalidate affected numerical evidence before publishing a replacement; unchanged sibling widgets keep current results. No eligible latest-data month produces an explained empty window, not a calendar-date fallback.
+
+Browsing filters survive chart open/return and navigation away/back within the current account session, isolated by dashboard identity. A new account session or reload starts from saved defaults. Save as dashboard defaults reviews/applies the valid current settings through the command boundary; success updates only the dashboard. Rejected persistence retains the browsing values for retry. Committed-but-unpublished recovery refreshes publication and never saves again.
+
+## Dashboard lifecycle and template updates
+
+### Initialization and owner changes
+
+Initialize one starter graph per explicit owner on first Home entry after a ready committed workspace is available. Create six dashboard instances, their widget references and required starter definitions in one native transaction with stable operation identities and one committed publication. Hidden Water/Emissions starters can exist without being visible or requesting data.
+
+Durable initialization/deletion state distinguishes a new owner, an older backup without Home records and an initialized owner whose dashboards were deleted. Never infer that an empty dashboard list authorizes reseeding. Concurrent entry/retry cannot create duplicate starters. Existing imported dashboards, owner defaults and deliberate empty sets survive restore. Home2 owns legacy/default adoption and backup compatibility without changing source data.
+
+A newly added facility gets its own set on its first Home entry. Account live selections can include the new facility before that set exists. A conversion between portfolio and valid single-facility presentation exposes the appropriate existing owner sets rather than changing their identities. Owner/account deletion and backup replacement apply the existing native-transaction ownership boundaries; reused definitions outside a deleted dashboard remain protected.
+
+### User actions
+
+| Action | Result and confirmation |
+| --- | --- |
+| Create from template | Independent editable instance with fresh chart definitions and template baseline; same-operation matching widgets may share them. Blank has none. |
+| Rename/reorder/resize/edit widgets or notes/shortcuts | Save through typed values and command boundaries. Saved user edits protect that dashboard from automatic template replacement. Pointer actions have keyboard alternatives. |
+| Set as default | Save owner-local default identity without changing another owner's default or the definition of a template. |
+| Duplicate dashboard | Allocate new dashboard/widget identities, copy layout/settings/notes/shortcuts, retain chart links. The copy is user-owned and not an untouched automatic starter. |
+| Delete widget | Remove the widget/reference only; preserve its saved chart and source records. |
+| Delete dashboard | Confirm the named owner/dashboard and explain that linked charts remain. If it was the default, choose the first remaining visible dashboard atomically, or leave creation guidance when none remain. Preserve deletion state. |
+| Restore from template | Confirm the named dashboard and replacement of its name, layout, widgets and saved dashboard defaults. Preserve dashboard identity, sidebar position and default selection; allocate fresh chart definitions and preserve every former chart. Establish a new template baseline only after commit. |
+| Delete a linked saved chart | Review affected widgets; keep recoverable Replace/Remove placeholders afterward. Dashboard/widget deletion never cascades to that chart. |
+| Replace a missing link | Explicitly choose a same-account visualization, review its scope and settings, then replace only that widget reference. No name-based repair. |
+
+Opening the menu or changing session filters is not a saved customization. Persisted widget/date/display edits, dashboard renames and edits to any linked starter definition, including its name/source/settings, protect affected dashboards from template upgrades. This protection survives a later apparent return to the original values; only explicit restore establishes an untouched baseline again. Deleting a referenced starter chart also protects the placeholder from automatic reseeding. Source-data, owner settings, reporting-selection and runtime membership changes do not count as dashboard customization.
+
+### Shipped template revisions
+
+Automatically upgrade only original starter instances with no protected customization and matching template/chart baselines. Include provenance and revision checks inside the command, so an intervening user edit cancels automatic replacement. If any linked starter definition was edited, protect every affected starter dashboard, including one with an otherwise untouched layout. Do not overwrite the edited definition.
+
+Upgrade eligible layouts/references using fresh starter definitions, preserving old charts, dashboard identity, user default and sidebar order. Keep explicitly deleted dashboards deleted and explicit visibility choices unchanged. New template types are available to create; they do not automatically refill a previously initialized owner's deleted set. Templates never mutate because an instance was edited.
+
+Unsupported/future versions retain their payload and an unavailable explanation; do not normalize unknown data into current defaults. Home2 owns validation, revision conflicts, transfer/remapping and operation recovery. The spec does not assign a database, backup or definition version.
+
+## Safe open and return navigation
+
+A chart opens the existing visualization workbench with an owner-qualified session return token. The token resolves only to a validated internal dashboard destination and carries dashboard/widget identity, scroll, focused action and browsing controls. Do not persist arbitrary return URLs or chart session state in a saved definition.
+
+Resolve protected workbench edits before chart exit, scope change or account change. Return restores the originating dashboard and effective session controls, then focus to its originating widget action. If that widget disappeared, focus the dashboard heading. If the dashboard disappeared, use its owner's current default/creation state. If ownership/account no longer exists or the token belongs to another account, use the current valid workspace destination rather than restoring stale cross-account state.
+
+While on another route, account/snapshot/definition/source changes cannot publish into the former widget. Demand results only for the active dashboard and its active widgets; hidden conditional dashboards start no chart work. Use existing cancellation/freshness checks and bounded result reuse, including the resolved reporting analysis identity.
+
+## Follow-on interface requirements
+
+These are semantic requirements, not executable types or final wire shapes. Follow the existing neutral domain/application/UI ownership boundaries.
+
+| Contract | Required capability | Delivery owner |
+| --- | --- | --- |
+| Dashboard instance | Durable account/owner identity, ordered widget identities, layout sizes, saved default controls, template lineage/revision, customization protection and revision-checked commands | Home2; Home3 UI |
+| Widget variants | Linked visualization reference and supported per-setting inheritance/overrides; typed goals/actions/tables/maps/notes/internal-shortcut settings; explicit owner inclusion | Home2; Home3–Home5 consumers |
+| Template blueprint | Independent immutable shipped composition with symbolic owner/resource/reporting bindings; per-operation chart sharing; no runtime result rows | Home2 contract; Home6 instantiation |
+| Analysis source binding | Exact GUID or explicit reporting-owner/category rule; ownership validation; resolved target in request identity; safe editor, Used By and source-repair behavior | Home2 serialization/transfer; Home4 provider/editor |
+| Embedding capabilities | Per-setting override approval and effective-context evidence for dates, display units, energy basis and emissions treatment; changed settings re-resolve current data | Home4; no existing API claims |
+| Summary/category adapters | Existing D2 comparison semantics, existing analysis rolling field, emissions categories, water subtypes and two-dimension selected-period comparisons without new formulas | Home4 rolling chart projection; Home5 summaries/categories |
+| Template provenance | Starter origin/library filter, initialized/deleted state, original baselines and durable protection that recognizes shared-chart edits | Home2; Home4 library presentation |
+| Session return/context | Validated internal origin, owner/account/dashboard/widget identity, session filter/scroll/focus restoration and protected leave behavior | Home3/Home4 |
+| Backup and recovery | Atomic graph changes, verified namespace/GUID remapping, exact versus rule bindings, legacy imports, unknown preservation and committed-publication recovery without write replay | Home2 |
+
+## Widget state and action matrix
+
+| State | Presentation and recovery | Required invariant |
+| --- | --- | --- |
+| Workspace not ready / loading | Scoped loading text; no stale ready status | No initialization or widget source requests against an obsolete owner |
+| Setup required | Missing goal/reporting selection/meter/equipment/cost explanation and scoped setup link | Missing configuration is not observed zero |
+| Eligible but empty | Owner, requested period and No saved observations message | Preserve valid intent and explicit empty membership |
+| Partial coverage | Available values with coverage, through-date and gaps; retain unavailable rows | A partial subtotal is labeled; unlike periods/baselines are not a fair ranking |
+| Invalid/missing source | Preserve binding/row and explanation; repair or choose a valid reporting selection | No same-name or latest-modified substitution |
+| Unsupported override/version | Explain incompatible control/version; explicit recovery to supported saved settings | No destructive normalization or silently dropped intent |
+| Calculation error | Preserve widget intent, show retry for the current owner/source | Old failed/pending result cannot publish after context changes |
+| Ready | Values, units, effective basis, provenance and periods; accessible chart/table detail | True zero and negative values remain visible; totals require valid aggregation |
+| Saving / rejected save | Indicate progress, prevent duplicate submission; retain unsaved valid input and retry after rejection | Acknowledgment cannot erase newer edits |
+| Conflict / committed but unpublished | Review current revisions or recover publication using existing command boundary | Never replay already committed creation/restore/update writes |
+
+## Home1 acceptance scenarios
+
+These are source/design walkthroughs and later implementation acceptance targets, not executed browser or storage tests. Each row states the expected result and the phase responsible for runtime evidence.
+
+| Scenario | Expected result | Runtime owner |
+| --- | --- | --- |
+| Portfolio with energy/water and complete data | Six eligible entries; Home actions/goals; Goal Progress facility rows before account charts; metered and equipment content separate | Home3–Home6 |
+| Valid single-facility account versus one-facility portfolio | First exposes one sole-facility set; second retains account and facility scopes. No viewing-time hidden pair creation | Home2/Home3/Home6 |
+| Single-facility account with zero/multiple owned facilities | Recovery state; no guessed owner or duplicate starter graph | Home2/Home3 |
+| Empty owner and newly created water meter | Initial setup guidance; no anchor fallback. Water appears for that owner when a meter exists, before readings, without being revealed by another facility's water | Home3/Home5/Home6 |
+| Emissions disabled, then enabled; explicit custom dashboard | Default Emissions visibility follows preference; user-created dashboard stays reachable and explains unavailable data | Home3/Home6 |
+| No reporting selection, although other analyses exist | Goals/configuration remain visible with selection placeholder; no latest-analysis fallback or source write | Home4/Home5 |
+| Reporting selection changes during calculation | Following widgets resolve the new exact target; named-analysis widgets retain their GUID; obsolete results are rejected | Home4 |
+| Different facility through-dates, goals, baselines or readiness | Rows display their own dates/baselines/unavailable state, without ranked equivalence or averaged percentages | Home5 |
+| Missing goal, negative improvement, zero utility value, missing costs | Independent states remain explicit; valid zero/negative values are not hidden; no invented progress or dollar savings | Home4/Home5 |
+| Lagging facility and shared U anchor | All U widgets use one window; lagging sources retain gaps. Y/A/E/L widgets label independent periods | Home4/Home5/Home6 |
+| Energy/cost facility comparison versus annual history | Optional facility-by-source chart uses selected dates; annual history uses actual fiscal years. Neither replaces the other | Home5/Home6 |
+| Multiple water subtypes and emissions categories | Account subtype rows/optional facility stacks and category tables/charts preserve those dimensions and their adapter requirements | Home5/Home6 |
+| Incompatible fiscal intervals, units or requested overrides | Distinct labeled contributions or explained unavailable state; no fabricated aggregate, resampling or silent fallback | Home4/Home5 |
+| Linked chart edited, dashboard duplicated, template instantiated | Linked appearances update; duplicate retains links; fresh template creates independent definitions; template itself never changes | Home2–Home4/Home6 |
+| Restore one of two dashboards sharing a chart | Only restored dashboard receives fresh links; its old chart and the other dashboard survive unchanged | Home2/Home3/Home6 |
+| New shipped revision with pristine versus edited/deleted starters | Upgrade pristine original starters only; preserve edits/shared-chart protection, deletions, default choice and sidebar order | Home2/Home6 |
+| Link deletion, replacement and return after dashboard/widget loss | Recoverable placeholder; explicit same-account replacement; return uses heading/default fallback and correct focus | Home3/Home4 |
+| Backup round trip, older backup, unknown payload, interrupted graph write | Verify owner/GUID references and initialization state; preserve unknown intent and do not reseed or replay commits | Home2/Home6 |
+| Keyboard, narrow layout, long labels and print | Saved order equals reading/focus order; keyboard move/resize available; tables stay usable and printing omits controls | Home3/Home4/Home6 |
+| Overview reports still unmigrated | New overview remains independent; supported Reports navigation is available, but no unavailable overview-report creation shortcut is advertised | Separate later report migration |
+
+### Issue acceptance traceability
+
+| Home1 criterion | Evidence |
+| --- | --- |
+| Every Home/Overview content area dispositioned | Content map H01–H12, E01–E07, C01–C07, M01–M07, W01–W07 and O01–O09; source/calculation owners and explicit legacy exclusions |
+| Seven templates with audience, widgets and data | Default compositions, vocabulary, optional catalog and annotated layouts above |
+| Personas without a role gate | Template audience descriptions and unrestricted template/customization choices |
+| Independent instances without editing shipped templates | Templates and ownership, linked-chart rules and lifecycle/upgrade contracts |
+| Linked definitions, filters, missing sources and safe return | Reporting resolution, filter precedence, state matrix and safe open/return sections |
+
+Home1 completes a source-backed specification and design walkthrough. It does not certify rendered layouts, native persistence/Workers, backup compatibility, real-data calculations or Electron printing. Each later issue must implement and test its assigned contract before the integrated Home6 acceptance; human review and QA retain issue closure.

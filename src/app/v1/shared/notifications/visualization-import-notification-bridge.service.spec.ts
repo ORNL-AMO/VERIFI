@@ -73,4 +73,14 @@ describe('visualization restore feedback across navigation', () => {
       expect(notifications.notifications()).toEqual([]);
     }
   });
+  it('announces Home-only repair and unknown formats after account activation and keeps the warning dismissible', () => {
+    summary.set({ accountGuid: 'account-a', total: 0, locked: 0, repairRequired: 0,
+      home: { dashboards: 2, owners: 1, locked: 1, repairRequired: 1, reasons: ['Home relationships need repair.'] }, reasons: ['Home relationships need repair.'] });
+    TestBed.tick(); expect(notifications.notifications()).toEqual([]);
+    account.set({ guid: 'account-a' }); TestBed.tick();
+    const notice = notifications.notifications()[0];
+    expect(notice).toMatchObject({ title: 'Home dashboards need attention', durationMs: 0, dismissible: true });
+    expect(notice.message).toContain('2 Home dashboards'); expect(notice.message).toContain('Home relationships need repair.');
+    notifications.dismiss(notice.id); TestBed.tick(); expect(notifications.notifications()).toEqual([]);
+  });
 });

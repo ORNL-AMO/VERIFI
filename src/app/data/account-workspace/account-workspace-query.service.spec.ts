@@ -75,7 +75,7 @@ describe('AccountWorkspaceQueryService', () => {
     store.publish(createSnapshot());
     const query = new AccountWorkspaceQueryService(store);
 
-    store.publish({
+    store.publish({ homeDashboards: [], homeOwners: [],
       account: { id: 2, guid: 'account-b' } as any,
       facilities: [{ id: 3, guid: 'facility-c', accountId: 'account-b' }] as any,
       meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
@@ -90,7 +90,7 @@ describe('AccountWorkspaceQueryService', () => {
 });
 
 function createSnapshot(): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { id: 1, guid: 'account-a' } as any,
     facilities: [
       {
