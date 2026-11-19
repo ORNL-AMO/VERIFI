@@ -54,7 +54,7 @@ function setup(single = false, deferredFacility = false) {
   store.publish(snapshot);
   const pairService = { ensurePairs: vi.fn(async () => true) };
   const workspaceService = { selectAccount: vi.fn(), selectFacility: vi.fn() };
-  const actions = { transfer: vi.fn<EnergyUseActionsService['transfer']>(), deleteGroups: vi.fn<EnergyUseActionsService['deleteGroups']>(), recoverPublication: vi.fn(async () => {}), create: vi.fn<EnergyUseActionsService['create']>(), deleteGroup: vi.fn<EnergyUseActionsService['deleteGroup']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
+  const actions = { transferItems: vi.fn<EnergyUseActionsService['transferItems']>(), deleteGroups: vi.fn<EnergyUseActionsService['deleteGroups']>(), recoverPublication: vi.fn(async () => {}), create: vi.fn<EnergyUseActionsService['create']>(), deleteGroup: vi.fn<EnergyUseActionsService['deleteGroup']>(), updateSetup: vi.fn(async (_identity, value) => value), updateGroupSettings: vi.fn(async (identity, value) => {
     store.publish({ ...store.snapshot()!, energyUseGroups: store.energyUseGroups().map(group => group.guid === identity.energyUseGroupGuid ? { ...group, ...value } : group) }); return value;
   }) };
   const account = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
@@ -100,7 +100,7 @@ describe('energy uses browser journeys', () => {
     await transfer.click(); await settle(view);
     let dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
     expect(dialog.element().textContent).toContain('North plant');
-    expect([...dialog.element().querySelectorAll('.creation-choice')].some(button => button.textContent?.trim() === 'Pump 00')).toBe(false);
+    expect([...dialog.element().querySelectorAll('.creation-choice')].some(button => button.textContent?.trim() === 'Pump 00')).toBe(true);
     expect([...dialog.element().querySelectorAll('.creation-choice')].some(button => button.textContent?.trim() === 'Pump 49')).toBe(false);
     await dialog.getByRole('button', { name: 'Pump 01', exact: true }).click(); await settle(view);
     expect(dialog.getByRole('button', { name: 'Transfer energy use', exact: true }).element()).toHaveProperty('disabled', false);
@@ -110,22 +110,97 @@ describe('energy uses browser journeys', () => {
       await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/phase5/transfer-energy-use-${width}.png` });
     }
     await userEvent.keyboard('{Escape}'); await settle(view);
-    expect(document.activeElement).toBe(transfer.element()); expect(view.actions.transfer).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(transfer.element()); expect(view.actions.transferItems).not.toHaveBeenCalled();
     await transfer.click(); await settle(view);
     dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
     await dialog.getByRole('button', { name: 'Pump 01', exact: true }).click(); await settle(view);
     const original = structuredClone(view.store.energyUseEquipment().find(item => item.guid === 'energy-00')!);
-    view.actions.transfer.mockImplementationOnce(async (_identity, before, target) => {
-      const saved = { ...before, energyUseGroupId: target.guid };
+    view.actions.transferItems.mockImplementationOnce(async request => {
+      const saved = { ...request.sources[0].item, energyUseGroupId: request.destinationGroup.group.guid };
       view.store.publish({ ...view.store.snapshot()!, energyUseEquipment: view.store.energyUseEquipment().map(item => item.guid === saved.guid ? saved : item) });
-      return saved;
+      return { mode: request.mode, group: request.destinationGroup.group, items: [saved] };
     });
     await dialog.getByRole('button', { name: 'Transfer energy use', exact: true }).click(); await settle(view);
-    expect(view.actions.transfer).toHaveBeenCalledTimes(1);
+    expect(view.actions.transferItems).toHaveBeenCalledTimes(1);
     expect(view.store.energyUseEquipment().find(item => item.guid === original.guid)).toEqual({ ...original, energyUseGroupId: 'group-01' });
     expect(view.router.url).toBe(`${groupUrl('group-01')}/items/energy-00`);
     await expect.element(dialog).not.toBeInTheDocument();
     expect(view.root.querySelector('[aria-current="page"].v1-member-rail__item')?.textContent).toContain('Pump 00');
+    view.fixture.destroy();
+  });
+
+  it('copies the selected table rows in place, then transfers the originals to a new group in another facility', async () => {
+    const view = setup();
+    view.store.publish({ ...view.store.snapshot()!, energyUseEquipment: view.store.energyUseEquipment().map((item, i) => i === 1 ? { ...item, energyUseGroupId: 'group-00' } : item) });
+    view.actions.transferItems.mockImplementation(async request => {
+      const group = request.destinationGroup.group;
+      const saved = request.sources.map((row, i) => ({ ...row.item, ...(request.mode === 'copy' ? request.copyIdentities[i] : {}),
+        name: row.item.name + (request.mode === 'copy' ? ' (copy)' : ''), facilityId: request.destinationFacility.guid, energyUseGroupId: group.guid }));
+      const ids = new Set(saved.map(row => row.guid));
+      view.store.publish({ ...view.store.snapshot()!, energyUseGroups: request.destinationGroup.kind === 'new' ? [...view.store.energyUseGroups(), group] : view.store.energyUseGroups(),
+        energyUseEquipment: [...view.store.energyUseEquipment().filter(row => !ids.has(row.guid)), ...saved] });
+      return { mode: request.mode, group, items: saved };
+    });
+    await view.router.navigateByUrl(`${groupUrl()}/setup`); await settle(view);
+    const transfer = page.getByRole('button', { name: 'Transfer energy use', exact: true });
+    expect(transfer.element()).toHaveProperty('disabled', true);
+    await page.getByRole('checkbox', { name: 'Select all energy uses', exact: true }).click(); await settle(view);
+    const selected = () => (view.fixture.debugElement.query(By.directive(EquipmentTableComponent)).componentInstance as EquipmentTableComponent).selection.selected();
+    expect(selected()).toHaveLength(2);
+    await transfer.click(); await settle(view);
+    let dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
+    expect(dialog.element().querySelector('ul, li')).toBeNull();
+    expect(dialog.getByRole('list', { name: 'Selected energy uses', exact: true }).element().querySelectorAll('[role=listitem]')).toHaveLength(2);
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
+      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/transfer-copy/stepped-groups-${width}.png` });
+    }
+
+    await expect.element(dialog.getByRole('checkbox', { name: 'Create Copy', exact: true })).not.toBeInTheDocument();
+    await userEvent.keyboard('{Escape}'); await settle(view); expect(selected()).toHaveLength(2);
+    expect(document.activeElement).toBe(transfer.element()); await transfer.click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
+    await dialog.getByRole('button', { name: 'Pump 00', exact: true }).click(); await settle(view);
+    expect(dialog.getByRole('button', { name: 'Transfer 2 energy uses', exact: true }).element()).toHaveProperty('disabled', true);
+    const copy = dialog.getByRole('checkbox', { name: 'Create Copy', exact: true });
+    expect(dialog.element().querySelector('footer')?.contains(copy.element())).toBe(true);
+    await copy.click(); await settle(view);
+    await dialog.getByRole('button', { name: 'Copy 2 energy uses', exact: true }).click(); await settle(view);
+    expect(view.router.url).toBe(`${groupUrl()}/setup`); expect(selected()).toHaveLength(2);
+    expect(view.root.querySelectorAll('tbody tr')).toHaveLength(4);
+    expect(page.getByRole('link', { name: 'Open destination', exact: true }).element().getAttribute('href')).toBe(`${groupUrl()}/setup`);
+    await transfer.click(); await settle(view);
+    dialog = page.getByRole('dialog', { name: 'Transfer energy use', exact: true });
+    await dialog.getByRole('button', { name: 'Change facility: North plant', exact: true }).click(); await settle(view);
+    expect(document.activeElement?.textContent).toBe('Choose a facility');
+    await dialog.getByRole('searchbox', { name: 'Find facility', exact: true }).fill('South'); await settle(view);
+    await dialog.getByRole('button', { name: 'South plant', exact: true }).click(); await settle(view);
+    await dialog.getByRole('button', { name: 'New group', exact: true }).click(); await settle(view);
+    const next = dialog.getByRole('button', { name: 'Continue', exact: true });
+    expect(next.element()).toHaveProperty('disabled', true);
+    expect(document.activeElement).toBe(dialog.getByRole('textbox', { name: 'New group name', exact: true }).element());
+    await dialog.getByRole('textbox', { name: 'New group name', exact: true }).fill('Transferred equipment'); await settle(view);
+    await next.click(); await settle(view);
+    expect(dialog.getByRole('checkbox', { name: 'Create Copy', exact: true }).element()).toHaveProperty('checked', false);
+    const confirm = dialog.getByRole('button', { name: 'Transfer 2 energy uses', exact: true });
+    await dialog.getByRole('button', { name: 'Back', exact: true }).click(); await settle(view);
+    expect(dialog.getByRole('textbox', { name: 'New group name', exact: true }).element()).toHaveProperty('value', 'Transferred equipment');
+    await dialog.getByRole('button', { name: 'Continue', exact: true }).click(); await settle(view);
+    expect(dialog.element().textContent).toContain('Links to the original facility');
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
+      await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
+      expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
+      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/transfer-copy/bulk-${width}.png` });
+    }
+    await confirm.click(); await settle(view);
+    expect(selected()).toEqual([]); expect(view.router.url).toBe(`${groupUrl()}/setup`);
+    expect(view.root.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(document.activeElement?.getAttribute('aria-label')).toBe('Energy use equipment table');
+    expect(view.actions.transferItems).toHaveBeenCalledTimes(2);
+    await page.getByRole('link', { name: 'Open destination', exact: true }).click(); await settle(view);
+    expect(view.router.url).toContain('/facility/facility-b/data/energy-uses/groups/');
+    expect(view.root.textContent).toContain('Transferred equipment');
     view.fixture.destroy();
   });
 
@@ -430,7 +505,7 @@ describe('energy uses browser journeys', () => {
     expect(table.querySelectorAll('tbody th app-ui-icon')).toHaveLength(2);
     const toolbar = view.root.querySelector<HTMLElement>('.bulk-actions')!, actions = toolbar.querySelector<HTMLElement>('.bulk-actions__buttons')!;
     const actionButtons = [...actions.querySelectorAll<HTMLButtonElement>('button')];
-    expect(actionButtons.map(button => button.textContent?.trim())).toEqual(['Add energy use', 'Add year', 'Delete selected']);
+    expect(actionButtons.map(button => button.textContent?.trim())).toEqual(['Add energy use', 'Add year', 'Transfer energy use', 'Delete selected']);
     expect(actionButtons[0].disabled).toBe(false); expect(actionButtons.slice(1).every(button => button.disabled)).toBe(true);
     expect(view.root.querySelector('.v1-data-workbench-header')?.textContent).not.toContain('Add energy use');
     expect(actions.textContent).not.toContain('Copy year'); expect(actions.textContent).not.toContain('Remove year');

@@ -1,3 +1,5 @@
+import { TransferEnergyUseComponent } from '../transfer-energy-use/transfer-energy-use.component';
+import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { By } from '@angular/platform-browser';
 import { SetupCalculatorComponent } from '../../forms/setup-calculator/setup-calculator.component';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
@@ -194,7 +196,9 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     const store = TestBed.inject(AccountWorkspaceStore), saved = store.energyUseEquipment()[0];
     expect(saved.utilityData[0].energyUse[0].energyUse).toBe(87600); expect(committed).toHaveBeenCalledTimes(2);
     vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    await settings.componentInstance.copy(); await settle(settings);
+    const transfer = settings.debugElement.query(By.directive(TransferEnergyUseComponent)).componentInstance as TransferEnergyUseComponent;
+    transfer.open(); transfer.controller.form.controls.asCopy.setValue(true);
+    transfer.controller.chooseGroup(store.energyUseGroups()[0]); await transfer.confirm(); await settle(settings);
     const copy = store.energyUseEquipment().find(item => item.guid !== created.guid)!;
     expect(copy.utilityData).toEqual(saved.utilityData); expect(copy.operatingConditionsData).toEqual(saved.operatingConditionsData);
     expect(copy.energyUseGroupId).toBe(saved.energyUseGroupId); expect(committed).toHaveBeenCalledTimes(3);
@@ -215,7 +219,8 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     const actions = TestBed.inject(EnergyUseActionsService);
     const created = await actions.create({ initialYear: 2025, group: { kind: 'new', name: 'Equipment' },
       settings: { name: 'Pump', notes: '', equipmentType: 'Pump', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
-    const survivor = await actions.copy({ accountGuid: account.guid, facilityGuid: facility.guid, energyUseGuid: created.guid });
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const survivor = (await actions.transferItems({ accountGuid: account.guid, mode: 'copy', sources: [{ item: created, facility: store.facilities()[0] }], destinationFacility: store.facilities()[0], destinationGroup: { kind: 'existing', group: store.energyUseGroups()[0] }, copyIdentities: [getNewIdbEntry()] })).items[0];
     guid.set(created.guid);
     const settings = mount(EnergyUseSettingsComponent);
     const portal = mount(EnergyUsePortalHost);

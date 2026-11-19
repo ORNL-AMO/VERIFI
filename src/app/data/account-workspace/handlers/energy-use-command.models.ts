@@ -54,3 +54,26 @@ export interface EnergyUseGroupSettings {
   readonly name: string;
   readonly notes: string;
 }
+
+/** Immutable review shared by the single-item and group-table transfer workflows. */
+export interface EnergyUseTransferRequest {
+  readonly accountGuid: string;
+  readonly mode: 'move' | 'copy';
+  readonly sources: readonly {
+    readonly facility: import('@data/models/idbModels/facility').IdbFacility;
+    readonly item: IdbFacilityEnergyUseEquipment;
+  }[];
+  readonly destinationFacility: import('@data/models/idbModels/facility').IdbFacility;
+  readonly destinationGroup: {
+    readonly kind: 'existing' | 'new';
+    readonly group: import('@data/models/idbModels/facilityEnergyUseGroups').IdbFacilityEnergyUseGroup;
+  };
+  /** Generated once per review, retained across rejected-write retries. */
+  readonly copyIdentities: readonly import('@data/models/idbModels/idbEntry').IdbEntry[];
+}
+
+export interface EnergyUseTransferResult {
+  readonly mode: 'move' | 'copy';
+  readonly items: readonly IdbFacilityEnergyUseEquipment[];
+  readonly group: import('@data/models/idbModels/facilityEnergyUseGroups').IdbFacilityEnergyUseGroup;
+}
