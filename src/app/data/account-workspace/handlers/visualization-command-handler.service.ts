@@ -1,3 +1,4 @@
+import type { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { Injectable } from '@angular/core';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { VerifiStoreName } from '@data/indexedDB/indexed-db-schema';
@@ -11,11 +12,14 @@ import { prepareVisualizationFacilityChange } from '@domain/visualizations/visua
 import { sameVisualizationFacilitySelection } from '@domain/visualizations/visualization-facilities';
 import { VisualizationReference, VisualizationReferenceIssue, visualizationReferences } from '@domain/visualizations/visualization-references';
 import { WorkspaceWriteError } from '../workspace-commands.models';
+import { protectLinkedHomeDashboards } from '@data/home/home-chart-protection';
 import { CreateVisualizationCommand, DeleteVisualizationCommand, DuplicateVisualizationCommand,
   UpdateVisualizationCommand, RetargetVisualizationCommand, VisualizationConflictError } from '../visualization-commands.models';
 import { inspectVisualizationReferences, VisualizationCatalogResource, VisualizationReferenceCatalog, readVisualizationReferenceCatalog, VISUALIZATION_CATALOG_STORES } from '../visualization-reference-inspection';
 
-const OWNER_STORES: readonly VerifiStoreName[] = ['accounts', 'facilities', 'savedVisualizations'];
+export interface VisualizationGraphChange { readonly value: IdbSavedVisualization; readonly homeDashboards: readonly IdbHomeDashboard[]; }
+
+const OWNER_STORES: readonly VerifiStoreName[] = ['accounts', 'facilities', 'savedVisualizations', 'homeDashboards'];
 const CATALOG_STORES = VISUALIZATION_CATALOG_STORES;
 
 @Injectable({ providedIn: 'root' })
@@ -57,6 +61,10 @@ export class VisualizationCommandHandler {
   }
 
   async update(command: UpdateVisualizationCommand, activeAccountGuid: string): Promise<IdbSavedVisualization> {
+    return (await this.updateGraph(command, activeAccountGuid)).value;
+  }
+
+  async updateGraph(command: UpdateVisualizationCommand, activeAccountGuid: string): Promise<VisualizationGraphChange> {
     const submitted = structuredClone(command);
     return this.transactions.runTransaction([...new Set([...OWNER_STORES, ...CATALOG_STORES])], 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
@@ -87,11 +95,15 @@ export class VisualizationCommandHandler {
       if (remaining.length) next.preservation = { references: remaining, transfers: current.preservation?.transfers ?? [] };
       else delete next.preservation;
       await tx.put('savedVisualizations', next);
-      return next;
+      return { value: next, homeDashboards: await protectLinkedHomeDashboards(tx, submitted.accountGuid, current.guid) };
     });
   }
 
   async retarget(command: RetargetVisualizationCommand, activeAccountGuid: string): Promise<IdbSavedVisualization> {
+    return (await this.retargetGraph(command, activeAccountGuid)).value;
+  }
+
+  async retargetGraph(command: RetargetVisualizationCommand, activeAccountGuid: string): Promise<VisualizationGraphChange> {
     const submitted = structuredClone(command);
     return this.transactions.runTransaction([...new Set([...OWNER_STORES, ...CATALOG_STORES])], 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
@@ -103,7 +115,7 @@ export class VisualizationCommandHandler {
       this.assertDefinition(submitted.reviewedDefinition, submitted.accountGuid);
       if (sameVisualizationFacilitySelection(decoded.definition.facilitySelection, submitted.targetFacilities)) {
         if (!sameDefinitionIntent(normalizeVisualizationDefinition(decoded.definition), normalizeVisualizationDefinition(submitted.reviewedDefinition))) throw new VisualizationConflictError(current);
-        return current;
+        return { value: current, homeDashboards: [] };
       }
       const catalog = await readVisualizationReferenceCatalog(tx);
       await this.assertFacilitiesExist(tx, { ...decoded.definition, facilitySelection: submitted.targetFacilities }, decoded.definition.facilitySelection);
@@ -115,7 +127,7 @@ export class VisualizationCommandHandler {
       if (current.preservation) next.preservation = { ...current.preservation,
         references: reconcileRetargetReferences(decoded.definition, definition, current.preservation.references, catalog) };
       await tx.put('savedVisualizations', next);
-      return next;
+      return { value: next, homeDashboards: await protectLinkedHomeDashboards(tx, submitted.accountGuid, current.guid) };
     });
   }
 
@@ -124,6 +136,7 @@ export class VisualizationCommandHandler {
     return this.transactions.runTransaction(OWNER_STORES, 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
       const current = await this.requireCurrent(tx, submitted.guid, submitted.accountGuid, submitted.expectedRevision);
+      await protectLinkedHomeDashboards(tx, submitted.accountGuid, current.guid);
       await tx.deleteByKey('savedVisualizations', current.id!);
     });
   }

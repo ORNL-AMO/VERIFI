@@ -117,7 +117,7 @@ function workspaceSnapshot(): AccountWorkspaceSnapshot {
     source: 'Electricity', startingUnit: 'kWh', energyUnit: 'kWh',
     displayEnergyUnit: 'GJ', displayEnergyIsSource: true
   });
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: accountValue,
     facilities: [facilityValue],
     meters: [meterValue],

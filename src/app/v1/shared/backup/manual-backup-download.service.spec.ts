@@ -202,7 +202,7 @@ describe('ManualBackupDownloadService', () => {
 
 function snapshot(guid = 'account-a'): AccountWorkspaceSnapshot {
   const account = { ...getNewIdbAccount(), guid, id: 1, name: 'Account A' };
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account,
     facilities: [{ ...getNewIdbFacility(account), guid: 'facility-a', name: 'Facility A' }],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],

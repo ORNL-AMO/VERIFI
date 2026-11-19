@@ -3,6 +3,8 @@ import { HOME_FORMAT_VERSION, HomeDashboardDefinition, HomeOwner, HomeTemplatePr
 import { IdbHomeRecord } from './homeRecord';
 
 export interface IdbHomeDashboard extends IdbHomeRecord {
+  /** Stable creation receipt identity; not a domain relationship or numeric database key. */
+  creationOperationGuid?: string;
   definition: unknown;
   template?: HomeTemplateProvenance;
 }

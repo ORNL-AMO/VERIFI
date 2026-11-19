@@ -237,7 +237,7 @@ function createSnapshot(accountGuid = 'account-a'): AccountWorkspaceSnapshot {
   const facility = { ...getNewIdbFacility(account), id: 1, guid: accountGuid + '-facility' };
   const analysis = { ...getNewIdbAnalysisItem(account, facility, [], [], 'energy'), id: 1, guid: accountGuid + '-analysis',
     groups: ['group-a', 'group-b'].map(id => ({ ...getNewAnalysisGroup(id, []), regressionConstant: 10 })) };
-  return { account, facilities: [facility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
+  return { homeDashboards: [], homeOwners: [], account, facilities: [facility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [],
     customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: [] };
 }

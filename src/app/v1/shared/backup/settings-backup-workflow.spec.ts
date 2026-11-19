@@ -39,7 +39,7 @@ describe('header backup with live Settings drafts', () => {
     store = new AccountWorkspaceStore();
     const account = { ...getNewIdbAccount(), guid: 'account-a', name: 'Account A' };
     const facility = { ...getNewIdbFacility(account), guid: 'facility-a', name: 'Facility A' };
-    const snapshot: AccountWorkspaceSnapshot = {
+    const snapshot: AccountWorkspaceSnapshot = { homeDashboards: [], homeOwners: [],
       account, facilities: [facility], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
       facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [],
       customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: []

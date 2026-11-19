@@ -1,8 +1,27 @@
 import { decodeHomeDashboard, decodeHomeOwnerState } from './home-validation';
 import { presentedHomeOwner, resolveHomeDefault } from './home-dashboard';
 import { chartWidget, homeDefinition, homeOwnerState } from './testing/home-fixtures';
+import type { HomeWidget } from './home-dashboard';
 
 describe('Home durable intent', () => {
+  const base = { id: 'widget', size: 'full' as const, visibility: 'always' as const };
+  const variants: HomeWidget[] = [
+    { ...base, kind: 'goal', binding: { kind: 'exact', analysisGuid: 'analysis-a' } },
+    { ...base, kind: 'goal', binding: { kind: 'reporting', owner: { kind: 'facility', guid: 'facility-a' }, category: 'water' } },
+    { ...base, kind: 'actions', settings: { scope: 'owner' } },
+    { ...base, kind: 'owner-summary', settings: { scope: 'owner' } },
+    { ...base, kind: 'shortcut', destination: { area: 'data', owner: { kind: 'facility', guid: 'facility-a' }, resource: { kind: 'meter', guid: 'meter-a' } } },
+    { ...base, kind: 'table', settings: { view: 'facility-progress', measure: 'energy', period: 'latest-result' } },
+    { ...base, kind: 'table', settings: { view: 'utility-detail', measure: 'cost', period: 'utility-window' } },
+    { ...base, kind: 'table', settings: { view: 'utility-summary', measure: 'water', period: 'all-years' } },
+    { ...base, kind: 'table', settings: { view: 'equipment-summary', measure: 'emissions', period: 'latest-equipment-year' } },
+    ...(['energy', 'cost', 'water', 'emissions'] as const).map(measure => ({ ...base, kind: 'map' as const, settings: { measure } }))
+  ];
+  it.each(variants)('round trips the typed $kind widget grammar and rejects unknown executable/settings fields', widget => {
+    expect(decodeHomeDashboard(homeDefinition([widget]))).toEqual({ state: 'valid', value: homeDefinition([widget]) });
+    expect(decodeHomeDashboard({ ...homeDefinition(), widgets: [{ ...widget, resultRows: [] }] }).state).toBe('invalid');
+    if ('settings' in widget) expect(decodeHomeDashboard({ ...homeDefinition(), widgets: [{ ...widget, settings: { ...widget.settings, unknown: true } }] }).state).toBe('invalid');
+  });
   it('retains widget reading order, independent settings and explicit inheritance', () => {
     const definition = homeDefinition([chartWidget(), { kind: 'note', id: 'note', size: 'full', visibility: 'always', text: 'Use <plain text>' }]);
     const result = decodeHomeDashboard(definition);

@@ -46,7 +46,7 @@ describe('v0-to-v1 status comparison fixtures', () => {
 });
 
 function snapshot(overrides: Partial<AccountWorkspaceSnapshot> = {}): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: account({ dataStalenessSettings: { enabled: false, thresholdMonths: 3 } }),
     facilities: [facility({ dataStalenessSettings: { enabled: false, thresholdMonths: 3, useAccountSettings: true } })],
     meters: [meter({ guid: 'meter-a', groupId: 'group-a' })], meterData: [], meterGroups: [group({ guid: 'group-a' })],

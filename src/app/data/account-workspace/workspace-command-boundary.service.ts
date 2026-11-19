@@ -46,6 +46,10 @@ export type WorkspacePublication<T> =
 
 export type WorkspaceCommandRequest<T> = WorkspaceCommandOptions & {
   readonly publication?: WorkspacePublication<T>;
+  /** A native handler may prove a conditional operation made no durable changes. */
+  readonly isNoop?: (value: T) => boolean;
+  /** A concurrent writer may have committed the condition already; hydrate without a new committed revision. */
+  readonly hydrateNoop?: (value: T) => boolean;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -57,7 +61,7 @@ export class WorkspaceCommandBoundary {
   /** Active account-scoped command queue. Resets when the active account changes. */
   private queueAccountGuid: string | undefined;
   private queue: Promise<unknown> = Promise.resolve();
-  private publicationRepairAccountGuid: string | undefined;
+  private readonly publicationRepairAccounts = new Set<string>();
 
   constructor(
     private readonly store: AccountWorkspaceStore,
@@ -91,7 +95,7 @@ export class WorkspaceCommandBoundary {
   recoverCommittedPublication(accountGuid: string): Promise<void> {
     return this.enqueue(accountGuid, async () => {
       if (this.store.account()?.guid !== accountGuid) throw new WorkspaceWriteError('stale-workspace', 'The active account changed before refresh.');
-      if (this.publicationRepairAccountGuid !== accountGuid) return;
+      if (!this.publicationRepairAccounts.has(accountGuid)) return;
       const opId = ++nextOperationId;
       this.store.setPending({ id: opId, label: 'Refreshing saved changes' });
       try { await this.repairPublication(accountGuid, { entityKind: 'account', changeKind: 'update', label: 'Refreshing saved changes' }); }
@@ -142,16 +146,14 @@ export class WorkspaceCommandBoundary {
 
     let value: T;
     try {
-      if (this.publicationRepairAccountGuid === submittedAccountGuid) {
+      if (this.publicationRepairAccounts.has(submittedAccountGuid)) {
         await this.repairPublication(submittedAccountGuid, options);
       }
       value = await persist();
     } catch (error) {
       this.store.clearPending(opId);
       if (error instanceof WorkspaceWriteError) {
-        if (error.persistenceCommitted && this.store.account()?.guid === submittedAccountGuid) {
-          this.publicationRepairAccountGuid = submittedAccountGuid;
-        }
+        if (error.persistenceCommitted) this.publicationRepairAccounts.add(submittedAccountGuid);
         throw error;
       }
       throw new WorkspaceWriteError(
@@ -159,6 +161,26 @@ export class WorkspaceCommandBoundary {
         `Persistence failed for ${options.entityKind} ${options.changeKind}.`,
         error
       );
+    }
+
+    let noop: boolean;
+    try { noop = options.isNoop?.(value) ?? false; }
+    catch (error) {
+      this.publicationRepairAccounts.add(submittedAccountGuid);
+      this.store.clearPending(opId);
+      throw new WorkspaceWriteError('persistence-failed', 'Publication decision failed after persistence.', error, true);
+    }
+    if (noop) {
+      try {
+        if (options.hydrateNoop?.(value)) {
+          this.assertCommandStillCurrent(submittedAccountGuid, 'before conditional hydration');
+          const result = await this.workspaceService.reloadActiveWorkspace(false);
+          if (result !== 'published') throw new WorkspaceWriteError('stale-workspace', 'Conditional hydration was superseded.');
+          this.assertCommandStillCurrent(submittedAccountGuid, 'after conditional hydration');
+        }
+      } finally { this.store.clearPending(opId); }
+      return { value, change: { entityKind: options.entityKind, changeKind: options.changeKind,
+        entityGuid: options.entityGuid, accountGuid: submittedAccountGuid, notification: options.notification } };
     }
 
     try {
@@ -177,9 +199,7 @@ export class WorkspaceCommandBoundary {
 
       this.assertCommandStillCurrent(submittedAccountGuid, 'after reload', true);
     } catch (error) {
-      if (this.store.account()?.guid === submittedAccountGuid) {
-        this.publicationRepairAccountGuid = submittedAccountGuid;
-      }
+      this.publicationRepairAccounts.add(submittedAccountGuid);
       this.store.clearPending(opId);
       throw error;
     }
@@ -199,7 +219,7 @@ export class WorkspaceCommandBoundary {
   }
 
   private async repairPublication(accountGuid: string, options: WorkspaceCommandOptions): Promise<void> {
-    if (this.publicationRepairAccountGuid !== accountGuid) return;
+    if (!this.publicationRepairAccounts.has(accountGuid)) return;
     let result: 'published' | 'superseded';
     try {
       result = await this.workspaceService.reloadActiveWorkspace(true);
@@ -212,7 +232,7 @@ export class WorkspaceCommandBoundary {
         `Command for account ${accountGuid} was superseded before the workspace repair could publish.`);
     }
     this.assertCommandStillCurrent(accountGuid, 'after publication repair');
-    this.publicationRepairAccountGuid = undefined;
+    this.publicationRepairAccounts.delete(accountGuid);
   }
 
   private async reloadCommittedWorkspace(

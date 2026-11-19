@@ -275,7 +275,8 @@ function createRepositories() {
     customGWPs: { getAllAccountCustomGWP: empty() },
     energyUseGroups: { getAllAccountEnergyUseGroups: empty() },
     energyUseEquipment: { getAllAccountEnergyUseEquipment: empty() },
-    savedVisualizations: { getAllAccountVisualizations: empty() }
+    savedVisualizations: { getAllAccountVisualizations: empty() },
+    homeDashboards: { getAllAccountDashboards: empty() }, homeOwners: { getAllAccountOwners: empty() }
   };
 }
 
@@ -297,7 +298,7 @@ function createLoader(repositories: ReturnType<typeof createRepositories>): Acco
     repositories.customGWPs as any,
     repositories.energyUseGroups as any,
     repositories.energyUseEquipment as any,
-    repositories.savedVisualizations as any
+    repositories.savedVisualizations as any, repositories.homeDashboards as any, repositories.homeOwners as any
   );
 }
 
@@ -320,7 +321,7 @@ function createSelectionStorage() {
 }
 
 function createSnapshot(accountGuid: string, accountId: number): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { id: accountId, guid: accountGuid, name: accountGuid } as any,
     facilities: [{ id: 11, guid: `${accountGuid}-facility`, accountId: accountGuid }] as any,
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],

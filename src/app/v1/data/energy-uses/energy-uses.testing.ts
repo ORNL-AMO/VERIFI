@@ -19,7 +19,7 @@ export const energyUseItem = (overrides: Partial<IdbFacilityEnergyUseEquipment> 
 });
 
 export function energyUsesSnapshot(items = [energyUseItem()]): import('@data/account-workspace/account-workspace.models').AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { guid: 'account-a', name: 'Example account' } as import('@data/models/idbModels/account').IdbAccount,
     facilities: [energyUseFacility(), energyUseFacility('facility-b', 'South plant')],
     savedVisualizations: [], energyUseEquipment: items, energyUseGroups: [energyUseGroup()],
