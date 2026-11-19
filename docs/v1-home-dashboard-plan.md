@@ -27,6 +27,8 @@ Implement the new overview experience before migrating overview reports. Overvie
 
 ## Template composition
 
+The [Home dashboard specification](v1-home-dashboard-spec.md) defines exact widget order, bindings, periods, scope variants, optional capabilities and annotated layouts. The table below is the planning summary; the specification owns those detailed compositions.
+
 The names Home and Goal Progress are the user-facing names for the issue's Overview and Goals & Performance templates. They introduce no new goal types or calculation methods.
 
 | Template | Audience and initial content | Required data |
