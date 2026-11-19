@@ -15,7 +15,7 @@ import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, HomeWidget } from '@domain/home/home-dashboard';
 import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixtures';
 import { storageBlueprints } from '@data/home/testing/home-command-fixtures';
-import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
+import { readHomeDashboard, readHomeOwner, readHomeWidget } from '@data/home/home-record';
 import { HomeCommands } from '../home-commands.service';
 import { AccountWorkspaceService } from '../account-workspace.service';
 import { AccountWorkspaceStore } from '../account-workspace.store';
@@ -178,6 +178,74 @@ describe('Home atomic native commands and workspace publication', () => {
     expect(definition(restored)).toMatchObject({ name: 'home', defaults: {} }); expect(definition(restored).widgets[0]).not.toMatchObject({ visualizationGuid: oldChart.guid });
     expect(store.savedVisualizations()).toHaveLength(2); expect(store.savedVisualizations()).toContainEqual(oldChart);
     expect(definition(current(sibling.guid))).toEqual(before); expect(commands.ownerView(homeAccountOwner).state).toEqual(state);
+  });
+  it('hydrates an external conflicting edit without replaying a rejected write and accepts a newly reviewed revision', async () => {
+    const { records } = await initialize(), home = records[0];
+    const retained = commands.prepareUpdate(home, { ...definition(home), name: 'Retained edit' });
+    await TestBed.inject(HomeCommandHandler).execute(commands.prepareUpdate(home, { ...definition(home), name: 'Other window' }), account.guid);
+    const committed = vi.fn(); TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
+    expect((await commands.submit(retained)).state).toBe('conflict'); expect(definition(current(home.guid)).name).toBe('home');
+    await commands.recover(account.guid, retained.operationGuid);
+    expect(definition(current(home.guid)).name).toBe('Other window'); expect(store.committedRevision()).toBeUndefined();
+    expect(committed).not.toHaveBeenCalled();
+    const retry = await commands.submit(commands.prepareUpdate(current(home.guid), { ...definition(current(home.guid)), name: 'Retained edit' }));
+    expect(retry.state).toBe('committed');
+  });
+  it('rejects stale chart-deletion dependencies even when the chart revision is unchanged', async () => {
+    const { records } = await initialize(), chart = store.savedVisualizations()[0], visualizations = TestBed.inject(SavedVisualizationCommands);
+    const reviewed = visualizations.prepareDelete(chart);
+    await commands.submit(commands.prepareUpdate(records[0], { ...definition(records[0]), widgets: [] }));
+    expect((await visualizations.submit(reviewed)).state).toBe('conflict');
+    expect(await harness.getAll('savedVisualizations')).toHaveLength(1);
+    await visualizations.recover(account.guid, chart.guid);
+    expect(visualizations.dependencies(chart.guid).widgets).toHaveLength(1);
+    expect((await visualizations.submit(visualizations.prepareDelete(store.savedVisualizations()[0]))).state).toBe('committed');
+    expect(visualizations.dependencies(chart.guid).widgets).toHaveLength(1);
+    expect(await harness.getAll('savedVisualizations')).toEqual([]);
+  });
+
+  it.each([true, false])('preserves transferred unavailable owner intent across lifecycle writes (initialized: %s)', async initialized => {
+    const { records, record } = await initialize(), costs = records.find(item => item.template?.template === 'costs')!;
+    const { transferHomeOwner } = await import('@data/backup/home-backup');
+    const source = { ...record!, state: { ...ownerState(record!), initialized, dashboardOrder: ['missing-order', ...ownerState(record!).dashboardOrder], defaultDashboardGuid: 'missing-default' } };
+    const transferred = transferHomeOwner(source, account.guid, { dashboard: Object.fromEntries(records.map(item => [item.guid, item.guid])) }, record!.guid, records);
+    await firstValueFrom(harness.dbService.update('homeOwners', { ...transferred, id: record!.id })); await workspace.reloadActiveWorkspace(false);
+    const assertIntent = () => {
+      const saved = store.homeOwners()[0];
+      expect(ownerState(saved).defaultDashboardGuid).toBe('missing-default'); expect(ownerState(saved).dashboardOrder[0]).toBe('missing-order');
+      expect(saved.preservation?.references).toEqual(transferred.preservation?.references);
+      expect(commands.ownerView(homeAccountOwner).defaultDashboardGuid).toBe(records[0].guid);
+    };
+    if (!initialized) { expect((await commands.submit(commands.prepareInitialize(homeAccountOwner, storageBlueprints()))).state).toBe('committed'); assertIntent(); }
+    expect((await commands.submit(commands.prepareCreate(homeAccountOwner, { template: 'blank', version: 1, dashboard: homeDefinition(), charts: [] }))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareDuplicate(current(records[0].guid)))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareUpdate(current(costs.guid), { ...definition(current(costs.guid)), name: 'Edited', visibility: 'hidden' }))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareDelete(current(costs.guid)))).state).toBe('committed'); assertIntent();
+    expect(ownerState(store.homeOwners()[0]).dashboardOrder).not.toContain(costs.guid);
+    await harness.reopen();
+    const restored = await TestBed.inject(AccountWorkspaceLoaderService).load(account.guid);
+    expect(ownerState(restored.homeOwners[0]).defaultDashboardGuid).toBe('missing-default');
+    expect(ownerState(restored.homeOwners[0]).dashboardOrder[0]).toBe('missing-order');
+  });
+  it('keeps a coincident shortcut unavailable until reviewed owner and resource bindings agree', async () => {
+    const { records } = await initialize(), home = records[0];
+    const other = { ...facility, id: 2, guid: 'facility-b' };
+    const meter = { ...getNewIdbUtilityMeter(other.guid, account.guid, true, 'kWh'), guid: 'meter-a' };
+    await harness.seed({ facilities: [other], utilityMeter: [meter] });
+    const imported: IdbHomeDashboard = { ...home, definition: homeDefinition([{ id: 'shortcut', kind: 'shortcut', size: 'full', visibility: 'always',
+      destination: { area: 'data', owner: { kind: 'facility', guid: facility.guid }, resource: { kind: 'meter', guid: meter.guid } } }]), preservation: {
+      references: [{ path: 'widgets.shortcut.destination.owner.guid', kind: 'facility', guid: facility.guid, reason: 'not-transferred' },
+        { path: 'widgets.shortcut.destination.resource.guid', kind: 'meter', guid: meter.guid, reason: 'not-transferred' }], transfers: [] } };
+    await firstValueFrom(harness.dbService.update('homeDashboards', imported)); await workspace.reloadActiveWorkspace(false);
+    // Ordinary layout edits may retain protected unavailable intent.
+    expect((await commands.submit(commands.prepareUpdate(current(home.guid), { ...definition(imported), name: 'Kept layout' }))).state).toBe('committed');
+    const retained = current(home.guid), paths = retained.preservation!.references.map(ref => ref.path);
+    expect((await commands.submit(commands.prepareUpdate(retained, definition(retained), paths))).state).toBe('failed');
+    expect(current(home.guid)).toEqual(retained); expect(readHomeWidget(current(home.guid), 'shortcut').state).toBe('repair-required');
+    const valid = { ...definition(retained), widgets: [{ ...definition(retained).widgets[0], kind: 'shortcut' as const,
+      destination: { area: 'data' as const, owner: { kind: 'facility' as const, guid: other.guid }, resource: { kind: 'meter' as const, guid: meter.guid } } }] };
+    expect((await commands.submit(commands.prepareUpdate(retained, valid, paths))).state).toBe('committed');
+    expect(readHomeWidget(current(home.guid), 'shortcut').state).toBe('valid');
   });
   it.each([true, false])('retains unavailable saved order/default through unrelated lifecycle commands (initialized: %s)', async initialized => {
     const { records, record } = await initialize(), home = records[0], costs = records.find(item => item.template?.template === 'costs')!;
@@ -358,7 +426,7 @@ describe('Home atomic native commands and workspace publication', () => {
     await visualizations.submit({ kind: 'update', accountGuid: account.guid, guid: updated.guid, expectedRevision: updated.revision, definition: read.definition });
     for (const record of records.slice(0, 2)) expect(current(record.guid).template?.customized).toBe(true);
     const next = store.savedVisualizations()[0];
-    await visualizations.submit({ kind: 'delete', accountGuid: account.guid, guid: next.guid, expectedRevision: next.revision });
+    await visualizations.submit(visualizations.prepareDelete(next));
     expect(store.savedVisualizations()).toHaveLength(0); expect(visualizations.dependencies(chart.guid).widgets).toHaveLength(2);
     expect(definition(current(records[0].guid)).widgets[0]).toMatchObject({ visualizationGuid: chart.guid });
     const proposal = commands.prepareTemplateReplacement(current(records[0].guid), { ...storageBlueprints()[0], version: 2 }, 'upgrade');
@@ -427,7 +495,7 @@ describe('Home atomic native commands and workspace publication', () => {
   it('protects pristine shared-chart placeholders on deletion and rejects an intervening stale template replacement', async () => {
     const { records } = await initialize(), chart = store.savedVisualizations()[0];
     const upgrade = commands.prepareTemplateReplacement(records[0], { ...storageBlueprints()[0], version: 2 }, 'upgrade');
-    await TestBed.inject(SavedVisualizationCommands).submit({ kind: 'delete', accountGuid: account.guid, guid: chart.guid, expectedRevision: chart.revision });
+    await TestBed.inject(SavedVisualizationCommands).submit(TestBed.inject(SavedVisualizationCommands).prepareDelete(chart));
     expect(records.slice(0, 2).every(record => current(record.guid).template?.customized)).toBe(true);
     expect((await commands.submit(upgrade)).state).toBe('conflict');
     expect(store.savedVisualizations()).toEqual([]);

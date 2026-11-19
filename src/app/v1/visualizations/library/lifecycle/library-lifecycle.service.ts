@@ -61,6 +61,15 @@ export class LibraryLifecycle {
   readonly decisionCleared = signal<readonly string[]>([]);
   private pendingDecision?: { readonly fingerprint: string; readonly editor: LibraryEditor; readonly workspaceRevision: number; readonly apply: () => void };
   readonly deleteCandidate = signal<VisualizationLibraryEntry | undefined>(undefined);
+  readonly deletionDependencies = computed(() => {
+    const candidate = this.deleteCandidate();
+    if (!candidate) return { widgets: [], unreadableDashboardGuids: [] };
+    const dependencies = this.commands.dependencies(candidate.record.guid);
+    return { ...dependencies, widgets: dependencies.widgets.map(widget => ({ ...widget,
+      ownerName: widget.owner.kind === 'account' ? this.workspace.account()?.name ?? 'Unavailable account'
+        : this.workspace.facilities().find(facility => facility.guid === widget.owner.guid)?.name ?? 'Unavailable facility',
+      label: widget.widgetTitle || candidate.name })) };
+  });
   readonly proposal = signal<VisualizationCommand | undefined>(undefined);
   readonly outcome = signal<VisualizationCommandOutcome['state'] | undefined>(undefined);
   readonly conflictCurrent = signal<Readonly<IdbSavedVisualization> | undefined>(undefined);
@@ -424,7 +433,7 @@ export class LibraryLifecycle {
   async confirmDelete(): Promise<void> {
     const entry = this.deleteCandidate();
     if (!entry || !this.canAct() || this.proposal()) return;
-    this.proposal.set({ kind: 'delete', accountGuid: entry.record.accountId, guid: entry.record.guid, expectedRevision: entry.record.revision });
+    this.proposal.set(this.commands.prepareDelete(entry.record));
     await this.execute();
   }
   retry(): Promise<void> { return this.canRetry() ? this.execute() : Promise.resolve(); }

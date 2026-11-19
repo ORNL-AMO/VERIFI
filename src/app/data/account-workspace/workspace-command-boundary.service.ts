@@ -92,10 +92,18 @@ export class WorkspaceCommandBoundary {
   }
 
   /** Retry only publication of a committed write, without invoking its persistence callback again. */
-  recoverCommittedPublication(accountGuid: string): Promise<void> {
+  recoverCommittedPublication(accountGuid: string, hydrateWhenCurrent = false): Promise<void> {
     return this.enqueue(accountGuid, async () => {
       if (this.store.account()?.guid !== accountGuid) throw new WorkspaceWriteError('stale-workspace', 'The active account changed before refresh.');
-      if (!this.publicationRepairAccounts.has(accountGuid)) return;
+      if (!this.publicationRepairAccounts.has(accountGuid)) {
+        if (hydrateWhenCurrent) {
+          this.assertCommandStillCurrent(accountGuid, 'before authoritative hydration');
+          const result = await this.workspaceService.reloadActiveWorkspace(false);
+          if (result !== 'published') throw new WorkspaceWriteError('stale-workspace', 'Authoritative hydration was superseded.');
+          this.assertCommandStillCurrent(accountGuid, 'after authoritative hydration');
+        }
+        return;
+      }
       const opId = ++nextOperationId;
       this.store.setPending({ id: opId, label: 'Refreshing saved changes' });
       try { await this.repairPublication(accountGuid, { entityKind: 'account', changeKind: 'update', label: 'Refreshing saved changes' }); }

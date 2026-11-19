@@ -1,5 +1,5 @@
 import type { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
-import { homeChartDependencies } from '@data/home/home-references';
+import { homeChartDependencies, homeChartUsage } from '@data/home/home-references';
 import { Injectable } from '@angular/core';
 import { getNewIdbSavedVisualization, IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { readSavedVisualization, SavedVisualizationReadResult } from '@data/visualizations/saved-visualization-record';
@@ -7,7 +7,7 @@ import { VisualizationDefinition } from '@domain/visualizations/visualization-de
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
 import { WorkspaceWriteError } from './workspace-commands.models';
-import { CreateVisualizationCommand, DuplicateVisualizationCommand, VisualizationCommand, VisualizationCommandOutcome, VisualizationConflictError } from './visualization-commands.models';
+import { CreateVisualizationCommand, DeleteVisualizationCommand, DuplicateVisualizationCommand, VisualizationCommand, VisualizationCommandOutcome, VisualizationConflictError } from './visualization-commands.models';
 import { VisualizationCommandHandler } from './handlers/visualization-command-handler.service';
 import { inspectVisualizationReferences } from './visualization-reference-inspection';
 import type { VisualizationCaptureSource, VisualizationCaptureOrigin } from '../visualizations/visualization-capture-origin';
@@ -20,6 +20,11 @@ export class SavedVisualizationCommands {
     private readonly workspace: AccountWorkspaceStore) { }
 
   dependencies(guid: string) { return homeChartDependencies(this.workspace.homeDashboards(), guid); }
+  prepareDelete(record: Readonly<IdbSavedVisualization>): DeleteVisualizationCommand {
+    const homeUsage = homeChartUsage(this.workspace.homeDashboards().filter(dashboard => dashboard.accountId === record.accountId), record.guid);
+    return { kind: 'delete', accountGuid: record.accountId, guid: record.guid, expectedRevision: record.revision,
+      ...(homeUsage.length ? { homeUsage } : {}) };
+  }
 
   /** Keep this command in the live editor until acknowledged or explicitly discarded. */
   prepareCreate(definition: VisualizationDefinition, captureSource?: VisualizationCaptureSource, retainedCaptureOrigin?: VisualizationCaptureOrigin): CreateVisualizationCommand {
@@ -93,7 +98,7 @@ export class SavedVisualizationCommands {
   async recover(accountGuid: string, guid: string): Promise<SavedVisualizationReadResult | undefined> {
     if (!this.workspace.isReady() || this.workspace.account()?.guid !== accountGuid)
       throw new WorkspaceWriteError('stale-workspace', 'Select the ready owning account before visualization recovery.');
-    await this.boundary.recoverCommittedPublication(accountGuid);
+    await this.boundary.recoverCommittedPublication(accountGuid, true);
     if (!this.workspace.isReady() || this.workspace.account()?.guid !== accountGuid)
       throw new WorkspaceWriteError('stale-workspace', 'The account changed before visualization recovery.');
     const record = this.workspace.savedVisualizations().find(item => item.guid === guid);

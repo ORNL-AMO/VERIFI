@@ -48,7 +48,7 @@ export function savedVisualizationEnvelopeError(value: unknown): string | undefi
     const preservation = record.preservation;
     if (!preservation || typeof preservation !== 'object' || (preservation.locked !== undefined && typeof preservation.locked !== 'boolean')
       || !Array.isArray(preservation.references) || !Array.isArray(preservation.transfers)) return 'Invalid visualization preservation metadata.';
-    const kinds = ['facility', 'meter', 'meter-group', 'predictor', 'equipment', 'energy-use-group', 'analysis', 'model', 'charge', 'unknown'];
+    const kinds = ['account', 'facility', 'meter', 'meter-group', 'predictor', 'equipment', 'energy-use-group', 'analysis', 'model', 'charge', 'unknown'];
     if (preservation.references.some(ref => !ref || !nonblank(ref.path) || !nonblank(ref.guid) || !kinds.includes(ref.kind)
       || !['missing', 'foreign', 'not-transferred', 'unclassified'].includes(ref.reason))) return 'Invalid preserved visualization reference.';
     if (preservation.transfers.some(hop => !hop || !nonblank(hop.accountId) || !nonblank(hop.targetAccountId)

@@ -3,7 +3,7 @@ import type { HomeOwner } from '@domain/home/home-dashboard';
 
 export interface HomeReferenceIssue {
   readonly path: string;
-  readonly kind: 'dashboard' | 'visualization' | 'facility' | 'analysis' | 'meter' | 'predictor' | 'equipment' | 'unknown';
+  readonly kind: 'account' | 'dashboard' | 'visualization' | 'facility' | 'analysis' | 'meter' | 'predictor' | 'equipment' | 'unknown';
   readonly guid: string;
   readonly reason: 'not-transferred' | 'missing' | 'foreign';
 }

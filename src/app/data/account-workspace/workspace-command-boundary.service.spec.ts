@@ -35,6 +35,16 @@ describe('WorkspaceCommandBoundary', () => {
     expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled(); expect(committed).not.toHaveBeenCalled();
     expect(store.snapshot()).toBe(snapshot); expect(store.hasPending()).toBe(false);
   });
+  it('hydrates authoritative state after a rejected conflict without publishing a committed change', async () => {
+    const { boundary, store, workspaceService } = createBoundary(); publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+    const revision = store.committedRevision(), committed = vi.fn(); boundary.committedChange$.subscribe(committed);
+    await boundary.recoverCommittedPublication('account-a', true);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledExactlyOnceWith(false);
+    expect(store.committedRevision()).toBe(revision); expect(committed).not.toHaveBeenCalled();
+    await expect(boundary.recoverCommittedPublication('departed-account', true)).rejects.toMatchObject({ code: 'stale-workspace' });
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledTimes(1);
+  });
   it('clears pending state and recovers publication if a post-persistence decision fails', async () => {
     const { boundary, store, workspaceService } = createBoundary();
     publishReady(store); workspaceService.reloadActiveWorkspace.mockResolvedValue('published');

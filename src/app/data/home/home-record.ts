@@ -1,8 +1,9 @@
-import { HOME_FORMAT_VERSION, HomeDashboardDefinition, HomeOwnerState } from '@domain/home/home-dashboard';
+import { homeReferences } from './home-widget-references';
+import { HOME_FORMAT_VERSION, HomeDashboardDefinition, HomeOwnerState, HomeWidget } from '@domain/home/home-dashboard';
 import { decodeHomeDashboard, decodeHomeOwnerState, homeJson, homePositiveInteger, homeText } from '@domain/home/home-validation';
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
-import { IdbHomeRecord } from '@data/models/idbModels/homeRecord';
+import { IdbHomeRecord, HomeReferenceIssue } from '@data/models/idbModels/homeRecord';
 
 /** Envelopes remain stable even when an app cannot interpret the versioned payload. */
 export function homeEnvelopeError(value: unknown, payload: 'definition' | 'state'): string | undefined {
@@ -16,7 +17,7 @@ export function homeEnvelopeError(value: unknown, payload: 'definition' | 'state
   if (preservation !== undefined && (!preservation || !homeJson(preservation) || !Array.isArray(preservation.references)
     || !Array.isArray(preservation.transfers) || preservation.locked !== undefined && typeof preservation.locked !== 'boolean'
     || preservation.references.some(ref => !ref || !homeText(ref.path) || !homeText(ref.guid)
-      || !['dashboard', 'visualization', 'facility', 'analysis', 'meter', 'predictor', 'equipment', 'unknown'].includes(ref.kind)
+      || !['account', 'dashboard', 'visualization', 'facility', 'analysis', 'meter', 'predictor', 'equipment', 'unknown'].includes(ref.kind)
       || !['not-transferred', 'missing', 'foreign'].includes(ref.reason))
     || preservation.transfers.some(hop => !hop || !homeText(hop.accountId) || !homeText(hop.targetAccountId)
       || !hop.maps || typeof hop.maps !== 'object' || Array.isArray(hop.maps)
@@ -50,4 +51,17 @@ export function readHomeDashboard(record: Readonly<IdbHomeDashboard>): HomeRecor
 }
 export function readHomeOwner(record: Readonly<IdbHomeOwner>): HomeRecordRead<HomeOwnerState> {
   return protectedRecord(record, 'state') ?? decodeHomeOwnerState(record.state);
+}
+
+/** Known transfer blocks belong to a widget, including when a destination GUID coincides later. */
+export function readHomeWidget(record: Readonly<IdbHomeDashboard>, widgetId: string):
+  | { readonly state: 'valid' | 'repair-required'; readonly widget: HomeWidget; readonly references: readonly HomeReferenceIssue[] }
+  | { readonly state: 'unavailable'; readonly message: string } {
+  const read = readHomeDashboard(record);
+  if (read.state !== 'valid') return { state: 'unavailable', message: read.message };
+  const widget = read.value.widgets.find(widget => widget.id === widgetId);
+  if (!widget) return { state: 'unavailable', message: 'This widget is no longer available.' };
+  const paths = new Set(homeReferences({ ...read.value, widgets: [widget] }).map(ref => ref.path));
+  const references = (record.preservation?.references ?? []).filter(ref => paths.has(ref.path));
+  return { state: references.length ? 'repair-required' : 'valid', widget, references };
 }

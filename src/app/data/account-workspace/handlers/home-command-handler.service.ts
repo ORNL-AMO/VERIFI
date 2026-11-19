@@ -285,6 +285,7 @@ export class HomeCommandHandler {
     }
   }
   private findReference(ref: { kind: HomeReferenceIssue['kind']; guid: string }, catalog: VisualizationReferenceCatalog, charts: readonly IdbSavedVisualization[]) {
+    if (ref.kind === 'account') return { guid: ref.guid, accountId: ref.guid, facilityId: undefined };
     const records = ref.kind === 'visualization' ? charts : ref.kind === 'facility' ? catalog.facilities : ref.kind === 'meter' ? catalog.meters
       : ref.kind === 'predictor' ? catalog.predictors : ref.kind === 'equipment' ? catalog.energyUseEquipment : ref.kind === 'analysis' ? [...catalog.facilityAnalyses, ...catalog.accountAnalyses] : [];
     return records.find(record => record.guid === ref.guid);

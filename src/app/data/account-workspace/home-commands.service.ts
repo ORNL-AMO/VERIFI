@@ -113,7 +113,7 @@ export class HomeCommands {
   /** Refresh only. Retrying the same recovered proposal returns its receipt without invoking persistence. */
   async recover(accountGuid: string, operationGuid: string): Promise<void> {
     this.requireReady(accountGuid);
-    await this.boundary.recoverCommittedPublication(accountGuid);
+    await this.boundary.recoverCommittedPublication(accountGuid, true);
     this.requireReady(accountGuid);
     const receipt = this.unpublished.get(operationGuid);
     if (receipt?.command.accountGuid === accountGuid) {
