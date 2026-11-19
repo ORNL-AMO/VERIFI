@@ -1,6 +1,6 @@
 # V1 Home content map
 
-Source inventory for [Home1 #2912](https://github.com/ORNL-AMO/VERIFI/issues/2912). Stable identifiers below connect legacy capabilities to the planned Home templates. The [Home dashboard plan](v1-home-dashboard-plan.md) owns the agreed starting experience until the Home specification replaces those design sections. This map records dispositions, not implemented parity or issue closure.
+Source inventory for [Home1 #2912](https://github.com/ORNL-AMO/VERIFI/issues/2912). Stable identifiers below connect legacy capabilities to the [Home dashboard specification](v1-home-dashboard-spec.md), which owns the accepted intended behavior. The [phase plan](v1-home-dashboard-plan.md) tracks remaining delivery. This map records dispositions, not implemented parity or issue closure.
 
 Account means portfolio scope; facility also covers the sole facility in valid single-facility presentation. A row naming both scopes has the same capability with account/facility ownership differences called out. Retain means preserve the capability; Combine means deliver it within another widget/workflow; Exclude means an intentional omission from Home, with its existing owner/access preserved.
 
@@ -91,6 +91,7 @@ The following rows identify every displayed content family in all eight overview
 | O06 | Create Data Overview Report with section choices/current dates/basis (facility OB) | Facility / legacy report commands and saved overview report settings | Exclude from initial Home delivery: migrate the overview experience first, then migrate overview reports separately. Preserve legacy access/settings; do not expose a shortcut claiming a working v1 overview report | Overview reports have not been migrated. Reports owns the later format migration; Home1–Home6 do not implement it |
 | O07 | Plotly hover/legend/image/annotation controls and charts used in overview report sections (P1/P2) | Both / chart presentation and report owner | Retain data inspection/accessibility and supported ECharts interaction; exclude Plotly-specific drawing tools. Report output composition remains unchanged | Home4 shared renderer; report formats/migrations are separately owned |
 | O08 | Click facility row to open its workspace (facility usage table in P1) | Account / workspace navigation | Retain: named facility detail link, without silently filtering an existing linked chart | Home3/Home5 |
+| O09 | Generic Create Report action in account Overview banner (OB) | Account / shared report-creation workflow | Combine: existing Reports navigation/optional shortcut for supported formats. This action is distinct from the facility overview-report modal in O06 | Reports owns format availability; do not imply overview reports are migrated |
 
 ## Calculation and compatibility requirements
 
