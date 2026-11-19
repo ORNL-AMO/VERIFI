@@ -1,3 +1,4 @@
+import type { VisualizationSourceResolution } from '@domain/visualizations/visualization-source-provider';
 import { latestUtilityHistoryMonth } from '@domain/visualizations/utility/utility-calendarized';
 import { resolveUtilitySelection } from '@domain/visualizations/utility/utility-selection';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
@@ -125,7 +126,7 @@ export class VisualizationDateContextResolver implements PreviewDateContextResol
       current();
       const request = { identity: { ...identity, scope, sourceId: source.id, requestId: 'exploration-dates' }, source,
         chart: definition.chart!, period: { kind: 'all-history' as const }, comparison: { kind: 'none' as const }, series: definition.series, dateContext: { calendarDate } };
-      let result: import('@domain/visualizations/visualization-source-provider').VisualizationSourceResolution | undefined;
+      let result: VisualizationSourceResolution | undefined;
       if (source.kind === 'utility') result = await this.provider.resolve(request, signal);
       else if (source.kind === 'predictor') {
         const range = predictorHistoryRange(snapshot!, scope, source), end = latestPredictorDate(snapshot!, scope, source);

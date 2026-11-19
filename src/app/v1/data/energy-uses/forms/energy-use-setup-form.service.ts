@@ -1,3 +1,4 @@
+import type { AbstractControl } from '@angular/forms';
 import { Injectable, inject } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -65,7 +66,7 @@ export class EnergyUseSetupFormService {
     form.setValidators(additional ? [setup, additional] : setup);
     form.updateValueAndValidity({ emitEvent: false });
   }
-  private sync<T, C extends import('@angular/forms').AbstractControl>(array: FormArray<C>, rows: readonly T[], key: (row: T) => number | string,
+  private sync<T, C extends AbstractControl>(array: FormArray<C>, rows: readonly T[], key: (row: T) => number | string,
     create: (row: T) => C, patch: (control: C, row: T) => void): void {
     const available: C[] = [...(array.controls as C[])];
     const next = rows.map(row => {

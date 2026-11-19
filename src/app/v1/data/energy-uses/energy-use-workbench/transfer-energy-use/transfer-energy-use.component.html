@@ -1,26 +1,88 @@
 <ng-template #transferDrawer>
-  @if (review(); as current) {
-    <app-workspace-slideout title="Transfer energy use" [description]="current.name" [saving]="busy() || committed()" [hasFooter]="true" (closed)="close()">
-      <div class="creation-selections" aria-label="Transfer facility">
-        <div class="creation-selection"><app-ui-icon name="facility"/><span>{{ facility()?.name || 'Facility unavailable' }}</span><app-ui-icon name="check"/></div>
-      </div>
-      <p>Choose a destination energy-use group. All setup, annual values, and meter-group links will move with this item.</p>
-      @if (groups().length) {
-        <label class="visually-hidden" for="energy-use-transfer-search">Find energy-use group</label>
-        <input id="energy-use-transfer-search" class="v1-input creation-search" type="search" [formControl]="search" placeholder="Find energy-use group" [readOnly]="busy() || committed()">
-      }
-      <div class="creation-choices">
-        @for (group of matchingGroups(); track group.guid) {
-          <button type="button" class="creation-choice" [attr.aria-pressed]="target.value?.guid === group.guid" [disabled]="busy() || committed() || stale()" (click)="chooseGroup(group)"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>{{ group.name || 'Unnamed energy-use group' }}</strong></button>
-        } @empty {
-          <div class="creation-search-empty" role="status"><p>{{ groups().length ? 'No matching energy-use groups.' : 'No other energy-use groups are available in this facility.' }}</p>@if (groups().length) { <button type="button" class="v1-btn v1-btn--quiet" (click)="search.setValue('')">Clear search</button> }</div>
+  @if (controller.review(); as review) {
+    @let step = controller.step();
+    <app-workspace-slideout title="Transfer energy use" [description]="review.sources.length + (review.sources.length === 1 ? ' energy use selected' : ' energy uses selected')" [saving]="controller.busy() || controller.committed()" [hasFooter]="true" [initialFocus]="step === 'new-group' ? '#transfer-group-name' : '#transfer-step-heading'" (closed)="close()">
+      <div class="creation-selections" role="group" aria-label="Transfer selections">
+        <button type="button" class="creation-selection" [class.creation-selection--active]="step === 'facility'" [disabled]="!controller.canEdit()" [attr.aria-expanded]="step === 'facility'" [attr.aria-label]="'Change facility: ' + (controller.facility()?.name || 'Facility unavailable')" (click)="controller.editSelection('facility')">
+          <app-ui-icon name="facility"/><span>{{ controller.facility()?.name || 'Facility unavailable' }}</span><app-ui-icon name="edit"/>
+        </button>
+        @if (controller.destinationName()) {
+          <button type="button" class="creation-selection" [class.creation-selection--active]="step === 'group' || step === 'new-group'" [disabled]="!controller.canEdit()" [attr.aria-expanded]="step === 'group' || step === 'new-group'" [attr.aria-label]="'Change energy-use group: ' + controller.destinationName()" (click)="controller.editSelection('group')">
+            <app-ui-icon name="energyUseGroup"/><span>{{ controller.destinationName() }}</span><app-ui-icon name="edit"/>
+          </button>
         }
       </div>
-      @if (stale() && !busy() && !committed()) { <p class="v1-alert v1-alert--warning" role="alert">The item or destination group changed. Cancel and review the transfer again.</p> }
-      @if (error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ error() }}</p> }
-      <button slideoutFooter type="button" class="v1-btn v1-btn--quiet" [disabled]="busy() || committed()" (click)="close()">Cancel</button>
-      @if (committed()) { <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="busy()" (click)="recover()">Refresh saved changes</button> }
-      @else { <button slideoutFooter type="button" class="v1-btn v1-btn--action" [disabled]="!canConfirm()" (click)="confirm()">@if (busy()) { <app-ui-icon name="loading" spin/> }Transfer energy use</button> }
+      <details class="transfer-equipment" open>
+        <summary>Selected equipment <span class="transfer-equipment__count">{{ review.sources.length }}</span></summary>
+        <div class="transfer-equipment__items" role="list" aria-label="Selected energy uses" tabindex="0">
+          @for (item of controller.selectedItems(); track item.guid) {
+            <div class="transfer-equipment__item" role="listitem">
+              <span class="transfer-equipment__icon"><app-ui-icon [name]="item.icon" [size]="22"/></span>
+              <div><strong>{{ item.name }}</strong><span>{{ item.category }} · {{ item.facility }}</span></div>
+            </div>
+          }
+        </div>
+      </details>
+      <form id="energy-use-transfer-draft" [formGroup]="controller.form" (ngSubmit)="controller.reviewDestination()">
+        <fieldset [disabled]="!controller.canEdit()">
+          <p class="transfer-step">Step {{ step === 'facility' ? 1 : step === 'review' ? 3 : 2 }} of 3</p>
+          <h3 id="transfer-step-heading" #stepHeading tabindex="-1">{{ step === 'facility' ? 'Choose a facility' : step === 'group' ? 'Choose an energy-use group' : step === 'new-group' ? 'Name the new group' : 'Review transfer' }}</h3>
+          @switch (step) {
+            @case ('facility') {
+              <label class="visually-hidden" for="transfer-facility-search">Find facility</label>
+              <input id="transfer-facility-search" class="v1-input creation-search" type="search" [formControl]="controller.facilitySearch" placeholder="Find facility" autocomplete="off">
+              <div class="creation-choices">
+                @for (facility of controller.matchingFacilities(); track facility.guid) {
+                  <button type="button" class="creation-choice" [attr.aria-pressed]="controller.form.controls.facilityGuid.value === facility.guid" (click)="controller.chooseFacility(facility.guid)"><app-ui-icon name="facility" [size]="28"/><strong>{{ facility.name || 'Unnamed facility' }}</strong></button>
+                } @empty { <div class="creation-search-empty" role="status"><p>No matching facilities.</p><button type="button" class="v1-btn v1-btn--quiet" (click)="controller.facilitySearch.reset('')">Clear search</button></div> }
+              </div>
+            }
+            @case ('group') {
+              <label class="visually-hidden" for="energy-use-transfer-search">Find energy-use group</label>
+              <input id="energy-use-transfer-search" class="v1-input creation-search" type="search" [formControl]="controller.search" placeholder="Find energy-use group" autocomplete="off">
+              <div class="creation-choices">
+                @for (group of controller.matchingGroups(); track group.guid) {
+                  <button type="button" class="creation-choice" [attr.aria-pressed]="!controller.creatingGroup() && controller.form.controls.group.value?.guid === group.guid" [disabled]="controller.stale()" (click)="controller.chooseGroup(group)"><app-ui-icon name="energyUseGroup" [size]="28"/><strong>{{ group.name || 'Unnamed energy-use group' }}</strong></button>
+                }
+                <button type="button" class="creation-choice" [disabled]="controller.stale()" (click)="controller.chooseNewGroup()"><app-ui-icon name="add" [size]="28"/><strong>New group</strong></button>
+              </div>
+              @if (!controller.matchingGroups().length) { <div class="creation-search-empty" role="status"><p>{{ controller.groups().length ? 'No matching energy-use groups.' : 'Create a destination group to continue.' }}</p>@if (controller.groups().length) { <button type="button" class="v1-btn v1-btn--quiet" (click)="controller.search.reset('')">Clear search</button> }</div> }
+            }
+            @case ('new-group') {
+              <label for="transfer-group-name">New group name</label>
+              <input #groupName id="transfer-group-name" class="v1-input" type="text" [formControl]="controller.form.controls.groupName" autocomplete="off" required [attr.aria-invalid]="controller.form.controls.groupName.touched && !controller.form.controls.groupName.value.trim()" aria-describedby="transfer-group-name-error">
+              @if (controller.form.controls.groupName.touched && !controller.form.controls.groupName.value.trim()) { <p id="transfer-group-name-error" class="v1-alert v1-alert--warning" role="alert">Enter a group name.</p> }
+            }
+            @case ('review') {
+              <p class="transfer-review" role="status">{{ controller.copying() ? 'Copy' : 'Transfer' }} {{ review.sources.length }} {{ review.sources.length === 1 ? 'energy use' : 'energy uses' }} to <strong>{{ controller.facility()?.name }} · {{ controller.destinationName() }}</strong>.</p>
+              @if (controller.creatingGroup()) { <p class="v1-muted">The new group will be created when you confirm.</p> }
+              @if (controller.crossFacility()) { <p class="v1-alert v1-alert--info">Utility setup and saved consumption will be retained. Links to the original facility’s utility meter groups will be cleared on the destination items.</p> }
+              @if (controller.calendarChanged()) { <p class="v1-alert v1-alert--warning">These facilities use different fiscal calendars. Saved year labels and values will be retained and interpreted using the destination facility’s calendar.</p> }
+              @if (controller.sameGroupMove()) { <p class="v1-alert v1-alert--info">This is the current group. Select Create Copy below to keep the originals and add copies here, or choose another group to transfer them.</p> }
+            }
+          }
+        </fieldset>
+      </form>
+      @if (controller.stale() && !controller.busy() && !controller.committed()) { <p class="v1-alert v1-alert--warning" role="alert">The selected items, facility settings, or destination changed. Cancel and review the transfer again.</p> }
+      @if (controller.error()) { <p class="v1-alert v1-alert--danger" role="alert">{{ controller.error() }}</p> }
+      <div slideoutFooter class="transfer-footer">
+        @if (step === 'review') {
+          <fieldset class="transfer-copy-option" [disabled]="controller.busy() || controller.committed()">
+            <legend class="visually-hidden">Copy option</legend>
+            <label class="transfer-copy"><input type="checkbox" [formControl]="controller.form.controls.asCopy" aria-describedby="transfer-copy-help"><span>Create Copy</span></label>
+            <p id="transfer-copy-help">Keep the original equipment in its current group.</p>
+          </fieldset>
+        }
+        <div class="creation-draft-actions">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="controller.busy() || controller.committed()" (click)="close()">Cancel</button>
+          <div class="transfer-footer__confirm">
+            @if (step !== 'facility') { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!controller.canEdit()" (click)="controller.back()">Back</button> }
+            @if (controller.committed()) { <button type="button" class="v1-btn v1-btn--action" [disabled]="controller.busy()" (click)="recover()">Refresh saved changes</button> }
+            @else if (step === 'new-group') { <button type="submit" form="energy-use-transfer-draft" class="v1-btn v1-btn--action" [disabled]="!controller.canReview()">Continue</button> }
+            @else if (step === 'review') { <button type="button" class="v1-btn v1-btn--action" [disabled]="!controller.canConfirm()" (click)="confirm()">@if (controller.busy()) { <app-ui-icon name="loading" spin/> }{{ controller.confirmLabel() }}</button> }
+          </div>
+        </div>
+      </div>
     </app-workspace-slideout>
   }
 </ng-template>

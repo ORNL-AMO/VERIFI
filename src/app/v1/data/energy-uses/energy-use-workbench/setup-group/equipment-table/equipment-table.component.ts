@@ -1,6 +1,9 @@
+import { facilityEnergyUseGroupRoute } from '@app/v1/routing/workspace-route';
+import { TransferEnergyUseComponent } from '../../transfer-energy-use/transfer-energy-use.component';
+import type { EnergyUseTransferResult } from '@data/account-workspace/handlers/energy-use-command.models';
 import { AddYearController } from '../add-year-drawer/add-year.controller';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Injector, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { FormControl, FormRecord } from '@angular/forms';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { EnergyUseWorkbenchContextService } from '../../energy-use-workbench-context.service';
@@ -27,7 +30,16 @@ export class EquipmentTableComponent {
   readonly yearEditor = new AddYearController(this.context, this.canOpen);
   readonly opened = signal(false);
   readonly someSelected = computed(() => !!this.selection.selected().length && this.selection.selected().length < this.context.items().length);
-  readonly canAct = computed(() => this.canOpen() && this.selection.canAct());
+  private readonly transferPanel = viewChild(TransferEnergyUseComponent);
+  private transferResultKey?: string;
+  readonly transferResult = signal<EnergyUseTransferResult | undefined>(undefined);
+  readonly transferItems = computed(() => this.context.items().filter(row => this.selection.selected().includes(row.guid)).map(row => row.item));
+  readonly destinationRoute = computed(() => { const group = this.transferResult()?.group; return group ? [...facilityEnergyUseGroupRoute(group.facilityId, group.guid), 'setup'] : []; });
+  readonly canAct = computed(() => this.canOpen() && this.selection.canAct() && !this.transferPanel()?.blocked());
+  transferCompleted(result: EnergyUseTransferResult): void {
+    this.transferResultKey = this.context.key(); this.transferResult.set(result);
+    if (result.mode === 'move') this.selection.clear();
+  }
   private readonly injector = inject(Injector);
   private readonly destroy = inject(DestroyRef);
   @ViewChild('itemTable', { read: ElementRef }) private readonly itemTable?: ElementRef<HTMLElement>;
@@ -42,9 +54,9 @@ export class EquipmentTableComponent {
     inject(DestroyRef).onDestroy(() => this.hide(false));
     effect(() => { const active = this.modal.activePortal();
       if (this.opened() && this.portal && active !== this.portal) untracked(() => this.hide(false)); });
-    effect(() => { const key = this.context.key(); if (this.opened() && key !== this.openedKey) untracked(() => this.hide(false)); });
+    effect(() => { const key = this.context.key(); if (this.transferResult() && key !== this.transferResultKey) untracked(() => this.transferResult.set(undefined)); if (this.opened() && key !== this.openedKey) untracked(() => this.hide(false)); });
     effect(() => {
-      const items = this.context.items(), selected = this.selection.selected(), canAct = this.canOpen() && this.selection.canAct(), ids = new Set(items.map(item => item.guid));
+      const items = this.context.items(), selected = this.selection.selected(), canAct = this.canAct(), ids = new Set(items.map(item => item.guid));
       untracked(() => {
         this.selectAllControl.setValue(!!items.length && selected.length === items.length, { emitEvent: false });
         if (canAct && items.length) this.selectAllControl.enable({ emitEvent: false }); else this.selectAllControl.disable({ emitEvent: false });

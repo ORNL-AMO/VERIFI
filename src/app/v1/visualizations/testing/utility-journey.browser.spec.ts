@@ -1,3 +1,4 @@
+import type { TimeSeriesModel } from '../time-series/time-series.models';
 import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { previewValuesText } from './preview-values.testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -187,7 +188,7 @@ describe('saved utility journey across native browser boundaries', () => {
     render(first, { ...saved, definition: itemTypeEdit });
     await expectValue(first, 10);
     const typedView = first.componentInstance.preview.state();
-    expect(typedView.state === 'ready' && (typedView.presentation.inputs.model as import('../time-series/time-series.models').TimeSeriesModel).traces[0].type).toBe('bar');
+    expect(typedView.state === 'ready' && (typedView.presentation.inputs.model as TimeSeriesModel).traces[0].type).toBe('bar');
     expect(workerMessages.mock.calls.length).toBe(workerCount);
 
     const beforeEdit = decoded(saved);
