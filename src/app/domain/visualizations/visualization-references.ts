@@ -50,6 +50,8 @@ export function visualizationReferences(definition: VisualizationDefinition): re
       add(`${path}.charge.chargeGuid`, 'charge', source.charge.chargeGuid, source.charge.meterGuid);
     }
     if (source.kind === 'analysis') {
+      if (source.mode === 'result' && source.reporting?.owner.kind === 'facility')
+        add(`${path}.reporting.owner.guid`, 'facility', source.reporting.owner.guid);
       add(`${path}.analysisGuid`, 'analysis', source.analysisGuid);
       add(`${path}.groupGuid`, 'meter-group', source.groupGuid, source.analysisGuid);
       if (source.mode === 'model') {
@@ -113,6 +115,10 @@ export function remapVisualizationDefinition(definition: VisualizationDefinition
     definition: VisualizationDefinition; issues: readonly VisualizationReferenceIssue[];
   } {
   const result = structuredClone(definition);
+  result.sources.forEach((source, index) => {
+    if (source.kind === 'analysis' && source.mode === 'result' && source.reporting?.owner.kind === 'account'
+      && source.reporting.owner.guid === definition.accountGuid) setPath(result, `sources.${index}.reporting.owner.guid`, accountGuid);
+  });
   const issues: VisualizationReferenceIssue[] = [];
   const sourceForPath = (path: string) => {
     const parts = path.split('.');

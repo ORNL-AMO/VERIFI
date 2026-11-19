@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgxIndexedDBService, provideIndexedDb } from 'ngx-indexed-db';
 import { firstValueFrom } from 'rxjs';
 import { dbConfig } from '../_dbConfig';
-import { historicalIndexes, VERSION_20_INDEXES } from './indexed-db-historical-schema';
+import { historicalIndexes, VERSION_20_INDEXES, VERSION_21_INDEXES } from './indexed-db-historical-schema';
 
 export interface IndexedDbTestRecord {
   id?: number;
@@ -52,6 +52,12 @@ export class IndexedDbTestHarness {
     await IndexedDbTestHarness.createHistoricalDatabase(databaseName, seedData, 20);
     const dbService = await IndexedDbTestHarness.initialize(databaseName);
     return new IndexedDbTestHarness(databaseName, dbService);
+  }
+
+  static async createUpgradedFromVersion21(testName: string, seedData: IndexedDbTestSeed): Promise<IndexedDbTestHarness> {
+    const databaseName = `verifi-test-${testName}-${crypto.randomUUID()}`;
+    await IndexedDbTestHarness.createHistoricalDatabase(databaseName, seedData, 21);
+    return new IndexedDbTestHarness(databaseName, await IndexedDbTestHarness.initialize(databaseName));
   }
 
   async seed(seedData: IndexedDbTestSeed): Promise<void> {
@@ -131,7 +137,7 @@ export class IndexedDbTestHarness {
   private static async createHistoricalDatabase(
     databaseName: string,
     seedData: IndexedDbTestSeed,
-    version: 19 | 20
+    version: 19 | 20 | 21
   ): Promise<void> {
     TestBed.resetTestingModule();
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -139,7 +145,7 @@ export class IndexedDbTestHarness {
       request.onerror = () => reject(request.error);
       request.onupgradeneeded = () => {
         const newDatabase = request.result;
-        for (const storeName of Object.keys(VERSION_20_INDEXES)) {
+        for (const storeName of Object.keys(version === 21 ? VERSION_21_INDEXES : VERSION_20_INDEXES)) {
           const objectStore = newDatabase.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
           for (const [name, keyPath] of Object.entries(historicalIndexes(version, storeName))) {
             objectStore.createIndex(name, keyPath, { unique: false });

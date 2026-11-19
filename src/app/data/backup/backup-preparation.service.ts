@@ -176,6 +176,8 @@ export function backupToMigrationData(backup: BackupFile): MigrationData {
     customGWPs: backup.customGWPs,
     energyUseGroups: backup.facilityEnergyUseGroups,
     savedVisualizations: backup.savedVisualizations ?? [],
+    homeDashboards: backup.homeDashboards ?? [],
+    homeOwners: backup.homeOwners ?? [],
     energyUseEquipment: backup.facilityEnergyUseEquipment
   };
 }
@@ -203,6 +205,8 @@ function applyMigrationDataToBackup(backup: BackupFile, data: MigrationData): vo
   backup.facilityEnergyUseGroups = data.energyUseGroups;
   backup.facilityEnergyUseEquipment = data.energyUseEquipment;
   backup.savedVisualizations = data.savedVisualizations;
+  backup.homeDashboards = data.homeDashboards;
+  backup.homeOwners = data.homeOwners;
 }
 
 function validateCoreRelationships(backup: BackupFile): void {

@@ -6,6 +6,8 @@ export interface FacilityDeletionStoreDefinition {
 }
 
 export const FACILITY_DELETION_CHILD_STORES = [
+  { storeName: 'homeDashboards', message: 'Deleting Home Dashboards' },
+  { storeName: 'homeOwners', message: 'Deleting Home Defaults' },
   { storeName: 'savedVisualizations', message: 'Deleting Facility Visualizations' },
   { storeName: 'predictors', message: 'Deleting Facility Predictors' },
   { storeName: 'predictor', message: 'Deleting Facility Predictors' },
