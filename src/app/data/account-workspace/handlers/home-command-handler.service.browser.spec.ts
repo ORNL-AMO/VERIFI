@@ -7,6 +7,9 @@ import { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transact
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
+import { createVisualizationDefinition, createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, HomeWidget } from '@domain/home/home-dashboard';
@@ -364,6 +367,51 @@ describe('Home atomic native commands and workspace publication', () => {
     const changed: HomeWidget = { ...widget, destination: { ...widget.destination, resource: { kind: 'predictor', guid: meter.guid } } };
     expect((await commands.submit(commands.prepareUpdate(current(home.guid), homeDefinition([changed])))).state).toBe('failed');
     expect(definition(current(home.guid)).widgets).toEqual([widget]);
+  });
+  const unavailableCharts = [
+    { format: 'locked', state: 'repair-required' }, { format: 'future-record', state: 'unsupported' },
+    { format: 'future-payload', state: 'unsupported' }, { format: 'invalid', state: 'invalid' }, { format: 'blocked-source', state: 'repair-required' }
+  ] as const;
+  it.each(unavailableCharts.flatMap(value => (['choose', 'acknowledge'] as const).map(action => ({ ...value, action }))))('rejects $action for a $format chart while retaining existing links', async ({ format, state, action }) => {
+    const { records } = await initialize(), home = records[0], originalChart = store.savedVisualizations()[0];
+    const target = { ...getNewIdbSavedVisualization(createVisualizationDefinition('Unavailable', account.guid, { kind: 'fixed', facilityGuids: [facility.guid] }, 'utility')), id: 20, guid: 'unavailable-chart' };
+    if (format === 'locked') target.preservation = { locked: true, references: [], transfers: [] };
+    if (format === 'future-record') target.recordVersion = 999;
+    if (format === 'future-payload') target.definition = { version: 999 };
+    if (format === 'invalid') target.definition = {};
+    if (format === 'blocked-source') target.preservation = { references: [{ path: 'facilitySelection.facilityGuids.0', kind: 'facility', guid: facility.guid, reason: 'not-transferred' }], transfers: [] };
+    expect(readSavedVisualization(target).state).toBe(state); await harness.seed({ savedVisualizations: [target] });
+    const widget: HomeWidget = { ...base, kind: 'visualization', visualizationGuid: target.guid, inherit: [], overrides: {} };
+    const value = homeDefinition([widget]);
+    if (action === 'choose') {
+      expect((await commands.submit(commands.prepareUpdate(home, value))).state).toBe('failed');
+      expect(current(home.guid)).toEqual(home);
+    } else {
+      const path = `widgets.${widget.id}.visualizationGuid`, references = [{ path, kind: 'visualization' as const, guid: target.guid, reason: 'not-transferred' as const }];
+      await firstValueFrom(harness.dbService.update('homeDashboards', { ...home, definition: value, preservation: { references, transfers: [] } }));
+      await workspace.reloadActiveWorkspace(false);
+      expect((await commands.submit(commands.prepareUpdate(current(home.guid), { ...value, name: 'Unchanged unavailable link' }))).state).toBe('committed');
+      if (format === 'locked') {
+        const duplicated = await commands.submit(commands.prepareDuplicate(current(home.guid)));
+        expect(duplicated.state).toBe('committed');
+        if (duplicated.state === 'committed') expect(definition(duplicated.value.dashboard!).widgets[0]).toMatchObject({ visualizationGuid: target.guid });
+      }
+      expect((await commands.submit(commands.prepareUpdate(current(home.guid), definition(current(home.guid)), [path]))).state).toBe('failed');
+      expect(current(home.guid).preservation?.references).toEqual(references);
+      const repaired = homeDefinition([{ ...widget, visualizationGuid: originalChart.guid }]);
+      expect((await commands.submit(commands.prepareUpdate(current(home.guid), repaired, [path]))).state).toBe('committed');
+      expect(current(home.guid).preservation?.references).toEqual([]);
+    }
+    expect((await harness.getAll('savedVisualizations')).find(chart => chart.guid === target.guid)).toEqual(target);
+  });
+  it('allows a supported chart that still needs setup without requiring source data or calculations', async () => {
+    const { records } = await initialize(), home = records[0];
+    const target = { ...getNewIdbSavedVisualization(createVisualizationSetupDefinition({ name: 'Setup', accountGuid: account.guid,
+      facilitySelection: { kind: 'all' }, chart: { kind: 'scatter', showFit: false }, sourceKinds: ['utility', 'predictor'] })), id: 20 };
+    expect(readSavedVisualization(target).state).toBe('setup-required'); await harness.seed({ savedVisualizations: [target] });
+    const value = homeDefinition([{ ...base, kind: 'visualization', visualizationGuid: target.guid, inherit: [], overrides: {} }]);
+    expect((await commands.submit(commands.prepareUpdate(home, value))).state).toBe('committed');
+    expect(definition(current(home.guid))).toEqual(value);
   });
   it('protects every affected starter after linked chart edits/deletion and exposes recoverable widget dependencies', async () => {
     const { records } = await initialize(), chart = store.savedVisualizations()[0];

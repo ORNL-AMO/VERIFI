@@ -10,6 +10,7 @@ import { getNewIdbHomeDashboard, IdbHomeDashboard } from '@data/models/idbModels
 import { getNewIdbHomeOwner, IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { homeRecordOwner, HomeReferenceIssue } from '@data/models/idbModels/homeRecord';
 import { getNewIdbSavedVisualization, IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
 import { duplicateHomeReferenceIssues, homeDashboardVisible, homeOwnerResolutionState, homeReferences, sameHomeJson } from '@data/home/home-references';
@@ -279,7 +280,8 @@ export class HomeCommandHandler {
     for (const ref of homeReferences(read.value)) {
       const existing = this.findReference(ref, catalog, charts);
       if (existing && existing.accountId !== command.accountGuid && !protectedIntent(ref.path, ref.kind, ref.guid)) invalid('A Home widget cannot refer to another account.');
-      if (!existing && !oldRefs.some(old => old.path === ref.path && old.kind === ref.kind && old.guid === ref.guid)) invalid('Choose an available same-account widget target.');
+      if (!this.referenceAvailable(ref, command.accountGuid, catalog, charts)
+        && !oldRefs.some(old => old.path === ref.path && old.kind === ref.kind && old.guid === ref.guid)) invalid('Choose an available same-account widget target.');
     }
   }
   private findReference(ref: { kind: HomeReferenceIssue['kind']; guid: string }, catalog: VisualizationReferenceCatalog, charts: readonly IdbSavedVisualization[]) {
@@ -289,7 +291,12 @@ export class HomeCommandHandler {
     return records.find(record => record.guid === ref.guid);
   }
   private referenceAvailable(ref: { kind: HomeReferenceIssue['kind']; guid: string }, accountGuid: string, catalog: VisualizationReferenceCatalog, charts: readonly IdbSavedVisualization[]): boolean {
-    return this.findReference(ref, catalog, charts)?.accountId === accountGuid;
+    if (this.findReference(ref, catalog, charts)?.accountId !== accountGuid) return false;
+    if (ref.kind !== 'visualization') return true;
+    const chart = charts.find(chart => chart.guid === ref.guid);
+    if (!chart) return false;
+    const read = readSavedVisualization(chart);
+    return read.state === 'valid' || read.state === 'setup-required';
   }
   private async assertUnused(tx: Tx, store: 'homeDashboards' | 'savedVisualizations', guid: string): Promise<void> {
     if ((await tx.getAllByIndex(store, 'guid', guid)).length) invalid('A proposed Home graph identity already exists.');
