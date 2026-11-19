@@ -1,4 +1,5 @@
-import { HomeDbService } from '@data/indexedDB/home-db.service';
+import { HomeDashboardsDbService } from '@data/indexedDB/home-dashboards-db.service';
+import { HomeOwnersDbService } from '@data/indexedDB/home-owners-db.service';
 /**
  * Builds a complete account workspace snapshot from persistence. It loads account-scoped
  * collections concurrently, validates account ownership, and returns deterministic ordering without publishing state.
@@ -50,7 +51,8 @@ export class AccountWorkspaceLoaderService {
     private energyUseGroupRepository: FacilityEnergyUseGroupsDbService,
     private energyUseEquipmentRepository: FacilityEnergyUseEquipmentDbService,
     private savedVisualizationsRepository: SavedVisualizationsDbService,
-    private homeRepository: HomeDbService
+    private homeDashboardsRepository: HomeDashboardsDbService,
+    private homeOwnersRepository: HomeOwnersDbService
   ) { }
 
   async load(accountGuid: string): Promise<AccountWorkspaceSnapshot> {
@@ -98,7 +100,7 @@ export class AccountWorkspaceLoaderService {
         this.energyUseGroupRepository.getAllAccountEnergyUseGroups(accountGuid),
         this.energyUseEquipmentRepository.getAllAccountEnergyUseEquipment(accountGuid),
         this.savedVisualizationsRepository.getAllAccountVisualizations(accountGuid),
-        this.homeRepository.getAllAccountDashboards(accountGuid), this.homeRepository.getAllAccountOwners(accountGuid)
+        this.homeDashboardsRepository.getAllAccountDashboards(accountGuid), this.homeOwnersRepository.getAllAccountOwners(accountGuid)
       ]);
 
       const collections = {

@@ -1,4 +1,5 @@
-import { HomeDbService } from '@data/indexedDB/home-db.service';
+import { HomeDashboardsDbService } from '@data/indexedDB/home-dashboards-db.service';
+import { HomeOwnersDbService } from '@data/indexedDB/home-owners-db.service';
 import { firstValueFrom } from 'rxjs';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from '@data/indexedDB/testing/indexed-db-test-fixtures';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
@@ -40,7 +41,7 @@ describe('Account workspace loading in Chromium', () => {
       { getAllAccountCustomGWP: byAccount('customGWP').load } as any,
       { getAllAccountEnergyUseGroups: byAccount('facilityEnergyUseGroups').load } as any,
       { getAllAccountEnergyUseEquipment: byAccount('facilityEnergyUseEquipment').load } as any,
-      new SavedVisualizationsDbService(harness.dbService, access), new HomeDbService(access)
+      new SavedVisualizationsDbService(harness.dbService, access), new HomeDashboardsDbService(harness.dbService, access), new HomeOwnersDbService(harness.dbService, access)
     );
 
     const snapshot = await loader.load(accountAFixture.account.guid as string);

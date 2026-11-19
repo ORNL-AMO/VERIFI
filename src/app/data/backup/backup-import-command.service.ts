@@ -1,4 +1,5 @@
-import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeTransferMaps, transferHomeDashboard, transferHomeOwner, summarizeHomeImport } from './home-backup';
 import { BackupFile } from '@data/models/backup-file';
 import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';

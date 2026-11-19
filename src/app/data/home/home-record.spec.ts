@@ -1,4 +1,5 @@
-import { getNewIdbHomeDashboard, getNewIdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { chartWidget, homeAccountOwner, homeDefinition, homeOwnerState } from '@domain/home/testing/home-fixtures';
 import { homeEnvelopeError, readHomeDashboard, readHomeOwner } from './home-record';
 

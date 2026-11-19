@@ -7,7 +7,8 @@ import { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transact
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState } from '@domain/home/home-dashboard';
 import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixtures';
 import { storageBlueprints } from '@data/home/testing/home-command-fixtures';

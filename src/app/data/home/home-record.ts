@@ -1,7 +1,9 @@
 import { homeReferences } from './home-widget-references';
 import { HOME_FORMAT_VERSION, HomeDashboardDefinition, HomeOwnerState, HomeWidget } from '@domain/home/home-dashboard';
 import { decodeHomeDashboard, decodeHomeOwnerState, homeJson, homePositiveInteger, homeText } from '@domain/home/home-validation';
-import { IdbHomeDashboard, IdbHomeOwner, IdbHomeRecord, HomeReferenceIssue } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
+import { IdbHomeRecord, HomeReferenceIssue } from '@data/models/idbModels/homeRecord';
 
 /** Envelopes remain stable even when an app cannot interpret the versioned payload. */
 export function homeEnvelopeError(value: unknown, payload: 'definition' | 'state'): string | undefined {

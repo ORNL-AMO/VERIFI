@@ -7,7 +7,8 @@ import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/
 import { IndexedDbCascadeDeleteService } from '@data/indexedDB/indexed-db-cascade-delete.service';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
-import { getNewIdbHomeDashboard, getNewIdbHomeOwner, IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard, IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountWorkspaceLoaderService } from '@data/account-workspace/account-workspace-loader.service';

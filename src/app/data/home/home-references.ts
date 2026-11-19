@@ -1,6 +1,8 @@
 import { homeReferences } from './home-widget-references';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, sameHomeOwner } from '@domain/home/home-dashboard';
-import { HomeReferenceIssue, IdbHomeDashboard, IdbHomeOwner, homeRecordOwner } from '@data/models/idbModels/homeDashboard';
+import { HomeReferenceIssue, homeRecordOwner } from '@data/models/idbModels/homeRecord';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { readHomeDashboard } from './home-record';
 
 export { homeReferences } from './home-widget-references';

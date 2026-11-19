@@ -1,7 +1,9 @@
 import { HOME_FORMAT_VERSION, HomeDashboardDefinition, HomeOwnerState, homeOwnerKey, sameHomeOwner } from '@domain/home/home-dashboard';
 import { decodeHomeDashboard, decodeHomeOwnerState } from '@domain/home/home-validation';
 import { VisualizationGuidMaps } from '@domain/visualizations/visualization-references';
-import { IdbHomeDashboard, IdbHomeOwner, IdbHomeRecord, HomeReferenceIssue, homeRecordOwner } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
+import { IdbHomeRecord, HomeReferenceIssue, homeRecordOwner } from '@data/models/idbModels/homeRecord';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { homeEnvelopeError } from '@data/home/home-record';
 import { sameHomeJson } from '@data/home/home-references';

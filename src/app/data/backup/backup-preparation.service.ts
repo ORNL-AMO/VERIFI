@@ -8,7 +8,8 @@ import { CURRENT_DATA_VERSION, MigrationData } from '@data/indexedDB/data-migrat
 import { StatusWarningDismissal } from '@data/models/status-warning-dismissal';
 import { normalizeVisualizationAnalysisGroup } from './visualization-backup';
 import { energyUseBackupReferencesError } from './energy-use-backup-relations';
-import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { homeBackupRelationshipsError } from './home-backup';
 
 export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION; savedVisualizations: IdbSavedVisualization[];

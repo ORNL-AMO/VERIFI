@@ -1,4 +1,5 @@
-import { getNewIdbHomeDashboard, getNewIdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { chartWidget, homeAccountOwner, homeDefinition, homeOwnerState } from '@domain/home/testing/home-fixtures';
 import { createVisualizationDefinition } from '@domain/visualizations/visualization-definition';

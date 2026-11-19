@@ -1,5 +1,5 @@
 import type { HomeDashboardDefinition } from '@domain/home/home-dashboard';
-import type { HomeReferenceIssue } from '@data/models/idbModels/homeDashboard';
+import type { HomeReferenceIssue } from '@data/models/idbModels/homeRecord';
 
 export interface HomeReference {
   /** Widget identities survive reordering; paths never use an array ordinal. */

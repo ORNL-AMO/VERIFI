@@ -3,7 +3,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { BackupComparisonService } from './backup-comparison.service';
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
 import { visualizationBackupSnapshot } from './visualization-backup.testing';
-import { getNewIdbHomeDashboard, getNewIdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { homeDefinition, homeOwnerState } from '@domain/home/testing/home-fixtures';
 
 describe('saved visualizations in facility backup comparison', () => {
