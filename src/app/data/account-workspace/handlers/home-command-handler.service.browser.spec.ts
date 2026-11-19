@@ -6,11 +6,12 @@ import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-ha
 import { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transaction.service';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState } from '@domain/home/home-dashboard';
 import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixtures';
 import { storageBlueprints } from '@data/home/testing/home-command-fixtures';
-import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
+import { readHomeDashboard, readHomeOwner, readHomeWidget } from '@data/home/home-record';
 import { HomeCommands } from '../home-commands.service';
 import { AccountWorkspaceService } from '../account-workspace.service';
 import { AccountWorkspaceStore } from '../account-workspace.store';
@@ -209,6 +210,26 @@ describe('Home atomic native commands and workspace publication', () => {
     expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, view.state!))).state).toBe('committed');
     expect(commands.ownerView(homeAccountOwner).defaultDashboardGuid).toBe(costs.guid);
     expect(store.homeOwners()[0].preservation?.references).toEqual([]);
+  });
+  it('keeps a coincident shortcut unavailable until reviewed owner and resource bindings agree', async () => {
+    const { records } = await initialize(), home = records[0];
+    const other = { ...facility, id: 2, guid: 'facility-b' };
+    const meter = { ...getNewIdbUtilityMeter(other.guid, account.guid, true, 'kWh'), guid: 'meter-a' };
+    await harness.seed({ facilities: [other], utilityMeter: [meter] });
+    const imported: IdbHomeDashboard = { ...home, definition: homeDefinition([{ id: 'shortcut', kind: 'shortcut', size: 'full', visibility: 'always',
+      destination: { area: 'data', owner: { kind: 'facility', guid: facility.guid }, resource: { kind: 'meter', guid: meter.guid } } }]), preservation: {
+      references: [{ path: 'widgets.shortcut.destination.owner.guid', kind: 'facility', guid: facility.guid, reason: 'not-transferred' },
+        { path: 'widgets.shortcut.destination.resource.guid', kind: 'meter', guid: meter.guid, reason: 'not-transferred' }], transfers: [] } };
+    await firstValueFrom(harness.dbService.update('homeDashboards', imported)); await workspace.reloadActiveWorkspace(false);
+    // Ordinary layout edits may retain protected unavailable intent.
+    expect((await commands.submit(commands.prepareUpdate(current(home.guid), { ...definition(imported), name: 'Kept layout' }))).state).toBe('committed');
+    const retained = current(home.guid), paths = retained.preservation!.references.map(ref => ref.path);
+    expect((await commands.submit(commands.prepareUpdate(retained, definition(retained), paths))).state).toBe('failed');
+    expect(current(home.guid)).toEqual(retained); expect(readHomeWidget(current(home.guid), 'shortcut').state).toBe('repair-required');
+    const valid = { ...definition(retained), widgets: [{ ...definition(retained).widgets[0], kind: 'shortcut' as const,
+      destination: { area: 'data' as const, owner: { kind: 'facility' as const, guid: other.guid }, resource: { kind: 'meter' as const, guid: meter.guid } } }] };
+    expect((await commands.submit(commands.prepareUpdate(retained, valid, paths))).state).toBe('committed');
+    expect(readHomeWidget(current(home.guid), 'shortcut').state).toBe('valid');
   });
   it('protects every affected starter after linked chart edits/deletion and exposes recoverable widget dependencies', async () => {
     const { records } = await initialize(), chart = store.savedVisualizations()[0];

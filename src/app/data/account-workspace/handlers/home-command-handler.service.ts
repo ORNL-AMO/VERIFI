@@ -245,7 +245,8 @@ export class HomeCommandHandler {
       invalid('Portfolio maps and facility progress tables require an account dashboard.');
     const old = retained && readHomeDashboard(retained);
     const oldRefs = old?.state === 'valid' ? homeReferences(old.value) : [];
-    const protectedIntent = (path: string, guid: string) => oldRefs.some(ref => ref.path === path && ref.guid === guid)
+    const acknowledged = command.kind === 'update' ? command.repairPaths ?? [] : [];
+    const protectedIntent = (path: string, guid: string) => !acknowledged.includes(path) && oldRefs.some(ref => ref.path === path && ref.guid === guid)
       && retained?.preservation?.references.some(ref => ref.path === path);
     for (const widget of read.value.widgets) {
       const owner = widget.kind === 'goal' && widget.binding.kind === 'reporting' ? widget.binding.owner : widget.kind === 'shortcut' ? widget.destination.owner : undefined;
