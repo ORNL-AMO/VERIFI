@@ -15,7 +15,7 @@ describe('facility report workbench navigation', () => {
     const { harness, open, updateName, store } = await setupReportWorkbench([reportFixture({ facilityReportType: value })]);
     const workbench = await open();
     expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name)
-      .toBe(value === 'analysis' ? 'facilityAnalysisReport' : 'report');
+      .toBe(value === 'analysis' ? 'facilityAnalysisReport' : value === 'modeling' ? 'modelingReport' : 'report');
     expect(workbench.context.stages().map(stage => stage.label)).toEqual(['analysis', 'savings', 'costSavings'].includes(value)
       ? ['Setup', 'Data Checks', `${label} Report`] : ['Setup', `${label} Report`]);
     const footer: HTMLElement = harness.routeNativeElement!.querySelector('footer')!;

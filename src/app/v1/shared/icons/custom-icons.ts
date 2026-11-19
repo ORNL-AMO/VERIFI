@@ -22,6 +22,17 @@ export const FacilityAnalysisReportIcon = [
   ['path', { d: 'M17.89127 18.125L19.1 17.42551M14.91224 14.07209L14.33723 13.07378C13.95181 12.40463 14.18053 11.549 14.84812 11.16267C15.51565 10.77633 16.36925 11.0056 16.75469 11.67475L18.4295 14.58258C18.69042 15.03553 18.82088 15.26203 18.82088 15.48693C18.82088 15.63427 18.78216 15.77903 18.70868 15.90663C18.59647 16.10144 18.37054 16.23218 17.91866 16.4937C17.46677 16.75523 17.24084 16.88596 17.01644 16.88596C16.86948 16.88596 16.72505 16.84719 16.59772 16.77349C16.40341 16.66107 16.27295 16.43458 16.01208 15.9816L15.73169 15.49485', stroke: 'currentColor', strokeWidth: 1.265, strokeLinecap: 'round', strokeLinejoin: 'round' }]
 ] as const satisfies IconSvgObject;
 
+/** Design source: src/assets/icons/modeling-report.svg. Keep geometry in sync. */
+export const ModelingReportIcon = [
+  ['path', { d: 'M13 2.5V3C13 5.82843 13 7.24264 13.8787 8.12132C14.7574 9 16.1716 9 19 9H19.5M20 10.6569V11M8 22C5 22 4 20.5 4 17V9.45584C4 6.21082 4 4.58831 4.88607 3.48933C5.06508 3.26731 5.26731 3.06508 5.48933 2.88607C6.58831 2 8.21082 2 11.4558 2C12.1614 2 12.5141 2 12.8372 2.11401C12.9044 2.13772 12.9702 2.165 13.0345 2.19575C13.3436 2.34355 13.593 2.593 14.0919 3.09188L18.8284 7.82843C19.4065 8.40649 19.6955 8.69552 19.8478 9.06306C20 9.4306 20 9.83935 20 10.6569', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M7.5 8.75h2m-2 3.25H9', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 11.5 20.1111 C 11.59433 20.5362 11.78454 21 12.28117 21 C 13.14059 21 13.35544 20.1111 14 17 C 14.64456 13.88889 14.85941 13 15.7188 13 C 16.21545 13 16.40565 13.46382 16.5 13.88889 M 12.95833 15.88889 H 15.7188', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 21 17 C 21.6902 18.6265 21.6427 19.4904 21 21', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 16.5 17 C 15.8098 18.6265 15.8573 19.4904 16.5 21', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 17.64455 17.9996 C 18.0465 17.9846 18.27575 18.032 18.41135 18.27295 C 18.57575 18.608 18.98925 19.53395 19.09175 19.736 C 19.15365 19.82445 19.23575 19.952 19.49975 19.99375 L 19.85495 20', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }],
+  ['path', { d: 'M 20.00125 18 C 19.43965 18 19.04365 18.644 18.77965 18.968 C 18.39565 19.472 17.9635 20.025 17.49805 20', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+] as const satisfies IconSvgObject;
+
 /** Design source: src/assets/icons/pump.svg. Keep geometry in sync. */
 export const PumpIcon = [
   ['path', { d: 'M4 4.5V12.5C4 16.8 7.5 19.5 12.5 19.5C17.3 19.5 21 16.6 21 12.2C21 8 17.6 5 13.3 5C11 5 8.9 5.9 7.5 7.5V4.5', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
@@ -157,6 +168,7 @@ export const CUSTOM_ICONS = {
   dataVisualization: VerifiChartIcon,
   betterPlantsReport: BetterPlantsReportIcon,
   facilityAnalysisReport: FacilityAnalysisReportIcon,
+  modelingReport: ModelingReportIcon,
   pump: PumpIcon,
   fan: FanIcon,
   processHeating: ProcessHeatingIcon,
