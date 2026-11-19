@@ -1,29 +1,97 @@
 <article aria-labelledby="home-title">
+  @let session = editor.session();
   <header class="v1-section-header">
     <p class="v1-eyebrow">{{ home.owner()?.kind === 'facility' ? 'Facility Home' : 'Account Home' }} · {{ home.ownerName() }}</p>
-    <h1 id="home-title" tabindex="-1">{{ home.definition()?.name || 'Home' }}</h1>
+    <h1 id="home-title" tabindex="-1">{{ (session?.mode === 'edit' ? session?.definition?.name : home.definition()?.name) || 'Home' }}</h1>
   </header>
   @if (!home.workspace.isReady()) {
     <p role="status">{{ home.workspace.status() === 'error' ? 'Home could not be loaded. Reopen this account to retry.' : 'Loading Home…' }}</p>
   } @else if (!home.owner()) {
     <p role="alert">Home is unavailable for this owner. Check the account and its single-facility configuration in Settings.</p>
-  } @else if (home.missing()) {
-    <section class="v1-alert v1-alert--warning"><p>This dashboard is missing, hidden, or belongs to another owner.</p><a [routerLink]="home.defaultRoute()">Open this owner’s Home</a></section>
-  } @else if (home.selected(); as entry) {
-    @if (entry.read.state !== 'valid') {
-      <p role="alert">{{ entry.read.message }} Your saved dashboard is preserved.</p>
-    } @else {
-      @if (!home.widgets().length) { <p>This dashboard has no widgets.</p> }
-      @for (shell of home.widgetShells(); track shell.widget.id) {
-        @let widget = shell.widget;
-        <section class="home-widget" [attr.aria-label]="widget.title || widget.kind">
-          <h2>{{ widget.title || widget.kind }}</h2>
-          @if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> }
-          @else { <p>{{ shell.message }}</p> }
-        </section>
-      }
-    }
   } @else {
-    <section class="home-widget"><h2>No dashboards</h2><p>Create a Blank dashboard to start your own layout. Starter templates will be available when their complete recipes ship.</p></section>
+    <div class="home-toolbar home-panel" aria-label="Dashboard actions">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!editor.canStart() || home.view()?.initialization === 'unavailable'" (click)="editor.beginCreate()">Create dashboard</button>
+      @if (home.view()?.initialization === 'legacy' && home.view()?.records?.length) {
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canStart()" (click)="editor.adopt()">Enable editing for imported dashboards</button>
+      }
+      @if (home.selected(); as entry) {
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid'" (click)="editor.beginEdit()">Edit dashboard</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid'" (click)="editor.duplicate()">Duplicate dashboard</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid' || home.configuredDefaultGuid() === entry.record.guid" (click)="editor.setDefault(entry.record.guid)">Set as default</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid'" (click)="editor.beginRestore()">Restore from template</button>
+        <button type="button" class="v1-btn v1-btn--danger" [disabled]="!editor.canStart() || !editor.adopted()" (click)="editor.requestDelete()">Delete dashboard</button>
+      }
+    </div>
+    @if (home.view()?.initialization === 'unavailable') { <p class="home-panel" role="alert">Saved owner preferences need a compatible version or explicit repair. Your dashboards and choices are preserved.</p> }
+    @if (editor.saving()) { <p class="home-panel" role="status">Saving Home change…</p> }
+    @if (session?.message) {
+      <div class="home-panel" [attr.role]="session?.proposal ? 'alert' : 'status'">
+        <p>{{ session?.message }}</p>
+        @if (editor.canRetry()) { <button type="button" class="v1-btn v1-btn--primary" (click)="editor.retry()">{{ session?.outcome?.state === 'refresh-required' ? 'Refresh saved change' : 'Retry save' }}</button> }
+        @if (session?.outcome?.state === 'failed') { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canAct()" (click)="editor.reviewRejected()">Review draft</button> }
+        @if (session?.outcome?.state === 'conflict') {
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canAct()" (click)="editor.loadConflict()">Load saved state for review</button>
+          @if (session?.conflictLoaded && (session?.mode === 'edit' || session?.mode === 'create')) {
+            <button type="button" class="v1-btn v1-btn--action" [disabled]="!editor.canAct()" (click)="editor.keepReviewedDraft()">Keep draft against reviewed version</button>
+          }
+          @if (editor.conflictOwnerChoices(); as choices) { <p>Saved Home default: {{ choices.defaultName }}. Saved order: {{ choices.order.join(' → ') }}.</p> }
+          <div class="home-conflict" aria-label="Saved and proposed dashboard versions">
+            @let saved = editor.conflictDefinition();
+            <section><h2>Saved version</h2><p>{{ saved?.name || 'Dashboard unavailable, deleted, or owner preferences changed' }}</p>@for (widget of saved?.widgets || []; track widget.id) { <p>{{ widget.title || widget.kind }} · {{ widget.size }}@if (widget.kind === 'note') { : {{ widget.text }} }</p> }</section>
+            <section><h2>Your draft</h2><p>{{ session?.definition?.name || 'The reviewed dashboard action is retained.' }}</p>@for (widget of session?.definition?.widgets || []; track widget.id) { <p>{{ widget.title || widget.kind }} · {{ widget.size }}@if (widget.kind === 'note') { : {{ widget.text }} }</p> }</section>
+          </div>
+        }
+        @if (session?.proposal && session?.outcome?.state !== 'refresh-required') { <button type="button" class="v1-btn v1-btn--danger" [disabled]="editor.saving()" (click)="editor.requestDiscard()">Discard unsaved changes</button> }
+      </div>
+    }
+    @if (session?.definition && session?.mode !== 'view') {
+      <form class="home-panel home-editor" [formGroup]="editor.form" (ngSubmit)="session?.mode === 'restore' ? editor.requestRestore() : editor.save()" aria-label="Dashboard editor">
+        <h2>{{ session?.mode === 'create' ? 'Create dashboard' : session?.mode === 'restore' ? 'Restore from template' : 'Edit dashboard' }}</h2>
+        @if (session?.mode !== 'restore') {
+          <label for="home-name">Dashboard name</label><input id="home-name" type="text" formControlName="name" autocomplete="off" [attr.aria-invalid]="editor.form.controls.name.invalid" aria-describedby="home-name-help">
+          <p id="home-name-help">Use a nonempty name. Changes stay in this draft until you save.</p>
+        }
+        @if (session?.mode !== 'edit') {
+          <label for="home-recipe">Template</label><select id="home-recipe" class="v1-select" formControlName="recipe">@for (choice of editor.catalog.choices; track choice.template) { <option [value]="choice.template">{{ choice.label }}</option> }</select>
+          <p>Only available templates are listed. Blank creates an empty dashboard.</p>
+        }
+        <div class="home-toolbar">
+          @if (session?.mode === 'restore') { <button type="submit" class="v1-btn v1-btn--danger" [disabled]="!editor.canEdit()">Review restore</button> }
+          @else { <button type="submit" class="v1-btn v1-btn--primary" [disabled]="!editor.canSave()">Save dashboard</button> }
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="editor.saving() || session?.outcome?.state === 'refresh-required'" (click)="editor.requestDiscard()">Cancel editing</button>
+        </div>
+      </form>
+    }
+    @if (home.missing()) {
+      <section class="v1-alert v1-alert--warning"><p>This dashboard is missing, hidden, or belongs to another owner.</p><a [routerLink]="home.defaultRoute()">Open this owner’s Home</a></section>
+    } @else if (home.selected(); as entry) {
+      @if (entry.read.state !== 'valid') { <p role="alert">{{ entry.read.message }} Your saved dashboard is preserved.</p> }
+      @else {
+        @if (!home.widgets().length) { <p class="home-panel">This dashboard has no visible widgets. Use Edit dashboard to customize it.</p> }
+        @for (shell of home.widgetShells(); track shell.widget.id) {
+          @let widget = shell.widget;
+          <section class="home-widget" [attr.aria-label]="widget.title || widget.kind"><h2>{{ widget.title || widget.kind }}</h2>
+            @if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> } @else { <p>{{ shell.message }}</p> }
+          </section>
+        }
+      }
+    } @else {
+      <section class="home-panel"><h2>No dashboards</h2><p>Create a Blank dashboard to start your own layout. Starter templates will be available when their complete recipes ship.</p></section>
+    }
+    @if (home.entries().length) {
+      <section class="home-panel home-order" aria-labelledby="home-order-title"><h2 id="home-order-title">Dashboard order</h2>
+        @for (entry of home.entries(); track entry.record.guid; let first = $first; let last = $last) {
+          <div class="home-toolbar" [attr.data-dashboard-guid]="entry.record.guid"><a [routerLink]="entry.route">{{ entry.name }}</a>
+            <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-label]="'Move ' + entry.name + ' earlier in Home navigation'" [disabled]="first || !editor.canStart() || !editor.adopted()" (click)="editor.moveDashboard(entry.record.guid, -1)">Move earlier</button>
+            <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-label]="'Move ' + entry.name + ' later in Home navigation'" [disabled]="last || !editor.canStart() || !editor.adopted()" (click)="editor.moveDashboard(entry.record.guid, 1)">Move later</button>
+          </div>
+        }
+      </section>
+    }
   }
 </article>
+<ng-template #confirmation>
+  @if (editor.confirmation(); as confirmation) {
+    <app-confirmation-dialog [title]="confirmation.title" titleId="home-confirm-title" cancelAriaLabel="Keep current Home state" [confirmLabel]="confirmation.label" (confirmed)="editor.confirm()" (cancelled)="editor.cancelConfirmation()"><p>{{ confirmation.detail }}</p></app-confirmation-dialog>
+  }
+</ng-template>

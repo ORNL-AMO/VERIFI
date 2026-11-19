@@ -1,10 +1,11 @@
+import { homeRouteOwner } from './home-route-owner';
 import { Injectable, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { HomeCommands } from '@data/account-workspace/home-commands.service';
 import { readHomeDashboard, readHomeWidget } from '@data/home/home-record';
 import { homeDashboardVisible, homeOwnerResolutionState } from '@data/home/home-references';
 import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
-import { HomeOwner, presentedHomeOwner } from '@domain/home/home-dashboard';
+import { HomeOwner } from '@domain/home/home-dashboard';
 import { WorkspaceContextService } from '@app/v1/shell/workspace-context.service';
 import { homeDashboardRoute, homeOwnerRoute } from '@app/v1/routing/workspace-route';
 
@@ -16,12 +17,7 @@ export class HomeContext {
   private readonly commands = inject(HomeCommands);
   readonly owner = computed<HomeOwner | undefined>(() => {
     const account = this.workspace.account(), route = this.context.routeState();
-    if (!this.workspace.isReady() || !account || route.section !== 'home') return undefined;
-    const presented = presentedHomeOwner(account, this.workspace.facilities());
-    if (!presented) return undefined;
-    if (route.contextMode === 'account') return route.accountGuid === account.guid ? presented : undefined;
-    return this.workspace.facilities().some(item => item.guid === route.facilityGuid && item.accountId === account.guid)
-      ? { kind: 'facility', guid: route.facilityGuid! } : undefined;
+    return this.workspace.isReady() && account ? homeRouteOwner(account, this.workspace.facilities(), route) : undefined;
   });
   readonly ownerName = computed(() => {
     const owner = this.owner();
