@@ -1,0 +1,2 @@
+@import '../../../shared/workbench/report-workbench-stage.css';
+:host { display: block; min-width: 0; padding-block-start: 1.25rem; }

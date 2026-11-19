@@ -60,7 +60,7 @@ describe('report inventory projections', () => {
     const data = reportSnapshot([reportFixture({ facilityReportType: value })]);
     const entry = buildReportInventory(data, [], 'ready')[0];
     expect(entry.scope).toBe('facility'); expect(entry.typeLabel).toBe(label);
-    expect(entry.snapshot.contentPending).toBe(!['analysis', 'dataQuality'].includes(value));
+    expect(entry.snapshot.contentPending).toBe(!['analysis', 'dataQuality', 'modeling'].includes(value));
   });
   it('keeps missing legacy facility settings and invalid modification dates explicit in the inventory', () => {
     const report = reportFixture({ facilityReportType: 'overview', dataOverviewReportSettings: undefined, modifiedDate: new Date('invalid') });

@@ -4,14 +4,16 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { RegressionModelValidationComponent } from '../model-validation/regression-model-validation.component';
-import { RegressionModelValidationState, groupWithGeneratedModel } from '../regression-model-validation.service';
+import { RegressionModelValidationState } from '../regression-model-validation.service';
+import { groupWithGeneratedModel } from '@shared/shared-analysis/calculations/regression-model-projection';
 import { formatRegressionNumber } from '@app/v1/analysis/facility/regression-number-format';
 import { modeledQuantityLabel } from '../regression-labels';
+import { ModelEquationModule } from '@app/v1/shared/analysis-results/model-equation/model-equation.module';
 
 @Component({
   selector: 'app-regression-model-review-slideout',
   standalone: true,
-  imports: [WorkspaceSlideoutComponent, IconComponent, RegressionModelValidationComponent],
+  imports: [WorkspaceSlideoutComponent, IconComponent, RegressionModelValidationComponent, ModelEquationModule],
   templateUrl: './regression-model-review-slideout.component.html',
   styleUrls: ['./regression-model-review-slideout.component.css']
 })

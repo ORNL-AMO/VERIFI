@@ -4,9 +4,16 @@ import { buildAnalysisReportInputs } from '@domain/reports/analysis-report-input
 import { analysisReportFixture } from '@domain/reports/testing/analysis-report-fixtures';
 import { CALCULATION_WORKER_TIMEOUT_MS } from '@platform/web-workers/run-worker';
 import { AnalysisReportCalculationService } from './analysis-report-calculation.service';
+import { calculateModelingReport } from '@domain/reports/modeling-report-calculation';
 
 describe('report calculation lifecycle', () => {
   afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
+  it('uses the same modeling calculation when Workers are unavailable', async () => {
+    vi.stubGlobal('Worker', undefined);
+    const inputs = buildAnalysisReportInputs(analysisReportFixture(), 'account-analysis');
+    expect(await firstValueFrom(new AnalysisReportCalculationService().execute({ operation: 'modeling', inputs,
+      years: [2023], chartMeters: [] }))).toEqual({ ok: true, operation: 'modeling', value: [calculateModelingReport(inputs, 2023, [])] });
+  });
   it('terminates a timed-out facility report Worker using the same timeout contract', async () => {
     vi.useFakeTimers(); const terminate = vi.fn();
     vi.stubGlobal('Worker', class { addEventListener = vi.fn(); postMessage = vi.fn(); terminate = terminate; });
