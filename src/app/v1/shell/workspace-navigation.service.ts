@@ -323,9 +323,9 @@ export class WorkspaceNavigationService {
       }
       return;
     }
-    const contextMode = this.contextMode();
-    if (sectionId === 'home') {
-      await this.setContext(contextMode);
+    if (account && sectionId === 'home') {
+      const facility = this.contextFacility();
+      await this.navigateScopeDestination(facility ? this.facilityRoute(facility.guid) : this.accountRoute(account.guid));
       return;
     }
   }

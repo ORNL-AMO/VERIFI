@@ -1,8 +1,9 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { HomeCommands } from '@data/account-workspace/home-commands.service';
-import { readHomeDashboard } from '@data/home/home-record';
-import { homeDashboardVisible } from '@data/home/home-references';
+import { readHomeDashboard, readHomeWidget } from '@data/home/home-record';
+import { homeDashboardVisible, homeOwnerResolutionState } from '@data/home/home-references';
+import { readSavedVisualization } from '@data/visualizations/saved-visualization-record';
 import { HomeOwner, presentedHomeOwner } from '@domain/home/home-dashboard';
 import { WorkspaceContextService } from '@app/v1/shell/workspace-context.service';
 import { homeDashboardRoute, homeOwnerRoute } from '@app/v1/routing/workspace-route';
@@ -38,6 +39,10 @@ export class HomeContext {
     });
   });
   readonly defaultGuid = computed(() => this.view()?.defaultDashboardGuid ?? this.entries().find(item => item.read.state === 'valid')?.record.guid);
+  readonly configuredDefaultGuid = computed(() => {
+    const view = this.view();
+    return view?.record && view.state ? homeOwnerResolutionState(view.record, view.state).defaultDashboardGuid : undefined;
+  });
   readonly selectedGuid = computed(() => this.context.routeState().homeDashboardGuid ?? this.defaultGuid());
   readonly selected = computed(() => this.entries().find(item => item.record.guid === this.selectedGuid()));
   readonly definition = computed(() => { const read = this.selected()?.read; return read?.state === 'valid' ? read.value : undefined; });
@@ -48,6 +53,20 @@ export class HomeContext {
     return (this.definition()?.widgets ?? []).filter(widget => widget.visibility === 'always'
       || widget.visibility === 'water' && water || widget.visibility === 'emissions' && this.workspace.account()?.displayEmissions);
   });
+  readonly widgetShells = computed(() => this.widgets().map(widget => {
+    const record = this.selected()!.record, read = readHomeWidget(record, widget.id);
+    if (read.state === 'repair-required') return { widget, state: 'repair-required' as const,
+      message: 'This widget has preserved unavailable relationships. Its saved intent is retained; source repair will be available in a later Home update.' };
+    if (widget.kind === 'visualization') {
+      const chart = this.workspace.savedVisualizations().find(chart => chart.guid === widget.visualizationGuid && chart.accountId === record.accountId);
+      if (!chart) return { widget, state: 'missing-source' as const, message: 'The linked saved visualization is unavailable. Its reference is preserved.' };
+      const chartRead = readSavedVisualization(chart);
+      if (chartRead.state !== 'valid' && chartRead.state !== 'setup-required') return { widget, state: chartRead.state,
+        message: 'The linked saved visualization needs review or a compatible version. Its reference is preserved.' };
+      return { widget, state: 'deferred' as const, message: 'Saved visualization linked. Chart display will be available in a later Home update.' };
+    }
+    return { widget, state: 'deferred' as const, message: 'This widget’s content will be available in a later Home update.' };
+  }));
   readonly ownerRoute = computed(() => { const owner = this.owner(); return owner ? homeOwnerRoute(owner) : ['/v1']; });
   readonly defaultRoute = computed(() => { const owner = this.owner(), guid = this.defaultGuid(); return owner && guid ? homeDashboardRoute(owner, guid) : this.ownerRoute(); });
   readonly missing = computed(() => !!this.context.routeState().homeDashboardGuid && !this.selected());

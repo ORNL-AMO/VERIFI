@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
-import { homeAccountOwner, homeOwnerState } from '@domain/home/testing/home-fixtures';
+import { homeAccountOwner, homeOwnerState, homeDefinition, chartWidget } from '@domain/home/testing/home-fixtures';
 import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { HomeContext } from './home-context.service';
 import { homeRecord, setupHome } from './testing/home-testing';
@@ -32,6 +32,18 @@ describe('Home owner navigation', () => {
     store.publish({ ...snapshot, account, homeDashboards: [{ ...record, definition }], meters: [{ ...foreignMeter, facilityId: 'facility-a' }] });
     expect(home.widgets().map(widget => widget.id)).toEqual(['water']);
     expect(store.homeOwners()).toEqual([]);
+  });
+  it('retains missing and blocked links and never labels a coincident blocked preference as a verified default', () => {
+    const { store, snapshot } = setupHome();
+    const record = { ...homeRecord('a'), definition: homeDefinition([chartWidget('missing', 'missing'), chartWidget('coincident', 'blocked')]),
+      preservation: { references: [{ path: 'widgets.blocked.visualizationGuid', kind: 'visualization' as const, guid: 'coincident', reason: 'not-transferred' as const }], transfers: [] } };
+    const owner = { ...getNewIdbHomeOwner('account-a', homeAccountOwner, homeOwnerState(['a'])),
+      preservation: { references: [{ path: 'defaultDashboardGuid', kind: 'dashboard' as const, guid: 'a', reason: 'not-transferred' as const }], transfers: [] } };
+    store.publish({ ...snapshot, homeDashboards: [record], homeOwners: [owner] });
+    const home = TestBed.inject(HomeContext);
+    expect(home.configuredDefaultGuid()).toBeUndefined();
+    expect(home.widgetShells().map(shell => shell.state)).toEqual(['missing-source', 'repair-required']);
+    expect(store.homeDashboards()[0].preservation).toEqual(record.preservation);
   });
   it('keeps an initialized empty owner empty and adopts readable imported dashboards without a marker', () => {
     const { store, snapshot } = setupHome();

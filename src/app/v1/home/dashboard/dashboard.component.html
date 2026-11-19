@@ -14,11 +14,12 @@
       <p role="alert">{{ entry.read.message }} Your saved dashboard is preserved.</p>
     } @else {
       @if (!home.widgets().length) { <p>This dashboard has no widgets.</p> }
-      @for (widget of home.widgets(); track widget.id) {
+      @for (shell of home.widgetShells(); track shell.widget.id) {
+        @let widget = shell.widget;
         <section class="home-widget" [attr.aria-label]="widget.title || widget.kind">
           <h2>{{ widget.title || widget.kind }}</h2>
           @if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> }
-          @else { <p>{{ widget.kind === 'visualization' ? 'Saved visualization linked. Chart display will be available in a later Home update.' : 'This widget’s content will be available in a later Home update.' }}</p> }
+          @else { <p>{{ shell.message }}</p> }
         </section>
       }
     }
