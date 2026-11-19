@@ -1,3 +1,4 @@
+import type { Params } from '@angular/router';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterRenderEffect, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -146,7 +147,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   private nextDraftId = 0;
   private deleteModalOpen = false;
   private saveModalOpen = false;
-  private postSaveRoute: { route: string[]; queryParams?: import('@angular/router').Params } | undefined;
+  private postSaveRoute: { route: string[]; queryParams?: Params } | undefined;
   @ViewChild('saveChangesConfirmModal') private readonly saveChangesConfirmModal?: TemplateRef<unknown>;
   @ViewChild('deleteStationConfirmModal') private readonly deleteStationConfirmModal?: TemplateRef<unknown>;
   private readonly initializeEffect = effect(() => {

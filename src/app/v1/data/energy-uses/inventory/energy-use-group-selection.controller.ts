@@ -1,3 +1,4 @@
+import type { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { DestroyRef, Injector, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { EnergyUseGroupDeletion } from '@data/account-workspace/handlers/energy-use-command.models';
@@ -129,7 +130,7 @@ export class EnergyUseGroupSelectionController {
     this.review.set(undefined); this.committed.set(false); this.selected.set([]); this.selecting.set(false);
     return true;
   }
-  private ordered(items: readonly import('@data/models/idbModels/facilityEnergyUseEquipment').IdbFacilityEnergyUseEquipment[]) {
+  private ordered(items: readonly IdbFacilityEnergyUseEquipment[]) {
     return [...items].sort((a, b) => a.guid.localeCompare(b.guid));
   }
 }

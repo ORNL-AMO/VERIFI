@@ -1,3 +1,5 @@
+import type { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import type { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
@@ -27,9 +29,9 @@ export function setupSectionNavTest() {
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
   const activePortfolioTab = signal('facilities');
   const activeEnergyUseGroupGuid = signal<string | undefined>(undefined);
-  const energyUseGroups = signal<import('@data/models/idbModels/facilityEnergyUseGroups').IdbFacilityEnergyUseGroup[]>([]);
+  const energyUseGroups = signal<IdbFacilityEnergyUseGroup[]>([]);
   const activeEnergyUseGuid = signal<string | undefined>(undefined);
-  const energyUses = signal<import('@data/models/idbModels/facilityEnergyUseEquipment').IdbFacilityEnergyUseEquipment[]>([]);
+  const energyUses = signal<IdbFacilityEnergyUseEquipment[]>([]);
   let activeDetail: ReturnType<typeof signal<string>>;
   let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
   let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;

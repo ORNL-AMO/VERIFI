@@ -1,3 +1,5 @@
+import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import type { IdbAccount } from '@data/models/idbModels/account';
 import type { IdbFacilityEnergyUseEquipment, EquipmentUtilityData } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import type { IdbFacility } from '@data/models/idbModels/facility';
 import type { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
@@ -18,9 +20,9 @@ export const energyUseItem = (overrides: Partial<IdbFacilityEnergyUseEquipment> 
   createdDate: new Date('2024-01-01'), modifiedDate: new Date('2024-01-01'), ...overrides
 });
 
-export function energyUsesSnapshot(items = [energyUseItem()]): import('@data/account-workspace/account-workspace.models').AccountWorkspaceSnapshot {
+export function energyUsesSnapshot(items = [energyUseItem()]): AccountWorkspaceSnapshot {
   return {
-    account: { guid: 'account-a', name: 'Example account' } as import('@data/models/idbModels/account').IdbAccount,
+    account: { guid: 'account-a', name: 'Example account' } as IdbAccount,
     facilities: [energyUseFacility(), energyUseFacility('facility-b', 'South plant')],
     savedVisualizations: [], energyUseEquipment: items, energyUseGroups: [energyUseGroup()],
     meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [],

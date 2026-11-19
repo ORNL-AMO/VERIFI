@@ -1,3 +1,4 @@
+import type { Type } from '@angular/core';
 import { TransferEnergyUseComponent } from '../transfer-energy-use/transfer-energy-use.component';
 import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { By } from '@angular/platform-browser';
@@ -68,7 +69,7 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     root = document.createElement('main'); root.className = 'v1-root'; root.style.overflow = 'auto'; document.body.append(root);
   });
   afterEach(async () => { fixtures.forEach(fixture => fixture.destroy()); root.remove(); vi.restoreAllMocks(); await harness.destroy(); });
-  function mount<T>(type: import('@angular/core').Type<T>): ComponentFixture<T> {
+  function mount<T>(type: Type<T>): ComponentFixture<T> {
     const fixture = TestBed.createComponent(type); fixtures.push(fixture);
     // The browser TestBed renderer otherwise removes earlier fixture roots when mounting the portal host.
     fixture.nativeElement.removeAttribute('id'); root.append(fixture.nativeElement); return fixture;

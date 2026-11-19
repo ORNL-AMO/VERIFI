@@ -1,3 +1,4 @@
+import type { StatusItem } from '@app/v1/status/status.models';
 import { Location } from '@angular/common';
 import { SpyLocation } from '@angular/common/testing';
 import { By } from '@angular/platform-browser';
@@ -86,7 +87,7 @@ describe('facility report workbench navigation', () => {
     expect(stageIcons()).not.toContain('checkmarkBadge');
     status.items.set([{ id: 'invalid-setup', severity: 'error', description: 'Select a reporting period.', destination: { kind: 'unavailable' }, entity: {
       kind: 'facility-report', guid: 'report-a', facilityGuid: 'facility-a', accountGuid: 'account-a'
-    } } as import('@app/v1/status/status.models').StatusItem]);
+    } } as StatusItem]);
     status.state.set('ready');
     harness.detectChanges();
     expect(host.querySelector('header')?.textContent).toContain('Needs attention');
