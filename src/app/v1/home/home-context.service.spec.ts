@@ -24,7 +24,7 @@ describe('Home owner navigation', () => {
       { id: 'water', kind: 'note', size: 'half', text: 'Water', visibility: 'water' },
       { id: 'emissions', kind: 'note', size: 'half', text: 'Emissions', visibility: 'emissions' }
     ] };
-    const foreignMeter = { ...getNewIdbUtilityMeter(snapshot.facilities[0]), facilityId: 'other', source: 'Water Intake' as const };
+    const foreignMeter = { ...getNewIdbUtilityMeter('facility-a', 'account-a', false, 'MMBtu'), facilityId: 'other', source: 'Water Intake' as const };
     const account = { ...snapshot.account, displayEmissions: false };
     store.publish({ ...snapshot, account, homeDashboards: [{ ...record, definition }], meters: [foreignMeter] });
     route.set(parseWorkspaceRoute('/v1/workspace/facility/facility-a/home/overview'));
