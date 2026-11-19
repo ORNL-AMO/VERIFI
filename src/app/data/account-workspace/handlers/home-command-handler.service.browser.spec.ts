@@ -6,9 +6,10 @@ import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-ha
 import { IndexedDbTransactionContext } from '@data/indexedDB/indexed-db-transaction.service';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
-import { HomeDashboardDefinition, HomeOwner, HomeOwnerState } from '@domain/home/home-dashboard';
+import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, HomeWidget } from '@domain/home/home-dashboard';
 import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixtures';
 import { storageBlueprints } from '@data/home/testing/home-command-fixtures';
 import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
@@ -251,6 +252,50 @@ describe('Home atomic native commands and workspace publication', () => {
     const repaired = { ...definition(current(home.guid)), widgets: [{ ...definition(current(home.guid)).widgets[0], visualizationGuid: chart.guid }] } as HomeDashboardDefinition;
     expect((await commands.submit(commands.prepareUpdate(current(home.guid), repaired, [path]))).state).toBe('committed');
     expect(current(home.guid).preservation?.references).toEqual([]);
+  });
+  const base = { id: 'target', size: 'half' as const, visibility: 'always' as const };
+  const missingTargets: { name: string; widget: HomeWidget }[] = [
+    { name: 'chart', widget: { ...base, kind: 'visualization', visualizationGuid: 'missing', inherit: [], overrides: {} } },
+    { name: 'reporting owner', widget: { ...base, kind: 'goal', binding: { kind: 'reporting', owner: { kind: 'facility', guid: 'missing' }, category: 'energy' } } },
+    { name: 'exact analysis', widget: { ...base, kind: 'goal', binding: { kind: 'exact', analysisGuid: 'missing' } } },
+    { name: 'shortcut owner', widget: { ...base, kind: 'shortcut', destination: { area: 'data', owner: { kind: 'facility', guid: 'missing' } } } },
+    ...(['meter', 'predictor', 'equipment', 'analysis'] as const).map(kind => ({ name: `shortcut ${kind}`, widget: { ...base, kind: 'shortcut' as const,
+      destination: { area: 'data' as const, owner: { kind: 'facility' as const, guid: facility.guid }, resource: { kind, guid: 'missing' } } } }))
+  ];
+  it.each(missingTargets)('rejects a newly missing $name target atomically in edits and fresh graphs', async ({ widget }) => {
+    const { records } = await initialize(), home = records[0];
+    const before = await harness.getAll('homeDashboards'), owners = await harness.getAll('homeOwners'), charts = await harness.getAll('savedVisualizations');
+    const value = homeDefinition([widget]);
+    expect((await commands.submit(commands.prepareUpdate(home, value))).state).toBe('failed');
+    if (widget.kind !== 'visualization') expect((await commands.submit(commands.prepareCreate(homeAccountOwner, { template: 'home', version: 1, dashboard: value, charts: [] }))).state).toBe('failed');
+    expect(await harness.getAll('homeDashboards')).toEqual(before); expect(await harness.getAll('homeOwners')).toEqual(owners);
+    expect(await harness.getAll('savedVisualizations')).toEqual(charts);
+  });
+  it('retains an unchanged deleted source but rejects a new namespace with the same unavailable GUID', async () => {
+    const { records } = await initialize(), home = records[0];
+    const meter = { ...getNewIdbUtilityMeter(facility.guid, account.guid, true, 'kWh'), guid: 'removed-source' };
+    await harness.seed({ utilityMeter: [meter] });
+    const widget: HomeWidget = { ...base, kind: 'shortcut', destination: { area: 'data', owner: { kind: 'facility', guid: facility.guid }, resource: { kind: 'meter', guid: meter.guid } } };
+    expect((await commands.submit(commands.prepareUpdate(home, homeDefinition([widget])))).state).toBe('committed');
+    const row = (await harness.getAll('utilityMeter'))[0]; await firstValueFrom(harness.dbService.delete('utilityMeter', row.id!));
+    const retained = current(home.guid);
+    const changed: HomeWidget = { ...widget, destination: { ...widget.destination, resource: { kind: 'predictor', guid: meter.guid } } };
+    expect((await commands.submit(commands.prepareUpdate(retained, homeDefinition([changed])))).state).toBe('failed');
+    expect((await commands.submit(commands.prepareUpdate(retained, { ...definition(retained), name: 'Source still unavailable' }))).state).toBe('committed');
+    expect(definition(current(home.guid)).widgets).toEqual([widget]); expect(await harness.getAll('utilityMeter')).toEqual([]);
+  });
+  it('does not treat a different foreign namespace with a coincident GUID as retained intent', async () => {
+    const { records } = await initialize(), home = records[0];
+    const meter = { ...getNewIdbUtilityMeter('foreign-facility', 'account-b', true, 'kWh'), guid: 'coincident' };
+    await harness.seed({ utilityMeter: [meter], predictor: [{ guid: meter.guid, accountId: 'account-b', facilityId: 'foreign-facility' }] });
+    const widget: HomeWidget = { ...base, kind: 'shortcut', destination: { area: 'data', owner: { kind: 'facility', guid: facility.guid }, resource: { kind: 'meter', guid: meter.guid } } };
+    const imported = { ...home, definition: homeDefinition([widget]), preservation: { references: [
+      { path: `widgets.${widget.id}.destination.resource.guid`, kind: 'meter' as const, guid: meter.guid, reason: 'not-transferred' as const }], transfers: [] } };
+    await firstValueFrom(harness.dbService.update('homeDashboards', imported)); await workspace.reloadActiveWorkspace(false);
+    expect((await commands.submit(commands.prepareUpdate(current(home.guid), { ...definition(current(home.guid)), name: 'Retained meter' }))).state).toBe('committed');
+    const changed: HomeWidget = { ...widget, destination: { ...widget.destination, resource: { kind: 'predictor', guid: meter.guid } } };
+    expect((await commands.submit(commands.prepareUpdate(current(home.guid), homeDefinition([changed])))).state).toBe('failed');
+    expect(definition(current(home.guid)).widgets).toEqual([widget]);
   });
   it('protects every affected starter after linked chart edits/deletion and exposes recoverable widget dependencies', async () => {
     const { records } = await initialize(), chart = store.savedVisualizations()[0];

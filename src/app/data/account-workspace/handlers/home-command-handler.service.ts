@@ -263,22 +263,23 @@ export class HomeCommandHandler {
     const old = retained && readHomeDashboard(retained);
     const oldRefs = old?.state === 'valid' ? homeReferences(old.value) : [];
     const acknowledged = command.kind === 'update' ? command.repairPaths ?? [] : [];
-    const protectedIntent = (path: string, guid: string) => !acknowledged.includes(path) && oldRefs.some(ref => ref.path === path && ref.guid === guid)
+    const protectedIntent = (path: string, kind: HomeReferenceIssue['kind'] | HomeOwner['kind'], guid: string) => !acknowledged.includes(path)
+      && oldRefs.some(ref => ref.path === path && ref.kind === kind && ref.guid === guid)
       && retained?.preservation?.references.some(ref => ref.path === path);
     for (const widget of read.value.widgets) {
       const owner = widget.kind === 'goal' && widget.binding.kind === 'reporting' ? widget.binding.owner : widget.kind === 'shortcut' ? widget.destination.owner : undefined;
       const ownerPath = `widgets.${widget.id}.${widget.kind === 'goal' ? 'binding' : 'destination'}.owner.guid`;
-      if (owner?.kind === 'account' && owner.guid !== command.accountGuid && !protectedIntent(ownerPath, owner.guid)) invalid('A Home widget cannot refer to another account.');
+      if (owner?.kind === 'account' && owner.guid !== command.accountGuid && !protectedIntent(ownerPath, owner.kind, owner.guid)) invalid('A Home widget cannot refer to another account.');
       if (widget.kind === 'shortcut' && widget.destination.resource && widget.destination.owner.kind === 'facility') {
         const target = this.findReference(widget.destination.resource, catalog, charts);
-        if (target && target.facilityId !== widget.destination.owner.guid && !protectedIntent(`widgets.${widget.id}.destination.resource.guid`, widget.destination.resource.guid))
+        if (target && target.facilityId !== widget.destination.owner.guid && !protectedIntent(`widgets.${widget.id}.destination.resource.guid`, widget.destination.resource.kind, widget.destination.resource.guid))
           invalid('The shortcut resource does not belong to its declared facility.');
       }
     }
     for (const ref of homeReferences(read.value)) {
       const existing = this.findReference(ref, catalog, charts);
-      if (existing && existing.accountId !== command.accountGuid && !protectedIntent(ref.path, ref.guid)) invalid('A Home widget cannot refer to another account.');
-      if (ref.kind === 'visualization' && !existing && !oldRefs.some(old => old.path === ref.path && old.guid === ref.guid)) invalid('Choose an existing same-account saved visualization.');
+      if (existing && existing.accountId !== command.accountGuid && !protectedIntent(ref.path, ref.kind, ref.guid)) invalid('A Home widget cannot refer to another account.');
+      if (!existing && !oldRefs.some(old => old.path === ref.path && old.kind === ref.kind && old.guid === ref.guid)) invalid('Choose an available same-account widget target.');
     }
   }
   private findReference(ref: { kind: HomeReferenceIssue['kind']; guid: string }, catalog: VisualizationReferenceCatalog, charts: readonly IdbSavedVisualization[]) {
