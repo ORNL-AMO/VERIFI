@@ -331,7 +331,7 @@ function analysisGroup(overrides: Record<string, unknown> = {}): IdbAnalysisItem
 
 function snapshot(overrides: Partial<AccountWorkspaceSnapshot> = {}): AccountWorkspaceSnapshot {
   const meterValue = meter({ guid: 'meter-a', groupId: 'group-a', meterReadingDataApplication: 'fullMonth' });
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: account({ dataStalenessSettings: { enabled: true, thresholdMonths: 3 } }),
     facilities: [facility({ dataStalenessSettings: { enabled: true, thresholdMonths: 3, useAccountSettings: true } })],
     meters: [meterValue],

@@ -180,7 +180,7 @@ describe('saved All Predictors and mixed monthly charts', () => {
     const period = fixture!.debugElement.query(By.directive(PeriodSettingsComponent)).componentInstance as PeriodSettingsComponent;
     period.form.controls.kind.setValue('fixed'); period.form.controls.start.setValue('2026-01'); fixture!.detectChanges();
     expect(component.hasInvalidFields()).toBe(true);
-    const update = vi.spyOn(handler, 'update').mockRejectedValueOnce(new Error('Rejected before commit'));
+    const update = vi.spyOn(handler, 'updateGraph').mockRejectedValueOnce(new Error('Rejected before commit'));
     const item = fixture!.debugElement.query(By.directive(ItemSettingsComponent)).componentInstance as ItemSettingsComponent;
     item.form.controls.label.setValue('Local production');
     await vi.waitFor(() => expect(component.editor.definition()!.series[0].overrides![0].label).toBe('Local production'));

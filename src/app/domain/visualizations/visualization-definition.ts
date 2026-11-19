@@ -1,6 +1,7 @@
 import { initializeCompositionChart } from './visualization-composition';
 import type { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { expandVisualizationDefinition, serializeVisualizationDefinition } from './visualization-source-groups';
+import type { ReportingAnalysisBinding } from '../home/home-dashboard';
 
 /** Saved intent only. Record identity, revisions, and persistence belong to Vis2. */
 export const VISUALIZATION_DEFINITION_VERSION = 3;
@@ -83,6 +84,8 @@ export interface AnalysisResultVisualizationSource extends SourceBase {
   readonly kind: 'analysis';
   readonly mode: 'result';
   readonly analysisGuid?: string;
+  /** Explicit saved rule, mutually exclusive with exact analysis/group identities. Runtime resolution is Home4. */
+  readonly reporting?: ReportingAnalysisBinding;
   readonly groupGuid?: string;
   readonly measure: 'actual' | 'calculated' | 'savings' | 'losses' | 'annual-improvement' | 'total-improvement' | 'banked-savings' | 'banked-losses';
   readonly aggregation: 'none';

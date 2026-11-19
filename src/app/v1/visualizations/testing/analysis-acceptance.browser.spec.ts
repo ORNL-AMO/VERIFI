@@ -148,7 +148,7 @@ describe('A4 composed analysis workbench acceptance', () => {
       if (component.pendingDecision()) await component.confirmDecision(); host!.detectChanges(); await wait();
       expect(component.sourcePanels()[0].context.definition.facilitySelection.kind).toBe('all'); expect(resultRequests).toHaveLength(initialWorkers);
     }
-    const handler = TestBed.inject(VisualizationCommandHandler), update = vi.spyOn(handler, 'update');
+    const handler = TestBed.inject(VisualizationCommandHandler), update = vi.spyOn(handler, 'updateGraph');
     update.mockRejectedValueOnce(new Error('Save temporarily unavailable'));
     component.editor.form.controls.title.setValue('Retry retained intent'); expect(await component.editor.flush()).toBe(false); host!.detectChanges();
     expect(component.editor.state()).toBe('error');

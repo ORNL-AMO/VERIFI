@@ -1,5 +1,6 @@
 import { savedVisualizationFacilityGuid } from '@data/visualizations/saved-visualization-record';
 import type { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
+import { protectLinkedHomeDashboards } from '@data/home/home-chart-protection';
 import { Injectable } from '@angular/core';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
@@ -105,6 +106,7 @@ export class IndexedDbCascadeDeleteService {
             const facilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid);
             const visualizations = await transaction.getAllByIndex<IdbSavedVisualization>('savedVisualizations', 'accountId', accountGuid);
             for (const record of visualizations) if (savedVisualizationFacilityGuid(record, facilities) === facility.guid) {
+              await protectLinkedHomeDashboards(transaction, accountGuid, record.guid);
               await transaction.deleteByKey('savedVisualizations', record.id!);
             }
           } else await transaction.deleteAllByIndex(

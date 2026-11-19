@@ -13,7 +13,9 @@ export type BackupDifference =
   | 'Meter Data'
   | 'Predictors'
   | 'Predictor Data'
-  | 'Saved Visualizations';
+  | 'Saved Visualizations'
+  | 'Home Dashboards'
+  | 'Home Defaults';
 
 export interface FacilityBackupDifference {
   readonly facilityName: string;
@@ -91,6 +93,14 @@ export class BackupComparisonService {
       const backupSignatures = backupVisualizations.map(signature).sort();
       const savedSignatures = savedVisualizations.map(signature).sort();
       if (JSON.stringify(backupSignatures) !== JSON.stringify(savedSignatures)) differences.push('Saved Visualizations');
+      const homeSignature = (record: { guid: string; recordVersion: number; revision: number; definition?: unknown; state?: unknown; template?: unknown; preservation?: unknown }) =>
+        JSON.stringify({ guid: record.guid, recordVersion: record.recordVersion, revision: record.revision, definition: record.definition,
+          state: record.state, template: record.template, preservation: record.preservation });
+      for (const [collection, label] of [['homeDashboards', 'Home Dashboards'], ['homeOwners', 'Home Defaults']] as const) {
+        const incoming = (backup[collection] ?? []).filter(item => item.facilityId === facility.guid).map(homeSignature).sort();
+        const stored = this.workspaceStore[collection]().filter(item => item.facilityId === accountFacility.guid).map(homeSignature).sort();
+        if (JSON.stringify(incoming) !== JSON.stringify(stored)) differences.push(label);
+      }
 
       return { facilityName: facility.name, differences };
     });

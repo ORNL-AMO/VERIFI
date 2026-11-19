@@ -21,7 +21,7 @@ export function visualizationBackupSnapshot(): AccountWorkspaceSnapshot {
     selection: { kind: 'fixed', resource: 'equipment', guids: ['equipment-a'] } }] } as VisualizationDefinition;
   const charges: VisualizationDefinition = { ...utility, sources: [{ id: 'utility', kind: 'utility', selectionMode: 'meter', selection: { kind: 'fixed', resource: 'meter', guids: ['meter-a'] }, measure: 'charge', aggregation: 'none',
     dataMode: 'billing-period', groupBy: 'meter', charge: { meterGuid: 'meter-a', chargeGuid: 'charge-a', measure: 'cost' } }] };
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account, facilities: [facility, { ...facility, guid: 'facility-extra', name: 'Other facility' }],
     meters: [{ guid: 'meter-a', accountId: account.guid, facilityId: facility.guid, groupId: 'group-a', name: 'Meter',
       charges: [{ guid: 'charge-a', name: 'Demand', chargeType: 'demand' }] } as any],

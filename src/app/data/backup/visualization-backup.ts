@@ -6,8 +6,10 @@ import { IdbSavedVisualization, SAVED_VISUALIZATION_RECORD_VERSION } from '@data
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { remapVisualizationDefinition, VisualizationGuidMaps, VisualizationReferenceKind, visualizationReferenceKey } from '@domain/visualizations/visualization-references';
+import type { HomeImportSummary } from './home-backup';
 
 export interface VisualizationImportSummary {
+  readonly home?: HomeImportSummary;
   readonly accountGuid: string;
   readonly total: number;
   readonly locked: number;
@@ -24,6 +26,7 @@ export function visualizationTransferMaps(source: BackupFile, imported: BackupFi
   const mapRecords = (kind: VisualizationReferenceKind, oldRecords: readonly { guid: string }[], newRecords: readonly { guid: string }[]) => {
     oldRecords.forEach((record, index) => add(kind, record.guid, newRecords[index]?.guid));
   };
+  if (source.backupFileType === 'Account' && imported.backupFileType === 'Account') add('account', source.account.guid, imported.account.guid);
   mapRecords('facility', source.backupFileType === 'Account' ? source.facilities : [source.facility],
     imported.backupFileType === 'Account' ? imported.facilities : [imported.facility]);
   mapRecords('meter', source.meters, imported.meters);
@@ -73,6 +76,11 @@ export function mergeVisualizationTransferMaps(all: readonly VisualizationGuidMa
 export function transferSavedVisualization(record: Readonly<IdbSavedVisualization>, accountGuid: string,
   maps: VisualizationGuidMaps, guid: string): IdbSavedVisualization {
   const result: IdbSavedVisualization = { ...structuredClone(record) };
+  if (result.homeOrigin) {
+    const origin = result.homeOrigin, map = maps[origin.owner.kind];
+    const mapped = map && Object.hasOwn(map, origin.owner.guid) ? map[origin.owner.guid] : undefined;
+    result.homeOrigin = mapped && !origin.unresolved ? { ...origin, owner: { ...origin.owner, guid: mapped } } : { ...origin, unresolved: true };
+  }
   if (result.captureOrigin) {
     const origin = result.captureOrigin;
     try {

@@ -15,6 +15,8 @@ import {
 
 const COLLECTION_STORES: Readonly<Record<MigrationCollectionName, VerifiStoreName>> = {
   savedVisualizations: 'savedVisualizations',
+  homeDashboards: 'homeDashboards',
+  homeOwners: 'homeOwners',
   accounts: 'accounts',
   facilities: 'facilities',
   meters: 'utilityMeter',

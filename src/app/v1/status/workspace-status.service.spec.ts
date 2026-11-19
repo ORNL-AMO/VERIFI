@@ -261,7 +261,7 @@ function result(
 }
 
 function workspaceSnapshot(overrides: Partial<AccountWorkspaceSnapshot> = {}): AccountWorkspaceSnapshot {
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: account(), facilities: [facility()], meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
     facilityAnalyses: [], accountAnalyses: [], accountReports: [], facilityReports: [], customEmissions: [], customFuels: [],
     customGWPs: [], energyUseGroups: [], savedVisualizations: [], energyUseEquipment: [], ...overrides
