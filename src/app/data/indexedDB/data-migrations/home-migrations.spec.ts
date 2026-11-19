@@ -1,6 +1,7 @@
 import { emptyMigrationData } from './data-migration.models';
 import { DATA_MIGRATIONS } from './data-migration.registry';
-import { getNewIdbHomeDashboard, getNewIdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { homeAccountOwner, homeDefinition, homeOwnerState } from '@domain/home/testing/home-fixtures';
 
 describe('Home migration preservation', () => {

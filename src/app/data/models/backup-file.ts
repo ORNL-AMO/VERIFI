@@ -1,5 +1,6 @@
 import { IdbSavedVisualization } from './idbModels/savedVisualization';
-import { IdbHomeDashboard, IdbHomeOwner } from './idbModels/homeDashboard';
+import { IdbHomeDashboard } from './idbModels/homeDashboard';
+import { IdbHomeOwner } from './idbModels/homeOwner';
 import { IdbAccount } from './idbModels/account';
 import { IdbAccountAnalysisItem } from './idbModels/accountAnalysisItem';
 import { IdbAccountReport } from './idbModels/accountReport';
