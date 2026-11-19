@@ -261,6 +261,22 @@ describe('Home atomic native commands and workspace publication', () => {
     expect((await commands.submit(commands.prepareUpdate(retained, valid, paths))).state).toBe('committed');
     expect(readHomeWidget(current(home.guid), 'shortcut').state).toBe('valid');
   });
+  it.each([true, false])('retains unavailable saved order/default through unrelated lifecycle commands (initialized: %s)', async initialized => {
+    const { records, record } = await initialize(), home = records[0], costs = records.find(item => item.template?.template === 'costs')!;
+    const imported = { ...record!, state: { ...ownerState(record!), initialized,
+      dashboardOrder: ['unavailable-order', ...ownerState(record!).dashboardOrder], defaultDashboardGuid: 'unavailable-default' } };
+    await firstValueFrom(harness.dbService.update('homeOwners', imported)); await workspace.reloadActiveWorkspace(false);
+    const assertIntent = () => {
+      expect(commands.ownerView(homeAccountOwner).state?.defaultDashboardGuid).toBe('unavailable-default');
+      expect(commands.ownerView(homeAccountOwner).state?.dashboardOrder[0]).toBe('unavailable-order');
+      expect(commands.ownerView(homeAccountOwner).defaultDashboardGuid).toBe(home.guid);
+    };
+    if (!initialized) { await commands.submit(commands.prepareInitialize(homeAccountOwner, storageBlueprints())); assertIntent(); }
+    expect((await commands.submit(commands.prepareCreate(homeAccountOwner, { template: 'blank', version: 1, dashboard: homeDefinition(), charts: [] }))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareDuplicate(current(home.guid)))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareUpdate(current(costs.guid), { ...definition(current(costs.guid)), visibility: 'hidden' }))).state).toBe('committed'); assertIntent();
+    expect((await commands.submit(commands.prepareDelete(current(costs.guid)))).state).toBe('committed'); assertIntent();
+  });
   it('protects every affected starter after linked chart edits/deletion and exposes recoverable widget dependencies', async () => {
     const { records } = await initialize(), chart = store.savedVisualizations()[0];
     const visualizations = TestBed.inject(SavedVisualizationCommands);
