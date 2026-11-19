@@ -1,4 +1,5 @@
-import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 /**
  * Defines the readonly snapshot, selection, lifecycle, revision, and error contracts
  * shared by the account workspace store, loader, service, and consumers.

@@ -3,9 +3,12 @@ import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
 import { twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
 import { IndexedDbTransactionService } from './indexed-db-transaction.service';
 import { TestBed } from '@angular/core/testing';
-import { getNewIdbHomeDashboard, getNewIdbHomeOwner, IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard, IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { homeAccountOwner, chartWidget, homeDefinition, homeOwnerState } from '@domain/home/testing/home-fixtures';
 import { migrateVersion22, VERIFI_DB_VERSION } from './indexed-db-schema';
+import { HomeDashboardsDbService } from './home-dashboards-db.service';
+import { HomeOwnersDbService } from './home-owners-db.service';
 
 describe('Home schema and restart in Chromium', () => {
   let harness: IndexedDbTestHarness;
@@ -40,12 +43,21 @@ describe('Home schema and restart in Chromium', () => {
     expect(await harness.getAll('homeDashboards')).toEqual([]);
     await tx.runTransaction(['homeOwners', 'homeDashboards'], 'readwrite', async context => {
       await context.add('homeOwners', owner); await context.add('homeDashboards', dashboard);
+      await context.add('homeOwners', getNewIdbHomeOwner('account-b', { kind: 'account', guid: 'account-b' }, homeOwnerState()));
+      await context.add('homeDashboards', getNewIdbHomeDashboard('account-b', { kind: 'account', guid: 'account-b' }, homeDefinition()));
     });
     const stored = await harness.getAll('homeDashboards');
     expect(stored[0].id).toEqual(expect.any(Number));
     expect((stored[0] as unknown as IdbHomeDashboard).definition).toEqual(dashboard.definition);
+    const layouts = TestBed.inject(HomeDashboardsDbService), owners = TestBed.inject(HomeOwnersDbService);
+    expect(await layouts.getAllAccountDashboards('account-a')).toEqual([stored[0]]);
+    expect(await owners.getAllAccountOwners('account-a')).toHaveLength(1);
+    expect(await owners.getStoredByGuid(owner.guid)).toMatchObject({ state: owner.state });
+    expect(await layouts.getStoredByGuid(String(stored[0].id))).toBeUndefined();
     await harness.reopen();
     expect(await harness.getAll('homeDashboards')).toEqual(stored);
     expect((await harness.getAll('homeOwners'))[0]['state']).toEqual(owner.state);
+    expect(await TestBed.inject(HomeDashboardsDbService).getStoredByGuid(dashboard.guid)).toEqual(stored[0]);
+    expect(await TestBed.inject(HomeOwnersDbService).getAllAccountOwners('account-b')).toHaveLength(1);
   });
 });

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
-import { homeRecordOwner, IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { homeRecordOwner } from '@data/models/idbModels/homeRecord';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
 import { HomeTemplateBlueprint, prepareHomeGraph } from '@data/home/home-template-graph';
 import { homeDashboardVisible } from '@data/home/home-references';

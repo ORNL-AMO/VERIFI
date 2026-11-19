@@ -276,7 +276,7 @@ function createRepositories() {
     energyUseGroups: { getAllAccountEnergyUseGroups: empty() },
     energyUseEquipment: { getAllAccountEnergyUseEquipment: empty() },
     savedVisualizations: { getAllAccountVisualizations: empty() },
-    home: { getAllAccountDashboards: empty(), getAllAccountOwners: empty() }
+    homeDashboards: { getAllAccountDashboards: empty() }, homeOwners: { getAllAccountOwners: empty() }
   };
 }
 
@@ -298,7 +298,7 @@ function createLoader(repositories: ReturnType<typeof createRepositories>): Acco
     repositories.customGWPs as any,
     repositories.energyUseGroups as any,
     repositories.energyUseEquipment as any,
-    repositories.savedVisualizations as any, repositories.home as any
+    repositories.savedVisualizations as any, repositories.homeDashboards as any, repositories.homeOwners as any
   );
 }
 

@@ -6,7 +6,9 @@ import { decodeVisualizationDefinition } from '@domain/visualizations/visualizat
 import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
-import { getNewIdbHomeDashboard, getNewIdbHomeOwner, homeRecordOwner, IdbHomeDashboard, IdbHomeOwner, HomeReferenceIssue } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard, IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeOwner, IdbHomeOwner } from '@data/models/idbModels/homeOwner';
+import { homeRecordOwner, HomeReferenceIssue } from '@data/models/idbModels/homeRecord';
 import { getNewIdbSavedVisualization, IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';

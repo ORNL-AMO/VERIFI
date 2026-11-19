@@ -1,5 +1,6 @@
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState } from '@domain/home/home-dashboard';
-import { IdbHomeDashboard, IdbHomeOwner } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeGraphProposal } from '@data/home/home-template-graph';
 import { WorkspaceWriteError } from './workspace-commands.models';
 

@@ -1,6 +1,7 @@
 import { chartWidget, homeDefinition } from '@domain/home/testing/home-fixtures';
 import { duplicateHomeReferenceIssues, homeChartDependencies } from './home-references';
-import { getNewIdbHomeDashboard, HomeReferenceIssue } from '@data/models/idbModels/homeDashboard';
+import { getNewIdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { HomeReferenceIssue } from '@data/models/idbModels/homeRecord';
 import { homeAccountOwner } from '@domain/home/testing/home-fixtures';
 
 describe('Home widget dependencies and duplication', () => {

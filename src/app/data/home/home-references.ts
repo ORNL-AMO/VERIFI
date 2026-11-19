@@ -1,5 +1,6 @@
 import { HomeDashboardDefinition, HomeOwner, sameHomeOwner } from '@domain/home/home-dashboard';
-import { HomeReferenceIssue, IdbHomeDashboard, homeRecordOwner } from '@data/models/idbModels/homeDashboard';
+import { HomeReferenceIssue, homeRecordOwner } from '@data/models/idbModels/homeRecord';
+import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { readHomeDashboard } from './home-record';
 
 export interface HomeReference {
