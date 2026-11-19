@@ -1,4 +1,5 @@
 import { IdbSavedVisualization } from './idbModels/savedVisualization';
+import { IdbHomeDashboard, IdbHomeOwner } from './idbModels/homeDashboard';
 import { IdbAccount } from './idbModels/account';
 import { IdbAccountAnalysisItem } from './idbModels/accountAnalysisItem';
 import { IdbAccountReport } from './idbModels/accountReport';
@@ -18,6 +19,9 @@ import { IdbUtilityMeterData } from './idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from './idbModels/utilityMeterGroup';
 
 export interface BackupFile {
+  /** Missing in supported pre-Home files. Empty initialized owners are explicitly represented. */
+  homeDashboards?: Array<IdbHomeDashboard>;
+  homeOwners?: Array<IdbHomeOwner>;
   dataVersion?: number;
   /** Optional only for supported backups created before saved visualizations. */
   savedVisualizations?: Array<IdbSavedVisualization>;

@@ -1,6 +1,7 @@
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import { EQUIPMENT_TYPES } from './energy-use/equipment-selection';
 import { expandVisualizationDefinition } from './visualization-source-groups';
+import { homeAnalysisBindingValid } from '../home/home-bindings';
 import { VISUALIZATION_DEFINITION_VERSION, VisualizationDefinition, VisualizationSource, VisualizationSourceKind } from './visualization-definition';
 
 export interface VisualizationIssue {
@@ -88,8 +89,9 @@ const source = variant({
     aggregation: enumeration('none', 'sum'), denominator: enumeration('selected', 'facility', 'account', 'metered-consumption') }, ['settings', 'selection', 'selectionMode', 'equipmentTypes']),
   analysis: variant({
     result: object({ ...base, kind: enumeration('analysis'), mode: enumeration('result'), analysisGuid: text, groupGuid: text,
+      reporting: (value, path, issues) => { if (!homeAnalysisBindingValid(value) || (value as { kind: string }).kind !== 'reporting') issue(issues, path, 'Choose an explicit reporting owner and category.'); },
       measure: enumeration('actual', 'calculated', 'savings', 'losses', 'annual-improvement', 'total-improvement', 'banked-savings', 'banked-losses'),
-      aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid']),
+      aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid', 'reporting']),
     model: object({ ...base, kind: enumeration('analysis'), mode: enumeration('model'), analysisGuid: text, groupGuid: text, modelId: text, comparisonModelId: text,
       measure: enumeration('actual', 'modeled', 'residual'), aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid', 'modelId', 'comparisonModelId'])
   }, false, 'mode')
@@ -207,7 +209,7 @@ function setupIssues(value: VisualizationDefinition): VisualizationIssue[] {
       if (!(selected.kind === 'energy-use' && selected.selectionMode === 'equipment-type' && selected.equipmentTypes?.length) && (!picked || picked.kind === 'fixed' && !picked.guids.length)) need(`${path}.selection`, 'Select resources.');
       if (picked && !sourceResources(selected.kind).includes(picked.resource)) need(`${path}.selection.resource`, 'Choose a resource kind supported by this source.');
     }
-    if (selected.kind === 'analysis' && !selected.analysisGuid) need(`${path}.analysisGuid`, 'Select a saved analysis.');
+    if (selected.kind === 'analysis' && !selected.analysisGuid && !(selected.mode === 'result' && selected.reporting)) need(`${path}.analysisGuid`, 'Select a saved analysis.');
     if (selected.kind === 'analysis' && selected.mode === 'model' && (!selected.modelId || !selected.groupGuid)) need(path, 'Select a saved group and durable model identity.');
     if (selected.kind === 'utility' && selected.measure === 'charge' && !selected.charge) need(`${path}.charge`, 'Select a meter and charge definition.');
     if (selected.kind === 'utility' && selected.measure !== 'charge' && selected.charge) need(`${path}.charge`, 'Charge settings require the charge measure.');
@@ -259,6 +261,12 @@ export function decodeVisualizationDefinition(value: unknown): VisualizationVali
     if (new Set(ids).size !== ids.length) issue(issues, `$.${key}`, 'Definition-local IDs must be unique.');
   }
   for (const [index, selected] of decoded.sources.entries()) {
+    if (selected.kind === 'analysis' && selected.mode === 'result' && selected.reporting) {
+      if (selected.analysisGuid !== undefined || selected.groupGuid !== undefined)
+        issue(issues, `$.sources[${index}].reporting`, 'Reporting rules cannot also pin exact analysis or group identities.');
+      if (selected.reporting.owner.kind === 'account' && selected.reporting.owner.guid !== decoded.accountGuid)
+        issue(issues, `$.sources[${index}].reporting.owner`, 'Reporting owner must belong to the definition account.');
+    }
     if ('selection' in selected && selected.selection?.kind === 'fixed' && new Set(selected.selection.guids).size !== selected.selection.guids.length)
       issue(issues, `$.sources[${index}].selection.guids`, 'Fixed selections cannot contain duplicate GUIDs.');
     if (selected.kind === 'utility' && selected.selection) {

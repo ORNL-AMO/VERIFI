@@ -29,6 +29,11 @@ Each phase remains pending until its implementation, focused validation and appl
 
 [Issue #2913](https://github.com/ORNL-AMO/VERIFI/issues/2913). Depends on Home1 and Vis2.
 
+Implementation slices remain based on `home2`: contracts/schema/reporting intent; atomic commands/workspace/lifecycle; backup/copy/deletion and integrated acceptance. Each includes focused fast/native coverage and is reviewed/published against its immediate predecessor, with cumulative review against `home2`. The reviewed Home1 contract commit is an isolated prerequisite in the first slice.
+
+Compatibility choices: two initially empty Home stores at structural schema 22; versioned record/payload envelopes independent of saved and workspace revisions; unchanged global data version; missing older collections mean no initialization evidence, while an explicit initialized empty owner never reseeds. Chart links are GUID references, and future payloads retain opaque JSON plus verified-transfer blocks. Home6 supplies immutable recipes through the Home2 graph-command contract; no incomplete template workflow is activated here.
+
+
 - [ ] Add durable dashboard/default/layout/widget records, template provenance, origin metadata, and initialization/deletion state.
 - [ ] Define serialized reporting-following bindings alongside exact named-analysis bindings, with validation and verified transfer/remapping behavior before runtime use.
 - [ ] Implement atomic creation, duplication, deletion, restore, and untouched-template upgrade commands with one committed publication and safe recovery.

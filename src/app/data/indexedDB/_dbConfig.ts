@@ -201,6 +201,16 @@ const objectStoresMeta: DBConfig['objectStoresMeta'] = [{
     ]
   },
   {
+    store: 'homeDashboards',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: []
+  },
+  {
+    store: 'homeOwners',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: []
+  },
+  {
     store: 'savedVisualizations',
     storeConfig: { keyPath: 'id', autoIncrement: true },
     storeSchema: []

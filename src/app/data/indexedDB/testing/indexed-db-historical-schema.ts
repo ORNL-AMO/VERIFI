@@ -131,8 +131,13 @@ export const VERSION_20_INDEXES: Readonly<Record<string, Readonly<Record<string,
   }
 };
 
-export function historicalIndexes(version: 19 | 20, storeName: string): Record<string, string> {
-  const indexes = { ...VERSION_20_INDEXES[storeName] };
+/** Frozen pre-Home schema; intentionally independent of current store configuration. */
+export const VERSION_21_INDEXES = { ...VERSION_20_INDEXES,
+  savedVisualizations: { guid: 'guid', accountId: 'accountId', facilityId: 'facilityId' }
+};
+
+export function historicalIndexes(version: 19 | 20 | 21, storeName: string): Record<string, string> {
+  const indexes = { ...(version === 21 ? VERSION_21_INDEXES : VERSION_20_INDEXES)[storeName] };
   if (version === 19) {
     delete indexes.guid;
     if (storeName === 'electronBackups') delete indexes.accountId;
