@@ -16,7 +16,7 @@ Saving locks the submitted proposal. Rejected writes retain that exact proposal 
 
 Restore confirms the named dashboard and owner, replacement of name/layout/widgets/saved defaults, preservation of identity/sidebar/default/visibility choices, creation of fresh recipe definitions, and retention of former charts. Routed confirmations use the shared modal portal and confirmation dialog, including canceled-dialog focus restoration.
 
-A committed publication failure retains its receipt across departure. Recovery calls `HomeCommands.recover` and never submits a mutation again or navigates to a departed selection. Rejected drafts and receipts are not durable journals; browser reload protection cannot guarantee recovery after an unconfirmed process termination.
+A committed publication failure retains its receipt across departure. Pending saved changes have an account-local recovery inbox, independent of the active owner/dashboard URL, so first creation/default redirects, deletion and hidden destinations cannot strand receipts. Recovery calls `HomeCommands.recover` and never submits a mutation again or navigates to a departed selection. Rejected drafts and receipts are not durable journals; browser reload protection cannot guarantee recovery after an unconfirmed process termination.
 
 ## Presentation boundary
 

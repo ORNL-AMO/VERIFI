@@ -85,6 +85,22 @@ export class HomeEditor {
   readonly canSave = computed(() => this.canEdit() && this.session()?.mode !== 'restore'
     && !!this.session()?.dirty && decodeHomeDashboard(this.session()?.definition).state === 'valid');
   readonly canRetry = computed(() => this.canAct() && !!this.session()?.proposal && ['failed', 'refresh-required'].includes(this.session()?.outcome?.state ?? ''));
+  readonly canRecoverPublication = computed(() => this.home.workspace.isReady() && !!this.home.workspace.account()
+    && !this.home.workspace.hasPending() && !this.saving());
+  readonly pendingPublications = computed(() => {
+    const account = this.home.workspace.account(), key = this.key();
+    if (!this.home.workspace.isReady() || !account) return [];
+    return [...this.sessions().values()].filter(session => session.accountGuid === account.guid && session.key !== key && session.outcome?.state === 'refresh-required')
+      .map(session => {
+        const command = session.proposal!;
+        const name = session.definition?.name || readDefinition(session.baseline)?.name || (command.kind === 'duplicate' ? command.name
+          : command.kind === 'create' || command.kind === 'restore' || command.kind === 'upgrade' ? command.graph.dashboards[0]?.definition.name : undefined);
+        const ownerName = session.owner.kind === 'account' ? account.name : this.home.workspace.facilities().find(item => item.guid === session.owner.guid)?.name ?? 'Unavailable facility';
+        return { key: session.key, label: `${name || 'Home navigation change'} · ${ownerName}` };
+      });
+  });
+  private readonly publicationNotice = signal<{ readonly accountGuid: string; readonly message: string } | undefined>(undefined);
+  readonly publicationMessage = computed(() => this.publicationNotice()?.accountGuid === this.home.workspace.account()?.guid ? this.publicationNotice()?.message : undefined);
   readonly form = new FormGroup({ name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     recipe: new FormControl<HomeTemplate>('blank', { nonNullable: true }) });
   readonly conflictDefinition = computed(() => {
@@ -114,7 +130,7 @@ export class HomeEditor {
     const preflight = changes.registerNavigationPreflight(() => this.resolveLeave());
     this.destroy.onDestroy(() => { unregister(); unload(); preflight(); this.finishLeave(false); });
     this.router.events.pipe(filter(event => event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError || event instanceof NavigationSkipped), takeUntilDestroyed()).subscribe(event => {
-      if (event instanceof NavigationEnd) this.navigationEpoch++;
+      if (event instanceof NavigationEnd) { this.navigationEpoch++; this.publicationNotice.set(undefined); }
       if (!(event instanceof NavigationCancel && event.code === NavigationCancellationCode.Redirect)) this.receiptDeparture.set(undefined);
     });
     effect(() => {
@@ -228,7 +244,7 @@ export class HomeEditor {
   requestDelete(): void {
     const session = this.current(), selected = this.home.selected();
     if (!session || !selected || !this.canStart() || this.confirmation() || !this.adopted()) return;
-    this.put(session);
+    this.put({ ...session, baseline: structuredClone(selected.record) });
     this.confirmation.set({ key: session.key, revision: session.revision, kind: 'delete', title: `Delete “${selected.name}”?`,
       detail: `Delete this dashboard from ${this.home.ownerName()}. Linked saved visualizations and source data will remain.`, label: 'Delete dashboard', command: this.commands.prepareDelete(selected.record) });
   }
@@ -284,6 +300,21 @@ export class HomeEditor {
   }
   private finishLeave(allow: boolean): void { const resolve = this.leaveResolve; this.leaveResolve = undefined; this.leavePromise = undefined; resolve?.(allow); }
   retry(): Promise<void> { const session = this.session(); return session && this.canRetry() ? this.execute(session.key) : Promise.resolve(); }
+  /** Account-local inbox recovery remains reachable after default redirects or dashboard deletion. */
+  async recoverPublication(key: string): Promise<void> {
+    const session = this.sessions().get(key), command = session?.proposal;
+    if (!session || !command || session.outcome?.state !== 'refresh-required' || !this.canRecoverPublication()
+      || command.accountGuid !== this.home.workspace.account()?.guid) return;
+    const navigationEpoch = this.navigationEpoch, viewEpoch = this.viewEpoch;
+    this.patch(key, { saving: true, message: undefined });
+    try {
+      await this.commands.recover(command.accountGuid, command.operationGuid);
+      this.complete(key, 'Saved change refreshed.');
+      this.publicationNotice.set({ accountGuid: command.accountGuid, message: 'Saved Home change refreshed. Your current dashboard selection is unchanged.' });
+      if (navigationEpoch === this.navigationEpoch && viewEpoch === this.viewEpoch && this.home.workspace.account()?.guid === command.accountGuid) this.focus('heading');
+    } catch (error) { this.patch(key, { message: message(error) }); this.publicationNotice.set({ accountGuid: command.accountGuid, message: 'The saved Home change could not refresh. Keep it for another recovery attempt.' }); }
+    finally { this.patch(key, { saving: false }); }
+  }
   reviewRejected(): void {
     const session = this.session();
     if (session?.outcome?.state !== 'failed' || !this.canAct()) return;

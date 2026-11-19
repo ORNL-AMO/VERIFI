@@ -83,6 +83,21 @@ describe('Home protected lifecycle drafts', () => {
     expect(await router.navigateByUrl('/blocked')).toBe(false);
     expect(editor.needsProtection()).toBe(true);
   });
+  it('recovers an overview-origin creation from the account inbox without replacing another active draft or selection', async () => {
+    const { editor, submit, commands, store, snapshot, route } = setupEditor();
+    store.publish(snapshot); route.set(parseWorkspaceRoute('/v1/workspace/account/account-a/home/overview'));
+    submit.mockImplementation(async command => ({ state: 'refresh-required', command, error: new Error('Refresh failed') }));
+    const recover = vi.spyOn(commands, 'recover').mockResolvedValue(), navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    editor.beginCreate(); TestBed.tick(); editor.form.controls.name.setValue('First creation'); await editor.save();
+    const pendingKey = editor.session()!.key, command = editor.session()!.proposal!;
+    const created = homeRecord('created', 'First creation'), owner = getNewIdbHomeOwner('account-a', homeAccountOwner, homeOwnerState(['created']));
+    store.publish({ ...snapshot, homeDashboards: [created], homeOwners: [owner] });
+    route.set(parseWorkspaceRoute('/v1/workspace/account/account-a/home/dashboard/created')); TestBed.tick();
+    expect(editor.pendingPublications().map(entry => entry.key)).toEqual([pendingKey]);
+    nameDraft(editor, 'Another active draft'); await editor.recoverPublication(pendingKey);
+    expect(recover).toHaveBeenCalledWith('account-a', command.operationGuid); expect(submit).toHaveBeenCalledTimes(1); expect(navigate).not.toHaveBeenCalled();
+    expect(editor.pendingPublications()).toEqual([]); expect(editor.session()?.definition?.name).toBe('Another active draft'); expect(editor.needsProtection()).toBe(true);
+  });
   it('guards leave choices against newer edits and preserves canceled drafts', async () => {
     const { editor } = setupEditor(); nameDraft(editor, 'Protected');
     const leaving = editor.resolveLeave(); editor.cancelConfirmation(); expect(await leaving).toBe(false);

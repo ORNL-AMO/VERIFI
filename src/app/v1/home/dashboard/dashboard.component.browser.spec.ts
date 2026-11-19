@@ -162,6 +162,37 @@ describe('Home lifecycle with native storage and routing in Chromium', () => {
     expect(editor.session()?.proposal).toBeUndefined();
   });
 
+  it.each(['first creation', 'last deletion'] as const)('keeps %s publication recovery reachable after account departure and return', async scenario => {
+    if (scenario === 'last deletion') await create('Last dashboard');
+    const commands = TestBed.inject(HomeCommands), submit = vi.spyOn(commands, 'submit'), execute = vi.spyOn(TestBed.inject(HomeCommandHandler), 'execute');
+    if (scenario === 'first creation') {
+      await click('Create dashboard'); await page.getByLabelText('Dashboard name', { exact: true }).fill('First dashboard');
+    } else await click('Delete dashboard');
+    const reload = vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication unavailable'));
+    await click(scenario === 'first creation' ? 'Save dashboard' : 'Delete dashboard'); reload.mockRestore();
+    const operation = TestBed.inject(HomeEditor).session()!.proposal!.operationGuid;
+    const departing = TestBed.inject(WorkspaceNavigationService).openWorkspace(accountB.guid);
+    await vi.waitFor(() => { fixture.detectChanges(); expect(root.querySelector('[role=dialog]')).not.toBeNull(); });
+    await page.getByRole('button', { name: 'Leave and recover later', exact: true }).click(); await departing; await settle();
+    await TestBed.inject(WorkspaceNavigationService).openWorkspace(account.guid); await settle();
+    const editor = TestBed.inject(HomeEditor), key = editor.pendingPublications()[0]?.key;
+    expect(key).toBeDefined(); expect(root.textContent).toContain('Saved Home changes need refresh');
+    if (scenario === 'first creation') { await click('Edit dashboard'); await page.getByLabelText('Dashboard name', { exact: true }).fill('Unsaved follow-up'); }
+    store.selectFacility(store.facilities()[0]); const selectedFacility = store.selectedFacility()?.guid, url = router.url, writes = execute.mock.calls.length, submissions = submit.mock.calls.length;
+    const recover = vi.spyOn(commands, 'recover');
+    await click('Refresh saved Home change');
+    expect(recover).toHaveBeenCalledWith(account.guid, operation); expect(execute).toHaveBeenCalledTimes(writes); expect(submit).toHaveBeenCalledTimes(submissions);
+    expect(router.url).toBe(url); expect(store.selectedFacility()?.guid).toBe(selectedFacility);
+    expect(store.committedRevision()?.accountGuid).toBe(account.guid); expect(editor.pendingPublications()).toEqual([]);
+    if (scenario === 'first creation') {
+      expect(editor.session()?.definition?.name).toBe('Unsaved follow-up');
+      expect((root.querySelector('#home-name') as HTMLInputElement).value).toBe('Unsaved follow-up');
+      expect(editor.needsProtection()).toBe(true);
+    }
+    expect(store.homeDashboards()).toHaveLength(scenario === 'first creation' ? 1 : 0);
+    expect(await harness.getAll('homeDashboards')).toHaveLength(scenario === 'first creation' ? 1 : 0);
+  });
+
   it('adopts an imported nonempty set explicitly without creating starter dashboards or charts', async () => {
     const imported = { ...getNewIdbHomeDashboard(account.guid, { kind: 'account', guid: account.guid }, { ...homeDefinition(), name: 'Imported board' }), id: 1 };
     await harness.seed({ homeDashboards: [imported] }); await workspace.reloadActiveWorkspace(false);

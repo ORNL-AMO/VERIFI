@@ -4,6 +4,15 @@
     <p class="v1-eyebrow">{{ home.owner()?.kind === 'facility' ? 'Facility Home' : 'Account Home' }} · {{ home.ownerName() }}</p>
     <h1 id="home-title" tabindex="-1">{{ (session?.mode === 'edit' ? session?.definition?.name : home.definition()?.name) || 'Home' }}</h1>
   </header>
+  @if (editor.publicationMessage()) { <p class="home-panel" role="status">{{ editor.publicationMessage() }}</p> }
+  @if (editor.pendingPublications().length) {
+    <section class="home-panel" role="alert" aria-labelledby="home-pending-title"><h2 id="home-pending-title">Saved Home changes need refresh</h2>
+      <p>These changes are already saved. Refresh them without saving again or leaving your current dashboard.</p>
+      @for (pending of editor.pendingPublications(); track pending.key) {
+        <p>{{ pending.label }} <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canRecoverPublication()" (click)="editor.recoverPublication(pending.key)">Refresh saved Home change</button></p>
+      }
+    </section>
+  }
   @if (!home.workspace.isReady()) {
     <p role="status">{{ home.workspace.status() === 'error' ? 'Home could not be loaded. Reopen this account to retry.' : 'Loading Home…' }}</p>
   } @else if (!home.owner()) {
