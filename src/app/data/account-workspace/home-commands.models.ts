@@ -21,7 +21,7 @@ export type HomeCommand = HomeCommandIdentity & (
       readonly name: string; readonly createdDate: string; readonly widgetIds: Readonly<Record<string, string>> }
   | { readonly kind: 'restore' | 'upgrade'; readonly guid: string; readonly expectedRevision: number; readonly graph: HomeGraphProposal }
   | { readonly kind: 'delete'; readonly guid: string; readonly expectedRevision: number }
-  | { readonly kind: 'configure'; readonly state: HomeOwnerState }
+  | { readonly kind: 'configure'; readonly state: HomeOwnerState; readonly repairPaths?: readonly string[] }
 );
 export interface HomeCommandValue {
   readonly owner: IdbHomeOwner;

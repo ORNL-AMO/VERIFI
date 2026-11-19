@@ -71,10 +71,9 @@ export class HomeCommandHandler {
         const available = owner ? homeOwnerResolutionState(owner, next) : next;
         return withDefault(next, resolveHomeDefault({ ...available, ...(preferred ? { defaultDashboardGuid: preferred } : {}) }, visible(records)));
       };
-      const writeOwner = async (next: HomeOwnerState, acknowledgeReferences = false): Promise<IdbHomeOwner> => {
+      const writeOwner = async (next: HomeOwnerState, references?: readonly HomeReferenceIssue[]): Promise<IdbHomeOwner> => {
         if (owner) {
-          const preservation = owner.preservation && acknowledgeReferences ? { ...owner.preservation,
-            references: owner.preservation.references.filter(ref => ref.path !== 'defaultDashboardGuid' && !ref.path.startsWith('dashboardOrder.')) } : owner.preservation;
+          const preservation = owner.preservation && references ? { ...owner.preservation, references } : owner.preservation;
           if (sameHomeJson(owner.state, next) && sameHomeJson(owner.preservation, preservation)) return owner;
           owner = { ...owner, state: structuredClone(next), revision: owner.revision + 1, modifiedDate: new Date(), ...(preservation ? { preservation } : {}) };
           await tx.put('homeOwners', owner);
@@ -103,9 +102,22 @@ export class HomeCommandHandler {
       if (submitted.kind === 'configure') {
         const read = decodeHomeOwnerState(submitted.state);
         if (read.state !== 'valid' || !read.value.initialized || !sameHomeJson(read.value.deletedStarters, state.deletedStarters)
-          || !sameSet(read.value.dashboardOrder, dashboards.map(record => record.guid))
-          || read.value.defaultDashboardGuid !== undefined && !visible(dashboards).includes(read.value.defaultDashboardGuid)) invalid('Choose this owner’s complete dashboard order and an available default.');
-        const revision = owner.revision, configured = await writeOwner(read.value, true);
+          || dashboards.some(record => !read.value.dashboardOrder.includes(record.guid))
+          || read.value.dashboardOrder.some(guid => !dashboards.some(record => record.guid === guid) && !state.dashboardOrder.includes(guid))
+          || read.value.defaultDashboardGuid !== state.defaultDashboardGuid && read.value.defaultDashboardGuid !== undefined
+            && !visible(dashboards).includes(read.value.defaultDashboardGuid)) invalid('Retain this owner’s dashboards and choose an available new default.');
+        const acknowledged = new Set(submitted.repairPaths ?? []), references = owner.preservation?.references ?? [];
+        for (const path of acknowledged) {
+          const ref = references.find(ref => ref.path === path && ref.kind === 'dashboard');
+          if (!ref || (path === 'defaultDashboardGuid'
+            ? read.value.defaultDashboardGuid !== undefined && !visible(dashboards).includes(read.value.defaultDashboardGuid)
+            : path !== `dashboardOrder.${ref.guid}` || read.value.dashboardOrder.includes(ref.guid) && !dashboards.some(record => record.guid === ref.guid)))
+            invalid('Only explicitly reviewed, available owner preferences or their removal may be acknowledged.');
+        }
+        const remaining = references.filter(ref => !acknowledged.has(ref.path)
+          && !(ref.path === 'defaultDashboardGuid' && read.value.defaultDashboardGuid !== state.defaultDashboardGuid)
+          && !state.dashboardOrder.some(guid => ref.path === `dashboardOrder.${guid}` && !read.value.dashboardOrder.includes(guid)));
+        const revision = owner.revision, configured = await writeOwner(read.value, remaining);
         return { owner: configured, changed: configured.revision !== revision };
       }
       const guid = submitted.kind === 'duplicate' ? submitted.sourceGuid : submitted.guid;
@@ -290,7 +302,6 @@ function sameSet(a: readonly string[], b: readonly string[]): boolean {
   return first.size === second.size && [...first].every(value => second.has(value));
 }
 function completeOrder(order: readonly string[], dashboards: readonly IdbHomeDashboard[]): string[] {
-  // Unavailable entries are durable intent; ordinary lifecycle writes only append known layouts.
   return [...order, ...dashboards.filter(record => !order.includes(record.guid)).map(record => record.guid)];
 }
 function withDefault(state: HomeOwnerState, guid: string | undefined): HomeOwnerState {

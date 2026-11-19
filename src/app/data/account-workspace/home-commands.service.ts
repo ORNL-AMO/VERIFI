@@ -71,8 +71,8 @@ export class HomeCommands {
     return { ...identity, kind, guid: record.guid, expectedRevision: record.revision,
       graph: { ...graph, dashboards: graph.dashboards.map(dashboard => ({ ...dashboard, guid: record.guid })) } };
   }
-  prepareConfigure(owner: HomeOwner, state: HomeOwnerState): HomeCommand {
-    return { ...this.identity(owner), kind: 'configure', state: structuredClone(state) };
+  prepareConfigure(owner: HomeOwner, state: HomeOwnerState, repairPaths?: readonly string[]): HomeCommand {
+    return { ...this.identity(owner), kind: 'configure', state: structuredClone(state), ...(repairPaths ? { repairPaths: [...repairPaths] } : {}) };
   }
 
   submit(command: HomeCommand): Promise<HomeCommandOutcome> {
