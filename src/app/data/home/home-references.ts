@@ -1,4 +1,5 @@
-import { HomeDashboardDefinition, HomeOwner, sameHomeOwner } from '@domain/home/home-dashboard';
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
+import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, sameHomeOwner } from '@domain/home/home-dashboard';
 import { HomeReferenceIssue, homeRecordOwner } from '@data/models/idbModels/homeRecord';
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { readHomeDashboard } from './home-record';
@@ -39,6 +40,13 @@ export function sameHomeJson(a: unknown, b: unknown): boolean {
   if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
   const keys = Object.keys(a);
   return keys.length === Object.keys(b).length && keys.every(key => Object.hasOwn(b, key) && sameHomeJson(a[key], b[key]));
+}
+/** Preserve raw unavailable defaults, but never let a coincident destination identity verify them. */
+export function homeOwnerResolutionState(record: Readonly<IdbHomeOwner>, state: HomeOwnerState): HomeOwnerState {
+  const blocked = record.preservation?.references ?? [];
+  const { defaultDashboardGuid, ...rest } = state;
+  return { ...rest, dashboardOrder: state.dashboardOrder.filter(guid => !blocked.some(ref => ref.path === `dashboardOrder.${guid}`)),
+    ...(defaultDashboardGuid && !blocked.some(ref => ref.path === 'defaultDashboardGuid') ? { defaultDashboardGuid } : {}) };
 }
 export function homeDashboardVisible(record: Readonly<IdbHomeDashboard>, catalog: {
   readonly account: { readonly displayEmissions?: boolean };

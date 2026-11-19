@@ -12,7 +12,7 @@ import { homeRecordOwner, HomeReferenceIssue } from '@data/models/idbModels/home
 import { getNewIdbSavedVisualization, IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
-import { duplicateHomeReferenceIssues, homeDashboardVisible, homeReferences, sameHomeJson } from '@data/home/home-references';
+import { duplicateHomeReferenceIssues, homeDashboardVisible, homeOwnerResolutionState, homeReferences, sameHomeJson } from '@data/home/home-references';
 import { HomeGraphProposal } from '@data/home/home-template-graph';
 import { HomeCommand, HomeCommandValue, HomeConflictError } from '../home-commands.models';
 import { WorkspaceWriteError } from '../workspace-commands.models';
@@ -38,6 +38,7 @@ export class HomeCommandHandler {
       if (ownerRead && ownerRead.state !== 'valid') invalid('This preserved Home owner needs review or a compatible VERIFI version.');
       const state: HomeOwnerState = ownerRead?.state === 'valid' ? ownerRead.value
         : { version: 1, initialized: false, dashboardOrder: [], deletedStarters: [] };
+      const resolution = owner ? homeOwnerResolutionState(owner, state) : state;
       const dashboards = (await tx.getAllByIndex<IdbHomeDashboard>('homeDashboards', 'accountId', submitted.accountGuid))
         .filter(record => sameHomeOwner(homeRecordOwner(record), submitted.owner));
       if (submitted.kind === 'initialize' && state.initialized) return { owner, changed: false, skipped: 'initialized' };
@@ -67,12 +68,14 @@ export class HomeCommandHandler {
       const visible = (records: readonly IdbHomeDashboard[]) => records.filter(record => homeDashboardVisible(record, { account, meters: catalog.meters })).map(record => record.guid);
       const initialDefault = (next: HomeOwnerState, records: readonly IdbHomeDashboard[], preferred?: string): HomeOwnerState => {
         if (state.defaultDashboardGuid !== undefined || owner?.preservation?.references.some(ref => ref.path === 'defaultDashboardGuid')) return next;
-        return withDefault(next, resolveHomeDefault({ ...next, ...(preferred ? { defaultDashboardGuid: preferred } : {}) }, visible(records)));
+        const available = owner ? homeOwnerResolutionState(owner, next) : next;
+        return withDefault(next, resolveHomeDefault({ ...available, ...(preferred ? { defaultDashboardGuid: preferred } : {}) }, visible(records)));
       };
-      const writeOwner = async (next: HomeOwnerState): Promise<IdbHomeOwner> => {
+      const writeOwner = async (next: HomeOwnerState, references?: readonly HomeReferenceIssue[]): Promise<IdbHomeOwner> => {
         if (owner) {
-          if (sameHomeJson(owner.state, next)) return owner;
-          owner = { ...owner, state: structuredClone(next), revision: owner.revision + 1, modifiedDate: new Date() };
+          const preservation = owner.preservation && references ? { ...owner.preservation, references } : owner.preservation;
+          if (sameHomeJson(owner.state, next) && sameHomeJson(owner.preservation, preservation)) return owner;
+          owner = { ...owner, state: structuredClone(next), revision: owner.revision + 1, modifiedDate: new Date(), ...(preservation ? { preservation } : {}) };
           await tx.put('homeOwners', owner);
         } else {
           owner = getNewIdbHomeOwner(submitted.accountGuid, submitted.owner, next);
@@ -99,10 +102,23 @@ export class HomeCommandHandler {
       if (submitted.kind === 'configure') {
         const read = decodeHomeOwnerState(submitted.state);
         if (read.state !== 'valid' || !read.value.initialized || !sameHomeJson(read.value.deletedStarters, state.deletedStarters)
-          || !sameSet(read.value.dashboardOrder, dashboards.map(record => record.guid))
-          || read.value.defaultDashboardGuid !== undefined && !visible(dashboards).includes(read.value.defaultDashboardGuid)) invalid('Choose this owner’s complete dashboard order and an available default.');
-        const changed = !sameHomeJson(owner.state, read.value);
-        return { owner: await writeOwner(read.value), changed };
+          || dashboards.some(record => !read.value.dashboardOrder.includes(record.guid))
+          || read.value.dashboardOrder.some(guid => !dashboards.some(record => record.guid === guid) && !state.dashboardOrder.includes(guid))
+          || read.value.defaultDashboardGuid !== state.defaultDashboardGuid && read.value.defaultDashboardGuid !== undefined
+            && !visible(dashboards).includes(read.value.defaultDashboardGuid)) invalid('Retain this owner’s dashboards and choose an available new default.');
+        const acknowledged = new Set(submitted.repairPaths ?? []), references = owner.preservation?.references ?? [];
+        for (const path of acknowledged) {
+          const ref = references.find(ref => ref.path === path && ref.kind === 'dashboard');
+          if (!ref || (path === 'defaultDashboardGuid'
+            ? read.value.defaultDashboardGuid !== undefined && !visible(dashboards).includes(read.value.defaultDashboardGuid)
+            : path !== `dashboardOrder.${ref.guid}` || read.value.dashboardOrder.includes(ref.guid) && !dashboards.some(record => record.guid === ref.guid)))
+            invalid('Only explicitly reviewed, available owner preferences or their removal may be acknowledged.');
+        }
+        const remaining = references.filter(ref => !acknowledged.has(ref.path)
+          && !(ref.path === 'defaultDashboardGuid' && read.value.defaultDashboardGuid !== state.defaultDashboardGuid)
+          && !state.dashboardOrder.some(guid => ref.path === `dashboardOrder.${guid}` && !read.value.dashboardOrder.includes(guid)));
+        const revision = owner.revision, configured = await writeOwner(read.value, remaining);
+        return { owner: configured, changed: configured.revision !== revision };
       }
       const guid = submitted.kind === 'duplicate' ? submitted.sourceGuid : submitted.guid;
       const current = dashboards.find(record => record.guid === guid);
@@ -112,8 +128,10 @@ export class HomeCommandHandler {
         const remaining = dashboards.filter(record => record.guid !== current.guid);
         const automaticTemplate = readHomeDashboard(current).state === 'valid' && current.template?.automatic ? current.template.template : undefined;
         const deletedStarters = automaticTemplate ? [...new Set([...state.deletedStarters, automaticTemplate])] : state.deletedStarters;
-        let next: HomeOwnerState = { ...state, dashboardOrder: completeOrder(state.dashboardOrder.filter(guid => guid !== current.guid), remaining), deletedStarters };
-        if (state.defaultDashboardGuid === current.guid) next = withDefault(next, resolveHomeDefault(withDefault(next, undefined), visible(remaining)));
+        const order = state.dashboardOrder.filter(guid => guid !== current.guid || !resolution.dashboardOrder.includes(guid));
+        let next: HomeOwnerState = { ...state, dashboardOrder: completeOrder(order, remaining), deletedStarters };
+        if (resolution.defaultDashboardGuid === current.guid) next = withDefault(next,
+          resolveHomeDefault(homeOwnerResolutionState(owner, withDefault(next, undefined)), visible(remaining)));
         return { owner: await writeOwner(next), changed: true };
       }
       const read = readHomeDashboard(current);
@@ -242,19 +260,24 @@ export class HomeCommandHandler {
     if (read.state !== 'valid') invalid('The Home layout or settings are malformed or unsupported.');
     if (command.owner.kind === 'facility' && read.value.widgets.some(widget => widget.kind === 'map' || widget.kind === 'table' && widget.settings.view === 'facility-progress'))
       invalid('Portfolio maps and facility progress tables require an account dashboard.');
-    for (const widget of read.value.widgets) {
-      const owner = widget.kind === 'goal' && widget.binding.kind === 'reporting' ? widget.binding.owner : widget.kind === 'shortcut' ? widget.destination.owner : undefined;
-      if (owner?.kind === 'account' && owner.guid !== command.accountGuid) invalid('A Home widget cannot refer to another account.');
-      if (widget.kind === 'shortcut' && widget.destination.resource && widget.destination.owner.kind === 'facility') {
-        const target = this.findReference(widget.destination.resource, catalog, charts);
-        if (target && target.facilityId !== widget.destination.owner.guid) invalid('The shortcut resource does not belong to its declared facility.');
-      }
-    }
     const old = retained && readHomeDashboard(retained);
     const oldRefs = old?.state === 'valid' ? homeReferences(old.value) : [];
+    const acknowledged = command.kind === 'update' ? command.repairPaths ?? [] : [];
+    const protectedIntent = (path: string, guid: string) => !acknowledged.includes(path) && oldRefs.some(ref => ref.path === path && ref.guid === guid)
+      && retained?.preservation?.references.some(ref => ref.path === path);
+    for (const widget of read.value.widgets) {
+      const owner = widget.kind === 'goal' && widget.binding.kind === 'reporting' ? widget.binding.owner : widget.kind === 'shortcut' ? widget.destination.owner : undefined;
+      const ownerPath = `widgets.${widget.id}.${widget.kind === 'goal' ? 'binding' : 'destination'}.owner.guid`;
+      if (owner?.kind === 'account' && owner.guid !== command.accountGuid && !protectedIntent(ownerPath, owner.guid)) invalid('A Home widget cannot refer to another account.');
+      if (widget.kind === 'shortcut' && widget.destination.resource && widget.destination.owner.kind === 'facility') {
+        const target = this.findReference(widget.destination.resource, catalog, charts);
+        if (target && target.facilityId !== widget.destination.owner.guid && !protectedIntent(`widgets.${widget.id}.destination.resource.guid`, widget.destination.resource.guid))
+          invalid('The shortcut resource does not belong to its declared facility.');
+      }
+    }
     for (const ref of homeReferences(read.value)) {
       const existing = this.findReference(ref, catalog, charts);
-      if (existing && existing.accountId !== command.accountGuid) invalid('A Home widget cannot refer to another account.');
+      if (existing && existing.accountId !== command.accountGuid && !protectedIntent(ref.path, ref.guid)) invalid('A Home widget cannot refer to another account.');
       if (ref.kind === 'visualization' && !existing && !oldRefs.some(old => old.path === ref.path && old.guid === ref.guid)) invalid('Choose an existing same-account saved visualization.');
     }
   }

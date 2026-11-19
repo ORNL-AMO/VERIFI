@@ -4,7 +4,7 @@ import { homeRecordOwner } from '@data/models/idbModels/homeRecord';
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
 import { HomeTemplateBlueprint, prepareHomeGraph } from '@data/home/home-template-graph';
-import { homeDashboardVisible } from '@data/home/home-references';
+import { homeDashboardVisible, homeOwnerResolutionState } from '@data/home/home-references';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, presentedHomeOwner, resolveHomeDefault, sameHomeOwner } from '@domain/home/home-dashboard';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
@@ -26,15 +26,16 @@ export class HomeCommands {
     const record = this.workspace.homeOwners().find(record => sameHomeOwner(homeRecordOwner(record), owner));
     const read = record && readHomeOwner(record), account = this.workspace.account();
     const state = read?.state === 'valid' ? read.value : undefined;
+    const resolution = state && record ? homeOwnerResolutionState(record, state) : state;
     const visible = account ? records.filter(record => homeDashboardVisible(record, { account, meters: this.workspace.meters() })).map(record => record.guid) : [];
     const initialization = record ? state ? state.initialized ? 'initialized' : 'legacy' : 'unavailable' : records.length ? 'legacy' : 'new';
-    const order = state?.dashboardOrder ?? [];
+    const order = resolution?.dashboardOrder ?? [];
     const ordered = [...records].sort((a, b) => {
       const ai = order.indexOf(a.guid), bi = order.indexOf(b.guid);
       return (ai < 0 ? Number.MAX_SAFE_INTEGER : ai) - (bi < 0 ? Number.MAX_SAFE_INTEGER : bi) || (a.id ?? 0) - (b.id ?? 0) || a.guid.localeCompare(b.guid);
     });
-    return { record, state, records: ordered, initialization, defaultDashboardGuid: state
-      ? resolveHomeDefault(state, ordered.filter(record => visible.includes(record.guid)).map(record => record.guid)) : undefined };
+    return { record, state, records: ordered, initialization, defaultDashboardGuid: resolution
+      ? resolveHomeDefault(resolution, ordered.filter(record => visible.includes(record.guid)).map(record => record.guid)) : undefined };
   }
   prepareInitialize(owner: HomeOwner, blueprints: readonly HomeTemplateBlueprint[]): HomeCommand {
     const identity = this.identity(owner);
@@ -70,8 +71,8 @@ export class HomeCommands {
     return { ...identity, kind, guid: record.guid, expectedRevision: record.revision,
       graph: { ...graph, dashboards: graph.dashboards.map(dashboard => ({ ...dashboard, guid: record.guid })) } };
   }
-  prepareConfigure(owner: HomeOwner, state: HomeOwnerState): HomeCommand {
-    return { ...this.identity(owner), kind: 'configure', state: structuredClone(state) };
+  prepareConfigure(owner: HomeOwner, state: HomeOwnerState, repairPaths?: readonly string[]): HomeCommand {
+    return { ...this.identity(owner), kind: 'configure', state: structuredClone(state), ...(repairPaths ? { repairPaths: [...repairPaths] } : {}) };
   }
 
   submit(command: HomeCommand): Promise<HomeCommandOutcome> {
