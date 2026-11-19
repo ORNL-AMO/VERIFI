@@ -1,7 +1,7 @@
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationCancel, NavigationCancellationCode, NavigationEnd, NavigationError, NavigationSkipped, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { HomeCommands } from '@data/account-workspace/home-commands.service';
@@ -69,12 +69,17 @@ export class HomeEditor {
   readonly focusRequest = signal<{ readonly target: 'heading' | 'name' | 'recipe' | 'dashboard-order'; readonly guid?: string; readonly sequence: number } | undefined>(undefined);
   private navigationEpoch = 0;
   private viewEpoch = 0;
+  private readonly receiptDeparture = signal<{ readonly key: string; readonly revision: number; readonly workspaceError: unknown } | undefined>(undefined);
+  private readonly receiptDepartureAccepted = computed(() => {
+    const session = this.session(), accepted = this.receiptDeparture();
+    return !!session && session.outcome?.state === 'refresh-required' && accepted?.key === session.key && accepted.revision === session.revision;
+  });
   private leaveResolve?: (allow: boolean) => void;
   private leavePromise?: Promise<boolean>;
   readonly saving = computed(() => [...this.sessions().values()].some(session => session.saving));
-  readonly needsProtection = computed(() => this.saving() || !!this.session()?.dirty || !!this.session()?.proposal);
+  readonly needsProtection = computed(() => this.saving() || !this.receiptDepartureAccepted() && (!!this.session()?.dirty || !!this.session()?.proposal));
   readonly canAct = computed(() => !!this.key() && this.home.workspace.canWrite() && !this.home.workspace.hasPending() && !this.saving());
-  readonly canStart = computed(() => this.canAct() && !this.needsProtection());
+  readonly canStart = computed(() => this.canAct() && !this.needsProtection() && !this.session()?.proposal);
   readonly adopted = computed(() => this.home.view()?.initialization === 'initialized');
   readonly canEdit = computed(() => this.canAct() && !!this.session()?.definition && this.session()?.mode !== 'view' && !this.session()?.proposal && this.home.view()?.initialization !== 'unavailable');
   readonly canSave = computed(() => this.canEdit() && this.session()?.mode !== 'restore'
@@ -108,7 +113,14 @@ export class HomeEditor {
     const unload = changes.protectBeforeUnload(this.needsProtection);
     const preflight = changes.registerNavigationPreflight(() => this.resolveLeave());
     this.destroy.onDestroy(() => { unregister(); unload(); preflight(); this.finishLeave(false); });
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed()).subscribe(() => this.navigationEpoch++);
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError || event instanceof NavigationSkipped), takeUntilDestroyed()).subscribe(event => {
+      if (event instanceof NavigationEnd) this.navigationEpoch++;
+      if (!(event instanceof NavigationCancel && event.code === NavigationCancellationCode.Redirect)) this.receiptDeparture.set(undefined);
+    });
+    effect(() => {
+      const accepted = this.receiptDeparture(), error = this.home.workspace.error();
+      if (accepted && error && error !== accepted.workspaceError) this.receiptDeparture.set(undefined);
+    });
     this.form.controls.name.valueChanges.pipe(takeUntilDestroyed()).subscribe(name => {
       const session = this.session();
       if (this.canEdit() && session?.definition && session.mode !== 'restore' && name !== session.definition.name)
@@ -243,7 +255,8 @@ export class HomeEditor {
     if (confirmation.key !== session.key || confirmation.revision !== session.revision) { this.cancelConfirmation(); return; }
     this.confirmation.set(undefined);
     if (confirmation.kind === 'leave') {
-      if (session.outcome?.state !== 'refresh-required') this.discard();
+      if (session.outcome?.state === 'refresh-required') this.receiptDeparture.set({ key: session.key, revision: session.revision, workspaceError: this.home.workspace.error() });
+      else this.discard();
       this.finishLeave(true); return;
     }
     if (confirmation.kind === 'discard') { this.discard(); return; }

@@ -71,6 +71,18 @@ describe('Home protected lifecycle drafts', () => {
     expect(recover).toHaveBeenCalledWith('account-a', command.operationGuid);
     expect(submit).toHaveBeenCalledTimes(1); expect(navigate).not.toHaveBeenCalled(); expect(editor.needsProtection()).toBe(false);
   });
+  it('keeps a receipt departure acknowledgement across guards and invalidates it after canceled navigation', async () => {
+    const { editor, submit } = setupEditor();
+    submit.mockImplementation(async command => ({ state: 'refresh-required', command, error: new Error('Refresh failed') }));
+    nameDraft(editor, 'Saved draft'); await editor.save();
+    const leave = editor.resolveLeave(); await editor.confirm(); expect(await leave).toBe(true);
+    expect(await editor.resolveLeave()).toBe(true); expect(editor.needsProtection()).toBe(false);
+    expect(editor.canStart()).toBe(false); expect(editor.session()?.proposal).toBeDefined();
+    const router = TestBed.inject(Router);
+    router.resetConfig([{ path: 'blocked', canActivate: [() => false], children: [] }]);
+    expect(await router.navigateByUrl('/blocked')).toBe(false);
+    expect(editor.needsProtection()).toBe(true);
+  });
   it('guards leave choices against newer edits and preserves canceled drafts', async () => {
     const { editor } = setupEditor(); nameDraft(editor, 'Protected');
     const leaving = editor.resolveLeave(); editor.cancelConfirmation(); expect(await leaving).toBe(false);

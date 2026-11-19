@@ -136,6 +136,32 @@ describe('Home lifecycle with native storage and routing in Chromium', () => {
     expect(await harness.getAll('homeDashboards')).toHaveLength(2);
   });
 
+  it('acknowledges a saved receipt departure once across composed router and account guards, retaining recovery on return', async () => {
+    const defaultBoard = await create('Default board');
+    const board = await create('Pending publication');
+    await click('Edit dashboard'); await page.getByLabelText('Dashboard name', { exact: true }).fill('Already saved');
+    const reload = vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication unavailable'));
+    await click('Save dashboard'); reload.mockRestore();
+    const nativeDiscard = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const editor = TestBed.inject(HomeEditor), operation = editor.session()!.proposal!.operationGuid;
+    const leaving = router.navigateByUrl('/v1/workspace/account/account-a/home/overview');
+    await vi.waitFor(() => { fixture.detectChanges(); expect(root.querySelector('[role=dialog]')).not.toBeNull(); });
+    await page.getByRole('button', { name: 'Leave and recover later', exact: true }).click();
+    expect(await leaving).toBe(true); await settle(); expect(root.querySelector('[role=dialog]')).toBeNull();
+    expect(router.url).toContain(defaultBoard.guid);
+    await router.navigateByUrl(`/v1/workspace/account/account-a/home/dashboard/${board.guid}`); await settle();
+    expect(editor.session()?.proposal?.operationGuid).toBe(operation); expect(editor.needsProtection()).toBe(true);
+    const switching = TestBed.inject(WorkspaceNavigationService).openWorkspace(accountB.guid);
+    await vi.waitFor(() => { fixture.detectChanges(); expect(root.querySelector('[role=dialog]')).not.toBeNull(); });
+    await page.getByRole('button', { name: 'Leave and recover later', exact: true }).click();
+    await switching; await settle(); expect(store.account()?.guid).toBe(accountB.guid); expect(nativeDiscard).not.toHaveBeenCalled();
+    await TestBed.inject(WorkspaceNavigationService).openWorkspace(account.guid); await settle();
+    await router.navigateByUrl(`/v1/workspace/account/account-a/home/dashboard/${board.guid}`); await settle();
+    expect(editor.session()?.proposal?.operationGuid).toBe(operation);
+    await click('Refresh saved change'); expect(definition(board.guid).name).toBe('Already saved');
+    expect(editor.session()?.proposal).toBeUndefined();
+  });
+
   it('adopts an imported nonempty set explicitly without creating starter dashboards or charts', async () => {
     const imported = { ...getNewIdbHomeDashboard(account.guid, { kind: 'account', guid: account.guid }, { ...homeDefinition(), name: 'Imported board' }), id: 1 };
     await harness.seed({ homeDashboards: [imported] }); await workspace.reloadActiveWorkspace(false);
