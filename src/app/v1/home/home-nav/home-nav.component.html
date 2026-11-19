@@ -1,0 +1,8 @@
+<section class="v1-nav__group" aria-labelledby="home-nav-title">
+  <span id="home-nav-title" class="v1-nav__label">Home dashboards</span>
+  @for (entry of home.entries(); track entry.record.guid) {
+    <a class="v1-nav__link" [routerLink]="entry.route" [class.active]="entry.record.guid === home.selectedGuid()" [attr.aria-current]="entry.record.guid === home.selectedGuid() ? 'page' : null">{{ entry.name }}{{ entry.record.guid === home.view()?.state?.defaultDashboardGuid ? ' (Default)' : '' }}</a>
+  } @empty {
+    <a class="v1-nav__link" [routerLink]="home.ownerRoute()">{{ home.owner() ? 'No dashboards' : 'Home recovery' }}</a>
+  }
+</section>

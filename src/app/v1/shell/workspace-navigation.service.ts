@@ -185,6 +185,9 @@ export class WorkspaceNavigationService {
       query = {};
     } else if (state.section === 'data' && state.detail === 'meter-grouping' && !state.meterGroupGuid && facilityGuid) {
       route = this.facilityDataToolRoute(facilityGuid, 'meter-grouping'); query = {};
+    } else if (state.section === 'home') {
+      route = facilityGuid ? this.facilityRoute(facilityGuid) : this.accountRoute(account.guid);
+      query = {};
     } else if (state.section === 'analysis') route = this.accountAnalysisRoute(account.guid);
     else if (state.section === 'reports') route = this.accountReportsRoute(account.guid);
     else if (state.section === 'visualization') route = routes.visualizationDashboardRoute(account.guid);

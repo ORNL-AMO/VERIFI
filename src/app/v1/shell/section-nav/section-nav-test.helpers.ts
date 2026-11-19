@@ -1,3 +1,4 @@
+import { HomeContext } from '@app/v1/home/home-context.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
@@ -88,6 +89,7 @@ export function setupSectionNavTest() {
       imports: [RouterModule.forRoot([]), SectionNavModule],
       providers: [
         SectionNavDisclosureService,
+        { provide: HomeContext, useValue: { entries: () => [], owner: () => undefined, ownerRoute: () => ['/v1'], selectedGuid: () => undefined, view: () => undefined } },
         {
           provide: WorkspaceNavigationService,
           useValue: {
