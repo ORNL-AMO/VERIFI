@@ -1,5 +1,17 @@
 :host { display: block; min-width: 0; }
+.v1-section-header { margin: 0; border-radius: 0; }
 h1, h2 { overflow-wrap: anywhere; }
 .home-widget { padding: 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface); }
 .home-widget + .home-widget { border-top: 0; }
 .home-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+.home-panel { border: 1px solid var(--v1-border); border-top: 0; padding: 1rem; background: var(--v1-surface); border-radius: 0; }
+.home-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.home-toolbar a { min-width: 0; overflow-wrap: anywhere; }
+.home-editor { display: grid; gap: .5rem; }
+.home-editor input { min-width: 0; width: 100%; padding: .5rem; border: 1px solid var(--v1-border); background: var(--v1-control-surface); color: var(--v1-text); }
+.home-conflict { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+.home-conflict section { min-width: 0; padding: .5rem; overflow-wrap: anywhere; }
+.home-conflict-fields { overflow-x: auto; }
+.home-conflict-fields table { width: 100%; table-layout: fixed; }
+.home-conflict-fields th, .home-conflict-fields td { vertical-align: top; padding: .5rem; border: 1px solid var(--v1-border); overflow-wrap: anywhere; }
+@media print { .home-toolbar, .home-editor, .home-order, [role=alert], [role=status] { display: none !important; } }

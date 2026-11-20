@@ -9,6 +9,7 @@ import { CustomGridFactorsComponent } from '@app/v1/data/custom-database/custom-
 import { CustomFuelsComponent } from '@app/v1/data/custom-database/custom-fuels/custom-fuels.component';
 import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/custom-gwps.component';
 import { flushPendingChangesGuard, unsavedChangesGuard, protectedNavigationPreflightGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
+import { homeDefaultGuard, homeLeaveGuard } from '@app/v1/home/home-navigation.guards';
 import { HomeDashboardComponent } from '@app/v1/home/dashboard/dashboard.component';
 import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
 import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
@@ -121,11 +122,11 @@ export const V1Routes: Routes = [
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
-          { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent },
+          { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
           {
             path: 'home/:detail',
             component: HomeDashboardComponent,
-            canActivate: [accountHomeCanonicalGuard]
+            canActivate: [protectedNavigationPreflightGuard, accountHomeCanonicalGuard, homeDefaultGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always'
           },
           { path: 'data/portfolio/analyses', pathMatch: 'full', redirectTo: 'analysis/dashboard' },
           { path: 'data/portfolio/reports', pathMatch: 'full', redirectTo: 'reports/dashboard' },
@@ -249,11 +250,11 @@ export const V1Routes: Routes = [
           { path: 'visualization', canActivate: [visualizationFacilityEntryGuard], children: [{ path: '**', children: [] }] },
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
-          { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent },
+          { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
           {
             path: 'home/:detail',
             component: HomeDashboardComponent,
-            canActivate: [facilityHomeCanonicalGuard]
+            canActivate: [protectedNavigationPreflightGuard, facilityHomeCanonicalGuard, homeDefaultGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always'
           },
           {
             path: 'data',

@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { HomeCommands } from '@data/account-workspace/home-commands.service';
@@ -27,6 +28,7 @@ export function homeRecord(guid: string, name = guid, facilityId?: string) {
 export function setupHome() {
   const route = signal(parseWorkspaceRoute('/v1/workspace/account/account-a/home/overview'));
   TestBed.configureTestingModule({ imports: [HomeModule], providers: [provideRouter([]),
+    { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: async () => 'published' } },
     { provide: WorkspaceContextService, useValue: { routeState: route } },
     { provide: HomeCommands, useFactory: () => new HomeCommands({} as WorkspaceCommandBoundary, {} as HomeCommandHandler, TestBed.inject(AccountWorkspaceStore)) }
   ] });
