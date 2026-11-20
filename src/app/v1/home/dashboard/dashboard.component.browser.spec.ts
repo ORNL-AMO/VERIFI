@@ -77,6 +77,21 @@ describe('Home lifecycle with native storage and routing in Chromium', () => {
   }
   function definition(guid: string) { const read = readHomeDashboard(store.homeDashboards().find(record => record.guid === guid)!); if (read.state !== 'valid') throw new Error('Unreadable test dashboard'); return read.value; }
 
+  it('rejects account-qualified facility dashboard links while flagged Home entry opens the sole facility default', async () => {
+    await router.navigateByUrl('/v1/workspace/facility/facility-a/home/overview'); await settle();
+    const board = await create('Sole facility board');
+    await firstValueFrom(harness.dbService.update('accounts', { ...account, isSingleFacilityCompany: true }));
+    await workspace.reloadActiveWorkspace(false);
+    await router.navigateByUrl(`/v1/workspace/account/account-a/home/dashboard/${board.guid}`); await settle();
+    expect(root.querySelector('[role=alert]')?.textContent).toContain('Home is unavailable for this owner');
+    expect(root.querySelector('h1')?.textContent).toBe('Home');
+    expect(router.url).toContain(`/account/account-a/home/dashboard/${board.guid}`);
+    await router.navigateByUrl('/v1/workspace/account/account-a/home/overview'); await settle();
+    expect(router.url).toContain(`/facility/facility-a/home/dashboard/${board.guid}`);
+    expect(root.querySelector('h1')?.textContent).toBe('Sole facility board');
+    expect(store.accountAnalyses()).toEqual([]); expect(store.facilityAnalyses()).toEqual([]);
+  });
+
   it('saves/reopens owner-local dashboards, uses defaults through the real rail, and preserves initialized-empty sets', async () => {
     expect(await harness.getAll('homeOwners')).toEqual([]);
     const first = await create('First board'), second = await create('Second board');
@@ -214,9 +229,11 @@ describe('Home lifecycle with native storage and routing in Chromium', () => {
     expect(execute.mock.calls[0][0].operationGuid).toBe(operation); expect(execute.mock.calls[1][0].operationGuid).toBe(operation);
     await click('Edit dashboard'); await page.getByLabelText('Dashboard name', { exact: true }).fill('Local conflict');
     const saved = store.homeDashboards().find(record => record.guid === board.guid)!;
-    await firstValueFrom(harness.dbService.update('homeDashboards', { ...saved, revision: saved.revision + 1, definition: { ...definition(board.guid), name: 'Concurrent change' } }));
+    await firstValueFrom(harness.dbService.update('homeDashboards', { ...saved, revision: saved.revision + 1, definition: { ...definition(board.guid), name: 'Concurrent change', defaults: { emissionsTreatment: 'market' } } }));
     await click('Save dashboard'); expect(root.textContent).toContain('draft is retained');
     await click('Load saved state for review'); expect(root.textContent).toContain('Concurrent change');
+    expect(root.querySelector('.home-conflict-fields')?.textContent).toContain('Dashboard defaults · Emissions treatment');
+    expect(root.querySelector('.home-conflict-fields')?.textContent).toContain('market');
     await click('Keep draft against reviewed version');
     const publication = vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Publication failed'));
     await click('Save dashboard'); expect(root.textContent).toContain('Refresh saved change');

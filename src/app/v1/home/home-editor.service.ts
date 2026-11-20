@@ -19,6 +19,7 @@ import { homeDashboardRoute } from '@app/v1/routing/workspace-route';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { HomeContext } from './home-context.service';
 import { HomeTemplateCatalog } from './home-template-catalog.service';
+import { homeDefinitionChanges } from './home-definition-changes';
 
 export interface HomeEditSession {
   readonly key: string;
@@ -110,6 +111,7 @@ export class HomeEditor {
     return read?.state === 'valid' ? read.value : undefined;
   });
 
+  readonly conflictFieldChanges = computed(() => homeDefinitionChanges(this.conflictDefinition(), this.session()?.definition));
   readonly conflictOwnerChoices = computed(() => {
     const session = this.session(), outcome = session?.outcome;
     const record = session?.conflictLoaded ? session.reviewedOwner : outcome?.state === 'conflict' ? outcome.error.currentOwner : undefined;

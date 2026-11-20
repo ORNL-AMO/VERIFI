@@ -49,6 +49,13 @@
             <section><h2>Saved version</h2><p>{{ saved?.name || 'Dashboard unavailable, deleted, or owner preferences changed' }}</p>@for (widget of saved?.widgets || []; track widget.id) { <p>{{ widget.title || widget.kind }} · {{ widget.size }}@if (widget.kind === 'note') { : {{ widget.text }} }</p> }</section>
             <section><h2>Your draft</h2><p>{{ session?.definition?.name || 'The reviewed dashboard action is retained.' }}</p>@for (widget of session?.definition?.widgets || []; track widget.id) { <p>{{ widget.title || widget.kind }} · {{ widget.size }}@if (widget.kind === 'note') { : {{ widget.text }} }</p> }</section>
           </div>
+          <p>Keeping your draft replaces every saved dashboard setting with the draft below. Review these differences before continuing; linked saved visualizations themselves remain unchanged.</p>
+          <div class="home-conflict-fields">
+            <table><caption>Dashboard settings that differ</caption><thead><tr><th scope="col">Setting</th><th scope="col">Saved version</th><th scope="col">Your draft</th></tr></thead>
+              <tbody>@for (change of editor.conflictFieldChanges(); track change.field) { <tr><th scope="row">{{ change.field }}</th><td>{{ change.saved }}</td><td>{{ change.draft }}</td></tr> }
+                @empty { <tr><td colspan="3">The dashboard definitions match. Review the saved owner choices above.</td></tr> }</tbody>
+            </table>
+          </div>
         }
         @if (session?.proposal && session?.outcome?.state !== 'refresh-required') { <button type="button" class="v1-btn v1-btn--danger" [disabled]="editor.saving()" (click)="editor.requestDiscard()">Discard unsaved changes</button> }
       </div>
