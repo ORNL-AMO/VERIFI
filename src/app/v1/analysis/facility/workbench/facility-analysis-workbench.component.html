@@ -7,7 +7,7 @@
     <h1>No facility selected</h1>
     <p>Select a facility before opening an analysis.</p>
   </article>
-} @else if (!analysis) {
+} @else if (!analysis && !autosave.deletionActive()) {
   <article class="v1-empty-state" role="alert">
     <app-ui-icon name="warning"></app-ui-icon>
     <h1>Analysis not found</h1>

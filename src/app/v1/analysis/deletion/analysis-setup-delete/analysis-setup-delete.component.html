@@ -1,0 +1,42 @@
+@if (preview() || session()) {
+  <section class="analysis-delete" aria-label="Delete analysis">
+    <button #deleteButton type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDelete()">
+      <app-ui-icon [name]="busy() ? 'loading' : 'delete'" [spin]="busy()"></app-ui-icon>
+      {{ busy() ? 'Preparing deletion…' : 'Delete analysis' }}
+    </button>
+  </section>
+}
+
+<ng-template #confirmation>
+  @if (session(); as current) {
+    <app-confirmation-dialog
+      [title]="committed() ? 'Analysis deleted' : 'Delete analysis?'"
+      titleId="setup-delete-analysis-title"
+      cancelAriaLabel="Cancel analysis deletion"
+      [confirmLabel]="committed() ? 'Return to Analysis' : 'Delete analysis'"
+      [confirmIcon]="committed() ? 'refresh' : 'delete'"
+      [busy]="busy()"
+      [disabled]="busy()"
+      [confirmDisabled]="!committed() && (!!blockedReason() || workspaceUnavailable())"
+      [hideCancel]="committed()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancel()">
+      <p>Permanently delete <strong>{{ current.target.analysisName }}</strong> from {{ current.target.ownerName }}?</p>
+      <p>This cannot be undone. Any unsaved edits will also be removed.</p>
+      @if (current.target.scope === 'account') { <p>The selected facility analyses will be retained.</p> }
+      @if (preview()?.clearsActiveSelection || current.target.clearsActiveSelection) {
+        <p>Its active reporting selection will be cleared.</p>
+      }
+      @if (preview(); as latest) {
+        @if (latest.linkedAccountAnalyses.length) {
+          <p>This facility selection will be cleared from these account analyses:</p>
+          <ul>@for (analysis of latest.linkedAccountAnalyses; track analysis.guid) { <li>{{ analysis.name }}</li> }</ul>
+        }
+        @if (latest.pairedAccountAnalysisCount) { <p>The account analysis paired with this facility analysis will also be deleted.</p> }
+      }
+      @if (!committed() && workspaceUnavailable()) { <p role="status">Waiting for the workspace to finish saving before deletion is available.</p> }
+      @if (!committed() && blockedReason()) { <div class="v1-alert v1-alert--danger" role="alert">{{ blockedReason() }}</div> }
+      @if (error()) { <div class="v1-alert v1-alert--danger" role="alert">{{ error() }}</div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>

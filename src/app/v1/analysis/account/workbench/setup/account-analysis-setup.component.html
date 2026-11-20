@@ -2,6 +2,7 @@
 @let account = context.account();
 @if (analysis && account) {
   <form class="v1-account-analysis-setup" aria-label="Account analysis setup" [formGroup]="form">
+    <fieldset class="analysis-setup-editor" [disabled]="autosave.deletionHeld()">
     <div class="v1-account-analysis-setup__grid">
       <section class="v1-account-analysis-setup__panel" aria-label="Analysis details">
         <label for="account-analysis-name">Name</label>
@@ -129,8 +130,11 @@
         </button>
       </section>
     }
+    </fieldset>
   </form>
 }
+
+<app-analysis-setup-delete scope="account" [analysisGuid]="context.analysisGuid()" [autosave]="autosave" />
 
 <ng-template #clearSelectionsModal>
   <app-confirmation-dialog

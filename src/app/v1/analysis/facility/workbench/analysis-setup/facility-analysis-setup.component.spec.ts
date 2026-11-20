@@ -1,3 +1,7 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountAnalysisActionsService } from '@app/v1/analysis/account/account-analysis-actions.service';
+import { FacilityAnalysisActionsService } from '@app/v1/analysis/facility/facility-analysis-actions.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -13,6 +17,15 @@ import { isCompatibleBankingSource } from '@shared/shared-analysis/banking-confi
 import { analysisSetupDraftValid, FacilityAnalysisSetupComponent } from './facility-analysis-setup.component';
 
 describe('facility analysis setup behavior', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [
+      { provide: AccountWorkspaceStore, useValue: { snapshot: signal(undefined), account: signal(undefined), canWrite: signal(false), hasPending: signal(false) } },
+      { provide: WorkspaceCommandBoundary, useValue: {} },
+      { provide: AccountAnalysisActionsService, useValue: {} },
+      { provide: FacilityAnalysisActionsService, useValue: {} }
+    ] });
+  });
+
   it('clears every persisted regression selection before unlocking setup', () => {
     const analysis = {
       isAnalysisVisited: true,
@@ -77,6 +90,7 @@ describe('facility analysis setup behavior', () => {
         {
           provide: FacilityAnalysisWorkbenchContext,
           useValue: {
+            analysisGuid: signal('analysis-a'),
             facility: signal({
               guid: 'facility-a', fiscalYear: 'calendarYear', sustainabilityQuestions: {
                 energyReductionGoal: false, waterReductionGoal: false
@@ -87,7 +101,7 @@ describe('facility analysis setup behavior', () => {
             status: { items: signal([]) }
           }
         },
-        { provide: FacilityAnalysisAutosaveService, useValue: { draft: signal(analysis), update } },
+        { provide: FacilityAnalysisAutosaveService, useValue: { deletionHeld: signal(false), draft: signal(analysis), update } },
         {
           provide: FacilityAnalysisPeriodService,
           useValue: { baselineYears, latestCompleteYear: signal(2025) }
@@ -171,6 +185,7 @@ describe('facility analysis setup behavior', () => {
         {
           provide: FacilityAnalysisWorkbenchContext,
           useValue: {
+            analysisGuid: signal('analysis-a'),
             facility: signal({
               guid: 'facility-a', fiscalYear: 'calendarYear', sustainabilityQuestions: {
                 energyReductionGoal: false, waterReductionGoal: false
@@ -184,7 +199,7 @@ describe('facility analysis setup behavior', () => {
             status: { items: signal([{ severity: 'warning', entity: { guid: warning.guid }, title: 'Review source model' }]) }
           }
         },
-        { provide: FacilityAnalysisAutosaveService, useValue: { draft: signal(analysis), update } },
+        { provide: FacilityAnalysisAutosaveService, useValue: { deletionHeld: signal(false), draft: signal(analysis), update } },
         {
           provide: FacilityAnalysisPeriodService,
           useValue: { baselineYears: signal([2024]), latestCompleteYear: signal(2025) }
@@ -256,11 +271,12 @@ describe('facility analysis setup behavior', () => {
         {
           provide: FacilityAnalysisWorkbenchContext,
           useValue: {
+            analysisGuid: signal('analysis-a'),
             facility: signal({ guid: 'facility-a', fiscalYear: 'calendarYear', sustainabilityQuestions: {} }),
             analyses: signal([analysis, source]), meterGroups: signal([]), status: { items: signal([]) }
           }
         },
-        { provide: FacilityAnalysisAutosaveService, useValue: { draft: signal(analysis), update: vi.fn() } },
+        { provide: FacilityAnalysisAutosaveService, useValue: { deletionHeld: signal(false), draft: signal(analysis), update: vi.fn() } },
         { provide: FacilityAnalysisPeriodService, useValue: { baselineYears: signal([2024]), latestCompleteYear: signal(2025) } },
         { provide: WorkspaceNavigationService, useValue: { facilitySettingsRoute: () => ['/v1', 'settings'] } },
         { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }

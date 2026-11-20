@@ -1,3 +1,4 @@
+import { AnalysisSetupDeleteComponent } from '@app/v1/analysis/deletion/analysis-setup-delete/analysis-setup-delete.component';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,7 +20,7 @@ import { AnalysisGroup, AnalysisType, JStatRegressionModel } from '@data/models/
 @Component({
   selector: 'app-facility-analysis-setup',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, IconComponent, ConfirmationDialogComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, ConfirmationDialogComponent, AnalysisSetupDeleteComponent],
   templateUrl: './facility-analysis-setup.component.html',
   styleUrls: ['./facility-analysis-setup.component.css']
 })
